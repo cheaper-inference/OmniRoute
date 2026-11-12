@@ -1,0 +1,1 @@
+- Split CI and Release-Green integration tests across four shards while keeping the full test inventory and the 15-minute CI deadline; require all four current receipts and reject results from the retired two-shard matrix.

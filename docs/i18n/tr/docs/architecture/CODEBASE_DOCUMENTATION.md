@@ -447,67 +447,56 @@ Odaklanmış alt dizinlere ayrılmıştır:
 
 ## 4. `open-sse/` — Akış motoru çalışma alanı
 
-`@omniroute/open-sse` olarak yayımlanan ayrı npm çalışma alanı. İstek
-işleme, yürütücüler, çeviriciler, hizmetler, dönüştürücü ve MCP sunucusundan
-sorumludur.
+`@omniroute/open-sse` olarak yayımlanan ayrı bir npm çalışma alanıdır. İstek
+işleme, yürütücüler, çeviriciler, hizmetler, dönüştürücü ve MCP sunucusunu barındırır.
 
 ```
 open-sse/
 ├── index.ts                Genel dışa aktarımlar
-├── package.json            Çalışma alanı manifestosu
+├── package.json            Çalışma alanı manifesti
 ├── tsconfig.json
 ├── types.d.ts
 ├── config/                 Sağlayıcı kayıtları, başlık profilleri, kimlik, …
-├── handlers/               İstek işleyicileri (sohbet, embeddings, ses, görüntü, …)
-├── executors/              159 sağlayıcı yürütücü modülü (yürütücü sınıfları + sağlayıcıya özgü yardımcılar)
+├── handlers/               İstek işleyicileri (sohbet, gömmeler, ses, görüntü, …)
+├── executors/              162 sağlayıcı yürütücü modülü (yürütücü sınıfları + sağlayıcıya özel yardımcılar)
 ├── translator/             Biçim dönüştürme (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions akış dönüştürücüsü
-├── services/               80+ hizmet modülü (kombinasyonlar, geri dönüş, kotalar, kimlik, …)
-├── utils/                  Akış yardımcıları, TLS istemcisi, AWS SigV4, proxy fetch, …
-└── mcp-server/             MCP sunucusu (3 aktarım, 33 kapsam, 110 araç)
+├── services/               80'den fazla hizmet modülü (kombinasyonlar, yedek mekanizmalar, kotalar, kimlik, …)
+├── utils/                  Akış yardımcıları, TLS istemcisi, AWS SigV4, proxy üzerinden getirme, …
+└── mcp-server/             MCP sunucusu (3 aktarım yöntemi, 33 kapsam, 110 araç)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| Handler                 | Purpose                                                                                     |
+| İşleyici                | Amaç                                                                                        |
 | ----------------------- | ------------------------------------------------------------------------------------------- |
 | `chatCore.ts`           | Ana sohbet işlem hattı (önbellek, hız sınırı, kombinasyon yönlendirmesi, yürütücü dağıtımı) |
 | `responsesHandler.ts`   | OpenAI Responses API giriş noktası                                                          |
-| `embeddings.ts`         | Embeddings                                                                                  |
+| `embeddings.ts`         | Gömmeler                                                                                    |
 | `imageGeneration.ts`    | Görüntü oluşturma                                                                           |
-| `audioSpeech.ts`        | Metinden sese                                                                               |
-| `audioTranscription.ts` | Sesten metne                                                                                |
+| `audioSpeech.ts`        | Metinden konuşmaya dönüştürme                                                               |
+| `audioTranscription.ts` | Konuşmadan metne dönüştürme                                                                 |
 | `videoGeneration.ts`    | Video oluşturma                                                                             |
 | `musicGeneration.ts`    | Müzik oluşturma                                                                             |
 | `rerank.ts`             | Yeniden sıralama                                                                            |
 | `moderations.ts`        | Moderasyon                                                                                  |
 | `search.ts`             | Web araması                                                                                 |
 | `sseParser.ts`          | SSE olay ayrıştırıcısı                                                                      |
-| `usageExtractor.ts`     | Yukarı akış akışlarından belirteç sayılarını çıkarır                                        |
-| `responseSanitizer.ts`  | Sağlayıcıya özgü gürültüyü ayıklar                                                          |
-| `responseTranslator.ts` | Sağlayıcı yanıtı ile çeviri katmanı arasındaki bağlantı                                     |
+| `usageExtractor.ts`     | Yukarı akışlardan token sayılarını çıkarır                                                  |
+| `responseSanitizer.ts`  | Sağlayıcıya özgü gereksiz verileri kaldırır                                                 |
+| `responseTranslator.ts` | Sağlayıcı yanıtı ile çevirici katmanı arasındaki bağlantıyı sağlar                          |
 
 ### 4.2 `open-sse/executors/`
 
-159 üst düzey yürütücü modülü (`*.ts`, `base.ts`, `index.ts` ve testler hariç; sayıyı
-`npm run check:docs-counts` ölçer). Her yürütücü sınıfı, doğrudan veya
-`DefaultExecutor` ya da başka bir yürütücü aracılığıyla `BaseExecutor` (`base.ts`)
-sınıfını genişletir; kalan modüller sağlayıcıya özgü yardımcılardır (araç şemaları,
-fetch/TTS adaptörleri, özellikli durum işleyicileri). Yürütücüler şunları içerir:
+162 üst düzey yürütücü modül (`*.ts` eksi `base.ts`, `index.ts` ve — testleri, `npm run check:docs-counts` ölçümlerinin sayısı). Her yürütücü sınıfı `BaseExecutor` (`base.ts`) doğrudan veya `DefaultExecutor` veya başka bir yürütücü aracılığıyla genişletir; geri kalan modüller sağlayıcı başına yardımcılardır (araç şemaları, fetch/TTS bağdaştırıcıları, ilginç işleyiciler). Yürütücüler şunları içerir:
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
-`chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
-`muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
-`pollinations`, `qoder`, `vertex`, `devin-desktop`, ayrıca
-`claudeIdentity.ts` (paylaşılan kimlik yardımcısı) ve `index.ts` (kayıt defteri).
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop` ve `claudeIdentity.ts` (paylaşılan kimlik yardımcısı) ve `index.ts` (kayıt defteri).
 
-> Not: Burada listelenmeyen sağlayıcılar, genel OpenAI uyumlu yürütücüyü kullanan
-> `default.ts` tarafından sunulur. Tam sağlayıcı kataloğu (380 sağlayıcı)
-> `src/shared/constants/providers.ts` içinde bulunur.
+> Not: Burada listelenmeyen sağlayıcılar, genel OpenAI uyumlu yürütücü kullanılarak `default.ts` tarafından sunulur. Sağlayıcı kataloğunun tamamı (380 sağlayıcı) `src/shared/constants/providers.ts` bulunmaktadır.
 
 ### 4.3 `open-sse/translator/`
 
-Hub-and-spoke çevirisi (hub OpenAI'dir).
+Merkez ve bağlantı noktaları şeklinde çeviri mimarisi (OpenAI merkezdir).
 
 - **9 istek çeviricisi** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
@@ -527,67 +516,59 @@ Hub-and-spoke çevirisi (hub OpenAI'dir).
 ### 4.4 `open-sse/transformer/`
 
 - `responsesTransformer.ts` — `TransformStream` tabanlı Responses API ↔ Chat
-  Completions dönüştürücüsü (`responses/` rotasının catch-all'ı tarafından kullanılır).
+  Completions dönüştürücüsü (`responses/` rotasının tümünü yakalayan işleyicisi tarafından kullanılır).
 
 ### 4.5 `open-sse/services/`
 
-Öne çıkanlar (`open-sse/services/` altındaki tam liste):
+Öne çıkanlar (tam liste `open-sse/services/` altında):
 
-| Concern                     | Files                                                                                                                                                                                                                                                    |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Birleşik yönlendirme        | `combo.ts` (20 strateji), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                      |
-| Otomatik Birleşim altyapısı | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| Dayanıklılık                | `accountFallback.ts` (bekleme süresi + kilitleme), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                 |
-| Kotalar                     | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| Önbelleğe alma              | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| Yönlendirme zekâsı          | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| Model işleme                | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Sıkıştırma                  | `compression/` — tam sıkıştırma altyapısının bağlantıları                                                                                                                                                                                                |
-| Belirteç + oturum           | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| Katman / bildirim           | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
-| IP / ağ                     | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| Toplu işlemler              | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| Kullanım                    | `usage.ts`                                                                                                                                                                                                                                               |
+| İlgi alanı            | Dosyalar                                                                                                                                                                                                                                                 |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Combo yönlendirmesi   | `combo.ts` (20 strateji), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                      |
+| Otomatik Combo motoru | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| Dayanıklılık          | `accountFallback.ts` (bekleme süresi + kilitleme), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                 |
+| Kotalar               | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
+| Önbelleğe alma        | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| Yönlendirme zekâsı    | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| Model işleme          | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| Sıkıştırma            | `compression/` — eksiksiz sıkıştırma motoru bağlantıları                                                                                                                                                                                                 |
+| Token + oturum        | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| Katman / manifest     | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| IP / ağ               | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
+| Toplu işlemler        | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| Kullanım              | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- `server.ts` dosyasında bağlanmış **110 benzersiz araç** ( `schemas/tools.ts` içindeki 45 kanonik araç +
-  bellek, beceriler, GitHub becerileri, havuz, oyunlaştırma, eklenti, Notion, Obsidian,
-  yerel derlem ve sıkıştırma modülleri — `countUniqueMcpTools` tarafından sayılan birleşim).
+- `server.ts` içinde bağlanmış **110 benzersiz araç** (`schemas/tools.ts` içinde 45 kanonik araç +
+  memory, skills, GitHub-skills, pool, gamification, plugin, Notion, Obsidian,
+  local-corpus ve compression modülleri — birleşim `countUniqueMcpTools` tarafından sayılır).
 - **3 aktarım yöntemi**: stdio, HTTP Streamable, SSE.
-- Çalışma zamanında uygulanan **33 kapsam** — temel liste `src/shared/constants/mcpScopes.ts` içinde bulunur; kapsamların tamamı, her araç modülü tarafından bildirilen kapsamların birleşimidir.
+- Çalışma zamanında **33 kapsam** uygulanır — temel liste `src/shared/constants/mcpScopes.ts` içindedir; tam küme, her araç modülü tarafından bildirilen kapsamların birleşimidir.
 - Denetim tablosu: `mcp_tool_audit` (`audit.ts` tarafından doldurulur).
 - Dosyalar: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
   ayrıca `__tests__/` altındaki testler.
-- Araç kataloğunun tamamı için [MCP-SERVER.md](../frameworks/MCP-SERVER.md) dosyasına bakın.
+- Araçların tam kataloğu için [MCP-SERVER.md](../frameworks/MCP-SERVER.md) dosyasına bakın.
 
 ### 4.7 `open-sse/config/`
 
 Sağlayıcı kayıtları (`providerRegistry.ts`, `providerModels.ts`,
-`providerHeaderProfiles.ts`), biçime göre model kayıtları (`audioRegistry.ts`,
+`providerHeaderProfiles.ts`), biçime özgü model kayıtları (`audioRegistry.ts`,
 `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
 `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
 kimlik yardımcıları (`codexIdentity.ts`, `codexInstructions.ts`,
 `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
 `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
 kimlik bilgisi yardımcıları (`credentialLoader.ts`, `codexClient.ts`) ve bulut
-adaptörleri (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
+bağdaştırıcıları (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
 `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
 `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 
-Akış primitifleri ve sağlayıcı yardımcıları: `stream.ts`, `streamHandler.ts`,
-`streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
-`sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
-`networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
-`cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`,
-`comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`,
-`thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`,
-`progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`,
-`ollamaTransform.ts`.
+Akış ilkelleri ve sağlayıcı yardımcıları: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`, `thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`, `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`, `ollamaTransform.ts`.
 
 ---
 
@@ -786,7 +767,7 @@ Bkz. [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) ve
    `open-sse/mcp-server/schemas/tools.ts` dosyasını genişletin).
 2. `src/shared/constants/mcpScopes.ts` içinde uygun kapsamları atayın.
 3. Aracı `open-sse/mcp-server/server.ts` içinde kaydedin.
-4. Testleri `open-sse/mcp-server/__tests__/` altına ekleyin.
+4. Testleri `tests/unit/` altına ekleyin.
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md) dosyasını güncelleyin.
 
 ### Yeni bir A2A becerisi ekleme
@@ -804,7 +785,7 @@ Bkz. [A2A-SERVER.md § Yeni Bir Beceri Ekleme](../frameworks/A2A-SERVER.md). Bec
 - **Adlandırma**: dosyalar `camelCase` veya `kebab-case`, bileşenler `PascalCase`,
   sabitler `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = her yerde `error`;
-  `no-explicit-any` = `open-sse/` ve `tests/` içinde `warn`, diğer yerlerde `error`.
+  `no-explicit-any` = `open-sse/**/*.ts` ve `tests/**/*.ts` içinde `error`.
 - **TypeScript**: `strict: false` (eski yaklaşım). Modüller arası sınırlarda
   çıkarım yerine açık türleri tercih edin.
 - **Veritabanı**: rotalarda veya işleyicilerde asla ham SQL yazmayın — her zaman
@@ -833,8 +814,7 @@ Bkz. [A2A-SERVER.md § Yeni Bir Beceri Ekleme](../frameworks/A2A-SERVER.md). Bec
   `a2a`, `memory`, `skills`.
 - **Dallar**: `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/` önekleri. Asla doğrudan `main` dalına commit göndermeyin.
-- **Husky**: pre-commit, `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11` çalıştırır; pre-push, `check:any-budget:t11` + `check:tracked-artifacts` çalıştırır (hızlı denetimler; `test:unit` hariç).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

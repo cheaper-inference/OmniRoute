@@ -27,6 +27,8 @@ import { join, dirname, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { assembleStandalone } from "./assembleStandalone.mjs";
+import { createBuildProgress } from "./buildPhaseProgress.mjs";
+import { ensureStandaloneInput } from "./standaloneInput.mjs";
 import { buildMitmUtilities } from "./buildMitm.mjs";
 import { isNativeExecutable, resolveLocalBinEntry } from "./buildToolRunner.mjs";
 import { resolveBundledNpmEntry } from "./resolveNpmEntry.ts";
@@ -171,6 +173,8 @@ function removeEmptyDirectories(dir: string): boolean {
   return hasFiles;
 }
 
+const buildProgress = createBuildProgress({ projectRoot: ROOT, role: "cli" });
+buildProgress.record("cli", "STARTED");
 console.log("🔨 OmniRoute — Building for npm publish...\n");
 
 // ── Step 1: Clean previous dist/ directory ─────────────────
@@ -185,36 +189,37 @@ if (existsSync(DIST_DIR)) {
 // If the artifact is absent we invoke it exactly once.
 const NEXT_DIST = process.env.NEXT_DIST_DIR || ".build/next";
 const standaloneServerJs = join(ROOT, NEXT_DIST, "standalone", "server.js");
-if (!existsSync(standaloneServerJs)) {
-  console.log("  🏗️  .build/next/standalone not found — running `npm run build` once...");
-  execFileSync(process.execPath, ["scripts/build/build-next-isolated.mjs"], {
-    cwd: ROOT,
-    stdio: "inherit",
-  });
-  if (!existsSync(standaloneServerJs)) {
-    console.error(
-      "\n  ❌ Standalone build not found after `npm run build` at:",
-      standaloneServerJs
-    );
-    console.error("     Make sure next.config.mjs has: output: 'standalone'");
-    process.exit(1);
-  }
-}
+buildProgress.runSync("next-input", () =>
+  ensureStandaloneInput({
+    serverPath: standaloneServerJs,
+    requirePrebuilt: process.env.OMNIROUTE_REQUIRE_PREBUILT_NEXT === "1",
+    build: () => {
+      console.log("  🏗️  .build/next/standalone not found — running `npm run build` once...");
+      execFileSync(process.execPath, ["scripts/build/build-next-isolated.mjs"], {
+        cwd: ROOT,
+        stdio: "inherit",
+      });
+    },
+  })
+);
 console.log("  ✅ Standalone artifact present:", standaloneServerJs);
 
 // ── Step 3–7: Assemble standalone into dist/ ───────────────
 // All shared copy/sync/sanitize/chunk-patch operations are delegated to
 // assembleStandalone.  npm-UNIQUE steps (MITM, MCP, CLI, sidecars) follow.
 console.log("  📋 Assembling standalone bundle into dist/...");
-assembleStandalone({
-  distDir: join(ROOT, NEXT_DIST),
-  outDir: DIST_DIR,
-  projectRoot: ROOT,
-  sanitizePaths: true,
-  patchTurbopackChunks: true,
-  copyNatives: true,
-});
+buildProgress.runSync("pack-assembly", () =>
+  assembleStandalone({
+    distDir: join(ROOT, NEXT_DIST),
+    outDir: DIST_DIR,
+    projectRoot: ROOT,
+    sanitizePaths: true,
+    patchTurbopackChunks: true,
+    copyNatives: true,
+  })
+);
 console.log("  ✅ Standalone bundle assembled to dist/");
+buildProgress.record("cli-sidecars", "STARTED");
 
 const distServer = join(DIST_DIR, "server.js");
 const methodGuardSrc = join(ROOT, "scripts", "dev", "http-method-guard.cjs");
@@ -756,3 +761,5 @@ if (existsSync(distPkg)) {
 }
 
 console.log("");
+buildProgress.record("cli-sidecars", "RETURNED");
+buildProgress.record("cli", "RETURNED");

@@ -4,70 +4,42 @@
 
 ---
 
-Ọdọ runner a na-akwado n'onwe ya na-arụ ọrụ na igbe **.113** (`tomni-proxmox-113`). Kemgbe 2026-10-18, runner
-OmniRoute ọ bụla nwere **otu ọrụ**, otu label, na oke memory/CPU a haziri dịka ihe ibu ọrụ ya
-gosiri na ọ na-eji. Oghere Turbopack na-enweta ihe build chọrọ; a haziri oghere ndị ọzọ dịka
-ọnụ ọgụgụ kachasị elu a tụrụ. Igbe ahụ na-eme overcommit naanị mgbe build Turbopack dakọtara na build
-webpack Release-Green na ọrụ lint; swap host (16 GB) na-anabata nke ahụ, ebe ọ bụkwa na Builds nke pull-request
-na-agba na hosted runners, oghere Turbopack anaghị arụ ọrụ ọtụtụ oge:
+Ọdọ mmiri a na-akwado onwe ya na-agba na **.113** igbe (`tomni-proxmox-113`). Kemgbe 2026-10-18 onye ọ bụla na-agba ọsọ OmniRoute nwere **otu ọrụ** , otu akara, na mmefu ego memory/CPU ruru ka ọrụ ya tụrụ. Oghere Turbopack na-enweta ihe ụlọ chọrọ; oghere ndị ọzọ na-aba na ọnụ ọgụgụ ha tụrụ atụ. Igbe ahụ na-emebiga ihe ókè mgbe ihe nrụpụta Turbopack dakọtara na ngwugwu webụsaịtị Ntọhapụ na ọrụ lint; swap host (16 GB) na-anakọta nke ahụ, na n'ihi na a na-arịọ arịrịọ Builds na-agba ọsọ, oghere Turbopack adịghị arụ ọrụ ọtụtụ oge:
 
-| runner               | label          | ọrụ                                                                                                                                                | `MemoryHigh` / `MemoryMax` | `CPUQuota`       |
-| -------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------------- |
-| `omniroute-113-5`    | `omni-build`   | Build Turbopack: `ci.yml` `Build` (naanị push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, build a11y nke abalị | 56 GB / 60 GB (swap 0)     | 1600 %           |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), build webpack                                                                                      | 20 GB / 24 GB (swap 4 GB)  | 800 %            |
-| `omniroute-113-2`    | `omni-light`   | ọrụ abalị (Schemathesis, promptfoo, garak, k6) na `quality.yml` `lint-guard`                                                                       | 12 GB / 16 GB (swap 4 GB)  | 600 %            |
-| `omniroute-113`      | `omni-light`   | otu ọdọ ahụ dị n'elu                                                                                                                               | 8 GB / 12 GB               | 400 %            |
-| OmniHeuris, OmniMind | (repos ha)     | Naanị Dependabot (ọnụ ọgụgụ kachasị elu bụ 155 MB nke ọ bụla, 2026-10-18)                                                                          | 4 GB / 6 GB                | 200 % nke ọ bụla |
+| onye na-agba ọsọ     | akara                           | ọrụ                                                                                                                                             | `MemoryHigh` / `MemoryMax`   | `CPUQuota`      |
+| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- | --------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack na-ewuli: `ci.yml` `Build` (push/dispatch naanị), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, ụlọ a11y abalị | 56 GB / 60 GB (gbanwee 0)    | 1600 %          |
+| `omniroute-113-6`    | `omni-release`                  | Ntọhapụ-Green (`release-green` + `main-green`), wuo akpa weebụ                                                                                  | 20 GB / 24 GB (gbanwee 4 GB) | 800 %           |
+| `omniroute-113-2`    | `omni-light`                    | nightlies (Schemathesis, Quickfoo, garak, k6) na `quality.yml` `lint-guard`                                                                     | 12 GB / 16 GB (gbanwee 4 GB) | 600 %           |
+| `omniroute-113`      | `omni-light`                    | otu ọdọ mmiri dị n'elu                                                                                                                          | 8 GB / 12 GB                 | 400 %           |
+| OmniHeuris, OmniMind | (nchekwa ha)                    | Dependabot naanị (elu 155 MB nke ọ bụla, 2026-10-18)                                                                                            | 4 GB / 6 GB                  | 200% nke ọ bụla |
 
-Ihe a tụrụ na 2026-10-18:
+Atụtara 2026-10-18:
 
-| akụrụngwa | uru                          | ihe ọ pụtara maka nhazi oge                                                                                                                                                                                                                                                                                                                                                                          |
-| --------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| RAM / CPU | **78 GB / cores 32**         | build production Turbopack ruru 49 GB mgbe enweghị oke (`tests/unit/ci-build-bundler-webpack.test.ts`); na Next 16.3.8, naanị usoro compile na-ejide ihe dịka 40 GB (36 GB RSS n'ime `next-build` tinyere loader workers 17 na 3 GB, nke a tụrụ na 2026-10-18); build webpack na-eji ihe dịka 14–16 GB. Otu build Turbopack + otu build webpack nwere ike ịgba ọnụ; build Turbopack abụọ enweghị ike |
-| swap      | 16 GB                        | `omniroute-113-5` na-agba ebe agbanyụrụ swap (`MemorySwapMax=0`) ka e wee kwụsị build gbapụrụ n'ike n'ókè ya kama ime ka igbe ahụ jiri swap                                                                                                                                                                                                                                                          |
-| `/tmp`    | **12 GB tmpfs = RAM**        | ihe ọ bụla echekwara ebe ahụ bụ memory; a na-ekpochapụ ihe fọdụrụ mgbe awa 3 gachara                                                                                                                                                                                                                                                                                                                 |
-| CPU       | a hụrụ load 60 na cores 32   | tupu e tinye quotas ndị ahụ, otu build Turbopack (~1166 % CPU) tinyere coverage suite n'otu igbe ahụ mere ka heartbeats nke listeners ndị ọzọ ghara inweta akụrụngwa zuru oke (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                  |
-| runners   | **listeners 7** (2026-10-28) | OmniRoute 5 + OmniHeuris + OmniMind; `omniroute-113-7` na-ebukwa `omni-build`; ehichapụrụ `omniroute-113-3/-4/-8` na repo (2026-10-28)                                                                                                                                                                                                                                                               |
+| akụ             | uru                               | ihe ọ pụtara maka nhazi oge                                                                                                                                                                                                                                                                                                                                             |
+| --------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RAM / CPU       | **78 GB / 32 isi**                | ihe nrụpụta Turbopack na-ewu elu na 49 GB enweghị mkpuchi (`tests/unit/ci-build-bundler-webpack.test.ts`); na 16.3.8 na-esote usoro nchịkọta naanị na-ejide ~ 40 GB (36 GB RSS na `next-build` gbakwunyere ndị ọrụ loader 17 na 3 GB, tụrụ 2026-10-18); Ihe ngwugwu webụ na-ewu na ~ 14–16 GB. Otu Turbopack + otu webpack wuo dabara ọnụ; Turbopack abụọ na-ewu adịghị |
+| gbanwee         | 16 GB                             | `omniroute-113-5` na-agba ọsọ na swap off (`MemorySwapMax=0`) ya mere a na-egbutu ụlọ ịgba ọsọ na okpu ya kama ịgbanwere igbe ahụ.                                                                                                                                                                                                                                      |
+| `/tmp`          | **12 GB tmpfs = RAM**             | ihe ọ bụla dọwara n'ebe ahụ bụ ebe nchekwa; A na-asachapụ ihe fọdụrụ mgbe awa 3 gachara                                                                                                                                                                                                                                                                                 |
+| CPU             | Ibu 60 na cores 32 hụrụ           | tupu quotas, otu Turbopack wuo (~ 1166% CPU) gbakwunyere mkpuchi mkpuchi n'otu igbe ahụ kpasuru obi ndị ọzọ na-ege ntị agụụ (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                       |
+| ndị na-agba ọsọ | **7 ndị na-ege ntị** (2026-10-28) | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` na-ebukwa `omni-build-60gb`; ehichapụrụ `omniroute-113-3/-4/-8` na repo (2026-10-28)                                                                                                                                                                                                                             |
 
-Oke ndị ahụ dị na `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` nke unit ọ bụla
-(e debere uru ndị gara aga dịka `override.conf.bak-20261018`) ma tinye ha ozugbo site na
-`systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — enweghị restart, ya mere
-emetụghị ọrụ ọ bụla na-agba aka. A na-agbanwe labels site na runners API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
-`gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), ozugbo kwa.
+Oke ndị a na-ebi na `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` nke ọ bụla (ụkpụrụ ndị gara aga edobere dị ka `override.conf.bak-20261018`) ma tinye ya na `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — enweghị ịmalitegharị, yabụ enweghị ọrụ ọ bụla metụrụ aka. A na-agbanwe akara ngosi site na ndị na-agba ọsọ API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` / `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), dịkwa ndụ.
 
-## Wụnye onye nhicha (otu ugboro, na sava ahụ)
+## Wụnye onye nlekọta (otu oge, na igbe)
 
 ```bash
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
-# cron (root): kwa nkeji 30, dekọọ ndekọ na /var/log/runner-janitor.log
+# cron (root): every 30 min, log to /var/log/runner-janitor.log
 */30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
-A chọrọ `lsof`: onye nhicha ahụ na-eji otu nseta ọnọdụ nke faịlụ ndị mepere emepe
-gosipụta na path adịghị arụ ọrụ tupu o wepụ ya; ma ọ bụrụ na tool ahụ adịghị, ọ naghị
-ewepụ ihe ọ bụla ma na-ekwupụta ya (exit 1). Buru ụzọ jiri `--dry-run` nwalee mgbanwe
-ọ bụla — ọ na-ebipụta kpọmkwem ihe ọ ga-eme ma ghara imetụ ihe ọ bụla aka.
+Achọrọ `lsof` : onye nlekọta na-egosi na ụzọ adịghị arụ ọrụ na otu foto nke faịlụ mepere emepe tupu iwepu ya, na-enweghị ngwá ọrụ ọ na-ewepụ ihe ọ bụla ma kwuo ya (wepụ 1). Gbalịa mee mgbanwe ọ bụla na `--dry-run` mbụ — ọ na-ebipụta kpọmkwem ihe ọ ga-eme na-emetụkwa ihe ọ bụla.
 
-Ihe ọ na-eme oge ọ bụla ọ na-agba: ọ na-ekpochapụ ihe fọdụrụ nke anyị
-(`runner-*`, `omniroute-*`, `next-build*`, `e2e-build.tar.gz`) mgbe **awa 3 na tmpfs**
-gasịrị na mgbe awa 24 gasịrị na `_work/_temp` nke disk; ọ na-akwụsị `next-build`
-nke karịrị nkeji 75 (ọ dịghị job na-agba ogologo oge ahụ — na 2026-08-27 otu gbara
-nkeji 70 mgbe GitHub kwupụtachara na job ya efuola); ọ na-ehichapụ checkout ndị
-ruru awa 48 nke runner ndị unit ha **kwụsịrị**; ọ na-enye ọkwa mgbe disk ≥ 85 %,
-memory PSI `full/avg60` ≥ 10 %, nakwa mgbe listener karịrị `MAX_ACTIVE_RUNNERS`
-(ya na nkewa omniroute/other). Exit 1 = a chọrọ nlebara anya; gụọ log ahụ.
+Ihe ọ na-eme ọ bụla na-agba ọsọ: sweeps anyị rifọrọ (`runner-*`, `omniroute-*`, `next-build*`, `e2e-build.tar.gz`) mgbe **3 h na tmpfs** na 24 h na diski `_work/_temp`; ọkwa na `next-build` tọrọ karịa 75 min ma mee ka ọ na-agba ọsọ; prunes 48 h-ochie checkouts nke ndị na-agba ọsọ nke unit bụ **kwụsịrị** ; Ngosipụta na diski ≥ 85%, ebe nchekwa PSI `full/avg60` ≥ 10%, yana ọtụtụ ndị na-ege ntị karịa `MAX_ACTIVE_RUNNERS` (ya na ndakpọ omniroute/other ). Wepụ 1 = nlebara anya chọrọ; gụọ akụkọ.
 
-Iwu nkeji 75 ahụ anaghị achọpụta build nke GitHub kwụsịrịla ichere job ya. Mgbe
-`Runner.Listener` enweghị ike imegharị job ya, `_diag/Runner_*.log` na-egosi
-`POST request to …/renewjob timed out after 100 seconds`, API na-akọ na job ahụ bụ
-`completed` (failure) ihe dị ka nkeji iri mgbe mmelite ikpeazụ gara nke ọma, ebe
-`next-build` na-aga n'ihu na-agba n'enweghị job jikọrọ ya (2026-10-18: Build nke #17066
-dara na 19:43 ma build ya ka na-ejide 40 GB nkeji ise ka e mesịrị). Kwenye ntụaka ahụ
-na `_diag/Worker_*.log` kachasị ọhụrụ, wee jiri PID ziga naanị osisi build ahụ
-SIGTERM — `next-build`, `npm run build`, `build-next-isolated.mjs` na worker ndị dị
-na `_work`. Emetụla `Runner.Listener`, `RunnerService.js` ma ọ bụ `Runner.Worker` aka:
-worker ahụ na-akọ na a kagbuola job ahụ, listener ahụ wee laghachi online n'onwe ya.
+Oge gafere naanị egosighi na usoro a bụ nwa mgbei. Onye na-elekọta ụlọ anaghị ezipụ mgbaama dabere na afọ. Aha gburugburu `ZOMBIE_BUILD_MAX_MIN` na `ZOMBIE_BUILD_COMM` dị adị ka akwadoro maka nhazi cron. Tupu ihicha nwa mgbei a na-enyo enyo, gosi na ọrụ GitHub ya bụ nke ga-akwụsị ma chọpụta usoro dị n'ọrụ ahụ. Mgbe `Runner.Listener` enweghị ike imeghari ọrụ ya, `_diag/Runner_*.log` na-egosi `POST request to …/renewjob timed out after 100 seconds`, API na-akọ ọrụ `completed` (ọdịda) ihe dị ka nkeji iri mgbe mmeghari ohuru gara nke ọma, `next-build` na-anọgide na-agba ọsọ na-enweghị ọrụ agbakwunyere (2026-10-18: Ewu nke #17066 dara na 19:43 na ụlọ ya ka na-ejide 40 GB nkeji ise). Kwado ref na `_diag/Worker_*.log` kachasị ọhụrụ, wee SIGTERM naanị wuo osisi site na PID — `next-build`, `npm run build`, `build-next-isolated.mjs` na ndị ọrụ `_work`. Emetụla `Runner.Listener`, `RunnerService.js` ma ọ bụ `Runner.Worker` aka: onye ọrụ na-akọ ọrụ ahụ ka a kagburu ma onye na-ege ntị na-alaghachi na ntanetị n'onwe ya.
 
 ## Unit runner: KillMode
 
@@ -84,7 +56,7 @@ nlele na ọ naghị arụ ọrụ na restart n'otu command ahụ.
 ## Iwu ọrụ
 
 - **Naanị otu build Turbopack n'otu oge — label na-amanye nke a.** Job ọ bụla na-eme build Turbopack zuru ezu
-  `next build` na-ezubere `[self-hosted, omni-build]`, ma ọ bụ naanị **`omniroute-113-5`** nwere
+  `next build` na-ezubere `[self-hosted, omni-build, omni-build-60gb]`, ma ọ bụ naanị **`omniroute-113-5`** nwere
   label ahụ: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   build a11y nke abalị (#16853) na `docker-publish.yml` **amd64** (webpack n'ime BuildKit —
   Turbopack dara n'ebe ahụ, run 33253576569). Akụkụ Docker arm64 ka na-eji `ubuntu-24.04-arm`.

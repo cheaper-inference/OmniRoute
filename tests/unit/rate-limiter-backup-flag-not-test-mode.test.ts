@@ -19,6 +19,10 @@ import { pathToFileURL } from "node:url";
 
 const ENV_KEYS = ["REDIS_URL", "NODE_ENV", "DISABLE_SQLITE_AUTO_BACKUP"] as const;
 
+// Compare both requests within one fixed window even when Redis retries cross a
+// real minute boundary. Mock only Date; connection and retry timers stay real.
+const FIXED_WINDOW_NOW = Date.UTC(2026, 0, 1, 0, 0, 30);
+
 async function twoRequestsAgainstLimitOne(env: Partial<Record<(typeof ENV_KEYS)[number], string>>) {
   const saved = Object.fromEntries(ENV_KEYS.map((key) => [key, process.env[key]]));
   for (const key of ENV_KEYS) {
@@ -30,11 +34,6 @@ async function twoRequestsAgainstLimitOne(env: Partial<Record<(typeof ENV_KEYS)[
   console.error = (...args: unknown[]) => {
     errorLogs.push(args.map(String).join(" "));
   };
-  // Both requests must land in the same fixed window. Each failed Redis call takes ~0.7 s, so
-  // on the real clock the pair could straddle a minute boundary and the second would be allowed.
-  const realDateNow = Date.now;
-  const now = realDateNow();
-  Date.now = () => now;
   const modulePath = path.join(process.cwd(), "src/shared/utils/rateLimiter.ts");
   const rateLimiter = await import(`${pathToFileURL(modulePath).href}?case=${Math.random()}`);
   try {
@@ -44,13 +43,12 @@ async function twoRequestsAgainstLimitOne(env: Partial<Record<(typeof ENV_KEYS)[
       await rateLimiter.checkRateLimit("key-1", rules),
     ];
     const tookRedisPath = errorLogs.some((line) => line.includes("Redis eval failed"));
-    return { results, tookRedisPath, now };
+    return { results, tookRedisPath };
   } finally {
     if (rateLimiter.isRedisConfigured()) {
       (await rateLimiter.getRedisClient()).disconnect();
     }
     console.error = originalConsoleError;
-    Date.now = realDateNow;
     for (const key of ENV_KEYS) {
       if (saved[key] === undefined) delete process.env[key];
       else process.env[key] = saved[key];
@@ -58,7 +56,8 @@ async function twoRequestsAgainstLimitOne(env: Partial<Record<(typeof ENV_KEYS)[
   }
 }
 
-test("DISABLE_SQLITE_AUTO_BACKUP=true does not move a Redis deployment to the in-memory store", async () => {
+test("DISABLE_SQLITE_AUTO_BACKUP=true does not move a Redis deployment to the in-memory store", async (t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: FIXED_WINDOW_NOW });
   const { results, tookRedisPath } = await twoRequestsAgainstLimitOne({
     REDIS_URL: "redis://127.0.0.1:1",
     NODE_ENV: "production",
@@ -70,8 +69,9 @@ test("DISABLE_SQLITE_AUTO_BACKUP=true does not move a Redis deployment to the in
   assert.equal(results[1].allowed, false);
 });
 
-test("NODE_ENV=test still keeps the limiter in memory even with REDIS_URL set", async () => {
-  const { results, tookRedisPath, now } = await twoRequestsAgainstLimitOne({
+test("NODE_ENV=test still keeps the limiter in memory even with REDIS_URL set", async (t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: FIXED_WINDOW_NOW });
+  const { results, tookRedisPath } = await twoRequestsAgainstLimitOne({
     REDIS_URL: "redis://127.0.0.1:1",
     NODE_ENV: "test",
   });
@@ -80,8 +80,8 @@ test("NODE_ENV=test still keeps the limiter in memory even with REDIS_URL set", 
   assert.equal(results[1].allowed, false);
   assert.equal(results[1].failedWindow, 60);
   assert.equal(typeof results[1].resetAt, "number");
-  assert.ok(results[1].resetAt! > now);
-  assert.ok(results[1].resetAt! - now <= 60_000);
+  assert.ok(results[1].resetAt! > Date.now());
+  assert.ok(results[1].resetAt! - Date.now() <= 60_000);
 });
 
 test("the Redis auth cache is not switched off by DISABLE_SQLITE_AUTO_BACKUP", () => {

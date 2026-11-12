@@ -397,6 +397,17 @@ test("chatCore returns a pre-content Grok failure to the outer fallback contract
 
 test("chatCore converts a Grok post-content failure into terminal wire error and failed persistence", async () => {
   await settingsDb.updateSettings({ call_log_pipeline_enabled: true });
+  // The assertion below retains its 3 s steady-state persistence contract. Prime the real
+  // source-checkout artifact worker by awaiting its exact first write instead of charging its
+  // tsx/worker_threads cold start to that contract (which flakes under a loaded CI scheduler).
+  await callLogs.saveCallLog({
+    id: "grok-stream-error-worker-warmup",
+    timestamp: new Date().toISOString(),
+    status: 200,
+    model: "fixture-warmup",
+    provider: "fixture-warmup",
+    requestBody: { warmup: true },
+  });
   const streamFailures: Array<Record<string, unknown>> = [];
   const requestBody = {
     model: "grok-4.1-fast",

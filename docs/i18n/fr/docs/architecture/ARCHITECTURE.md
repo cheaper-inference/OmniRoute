@@ -10,77 +10,76 @@ _Dernière mise à jour : 2026-06-28_
 
 ## Résumé exécutif
 
-OmniRoute est une passerelle locale de routage d’IA et un tableau de bord basés sur Next.js.
-Il fournit un point de terminaison unique compatible avec OpenAI (`/v1/*`) et achemine le trafic entre plusieurs fournisseurs en prenant en charge la traduction, le basculement, le renouvellement des jetons et le suivi de l’utilisation.
+OmniRoute est une passerelle de routage AI locale et un tableau de bord construit sur Next.js. Il fournit un seul point de terminaison compatible OpenAI (`/v1/*`) et achemine le trafic vers plusieurs fournisseurs en amont avec traduction, secours, actualisation des jetons et suivi de l'utilisation.
 
-Fonctionnalités principales :
+Capacités de base :
 
-- Interface d’API compatible avec OpenAI pour les CLI/outils (380 fournisseurs, 159 modules d’exécution)
-- Traduction des requêtes/réponses entre les formats des fournisseurs
-- Basculement par combinaison de modèles (séquence multi-modèles)
-- Étapes de combinaison structurées (`provider + model + connection`) avec classement à l’exécution via `compositeTiers`
-- Basculement au niveau du compte (plusieurs comptes par fournisseur)
-- Pré-vérification des quotas et sélection de compte P2C tenant compte des quotas dans le chemin principal de conversation
-- Gestion des connexions des fournisseurs OAuth et à clé d’API (27 modules de fournisseurs OAuth)
-- Génération d’embeddings via `/v1/embeddings` (18 fournisseurs)
-- Génération d’images via `/v1/images/generations` (10+ fournisseurs, 20+ modèles)
+- Surface API compatible OpenAI pour CLI/tools (380 fournisseurs, 162 modules exécuteurs)
+- Traduction Request/response dans tous les formats de fournisseurs
+- Modèle de secours combiné (séquence multimodèle)
+- Étapes combinées structurées (`provider + model + connection`) avec classement d'exécution par `compositeTiers`
+- Solution de secours au niveau du compte (multi-comptes par fournisseur)
+- Contrôle en amont des quotas et sélection du compte P2C tenant compte des quotas dans le chemin de discussion principal
+- Gestion des connexions du fournisseur de clé API OAuth + (27 modules du fournisseur OAuth )
+- Génération d'intégration via `/v1/embeddings` (18 fournisseurs)
+- Génération d'images via `/v1/images/generations` (10 fournisseurs +, 20 modèles + )
 - Transcription audio via `/v1/audio/transcriptions` (18 fournisseurs)
 - Synthèse vocale via `/v1/audio/speech` (24 fournisseurs intégrés)
 - Génération vidéo via `/v1/videos/generations` (ComfyUI + SD WebUI)
-- Génération musicale via `/v1/music/generations` (ComfyUI)
+- Génération de musique via `/v1/music/generations` (ComfyUI)
 - Recherche Web via `/v1/search` (20 fournisseurs)
-- Modération via `/v1/moderations`
+- Modérations via `/v1/moderations`
 - Reclassement via `/v1/rerank`
-- Analyse des balises de réflexion (`<think>...</think>`) pour les modèles de raisonnement
-- Nettoyage des réponses pour assurer une compatibilité stricte avec le SDK OpenAI
-- Normalisation des rôles (developer→system, system→user) pour assurer la compatibilité entre les fournisseurs
-- Conversion des sorties structurées (json_schema → Gemini responseSchema)
-- Persistance locale des fournisseurs, clés, alias, combinaisons, paramètres et tarifs (122 modules de base de données)
-- Suivi de l’utilisation et des coûts, ainsi que journalisation des requêtes
-- Synchronisation cloud facultative pour la synchronisation entre appareils et états
-- Liste d’autorisation/blocage d’adresses IP pour le contrôle d’accès à l’API
-- Gestion du budget de réflexion (transmission directe/automatique/personnalisée/adaptative)
-- Injection d’une invite système globale
-- Suivi des sessions et empreintes
-- Limitation de débit améliorée par compte avec des profils spécifiques aux fournisseurs
-- Schéma de disjoncteur pour la résilience des fournisseurs
-- Protection contre l’effet de foule avec verrouillage mutex
-- Cache de déduplication des requêtes basé sur leur signature
-- Couche métier : règles de coûts, stratégie de basculement, stratégie de verrouillage
-- Context Relay : résumés de transfert de session pour assurer la continuité lors de la rotation des comptes
-- Persistance de l’état métier (cache d’écriture directe SQLite pour les basculements, budgets, verrouillages et disjoncteurs)
-- Moteur de stratégie pour l’évaluation centralisée des requêtes (verrouillage → budget → basculement)
-- Télémétrie des requêtes avec agrégation de la latence p50/p95/p99
-- Télémétrie des cibles de combinaison et état historique des cibles de combinaison via `combo_execution_key` / `combo_step_id`
-- ID de corrélation (X-Request-Id) pour le traçage de bout en bout
-- Journalisation d’audit de conformité avec possibilité de désactivation par clé d’API
-- Cadre d’évaluation pour l’assurance qualité des LLM
-- Tableau de bord de santé avec état en temps réel des disjoncteurs des fournisseurs
+- Pensez à l'analyse des balises (`<think>...</think>`) pour les modèles de raisonnement
+- Désinfection des réponses pour une compatibilité stricte OpenAI SDK
+- Normalisation des rôles (développeur du système →, utilisateur du système →) pour une compatibilité entre fournisseurs
+- Conversion de sortie structurée (json_schema → Gemini responseSchema)
+- Persistance locale pour les fournisseurs, les clés, les alias, les combos, les paramètres, la tarification (122 modules DB )
+- Suivi Usage/cost et journalisation des demandes
+- Synchronisation cloud en option pour la synchronisation multi-device/state
+- IP allowlist/blocklist pour le contrôle d'accès API
+- Penser la gestion budgétaire (passthrough/auto/custom/adaptive)
+- Injection rapide du système global
+- Suivi de session et empreintes digitales
+- Limitation de débit améliorée par compte avec des profils spécifiques au fournisseur
+- Modèle de disjoncteur pour la résilience des fournisseurs
+- Protection de troupeau anti-tonnerre avec verrouillage mutex
+- Cache de déduplication de requêtes basées sur les signatures
+- Couche de domaine : règles de coûts, politique de repli, politique de verrouillage
+- Context Relay : résumés de transfert de session pour la continuité de la rotation des comptes
+- Persistance de l'état du domaine (cache en écriture SQLite pour les solutions de secours, les budgets, les verrouillages, les disjoncteurs)
+- Moteur de politique pour l’évaluation centralisée des demandes (blocage du budget → secours → )
+- Demander une télémétrie avec l'agrégation de latence p50/p95/p99
+- Télémétrie de la cible combinée et santé historique de la cible combinée via `combo_execution_key` / `combo_step_id`
+- Corrélation ID (X-Request-Id) pour un traçage de bout en bout
+- Journalisation d'audit de conformité avec désinscription par clé API
+- Cadre d'évaluation pour l'assurance qualité LLM
+- Tableau de bord de santé avec état du disjoncteur du fournisseur en temps réel
 - Serveur MCP (110 outils) avec 3 transports (stdio/SSE/Streamable HTTP)
 - Serveur A2A (JSON-RPC 2.0 + SSE) avec compétences et cycle de vie des tâches
-- Système de mémoire (extraction, injection, récupération, synthèse)
+- Système de mémoire (extraction, injection, récupération, résumé)
 - Système de compétences (registre, exécuteur, bac à sable, compétences intégrées)
-- Proxy MITM avec gestion des certificats et traitement DNS
-- Middleware de protection contre l’injection d’invites
-- Pipeline de compression des invites avec Caveman, RTK, pipelines empilés, combinaisons de compression, packs linguistiques et analyses
+- Proxy MITM avec gestion des certificats et gestion DNS
+- Intergiciel de protection contre les injections rapides
+- Pipeline de compression rapide avec Caveman, RTK, pipelines empilés, combinaisons de compression, modules linguistiques et analyses
 - Registre ACP (Agent Communication Protocol)
 - Fournisseurs OAuth modulaires (22 modules individuels sous `src/lib/oauth/providers/`)
-- Scripts de désinstallation/désinstallation complète
-- Action de réparation de l’environnement OAuth
-- Pont WebSocket pour les clients WS compatibles avec OpenAI (`/v1/ws`)
-- Gestion des jetons de synchronisation (émission/révocation, téléchargement de lots de configuration versionnés par ETag)
-- Préréglage de fournisseur GLM Thinking (`glmt`) de première classe
-- Comptage hybride des jetons (comptage côté fournisseur via `/messages/count_tokens` avec solution de secours par estimation)
-- Préremplissage automatique des alias de modèles (30+ normalisations de dialectes inter-proxy au démarrage)
-- Récupération sortante sécurisée avec protection SSRF, blocage des URL privées et nouvelle tentative configurable
-- Nouvelles tentatives de conversation tenant compte des périodes de refroidissement avec `requestRetry` et `maxRetryIntervalSec` configurables
-- Validation de l’environnement d’exécution avec Zod au démarrage
-- Audit de conformité v2 avec pagination, événements CRUD des fournisseurs et journalisation de la validation des blocages SSRF
+- Scripts Uninstall/full-uninstall
+- Action de réparation de l'environnement OAuth
+- Pont WebSocket pour les clients WS compatibles OpenAI (`/v1/ws`)
+- Gestion des jetons de synchronisation (issue/revoke, téléchargement du bundle de configuration avec version ETag)
+- Préréglage de fournisseur de première classe GLM Thinking (`glmt`)
+- Comptage de jetons hybrides ( `/messages/count_tokens` côté fournisseur avec repli d'estimation)
+- Auto-ensemencement automatique de l'alias du modèle (30 normalisations de dialectes inter-proxy + au démarrage)
+- Récupération sortante sécurisée avec protection SSRF, blocage URL privé et nouvelle tentative configurable
+- Nouvelles tentatives de discussion prenant en compte le temps de recharge avec `requestRetry` et `maxRetryIntervalSec` configurables
+- Validation de l'environnement d'exécution avec Zod au démarrage
+- Audit de conformité v2 avec pagination, événements CRUD du fournisseur et journalisation de validation bloquée par SSRF
 
-Modèle d’exécution principal :
+Modèle d'exécution principal :
 
-- Les routes de l’application Next.js sous `src/app/api/*` implémentent à la fois les API du tableau de bord et les API de compatibilité
-- Un cœur partagé SSE/routage situé dans `src/sse/*` + `open-sse/*` gère l’exécution des fournisseurs, la traduction, la diffusion en continu, le basculement et l’utilisation
+- Les routes de l'application Next.js sous `src/app/api/*` implémentent à la fois le tableau de bord APIs et la compatibilité APIs
+- Un noyau SSE/routing partagé dans `src/sse/*` + `open-sse/*` gère l'exécution, la traduction, le streaming, le repli et l'utilisation du fournisseur.
 
 ## Diagrammes de référence
 
@@ -345,7 +344,7 @@ Couches de l’architecture :
   la diffusion des journaux en temps réel, la gestion des clés API et, pour 9Router, une interface utilisateur native intégrée via
   un proxy inverse interne.
 - **API** (`/api/services/{name}/*`) — 11 points de terminaison pour 9Router, 10 pour CLIProxyAPI, 8 chacun pour Bifrost / Mux / Dario,
-  tous classés **LOCAL_ONLY** (règle stricte nº 17). Un point de terminaison SSE partagé `GET /api/services/[name]/logs`
+  tous classés **LOCAL_ONLY** (règle stricte nº #17). Un point de terminaison SSE partagé `GET /api/services/[name]/logs`
   dessert les deux services.
 - **Superviseur** (`src/lib/services/`) — la classe générique `ServiceSupervisor` encapsule
   `child_process.spawn`, maintient un tampon circulaire de 5 Mo pour la diffusion SSE des journaux, une boucle
@@ -400,22 +399,22 @@ Le module guardrails est une couche middleware rechargeable à chaud qui inspect
 - Points de connexion : entrée du gestionnaire de discussion, gestionnaire de génération d'images, désinfectant de réponse
 - Contrat HTTP : les violations font surface sous forme `503` avec `error.code = "GUARDRAIL_VIOLATION"`
 
-Pour la création d'ensembles de règles et le réglage des seuils, voir [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
+Pour la création d’ensembles de règles et le réglage des seuils, voir [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
 
 ### D. Couche de domaine
 
 L'espace de noms `src/domain/` centralise les décisions politiques afin que les gestionnaires de routes n'aient pas à assembler eux-mêmes la logique lockout/budget/fallback.
 
-- Moteur de stratégie : point d'entrée unique `src/domain/policyEngine.ts` — pour l'évaluation avant exécution (verrouillage du budget →, commande de secours → )
-- Règles de coût : `src/domain/costRules.ts`
+- Moteur de stratégie : point d'entrée unique `src/domain/policyEngine.ts` — pour l'évaluation avant exécution (blocage du budget → commande de secours → )
+- Règles de coûts : `src/domain/costRules.ts`
 - Politique de repli : `src/domain/fallbackPolicy.ts`
 - Politique de verrouillage : `src/domain/lockoutPolicy.ts`
 - Routage basé sur des balises : `src/domain/tagRouter.ts`
-- Résolveur de combo : `src/domain/comboResolver.ts` — résout les noms de combo, les préfixes auto/\* et les cibles de modèle générique en plans d'exécution concrets
-- menuisier de règles Connection/model : `src/domain/connectionModelRules.ts`
+- Résolveur de combo : `src/domain/comboResolver.ts` — résout les noms de combo, les préfixes auto/\* et les cibles de modèle générique en plans d'exécution concrets.
+- Menuisier de règles Connection/model : `src/domain/connectionModelRules.ts`
 - Instantanés de disponibilité du modèle : `src/domain/modelAvailability.ts`
-- Suivi de l'expiration du fournisseur : `src/domain/providerExpiration.ts`
-- Cache de quota : `src/domain/quotaCache.ts`
+- Suivi de l'expiration des fournisseurs : `src/domain/providerExpiration.ts`
+- Cache de quotas : `src/domain/quotaCache.ts`
 - État de dégradation : `src/domain/degradation.ts`
 - Audit de configuration : `src/domain/configAudit.ts`
 - Générateur de métadonnées de réponse OmniRoute : `src/domain/omnirouteResponseMeta.ts`
@@ -433,7 +432,7 @@ Le pipeline d'autorisation classe chaque demande entrante et applique la chaîne
 - Assistant d'assertion : `src/server/authz/assertAuth.ts`
 - Contexte de la requête : `src/server/authz/context.ts`
 
-Les routes publiques et de gestion constituent une frontière stricte : les mutations agent/cooldown APIs et du fournisseur nécessitent une authentification de gestion (HTTP 401 s'il est manquant).
+Les routes publiques et de gestion constituent une frontière stricte : les mutations agent/cooldown APIs et de fournisseur nécessitent une authentification de gestion (HTTP 401 s'il est manquant).
 
 Pour les règles complètes de classification des itinéraires, voir [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 
@@ -1056,11 +1055,11 @@ L’ancien journaliseur de requêtes basé sur des fichiers (`open-sse/utils/req
 - migrations du schéma SQLite et mécanismes de mise à niveau automatique au démarrage
 - chemin de compatibilité pour la migration de l’ancien format JSON vers SQLite
 
-## 6) Protection contre les SSRF et contrôle des URL sortantes
+## 6) Protection contre les SSRF / URL sortantes
 
-- `src/shared/network/outboundUrlGuard.ts` bloque toutes les URL cibles privées, de bouclage ou locales au lien avant qu’elles n’atteignent les exécuteurs des fournisseurs
-- les routes de découverte et de validation des modèles des fournisseurs utilisent `src/shared/network/safeOutboundFetch.ts`, qui applique le contrôle avant chaque requête sortante
-- les erreurs du contrôle sont signalées sous la forme `URL_GUARD_BLOCKED` avec le code HTTP 422 et sont consignées dans la piste d’audit de conformité via `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) applique `src/shared/network/outboundUrlGuard.ts` aux requêtes de chat envoyées via `BaseExecutor.execute()`. En mode public uniquement (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` avec l’option d’autorisation des adresses privées désactivée), il bloque les hôtes privés et de bouclage ainsi que 169.254.0.0/16 ; dans tous les autres modes, il bloque les hôtes de métadonnées cloud. Il vérifie le nom d’hôte ou l’adresse IP littérale tel qu’il est écrit, avant toute résolution DNS. Les fournisseurs locaux intégrés ne sont pas soumis à cette vérification.
+- Les routes de découverte et de validation des modèles de fournisseurs utilisent `src/shared/network/safeOutboundFetch.ts`, qui applique la protection avant chaque requête sortante
+- Les erreurs de protection sont signalées par `URL_GUARD_BLOCKED` avec le code HTTP 503 (`getSafeOutboundFetchErrorStatus` ; la route de découverte des modèles renvoie 400), et les véritables blocages SSRF lors de la validation sont consignés dans la piste d’audit sous forme d’événements `provider.validation.ssrf_blocked`
 
 ## Observabilité et signaux opérationnels
 
@@ -1111,7 +1110,7 @@ Variables d’environnement activement utilisées par le code :
 4. Le comportement du cloud dépend de la configuration correcte de `NEXT_PUBLIC_BASE_URL` et de l’accessibilité du point de terminaison cloud.
 5. Le répertoire `open-sse/` est publié en tant que **package d’espace de travail npm** `@omniroute/open-sse`. Le code source l’importe via `@omniroute/open-sse/...` (résolu par `transpilePackages` de Next.js). Les chemins de fichiers de ce document continuent d’utiliser le nom de répertoire `open-sse/` par souci de cohérence.
 6. Les graphiques du tableau de bord utilisent **Recharts** (basé sur SVG) pour fournir des visualisations analytiques accessibles et interactives (histogrammes d’utilisation des modèles, tableaux de répartition par fournisseur avec taux de réussite).
-7. Les tests E2E utilisent **Playwright** (`tests/e2e/`) et sont exécutés via `npm run test:e2e`. Les tests unitaires utilisent le **moteur de test de Node.js** (`tests/unit/`) et sont exécutés via `npm run test:unit`. Le code source sous `src/` est en **TypeScript** (`.ts`/`.tsx`) ; l’espace de travail `open-sse/` reste en JavaScript (`.js`).
+7. Les tests E2E utilisent **Playwright** (`tests/e2e/`) et sont exécutés via `npm run test:e2e`. Les tests unitaires utilisent le **moteur de test de Node.js** (`tests/unit/`) et sont exécutés via `npm run test:unit`. Le code source sous `src/` est en **TypeScript** (`.ts`/`.tsx`) ; l’espace de travail `open-sse/` reste en TypeScript (`.ts`).
 8. La page des paramètres est organisée en 7 onglets : Général, Apparence, IA, Sécurité, Routage, Résilience, Avancé. La page Résilience configure uniquement la file d’attente des requêtes, le délai de récupération des connexions, le disjoncteur des fournisseurs et le comportement d’attente du délai de récupération ; l’état d’exécution en direct des disjoncteurs est affiché sur la page Santé.
 9. La stratégie **Context Relay** (`context-relay`) est répartie sur deux couches : `combo.ts` détermine si un transfert doit être généré, tandis que `chat.ts` injecte le transfert après la résolution du compte. Les données de transfert résident dans la table SQLite `context_handoffs`. Cette séparation est intentionnelle, car seul `chat.ts` sait si le compte réellement utilisé a changé.
 10. **L’application du proxy** est désormais complète : `tokenHealthCheck.ts` résout le proxy pour chaque connexion, `/api/providers/validate` utilise `runWithProxyContext`, et `proxyFetch.ts` utilise `undici.fetch()` afin de maintenir la compatibilité du répartiteur avec Node 22.

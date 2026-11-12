@@ -80,15 +80,84 @@ test("planSectionReuse gives up when the mirror does not have the same section c
     planSectionReuse({ previousHashes: undefined, sections: ["p"], mirrorSections: ["p"] }),
     null
   );
-  // An inserted section shifts the count: the plan falls back to a full translation.
+  // The recorded hashes describe a mirror with another section count (a hand edit, or a mirror
+  // written by an older pipeline): nothing can be lined up, whatever the source looks like now.
   assert.equal(
     planSectionReuse({
       previousHashes: prev,
       sections: ["p", "## New", "## A"],
-      mirrorSections: ["p", "## A"],
+      mirrorSections: ["p", "## A", "## Extra"],
     }),
     null
   );
+});
+
+// A source that gains or loses a `## ` section no longer has the section count the hashes were
+// recorded for. Matching by index would then throw every section away (ENVIRONMENT.md, 697 KB,
+// was heading for a full retranslation in 66 locales over one appended 794-byte section on
+// 2026-11-05), so the two lists are lined up by hash instead.
+test("planSectionReuse translates only the section that was inserted", () => {
+  const prev = sectionHashes(["p", "## A\n\na", "## B\n\nb"]);
+  const now = ["p", "## A\n\na", "## New\n\nnew", "## B\n\nb"];
+  const mirror = ["p-pt", "## A-pt\n\na-pt", "## B-pt\n\nb-pt"];
+  const plan = planSectionReuse({ previousHashes: prev, sections: now, mirrorSections: mirror });
+  assert.ok(plan);
+  assert.deepEqual(
+    [...plan.reuse.entries()],
+    [
+      [0, "p-pt"],
+      [1, "## A-pt\n\na-pt"],
+      [3, "## B-pt\n\nb-pt"],
+    ]
+  );
+  assert.deepEqual(plan.translate, [2]);
+});
+
+test("planSectionReuse translates only the section appended at the end", () => {
+  const prev = sectionHashes(["p", "## A\n\na", "## B\n\nb"]);
+  const now = ["p", "## A\n\na", "## B\n\nb", "## Tail\n\ntail"];
+  const mirror = ["p-pt", "## A-pt\n\na-pt", "## B-pt\n\nb-pt"];
+  const plan = planSectionReuse({ previousHashes: prev, sections: now, mirrorSections: mirror });
+  assert.ok(plan);
+  assert.deepEqual([...plan.reuse.keys()], [0, 1, 2]);
+  assert.deepEqual(plan.translate, [3]);
+});
+
+test("planSectionReuse keeps every surviving section when one was removed", () => {
+  const prev = sectionHashes(["p", "## A\n\na", "## B\n\nb", "## C\n\nc"]);
+  const now = ["p", "## A\n\na", "## C\n\nc"];
+  const mirror = ["p-pt", "## A-pt\n\na-pt", "## B-pt\n\nb-pt", "## C-pt\n\nc-pt"];
+  const plan = planSectionReuse({ previousHashes: prev, sections: now, mirrorSections: mirror });
+  assert.ok(plan);
+  assert.deepEqual(
+    [...plan.reuse.entries()],
+    [
+      [0, "p-pt"],
+      [1, "## A-pt\n\na-pt"],
+      [2, "## C-pt\n\nc-pt"],
+    ]
+  );
+  assert.deepEqual(plan.translate, []);
+});
+
+test("planSectionReuse: an inserted section next to a changed one translates both and nothing else", () => {
+  const prev = sectionHashes(["p", "## A\n\na", "## B\n\nb"]);
+  const now = ["p", "## A\n\na CHANGED", "## New\n\nnew", "## B\n\nb"];
+  const mirror = ["p-pt", "## A-pt\n\na-pt", "## B-pt\n\nb-pt"];
+  const plan = planSectionReuse({ previousHashes: prev, sections: now, mirrorSections: mirror });
+  assert.ok(plan);
+  assert.deepEqual([...plan.reuse.keys()], [0, 3]);
+  assert.deepEqual(plan.translate, [1, 2]);
+});
+
+test("planSectionReuse still refuses an English copy when the section count changed", () => {
+  const prev = sectionHashes(["p", "## A\n\nalpha text here", "## B\n\nbeta"]);
+  const now = ["p", "## A\n\nalpha text here", "## B\n\nbeta", "## Tail\n\ntail"];
+  const mirror = ["p-pt", "## A\n\nalpha text here", "## B-pt\n\nbeta-pt"];
+  const plan = planSectionReuse({ previousHashes: prev, sections: now, mirrorSections: mirror });
+  assert.ok(plan);
+  assert.deepEqual([...plan.reuse.keys()], [0, 2]);
+  assert.deepEqual(plan.translate, [1, 3]);
 });
 
 test("extractMirrorBody strips the heading, the language bar and the separator", () => {
@@ -189,6 +258,55 @@ test("mirrorNeedsRebuild: a real translation is left alone", () => {
   assert.equal(mirrorNeedsRebuild(mirror, SRC), false);
 });
 
+test("mirrorNeedsRebuild: an extra body H1 is stale even when the mirror is translated", () => {
+  const source = "# Quality Gates Reference\n\n## Inventory\n\nQuality checks are required.";
+  const prefix = "# Referenca (Bosanski)\n\n🌐 Languages\n\n---\n\n";
+  const body = "## Inventar\n\nProvjere kvaliteta su obavezne.";
+  assert.equal(mirrorNeedsRebuild(prefix + body, source), false);
+  assert.equal(
+    mirrorNeedsRebuild(prefix + "# Referenca za Quality Gates\n\n" + body, source),
+    true
+  );
+});
+
+test("mirrorNeedsRebuild: initial indented code is preserved as translated code", () => {
+  const source = "# Example\n\n    # Example comment\n    npm ci";
+  const mirror = "# Exemplo\n\n🌐 Languages\n\n---\n\n    ### Comentário traduzido\n    npm ci";
+  assert.equal(mirrorNeedsRebuild(mirror, source), false);
+});
+
+test("section reuse retranslates heading drift despite matching source hashes", () => {
+  const sections = ["Introduction.", "## Settings\n\n### Limits\n\nSet the limits."];
+  const prefix = "Introdução.";
+  const complete = "## Configurações\n\n### Limites\n\nConfigure os limites.";
+  for (const broken of [
+    "# Título extra\n\n" + complete,
+    complete.replace("### Limites", "Limites"),
+    complete.replace("### Limites", "#### Limites"),
+  ]) {
+    const plan = planSectionReuse({
+      previousHashes: sectionHashes(sections),
+      sections,
+      mirrorSections: [prefix, broken],
+    });
+    assert.deepEqual(plan.translate, [1]);
+    assert.deepEqual([...plan.reuse.entries()], [[0, prefix]]);
+  }
+  const valid = planSectionReuse({
+    previousHashes: sectionHashes(sections),
+    sections,
+    mirrorSections: [prefix, complete],
+  });
+  assert.deepEqual(valid.translate, []);
+  assert.deepEqual(
+    [...valid.reuse.entries()],
+    [
+      [0, prefix],
+      [1, complete],
+    ]
+  );
+});
+
 test("mergeStateUpdates keeps other runners' entries and applies this run's records", () => {
   const fresh = {
     sources: {
@@ -219,6 +337,50 @@ test("planSectionReuse retranslates a section that is still mostly English even 
     looksUntranslated(
       "## Einrichtung\n\nKlone das Repository und installiere zuerst die Abhängigkeiten.\n\nStarte den Entwicklungsserver und öffne das Dashboard.\n\nErstelle deine env-Datei aus der Vorlage.\n",
       sec
+    ),
+    false
+  );
+});
+
+test("section reuse revalidates cached code literals and table rows despite matching hashes", () => {
+  const sections = [
+    "Introduction.",
+    "## Settings\n\n| Variable | Meaning |\n| --- | --- |\n| `QODER_CLI_MAX_CONCURRENCY` | Queue limit |\n| `KIRO_REQUIRE_CREDITS` | Credit policy |",
+    "## Next\n\nContinue with setup.",
+  ];
+  const complete =
+    "## Configuração\n\n| Variável | Significado |\n| --- | --- |\n| `QODER_CLI_MAX_CONCURRENCY` | Limite da fila |\n| `KIRO_REQUIRE_CREDITS` | Política de créditos |";
+  for (const broken of [
+    complete
+      .split("\n")
+      .filter((line) => !line.includes("KIRO_REQUIRE_CREDITS"))
+      .join("\n"),
+    complete.replace("KIRO_REQUIRE_CREDITS", "KIRO_EXIGE_CREDITOS"),
+  ]) {
+    const plan = planSectionReuse({
+      previousHashes: sectionHashes(sections),
+      sections,
+      mirrorSections: ["Introdução.", broken, "## Próximo\n\nContinue a configuração."],
+    });
+    assert.deepEqual(plan.translate, [1]);
+    assert.deepEqual([...plan.reuse.keys()], [0, 2]);
+  }
+  const valid = planSectionReuse({
+    previousHashes: sectionHashes(sections),
+    sections,
+    mirrorSections: ["Introdução.", complete, "## Próximo\n\nContinue a configuração."],
+  });
+  assert.deepEqual(valid.translate, []);
+});
+
+test("a mirror with missing source literals is rebuilt even when its prose is translated", () => {
+  const source = "# Configuration\n\nSet `QODER_CLI_MAX_CONCURRENCY` and `KIRO_REQUIRE_CREDITS`.";
+  const mirror = "# Configuração\n\n🌐 Languages\n\n---\n\nConfigure `QODER_CLI_MAX_CONCURRENCY`.";
+  assert.equal(mirrorNeedsRebuild(mirror, source), true);
+  assert.equal(
+    mirrorNeedsRebuild(
+      mirror.replace("CONCURRENCY`.", "CONCURRENCY` e `KIRO_REQUIRE_CREDITS`."),
+      source
     ),
     false
   );

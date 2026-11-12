@@ -445,9 +445,8 @@ server/
 
 ## 4. `open-sse/` — സ്ട്രീമിംഗ് എഞ്ചിൻ വർക്ക്സ്പേസ്
 
-`@omniroute/open-sse` ആയി പ്രസിദ്ധീകരിക്കുന്ന പ്രത്യേക npm വർക്ക്സ്പേസ്. അഭ്യർത്ഥന
-പ്രോസസ്സിംഗ്, എക്സിക്യൂട്ടറുകൾ, ട്രാൻസ്ലേറ്ററുകൾ, സർവീസുകൾ, ട്രാൻസ്ഫോർമർ, MCP സെർവർ എന്നിവയുടെ
-ഉടമസ്ഥത വഹിക്കുന്നു.
+`@omniroute/open-sse` ആയി പ്രസിദ്ധീകരിച്ച പ്രത്യേക npm വർക്ക്സ്പേസ്. അഭ്യർത്ഥന
+പ്രോസസ്സിംഗ്, എക്സിക്യൂട്ടറുകൾ, ട്രാൻസ്ലേറ്ററുകൾ, സർവീസുകൾ, ട്രാൻസ്ഫോർമർ, MCP സെർവർ എന്നിവ കൈകാര്യം ചെയ്യുന്നു.
 
 ```
 open-sse/
@@ -456,52 +455,42 @@ open-sse/
 ├── tsconfig.json
 ├── types.d.ts
 ├── config/                 പ്രൊവൈഡർ രജിസ്ട്രികൾ, ഹെഡർ പ്രൊഫൈലുകൾ, ഐഡന്റിറ്റി, …
-├── handlers/               അഭ്യർത്ഥന ഹാൻഡ്ലറുകൾ (ചാറ്റ്, എംബെഡ്ഡിംഗുകൾ, ഓഡിയോ, ചിത്രം, …)
-├── executors/              159 പ്രൊവൈഡർ എക്സിക്യൂട്ടർ മോഡ്യൂളുകൾ (എക്സിക്യൂട്ടർ ക്ലാസുകൾ + ഓരോ പ്രൊവൈഡറിനുമുള്ള സഹായികൾ)
+├── handlers/               അഭ്യർത്ഥന ഹാൻഡ്ലറുകൾ (ചാറ്റ്, എംബെഡ്ഡിങ്ങുകൾ, ഓഡിയോ, ഇമേജ്, …)
+├── executors/              162 പ്രൊവൈഡർ എക്സിക്യൂട്ടർ മൊഡ്യൂളുകൾ (എക്സിക്യൂട്ടർ ക്ലാസുകൾ + ഓരോ പ്രൊവൈഡറിനുമുള്ള ഹെൽപ്പറുകൾ)
 ├── translator/             ഫോർമാറ്റ് പരിവർത്തനം (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions സ്ട്രീം ട്രാൻസ്ഫോർമർ
-├── services/               80+ സർവീസ് മോഡ്യൂളുകൾ (കോംബോകൾ, ഫാൾബാക്ക്, ക്വോട്ടകൾ, ഐഡന്റിറ്റി, …)
-├── utils/                  സ്ട്രീമിംഗ് സഹായികൾ, TLS ക്ലയന്റ്, AWS SigV4, പ്രോക്സി fetch, …
+├── services/               80+ സർവീസ് മൊഡ്യൂളുകൾ (കോംബോകൾ, ഫാൾബാക്ക്, ക്വോട്ടകൾ, ഐഡന്റിറ്റി, …)
+├── utils/                  സ്ട്രീമിംഗ് ഹെൽപ്പറുകൾ, TLS ക്ലയന്റ്, AWS SigV4, പ്രോക്സി ഫെച്ച്, …
 └── mcp-server/             MCP സെർവർ (3 ട്രാൻസ്പോർട്ടുകൾ, 33 സ്കോപ്പുകൾ, 110 ടൂളുകൾ)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| ഹാൻഡ്ലർ                 | ഉദ്ദേശ്യം                                                                                |
-| ----------------------- | ---------------------------------------------------------------------------------------- |
-| `chatCore.ts`           | പ്രധാന ചാറ്റ് പൈപ്പ്ലൈൻ (കാഷെ, നിരക്ക് പരിധി, കോംബോ റൂട്ടിംഗ്, എക്സിക്യൂട്ടർ ഡിസ്പാച്ച്) |
-| `responsesHandler.ts`   | OpenAI Responses API എൻട്രി പോയിന്റ്                                                     |
-| `embeddings.ts`         | എംബെഡ്ഡിംഗുകൾ                                                                            |
-| `imageGeneration.ts`    | ചിത്രം ജനറേഷൻ                                                                            |
-| `audioSpeech.ts`        | ടെക്സ്റ്റ്-ടു-സ്പീച്ച്                                                                   |
-| `audioTranscription.ts` | സ്പീച്ച്-ടു-ടെക്സ്റ്റ്                                                                   |
-| `videoGeneration.ts`    | വീഡിയോ ജനറേഷൻ                                                                            |
-| `musicGeneration.ts`    | സംഗീത ജനറേഷൻ                                                                             |
-| `rerank.ts`             | റീറാങ്കിംഗ്                                                                              |
-| `moderations.ts`        | മോഡറേഷൻ                                                                                  |
-| `search.ts`             | വെബ് തിരയൽ                                                                               |
-| `sseParser.ts`          | SSE ഇവന്റ് പാർസർ                                                                         |
-| `usageExtractor.ts`     | അപ്സ്ട്രീം സ്ട്രീമുകളിൽ നിന്ന് ടോക്കൺ എണ്ണങ്ങൾ വേർതിരിച്ചെടുക്കുന്നു                     |
-| `responseSanitizer.ts`  | പ്രൊവൈഡർ-നിർദ്ദിഷ്ട അനാവശ്യ ഉള്ളടക്കം നീക്കംചെയ്യുന്നു                                   |
-| `responseTranslator.ts` | പ്രൊവൈഡർ പ്രതികരണത്തിനും ട്രാൻസ്ലേറ്റർ ലെയറിനുമിടയിലെ ബന്ധകം                             |
+| ഹാൻഡ്ലർ                 | ഉദ്ദേശ്യം                                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------ |
+| `chatCore.ts`           | പ്രധാന ചാറ്റ് പൈപ്പ്ലൈൻ (കാഷ്, റേറ്റ് ലിമിറ്റ്, കോംബോ റൂട്ടിംഗ്, എക്സിക്യൂട്ടർ ഡിസ്പാച്ച്) |
+| `responsesHandler.ts`   | OpenAI Responses API എൻട്രി പോയിന്റ്                                                       |
+| `embeddings.ts`         | എംബെഡ്ഡിങ്ങുകൾ                                                                             |
+| `imageGeneration.ts`    | ഇമേജ് ജനറേഷൻ                                                                               |
+| `audioSpeech.ts`        | ടെക്സ്റ്റ്-ടു-സ്പീച്ച്                                                                     |
+| `audioTranscription.ts` | സ്പീച്ച്-ടു-ടെക്സ്റ്റ്                                                                     |
+| `videoGeneration.ts`    | വീഡിയോ ജനറേഷൻ                                                                              |
+| `musicGeneration.ts`    | സംഗീത ജനറേഷൻ                                                                               |
+| `rerank.ts`             | പുനഃറാങ്കിംഗ്                                                                              |
+| `moderations.ts`        | മോഡറേഷൻ                                                                                    |
+| `search.ts`             | വെബ് തിരയൽ                                                                                 |
+| `sseParser.ts`          | SSE ഇവന്റ് പാർസർ                                                                           |
+| `usageExtractor.ts`     | അപ്സ്ട്രീം സ്ട്രീമുകളിൽനിന്ന് ടോക്കൺ എണ്ണങ്ങൾ വേർതിരിച്ചെടുക്കുന്നു                        |
+| `responseSanitizer.ts`  | പ്രൊവൈഡർ-നിർദ്ദിഷ്ട അനാവശ്യ ഉള്ളടക്കം നീക്കം ചെയ്യുന്നു                                    |
+| `responseTranslator.ts` | പ്രൊവൈഡർ പ്രതികരണത്തിനും ട്രാൻസ്ലേറ്റർ ലെയറിനും ഇടയിലുള്ള ബന്ധിപ്പിക്കൽ ഘടകം               |
 
 ### 4.2 `open-sse/executors/`
 
-159 ടോപ്പ്-ലെവൽ എക്സിക്യൂട്ടർ മോഡ്യൂളുകൾ (`*.ts`, `base.ts`, `index.ts`, ടെസ്റ്റുകൾ എന്നിവ
-ഒഴിവാക്കി — `npm run check:docs-counts` ആണ് ഈ എണ്ണം അളക്കുന്നത്). ഓരോ എക്സിക്യൂട്ടർ ക്ലാസും
-`BaseExecutor` (`base.ts`) വിപുലീകരിക്കുന്നു; നേരിട്ടോ `DefaultExecutor` വഴിയോ മറ്റൊരു എക്സിക്യൂട്ടർ
-വഴിയോ. ശേഷിക്കുന്ന മോഡ്യൂളുകൾ ഓരോ പ്രൊവൈഡറിനുമുള്ള സഹായികളാണ് (ടൂൾ സ്കീമകൾ, fetch/TTS
-അഡാപ്റ്ററുകൾ, ക്വിർക്ക് ഹാൻഡ്ലറുകൾ). എക്സിക്യൂട്ടറുകളിൽ ഉൾപ്പെടുന്നവ:
+162 ടോപ്പ്-ലെവൽ എക്സിക്യൂട്ടർ മൊഡ്യൂളുകൾ (`*.ts` മൈനസ് `base.ts`, `index.ts` കൂടാതെ — ടെസ്റ്റുകൾ `npm run check:docs-counts` അളവുകളുടെ എണ്ണം). എല്ലാ എക്സിക്യൂട്ടർ ക്ലാസും `BaseExecutor` (`base.ts`) വിപുലീകരിക്കുന്നു, നേരിട്ടോ `DefaultExecutor` വഴിയോ മറ്റൊരു എക്സിക്യൂട്ടർ വഴിയോ; ശേഷിക്കുന്ന മൊഡ്യൂളുകൾ ഓരോ പ്രൊവൈഡർ സഹായികളാണ് (ടൂൾ സ്കീമകൾ, fetch/TTS അഡാപ്റ്ററുകൾ, ക്വിർക്ക് ഹാൻഡ്ലറുകൾ). എക്സിക്യൂട്ടീവുകളിൽ ഉൾപ്പെടുന്നു:
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
-`chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
-`muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
-`pollinations`, `qoder`, `vertex`, `devin-desktop`, കൂടാതെ
-`claudeIdentity.ts` (പങ്കിടുന്ന ഐഡന്റിറ്റി സഹായി), `index.ts` (രജിസ്ട്രി).
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex` `devin-desktop`, `claudeIdentity.ts` ID സഹായം `index.ts` (രജിസ്ട്രി).
 
-> കുറിപ്പ്: ഇവിടെ പട്ടികപ്പെടുത്തിയിട്ടില്ലാത്ത പ്രൊവൈഡറുകൾ, പൊതുവായ
-> OpenAI-അനുയോജ്യമായ എക്സിക്യൂട്ടർ ഉപയോഗിക്കുന്ന `default.ts` വഴിയാണ് സേവനം നൽകുന്നത്. പൂർണ്ണ പ്രൊവൈഡർ
-> കാറ്റലോഗ് (380 പ്രൊവൈഡറുകൾ) `src/shared/constants/providers.ts`-ൽ സ്ഥിതിചെയ്യുന്നു.
+> ശ്രദ്ധിക്കുക: ഇവിടെ ലിസ്റ്റുചെയ്തിട്ടില്ലാത്ത ദാതാക്കൾക്ക് പൊതുവായ OpenAI-അനുയോജ്യമായ എക്സിക്യൂട്ടർ ഉപയോഗിച്ച് `default.ts` സേവനം നൽകുന്നു. പൂർണ്ണ ദാതാവിൻ്റെ കാറ്റലോഗ് (380 ദാതാക്കൾ) `src/shared/constants/providers.ts` ൽ താമസിക്കുന്നു.
 
 ### 4.3 `open-sse/translator/`
 
@@ -513,51 +502,52 @@ open-sse/
   `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
 - **9 പ്രതികരണ ട്രാൻസ്ലേറ്ററുകൾ** (`translator/response/`):
   `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
-  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
-- **9 സഹായികൾ** (`translator/helpers/`):
+  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
+  `openai-to-claude`.
+- **9 ഹെൽപ്പറുകൾ** (`translator/helpers/`):
   `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
   `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, കൂടാതെ
-  സഹായി ടെസ്റ്റുകൾ.
-- **ചിത്ര സഹായികൾ** (`translator/image/sizeMapper.ts`).
+  ഹെൽപ്പർ ടെസ്റ്റുകൾ.
+- **ഇമേജ് ഹെൽപ്പറുകൾ** (`translator/image/sizeMapper.ts`).
 - ടോപ്പ്-ലെവൽ: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
 - `responsesTransformer.ts` — `TransformStream` അടിസ്ഥാനമാക്കിയുള്ള Responses API ↔ Chat
-  Completions കൺവെർട്ടർ (`responses/` റൂട്ടിലെ catch-all ഉപയോഗിക്കുന്നു).
+  Completions കൺവേർട്ടർ (`responses/` റൂട്ട് ക്യാച്ച്-ഓൾ ഉപയോഗിക്കുന്നത്).
 
 ### 4.5 `open-sse/services/`
 
-പ്രധാനപ്പെട്ടവ (പൂർണ്ണ പട്ടിക `open-sse/services/`-ന് കീഴിൽ):
+പ്രധാനപ്പെട്ടവ (`open-sse/services/`-ന് കീഴിലുള്ള പൂർണ്ണ പട്ടിക):
 
-| ആശങ്ക                 | ഫയലുകൾ                                                                                                                                                                                                                                                   |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| കോംബോ റൂട്ടിംഗ്       | `combo.ts` (20 തന്ത്രങ്ങൾ), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                    |
-| ഓട്ടോ കോംബോ എൻജിൻ     | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| പ്രതിരോധക്ഷമത         | `accountFallback.ts` (കൂൾഡൗൺ + ലോക്കൗട്ട്), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                        |
-| ക്വോട്ടകൾ             | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| കാഷിംഗ്               | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| റൂട്ടിംഗ് ബുദ്ധിശക്തി | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| മോഡൽ കൈകാര്യം ചെയ്യൽ  | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| കംപ്രഷൻ               | `compression/` — സമ്പൂർണ്ണ കംപ്രഷൻ എൻജിൻ വയറിംഗ്                                                                                                                                                                                                         |
-| ടോക്കൺ + സെഷൻ         | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| ടയർ / മാനിഫെസ്റ്റ്    | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
-| IP / നെറ്റ്വർക്ക്     | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| ബാച്ചുകൾ              | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| ഉപയോഗം                | `usage.ts`                                                                                                                                                                                                                                               |
+| പരിഗണന               | ഫയലുകൾ                                                                                                                                                                                                                                                   |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| കോംബോ റൂട്ടിംഗ്      | `combo.ts` (20 തന്ത്രങ്ങൾ), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                    |
+| ഓട്ടോ കോംബോ എൻജിൻ    | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| പ്രതിരോധശേഷി         | `accountFallback.ts` (കൂൾഡൗൺ + ലോക്കൗട്ട്), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                        |
+| ക്വോട്ടകൾ            | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
+| കാഷിങ്               | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| റൂട്ടിംഗ് ഇന്റലിജൻസ് | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| മോഡൽ കൈകാര്യം ചെയ്യൽ | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| കംപ്രഷൻ              | `compression/` — പൂർണ്ണ കംപ്രഷൻ എൻജിൻ വയറിങ്                                                                                                                                                                                                             |
+| ടോക്കൺ + സെഷൻ        | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| ടിയർ / മാനിഫെസ്റ്റ്  | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| IP / നെറ്റ്വർക്ക്    | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
+| ബാച്ചുകൾ             | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| ഉപയോഗം               | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- `server.ts`-ൽ വയർ ചെയ്തിട്ടുള്ള **110 തനതായ ടൂളുകൾ** (`schemas/tools.ts`-ലെ 45 കാനോണിക്കൽ ടൂളുകൾ +
-  മെമ്മറി, സ്കിൽസ്, GitHub-സ്കിൽസ്, പൂൾ, ഗെയിമിഫിക്കേഷൻ, പ്ലഗിൻ, Notion, Obsidian,
-  ലോക്കൽ-കോർപ്പസ്, കംപ്രഷൻ മൊഡ്യൂളുകൾ — `countUniqueMcpTools` ഉപയോഗിച്ച് യൂണിയൻ എണ്ണുന്നു).
+- **110 അതുല്യ ടൂളുകൾ** `server.ts`-ൽ വയർ ചെയ്തിരിക്കുന്നു (`schemas/tools.ts`-ൽ 45 കാനോണിക്കൽ ടൂളുകൾ +
+  മെമ്മറി, സ്കില്ലുകൾ, GitHub-സ്കില്ലുകൾ, പൂൾ, ഗെയിമിഫിക്കേഷൻ, പ്ലഗിൻ, Notion, Obsidian,
+  ലോക്കൽ-കോർപ്പസ്, കംപ്രഷൻ മൊഡ്യൂളുകൾ — യൂണിയൻ `countUniqueMcpTools` ഉപയോഗിച്ച് എണ്ണുന്നു).
 - **3 ട്രാൻസ്പോർട്ടുകൾ**: stdio, HTTP Streamable, SSE.
-- റൺടൈമിൽ പ്രയോഗിക്കുന്ന **33 സ്കോപ്പുകൾ** — അടിസ്ഥാന ലിസ്റ്റ് `src/shared/constants/mcpScopes.ts`-ൽ, പൂർണ്ണ സെറ്റ് ഓരോ ടൂൾ മൊഡ്യൂളും പ്രഖ്യാപിച്ച സ്കോപ്പുകളുടെ യൂണിയനാണ്.
-- ഓഡിറ്റ് പട്ടിക: `mcp_tool_audit` (`audit.ts` ആണ് ജനിപ്പിക്കുന്നത്).
+- റൺടൈമിൽ **33 സ്കോപ്പുകൾ** നിർബന്ധമാക്കുന്നു — അടിസ്ഥാന പട്ടിക `src/shared/constants/mcpScopes.ts`-ൽ; ഓരോ ടൂൾ മൊഡ്യൂളും പ്രഖ്യാപിക്കുന്ന സ്കോപ്പുകളുടെ യൂണിയനാണ് പൂർണ്ണ സെറ്റ്.
+- ഓഡിറ്റ് പട്ടിക: `mcp_tool_audit` (`audit.ts` വഴി പോപ്പുലേറ്റ് ചെയ്യുന്നു).
 - ഫയലുകൾ: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
-  കൂടാതെ `__tests__/`-നുള്ളിലെ ടെസ്റ്റുകളും.
+  കൂടാതെ `__tests__/`-ന് കീഴിലുള്ള ടെസ്റ്റുകളും.
 - പൂർണ്ണ ടൂൾ കാറ്റലോഗിനായി [MCP-SERVER.md](../frameworks/MCP-SERVER.md) കാണുക.
 
 ### 4.7 `open-sse/config/`
@@ -576,15 +566,7 @@ open-sse/
 
 ### 4.8 `open-sse/utils/`
 
-സ്ട്രീമിംഗ് പ്രിമിറ്റീവുകളും പ്രൊവൈഡർ സഹായികളും: `stream.ts`, `streamHandler.ts`,
-`streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
-`sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
-`networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
-`cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`,
-`comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`,
-`thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`,
-`progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`,
-`ollamaTransform.ts`.
+സ്ട്രീമിംഗ് പ്രിമിറ്റീവുകളും പ്രൊവൈഡർ സഹായികളും: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts` `ollamaTransform.ts` `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`, `thinkTagParser.ts`, `requestLogger.ts`, `urlSanitize.ts`, `usageTracking.ts` `error.ts` `progressTracker.ts` `cors.ts`, `logger.ts`, `sleep.ts`.
 
 ---
 
@@ -782,7 +764,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts` വിപുലീകരിക്കുക).
 2. `src/shared/constants/mcpScopes.ts`-ൽ അനുയോജ്യമായ സ്കോപ്പ്(കൾ) നൽകുക.
 3. `open-sse/mcp-server/server.ts`-ൽ ടൂൾ രജിസ്റ്റർ ചെയ്യുക.
-4. `open-sse/mcp-server/__tests__/`-ന് കീഴിൽ ടെസ്റ്റുകൾ ചേർക്കുക.
+4. `tests/unit/`-ന് കീഴിൽ ടെസ്റ്റുകൾ ചേർക്കുക.
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md) പുതുക്കുക.
 
 ### ഒരു പുതിയ A2A സ്കിൽ ചേർക്കുക
@@ -800,7 +782,7 @@ bin/
 - **നാമകരണം**: ഫയലുകൾ `camelCase` അല്ലെങ്കിൽ `kebab-case`, ഘടകങ്ങൾ `PascalCase`,
   കോൺസ്റ്റന്റുകൾ `UPPER_SNAKE`.
 - **ESLint**: എല്ലായിടത്തും `no-eval`, `no-implied-eval`, `no-new-func` = `error`;
-  `open-sse/`-ലും `tests/`-ലും `no-explicit-any` = `warn`, മറ്റിടങ്ങളിൽ `error`.
+  `open-sse/**/*.ts`-ലും `tests/**/*.ts`-ലും `no-explicit-any` = `error`.
 - **TypeScript**: `strict: false` (ലെഗസി നിലപാട്). മൊഡ്യൂളുകൾക്കിടയിലെ അതിരുകളിൽ
   ഇൻഫറൻസിനേക്കാൾ വ്യക്തമായ ടൈപ്പുകൾക്ക് മുൻഗണന നൽകുക.
 - **ഡാറ്റാബേസ്**: റൂട്ടുകളിലോ ഹാൻഡ്ലറുകളിലോ ഒരിക്കലും റോ SQL എഴുതരുത് — എല്ലായ്പ്പോഴും
@@ -829,8 +811,7 @@ bin/
   `a2a`, `memory`, `skills`.
 - **ബ്രാഞ്ചുകൾ**: പ്രിഫിക്സുകൾ `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. ഒരിക്കലും നേരിട്ട് `main`-ലേക്ക് കമ്മിറ്റ് ചെയ്യരുത്.
-- **Husky**: pre-commit `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11` പ്രവർത്തിപ്പിക്കുന്നു; pre-push `check:any-budget:t11` + `check:tracked-artifacts` പ്രവർത്തിപ്പിക്കുന്നു (വേഗത്തിലുള്ള ഗേറ്റുകൾ; `test:unit` ഒഴിവാക്കുന്നു).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

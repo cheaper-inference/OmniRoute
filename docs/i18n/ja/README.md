@@ -74,7 +74,7 @@
 |                                 |              v3.8.50              | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------------- | :-------------------------------: | :---------: | :-------------------: |
 | 🌐 プロバイダー                 |                352                |   **358**   |          380          |
-| 🧠 一意なチャットモデル ID      |               1320                |  **1374**   |         1491          |
+| 🧠 一意なチャットモデル ID      |               1320                |  **1374**   |         1499          |
 | 🖼️ モダリティブリッジ           | 🆕 ビジョン + オーディオ + ビデオ |      ✓      |           ✓           |
 | 📡 Radar 無料カタログ           |           🆕 オプトイン           |      ✓      |           ✓           |
 | ⚖️ クォータ対応スケジューリング |          🆕 Quota-Share           |      ✓      |           ✓           |
@@ -89,132 +89,127 @@
 
 <br/>
 
-## 🧩 利用可能
+## 🧩利用可能
 
-[![npm バージョン](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-![NPM 月間](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
-![ライセンス: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-![Docker ダウンロード数](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron ダウンロード数](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+[![npm バージョン](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute) ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm) [![Dockerハブ](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute) [![ライセンス: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square) ](LICENSE) ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED) ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
-    <td align="right"><b>🚀 はじめに</b></td>
-    <td align="center"><a href="#-quick-start">🚀 クイックスタート</a></td>
-    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 インストール</a></td>
-    <td align="center"><a href="#first-run">🆓 プロバイダーに接続</a></td>
+    <td align="right"><b>🚀 Start</b></td>
+    <td align="center"><a href="#-quick-start">🚀 Quick Start</a></td>
+    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Install</a></td>
+    <td align="center"><a href="#first-run">🆓 Connect a provider</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💡 学ぶ</b></td>
-    <td align="center"><a href="#-the-promise">💥 目指すもの</a></td>
-    <td align="center"><a href="#-why-omniroute">🤔 OmniRoute を選ぶ理由</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 独自の特長</a></td>
+    <td align="right"><b>💡 Learn</b></td>
+    <td align="center"><a href="#-the-promise">💥 The Promise</a></td>
+    <td align="center"><a href="#-why-omniroute">🤔 Why OmniRoute</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 What Sets Apart</a></td>
   </tr>
   <tr>
-    <td align="right"><b>⚙️ 機能</b></td>
-    <td align="center"><a href="#-combos--the-flagship">🎯 コンボ</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 プロバイダー</a></td>
+    <td align="right"><b>⚙️ Features</b></td>
+    <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
+    <td align="center"><a href="#-380-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
     <td align="right"></td>
-    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ 圧縮</a></td>
-    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ 実行場所</a></td>
-    <td align="center"><a href="#-private--local-first">🔒 プライベート</a></td>
+    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Compression</a></td>
+    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Where It Runs</a></td>
+    <td align="center"><a href="#-private--local-first">🔒 Private</a></td>
   </tr>
   <tr>
-    <td align="right"><b>👀 見てみる</b></td>
-    <td align="center"><a href="#-omniroute-in-action">🎬 実際の動作</a></td>
-    <td align="center"><a href="#-whats-new">✨ 新機能</a></td>
-    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 対応 CLI</a></td>
+    <td align="right"><b>👀 See it</b></td>
+    <td align="center"><a href="#-omniroute-in-action">🎬 In Action</a></td>
+    <td align="center"><a href="#-whats-new">✨ What's New</a></td>
+    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 Compatible CLIs</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💚 支援</b></td>
-    <td align="center"><a href="#-support-omniroute">💚 支援 / 寄付</a></td>
-    <td align="center"><a href="#-community--help">💬 コミュニティ</a></td>
-    <td align="center"><a href="#-sponsors">💖 スポンサー</a></td>
+    <td align="right"><b>💚 Support</b></td>
+    <td align="center"><a href="#-support-omniroute">💚 Support / Donate</a></td>
+    <td align="center"><a href="#-community--help">💬 Community</a></td>
+    <td align="center"><a href="#-sponsors">💖 Sponsors</a></td>
   </tr>
   <tr>
-    <td align="right"><b>📦 プロジェクト</b></td>
-    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ 技術スタック</a></td>
-    <td align="center"><a href="#-documentation">📖 ドキュメント</a></td>
-    <td align="center"><a href="#-1000-contributors">👥 コントリビューター</a></td>
+    <td align="right"><b>📦 Project</b></td>
+    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Tech Stack</a></td>
+    <td align="center"><a href="#-documentation">📖 Docs</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 Contributors</a></td>
   </tr>
 </table>
 
 </div>
 
 <div align="center">
-  <b>🌐 67言語対応</b>
+  <b>67 言語の🌐</b>
   <br/><br/>
-  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="英語 (en)" title="英語 (en)"></a>
-  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="ポルトガル語 — ブラジル (pt-BR)" title="ポルトガル語 — ブラジル (pt-BR)"></a>
-  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="ポルトガル語 (pt)" title="ポルトガル語 (pt)"></a>
-  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="スペイン語 (es)" title="スペイン語 (es)"></a>
-  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="フランス語 (fr)" title="フランス語 (fr)"></a>
-  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="イタリア語 (it)" title="イタリア語 (it)"></a>
-  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="ドイツ語 (de)" title="ドイツ語 (de)"></a>
-  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="オランダ語 (nl)" title="オランダ語 (nl)"></a>
-  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="ロシア語 (ru)" title="ロシア語 (ru)"></a>
-  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="ウクライナ語 (uk-UA)" title="ウクライナ語 (uk-UA)"></a>
-  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="ポーランド語 (pl)" title="ポーランド語 (pl)"></a>
-  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="チェコ語 (cs)" title="チェコ語 (cs)"></a>
-  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="スロバキア語 (sk)" title="スロバキア語 (sk)"></a>
-  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="ルーマニア語 (ro)" title="ルーマニア語 (ro)"></a>
-  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="ハンガリー語 (hu)" title="ハンガリー語 (hu)"></a>
-  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="ブルガリア語 (bg)" title="ブルガリア語 (bg)"></a>
-  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="デンマーク語 (da)" title="デンマーク語 (da)"></a>
-  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="フィンランド語 (fi)" title="フィンランド語 (fi)"></a>
-  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="ノルウェー語 (no)" title="ノルウェー語 (no)"></a>
-  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="スウェーデン語 (sv)" title="スウェーデン語 (sv)"></a>
-  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="中国語 — 簡体字 (zh-CN)" title="中国語 — 簡体字 (zh-CN)"></a>
-  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="中国語 — 繁体字 (zh-TW)" title="中国語 — 繁体字 (zh-TW)"></a>
+  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="English (en)" title="English (en)"></a>
+  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
+  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Português (pt)" title="Português (pt)"></a>
+  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Español (es)" title="Español (es)"></a>
+  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Français (fr)" title="Français (fr)"></a>
+  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Italiano (it)" title="Italiano (it)"></a>
+  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Deutsch (de)" title="Deutsch (de)"></a>
+  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Nederlands (nl)" title="Nederlands (nl)"></a>
+  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Русский (ru)" title="Русский (ru)"></a>
+  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Українська (uk-UA)" title="Українська (uk-UA)"></a>
+  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Polski (pl)" title="Polski (pl)"></a>
+  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Čeština (cs)" title="Čeština (cs)"></a>
+  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Slovenčina (sk)" title="Slovenčina (sk)"></a>
+  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Română (ro)" title="Română (ro)"></a>
+  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Magyar (hu)" title="Magyar (hu)"></a>
+  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Български (bg)" title="Български (bg)"></a>
+  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Dansk (da)" title="Dansk (da)"></a>
+  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Suomi (fi)" title="Suomi (fi)"></a>
+  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Norsk (no)" title="Norsk (no)"></a>
+  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Svenska (sv)" title="Svenska (sv)"></a>
+  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="中文 — 简体 (zh-CN)" title="中文 — 简体 (zh-CN)"></a>
+  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="中文 — 繁體 (zh-TW)" title="中文 — 繁體 (zh-TW)"></a>
   <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="日本語 (ja)" title="日本語 (ja)"></a>
-  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="韓国語 (ko)" title="韓国語 (ko)"></a>
-  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="タイ語 (th)" title="タイ語 (th)"></a>
-  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="ベトナム語 (vi)" title="ベトナム語 (vi)"></a>
-  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="インドネシア語 (id)" title="インドネシア語 (id)"></a>
-  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="マレー語 (ms)" title="マレー語 (ms)"></a>
-  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="フィリピン語 (phi)" title="フィリピン語 (phi)"></a>
-  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ヒンディー語 (hi)" title="ヒンディー語 (hi)"></a>
-  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="グジャラート語 (gu)" title="グジャラート語 (gu)"></a>
-  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="マラーティー語 (mr)" title="マラーティー語 (mr)"></a>
-  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="タミル語 (ta)" title="タミル語 (ta)"></a>
-  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="テルグ語 (te)" title="テルグ語 (te)"></a>
-  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="ベンガル語 (bn)" title="ベンガル語 (bn)"></a>
-  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="ウルドゥー語 (ur)" title="ウルドゥー語 (ur)"></a>
-  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="ペルシア語 (fa)" title="ペルシア語 (fa)"></a>
-  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="アラビア語 (ar)" title="アラビア語 (ar)"></a>
-  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="ヘブライ語 (he)" title="ヘブライ語 (he)"></a>
-  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="トルコ語 (tr)" title="トルコ語 (tr)"></a>
-  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="アゼルバイジャン語 (az)" title="アゼルバイジャン語 (az)"></a>
-  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="スワヒリ語 (sw)" title="スワヒリ語 (sw)"></a>
-  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="ギリシャ語 (el)" title="ギリシャ語 (el)"></a>
-  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="クロアチア語 (hr)" title="クロアチア語 (hr)"></a>
-  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="セルビア語 (sr)" title="セルビア語 (sr)"></a>
-  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="リトアニア語 (lt)" title="リトアニア語 (lt)"></a>
-  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="エストニア語 (et)" title="エストニア語 (et)"></a>
-  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="ラトビア語 (lv)" title="ラトビア語 (lv)"></a>
-  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="スロベニア語 (sl)" title="スロベニア語 (sl)"></a>
-  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="マルタ語 (mt)" title="マルタ語 (mt)"></a>
-  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="アイルランド語 (ga)" title="アイルランド語 (ga)"></a>
-  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="カンナダ語 (kn)" title="カンナダ語 (kn)"></a>
-  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="マラヤーラム語 (ml)" title="マラヤーラム語 (ml)"></a>
-  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="オディア語 (or)" title="オディア語 (or)"></a>
-  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="パンジャーブ語 (pa)" title="パンジャーブ語 (pa)"></a>
-  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="ネパール語 (ne)" title="ネパール語 (ne)"></a>
-  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="シンハラ語 (si)" title="シンハラ語 (si)"></a>
-  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="ビルマ語 (my)" title="ビルマ語 (my)"></a>
-  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="クメール語 (km)" title="クメール語 (km)"></a>
-  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="ハウサ語 (ha)" title="ハウサ語 (ha)"></a>
-  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="ヨルバ語 (yo)" title="ヨルバ語 (yo)"></a>
-  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="イボ語 (ig)" title="イボ語 (ig)"></a>
-  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="アムハラ語 (am)" title="アムハラ語 (am)"></a>
-  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="ウズベク語 (uz)" title="ウズベク語 (uz)"></a>
-  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="ジョージア語 (ka)" title="ジョージア語 (ka)"></a>
-  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="アルメニア語 (hy)" title="アルメニア語 (hy)"></a>
-  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="ボスニア語 (bs)" title="ボスニア語 (bs)"></a>
+  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="한국어 (ko)" title="한국어 (ko)"></a>
+  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="ไทย (th)" title="ไทย (th)"></a>
+  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Tiếng Việt (vi)" title="Tiếng Việt (vi)"></a>
+  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Bahasa Indonesia (id)" title="Bahasa Indonesia (id)"></a>
+  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Bahasa Melayu (ms)" title="Bahasa Melayu (ms)"></a>
+  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filipino (phi)" title="Filipino (phi)"></a>
+  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="हिन्दी (hi)" title="हिन्दी (hi)"></a>
+  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ગુજરાતી (gu)" title="ગુજરાતી (gu)"></a>
+  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="मराठी (mr)" title="मराठी (mr)"></a>
+  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="தமிழ் (ta)" title="தமிழ் (ta)"></a>
+  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="తెలుగు (te)" title="తెలుగు (te)"></a>
+  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="বাংলা (bn)" title="বাংলা (bn)"></a>
+  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="اردو (ur)" title="اردو (ur)"></a>
+  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="فارسی (fa)" title="فارسی (fa)"></a>
+  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="العربية (ar)" title="العربية (ar)"></a>
+  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="עברית (he)" title="עברית (he)"></a>
+  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Türkçe (tr)" title="Türkçe (tr)"></a>
+  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Azərbaycan (az)" title="Azərbaycan (az)"></a>
+  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Kiswahili (sw)" title="Kiswahili (sw)"></a>
+  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Ελληνικά (el)" title="Ελληνικά (el)"></a>
+  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Hrvatski (hr)" title="Hrvatski (hr)"></a>
+  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Српски (sr)" title="Српски (sr)"></a>
+  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Lietuvių (lt)" title="Lietuvių (lt)"></a>
+  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Eesti (et)" title="Eesti (et)"></a>
+  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Latviešu (lv)" title="Latviešu (lv)"></a>
+  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Slovenščina (sl)" title="Slovenščina (sl)"></a>
+  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Malti (mt)" title="Malti (mt)"></a>
+  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Gaeilge (ga)" title="Gaeilge (ga)"></a>
+  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ಕನ್ನಡ (kn)" title="ಕನ್ನಡ (kn)"></a>
+  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="മലയാളം (ml)" title="മലയാളം (ml)"></a>
+  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ଓଡ଼ିଆ (or)" title="ଓଡ଼ିଆ (or)"></a>
+  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ਪੰਜਾਬੀ (pa)" title="ਪੰਜਾਬੀ (pa)"></a>
+  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="नेपाली (ne)" title="नेपाली (ne)"></a>
+  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="සිංහල (si)" title="සිංහල (si)"></a>
+  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="မြန်မာ (my)" title="မြန်မာ (my)"></a>
+  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="ខ្មែរ (km)" title="ខ្មែរ (km)"></a>
+  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Hausa (ha)" title="Hausa (ha)"></a>
+  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Yorùbá (yo)" title="Yorùbá (yo)"></a>
+  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Igbo (ig)" title="Igbo (ig)"></a>
+  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="አማርኛ (am)" title="አማርኛ (am)"></a>
+  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Oʻzbekcha (uz)" title="Oʻzbekcha (uz)"></a>
+  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="ქართული (ka)" title="ქართული (ka)"></a>
+  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Հայերեն (hy)" title="Հայերեն (hy)"></a>
+  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bosanski (bs)" title="Bosanski (bs)"></a>
 </div>
 
 <br/>
@@ -689,15 +684,15 @@ omniroute configure codex          # 他にも: claude opencode qwen aider goose
 
 <div align="center">
 
-## 🌐 380 の AI プロバイダー — カタログ登録済み無料 153
+## 🌐 380 AIプロバイダー— 156 カタログマーク付き無料
 
 </div>
 
-> **登録済みプロバイダー 380**。正規のチャット、メディア、検索、ローカル、クラウドエージェント、システムの各コレクションにまたがり、そのうち **153 は `hasFree: true` の検出メタデータを保持**しています。チャットモデルレジストリには **239 プロバイダー / 3,059 個の一意なプロバイダー・モデルの組み合わせ / 1,475 個の未加工モデル ID** が含まれます。別個に用意された無料予算カタログには、**モデルごとの行が 471 件**、**定期プールが 34 件**、**定期利用・キー不要で永久無料のプロバイダーが 54 件**あります。これらは設計上、異なる分母を使用しています。定義とプール重複排除済みの計算については、[プロバイダーリファレンス](docs/reference/PROVIDER_REFERENCE.md) および [無料ティア](docs/reference/FREE_TIERS.md) を参照してください。
+> **登録プロバイダー数 380**正規のチャット、メディア、検索、ローカル、クラウド エージェント、およびシステム コレクション全体にわたって、以下を含みます。**156 `hasFree: true`ディスカバリーメタデータを伝送する**。チャット モデル レジストリの対象範囲**241 プロバイダー / 3,114 の異なるプロバイダーとモデルのペア / 1,499 の生モデルIDs** ;別の無料のカタログには、**モデルごとに 485 行**、**34 の定期的なプール**そして**54 のrecurring/keyless永久無料プロバイダー**。これらは設計上、分母が異なります。定義とプールの重複排除された計算は、[プロバイダー リファレンス](docs/reference/PROVIDER_REFERENCE.md)と[無料利用枠](docs/reference/FREE_TIERS.md)に存在します。
 
 <div align="center">
 
-### 🏢 主要なすべてのラボを — 1 つのエンドポイントで
+### 🏢 1 つのエンドポイントを介したすべての主要なラボ—
 
 <table>
   <tr>
@@ -726,7 +721,7 @@ omniroute configure codex          # 他にも: claude opencode qwen aider goose
   </tr>
 </table>
 
-<sub>…さらに 350 以上 — すべてのアイコンはダッシュボードのプロバイダーカタログからライブで解決されます。📖 [プロバイダーリファレンス](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>...さらに 350 +さらに—各アイコンは、ダッシュボードのプロバイダー カタログからライブで解決されます。 📖[プロバイダーのリファレンス](docs/reference/PROVIDER_REFERENCE.md)</sub>
 
 <br/>
 
@@ -758,80 +753,93 @@ omniroute configure codex          # 他にも: claude opencode qwen aider goose
 
 <div align="center">
 
-## 🖥️ OmniRouteが実行される場所 - どこでも
+## 🖥️ OmniRoute の実行環境 — どこでも
 
 </div>
 
-> 同じアプリ、同じマシン、あなたのルール。グローバル npm インストールから**あなたの電話**Termux経由。
+> 同じアプリを、あなたのマシンで、あなたのルールに従って。グローバル npm インストールから、Termux を介した **あなたのスマートフォン** まで。
 
 <table>
-  <tr><th align="left">プラットフォーム</th><th align="left">インストール</th><th align="left">ハイライト</th></tr>
-  <tr><td align="left" nowrap>📦 <b> npm (グローバル)</b></td><td align="left" nowrap><code> npm install -gオムニルート</code></td><td align="left"> 1 つのコマンド、任意のOS</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Bun (グローバル)</b></td><td align="left" nowrap><code> bun add -gオムニルート</code></td><td align="left">同じレジストリ tarball、高速インストール</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> docker run … diegosouzapw/omniroute</code></td><td align="left">マルチアーチ<b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b>デスクトップ (Electron)</b></td><td align="left" nowrap><code> npm run electric:build </code></td><td align="left">ネイティブ ウィンドウ+システム トレイ — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b>メニューバー (OmniRouteTray)</b></td><td align="left" nowrap><code> brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">&amp;サーバーの自動更新の監視 — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>ネイティブ<code> arm64 </code></td><td align="left"> Raspberry Pi、 ARMサーバー、Apple Silicon </td></tr>
-  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg install Nodejs && npx -yオムニルート</code></td><td align="left">携帯電話で<b>を実行します</b>、 24/7、ルートなし</td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>「ホーム画面に追加」</td><td align="left">フルスクリーン、オフライン、ブラウザからインストール可能</td></tr>
-  <tr><td align="left" nowrap>🧩 <b>OpenCodeプラグイン</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">OpenCode zqn 統合</td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VSコードCopilotチャット</b></td><td align="left" nowrap>インストール<b>OmniCopilot</b>拡張</td><td align="left">ネイティブCopilotのすべてのOmniRouteモデル チャット ピッカー — 安定した&amp; Insiders </td></tr>
-  <tr><td align="left" nowrap>🛠️ <b>ソースから</b></td><td align="left" nowrap><code> npm install && npm run dev </code></td><td align="left">ハックして、</td></tr>に貢献してください
+  <tr><th align="left">プラットフォーム</th><th align="left">インストール</th><th align="left">特長</th></tr>
+  <tr><td align="left" nowrap>📦 <b>npm（グローバル）</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">1つのコマンドで、あらゆる OS に対応</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun（グローバル）</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">サポート保証のないベストエフォートの互換性です。サポート対象のランタイムは Node.js です。</td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">マルチアーキテクチャ対応：<b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🖥️ <b>デスクトップ（Electron）</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">ネイティブウィンドウ + システムトレイ — <b>Windows / macOS / Linux</b></td></tr>
+  <tr><td align="left" nowrap>🎩 <b>メニューバー（OmniRouteTray）</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">サーバーの監視と自動更新 — <b>macOS</b></td></tr>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>ネイティブ <code>arm64</code></td><td align="left">Raspberry Pi、ARM サーバー、Apple Silicon</td></tr>
+  <tr><td align="left" nowrap>📱 <b>Android（Termux）</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left"><b>スマートフォン上で</b>年中無休で動作、root 不要</td></tr>
+  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>「ホーム画面に追加」</td><td align="left">全画面表示、オフライン対応、ブラウザからインストール可能</td></tr>
+  <tr><td align="left" nowrap>🧩 <b>OpenCode プラグイン</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">OpenCode ネイティブ統合</td></tr>
+  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap><b>OmniCopilot</b> 拡張機能をインストール</td><td align="left">OmniRoute のすべてのモデルをネイティブ Copilot Chat ピッカーで利用可能 — 安定版と Insiders に対応</td></tr>
+  <tr><td align="left" nowrap>🛠️ <b>ソースから</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">カスタマイズやコントリビューションに</td></tr>
 </table>
 
-<sub>📖 [Dockerガイド](docs/guides/DOCKER_GUIDE.md)·[デスクトップ](electron/README.md)·[メニューバー トレイ](https://github.com/zoispag/omniroute-tray)· [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+<sub>📖 [Docker ガイド](docs/guides/DOCKER_GUIDE.md) · [デスクトップ](electron/README.md) · [メニューバートレイ](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-### 🧩新しい: VSコードのネイティブCopilotチャット内のOmniRoute
+### 🧩 新機能：VS Code のネイティブ Copilot Chat 内で OmniRoute を利用
 
 </div>
 
-> 新しいサイドバーや新しいチャットUIはありませんOmniRoute提供するすべてのモデルは、**すでに使用しているCopilotチャット モデル ピッカー**。 VSコード 1.122 以降、プロバイダー モデルは、 GitHubサインインやCopilotサブスクリプションなしでも、エージェント モード、ツール呼び出し、ビジョンを無料で利用できます。
+> 新しいサイドバーも、新しいチャット UI も不要です。OmniRoute が提供するすべてのモデルが、
+> **使い慣れた Copilot Chat のモデルピッカー**に直接表示されます。VS Code 1.122 以降では、プロバイダーモデルを
+> GitHub へのサインインや Copilot サブスクリプションなしで利用できます。エージェントモード、ツール呼び出し、ビジョン機能も
+> 無料です。
 
-をインストールします。** [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)**拡張子を使用して、 OmniRouteサーバー (デフォルトは`localhost:20128`) を指定してから、 Copilot Chat → model picker →を開きます。**モデルを管理…** →**OmniRoute** 。
+**[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** 拡張機能をインストールし、OmniRoute サーバー（デフォルトは `localhost:20128`）を
+指定してから、Copilot Chat → モデルピッカー
+→ **モデルの管理…** → **OmniRoute** を開きます。
 
 <table>
-  <tr><th align="left">ストア</th><th align="left">リンク</th><th align="left"></th></tr>で動作
-  <tr><td align="left" nowrap>🧩 <b>VSコード マーケットプレイス</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">→<をインストール /a ></td ><="左" に整列>VSコード — 安定した&amp; Insiders </td></tr>
-  <tr><td align="left" nowrap>🔓 <b>VSXレジストリを開く</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">をインストールする /a →</><>< td ="left" に整列>Cursor、 Windsurf、 VSCodium、Theia、 code-server、 Gitpod、 Antigravity、 Kiro…</td></tr>
+  <tr><th align="left">ストア</th><th align="left">リンク</th><th align="left">対応環境</th></tr>
+  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">インストール →</a></td><td align="left">VS Code — 安定版と Insiders</td></tr>
+  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">インストール →</a></td><td align="left">Cursor、Windsurf、VSCodium、Theia、code-server、Gitpod、Antigravity、Kiro…</td></tr>
 </table>
 
-エディター内から:**拡張機能**見る、検索する**「OmniRoute」** 、 クリック**インストール**— どちらのストアでも同じように機能します。ソース、問題、発行 Runbook は[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)にあります。
+エディター内から行う場合：**拡張機能**ビューを開き、**「OmniRoute」**を検索して、**インストール**をクリックします
+— どちらのストアでも同じように動作します。ソース、Issue、公開手順書は
+[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) にあります。
 
-<sub>📖 [VSコードCopilotチャット ガイド](docs/guides/VSCODE-COPILOT.md)— セットアップ、ピッカーの表示内容、タブ内のダッシュボード、</sub>トラブルシューティング
+<sub>📖 [VS Code Copilot Chat ガイド](docs/guides/VSCODE-COPILOT.md) — セットアップ、ピッカーの表示内容、タブ内ダッシュボード、トラブルシューティング</sub>
 
 <br/>
 
 <div align="center">
 
-### 🎩 New: OmniRouteTray — メニューバーにあるゲートウェイ
+### 🎩 新機能：OmniRouteTray — メニューバーに常駐する、あなた専用のゲートウェイ
 
 </div>
 
-> `omniroute serve`常にオンになっているときが最も幸せです。** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)**これをmacOS用の、設定して忘れるメニューバー アプリに変えます。サーバーを起動し、再起動後もサーバーを存続させ、所定の位置に更新し、ワンクリックでライブ トークン バジェットを設定します。**ターミナル ウィンドウを開いたままにすることも、 `npm install -g omniroute`ベビーシッターをすることもありません。**
+> `omniroute serve` は常時稼働させるのが最適です。**[OmniRouteTray](https://github.com/zoispag/omniroute-tray)** は、
+> それを一度設定すれば後は任せられる macOS 用メニューバーアプリに変えます。サーバーを起動して稼働状態を維持し、
+> 再起動後も自動で復帰させ、その場で更新を行い、使用中のトークン予算をワンクリックで確認できます。**ターミナルウィンドウを
+> 開いたままにする必要も、`npm install -g omniroute` の面倒を見る必要もありません。**
 
-[Tauri v2](https://v2.tauri.app/) (丸め誤差のサイズの Rust コア) で構築されており、独自の署名付き Node 24 ランタイムが同梱され、アプリ所有のOmniRouteインストールを管理するため、グローバル`node`/`bun`と競合することはありません。それ**既存の`~/.omniroute/`構成とデータベースを共有します**— つまり、帽子をかぶっているだけで、すでに実行しているのと同じOmniRouteです。 🎩
+[Tauri v2](https://v2.tauri.app/)（誤差と言えるほど小さな Rust コア）で構築されており、
+署名済みの Node 24 ランタイムを同梱し、アプリ専用の OmniRoute インストールを管理するため、グローバルの
+`node`/`bun` と競合することはありません。**既存の `~/.omniroute/` 設定とデータベースを共有**するため、
+いつも実行しているものと同じ OmniRoute に、帽子をかぶせただけです。🎩
 
 <table>
-  <tr><th align="left">内容</th><th align="left">方法</tr></th>
-  <tr><td align="left" nowrap>🟢 <b>サーバーを監視します</b></td><td align="left"><code>オムニルート サーブ</code>を生成し、複製する代わりにすでに実行中のインスタンスを採用します</td></tr>
-  <tr><td align="left" nowrap>📊 <b>一目でわかるライブ使用量</b></td><td align="left">プロバイダー クォータ バー、リセット カウントダウン付きのClaude session/weekly制限、30 日間のコストの内訳</td></tr>
-  <tr><td align="left" nowrap>🔄 <b>自動更新を導入</b></td><td align="left">段階的インストール、アトミックスワップ、失敗時のロールバック — 常に最新リリース</td></tr>
-  <tr><td align="left" nowrap>🚀 <b>ログイン時に開始</b></td><td align="left">ログイン時にオプションで起動します。トレイのみ、ドックアイコンなし</td></tr>
-  <tr><td align="left" nowrap>🩺 <b> Doctor &amp;ログ</b></td><td align="left">ワンクリック診断とサーバー ログ アクセス</td></tr>
+  <tr><th align="left">機能</th><th align="left">仕組み</th></tr>
+  <tr><td align="left" nowrap>🟢 <b>サーバーを監視</b></td><td align="left"><code>omniroute serve</code> を起動し、すでに実行中のインスタンスがある場合は、重複して起動せずにそれを引き継ぎます</td></tr>
+  <tr><td align="left" nowrap>📊 <b>使用状況をひと目で確認</b></td><td align="left">プロバイダーのクォータバー、リセットまでのカウントダウン付き Claude セッション／週間上限、30日間のコスト内訳</td></tr>
+  <tr><td align="left" nowrap>🔄 <b>その場で自動更新</b></td><td align="left">段階的インストール、アトミックな切り替え、失敗時のロールバックにより、常に最新リリースを維持</td></tr>
+  <tr><td align="left" nowrap>🚀 <b>ログイン時に起動</b></td><td align="left">任意でログイン時に起動可能。トレイのみに常駐し、Dock アイコンは表示されません</td></tr>
+  <tr><td align="left" nowrap>🩺 <b>診断とログ</b></td><td align="left">ワンクリックで診断を実行し、サーバーログにアクセス</td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub>ダウンロードをご希望ですか?最新の<code>.dmg </code>を次の場所から取得します。
-<a href="https://github.com/zoispag/omniroute-tray/releases"></a>をリリースします。ソース、問題、ビルド
+<sub>ダウンロードをご希望ですか？最新の<code>.dmg</code>は
+<a href="https://github.com/zoispag/omniroute-tray/releases">Releases</a>から入手できます。ソースコード、Issue、ビルド
 ドキュメントは<a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>にあります。
-<br/>💛 <a href="https://github.com/zoispag">@zoispag </a>によるコミュニティ プロジェクト — 公式のOmniRouteリリースではありません。</sub>
+<br/>💛 <a href="https://github.com/zoispag">@zoispag</a>によるコミュニティプロジェクトです。OmniRouteの公式リリースではありません。</sub>
 
 <br/>
 
@@ -1081,13 +1089,13 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
 ```
 
-`:latest` は、**公開済み**の安定版 SemVer のうち最も高いバージョンを指します。git の `main` は追跡しません。GitOps では `:X.Y.Z` に固定してください。[Docker リリースチャンネル](docs/guides/DOCKER_GUIDE.md#release-channels)を参照してください。このイメージでは **`OMNIROUTE_MEMORY_MB=1024`** に固定されています。これはダッシュボードと軽量なチャットには十分です。**コーディングエージェント**（Claude Code、Codex、Grok などからの `POST /v1/responses`）には、はるかに大きな V8 ヒープが必要です。そうでない場合、2 つの長いコンテキストが重複すると約 12 GiB でプロセスが `FATAL ERROR` になります。ネイティブバッファは V8 の外部に配置されるため、コンテナのサイズはヒープより大きく設定してください。
+`:latest` は、**公開済み**の安定版 SemVer のうち最も高いバージョンを指します。git の `main` は追跡しません。GitOps では `:X.Y.Z` に固定してください。[Docker リリースチャンネル](docs/guides/DOCKER_GUIDE.md#release-channels)を参照してください。イメージでは **`OMNIROUTE_MEMORY_MB=1024`** に固定されています。これはダッシュボードや軽量なチャットには十分です。**コーディングエージェント**（Claude Code、Codex、Grok などからの `POST /v1/responses`）では、より大きな V8 ヒープが必要です。そうしないと、長いコンテキストが 2 つ重複した際に約 12 GiB でプロセスが `FATAL ERROR` になります。ネイティブバッファは V8 の外部に配置されるため、コンテナのサイズはヒープより大きくしてください。
 
-| ワークロード                               | ヒープ（`-e OMNIROUTE_MEMORY_MB`） | コンテナ（`--memory`） |
-| ------------------------------------------ | ---------------------------------- | ---------------------- |
-| ダッシュボード／軽量なチャット             | `1024`（イメージのデフォルト）     | ≥2 g                   |
-| 1 つのコーディングエージェント             | `8192`                             | ≥10 g                  |
-| 2 つの長時間実行される同時 `/v1/responses` | `10240`–`12288`                    | ≥12–16 g               |
+| ワークロード                          | ヒープ（`-e OMNIROUTE_MEMORY_MB`） | コンテナ（`--memory`） |
+| ------------------------------------- | ---------------------------------- | ---------------------- |
+| ダッシュボード／軽量なチャット        | `1024`（イメージのデフォルト）     | 2 g 以上               |
+| 1 つのコーディングエージェント        | `8192`                             | 10 g 以上              |
+| 2 つの長い `/v1/responses` の同時実行 | `10240`–`12288`                    | 12～16 g 以上          |
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
@@ -1098,9 +1106,9 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 完全な表：[Docker ガイド — ランタイム RAM](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents)。
 
 > **プレリリース Docker チャンネル：** `diegosouzapw/omniroute:next` と
-> `diegosouzapw/omniroute:next-web` は、現在のデフォルトの `release/v*`
-> ブランチを追跡します。これらの可変タグは、未リリースの修正をテストする目的にのみ使用するものであり、
-> **本番環境ではサポートされません**。詳しくは
+> `diegosouzapw/omniroute:next-web` は、現在デフォルトの `release/v*`
+> ブランチを追跡します。これらの可変タグは未リリースの修正をテストするためだけのものであり、
+> **本番環境ではサポートされません**。詳細は
 > [Docker リリースチャンネル](docs/guides/DOCKER_GUIDE.md#release-channels)を参照してください。
 
 **🥟 Bun**
@@ -1108,7 +1116,7 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 Bun ランタイムの検出により、標準の `bun install` とグローバルインストール（`bun install -g omniroute`）がサポートされています。
 
 - **組み込みの `bun:sqlite`**：OmniRoute は Bun 上で実行されている場合、Bun 組み込みの `bun:sqlite` ドライバーを使用し、Node.js では `better-sqlite3` または `sql.js` にフォールバックします。
-- **開発時の Webpack バンドラー自動選択**：開発環境（`bun run dev`）では Bun を自動的に検出し、ネイティブ V8 バインディングの非互換性を防ぐため、Turbopack を無効にして Webpack を使用します。本番ビルド（`bun run build`）では、Node とまったく同様に `OMNIROUTE_USE_TURBOPACK` に従います。デフォルトでは Turbopack を使用し、`OMNIROUTE_USE_TURBOPACK=0` を指定すると Webpack でビルドします（`Dockerfile.bun` では `--build-arg` として公開されています）。
+- **開発時の Webpack バンドラー自動選択**：開発環境（`bun run dev`）では Bun を自動検出し、ネイティブ V8 バインディングの非互換性を防ぐために Turbopack を無効化して Webpack を使用します。本番ビルド（`bun run build`）では Node とまったく同様に `OMNIROUTE_USE_TURBOPACK` に従います。デフォルトは Turbopack で、Webpack を使用してビルドするには `OMNIROUTE_USE_TURBOPACK=0` を指定します（`Dockerfile.bun` では `--build-arg` として公開されています）。
 - **専用の Bun Dockerfile**：ネイティブ Bun 本番デプロイ用のマルチステージ `Dockerfile.bun`（`docker build -f Dockerfile.bun -t omniroute:bun .`）。
 
 ```bash
@@ -1155,16 +1163,16 @@ devbox run npm run dev
 # 1. バインドマウントするデータディレクトリを準備
 mkdir -p data
 
-# 2. Linux + ローカルのルートレス Podman のみ（リモートの Podman Machine クライアントでは決して実行しないでください）：
+# 2. Linux + ローカルの rootless Podman のみ（リモート Podman Machine クライアントでは決して実行しないでください）：
 podman unshare chown 1000:1000 ./data
 
-# 3. ランタイムヒントを設定し、ローカルの Compose イメージをビルドして起動
+# 3. ランタイムのヒントを設定し、ローカルの Compose イメージをビルドして起動
 echo "CONTAINER_HOST=podman" >> .env
 podman compose --profile base up -d --build
 ```
 
-macOS または Windows では、Podman はリモートの Podman Machine を使用します。`podman unshare` を省略し、
-[トポロジー別のデータディレクトリに関するガイダンス](contrib/podman/README.md#data-directory-permissions-by-topology)に従ってください。
+macOS または Windows では、Podman はリモートの Podman Machine を使用します。`podman unshare` は省略し、
+[トポロジー固有のデータディレクトリに関するガイダンス](contrib/podman/README.md#data-directory-permissions-by-topology)に従ってください。
 
 📖 [Podman ガイド](contrib/podman/README.md) — Compose ビルド、Podman Machine、および
 Linux/systemd Quadlet のセットアップ。
@@ -1172,20 +1180,22 @@ Linux/systemd Quadlet のセットアップ。
 **⚡ より高速／軽量なインストール（ネイティブビルドを省略）**
 
 ネイティブ SQLite エンジン（`better-sqlite3`）は**オプション**の依存関係であるため、グローバル
-インストールがソースからのコンパイルでブロックされることはありません。プラットフォーム／Node に適合する
-ビルド済みバイナリがある場合はそれを使用し、ない場合は透過的に純粋な JS エンジン
-（Node 22+ では `node:sqlite`、それ以外では同梱の `sql.js` WASM）にフォールバックします。ビルドツールは不要です。
+インストールがソースからのコンパイルで停止することはありません。プラットフォーム／Node に一致する
+ビルド済みバイナリがある場合はそれを使用し、それ以外の場合は Pure JS エンジン
+（Node 22 以降では `node:sqlite`、それ以外では同梱の `sql.js` WASM）に透過的にフォールバックするため、ビルドツールは不要です。
 
-インストール後のネイティブウォームアップを完全に省略するには（CI、ヘッドレス環境、または低速なマシン）：
+インストール後の**ネイティブウォームアップ**を完全に省略するには、次のようにします（CI、ヘッドレス環境、または低速なマシン向け）。
+注：これによって省略されるのはネイティブ SQLite のウォームアップ手順（`scripts/postinstall.mjs`）のみです。
+バイナリのコピー／修復フック（`scripts/build/postinstall.mjs`）は通常どおり実行されます。
 
 ```bash
 OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 でも省略されます
 ```
 
-最速でインストールするには、**pnpm**（コンテンツアドレス方式のストア + ハードリンク — 上記参照）を推奨します。
+最速のインストールには **pnpm** を推奨します（コンテンツアドレスストア + ハードリンク — 上記を参照）。
 ダッシュボードを使用しないヘッドレスランタイムには、Docker の `base` プロファイル（上記）または
 [Termux ガイド](docs/guides/TERMUX_GUIDE.md)を使用してください。CLI と Web ダッシュボードは同じプロセスから
-1 つのポートで提供されるため、現時点では CLI 専用パッケージはありません。
+1 つのポートで提供されるため、現時点では CLI 専用のパッケージはありません。
 
 <br/>
 

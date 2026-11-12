@@ -10,77 +10,76 @@ _Zuletzt aktualisiert: 2026-06-28_
 
 ## Zusammenfassung
 
-OmniRoute ist ein lokales KI-Routing-Gateway und Dashboard, das auf Next.js basiert.  
-Es stellt einen einzelnen OpenAI-kompatiblen Endpunkt (`/v1/*`) bereit und leitet Datenverkehr mit Übersetzung, Fallback, Token-Aktualisierung und Nutzungsverfolgung über mehrere Upstream-Anbieter.
+OmniRoute ist ein lokales AI Routing-Gateway und Dashboard, das auf Next.js basiert. Es bietet einen einzigen OpenAI-kompatiblen Endpunkt (`/v1/*`) und leitet den Datenverkehr über mehrere Upstream-Anbieter mit Übersetzung, Fallback, Token-Aktualisierung und Nutzungsverfolgung weiter.
 
-Zentrale Funktionen:
+Kernkompetenzen:
 
-- OpenAI-kompatible API-Oberfläche für CLI/Tools (380 Anbieter, 159 Executor-Module)
-- Übersetzung von Anfragen und Antworten zwischen Anbieterformaten
-- Fallback für Modellkombinationen (Sequenz mit mehreren Modellen)
-- Strukturierte Kombinationsschritte (`provider + model + connection`) mit Laufzeitreihenfolge über `compositeTiers`
+- OpenAI-kompatible API Oberfläche für CLI/tools (380 Anbieter, 162 Executor-Module)
+- Request/response -Übersetzung über Anbieterformate hinweg
+- Modell-Combo-Fallback (Multi-Modell-Sequenz)
+- Strukturierte Kombinationsschritte (`provider + model + connection`) mit Laufzeitreihenfolge durch `compositeTiers`
 - Fallback auf Kontoebene (mehrere Konten pro Anbieter)
-- Quota-Vorprüfung und quota-bewusste P2C-Kontenauswahl im zentralen Chat-Pfad
-- Verwaltung von OAuth- und API-Key-Anbieterverbindungen (27 OAuth-Anbietermodule)
-- Embedding-Erzeugung über `/v1/embeddings` (18 Anbieter)
-- Bilderzeugung über `/v1/images/generations` (10+ Anbieter, 20+ Modelle)
+- Kontingent-Preflight und kontingentbewusste P2C Kontoauswahl im Haupt-Chat-Pfad
+- OAuth + API-Schlüssel-Provider-Verbindungsmanagement (27 OAuth -Provider-Module)
+- Einbettungsgenerierung über `/v1/embeddings` (18 Anbieter)
+- Bildgenerierung über `/v1/images/generations` (10 + -Anbieter, 20 + -Modelle)
 - Audiotranskription über `/v1/audio/transcriptions` (18 Anbieter)
 - Text-to-Speech über `/v1/audio/speech` (24 integrierte Anbieter)
 - Videogenerierung über `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Musikgenerierung über `/v1/music/generations` (ComfyUI)
 - Websuche über `/v1/search` (20 Anbieter)
 - Moderationen über `/v1/moderations`
-- Reranking über `/v1/rerank`
-- Analyse von Think-Tags (`<think>...</think>`) für Reasoning-Modelle
-- Bereinigung von Antworten für strikte OpenAI-SDK-Kompatibilität
-- Normalisierung von Rollen (developer→system, system→user) für anbieterübergreifende Kompatibilität
-- Konvertierung strukturierter Ausgaben (json_schema → Gemini responseSchema)
-- Lokale Persistenz für Anbieter, Schlüssel, Aliase, Kombinationen, Einstellungen und Preise (122 DB-Module)
-- Nutzungs-/Kostenverfolgung und Protokollierung von Anfragen
-- Optionale Cloud-Synchronisierung für die Synchronisierung mehrerer Geräte/Zustände
-- IP-Allowlist/Blocklist zur Zugriffssteuerung der API
-- Verwaltung des Denkbudgets (passthrough/auto/custom/adaptive)
-- Injektion globaler System-Prompts
-- Sitzungsverfolgung und Fingerprinting
-- Erweitertes Rate-Limiting pro Konto mit anbieterspezifischen Profilen
-- Circuit-Breaker-Muster für die Ausfallsicherheit von Anbietern
-- Schutz vor dem Thundering-Herd-Problem durch Mutex-Sperren
-- Signaturbasierter Cache zur Deduplizierung von Anfragen
+- Neubewertung über `/v1/rerank`
+- Think-Tag-Parsing (`<think>...</think>`) für Argumentationsmodelle
+- Antwortbereinigung für strikte OpenAI SDK Kompatibilität
+- Rollennormalisierung (Entwickler-→ System, System-→ Benutzer) für anbieterübergreifende Kompatibilität
+- Strukturierte Ausgabekonvertierung (json_schema → Gemini responseSchema)
+- Lokale Persistenz für Anbieter, Schlüssel, Aliase, Kombinationen, Einstellungen, Preise (122 DB Module)
+- Usage/cost -Verfolgung und Anforderungsprotokollierung
+- Optionale Cloud-Synchronisierung für multi-device/state -Synchronisierung
+- IP allowlist/blocklist für API -Zugriffskontrolle
+- Budgetmanagement denken (passthrough/auto/custom/adaptive)
+- Sofortige Injektion des globalen Systems
+- Sitzungsverfolgung und Fingerabdruck
+- Erweiterte Ratenbegrenzung pro Konto mit anbieterspezifischen Profilen
+- Leistungsschaltermuster für die Ausfallsicherheit des Anbieters
+- Anti-Donner-Herdenschutz mit Mutex-Verriegelung
+- Signaturbasierter Anforderungsdeduplizierungs-Cache
 - Domänenschicht: Kostenregeln, Fallback-Richtlinie, Sperrrichtlinie
-- Context Relay: Zusammenfassungen zur Sitzungsübergabe für Kontinuität bei der Kontorotation
-- Persistenz des Domänenzustands (SQLite-Write-through-Cache für Fallbacks, Budgets, Sperren und Circuit Breaker)
-- Richtlinien-Engine zur zentralisierten Anfragebewertung (Sperre → Budget → Fallback)
-- Anfrage-Telemetrie mit Aggregation der Latenzen p50/p95/p99
-- Telemetrie für Kombinationsziele und historische Gesundheit der Kombinationsziele über `combo_execution_key` / `combo_step_id`
-- Korrelations-ID (X-Request-Id) für End-to-End-Tracing
-- Compliance-Audit-Protokollierung mit Opt-out pro API-Schlüssel
-- Eval-Framework zur Qualitätssicherung von LLMs
-- Health-Dashboard mit dem Echtzeitstatus der Circuit Breaker von Anbietern
-- MCP-Server (110 Tools) mit 3 Transporten (stdio/SSE/Streamable HTTP)
-- A2A-Server (JSON-RPC 2.0 + SSE) mit Skills und Aufgabenlebenszyklus
+- Kontext-Relay: Zusammenfassungen der Sitzungsübergaben für die Kontinuität der Kontorotation
+- Persistenz des Domänenstatus (SQLite -Durchschreibcache für Fallbacks, Budgets, Sperren, Leistungsschalter)
+- Richtlinien-Engine für zentralisierte Anfrageauswertung (Sperrung → Budgets → Fallback)
+- Fordern Sie Telemetrie mit p50/p95/p99 -Latenzaggregation an
+- Combo-Ziel-Telemetrie und historischer Combo-Zielzustand über `combo_execution_key` / `combo_step_id`
+- Korrelation ID (X-Request-Id) für End-to-End-Tracing
+- Compliance-Audit-Protokollierung mit Opt-out per API -Schlüssel
+- Evaluierungsrahmen für LLM Qualitätssicherung
+- Gesundheits-Dashboard mit Echtzeit-Leistungsschalterstatus des Anbieters
+- MCP Server (110 Werkzeuge) mit 3 Transporten (stdio/SSE/Streamable HTTP)
+- A2A Server (JSON-RPC 2.0 + SSE) mit Fähigkeiten und Aufgabenlebenszyklus
 - Speichersystem (Extraktion, Injektion, Abruf, Zusammenfassung)
-- Skills-System (Registry, Executor, Sandbox, integrierte Skills)
-- MITM-Proxy mit Zertifikatsverwaltung und DNS-Verarbeitung
-- Middleware zum Schutz vor Prompt-Injection
-- Prompt-Komprimierungspipeline mit Caveman, RTK, gestapelten Pipelines, Komprimierungskombinationen, Sprachpaketen und Analysen
-- ACP-Registry (Agent Communication Protocol)
-- Modulare OAuth-Anbieter (22 einzelne Module unter `src/lib/oauth/providers/`)
-- Skripte zur Deinstallation/vollständigen Deinstallation
-- Aktion zur Reparatur der OAuth-Umgebung
-- WebSocket-Bridge für OpenAI-kompatible WS-Clients (`/v1/ws`)
-- Verwaltung von Synchronisierungstokens (Ausstellen/Widerrufen, Download versionsbasierter ETag-Konfigurationspakete)
-- GLM Thinking (`glmt`) als erstklassige Anbieter-Voreinstellung
-- Hybride Tokenzählung (anbietereseitiges `/messages/count_tokens` mit Schätzungs-Fallback)
-- Automatisches Anlegen von Modellaliasen (30+ domänenübergreifende Proxy-Dialekt-Normalisierungen beim Start)
-- Sicherer ausgehender Abruf mit SSRF-Schutz, Blockierung privater URLs und konfigurierbaren Wiederholungsversuchen
-- Cooldown-bewusste Chat-Wiederholungsversuche mit konfigurierbarem `requestRetry` und `maxRetryIntervalSec`
+- Skills-System (Registrierung, Executor, Sandbox, integrierte Skills)
+- MITM Proxy mit Zertifikatsverwaltung und DNS Handhabung
+- Prompt-Injection-Guard-Middleware
+- Schnelle Komprimierungspipeline mit Caveman, RTK, gestapelten Pipelines, Komprimierungskombinationen, Sprachpaketen und Analysen
+- ACP -Registrierung (Agent Communication Protocol).
+- Modulare OAuth -Anbieter (22 Einzelmodule unter `src/lib/oauth/providers/`)
+- Uninstall/full-uninstall -Skripte
+- Reparaturaktion für OAuth Umgebung
+- WebSocket Brücke für OpenAI-kompatible WS Clients (`/v1/ws`)
+- Sync-Token-Verwaltung (issue/revoke, Download des ETag-versionierten Konfigurationspakets)
+- GLM Thinking (`glmt`) erstklassige Anbietervoreinstellung
+- Hybrid-Token-Zählung (anbieterseitige `/messages/count_tokens` mit Schätzungs-Fallback)
+- Automatisches Seeding des Modellalias (30 + -übergreifende Proxy-Dialektnormalisierungen beim Start)
+- Sicherer ausgehender Abruf mit SSRF Schutz, privater URL Blockierung und konfigurierbarer Wiederholung
+- Abklingzeitbewusste Chat-Wiederholungsversuche mit konfigurierbarem `requestRetry` und `maxRetryIntervalSec`
 - Validierung der Laufzeitumgebung mit Zod beim Start
-- Compliance-Audit v2 mit Paginierung, CRUD-Ereignissen für Anbieter und Protokollierung der SSRF-blockierten Validierung
+- Compliance-Audit v2 mit Paginierung, Anbieter- CRUD Ereignissen und SSRF-blockierter Validierungsprotokollierung
 
 Primäres Laufzeitmodell:
 
-- Next.js-App-Routen unter `src/app/api/*` implementieren sowohl Dashboard-APIs als auch Kompatibilitäts-APIs
-- Ein gemeinsam genutzter SSE-/Routing-Kern in `src/sse/*` + `open-sse/*` übernimmt Anbieterausführung, Übersetzung, Streaming, Fallback und Nutzungsverwaltung
+- Next.js -App-Routen unter `src/app/api/*` implementieren sowohl Dashboard- APIs als auch Kompatibilitäts APIs
+- Ein gemeinsamer SSE/routing Kern in `src/sse/*` + `open-sse/*` übernimmt die Ausführung, Übersetzung, Streaming, Fallback und Nutzung des Anbieters
 
 ## Referenzdiagramme
 
@@ -341,7 +340,7 @@ OmniRoute kann lokal ausgeführte KI-Tool-Prozesse installieren, überwachen und
 Architekturschichten:
 
 - **UI** (`/dashboard/providers/services`) — Seite mit zwei Registerkarten, Lebenszyklussteuerung, Live-Log-Streaming, API-Schlüsselverwaltung und (für 9Router) eingebetteter nativer Benutzeroberfläche über einen internen Reverse-Proxy.
-- **API** (`/api/services/{name}/*`) — 11 Endpunkte für 9Router, 10 für CLIProxyAPI sowie jeweils 8 für Bifrost / Mux / Dario, alle als **LOCAL_ONLY** klassifiziert (strikte Regel Nr. 17). Ein gemeinsam genutzter SSE-Endpunkt `GET /api/services/[name]/logs` bedient beide Dienste.
+- **API** (`/api/services/{name}/*`) — 11 Endpunkte für 9Router, 10 für CLIProxyAPI sowie jeweils 8 für Bifrost / Mux / Dario, alle als **LOCAL_ONLY** klassifiziert (strikte Regel Nr. #17). Ein gemeinsam genutzter SSE-Endpunkt `GET /api/services/[name]/logs` bedient beide Dienste.
 - **Supervisor** (`src/lib/services/`) — die generische Klasse `ServiceSupervisor` umschließt `child_process.spawn`, verwaltet einen 5-MB-Ringpuffer für das SSE-Log-Streaming, eine Schleife für Zustandsprüfungen, eine atomare Operationssperre und ein ordnungsgemäßes Herunterfahren mittels SIGTERM→SIGKILL. `bootstrap.ts` bindet beim Prozessstart alle konfigurierten Dienste ein.
 - **Provider/Executor** (`open-sse/executors/ninerouter.ts`) — 9Router wird als echter Provider bereitgestellt. Modelle erhalten das Präfix `9router/{sub}/{model}` und werden alle 5 Minuten über den Endpunkt `/v1/models` von 9Router synchronisiert.
 
@@ -394,9 +393,9 @@ Informationen zur Regelsatzerstellung und Schwellenwertoptimierung finden Sie un
 
 ### D. Domänenschicht
 
-Der `src/domain/` -Namespace zentralisiert Richtlinienentscheidungen, sodass Routenhandler lockout/budget/fallback Logik nicht selbst zusammenstellen müssen.
+Der `src/domain/` Namespace zentralisiert Richtlinienentscheidungen, sodass Routenhandler lockout/budget/fallback Logik nicht selbst zusammenstellen müssen.
 
-- Richtlinien-Engine: `src/domain/policyEngine.ts` — einzelner Einstiegspunkt für die Evaluierung vor der Ausführung (Sperrung → Budgets → Fallback-Bestellung)
+- Richtlinien-Engine: `src/domain/policyEngine.ts` — einzelner Einstiegspunkt für die Evaluierung vor der Ausführung (Sperrung → Budgets, → -Fallback-Reihenfolge)
 - Kostenregeln: `src/domain/costRules.ts`
 - Fallback-Richtlinie: `src/domain/fallbackPolicy.ts`
 - Sperrrichtlinie: `src/domain/lockoutPolicy.ts`
@@ -407,9 +406,9 @@ Der `src/domain/` -Namespace zentralisiert Richtlinienentscheidungen, sodass Rou
 - Ablaufverfolgung des Anbieters: `src/domain/providerExpiration.ts`
 - Kontingent-Cache: `src/domain/quotaCache.ts`
 - Abbauzustand: `src/domain/degradation.ts`
-- Konfigurationsprüfung: `src/domain/configAudit.ts`
+- Konfigurationsaudit: `src/domain/configAudit.ts`
 - OmniRoute Antwortmetadaten-Builder: `src/domain/omnirouteResponseMeta.ts`
-- Bewertungssubsystem: regelmäßige Bewertungsjobs `src/domain/assessment/` —
+- Bewertungssubsystem: `src/domain/assessment/` — regelmäßige Bewertungsjobs
 
 ### E. Autorisierungspipeline
 
@@ -429,7 +428,7 @@ Die vollständigen Routenklassifizierungsregeln finden Sie unter [`docs/architec
 
 ### F. Workflow FSM und Task-Aware Router
 
-Ein durch eine Finite-State-Maschine gesteuerter Router, der über der Kombinationsauswahl liegt, um den Datenverkehr basierend auf der erkannten Workflow-Stufe (Planung, Ausführung, Überprüfung) und der Affinität zur Hintergrundaufgabe zu leiten.
+Ein durch eine Finite-State-Maschine gesteuerter Router, der über der Combo-Auswahl liegt, um den Datenverkehr basierend auf der erkannten Workflow-Phase (Planung, Ausführung, Überprüfung) und der Affinität zur Hintergrundaufgabe zu leiten.
 
 - Workflow FSM: `open-sse/services/workflowFSM.ts`
 - Aufgabenbewusster Router: `open-sse/services/taskAwareRouter.ts`
@@ -1046,11 +1045,11 @@ Der ältere dateibasierte Anfrage-Logger (`open-sse/utils/requestLogger.ts`) wir
 - SQLite-Schemamigrationen und Hooks für automatische Upgrades beim Start
 - Kompatibilitätspfad für die Migration von Legacy-JSON zu SQLite
 
-## 6) SSRF-/Schutzmechanismus für ausgehende URLs
+## 6) SSRF-/Outbound-URL-Schutz
 
-- `src/shared/network/outboundUrlGuard.ts` blockiert alle privaten, Loopback- und Link-Local-Ziel-URLs, bevor sie die Anbieter-Executors erreichen
-- Routen zur Erkennung und Validierung von Anbietermodellen verwenden `src/shared/network/safeOutboundFetch.ts`, das den Schutzmechanismus vor jeder ausgehenden Anfrage anwendet
-- Fehler des Schutzmechanismus werden als `URL_GUARD_BLOCKED` mit HTTP 422 ausgegeben und über `providerAudit.ts` im Compliance-Audit-Trail protokolliert
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) wendet `src/shared/network/outboundUrlGuard.ts` auf Chat-Anfragen an, die über `BaseExecutor.execute()` gesendet werden. Im Nur-öffentlich-Modus (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` bei deaktiviertem Private-Flag) blockiert der Schutz private Hosts, Loopback-Hosts und 169.254.0.0/16; in jedem anderen Modus blockiert er Cloud-Metadaten-Hosts. Er prüft den Hostnamen oder das IP-Literal in der angegebenen Form vor jeder DNS-Auflösung. Integrierte lokale Anbieter umgehen diese Prüfung.
+- Routen zur Erkennung und Validierung von Anbietermodellen verwenden `src/shared/network/safeOutboundFetch.ts`, das den Schutz vor jeder ausgehenden Anfrage anwendet.
+- Schutzfehler werden als `URL_GUARD_BLOCKED` mit HTTP 503 (`getSafeOutboundFetchErrorStatus`; die Route zur Modellerkennung gibt 400 zurück) ausgegeben, und tatsächliche SSRF-Blockierungen während der Validierung werden im Audit-Protokoll als `provider.validation.ssrf_blocked`-Ereignisse protokolliert.
 
 ## Observability und Betriebssignale
 
@@ -1101,7 +1100,7 @@ Vom Code aktiv verwendete Umgebungsvariablen:
 4. Das Cloud-Verhalten hängt von einem korrekten `NEXT_PUBLIC_BASE_URL` und der Erreichbarkeit des Cloud-Endpunkts ab.
 5. Das Verzeichnis `open-sse/` wird als **npm-Workspace-Paket** `@omniroute/open-sse` veröffentlicht. Der Quellcode importiert es über `@omniroute/open-sse/...` (aufgelöst durch Next.js `transpilePackages`). Dateipfade in diesem Dokument verwenden aus Konsistenzgründen weiterhin den Verzeichnisnamen `open-sse/`.
 6. Diagramme im Dashboard verwenden **Recharts** (SVG-basiert) für barrierefreie, interaktive Analysevisualisierungen (Balkendiagramme zur Modellnutzung, Tabellen zur Anbieteraufschlüsselung mit Erfolgsraten).
-7. E2E-Tests verwenden **Playwright** (`tests/e2e/`) und werden über `npm run test:e2e` ausgeführt. Unit-Tests verwenden den **Node.js-Test-Runner** (`tests/unit/`) und werden über `npm run test:unit` ausgeführt. Der Quellcode unter `src/` ist **TypeScript** (`.ts`/`.tsx`); der Workspace `open-sse/` bleibt JavaScript (`.js`).
+7. E2E-Tests verwenden **Playwright** (`tests/e2e/`) und werden über `npm run test:e2e` ausgeführt. Unit-Tests verwenden den **Node.js-Test-Runner** (`tests/unit/`) und werden über `npm run test:unit` ausgeführt. Der Quellcode unter `src/` ist **TypeScript** (`.ts`/`.tsx`); der Workspace `open-sse/` bleibt TypeScript (`.ts`).
 8. Die Einstellungsseite ist in 7 Registerkarten unterteilt: Allgemein, Darstellung, KI, Sicherheit, Routing, Resilienz, Erweitert. Auf der Resilienzseite werden nur die Anfragewarteschlange, die Verbindungsabkühlzeit, der Anbieter-Schutzschalter und das Verhalten beim Warten auf die Abkühlzeit konfiguriert; der aktuelle Laufzeitstatus des Schutzschalters wird auf der Systemstatusseite angezeigt.
 9. Die Strategie **Context Relay** (`context-relay`) ist auf zwei Ebenen aufgeteilt: `combo.ts` entscheidet, ob eine Übergabe erzeugt werden soll, `chat.ts` fügt die Übergabe nach der Kontoauflösung ein. Übergabedaten befinden sich in der SQLite-Tabelle `context_handoffs`. Diese Aufteilung ist beabsichtigt, da nur `chat.ts` weiß, ob sich das tatsächlich verwendete Konto geändert hat.
 10. Die **Proxy-Durchsetzung** ist jetzt umfassend: `tokenHealthCheck.ts` löst den Proxy pro Verbindung auf, `/api/providers/validate` verwendet `runWithProxyContext`, und `proxyFetch.ts` verwendet `undici.fetch()`, um die Dispatcher-Kompatibilität unter Node 22 zu gewährleisten.

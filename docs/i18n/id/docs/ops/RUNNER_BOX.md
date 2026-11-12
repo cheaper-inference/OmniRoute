@@ -4,69 +4,42 @@
 
 ---
 
-Pool yang di-host sendiri berjalan di mesin **.113** (`tomni-proxmox-113`). Sejak 2026-10-18, setiap
-runner OmniRoute memiliki **satu peran**, satu label, serta anggaran memori/CPU yang disesuaikan dengan
-hasil pengukuran beban kerjanya. Slot Turbopack mendapatkan sumber daya yang dibutuhkan build; slot
-lainnya disesuaikan dengan puncak penggunaan yang terukur. Mesin hanya mengalami overcommit ketika
-build Turbopack bertepatan dengan build webpack Release-Green dan job lint; swap host (16 GB)
-menanganinya, dan karena Build pull request berjalan di runner terkelola, slot Turbopack sebagian besar
-waktu tidak digunakan:
+Kolam renang yang dihosting sendiri beroperasi di **.113** kotak (`tomni-proxmox-113`). Sejak 18-10-2026 setiap pelari OmniRoute memilikinya **satu peran** , satu label, dan anggaran memory/CPU disesuaikan dengan ukuran beban kerjanya. Slot Turbopack mendapatkan apa yang dibutuhkan build; slot lainnya berukuran sesuai puncak terukurnya. Kotak ini hanya melakukan overcommit ketika build Turbopack bertepatan dengan build webpack Release-Green dan tugas lint; host swap (16 GB) menyerapnya, dan karena Build permintaan tarik dijalankan dihosting, slot Turbopack hampir selalu menganggur:
 
-| runner               | label          | peran                                                                                                                                                | `MemoryHigh` / `MemoryMax` | `CPUQuota`          |
-| -------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------------- |
-| `omniroute-113-5`    | `omni-build`   | Build Turbopack: `ci.yml` `Build` (khusus push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, build a11y malam hari | 56 GB / 60 GB (swap 0)     | 1600 %              |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), build webpack                                                                                        | 20 GB / 24 GB (swap 4 GB)  | 800 %               |
-| `omniroute-113-2`    | `omni-light`   | job malam hari (Schemathesis, promptfoo, garak, k6) dan `quality.yml` `lint-guard`                                                                   | 12 GB / 16 GB (swap 4 GB)  | 600 %               |
-| `omniroute-113`      | `omni-light`   | pool yang sama seperti di atas                                                                                                                       | 8 GB / 12 GB               | 400 %               |
-| OmniHeuris, OmniMind | (repo mereka)  | Khusus Dependabot (puncak masing-masing 155 MB, 2026-10-18)                                                                                          | 4 GB / 6 GB                | masing-masing 200 % |
+| pelari               | label                           | peran                                                                                                                                             | `MemoryHigh` / `MemoryMax` | `CPUQuota`          |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack build: `ci.yml` `Build` (hanya push/dispatch ), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, nightly a11y build | 56 GB / 60 GB (tukar 0)    | 1600 %              |
+| `omniroute-113-6`    | `omni-release`                  | Rilis-Hijau (`release-green` + `main-green`), pembuatan webpack                                                                                   | 20 GB / 24 GB (tukar 4 GB) | 800 %               |
+| `omniroute-113-2`    | `omni-light`                    | nightlies (Skematesis, promptfoo, garak, k6) dan `quality.yml` `lint-guard`                                                                       | 12 GB / 16 GB (tukar 4 GB) | 600 %               |
+| `omniroute-113`      | `omni-light`                    | kolam yang sama seperti di atas                                                                                                                   | 8 GB / 12 GB               | 400 %               |
+| OmniHeuris, OmniMind | (repo mereka)                   | Khusus Dependabot (masing-masing puncak 155 MB, 18-10-2026)                                                                                       | 4 GB / 6 GB                | masing-masing 200%. |
 
-Diukur pada 2026-10-18:
+Diukur pada 18-10-2026:
 
-| sumber daya | nilai                         | implikasinya terhadap penjadwalan                                                                                                                                                                                                                                                                                                                                                                                       |
-| ----------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| RAM / CPU   | **78 GB / 32 core**           | build produksi Turbopack mencapai puncak 49 GB tanpa pembatasan (`tests/unit/ci-build-bundler-webpack.test.ts`); pada Next 16.3.8, fase kompilasi saja menggunakan ~40 GB (36 GB RSS dalam `next-build` ditambah 17 worker loader masing-masing sebesar 3 GB, diukur pada 2026-10-18); build webpack menggunakan ~14–16 GB. Satu build Turbopack + satu build webpack dapat berjalan bersama; dua build Turbopack tidak |
-| swap        | 16 GB                         | `omniroute-113-5` berjalan dengan swap dinonaktifkan (`MemorySwapMax=0`), sehingga build yang tidak terkendali dihentikan pada batasnya alih-alih menyebabkan mesin melakukan swap                                                                                                                                                                                                                                      |
-| `/tmp`      | **tmpfs 12 GB = RAM**         | apa pun yang disimpan di sana menggunakan memori; sisa file dibersihkan setelah 3 jam                                                                                                                                                                                                                                                                                                                                   |
-| CPU         | load 60 pada 32 core teramati | sebelum kuota diterapkan, satu build Turbopack (~1166 % CPU) ditambah suite coverage pada mesin yang sama membuat heartbeat listener lain kekurangan sumber daya (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                  |
-| runner      | **7 listener** (2026-10-28)   | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` juga membawa `omni-build`; `omniroute-113-3/-4/-8` telah dihapus dari repositori (2026-10-28)                                                                                                                                                                                                                                                                    |
+| sumber    | nilai                               | apa artinya penjadwalan                                                                                                                                                                                                                                                                                                                                                                             |
+| --------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RAM / CPU | **78 GB / 32 inti**                 | produksi Turbopack mencapai puncaknya pada 49 GB yang belum dibuka (`tests/unit/ci-build-bundler-webpack.test.ts`); pada 16.3.8 Berikutnya, fase kompilasi saja menampung ~ 40 GB (36 GB RSS di `next-build` ditambah 17 pekerja pemuat di 3 GB, diukur pada 18-10-2026); paket web yang dibuat di ~ 14–16 GB. Satu Turbopack + satu webpack dibuat cocok satu sama lain; dua build Turbopack tidak |
+| menukar   | 16 GB                               | `omniroute-113-5` berjalan dengan swap off (`MemorySwapMax=0`) sehingga runaway build dipotong pada bagian atasnya alih-alih menukar kotaknya                                                                                                                                                                                                                                                       |
+| `/tmp`    | **12 GB tmpfs = RAM**               | apapun yang diparkir di sana adalah kenangan; sisa makanan disapu setelah 3 jam                                                                                                                                                                                                                                                                                                                     |
+| CPU       | memuat 60 pada 32 core yang diamati | sebelum kuota, satu build Turbopack (~ 1166 % CPU) ditambah rangkaian cakupan pada kotak yang sama membuat detak jantung pendengar lainnya kelaparan (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                          |
+| pelari    | **7 pendengar** (28-10-2026)        | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` juga membawa `omni-build-60gb`; `omniroute-113-3/-4/-8` telah dihapus dari repo (28-10-2026)                                                                                                                                                                                                                                                 |
 
-Batasan berada di `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` milik setiap unit
-(nilai sebelumnya disimpan sebagai `override.conf.bak-20261018`) dan diterapkan secara live dengan
-`systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — tanpa restart, sehingga
-tidak ada job yang sedang berjalan yang terdampak. Label diubah melalui API runner (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
-`gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), juga secara live.
+Batasan tersebut berlaku di `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` setiap unit (nilai sebelumnya disimpan sebagai `override.conf.bak-20261018`) dan diterapkan langsung dengan `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — tanpa memulai ulang, sehingga tidak ada tugas yang sedang berjalan yang disentuh. Label diubah melalui pelari API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` / `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), juga secara langsung.
 
-## Instal janitor (satu kali, di mesin)
+## Pasang petugas kebersihan (satu kali, di kotak)
 
 ```bash
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
-# cron (root): setiap 30 menit, catat log ke /var/log/runner-janitor.log
+# cron (root): every 30 min, log to /var/log/runner-janitor.log
 */30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
-`lsof` diperlukan: janitor memastikan suatu path sedang tidak digunakan melalui satu snapshot file
-yang terbuka sebelum menghapusnya, dan tanpa alat tersebut janitor tidak menghapus apa pun serta menyatakannya
-(exit 1). Uji setiap perubahan terlebih dahulu dengan `--dry-run` — opsi ini mencetak persis apa yang akan
-dilakukan tanpa mengubah apa pun.
+`lsof` diperlukan: petugas kebersihan membuktikan bahwa jalur tidak aktif dengan satu snapshot dari file yang terbuka sebelum menghapusnya, dan tanpa alat tersebut, ia tidak menghapus apa pun dan mengatakannya (keluar 1). Coba perubahan apa pun dengan `--dry-run` terlebih dahulu. — akan mencetak apa yang akan dilakukannya dan tidak menyentuh apa pun.
 
-Yang dilakukannya pada setiap eksekusi: membersihkan sisa-sisa milik kita sendiri (`runner-*`, `omniroute-*`,
-`next-build*`, `e2e-build.tar.gz`) setelah **3 jam di tmpfs** dan 24 jam di disk
-`_work/_temp`; menghentikan `next-build` yang berusia lebih dari 75 menit (tidak ada job yang berjalan selama itu — pada
-2026-08-27, satu job berjalan selama 70 menit setelah GitHub menyatakan job tersebut hilang); memangkas
-checkout berusia 48 jam dari runner yang unitnya **stopped**; memberikan peringatan jika penggunaan disk ≥ 85 %, PSI memori
-`full/avg60` ≥ 10 %, dan jumlah listener melebihi `MAX_ACTIVE_RUNNERS` (dengan
-rincian omniroute/lainnya). Exit 1 = perlu perhatian; baca log.
+Apa yang dilakukannya setiap kali dijalankan: menyapu sisa makanan kita sendiri (`runner-*`, `omniroute-*`, `next-build*`, `e2e-build.tar.gz`) setelahnya **3 jam di tmpfs** dan 24 jam pada disk `_work/_temp`; memberi peringatan pada `next-build` yang lebih lama dari 75 menit dan membuatnya tetap berjalan; memangkas checkout pelari berusia 48 jam yang unitnya **berhenti** ; peringatan pada disk ≥ 85 %, memori PSI `full/avg60` ≥ 10 %, dan lebih banyak pendengar daripada `MAX_ACTIVE_RUNNERS` (dengan rincian omniroute/other ). Keluar dari 1 perhatian = diperlukan; membaca lognya.
 
-Aturan 75 menit tidak mendeteksi build yang job-nya sudah dihentikan oleh GitHub. Ketika
-`Runner.Listener` tidak dapat memperbarui job-nya, `_diag/Runner_*.log` menampilkan
-`POST request to …/renewjob timed out after 100 seconds`, API melaporkan job sebagai `completed`
-(failure) sekitar sepuluh menit setelah pembaruan terakhir yang berhasil, dan `next-build` terus berjalan tanpa
-job yang terpasang (2026-10-18: Build dari #17066 dinyatakan gagal pada 19:43 dan build-nya masih
-menggunakan 40 GB lima menit kemudian). Konfirmasikan ref di `_diag/Worker_*.log` terbaru, lalu
-kirim SIGTERM hanya ke hierarki proses build berdasarkan PID — `next-build`, `npm run build`, `build-next-isolated.mjs`, dan
-worker `_work`. Jangan pernah menyentuh `Runner.Listener`, `RunnerService.js`, atau `Runner.Worker`:
-worker melaporkan job sebagai dibatalkan dan listener kembali online dengan sendirinya.
+Waktu yang berlalu saja tidak membuktikan bahwa suatu proses tidak ada gunanya lagi. Petugas kebersihan tidak pernah mengirimkan sinyal berdasarkan usia. Nama lingkungan `ZOMBIE_BUILD_MAX_MIN` dan `ZOMBIE_BUILD_COMM` yang ada tetap didukung untuk konfigurasi cron. Sebelum membersihkan anak yatim yang dicurigai, pastikan bahwa pekerjaan GitHub sebenarnya adalah terminal dan identifikasi proses yang termasuk dalam pekerjaan itu. Ketika `Runner.Listener` tidak dapat memperbarui tugasnya, `_diag/Runner_*.log` menunjukkan `POST request to …/renewjob timed out after 100 seconds`, API melaporkan tugas `completed` (kegagalan) sekitar sepuluh menit setelah pembaruan terakhir berhasil, dan `next-build` terus berjalan tanpa tugas yang terpasang (18-10-2026: Pembangunan #17066 gagal pada 19:43 dan pembangunannya masih menahan 40 GB lima menit kemudian). Konfirmasikan referensi di `_diag/Worker_*.log` terbaru, lalu SIGTERM hanya pohon build oleh PID — `next-build`, `npm run build`, `build-next-isolated.mjs` dan pekerja `_work`. Jangan pernah menyentuh `Runner.Listener`, `RunnerService.js` atau `Runner.Worker`: pekerja melaporkan pekerjaan sebagai dibatalkan dan pendengar kembali online dengan sendirinya.
 
 ## Unit runner: KillMode
 
@@ -81,7 +54,7 @@ satu waktu, hanya ketika idle**, dengan pemeriksaan kondisi idle dan perintah mu
 ## Aturan operasional
 
 - **Hanya satu build Turbopack dalam satu waktu — diberlakukan melalui label.** Setiap job yang menjalankan
-  `next build` Turbopack penuh menargetkan `[self-hosted, omni-build]`, dan hanya **`omniroute-113-5`**
+  `next build` Turbopack penuh menargetkan `[self-hosted, omni-build, omni-build-60gb]`, dan hanya **`omniroute-113-5`**
   yang memiliki label tersebut: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`,
   `preview-artifact`, build a11y malam hari (#16853), dan **amd64** di `docker-publish.yml` (webpack
   di dalam BuildKit — Turbopack mengalami panic di sana, run 33253576569). Bagian Docker arm64 tetap

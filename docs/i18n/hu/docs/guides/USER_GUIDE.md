@@ -355,24 +355,24 @@ Modell: cc/claude-opus-4-7
 
 ## 🚀 Telepítés
 
-### Globális npm-telepítés (ajánlott)
+### Globális npm telepítés (ajánlott)
 
 ```bash
 npm install -g omniroute
 
-# Konfigurációs könyvtár létrehozása
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env fájl létrehozása (lásd: .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Kiszolgáló indítása
+# Start server
 omniroute
-# Vagy egyéni porttal:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-A CLI automatikusan betölti a `.env` fájlt a `~/.omniroute/.env` vagy a `./.env` helyről.
+A CLI automatikusan betölti `.env` `~/.omniroute/.env` ből vagy `./.env` ből.
 
 ### Tálcamód
 
@@ -598,28 +598,28 @@ post_install() {
 
 ### Környezeti változók
 
-| Változó                                 | Alapértelmezett érték                | Leírás                                                                                                                                                                     |
-| --------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT-aláírási titok (**éles környezetben módosítsa**)                                                                                                                       |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Első bejelentkezési jelszó                                                                                                                                                 |
-| `DATA_DIR`                              | `~/.omniroute`                       | Adatkönyvtár (adatbázis, használati adatok, naplók)                                                                                                                        |
-| `PORT`                                  | keretrendszer alapértelmezése        | Szolgáltatás portja (a példákban `20128`)                                                                                                                                  |
-| `HOSTNAME`                              | keretrendszer alapértelmezése        | Figyelési cím (a Docker alapértelmezése `0.0.0.0`)                                                                                                                         |
-| `NODE_ENV`                              | futtatókörnyezet alapértelmezése     | Telepítéshez állítsa `production` értékre                                                                                                                                  |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Az irányítópulton megjelenített és a kiszolgáló számára elérhető nyilvános alap-URL (a korábbi `BASE_URL` helyett)                                                         |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | A felhőszinkronizálási végpont alap-URL-je (a korábbi `CLOUD_URL` helyett)                                                                                                 |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | HMAC-titok a generált API-kulcsokhoz                                                                                                                                       |
-| `REQUIRE_API_KEY`                       | `false`                              | Bearer API-kulcs megkövetelése a `/v1/*` útvonalakon                                                                                                                       |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Annak engedélyezése, hogy a hitelesített irányítópult-felhasználók igény szerint felfedjék a tárolt API-kulcsok teljes értékét                                             |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | A gyorsítótárazott szolgáltatói korlátadatok kiszolgálóoldali frissítési gyakorisága; a felhasználói felület frissítési gombjai továbbra is kézi szinkronizálást indítanak |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Az írás, importálás és visszaállítás előtti automatikus SQLite-pillanatképek letiltása; a kézi biztonsági mentések továbbra is működnek                                    |
-| `APP_LOG_TO_FILE`                       | `true`                               | Engedélyezi az alkalmazás- és auditnaplók lemezre írását                                                                                                                   |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | A hitelesítési süti `Secure` attribútumának kikényszerítése (HTTPS fordított proxy mögött)                                                                                 |
-| `CLOUDFLARED_BIN`                       | nincs beállítva                      | Meglévő `cloudflared` bináris használata a felügyelt letöltés helyett                                                                                                      |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | A felügyelt gyors alagutak átviteli protokollja (`http2`, `quic` vagy `auto`)                                                                                              |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | A Node.js halommemória-korlátja MB-ban                                                                                                                                     |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | A prompt-gyorsítótár bejegyzéseinek maximális száma                                                                                                                        |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | A szemantikus gyorsítótár bejegyzéseinek maximális száma                                                                                                                   |
+| Változó                                 | Alapértelmezett érték            | Leírás                                                                                                                                                                     |
+| --------------------------------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(automatikusan generált)_       | JWT-aláírási titok — az első indításkor automatikusan létrejön, és tartósan a `server.env` fájlba kerül; állítsa be kifejezetten, ha az adatkönyvtár ideiglenes            |
+| `INITIAL_PASSWORD`                      | _(nincs beállítva)_              | Első bejelentkezési jelszó. Az npm-/forráskód-telepítések `CHANGEME` értékkel indulnak: cserélje le. Ha nincs beállítva: bevezető varázsló                                 |
+| `DATA_DIR`                              | `~/.omniroute`                   | Adatkönyvtár (adatbázis, használati adatok, naplók)                                                                                                                        |
+| `PORT`                                  | keretrendszer alapértelmezése    | Szolgáltatás portja (a példákban `20128`)                                                                                                                                  |
+| `HOSTNAME`                              | keretrendszer alapértelmezése    | Figyelési cím (a Docker alapértelmezése `0.0.0.0`)                                                                                                                         |
+| `NODE_ENV`                              | futtatókörnyezet alapértelmezése | Telepítéshez állítsa `production` értékre                                                                                                                                  |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`         | Az irányítópulton megjelenített és a kiszolgáló számára elérhető nyilvános alap-URL (a korábbi `BASE_URL` helyett)                                                         |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`          | A felhőszinkronizálási végpont alap-URL-je (a korábbi `CLOUD_URL` helyett)                                                                                                 |
+| `API_KEY_SECRET`                        | _(automatikusan generált)_       | Géphez kötött API-kulcsok ellenőrzőösszeg-titka — az indítási bootstrap automatikusan létrehozza, ha nincs beállítva, és írható `server.env` fájlba menti                  |
+| `REQUIRE_API_KEY`                       | `false`                          | Bearer API-kulcs megkövetelése a `/v1/*` útvonalakon                                                                                                                       |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                          | Annak engedélyezése, hogy a hitelesített irányítópult-felhasználók igény szerint felfedjék a tárolt API-kulcsok teljes értékét                                             |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                             | A gyorsítótárazott szolgáltatói korlátadatok kiszolgálóoldali frissítési gyakorisága; a felhasználói felület frissítési gombjai továbbra is kézi szinkronizálást indítanak |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                          | Az írás, importálás és visszaállítás előtti automatikus SQLite-pillanatképek letiltása; a kézi biztonsági mentések továbbra is működnek                                    |
+| `APP_LOG_TO_FILE`                       | `true`                           | Engedélyezi az alkalmazás- és auditnaplók lemezre írását                                                                                                                   |
+| `AUTH_COOKIE_SECURE`                    | `false`                          | A hitelesítési süti `Secure` attribútumának kikényszerítése (HTTPS fordított proxy mögött)                                                                                 |
+| `CLOUDFLARED_BIN`                       | nincs beállítva                  | Meglévő `cloudflared` bináris használata a felügyelt letöltés helyett                                                                                                      |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                          | A felügyelt gyors alagutak átviteli protokollja (`http2`, `quic` vagy `auto`)                                                                                              |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                            | A Node.js halommemória-korlátja MB-ban                                                                                                                                     |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                             | A prompt-gyorsítótár bejegyzéseinek maximális száma                                                                                                                        |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                            | A szemantikus gyorsítótár bejegyzéseinek maximális száma                                                                                                                   |
 
 A környezeti változók teljes referenciáját lásd a [README](../README.md) fájlban.
 
@@ -686,56 +686,75 @@ A környezeti változók teljes referenciáját lásd a [README](../README.md) f
 
 ## 🧩 Speciális funkciók
 
-### Egyedi modellek
+### Egyéni modellek
 
-Adjon hozzá bármilyen ID modellt bármely szolgáltatóhoz anélkül, hogy az alkalmazás frissítésére várna:
+Bármely szolgáltatóhoz hozzáadhat bármilyen modellazonosítót anélkül, hogy alkalmazásfrissítésre kellene várnia:
 
 ```bash
-# Via API
+# API-n keresztül
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# List: curl http://localhost:20128/api/provider-models?provider=openai
-# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# Listázás: curl http://localhost:20128/api/provider-models?provider=openai
+# Eltávolítás: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-Vagy használja az irányítópultot:** Szolgáltatók → [Szállító] → Egyedi modellek** .
+Vagy használja az irányítópultot: **Szolgáltatók → [Szolgáltató] → Egyéni modellek**.
 
 Megjegyzések:
 
-- OpenRouter és OpenAI/Anthropic-compatible szolgáltatók kezelése innen történik** Elérhető modellek** csak. Az összes kézi hozzáadása, importálása és automatikus szinkronizálása ugyanabban az elérhető modelllistában található, így ezeknek a szolgáltatóknak nincs külön egyéni modellek szakasza.
-- A** Egyedi modellek** szakasz azoknak a szolgáltatóknak szól, akik nem teszik közzé a felügyelt elérhető modellek importálását.
+- Az OpenRouter és az OpenAI-/Anthropic-kompatibilis szolgáltatók kizárólag az **Elérhető modellek** felületen kezelhetők. A kézi hozzáadás, az importálás és az automatikus szinkronizálás ugyanabba az elérhetőmodell-listába kerül, így ezeknél a szolgáltatóknál nincs külön Egyéni modellek szakasz.
+- Az **Egyéni modellek** szakasz azokhoz a szolgáltatókhoz készült, amelyek nem kínálnak felügyelt elérhetőmodell-importálást.
 
 ### Egyéni OpenAI-kompatibilis szolgáltatók
 
-Bármely átjáró, amely beszéli a OpenAI API (egy saját üzemeltetésű proxy, vLLM, harmadik féltől származó aggregátor), hozzáadható saját szolgáltatói csomópontként:
+Bármely, az OpenAI API-t használó átjáró (saját üzemeltetésű proxy, vLLM vagy külső aggregátor)
+hozzáadható önálló szolgáltatói csomópontként:
 
-1. **Szolgáltatók → Add OpenAI Kompatibilis** .
-2. **Név** : a csomópont megjelenítési címkéje.
-3. **Előtag** : az útválasztás neve. Az ügyfelek a modelleket `<prefix>/<model>` nak hívják, így `mygw` előtaggal rendelkező csomópont `mygw/gpt-4o-mini` szolgálja ki. Kívánt; nincs karakterkorlátozás.
-4. **API típus** : az átjáró által kiszolgált végpontcsalád (Csevegés befejezések, Válaszok, Beágyazások, hang, képek).
-5. **Alap URL** : a API gyökér, egészen `/v1` (például `https://gateway.example.com/v1`), nem a teljes `/chat/completions` elérési út. Nem szabványos útvonalú átjárók állítják be őket** Speciális beállítások** (csevegési útvonal, modellek elérési útja).
-6. A**API kulcs (ellenőrzéshez)** mező csak a kapcsolatot teszteli. A csomópont létrehozása után nyissa meg és használja** Csatlakozás hozzáadása** a kérések által használt kulcs tárolására.
+1. **Szolgáltatók → OpenAI-kompatibilis hozzáadása**.
+2. **Név**: a csomópont megjelenítési neve.
+3. **Előtag**: az útválasztáshoz használt név. A kliensek `<prefix>/<model>` formában hívják meg a modelleket, így egy
+   `mygw` előtagú csomópont a `mygw/gpt-4o-mini` modellt szolgálja ki. Kötelező; nincsenek karakterkorlátozások.
+4. **API típusa**: az átjáró által kiszolgált végpontcsalád (Chat Completions, Responses,
+   Embeddings, hang, képek).
+5. **Alap URL**: az API gyökérútvonala a `/v1` résszel bezárólag (például
+   `https://gateway.example.com/v1`), nem pedig a teljes `/chat/completions` útvonal. A nem szabványos
+   útvonalakat használó átjáróknál ezek a **Speciális beállítások** alatt adhatók meg (csevegési útvonal, modellek útvonala).
+6. Az **API-kulcs (ellenőrzéshez)** mező csak a kapcsolat tesztelésére szolgál. A csomópont létrehozása után
+   nyissa meg, majd a **Kapcsolat hozzáadása** lehetőséggel mentse a kérésekhez használandó kulcsot.
 
-A csomópont `openai-compatible-<apiType>-<uuid>` alakú belső azonosítót kap; soha nem kell beírnia, az előtag a nyilvános név.
+A csomópont `openai-compatible-<apiType>-<uuid>` formátumú belső azonosítót kap; ezt soha nem
+kell beírnia, mivel az előtag a nyilvános név.
 
 #### Fenntartott előtagok
 
-Az előtag nem lehet beépített szolgáltató azonosítója vagy álneve (például `openai`, `cf`), sem pedig nyugdíjas szolgáltató azonosítója. A modellfeloldó az egyéni csomópontok előtt ellenőrzi a beépített azonosítókat és álneveket, így az ilyen előtagok valamelyikét használó csomópont soha nem kap forgalmat: `<prefix>/model` a beépített szolgáltatóhoz megy, vagy nem záródik be, ha a szolgáltató megszűnt. Az ilyen előtaggal rendelkező csomópont létrehozása vagy szerkesztése elutasításra kerül a következőkkel:
+Az előtag nem lehet beépített szolgáltató azonosítója vagy álneve (például `openai`, `cf`), sem
+megszüntetett szolgáltató azonosítója. A modellfeloldó az egyéni csomópontok előtt ellenőrzi
+a beépített azonosítókat és álneveket, ezért az ilyen előtagot használó csomópont soha nem kapna forgalmat:
+a `<prefix>/model` a beépített szolgáltatóhoz kerülne, vagy zárt módon meghiúsulna, ha az adott szolgáltatót
+megszüntették. Az ilyen előtaggal rendelkező csomópont létrehozása vagy szerkesztése a következő hibával lesz elutasítva:
 
 ```text
 prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
 ```
 
-Válasszon egy külön előtagot (`mygw`, `acme-proxy`). Ha egy egyéni csomóponthoz intézett kérések meghiúsulnak egy beépített szolgáltatót vagy annak hitelesítő adatait megnevező hibával, ellenőrizze, hogy a csomópont előtagja le van-e foglalva: a szabály létezése előtt mentett csomópontok továbbra is tárolásra kerülnek, de előtagjaik a beépített szolgáltatóhoz vezetnek. Szerkessze a csomópontot, és adjon neki új előtagot.
+Válasszon egyedi előtagot (`mygw`, `acme-proxy`). Ha egy egyéni csomóponthoz küldött kérések olyan
+hibával hiúsulnak meg, amely egy beépített szolgáltatót vagy annak hitelesítő adatait nevezi meg, ellenőrizze, hogy a csomópont előtagja
+fenntartott-e: a szabály bevezetése előtt mentett csomópontok továbbra is tárolva maradnak, de az előtagjuk a
+beépített szolgáltatóhoz irányít. Szerkessze a csomópontot, és adjon neki új előtagot.
 
-#### Kapcsolatonkénti átjáró opciók
+#### Kapcsolatonkénti átjáróbeállítások
 
-Ezek a billentyűk egy kapcsolat `providerSpecificData` jába kerülnek (például `PUT /api/providers/{id}` keresztül):
+Ezek a kulcsok egy kapcsolat `providerSpecificData` mezőjébe kerülnek (például a
+`PUT /api/providers/{id}` használatával):
 
-- `toolNameMaxLength` (egész szám, 1–1024) – OpenAI chat-formátummal kompatibilis kapcsolatokhoz, amelyek átjárója elutasítja a hosszú eszközneveket. A hosszabb neveket rövid álnévként küldi el a rendszer, és visszaállítja a válaszban.
-- `quotaEndpoint` – az átjáró quota/credits végpontja, olvasható az irányítópult kvótasávjához és a kvóta-tudatos útválasztáshoz. OpenAI- és Anthropic-kompatibilis kapcsolatokon egyaránt működik; a teljes alakzat `open-sse/services/usage/openaiCompatible.ts` ben van dokumentálva.
+- `toolNameMaxLength` (egész szám, 1–1024) — olyan OpenAI chat formátummal kompatibilis kapcsolatokhoz, amelyek
+  átjárója elutasítja a hosszú eszközneveket. A hosszabb neveket rövid álnevekként küldi el a rendszer, majd visszaállítja őket a
+  válaszban.
+- `quotaEndpoint` — az átjáró kvóta-/kreditvégpontja, amelyet az irányítópult kvótasávja és a
+  kvótát figyelembe vevő útválasztás olvas be. OpenAI- és Anthropic-kompatibilis kapcsolatokon egyaránt
+  működik; a teljes struktúra dokumentációja az `open-sse/services/usage/openaiCompatible.ts` fájlban található.
 
 ```json
 {
@@ -750,11 +769,12 @@ Ezek a billentyűk egy kapcsolat `providerSpecificData` jába kerülnek (példá
 }
 ```
 
-### OmniRoute Peers láncolása
+### OmniRoute-partnerek láncolása
 
-Egy másik OmniRoute átjáró hozzáadható a** Egyedi OpenAI-kompatibilis** szolgáltató. Használja a társ `/v1` alap URL és az adott társ által kiadott dedikált, legkisebb jogosultságokkal rendelkező API kulcsot.
+Egy másik OmniRoute-átjáró hozzáadható **egyéni OpenAI-kompatibilis** szolgáltatóként. Használja a
+partner `/v1` alap-URL-jét és az adott partner által kibocsátott, dedikált, legkisebb jogosultságú API-kulcsot.
 
-Kölcsönös vagy többugrásos láncok esetén engedélyezze az opt-in hurokvédőt minden átjárón:
+Kölcsönös vagy több ugrásból álló láncok esetén engedélyezze az opcionális hurokvédelmet minden átjárón:
 
 ```bash
 # gateway-a
@@ -770,13 +790,18 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Csak azok a kérések kapják meg a `X-OmniRoute-Peer-Trace` fejlécet, amelyeket egy kifejezetten engedélyezési listán szereplő URL társnak küldtek. Az átjáró elutasítja az ismétlődő ID példányt vagy a kimerült ugráskeretet HTTP `508 Loop Detected` paraméterrel; a hagyományos upstream szolgáltatók nem kapnak peer metaadatokat.
+Csak a kifejezetten engedélyezési listára helyezett partner-URL-re küldött kérések kapják meg az
+`X-OmniRoute-Peer-Trace` fejlécet. Az átjáró az ismétlődő példányazonosítót vagy a kimerült ugrási
+keretet HTTP `508 Loop Detected` válasszal utasítja el; a szokásos upstream szolgáltatók nem kapnak partner-metaadatokat.
 
-A peer láncolás nem adatbázis-replikáció vagy gazdagép feladatátvétel. Mindegyik átjáró független SQLite állapotot, gyorsítótárakat, sebességszámlálókat és munkameneteket tart fenn. Használjon állapotellenőrzött fordított proxyt vagy ügyfél feladatátvételt active/passive vagy active/active elérhetőségéhez, és soha ne csatlakoztasson egyetlen SQLite adatbázist több futó OmniRoute példányhoz.
+A partnerek láncolása nem jelent adatbázis-replikációt vagy gazdagépi feladatátvételt. Minden átjáró különálló
+SQLite-állapotot, gyorsítótárakat, sebességkorlátozási számlálókat és munkameneteket tart fenn. Aktív/passzív vagy aktív/aktív rendelkezésre álláshoz
+használjon állapotfelügyelt fordított proxyt vagy kliensoldali feladatátvételt, és soha ne csatoljon egyetlen SQLite-adatbázist
+több futó OmniRoute-példányhoz.
 
 ### Dedikált szolgáltatói útvonalak
 
-A kérések közvetlenül egy adott szolgáltatóhoz irányíthatók modellellenőrzéssel:
+Irányítsa a kéréseket közvetlenül egy adott szolgáltatóhoz modellérvényesítéssel:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -784,118 +809,118 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-A szolgáltató előtagja automatikusan hozzáadódik, ha hiányzik. A nem megfelelő modellek `400` adnak vissza.
+A szolgáltatói előtag automatikusan hozzáadódik, ha hiányzik. A nem egyező modellek `400` választ adnak.
 
-### Hálózati proxy konfiguráció
+### Hálózati proxy beállítása
 
 ```bash
-# Set global proxy
+# Globális proxy beállítása
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# Per-provider proxy
+# Szolgáltatónkénti proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# Test proxy
+# Proxy tesztelése
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**Elsőbbség:** Kulcs-specifikus → Combo-specifikus → Szolgáltató-specifikus → Globális → környezet.
+**Prioritási sorrend:** Kulcsspecifikus → Kombinációspecifikus → Szolgáltatóspecifikus → Globális → Környezet.
 
-### API modellkatalógus
+### Modellkatalógus API
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-A modelleket szolgáltató szerint csoportosítva adja vissza típusokkal (`chat`, `embedding`, `image`).
+A modelleket szolgáltatók szerint csoportosítva adja vissza, típusokkal (`chat`, `embedding`, `image`).
 
-### Cloud Sync
+### Felhőszinkronizálás
 
-- Szinkronizálja a szolgáltatókat, kombinációkat és beállításokat az eszközök között
-- Automatikus háttérszinkronizálás időtúllépéssel + fail-fast
-- Előnyben részesítse a szerveroldali `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` az éles környezetben
+- Szolgáltatók, kombinációk és beállítások szinkronizálása az eszközök között
+- Automatikus háttérszinkronizálás időtúllépéssel és gyors hibakezeléssel
+- Éles környezetben részesítse előnyben a szerveroldali `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` használatát
 
 ### Cloudflare Quick Tunnel
 
-- Elérhető:** Irányítópult → végpontok** Docker hez és más saját üzemeltetésű telepítésekhez
-- Létrehoz egy ideiglenes `https://*.trycloudflare.com` URL, amely továbbítja az aktuális OpenAI-kompatibilis `/v1` végponthoz
-- Az első engedélyezés csak szükség esetén telepíti `cloudflared` ; a későbbi újraindítások újra felhasználják ugyanazt a felügyelt bináris fájlt
-- A gyors alagutak nem állnak vissza automatikusan a OmniRoute vagy a tároló újraindítása után; szükség esetén újra engedélyezze őket a műszerfalról
-- Az alagút URLs múlékony, és minden alkalommal változik, amikor az alagutat stop/start
-- A felügyelt gyorsalagutak alapértelmezés szerint HTTP/2 szállítást használják, hogy elkerüljék a zajos QUIC UDP puffer figyelmeztetéseket a korlátozott tárolókban
-- Állítsa be `CLOUDFLARED_PROTOCOL=quic` vagy `auto`, ha felül szeretné bírálni a felügyelt szállítási lehetőséget
-- Állítsa be `CLOUDFLARED_BIN` ha a felügyelt letöltés helyett egy előre telepített `cloudflared` binárist szeretne használni
-- Cloudflare Quick Tunnel, Tailscale Funnel és ngrok Tunnel panelek megjeleníthetők vagy elrejthetők** Beállítások → Megjelenés** . A panel elrejtése nem állítja meg a futó alagutat.
+- Elérhető a **Vezérlőpult → Végpontok** menüpontban Docker- és más saját üzemeltetésű telepítések esetén
+- Létrehoz egy ideiglenes `https://*.trycloudflare.com` URL-t, amely az aktuális, OpenAI-kompatibilis `/v1` végpontra továbbít
+- Az első engedélyezés csak szükség esetén telepíti a `cloudflared` alkalmazást; a későbbi újraindítások ugyanazt a felügyelt bináris fájlt használják
+- A Quick Tunnel alagutak nem állnak automatikusan helyre az OmniRoute vagy a konténer újraindítása után; szükség esetén engedélyezze őket újra a vezérlőpulton
+- Az alagút-URL-ek ideiglenesek, és az alagút minden leállításakor és elindításakor megváltoznak
+- A felügyelt Quick Tunnel alagutak alapértelmezés szerint HTTP/2 átvitelt használnak, hogy korlátozott erőforrású konténerekben elkerüljék a zajos QUIC UDP-pufferfigyelmeztetéseket
+- Állítsa a `CLOUDFLARED_PROTOCOL` értékét `quic` (`CLOUDFLARED_PROTOCOL=quic`) vagy `auto` értékre, ha felül szeretné bírálni a felügyelt átviteli mód kiválasztását
+- Állítsa be a `CLOUDFLARED_BIN` változót, ha a felügyelt letöltés helyett inkább egy előre telepített `cloudflared` bináris fájlt szeretne használni
+- A Cloudflare Quick Tunnel, a Tailscale Funnel és az ngrok Tunnel panelek megjeleníthetők vagy elrejthetők a **Beállítások → Megjelenés** menüpontban. Egy panel elrejtése nem állítja le a futó alagutat.
 
-### LLM Gateway Intelligence (9. fázis)
+### LLM-átjáró intelligenciája (9. fázis)
 
-- **Szemantikus gyorsítótár** - Automatikusan gyorsítótárazza a nem adatfolyamot, hőmérséklet = 0 válaszokat (bypass `X-OmniRoute-No-Cache: true`-vel)
-- **Idempotencia kérése** — Deduplikálja a kéréseket 5 másodpercen belül `Idempotency-Key` vagy `X-Request-Id` fejlécen keresztül
-- **Haladás követése** — SSE `event: progress` események engedélyezése `X-OmniRoute-Progress: true` fejlécen keresztül
+- **Szemantikus gyorsítótár** — Automatikusan gyorsítótárazza a nem streamelt, temperature=0 válaszokat (megkerülhető az `X-OmniRoute-No-Cache: true` fejléccel)
+- **Kérések idempotenciája** — Az `Idempotency-Key` vagy `X-Request-Id` fejléc használatával kiszűri az 5 másodpercen belüli ismétlődő kéréseket
+- **Folyamatkövetés** — Igény szerint SSE `event: progress` eseményeket biztosít az `X-OmniRoute-Progress: true` fejléc használatával
 
 ---
 
-### Fordító játszótér
+### Fordítói tesztkörnyezet
 
-Hozzáférés a következőn keresztül** Dashboard → Translator** . Hibakeresés és vizualizálás, hogyan fordítja le OmniRoute API kéréseket a szolgáltatók között.
+A **Vezérlőpult → Fordító** menüpontban érhető el. Hibakereséssel és vizuálisan is megvizsgálhatja, hogyan fordítja át az OmniRoute az API-kéréseket a szolgáltatók között.
 
-| Mód               | Cél                                                                                                               |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------- |
-| **Játszótér**     | Válassza ki source/target formátumokat, illesszen be egy kérést, és azonnal megtekintheti a lefordított kimenetet |
-| **Chat tesztelő** | Küldjön élő csevegési üzeneteket a proxyn keresztül, és ellenőrizze a teljes request/response ciklust             |
-| **Próbapad**      | Futtasson kötegelt teszteket több formátumkombinációra a fordítás helyességének ellenőrzéséhez                    |
-| **Élő monitor**   | Nézze meg a valós idejű fordításokat, ahogy a kérések áthaladnak a proxyn                                         |
+| Mód                  | Cél                                                                                                   |
+| -------------------- | ----------------------------------------------------------------------------------------------------- |
+| **Tesztkörnyezet**   | Válassza ki a forrás- és célformátumot, illesszen be egy kérést, és azonnal tekintse meg az eredményt |
+| **Csevegéstesztelő** | Küldjön élő csevegőüzeneteket a proxyn keresztül, és vizsgálja meg a teljes kérés-válasz ciklust      |
+| **Tesztpad**         | Futtasson kötegelt teszteket több formátumkombinációval a fordítás helyességének ellenőrzéséhez       |
+| **Élő figyelő**      | Figyelje valós időben a fordításokat, miközben a kérések áthaladnak a proxyn                          |
 
 **Felhasználási esetek:**
 
-- Hibakeresés, miért nem sikerül egy adott client/provider kombináció
-- Győződjön meg arról, hogy a gondolkodó címkék, eszközhívások és rendszerkérések helyesen fordítódnak-e
-- Hasonlítsa össze OpenAI, Claude, Gemini és Responses API formátumok formátumbeli különbségeit
+- Annak hibakeresése, hogy egy adott kliens- és szolgáltatókombináció miért nem működik
+- Annak ellenőrzése, hogy a gondolkodási címkék, az eszközhívások és a rendszerpromptok megfelelően vannak-e lefordítva
+- Az OpenAI-, Claude-, Gemini- és Responses API-formátumok közötti különbségek összehasonlítása
 
 ---
 
 ### Útválasztási stratégiák
 
-Konfigurálás ezen keresztül** Irányítópult → Beállítások → Útválasztás** . Az irányítópult a hat leggyakrabban használt stratégiát mutatja be; A kombók és az automatikus útválasztó belsőleg szélesebb készletet támogat.
+A **Vezérlőpult → Beállítások → Útválasztás** menüpontban konfigurálható. A vezérlőpult a hat leggyakrabban használt stratégiát jeleníti meg; a kombinációk és az automatikus útválasztó belsőleg ennél több stratégiát támogatnak.
 
-**Az irányítópulton látható stratégiák (fiókszintű útválasztás):**
+**A vezérlőpulton látható stratégiák (fiókszintű útválasztás):**
 
-| Stratégia                     | Leírás                                                                                                             |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **Először töltse ki**         | A fiókokat prioritási sorrendben használja – az elsődleges fiók az összes kérést kezeli, amíg el nem éri           |
-| **Round Robin**               | Az összes fiókot végigjárja, konfigurálható ragadós korláttal (alapértelmezett: fiókonként 3 hívás)                |
-| **P2C (Két választás ereje)** | Kiválaszt 2 véletlenszerű fiókot, és az egészségesebbhez vezet – egyensúlyba hozza a terhelést az egészségtudattal |
-| **Véletlen**                  | Véletlenszerűen kiválaszt egy fiókot minden kéréshez a Fisher-Yates shuffle segítségével                           |
-| **Legkevésbé használt**       | Útvonalak a legrégebbi `lastUsedAt` időbélyeggel rendelkező fiókhoz, egyenletesen elosztva a forgalmat             |
-| **Költségoptimalizált**       | A legalacsonyabb prioritású fiókhoz irányít, a legalacsonyabb költségű szolgáltatókra optimalizálva                |
+| Stratégia                         | Leírás                                                                                                                      |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **Első feltöltése**               | Prioritási sorrendben használja a fiókokat — az elsődleges fiók kezel minden kérést, amíg elérhetetlenné nem válik          |
+| **Körkörös elosztás**             | Végiglépked az összes fiókon egy konfigurálható ragadós korláttal (alapértelmezés: fiókonként 3 hívás)                      |
+| **P2C (kettő közötti választás)** | Kiválaszt 2 véletlenszerű fiókot, és az egészségesebbhez irányít — az állapot figyelembevételével egyensúlyozza a terhelést |
+| **Véletlenszerű**                 | Fisher–Yates-keveréssel véletlenszerűen választ ki egy fiókot minden kéréshez                                               |
+| **Legkevésbé használt**           | A legrégebbi `lastUsedAt` időbélyeggel rendelkező fiókhoz irányít, egyenletesen elosztva a forgalmat                        |
+| **Költségoptimalizált**           | A legalacsonyabb prioritási értékű fiókhoz irányít, a legalacsonyabb költségű szolgáltatókra optimalizálva                  |
 
-**Fejlett kombinált és automatikus stratégiák** (kombinációnként vagy `auto/*` előtagokkal konfigurálható – lásd [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Speciális kombinációs és automatikus stratégiák** (kombinációnként vagy `auto/*` előtagokkal konfigurálhatók — lásd: [AUTO-COMBO.md](../routing/AUTO-COMBO.md)):
 
-- `priority` – szigorú rend, soha nem körmérkőzés
-- `weighted` – arányos forgalom modellenkénti súlyokkal osztva
-- `fill-first` — ürítse ki az első modellt, amíg el nem érik a határokat
+- `priority` — szigorú sorrend, soha nem használ körkörös elosztást
+- `weighted` — a forgalom arányos elosztása modellenkénti súlyok alapján
+- `fill-first` — az első modellt használja a korlátok eléréséig
 - `round-robin` / `strict-random` / `random`
-- `p2c` (Két választás ereje)
+- `p2c` (kettő közötti választás)
 - `least-used` és `cost-optimized`
-- `auto` – minden jelöltnél pontszámfüggő
-- `lkgp` (Last Known Good Provider) – rögzíti az utolsó sikeres szolgáltatót, majd visszatér a szabályokhoz
-- `context-optimized` – kiválasztja a legnagyobb szabad környezetablakkal rendelkező modellt
-- `context-relay` — hosszú kontextusú modelleket láncol a kanyarok követéséhez
+- `auto` — pontszámalapú választás az összes jelölt közül
+- `lkgp` (utolsó ismerten működő szolgáltató) — az utolsó sikeres szolgáltatóhoz rögzíti az útválasztást, majd szükség esetén visszatér a szabályokhoz
+- `context-optimized` — a legnagyobb szabad kontextusablakkal rendelkező modellt választja
+- `context-relay` — hosszú kontextusú modelleket kapcsol láncba a követő fordulókhoz
 
-#### Külső ragadós munkamenet fejléc
+#### Külső ragadós munkamenet fejléce
 
-Külső munkamenet-affinitás esetén (például Claude Code/Codex ügynökök fordított proxyk mögött) küldje el:
+Külső munkamenet-affinitáshoz (például fordított proxyk mögött működő Claude Code/Codex-ügynökökhöz) küldje el a következőt:
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute `x_session_id` is elfogadja, és `X-OmniRoute-Session-Id` ben visszaadja a tényleges szekciókulcsot.
+Az OmniRoute az `x_session_id` értéket is elfogadja, és a tényleges munkamenetkulcsot az `X-OmniRoute-Session-Id` fejlécben adja vissza.
 
-Ha az Nginxet használja, és aláhúzás-formájú fejléceket küld, engedélyezze:
+Ha Nginxet használ, és aláhúzásjeles fejléceket küld, engedélyezze a következőt:
 
 ```nginx
 underscores_in_headers on;
@@ -903,21 +928,21 @@ underscores_in_headers on;
 
 #### Helyettesítő karakteres modellálnevek
 
-Hozzon létre helyettesítő karakteres mintákat a modellnevek újratervezéséhez:
+Hozzon létre helyettesítő karakteres mintákat a modellnevek átirányításához:
 
 ```
-Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
-Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
+Minta: claude-sonnet-*     →  Cél: cc/claude-sonnet-4-6
+Minta: gpt-*               →  Cél: gh/gpt-5.3-codex
 ```
 
-A helyettesítő karakterek támogatják `*` (bármilyen karakter) és `?` (egy karakter).
+A helyettesítő karakterek támogatják a `*` (tetszőleges karakterek) és a `?` (egyetlen karakter) használatát.
 
 #### Tartalék láncok
 
-Határozzon meg globális tartalék láncokat, amelyek minden kérelemre vonatkoznak:
+Határozzon meg minden kérésre érvényes globális tartalék láncokat:
 
 ```
-Chain: production-fallback
+Lánc: production-fallback
   1. cc/claude-opus-4-7
   2. gh/gpt-5.3-codex
   3. glm/glm-4.7
@@ -925,22 +950,22 @@ Chain: production-fallback
 
 ---
 
-### Közös szolgáltatói kombinációk és útválasztási minták
+### Gyakori szolgáltatókombinációk és útválasztási minták
 
-Íme példaminták több szolgáltató kombinálására és a köztük lévő útválasztásra OmniRoute ban:
+Az alábbiak példákat mutatnak több szolgáltató kombinálására és a közöttük történő útválasztásra az OmniRoute-ban:
 
-#### 1. Kódolóügynök kombó: Csúcskategóriás érvelés a Cost/Speed tartalékkal
+#### 1. Kódolóügynök-kombináció: fejlett következtetés költség-/sebességalapú tartalékokkal
 
-Ideális kódoló szerekhez (OpenCode, Claude Code, Cursor, Cline). Kezdetben a határmenti gondolkodási modellekhez vezet, majd a kvótakimerülés vagy a hibák gyors kódolási modelljéhez nyúlik vissza.
+Ideális kódolóügynökökhöz (OpenCode, Claude Code, Cursor, Cline). Kezdetben élvonalbeli következtetési modellekhez irányít, majd a kvóta kimerülése vagy hibák esetén gyors kódolási modellekre vált.
 
-- **Műszerfal** : Combos → Új Combo → Név: `agent-coding` → Stratégia: `Priority`
-- **Modellek** :
-  1. `claude/claude-sonnet-4-6` (elsődleges kódoló ügynök)
-  2. `openai/gpt-4o` (másodlagos nagy kapacitású tartalék)
+- **Vezérlőpult**: Kombinációk → Új kombináció → Név: `agent-coding` → Stratégia: `Priority`
+- **Modellek**:
+  1. `claude/claude-sonnet-4-6` (Elsődleges kódolóügynök)
+  2. `openai/gpt-4o` (Másodlagos, nagy kapacitású tartalék)
   3. `deepseek/deepseek-v4-flash` (Nagy hatékonyságú, költséghatékony tartalék)
 
 ```bash
-# Example via API
+# Példa API-n keresztül
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
@@ -955,174 +980,178 @@ curl -X POST http://localhost:20128/api/combos \
   }'
 ```
 
-#### 2. Free-Tier Auto Failover Combo
+#### 2. Automatikus feladatátvételi kombináció ingyenes csomagokhoz
 
-Több szabadszintű és kulcs nélküli szolgáltatót láncol össze, hogy maximalizálja az üzemidőt API költségek nélkül.
+Több ingyenes csomagú és API-kulcsot nem igénylő szolgáltatót kapcsol össze, hogy API-költségek nélkül maximalizálja a rendelkezésre állást.
 
-- **Stratégia** : `Least Used` vagy `Round Robin` (elosztja a terhelést a kvóták között)
-- **Modellek** :
+- **Stratégia**: `Least Used` vagy `Round Robin` (elosztja a terhelést a kvóták között)
+- **Modellek**:
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
   3. `cerebras/gpt-oss-120b`
 
 ```bash
-# Example via CLI
+# Példa CLI-n keresztül
 omniroute combo create free-stack \
   --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
   --strategy round-robin
 ```
 
-#### 3. Multimodális / Vision & Text Pipeline
+#### 3. Multimodális / képi és szöveges feldolgozási folyamat
 
-Speciális látásmodellek párosítása nagy sebességű szöveggenerálással a képmegértést és kódgenerálást magában foglaló munkafolyamatokhoz.
+Specializált képfeldolgozó modellek párosítása nagy sebességű szöveggenerálással a képek értelmezését és kódgenerálást igénylő munkafolyamatokhoz.
 
-- **Minta** : Egy `Priority` kombó, amely először a látásképes modelleket sorolja fel, a nagy áteresztőképességű text/code modelleket pedig az utolsó helyen.
-- **Modellek** :
-  1. `gemini/gemini-2.5-pro` (erős image/multimodal megértés)
-  2. `openai/gpt-4o` (kiegyensúlyozott látás és szerszámhasználat)
-  3. `deepseek/deepseek-v4-flash` (Text/code generáció)
-
----
-
-### Rugalmasság és áramkör-megszakítók
-
-Konfigurálás ezen keresztül** Dashboard → Settings → Resilience** .
-
-OmniRoute szolgáltatói szintű rugalmasságot valósít meg öt összetevőből:
-
-1. **Sor és ütemezés kérése** — Rendszerszintű kérésformálás:
-   - **Percenkénti kérések (RPM)** — Számlánkénti percenkénti kérések maximális száma
-   - **Minimális idő a kérések között** — Minimális eltérés ezredmásodpercben a kérések között
-   - **Maximális egyidejű kérések** — Egyidejű kérések maximális száma fiókonként
-
-2. **Csatlakozás lehűlés** — Auth-típusonkénti konfiguráció egyetlen kapcsolathoz újrapróbálható hibák után:
-   - **Alaphűtés** — Alapértelmezett lehűlési ablak az újrapróbálható upstream hibákhoz
-   - **Használja az Upstream újrapróbálkozási tippeket** — A mérvadó `Retry-After` vagy visszaállítási tippek tiszteletben tartása, ha rendelkezésre állnak
-   - **Max visszalépési lépések** — Maximális exponenciális visszalépési szint ismétlődő hibák esetén
-
-3. **Szolgáltató áramköri megszakító** — Nyomon követi a végpontok közötti szolgáltatói hibákat, megjelöli a beállított figyelmeztetési küszöbön leromlott szolgáltatót, és megnyitja a megszakítót, ha eléri a konfigurált hibaküszöböt:
-   - **Degradációs küszöb** — `DEGRADED` beírása előtt egymást követő szolgáltatói hibák
-   - **Meghibásodási küszöb** — `OPEN` beírása előtt egymást követő szolgáltatói hibák
-   - **Időtúllépés visszaállítása** — Időablak a szolgáltató újbóli tesztelése előtt
-   - **CLOSED** (Egészséges) – A kérések normálisan futnak
-   - **DEGRADED** — A kérések továbbra is folynak, miközben a rendszer követi a megnövekedett hibákat
-   - **OPEN** — Ismételt meghibásodások miatt a szolgáltató ideiglenesen le van tiltva
-   - **HALF_OPEN** — Tesztelés, hogy a szolgáltató helyreállt-e
-
-   A csatlakozási hatókörű `429` sebességkorlátok bennmaradnak** Csatlakozás lehűlés** és nem számítanak bele a szolgáltató megszakítójába.
-
-   A szolgáltató megszakító futásidejű állapota látható** Irányítópult → Health** csak.
-
-4. **Várja meg a lehűlést** — Ha már minden lehetséges kapcsolat lehűl, OmniRoute megvárhatja a legkorábbi leállást, és automatikusan újra megpróbálhatja ugyanazt az ügyfélkérést.
-
-5. **Dóziskorlát automatikus észlelése** — Amikor az upstream szolgáltatók kifejezett várakozási ablakokat adnak vissza, ezek a tippek felülírják a helyi kapcsolat lehűlését, ha a beállítás engedélyezve van.
-
-**Profi tipp:** Használja a** Egészség** oldalon ellenőrizheti és visszaállíthatja az élő szolgáltatói megszakítókat egy kimaradás után. A Rugalmasság oldal csak a konfigurációt módosítja.
+- **Minta**: Egy `Priority` kombináció, amely először a képfeldolgozásra képes modelleket, utoljára pedig egy nagy áteresztőképességű szöveg-/kódmodellt sorol fel.
+- **Modellek**:
+  1. `gemini/gemini-2.5-pro` (Kiemelkedő kép- és multimodális értelmezés)
+  2. `openai/gpt-4o` (Kiegyensúlyozott képfeldolgozás és eszközhasználat)
+  3. `deepseek/deepseek-v4-flash` (Szöveg- és kódgenerálás)
 
 ---
 
-### Adatbázis export / import
+### Hibatűrés és áramkör-megszakítók
 
-Kezelje az adatbázis biztonsági mentéseit** Dashboard → Settings → System & Storage** .
+A **Vezérlőpult → Beállítások → Hibatűrés** útvonalon konfigurálható.
 
-| Akció                            | Leírás                                                                                                                                                                              |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Adatbázis exportálása**        | Letölti az aktuális SQLite adatbázist `.sqlite` fájlként                                                                                                                            |
-| **Összes exportálása (.tar.gz)** | Letölt egy teljes biztonsági mentési archívumot, beleértve: adatbázist, beállításokat, kombinációkat, szolgáltatói kapcsolatokat (hitelesítő adatok nélkül), API kulcs metaadatokat |
-| **Adatbázis importálása**        | Töltsön fel egy `.sqlite` fájlt az aktuális adatbázis lecseréléséhez. Az importálás előtti biztonsági másolat automatikusan létrejön, hacsak nem `DISABLE_SQLITE_AUTO_BACKUP=true`  |
+Az OmniRoute öt összetevővel valósítja meg a szolgáltatói szintű hibatűrést:
+
+1. **Kérésvárólista és ütemezés** — Rendszerszintű kérésszabályozás:
+   - **Kérések percenként (RPM)** — A fiókonként és percenként engedélyezett kérések maximális száma
+   - **Kérések közötti minimális idő** — A kérések közötti minimális időköz ezredmásodpercben
+   - **Egyidejű kérések maximális száma** — A fiókonkénti egyidejű kérések maximális száma
+
+2. **Kapcsolati várakozási idő** — Hitelesítéstípusonkénti konfiguráció egy adott kapcsolathoz az újrapróbálható hibák után:
+   - **Alapértelmezett várakozási idő** — Az újrapróbálható szolgáltatói hibák alapértelmezett várakozási időszaka
+   - **Szolgáltatói újrapróbálkozási javaslatok használata** — Figyelembe veszi a mérvadó `Retry-After` vagy alaphelyzetbe állítási javaslatokat, ha rendelkezésre állnak
+   - **Visszalépési lépések maximális száma** — Az ismétlődő hibákhoz tartozó exponenciális visszalépés maximális szintje
+
+3. **Szolgáltatói áramkör-megszakító** — Nyomon követi a szolgáltatók teljes feldolgozási láncban bekövetkező hibáit, a beállított figyelmeztetési küszöbértéknél csökkent állapotúnak jelöli a szolgáltatót, és a beállított hibaküszöb elérésekor megnyitja a megszakítót:
+   - **Állapotromlási küszöbérték** — Az egymást követő szolgáltatói hibák száma a `DEGRADED` állapotba lépés előtt
+   - **Hibaküszöb** — Az egymást követő szolgáltatói hibák száma az `OPEN` állapotba lépés előtt
+   - **Visszaállítási időkorlát** — A szolgáltató újbóli teszteléséig tartó időszak
+   - **CLOSED** (Működőképes) — A kérések feldolgozása a szokásos módon történik
+   - **DEGRADED** — A kérések feldolgozása folytatódik, miközben a rendszer nyomon követi a megnövekedett számú hibát
+   - **OPEN** — A szolgáltató az ismétlődő hibák után ideiglenesen blokkolva van
+   - **HALF_OPEN** — Annak ellenőrzése, hogy a szolgáltató helyreállt-e
+
+   A kapcsolatra korlátozódó `429` sebességkorlátozások a **Kapcsolati várakozási idő** hatálya alatt maradnak, és nem számítanak bele a szolgáltatói megszakító hibaszámába.
+
+   A szolgáltatói megszakító futásidejű állapota kizárólag a **Vezérlőpult → Állapot** oldalon jelenik meg.
+
+4. **Várakozás a várakozási idő lejártára** — Ha minden lehetséges kapcsolat már várakozási állapotban van, az OmniRoute megvárhatja a legkorábbi várakozási idő lejártát, majd automatikusan újrapróbálhatja ugyanazt az ügyfélkérést.
+
+5. **Sebességkorlát automatikus észlelése** — Ha a külső szolgáltatók explicit várakozási időszakot adnak vissza, és ez a beállítás engedélyezve van, ezek az adatok felülírják a kapcsolat helyi várakozási idejét.
+
+**Profi tipp:** Az **Állapot** oldalon ellenőrizheti és állíthatja vissza az aktív szolgáltatói megszakítókat egy üzemzavar után. A Hibatűrés oldal csak a konfigurációt módosítja.
+
+---
+
+### Adatbázis exportálása/importálása
+
+Az adatbázis biztonsági mentései a **Vezérlőpult → Beállítások → Rendszer és tárhely** útvonalon kezelhetők.
+
+| Művelet                          | Leírás                                                                                                                                                                                                    |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Adatbázis exportálása**        | Letölti az aktuális SQLite-adatbázist `.sqlite` fájlként                                                                                                                                                  |
+| **Minden exportálása (.tar.gz)** | Letölt egy teljes biztonsági mentési archívumot, amely tartalmazza az adatbázist, a beállításokat, a kombinációkat, a szolgáltatói kapcsolatokat (hitelesítő adatok nélkül) és az API-kulcsok metaadatait |
+| **Adatbázis importálása**        | Feltölt egy `.sqlite` fájlt az aktuális adatbázis lecseréléséhez. Az importálás előtt automatikusan biztonsági mentés készül, kivéve, ha `DISABLE_SQLITE_AUTO_BACKUP=true`                                |
 
 ```bash
-# API: Export database
+# API: Adatbázis exportálása
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: Export all (full archive)
+# API: Minden exportálása (teljes archívum)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: Import database
+# API: Adatbázis importálása
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**Import ellenőrzés:** Az importált fájl sértetlenségét (SQLite pragma check), a szükséges táblákat (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) és méretét (maximum 100 MB) ellenőrzi.
+**Importálás ellenőrzése:** A rendszer ellenőrzi az importált fájl sértetlenségét (SQLite pragma-ellenőrzés), a szükséges táblák (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) meglétét és a fájl méretét (legfeljebb 100 MB).
 
-**Használati esetek:**
+**Felhasználási esetek:**
 
-- OmniRoute migrálása a gépek között
-- Készítsen külső biztonsági másolatot a katasztrófa utáni helyreállításhoz
-- Konfigurációk megosztása a csapattagok között (az összes → megosztási archívum exportálása)
-
----
-
-### Beállítások irányítópultja
-
-A beállítások oldala a következőbe van rendezve** 7 lap** az egyszerű navigáció érdekében:
-
-| Tab             | Tartalom                                                                                                                                                                                    |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Általános**   | Rendszertároló eszközök, alapértelmezett viselkedés, végponti alagút láthatósága                                                                                                            |
-| **Megjelenés**  | Témavezérlők (light/dark/system), oldalsáv láthatóság, panelkapcsolók Cloudflare/Tailscale/ngrok alagútkártyákhoz                                                                           |
-| **AI**          | Átgondolt költségvetés (passthrough / auto-strip / egyéni / adaptív – lásd [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), globális rendszerkérdés, gyorsítótár-statisztikák                  |
-| **Biztonság**   | Login/Password beállítások, IP hozzáférés-vezérlés, API hitelesítés `/models` hez, szolgáltató blokkolása, azonnali befecskendezési védelem                                                 |
-| **Útválasztás** | Globális útválasztási stratégia (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), helyettesítő karakteres modellálnevek, tartalék láncok, kombinált alapértelmezések |
-| **Rugalmasság** | Várólista kérése, kapcsolat leállása, szolgáltatói megszakító konfigurációja és várakozás a lehűlésre                                                                                       |
-| **Fejlett**     | Globális proxykonfiguráció (HTTP/SOCKS5), szolgáltatónkénti proxy-felülbírálások                                                                                                            |
-
-Az Általános többé nem duplikálja a csak olvasható naplózási és gyorsítótári jegyzeteket. Az adatbázis-megőrzési és -optimalizálási beállítások `/api/settings/database` keresztül megmaradnak; a gyorsítótár kézi törlése `DELETE /api/cache` használja. A kérések és a proxy naplósorok sapkáit `CALL_LOGS_TABLE_MAX_ROWS` és `PROXY_LOGS_TABLE_MAX_ROWS` vezérli.
+- Az OmniRoute áttelepítése gépek között
+- Külső biztonsági mentések létrehozása katasztrófa utáni helyreállításhoz
+- Konfigurációk megosztása a csapattagok között (minden exportálása → archívum megosztása)
 
 ---
 
-### Költségek és költségvetés kezelése
+### Beállítási vezérlőpult
 
-Hozzáférés a következőn keresztül** Műszerfal → költségek** .
+A beállítási oldal az egyszerű navigáció érdekében **7 lapra** van felosztva:
 
-| Tab              | Cél                                                                                                                  |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------- |
-| **Költségvetés** | Állítson be költési határokat API kulcsonként daily/weekly/monthly költségvetéssel és valós idejű követéssel         |
-| **Árképzés**     | Tekintse meg és szerkessze a modell árazási bejegyzéseit – szolgáltatónként 1 ezer input/output tokenenkénti költség |
+| Lap             | Tartalom                                                                                                                                                                                                       |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Általános**   | Rendszertárolási eszközök, alapértelmezett viselkedés, az Endpoint-alagutak láthatósága                                                                                                                        |
+| **Megjelenés**  | Témabeállítások (világos/sötét/rendszer), az oldalsáv láthatósága, a Cloudflare-/Tailscale-/ngrok-alagútkártyák panelkapcsolói                                                                                 |
+| **AI**          | Gondolkodási keret (továbbítás / automatikus eltávolítás / egyéni / adaptív — lásd: [THINKING_BUDGET.md](./THINKING_BUDGET.md)), globális rendszerprompt, promptgyorsítótár-statisztikák                       |
+| **Biztonság**   | Bejelentkezési/jelszóbeállítások, IP-hozzáférés-vezérlés, API-hitelesítés a `/models` végponthoz, szolgáltatók blokkolása, promptinjektálás elleni védelem                                                     |
+| **Útválasztás** | Globális útválasztási stratégia (első feltöltése / ciklikus / P2C / véletlenszerű / legkevésbé használt / költségoptimalizált), helyettesítő karakteres modellálnevek, tartalékláncok, kombinációs alapértékek |
+| **Hibatűrés**   | Kérésvárólista, kapcsolati visszahűlési idő, a szolgáltatói megszakító beállításai és a visszahűlés kivárása                                                                                                   |
+| **Speciális**   | Globális proxykonfiguráció (HTTP/SOCKS5), szolgáltatónkénti proxyfelülbírálások                                                                                                                                |
+
+Az Általános lap már nem ismétli meg a csak olvasható naplózási és gyorsítótárazási megjegyzéseket. Az adatbázis megőrzési és
+optimalizálási beállításai a `/api/settings/database` végponton keresztül maradnak fenn; a gyorsítótár kézi ürítéséhez a
+`DELETE /api/cache` használható. A kérések és proxynaplók sorainak felső korlátját a
+`CALL_LOGS_TABLE_MAX_ROWS` és a `PROXY_LOGS_TABLE_MAX_ROWS` szabályozza.
+
+---
+
+### Költség- és keretkezelés
+
+Elérés: **Irányítópult → Költségek**.
+
+| Lap        | Rendeltetés                                                                                                              |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------ |
+| **Keret**  | Költési korlátok beállítása API-kulcsonként napi/heti/havi kerettel és valós idejű nyomon követéssel                     |
+| **Árazás** | A modellek árbejegyzéseinek megtekintése és szerkesztése — 1 000 bemeneti/kimeneti tokenre jutó költség szolgáltatónként |
 
 ```bash
-# API: Set a budget
+# API: Keret beállítása
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: Get current budget status
+# API: Az aktuális keretállapot lekérése
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Költségkövetés:** Minden kérés naplózza a token használatát, és az ártáblázat segítségével kiszámítja a költségeket. Lebontások megtekintése itt** Műszerfal → Használat** szolgáltató, modell és API kulcs szerint.
+**Költségkövetés:** Minden kérés naplózza a tokenhasználatot, és az árazási táblázat alapján kiszámítja a költséget. A szolgáltató, modell és API-kulcs szerinti bontás az **Irányítópult → Használat** oldalon tekinthető meg.
 
 ---
 
-### Hang átírása
+### Hangátírás
 
-OmniRoute támogatja a hang átírását az OpenAI-kompatibilis végponton keresztül:
+Az OmniRoute az OpenAI-kompatibilis végponton keresztül támogatja a hanganyagok átírását:
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# Example with curl
+# Példa curl használatával
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` a natív Deepgram útvonal, és ehhez Deepgram API kulcsra van szüksége. Ha csak OpenRouter van beállítva, használja `openrouter/deepgram/nova-3`.
+A `deepgram/nova-3` a natív Deepgram-útvonal, és Deepgram API-kulcsot igényel.
+Ha csak az OpenRouter van beállítva, használja az `openrouter/deepgram/nova-3` értéket.
 
-**Beszédből szöveggé (átírás)** szolgáltatók:
+**Beszédfelismerési (átírási)** szolgáltatók:
 
-- `openai/` (suttogással kompatibilis)
+- `openai/` (whisper-kompatibilis)
 - `groq/` (Groq Whisper Turbo)
 - `deepgram/` (Nova család)
 - `assemblyai/`
-- `nvidia/` (papagáj, kanári)
-- `huggingface/` (suttogó változatok)
+- `nvidia/` (Parakeet, Canary)
+- `huggingface/` (whisper-változatok)
 - `qwen/`
 
-**Szövegfelolvasó (`POST /v1/audio/speech`)** szolgáltatók:
+**Szövegfelolvasási (`POST /v1/audio/speech`)** szolgáltatók:
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
@@ -1139,45 +1168,54 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-Támogatott hangformátumok az átíráshoz: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. TTS kimeneti formátumok a szolgáltatótól függenek (mp3, wav, opus, pcm, mulaw).
+Az átíráshoz támogatott hangformátumok: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. A TTS kimeneti formátumai a szolgáltatótól függnek (mp3, wav, opus, pcm, mulaw).
 
 ---
 
-### Kombinált egyensúlyozási stratégiák
+### Kombinációkiegyenlítési stratégiák
 
-Konfigurálja a kombinált kiegyensúlyozást** Irányítópult → Combos → Create/Edit → stratégia** .
+A kombinációnkénti kiegyenlítés az **Irányítópult → Kombinációk → Létrehozás/Szerkesztés → Stratégia** menüpontban állítható be.
 
-| Stratégia               | Leírás                                                                                           |
-| ----------------------- | ------------------------------------------------------------------------------------------------ |
-| **Round-Robin**         | Sorban forog a modellek között                                                                   |
-| **Prioritás**           | Mindig az első modellt próbálja ki; csak hibára esik vissza                                      |
-| **Véletlen**            | Véletlenszerű modellt választ a kombinációból minden kéréshez                                    |
-| **Súlyozott**           | Útvonalak arányosan a modellenként hozzárendelt súlyok alapján                                   |
-| **Legkevésbé használt** | Útvonalak a legutóbbi legkevesebb kéréssel rendelkező modellhez (kombinált mérőszámokat használ) |
-| **Költségoptimalizált** | Útvonalak a legolcsóbb elérhető modellhez (árazási táblázatot használ)                           |
+| Stratégia               | Leírás                                                                                               |
+| ----------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Ciklikus**            | Sorban, egymás után vált a modellek között                                                           |
+| **Prioritásos**         | Mindig az első modellt próbálja; csak hiba esetén vált tartalékra                                    |
+| **Véletlenszerű**       | Minden kéréshez véletlenszerű modellt választ a kombinációból                                        |
+| **Súlyozott**           | Az egyes modellekhez rendelt súlyok arányában végzi az útválasztást                                  |
+| **Legkevésbé használt** | A legkevesebb közelmúltbeli kéréssel rendelkező modellhez irányít (kombinációs mérőszámokat használ) |
+| **Költségoptimalizált** | A legolcsóbb elérhető modellhez irányít (az árazási táblázatot használja)                            |
 
-A globális kombinált alapértelmezések beállíthatók** Irányítópult → beállítások → Útválasztás → kombinált alapértékek** . A kombinált célidőtúllépések alapértelmezés szerint öröklik az aktuális kérés időtúllépését. Használat** Cél időtúllépés (másodperc)** kombinált alapértelmezéseken vagy egyéni kombináción csak akkor, ha a célonkénti rövidebb korlát gyorsabb visszaesést vált ki.
+A globális kombinációs alapértékek az **Irányítópult → Beállítások → Útválasztás → Kombinációs alapértékek** menüpontban állíthatók be.
+A kombináció céljainak időtúllépése alapértelmezés szerint az aktuális kérés időtúllépését örökli. A **Cél időtúllépése
+(másodperc)** beállítást a kombinációs alapértékeknél vagy egy adott kombinációnál csak akkor használja, ha egy rövidebb célonkénti korlátnak
+gyorsabb tartalékra váltást kell kiváltania.
 
-A nulla késleltetésű kombinált optimalizálások választhatók. Szabadság** Nulla késleltetésű optimalizálás** letiltva, hogy megakadályozzák, hogy ezek a késleltetési funkciók versenyezhessenek tartalékcélokkal, TTFT -előzmények alapján kihagyják a célokat, vagy ne tömörítsék a tartalékkérelmeket; Az engedélyezése lehetővé teszi a konfigurált fedezést, a prediktív TTFT kihagyásokat és a proaktív tartalék tömörítést, hogy routing/request hűségét alacsonyabb késleltetésre cserélje.
+A késleltetésmentes kombinációs optimalizálások külön engedélyezhetők. Hagyja kikapcsolva a **Késleltetésmentes optimalizálások** beállítást,
+hogy ezek a késleltetési funkciók ne versenyeztessék a tartalék célokat, ne ugorjanak át célokat a TTFT-
+előzmények alapján, és ne tömörítsék a tartalék kéréseket; az engedélyezés lehetővé teszi a beállított fedezeti kéréseket, a prediktív TTFT-
+átugrásokat és a proaktív tartalékkérés-tömörítést, így az útválasztás/kérés pontossága kisebb szélsőérték-késleltetésre cserélhető.
 
-Letiltás** Érvelési token puffer** amikor az upstream szolgáltatók szigorú `max_tokens` / `maxOutputTokens` korlátokat írnak elő. Ha engedélyezve van, a kombinált útválasztás csak az ismert kimeneti korláttal rendelkező modelleknél ad hozzá az érvelési modell mozgásterét, és változatlanul hagyja az ügyféljogkivonat-korlátot, ha a biztonságos pufferelt érték meghaladja ezt a felső határt. Ha a kliens határértéke már meghaladja az ismert felső határt, OmniRoute lefogja azt az adott korláthoz, mielőtt elküldi az upstream kérést.
+Tiltsa le a **gondolkodási tokenpuffert**, ha a felsőbb szintű szolgáltatók szigorú
+`max_tokens` / `maxOutputTokens` korlátokat írnak elő. Ha engedélyezve van, a kombinált útválasztás csak az ismert kimeneti korláttal rendelkező gondolkodási modellekhez ad
+további tartalékot, és változatlanul hagyja az ügyfél tokenkorlátját, ha a biztonságos pufferelt érték meghaladná ezt a korlátot. Ha az ügyfél korlátja már eleve meghalad egy ismert korlátot,
+az OmniRoute erre a korlátra csökkenti azt, mielőtt elküldené a kérést a felsőbb szintű szolgáltatónak.
 
 ---
 
-### Egészségügyi irányítópult
+### Állapot-irányítópult
 
-Hozzáférés a következőn keresztül** Irányítópult → Health** . Valós idejű rendszerállapot-áttekintés 6 kártyával:
+Elérés: **Irányítópult → Állapot**. A rendszer állapotának valós idejű áttekintése 6 kártyán:
 
-| Kártya                    | Mit mutat                                                              |
-| ------------------------- | ---------------------------------------------------------------------- |
-| **Rendszer állapota**     | Üzemidő, verzió, memóriahasználat, adatkönyvtár                        |
-| **Szolgáltató egészsége** | Globális szolgáltatói megszakító futásidejű állapota                   |
-| **Rate Limits**           | Aktív kapcsolat lehűlés fiókonként a hátralévő idővel                  |
-| **Aktív zárolások**       | Aktív modell-hatókörű kizárások és ideiglenes kizárások                |
-| **Aláírás gyorsítótár**   | Deduplikációs gyorsítótár statisztikái (aktív kulcsok, találati arány) |
-| **Latencia telemetria**   | p50/p95/p99 késleltetési összesítés szolgáltatónként                   |
+| Kártya                      | Mit jelenít meg                                                          |
+| --------------------------- | ------------------------------------------------------------------------ |
+| **Rendszerállapot**         | Üzemidő, verzió, memóriahasználat, adatkönyvtár                          |
+| **Szolgáltatók állapota**   | A globális szolgáltatói áramkör-megszakító futásidejű állapota           |
+| **Sebességkorlátok**        | Fiókonkénti aktív kapcsolati várakozási idők a hátralévő idővel          |
+| **Aktív kizárások**         | Aktív, modellhatókörű kizárások és ideiglenes kizárások                  |
+| **Aláírás-gyorsítótár**     | A deduplikációs gyorsítótár statisztikái (aktív kulcsok, találati arány) |
+| **Késleltetési telemetria** | Szolgáltatónkénti p50/p95/p99 késleltetési összesítés                    |
 
-**Profi tipp:** Az Egészségügyi oldal 10 másodpercenként automatikusan frissül. Használja a megszakító kártyát annak azonosítására, hogy mely szolgáltatók tapasztaltak problémákat.
+**Profi tipp:** Az Állapot oldal 10 másodpercenként automatikusan frissül. Az áramkör-megszakító kártyájával azonosíthatja, hogy mely szolgáltatóknál jelentkeznek problémák.
 
 ---
 

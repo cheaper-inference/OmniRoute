@@ -1,97 +1,41 @@
-# Release-Green: keeping the queue and release branch green (தமிழ்)
+# Release-Green: candidate validation and evidence (தமிழ்)
 
 🌐 **Languages:** 🇺🇸 [English](../../../../ops/RELEASE_GREEN.md) · 🇪🇹 [am](../../../am/docs/ops/RELEASE_GREEN.md) · 🇸🇦 [ar](../../../ar/docs/ops/RELEASE_GREEN.md) · 🇦🇿 [az](../../../az/docs/ops/RELEASE_GREEN.md) · 🇧🇬 [bg](../../../bg/docs/ops/RELEASE_GREEN.md) · 🇧🇩 [bn](../../../bn/docs/ops/RELEASE_GREEN.md) · 🇧🇦 [bs](../../../bs/docs/ops/RELEASE_GREEN.md) · 🇨🇿 [cs](../../../cs/docs/ops/RELEASE_GREEN.md) · 🇩🇰 [da](../../../da/docs/ops/RELEASE_GREEN.md) · 🇩🇪 [de](../../../de/docs/ops/RELEASE_GREEN.md) · 🇬🇷 [el](../../../el/docs/ops/RELEASE_GREEN.md) · 🇪🇸 [es](../../../es/docs/ops/RELEASE_GREEN.md) · 🇪🇪 [et](../../../et/docs/ops/RELEASE_GREEN.md) · 🇮🇷 [fa](../../../fa/docs/ops/RELEASE_GREEN.md) · 🇫🇮 [fi](../../../fi/docs/ops/RELEASE_GREEN.md) · 🇫🇷 [fr](../../../fr/docs/ops/RELEASE_GREEN.md) · 🇮🇪 [ga](../../../ga/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [gu](../../../gu/docs/ops/RELEASE_GREEN.md) · 🇳🇬 [ha](../../../ha/docs/ops/RELEASE_GREEN.md) · 🇮🇱 [he](../../../he/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [hi](../../../hi/docs/ops/RELEASE_GREEN.md) · 🇭🇷 [hr](../../../hr/docs/ops/RELEASE_GREEN.md) · 🇭🇺 [hu](../../../hu/docs/ops/RELEASE_GREEN.md) · 🇦🇲 [hy](../../../hy/docs/ops/RELEASE_GREEN.md) · 🇮🇩 [id](../../../id/docs/ops/RELEASE_GREEN.md) · 🇳🇬 [ig](../../../ig/docs/ops/RELEASE_GREEN.md) · 🇮🇹 [it](../../../it/docs/ops/RELEASE_GREEN.md) · 🇯🇵 [ja](../../../ja/docs/ops/RELEASE_GREEN.md) · 🇬🇪 [ka](../../../ka/docs/ops/RELEASE_GREEN.md) · 🇰🇭 [km](../../../km/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [kn](../../../kn/docs/ops/RELEASE_GREEN.md) · 🇰🇷 [ko](../../../ko/docs/ops/RELEASE_GREEN.md) · 🇱🇹 [lt](../../../lt/docs/ops/RELEASE_GREEN.md) · 🇱🇻 [lv](../../../lv/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [ml](../../../ml/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [mr](../../../mr/docs/ops/RELEASE_GREEN.md) · 🇲🇾 [ms](../../../ms/docs/ops/RELEASE_GREEN.md) · 🇲🇹 [mt](../../../mt/docs/ops/RELEASE_GREEN.md) · 🇲🇲 [my](../../../my/docs/ops/RELEASE_GREEN.md) · 🇳🇵 [ne](../../../ne/docs/ops/RELEASE_GREEN.md) · 🇳🇱 [nl](../../../nl/docs/ops/RELEASE_GREEN.md) · 🇳🇴 [no](../../../no/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [or](../../../or/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [pa](../../../pa/docs/ops/RELEASE_GREEN.md) · 🇵🇭 [phi](../../../phi/docs/ops/RELEASE_GREEN.md) · 🇵🇱 [pl](../../../pl/docs/ops/RELEASE_GREEN.md) · 🇵🇹 [pt](../../../pt/docs/ops/RELEASE_GREEN.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/ops/RELEASE_GREEN.md) · 🇷🇴 [ro](../../../ro/docs/ops/RELEASE_GREEN.md) · 🇷🇺 [ru](../../../ru/docs/ops/RELEASE_GREEN.md) · 🇱🇰 [si](../../../si/docs/ops/RELEASE_GREEN.md) · 🇸🇰 [sk](../../../sk/docs/ops/RELEASE_GREEN.md) · 🇸🇮 [sl](../../../sl/docs/ops/RELEASE_GREEN.md) · 🇷🇸 [sr](../../../sr/docs/ops/RELEASE_GREEN.md) · 🇸🇪 [sv](../../../sv/docs/ops/RELEASE_GREEN.md) · 🇰🇪 [sw](../../../sw/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [te](../../../te/docs/ops/RELEASE_GREEN.md) · 🇹🇭 [th](../../../th/docs/ops/RELEASE_GREEN.md) · 🇹🇷 [tr](../../../tr/docs/ops/RELEASE_GREEN.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/ops/RELEASE_GREEN.md) · 🇵🇰 [ur](../../../ur/docs/ops/RELEASE_GREEN.md) · 🇺🇿 [uz](../../../uz/docs/ops/RELEASE_GREEN.md) · 🇻🇳 [vi](../../../vi/docs/ops/RELEASE_GREEN.md) · 🇳🇬 [yo](../../../yo/docs/ops/RELEASE_GREEN.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/ops/RELEASE_GREEN.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/ops/RELEASE_GREEN.md)
 
 ---
 
-## இது தீர்க்கும் பிரச்சினை
+வெளியீடு-பசுமை ஒரு குறிப்பிட்ட உறுதிப்பாட்டைக் கவனித்து அதன் சரிபார்ப்பு முடிவுகளைப் புகாரளிக்கிறது. [தர கேட்ஸ் குறிப்பு](../architecture/QUALITY_GATES.md) தற்போதைய CI சுயவிவரங்கள், தேவையான காசோலைகள் மற்றும் ஏற்றுக்கொள்ளும் கொள்கையை வரையறுக்கிறது. `config/quality/admission-policy.json` இல் உள்ள பதிப்பு செய்யப்பட்ட சேர்க்கை கொள்கை `Gate / CI` மற்றும் `Gate / Quality` க்கான செயல்படுத்தக்கூடிய ஒப்பந்தமாகும்.
 
-**முழுமையான கேட்** (`.github/workflows/ci.yml` — unit shards, vitest, ratchets,
-`package-artifact`, SonarQube, E2E) **release PR-இல் மட்டுமே** (PR → `main`) இயங்குகிறது. `release/**`-ஐ இலக்காகக் கொண்ட PR-கள்
-**fast-gates**-ஐ (`quality.yml`: TIA-வால் பாதிக்கப்பட்ட சோதனைகள் + typecheck + lint)
-பெறுகின்றன; மேலும், குறியீட்டு மாற்றங்களுக்கு, **ஆலோசனைத் தன்மையிலான** production build ஒன்றையும் பெறுகின்றன. இதன் விளைவாக: release-இல் மட்டுமே தோன்றும் red-கள் release branch-இல் கவனிக்கப்படாமல் குவிந்து, release நேரத்தில்
-**ஒவ்வொன்றாக, ~40 நிமிட அடுக்குகளாக வெடிக்கக்கூடும்**.
+## CI மற்றும் பார்வையாளர் நோக்கம்
 
-"release-green குடும்பம்", அந்த red-களை **முன்கூட்டியே அறிய** உருவாக்கப்பட்டுள்ளது — முழுமையான
-கேட்டிற்கு இணையானதை எந்த நேரத்திலும் **உள்ளூரில் / release-க்கு வெளியே** சரிபார்ப்பதன் மூலம், release PR அதன் முதல் CI இயக்கத்திலேயே
-green ஆக இருப்பதை உறுதிசெய்கிறது.
+`ci.yml` மற்றும் `quality.yml` கவர் கோரிக்கைகளை பிரதான மற்றும் வெளியீடு கிளைகளுக்கு இழுக்கும். தேர்ந்தெடுக்கப்பட்ட சுயவிவரம் எந்தெந்த வேலைகளுக்கு பொருந்தும் என்பதை தீர்மானிக்கிறது. முழு CI ஆனது ஒரு சாதாரண இழுப்பு கோரிக்கையை செயல்படுத்தாத பாதைகளையும் உள்ளடக்கியது. ஒரு விரைவான பார்வையாளர் முடிவு அந்த வேலைகளை மாற்ற முடியாது, மேலும் முடிக்கப்பட்ட பணிப்பாய்வு ரேப்பரால் அதன் ரசீதுகளை மாற்ற முடியாது.
 
-> **பேச்சுவார்த்தைக்கே இடமில்லாத கொள்கை:** இதில் எதுவும் பங்களிப்பாளரைத் தடுக்காது. அவர்களின் PR தோல்வியடையச் செய்யும் கட்டாய
-> check ஒன்றை நாங்கள் சேர்ப்பதில்லை. **drift** (ratchets) என்பது release நேரத்தில் maintainer மறுபடி baseline அமைப்பதற்கானது —
-> அது ஒருபோதும் பங்களிப்பாளரின் பொறுப்பு அல்ல. எந்தப் பகுதியும் PR-ஐ **மூடுவதில்லை** (credit theft), மேலும்
-> தேர்ச்சி பெறுவதற்காக எந்தச் சோதனையையும் **பலவீனப்படுத்துவதில்லை**.
+உற்பத்தி உருவாக்கம் CI க்கு சொந்தமானது. `quality.yml` இல் நகல் ஆலோசனை உருவாக்கம் இல்லை. காணாமல் போன கலைப்பொருட்கள், ரத்து செய்யப்பட்ட வேலை மற்றும் முழுமையடையாத அளவீடுகள் வெற்றிகரமான தேவையான காசோலையை நிறுவவில்லை. முடிவுகளை ஏற்றுக்கொள்வதற்கு முன், தற்போதைய அடிப்படை, தலைவர் மற்றும் ஒருங்கிணைந்த வேட்பாளர் ஆகியவற்றை உறுதிப்படுத்தவும்.
 
-## இந்தக் குடும்பம் (4 பகுதிகள்) — ஒவ்வொன்றும் எவ்வாறு தனித்தனியாக இயங்குகிறது
+## உள்ளூர் சரிபார்ப்பு
 
-| பகுதி                                                                    | அது என்ன                                                                                                      | எப்போது இயக்க வேண்டும்                                                        | வரம்பு                                 |
-| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | -------------------------------------- |
-| **`/green-prs`** (தீர்வு A)                                              | **திறந்த PR-களின் வரிசையை** maintainer தேவைக்கேற்ப scan செய்வது                                               | **தனித்தனியாக, அவ்வப்போது** — குறிப்பாக ஒரு `/generate-release`-க்கு **முன்** | முழு PR வரிசை → `release/**`           |
-| **`/validate-release-green`** (தீர்வு C — `npm run check:release-green`) | சரிபார்ப்பு engine: ஒரு branch அல்லது merge candidate-க்கு எதிராக முழுமையான கேட்டை மீண்டும் செயல்படுத்துகிறது | தனித்தனியாக, எந்த நேரத்திலும்                                                 | ஒரு குறிப்பிட்ட branch அல்லது merge-PR |
-| **`/babysit <PR#>`**                                                     | **ஒரு** PR-இன் **நேரடி CI**-ஐ green நிலைக்கு வழிநடத்துகிறது                                                   | தனித்தனியாக, ஒவ்வொரு PR-க்கும்                                                | ஒரு தனிப்பட்ட PR                       |
-| **`nightly-release-green.yml`** (தீர்வு D)                               | தானியக்க nightly workflow; HARD red ஏற்பட்டால் issue-ஐத் திறக்கிறது                                           | தானாக (cron)                                                                  | செயலில் உள்ள release branch            |
-
-**"இது release-களுக்காக மட்டும்தானா?" என்பதற்கான சுருக்கமான பதில்:** **இல்லை.** `/green-prs`,
-**release-களுக்கு இடையில், அவ்வப்போது** இயங்குவதற்காக வடிவமைக்கப்பட்டது. தனித்தனியாக இயக்குவதே இயல்பான பயன்பாடு — release என்பது
-அதை இயக்குவதால் அதிகபட்ச மதிப்பு கிடைக்கும் தருணம் மட்டுமே.
-
-## PR-இலிருந்து-release வரையிலான ஆலோசனை build
-
-`quality.yml` இப்போது draft அல்லாத code PR-களுக்கும் Mergify queue branch-களுக்கும் `Build (advisory)`-ஐ உள்ளடக்கியுள்ளது.
-இது `ci.yml`-இல் உள்ள production build செய்முறையைப் பிரதிபலிக்கிறது: Node 24, `npm-ci-retry`,
-`check:node-runtime`, மற்றும் `OMNIROUTE_USE_TURBOPACK=1` உடன் `npm run build`. இந்த workflow-இல் எந்த downstream quality job-உம் build artifact-ஐப் பயன்படுத்தாததால், இது வேண்டுமென்றே ஒன்றைப் பதிவேற்றுவதில்லை.
-ஒரு வாரம் நிலையான release-PR இயக்கங்களுக்குப் பிறகு `continue-on-error`-ஐ அகற்றுங்கள்; இதனால் இந்தச் சமிக்ஞை தடுக்கும் தன்மையுள்ள
-PR-to-release gate ஆக மாறும்.
-
-## தீர்வு C — `npm run check:release-green` (engine)
-
-தற்போதைய working tree-க்கு எதிராக release-க்கு நிகரான validation-ஐ மறுஉருவாக்கி, ஒவ்வொரு red-ஐயும் வகைப்படுத்துகிறது:
-
-- **HARD** (typecheck, lint பிழைகள், unit, vitest, db-rules, public-creds, விருப்பத்திற்குரிய
-  `package-artifact`) → **உண்மையான குறைபாடு**; `exit 1`. Source branch-இல் சரிசெய்யப்படும் (TDD, Rule #18).
-- **DRIFT** (eslint **எச்சரிக்கைகள்**, cognitive-complexity, file-size) → cycle-இல் திரண்ட ratchet drift,
-  **contributor-இன் தவறு அல்ல**; இது அறிக்கையிடப்படுவது மட்டுமே, மேலும் **release நேரத்தில் maintainer-ஆல் rebaseline செய்யப்படும்**.
-  Drift வெளியேறும் code-ஐ **ஒருபோதும்** மாற்றாது — எனவே அது எவரையும் ஒருபோதும் தடுக்காது.
+பார்வையாளரை அதன் சார்புகளைத் தயாரித்த பிறகு, சொந்தமான பணிமரத்தில் இயக்கவும். கடுமையான சரிபார்ப்புக்கு முன் `docs/ops/WORKTREE_ISOLATION.md` இல் பணிமரம் மற்றும் ஆதார நெறிமுறையைப் பின்பற்றவும்.
 
 ```bash
-npm run check:release-green                 # தற்போதைய branch (working tree)
-node scripts/quality/validate-release-green.mjs --json   # கட்டமைக்கப்பட்ட output
-node scripts/quality/validate-release-green.mjs --quick  # unit+vitest-ஐத் தவிர்க்கிறது (drift+typecheck+lint மட்டும்)
-node scripts/quality/validate-release-green.mjs --with-build  # package-artifact-ஐ உள்ளடக்குகிறது (மெதுவானது)
+npm run check:release-green -- --quick --json
+npm run check:release-green -- --with-build --full-ci --json
 ```
 
-கண்டறிந்து **அறிக்கையிடுவது** மட்டுமே (தானியங்கு சரிசெய்தல் இல்லை). Green நிலைக்குச் சரிசெய்வதற்கான orchestration
-`/green-prs` மற்றும் `/review-prs`-இல் உள்ளது.
+விரைவு சுயவிவரம் பகுதியளவு உள்ளது. முழு சுயவிவரம் அதன் மாதிரி தேவைகளை சரிபார்த்து, கட்டளை ரசீதுகளைப் பாதுகாக்கிறது; இது வரிசைப்படுத்தலை சான்றளிக்காது அல்லது பொருந்தக்கூடிய ஹோஸ்ட் செய்யப்பட்ட காசோலைகளுக்கு மாற்றாக இல்லை. மெட்ரிக் டிரிஃப்ட்டில் இருந்து செயல்படுத்தல் தோல்வியை அறிக்கை வேறுபடுத்துகிறது. தேர்ந்தெடுக்கப்பட்ட கொள்கையின்படி தேவையான ராட்செட்கள் தொடர்ந்து தடுக்கப்படுகின்றன. தேர்ச்சி முடிவைப் பெறுவதற்காக ஒரு அடிப்படையை உயர்த்த வேண்டாம்.
 
-## தீர்வு A — `/green-prs` (queue scan)
+## இரவு மற்றும் கைமுறை ஸ்வீப்
 
-செயல்முறை (சுருக்கம் — விவரங்களுக்கு `green-prs` skill-ஐப் பார்க்கவும்):
+இரவு வெளியீடு மற்றும் பொருந்தக்கூடிய தீர்வுகள் ஒரு நியமன வெளியீட்டு கிளையைத் தேர்ந்தெடுக்கின்றன. அந்தத் தேர்வு, பணிப்பாய்வுகளைத் தூண்டிய கிளையுடன் பொருந்த வேண்டும், மேலும் தொகுப்புகள் நிகழ்வின் மாறாத SHA பயன்படுத்துகின்றன. கைமுறை செயல்பாட்டிற்கு, `release_branch` இல் உத்தேசிக்கப்பட்ட வெளியீட்டைத் தேர்ந்தெடுத்து, அதே குறிப்பில் அனுப்பவும்:
 
-1. செயலில் உள்ள release branch-க்கு எதிரான திறந்த PR-களின் queue-ஐ **பட்டியலிடவும்**.
-2. ஒவ்வொரு PR-ஐயும் **வகைப்படுத்தவும்** (viable / reject-worthy / needs-author) — reject/needs-author ஆகியவை
-   **அறிக்கையிடப்படும், மூடப்படாது** (author முடிவு செய்வார்).
-3. ஒவ்வொரு viable PR-க்கும், ஒரு **தனிமைப்படுத்தப்பட்ட worktree**-இல் (Rule #19), PR-ஐ release tip-க்குக் கொண்டு வந்து
-   `npm run check:release-green`-ஐ இயக்கவும்:
-   - **HARD** → co-authorship வழியாக **contributor-இன் branch-இலேயே** சரிசெய்யவும் (author-இன் "Merged" நிலையைப் பாதுகாக்கிறது);
-     அனைத்து HARD-களும் நீங்கும் வரை மீண்டும் இயக்கவும்.
-   - **DRIFT** → அப்படியே விடவும்; release நேரத்தில் அது rebaseline செய்யப்படும்.
-4. PR × (தீர்ப்பு, HARD red-கள், சரிசெய்யப்பட்டதா?, DRIFT, இப்போது release-green-ஆ?) அட்டவணையை **அறிக்கையிடவும்**.
+```bash
+gh workflow run nightly-release-green.yml --ref "$release_branch" -f branch="$release_branch"
+gh workflow run nightly-compat.yml --ref "$release_branch" -f branch="$release_branch"
+```
 
-Merge செய்யாமலேயே queue-ஐ **தயாரிக்க** முடியும்; வெளிப்படையாகக் கோரப்பட்டால் மட்டுமே merge செய்யும் — மேலும் ஒரு PR-ஐ ஒருபோதும் மூடாது.
+தேர்ந்தெடுக்கப்பட்ட குறியீட்டை இயக்கும் முன் குறுக்குக் கிளை அனுப்புதல் நிராகரிக்கப்பட்டது. ஹோஸ்ட் செய்யப்பட்ட முதன்மை தொகுப்புகள் `main` செக் அவுட் செய்து, அதன் SHA இன்னும் நிறுவலுக்கு முன் தீர்க்கப்பட்ட இலக்குடன் பொருந்துகிறதா என்பதைச் சரிபார்க்கவும். தீர்மானத்தின் போது முக்கிய நகர்வுகள் இருந்தால், முழுமையடையாத ஸ்வீப்பை புதிய கமிட்டில் மீண்டும் இயக்கவும். வெவ்வேறு வேட்பாளர்களின் தொகுப்பு ரசீதுகளை இணைக்க வேண்டாம்.
 
-## பரிந்துரைக்கப்படும் காலமுறை
+## தோல்வி சோதனை மற்றும் மீட்பு
 
-- **`/green-prs`-ஐ அவ்வப்போது இயக்கவும்** (எ.கா., வாரந்தோறும்), மேலும்
-  `/generate-release`-க்கு முன் **எப்போதும்** இயக்கவும்.
-- **`nightly-release-green.yml`**-ஐ (தீர்வு D) தொடர்ச்சியான சமிக்ஞையாக வைத்திருக்கவும்: அது ஒரு
-  HARD red issue-ஐத் திறக்கும்போது, scan செய்வதற்கான நேரம் வந்துவிட்டது.
-- ஒரு branch அல்லது குறிப்பிட்ட merge candidate-ஐச் சரிபார்க்க, தேவைக்கேற்ப **`/validate-release-green`**-ஐப் பயன்படுத்தவும்.
-- குறிப்பிட்ட PR ஒன்றை live CI-இல் green நிலைக்குக் கொண்டு செல்ல வேண்டியிருக்கும்போது **`/babysit <PR#>`**-ஐப் பயன்படுத்தவும்.
+சம்பவத்தை கண்டறியும் குறியீடாகப் பயன்படுத்தவும், பின்னர் சரியான ஓட்டம், முயற்சி, தோல்வியடைந்த படி மற்றும் கலைப்பொருளை ஆய்வு செய்யவும். ஒரு பங்களிப்பாளருக்கு தோல்வியைக் கூறுவதற்கு முன் சமமான அடிப்படை மற்றும் வேட்பாளர் சான்றுகளை ஒப்பிடவும். உள்கட்டமைப்பு பிழைகள், பரம்பரை குறைபாடுகள், வேட்பாளர் பின்னடைவுகள் மற்றும் நிலுவையில் உள்ள அனுமதிகளுக்கு வெவ்வேறு தீர்வுகள் தேவைப்படுகின்றன.
 
-## Release-உடனான தொடர்பு
-
-- `/generate-release`, **Phase 0 (pre-flight)**-இல் validation-ஐ அழைக்கிறது: release PR-ஐத் திறப்பதற்கு முன் DRIFT-ஐ rebaseline செய்து,
-  HARD-ஐச் சரிசெய்கிறது.
-- `/review-prs`, merge முடிவு படியில் release-green gate-ஐப் பயன்படுத்துகிறது (merge செய்வதற்கு முன் green).
-
-அனைத்துப் பகுதிகளின் இலக்கும் ஒன்றே: release நாளில் 40 நிமிட அடுக்குகளாக வரும்
-red-களைத் தொடர்ந்து சமாளிப்பதற்குப் பதிலாக, **முதல் CI இயக்கத்திலேயே ஒரு green release PR**.
+`/green-prs`, `/sweep-reds`, `/validate-release-green` மற்றும் `/babysit` திறன்கள் ஆதாரங்களைச் சேகரித்து அவற்றின் ஆவணப்படுத்தப்பட்ட நோக்கத்தின் கீழ் திருத்தங்களைத் தயாரிக்கின்றன. பங்களிப்பாளர் கிரெடிட்டை வைத்திருங்கள், தனிமைப்படுத்தப்பட்ட பழுதுபார்க்கும் கிளைகளைப் பயன்படுத்துங்கள் மற்றும் அங்கீகரிக்கப்பட்ட இணைப்பிற்கு முன் தேவையான அனைத்து காசோலைகளையும் சரிபார்க்கவும். கடந்து செல்லும் தற்போதைய வேட்பாளருக்கு தானியங்கி மறுசீரமைப்பு அல்லது சம்பவ மூடல் மாற்றீடுகள் இல்லை.

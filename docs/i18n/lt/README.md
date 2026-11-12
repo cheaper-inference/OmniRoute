@@ -74,7 +74,7 @@
 |                                 |               v3.8.50               | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------------- | :---------------------------------: | :---------: | :-------------------: |
 | 🌐 Teikėjai                     |                 352                 |   **358**   |          380          |
-| 🧠 Unikalūs pokalbių modelių ID |                1320                 |  **1374**   |         1491          |
+| 🧠 Unikalūs pokalbių modelių ID |                1320                 |  **1374**   |         1499          |
 | 🖼️ Modalumų sąsaja              | 🆕 vaizdas + garsas + vaizdo įrašas |      ✓      |           ✓           |
 | 📡 Nemokamas „Radar“ katalogas  |           🆕 pasirenkamas           |      ✓      |           ✓           |
 | ⚖️ Kvotų paisantis planavimas   |           🆕 Quota-Share            |      ✓      |           ✓           |
@@ -89,57 +89,52 @@
 
 <br/>
 
-## 🧩 Prieinama
+## 🧩
 
-[![npm version](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+[![npm versija](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm) ](https://www.npmjs.com/package/omniroute) ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm) [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED) ](https://hub.docker.com/r/diegosouzapw/omniroute) [![Licencija: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square) ](LICENSE) ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED) ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
-    <td align="right"><b>🚀 Pradėti</b></td>
-    <td align="center"><a href="#-quick-start">🚀 Greita pradžia</a></td>
-    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Įdiegti</a></td>
-    <td align="center"><a href="#first-run">🆓 Prijungti teikėją</a></td>
+    <td align="right"><b>🚀 Start</b></td>
+    <td align="center"><a href="#-quick-start">🚀 Quick Start</a></td>
+    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Install</a></td>
+    <td align="center"><a href="#first-run">🆓 Connect a provider</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💡 Sužinoti daugiau</b></td>
-    <td align="center"><a href="#-the-promise">💥 Pažadas</a></td>
-    <td align="center"><a href="#-why-omniroute">🤔 Kodėl OmniRoute</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 Kuo išsiskiria</a></td>
+    <td align="right"><b>💡 Learn</b></td>
+    <td align="center"><a href="#-the-promise">💥 The Promise</a></td>
+    <td align="center"><a href="#-why-omniroute">🤔 Why OmniRoute</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 What Sets Apart</a></td>
   </tr>
   <tr>
-    <td align="right"><b>⚙️ Funkcijos</b></td>
-    <td align="center"><a href="#-combos--the-flagship">🎯 Deriniai</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Teikėjai</a></td>
-    <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI ir MCP</a></td>
+    <td align="right"><b>⚙️ Features</b></td>
+    <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
+    <td align="center"><a href="#-380-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
     <td align="right"></td>
-    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Glaudinimas</a></td>
-    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Kur veikia</a></td>
-    <td align="center"><a href="#-private--local-first">🔒 Privatu</a></td>
+    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Compression</a></td>
+    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Where It Runs</a></td>
+    <td align="center"><a href="#-private--local-first">🔒 Private</a></td>
   </tr>
   <tr>
-    <td align="right"><b>👀 Peržiūrėti</b></td>
-    <td align="center"><a href="#-omniroute-in-action">🎬 Veikimas</a></td>
-    <td align="center"><a href="#-whats-new">✨ Kas naujo</a></td>
-    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 Suderinami CLI</a></td>
+    <td align="right"><b>👀 See it</b></td>
+    <td align="center"><a href="#-omniroute-in-action">🎬 In Action</a></td>
+    <td align="center"><a href="#-whats-new">✨ What's New</a></td>
+    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 Compatible CLIs</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💚 Palaikyti</b></td>
-    <td align="center"><a href="#-support-omniroute">💚 Palaikyti / Paaukoti</a></td>
-    <td align="center"><a href="#-community--help">💬 Bendruomenė</a></td>
-    <td align="center"><a href="#-sponsors">💖 Rėmėjai</a></td>
+    <td align="right"><b>💚 Support</b></td>
+    <td align="center"><a href="#-support-omniroute">💚 Support / Donate</a></td>
+    <td align="center"><a href="#-community--help">💬 Community</a></td>
+    <td align="center"><a href="#-sponsors">💖 Sponsors</a></td>
   </tr>
   <tr>
-    <td align="right"><b>📦 Projektas</b></td>
-    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Technologijų rinkinys</a></td>
-    <td align="center"><a href="#-documentation">📖 Dokumentacija</a></td>
-    <td align="center"><a href="#-1000-contributors">👥 Bendraautoriai</a></td>
+    <td align="right"><b>📦 Project</b></td>
+    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Tech Stack</a></td>
+    <td align="center"><a href="#-documentation">📖 Docs</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 Contributors</a></td>
   </tr>
 </table>
 
@@ -697,11 +692,11 @@ slaptus duomenis nuo patekimo į jūsų shell istoriją. → [CLI integracijos](
 
 <div align="center">
 
-## 🌐 380 dirbtinio intelekto teikėjų — 153 kataloge pažymėti kaip nemokami
+## 🌐 380 AI teikėjai — 156 kataloge pažymėti nemokamai
 
 </div>
 
-> **380 registruotų teikėjų** kanoninėse pokalbių, medijos, paieškos, vietinių, debesijos agentų ir sistemų kolekcijose, įskaitant **153 teikėjus, turinčius `hasFree: true` aptikimo metaduomenis**. Pokalbių modelių registre yra **239 teikėjai / 3 059 atskiros teikėjo ir modelio poros / 1 475 pirminiai modelių ID**; atskirame nemokamo biudžeto kataloge yra **471 eilutė pagal modelį**, **34 pasikartojantys fondai** ir **54 pasikartojantys / be rakto visam laikui nemokami teikėjai**. Tai sąmoningai skirtingi vardikliai; apibrėžtys ir pagal fondus deduplikuoti skaičiavimai pateikiami [Teikėjų žinyne](docs/reference/PROVIDER_REFERENCE.md) ir [Nemokamuose planuose](docs/reference/FREE_TIERS.md).
+> **380 registruotų paslaugų teikėjų** visose kanoninėse pokalbių, medijos, paieškos, vietinėse, debesies agentų ir sistemos kolekcijose, įskaitant **156, kuriame yra `hasFree: true` atradimo metaduomenys** . Pokalbių modelio registras apima **241 teikėjas / 3 114 skirtingų teikėjų ir modelių porų / 1 499 neapdorotas IDs modelis** ; turi atskiras laisvo biudžeto katalogas **485 modelio eilutės** ,**34 pasikartojantys baseinai** ir **54 recurring/keyless nemokami amžinai tiekėjai** . Tai yra skirtingi vardikliai pagal dizainą; apibrėžimai ir apibendrinti skaičiavimai pateikiami [teikėjo nuorodose](docs/reference/PROVIDER_REFERENCE.md) ir [nemokamose pakopose](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -734,7 +729,7 @@ slaptus duomenis nuo patekimo į jūsų shell istoriją. → [CLI integracijos](
   </tr>
 </table>
 
-<sub>…ir dar daugiau nei 350 — kiekviena piktograma tiesiogiai gaunama iš prietaisų skydelio teikėjų katalogo. 📖 [Teikėjų žinynas](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>…ir dar 350 + — kiekviena piktograma išsprendžiama tiesiogiai iš prietaisų skydelio teikėjų katalogo. 📖 [teikėjo nuoroda](docs/reference/PROVIDER_REFERENCE.md)</sub>
 
 <br/>
 
@@ -766,80 +761,93 @@ slaptus duomenis nuo patekimo į jūsų shell istoriją. → [CLI integracijos](
 
 <div align="center">
 
-## 🖥️ Kur OmniRoute bėga – bet kur
+## 🖥️ Kur veikia OmniRoute — bet kur
 
 </div>
 
-> Ta pati programa, jūsų aparatas, jūsų taisyklės. Nuo visuotinio npm diegimo iki** savo telefoną** per Termux.
+> Ta pati programa, jūsų įrenginys, jūsų taisyklės. Nuo visuotinio npm diegimo iki **jūsų telefono** naudojant Termux.
 
 <table>
-  <tr><th align="left"> Platforma </th><th align="left"> Įdiekite </th><th align="left"> Svarbiausi </th></tr>
-  <tr><td align="left" nowrap>📦 <b> npm (visuotinis)</b></td><td align="left" nowrap><code> npm įdiegti -g omniroute </code></td><td align="left"> Viena komanda, bet kuri OS</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Bun (pasaulinis)</b></td><td align="left" nowrap><code> bun add -g omniroute </code></td><td align="left"> Tas pats registro rinkinys, greičiau įdiegiamas </td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> docker paleisti … diegosouzapw/omniroute</code></td><td align="left"> Daugiašakė <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b> Darbalaukis (Electron)</b></td><td align="left" nowrap><code> npm paleisti elektroną: kūrimas </code></td><td align="left"> Natūralus langas + </td></tr>– <b>Windows / macOS / Linux</b>
-  <tr><td align="left" nowrap>🎩 <b> Meniu juosta </tr>OmniRouteTray)</b></td><td align="left" nowrap><code> brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left"> Prižiūri &amp; automatinius serverio atnaujinimus – <b>macOS</b></td>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap> vietinis <code> arm64 </code></td><td align="left"> Raspberry Pi, ARM serveriai, Apple Silicon </td></tr>
-  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg įdiegti nodejs && npx -y omniroute </code></td><td align="left"> Vykdo <b> jūsų telefone </b>, 24/7, be </tr></td>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>„Pridėti prie pagrindinio ekrano“</td><td align="left"> Visas ekranas, neprisijungus, galima įdiegti iš naršyklės </td></tr>
-  <tr><td align="left" nowrap>🧩 <b>OpenCode papildinys </b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left"> Vietinis OpenCode integravimas </td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS Kodas Copilot Pokalbiai </b></td><td align="left" nowrap> įdiegti <b>OmniCopilot</b> plėtinys </td><td align="left"> Kiekvienas OmniRoute modelis vietiniame Copilot pokalbių rinkiklyje – stabilus &amp; Insiders </td></tr>
-  <tr><td align="left" nowrap>🛠️ <b> Iš šaltinio </b></td><td align="left" nowrap><code> npm įdiegti && npm paleisti dev </code></td><td align="left"> Nulaužkite jį, prisidėkite </td></tr>
+  <tr><th align="left">Platforma</th><th align="left">Diegimas</th><th align="left">Privalumai</th></tr>
+  <tr><td align="left" nowrap>📦 <b>npm (visuotinis)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Viena komanda, bet kuri OS</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (visuotinis)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Geriausio įmanomo lygio suderinamumas be palaikymo garantijų; Node.js yra palaikoma vykdymo aplinka.</td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Kelių architektūrų palaikymas: <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🖥️ <b>Darbalaukis (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Savasis langas + sistemos dėklas — <b>Windows / macOS / Linux</b></td></tr>
+  <tr><td align="left" nowrap>🎩 <b>Meniu juosta (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Prižiūri ir automatiškai atnaujina serverį — <b>macOS</b></td></tr>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>savasis <code>arm64</code></td><td align="left">Raspberry Pi, ARM serveriai, Apple Silicon</td></tr>
+  <tr><td align="left" nowrap>📱 <b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left">Veikia <b>jūsų telefone</b> visą parą, root teisių nereikia</td></tr>
+  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>„Pridėti prie pradžios ekrano“</td><td align="left">Visas ekranas, veikia neprisijungus, galima įdiegti iš naršyklės</td></tr>
+  <tr><td align="left" nowrap>🧩 <b>OpenCode papildinys</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">Tiesioginė OpenCode integracija</td></tr>
+  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap>įdiekite <b>OmniCopilot</b> plėtinį</td><td align="left">Kiekvienas OmniRoute modelis savajame Copilot Chat parinkiklyje — stabiliojoje ir Insiders versijose</td></tr>
+  <tr><td align="left" nowrap>🛠️ <b>Iš pirminio kodo</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">Modifikuokite ir prisidėkite</td></tr>
 </table>
 
-<sub>📖 [Docker vadovas](docs/guides/DOCKER_GUIDE.md) · [Darbalaukis](electron/README.md) · [Meniu juostos dėklas](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+<sub>📖 [Docker vadovas](docs/guides/DOCKER_GUIDE.md) · [Darbalaukis](electron/README.md) · [Meniu juostos programa](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-### 🧩 Naujiena: OmniRoute viduje VS Code vietiniame Copilot pokalbyje
+### 🧩 Naujiena: OmniRoute tiesiogiai integruotame VS Code Copilot Chat
 
 </div>
 
-> Jokios naujos šoninės juostos, jokio naujo pokalbio UI – kiekvienas OmniRoute modelis rodomas tiesiai**Copilot pokalbių modelių rinkiklis, kurį jau naudojate** . Nuo VS kodo 1.122 teikėjo modeliai veikia be GitHub prisijungimo arba Copilot prenumeratos – agento režimas, įrankių iškvietimas ir vizija, nemokamai.
+> Jokios naujos šoninės juostos ar naujos pokalbių sąsajos — kiekvienas OmniRoute teikiamas modelis rodomas tiesiog
+> **jau naudojamame Copilot Chat modelių parinkiklyje**. Nuo VS Code 1.122 teikėjų modeliai veikia
+> neprisijungus prie GitHub ir be Copilot prenumeratos — agento režimas, įrankių iškvietimas ir vaizdų analizė
+> nemokamai.
 
-Įdiekite** [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** plėtinį, nukreipkite jį į savo OmniRoute serverį (numatytasis nustatymas yra `localhost:20128`), tada atidarykite Copilot Chat → modelių rinkiklį →** Tvarkyti modelius…** →**OmniRoute** .
+Įdiekite **[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** plėtinį, nurodykite jam
+savo OmniRoute serverį (numatytoji reikšmė — `localhost:20128`), tada atidarykite Copilot Chat → modelių parinkiklį
+→ **Tvarkyti modelius…** → **OmniRoute**.
 
 <table>
-  <tr><th align="left"> parduotuvė </th><th align="left"> nuoroda </th><th align="left"> Veikia su </th></tr>
-  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace </b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot"> Įdiegti →</a ></td >< td lygiuoti ="kairėje">VS Kodas – stabilus &amp; Insiders </td></tr>
-  <tr><td align="left" nowrap>🔓 <b> Atidaryti VSX registrą </b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"> Įdiegti →</a ></td >< td lygiuoti ="kairėje">Cursor, Windsurf, VSCodium, Theia, Antigravity, Kiro…</td></tr>
+  <tr><th align="left">Parduotuvė</th><th align="left">Nuoroda</th><th align="left">Veikia su</th></tr>
+  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">Įdiegti →</a></td><td align="left">VS Code — stabilioji ir Insiders versijos</td></tr>
+  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">Įdiegti →</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro…</td></tr>
 </table>
 
-Iš redaktoriaus vidaus: atidarykite** Plėtiniai** peržiūrėti, ieškoti** "OmniRoute"** , spustelėkite** Įdiegti** – veikia vienodai abiejose parduotuvėse. Šaltinis, numeriai ir leidybos vadovėlis tiesiogiai adresu [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
+Redaktoriuje atidarykite **Plėtinių** rodinį, ieškokite **„OmniRoute“**, spustelėkite **Įdiegti**
+— abiejose parduotuvėse veikia vienodai. Pirminį kodą, problemas ir publikavimo instrukciją rasite
+[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
 
-<sub>📖 [VS kodas Copilot Pokalbių vadovas](docs/guides/VSCODE-COPILOT.md) – sąranka, ką rodo rinkiklis, prietaisų skydelis skirtuke, trikčių šalinimas </sub>
+<sub>📖 [VS Code Copilot Chat vadovas](docs/guides/VSCODE-COPILOT.md) — sąranka, ką rodo parinkiklis, valdymo skydelis kortelėje, trikčių šalinimas</sub>
 
 <br/>
 
 <div align="center">
 
-### 🎩 Naujiena: OmniRouteTray – jūsų vartai, gyvenantys meniu juostoje
+### 🎩 Naujiena: OmniRouteTray — jūsų šliuzas, gyvenantis meniu juostoje
 
 </div>
 
-> `omniroute serve` yra laimingiausias, kai jis visada įjungtas.** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)** paverčia ją „nustatyti ir pamiršti“ meniu juostos programa, skirta macOS: ji paleidžia serverį, palaiko jį perkraunant iš naujo, atnaujina jį vietoje ir vienu spustelėjimu suteikia jūsų tiesioginio prieigos rakto biudžetą –** nėra paliktas atidarytas terminalo langas, nėra `npm install -g omniroute` auklei.**
+> `omniroute serve` geriausiai veikia būdamas nuolat įjungtas. **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)**
+> paverčia jį „nustatykite ir pamirškite“ principu veikiančia macOS meniu juostos programa: ji paleidžia serverį, palaiko jo veikimą
+> po paleidimų iš naujo, atnaujina jį vietoje ir leidžia vienu spustelėjimu pasiekti dabartinį žetonų biudžetą — **nereikia
+> palikti atidaryto terminalo lango ar prižiūrėti `npm install -g omniroute`.**
 
-Sukurtas naudojant [„Tauri v2“](https://v2.tauri.app/) (Rust branduolys, kurio dydis yra apvalinimo klaidos), jis pristato savo pasirašytą „Node 24“ vykdymo laiką ir valdo programai priklausančią OmniRoute diegimą, todėl niekada nekovoja su jūsų visuotiniu `node`/`bun`. Tai** bendrina esamą `~/.omniroute/` konfigūraciją ir duomenų bazę** — vadinasi, tai tas pats OmniRoute kurį jau bėgi, tik su kepure. 🎩
+Sukurta naudojant [Tauri v2](https://v2.tauri.app/) (Rust branduolį, kurio dydis prilygsta apvalinimo paklaidai), programa pateikiama
+su nuosava pasirašyta Node 24 vykdymo aplinka ir valdo programai priklausantį OmniRoute diegimą, todėl niekada nekonfliktuoja su jūsų
+visuotiniu `node`/`bun`. Ji **naudoja jūsų esamą `~/.omniroute/` konfigūraciją ir duomenų bazę** — taigi tai
+tas pats OmniRoute, kurį jau naudojate, tik su skrybėle. 🎩
 
 <table>
-  <tr><th align="left"> Ką tai daro </th><th align="left"> Kaip </th></tr>
-  <tr><td align="left" nowrap>🟢 <b> Prižiūri serverį </b></td><td align="left"> Sukuria <code> omniroute serve </code>, priima jau veikiantį egzempliorių, o ne dubliuoja jį </td></tr>
-  <tr><td align="left" nowrap>📊 <b> Tiesioginis naudojimas </b></td><td align="left"> Teikėjo kvotų juostos, Claude session/weekly ribos su iš naujo nustatytais atgaliniais skaičiavimais, 30 dienų išlaidų paskirstymas </td></tr>
-  <tr><td align="left" nowrap>🔄 <b> Automatiniai atnaujinimai vietoje </b></td><td align="left"> Laipsniškas diegimas, atomų keitimas, atšaukimas gedimo atveju – visada naujausiame leidime </td></tr>
-  <tr><td align="left" nowrap>🚀 <b> Pradėti prisijungus </b></td><td align="left"> Pasirenkamas paleidimas prisijungus; tik dėklas, be doko piktogramos </td></tr>
-  <tr><td align="left" nowrap>🩺 <b> Doctor &amp; žurnalai </b></td><td align="left"> Diagnostika vienu paspaudimu ir serverio žurnalo prieiga </td></tr>
+  <tr><th align="left">Ką atlieka</th><th align="left">Kaip</th></tr>
+  <tr><td align="left" nowrap>🟢 <b>Prižiūri serverį</b></td><td align="left">Paleidžia <code>omniroute serve</code>, o jau veikiančią egzemplioriaus kopiją perima, užuot ją dubliavusi</td></tr>
+  <tr><td align="left" nowrap>📊 <b>Naudojimas realiuoju laiku iš pirmo žvilgsnio</b></td><td align="left">Teikėjų kvotų juostos, Claude sesijos ir savaitės limitai su atstatymo laiko atskaita, 30 dienų išlaidų suvestinė</td></tr>
+  <tr><td align="left" nowrap>🔄 <b>Automatiškai atnaujina vietoje</b></td><td align="left">Etapinis diegimas, atominis pakeitimas, grąžinimas į ankstesnę būseną nesėkmės atveju — visada naudojama naujausia laida</td></tr>
+  <tr><td align="left" nowrap>🚀 <b>Paleidžia prisijungus</b></td><td align="left">Pasirinktinis paleidimas prisijungus; tik sistemos dėkle, be doko piktogramos</td></tr>
+  <tr><td align="left" nowrap>🩺 <b>Patikra ir žurnalai</b></td><td align="left">Diagnostika vienu spustelėjimu ir prieiga prie serverio žurnalų</td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub> Norite atsisiųsti? Paimkite naujausią <code>.dmg </code> iš
-<a href="https://github.com/zoispag/omniroute-tray/releases"> Išleidžia </a>. Šaltinis, problemos ir konstrukcija
-docs gyvena <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
-<br/>💛 </a> <a href="https://github.com/zoispag"> projektas – ne oficialus OmniRoute leidimas.</sub>
+<sub>Norite atsisiųsti? Naujausią <code>.dmg</code> rasite
+<a href="https://github.com/zoispag/omniroute-tray/releases">leidimų skiltyje</a>. Šaltinio kodą, pranešimus apie problemas ir kompiliavimo
+dokumentaciją rasite <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
+<br/>💛 Bendruomenės projektas, sukurtas <a href="https://github.com/zoispag">@zoispag</a> — tai nėra oficialus „OmniRoute“ leidimas.</sub>
 
 <br/>
 

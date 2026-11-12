@@ -74,7 +74,7 @@
 |                                                 |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | ----------------------------------------------- | :----------------------: | :---------: | :-------------------: |
 | 🌐 Watoa huduma                                 |           352            |   **358**   |          380          |
-| 🧠 Vitambulisho vya kipekee vya miundo ya gumzo |           1320           |  **1374**   |         1491          |
+| 🧠 Vitambulisho vya kipekee vya miundo ya gumzo |           1320           |  **1374**   |         1499          |
 | 🖼️ Daraja la modali                             | 🆕 maono + sauti + video |      ✓      |           ✓           |
 | 📡 Katalogi huria ya Radar                      |  🆕 kujiunga kwa hiari   |      ✓      |           ✓           |
 | ⚖️ Upangaji unaozingatia mgao                   |      🆕 Quota-Share      |      ✓      |           ✓           |
@@ -91,55 +91,50 @@
 
 ## 🧩 Inapatikana
 
-[![npm version](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+[![ toleo la npm](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm) ](https://www.npmjs.com/package/omniroute) ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm) [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED) ](https://hub.docker.com/r/diegosouzapw/omniroute) [![Leseni: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square) ](LICENSE) ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED) ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
-    <td align="right"><b>🚀 Anza</b></td>
-    <td align="center"><a href="#-quick-start">🚀 Anza ya Haraka</a></td>
-    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Sakinisha</a></td>
-    <td align="center"><a href="#first-run">🆓 Unganisha mtoa huduma</a></td>
+    <td align="right"><b>🚀 Start</b></td>
+    <td align="center"><a href="#-quick-start">🚀 Quick Start</a></td>
+    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Install</a></td>
+    <td align="center"><a href="#first-run">🆓 Connect a provider</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💡 Jifunze</b></td>
-    <td align="center"><a href="#-the-promise">💥 Ahadi</a></td>
-    <td align="center"><a href="#-why-omniroute">🤔 Kwa nini OmniRoute</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 Kinachoitofautisha</a></td>
+    <td align="right"><b>💡 Learn</b></td>
+    <td align="center"><a href="#-the-promise">💥 The Promise</a></td>
+    <td align="center"><a href="#-why-omniroute">🤔 Why OmniRoute</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 What Sets Apart</a></td>
   </tr>
   <tr>
-    <td align="right"><b>⚙️ Vipengele</b></td>
-    <td align="center"><a href="#-combos--the-flagship">🎯 Mchanganyiko</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Watoa huduma</a></td>
+    <td align="right"><b>⚙️ Features</b></td>
+    <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
+    <td align="center"><a href="#-380-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
     <td align="right"></td>
-    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Mfinyazo</a></td>
-    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Inapoendeshwa</a></td>
-    <td align="center"><a href="#-private--local-first">🔒 Faragha</a></td>
+    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Compression</a></td>
+    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Where It Runs</a></td>
+    <td align="center"><a href="#-private--local-first">🔒 Private</a></td>
   </tr>
   <tr>
-    <td align="right"><b>👀 Ione</b></td>
-    <td align="center"><a href="#-omniroute-in-action">🎬 Katika matumizi</a></td>
-    <td align="center"><a href="#-whats-new">✨ Nini kipya</a></td>
-    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 CLI zinazooana</a></td>
+    <td align="right"><b>👀 See it</b></td>
+    <td align="center"><a href="#-omniroute-in-action">🎬 In Action</a></td>
+    <td align="center"><a href="#-whats-new">✨ What's New</a></td>
+    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 Compatible CLIs</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💚 Usaidizi</b></td>
-    <td align="center"><a href="#-support-omniroute">💚 Saidia / Toa mchango</a></td>
-    <td align="center"><a href="#-community--help">💬 Jumuiya</a></td>
-    <td align="center"><a href="#-sponsors">💖 Wafadhili</a></td>
+    <td align="right"><b>💚 Support</b></td>
+    <td align="center"><a href="#-support-omniroute">💚 Support / Donate</a></td>
+    <td align="center"><a href="#-community--help">💬 Community</a></td>
+    <td align="center"><a href="#-sponsors">💖 Sponsors</a></td>
   </tr>
   <tr>
-    <td align="right"><b>📦 Mradi</b></td>
-    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Teknolojia zinazotumika</a></td>
-    <td align="center"><a href="#-documentation">📖 Nyaraka</a></td>
-    <td align="center"><a href="#-1000-contributors">👥 Wachangiaji</a></td>
+    <td align="right"><b>📦 Project</b></td>
+    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Tech Stack</a></td>
+    <td align="center"><a href="#-documentation">📖 Docs</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 Contributors</a></td>
   </tr>
 </table>
 
@@ -148,73 +143,73 @@
 <div align="center">
   <b>🌐 Katika lugha 67</b>
   <br/><br/>
-  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="Kiingereza (en)" title="Kiingereza (en)"></a>
-  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Kireno — Brazili (pt-BR)" title="Kireno — Brazili (pt-BR)"></a>
-  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Kireno (pt)" title="Kireno (pt)"></a>
-  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Kihispania (es)" title="Kihispania (es)"></a>
-  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Kifaransa (fr)" title="Kifaransa (fr)"></a>
-  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Kiitalia (it)" title="Kiitalia (it)"></a>
-  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Kijerumani (de)" title="Kijerumani (de)"></a>
-  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Kiholanzi (nl)" title="Kiholanzi (nl)"></a>
-  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Kirusi (ru)" title="Kirusi (ru)"></a>
-  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Kiukraini (uk-UA)" title="Kiukraini (uk-UA)"></a>
-  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Kipolandi (pl)" title="Kipolandi (pl)"></a>
-  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Kicheki (cs)" title="Kicheki (cs)"></a>
-  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Kislovakia (sk)" title="Kislovakia (sk)"></a>
-  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Kiromania (ro)" title="Kiromania (ro)"></a>
-  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Kihungaria (hu)" title="Kihungaria (hu)"></a>
-  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Kibulgaria (bg)" title="Kibulgaria (bg)"></a>
-  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Kidenmaki (da)" title="Kidenmaki (da)"></a>
-  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Kifini (fi)" title="Kifini (fi)"></a>
-  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Kinorwei (no)" title="Kinorwei (no)"></a>
-  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Kiswidi (sv)" title="Kiswidi (sv)"></a>
-  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="Kichina — Rahisi (zh-CN)" title="Kichina — Rahisi (zh-CN)"></a>
-  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="Kichina — Cha jadi (zh-TW)" title="Kichina — Cha jadi (zh-TW)"></a>
-  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="Kijapani (ja)" title="Kijapani (ja)"></a>
-  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="Kikorea (ko)" title="Kikorea (ko)"></a>
-  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="Kithai (th)" title="Kithai (th)"></a>
-  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Kivietinamu (vi)" title="Kivietinamu (vi)"></a>
-  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Kiindonesia (id)" title="Kiindonesia (id)"></a>
-  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Kimalei (ms)" title="Kimalei (ms)"></a>
-  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Kifilipino (phi)" title="Kifilipino (phi)"></a>
-  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kihindi (hi)" title="Kihindi (hi)"></a>
-  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kigujarati (gu)" title="Kigujarati (gu)"></a>
-  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kimarathi (mr)" title="Kimarathi (mr)"></a>
-  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kitamili (ta)" title="Kitamili (ta)"></a>
-  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kitelugu (te)" title="Kitelugu (te)"></a>
-  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="Kibengali (bn)" title="Kibengali (bn)"></a>
-  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="Kiurdu (ur)" title="Kiurdu (ur)"></a>
-  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="Kiajemi (fa)" title="Kiajemi (fa)"></a>
-  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="Kiarabu (ar)" title="Kiarabu (ar)"></a>
-  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="Kiebrania (he)" title="Kiebrania (he)"></a>
-  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Kituruki (tr)" title="Kituruki (tr)"></a>
-  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Kiazerbaijani (az)" title="Kiazerbaijani (az)"></a>
+  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="English (en)" title="English (en)"></a>
+  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
+  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Português (pt)" title="Português (pt)"></a>
+  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Español (es)" title="Español (es)"></a>
+  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Français (fr)" title="Français (fr)"></a>
+  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Italiano (it)" title="Italiano (it)"></a>
+  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Deutsch (de)" title="Deutsch (de)"></a>
+  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Nederlands (nl)" title="Nederlands (nl)"></a>
+  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Русский (ru)" title="Русский (ru)"></a>
+  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Українська (uk-UA)" title="Українська (uk-UA)"></a>
+  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Polski (pl)" title="Polski (pl)"></a>
+  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Čeština (cs)" title="Čeština (cs)"></a>
+  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Slovenčina (sk)" title="Slovenčina (sk)"></a>
+  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Română (ro)" title="Română (ro)"></a>
+  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Magyar (hu)" title="Magyar (hu)"></a>
+  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Български (bg)" title="Български (bg)"></a>
+  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Dansk (da)" title="Dansk (da)"></a>
+  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Suomi (fi)" title="Suomi (fi)"></a>
+  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Norsk (no)" title="Norsk (no)"></a>
+  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Svenska (sv)" title="Svenska (sv)"></a>
+  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="中文 — 简体 (zh-CN)" title="中文 — 简体 (zh-CN)"></a>
+  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="中文 — 繁體 (zh-TW)" title="中文 — 繁體 (zh-TW)"></a>
+  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="日本語 (ja)" title="日本語 (ja)"></a>
+  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="한국어 (ko)" title="한국어 (ko)"></a>
+  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="ไทย (th)" title="ไทย (th)"></a>
+  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Tiếng Việt (vi)" title="Tiếng Việt (vi)"></a>
+  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Bahasa Indonesia (id)" title="Bahasa Indonesia (id)"></a>
+  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Bahasa Melayu (ms)" title="Bahasa Melayu (ms)"></a>
+  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filipino (phi)" title="Filipino (phi)"></a>
+  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="हिन्दी (hi)" title="हिन्दी (hi)"></a>
+  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ગુજરાતી (gu)" title="ગુજરાતી (gu)"></a>
+  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="मराठी (mr)" title="मराठी (mr)"></a>
+  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="தமிழ் (ta)" title="தமிழ் (ta)"></a>
+  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="తెలుగు (te)" title="తెలుగు (te)"></a>
+  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="বাংলা (bn)" title="বাংলা (bn)"></a>
+  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="اردو (ur)" title="اردو (ur)"></a>
+  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="فارسی (fa)" title="فارسی (fa)"></a>
+  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="العربية (ar)" title="العربية (ar)"></a>
+  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="עברית (he)" title="עברית (he)"></a>
+  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Türkçe (tr)" title="Türkçe (tr)"></a>
+  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Azərbaycan (az)" title="Azərbaycan (az)"></a>
   <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Kiswahili (sw)" title="Kiswahili (sw)"></a>
-  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Kigiriki (el)" title="Kigiriki (el)"></a>
-  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Kikorasia (hr)" title="Kikorasia (hr)"></a>
-  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Kiserbia (sr)" title="Kiserbia (sr)"></a>
-  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Kilithuania (lt)" title="Kilithuania (lt)"></a>
-  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Kiestonia (et)" title="Kiestonia (et)"></a>
-  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Kilatvia (lv)" title="Kilatvia (lv)"></a>
-  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Kislovenia (sl)" title="Kislovenia (sl)"></a>
-  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Kimalta (mt)" title="Kimalta (mt)"></a>
-  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Kiayalandi (ga)" title="Kiayalandi (ga)"></a>
-  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kikanada (kn)" title="Kikanada (kn)"></a>
-  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kimalayalam (ml)" title="Kimalayalam (ml)"></a>
-  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kiodia (or)" title="Kiodia (or)"></a>
-  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kipunjabi (pa)" title="Kipunjabi (pa)"></a>
-  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="Kinepali (ne)" title="Kinepali (ne)"></a>
-  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="Kisinhala (si)" title="Kisinhala (si)"></a>
-  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="Kiburma (my)" title="Kiburma (my)"></a>
-  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="Kikambodia (km)" title="Kikambodia (km)"></a>
-  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Kihausa (ha)" title="Kihausa (ha)"></a>
-  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Kiyoruba (yo)" title="Kiyoruba (yo)"></a>
-  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Kiigbo (ig)" title="Kiigbo (ig)"></a>
-  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="Kiamhari (am)" title="Kiamhari (am)"></a>
-  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Kiuzbeki (uz)" title="Kiuzbeki (uz)"></a>
-  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="Kijiojia (ka)" title="Kijiojia (ka)"></a>
-  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Kiarmenia (hy)" title="Kiarmenia (hy)"></a>
-  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Kibosnia (bs)" title="Kibosnia (bs)"></a>
+  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Ελληνικά (el)" title="Ελληνικά (el)"></a>
+  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Hrvatski (hr)" title="Hrvatski (hr)"></a>
+  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Српски (sr)" title="Српски (sr)"></a>
+  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Lietuvių (lt)" title="Lietuvių (lt)"></a>
+  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Eesti (et)" title="Eesti (et)"></a>
+  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Latviešu (lv)" title="Latviešu (lv)"></a>
+  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Slovenščina (sl)" title="Slovenščina (sl)"></a>
+  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Malti (mt)" title="Malti (mt)"></a>
+  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Gaeilge (ga)" title="Gaeilge (ga)"></a>
+  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ಕನ್ನಡ (kn)" title="ಕನ್ನಡ (kn)"></a>
+  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="മലയാളം (ml)" title="മലയാളം (ml)"></a>
+  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ଓଡ଼ିଆ (or)" title="ଓଡ଼ିଆ (or)"></a>
+  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ਪੰਜਾਬੀ (pa)" title="ਪੰਜਾਬੀ (pa)"></a>
+  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="नेपाली (ne)" title="नेपाली (ne)"></a>
+  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="සිංහල (si)" title="සිංහල (si)"></a>
+  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="မြန်မာ (my)" title="မြန်မာ (my)"></a>
+  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="ខ្មែរ (km)" title="ខ្មែរ (km)"></a>
+  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Hausa (ha)" title="Hausa (ha)"></a>
+  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Yorùbá (yo)" title="Yorùbá (yo)"></a>
+  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Igbo (ig)" title="Igbo (ig)"></a>
+  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="አማርኛ (am)" title="አማርኛ (am)"></a>
+  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Oʻzbekcha (uz)" title="Oʻzbekcha (uz)"></a>
+  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="ქართული (ka)" title="ქართული (ka)"></a>
+  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Հայերեն (hy)" title="Հայերեն (hy)"></a>
+  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bosanski (bs)" title="Bosanski (bs)"></a>
 </div>
 
 <br/>
@@ -283,7 +278,74 @@ curl http://localhost:20128/v1/chat/completions \
   </a>
 </p>
 
-> **Je, unataka kujiunga kama Rafiki wa Chanzo Huria?** Hizi ni kampuni zinazou
+> **Ungependa kujiunga kama Rafiki wa Chanzo Huria?** Haya ndiyo makampuni yanayounga mkono chanzo huria na kusaidia OmniRoute kuendelea — na tunaeleza hadharani kila tokeni wanayotupatia inatumika wapi. Wasiliana nasi: [diegosouza.pw@outlook.com](mailto:diegosouza.pw@outlook.com)
+
+<table>
+  <tr>
+    <td align="center" width="150">
+      <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute">
+        <picture>
+          <source media="(prefers-color-scheme: dark)" srcset="public/providers/kimi-logomark-dark.svg">
+          <img src="public/providers/kimi-logomark-light.svg" width="64" alt="Kimi (Moonshot AI)"/>
+        </picture>
+      </a>
+      <br/><b>Kimi</b><br/><sub>Moonshot AI</sub><br/><br/>
+      <img src="https://img.shields.io/badge/Founding_Friend-1783FF?style=flat-square" alt="Rafiki Mwanzilishi wa Chanzo Huria"/>
+    </td>
+    <td>
+      Shukrani kwa <b>Kimi (Moonshot AI)</b>, Rafiki wetu mwanzilishi wa Chanzo Huria, kwa kuunga mkono mradi huu! Kimi ni maabara ya AI iliyoanzisha familia za miundo ya K2 na K3 zenye uzani huria — <b>Kimi K3</b> hutoa dirisha la muktadha la tokeni milioni 1, uwezo asilia wa kuona na uandishi wa msimbo wa kiwango cha juu kwa sehemu ndogo ya bei za miundo funge, na hufanya kazi moja kwa moja na Claude Code, Codex na kila zana ya uandishi wa msimbo inayohudumiwa na OmniRoute.
+      <br/><br/>
+      <b>Msaada wa Kimi unawezesha nini:</b> Salio la API la Kimi linawezesha mchakato wa matoleo wa OmniRoute unaothibitishwa na AI — hatua ya <i>uthibitishaji wa kuunganisha unaowezeshwa na Kimi K3</i> ambayo hukagua kila ombi la kuunganisha kabla halijatolewa — pamoja na uundaji wa vipengele wa kila siku. Usaidizi wa kiwango cha kwanza wa Kimi hutolewa kupitia njia zote mbili: <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute">Kimi API</a> ya moja kwa moja (<code>kimi-k3</code>) na <a href="https://www.kimi.ai/code?aff=omniroute">mpango wa uandishi wa msimbo wa Kimi Code</a> (OAuth na ufunguo wa API). OmniRoute pia ni mradi wa kwanza wa chanzo huria wa Brazil katika mpango wa usaidizi wa Kimi. <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute"><b>Pata ufunguo wa Kimi API wenye salio la ziada la 15% →</b></a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="150">
+      <a href="https://cheaperinference.com/?utm_source=omniroute">
+        <img src="./public/providers/cli-generic.svg" width="64" alt="Cheaper Inference"/>
+      </a>
+      <br/><b>Cheaper Inference</b><br/><sub>cheaperinference.com</sub><br/><br/>
+      <img src="https://img.shields.io/badge/Open_Source_Friend-31f889?style=flat-square&labelColor=04170d" alt="Rafiki wa Chanzo Huria"/>
+    </td>
+    <td>
+      Shukrani kwa <b>Cheaper Inference</b>, Rafiki wa Chanzo Huria wa OmniRoute, kwa kuunga mkono mradi huu! Cheaper Inference ni lango lililopangwa kwa gharama ambalo huuza tena miundo 42 ya kiwango cha juu — Claude, GPT-5.x, Gemini, Kimi K3, GLM, DeepSeek, Grok na MiniMax — kupitia endpoint moja inayooana na OpenAI, likielekeza kila ombi kwa mtoa huduma anayestahiki mwenye gharama ya chini zaidi bila kutoza zaidi ya bei iliyoorodheshwa na mtengenezaji wa muundo.
+      <br/><br/>
+      <b>Usaidizi wa kiwango cha kwanza katika OmniRoute:</b> Chat Completions, endpoint asilia ya <code>/v1/responses</code>, uwezo wa kuona, uitaji wa zana na miundo 3 ya picha (<code>grok-imagine</code>, <code>nano-banana-pro</code>, <code>nano-banana-2</code>, inayofikiwa kama <code>cheaperinference/&lt;model&gt;</code>). <a href="https://cheaperinference.com/?utm_source=omniroute"><b>Pata ufunguo wa API →</b></a>
+    </td>
+  </tr>
+</table>
+
+<sub>Viungo vilivyowekewa alama ya <code>aff=omniroute</code> ni viungo vya washirika. Vinafadhili mradi bila gharama yoyote ya ziada kwako.</sub>
+
+<br/>
+
+<details open>
+<summary><sub><b>🎟️ Ofa za Washirika</b> — kuponi za kujisajili bila malipo kutoka kwa watoa huduma ambao hawatudhamini (bofya ili kupanua)</sub></summary>
+
+<sub><i>Sehemu hii ni ya misimbo ya rufaa/kuponi pekee. Ushirikiano unaodhaminiwa unapatikana katika sehemu ya <b>🤝 Tunaungwa mkono na Marafiki wetu wa Chanzo Huria</b> hapo juu. OmniRoute haina udhamini wala ushirikiano na watoa huduma walioorodheshwa hapa — hizi ni kuponi za umma ambazo mtu yeyote anaweza kutumia.</i></sub>
+
+<table>
+  <tr>
+    <td align="center" width="120">
+      <a href="https://agentrouter.org/register?aff=70LM">
+        <img src="./public/providers/cli-generic.svg" width="32" alt="AgentRouter"/>
+      </a>
+      <br/><sub><b>AgentRouter</b></sub><br/><sub>agentrouter.org</sub>
+    </td>
+    <td>
+      <sub><b><a href="https://agentrouter.org/register?aff=70LM">AgentRouter</a></b> — usajili wa ushirika · <b>salio la $100 bila malipo</b> unapojisajili (seva ya bila malipo, tarajia ucheleweshaji zaidi — inafaa zaidi kwa majaribio, si kwa uzalishaji). Usaidizi wa kiwango cha kwanza katika OmniRoute tangu <b>v3.8.50</b>: Chat Completions, umbizo la mawasiliano linalooana na Anthropic na njia inayooana na OpenAI. Miundo inayopatikana ni pamoja na <code>claude-opus-4-8</code>, <code>claude-opus-5</code>, <code>gpt-5.6-sol</code> na mingine zaidi. <b><a href="https://agentrouter.org/register?aff=70LM">Jipatie $100 yako →</a></b></sub>
+      <br/><br/>
+      <sub>⚠️ <i>Kiungo cha ushirika — OmniRoute haina udhamini wala ushirikiano na mtoa huduma huyu.</i></sub>
+    </td>
+  </tr>
+</table>
+
+<sub>Unamfahamu mtoa huduma mwingine mwenye kuponi nzuri ya kujisajili bila malipo inayowanufaisha watumiaji wa OmniRoute? Fungua suala nasi tutaliongeza hapa.</sub>
+
+</details>
+
+<br/>
+
+<div align="center">
 
 ## 🎯 Combo — Kipengele Kikuu
 
@@ -622,15 +684,15 @@ ya historia ya shell yako. → [Muunganiko wa CLI](docs/guides/CLI-INTEGRATIONS.
 
 <div align="center">
 
-## 🌐 Watoa huduma 380 wa AI — 153 Waliowekwa Alama kuwa Bure kwenye Katalogi
+## Watoa Huduma wa 🌐 380 AI — 156 Katalogi-Imetiwa Alama Bila Malipo
 
 </div>
 
-> **Watoa huduma 380 waliosajiliwa** katika mikusanyo rasmi ya mazungumzo, midia, utafutaji, ya ndani, mawakala wa wingu na mfumo, wakiwemo **153 wenye metadata ya ugunduzi ya `hasFree: true`**. Rejista ya miundo ya mazungumzo inajumuisha **watoa huduma 239 / jozi 3,059 tofauti za mtoa huduma na modeli / vitambulisho 1,475 ghafi vya miundo**; katalogi tofauti ya bajeti ya bure ina **mistari 471 kwa kila modeli**, **madimbwi 34 yanayojirudia** na **watoa huduma 54 wa bure milele wanaojirudia/wasiohitaji ufunguo**. Hizi ni vigawanyo tofauti kwa makusudi; ufafanuzi na hesabu zilizoondoa marudio ya madimbwi zinapatikana katika [Marejeleo ya Watoa Huduma](docs/reference/PROVIDER_REFERENCE.md) na [Viwango vya Bure](docs/reference/FREE_TIERS.md).
+> **Watoa huduma 380 waliosajiliwa** kote kwenye gumzo la kanuni, midia, utafutaji, wa ndani, wakala wa wingu na makusanyo ya mfumo, ikijumuisha **156 iliyobeba metadata ya ugunduzi wa `hasFree: true`** . Usajili wa muundo wa gumzo unashughulikia **Watoa huduma 241 / jozi 3,114 za watoa huduma tofauti / 1,499 muundo ghafi IDs** ; katalogi tofauti ya bure ya bajeti inayo **Safu 485 kwa kila mfano** ,**34 mabwawa ya mara kwa mara** na **54 recurring/keyless watoa huduma bila malipo** . Hizi ni madhehebu tofauti kwa kubuni; ufafanuzi na hesabu zilizojumuishwa kwenye bwawa huishi katika [Marejeleo ya Mtoa Huduma](docs/reference/PROVIDER_REFERENCE.md) na [Viwango Visivyolipishwa](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
-### 🏢 Maabara zote kuu — kupitia endpoint moja
+### 🏢 Kila maabara kuu — kupitia sehemu moja ya mwisho
 
 <table>
   <tr>
@@ -659,7 +721,7 @@ ya historia ya shell yako. → [Muunganiko wa CLI](docs/guides/CLI-INTEGRATIONS.
   </tr>
 </table>
 
-<sub>…na wengine zaidi ya 350 — kila ikoni hupatikana moja kwa moja kutoka kwenye katalogi ya watoa huduma ya dashibodi. 📖 [Marejeleo ya Watoa Huduma](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>…na + 350 zaidi — kila ikoni hutatuliwa moja kwa moja kutoka kwa katalogi ya watoa huduma wa dashibodi. [Rejea ya Mtoa Huduma](docs/reference/PROVIDER_REFERENCE.md) 📖</sub>
 
 <br/>
 
@@ -691,80 +753,93 @@ ya historia ya shell yako. → [Muunganiko wa CLI](docs/guides/CLI-INTEGRATIONS.
 
 <div align="center">
 
-## 🖥️ Ambapo OmniRoute Inaendeshwa - Popote
+## 🖥️ OmniRoute Huendeshwa Wapi — Popote
 
 </div>
 
-> Programu sawa, mashine yako, sheria zako. Kutoka kwa usakinishaji wa npm wa kimataifa hadi** simu yako** kupitia Termux.
+> Programu ileile, mashine yako, sheria zako. Kuanzia usakinishaji wa kimataifa wa npm hadi **simu yako** kupitia Termux.
 
 <table>
-  <tr><th align="left"></th><th align="left"> Sakinisha </th><th align="left"> Vivutio </th></tr>
-  <tr><td align="left" nowrap>📦 <b> npm (kimataifa)</b></td><td align="left" nowrap><code> npm install -g omniroute </code></td><td align="left"> Amri moja, OS yoyote </td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Bun (kimataifa)</b></td><td align="left" nowrap><code> bun ongeza -g omniroute </code></td><td align="left"> Usajili ule ule, usakinishaji haraka </td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> docker kukimbia … diegosouzapw/omniroute</code></td><td align="left"> Multi-arch <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b> Eneo-kazi (Electron)</b></td><td align="left" nowrap><code> npm endesha elektroni:jenga </code></td><td align="left"> Dirisha la asili trei ya mfumo + — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b> menyu (OmniRouteTray)</b></td><td align="left" nowrap><code> brew sakinisha --cask zoispag/tap/omniroute-tray</code></td><td align="left"> Inasimamia &amp; kusasisha seva kiotomatiki — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap> asili <code> arm64 </code></td><td align="left"> Raspberry Pi, ARM za zqm, Apple Silicon </td></tr>
-  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg sakinisha nodejs && npx -y omniroute </code></td><td align="left"> Inaendesha <b> kwenye simu yako </b>, 24/7, hakuna mizizi </td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Ongeza kwenye Skrini ya Nyumbani"</td><td align="left"> Skrini nzima, nje ya mtandao, inaweza kusakinishwa kutoka kwa kivinjari </td></tr>
-  <tr><td align="left" nowrap>🧩 <b>OpenCode programu-jalizi </b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left"> Ujumuishaji wa asili OpenCode </td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS Msimbo Copilot </b></td><td align="left" nowrap> sakinisha <b>OmniCopilot</b> kiendelezi </td><td align="left"> Kila modeli OmniRoute katika kichagua gumzo Copilot asili - &amp; Insiders </td></tr>
-  <tr><td align="left" nowrap>🛠️ <b> Kutoka chanzo </b></td><td align="left" nowrap><code> npm kufunga && npm run dev </code></td><td align="left"> Hack juu yake, kuchangia </td></tr>
+  <tr><th align="left">Jukwaa</th><th align="left">Usakinishaji</th><th align="left">Vipengele muhimu</th></tr>
+  <tr><td align="left" nowrap>📦 <b>npm (kimataifa)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Amri moja, mfumo wowote wa uendeshaji</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (kimataifa)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Upatanifu wa kadiri inavyowezekana bila hakikisho la usaidizi; Node.js ndiyo mazingira ya utekelezaji yanayotumika rasmi.</td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Miundio mingi <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🖥️ <b>Kompyuta ya mezani (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Dirisha asilia + trei ya mfumo — <b>Windows / macOS / Linux</b></td></tr>
+  <tr><td align="left" nowrap>🎩 <b>Upau wa menyu (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Husimamia &amp; kusasisha seva kiotomatiki — <b>macOS</b></td></tr>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>asilia <code>arm64</code></td><td align="left">Raspberry Pi, seva za ARM, Apple Silicon</td></tr>
+  <tr><td align="left" nowrap>📱 <b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left">Huendeshwa <b>kwenye simu yako</b>, saa 24/7, bila root</td></tr>
+  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Ongeza kwenye Skrini ya Mwanzo"</td><td align="left">Skrini nzima, nje ya mtandao, inaweza kusakinishwa kutoka kwenye kivinjari</td></tr>
+  <tr><td align="left" nowrap>🧩 <b>Programu-jalizi ya OpenCode</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">Muunganisho asilia wa OpenCode</td></tr>
+  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap>sakinisha kiendelezi cha <b>OmniCopilot</b></td><td align="left">Kila modeli ya OmniRoute katika kiteuzi asilia cha Copilot Chat — toleo thabiti &amp; Insiders</td></tr>
+  <tr><td align="left" nowrap>🛠️ <b>Kutoka kwenye msimbo chanzo</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">Ifanyie marekebisho, changia</td></tr>
 </table>
 
-<sub>📖 [Docker Mwongozo](docs/guides/DOCKER_GUIDE.md) · [Eneo-kazi](electron/README.md) · [Trei ya menyu ya upau](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+<sub>📖 [Mwongozo wa Docker](docs/guides/DOCKER_GUIDE.md) · [Kompyuta ya mezani](electron/README.md) · [Trei ya upau wa menyu](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-### 🧩 Mpya: OmniRoute ndani ya VS Code ya Copilot Gumzo
+### 🧩 Mpya: OmniRoute ndani ya Copilot Chat asilia ya VS Code
 
 </div>
 
-> Hakuna utepe mpya, hakuna gumzo UI mpya - kila muundo OmniRoute unaotumika huonekana moja kwa moja**Copilot Kiteuzi cha kielelezo cha Gumzo ambacho tayari unatumia** . Tangu Msimbo wa VS 1.122, miundo ya watoa huduma hufanya kazi bila kuingia kwa GitHub au usajili wa Copilot - hali ya wakala, kupiga simu kwa zana na kuona, bila malipo.
+> Hakuna upau mpya wa pembeni, hakuna kiolesura kipya cha gumzo — kila modeli inayotolewa na OmniRoute huonekana moja kwa moja kwenye
+> **kiteuzi cha modeli cha Copilot Chat ambacho tayari unatumia**. Tangu VS Code 1.122, modeli za watoa huduma hufanya kazi
+> bila kuingia kwa akaunti ya GitHub au kuwa na usajili wa Copilot — hali ya ajenti, uitaji wa zana na uwezo wa kuona, bila
+> malipo.
 
-Sakinisha** [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** kiendelezi, kielekeze kwenye seva yako OmniRoute (chaguo-msingi hadi `localhost:20128`), kisha ufungue Copilot Chat → kichagua mfano →** Dhibiti Miundo...** →**OmniRoute** .
+Sakinisha kiendelezi cha **[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)**, kielekeze
+kwenye seva yako ya OmniRoute (chaguo-msingi ni `localhost:20128`), kisha fungua Copilot Chat → kiteuzi cha modeli
+→ **Dhibiti Modeli…** → **OmniRoute**.
 
 <table>
-  <tr><th align="left"> Store </th><th align="left"> Link </th><th align="left"> Inafanya kazi na </th></tr>
-  <tr><td align="left" nowrap>🧩 <b>VS Msimbo wa Soko </b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot"> Sakinisha →</a ></td >< td ="kushoto"> Msimbo wa VS — zqp &amp; Insiders </td></tr>
-  <tr><td align="left" nowrap>🔓 <b> Usajili wa VSX </b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"> Sakinisha →</a ></td >< td ="kushoto">Cursor, Windsurf, VSCodium, Theia,</tr>-server, Antigravity, Kiro...</td>
+  <tr><th align="left">Duka</th><th align="left">Kiungo</th><th align="left">Hufanya kazi na</th></tr>
+  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">Sakinisha →</a></td><td align="left">VS Code — toleo thabiti &amp; Insiders</td></tr>
+  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">Sakinisha →</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro…</td></tr>
 </table>
 
-Kutoka ndani ya mhariri: fungua faili ya** Viendelezi** tazama, tafuta** "OmniRoute"** , bofya** Sakinisha** - inafanya kazi kwa njia sawa kwenye duka zote mbili. Chanzo, matoleo na kijitabu cha uchapishaji cha moja kwa moja [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
+Kutoka ndani ya kihariri: fungua mwonekano wa **Viendelezi**, tafuta **"OmniRoute"**, bofya **Sakinisha**
+— hufanya kazi kwa njia ileile kwenye maduka yote mawili. Msimbo chanzo, masuala na mwongozo wa uchapishaji vinapatikana kwenye
+[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
 
-<sub>📖 [VS Msimbo wa Copilot Mwongozo wa gumzo](docs/guides/VSCODE-COPILOT.md) — sanidi, kile kichagua kinaonyesha, dashibodi-katika-kichupo, utatuzi wa </sub>
+<sub>📖 [Mwongozo wa VS Code Copilot Chat](docs/guides/VSCODE-COPILOT.md) — usanidi, kile ambacho kiteuzi huonyesha, dashibodi ndani ya kichupo, utatuzi wa matatizo</sub>
 
 <br/>
 
 <div align="center">
 
-### 🎩 Mpya: OmniRouteTray - lango lako, unaishi katika upau wa menyu
+### 🎩 Mpya: OmniRouteTray — lango lako, likiishi kwenye upau wa menyu
 
 </div>
 
-> `omniroute serve` huwa na furaha zaidi inapowashwa kila wakati.** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)** hugeuza hiyo kuwa programu ya upau wa menyu ya kuweka-na-kusahau kwa macOS: huanzisha seva, huiweka hai katika kuwashwa upya, kuisasisha mahali pake, na kuweka bajeti yako ya tokeni ya moja kwa moja kwa mbofyo mmoja tu -** hakuna dirisha la mwisho lililoachwa wazi, hakuna `npm install -g omniroute` ya kumtunza mtoto.**
+> `omniroute serve` hufanya kazi vyema zaidi ikiwa imewashwa kila wakati. **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)**
+> hubadilisha hilo kuwa programu ya upau wa menyu ya macOS unayosanidi na kuisahau: huanzisha seva, huiweka ikiendelea kufanya kazi
+> baada ya kuwasha upya, huisasisha papo hapo, na kuweka bajeti yako ya tokeni ya moja kwa moja umbali wa mbofyo mmoja — **hakuna
+> dirisha la terminal linaloachwa wazi, hakuna `npm install -g omniroute` ya kuendelea kusimamia.**
 
-Imeundwa kwa [Tauri v2](https://v2.tauri.app/) (Kiini cha kutu chenye ukubwa wa hitilafu ya kuzungusha), husafirisha muda wake wa utekelezaji wa Node 24 na kudhibiti usakinishaji OmniRoute unaomilikiwa na programu, kwa hivyo haitapigana kamwe na `node`/`bun` yako ya kimataifa. Ni** inashiriki usanidi wako wa `~/.omniroute/` na hifadhidata** - kwa hivyo ni OmniRoute sawa tayari kukimbia, tu na kofia. 🎩
+Imeundwa kwa [Tauri v2](https://v2.tauri.app/) (kiini cha Rust chenye ukubwa mdogo sana), inakuja
+na mazingira yake ya utekelezaji ya Node 24 yaliyotiwa sahihi na inasimamia usakinishaji wa OmniRoute unaomilikiwa na programu, kwa hivyo haigongani kamwe na
+`node`/`bun` yako ya kimataifa. **Inashiriki usanidi na hifadhidata yako iliyopo ya `~/.omniroute/`** — kwa hivyo ni
+OmniRoute ileile ambayo tayari unaendesha, lakini sasa ikiwa imevaa kofia. 🎩
 
 <table>
-  <tr><th align="left"> Inafanya nini </th><th align="left"> Jinsi </th></tr>
-  <tr><td align="left" nowrap>🟢 <b> Inasimamia seva </b></td><td align="left"> Spawns <code> omniroute serve </code>, inachukua mfano unaoendeshwa tayari badala ya kuiga nakala </td></tr>
-  <tr><td align="left" nowrap>📊 <b> Matumizi ya moja kwa moja kwa muhtasari </b></td><td align="left"> pau za upendeleo wa watoa huduma, Claude session/weekly mipaka na vihesabu vilivyowekwa upya, uchanganuzi wa gharama ya siku 30 </td></tr>
-  <tr><td align="left" nowrap>🔄 <b> Usasishaji otomatiki umewekwa </b></td><td align="left"> Usakinishaji kwa hatua, ubadilishanaji wa atomiki, urejeshaji wa kushindwa - kila mara kwenye toleo jipya zaidi </td></tr>
-  <tr><td align="left" nowrap>🚀 <b> Anza kwa kuingia </b></td><td align="left"> Uzinduzi wa hiari wakati wa kuingia; trei pekee, hakuna ikoni ya kizimbani </td></tr>
-  <tr><td align="left" nowrap>🩺 <b> Daktari &amp; kumbukumbu </b></td><td align="left"> uchunguzi wa bofya moja na ufikiaji wa kumbukumbu ya seva </td></tr>
+  <tr><th align="left">Inachofanya</th><th align="left">Jinsi inavyofanya</th></tr>
+  <tr><td align="left" nowrap>🟢 <b>Husimamia seva</b></td><td align="left">Huanzisha <code>omniroute serve</code>, hutumia instansi ambayo tayari inaendeshwa badala ya kuiunda mara mbili</td></tr>
+  <tr><td align="left" nowrap>📊 <b>Matumizi ya moja kwa moja kwa muhtasari</b></td><td align="left">Pau za mgao wa watoa huduma, vikomo vya vipindi vya Claude/kila wiki pamoja na vihesabio vya muda hadi kuwekwa upya, uchanganuzi wa gharama za siku 30</td></tr>
+  <tr><td align="left" nowrap>🔄 <b>Hujisasisha kiotomatiki papo hapo</b></td><td align="left">Usakinishaji wa hatua kwa hatua, ubadilishaji atomiki, kurejesha toleo la awali ikishindikana — daima kwenye toleo jipya zaidi</td></tr>
+  <tr><td align="left" nowrap>🚀 <b>Anza wakati wa kuingia</b></td><td align="left">Uzinduzi wa hiari wakati wa kuingia; trei pekee, hakuna ikoni ya dock</td></tr>
+  <tr><td align="left" nowrap>🩺 <b>Uchunguzi &amp; kumbukumbu</b></td><td align="left">Uchunguzi kwa mbofyo mmoja na ufikiaji wa kumbukumbu za seva</td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub> unapendelea upakuaji? Pata toleo jipya zaidi <code>.dmg </code> kutoka
-<a href="https://github.com/zoispag/omniroute-tray/releases"> Imetolewa </a>. Chanzo, masuala na kujenga
-hati zinaishi <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
-<br/>💛 Mradi wa jumuiya wa <a href="https://github.com/zoispag">@zoispag </a> - sio toleo rasmi OmniRoute.</sub>
+<sub>Unapendelea kupakua? Pakua <code>.dmg</code> ya hivi karibuni kutoka
+<a href="https://github.com/zoispag/omniroute-tray/releases">Matoleo</a>. Msimbo chanzo, masuala na nyaraka za
+ujenzi zinapatikana katika <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
+<br/>💛 Mradi wa jamii ulioundwa na <a href="https://github.com/zoispag">@zoispag</a> — si toleo rasmi la OmniRoute.</sub>
 
 <br/>
 
@@ -1013,11 +1088,11 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
 ```
 
-`:latest` hufuata toleo thabiti la juu zaidi la SemVer **lililochapishwa**. Haifuatilii `main` ya git. Bandika `:X.Y.Z` kwa GitOps. Tazama [Vituo vya Matoleo ya Docker](docs/guides/DOCKER_GUIDE.md#release-channels).Image hubandika **`OMNIROUTE_MEMORY_MB=1024`**. Hiyo inatosha kwa dashibodi na gumzo jepesi. **Mawakala wa uandishi wa msimbo** (`POST /v1/responses` kutoka Claude Code, Codex, Grok, …) wanahitaji heap kubwa zaidi ya V8, la sivyo mchakato hupata `FATAL ERROR` unapofikia takriban GiB 12 chini ya miktadha miwili mirefu inayopishana. Weka ukubwa wa kontena juu ya heap (bafa asilia huwa nje ya V8):
+`:latest` hufuata SemVer thabiti ya juu zaidi **iliyochapishwa**. Haifuatilii git `main`. Bandika `:X.Y.Z` kwa GitOps. Angalia [Vituo vya Matoleo ya Docker](docs/guides/DOCKER_GUIDE.md#release-channels). Picha huweka **`OMNIROUTE_MEMORY_MB=1024`**. Hiyo inatosha kwa dashibodi na gumzo jepesi. **Mawakala wa uandishi wa msimbo** (`POST /v1/responses` kutoka Claude Code, Codex, Grok, …) wanahitaji heap kubwa zaidi ya V8, vinginevyo mchakato hupata `FATAL ERROR` unapofikia takribani GiB 12 chini ya miktadha miwili mirefu inayopishana. Weka ukubwa wa kontena juu ya heap (vihifadhi asilia vya muda vipo nje ya V8):
 
 | Mzigo wa kazi                                | Heap (`-e OMNIROUTE_MEMORY_MB`) | Kontena (`--memory`) |
 | -------------------------------------------- | ------------------------------- | -------------------- |
-| Dashibodi / gumzo jepesi                     | `1024` (chaguo-msingi la image) | ≥2 g                 |
+| Dashibodi / gumzo jepesi                     | `1024` (chaguo-msingi la picha) | ≥2 g                 |
 | Wakala mmoja wa uandishi wa msimbo           | `8192`                          | ≥10 g                |
 | `/v1/responses` mbili ndefu kwa wakati mmoja | `10240`–`12288`                 | ≥12–16 g             |
 
@@ -1031,17 +1106,17 @@ Jedwali kamili: [Mwongozo wa Docker — RAM ya wakati wa utekelezaji](docs/guide
 
 > **Kituo cha Docker cha matoleo ya awali:** `diegosouzapw/omniroute:next` na
 > `diegosouzapw/omniroute:next-web` hufuata tawi la sasa la chaguo-msingi `release/v*`.
-> Lebo hizi zinazoweza kubadilika zimekusudiwa tu kwa kujaribu marekebisho ambayo bado hayajatolewa na
-> **hazitumiki katika mazingira ya uzalishaji**. Tazama
+> Lebo hizi zinazoweza kubadilika zimekusudiwa tu kujaribu marekebisho ambayo bado hayajatolewa na
+> **hazitumiki katika mazingira ya uzalishaji**. Angalia
 > [Vituo vya Matoleo ya Docker](docs/guides/DOCKER_GUIDE.md#release-channels).
 
 **🥟 Bun**
 
-`bun install` ya kawaida na usakinishaji wa kimataifa (`bun install -g omniroute`) vinaweza kutumika kupitia utambuzi wa mazingira ya utekelezaji ya Bun:
+`bun install` ya kawaida na usakinishaji wa kimataifa (`bun install -g omniroute`) vinatumika kupitia utambuzi wa mazingira ya utekelezaji ya Bun:
 
-- **`bun:sqlite` iliyojengewa ndani**: OmniRoute hutumia kiendeshaji cha Bun cha `bun:sqlite` kilichojengewa ndani inapoendeshwa chini ya Bun, na kurejea kwenye `better-sqlite3` katika Node.js au `sql.js`.
-- **Uteuzi otomatiki wa kifungashaji cha Webpack wakati wa usanidi**: Mazingira ya usanidi (`bun run dev`) hutambua Bun kiotomatiki na kuzima Turbopack ili kutumia Webpack, kwa lengo la kuzuia kutooana kwa vifungo asilia vya V8. Miundo ya uzalishaji (`bun run build`) hufuata `OMNIROUTE_USE_TURBOPACK` sawasawa na ilivyo kwenye Node: Turbopack kwa chaguo-msingi, `OMNIROUTE_USE_TURBOPACK=0` ili kujenga kwa Webpack (`Dockerfile.bun` huiwasilisha kama `--build-arg`).
-- **Dockerfile maalumu ya Bun**: `Dockerfile.bun` ya hatua nyingi kwa ajili ya upelekaji asilia wa uzalishaji wa Bun (`docker build -f Dockerfile.bun -t omniroute:bun .`).
+- **`bun:sqlite` iliyojengewa ndani**: OmniRoute hutumia kiendeshaji cha `bun:sqlite` kilichojengewa ndani ya Bun inapotekelezwa chini ya Bun, na hurudi kutumia `better-sqlite3` kwenye Node.js au `sql.js`.
+- **Uteuzi wa kiotomatiki wa kifungashaji cha Webpack wakati wa utengenezaji**: Utengenezaji (`bun run dev`) hutambua Bun kiotomatiki na kulemaza Turbopack ili kutumia Webpack, kwa lengo la kuzuia kutooana kwa viunganishi asilia vya V8. Miundo ya uzalishaji (`bun run build`) hufuata `OMNIROUTE_USE_TURBOPACK` kikamilifu kama ilivyo kwenye Node: Turbopack kwa chaguo-msingi, `OMNIROUTE_USE_TURBOPACK=0` ili kujenga kwa Webpack (`Dockerfile.bun` huiwasilisha kama `--build-arg`).
+- **Dockerfile maalumu ya Bun**: `Dockerfile.bun` ya hatua nyingi kwa ajili ya uwekaji asilia wa Bun katika mazingira ya uzalishaji (`docker build -f Dockerfile.bun -t omniroute:bun .`).
 
 ```bash
 # Sakinisha na uendeshe kwa Bun
@@ -1084,40 +1159,42 @@ devbox run npm run dev
 **🦭 Podman**
 
 ```bash
-# 1. Andaa saraka ya data iliyounganishwa kwa bind mount
+# 1. Andaa saraka ya data iliyounganishwa moja kwa moja
 mkdir -p data
 
-# 2. Kwa Linux + Podman ya ndani isiyo na root pekee (kamwe si kiteja cha mbali cha Podman Machine):
+# 2. Linux + Podman ya ndani isiyo na root pekee (kamwe si kiteja cha mbali cha Podman Machine):
 podman unshare chown 1000:1000 ./data
 
-# 3. Weka kidokezo cha mazingira ya utekelezaji, jenga image ya ndani ya Compose, kisha uanzishe
+# 3. Weka kidokezo cha mazingira ya utekelezaji, jenga picha ya ndani ya Compose, kisha uanzishe
 echo "CONTAINER_HOST=podman" >> .env
 podman compose --profile base up -d --build
 ```
 
 Kwenye macOS au Windows, Podman hutumia Podman Machine ya mbali: ruka `podman unshare` na
-ufuate [mwongozo wa saraka ya data unaolingana na topolojia](contrib/podman/README.md#data-directory-permissions-by-topology).
+ufuate [mwongozo wa saraka ya data unaozingatia topolojia](contrib/podman/README.md#data-directory-permissions-by-topology).
 
 📖 [Mwongozo wa Podman](contrib/podman/README.md) — Miundo ya Compose, Podman Machine, na
 usanidi wa Quadlet wa Linux/systemd.
 
 **⚡ Usakinishaji wa haraka zaidi / mwepesi zaidi (ruka ujenzi asilia)**
 
-Injini asilia ya SQLite (`better-sqlite3`) ni tegemezi la **hiari**, kwa hivyo usakinishaji wa
-kimataifa haukwami kamwe ukisubiri utungaji kutoka kwenye msimbo chanzo: hutumia faili jozi iliyojengwa tayari inapolingana
-na mfumo wako/Node, na vinginevyo hubadilika kwa uwazi hadi injini ya JavaScript safi
-(`node:sqlite` kwenye Node 22+, au `sql.js` WASM iliyofungashwa) — hakuna zana za ujenzi zinazohitajika.
+Injini asilia ya SQLite (`better-sqlite3`) ni utegemezi wa **hiari**, kwa hiyo usakinishaji wa
+kimataifa haukwami kamwe kwa kusubiri utungaji kutoka kwenye msimbo chanzo: hutumia faili tekelezi
+iliyojengwa mapema inapolingana na mfumo/Node wako, na vinginevyo hurudi kwa uwazi kutumia injini
+ya JavaScript pekee (`node:sqlite` kwenye Node 22+, au `sql.js` WASM iliyojumuishwa) — hakuna zana za ujenzi zinazohitajika.
 
-Ili kuruka kabisa uanzishaji asilia wa baada ya usakinishaji (CI, bila kiolesura cha picha, au mashine za polepole):
+Ili kuruka kabisa **upashaji-joto asilia** wa baada ya usakinishaji (CI, mifumo isiyo na kiolesura, au mashine polepole).
+Kumbuka: hii huruka tu hatua ya upashaji-joto wa SQLite asilia (`scripts/postinstall.mjs`); kishikio
+cha kunakili/kurekebisha faili tekelezi (`scripts/build/postinstall.mjs`) bado hutekelezwa kama kawaida:
 
 ```bash
 OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 pia huiruka
 ```
 
-Kwa usakinishaji wa haraka zaidi, pendelea **pnpm** (hifadhi inayotegemea maudhui + viungo vigumu — tazama hapo juu).
-Kwa mazingira ya utekelezaji yasiyo na dashibodi wala kiolesura cha picha, tumia wasifu wa Docker wa `base` (hapo juu) au
-[mwongozo wa Termux](docs/guides/TERMUX_GUIDE.md). CLI na dashibodi ya wavuti huhudumiwa na
-mchakato uleule kwenye port moja, kwa hivyo kwa sasa hakuna package tofauti ya CLI pekee.
+Kwa usakinishaji wa haraka zaidi, pendelea **pnpm** (hifadhi inayotambuliwa kwa maudhui + viungo vigumu — angalia hapo juu).
+Kwa mazingira ya utekelezaji yasiyo na dashibodi wala kiolesura, tumia wasifu wa Docker wa `base` (hapo juu) au
+[mwongozo wa Termux](docs/guides/TERMUX_GUIDE.md). CLI na dashibodi ya wavuti zinatolewa na
+mchakato uleule kwenye port moja, kwa hiyo kwa sasa hakuna kifurushi tofauti cha CLI pekee.
 
 <br/>
 

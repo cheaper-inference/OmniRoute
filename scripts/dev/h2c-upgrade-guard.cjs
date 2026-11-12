@@ -21,9 +21,10 @@
  * RFC 9110 §7.8 explicitly allows a server to ignore `Upgrade` and keep
  * answering in HTTP/1.1; the client then simply carries on in HTTP/1.1. This
  * guard does exactly that, for requests whose ONLY offered protocol is `h2c`:
- * it removes the two negotiation headers, pushes the request bytes back into
- * the socket and hands the socket to the server as a fresh connection, so the
- * regular `request` pipeline (peer stamp, method/HEAD guards, Next) serves it.
+ * shouldUpgradeCallback rejects that upgrade and removes the negotiation
+ * headers from the normalized request headers, keeping its body in Node's
+ * HTTP/1 parser. Older runtimes use the upgrade-listener replay fallback, so
+ * the regular request pipeline (peer stamp, method/HEAD guards, Next) serves it.
  *
  * What is deliberately NOT touched:
  *   - Anything that offers another protocol (`websocket`, `h2c, websocket`, …)
@@ -86,6 +87,49 @@ function serializeRequestHead(req) {
   return Buffer.from(`${head}\r\n`, "latin1");
 }
 
+/** Remove negotiation headers before dispatching the ordinary HTTP/1 request. */
+function stripH2cRequestHeaders(req) {
+  // Keep rawHeaders intact: Node 26 still reads its wire representation after
+  // shouldUpgradeCallback returns, using an internal count. Application code
+  // consumes these normalized headers instead.
+  const headers = req.headers;
+  const distinct = req.headersDistinct;
+  for (const name of NEGOTIATION_HEADERS) {
+    delete headers[name];
+    if (distinct) delete distinct[name];
+  }
+  const connection = stripNegotiationTokens(headers.connection || "");
+  if (connection === null) {
+    delete headers.connection;
+    if (distinct) delete distinct.connection;
+  } else {
+    headers.connection = connection;
+    if (distinct) distinct.connection = [connection];
+  }
+}
+
+/**
+ * Keep h2c inside Node's HTTP/1 parser, including streaming/chunked bodies.
+ * Node 26 separates request-body bytes from the upgrade Duplex; replaying only
+ * its `head` loses the body. Older runtimes that ignore shouldUpgradeCallback
+ * retain the upgrade-listener fallback below.
+ */
+function createH2cUpgradeCallback(getServer, previous) {
+  if (previous !== undefined && typeof previous !== "function") {
+    throw new TypeError("shouldUpgradeCallback must be a function");
+  }
+  return function shouldUpgrade(req) {
+    if (isCleartextH2cUpgrade(req, req.socket)) {
+      stripH2cRequestHeaders(req);
+      return false;
+    }
+    const server = getServer();
+    return typeof previous === "function"
+      ? previous.call(server, req)
+      : server.listenerCount("upgrade") > 0;
+  };
+}
+
 /**
  * Serve an h2c upgrade request as plain HTTP/1.1.
  *
@@ -104,4 +148,4 @@ function handleH2cUpgrade(server, req, socket, head) {
   return true;
 }
 
-module.exports = { isCleartextH2cUpgrade, handleH2cUpgrade };
+module.exports = { isCleartextH2cUpgrade, handleH2cUpgrade, createH2cUpgradeCallback };

@@ -355,20 +355,20 @@ Modelis: cc/claude-opus-4-7
 
 ## 🚀 Diegimas
 
-### Visuotinis diegimas naudojant npm (rekomenduojama)
+### Visuotinis npm diegimas (rekomenduojama)
 
 ```bash
 npm install -g omniroute
 
-# Sukurkite konfigūracijos katalogą
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Sukurkite .env failą (žr. .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Paleiskite serverį
+# Start server
 omniroute
-# Arba naudodami pasirinktinį prievadą:
+# Or with custom port:
 omniroute --port 3000
 ```
 
@@ -598,28 +598,28 @@ post_install() {
 
 ### Aplinkos kintamieji
 
-| Kintamasis                              | Numatytoji reikšmė                   | Aprašymas                                                                                                                                      |
-| --------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT pasirašymo paslaptis (**pakeiskite gamybinėje aplinkoje**)                                                                                 |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Pirmojo prisijungimo slaptažodis                                                                                                               |
-| `DATA_DIR`                              | `~/.omniroute`                       | Duomenų katalogas (DB, naudojimo duomenys, žurnalai)                                                                                           |
-| `PORT`                                  | sistemos numatytoji reikšmė          | Paslaugos prievadas (pavyzdžiuose – `20128`)                                                                                                   |
-| `HOSTNAME`                              | sistemos numatytoji reikšmė          | Susiejimo pagrindinis kompiuteris (Docker numatytoji reikšmė – `0.0.0.0`)                                                                      |
-| `NODE_ENV`                              | vykdymo aplinkos numatytoji reikšmė  | Diegdami nustatykite `production`                                                                                                              |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Viešasis bazinis URL, rodomas valdymo skydelyje ir pateikiamas serveriui (pakeičia senąjį `BASE_URL`)                                          |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Debesijos sinchronizavimo galinio taško bazinis URL (pakeičia senąjį `CLOUD_URL`)                                                              |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | HMAC paslaptis sugeneruotiems API raktams                                                                                                      |
-| `REQUIRE_API_KEY`                       | `false`                              | Reikalauti Bearer API rakto maršrutams `/v1/*`                                                                                                 |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Leisti autentifikuotiems valdymo skydelio naudotojams pareikalavus parodyti visas išsaugotas API raktų reikšmes                                |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Talpykloje saugomų teikėjų apribojimų duomenų atnaujinimo serveryje dažnis; UI atnaujinimo mygtukai vis tiek paleidžia rankinį sinchronizavimą |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Išjungti automatines SQLite momentines kopijas prieš rašymą, importavimą ar atkūrimą; rankinės atsarginės kopijos vis tiek veikia              |
-| `APP_LOG_TO_FILE`                       | `true`                               | Įjungia programos ir audito žurnalų rašymą į diską                                                                                             |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Priverstinai naudoti `Secure` autentifikavimo slapuką (už HTTPS atvirkštinio tarpinio serverio)                                                |
-| `CLOUDFLARED_BIN`                       | nenustatyta                          | Naudoti esamą `cloudflared` dvejetainį failą vietoje valdomo atsisiuntimo                                                                      |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Valdomų sparčiųjų tunelių transportas (`http2`, `quic` arba `auto`)                                                                            |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js kaupo apribojimas MB                                                                                                                   |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Didžiausias užklausų talpyklos įrašų skaičius                                                                                                  |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Didžiausias semantinės talpyklos įrašų skaičius                                                                                                |
+| Kintamasis                              | Numatytoji reikšmė                  | Aprašymas                                                                                                                                                                        |
+| --------------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(sugeneruojama automatiškai)_      | JWT pasirašymo paslaptis — sugeneruojama automatiškai pirmą kartą paleidus ir nuolat išsaugoma faile `server.env`; nustatykite ją tiesiogiai, kai duomenų katalogas yra laikinas |
+| `INITIAL_PASSWORD`                      | _(nenustatyta)_                     | Pirmojo prisijungimo slaptažodis. npm / šaltinio diegimai pradedami su `CHANGEME`: pakeiskite jį. Nenustatyta: pradinės sąrankos vedlys                                          |
+| `DATA_DIR`                              | `~/.omniroute`                      | Duomenų katalogas (DB, naudojimo duomenys, žurnalai)                                                                                                                             |
+| `PORT`                                  | sistemos numatytoji reikšmė         | Paslaugos prievadas (pavyzdžiuose – `20128`)                                                                                                                                     |
+| `HOSTNAME`                              | sistemos numatytoji reikšmė         | Susiejimo pagrindinis kompiuteris (Docker numatytoji reikšmė – `0.0.0.0`)                                                                                                        |
+| `NODE_ENV`                              | vykdymo aplinkos numatytoji reikšmė | Diegdami nustatykite `production`                                                                                                                                                |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`            | Viešasis bazinis URL, rodomas valdymo skydelyje ir pateikiamas serveriui (pakeičia senąjį `BASE_URL`)                                                                            |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`             | Debesijos sinchronizavimo galinio taško bazinis URL (pakeičia senąjį `CLOUD_URL`)                                                                                                |
+| `API_KEY_SECRET`                        | _(sugeneruojama automatiškai)_      | Su įrenginiu susietų API raktų kontrolinės sumos paslaptis — paleisties bootstrap automatiškai ją sugeneruoja, kai ji nenustatyta, ir išsaugo rašomame `server.env`              |
+| `REQUIRE_API_KEY`                       | `false`                             | Reikalauti Bearer API rakto maršrutams `/v1/*`                                                                                                                                   |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                             | Leisti autentifikuotiems valdymo skydelio naudotojams pareikalavus parodyti visas išsaugotas API raktų reikšmes                                                                  |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                | Talpykloje saugomų teikėjų apribojimų duomenų atnaujinimo serveryje dažnis; UI atnaujinimo mygtukai vis tiek paleidžia rankinį sinchronizavimą                                   |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                             | Išjungti automatines SQLite momentines kopijas prieš rašymą, importavimą ar atkūrimą; rankinės atsarginės kopijos vis tiek veikia                                                |
+| `APP_LOG_TO_FILE`                       | `true`                              | Įjungia programos ir audito žurnalų rašymą į diską                                                                                                                               |
+| `AUTH_COOKIE_SECURE`                    | `false`                             | Priverstinai naudoti `Secure` autentifikavimo slapuką (už HTTPS atvirkštinio tarpinio serverio)                                                                                  |
+| `CLOUDFLARED_BIN`                       | nenustatyta                         | Naudoti esamą `cloudflared` dvejetainį failą vietoje valdomo atsisiuntimo                                                                                                        |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                             | Valdomų sparčiųjų tunelių transportas (`http2`, `quic` arba `auto`)                                                                                                              |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                               | Node.js kaupo apribojimas MB                                                                                                                                                     |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                | Didžiausias užklausų talpyklos įrašų skaičius                                                                                                                                    |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                               | Didžiausias semantinės talpyklos įrašų skaičius                                                                                                                                  |
 
 Visą aplinkos kintamųjų žinyną rasite [README](../README.md).
 
@@ -684,58 +684,63 @@ Visą aplinkos kintamųjų žinyną rasite [README](../README.md).
 
 ---
 
-## 🧩 išplėstinės funkcijos
+## 🧩 Išplėstinės funkcijos
 
-### Individualūs modeliai
+### Pasirinktiniai modeliai
 
-Pridėkite bet kurį ID modelį prie bet kurio teikėjo nelaukdami programos atnaujinimo:
+Pridėkite bet kokį modelio ID prie bet kurio teikėjo nelaukdami programos atnaujinimo:
 
 ```bash
-# Via API
+# Per API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# List: curl http://localhost:20128/api/provider-models?provider=openai
-# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# Sąrašas: curl http://localhost:20128/api/provider-models?provider=openai
+# Pašalinimas: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-Arba naudokite prietaisų skydelį:** Tiekėjai → [Teikėjas] → Custom Models** .
+Arba naudokite valdymo skydelį: **Teikėjai → [Teikėjas] → Pasirinktiniai modeliai**.
 
 Pastabos:
 
-- OpenRouter ir OpenAI/Anthropic-compatible teikėjai valdomi iš** Galimi modeliai** tik. Neautomatinis įtraukimas, importavimas ir automatinis sinchronizavimas visa žemė tame pačiame galimų modelių sąraše, todėl nėra atskiros skilties „Custom Models“ tiems teikėjams.
-- The** Individualūs modeliai** skyrius yra skirtas teikėjams, kurie neatskleidžia valdomų galimų modelių importo.
+- OpenRouter ir su OpenAI/Anthropic suderinami teikėjai valdomi tik skiltyje **Galimi modeliai**. Rankiniu būdu pridėti, importuoti ir automatiškai sinchronizuoti modeliai patenka į tą patį galimų modelių sąrašą, todėl šiems teikėjams atskiros skilties „Pasirinktiniai modeliai“ nėra.
+- Skiltis **Pasirinktiniai modeliai** skirta teikėjams, kurie nepalaiko valdomo galimų modelių importavimo.
 
 ### Pasirinktiniai su OpenAI suderinami teikėjai
 
-Bet kokį šliuzą, kuris kalba OpenAI API (savarankiškai priglobtas tarpinis serveris, vLLM, trečiosios šalies kaupiklis), galima pridėti kaip savo teikėjo mazgą:
+Bet kuris tinklų sietuvas, palaikantis OpenAI API (savarankiškai talpinamas tarpinis serveris, vLLM arba trečiosios šalies agregatorius), gali būti pridėtas kaip atskiras teikėjo mazgas:
 
-1. **Teikėjai → Pridėti OpenAI Suderinamas** .
-2. **Vardas** : mazgo rodymo etiketė.
-3. **Priešdėlis** : maršruto pavadinimas. Klientai modelius vadina `<prefix>/<model>`, todėl mazgas su priešdėliu `mygw` aptarnauja `mygw/gpt-4o-mini`. Reikalingas; nėra simbolių apribojimų.
-4. **API tipas** : galinių taškų šeima, kurią aptarnauja šliuzas (pokalbių užbaigimai, atsakymai, įterpimai, garsas, vaizdai).
-5. **Pagrindas URL** : API šaknis iki `/v1` imtinai (pavyzdžiui `https://gateway.example.com/v1`), o ne visas `/chat/completions` kelias. Vartai su nestandartiniais keliais juos nustato** Išplėstiniai nustatymai** (pokalbių kelias, modelių kelias).
-6. The**API raktas (tikrinimui)** laukas tik tikrina ryšį. Sukūrę mazgą atidarykite jį ir naudokite** Pridėti ryšį** išsaugoti raktą, kurį naudos užklausos.
+1. **Teikėjai → Pridėti su OpenAI suderinamą teikėją**.
+2. **Pavadinimas**: rodomas mazgo pavadinimas.
+3. **Priešdėlis**: maršruto pavadinimas. Klientai modelius iškviečia kaip `<prefix>/<model>`, todėl mazgas su priešdėliu `mygw` aptarnauja `mygw/gpt-4o-mini`. Privalomas; simbolių apribojimų nėra.
+4. **API tipas**: galinių taškų šeima, kurią aptarnauja tinklų sietuvas (pokalbių užbaigimai, atsakymai, vektoriniai atvaizdai, garsas, vaizdai).
+5. **Bazinis URL**: API šakninis adresas iki `/v1` imtinai (pavyzdžiui, `https://gateway.example.com/v1`), o ne visas `/chat/completions` kelias. Nestandartinius kelius naudojantys tinklų sietuvai juos nustato skiltyje **Išplėstiniai nustatymai** (pokalbių kelias, modelių kelias).
+6. Laukas **API raktas (patikrai)** skirtas tik ryšiui patikrinti. Sukūrę mazgą, atidarykite jį ir naudokite **Pridėti ryšį**, kad išsaugotumėte užklausoms naudojamą raktą.
 
-Mazgas gauna vidinį id formos `openai-compatible-<apiType>-<uuid>`; niekada nereikia jo įvesti, priešdėlis yra viešasis vardas.
+Mazgui suteikiamas vidinis ID formatu `openai-compatible-<apiType>-<uuid>`; jums jo niekada nereikia įvesti, nes viešasis pavadinimas yra priešdėlis.
 
 #### Rezervuoti priešdėliai
 
-Priešdėlis negali būti nei integruoto teikėjo ID arba slapyvardis (pvz., `openai`, `cf`), nei pasitraukusio teikėjo ID. Modelių sprendiklis tikrina įtaisytuosius ID ir slapyvardžius prieš pasirinktinius mazgus, todėl mazgas, kuriame naudojamas vienas iš šių priešdėlių, niekada negautų srauto: vietoj to `<prefix>/model` būtų nukreiptas į integruotą teikėją arba nepavyktų uždaryti, jei teikėjas būtų pašalintas. Sukurti ar redaguoti mazgą su tokiu priešdėliu atmetama naudojant:
+Priešdėlis negali būti integruoto teikėjo ID ar alternatyvusis pavadinimas (pavyzdžiui, `openai`, `cf`) arba nebenaudojamo teikėjo ID. Modelių parinkimo mechanizmas integruotų teikėjų ID ir alternatyviuosius pavadinimus tikrina prieš pasirinktinius mazgus, todėl vieną iš šių priešdėlių naudojantis mazgas niekada negautų srauto: `<prefix>/model` būtų nukreiptas integruotam teikėjui arba saugiai atmestas, jei tas teikėjas buvo pašalintas. Sukurti ar redaguoti mazgą su tokiu priešdėliu neleidžiama ir pateikiamas šis pranešimas:
 
 ```text
-prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
+prefix: „<prefix>“ yra rezervuotas teikėjo priešdėlis — pasirinkite kitą priešdėlį (rezervuotų ID / alternatyviųjų pavadinimų negalima naudoti pasirinktiniams mazgams, nes tokios užklausos kaip <prefix>/model nukreipiamos integruotam teikėjui arba saugiai atmetamos, kai jis pašalintas)
 ```
 
-Pasirinkite atskirą priešdėlį (`mygw`, `acme-proxy`). Jei užklausos tinkintam mazgui nepavyksta dėl klaidos, įvardijančios įtaisytąjį teikėją arba jo kredencialus, patikrinkite, ar mazgo priešdėlis yra rezervuotas: mazgai, išsaugoti iki šios taisyklės egzistavimo, vis tiek išsaugomi, bet jų priešdėlių maršrutai į įtaisytąjį teikėją. Redaguokite mazgą ir suteikite jam naują priešdėlį.
+Pasirinkite unikalų priešdėlį (`mygw`, `acme-proxy`). Jei užklausos pasirinktiniam mazgui nepavyksta ir klaidoje nurodomas integruotas teikėjas arba jo prisijungimo duomenys, patikrinkite, ar mazgo priešdėlis nėra rezervuotas: prieš įvedant šią taisyklę išsaugoti mazgai vis dar saugomi, tačiau jų priešdėlis nukreipia į integruotą teikėją. Redaguokite mazgą ir suteikite jam naują priešdėlį.
 
-#### Vieno ryšio šliuzo parinktys
+#### Kiekvienam ryšiui taikomos šliuzo parinktys
 
-Šie klavišai patenka į ryšio `providerSpecificData` (pavyzdžiui, per `PUT /api/providers/{id}`):
+Šie raktai nurodomi ryšio `providerSpecificData` (pavyzdžiui, naudojant
+`PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (sveikasis skaičius, 1–1024) – su OpenAI pokalbių formatu suderinamoms jungtims, kurių šliuzas atmeta ilgus įrankių pavadinimus. Ilgesni vardai siunčiami kaip trumpi slapyvardžiai ir atkuriami atsakyme.
-- `quotaEndpoint` – šliuzo quota/credits galinis taškas, skaitomas prietaisų skydelio kvotos juostoje ir kvotą žinančiame maršrute. Veikia su OpenAI ir Anthropic suderinamomis jungtimis; visa forma užfiksuota `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (sveikasis skaičius, 1–1024) — skirta su OpenAI pokalbių formatu suderinamiems ryšiams, kurių
+  šliuzas atmeta ilgus įrankių pavadinimus. Ilgesni pavadinimai siunčiami kaip trumpi alternatyvūs vardai ir atsakyme
+  atkuriami.
+- `quotaEndpoint` — šliuzo kvotos / kreditų galinis taškas, naudojamas kvotos juostai valdymo skydelyje ir
+  į kvotą atsižvelgiančiam maršruto parinkimui. Veikia tiek su OpenAI, tiek su Anthropic suderinamuose ryšiuose; visa struktūra
+  aprašyta faile `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -750,11 +755,11 @@ Pasirinkite atskirą priešdėlį (`mygw`, `acme-proxy`). Jei užklausos tinkint
 }
 ```
 
-### Grandininis OmniRoute Peers
+### OmniRoute lygiaverčių mazgų grandinės sudarymas
 
-Kitas OmniRoute šliuzas gali būti pridėtas kaip a** Pasirinktinis su OpenAI suderinamas** teikėjas. Naudokite lygiavertės programos `/v1` bazę URL ir tam skirtą, mažiausią privilegiją turintį API raktą, išduotą to bendraamžio.
+Kitas OmniRoute tinklų sietuvas gali būti pridėtas kaip **pasirinktinis su OpenAI suderinamas** teikėjas. Naudokite lygiaverčio mazgo `/v1` bazinį URL ir specialų, mažiausių būtinų teisių principu to mazgo išduotą API raktą.
 
-Abipusėms arba kelių šuolių grandinėms įjunkite pasirinkimo kilpos apsaugą kiekviename šliuze:
+Abipusėms arba kelių etapų grandinėms kiekviename tinklų sietuve įjunkite pasirenkamą apsaugą nuo kilpų:
 
 ```bash
 # gateway-a
@@ -770,13 +775,13 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Tik užklausos, išsiųstos aiškiai įtrauktam lygiaverčiui URL sąrašui, gauna `X-OmniRoute-Peer-Trace` antraštę. Šliuzas atmeta kartotinį ID egzempliorių arba išnaudotą šuolio biudžetą su HTTP `508 Loop Detected`; įprasti tiekėjai negauna lygiaverčių metaduomenų.
+`X-OmniRoute-Peer-Trace` antraštę gauna tik į aiškiai leistinų lygiaverčių mazgų URL sąrašą įtrauktu adresu siunčiamos užklausos. Tinklų sietuvas atmeta pasikartojantį egzemplioriaus ID arba išnaudotą leidžiamų etapų limitą, grąžindamas HTTP `508 Loop Detected`; įprasti aukštesnio lygio teikėjai negauna jokių lygiaverčių mazgų metaduomenų.
 
-Bendradarbiavimo grandinė nėra duomenų bazės replikacija ar pagrindinio kompiuterio perkėlimas. Kiekvienas šliuzas išlaiko nepriklausomą SQLite būseną, talpyklas, tarifų skaitiklius ir seansus. Norėdami nustatyti active/passive arba active/active pasiekiamumą, naudokite patikrintą atvirkštinį tarpinį serverį arba kliento perjungimą ir niekada nejunkite vienos SQLite duomenų bazės į kelis veikiančius OmniRoute egzempliorius.
+Lygiaverčių mazgų grandinės sudarymas nėra duomenų bazės replikavimas ar pagrindinio kompiuterio perjungimas gedimo atveju. Kiekvienas tinklų sietuvas turi nepriklausomą SQLite būseną, podėlius, dažnio skaitiklius ir seansus. Aktyviajam / pasyviajam arba aktyviajam / aktyviajam pasiekiamumui naudokite būklę tikrinantį atvirkštinį tarpinį serverį arba kliento perjungimą gedimo atveju ir niekada neprijunkite vienos SQLite duomenų bazės prie kelių veikiančių OmniRoute egzempliorių.
 
-### Dedikuotų paslaugų teikėjų maršrutai
+### Specialieji teikėjų maršrutai
 
-Nukreipkite užklausas tiesiai konkrečiam teikėjui su modelio patvirtinimu:
+Nukreipkite užklausas tiesiogiai konkrečiam teikėjui, kartu patikrindami modelį:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -784,140 +789,140 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-Teikėjo priešdėlis pridedamas automatiškai, jei jo nėra. Neatitinkantys modeliai grąžina `400`.
+Jei teikėjo priešdėlio nėra, jis pridedamas automatiškai. Neatitinkantiems modeliams grąžinamas `400`.
 
 ### Tinklo tarpinio serverio konfigūracija
 
 ```bash
-# Set global proxy
+# Nustatyti visuotinį tarpinį serverį
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# Per-provider proxy
+# Atskiro teikėjo tarpinis serveris
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# Test proxy
+# Patikrinti tarpinį serverį
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**Pirmenybė:** Konkretaus rakto → Kombinuoti specifinis → Konkrečiam teikėjui skirtas → Global → aplinka.
+**Pirmenybė:** konkretaus rakto → konkretaus derinio → konkretaus teikėjo → visuotinė → aplinkos.
 
-### Modelių katalogas API
+### Modelių katalogo API
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-Pateikiami modeliai, sugrupuoti pagal teikėją ir tipus (`chat`, `embedding`, `image`).
+Grąžina pagal teikėjus sugrupuotus modelius su tipais (`chat`, `embedding`, `image`).
 
-### Debesų sinchronizavimas
+### Sinchronizavimas debesyje
 
-- Sinchronizuokite teikėjus, derinius ir nustatymus visuose įrenginiuose
-- Automatinis foninis sinchronizavimas su skirtuoju laiku + greitai
-- Gamyboje teikti pirmenybę serverio `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL`
+- Teikėjų, derinių ir nustatymų sinchronizavimas tarp įrenginių
+- Automatinis foninis sinchronizavimas su skirtuoju laiku ir greitu nutraukimu įvykus klaidai
+- Produkcinėje aplinkoje pirmenybę teikite serverio pusės `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL`
 
-### Cloudflare greitasis tunelis
+### Cloudflare spartusis tunelis
 
-- Galima įsigyti** Prietaisų skydelis → galutiniai taškai** Docker ir kitiems savarankiškai priglobtam diegimui
-- Sukuria laikiną `https://*.trycloudflare.com` URL, kuris persiunčia į dabartinį su OpenAI suderinamą `/v1` galinį tašką
-- Pirmiausia įgalinti įdiegia `cloudflared` tik tada, kai reikia; vėliau paleidžiant iš naujo pakartotinai naudoja tą patį valdomą dvejetainį failą
-- Greitieji tuneliai nėra automatiškai atkuriami iš naujo paleidus OmniRoute arba konteinerį; prireikus vėl įjunkite juos iš prietaisų skydelio
-- Tunelio URLs yra trumpalaikiai ir keičiasi kiekvieną kartą, kai stop/start tunelį
-- Tvarkomuose greituosiuose tuneliuose numatytasis HTTP/2 transportavimas, kad būtų išvengta triukšmingų QUIC UDP buferio įspėjimų apribotuose konteineriuose
-- Jei norite nepaisyti valdomo transporto pasirinkimo, nustatykite `CLOUDFLARED_PROTOCOL=quic` arba `auto`
-- Nustatykite `CLOUDFLARED_BIN` jei norite naudoti iš anksto įdiegtą `cloudflared` dvejetainį failą, o ne valdomą atsisiuntimą
-- Cloudflare Quick Tunnel, Tailscale Funnel ir ngrok Tunnel skydeliai gali būti rodomi arba paslėpti** Nustatymai → Išvaizda** . Paslėpus skydelį, važiuojantis tunelis nesustabdomas.
+- Pasiekiama skiltyje **Valdymo skydelis → Galiniai taškai**, naudojant Docker ir kitus savarankiškai talpinamus diegimus
+- Sukuria laikiną `https://*.trycloudflare.com` URL, kuris nukreipia į dabartinį su OpenAI suderinamą `/v1` galinį tašką
+- Pirmą kartą įjungus, `cloudflared` įdiegiamas tik tada, kai jo reikia; vėliau paleidžiant iš naujo naudojamas tas pats valdomas dvejetainis failas
+- „Quick Tunnels“ nėra automatiškai atkuriami iš naujo paleidus OmniRoute arba konteinerį; prireikus vėl juos įjunkite valdymo skydelyje
+- Tunelių URL yra laikini ir keičiasi kiekvieną kartą sustabdžius ir paleidus tunelį
+- Valdomi „Quick Tunnels“ pagal numatytąsias nuostatas naudoja HTTP/2 perdavimą, kad ribotų išteklių konteineriuose būtų išvengta triukšmingų QUIC UDP buferio įspėjimų
+- Nustatykite `CLOUDFLARED_PROTOCOL=quic` arba `auto`, jei norite pakeisti valdomo perdavimo parinktį
+- Nustatykite `CLOUDFLARED_BIN`, jei vietoje valdomo atsisiuntimo norite naudoti iš anksto įdiegtą `cloudflared` dvejetainį failą
+- Cloudflare Quick Tunnel, Tailscale Funnel ir ngrok Tunnel skydelius galima rodyti arba slėpti skiltyje **Nustatymai → Išvaizda**. Paslėpus skydelį veikiantis tunelis nesustabdomas.
 
-### LLM Gateway Intelligence“ (9 etapas)
+### LLM šliuzo intelektika (9 etapas)
 
-- **Semantinė talpykla** - Automatiškai talpykloje neperduodama, temperatūra = 0 (apeiti naudojant `X-OmniRoute-No-Cache: true`)
-- **Prašyti Idempotencijos** — Per 5 sek. per `Idempotency-Key` arba `X-Request-Id` antraštę panaikina užklausų dublikatus
-- **Pažangos stebėjimas** — Pasirinkite SSE `event: progress` įvykius per `X-OmniRoute-Progress: true` antraštę
+- **Semantinė podėlio atmintinė** — automatiškai išsaugo podėlyje nesrautinius atsakymus, kurių temperatūra lygi 0 (apeikite naudodami `X-OmniRoute-No-Cache: true`)
+- **Užklausų idempotentiškumas** — per 5 sek. pašalina pasikartojančias užklausas pagal `Idempotency-Key` arba `X-Request-Id` antraštę
+- **Eigos stebėjimas** — pasirinktiniai SSE `event: progress` įvykiai, įjungiami naudojant `X-OmniRoute-Progress: true` antraštę
 
 ---
 
-### Vertėjo žaidimų aikštelė
+### Vertėjo bandymų aplinka
 
-Prieiga per** Prietaisų skydelio → vertėjas** . Derinkite ir įsivaizduokite, kaip OmniRoute verčia API užklausas tarp tiekėjų.
+Pasiekiama per **Valdymo skydelis → Vertėjas**. Derinkite ir vizualizuokite, kaip OmniRoute verčia API užklausas tarp teikėjų.
 
-| Režimas                    | Tikslas                                                                                                  |
-| -------------------------- | -------------------------------------------------------------------------------------------------------- |
-| **Žaidimų aikštelė**       | Pasirinkite source/target formatus, įklijuokite užklausą ir akimirksniu pamatysite išverstą išvestį      |
-| **Pokalbių testeris**      | Siųskite tiesioginio pokalbio pranešimus per tarpinį serverį ir patikrinkite visą request/response ciklą |
-| **Bandymų stendas**        | Vykdykite paketinius kelių formatų derinių testus, kad patikrintumėte vertimo teisingumą                 |
-| **Tiesioginis monitorius** | Stebėkite vertimus realiuoju laiku, kai užklausos perduodamos per tarpinį serverį                        |
+| Režimas                    | Paskirtis                                                                                                     |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Bandymų aplinka**        | Pasirinkite šaltinio ir paskirties formatus, įklijuokite užklausą ir iškart peržiūrėkite išverstą išvestį     |
+| **Pokalbių testuoklis**    | Siųskite tiesioginius pokalbių pranešimus per tarpinį serverį ir tikrinkite visą užklausos bei atsakymo ciklą |
+| **Testavimo stendas**      | Vykdykite paketinius kelių formatų derinių testus, kad patikrintumėte vertimo teisingumą                      |
+| **Tiesioginis stebėjimas** | Stebėkite vertimus realiuoju laiku, kai užklausos perduodamos per tarpinį serverį                             |
 
 **Naudojimo atvejai:**
 
-- Derinti, kodėl nepavyksta konkretus client/provider derinys
-- Patikrinkite, ar mąstymo žymos, įrankių iškvietimai ir sistemos raginimai verčiami teisingai
-- Palyginkite formatų skirtumus tarp OpenAI, Claude, Gemini ir Responses API formatų
+- Nustatykite, kodėl konkretus kliento ir teikėjo derinys neveikia
+- Patikrinkite, ar mąstymo žymos, įrankių iškvietimai ir sistemos raginimai išverčiami tinkamai
+- Palyginkite OpenAI, Claude, Gemini ir Responses API formatų skirtumus
 
 ---
 
-### Maršruto strategijos
+### Maršruto parinkimo strategijos
 
-Konfigūruoti per** Prietaisų skydelis → Nustatymai → Maršrutas** . Prietaisų skydelyje pateikiamos šešios dažniausiai naudojamos strategijos; kombinacijos ir automatinis maršruto parinktuvas viduje palaiko platesnį rinkinį.
+Konfigūruokite skiltyje **Valdymo skydelis → Nustatymai → Maršruto parinkimas**. Valdymo skydelyje pateikiamos šešios dažniausiai naudojamos strategijos; deriniai ir automatinis maršruto parinktuvas viduje palaiko platesnį strategijų rinkinį.
 
-**Informacijos suvestinėje matomos strategijos (paskyros lygio maršrutas):**
+**Valdymo skydelyje matomos strategijos (paskyros lygmens maršruto parinkimas):**
 
-| strategija                         | Aprašymas                                                                                                   |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| **Pirmiausia užpildykite**         | Naudoja paskyras prioritetine tvarka – pagrindinė paskyra apdoroja visas užklausas, kol jos nepasiekiamos   |
-| **Apvalus Robinas**                | Pereina per visas paskyras su konfigūruojamu fiksavimo limitu (numatytasis: 3 skambučiai vienoje paskyroje) |
-| **P2C (dviejų pasirinkimų galia)** | Atsitiktinai pasirenka 2 paskyras ir kelius į sveikesnę – subalansuoja apkrovą ir sveikatos suvokimą        |
-| **Atsitiktinis**                   | Atsitiktinai pasirenka paskyrą kiekvienai užklausai naudodamas Fisher-Yates shuffle                         |
-| **Mažiausiai naudotas**            | Maršrutai į paskyrą su seniausia `lastUsedAt` laiko žyma, tolygiai paskirstant srautą                       |
-| **Optimizuotos išlaidos**          | Maršrutai į paskyrą, kurios prioriteto vertė yra mažiausia, optimizuojama pigiausių paslaugų teikėjams      |
+| Strategija                         | Aprašas                                                                                                       |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Pirmiausia užpildyti**           | Naudoja paskyras prioriteto tvarka — pagrindinė paskyra apdoroja visas užklausas, kol tampa nepasiekiama      |
+| **Ciklinis paskirstymas**          | Cikliškai naudoja visas paskyras su konfigūruojama susiejimo riba (numatytoji: 3 iškvietimai vienai paskyrai) |
+| **P2C (dviejų pasirinkimų galia)** | Parenka 2 atsitiktines paskyras ir nukreipia į sveikesnę — subalansuoja apkrovą, atsižvelgdama į būklę        |
+| **Atsitiktinė**                    | Kiekvienai užklausai atsitiktinai parenka paskyrą, naudodama Fisher-Yates maišymą                             |
+| **Mažiausiai naudota**             | Nukreipia į paskyrą, kurios `lastUsedAt` laiko žyma seniausia, taip tolygiai paskirstydama srautą             |
+| **Optimizuota pagal kainą**        | Nukreipia į paskyrą, kurios prioriteto reikšmė mažiausia, taip pasirinkdama mažiausios kainos teikėjus        |
 
-**Išplėstinės kombinuotos ir automatinės strategijos** (konfigūruojama kombinacijoje arba naudojant `auto/*` priešdėlius – žr. [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Išplėstinės derinių ir automatinės strategijos** (konfigūruojamos kiekvienam deriniui arba naudojant `auto/*` priešdėlius — žr. [AUTO-COMBO.md](../routing/AUTO-COMBO.md)):
 
-- `priority` - griežta tvarka, niekada nevyksta
-- `weighted` – proporcingas srautas, padalytas pagal kiekvieno modelio svorius
-- `fill-first` - ištuštinkite pirmąjį modelį, kol pasieks ribos
+- `priority` — griežta tvarka, ciklinis paskirstymas niekada nenaudojamas
+- `weighted` — proporcingas srauto paskirstymas pagal kiekvieno modelio svorį
+- `fill-first` — pirmasis modelis naudojamas tol, kol pasiekiami apribojimai
 - `round-robin` / `strict-random` / `random`
 - `p2c` (dviejų pasirinkimų galia)
 - `least-used` ir `cost-optimized`
-- `auto` – visų kandidatų rezultatas
-- `lkgp` (Paskutinis žinomas geras teikėjas) – prisega prie paskutinio sėkmingo teikėjo, tada grįžta prie taisyklių
-- `context-optimized` – pasirenka modelį su didžiausiu laisvo konteksto langu
-- `context-relay` – sujungia ilgo konteksto modelius tolesniems posūkiams
+- `auto` — visų kandidatų pasirinkimas pagal įverčius
+- `lkgp` (paskutinis žinomas geras teikėjas) — naudojamas paskutinis sėkmingai veikęs teikėjas, o tada taikomos atsarginės taisyklės
+- `context-optimized` — parenkamas modelis, turintis didžiausią laisvą konteksto langą
+- `context-relay` — tolesnėms sąveikoms grandine sujungia ilgo konteksto modelius
 
-#### Išorinė lipni seanso antraštė
+#### Išorinė susietos sesijos antraštė
 
-Dėl išorinių seansų giminingumo (pvz., Claude Code/Codex agentai už atvirkštinių tarpinių serverių), atsiųskite:
+Norėdami užtikrinti išorinį sesijos susiejimą (pavyzdžiui, Claude Code/Codex agentams už atvirkštinių tarpinių serverių), siųskite:
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute taip pat priima `x_session_id` ir grąžina galiojantį seanso raktą `X-OmniRoute-Session-Id`.
+OmniRoute taip pat priima `x_session_id` ir grąžina galiojantį sesijos raktą antraštėje `X-OmniRoute-Session-Id`.
 
-Jei naudojate Nginx ir siunčiate pabraukimo formos antraštes, įgalinkite:
+Jei naudojate Nginx ir siunčiate antraštes su pabraukimo brūkšniais, įjunkite:
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### Pakaitos simbolių modelio slapyvardžiai
+#### Modelių pseudonimai su pakaitos simboliais
 
-Sukurkite pakaitos simbolių šablonus, kad pakeistumėte modelių pavadinimus:
-
-```
-Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
-Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
-```
-
-Pakaitos simboliai palaiko `*` (bet kokius simbolius) ir `?` (vieną simbolį).
-
-#### Atsarginės grandinės
-
-Apibrėžkite pasaulines atsargines grandines, taikomas visoms užklausoms:
+Sukurkite šablonus su pakaitos simboliais modelių pavadinimams peradresuoti:
 
 ```
-Chain: production-fallback
+Šablonas: claude-sonnet-*     →  Paskirtis: cc/claude-sonnet-4-6
+Šablonas: gpt-*               →  Paskirtis: gh/gpt-5.3-codex
+```
+
+Pakaitos simboliai palaiko `*` (bet kokie simboliai) ir `?` (vienas simbolis).
+
+#### Atsarginių variantų grandinės
+
+Apibrėžkite visuotines atsarginių variantų grandines, taikomas visoms užklausoms:
+
+```
+Grandinė: production-fallback
   1. cc/claude-opus-4-7
   2. gh/gpt-5.3-codex
   3. glm/glm-4.7
@@ -925,22 +930,22 @@ Chain: production-fallback
 
 ---
 
-### Įprasti teikėjų deriniai ir maršruto parinkimo šablonai
+### Dažniausi teikėjų deriniai ir maršruto parinkimo šablonai
 
-Čia pateikiami kelių teikėjų derinimo ir maršruto tarp jų OmniRoute modelių pavyzdžiai:
+Toliau pateikiami keli kelių teikėjų sujungimo ir maršruto tarp jų parinkimo OmniRoute pavyzdžiai:
 
-#### 1. Kodavimo agento derinys: aukščiausios klasės samprotavimai su Cost/Speed atsarginiu variantu
+#### 1. Programavimo agento derinys: aukšto lygio samprotavimas su atsarginiu kainos ir spartos pasirinkimu
 
-Idealiai tinka kodavimo agentams (OpenCode, Claude Code, Cursor, Cline). Iš pradžių nukreipiama į pasienio samprotavimo modelius, grįžtama prie greito kodavimo modelių, susijusių su kvotos išnaudojimu arba klaidomis.
+Idealiai tinka programavimo agentams (OpenCode, Claude Code, Cursor, Cline). Iš pradžių užklausos nukreipiamos į pažangiausius samprotavimo modelius, o išnaudojus kvotą arba įvykus klaidoms pereinama prie sparčių programavimo modelių.
 
-- **Prietaisų skydelis** : Combos → Naujas Combo → Pavadinimas: `agent-coding` → Strategija: `Priority`
-- **Modeliai** :
-  1. `claude/claude-sonnet-4-6` (pagrindinis kodavimo agentas)
-  2. `openai/gpt-4o` (antrinė didelės talpos atsarginė priemonė)
-  3. `deepseek/deepseek-v4-flash` (didelio efektyvumo, ekonomiškas atsarginis variantas)
+- **Valdymo skydelis**: Deriniai → Naujas derinys → Pavadinimas: `agent-coding` → Strategija: `Priority`
+- **Modeliai**:
+  1. `claude/claude-sonnet-4-6` (pagrindinis programavimo agentas)
+  2. `openai/gpt-4o` (antrinis didelio pajėgumo atsarginis variantas)
+  3. `deepseek/deepseek-v4-flash` (didelio efektyvumo ir ekonomiškas atsarginis variantas)
 
 ```bash
-# Example via API
+# Pavyzdys naudojant API
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
@@ -955,179 +960,183 @@ curl -X POST http://localhost:20128/api/combos \
   }'
 ```
 
-#### 2. Laisvos pakopos automatinio perkėlimo derinys
+#### 2. Automatinio perjungimo tarp nemokamo lygio paslaugų derinys
 
-Sujungia kelis laisvos pakopos ir berakčius tiekėjus, kad maksimaliai padidintų veikimo laiką be API išlaidų.
+Sujungia kelis nemokamo lygio ir rakto nereikalaujančius teikėjus, kad būtų maksimaliai padidintas pasiekiamumas be API išlaidų.
 
-- **strategija** : `Least Used` arba `Round Robin` (paskirsto apkrovą pagal kvotas)
-- **Modeliai** :
+- **Strategija**: `Least Used` arba `Round Robin` (paskirsto apkrovą tarp kvotų)
+- **Modeliai**:
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
   3. `cerebras/gpt-oss-120b`
 
 ```bash
-# Example via CLI
+# Pavyzdys naudojant CLI
 omniroute combo create free-stack \
   --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
   --strategy round-robin
 ```
 
-#### 3. Multimodalinis / Vision & Text Pipeline
+#### 3. Daugiarūšio turinio / vaizdų ir teksto konvejeris
 
-Specializuotų regėjimo modelių susiejimas su didelės spartos teksto generavimu darbo eigoms, apimančioms vaizdo supratimą ir kodo generavimą.
+Specializuoti vaizdų modeliai derinami su sparčiu teksto generavimu darbo eigoms, apimančioms vaizdų supratimą ir kodo generavimą.
 
-- **Šablonas** : `Priority` derinys, kuriame pirmiausia pateikiami regėjimą turintys modeliai, o paskutinis – didelio našumo text/code modelis.
-- **Modeliai** :
-  1. `gemini/gemini-2.5-pro` (stiprus image/multimodal supratimas)
-  2. `openai/gpt-4o` (subalansuotas regėjimas ir įrankių naudojimas)
-  3. `deepseek/deepseek-v4-flash` (Text/code karta)
+- **Šablonas**: `Priority` derinys, kuriame pirmiausia nurodomi vaizdus apdorojantys modeliai, o paskutinis – didelio našumo teksto / kodo modelis.
+- **Modeliai**:
+  1. `gemini/gemini-2.5-pro` (Puikus vaizdų ir daugiarūšio turinio supratimas)
+  2. `openai/gpt-4o` (Subalansuotas vaizdų apdorojimas ir įrankių naudojimas)
+  3. `deepseek/deepseek-v4-flash` (Teksto / kodo generavimas)
 
 ---
 
 ### Atsparumas ir grandinės pertraukikliai
 
-Konfigūruoti per** Prietaisų skydelis → Nustatymai → Atsparumas** .
+Konfigūruokite per **Valdymo skydas → Nustatymai → Atsparumas**.
 
-OmniRoute įgyvendina teikėjo lygio atsparumą su penkiais komponentais:
+OmniRoute užtikrina teikėjo lygmens atsparumą naudodama penkis komponentus:
 
-1. **Prašyti eilės ir tempo** — Sistemos lygio užklausos formavimas:
-   - **Užklausos per minutę (RPM)** – Maksimalus užklausų skaičius per minutę vienoje paskyroje
-   - **Minimalus laikas tarp užklausų** — Minimalus tarpas tarp užklausų milisekundėmis
-   - **Maksimalus vienu metu vykstančių užklausų skaičius** — Didžiausias užklausų skaičius vienu metu vienoje paskyroje
+1. **Užklausų eilė ir dažnio valdymas** — Sistemos lygmens užklausų srauto formavimas:
+   - **Užklausos per minutę (RPM)** — Didžiausias vienai paskyrai tenkantis užklausų skaičius per minutę
+   - **Mažiausias laikas tarp užklausų** — Mažiausias tarpas milisekundėmis tarp užklausų
+   - **Didžiausias lygiagrečių užklausų skaičius** — Didžiausias vienai paskyrai tenkantis vienu metu vykdomų užklausų skaičius
 
-2. **Ryšio vėsinimas** — Autentiškumo tipo konfigūracija vienam ryšiui po pakartotinai bandomų gedimų:
-   - **Bazinis aušinimas** — Numatytasis atvėsimo langas, skirtas pakartotiniam gedimui prieš srovę
-   - **Naudokite prieš srovę bandyti dar kartą patarimus** — Gerbiamos autoritetingos `Retry-After` arba iš naujo nustatomos užuominos, kai jos pateikiamos
-   - **Maks. atsitraukimo žingsniai** — Maksimalus eksponentinis atsitraukimo lygis pasikartojantiems gedimams
+2. **Ryšio atvėsimo laikotarpis** — Kiekvienam autentifikavimo tipui atskirai taikoma vieno ryšio konfigūracija po klaidų, leidžiančių pakartoti užklausą:
+   - **Bazinis atvėsimo laikotarpis** — Numatytasis atvėsimo laikotarpis po teikėjo klaidų, leidžiančių pakartoti užklausą
+   - **Naudoti teikėjo pakartojimo užuominas** — Atsižvelgiama į patikimas `Retry-After` arba atstatymo užuominas, kai jos pateikiamos
+   - **Didžiausias atidėjimo žingsnių skaičius** — Didžiausias eksponentinio atidėjimo lygis pasikartojančių klaidų atveju
 
-3. **Tiekėjo grandinės pertraukiklis** – Stebi tiekėjo gedimus iki galo, pažymi teikėją, kuris pablogėjo iki sukonfigūruoto įspėjimo slenksčio, ir atidaro pertraukiklį, kai pasiekiamas sukonfigūruotas gedimo slenkstis:
-   - **Degradacijos slenkstis** — Iš eilės teikėjo gedimai prieš įeinant į `DEGRADED`
-   - **Nesėkmės slenkstis** — Iš eilės teikėjo gedimai prieš įeinant į `OPEN`
-   - **Iš naujo nustatyti skirtąjį laiką** — Laiko intervalas, kol teikėjas bus išbandytas dar kartą
-   - **CLOSED** (Sveikas) – užklausos vyksta įprastai
-   - **DEGRADED** — Užklausos vis dar teikiamos, kol stebimi didesni gedimai
-   - **OPEN** — Teikėjas laikinai blokuojamas po pasikartojančių gedimų
-   - **HALF_OPEN** — Tikrinama, ar paslaugų teikėjas atsigavo
+3. **Teikėjo grandinės pertraukiklis** — Stebi galutines teikėjo klaidas, pažymi teikėją kaip sutrikusį pasiekus sukonfigūruotą įspėjimo slenkstį ir atveria pertraukiklį, kai pasiekiamas sukonfigūruotas klaidų slenkstis:
+   - **Sutrikimo slenkstis** — Nuoseklių teikėjo klaidų skaičius prieš pereinant į būseną `DEGRADED`
+   - **Klaidų slenkstis** — Nuoseklių teikėjo klaidų skaičius prieš pereinant į būseną `OPEN`
+   - **Atstatymo skirtasis laikas** — Laikotarpis, po kurio teikėjas išbandomas dar kartą
+   - **CLOSED** (Veikia tinkamai) — Užklausos perduodamos įprastai
+   - **DEGRADED** — Užklausos vis dar perduodamos, kol stebimas padidėjęs klaidų skaičius
+   - **OPEN** — Po pasikartojančių klaidų teikėjas laikinai blokuojamas
+   - **HALF_OPEN** — Tikrinama, ar teikėjo veikimas atkurtas
 
-   Ryšio apimties `429` normos ribos išlieka** Ryšio vėsinimas** ir neįskaičiuojami į teikėjo pertraukiklį.
+   Konkrečiam ryšiui taikomi `429` spartos apribojimai lieka **Ryšio atvėsimo laikotarpyje** ir nėra įskaičiuojami į teikėjo pertraukiklį.
 
-   Rodoma teikėjo pertraukiklio vykdymo būsena** Prietaisų skydelis → Health** tik.
+   Teikėjo pertraukiklio vykdymo būsena rodoma tik puslapyje **Valdymo skydas → Būklė**.
 
-4. **Palaukite atvėsimo** — Jei kiekvienas potencialus ryšys jau atvėsęs, OmniRoute gali palaukti anksčiausio atšalimo ir automatiškai pakartoti tą patį kliento užklausą.
+4. **Laukti atvėsimo laikotarpio** — Jei visi galimi ryšiai jau yra atvėsimo būsenoje, OmniRoute gali palaukti, kol baigsis anksčiausiai pasibaigiantis atvėsimo laikotarpis, ir automatiškai pakartoti tą pačią kliento užklausą.
 
-5. **Normos ribos automatinis aptikimas** — Kai tiekėjai grąžina aiškų laukimo langus, šios užuominos nepaiso vietinio ryšio atvėsimo, kai nustatymas įgalintas.
+5. **Automatinis spartos apribojimo aptikimas** — Kai išoriniai teikėjai grąžina aiškius laukimo laikotarpius, įjungus šį nustatymą tos užuominos pakeičia vietinį ryšio atvėsimo laikotarpį.
 
-**Pro patarimas:** Naudokite** Sveikata** puslapį, kad patikrintumėte ir iš naujo nustatytumėte tiesioginius teikėjo pertraukiklius po gedimo. Atsparumo puslapis keičia tik konfigūraciją.
+**Profesionalo patarimas:** Naudokite puslapį **Būklė**, kad patikrintumėte ir iš naujo nustatytumėte veikiančius teikėjų pertraukiklius po veikimo sutrikimo. Puslapyje „Atsparumas“ keičiama tik konfigūracija.
 
 ---
 
-### Duomenų bazės eksportas / importas
+### Duomenų bazės eksportavimas / importavimas
 
-Tvarkykite duomenų bazės atsargines kopijas** Prietaisų skydelis → Nustatymai → Sistema ir saugykla** .
+Tvarkykite duomenų bazės atsargines kopijas skiltyje **Valdymo skydas → Nustatymai → Sistema ir saugykla**.
 
-| Veiksmas                        | Aprašymas                                                                                                                                                          |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Eksportuoti duomenų bazę**    | Atsisiunčiama dabartinė SQLite duomenų bazė kaip `.sqlite` failas                                                                                                  |
-| **Eksportuoti viską (.tar.gz)** | Atsisiunčiamas visas atsarginės kopijos archyvas, įskaitant: duomenų bazę, nustatymus, derinius, tiekėjo ryšius (be kredencialų), API rakto metaduomenis           |
-| **Importuoti duomenų bazę**     | Įkelkite `.sqlite` failą, kad pakeistumėte dabartinę duomenų bazę. Atsarginė kopija prieš importą sukuriama automatiškai, nebent `DISABLE_SQLITE_AUTO_BACKUP=true` |
+| Veiksmas                        | Aprašymas                                                                                                                                                              |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Eksportuoti duomenų bazę**    | Atsisiunčia dabartinę SQLite duomenų bazę kaip `.sqlite` failą                                                                                                         |
+| **Eksportuoti viską (.tar.gz)** | Atsisiunčia visą atsarginės kopijos archyvą, apimantį: duomenų bazę, nustatymus, derinius, teikėjų ryšius (be prisijungimo duomenų), API raktų metaduomenis            |
+| **Importuoti duomenų bazę**     | Įkelia `.sqlite` failą, kuriuo pakeičiama dabartinė duomenų bazė. Prieš importuojant automatiškai sukuriama atsarginė kopija, nebent `DISABLE_SQLITE_AUTO_BACKUP=true` |
 
 ```bash
-# API: Export database
+# API: eksportuoti duomenų bazę
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: Export all (full archive)
+# API: eksportuoti viską (visą archyvą)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: Import database
+# API: importuoti duomenų bazę
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**Importo patvirtinimas:** Importuotas failas patvirtinamas dėl vientisumo (SQLite pragma check ), reikalingų lentelių (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) ir dydžio (maks. 100 MB).
+**Importavimo patikra:** Patikrinamas importuoto failo vientisumas (SQLite „pragma“ patikra), privalomos lentelės (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) ir dydis (ne daugiau kaip 100 MB).
 
 **Naudojimo atvejai:**
 
-- Perkelkite OmniRoute tarp mašinų
-- Sukurkite išorines atsargines kopijas, kad atkurtumėte nelaimės atveju
-- Bendrinkite konfigūracijas tarp komandos narių (eksportuokite visą → bendrinimo archyvą)
+- Perkelti OmniRoute iš vieno kompiuterio į kitą
+- Kurti išorines atsargines kopijas atkūrimui po nelaimės
+- Bendrinti konfigūracijas tarp komandos narių (eksportuoti viską → bendrinti archyvą)
 
 ---
 
-### Nustatymų prietaisų skydelis
+### Nustatymų valdymo skydas
 
-Nustatymų puslapis suskirstytas į** 7 skirtukai** kad būtų lengviau naršyti:
+Kad būtų lengviau naršyti, nustatymų puslapis suskirstytas į **7 skirtukus**:
 
-| Skirtukas      | Turinys                                                                                                                                                                                                                               |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Generolas**  | Sistemos saugojimo įrankiai, numatytasis elgesys, galutinio taško tunelio matomumas                                                                                                                                                   |
-| **Išvaizda**   | Temos valdikliai (light/dark/system), šoninės juostos matomumas, skydelio perjungimai Cloudflare/Tailscale/ngrok tunelinėms kortelėms                                                                                                 |
-| **AI**         | Mąstomas biudžetas (pereinamoji / automatinė juostelė / tinkintas / adaptyvus – žr. [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), pasaulinė sistemos raginimas, sparčios talpyklos statistika                                         |
-| **Saugumas**   | Login/Password nustatymai, IP prieigos valdymas, API autentifikavimas `/models`, teikėjo blokavimas, greito įpurškimo apsauga                                                                                                         |
-| **Maršrutas**  | Visuotinė maršruto parinkimo strategija (Fill First / Round Robin / P2C / Atsitiktinis / Mažiausiai naudojamas / Optimizuota kaina), pakaitos simbolių modelio slapyvardžiai, atsarginės grandinės, kombinuoti numatytieji nustatymai |
-| **Atsparumas** | Užklausa dėl eilės, ryšio atvėsimo, teikėjo pertraukiklio konfigūracijos ir laukimo, kol atvėsimas                                                                                                                                    |
-| **Išplėstinė** | Visuotinė tarpinio serverio konfigūracija (HTTP/SOCKS5), tarpinio serverio nepaisymas pagal teikėją                                                                                                                                   |
+| Skirtukas           | Turinys                                                                                                                                                                                                                                                       |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Bendrieji**       | Sistemos saugyklos įrankiai, numatytoji elgsena, galinių tunelių matomumas                                                                                                                                                                                    |
+| **Išvaizda**        | Temos valdikliai (šviesi / tamsi / sistemos), šoninės juostos matomumas, Cloudflare / Tailscale / ngrok tunelių kortelių skydelių perjungikliai                                                                                                               |
+| **DI**              | Mąstymo biudžetas (perdavimas nepakeitus / automatinis pašalinimas / pasirinktinis / adaptyvusis — žr. [THINKING_BUDGET.md](./THINKING_BUDGET.md)), visuotinis sistemos raginimas, raginimų podėlio statistika                                                |
+| **Sauga**           | Prisijungimo / slaptažodžio nuostatos, IP prieigos valdymas, `/models` API autentifikavimas, teikėjų blokavimas, apsauga nuo raginimų injekcijos                                                                                                              |
+| **Maršrutizavimas** | Visuotinė maršrutizavimo strategija (pirmiausia užpildyti / ciklinis / P2C / atsitiktinis / mažiausiai naudotas / optimizuotas pagal kainą), modelių pakaitiniai vardai su pakaitos simboliais, atsarginių variantų grandinės, numatytosios derinių nuostatos |
+| **Atsparumas**      | Užklausų eilė, ryšio atvėsimo laikotarpis, teikėjo grandinės pertraukiklio konfigūracija ir laukimo, kol baigsis atvėsimo laikotarpis, elgsena                                                                                                                |
+| **Išplėstiniai**    | Visuotinė tarpinio serverio konfigūracija (HTTP/SOCKS5), atskiri kiekvieno teikėjo tarpinio serverio perrašymai                                                                                                                                               |
 
-Bendra nebedubliuoja tik skaitymo registravimo ir talpyklos pastabų. Duomenų bazės saugojimo ir optimizavimo nustatymai išlieka per `/api/settings/database`; rankinis talpyklos išvalymas naudoja `DELETE /api/cache`. Užklausų ir tarpinio serverio žurnalo eilučių viršutines ribas valdo `CALL_LOGS_TABLE_MAX_ROWS` ir `PROXY_LOGS_TABLE_MAX_ROWS`.
+Skiltyje „Bendrieji“ nebedubliuojamos tik skaityti skirtos žurnalų ir podėlio pastabos. Duomenų bazės saugojimo ir
+optimizavimo nuostatos išsaugomos per `/api/settings/database`; podėliui rankiniu būdu išvalyti naudojama
+`DELETE /api/cache`. Užklausų ir tarpinio serverio žurnalų eilučių ribas valdo
+`CALL_LOGS_TABLE_MAX_ROWS` ir `PROXY_LOGS_TABLE_MAX_ROWS`.
 
 ---
 
-### Išlaidos ir biudžeto valdymas
+### Išlaidų ir biudžeto valdymas
 
-Prieiga per** Prietaisų skydelio → išlaidos** .
+Pasiekiama per **Valdymo skydas → Išlaidos**.
 
-| Skirtukas     | Tikslas                                                                                                             |
-| ------------- | ------------------------------------------------------------------------------------------------------------------- |
-| **Biudžetas** | Nustatykite išlaidų limitus vienam API raktui naudodami daily/weekly/monthly biudžetus ir stebėjimą realiuoju laiku |
-| **Kainodara** | Peržiūrėkite ir redaguokite modelio kainodaros įrašus – kaina už 1 tūkst. input/output žetonų vienam teikėjui       |
+| Skirtukas     | Paskirtis                                                                                                          |
+| ------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **Biudžetas** | Nustatyti kiekvieno API rakto išlaidų ribas su dienos / savaitės / mėnesio biudžetais ir stebėjimu realiuoju laiku |
+| **Kainodara** | Peržiūrėti ir redaguoti modelių kainodaros įrašus — 1 tūkst. įvesties / išvesties žetonų kaina kiekvienam teikėjui |
 
 ```bash
-# API: Set a budget
+# API: nustatyti biudžetą
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: Get current budget status
+# API: gauti dabartinę biudžeto būseną
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Išlaidų stebėjimas:** Kiekviena užklausa registruoja prieigos rakto naudojimą ir apskaičiuoja kainą naudojant kainodaros lentelę. Peržiūrėkite suskirstymą** Prietaisų skydelio → naudojimas** pagal teikėją, modelį ir API raktą.
+**Išlaidų stebėjimas:** kiekvienai užklausai registruojamas žetonų naudojimas, o išlaidos apskaičiuojamos pagal kainodaros lentelę. Išskaidymą pagal teikėją, modelį ir API raktą galite peržiūrėti skiltyje **Valdymo skydas → Naudojimas**.
 
 ---
 
-### Garso transkripcija
+### Garso transkribavimas
 
-OmniRoute palaiko garso transkripciją per su OpenAI suderinamą galinį tašką:
+OmniRoute palaiko garso transkribavimą per su OpenAI suderinamą galinį tašką:
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# Example with curl
+# Pavyzdys su curl
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` yra vietinis Deepgram maršrutas ir jam reikia Deepgram API rakto. Jei sukonfigūruotas tik OpenRouter, naudokite `openrouter/deepgram/nova-3`.
+`deepgram/nova-3` yra savasis Deepgram maršrutas, kuriam reikia Deepgram API rakto.
+Jei sukonfigūruotas tik OpenRouter, naudokite `openrouter/deepgram/nova-3`.
 
-**Kalbos keitimas į tekstą (transkripcija)** teikėjai:
+**Kalbos vertimo tekstu (transkribavimo)** teikėjai:
 
-- `openai/` (suderinamas su šnabždesiais)
+- `openai/` (suderinama su whisper)
 - `groq/` (Groq Whisper Turbo)
 - `deepgram/` (Nova šeima)
 - `assemblyai/`
-- `nvidia/` (parakeet, Kanarų salos)
-- `huggingface/` (šnabždesio variantai)
+- `nvidia/` (Parakeet, Canary)
+- `huggingface/` (whisper variantai)
 - `qwen/`
 
-**Tekstas į kalbą (`POST /v1/audio/speech`)** teikėjai:
+**Teksto vertimo kalba (`POST /v1/audio/speech`)** teikėjai:
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
 - `deepgram/` (Aura)
-- `nvidia/` (Šarka TTS)
+- `nvidia/` (Magpie TTS)
 - `elevenlabs/`
 - `huggingface/`
 - `inworld/`
@@ -1139,45 +1148,56 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-Palaikomi transkripcijos garso formatai: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. TTS išvesties formatai priklauso nuo teikėjo (mp3, wav, opus, pcm, mulaw).
+Palaikomi transkribavimo garso formatai: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. TTS išvesties formatai priklauso nuo teikėjo (mp3, wav, opus, pcm, mulaw).
 
 ---
 
-### Kombinuotos balansavimo strategijos
+### Derinių balansavimo strategijos
 
-Konfigūruokite derinį balansavimą** Prietaisų skydelis → Combos → Create/Edit → strategija** .
+Kiekvieno derinio balansavimą konfigūruokite skiltyje **Valdymo skydas → Deriniai → Kurti / redaguoti → Strategija**.
 
-| strategija                | Aprašymas                                                                          |
-| ------------------------- | ---------------------------------------------------------------------------------- |
-| **Round-Robin**           | Paeiliui sukasi per modelius                                                       |
-| **Pirmenybė**             | Visada bando pirmąjį modelį; grįžta tik dėl klaidos                                |
-| **Atsitiktinis**          | Kiekvienai užklausai iš derinio pasirenka atsitiktinį modelį                       |
-| **Svertinis**             | Maršrutai proporcingai pagrįsti priskirtais svoriais kiekvienam modeliui           |
-| **Mažiausiai naudotas**   | Maršrutai į modelį su mažiausiai naujausių užklausų (naudojama kombinuota metrika) |
-| **Optimizuotas sąnaudas** | Maršrutai į pigiausią turimą modelį (naudoja kainų lentelę)                        |
+| Strategija                     | Aprašas                                                                                  |
+| ------------------------------ | ---------------------------------------------------------------------------------------- |
+| **Ciklinė**                    | Modeliai naudojami paeiliui                                                              |
+| **Prioritetinė**               | Visada pirmiausia bandomas pirmasis modelis; atsarginis naudojamas tik įvykus klaidai    |
+| **Atsitiktinė**                | Kiekvienai užklausai iš derinio parenkamas atsitiktinis modelis                          |
+| **Svertinė**                   | Maršrutizuoja proporcingai pagal kiekvienam modeliui priskirtus svorius                  |
+| **Mažiausiai naudoto modelio** | Maršrutizuoja į modelį, gavusį mažiausiai naujausių užklausų (naudojama derinio metrika) |
+| **Optimizuota pagal kainą**    | Maršrutizuoja į pigiausią pasiekiamą modelį (naudojama kainodaros lentelė)               |
 
-Galima nustatyti visuotinius kombinuotus numatytuosius nustatymus** Dashboard → Settings → Routing → Combo Numatytieji nustatymai** . Pagal numatytuosius nustatymus kombinuoti tiksliniai skirtieji laikotarpiai paveldi dabartinį užklausos skirtąjį laiką. Naudokite** Tikslinis skirtasis laikas (sekundėmis)** naudojant numatytuosius kombinuotus nustatymus arba atskirą derinį tik tada, kai trumpesnė tikslinė riba turėtų suaktyvinti greitesnį atsarginį režimą.
+Visuotines numatytąsias derinių nuostatas galima nustatyti skiltyje **Valdymo skydas → Nuostatos → Maršrutizavimas → Numatytosios derinių nuostatos**.
+Pagal numatytąją nuostatą derinio paskirties vietų skirtasis laikas paveldi dabartinį užklausos skirtąjį laiką. Parinktį **Paskirties vietos skirtasis laikas
+(sekundėmis)** numatytosiose derinių nuostatose arba atskirame derinyje naudokite tik tada, kai trumpesnė kiekvienos paskirties vietos riba turėtų
+greičiau suaktyvinti atsarginį variantą.
 
-Nulinės delsos derinio optimizavimas yra pasirenkamas. Palikti** Nulinės delsos optimizavimas** išjungta, kad šios delsos funkcijos negalėtų lenktyniauti su atsarginiais tikslais, praleisti taikinius pagal TTFT istoriją arba suspausti atsarginių užklausų; Įgalinus jį, galima sukonfigūruoti apsidraudimą, nuspėjamą TTFT praleidimą ir aktyvų atsarginį glaudinimą, kad būtų galima pakeisti routing/request tikslumą ir sumažinti uodegos delsą.
+Nulinės delsos derinių optimizavimas yra pasirenkamas. Palikite parinktį **Nulinės delsos optimizavimas** išjungtą, kad
+šios delsos funkcijos nepradėtų lygiagrečiai vykdyti atsarginių paskirties vietų, nepraleistų paskirties vietų pagal TTFT
+istoriją ir neglaudintų atsarginių užklausų; ją įjungus, sukonfigūruotas lygiagretusis dubliavimas, prognozuojamieji TTFT
+praleidimai ir aktyvus atsarginių užklausų glaudinimas gali sumažinti didžiausią delsą maršrutizavimo / užklausų tikslumo
+sąskaita.
 
-Išjungti** Samprotavimo prieigos rakto buferis** kai tiekėjai reikalauja griežtų `max_tokens` / `maxOutputTokens` apribojimų. Kai įjungta, kombinuotasis maršrutas prideda tik modelių, kurių išvesties riba yra žinoma, samprotavimo modelio laisvumą ir palieka kliento prieigos rakto ribą nepakitusią, kai saugi buferio vertė viršytų šią ribą. Jei kliento riba jau viršija žinomą viršutinę ribą, OmniRoute sumažina ją iki tos ribos prieš siųsdama užklausą prieš srovę.
+Išjunkite **samprotavimo žetonų buferį**, kai pirminiai paslaugų teikėjai reikalauja griežtų
+`max_tokens` / `maxOutputTokens` apribojimų. Kai ši funkcija įjungta, kombinuotas maršruto parinkimas prideda
+papildomą samprotavimo modelio rezervą tik modeliams, kurių išvesties riba yra žinoma, ir nekeičia kliento žetonų limito, jei
+saugi buferinė reikšmė viršytų tą ribą. Jei kliento limitas jau viršija žinomą ribą,
+prieš siųsdama užklausą pirminiam paslaugų teikėjui „OmniRoute“ sumažina jį iki tos ribos.
 
 ---
 
-### Sveikatos prietaisų skydelis
+### Sistemos būklės suvestinė
 
-Prieiga per** Prietaisų skydelis → Health** . Sistemos būklės apžvalga realiuoju laiku su 6 kortelėmis:
+Pasiekiama per **Valdymo skydas → Sistemos būklė**. Sistemos būklės apžvalga realiuoju laiku, pateikiama 6 kortelėse:
 
-| Kort                       | Ką Tai rodo                                                          |
-| -------------------------- | -------------------------------------------------------------------- |
-| **Sistemos būsena**        | Veikimo laikas, versija, atminties naudojimas, duomenų katalogas     |
-| **Teikėjo sveikata**       | Pasaulinio teikėjo grandinės pertraukiklio vykdymo būsena            |
-| **Kainos ribos**           | Aktyvūs ryšio atvėsimai vienoje paskyroje su likusiu laiku           |
-| **Aktyvūs blokavimai**     | Aktyvūs modelio blokavimai ir laikini išskyrimai                     |
-| **Parašo talpykla**        | Dubliavimo talpyklos statistika (aktyvūs raktai, pataikymo rodiklis) |
-| **Latencijos telemetrija** | p50/p95/p99 delsos agregacija vienam teikėjui                        |
+| Kortelė                    | Kas joje rodoma                                                           |
+| -------------------------- | ------------------------------------------------------------------------- |
+| **Sistemos būsena**        | Veikimo laikas, versija, atminties naudojimas, duomenų katalogas          |
+| **Paslaugų teikėjų būklė** | Visuotinio paslaugų teikėjų grandinės pertraukiklio vykdymo būsena        |
+| **Spartos apribojimai**    | Aktyvūs kiekvienos paskyros ryšio atvėsimo laikotarpiai ir likęs laikas   |
+| **Aktyvūs blokavimai**     | Aktyvūs konkretiems modeliams taikomi blokavimai ir laikinos išimtys      |
+| **Parašų podėlis**         | Dubliavimo šalinimo podėlio statistika (aktyvūs raktai, pataikymų dažnis) |
+| **Delsos telemetrija**     | Kiekvieno paslaugų teikėjo p50/p95/p99 delsos suvestinė                   |
 
-**Pro patarimas:** Sveikatos puslapis automatiškai atnaujinamas kas 10 sekundžių. Naudokite grandinės pertraukiklio kortelę, kad nustatytumėte, kurie teikėjai susiduria su problemomis.
+**Naudingas patarimas:** Sistemos būklės puslapis automatiškai atnaujinamas kas 10 sekundžių. Grandinės pertraukiklio kortelėje galite nustatyti, kuriems paslaugų teikėjams kyla problemų.
 
 ---
 

@@ -64,6 +64,8 @@ import path from "node:path";
 import crypto from "node:crypto";
 import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { isDeepStrictEqual } from "node:util";
+import { REFRESH_BUCKETS, readRefreshReport } from "./mirror-refresh-report.mjs";
 import { normalizeLocaleText } from "./glossary-normalize.mjs";
 import { buildMirrorBar } from "./lib/language-bar.mjs";
 import {
@@ -77,6 +79,17 @@ import {
 } from "./lib/translate-backend.mjs";
 import { translateMarkdownWithGoogle } from "./lib/google-translate.mjs";
 import { adoptState, mergeAdoptedState, refreshTargetHashes } from "./lib/translation-state.mjs";
+import { applyNumericSectionDelta } from "./lib/numeric-section-delta.mjs";
+import { linesOutsideFencedCode, looksUntranslated } from "./lib/untranslated-guard.mjs";
+import {
+  sectionCacheMatchesSnapshot,
+  sectionHashes,
+  splitSections,
+  stripFrontMatter,
+  stripTopHeading,
+} from "./lib/section-cache.mjs";
+
+export { looksUntranslated, sectionHashes, splitSections, stripTopHeading };
 
 // ----- .env loader --------------------------------------------------------
 // Loads variables from a local `.env` (gitignored) into process.env without
@@ -343,19 +356,9 @@ function targetPathFor(relSource, locale) {
 // H1 sits behind it, so the heading helpers look past the block: otherwise the
 // mirror gets the file name as its title and the front matter (plus a second
 // heading) is translated into its body.
-const FRONT_MATTER = /^---\r?\n[\s\S]*?\r?\n---\r?\n+/;
-
-function stripFrontMatter(markdown) {
-  return markdown.replace(FRONT_MATTER, "");
-}
-
 export function extractTopHeading(markdown) {
   const m = stripFrontMatter(markdown).match(/^# (.+)\r?\n/);
   return m ? m[1].trim() : null;
-}
-
-export function stripTopHeading(markdown) {
-  return stripFrontMatter(markdown).replace(/^# .+\r?\n+/, "");
 }
 
 // ----- Translator backend --------------------------------------------------
@@ -547,15 +550,37 @@ function protectThinkCode(source, output) {
   };
 }
 
+// Leading spaces can be an indented code block, not disposable whitespace.
+const trimChunk = (text) => text.replace(/^(?:[ \t]*\r?\n)+/, "").trimEnd();
+// The reasoning patterns also consume trailing whitespace. Keep indentation
+// after their last newline so removing a block cannot turn code into a heading.
+const stripThinkBlocks = (text, pattern) =>
+  text.replace(pattern, (block) => block.match(/\n([ \t]*)$/)?.[1] ?? "");
+
 function unwrapTranslationFence(source, text) {
   const unwrapped = !/^\s*```/.test(source) && text.match(WRAPPING_FENCE);
-  return unwrapped ? unwrapped[1].trim() : text;
+  return unwrapped ? trimChunk(unwrapped[1]) : text;
+}
+
+// Compare ATX heading structure, never translated titles. A fence closes only
+// with the same delimiter character, at least its opening length, and no info
+// string; shorter or mixed fences inside an example are still code.
+function headingLevels(markdown) {
+  const levels = [];
+  for (const line of linesOutsideFencedCode(markdown)) {
+    const heading = line.match(/^ {0,3}(#{1,6})(?:[ \t]+|$)/);
+    if (heading) levels.push(heading[1].length);
+  }
+  return levels;
 }
 
 export function validateTranslatedChunk(source, output) {
-  const candidate = unwrapTranslationFence(source, output.replace(LEADING_THINK_BLOCKS, "").trim());
+  const candidate = unwrapTranslationFence(
+    source,
+    trimChunk(stripThinkBlocks(output, LEADING_THINK_BLOCKS))
+  );
   const protectedOutput = protectThinkCode(source, candidate);
-  let text = protectedOutput.text.replace(THINK_BLOCK, "").trim();
+  let text = trimChunk(stripThinkBlocks(protectedOutput.text, THINK_BLOCK));
   text = unwrapTranslationFence(source, text);
   text = protectedOutput.restore(text);
   // Recheck after stripping/unwrapping: an outer leaked block can consume a
@@ -570,6 +595,10 @@ export function validateTranslatedChunk(source, output) {
   else problems.push(...tableCellProblems(source, text));
   const refs = issueRefProblem(source, text);
   if (refs) problems.push(refs);
+  const headings = [headingLevels(source), headingLevels(text)];
+  if (headings[0].join(",") !== headings[1].join(",")) {
+    problems.push(`heading levels [${headings[1]}]/[${headings[0]}]`);
+  }
   const meta = META_PROSE.filter((re) => countMatches(re, text) > countMatches(re, source));
   if (meta.length) problems.push(`meta-prose ${meta.map((re) => re.source).join(", ")}`);
   const lost = lostInlineCode(source, text);
@@ -641,14 +670,31 @@ function tableCellProblems(source, translated) {
 // The Google engine's masking tokens (`<span translate="no">zqa</span>`, bare `zqi`, private-use
 // placeholders): none may survive into a mirror (ja, 2026-10-28, shipped `zqi` / `zqo`).
 const LEAKED_PLACEHOLDER = /<span translate=|(?<!\p{L})zq[a-z]+(?!\p{L})|[\ue000-\uf8ff]/gu;
-const HTML_TAG = /<(\/?)([A-Za-z][\w-]*)(?=[\s/>])[^>]*?(\/?)>/g;
-const HTML_CODE = /<(code|kbd|samp)\b[^>]*>([\s\S]*?)<\/\1\s*>/gi;
+const HTML_TAG = /<(\/?)([A-Za-z][\w-]*)(?=[\s/>])(?:[^"'<>]|"[^"]*"|'[^']*')*?(\/?)>/g;
+const HTML_CODE = /<(code|kbd|samp)\b(?:[^"'<>]|"[^"]*"|'[^']*')*>([\s\S]*?)<\/\1\s*>/gi;
 const VOID_TAGS = new Set(["br", "hr", "img", "input", "meta", "link", "wbr", "source", "col"]);
 
 // Prose an HTML tag can live in: outside fences and outside backtick code spans (a tag inside
 // backticks is a literal, compared by lostInlineCode). <think> is checked on its own above.
+const AUTHORIZATION_PLACEHOLDERS = new Set([
+  "Authorization: Cloud-IDE-JWT <token>",
+  "Authorization: Key <token>",
+]);
+const AUTHORIZATION_PLACEHOLDER = /(?<![\w-])Authorization: (?:Cloud-IDE-JWT|Key) <token>/g;
+
+function authorizationPlaceholderCounts(markdown) {
+  const counts = new Map();
+  for (const [header] of proseOutsideFences(markdown).matchAll(AUTHORIZATION_PLACEHOLDER)) {
+    counts.set(header, (counts.get(header) ?? 0) + 1);
+  }
+  return counts;
+}
+
 function htmlProse(markdown) {
-  return proseOutsideFences(markdown).replace(/(`+)[^\n]*?\1/g, "");
+  // These exact HTTP examples are literals, not HTML, even without code delimiters.
+  return proseOutsideFences(markdown)
+    .replace(AUTHORIZATION_PLACEHOLDER, "")
+    .replace(/(`+)[^\n]*?\1/g, "");
 }
 
 function htmlTags(prose) {
@@ -676,6 +722,15 @@ function nestsWell(tags) {
 // `<code>` / `<kbd>` / `<samp>` spans, the same contract lostInlineCode applies to backticks.
 export function htmlStructureProblems(source, translated) {
   const problems = [];
+  const sourceHeaders = authorizationPlaceholderCounts(source);
+  const translatedHeaders = authorizationPlaceholderCounts(translated);
+  for (const header of AUTHORIZATION_PLACEHOLDERS) {
+    const expected = sourceHeaders.get(header) ?? 0;
+    const actual = translatedHeaders.get(header) ?? 0;
+    if (actual !== expected) {
+      problems.push(`authorization header placeholder changed: ${header} ${actual}/${expected}`);
+    }
+  }
   const src = htmlProse(source);
   const out = htmlProse(translated);
   const srcTags = htmlTags(src);
@@ -731,7 +786,10 @@ function inlineCodeSpans(markdown) {
   const spans = new Map();
   for (const match of joined.matchAll(/(?<!`)`([^`\n]+)`(?!`)/g)) {
     const span = match[1].replace(/\s+/g, " ").trim();
-    if (span) spans.set(span, (spans.get(span) ?? 0) + 1);
+    // The exact header multiset is checked separately, independent of its wrapper.
+    if (span && !AUTHORIZATION_PLACEHOLDERS.has(match[1].trim())) {
+      spans.set(span, (spans.get(span) ?? 0) + 1);
+    }
   }
   return spans;
 }
@@ -763,8 +821,10 @@ export function chunkMarkdown(markdown, maxChars = 6000) {
   const sections = [];
   let buf = [];
   let size = 0;
+  let fence = null;
   for (const line of lines) {
-    if (line.startsWith("## ") && size > maxChars * 0.5) {
+    fence = fenceAfterLine(fence, line);
+    if (!fence && line.startsWith("## ") && size > maxChars * 0.5) {
       sections.push(buf.join("\n"));
       buf = [line];
       size = line.length;
@@ -781,6 +841,23 @@ export function chunkMarkdown(markdown, maxChars = 6000) {
 
 const FENCE_LINE = /^\s*(```|~~~)/;
 
+// A closing fence must use the opener's character, be at least as long and
+// contain only trailing whitespace. Other delimiter-shaped lines remain code.
+// Keep indentation conservative so fenced examples nested inside lists stay whole.
+function fenceAfterLine(fence, line) {
+  const match = line.replace(/\r$/, "").match(/^\s*(`{3,}|~{3,})(.*)$/);
+  if (fence) {
+    return match &&
+      match[1][0] === fence[0] &&
+      match[1].length >= fence.length &&
+      /^[ \t]*$/.test(match[2])
+      ? null
+      : fence;
+  }
+  // Backtick fences cannot contain a backtick in their info string.
+  return match && (match[1][0] === "~" || !match[2].includes("`")) ? match[1] : null;
+}
+
 // Groups a section into blocks — a whole fenced code block, a heading-led run,
 // or a paragraph ending at a blank line — and packs them greedily. A block that
 // is itself larger than maxChars stays whole: cutting mid-paragraph or inside a
@@ -788,22 +865,21 @@ const FENCE_LINE = /^\s*(```|~~~)/;
 function splitOversizedSection(section, maxChars) {
   const blocks = [];
   let block = [];
-  let inFence = false;
+  let fence = null;
   for (const line of section.split("\n")) {
-    const isFence = FENCE_LINE.test(line);
-    if (inFence) {
+    const previousFence = fence;
+    fence = fenceAfterLine(fence, line);
+    if (previousFence) {
       block.push(line);
-      if (isFence) {
-        inFence = false;
+      if (!fence) {
         blocks.push(block);
         block = [];
       }
       continue;
     }
-    if (isFence) {
+    if (fence) {
       if (block.length) blocks.push(block);
       block = [line];
-      inFence = true;
       continue;
     }
     if (/^##+ /.test(line) && block.length) {
@@ -885,9 +961,11 @@ export function joinTranslatedChunks(parts) {
       out = parts[i];
       continue;
     }
-    const nextFirst = parts[i].trimStart().split("\n")[0] ?? "";
+    // Strip blank lines at the seam, preserving indentation on the first content line.
+    const next = parts[i].replace(/^(?:[ \t]*\r?\n)+/, "");
+    const nextFirst = next.split("\n")[0] ?? "";
     const seam = endsInsideItemRun(out) && ITEM_LINE.test(nextFirst) ? "\n" : "\n\n";
-    out = out.trimEnd() + seam + parts[i].trimStart();
+    out = out.trimEnd() + seam + next;
   }
   return out;
 }
@@ -896,51 +974,96 @@ export function joinTranslatedChunks(parts) {
 // A mirror is retranslated section by section: the state remembers a short
 // hash of every `## ` section of the source at the time of translation, and a
 // later run only sends the sections whose hash changed, splicing the untouched
-// translated sections of the mirror back in. Sections are matched by index
-// only — an inserted or removed section shifts everything after it and costs
-// a retranslation of the tail, which is acceptable.
-
-// Section 0 is the preamble (text before the first `## `); every other section
-// starts with its `## ` heading line. Joining with "\n\n" reproduces the body
-// modulo trailing whitespace. A `## ` inside a fenced code block never splits.
-export function splitSections(markdown) {
-  const sections = [[]];
-  let inFence = false;
-  for (const line of markdown.split("\n")) {
-    if (FENCE_LINE.test(line)) inFence = !inFence;
-    if (!inFence && /^## /.test(line) && sections.at(-1).length) sections.push([]);
-    sections.at(-1).push(line);
-  }
-  return sections.map((s) => s.join("\n").replace(/\s+$/, ""));
-}
-
-export function sectionHashes(sections) {
-  return sections.map((s) => sha256(Buffer.from(s.trim(), "utf8")).slice(0, 12));
-}
+// translated sections of the mirror back in. While the source keeps its section
+// count, sections are matched by index (a rewritten section keeps its slot).
+// When a section is inserted or removed the two lists are lined up by hash, so
+// only the sections that are really new go to the model.
 
 // `null` means "no reuse possible — translate the whole body": no recorded
 // hashes, or the mirror on disk does not have the section count the hashes
-// were recorded for (a hand edit, or a mirror written by an older pipeline).
-export function planSectionReuse({ previousHashes, sections, mirrorSections }) {
+// were recorded for, or an exact source snapshot contradicts the cache.
+export function planSectionReuse({
+  previousHashes,
+  previousSections = null,
+  sections,
+  mirrorSections,
+}) {
   if (!Array.isArray(previousHashes) || previousHashes.length !== mirrorSections.length) {
     return null;
   }
-  if (previousHashes.length !== sections.length) return null;
+  if (previousSections !== null && !sectionCacheMatchesSnapshot(previousHashes, previousSections)) {
+    return null;
+  }
   const now = sectionHashes(sections);
+  const verifiedPrevious = Array.isArray(previousSections) ? sectionHashes(previousSections) : [];
+  // `match[i]` identifies the previous source and mirror section for current section `i`.
+  // A verified snapshot may have a different length after an insertion or removal.
+  const match =
+    previousHashes.length === now.length
+      ? now.map((_, i) => i)
+      : alignSectionHashes(previousHashes, now);
   const reuse = new Map();
   const translate = [];
   now.forEach((h, i) => {
+    const j = match[i];
+    if (j < 0) {
+      translate.push(i);
+      return;
+    }
     // A mirror section byte-equal to its source section is an untranslated copy (322 mirrors
     // of the 36 pre-expansion locales were adopted as English, 2026-09-16 audit) — never reuse it.
     // Section 0 of a mirror that starts with a YAML block is the old extractor's leaked
     // frontmatter (24 newer locales, 2026-09-16) — always rebuild it.
-    const leakedFrontmatter = i === 0 && /^---\s*\n/.test(mirrorSections[i]);
-    const untranslated = looksUntranslated(mirrorSections[i], sections[i]);
-    if (h === previousHashes[i] && !untranslated && !leakedFrontmatter)
-      reuse.set(i, mirrorSections[i]);
+    const numericUpdate =
+      h !== previousHashes[j] &&
+      typeof verifiedPrevious[j] === "string" &&
+      verifiedPrevious[j] === previousHashes[j]
+        ? applyNumericSectionDelta(previousSections[j], sections[i], mirrorSections[j])
+        : null;
+    const candidate = numericUpdate ?? mirrorSections[j];
+    const leakedFrontmatter = j === 0 && /^---\s*\n/.test(candidate);
+    const untranslated = looksUntranslated(candidate, sections[i]);
+    // Validate the matched mirror against its current source even when the source hash agrees.
+    // Historic adoption cannot authorize missing rows, code literals or leaked reasoning.
+    const checked = validateTranslatedChunk(sections[i], candidate);
+    if (
+      (h === previousHashes[j] || numericUpdate !== null) &&
+      !untranslated &&
+      !leakedFrontmatter &&
+      checked.problems.length === 0
+    )
+      reuse.set(i, checked.text);
     else translate.push(i);
   });
   return { reuse, translate };
+}
+
+// Longest common subsequence of the recorded hashes and the current ones: for every current
+// section, the index of the recorded section it lines up with, or -1. Used only when the section
+// count changed. Order is preserved, so a section that merely moved is translated again; equal
+// hashes (two identical sections) pair up left to right.
+function alignSectionHashes(previous, now) {
+  const rows = previous.length + 1;
+  const cols = now.length + 1;
+  const lcs = Array.from({ length: rows }, () => new Uint32Array(cols));
+  for (let i = previous.length - 1; i >= 0; i--) {
+    for (let j = now.length - 1; j >= 0; j--) {
+      lcs[i][j] =
+        previous[i] === now[j] ? lcs[i + 1][j + 1] + 1 : Math.max(lcs[i + 1][j], lcs[i][j + 1]);
+    }
+  }
+  const match = new Array(now.length).fill(-1);
+  let i = 0;
+  let j = 0;
+  while (i < previous.length && j < now.length) {
+    if (previous[i] === now[j]) {
+      match[j] = i;
+      i++;
+      j++;
+    } else if (lcs[i + 1][j] >= lcs[i][j + 1]) i++;
+    else j++;
+  }
+  return match;
 }
 
 // The mirror without the prefix this script writes in front of the translated
@@ -952,32 +1075,16 @@ export function planSectionReuse({ previousHashes, sections, mirrorSections }) {
  * locales were plain English copies adopted as translated. Both are invisible to the hash
  * comparison, so the task loop asks this before skipping an up-to-date pair.
  */
-/** Long prose lines (> 20 chars, not table/code/list scaffolding) of a markdown fragment. */
-function proseLines(text) {
-  return text
-    .split("\n")
-    .map((l) => l.trim())
-    .filter((l) => l.length > 20 && !/^[`|#\-*\d\s]+$/.test(l));
-}
-
-/**
- * True when a mirror fragment is still (mostly) the English source: byte-equal, or ≥ 80 % of
- * its prose lines appear verbatim in the source. Fragments with < 3 prose lines fall back to
- * byte equality (code-only sections are legitimately identical).
- */
-export function looksUntranslated(mirrorFragment, sourceFragment) {
-  if (mirrorFragment.trim() === sourceFragment.trim()) return /[A-Za-z]{3,}/.test(sourceFragment);
-  const mir = proseLines(mirrorFragment);
-  if (mir.length < 3) return false;
-  const src = new Set(proseLines(sourceFragment));
-  return mir.filter((l) => src.has(l)).length / mir.length >= 0.8;
-}
-
 export function mirrorNeedsRebuild(mirrorText, sourceText) {
   const body = extractMirrorBody(mirrorText);
   if (/^---\s*\n[\s\S]{0,600}?\n---\s*\n/.test(body)) return true; // leaked frontmatter
   const sourceBody = stripTopHeading(sourceText.replace(/^---\n[\s\S]*?\n---\n+/, ""));
-  return looksUntranslated(body, sourceBody); // still English
+  const checked = validateTranslatedChunk(sourceBody, body);
+  return (
+    looksUntranslated(body, sourceBody) ||
+    checked.problems.length > 0 ||
+    checked.text !== trimChunk(body)
+  );
 }
 
 /**
@@ -1074,25 +1181,52 @@ export function mirrorLastCommitDate(mirrorRel, { cwd = ROOT } = {}) {
   }
 }
 
-async function resolveSectionPlan({ task, state, opts, sections }) {
+const exactSourceSnapshots = new Map();
+
+export async function resolveSectionPlan({ task, state, opts, sections }) {
   if (task.missingTarget || opts.force) return null;
   const recorded = state.sources[task.rel]?.locales?.[task.locale];
   let previousHashes = recorded?.section_hashes;
+  let exactOldText = null;
+  if (recorded?.source_hash) {
+    const key = `${task.rel}:${recorded.source_hash}`;
+    if (!exactSourceSnapshots.has(key)) {
+      exactSourceSnapshots.set(key, findSourceTextByHash(task.rel, recorded.source_hash));
+    }
+    exactOldText = await exactSourceSnapshots.get(key);
+  }
   if (!previousHashes && recorded?.source_hash) {
-    let oldText = await findSourceTextByHash(task.rel, recorded.source_hash);
-    if (!oldText) {
+    let oldText = exactOldText;
+    if (oldText === null) {
       // `updated_at` is bumped by `--adopt`, so prefer the date of the last commit that
       // actually wrote the mirror (mirrors are only written by translation runs).
       const translatedAt =
         mirrorLastCommitDate(path.relative(ROOT, task.targetAbs)) || recorded.updated_at;
       if (translatedAt) oldText = findSourceTextBefore(task.rel, translatedAt);
     }
-    if (oldText) previousHashes = sectionHashes(splitSections(stripTopHeading(oldText)));
+    if (oldText !== null) previousHashes = sectionHashes(splitSections(stripTopHeading(oldText)));
   }
   if (!previousHashes) return null;
+  const exactPreviousSections =
+    exactOldText === null ? null : splitSections(stripTopHeading(exactOldText));
+  // Validate the cache even when mirror bytes are unverified: target_hash is
+  // required for numeric edits, but cannot authorize contradictory source metadata.
+  if (
+    exactPreviousSections !== null &&
+    !sectionCacheMatchesSnapshot(previousHashes, exactPreviousSections)
+  ) {
+    return null;
+  }
   const mirrorText = await fs.readFile(task.targetAbs, "utf8");
   const mirrorSections = splitSections(extractMirrorBody(mirrorText));
-  return planSectionReuse({ previousHashes, sections, mirrorSections });
+  // A timestamp fallback is not proof of the previous source. Numeric edits
+  // require both the exact source snapshot and the recorded mirror bytes.
+  const previousSections =
+    exactPreviousSections !== null &&
+    recorded?.target_hash === sha256(Buffer.from(mirrorText, "utf8"))
+      ? exactPreviousSections
+      : undefined;
+  return planSectionReuse({ previousHashes, previousSections, sections, mirrorSections });
 }
 
 // A chunk the validator keeps rejecting used to be retried CHUNK_ATTEMPTS times on the same
@@ -1129,6 +1263,18 @@ export async function translateChunk(
       logWarn(
         `  ${label} rejected (${chain[level]}, attempt ${attempt}/${CHUNK_ATTEMPTS}): ${checked.problems.join("; ")}`
       );
+      if (attempt < CHUNK_ATTEMPTS) {
+        messages.push(
+          { role: "assistant", content: checked.text },
+          {
+            role: "user",
+            content:
+              `The previous translation failed validation: ${checked.problems.join("; ")}. ` +
+              "Return a complete corrected translation of the original source. " +
+              "Preserve every inline code literal exactly and return only the translated markdown.",
+          }
+        );
+      }
     }
   }
   if (depth < SPLIT_DEPTH && chunk.length > SPLIT_MIN_CHARS) {
@@ -1278,30 +1424,115 @@ export function translationExitCode({ translated, failed }) {
   return translated > 0 ? EXIT_PARTIAL : 1;
 }
 
-/**
- * The drift a partial run is allowed to leave behind: a source none of whose locales
- * translated keeps its recorded `source_hash`, and a failed (source, locale) keeps its
- * mirror (missing or hand-edited). Everything else in the drift report still blocks.
- */
+const refreshObject = (value) =>
+  value !== null && typeof value === "object" && !Array.isArray(value);
+const refreshUnitKey = ({ rel, locale }) => `${rel}\u0000${locale}`;
+
+function refreshUnitSet(units) {
+  if (!Array.isArray(units)) throw new Error("invalid-translation-units");
+  const keys = new Set();
+  for (const unit of units) {
+    if (
+      !refreshObject(unit) ||
+      typeof unit.rel !== "string" ||
+      !/^(?:[A-Za-z0-9_.-]+\/)*[A-Za-z0-9_.-]+$/.test(unit.rel) ||
+      unit.rel.startsWith("-") ||
+      unit.rel.split("/").some((part) => part === "." || part === "..") ||
+      typeof unit.locale !== "string" ||
+      !/^[a-z]{2,3}(?:-[A-Za-z]{2,4})?$/.test(unit.locale)
+    ) {
+      throw new Error("invalid-translation-unit");
+    }
+    const key = refreshUnitKey(unit);
+    if (keys.has(key)) throw new Error("duplicate-translation-unit");
+    keys.add(key);
+  }
+  return keys;
+}
+
+/** Validate the exact summary emitted by this runner before granting partial-run exceptions. */
+export function readTranslationSummary(summary) {
+  const fields = ["considered", "translated", "skipped", "failed", "failures", "translatedUnits"];
+  if (
+    !refreshObject(summary) ||
+    Object.keys(summary).length !== fields.length ||
+    Object.keys(summary).some((key) => !fields.includes(key)) ||
+    fields.slice(0, 4).some((key) => !Number.isSafeInteger(summary[key]) || summary[key] < 0)
+  ) {
+    throw new Error("invalid-translation-summary");
+  }
+  const failed = refreshUnitSet(summary.failures);
+  const translated = refreshUnitSet(summary.translatedUnits);
+  if (
+    failed.size !== summary.failed ||
+    translated.size !== summary.translated ||
+    summary.considered !== summary.failed + summary.translated + summary.skipped ||
+    [...failed].some((key) => translated.has(key)) ||
+    summary.failures.some((unit) => typeof unit.error !== "string")
+  ) {
+    throw new Error("contradictory-translation-summary");
+  }
+  return summary;
+}
+
+/** All five classes remain checked. Only precisely named failed units may be excused. */
 export function blockingDrift(report, failures, translated = []) {
-  // A report without the drift lists (e.g. `missing-state`) can never be excused.
-  const lists = ["driftedSources", "missingTargets", "driftedTargets"];
-  if (!lists.every((k) => Array.isArray(report?.[k]))) {
-    return [{ kind: "report", rel: String(report?.reason ?? "unreadable drift report") }];
+  try {
+    readRefreshReport(report);
+    const failedUnits = refreshUnitSet(failures);
+    const translatedUnits = refreshUnitSet(translated);
+    if ([...failedUnits].some((key) => translatedUnits.has(key))) {
+      throw new Error("overlapping-translation-units");
+    }
+    const translatedRels = new Set(translated.map((unit) => unit.rel));
+    const failedRels = new Set(
+      failures.map((unit) => unit.rel).filter((rel) => !translatedRels.has(rel))
+    );
+    return REFRESH_BUCKETS.flatMap((kind) =>
+      report[kind]
+        .filter((unit) =>
+          kind === "driftedSources"
+            ? !failedRels.has(unit.rel)
+            : !failedUnits.has(refreshUnitKey(unit))
+        )
+        .map((unit) => ({ ...unit, kind }))
+    );
+  } catch {
+    return [{ kind: "report", rel: "invalid-checker-report-or-translation-units" }];
   }
-  const translatedRels = new Set(translated.map((t) => t.rel));
-  const failedRels = new Set(failures.map((f) => f.rel).filter((rel) => !translatedRels.has(rel)));
-  const failedUnits = new Set(failures.map((f) => `${f.rel}\u0000${f.locale}`));
-  const blocking = [];
-  for (const x of report.driftedSources) {
-    if (!failedRels.has(x.rel)) blocking.push({ kind: "driftedSources", ...x });
+}
+
+/**
+ * A failed unit is eligible only if its complete locale record and actual mirror bytes
+ * still match the immutable pre-run base. Rechecking after hooks catches new drift even
+ * on an already-excused unit. The workflow obtains hashes through read-only Git/fs calls.
+ */
+export function assertFailedUnitsUnchanged(failures, beforeState, afterState, targets) {
+  const failed = refreshUnitSet(failures);
+  const observed = refreshUnitSet(targets);
+  const isHash = (value) =>
+    value === null || (typeof value === "string" && /^[a-f0-9]{64}$/.test(value));
+  if (
+    !refreshObject(beforeState?.sources) ||
+    !refreshObject(afterState?.sources) ||
+    observed.size !== failed.size ||
+    [...observed].some((key) => !failed.has(key))
+  ) {
+    throw new Error("invalid-failed-unit-preimages");
   }
-  for (const kind of ["missingTargets", "driftedTargets"]) {
-    for (const x of report[kind]) {
-      if (!failedUnits.has(`${x.rel}\u0000${x.locale}`)) blocking.push({ kind, ...x });
+  for (const unit of targets) {
+    if (
+      !isHash(unit.beforeHash) ||
+      !isHash(unit.afterHash) ||
+      unit.beforeHash !== unit.afterHash ||
+      !isDeepStrictEqual(
+        beforeState.sources[unit.rel]?.locales?.[unit.locale],
+        afterState.sources[unit.rel]?.locales?.[unit.locale]
+      )
+    ) {
+      throw new Error("failed-unit-changed");
     }
   }
-  return blocking;
 }
 
 /**
@@ -1546,6 +1777,13 @@ async function main() {
           } else {
             translatedBody = await translateBody(body, localeEntry, backend);
           }
+          // Check the assembled document before writing content or advancing
+          // provenance, including sections that came from the reuse cache.
+          const checked = validateTranslatedChunk(body, translatedBody);
+          if (checked.problems.length) {
+            throw new Error(`assembled document failed validation: ${checked.problems.join("; ")}`);
+          }
+          translatedBody = checked.text;
         } catch (err) {
           stats.failed++;
           failures.push({ rel: task.rel, locale: task.locale, error: err.message });

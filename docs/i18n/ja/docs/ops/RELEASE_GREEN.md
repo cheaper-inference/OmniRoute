@@ -1,89 +1,41 @@
-# Release-Green: keeping the queue and release branch green (日本語)
+# Release-Green: candidate validation and evidence (日本語)
 
 🌐 **Languages:** 🇺🇸 [English](../../../../ops/RELEASE_GREEN.md) · 🇪🇹 [am](../../../am/docs/ops/RELEASE_GREEN.md) · 🇸🇦 [ar](../../../ar/docs/ops/RELEASE_GREEN.md) · 🇦🇿 [az](../../../az/docs/ops/RELEASE_GREEN.md) · 🇧🇬 [bg](../../../bg/docs/ops/RELEASE_GREEN.md) · 🇧🇩 [bn](../../../bn/docs/ops/RELEASE_GREEN.md) · 🇧🇦 [bs](../../../bs/docs/ops/RELEASE_GREEN.md) · 🇨🇿 [cs](../../../cs/docs/ops/RELEASE_GREEN.md) · 🇩🇰 [da](../../../da/docs/ops/RELEASE_GREEN.md) · 🇩🇪 [de](../../../de/docs/ops/RELEASE_GREEN.md) · 🇬🇷 [el](../../../el/docs/ops/RELEASE_GREEN.md) · 🇪🇸 [es](../../../es/docs/ops/RELEASE_GREEN.md) · 🇪🇪 [et](../../../et/docs/ops/RELEASE_GREEN.md) · 🇮🇷 [fa](../../../fa/docs/ops/RELEASE_GREEN.md) · 🇫🇮 [fi](../../../fi/docs/ops/RELEASE_GREEN.md) · 🇫🇷 [fr](../../../fr/docs/ops/RELEASE_GREEN.md) · 🇮🇪 [ga](../../../ga/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [gu](../../../gu/docs/ops/RELEASE_GREEN.md) · 🇳🇬 [ha](../../../ha/docs/ops/RELEASE_GREEN.md) · 🇮🇱 [he](../../../he/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [hi](../../../hi/docs/ops/RELEASE_GREEN.md) · 🇭🇷 [hr](../../../hr/docs/ops/RELEASE_GREEN.md) · 🇭🇺 [hu](../../../hu/docs/ops/RELEASE_GREEN.md) · 🇦🇲 [hy](../../../hy/docs/ops/RELEASE_GREEN.md) · 🇮🇩 [id](../../../id/docs/ops/RELEASE_GREEN.md) · 🇳🇬 [ig](../../../ig/docs/ops/RELEASE_GREEN.md) · 🇮🇹 [it](../../../it/docs/ops/RELEASE_GREEN.md) · 🇬🇪 [ka](../../../ka/docs/ops/RELEASE_GREEN.md) · 🇰🇭 [km](../../../km/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [kn](../../../kn/docs/ops/RELEASE_GREEN.md) · 🇰🇷 [ko](../../../ko/docs/ops/RELEASE_GREEN.md) · 🇱🇹 [lt](../../../lt/docs/ops/RELEASE_GREEN.md) · 🇱🇻 [lv](../../../lv/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [ml](../../../ml/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [mr](../../../mr/docs/ops/RELEASE_GREEN.md) · 🇲🇾 [ms](../../../ms/docs/ops/RELEASE_GREEN.md) · 🇲🇹 [mt](../../../mt/docs/ops/RELEASE_GREEN.md) · 🇲🇲 [my](../../../my/docs/ops/RELEASE_GREEN.md) · 🇳🇵 [ne](../../../ne/docs/ops/RELEASE_GREEN.md) · 🇳🇱 [nl](../../../nl/docs/ops/RELEASE_GREEN.md) · 🇳🇴 [no](../../../no/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [or](../../../or/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [pa](../../../pa/docs/ops/RELEASE_GREEN.md) · 🇵🇭 [phi](../../../phi/docs/ops/RELEASE_GREEN.md) · 🇵🇱 [pl](../../../pl/docs/ops/RELEASE_GREEN.md) · 🇵🇹 [pt](../../../pt/docs/ops/RELEASE_GREEN.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/ops/RELEASE_GREEN.md) · 🇷🇴 [ro](../../../ro/docs/ops/RELEASE_GREEN.md) · 🇷🇺 [ru](../../../ru/docs/ops/RELEASE_GREEN.md) · 🇱🇰 [si](../../../si/docs/ops/RELEASE_GREEN.md) · 🇸🇰 [sk](../../../sk/docs/ops/RELEASE_GREEN.md) · 🇸🇮 [sl](../../../sl/docs/ops/RELEASE_GREEN.md) · 🇷🇸 [sr](../../../sr/docs/ops/RELEASE_GREEN.md) · 🇸🇪 [sv](../../../sv/docs/ops/RELEASE_GREEN.md) · 🇰🇪 [sw](../../../sw/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [ta](../../../ta/docs/ops/RELEASE_GREEN.md) · 🇮🇳 [te](../../../te/docs/ops/RELEASE_GREEN.md) · 🇹🇭 [th](../../../th/docs/ops/RELEASE_GREEN.md) · 🇹🇷 [tr](../../../tr/docs/ops/RELEASE_GREEN.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/ops/RELEASE_GREEN.md) · 🇵🇰 [ur](../../../ur/docs/ops/RELEASE_GREEN.md) · 🇺🇿 [uz](../../../uz/docs/ops/RELEASE_GREEN.md) · 🇻🇳 [vi](../../../vi/docs/ops/RELEASE_GREEN.md) · 🇳🇬 [yo](../../../yo/docs/ops/RELEASE_GREEN.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/ops/RELEASE_GREEN.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/ops/RELEASE_GREEN.md)
 
 ---
 
-## この仕組みが解決する問題
+Release-Green は、特定のコミットを監視し、その検証結果を報告します。 [Quality Gates リファレンスでは](../architecture/QUALITY_GATES.md)、現在のCIプロファイル、必要なチェック、および受け入れポリシーが定義されています。 `config/quality/admission-policy.json`のバージョン管理されたアドミッション ポリシーは、 `Gate / CI`および`Gate / Quality`の実行可能な契約です。
 
-**フルゲート**（`.github/workflows/ci.yml` — unit shards、vitest、ratchets、
-`package-artifact`、SonarQube、E2E）は、**リリース PR**（PR → `main`）でのみ実行されます。
-`release/**` を対象とする PR では **fast-gates**（`quality.yml`：TIA の影響を受けるテスト + typecheck + lint）が実行され、コード変更に対しては**参考情報として**本番ビルドも実行されます。その結果、リリース時にのみ発生するエラーがリリースブランチ上で気付かれないまま蓄積し、リリース時に**約40分単位で何層にもわたって**、1つずつ**噴出する**可能性があります。
+## CIとオブザーバー スコープ
 
-「release-green ファミリー」は、こうしたエラーを**事前に予測**するために存在します。つまり、フルゲート相当の検証を、いつでも**ローカルまたはリリース外**で実行し、リリース PR が最初の CI 実行から
-green になるようにします。
+`ci.yml`と`quality.yml` 、メイン ブランチとリリース ブランチへのプル リクエストをカバーします。選択したプロファイルによって、どのジョブが適用されるかが決まります。完全なCIは、通常のプル リクエストでは実行されないレーンも含まれます。クイック オブザーバーの結果はこれらのジョブを置き換えることはできません。また、完了したワークフロー ラッパーはそのレシートを置き換えることはできません。
 
-> **譲れない原則：** これらはいずれもコントリビューターをブロックしません。PR を失敗させる必須チェックは追加しません。**drift**（ratchets）は、リリース時にメンテナーが再ベースライン化するためのものであり、コントリビューターが関与すべき事項ではありません。いかなる仕組みも PR を**クローズ**（功績の横取り）したり、通過させるためにテストを**弱めたり**することはありません。
+実稼働ビルドはCIに属します。 `quality.yml`には重複したアドバイザリ ビルドはありません。アーティファクトの欠落、キャンセルされた作業、不完全な測定は、必要なチェックを成功させることができません。結果を受け入れる前に、現在のベース、ヘッド、および組み合わせた候補を確認してください。
 
-## ファミリー（4つの構成要素）— それぞれが独立して実行される仕組み
+## ローカル検証
 
-| 構成要素                                                                          | 概要                                                                  | 実行タイミング                                           | 対象範囲                      |
-| --------------------------------------------------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------- | ----------------------------- |
-| **`/green-prs`**（ソリューション A）                                              | メンテナーが**オープンな PR キュー**をオンデマンドでスキャンする      | **独立して定期的に** — 特に `/generate-release` の**前** | PR キュー全体 → `release/**`  |
-| **`/validate-release-green`**（ソリューション C — `npm run check:release-green`） | 検証エンジン：ブランチまたはマージ候補に対してフルゲートを再現する    | 独立して、いつでも                                       | 特定のブランチまたはマージ PR |
-| **`/babysit <PR#>`**                                                              | **1つの** PR の**実際の CI**を green になるまで導く                   | PR ごとに独立して                                        | 1つの PR                      |
-| **`nightly-release-green.yml`**（ソリューション D）                               | 自動化された nightly ワークフロー。HARD red の場合に issue を作成する | 自動（cron）                                             | アクティブなリリースブランチ  |
-
-**「これはリリース専用か？」への短い回答：****いいえ。** `/green-prs` は、
-**リリース間にも定期的に**実行することを想定して設計されています。独立して実行するのが通常の使い方であり、リリースは単に、それを実行する価値が最も高まるタイミングにすぎません。
-
-## PR からリリースへの助言的ビルド
-
-`quality.yml` に、ドラフトではないコード PR と Mergify キューブランチ向けの `Build (advisory)` が追加されました。
-これは `ci.yml` の本番ビルド手順を再現しています。Node 24、`npm-ci-retry`、
-`check:node-runtime`、および `OMNIROUTE_USE_TURBOPACK=1` を指定した `npm run build` です。このワークフローでは、後続の品質ジョブがビルド成果物を使用しないため、意図的にアップロードしていません。
-リリース PR の実行が 1 週間安定した後に `continue-on-error` を削除し、このシグナルを
-PR からリリースへのブロッキングゲートにしてください。
-
-## ソリューション C — `npm run check:release-green`（エンジン）
-
-現在の作業ツリーに対してリリース相当の検証を再現し、各エラーを分類します。
-
-- **HARD**（型チェック、lint エラー、unit、vitest、db-rules、public-creds、任意の
-  `package-artifact`）→ **実際の不具合**。`exit 1`。ソースブランチ上で修正します（TDD、ルール #18）。
-- **DRIFT**（eslint の**警告**、認知的複雑度、ファイルサイズ）→ サイクル中に蓄積されたラチェットのドリフトであり、
-  **コントリビューターの責任ではありません**。報告のみを行い、**リリース時にメンテナーが
-  再ベースライン化します**。ドリフトによって終了コードが変わることは**ありません**。したがって、誰かの作業をブロックすることもありません。
+依存関係を準備した後、所有されているワークツリーでオブザーバーを実行します。厳密な検証を行う前に、 `docs/ops/WORKTREE_ISOLATION.md`のワークツリーとリソース プロトコルに従ってください。
 
 ```bash
-npm run check:release-green                 # 現在のブランチ（作業ツリー）
-node scripts/quality/validate-release-green.mjs --json   # 構造化出力
-node scripts/quality/validate-release-green.mjs --quick  # unit+vitest をスキップ（ドリフト+型チェック+lint のみ）
-node scripts/quality/validate-release-green.mjs --with-build  # package-artifact を含める（低速）
+npm run check:release-green -- --quick --json
+npm run check:release-green -- --with-build --full-ci --json
 ```
 
-診断と**報告**のみを行います（自動修正は行いません）。グリーン状態に修正するためのオーケストレーションは、
-`/green-prs` と `/review-prs` にあります。
+クイックプロフィールは部分的なものです。完全なプロファイルは、モデル化された要件をチェックし、コマンド受信を保存します。導入を保証したり、該当するホスト型チェックの代わりをするものではありません。レポートでは、実行の失敗とメトリックのドリフトが区別されます。必要なラチェットは、選択したポリシーに従ってブロックされたままになります。合格結果を得るためだけにベースラインを上げないでください。
 
-## ソリューション A — `/green-prs`（キュースキャン）
+## 夜間および手動のスイープ
 
-手順（概要 — 詳細は `green-prs` スキルを参照）：
+夜間リリースおよび互換性リゾルバーは、正規リリース ブランチを選択します。その選択はワークフローをトリガーしたブランチと一致する必要があり、スイートはイベントの不変SHAを使用します。手動で実行する場合は、 `release_branch`で目的のリリースを選択し、同じ参照でディスパッチします。
 
-1. アクティブなリリースブランチを対象とするオープン PR のキューを**棚卸し**します。
-2. 各 PR を**トリアージ**します（対応可能 / 却下相当 / 作者による対応が必要）。却下相当または作者による対応が必要な PR は、
-   **報告するだけで、クローズしません**（作者が判断します）。
-3. 対応可能な各 PR について、**分離された worktree**（ルール #19）で PR をリリースブランチの先端に追従させ、
-   `npm run check:release-green` を実行します。
-   - **HARD** → 共同作成者として**コントリビューターのブランチ上で**修正し（作者の「Merged」ステータスを維持）、
-     すべての HARD が解消されるまで再実行します。
-   - **DRIFT** → そのままにします。リリース時に再ベースライン化されます。
-4. PR ×（判定、HARD エラー、修正済み？、DRIFT、現在リリースグリーン？）の表を**報告**します。
+```bash
+gh workflow run nightly-release-green.yml --ref "$release_branch" -f branch="$release_branch"
+gh workflow run nightly-compat.yml --ref "$release_branch" -f branch="$release_branch"
+```
 
-マージせずにキューを**準備**できます。明示的に要求された場合にのみマージし、PR をクローズすることは決してありません。
+選択したコードを実行する前に、ブランチ間のディスパッチは拒否されます。ホストされたメイン スイートは`main`をチェックアウトし、インストール前にそのSHA解決されたターゲットとまだ一致していることを確認します。メインが解決中に移動した場合は、新しいコミットで不完全なスイープを再実行します。異なる候補者からのスイートの領収書を結合しないでください。
 
-## 推奨頻度
+## 障害のトリアージとリカバリ
 
-- **`/green-prs` を定期的に**（例：毎週）、また**`/generate-release` の前には必ず**
-  実行します。
-- **`nightly-release-green.yml`**（ソリューション D）を継続的なシグナルとして維持します。HARD エラーの issue が作成されたら、
-  スキャンを実行するタイミングです。
-- ブランチまたは特定のマージ候補を確認するには、必要に応じて **`/validate-release-green`** を使用します。
-- 特定の PR を実際の CI 上でグリーンになるまで進める必要がある場合は、**`/babysit <PR#>`** を使用します。
+インシデントを診断インデックスとして使用し、正確な実行、試行、失敗したステップ、および成果物を検査します。失敗の原因を特定する前に、同等の基本証拠と候補証拠を比較します。インフラストラクチャのエラー、継承された欠陥、候補者のリグレッション、および保留中の承認には、さまざまな救済策が必要です。
 
-## リリースとの関係
-
-- `/generate-release` は、**フェーズ 0（事前チェック）**で検証を呼び出します。リリース PR を作成する前に DRIFT を再ベースライン化し、
-  HARD を修正します。
-- `/review-prs` は、マージ判断のステップでリリースグリーンゲートを使用します（マージ前にグリーン化）。
-
-すべての要素の目標は同じです。リリース当日に 40 分単位で連鎖するエラーへの対応に追われるのではなく、**最初の CI 実行でリリース PR をグリーンにすること**です。
+`/green-prs`、 `/sweep-reds`、 `/validate-release-green`および`/babysit`スキルは証拠を収集し、文書化された範囲内で修正を準備します。貢献者のクレジットを保持し、分離された修復ブランチを使用し、認可されたマージの前に必要なチェックをすべて検証します。合格した現在の候補に代わる自動リベースラインやインシデント クロージャはありません。

@@ -74,7 +74,7 @@
 |                                    |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
 | ---------------------------------- | :------------------------: | :---------: | :-------------------: |
 | 🌐 Fornituri                       |            352             |   **358**   |          380          |
-| 🧠 IDs uniċi tal-mudelli taċ-chat  |            1320            |  **1374**   |         1491          |
+| 🧠 IDs uniċi tal-mudelli taċ-chat  |            1320            |  **1374**   |         1499          |
 | 🖼️ Pont tal-modalitajiet           | 🆕 viżjoni + awdjo + vidjo |      ✓      |           ✓           |
 | 📡 Katalgu b’xejn ta’ Radar        |         🆕 opt-in          |      ✓      |           ✓           |
 | ⚖️ Skedar konxju mill-kwota        |       🆕 Quota-Share       |      ✓      |           ✓           |
@@ -91,64 +91,59 @@
 
 ## 🧩 Disponibbli
 
-[![Verżjoni npm](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-![NPM ta' Kull Xahar](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
-[![Liċenzja: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-![Downloads ta' Docker](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Downloads ta' Electron](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+[![Verżjoni npm](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm) ](https://www.npmjs.com/package/omniroute) ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm) [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED) ](https://hub.docker.com/r/diegosouzapw/omniroute) [![Liċenzja: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square) ](LICENSE) ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED) ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
-    <td align="right"><b>🚀 Ibda</b></td>
-    <td align="center"><a href="#-quick-start">🚀 Bidu malajr</a></td>
-    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Installa</a></td>
-    <td align="center"><a href="#first-run">🆓 Qabbad fornitur</a></td>
+    <td align="right"><b>🚀 Start</b></td>
+    <td align="center"><a href="#-quick-start">🚀 Quick Start</a></td>
+    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Install</a></td>
+    <td align="center"><a href="#first-run">🆓 Connect a provider</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💡 Tgħallem</b></td>
-    <td align="center"><a href="#-the-promise">💥 Il-wegħda</a></td>
-    <td align="center"><a href="#-why-omniroute">🤔 Għaliex OmniRoute</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 X’jagħmel lil OmniRoute differenti</a></td>
+    <td align="right"><b>💡 Learn</b></td>
+    <td align="center"><a href="#-the-promise">💥 The Promise</a></td>
+    <td align="center"><a href="#-why-omniroute">🤔 Why OmniRoute</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 What Sets Apart</a></td>
   </tr>
   <tr>
-    <td align="right"><b>⚙️ Karatteristiċi</b></td>
-    <td align="center"><a href="#-combos--the-flagship">🎯 Kombinazzjonijiet</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Fornituri</a></td>
+    <td align="right"><b>⚙️ Features</b></td>
+    <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
+    <td align="center"><a href="#-380-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
     <td align="right"></td>
-    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Kompressjoni</a></td>
-    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Fejn jaħdem</a></td>
-    <td align="center"><a href="#-private--local-first">🔒 Privat</a></td>
+    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Compression</a></td>
+    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Where It Runs</a></td>
+    <td align="center"><a href="#-private--local-first">🔒 Private</a></td>
   </tr>
   <tr>
-    <td align="right"><b>👀 Araha</b></td>
-    <td align="center"><a href="#-omniroute-in-action">🎬 Fl-azzjoni</a></td>
-    <td align="center"><a href="#-whats-new">✨ X’hemm ġdid</a></td>
-    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 CLI kompatibbli</a></td>
+    <td align="right"><b>👀 See it</b></td>
+    <td align="center"><a href="#-omniroute-in-action">🎬 In Action</a></td>
+    <td align="center"><a href="#-whats-new">✨ What's New</a></td>
+    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 Compatible CLIs</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💚 Appoġġ</b></td>
-    <td align="center"><a href="#-support-omniroute">💚 Appoġġ / Agħti donazzjoni</a></td>
-    <td align="center"><a href="#-community--help">💬 Komunità</a></td>
-    <td align="center"><a href="#-sponsors">💖 Sponsers</a></td>
+    <td align="right"><b>💚 Support</b></td>
+    <td align="center"><a href="#-support-omniroute">💚 Support / Donate</a></td>
+    <td align="center"><a href="#-community--help">💬 Community</a></td>
+    <td align="center"><a href="#-sponsors">💖 Sponsors</a></td>
   </tr>
   <tr>
-    <td align="right"><b>📦 Proġett</b></td>
-    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Munzell teknoloġiku</a></td>
-    <td align="center"><a href="#-documentation">📖 Dokumentazzjoni</a></td>
-    <td align="center"><a href="#-1000-contributors">👥 Kontributuri</a></td>
+    <td align="right"><b>📦 Project</b></td>
+    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Tech Stack</a></td>
+    <td align="center"><a href="#-documentation">📖 Docs</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 Contributors</a></td>
   </tr>
 </table>
 
 </div>
 
 <div align="center">
-  <b>🌐 F’67 lingwa</b>
+  <b>🌐 F'67 lingwa</b>
   <br/><br/>
-  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="Ingliż (en)" title="Ingliż (en)"></a>
+  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="English (en)" title="English (en)"></a>
   <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
   <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Português (pt)" title="Português (pt)"></a>
   <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Español (es)" title="Español (es)"></a>
@@ -689,15 +684,15 @@ mill-istorja tas-shell tiegħek. → [CLI Integrations](docs/guides/CLI-INTEGRAT
 
 <div align="center">
 
-## 🌐 380 Fornitur tal-IA — 153 Immarkati bħala B’xejn fil-Katalgu
+## 🌐 380 AI Providers — 156 Catalog-Marked Free
 
 </div>
 
-> **380 fornitur irreġistrat** fil-kollezzjonijiet kanoniċi taċ-chat, tal-midja, tat-tfittxija, lokali, tal-aġenti tal-cloud u tas-sistema, inklużi **153 li għandhom metadata ta’ skoperta `hasFree: true`**. Ir-reġistru tal-mudelli taċ-chat ikopri **239 fornitur / 3,059 par distint ta’ fornitur-mudell / 1,475 ID mhux ipproċessat tal-mudelli**; il-katalgu separat tal-baġit b’xejn għandu **471 ringiela għal kull mudell**, **34 pool rikorrenti** u **54 fornitur rikorrenti/bla ċavetta b’xejn għal dejjem**. Dawn huma denominaturi differenti skont id-disinn; id-definizzjonijiet u l-kalkoli deduplikati skont il-pool jinsabu fir-[Referenza tal-Fornituri](docs/reference/PROVIDER_REFERENCE.md) u fil-[Livelli B’xejn](docs/reference/FREE_TIERS.md).
+> **380 fornitur irreġistrat** madwar iċ-chat kanoniku, il-midja, it-tfittxija, il-kollezzjonijiet lokali, tal-aġent tal-cloud u tas-sistema, inkluż **156 li jġorru metadata ta' skoperta `hasFree: true`** . Ir-reġistru tal-mudell taċ-chat ikopri **241 fornitur / 3,114 par distinti fornitur-mudell / 1,499 mudell mhux maħdum IDs** ; il-katalgu separat tal-baġit ħieles għandu **485 ringieli għal kull mudell** ,**34 pool rikorrenti** u **54 recurring/keyless fornitur bla ħlas għal dejjem** . Dawn huma denominaturi differenti skond id-disinn; id-definizzjonijiet u l-kalkoli deduppjati bil-pool jgħixu fil-Livelli [ta' Referenza tal-Fornitur](docs/reference/PROVIDER_REFERENCE.md) u [Ħieles](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
-### 🏢 Kull laboratorju ewlieni — permezz ta’ endpoint wieħed
+### 🏢 Kull laboratorju ewlieni — permezz ta' endpoint wieħed
 
 <table>
   <tr>
@@ -726,7 +721,7 @@ mill-istorja tas-shell tiegħek. → [CLI Integrations](docs/guides/CLI-INTEGRAT
   </tr>
 </table>
 
-<sub>…u 350+ oħra — kull ikona tissolva direttament mill-katalgu tal-fornituri tad-dashboard. 📖 [Referenza tal-Fornituri](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>…u 350 + aktar — kull ikona tissolva diretta mill-katalgu tal-fornitur tad-dashboard. [Referenza tal-Fornitur](docs/reference/PROVIDER_REFERENCE.md) 📖</sub>
 
 <br/>
 
@@ -758,80 +753,93 @@ mill-istorja tas-shell tiegħek. → [CLI Integrations](docs/guides/CLI-INTEGRAT
 
 <div align="center">
 
-## 🖥️ Fejn OmniRoute Runs — Kullimkien
+## 🖥️ Fejn Jaħdem OmniRoute — Kullimkien
 
 </div>
 
-> L-istess app, il-magna tiegħek, ir-regoli tiegħek. Minn npm globali jinstallaw għal** telefon tiegħek** permezz ta’ Termux.
+> L-istess app, il-magna tiegħek, ir-regoli tiegħek. Minn installazzjoni globali b’npm sa **fuq il-mobile tiegħek** permezz ta’ Termux.
 
 <table>
-  <tr><th align="left"> Pjattaforma </th><th align="left"> Installa </th><th align="left"> Highlights </th></tr>
-  <tr><td align="left" nowrap>📦 <b> npm (globali)</b></td><td align="left" nowrap><code> npm install -g omniroute </code></td><td align="left"> Kmand wieħed, kwalunkwe OS</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Bun (globali)</b></td><td align="left" nowrap><code> bun add -g omniroute </code></td><td align="left"> L-istess tarball tar-reġistru, installs faster </td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> docker run … diegosouzapw/omniroute</code></td><td align="left"> Multi-arch <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b> Desktop (Electron)</b></td><td align="left" nowrap><code> npm run electron:build </code></td><td align="left"> Native window + system trey — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b> Menu-bar (OmniRouteTray)</b></td><td align="left" nowrap><code> brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left"> Jissorvelja &amp; auto-updates the server — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap> native <code> arm64 </code></td><td align="left"> Raspberry Pi, ARM servers, Apple Silicon </td></tr>
-  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg install nodejs && npx -y omniroute </code></td><td align="left"> Runs <b> on your phone </b>, 24/7, no root </td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Żid mal-Iskrin tad-Dar"</td><td align="left"> Skrin sħiħ, offline, jistallabbli mill-browser </td></tr>
-  <tr><td align="left" nowrap>🧩 <b>OpenCode plugin </b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left"> Native OpenCode integration </td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS Kodiċi Copilot Chat </b></td><td align="left" nowrap> install <b>OmniCopilot</b> extension </td><td align="left">OmniRoute mudell zqo fl-indiġeni Copilot Chat picker — stabbli &amp; Insiders </td></tr>
-  <tr><td align="left" nowrap>🛠️ <b> Minn sors </b></td><td align="left" nowrap><code> npm install && npm run dev </code></td><td align="left"> Hack fuqha, tikkontribwixxi </td></tr>
+  <tr><th align="left">Pjattaforma</th><th align="left">Installazzjoni</th><th align="left">Punti ewlenin</th></tr>
+  <tr><td align="left" nowrap>📦 <b>npm (globali)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Kmand wieħed, kwalunkwe OS</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (globali)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Kompatibbiltà fuq bażi tal-aħjar sforz mingħajr garanziji ta&#39; appoġġ; Node.js huwa l-ambjent ta&#39; eżekuzzjoni appoġġjat.</td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Multi-arch <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🖥️ <b>Desktop (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Tieqa nattiva + system tray — <b>Windows / macOS / Linux</b></td></tr>
+  <tr><td align="left" nowrap>🎩 <b>Menu bar (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Jissorvelja u jaġġorna awtomatikament is-server — <b>macOS</b></td></tr>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap><code>arm64</code> nattiv</td><td align="left">Raspberry Pi, servers ARM, Apple Silicon</td></tr>
+  <tr><td align="left" nowrap>📱 <b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left">Jaħdem <b>fuq il-mobile tiegħek</b>, 24/7, mingħajr root</td></tr>
+  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Żid mal-Iskrin Prinċipali"</td><td align="left">Skrin sħiħ, offline, jista’ jiġi installat mill-browser</td></tr>
+  <tr><td align="left" nowrap>🧩 <b>Plugin ta’ OpenCode</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">Integrazzjoni nattiva ma’ OpenCode</td></tr>
+  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap>installa l-estensjoni <b>OmniCopilot</b></td><td align="left">Kull mudell ta’ OmniRoute fis-selettur nattiv ta’ Copilot Chat — stable u Insiders</td></tr>
+  <tr><td align="left" nowrap>🛠️ <b>Mill-kodiċi sors</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">Immodifikah, ikkontribwixxi</td></tr>
 </table>
 
-<sub>📖 [Docker Guide](docs/guides/DOCKER_GUIDE.md) · [Desktop](electron/README.md) · [Menu-bar trey](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+<sub>📖 [Gwida għal Docker](docs/guides/DOCKER_GUIDE.md) · [Desktop](electron/README.md) · [Tray tal-menu bar](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-### 🧩 Ġdid: OmniRoute ġewwa VS Kodiċi nattiv Copilot Chat
+### 🧩 Ġdid: OmniRoute ġewwa l-Copilot Chat nattiv ta’ VS Code
 
 </div>
 
-> L-ebda sidebar ġdida, l-ebda chat UI ġdida — kull mudell OmniRoute iservi jidher dritt fil-**Copilot Chat model picker li diġà tuża** . Minn VS Code 1.122, il-mudelli tal-fornituri jaħdmu mingħajr GitHub sign-in jew abbonament Copilot — mod ta 'aġent, sejħa ta' għodda u viżjoni, b'xejn.
+> L-ebda sidebar ġdida, l-ebda interfaċċa ġdida għaċ-chat — kull mudell li joffri OmniRoute jidher direttament
+> fis-**selettur tal-mudelli ta’ Copilot Chat li diġà tuża**. Minn VS Code 1.122 ’il quddiem, il-mudelli tal-providers jaħdmu
+> mingħajr sign-in ma’ GitHub jew abbonament għal Copilot — modalità ta’ aġent, sejħiet ta’ għodod u viżjoni,
+> b’xejn.
 
-Installa l-** [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** estensjoni, ippuntah lejn is-server OmniRoute tiegħek (defaults għal `localhost:20128`), imbagħad iftaħ Copilot Chat → model picker →** Immaniġġja Mudelli...** →**OmniRoute** .
+Installa l-estensjoni **[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)**, qabbadha
+mas-server OmniRoute tiegħek (b’mod awtomatiku `localhost:20128`), imbagħad iftaħ Copilot Chat → is-selettur tal-mudelli
+→ **Immaniġġja l-Mudelli…** → **OmniRoute**.
 
 <table>
-  <tr><th align="left"> Aħżen </th><th align="left"> Link </th><th align="left"> Jaħdem ma </th></tr>
-  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace </b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot"> Install →</a ></td >< td align ="left">VS Code — stable &amp; Insiders </td></tr>
-  <tr><td align="left" nowrap>🔓 <b> Iftaħ VSX Reġistru </b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"> Installa →</a ></td >< td align ="left">Cursor, Windsurf, VSCodium, Theia, code-server </tr>AntigravityKiro…</td>
+  <tr><th align="left">Ħanut</th><th align="left">Link</th><th align="left">Jaħdem ma’</th></tr>
+  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">Installa →</a></td><td align="left">VS Code — stable u Insiders</td></tr>
+  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">Installa →</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro…</td></tr>
 </table>
 
-Minn ġewwa l-editur: iftaħ il-** Estensjonijiet** ħsieb, tfittxija** "OmniRoute"** , ikklikkja** Installa** — jaħdem bl-istess mod fiż-żewġ ħwienet. Sors, kwistjonijiet u r-runbook tal-pubblikazzjoni ħajjin fuq [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
+Minn ġewwa l-editur: iftaħ il-veduta **Extensions**, fittex **"OmniRoute"**, ikklikkja **Install**
+— jaħdem bl-istess mod fiż-żewġ ħwienet. Il-kodiċi sors, l-issues u l-gwida għall-pubblikazzjoni jinsabu fuq
+[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
 
-<sub>📖 [VS Kodiċi Copilot Gwida taċ-chat](docs/guides/VSCODE-COPILOT.md) — setup, dak li juri l-picker, dashboard-in-a-tab, issolvi l-problemi </sub>
+<sub>📖 [Gwida għal VS Code Copilot Chat](docs/guides/VSCODE-COPILOT.md) — konfigurazzjoni, x’juri s-selettur, dashboard f’tab, soluzzjoni tal-problemi</sub>
 
 <br/>
 
 <div align="center">
 
-### 🎩 Ġdid: OmniRouteTray — il-portal tiegħek, li tgħix fil-menu bar
+### 🎩 Ġdid: OmniRouteTray — il-gateway tiegħek, jgħix fil-menu bar
 
 </div>
 
-> `omniroute serve` huwa happiest meta dejjem mixghul.** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)** jibdel dan f'app tal-menu-bar issettja u tinsa għal macOS: jibda s-server, iżżommu ħaj matul reboots, jaġġornah f'postu, u jpoġġi l-baġit tat-tokens ħajjin tiegħek klikk waħda bogħod -** l-ebda tieqa terminali ma tithalla miftuha, l-ebda `npm install -g omniroute` ghal babysitting.**
+> `omniroute serve` jaħdem l-aħjar meta jkun dejjem mixgħul. **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)**
+> jibdlu f’app tal-menu bar għal macOS li tikkonfiguraha darba u tħalliha taħdem: jistartja s-server, iżommu jaħdem
+> wara restarts, jaġġornah fuq il-post, u jqiegħed il-baġit tat-tokens tiegħek f’ħin reali klikk waħda biss ’il bogħod — **mingħajr
+> tieqa tat-terminal li tibqa’ miftuħa, u mingħajr `npm install -g omniroute` li trid tibqa’ tieħu ħsiebu.**
 
-Mibnija [b'Tauri v2](https://v2.tauri.app/) (qalba Rust tad-daqs ta 'żball ta' arrotondament), tibgħat il-ħin tar-runtime Node 24 iffirmat tagħha stess u tamministra OmniRoute install ta' app, u għalhekk qatt ma tiġġieled `node`/`bun` globali tiegħek. Huwa** jaqsam il-konfigurazzjoni u d-database `~/.omniroute/` eżistenti tiegħek** — allura huwa l-istess OmniRoute li diġà tmexxi, biss bil-kappell fuq. 🎩
+Mibni b’[Tauri v2](https://v2.tauri.app/) (qalba Rust żgħira daqs żball ta’ approssimazzjoni), jiġi
+bir-runtime iffirmat tiegħu stess ta’ Node 24 u jimmaniġġja installazzjoni ta’ OmniRoute proprjetà tal-app, għalhekk qatt ma jidħol f’kunflitt man-
+`node`/`bun` globali tiegħek. Huwa **jaqsam il-konfigurazzjoni u d-database eżistenti tiegħek f’`~/.omniroute/`** — għalhekk huwa
+l-istess OmniRoute li diġà tħaddem, sempliċement b’kappell. 🎩
 
 <table>
-  <tr><th align="left"></th><th align="left"> Kif </th></tr>
-  <tr><td align="left" nowrap>🟢 <b> Jissorvelja s-server </b></td><td align="left"> Spawns <code> omniroute serve </code>, jadotta istanza li diġà qed taħdem minflok ma tidduplikaha </td></tr>
-  <tr><td align="left" nowrap>📊 <b> Użu dirett f'daqqa t'għajn </b><td align="left"></td> tal-kwoti tal-fornitur, Claude session/weekly limiti b'reset countdowns, tqassim tal-ispejjeż ta' 30 jum </td></tr>
-  <tr><td align="left" nowrap>🔄 <b> Aġġornamenti awtomatiċi fis-seħħ </b></td><td align="left"> Installazzjoni fi stadji, skambju atomiku, rollback fuq falliment — dejjem fuq l-aktar rilaxx ġdid </td></tr>
-  <tr><td align="left" nowrap>🚀 <b> Ibda mal-login </b></td><td align="left"> Tnedija mhux obbligatorja mal-login; trej biss, l-ebda ikona tal-baċir </td></tr>
-  <tr><td align="left" nowrap>🩺 <b> Tabib &amp; logs </b></td><td align="left"> Dijanjostika b'klikk waħda u aċċess għall-log tas-server </td></tr>
+  <tr><th align="left">X’jagħmel</th><th align="left">Kif</th></tr>
+  <tr><td align="left" nowrap>🟢 <b>Jissorvelja s-server</b></td><td align="left">Iniedi <code>omniroute serve</code>, u jadotta istanza li diġà qed taħdem minflok jidduplikaha</td></tr>
+  <tr><td align="left" nowrap>📊 <b>Użu f’ħin reali f’daqqa t’għajn</b></td><td align="left">Bars tal-kwota tal-providers, limiti tas-sessjoni/ta’ kull ġimgħa ta’ Claude b’countdowns għar-reset, rendikont tal-ispejjeż ta’ 30 jum</td></tr>
+  <tr><td align="left" nowrap>🔄 <b>Jaġġorna awtomatikament fuq il-post</b></td><td align="left">Installazzjoni fi stadji, bdil atomiku, rollback f’każ ta’ falliment — dejjem fuq l-aktar rilaxx ġdid</td></tr>
+  <tr><td align="left" nowrap>🚀 <b>Ibda mal-login</b></td><td align="left">Tnedija fakultattiva mal-login; tray biss, mingħajr ikona fid-dock</td></tr>
+  <tr><td align="left" nowrap>🩺 <b>Dijanjostika u logs</b></td><td align="left">Dijanjostika bi klikk waħda u aċċess għal-logs tas-server</td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub> Jippreferi download? Aqbad l-aħħar <code>.dmg </code> minn
-<a href="https://github.com/zoispag/omniroute-tray/releases"> Releases </a>. Sors, kwistjonijiet u bini
-docs live at <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
-<br/>💛 Proġett komunitarju minn <a href="https://github.com/zoispag">@zoispag </a> — mhux rilaxx uffiċjali OmniRoute.</sub>
+<sub>Tippreferi tniżżel? Ikseb l-aħħar <code>.dmg</code> minn
+<a href="https://github.com/zoispag/omniroute-tray/releases">Ir-Rilaxxi</a>. Il-kodiċi sors, il-kwistjonijiet u d-dokumentazzjoni tal-bini
+jinsabu fuq <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
+<br/>💛 Proġett tal-komunità minn <a href="https://github.com/zoispag">@zoispag</a> — mhuwiex rilaxx uffiċjali ta’ OmniRoute.</sub>
 
 <br/>
 
@@ -1071,7 +1079,7 @@ Uża dawn biss għal klijenti li ma jistgħux inqabbdu `Authorization: Bearer ..
 
 <br/>
 
-## 📦 Aktar metodi ta’ installazzjoni — Docker, sors, pnpm, Arch
+## 📦 Aktar metodi ta’ installazzjoni — Docker, kodiċi sors, pnpm, Arch
 
 **🐳 Docker**
 
@@ -1080,11 +1088,11 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
 ```
 
-`:latest` isegwi l-ogħla SemVer stabbli **ppubblikat**. Ma jsegwix il-`main` ta’ git. Uża `:X.Y.Z` għal GitOps. Ara [Kanali tar-Rilaxxi ta’ Docker](docs/guides/DOCKER_GUIDE.md#release-channels). L-immaġni tissettja **`OMNIROUTE_MEMORY_MB=1024`**. Dan huwa biżżejjed għad-dashboard u għal chat ħafif. **Aġenti tal-kodifikazzjoni** (`POST /v1/responses` minn Claude Code, Codex, Grok, …) jeħtieġu heap V8 ferm akbar, inkella l-proċess jagħti `FATAL ERROR` madwar 12 GiB meta jkun hemm żewġ kuntesti twal li jikkoinċidu. Issettja d-daqs tal-container ogħla mill-heap (il-buffers nattivi jinsabu barra minn V8):
+`:latest` isegwi l-ogħla verżjoni stabbli SemVer **ippubblikata**. Ma jsegwix il-`main` ta’ git. Uża verżjoni fissa `:X.Y.Z` għal GitOps. Ara [Il-Kanali tar-Rilaxx ta’ Docker](docs/guides/DOCKER_GUIDE.md#release-channels). L-immaġni tiffissa **`OMNIROUTE_MEMORY_MB=1024`**. Dan huwa biżżejjed għad-dashboard u għal chat ħafif. **L-aġenti tal-kodifikazzjoni** (`POST /v1/responses` minn Claude Code, Codex, Grok, …) jeħtieġu heap V8 ferm akbar, inkella l-proċess jagħti `FATAL ERROR` f’madwar 12 GiB taħt żewġ kuntesti twal li jikkoinċidu. Issettja d-daqs tal-container ogħla mill-heap (il-buffers nattivi jinsabu barra minn V8):
 
 | Tagħbija tax-xogħol                  | Heap (`-e OMNIROUTE_MEMORY_MB`) | Container (`--memory`) |
 | ------------------------------------ | ------------------------------- | ---------------------- |
-| Dashboard / chat ħafif               | `1024` (default tal-immaġni)    | ≥2 g                   |
+| Dashboard / chat ħafif               | `1024` (predefinit tal-immaġni) | ≥2 g                   |
 | Aġent wieħed tal-kodifikazzjoni      | `8192`                          | ≥10 g                  |
 | Żewġ `/v1/responses` twal simultanji | `10240`–`12288`                 | ≥12–16 g               |
 
@@ -1094,21 +1102,21 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
 ```
 
-It-tabella sħiħa: [Gwida ta’ Docker — RAM waqt it-tħaddim](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
+Tabella sħiħa: [Gwida ta’ Docker — RAM waqt it-tħaddim](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
 
-> **Kanal ta’ Docker għall-verżjonijiet preliminari:** `diegosouzapw/omniroute:next` u
-> `diegosouzapw/omniroute:next-web` isegwu l-fergħa default attwali `release/v*`.
-> Dawn it-tags mutabbli huma maħsuba biss għall-ittestjar ta’ tiswijiet li għadhom ma ġewx
-> rilaxxati u **mhumiex appoġġjati għall-produzzjoni**. Ara
-> [Kanali tar-Rilaxxi ta’ Docker](docs/guides/DOCKER_GUIDE.md#release-channels).
+> **Kanal ta’ Docker għal verżjonijiet ta’ qabel ir-rilaxx:** `diegosouzapw/omniroute:next` u
+> `diegosouzapw/omniroute:next-web` isegwu l-fergħa predefinita attwali `release/v*`.
+> Dawn it-tags li jistgħu jinbidlu huma maħsuba biss għall-ittestjar ta’ soluzzjonijiet li għadhom ma ġewx rilaxxati u
+> **mhumiex appoġġjati għall-produzzjoni**. Ara
+> [Il-Kanali tar-Rilaxx ta’ Docker](docs/guides/DOCKER_GUIDE.md#release-channels).
 
 **🥟 Bun**
 
 L-`bun install` standard u l-installazzjoni globali (`bun install -g omniroute`) huma appoġġjati permezz tal-identifikazzjoni tar-runtime Bun:
 
-- **`bun:sqlite` inkorporat**: OmniRoute juża d-driver `bun:sqlite` inkorporat ta’ Bun meta jitħaddem taħt Bun, u jaqleb għal `better-sqlite3` fuq Node.js jew `sql.js`.
-- **Għażla awtomatika tal-bundler Webpack fl-iżvilupp**: L-iżvilupp (`bun run dev`) jidentifika awtomatikament lil Bun u jiddiżattiva Turbopack favur Webpack biex jiġu evitati inkompatibbiltajiet mal-bindings nattivi ta’ V8. Il-builds tal-produzzjoni (`bun run build`) isegwu `OMNIROUTE_USE_TURBOPACK` eżattament bħal fuq Node: Turbopack b’mod default, jew `OMNIROUTE_USE_TURBOPACK=0` biex tibni b’Webpack (`Dockerfile.bun` jesponih bħala `--build-arg`).
-- **Dockerfile apposta għal Bun**: `Dockerfile.bun` b’diversi stadji għal deployments tal-produzzjoni nattivi ta’ Bun (`docker build -f Dockerfile.bun -t omniroute:bun .`).
+- **`bun:sqlite` integrat**: OmniRoute juża d-driver `bun:sqlite` integrat ta’ Bun meta jkun qed jaħdem taħt Bun, u jaqleb għal `better-sqlite3` fuq Node.js jew `sql.js`.
+- **Għażla awtomatika tal-bundler Webpack fl-iżvilupp**: L-iżvilupp (`bun run dev`) jidentifika awtomatikament lil Bun u jiddiżattiva Turbopack favur Webpack biex jipprevjeni inkompatibbiltajiet mal-bindings nattivi ta’ V8. Il-builds tal-produzzjoni (`bun run build`) isegwu `OMNIROUTE_USE_TURBOPACK` eżattament bħal fuq Node: Turbopack b’mod predefinit, `OMNIROUTE_USE_TURBOPACK=0` biex tibni b’Webpack (`Dockerfile.bun` jesponih bħala `--build-arg`).
+- **Dockerfile iddedikat għal Bun**: `Dockerfile.bun` b’diversi stadji għal deployments nattivi ta’ Bun fil-produzzjoni (`docker build -f Dockerfile.bun -t omniroute:bun .`).
 
 ```bash
 # Installa u ħaddem b’Bun
@@ -1116,7 +1124,7 @@ bun install
 bun run dev
 ```
 
-**🛠️ Mis-sors**
+**🛠️ Mill-kodiċi sors**
 
 ```bash
 cp .env.example .env && npm install
@@ -1138,7 +1146,7 @@ yay -S omniroute-bin && systemctl --user enable --now omniroute.service
 **🔧 Nix (Flake)**
 
 ```bash
-# Bl-użu ta’ Nix flakes
+# Bl-użu ta’ flakes ta’ Nix
 nix develop
 npm run dev
 
@@ -1151,40 +1159,42 @@ devbox run npm run dev
 **🦭 Podman**
 
 ```bash
-# 1. Ipprepara d-direttorju tad-data bind-mounted
+# 1. Ipprepara d-direttorju tad-data mmuntat b’bind mount
 mkdir -p data
 
-# 2. Linux + Podman lokali rootless biss (qatt klijent remot ta’ Podman Machine):
+# 2. Linux + Podman rootless lokali biss (qatt client remot ta’ Podman Machine):
 podman unshare chown 1000:1000 ./data
 
-# 3. Issettja l-ħjiel tar-runtime, ibni l-immaġni lokali ta’ Compose, u ibda
+# 3. Issettja l-indikazzjoni tar-runtime, ibni l-immaġni Compose lokali, u ibda
 echo "CONTAINER_HOST=podman" >> .env
 podman compose --profile base up -d --build
 ```
 
 Fuq macOS jew Windows, Podman juża Podman Machine remota: aqbeż `podman unshare` u
-segwi l-[gwida tad-direttorju tad-data speċifika għat-topoloġija](contrib/podman/README.md#data-directory-permissions-by-topology).
+segwi l-[gwida għad-direttorju tad-data speċifika għat-topoloġija](contrib/podman/README.md#data-directory-permissions-by-topology).
 
 📖 [Gwida ta’ Podman](contrib/podman/README.md) — Builds ta’ Compose, Podman Machine, u
 konfigurazzjoni ta’ Quadlet għal Linux/systemd.
 
-**⚡ Installazzjoni aktar veloċi / ħafifa (aqbeż il-build nattiva)**
+**⚡ Installazzjoni aktar veloċi / eħfef (aqbeż il-build nattiv)**
 
-L-engine nattiv ta’ SQLite (`better-sqlite3`) huwa dipendenza **mhux obbligatorja**, għalhekk installazzjoni
-globali qatt ma teħel waqt il-kompilazzjoni mis-sors: tuża binary mibnija minn qabel meta jkun hemm waħda kompatibbli
-mal-pjattaforma/Node tiegħek, u inkella taqleb b’mod trasparenti għal engine JavaScript pur
-(`node:sqlite` fuq Node 22+, inkella l-WASM `sql.js` inkluż) — mingħajr il-ħtieġa ta’ għodod tal-build.
+Il-magna SQLite nattiva (`better-sqlite3`) hija dipendenza **fakultattiva**, għalhekk installazzjoni
+globali qatt ma teħel waqt il-kompilazzjoni mill-kodiċi sors: tuża binarju mibni minn qabel meta wieħed ikun jaqbel
+mal-pjattaforma/Node tiegħek, u inkella taqleb b’mod trasparenti għal magna pure-JS
+(`node:sqlite` fuq Node 22+, inkella l-WASM `sql.js` inkluż) — l-ebda għodda tal-build mhija meħtieġa.
 
-Biex taqbeż għalkollox it-tħejjija nattiva ta’ wara l-installazzjoni (CI, ambjenti headless, jew magni kajmana):
+Biex taqbeż kompletament it-**tisħin nattiv** ta’ wara l-installazzjoni (CI, sistemi mingħajr interfaċċa grafika, jew magni bil-mod).
+Nota: dan jaqbeż biss il-pass tat-tisħin nattiv ta’ SQLite (`scripts/postinstall.mjs`); il-hook
+għall-ikkupjar/tiswija tal-binarju (`scripts/build/postinstall.mjs`) jibqa’ jaħdem bħas-soltu:
 
 ```bash
-OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 jaqbiżha wkoll
+OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 jaqbżu wkoll
 ```
 
 Għall-aktar installazzjonijiet veloċi, ippreferi **pnpm** (ħażna indirizzata skont il-kontenut + hard links — ara hawn fuq).
-Għal runtime headless mingħajr dashboard, uża l-profil `base` ta’ Docker (hawn fuq) jew il-
+Għal runtime mingħajr dashboard u mingħajr interfaċċa grafika, uża l-profil `base` ta’ Docker (hawn fuq) jew il-
 [gwida ta’ Termux](docs/guides/TERMUX_GUIDE.md). Is-CLI u d-dashboard tal-web jiġu servuti mill-
-istess proċess fuq port wieħed, għalhekk bħalissa m’hemm l-ebda pakkett separat għas-CLI biss.
+istess proċess fuq port wieħed, għalhekk illum m’hemmx pakkett separat għas-CLI biss.
 
 <br/>
 

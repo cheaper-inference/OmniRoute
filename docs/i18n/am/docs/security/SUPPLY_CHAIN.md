@@ -18,42 +18,33 @@ OmniRoute npm + Docker artifacts ያትማል። እነዚህ መግቢያዎች
 
 የምስሉ CVE ratchet በ`docker-publish.yml` ውስጥ **ሁለት ደረጃዎችን** ይጠቀማል፦ የSARIF ደረጃ (`HIGH,CRITICAL`, `exit-code: 0`) HIGH+CRITICALን በደህንነት ትር (Security tab) ውስጥ ሳያግድ እንዲታይ ያደርጋል፤ የ_CRITICAL gate_ ደረጃ (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) **መፍትሄ ያለው** CRITICAL CVE ሲገኝ መልቀቂያውን ያቋርጣል። `ignore-unfixed` ከላይኛው ምንጭ (upstream) ጥገና የሌለውን የመሠረት ምስል (base-image) CVE መልቀቂያውን እንዳያግድ ይከላከላል።
 
-## ⚠️ የCVE ልዩነት (osv/Trivy መግቢያዎችን ማገድ)
+## ⚠️ የCVE ልዩነት (የማገጃ osv/Trivy ጌቶች)
 
-osv እና Trivy ጥገኞችን (deps) **በቀጣይነት ከሚያድጉ** የCVE ዳታቤዞች ጋር ያነጻጽራሉ። **ምንም ጥገኞችን የማይነካ** PR በአንድ ነባር ጥገኛ ውስጥ አዲስ CVE በመገለጡ ምክንያት በድንገት ቀይ ሊሆን ይችላል (osv: የተለካው `vulnCount` > መሰረታዊ መስመር (baseline)፤ Trivy: በምስሉ ውስጥ አዲስ ሊስተካከል የሚችል CRITICAL)። **ይህ የማገጃ CVE መግቢያ የሚጠበቅ የአሠራር ባህሪ እንጂ የምርት መበላሸት (regression) አይደለም።**
+osv እና Trivy ጥገኞችን **ያለማቋረጥ እያደጉ ካሉ** የCVE የውሂብ ጎታዎች ጋር ያነጻጽራሉ። **ምንም ጥገኞችን የማይነካ** PR፣ በነባር ጥገኛ ውስጥ አዲስ CVE ይፋ ስለተደረገ ብቻ በድንገት ቀይ ሊሆን ይችላል (osv፦ የተለካው `vulnCount` > መነሻ መለኪያ፤ Trivy፦ በምስሉ ውስጥ አዲስ ሊስተካከል የሚችል CRITICAL)። **ይህ የሚጠበቅ የማገጃ CVE ጌት የአሠራር ባህሪ እንጂ የምርት ዳግም-ማሽቆልቆል አይደለም።**
 
-osv ወይም Trivy በአዲስ በተገለጸ CVE ምክንያት ቀይ ሲሆኑ፣ መፍትሄው የሚከተለው ነው፦
+አዲስ ይፋ በተደረገ CVE ምክንያት osv ወይም Trivy ቀይ ሲሆኑ፣ መፍትሔው፦
 
-1.  **የተጎዳውን ጥገኛ ያሳድጉ** (የተመረጠ) — በ`package.json` `overrides` (transitive deps) በኩል ወደተስተካከለው ስሪት ያሻሽሉ ወይም ምስሉን በተስተካከለ መሠረት ላይ እንደገና ይገንቡ።
-2.  **ከላይኛው ምንጭ (upstream) ጥገና ከሌለ፦**
-    - **osv:** በ`config/quality/quality-baseline.json` ውስጥ `metrics.vulnCount`ን እንደገና መሰረታዊ መስመር ያድርጉ (`npm run quality:ratchet -- --update` የተወሰኑ መግቢያዎችን አይሸፍንም — እሴቱን በእጅ ያርትዑ፣ `direction:down`) ከማረጋገጫ ማስታወሻ + መከታተያ ጉዳይ ጋር።
-    - **Trivy:** በ`.trivyignore` ውስጥ (በእያንዳንዱ መስመር CVE-ID) ከማረጋገጫ አስተያየት + መከታተያ ጉዳይ ጋር ግቤት ያክሉ። `ignore-unfixed: true` ጥገና የሌላቸውን CVEs በራስ-ሰር ይሸፍናል።
+1. **የተጎዳውን ጥገኛ ስሪት ከፍ ያድርጉ** (ተመራጭ) — በ`package.json`
+   `overrides` (ተዘዋዋሪ ጥገኞች) በኩል ወደ ታረመው ስሪት ያሻሽሉ ወይም ምስሉን በታረመ መሠረታዊ ምስል ላይ እንደገና ይገንቡ።
+2. **ማገገሚያ ከሌለ፡-** የሚለካውን ግኝት ያቆዩ እና የተጎዳውን ጥገኝነት ወይም ምስል ይከታተሉ። ያልተሳካ እጩ ለማለፍ የተጋላጭነት መነሻውን አያሳድጉ። Trivy's `ignore-unfixed: true` ቀድሞውንም የምስል ድክመቶችን ያለላይኛ መጣጥፍ አያካትትም። ማንኛውም ልዩ ሁኔታ የተገመገመ የተጋላጭነት ID ያስፈልገዋል፣ ትክክለኛው የጥቅል መንገድ፣ የአገልግሎት ማብቂያ እና የመከታተያ ጉዳይ በፖሊሲው ውስጥ። ያልተሳካ ቅኝት አውቶማቲክ ውጤት አይደለም.
 
-ሁለቱም መግቢያዎች መሳሪያው በማይኖርበት ጊዜ ወይም መለኪያው ሲከሽፍ (osv-scanner በPATH ውስጥ ከሌለ፣ osv.dev/network ሊደረስበት የማይችል ከሆነ፣ ልክ ያልሆነ JSON) **በጥሩ ሁኔታ ይዘላሉ** (exit 0) — የ**መለኪያ** ውድቀት በጭራሽ አያግድም፣ የ**ተለካ** መበላሸት (regression) ብቻ ነው የሚያግደው።
+አስፈላጊ የOSV አፈጻጸሞች (`check:vuln-ratchet -- --ratchet`) ስካነሩ፣ ሪፖርቱ ወይም መነሻ መለኪያው ሊረጋገጥ በማይችልበት ጊዜ በ
+`INCOMPLETE` እና የመውጫ ኮድ 2 የተዘጋ ሁኔታ ይከሽፋሉ።
+የተለካ ዳግም-ማሽቆልቆል በኮድ 1 ይወጣል። የምክር አፈጻጸም አሁንም `SKIP`ን ከመውጫ ኮድ 0 ጋር ሪፖርት ሊያደርግ ይችላል፤ ይህም ጥገኞቹ ስካኑን እንዳለፉ አያረጋግጥም። የማገጃው
+Trivy ደረጃም የተሳካ ልኬትን ይፈልጋል፦ የማይገኙ መሣሪያዎች፣ ያልተሳኩ ሥራዎች
+እና የጎደለ የምስል ማስረጃ አንድ ምስል ንጹሕ መሆኑን ማረጋገጥ አይችሉም።
 
-## የታወቁ ተቀባይነት ያላቸው ስጋቶች
+## የምስል ቅኝት ፖሊሲ
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+የአሁኑ `.trivyignore.yaml` ምንም የተጋላጭነት ሁኔታዎችን አልያዘም። `npm run check:trivy-ignore-policy` የተዋቀረውን ፖሊሲ በአካባቢያዊ ቅኝት መገለጫዎች፣ CI እና ጥራት ያረጋግጣል። ያልታወቀ IDs፣ ሰፋ ያሉ መንገዶች፣ የተባዙ ግቤቶች እና ጊዜያቸው ያለፈባቸው ልዩ ሁኔታዎች ውድቅ ተደርገዋል። ቅርስ `.trivyignore` ለተሰደዱ ፍተሻዎች ግብዓት አይደለም።
 
-`extract-zip@2.0.1` ያልተጠገኑ ሁለት ከፍተኛ-አደጋ የሲምሊንክ-ትራቨርሳል ማስጠንቀቂያዎችን ይዟል።
-ከላይ ባለው የCVE ልዩነት መፍትሄ "ምንም የላይኛው ፍሰት ጥገና የለም" በሚለው ቅርንጫፍ መሰረት፣ ይህ
-**ተቀባይነት ያለው ስጋት** ነው፣ ማሻሻያ አይደለም፦
+Docker ከ `github.workflow_sha` የመመሪያ መሳሪያ እና የምስል ምንጭ ፖሊሲን ከግንባታው ጋር ተመሳሳይ ምንጭ መራጭን ይፈትሻል። የመመሪያው መራጩ ተኳዃኝ ያልሆኑ ወሰኖችን ውድቅ ያደርጋል እና ለሁለቱም Trivy ስካን አንድ ፋይል ያዘጋጃል። የተዋቀረ ፖሊሲ የሌለው ታሪካዊ ምንጭ ምንም ልዩ ሁኔታዎችን አያገኝም። ሁለቱም ቅኝቶች Trivy `v0.70.0` ን ያያሉ። የፖሊሲ ማረጋገጫ የውቅር ወጥነት ያረጋግጣል; ምስሉ አሁንም የተሳካ ቅኝት ያስፈልገዋል.
 
-- **ሰንሰለት:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`።
-  በ`package-lock.json` የተረጋገጠ — በጠቅላላው የጥገኝነት ዛፍ ውስጥ አንድ ጥቅል ብቻ
-  (`@openai/codex-security`) `extract-zip`ን ያውጃል፣ እና አንድ ጥቅል ብቻ
-  (`promptfoo`) `@openai/codex-security`ን ያውጃል።
-- **በሰንሰለቱ ውስጥ የትኛውም የተስተካከለ ልቀት የለም።** `extract-zip@2.0.1` (በ2020 የታተመ) የጥቅሉ የመጨረሻ ልቀት ነው — ጥገና የሌለው ነው። `@openai/codex-security`'s
-  የአሁኑ npm-latest (`0.1.29`) አሁንም `extract-zip@2.0.1`ን ይጎትታል።
-- **ከምርት ሊደረስበት የማይችል ነው።** `promptfoo` ለልማት ጥገኝነት ብቻ ነው (በ`dependencies` ስር በጭራሽ ያልተዘረዘረ)፣ እና በ`src/`፣ `open-sse/`፣ ወይም `bin/` ስር ያለ ምንም ፋይል የ`extract-zip` npm ጥቅልን አያስመጣም — የOmniRoute የራሱ `extractZip()` ረዳት
-  (`src/lib/versionManager/binaryManager.ts:93`) ወደ ቤተኛ `unzip`/`tar` ይወጣል
-  እና ተዛማጅነት የሌለው ነው። `@openai/codex-security` የራሱን የሲምሊንክ-ትራቨርሳል መከላከያ
-  በextract-zip's onEntry callback ላይ ይልካል።
-- **አትስጡ** `extract-zip`ን በ`package.json` `overrides` በኩል ቅጽል ስም — ብቸኛው ሊተካ የሚችል አማራጭ Electron-org-internal ሲሆን ከ`@openai/codex-security` የራሱ onEntry/defaultDirMode/defaultFileMode ፍተሻዎች ጋር ከኤፒአይ ጋር የማይጣጣም ነው፤ እሱን መሻር የዚያን ጥቅል የደህንነት ፍተሻዎች በዝምታ ይሰብራል።
-- **መሰረታዊ መስመር:** የተለካው osv `vulnCount` (3) አስቀድሞ ከቀዘቀዘው
-  `config/quality/quality-baseline.json` መሰረታዊ መስመር (27) በታች ነው — የመቆለፊያ ለውጥ አያስፈልግም።
-- **የመመለሻ መከላከያ:** `tests/unit/extract-zip-14482-exposure.test.ts` ሰንሰለቱን እና ከምርት የማያስመጣውን የማይለወጥ ነገር ያረጋግጣል፤ ከሁለቱ አንዱ ከተበላሸ (ለምሳሌ የወደፊት PR `extract-zip`ን ከምርት ሊደረስበት የሚችል ካደረገ) CI ይወድቃል።
-- **ክትትል:** ጉዳይ #14482።
+## ከአገልግሎት የወጣ ጥገኛ አካል ስጋት
+
+በቋሚ ስሪት የተወሰነውን promptfoo የልማት መሣሪያ ካሻሻልን በኋላ፣ ዋናው lockfile ከእንግዲህ `extract-zip`ን ወይም ወደ እሱ የሚያመራ የጥገኝነት ግንኙነትን አያካትትም። ይህ፣ በ#14482 ውስጥ ክትትል የተደረገበትን እና ከዚህ ቀደም ተቀባይነት ያገኘውን `promptfoo` → `@openai/codex-security` → `extract-zip` ሰንሰለት ከአገልግሎት ያወጣል። በ`tests/unit/extract-zip-14482-exposure.test.ts` ውስጥ ያሉት የድጋሚ ስህተት ማረጋገጫዎች ይህ ሰንሰለት ዳግም እንዳይገባ ይከላከላሉ፣ እንዲሁም ከምርት ኮድ የሚደረጉ ማስገባቶችን የሚከለክለውን ደንብ ያስቀጥላሉ።
+
+የአሁኑ የጥገኝነት ጥገና፣ የተኳኋኝነት ማሻሻያዎችን በAzure identity MSAL client፣ በget-uri FTP client እና በOpenCode v1 SDK Zod ጥገኝነት ብቻ እንዲወሰኑም ያደርጋል። የAzure token ማግኘት እና የFTP ሰርስሮ ማውጣት ቁጥጥር በተደረገባቸው ማጓጓዣዎች ይሞከራሉ፤ ሁለቱም OpenCode packages የራሳቸውን build እና test suites ያስኬዳሉ። የRegistry advisory ብዛቶች በአንድ የጊዜ ነጥብ ላይ የተወሰዱ መለኪያዎች ሲሆኑ፣ lockfile ከተመዘገበ በኋላ ሊለወጡ ይችላሉ።
 
 ## የኋላ መዝገብ: የስኮርካርድ ማስጠንቀቂያ → አጋጅ
 

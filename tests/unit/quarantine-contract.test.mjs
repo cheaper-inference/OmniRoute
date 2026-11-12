@@ -37,7 +37,22 @@ test("discovery --update cannot silently freeze newly orphaned tests", () => {
     ]);
     for (const source of fixtureSources) {
       mkdirSync(dirname(join(dir, source)), { recursive: true });
-      copyFileSync(new URL(source, root), join(dir, source));
+      if (
+        /^vitest.*\.config\.ts$/.test(source) &&
+        COLLECTORS.some((collector) => collector.sources.includes(source))
+      ) {
+        // The real collector loads this config. Keep the fixture independent of
+        // the checkout's Vite plugins, aliases, setup files and node_modules.
+        const include = COLLECTORS.filter((collector) => collector.sources.includes(source)).map(
+          (collector) => collector.glob
+        );
+        writeFileSync(
+          join(dir, source),
+          `export default { test: { include: ${JSON.stringify(include)}, exclude: [] } };\n`
+        );
+      } else {
+        copyFileSync(new URL(source, root), join(dir, source));
+      }
     }
     writeFileSync(
       join(dir, "config/quality/vitest-exclusions.json"),

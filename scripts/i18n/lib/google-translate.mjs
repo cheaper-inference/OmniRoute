@@ -103,11 +103,14 @@ const INLINE_PATTERNS = [
   /<https?:\/\/[^>\s]+>/y, // autolinks
   // An HTML code span is a literal like a backtick span: the WHOLE element (tags and content)
   // is one token, so the translator never sees `<code>any</code>`'s "any" (am translated it).
-  /<(code|kbd|samp)\b[^>]*>[\s\S]*?<\/\1\s*>/iy,
-  /<!--[\s\S]*?-->|<\/?[A-Za-z][^>\n]*>/y, // HTML comments / tags
+  /<(code|kbd|samp)\b(?:[^"'<>]|"[^"]*"|'[^']*')*>[\s\S]*?<\/\1\s*>/iy,
+  /<!--[\s\S]*?-->|<\/?[A-Za-z](?:[^"'<>\n]|"[^"\n]*"|'[^'\n]*')*>/y, // HTML comments / tags
   /https?:\/\/[^\s)<>\]]+/y, // bare URLs
   /\{[^{}\n]{1,80}\}|\$\{[^}\n]+\}|%[sd]|\$[A-Z_][A-Z0-9_]*/y, // ICU / shell placeholders
   /(?<![\w-])[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+(?![\w-])/y, // UPPER_SNAKE env names
+  // Preserve the repository qualifier too: transliterating 9router in 9router#1437
+  // loses the original reference. Match before paths, and leave C#7 as prose.
+  /(?<![\w/.-])(?:[\w.-]+\/[\w.-]+|[\w.-]{2,})#\d+(?!\d)/y,
   /(?<![\w/-])(?:[\w.-]+\/)+[\w.-]+(?![\w/-])/y, // paths with a slash
   /(?<![\w-])[\w-]+\.(?:md|mdx|ts|tsx|js|mjs|cjs|json|ya?ml|sh|sql|css|html|txt|toml|env)(?![\w-])/y, // file names
   /(?<![\w-])--?[a-z][\w-]*(?![\w-])/y, // CLI flags
@@ -194,6 +197,14 @@ export const BRAND_TERMS = [
   "Docker",
   "Playwright",
   "Vitest",
+  // UI kit, palette and font names from the design-system source.
+  "Keak CI UI Kit",
+  "Switzer",
+  "Inter",
+  "Vazirmatn",
+  "Editions",
+  "Classic",
+  "Lucide",
 ];
 
 // A masked token that is a real HTML tag (not an autolink, not a whole code element). The
@@ -205,6 +216,19 @@ const isHtmlTagToken = (raw) =>
 const BARE_TOKEN_ID = /(?<!\p{L})zq[a-z]+(?!\p{L})/u;
 const LINK = /\[([^\]\n]+)\]\(([^)\n]+)\)/y;
 const EMPHASIS = /\*\*|__|~~|\*/y;
+
+function normalizeEmphasisSpacing(text) {
+  return text.replace(/(\*\*|__|~~)([^*_~\n]+?)\1/g, (all, marker, inner, offset, whole) => {
+    const content = inner.replace(/^[ \t]+|[ \t]+$/g, "");
+    if (!content) return all;
+    // A translator can move the separating space inside either delimiter. Keep it
+    // outside when prose touches that edge; source code spans are still opaque tokens.
+    const before = /^[ \t]/.test(inner) && /[\p{L}\p{N}]/u.test(whole[offset - 1] ?? "") ? " " : "";
+    const after =
+      /[ \t]$/.test(inner) && /[\p{L}\p{N}]/u.test(whole[offset + all.length] ?? "") ? " " : "";
+    return before + marker + content + marker + after;
+  });
+}
 
 /**
  * Masks everything in one text segment that must survive verbatim and converts inline
@@ -262,6 +286,15 @@ export function maskInline(text, { protectedTerms = [], pipe = "\\|" } = {}) {
           continue;
         }
       }
+      // Recognize markup before the generic symbol token can mask a strikethrough delimiter.
+      EMPHASIS.lastIndex = pos;
+      const em = EMPHASIS.exec(src);
+      if (em && (em[0] !== "*" || /\S/.test(src[pos + 1] ?? ""))) {
+        flushPlain();
+        html += `<em data-m="${em[0]}"></em>`;
+        pos += em[0].length;
+        continue;
+      }
       for (const re of INLINE_PATTERNS) {
         re.lastIndex = pos;
         const hit = re.exec(src);
@@ -280,14 +313,6 @@ export function maskInline(text, { protectedTerms = [], pipe = "\\|" } = {}) {
           continue;
         }
       }
-      EMPHASIS.lastIndex = pos;
-      const em = EMPHASIS.exec(src);
-      if (em && (em[0] !== "*" || /\S/.test(src[pos + 1] ?? ""))) {
-        flushPlain();
-        html += `<em data-m="${em[0]}"></em>`;
-        pos += em[0].length;
-        continue;
-      }
       plain += src[pos];
       pos++;
     }
@@ -299,6 +324,9 @@ export function maskInline(text, { protectedTerms = [], pipe = "\\|" } = {}) {
 
   function restore(translated) {
     let out = String(translated);
+    // Normalize before span restoration can consume spaces next to masked UI names.
+    out = out.replace(/<em data-m=\\?"([*_~]+)\\?"\s*>\s*<\/em>/g, "$1");
+    out = normalizeEmphasisSpacing(out);
     // 1. tokens → private-use placeholders, keeping only source-side whitespace
     const seen = new Set();
     const order = []; // token indices in the order the translator returned them
@@ -332,7 +360,6 @@ export function maskInline(text, { protectedTerms = [], pipe = "\\|" } = {}) {
       const url = links[Number(k)];
       return url === undefined ? all : `[${inner.trim()}](${url})`;
     });
-    out = out.replace(/<em data-m=\\?"([*_~]+)\\?"\s*>\s*<\/em>/g, "$1");
     if (/<\/?(?:span|a|em)\b/i.test(out)) return null;
     // 3. entities, whitespace and emphasis on the translated prose only, then the originals
     out = decodeEntities(out)
@@ -341,7 +368,7 @@ export function maskInline(text, { protectedTerms = [], pipe = "\\|" } = {}) {
       .trim();
     // no space between a link / masked token and a following period or comma
     out = out.replace(/(\]\([^)\s]*\)|[\ue000-\uf8ff])[ \t]+([.,])/g, "$1$2");
-    out = out.replace(/(\*\*|__|~~)\s+([^*_~\n]+?)\s+\1/g, "$1$2$1");
+    out = normalizeEmphasisSpacing(out);
     // Every source code span is masked, so a backtick in the translated prose came from the
     // translator (hy renders its comma ՝ as `) and would open a fake code span; a bare pipe
     // would split a table cell.
@@ -361,24 +388,75 @@ export function maskInline(text, { protectedTerms = [], pipe = "\\|" } = {}) {
     return out.replace(/[\ue000-\uf8ff]/g, (ch) => tokens[ch.charCodeAt(0) - PUA_BASE]?.raw ?? ch);
   }
 
-  return { html, tokens, links, restore, hasProse };
+  return { html, tokens, links, restore, hasProse, sourceText: text };
+}
+
+// Classify bare echoes only when every original protected span remains valid
+// and exactly once. The cleaned reply is NEVER used as translated text.
+function classifyBareTokenEchoes(mask, answer) {
+  if (!mask.tokens.length || BARE_TOKEN_ID.test(mask.sourceText)) return null;
+  let echoes = 0;
+  let unknown = false;
+  const known = new Set(mask.tokens.map((_token, index) => tokenId(index)));
+  const cleaned = answer
+    .split(/(<span translate=\\?"no\\?"\s*>\s*zq[a-z]+\s*<\/span>)/g)
+    .map((piece) => {
+      if (piece.startsWith("<span")) return piece;
+      return piece.replace(/(?<!\p{L})zq[a-z]+(?!\p{L})/gu, (id) => {
+        echoes++;
+        if (!known.has(id)) unknown = true;
+        return "";
+      });
+    })
+    .join("");
+  if (!echoes || mask.restore(cleaned) === null) return null;
+  return unknown ? "unknown" : "known";
+}
+
+// Keep the generated tags and protected spans local. Only the source prose
+// nodes are sent on this retry, preserving source punctuation and whitespace.
+function proseRetryPlan(mask) {
+  const pieces = mask.html.split(/(<span translate="no">zq[a-z]+<\/span>|<[^>]+>)/g);
+  const nodes = [];
+  pieces.forEach((piece, index) => {
+    if (!piece || piece.startsWith("<") || !hasLetters(piece)) return;
+    nodes.push({
+      index,
+      source: piece.trim(),
+      lead: piece.match(/^\s*/)[0],
+      trail: piece.match(/\s*$/)[0],
+    });
+  });
+  return { pieces, nodes };
+}
+
+function safeRetriedProse(text) {
+  return (
+    typeof text === "string" &&
+    text.trim() &&
+    !/<[^>]*>/.test(text) &&
+    !/<\/?[a-z]/i.test(decodeEntities(text)) &&
+    !/(?<!\p{L})(?:zq[a-z]+|ZQ[A-Z]+)(?!\p{L})/u.test(text)
+  );
 }
 
 // ----- block parsing ----------------------------------------------------------------
 
-const FENCE = /^(\s*)(`{3,}|~{3,})/;
+const FENCE = /^(\s*)(`{3,}|~{3,})(.*)$/;
 const TABLE_ROW = /^\s*\|/;
 const TABLE_SEP = /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$/;
 const HEADING = /^(#{1,6}\s+)(.*?)(\s+#+\s*)?$/;
 const LIST_ITEM = /^(\s*(?:[-*+]|\d+[.)])\s+(?:\[[ xX]\]\s+)?)(.*)$/;
 const QUOTE = /^(\s*(?:>\s?)+)(.*)$/;
 const HR = /^\s*(?:-{3,}|\*{3,}|_{3,}|={3,})\s*$/;
+const columns = (prefix) =>
+  [...prefix].reduce((width, char) => width + (char === "\t" ? 4 - (width % 4) : 1), 0);
 
 export function splitCells(row) {
   // split on `|` outside inline code; escaped pipes stay inside the cell
   const cells = [];
   let cur = "";
-  let tick = false;
+  let ticks = 0;
   for (let i = 0; i < row.length; i++) {
     const ch = row[i];
     if (ch === "\\" && row[i + 1] === "|") {
@@ -386,8 +464,17 @@ export function splitCells(row) {
       i++;
       continue;
     }
-    if (ch === "`") tick = !tick;
-    if (ch === "|" && !tick) {
+    if (ch === "`") {
+      let end = i + 1;
+      while (row[end] === "`") end++;
+      const length = end - i;
+      if (ticks === 0) ticks = length;
+      else if (ticks === length) ticks = 0;
+      cur += row.slice(i, end);
+      i = end - 1;
+      continue;
+    }
+    if (ch === "|" && ticks === 0) {
       cells.push(cur);
       cur = "";
       continue;
@@ -403,7 +490,7 @@ export function splitCells(row) {
 // and is masked there as one token. Before this the line was sent whole and every tag was a
 // movable token: the translator could swap them (ja) and rewrite code-span content (am).
 const HTML_PIECE =
-  /<!--[\s\S]*?-->|<(code|kbd|samp)\b[^>]*>[\s\S]*?<\/\1\s*>|<\/?[A-Za-z][\w-]*(?=[\s/>])[^>]*>/gi;
+  /<!--[\s\S]*?-->|<(code|kbd|samp)\b(?:[^"'<>]|"[^"]*"|'[^']*')*>[\s\S]*?<\/\1\s*>|<\/?[A-Za-z][\w-]*(?=[\s/>])(?:[^"'<>]|"[^"]*"|'[^']*')*>/gi;
 export function splitHtmlLine(line) {
   const pieces = [];
   let text = "";
@@ -433,51 +520,128 @@ export function splitHtmlLine(line) {
  * two halves).
  */
 export function segmentMarkdown(markdown) {
-  const lines = markdown.split("\n");
   const parts = [];
-  let fence = null;
-  let para = null; // { pre, lines }
+  let code = null;
+  let para = null;
   let comment = false;
+  let containers = [];
   const flush = () => {
     if (para) parts.push({ pre: para.pre, text: para.lines.join(" "), post: "" });
     para = null;
   };
-  for (const line of lines) {
-    if (fence) {
-      parts.push(line);
-      const t = line.trim();
-      if (
-        t.startsWith(fence) &&
-        t
-          .slice(fence.length)
-          .replace(new RegExp(`^\\${fence[0]}+`), "")
-          .trim() === ""
-      ) {
-        fence = null;
-      }
-      continue;
+  const indentation = (text) => columns(text.match(/^ */)?.[0] ?? "");
+  const quoteLength = (text) => {
+    const quote = QUOTE.exec(text);
+    if (!quote) return 0;
+    const marker = quote[1].indexOf(">");
+    if (marker > 3) return 0;
+    return marker + 1 + (text[marker + 1] === " " ? 1 : 0);
+  };
+  // Normalize only container prefixes. Keep raw offsets so prose prefixes and
+  // every code line can be emitted from the original bytes, including tabs.
+  const normalize = (line, previous, allowNew) => {
+    let expanded = "";
+    const offsets = [0];
+    for (let i = 0; i < line.length; i++) {
+      const chars = line[i] === "\t" ? " ".repeat(4 - (expanded.length % 4)) : line[i];
+      expanded += chars;
+      for (let j = 0; j < chars.length; j++) offsets.push(i + 1);
     }
+    let offset = 0;
+    const current = [];
+    for (const container of previous) {
+      const rest = expanded.slice(offset);
+      if (container.kind === "quote") {
+        const length = quoteLength(rest);
+        if (!length) break;
+        offset += length;
+      } else if (!rest.trim()) {
+        offset = expanded.length;
+      } else {
+        if (indentation(rest) < container.width) break;
+        offset += container.width;
+      }
+      current.push(container);
+    }
+    const complete = current.length === previous.length;
+    if (allowNew) {
+      while (offset < expanded.length) {
+        const rest = expanded.slice(offset);
+        if (indentation(rest) >= 4) break; // a marker here is literal code content
+        const quote = quoteLength(rest);
+        if (quote) {
+          offset += quote;
+          current.push({ kind: "quote" });
+          continue;
+        }
+        const marker = /^( {0,3})([-*+]|\d+[.)])( +)/.exec(rest);
+        if (!marker || !LIST_ITEM.test(rest)) break;
+        // Five or more spaces after a marker start indented code: only the
+        // first space belongs to the list prefix; the remaining spaces stay.
+        const padding = marker[3].length > 4 ? 1 : marker[3].length;
+        const width = marker[1].length + marker[2].length + padding;
+        offset += width;
+        current.push({ kind: "list", width });
+      }
+    }
+    return { text: expanded.slice(offset), offset, offsets, containers: current, complete };
+  };
+  for (const line of markdown.split("\n")) {
     if (comment) {
       parts.push(line);
       if (line.includes("-->")) comment = false;
       continue;
     }
-    const f = FENCE.exec(line);
-    if (f) {
+    if (code) {
+      // Existing code only consumes its original containers. A new `>` or
+      // list marker in the body is never interpreted as another container.
+      const view = normalize(line, code.containers, false);
+      if (view.complete && (code.delimiter || !view.text.trim() || indentation(view.text) >= 4)) {
+        parts.push(line);
+        containers = view.containers;
+        const closer = indentation(view.text) < 4 ? FENCE.exec(view.text) : null;
+        if (
+          code.delimiter &&
+          closer &&
+          closer[2][0] === code.delimiter[0] &&
+          closer[2].length >= code.delimiter.length &&
+          closer[3].trim() === ""
+        )
+          code = null;
+        continue;
+      }
+      code = null;
+    }
+    const view = normalize(line, containers, true);
+    if (
+      view.containers.length !== containers.length ||
+      view.containers.some((container, i) => container !== containers[i])
+    )
       flush();
-      fence = f[2];
+    containers = view.containers;
+    if (!view.text.trim()) {
+      flush();
       parts.push(line);
       continue;
     }
-    if (/^\s*<!--/.test(line)) {
+    const indent = indentation(view.text);
+    // Indented code cannot interrupt an existing paragraph.
+    if (!para && indent >= 4) {
+      code = { containers: [...containers] };
+      parts.push(line);
+      continue;
+    }
+    const fence = indent < 4 ? FENCE.exec(view.text) : null;
+    if (fence && (fence[2][0] === "~" || !fence[3].includes("`"))) {
+      flush();
+      code = { delimiter: fence[2], containers: [...containers] };
+      parts.push(line);
+      continue;
+    }
+    if (/^\s*<!--/.test(view.text)) {
       flush();
       parts.push(line);
       if (!line.includes("-->")) comment = true;
-      continue;
-    }
-    if (!line.trim()) {
-      flush();
-      parts.push(line);
       continue;
     }
     if (TABLE_ROW.test(line)) {
@@ -485,52 +649,33 @@ export function segmentMarkdown(markdown) {
       parts.push(TABLE_SEP.test(line) ? line : { cells: splitCells(line) });
       continue;
     }
-    if (HR.test(line)) {
+    const rawStart = view.offsets[view.offset + indent];
+    let pre = line.slice(0, rawStart);
+    let text = line.slice(rawStart);
+    // A task checkbox belongs to the visible list prefix, not its indentation.
+    const task = containers.at(-1)?.kind === "list" ? /^\[[ xX]\] +/.exec(text) : null;
+    if (task) {
+      pre += task[0];
+      text = text.slice(task[0].length);
+    }
+    if (HR.test(text) || /^\[![A-Z]+\]\s*$/.test(text)) {
       flush();
       parts.push(line);
       continue;
     }
-    const h = HEADING.exec(line);
-    if (h) {
+    const heading = HEADING.exec(text);
+    if (heading) {
       flush();
-      parts.push({ pre: h[1], text: h[2], post: h[3] ?? "" });
+      parts.push({ pre: pre + heading[1], text: heading[2], post: heading[3] ?? "" });
       continue;
     }
-    const li = LIST_ITEM.exec(line);
-    if (li) {
+    if (/^\s*</.test(text)) {
       flush();
-      para = { pre: li[1], lines: [li[2]] };
+      parts.push({ html: [pre, ...splitHtmlLine(text)] });
       continue;
     }
-    const q = QUOTE.exec(line);
-    if (q && /^\[![A-Z]+\]\s*$/.test(q[2])) {
-      // GitHub alert marker (`> [!NOTE]`): its own line, never merged with the body
-      flush();
-      parts.push(line);
-      continue;
-    }
-    if (q) {
-      if (para && para.quote === q[1]) {
-        para.lines.push(q[2]);
-        continue;
-      }
-      flush();
-      const inner = LIST_ITEM.exec(q[2]) ?? HEADING.exec(q[2]);
-      para = inner ? { pre: q[1] + inner[1], lines: [inner[2]] } : { pre: q[1], lines: [q[2]] };
-      para.quote = q[1];
-      continue;
-    }
-    if (/^\s*</.test(line)) {
-      flush();
-      parts.push({ html: splitHtmlLine(line) });
-      continue;
-    }
-    if (para && !para.quote && (/^\s+\S/.test(line) || para.pre.trim() === "")) {
-      para.lines.push(line.trim());
-      continue;
-    }
-    flush();
-    para = { pre: line.match(/^\s*/)[0], lines: [line.trim()] };
+    if (para) para.lines.push(text.trim());
+    else para = { pre, lines: [text.trim()] };
   }
   flush();
   return parts;
@@ -570,7 +715,26 @@ function limiterFor(concurrency) {
   return sharedLimiter.run;
 }
 
-async function requestBatch(htmlList, target, { fetchImpl, apiKey, timeoutMs, backoffMs }) {
+async function requestBatch(
+  htmlList,
+  target,
+  { fetchImpl, apiKey, timeoutMs, backoffMs, wireCase = "upper" }
+) {
+  // The keyless endpoint sometimes echoes a lowercase marker outside its protected
+  // span. Uppercase wire markers avoid that observed corruption without growing
+  // the batch. Decode them before the existing strict token/structure validation;
+  // duplicated or invented wire markers must still fail that validation.
+  // Preserve legacy handling if source prose already uses the wire-marker prefix.
+  const useWireMarkers = !apiKey && !htmlList.some((html) => /ZQ[A-Z]+/.test(html));
+  const wireHtml =
+    useWireMarkers && wireCase === "upper"
+      ? htmlList.map((html) =>
+          html.replace(
+            /(<span translate="no">)(zq[a-z]+)(<\/span>)/g,
+            (_match, before, id, after) => before + id.toUpperCase() + after
+          )
+        )
+      : htmlList;
   let lastErr;
   for (let attempt = 1; attempt <= MAX_TRIES; attempt++) {
     const ctrl = new AbortController();
@@ -586,7 +750,7 @@ async function requestBatch(htmlList, target, { fetchImpl, apiKey, timeoutMs, ba
         });
       } else {
         const body = new URLSearchParams();
-        for (const q of htmlList) body.append("q", q);
+        for (const q of wireHtml) body.append("q", q);
         const qs = new URLSearchParams({ client: "gtx", sl: "en", tl: target, format: "html" });
         res = await fetchImpl(`${DEFAULT_ENDPOINT}?${qs}`, {
           method: "POST",
@@ -611,7 +775,11 @@ async function requestBatch(htmlList, target, { fetchImpl, apiKey, timeoutMs, ba
         err.retryable = true;
         throw err;
       }
-      return list;
+      return useWireMarkers
+        ? list.map((text) =>
+            text.replace(/(?<!\p{L})ZQ[A-Z]+(?!\p{L})/gu, (id) => id.toLowerCase())
+          )
+        : list;
     } catch (err) {
       lastErr = err;
       const retryable =
@@ -672,6 +840,12 @@ export async function translateMarkdownWithGoogle(markdown, localeCode, options 
     maxUntranslatedRatio = 0.1,
     stats = null,
   } = options;
+  if (!Number.isSafeInteger(concurrency) || concurrency < 1) {
+    throw new Error("google translate concurrency must be a positive integer");
+  }
+  if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 2147483647) {
+    throw new Error("google translate timeout must be a positive 32-bit integer in milliseconds");
+  }
   const target = googleLangFor(localeCode);
   const parts = segmentMarkdown(markdown);
   const pipe = TRANSLATOR_PIPE[target] ?? "\\|";
@@ -690,13 +864,14 @@ export async function translateMarkdownWithGoogle(markdown, localeCode, options 
   }
   // a segment made only of masked tokens / markup needs no request
   const results = new Map();
+  const answersByText = new Map();
   const toSend = [];
   for (const [text, m] of masks) {
     if (m.hasProse) toSend.push([text, m]);
     else results.set(text, text);
   }
 
-  const run = limiterFor(Math.max(1, concurrency));
+  const run = limiterFor(concurrency);
   const groups = planBatches(toSend.map(([, m]) => m.html));
   let cursor = 0;
   await Promise.all(
@@ -706,10 +881,93 @@ export async function translateMarkdownWithGoogle(markdown, localeCode, options 
       return run(() =>
         requestBatch(group, target, { fetchImpl, apiKey, timeoutMs, backoffMs })
       ).then((answers) => {
-        answers.forEach((ans, i) => results.set(slice[i][0], slice[i][1].restore(ans)));
+        answers.forEach((ans, i) => {
+          answersByText.set(slice[i][0], ans);
+          results.set(slice[i][0], slice[i][1].restore(ans));
+        });
       });
     })
   );
+
+  let retryRequests = 0;
+  if (!apiKey) {
+    // Some keyless batches return empty items; uppercase markers can also invent
+    // bare ids while retaining every protected span. Retry those source segments
+    // once, independently. Only a fresh, strictly restored answer can recover.
+    await Promise.all(
+      toSend.map(([text, mask]) => {
+        const answer = answersByText.get(text);
+        if (typeof answer !== "string") return;
+        const empty = answer.trim() === "";
+        const unknownEcho =
+          results.get(text) === null && classifyBareTokenEchoes(mask, answer) === "unknown";
+        if (!empty && !unknownEcho) return;
+        return run(async () => {
+          retryRequests++;
+          try {
+            const [reply] = await requestBatch([mask.html], target, {
+              fetchImpl,
+              apiKey,
+              timeoutMs,
+              backoffMs,
+              wireCase: unknownEcho ? "lower" : "upper",
+            });
+            const restored = mask.restore(reply);
+            if (restored && restored !== text) {
+              results.set(text, restored);
+              answersByText.set(text, reply);
+            }
+          } catch {
+            // Preserve the original rejection; neither a failed retry nor its
+            // corrupt primary response may satisfy the untranslated budget.
+          }
+        });
+      })
+    );
+    const retryPlans = new Map();
+    for (const [text, mask] of toSend) {
+      const answer = answersByText.get(text);
+      if (
+        results.get(text) === null &&
+        typeof answer === "string" &&
+        classifyBareTokenEchoes(mask, answer) === "known"
+      ) {
+        retryPlans.set(text, { mask, ...proseRetryPlan(mask) });
+      }
+    }
+    const sources = [
+      ...new Set([...retryPlans.values()].flatMap((plan) => plan.nodes.map((node) => node.source))),
+    ];
+    const retried = new Map();
+    await Promise.all(
+      planBatches(sources).map((group) =>
+        run(async () => {
+          retryRequests++;
+          try {
+            const replies = await requestBatch(group, target, {
+              fetchImpl,
+              apiKey,
+              timeoutMs,
+              backoffMs,
+            });
+            replies.forEach((reply, i) => {
+              if (safeRetriedProse(reply)) retried.set(group[i], reply.trim());
+            });
+          } catch {
+            // The original segment remains rejected. A failed recovery must never
+            // authorize its corrupt response or bypass the untranslated threshold.
+          }
+        })
+      )
+    );
+    for (const [text, plan] of retryPlans) {
+      if (!plan.nodes.length || plan.nodes.some((node) => !retried.has(node.source))) continue;
+      if (!plan.nodes.some((node) => retried.get(node.source) !== node.source)) continue;
+      for (const node of plan.nodes)
+        plan.pieces[node.index] = node.lead + retried.get(node.source) + node.trail;
+      results.set(text, plan.mask.restore(plan.pieces.join("")));
+    }
+  }
 
   let untranslated = 0;
   const pick = (text) => {
@@ -738,7 +996,7 @@ export async function translateMarkdownWithGoogle(markdown, localeCode, options 
   if (stats) {
     stats.segments = (stats.segments ?? 0) + total;
     stats.untranslated = (stats.untranslated ?? 0) + untranslated;
-    stats.requests = (stats.requests ?? 0) + groups.length;
+    stats.requests = (stats.requests ?? 0) + groups.length + retryRequests;
   }
   if (total > 0 && untranslated / total > maxUntranslatedRatio) {
     throw new Error(`google translate: ${untranslated}/${total} segments could not be restored`);
@@ -753,11 +1011,24 @@ export async function translateMarkdownWithGoogle(markdown, localeCode, options 
  * — kept verbatim) | { complex: { head, options: [{ head, message }], close } } for plural /
  * select / selectordinal. Malformed input degrades to text.
  */
-export function parseIcuMessage(source) {
+export function parseIcuMessage(source, inPlural = false) {
   let i = 0;
+  function quotedEnd(from) {
+    if (source[from + 1] === "'") return from + 2;
+    for (let k = from + 1; k < source.length; k++) {
+      if (source[k] !== "'") continue;
+      if (source[k + 1] === "'") k++;
+      else return k + 1;
+    }
+    return source.length;
+  }
   function matchBrace(from) {
     let depth = 0;
     for (let k = from; k < source.length; k++) {
+      if (source[k] === "'" && /[{}#|'<]/.test(source[k + 1] ?? "")) {
+        k = quotedEnd(k) - 1;
+        continue;
+      }
       if (source[k] === "{") depth++;
       else if (source[k] === "}" && --depth === 0) return k;
     }
@@ -774,8 +1045,7 @@ export function parseIcuMessage(source) {
       const c = source[i];
       // ICU quoting, incl. the '<literal>' escape intl-messageformat needs for angle spans
       if (c === "'" && /[{}#|'<]/.test(source[i + 1] ?? "")) {
-        const close = source[i + 1] === "'" ? i + 1 : source.indexOf("'", i + 1);
-        const end = close < 0 ? source.length : close + 1;
+        const end = quotedEnd(i);
         nodes.push({ raw: source.slice(i, end) });
         i = end;
         continue;
@@ -798,7 +1068,7 @@ export function parseIcuMessage(source) {
             nodes.push({
               complex: {
                 head: open[0],
-                options: [{ head: "", message: parseIcuMessage(inner) }],
+                options: [{ head: "", message: parseIcuMessage(inner, inPlural) }],
                 close: closeTag,
                 tag: true,
               },
@@ -840,7 +1110,7 @@ export function parseIcuMessage(source) {
     }
     return nodes;
   }
-  return message(0, false);
+  return message(0, inPlural);
 }
 
 /**
@@ -926,6 +1196,12 @@ export async function translateSegmentsWithGoogle(segments, localeCode, options 
     backoffMs = 1000,
     protectedTerms = [],
   } = options;
+  if (!Number.isSafeInteger(concurrency) || concurrency < 1) {
+    throw new Error("google translate concurrency must be a positive integer");
+  }
+  if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 2147483647) {
+    throw new Error("google translate timeout must be a positive 32-bit integer in milliseconds");
+  }
   const target = googleLangFor(localeCode);
   const results = segments.map(() => null);
   const pending = [];
@@ -937,7 +1213,7 @@ export async function translateSegmentsWithGoogle(segments, localeCode, options 
     if (!mask.hasProse) results[idx] = text;
     else pending.push({ idx, lead, trail, mask });
   });
-  const run = limiterFor(Math.max(1, concurrency));
+  const run = limiterFor(concurrency);
   const groups = planBatches(pending.map((p) => p.mask.html));
   let cursor = 0;
   await Promise.all(

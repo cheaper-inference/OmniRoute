@@ -1,6 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import plugin from "../src/index.js";
+import { withBootstrapNetwork } from "./helpers/network-fixtures.js";
 
 /**
  * Strict fallback (re-anchored): no `includeUsage` marking is proven anywhere
@@ -8,7 +9,7 @@ import plugin from "../src/index.js";
  * (a) the host mock in `gemini-language.test.ts` mounts a callable `aisdk`
  *     domain the plugin reaches through `hook(name, cb)` — the domain exists
  *     on the host and routes by name;
- * (b) `@opencode/plugin 2.0.12` is the pinned contract reference
+ * (b) the pinned `@opencode/plugin` package is the contract reference
  *     (`package.json`), its `sdk`-event option shape is UNKNOWN here.
  * Consequence: no options-only marking is proven → strict fallback: register
  * the hook (domain exists, probed at runtime) and record the observation in
@@ -72,7 +73,9 @@ async function setupQuiet(ctx: Record<string, unknown>): Promise<void> {
   console.warn = () => {};
   console.log = () => {};
   try {
-    await (plugin as unknown as { setup: (c: unknown) => Promise<void> }).setup(ctx);
+    await withBootstrapNetwork(() =>
+      (plugin as unknown as { setup: (c: unknown) => Promise<() => void> }).setup(ctx)
+    );
   } finally {
     console.warn = warn;
     console.log = log;

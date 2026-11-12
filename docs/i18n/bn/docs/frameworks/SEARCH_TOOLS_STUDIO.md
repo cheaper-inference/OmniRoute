@@ -54,7 +54,7 @@ Search Tools Studio `/dashboard/search-tools`-কে একটি সাধা�
 - ইনপুট: URL + পূর্ণ-পেজ টগল + ফরম্যাট নির্বাচক (মার্কডাউন / টেক্সট / HTML)।
 - সাবমিট → ফেচ → `ScrapeResult.tsx` রেন্ডার।
 - `ScrapeResult` মার্কডাউন প্রিভিউ + র’ টগল রেন্ডার করে।
-- সীমা: রেসপন্স বডি **256 KB**-এর বেশি হলে, UI-তে `(সংক্ষিপ্ত করা হয়েছে, র’ দেখুন)` দেখানো হয় এবং র’ কনটেন্ট একটি Monaco মোডালে খোলে (D21)।
+- সীমা: রেসপন্স বডি **256 KB**-এর বেশি হলে, UI-তে `View full raw content` দেখানো হয় এবং র’ কনটেন্ট একটি মোডালে খোলে (D21)।
 - মেটাডেটা প্যানেল: প্রোভাইডার (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), ল্যাটেন্সি, খরচ, রেসপন্সের আকার, লিংকের সংখ্যা।
 - `useScrapeFetch.ts` হুক ব্যবহার করে।
 

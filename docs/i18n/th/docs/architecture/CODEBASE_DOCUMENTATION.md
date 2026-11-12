@@ -443,33 +443,33 @@ server/
 
 ---
 
-## 4. `open-sse/` — เวิร์กสเปซเอนจินการสตรีม
+## 4. `open-sse/` — เวิร์กสเปซของเอนจินสตรีมมิง
 
-เวิร์กสเปซ npm แยกต่างหากที่เผยแพร่ในชื่อ `@omniroute/open-sse` รับผิดชอบการประมวลผลคำขอ
-ตัวดำเนินการ ตัวแปล บริการ ตัวแปลง และเซิร์ฟเวอร์ MCP
+เวิร์กสเปซ npm แยกต่างหากที่เผยแพร่ในชื่อ `@omniroute/open-sse` รับผิดชอบการประมวลผล
+คำขอ ตัวดำเนินการ ตัวแปล บริการ ตัวแปลง และเซิร์ฟเวอร์ MCP
 
 ```
 open-sse/
 ├── index.ts                การส่งออกสาธารณะ
-├── package.json            แม니เฟสต์ของเวิร์กสเปซ
+├── package.json            แมนิเฟสต์ของเวิร์กสเปซ
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 รีจิสทรีของผู้ให้บริการ โปรไฟล์ส่วนหัว ข้อมูลระบุตัวตน …
-├── handlers/               ตัวจัดการคำขอ (แชต, embeddings, เสียง, รูปภาพ, …)
-├── executors/              โมดูลตัวดำเนินการของผู้ให้บริการ 159 รายการ (คลาสตัวดำเนินการ + ตัวช่วยเฉพาะผู้ให้บริการ)
+├── config/                 รีจิสทรีผู้ให้บริการ โปรไฟล์ส่วนหัว ข้อมูลประจำตัว …
+├── handlers/               ตัวจัดการคำขอ (แชต embeddings เสียง รูปภาพ …)
+├── executors/              โมดูลตัวดำเนินการสำหรับผู้ให้บริการ 162 โมดูล (คลาสตัวดำเนินการ + ตัวช่วยรายผู้ให้บริการ)
 ├── translator/             การแปลงรูปแบบ (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            ตัวแปลงสตรีม Responses API ↔ Chat Completions
-├── services/               โมดูลบริการมากกว่า 80 รายการ (คอมโบ, สำรอง, โควตา, ข้อมูลระบุตัวตน, …)
-├── utils/                  ตัวช่วยการสตรีม ไคลเอนต์ TLS, AWS SigV4, proxy fetch, …
-└── mcp-server/             เซิร์ฟเวอร์ MCP (ทรานสปอร์ต 3 รูปแบบ, สโคป 33 รายการ, เครื่องมือ 110 รายการ)
+├── services/               โมดูลบริการมากกว่า 80 โมดูล (คอมโบ การสำรอง โควตา ข้อมูลประจำตัว …)
+├── utils/                  ตัวช่วยสตรีมมิง ไคลเอนต์ TLS, AWS SigV4, การดึงข้อมูลผ่านพร็อกซี …
+└── mcp-server/             เซิร์ฟเวอร์ MCP (3 การขนส่ง, 33 ขอบเขต, 110 เครื่องมือ)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| Handler                 | Purpose                                                                             |
+| ตัวจัดการ               | วัตถุประสงค์                                                                        |
 | ----------------------- | ----------------------------------------------------------------------------------- |
-| `chatCore.ts`           | ไปป์ไลน์แชตหลัก (แคช, จำกัดอัตรา, การกำหนดเส้นทางคอมโบ, การส่งต่อไปยังตัวดำเนินการ) |
-| `responsesHandler.ts`   | จุดเริ่มต้นของ OpenAI Responses API                                                 |
+| `chatCore.ts`           | ไปป์ไลน์แชตหลัก (แคช การจำกัดอัตรา การกำหนดเส้นทางคอมโบ การส่งต่อไปยังตัวดำเนินการ) |
+| `responsesHandler.ts`   | จุดรับคำขอของ OpenAI Responses API                                                  |
 | `embeddings.ts`         | Embeddings                                                                          |
 | `imageGeneration.ts`    | การสร้างรูปภาพ                                                                      |
 | `audioSpeech.ts`        | การแปลงข้อความเป็นเสียง                                                             |
@@ -477,41 +477,33 @@ open-sse/
 | `videoGeneration.ts`    | การสร้างวิดีโอ                                                                      |
 | `musicGeneration.ts`    | การสร้างเพลง                                                                        |
 | `rerank.ts`             | การจัดอันดับใหม่                                                                    |
-| `moderations.ts`        | การกลั่นกรอง                                                                        |
+| `moderations.ts`        | การตรวจสอบเนื้อหา                                                                   |
 | `search.ts`             | การค้นหาเว็บ                                                                        |
 | `sseParser.ts`          | ตัวแยกวิเคราะห์เหตุการณ์ SSE                                                        |
 | `usageExtractor.ts`     | ดึงจำนวนโทเค็นออกจากสตรีมต้นทาง                                                     |
-| `responseSanitizer.ts`  | ลบข้อมูลรบกวนเฉพาะผู้ให้บริการ                                                      |
-| `responseTranslator.ts` | ตัวเชื่อมระหว่างการตอบกลับจากผู้ให้บริการกับเลเยอร์ตัวแปล                           |
+| `responseSanitizer.ts`  | ตัดข้อมูลรบกวนเฉพาะผู้ให้บริการออก                                                  |
+| `responseTranslator.ts` | ตัวเชื่อมระหว่างการตอบกลับของผู้ให้บริการกับเลเยอร์ตัวแปล                           |
 
 ### 4.2 `open-sse/executors/`
 
-โมดูลตัวดำเนินการระดับบนสุด 159 รายการ (`*.ts` ลบ `base.ts`, `index.ts` และการทดสอบ — จำนวนนี้
-วัดโดย `npm run check:docs-counts`) คลาสตัวดำเนินการทุกคลาสสืบทอดจาก `BaseExecutor` (`base.ts`)
-โดยตรงหรือผ่าน `DefaultExecutor` หรือตัวดำเนินการอื่น ส่วนโมดูลที่เหลือเป็นตัวช่วยเฉพาะผู้ให้บริการ
-(สคีมาของเครื่องมือ อะแดปเตอร์ fetch/TTS ตัวจัดการข้อจำกัดเฉพาะ) ตัวดำเนินการประกอบด้วย:
+โมดูลดำเนินการระดับบนสุด 162 โมดูล (`*.ts` ลบ `base.ts`, `index.ts` และทดสอบ — การวัดจำนวน `npm run check:docs-counts` ) ทุกคลาสของตัวดำเนินการจะขยาย `BaseExecutor` (`base.ts`) โดยตรงหรือผ่าน `DefaultExecutor` หรือตัวเรียกทำงานอื่น โมดูลที่เหลือเป็นตัวช่วยต่อผู้ให้บริการ (สกีมาเครื่องมือ, อะแดปเตอร์ fetch/TTS, ตัวจัดการมุม) ผู้ดำเนินการได้แก่:
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
-`chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
-`muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
-`pollinations`, `qoder`, `vertex`, `devin-desktop`, รวมถึง `claudeIdentity.ts`
-(ตัวช่วยข้อมูลระบุตัวตนที่ใช้ร่วมกัน) และ `index.ts` (รีจิสทรี)
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`บวก `claudeIdentity.ts` (ผู้ช่วยระบุตัวตนที่ใช้ร่วมกัน) และ `index.ts` (รีจิสทรี)
 
-> หมายเหตุ: ผู้ให้บริการที่ไม่ได้แสดงไว้ที่นี่ให้บริการโดย `default.ts` ซึ่งใช้ตัวดำเนินการทั่วไปที่เข้ากันได้กับ
-> OpenAI แค็ตตาล็อกผู้ให้บริการฉบับเต็ม (380 รายการ) อยู่ที่
-> `src/shared/constants/providers.ts`
+> หมายเหตุ: ผู้ให้บริการที่ไม่ได้ระบุไว้ในที่นี้ให้บริการโดย `default.ts` โดยใช้ตัวดำเนินการทั่วไปที่เข้ากันได้กับ OpenAI แค็ตตาล็อกผู้ให้บริการเต็มรูปแบบ (ผู้ให้บริการ 380 ราย) อยู่ใน `src/shared/constants/providers.ts`
 
 ### 4.3 `open-sse/translator/`
 
-การแปลแบบศูนย์กลางและโหนดปลายทาง (OpenAI เป็นศูนย์กลาง)
+การแปลแบบศูนย์กลางและซี่ล้อ (OpenAI เป็นศูนย์กลาง)
 
 - **ตัวแปลคำขอ 9 รายการ** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
   `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
-  `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
+  `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`
 - **ตัวแปลการตอบกลับ 9 รายการ** (`translator/response/`):
   `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
-  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
+  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
+  `openai-to-claude`
 - **ตัวช่วย 9 รายการ** (`translator/helpers/`):
   `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
   `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper` รวมถึง
@@ -521,42 +513,42 @@ open-sse/
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — ตัวแปลงที่ใช้ `TransformStream` สำหรับ Responses API ↔ Chat
-  Completions (ใช้โดย catch-all ของเส้นทาง `responses/`)
+- `responsesTransformer.ts` — ตัวแปลง Responses API ↔ Chat Completions ที่ใช้
+  `TransformStream` (ใช้งานโดยเส้นทาง catch-all ของ `responses/`)
 
 ### 4.5 `open-sse/services/`
 
-รายการสำคัญ (รายการทั้งหมดอยู่ภายใต้ `open-sse/services/`):
+รายการเด่น (รายการทั้งหมดอยู่ภายใต้ `open-sse/services/`):
 
-| ข้อกังวล                      | ไฟล์                                                                                                                                                                                                                                                     |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| การกำหนดเส้นทาง Combo         | `combo.ts` (20 กลยุทธ์), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                       |
-| เอนจิน Auto Combo             | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| ความยืดหยุ่น                  | `accountFallback.ts` (ช่วงพัก + การล็อกไม่ให้ใช้งาน), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                              |
-| โควตา                         | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| การแคช                        | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| ความอัจฉริยะในการกำหนดเส้นทาง | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| การจัดการโมเดล                | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| การบีบอัด                     | `compression/` — การเชื่อมต่อการทำงานของเอนจินการบีบอัดทั้งหมด                                                                                                                                                                                           |
-| โทเค็น + เซสชัน               | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| ระดับ / แมนนิเฟสต์            | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
-| IP / เครือข่าย                | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| แบตช์                         | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| การใช้งาน                     | `usage.ts`                                                                                                                                                                                                                                               |
+| ประเด็น                           | ไฟล์                                                                                                                                                                                                                                                     |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| การกำหนดเส้นทางแบบ Combo          | `combo.ts` (20 กลยุทธ์), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                       |
+| กลไก Auto Combo                   | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| ความทนทานต่อความล้มเหลว           | `accountFallback.ts` (คูลดาวน์ + การล็อกไม่ให้ใช้งาน), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                             |
+| โควตา                             | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
+| การแคช                            | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| ระบบอัจฉริยะสำหรับการกำหนดเส้นทาง | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| การจัดการโมเดล                    | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| การบีบอัด                         | `compression/` — การเชื่อมต่อกลไกการบีบอัดทั้งหมด                                                                                                                                                                                                        |
+| โทเค็น + เซสชัน                   | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| ระดับ / แมนิเฟสต์                 | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| IP / เครือข่าย                    | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
+| แบตช์                             | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| การใช้งาน                         | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **เครื่องมือที่ไม่ซ้ำกัน 110 รายการ** ซึ่งเชื่อมต่อไว้ใน `server.ts` (45 รายการเป็นแบบบัญญัติใน `schemas/tools.ts` +
-  โมดูล memory, skills, GitHub-skills, pool, gamification, plugin, Notion, Obsidian,
-  local-corpus และ compression — นับรวมโดย `countUniqueMcpTools`)
-- **ทรานสปอร์ต 3 แบบ**: stdio, HTTP Streamable, SSE
-- **ขอบเขต 33 รายการ** ที่บังคับใช้ขณะรันไทม์ — รายการพื้นฐานอยู่ใน `src/shared/constants/mcpScopes.ts` และชุดเต็มคือผลรวมของขอบเขตที่ประกาศโดยแต่ละโมดูลเครื่องมือ
+- มีการเชื่อมต่อ **เครื่องมือที่ไม่ซ้ำกัน 110 รายการ** ใน `server.ts` (เครื่องมือมาตรฐาน 45 รายการใน `schemas/tools.ts` +
+  โมดูลหน่วยความจำ ทักษะ GitHub-skills พูล เกมมิฟิเคชัน ปลั๊กอิน Notion, Obsidian,
+  คอร์ปัสภายในเครื่อง และการบีบอัด — นับยูเนียนด้วย `countUniqueMcpTools`)
+- **การขนส่ง 3 รูปแบบ**: stdio, HTTP Streamable, SSE
+- บังคับใช้ **33 ขอบเขต** ขณะรันไทม์ — รายการพื้นฐานอยู่ใน `src/shared/constants/mcpScopes.ts` ส่วนชุดที่สมบูรณ์คือยูเนียนของขอบเขตที่แต่ละโมดูลเครื่องมือประกาศไว้
 - ตารางการตรวจสอบ: `mcp_tool_audit` (เติมข้อมูลโดย `audit.ts`)
 - ไฟล์: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
   รวมถึงการทดสอบภายใต้ `__tests__/`
-- ดู [MCP-SERVER.md](../frameworks/MCP-SERVER.md) สำหรับแค็ตตาล็อกเครื่องมือฉบับเต็ม
+- ดูแค็ตตาล็อกเครื่องมือฉบับเต็มได้ที่ [MCP-SERVER.md](../frameworks/MCP-SERVER.md)
 
 ### 4.7 `open-sse/config/`
 
@@ -564,7 +556,7 @@ open-sse/
 `providerHeaderProfiles.ts`), รีจิสทรีโมเดลแยกตามรูปแบบ (`audioRegistry.ts`,
 `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
 `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
-ตัวช่วยด้านอัตลักษณ์ (`codexIdentity.ts`, `codexInstructions.ts`,
+ตัวช่วยด้านข้อมูลประจำตัว (`codexIdentity.ts`, `codexInstructions.ts`,
 `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
 `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
 ตัวช่วยด้านข้อมูลรับรอง (`credentialLoader.ts`, `codexClient.ts`) และอะแดปเตอร์
@@ -574,15 +566,7 @@ open-sse/
 
 ### 4.8 `open-sse/utils/`
 
-พื้นฐานการสตรีมและตัวช่วยสำหรับผู้ให้บริการ: `stream.ts`, `streamHandler.ts`,
-`streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
-`sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
-`networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
-`cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`,
-`comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`,
-`thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`,
-`progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`,
-`ollamaTransform.ts`.
+สตรีมมิ่งดั้งเดิมและผู้ช่วยเหลือผู้ให้บริการ: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`, `thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`, `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`, `ollamaTransform.ts`.
 
 ---
 
@@ -780,7 +764,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts`)
 2. กำหนด scope ที่เหมาะสมใน `src/shared/constants/mcpScopes.ts`
 3. ลงทะเบียนเครื่องมือใน `open-sse/mcp-server/server.ts`
-4. เพิ่มการทดสอบภายใต้ `open-sse/mcp-server/__tests__/`
+4. เพิ่มการทดสอบภายใต้ `tests/unit/`
 5. อัปเดต [MCP-SERVER.md](../frameworks/MCP-SERVER.md)
 
 ### เพิ่มทักษะ A2A ใหม่
@@ -798,7 +782,7 @@ bin/
 - **การตั้งชื่อ**: ไฟล์ใช้ `camelCase` หรือ `kebab-case`, component ใช้ `PascalCase`,
   ค่าคงที่ใช้ `UPPER_SNAKE`
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` ทุกแห่ง;
-  `no-explicit-any` = `warn` ใน `open-sse/` และ `tests/` และเป็น error ในที่อื่น
+  `no-explicit-any` = `error` ใน `open-sse/**/*.ts` และ `tests/**/*.ts`
 - **TypeScript**: `strict: false` (แนวทางที่สืบทอดจากระบบเดิม) ควรใช้ type ที่ระบุอย่างชัดเจนแทน
   inference สำหรับขอบเขตระหว่างโมดูล
 - **ฐานข้อมูล**: ห้ามเขียน SQL ดิบใน route หรือ handler — ให้ดำเนินการผ่านโมดูล
@@ -827,8 +811,7 @@ bin/
   `a2a`, `memory`, `skills`
 - **Branch**: ใช้ prefix `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/` ห้าม commit โดยตรงไปยัง `main`
-- **Husky**: pre-commit เรียกใช้ `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pre-push เรียกใช้ `check:any-budget:t11` + `check:tracked-artifacts` (ขั้นตรวจสอบแบบรวดเร็ว โดยไม่รวม `test:unit`)
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

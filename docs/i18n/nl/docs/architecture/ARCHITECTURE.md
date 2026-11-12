@@ -8,79 +8,78 @@
 
 _Laatst bijgewerkt: 2026-06-28_
 
-## Samenvatting voor leidinggevenden
+## Samenvatting
 
-OmniRoute is een lokale AI-routeringsgateway en een dashboard, gebouwd met Next.js.
-Het biedt één OpenAI-compatibel eindpunt (`/v1/*`) en routeert verkeer via meerdere upstreamproviders, met vertaling, fallback, tokenvernieuwing en gebruiksregistratie.
+OmniRoute is een lokale AI routeringsgateway en dashboard gebouwd op Next.js. Het biedt een enkel OpenAI-compatibel eindpunt (`/v1/*`) en routeert verkeer over meerdere upstream-providers met vertaling, fallback, tokenvernieuwing en gebruiksregistratie.
 
-Belangrijkste mogelijkheden:
+Kernmogelijkheden:
 
-- OpenAI-compatibele API-oppervlakte voor CLI/tools (380 providers, 159 executormodules)
-- Vertaling van aanvragen en antwoorden tussen providerindelingen
-- Fallback voor modelcombinaties (reeks met meerdere modellen)
-- Gestructureerde combinatiestappen (`provider + model + connection`) met runtimevolgorde via `compositeTiers`
-- Fallback op accountniveau (meerdere accounts per provider)
-- Quota-preflight en quotabewuste P2C-accountselectie in het primaire chatpad
-- Beheer van OAuth- en API-sleutelproviderverbindingen (27 OAuth-providermodules)
-- Genereren van embeddings via `/v1/embeddings` (18 providers)
-- Afbeeldingen genereren via `/v1/images/generations` (10+ providers, 20+ modellen)
-- Audio transcriberen via `/v1/audio/transcriptions` (18 providers)
+- OpenAI-compatibel API oppervlak voor CLI/tools (380 providers, 162 uitvoerdermodules)
+- Request/response -vertaling in verschillende providerformaten
+- Terugval op modelcombinaties (reeks met meerdere modellen)
+- Gestructureerde combostappen (`provider + model + connection`) met runtime-bestelling door `compositeTiers`
+- Terugval op accountniveau (meerdere accounts per provider)
+- Quota-preflight en quotabewuste P2C accountselectie in het hoofdchatpad
+- OAuth + API-sleutel provider verbindingsbeheer (27 OAuth providermodules)
+- Generatie inbedden via `/v1/embeddings` (18 aanbieders)
+- Beeldgeneratie via `/v1/images/generations` (10 + providers, 20 + modellen)
+- Audiotranscriptie via `/v1/audio/transcriptions` (18 providers)
 - Tekst-naar-spraak via `/v1/audio/speech` (24 ingebouwde providers)
-- Video genereren via `/v1/videos/generations` (ComfyUI + SD WebUI)
+- Videogeneratie via `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Muziek genereren via `/v1/music/generations` (ComfyUI)
-- Zoeken op het web via `/v1/search` (20 providers)
+- Zoeken op internet via `/v1/search` (20 aanbieders)
 - Moderaties via `/v1/moderations`
-- Herordenen via `/v1/rerank`
-- Parseren van think-tags (`<think>...</think>`) voor redeneermodellen
-- Sanitisatie van antwoorden voor strikte compatibiliteit met de OpenAI SDK
-- Normalisatie van rollen (developer→system, system→user) voor compatibiliteit tussen providers
-- Conversie van gestructureerde uitvoer (json_schema → Gemini responseSchema)
-- Lokale persistentie voor providers, sleutels, aliassen, combinaties, instellingen en prijzen (122 databasemodules)
-- Registratie van gebruik/kosten en aanvragen
-- Optionele cloudsynchronisatie voor synchronisatie van meerdere apparaten en statussen
-- IP-allowlist/blocklist voor toegangsbeheer van de API
-- Beheer van denkbudgetten (passthrough/auto/custom/adaptive)
-- Injectie van een globale systeemprompt
-- Sessieregistratie en fingerprinting
-- Verbeterde snelheidslimitering per account met providerspecifieke profielen
-- Circuit-breakerpatroon voor providerweerbaarheid
-- Bescherming tegen de thundering-herd-impact met mutexvergrendeling
-- Cache voor deduplicatie van aanvragen op basis van handtekeningen
-- Domeinlaag: kostenregels, fallbackbeleid en vergrendelingsbeleid
-- Context Relay: samenvattingen voor sessieoverdracht ten behoeve van continuïteit bij accountrotatie
-- Persistentie van de domeinstaat (SQLite write-through-cache voor fallbacks, budgetten, vergrendelingen en circuit breakers)
-- Beleidsengine voor gecentraliseerde evaluatie van aanvragen (vergrendeling → budget → fallback)
-- Telemetrie van aanvragen met aggregatie van p50/p95/p99-latentie
-- Telemetrie van combinatiedoelen en historische gezondheid van combinatiedoelen via `combo_execution_key` / `combo_step_id`
-- Correlatie-ID (X-Request-Id) voor end-to-end-tracering
-- Compliance-auditregistratie met opt-out per API-sleutel
-- Eval-framework voor kwaliteitsborging van LLM's
-- Gezondheidsdashboard met realtime status van provider-circuit breakers
-- MCP-server (110 tools) met 3 transports (stdio/SSE/Streamable HTTP)
-- A2A-server (JSON-RPC 2.0 + SSE) met vaardigheden en levenscyclus van taken
-- Geheugensysteem (extractie, injectie, ophalen en samenvatting)
-- Vaardighedensysteem (register, uitvoerder, sandbox en ingebouwde vaardigheden)
-- MITM-proxy met certificaatbeheer en DNS-afhandeling
-- Middleware voor bescherming tegen promptinjectie
-- Promptcompressiepijplijn met Caveman, RTK, gestapelde pijplijnen, compressiecombinaties, taalpakketten en analyses
-- ACP-register (Agent Communication Protocol)
-- Modulaire OAuth-providers (22 afzonderlijke modules onder `src/lib/oauth/providers/`)
-- Scripts voor verwijderen en volledig verwijderen
-- Actie voor herstel van de OAuth-omgeving
-- WebSocket-bridge voor OpenAI-compatibele WS-clients (`/v1/ws`)
-- Beheer van synchronisatietokens (uitgeven/intrekken, downloaden van een met ETag versieverdeeld configuratiepakket)
-- Eersteklas GLM Thinking (`glmt`)-providerpreset
-- Hybride token telling (providerzijde `/messages/count_tokens` met een schattingsfallback)
-- Automatisch vullen van modelaliassen (30+ normalisaties van dialecten tussen proxies bij het opstarten)
-- Veilige uitgaande fetch met SSRF-beveiliging, blokkering van privé-URL's en configureerbare retries
-- Chatretries die rekening houden met cooldowns, met configureerbare `requestRetry` en `maxRetryIntervalSec`
-- Validatie van de runtimeomgeving met Zod bij het opstarten
-- Compliance-audit v2 met paginering, CRUD-gebeurtenissen voor providers en validatielogging van door SSRF geblokkeerde aanvragen
+- Herrangschikking via `/v1/rerank`
+- Denk aan tag-parsing (`<think>...</think>`) voor redeneermodellen
+- Reactie-sanering voor strikte OpenAI SDK compatibiliteit
+- Rolnormalisatie (ontwikkelaar → systeem, systeem → gebruiker) voor compatibiliteit tussen providers
+- Gestructureerde uitvoerconversie (json_schema → Gemini responseSchema)
+- Lokale persistentie voor providers, sleutels, aliassen, combo's, instellingen, prijzen (122 DB modules)
+- Usage/cost -tracking en verzoekregistratie
+- Optionele cloudsynchronisatie voor multi-device/state synchronisatie
+- IP allowlist/blocklist voor API -toegangscontrole
+- Meedenkend budgetbeheer (passthrough/auto/custom/adaptive)
+- Wereldwijde systeempromptinjectie
+- Sessie volgen en vingerafdrukken maken
+- Verbeterde tarieflimieten per account met providerspecifieke profielen
+- Patroon van stroomonderbrekers voor veerkracht van de provider
+- Bescherming tegen donderende kuddes met mutex-vergrendeling
+- Op handtekeningen gebaseerde cache voor deduplicatie van verzoeken
+- Domeinlaag: kostenregels, fallback-beleid, lock-outbeleid
+- Context Relay: samenvattingen van sessieoverdrachten voor continuïteit van accountrotatie
+- Persistentie van domeinstatus (SQLite -schrijfcache voor fallbacks, budgetten, uitsluitingen, stroomonderbrekers)
+- Beleidsengine voor gecentraliseerde verzoekevaluatie (uitsluiting → budget → fallback)
+- Vraag telemetrie aan met p50/p95/p99 -latentieaggregatie
+- Combo-doeltelemetrie en historische combo-doelgezondheid via `combo_execution_key` / `combo_step_id`
+- Correlatie ID (X-Request-Id) voor end-to-end tracering
+- Compliance auditregistratie met opt-out per API sleutel
+- Evaluatiekader voor LLM kwaliteitsborging
+- Gezondheidsdashboard met realtime stroomonderbrekerstatus van de provider
+- MCP Server (110 tools) met 3 transporten (stdio/SSE/Streamable HTTP)
+- A2A Server (JSON-RPC 2.0 + SSE) met vaardigheden en taaklevenscyclus
+- Geheugensysteem (extractie, injectie, ophalen, samenvatting)
+- Vaardighedensysteem (register, uitvoerder, sandbox, ingebouwde vaardigheden)
+- MITM proxy met certificaatbeheer en DNS -afhandeling
+- Snelle middleware voor injectiebescherming
+- Snelle compressiepijplijn met Caveman, RTK, gestapelde pijplijnen, compressiecombo's, taalpakketten en analyses
+- ACP -register (Agent Communication Protocol).
+- Modulaire OAuth aanbieders (22 individuele modules onder `src/lib/oauth/providers/`)
+- Uninstall/full-uninstall scripts
+- OAuth -omgevingsherstelactie
+- WebSocket bridge voor OpenAI-compatibele WS clients (`/v1/ws`)
+- Synchronisatietokenbeheer (issue/revoke, download van configuratiebundel met ETag-versie)
+- GLM Thinking (`glmt`) eersteklas provider-preset
+- Hybride tokentelling ( `/messages/count_tokens` aan de providerzijde met terugval op schattingen)
+- Automatisch zaaien van modelalias (30 + cross-proxy dialectnormalisaties bij het opstarten)
+- Veilig uitgaand ophalen met SSRF bewaking, privé- URL blokkering en configureerbaar opnieuw proberen
+- Cooldown-bewuste chatpogingen met configureerbare `requestRetry` en `maxRetryIntervalSec`
+- Runtime-omgevingsvalidatie met Zod bij opstarten
+- Nalevingsaudit v2 met paginering, provider CRUD gebeurtenissen en SSRF-geblokkeerde validatielogboekregistratie
 
-Primair runtime-model:
+Primair runtimemodel:
 
-- Next.js-app-routes onder `src/app/api/*` implementeren zowel dashboard-API's als compatibiliteits-API's
-- Een gedeelde SSE-/routeringskern in `src/sse/*` + `open-sse/*` verzorgt provideruitvoering, vertaling, streaming, fallback en gebruiksgemetadata
+- Next.js -app-routes onder `src/app/api/*` implementeren zowel dashboard APIs als compatibiliteit APIs
+- Een gedeelde SSE/routing kern in `src/sse/*` + `open-sse/*` zorgt voor de uitvoering, vertaling, streaming, fallback en gebruik van de provider
 
 ## Referentiediagrammen
 
@@ -383,7 +382,7 @@ Zie [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md) voor inrich
 
 ### C. Vangrails
 
-De Guardrails-module is een hot-reloadable middleware-laag die verzoeken en reacties op PII, snelle injectie en onveilige zichtinhoud inspecteert. Overtredingen kortsluiten het verzoek met HTTP** 503** plus een gestructureerde foutcode, waardoor downstream-bellers het opnieuw kunnen proberen of kunnen vertakken.
+De Guardrails-module is een hot-reloadable middleware-laag die verzoeken en reacties op PII, snelle injectie en onveilige zichtinhoud inspecteert. Overtredingen veroorzaken kortsluiting in het verzoek met HTTP** 503** plus een gestructureerde foutcode, waardoor downstream-bellers het opnieuw kunnen proberen of kunnen vertakken.
 
 - Modulewortel: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
 - Heet herladen: het register let op configuratiewijzigingen en bouwt de keten opnieuw op
@@ -396,19 +395,19 @@ Zie [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) voor het schrijve
 
 De `src/domain/` naamruimte centraliseert beleidsbeslissingen, zodat route-handlers niet zelf lockout/budget/fallback logica hoeven samen te stellen.
 
-- Beleidsengine: `src/domain/policyEngine.ts` — enkel toegangspunt voor evaluatie vóór uitvoering (uitsluiting → budget → fallback order)
+- Beleidsengine: `src/domain/policyEngine.ts` — enkel toegangspunt voor evaluatie vóór uitvoering (uitsluiting → budget → fallback-bestelling)
 - Kostenregels: `src/domain/costRules.ts`
 - Terugvalbeleid: `src/domain/fallbackPolicy.ts`
 - Uitsluitingsbeleid: `src/domain/lockoutPolicy.ts`
 - Op tags gebaseerde routering: `src/domain/tagRouter.ts`
 - Combo-resolver: `src/domain/comboResolver.ts` — zet combo-namen, auto/\*-voorvoegsels en wildcard-modeldoelen om in concrete uitvoeringsplannen
-- Connection/model regel-joiner: `src/domain/connectionModelRules.ts`
+- Connection/model -regel-joiner: `src/domain/connectionModelRules.ts`
 - Momentopnamen van modelbeschikbaarheid: `src/domain/modelAvailability.ts`
 - Bijhouden van vervaldatum van provider: `src/domain/providerExpiration.ts`
 - Quotumcache: `src/domain/quotaCache.ts`
 - Afbraaktoestand: `src/domain/degradation.ts`
 - Configuratie-audit: `src/domain/configAudit.ts`
-- OmniRoute -antwoord-metagegevensbouwer: `src/domain/omnirouteResponseMeta.ts`
+- Metagegevensbouwer voor OmniRoute antwoorden: `src/domain/omnirouteResponseMeta.ts`
 - Beoordelingssubsysteem: `src/domain/assessment/` — periodieke evaluatiefuncties
 
 ### E. Autorisatiepijplijn
@@ -1048,9 +1047,9 @@ De oudere bestandsgebaseerde verzoeklogger (`open-sse/utils/requestLogger.ts`) w
 
 ## 6) SSRF-/uitgaande-URL-beveiliging
 
-- `src/shared/network/outboundUrlGuard.ts` blokkeert alle privé-, loopback- en link-local-doel-URL's voordat ze providerexecutors bereiken
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) past `src/shared/network/outboundUrlGuard.ts` toe op chatverzoeken die via `BaseExecutor.execute()` worden verzonden. In de modus alleen-openbaar (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` met de privévlag uitgeschakeld) blokkeert deze privé- en loopbackhosts en 169.254.0.0/16; in elke andere modus blokkeert deze cloudmetadatahosts. De hostnaam of het letterlijke IP-adres wordt gecontroleerd zoals opgegeven, vóór elke DNS-lookup. Ingebouwde lokale providers slaan deze controle over.
 - Routes voor detectie en validatie van providermodellen gebruiken `src/shared/network/safeOutboundFetch.ts`, dat de beveiliging vóór elk uitgaand verzoek toepast
-- Beveiligingsfouten worden weergegeven als `URL_GUARD_BLOCKED` met HTTP 422 en via `providerAudit.ts` vastgelegd in het compliance-auditspoor
+- Beveiligingsfouten worden weergegeven als `URL_GUARD_BLOCKED` met HTTP 503 (`getSafeOutboundFetchErrorStatus`; de route voor modeldetectie retourneert 400), en daadwerkelijke SSRF-blokkeringen tijdens validatie worden in het auditlogboek vastgelegd als `provider.validation.ssrf_blocked`-gebeurtenissen
 
 ## Observeerbaarheid en operationele signalen
 
@@ -1101,7 +1100,7 @@ Omgevingsvariabelen die actief door de code worden gebruikt:
 4. Cloudgedrag is afhankelijk van een correcte `NEXT_PUBLIC_BASE_URL` en de bereikbaarheid van het cloudeindpunt.
 5. De map `open-sse/` wordt gepubliceerd als het **npm-werkruimtepakket** `@omniroute/open-sse`. De broncode importeert dit via `@omniroute/open-sse/...` (opgelost door `transpilePackages` van Next.js). Bestandspaden in dit document gebruiken voor consistentie nog steeds de mapnaam `open-sse/`.
 6. Grafieken in het dashboard gebruiken **Recharts** (gebaseerd op SVG) voor toegankelijke, interactieve analytische visualisaties (staafdiagrammen voor modelgebruik en uitsplitsingstabellen per provider met slagingspercentages).
-7. E2E-tests gebruiken **Playwright** (`tests/e2e/`) en worden uitgevoerd via `npm run test:e2e`. Unittests gebruiken de **Node.js-test-runner** (`tests/unit/`) en worden uitgevoerd via `npm run test:unit`. Broncode onder `src/` is **TypeScript** (`.ts`/`.tsx`); de werkruimte `open-sse/` blijft JavaScript (`.js`).
+7. E2E-tests gebruiken **Playwright** (`tests/e2e/`) en worden uitgevoerd via `npm run test:e2e`. Unittests gebruiken de **Node.js-test-runner** (`tests/unit/`) en worden uitgevoerd via `npm run test:unit`. Broncode onder `src/` is **TypeScript** (`.ts`/`.tsx`); de werkruimte `open-sse/` blijft TypeScript (`.ts`).
 8. De instellingenpagina is ingedeeld in 7 tabbladen: Algemeen, Uiterlijk, AI, Beveiliging, Routering, Veerkracht en Geavanceerd. De pagina Veerkracht configureert alleen de verzoekwachtrij, de afkoelperiode voor verbindingen, de provideronderbreker en het gedrag voor wachten op de afkoelperiode; de actuele runtimestatus van de onderbreker wordt op de pagina Status weergegeven.
 9. De strategie **Context Relay** (`context-relay`) is verdeeld over twee lagen: `combo.ts` bepaalt of een overdracht moet worden gegenereerd, waarna `chat.ts` de overdracht invoegt nadat het account is bepaald. Overdrachtsgegevens bevinden zich in de SQLite-tabel `context_handoffs`. Deze opsplitsing is opzettelijk, omdat alleen `chat.ts` weet of het daadwerkelijke account is gewijzigd.
 10. **Proxyhandhaving** is nu allesomvattend: `tokenHealthCheck.ts` bepaalt de proxy per verbinding, `/api/providers/validate` gebruikt `runWithProxyContext` en `proxyFetch.ts` gebruikt `undici.fetch()` om de dispatchercompatibiliteit in Node 22 te behouden.

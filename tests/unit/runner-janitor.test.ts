@@ -1,6 +1,8 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
+import { once } from "node:events";
+import { setTimeout as delay } from "node:timers/promises";
 import {
   existsSync,
   mkdirSync,
@@ -127,7 +129,7 @@ describe("runner-janitor.sh", () => {
         "a fresh dir is never a candidate"
       );
       assert.doesNotMatch(r.stdout, /somebody-elses\.log/, "only names our tooling creates");
-      assert.match(r.stdout, /zombie builds: 0/);
+      assert.match(r.stdout, /long-running builds: 0/);
       assert.match(r.stdout, /done status=0/);
     } finally {
       rmSync(f.base, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
@@ -194,3 +196,55 @@ describe("runner-janitor.sh", () => {
     assert.equal(r.status, 2);
   });
 });
+
+for (const args of [[], ["--dry-run"]]) {
+  it(
+    `age alone never authorizes terminating a live build (${args.length ? "dry run" : "real run"})`,
+    { timeout: 30_000 },
+    async () => {
+      const f = fixture();
+      const title = `jb${process.pid}${args.length}`;
+      const child = spawn(
+        process.execPath,
+        [
+          "--eval",
+          `
+      process.title = ${JSON.stringify(title)};
+      process.stdout.write("ready");
+      setInterval(() => {}, 1_000);
+      setTimeout(() => process.exit(0), 25_000);
+    `,
+        ],
+        { stdio: ["ignore", "pipe", "ignore"] }
+      );
+      const closed = once(child, "exit");
+      try {
+        await Promise.race([
+          once(child.stdout, "data"),
+          closed.then(() => {
+            throw new Error("fixture exited before readiness");
+          }),
+        ]);
+        const result = run(args, f.base, {
+          ZOMBIE_BUILD_COMM: title,
+          ZOMBIE_BUILD_MAX_MIN: "-1",
+          JANITOR_LSOF: "/nonexistent/lsof",
+        });
+        await delay(50);
+        assert.equal(child.exitCode, null, "the active build must still be running");
+        assert.equal(
+          child.signalCode,
+          null,
+          "the janitor must not signal a process based only on its age"
+        );
+        assert.equal(result.status, 1, "an old build still requires operator attention");
+        assert.match(result.stdout, /age alone does not prove orphan ownership; kept/);
+        assert.doesNotMatch(result.stdout, /would: kill|no job runs this long/);
+      } finally {
+        if (child.exitCode === null && child.signalCode === null) child.kill("SIGTERM");
+        await closed;
+        rmSync(f.base, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+      }
+    }
+  );
+}

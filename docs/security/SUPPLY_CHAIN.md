@@ -37,48 +37,46 @@ When osv or Trivy go red due to a newly disclosed CVE, the remedy is:
 
 1. **Bump the affected dep** (preferred) — upgrade to the patched version via `package.json`
    `overrides` (transitive deps) or rebuild the image on a patched base.
-2. **If there is no upstream fix:**
-   - **osv:** re-baseline `metrics.vulnCount` in `config/quality/quality-baseline.json`
-     (`npm run quality:ratchet -- --update` does not cover dedicated gates — edit the value by
-     hand, `direction:down`) with a justification note + tracking issue.
-   - **Trivy:** add an entry in `.trivyignore` (CVE-ID per line) with a justification
-     comment + tracking issue. `ignore-unfixed: true` already covers CVEs without
-     patches automatically.
+2. **If a remediation is unavailable:** retain the measured finding and track the
+   affected dependency or image. Do not raise the vulnerability baseline to make a
+   failing candidate pass. Trivy's `ignore-unfixed: true` already excludes image
+   vulnerabilities without an upstream patch. Any exception requires a reviewed
+   vulnerability ID, exact package path, expiry and tracking issue in the policy;
+   it is not an automatic consequence of a failed scan.
 
-Both gates **gracefully SKIP** (exit 0) when the tool is absent or the measurement
-fails (osv-scanner not in PATH, osv.dev/network unreachable, invalid JSON) — a
-**measurement** failure never blocks, only a **measured** regression blocks.
+Required OSV executions (`check:vuln-ratchet -- --ratchet`) fail closed with
+`INCOMPLETE` and exit 2 when the scanner, report or baseline cannot be validated.
+A measured regression exits 1. Advisory execution can still report `SKIP` with
+exit 0, which does not establish that dependencies passed the scan. The blocking
+Trivy step also requires a successful measurement: unavailable tools, failed jobs
+and missing image evidence cannot certify an image as clean.
 
-## Known Accepted Risks
+## Image scan policy
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+The current `.trivyignore.yaml` contains no vulnerability exceptions.
+`npm run check:trivy-ignore-policy` validates the structured policy in local scan
+profiles, CI and Quality. Unknown IDs, broader paths, duplicate entries and expired
+exceptions are rejected; the legacy `.trivyignore` is not an input to the migrated scans.
 
-`extract-zip@2.0.1` carries two unpatched high-severity symlink-traversal advisories.
-Per the "no upstream fix" branch of the CVE Variance remedy above, this is an
-**accepted risk**, not a bump:
+Docker checks out policy tooling from `github.workflow_sha` and the image source
+policy with the same source selector as the build. The policy selector rejects
+incompatible scopes and prepares one file for both Trivy scans. A historical source
+without a structured policy receives no exceptions. Both scans pin Trivy `v0.70.0`.
+Policy validation proves configuration consistency; the image still needs a successful scan.
 
-- **Chain:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  Confirmed via `package-lock.json` — exactly one package in the whole dependency
-  tree (`@openai/codex-security`) declares `extract-zip`, and exactly one package
-  (`promptfoo`) declares `@openai/codex-security`.
-- **No fixed release exists anywhere in the chain.** `extract-zip@2.0.1` (published 2020) is the package's final release — it is unmaintained. `@openai/codex-security`'s
-  current npm-latest (`0.1.29`) still pulls `extract-zip@2.0.1`.
-- **Unreachable from production.** `promptfoo` is devDependency-only (never listed
-  under `dependencies`), and no file under `src/`, `open-sse/`, or `bin/` imports the
-  `extract-zip` npm package — OmniRoute's own `extractZip()` helper
-  (`src/lib/versionManager/binaryManager.ts:93`) shells out to native `unzip`/`tar`
-  and is unrelated. `@openai/codex-security` also ships its own symlink-traversal
-  guard on top of extract-zip's onEntry callback.
-- **Do not** alias `extract-zip` via `package.json` `overrides` — the only viable
-  drop-in replacement is Electron-org-internal and API-incompatible with
-  `@openai/codex-security`'s own onEntry/defaultDirMode/defaultFileMode checks;
-  overriding it would silently break that package's security checks.
-- **Baseline:** measured osv `vulnCount` (3) is already well under the frozen
-  `config/quality/quality-baseline.json` baseline (27) — no ratchet change needed.
-- **Regression guard:** `tests/unit/extract-zip-14482-exposure.test.ts` asserts the
-  chain and the no-production-import invariant above; it fails CI if either ever
-  breaks (e.g. a future PR makes `extract-zip` reachable from production).
-- **Tracking:** issue #14482.
+## Retired dependency risk
+
+The root lockfile no longer includes `extract-zip` or a dependency edge to it after
+upgrading the pinned promptfoo development tool. This retires the previously accepted
+`promptfoo` → `@openai/codex-security` → `extract-zip` chain tracked in #14482.
+The regression checks in `tests/unit/extract-zip-14482-exposure.test.ts` reject its
+reintroduction and retain the prohibition on imports from production code.
+
+The current dependency repair also scopes compatibility overrides to Azure identity's
+MSAL client, get-uri's FTP client, and the OpenCode v1 SDK's Zod dependency. Azure token
+acquisition and FTP retrieval are tested with controlled transports; both OpenCode
+packages run their own build and test suites. Registry advisory counts are measurements
+at a point in time and can change after the lockfile is committed.
 
 ## Backlog: Scorecard advisory → blocking
 

@@ -29,16 +29,17 @@ const formerlyMisclassifiedIds = [
 ];
 
 describe("#17028 SiliconFlow pay-as-you-go model protection", () => {
-  it("retains honest release catalog counts and never counts SiliconFlow as statically uncapped", () => {
+  it("never counts SiliconFlow as a static free model, pool or uncapped provider", () => {
     const totals = computeFreeModelTotals();
-    // 471 → 484: #16325 added 13 onomeo free-catalog rows (one uncapped pool, not steady-monthly).
-    // 484 → 485: #16315 added the Token Harbor free route to its own uncapped pool.
-    // 485 → 484: #18418 drops NVIDIA's retired openai/gpt-oss-120b endpoint.
-    // 484 → 485: #18579 replaces the stale Token Harbor claude-haiku-5.5:free route with its two
-    // sourced :free routes (deepseek-v4.1-flash, mimo-v2.6-flash).
-    assert.equal(totals.modelCount, 485);
-    assert.equal(totals.poolCount, 34);
     assert.equal(totals.uncappedProviders.includes("siliconflow"), false);
+    // Other providers can grow without changing SiliconFlow's paid-only contract.
+    // Aggregate counting and pool deduplication have their own catalog fixtures.
+    const siliconflow = computeFreeModelTotals({
+      entries: FREE_MODEL_BUDGETS.filter((row) => row.provider === "siliconflow"),
+    });
+    assert.equal(siliconflow.modelCount, 0);
+    assert.equal(siliconflow.poolCount, 0);
+    assert.equal(siliconflow.steadyRecurringTokens, 0);
   });
 
   it("vetoes any contradictory paid flag, including nested pricing and is_free badges", () => {

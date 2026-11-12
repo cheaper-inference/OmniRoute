@@ -1,0 +1,50 @@
+name: i18n Base Health
+
+# Observe the published base after a docs push. PR and merge-train policy stays in CI.
+# No translation, dependency install, issue mutation or required PR check is added here.
+on:
+  push:
+    branches: [main, "release/v*"]
+    paths:
+      - "docs/**"
+      - "*.md"
+      - "llm.txt"
+      - ".i18n-state.json"
+      - "config/i18n*.json"
+      - "scripts/i18n/**"
+      - "tests/unit/i18n-base-health.test.mjs"
+      - ".github/workflows/i18n-base-health.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: i18n-base-health-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  base-health:
+    name: Published base documentation health
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Check every documentation drift class and retain the verdict
+        run: node scripts/i18n/check-base-health.mjs --output _artifacts/i18n-base-health/report.json
+      - name: Upload the exact-base receipt, including failed verdicts
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: i18n-base-health-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: _artifacts/i18n-base-health/report.json
+          if-no-files-found: error
+          retention-days: 14

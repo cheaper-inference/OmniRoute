@@ -18,45 +18,28 @@ OmniRoute npm + Docker artefaktlarini nashr etadi. Bu darvozalar kelib chiqishin
 
 Tasvir CVE ratcheti `docker-publish.yml` da **ikki bosqichdan** foydalanadi: SARIF bosqichi (`HIGH,CRITICAL`, `exit-code: 0`) HIGH+CRITICAL ni Xavfsizlik yorlig'ida bloklamasdan ko'rinadigan qilib turadi; _CRITICAL darvozasi_ bosqichi (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) **mavjud tuzatishga ega bo'lgan** CRITICAL CVE da chiqarishni muvaffaqiyatsiz qiladi. `ignore-unfixed` yuqori oqim yamoqchisiz asosiy tasvir CVE uchun chiqarishni bloklashning oldini oladi.
 
-## ⚠️ CVE farqi (osv/Trivy darvozalarini bloklash)
+## ⚠️ CVE o‘zgaruvchanligi (osv/Trivy tekshiruvlarini bloklaydi)
 
-osv va Trivy bog'liqliklarni **doimiy ravishda o'sib boruvchi** CVE ma'lumotlar bazalari bilan solishtiradi. **Hech qanday bog'liqliklarga tegmaydigan** PR to'satdan qizil rangga aylanishi mumkin, chunki mavjud bog'liqlikda yangi CVE oshkor qilingan (osv: o'lchangan `vulnCount` > bazaviy ko'rsatkich; Trivy: tasvirda yangi tuzatiladigan CRITICAL). **Bu bloklovchi CVE darvozasining KUTILGAN operatsion xatti-harakati, mahsulot regressiyasi emas.**
+osv va Trivy bog‘liqliklarni **doimiy ravishda kengayib boradigan** CVE ma’lumotlar bazalari bilan solishtiradi. **Hech qanday bog‘liqlikka tegmagan** PR ham mavjud bog‘liqlikda yangi CVE oshkor etilgani sababli to‘satdan qizil holatga o‘tishi mumkin (osv: o‘lchangan `vulnCount` > bazaviy qiymat; Trivy: tasvirda tuzatish mumkin bo‘lgan yangi CRITICAL zaiflik). **Bu mahsulot regressiyasi emas, balki bloklovchi CVE tekshiruvining KUTILGAN operatsion xatti-harakatidir.**
 
-osv yoki Trivy yangi oshkor qilingan CVE tufayli qizil rangga aylanganda, yechim quyidagicha:
+Yangi oshkor etilgan CVE sababli osv yoki Trivy qizil holatga o‘tganda, quyidagilarni bajaring:
 
-1.  **Ta'sirlangan bog'liqlikni yangilash** (afzalroq) — `package.json` `overrides` (tranzitiv bog'liqliklar) orqali yamoqlangan versiyaga yangilash yoki yamoqlangan asosda tasvirni qayta qurish.
-2.  **Agar yuqori oqim tuzatmasi bo'lmasa:**
-    - **osv:** `config/quality/quality-baseline.json` dagi `metrics.vulnCount` ni qayta bazaviy holatga keltirish (`npm run quality:ratchet -- --update` maxsus darvozalarni qamrab olmaydi — qiymatni qo'lda tahrirlash, `direction:down`) asoslash eslatmasi + kuzatuv masalasi bilan.
-    - **Trivy:** `.trivyignore` ga (har bir qatorda CVE-ID) asoslash izohi + kuzatuv masalasi bilan yozuv qo'shish. `ignore-unfixed: true` allaqachon yamoqlarsiz CVE larni avtomatik ravishda qamrab oladi.
+1. **Ta’sirlangan bog‘liqlik versiyasini oshiring** (afzal) — `package.json` faylidagi `overrides` orqali tuzatilgan versiyaga yangilang (tranzitiv bog‘liqliklar uchun) yoki tasvirni tuzatilgan bazaviy tasvir asosida qayta yarating.
+2. **Agar tuzatish mavjud bo'lmasa:** o'lchangan topilmani saqlang va ta'sirlangan bog'liqlik yoki tasvirni kuzatib boring. Muvaffaqiyatsiz nomzodni o'tish uchun zaiflik asosini ko'tarmang. Trivy's `ignore-unfixed: true` allaqachon yuqori oqim patchisiz tasvir zaifliklarini istisno qiladi. Har qanday istisnolar ko'rib chiqilgan zaiflikni talab qiladi ID, paketning aniq yo'li, amal qilish muddati va siyosatdagi kuzatuv muammosi; bu muvaffaqiyatsiz skanerlashning avtomatik natijasi emas.
 
-Ikkala darvoza ham vosita mavjud bo'lmaganda yoki o'lchov muvaffaqiyatsiz bo'lganda (osv-scanner PATH da emas, osv.dev/tarmoqqa ulanib bo'lmaydi, noto'g'ri JSON) **muloyimlik bilan O'TKAZIB YUBORADI** (exit 0) — **o'lchov** muvaffaqiyatsizligi hech qachon bloklamaydi, faqat **o'lchangan** regressiya bloklaydi.
+Majburiy OSV ishga tushirishlari (`check:vuln-ratchet -- --ratchet`) skaner, hisobot yoki bazaviy qiymatni tekshirish imkoni bo‘lmaganda `INCOMPLETE` holati va 2 chiqish kodi bilan xavfsiz tarzda muvaffaqiyatsiz yakunlanadi. O‘lchangan regressiya 1 chiqish kodi bilan yakunlanadi. Tavsiyaviy ishga tushirish hali ham 0 chiqish kodi bilan `SKIP` holatini bildirishi mumkin, ammo bu bog‘liqliklar skanerlashdan muvaffaqiyatli o‘tganini tasdiqlamaydi. Bloklovchi Trivy bosqichi ham muvaffaqiyatli o‘lchovni talab qiladi: mavjud bo‘lmagan vositalar, muvaffaqiyatsiz topshiriqlar va yetishmayotgan tasvir dalillari tasvirning zaifliklardan xoli ekanini tasdiqlay olmaydi.
 
-## Ma'lum qilingan qabul qilingan xatarlar
+## Rasmni skanerlash siyosati
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Joriy `.trivyignore.yaml` hech qanday zaiflik istisnolarini o'z ichiga olmaydi. `npm run check:trivy-ignore-policy` mahalliy skanerlash profillarida, CI va Sifatda tuzilgan siyosatni tasdiqlaydi. Noma'lum IDs, kengroq yo'llar, takroriy yozuvlar va muddati o'tgan istisnolar rad etiladi; eski `.trivyignore` ko'chirilgan skanerlash uchun kirish emas.
 
-`extract-zip@2.0.1` ikkita tuzatilmagan yuqori xavfli symlink-traversal maslahatlarini o'z ichiga oladi.
-Yuqoridagi CVE Variance tuzatishining "yuqori oqimda tuzatish yo'q" bo'limiga ko'ra, bu
-**qabul qilingan xatar**, ko'tarilish emas:
+Docker `github.workflow_sha` siyosat vositalarini va tasvir manbasi siyosatini tuzilish bilan bir xil manba selektori bilan tekshiradi. Siyosat selektori mos kelmaydigan doiralarni rad etadi va ikkala Trivy skanerlash uchun bitta fayl tayyorlaydi. Tarkibiy siyosatga ega bo'lmagan tarixiy manba hech qanday istisnolarga ega emas. Ikkala skanerlash Trivy `v0.70.0` ni o'rnatadi. Siyosatni tekshirish konfiguratsiyaning muvofiqligini tasdiqlaydi; tasvir hali ham muvaffaqiyatli skanerdan o'tishi kerak.
 
-- **Zanjir:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  `package-lock.json` orqali tasdiqlangan — butun bog'liqlik daraxtidagi faqat bitta paket
-  (`@openai/codex-security`) `extract-zip`ni e'lon qiladi va faqat bitta paket
-  (`promptfoo`) `@openai/codex-security`ni e'lon qiladi.
-- **Zanjirning hech bir joyida tuzatilgan versiya mavjud emas.** `extract-zip@2.0.1` (2020 yilda nashr etilgan) paketning yakuniy versiyasi — u qo'llab-quvvatlanmaydi. `@openai/codex-security`ning
-  joriy npm-latest (`0.1.29`) hali ham `extract-zip@2.0.1`ni tortadi.
-- **Ishlab chiqarishdan erishib bo'lmaydi.** `promptfoo` faqat devDependency (hech qachon `dependencies` ostida ko'rsatilmagan) va `src/`, `open-sse/` yoki `bin/` ostidagi hech qanday fayl
-  `extract-zip` npm paketini import qilmaydi — OmniRoute'ning o'z `extractZip()` yordamchisi
-  (`src/lib/versionManager/binaryManager.ts:93`) mahalliy `unzip`/`tar`ga murojaat qiladi
-  va bog'liq emas. `@openai/codex-security` ham extract-zip'ning onEntry callback'i ustiga o'zining symlink-traversal himoyasini o'rnatadi.
-- **`package.json` `overrides` orqali `extract-zip`ni alias qilmang** — yagona maqbul
-  o'rnini bosuvchi Electron-org-internal bo'lib, `@openai/codex-security`ning o'z onEntry/defaultDirMode/defaultFileMode tekshiruvlari bilan API-mos kelmaydi;
-  uni bekor qilish ushbu paketning xavfsizlik tekshiruvlarini jimjit buzadi.
-- **Boshlang'ich:** o'lchangan osv `vulnCount` (3) allaqachon muzlatilgan
-  `config/quality/quality-baseline.json` boshlang'ich chizig'idan (27) ancha past — hech qanday o'zgarish kerak emas.
-- **Regressiya himoyasi:** `tests/unit/extract-zip-14482-exposure.test.ts` zanjirni va yuqoridagi ishlab chiqarishga import qilinmaslik invariantini tasdiqlaydi; agar ikkalasidan biri
-  buzilsa (masalan, kelajakdagi PR `extract-zip`ni ishlab chiqarishdan erishish mumkin qilsa), CI muvaffaqiyatsiz tugaydi.
-- **Kuzatuv:** #14482 masalasi.
+## Foydalanishdan chiqarilgan bogʻliqlik xavfi
+
+Biriktirilgan promptfoo ishlab chiqish vositasi yangilangach, ildiz lockfile endi `extract-zip` paketini yoki unga olib boruvchi bogʻliqlik qirrasini o‘z ichiga olmaydi. Bu #14482 da kuzatilgan va avval qabul qilingan `promptfoo` → `@openai/codex-security` → `extract-zip` zanjirini foydalanishdan chiqaradi. `tests/unit/extract-zip-14482-exposure.test.ts` faylidagi regressiya tekshiruvlari uning qayta kiritilishini rad etadi va ishlab chiqarish kodidan import qilish taqiqini saqlab qoladi.
+
+Joriy bogʻliqlik tuzatishi, shuningdek, moslik almashtirishlarini Azure identity’ning MSAL mijozi, get-uri’ning FTP mijozi va OpenCode v1 SDK’ning Zod bogʻliqligi bilan cheklaydi. Azure tokenini olish va FTP orqali yuklab olish boshqariladigan transportlar yordamida sinovdan o‘tkaziladi; ikkala OpenCode paketi ham o‘zining build va test to‘plamlarini ishga tushiradi. Registrdagi xavfsizlik tavsiyalari soni muayyan vaqt nuqtasidagi o‘lchov bo‘lib, lockfile commit qilinganidan keyin o‘zgarishi mumkin.
 
 ## Qoldiq: Scorecard maslahati → blokirovka qilish
 

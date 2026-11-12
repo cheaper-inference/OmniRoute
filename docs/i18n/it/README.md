@@ -74,7 +74,7 @@
 |                                           |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
 | ----------------------------------------- | :------------------------: | :---------: | :-------------------: |
 | 🌐 Provider                               |            352             |   **358**   |          380          |
-| 🧠 ID univoci dei modelli di chat         |            1320            |  **1374**   |         1491          |
+| 🧠 ID univoci dei modelli di chat         |            1320            |  **1374**   |         1499          |
 | 🖼️ Bridge delle modalità                  | 🆕 visione + audio + video |      ✓      |           ✓           |
 | 📡 Catalogo gratuito Radar                |         🆕 opt-in          |      ✓      |           ✓           |
 | ⚖️ Pianificazione consapevole delle quote |       🆕 Quota-Share       |      ✓      |           ✓           |
@@ -89,57 +89,52 @@
 
 <br/>
 
-## 🧩 Disponibile
+## 🧩 disponibile
 
-[![versione npm](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-![NPM mensili](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
-[![Licenza: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-![Download Docker](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Download Electron](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+[![versione npm](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm) ](https://www.npmjs.com/package/omniroute) ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm) [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED) ](https://hub.docker.com/r/diegosouzapw/omniroute) [![Licenza: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square) ](LICENSE) ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED) ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
-    <td align="right"><b>🚀 Avvio</b></td>
-    <td align="center"><a href="#-quick-start">🚀 Avvio rapido</a></td>
-    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Installazione</a></td>
-    <td align="center"><a href="#first-run">🆓 Collega un provider</a></td>
+    <td align="right"><b>🚀 Start</b></td>
+    <td align="center"><a href="#-quick-start">🚀 Quick Start</a></td>
+    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Install</a></td>
+    <td align="center"><a href="#first-run">🆓 Connect a provider</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💡 Scopri</b></td>
-    <td align="center"><a href="#-the-promise">💥 La promessa</a></td>
-    <td align="center"><a href="#-why-omniroute">🤔 Perché OmniRoute</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 Cosa distingue OmniRoute</a></td>
+    <td align="right"><b>💡 Learn</b></td>
+    <td align="center"><a href="#-the-promise">💥 The Promise</a></td>
+    <td align="center"><a href="#-why-omniroute">🤔 Why OmniRoute</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 What Sets Apart</a></td>
   </tr>
   <tr>
-    <td align="right"><b>⚙️ Funzionalità</b></td>
-    <td align="center"><a href="#-combos--the-flagship">🎯 Combo</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Provider</a></td>
+    <td align="right"><b>⚙️ Features</b></td>
+    <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
+    <td align="center"><a href="#-380-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
     <td align="right"></td>
-    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Compressione</a></td>
-    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Dove viene eseguito</a></td>
-    <td align="center"><a href="#-private--local-first">🔒 Privato</a></td>
+    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Compression</a></td>
+    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Where It Runs</a></td>
+    <td align="center"><a href="#-private--local-first">🔒 Private</a></td>
   </tr>
   <tr>
-    <td align="right"><b>👀 Guardalo</b></td>
-    <td align="center"><a href="#-omniroute-in-action">🎬 In azione</a></td>
-    <td align="center"><a href="#-whats-new">✨ Novità</a></td>
-    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 CLI compatibili</a></td>
+    <td align="right"><b>👀 See it</b></td>
+    <td align="center"><a href="#-omniroute-in-action">🎬 In Action</a></td>
+    <td align="center"><a href="#-whats-new">✨ What's New</a></td>
+    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 Compatible CLIs</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💚 Supporto</b></td>
-    <td align="center"><a href="#-support-omniroute">💚 Supporta / Dona</a></td>
+    <td align="right"><b>💚 Support</b></td>
+    <td align="center"><a href="#-support-omniroute">💚 Support / Donate</a></td>
     <td align="center"><a href="#-community--help">💬 Community</a></td>
-    <td align="center"><a href="#-sponsors">💖 Sponsor</a></td>
+    <td align="center"><a href="#-sponsors">💖 Sponsors</a></td>
   </tr>
   <tr>
-    <td align="right"><b>📦 Progetto</b></td>
-    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Stack tecnologico</a></td>
-    <td align="center"><a href="#-documentation">📖 Documentazione</a></td>
-    <td align="center"><a href="#-1000-contributors">👥 Contributori</a></td>
+    <td align="right"><b>📦 Project</b></td>
+    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Tech Stack</a></td>
+    <td align="center"><a href="#-documentation">📖 Docs</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 Contributors</a></td>
   </tr>
 </table>
 
@@ -148,7 +143,7 @@
 <div align="center">
   <b>🌐 In 67 lingue</b>
   <br/><br/>
-  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="Inglese (en)" title="Inglese (en)"></a>
+  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="English (en)" title="English (en)"></a>
   <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
   <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Português (pt)" title="Português (pt)"></a>
   <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Español (es)" title="Español (es)"></a>
@@ -698,15 +693,15 @@ dalla cronologia della tua shell. → [Integrazioni CLI](docs/guides/CLI-INTEGRA
 
 <div align="center">
 
-## 🌐 380 provider di IA — 153 contrassegnati come gratuiti nel catalogo
+## 🌐 380 Fornitori AI — 156 Catalogo contrassegnato come gratuito
 
 </div>
 
-> **380 provider registrati** nelle raccolte canoniche di chat, media, ricerca, locali, agenti cloud e sistema, inclusi **153 con i metadati di rilevamento `hasFree: true`**. Il registro dei modelli di chat comprende **239 provider / 3.059 coppie provider-modello distinte / 1.475 ID modello grezzi**; il catalogo separato dei budget gratuiti contiene **471 righe per modello**, **34 pool ricorrenti** e **54 provider gratuiti per sempre, ricorrenti e senza chiave**. Si tratta di denominatori diversi per scelta progettuale; definizioni e calcoli deduplicati per pool sono disponibili nel [Riferimento dei provider](docs/reference/PROVIDER_REFERENCE.md) e nei [Livelli gratuiti](docs/reference/FREE_TIERS.md).
+> **380 fornitori registrati** attraverso le raccolte canoniche di chat, media, ricerca, locale, agente cloud e sistema, inclusi **156 contenente metadati di scoperta `hasFree: true`** . Copre il registro del modello di chat **241 fornitori / 3.114 coppie distinte fornitore-modello / 1.499 modello grezzo IDs** ; ha il catalogo separato a budget gratuito **485 righe per modello** ,**34 pool ricorrenti** E **54 fornitori recurring/keyless gratuiti per sempre** . Questi sono denominatori diversi in base alla progettazione; le definizioni e i calcoli deduplicati dal pool si trovano nel [riferimento del provider](docs/reference/PROVIDER_REFERENCE.md) e [nei livelli gratuiti](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
-### 🏢 Ogni laboratorio principale — tramite un unico endpoint
+### 🏢 Tutti i principali laboratori — attraverso un endpoint
 
 <table>
   <tr>
@@ -735,7 +730,7 @@ dalla cronologia della tua shell. → [Integrazioni CLI](docs/guides/CLI-INTEGRA
   </tr>
 </table>
 
-<sub>…e oltre 350 altri — ogni icona viene risolta in tempo reale dal catalogo dei provider della dashboard. 📖 [Riferimento dei provider](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>…e 350 + in più — ogni icona si risolve in tempo reale dal catalogo dei fornitori della dashboard. [Riferimento del fornitore](docs/reference/PROVIDER_REFERENCE.md) 📖</sub>
 
 <br/>
 
@@ -767,80 +762,93 @@ dalla cronologia della tua shell. → [Integrazioni CLI](docs/guides/CLI-INTEGRA
 
 <div align="center">
 
-## 🖥️ Dove funziona OmniRoute : ovunque
+## 🖥️ Dove funziona OmniRoute — ovunque
 
 </div>
 
-> La stessa app, la tua macchina, le tue regole. Da un'installazione npm globale a** il tuo telefono** tramite Termux.
+> Stessa app, la tua macchina, le tue regole. Da un'installazione globale tramite npm fino al **tuo telefono** tramite Termux.
 
 <table>
-  <tr><th align="left"> Piattaforma </th><th align="left"> Installa </th><th align="left"> evidenza </th></tr>
-  <tr><td align="left" nowrap>📦 <b> npm (globale)</b></td><td align="left" nowrap><code> npm install -g omniroute </code></td><td align="left"> Un comando, qualsiasi OS</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Bun (globale)</b></td><td align="left" nowrap><code> bun add -g omniroute </code></td><td align="left"> Stesso tarball del registro, installazioni più veloci </td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> docker run … diegosouzapw/omniroute</code></td><td align="left"> Multi-arco <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b> Desktop (Electron)</b></td><td align="left" nowrap><code> npm esegui elettrone:build </code></td><td align="left"> Finestra nativa + vassoio di sistema — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b> Barra dei menu (OmniRouteTray)</b></td><td align="left" nowrap><code> brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left"> Supervisiona &amp; aggiorna automaticamente il server — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap> nativo <code> arm64 </code></td><td align="left"> Raspberry Pi, server ARM, Apple Silicon </td></tr>
-  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg install nodejs && npx -y omniroute </code></td><td align="left"> Esegue <b> sul tuo telefono </b>, 24/7, no root </td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Aggiungi alla schermata iniziale"</td><td align="left"> Schermo intero, offline, installabile dal browser </td></tr>
-  <tr><td align="left" nowrap>🧩 <b>OpenCode plugin </b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left"> Integrazione OpenCode nativa </td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS Codice Copilot Chat </b></td><td align="left" nowrap> installa <b>OmniCopilot</b> estensione </td><td align="left"> Ogni modello OmniRoute nel selettore chat nativo Copilot : stabile &amp; Insider </td></tr>
-  <tr><td align="left" nowrap>🛠️ <b> Dal sorgente </b></td><td align="left" nowrap><code> npm installa && npm esegui dev </code></td><td align="left"> Hackalo, contribuisci </td></tr>
+  <tr><th align="left">Piattaforma</th><th align="left">Installazione</th><th align="left">Caratteristiche principali</th></tr>
+  <tr><td align="left" nowrap>📦 <b>npm (globale)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Un solo comando, qualsiasi sistema operativo</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (globale)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Compatibilità best effort senza garanzie di supporto; Node.js è il runtime supportato.</td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Multi-arch <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🖥️ <b>Desktop (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Finestra nativa + barra delle applicazioni — <b>Windows / macOS / Linux</b></td></tr>
+  <tr><td align="left" nowrap>🎩 <b>Barra dei menu (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Supervisiona e aggiorna automaticamente il server — <b>macOS</b></td></tr>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap><code>arm64</code> nativo</td><td align="left">Raspberry Pi, server ARM, Apple Silicon</td></tr>
+  <tr><td align="left" nowrap>📱 <b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left">Funziona <b>sul tuo telefono</b>, 24/7, senza root</td></tr>
+  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Aggiungi alla schermata Home"</td><td align="left">A schermo intero, offline, installabile dal browser</td></tr>
+  <tr><td align="left" nowrap>🧩 <b>Plugin OpenCode</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">Integrazione nativa con OpenCode</td></tr>
+  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap>installa l'estensione <b>OmniCopilot</b></td><td align="left">Ogni modello OmniRoute nel selettore nativo di Copilot Chat — versione stabile e Insiders</td></tr>
+  <tr><td align="left" nowrap>🛠️ <b>Dal codice sorgente</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">Modificalo, contribuisci</td></tr>
 </table>
 
-<sub>📖 [Docker Guida](docs/guides/DOCKER_GUIDE.md) · [Desktop](electron/README.md) · [Barra dei menu](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+<sub>📖 [Guida a Docker](docs/guides/DOCKER_GUIDE.md) · [Desktop](electron/README.md) · [Icona nella barra dei menu](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-### 🧩 Novità: OmniRoute all'interno della chat Copilot nativa di VS Code
+### 🧩 Novità: OmniRoute all'interno del Copilot Chat nativo di VS Code
 
 </div>
 
-> Nessuna nuova barra laterale, nessuna nuova chat UI : ogni modello servito da OmniRoute viene visualizzato direttamente nel file**Copilot Selettore modello di chat che già usi** . A partire dal codice VS 1.122, i modelli dei provider funzionano senza accesso GitHub o abbonamento Copilot : modalità agente, chiamata allo strumento e visione, gratuitamente.
+> Nessuna nuova barra laterale, nessuna nuova interfaccia di chat: ogni modello fornito da OmniRoute appare direttamente nel
+> **selettore di modelli di Copilot Chat che già utilizzi**. A partire da VS Code 1.122, i modelli dei provider funzionano
+> senza accesso a GitHub o abbonamento a Copilot: modalità agente, chiamate agli strumenti e visione,
+> gratuitamente.
 
-Installa il** [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** estensione, puntala sul tuo server OmniRoute (il valore predefinito è `localhost:20128`), quindi apri Copilot Chat → selettore modello →** Gestisci modelli…** →**OmniRoute** .
+Installa l'estensione **[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)**, collegala
+al tuo server OmniRoute (il valore predefinito è `localhost:20128`), quindi apri Copilot Chat → selettore di modelli
+→ **Gestisci modelli…** → **OmniRoute**.
 
 <table>
-  <tr><th align="left"> Negozio </th><th align="left"> Link </th><th align="left"> Funziona con </th></tr>
-  <tr><td align="left" nowrap>🧩 <b>VS Mercato dei codici </b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot"> Installa →</a ></td >< td allinea ="sinistra">VS Codice: stabile &amp; Insider </td></tr>
-  <tr><td align="left" nowrap>🔓 <b> Apri registro VSX </b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"> Installa →</a ></td >< td allinea ="sinistra">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro…</td></tr>
+  <tr><th align="left">Store</th><th align="left">Link</th><th align="left">Compatibile con</th></tr>
+  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">Installa →</a></td><td align="left">VS Code — versione stabile e Insiders</td></tr>
+  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">Installa →</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro…</td></tr>
 </table>
 
-Dall'interno dell'editor: apri il file** Estensioni** visualizzare, cercare** "OmniRoute"** , fare clic** Installare** - funziona allo stesso modo su entrambi i negozi. Fonte, problemi e runbook di pubblicazione in diretta su [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
+Dall'editor: apri la vista **Estensioni**, cerca **"OmniRoute"**, fai clic su **Installa**
+— funziona allo stesso modo in entrambi gli store. Il codice sorgente, le segnalazioni e la guida alla pubblicazione si trovano in
+[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
 
-<sub>📖 [VS Codice Copilot Guida alla chat](docs/guides/VSCODE-COPILOT.md) : configurazione, cosa mostra il selettore, dashboard in una scheda, risoluzione dei problemi </sub>
+<sub>📖 [Guida a VS Code Copilot Chat](docs/guides/VSCODE-COPILOT.md) — configurazione, cosa mostra il selettore, dashboard in una scheda, risoluzione dei problemi</sub>
 
 <br/>
 
 <div align="center">
 
-### 🎩 Novità: OmniRouteTray : il tuo gateway, situato nella barra dei menu
+### 🎩 Novità: OmniRouteTray — il tuo gateway, nella barra dei menu
 
 </div>
 
-> `omniroute serve` è più felice quando è sempre acceso.** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)** lo trasforma in un'app della barra dei menu imposta e dimentica per macOS: avvia il server, lo mantiene attivo durante i riavvii, lo aggiorna in posizione e mette il budget del tuo token live a un clic di distanza —** nessuna finestra del terminale lasciata aperta, niente `npm install -g omniroute` a cui fare da babysitter.**
+> `omniroute serve` dà il meglio di sé quando è sempre attivo. **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)**
+> lo trasforma in un'app per la barra dei menu di macOS che puoi configurare e dimenticare: avvia il server, lo mantiene attivo
+> dopo i riavvii, lo aggiorna direttamente e rende accessibile il tuo budget di token in tempo reale con un clic — **senza
+> lasciare aperta una finestra del terminale e senza dover gestire `npm install -g omniroute`.**
 
-Costruito con [Tauri v2](https://v2.tauri.app/) (un core Rust delle dimensioni di un errore di arrotondamento), fornisce il proprio runtime Node 24 firmato e gestisce un'installazione OmniRoute di proprietà dell'app, quindi non combatte mai il tuo `node`/`bun` globale. Esso** condivide la configurazione e il database `~/.omniroute/` esistenti** - quindi è lo stesso OmniRoute che già corri, solo con il cappello in testa. 🎩
+Realizzato con [Tauri v2](https://v2.tauri.app/) (un core Rust dalle dimensioni trascurabili), include
+il proprio runtime Node 24 firmato e gestisce un'installazione di OmniRoute appartenente all'app, quindi non entra mai in conflitto con le tue
+installazioni globali di `node`/`bun`. **Condivide la configurazione e il database esistenti in `~/.omniroute/`** — quindi è lo
+stesso OmniRoute che già utilizzi, semplicemente con un cappello. 🎩
 
 <table>
-  <tr><th align="left"> Cosa fa </th><th align="left"> Come </th></tr>
-  <tr><td align="left" nowrap>🟢 <b> Supervisiona il server </b></td><td align="left"> Genera <code> omniroute serve </code>, adotta un'istanza già in esecuzione invece di duplicarla </td></tr>
-  <tr><td align="left" nowrap>📊 <b> Utilizzo in tempo reale a colpo d'occhio </b></td><td align="left"> Barre delle quote del provider, Claude session/weekly limiti con conto alla rovescia reimpostato, suddivisione dei costi in 30 giorni </td></tr>
-  <tr><td align="left" nowrap>🔄 <b> Aggiornamenti automatici sul posto </b></td><td align="left"> Installazione graduale, scambio atomico, rollback in caso di errore: sempre sulla versione più recente </td></tr>
-  <tr><td align="left" nowrap>🚀 <b> Avvia all'accesso </b></td><td align="left"> Avvio opzionale all'accesso; solo nel vassoio, nessuna icona nel dock </td></tr>
-  <tr><td align="left" nowrap>🩺 <b> Doctor &amp; logs </b></td><td align="left"> Diagnostica con un clic e accesso al log del server </td></tr>
+  <tr><th align="left">Cosa fa</th><th align="left">Come</th></tr>
+  <tr><td align="left" nowrap>🟢 <b>Supervisiona il server</b></td><td align="left">Avvia <code>omniroute serve</code> e adotta un'istanza già in esecuzione invece di duplicarla</td></tr>
+  <tr><td align="left" nowrap>📊 <b>Utilizzo in tempo reale a colpo d'occhio</b></td><td align="left">Barre delle quote dei provider, limiti di sessione/settimanali di Claude con conto alla rovescia per il ripristino, ripartizione dei costi degli ultimi 30 giorni</td></tr>
+  <tr><td align="left" nowrap>🔄 <b>Aggiornamento automatico sul posto</b></td><td align="left">Installazione in più fasi, sostituzione atomica, rollback in caso di errore — sempre aggiornato alla versione più recente</td></tr>
+  <tr><td align="left" nowrap>🚀 <b>Avvio all'accesso</b></td><td align="left">Avvio facoltativo all'accesso; solo nella barra dei menu, senza icona nel dock</td></tr>
+  <tr><td align="left" nowrap>🩺 <b>Diagnostica e log</b></td><td align="left">Diagnostica con un clic e accesso ai log del server</td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub> Preferisci un download? Prendi l'ultimo <code>.dmg </code> da
-<a href="https://github.com/zoispag/omniroute-tray/releases"> Rilascia </a>. Fonte, problemi e costruzione
-i documenti vivono su <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
-<br/>💛 Un progetto comunitario di <a href="https://github.com/zoispag">@zoispag </a> — non una versione ufficiale OmniRoute.</sub>
+<sub>Preferisci un download? Scarica l'ultimo <code>.dmg</code> da
+<a href="https://github.com/zoispag/omniroute-tray/releases">Releases</a>. Il codice sorgente, le segnalazioni e la documentazione
+di compilazione si trovano su <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
+<br/>💛 Un progetto della community a cura di <a href="https://github.com/zoispag">@zoispag</a> — non è una versione ufficiale di OmniRoute.</sub>
 
 <br/>
 

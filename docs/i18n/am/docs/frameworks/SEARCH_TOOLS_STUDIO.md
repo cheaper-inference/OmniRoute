@@ -54,7 +54,7 @@ Search Tools Studio፣ `/dashboard/search-tools`ን ከመሠረታዊ የፍለ
 - ግቤት፦ URL + የሙሉ ገጽ ማብሪያ/ማጥፊያ + የቅርጸት መምረጫ (markdown / ጽሑፍ / HTML)።
 - ያስገቡ → ያምጡ → `ScrapeResult.tsx`ን ያቅርቡ።
 - `ScrapeResult` የmarkdown ቅድመ ዕይታን + የጥሬ ይዘት ማብሪያ/ማጥፊያን ያቀርባል።
-- ገደብ፦ የምላሹ ይዘት > **256 KB** ከሆነ፣ UI `(ተቆርጧል፣ ጥሬውን ይመልከቱ)` ያሳያል እና ጥሬ ይዘቱን በMonaco ሞዳል (D21) ውስጥ ይከፍታል።
+- ገደብ፦ የምላሹ ይዘት > **256 KB** ከሆነ፣ UI `View full raw content` ያሳያል እና ጥሬ ይዘቱን በሞዳል (D21) ውስጥ ይከፍታል።
 - የሜታዳታ ፓነል፦ አቅራቢ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search)፣ መዘግየት፣ ወጪ፣ የምላሽ መጠን፣ የአገናኞች ብዛት።
 - `useScrapeFetch.ts` hookን ይጠቀማል።
 

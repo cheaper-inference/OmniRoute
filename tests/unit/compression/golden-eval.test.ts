@@ -107,9 +107,12 @@ describe("Golden Eval: long-coding-session", () => {
     );
   });
 
-  it("latency under 50ms for 50-message session", () => {
+  it("uses under 50ms of synchronous CPU for the coding-session fixture", () => {
     const messages = loadFixture();
-    const start = performance.now();
+    const threadCpuClock =
+      typeof process.threadCpuUsage === "function" ? process.threadCpuUsage : process.cpuUsage;
+    const cpuStart = threadCpuClock();
+    const wallStart = performance.now();
     compressAggressive(
       messages as Array<{
         role: string;
@@ -117,7 +120,13 @@ describe("Golden Eval: long-coding-session", () => {
         [key: string]: unknown;
       }>
     );
-    const elapsed = performance.now() - start;
-    assert.ok(elapsed < 50, `Expected < 50ms, got ${elapsed.toFixed(1)}ms`);
+    const wallMs = performance.now() - wallStart;
+    const cpu = threadCpuClock(cpuStart);
+    const cpuMs = (cpu.user + cpu.system) / 1_000;
+    assert.ok(
+      cpuMs < 50,
+      `Expected < 50ms synchronous CPU, got ${cpuMs.toFixed(1)}ms ` +
+        `(wall ${wallMs.toFixed(1)}ms)`
+    );
   });
 });

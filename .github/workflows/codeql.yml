@@ -1,31 +1,96 @@
-name: CodeQL
-# OWNER ACTION REQUIRED before enabling auto-triggers: advanced CodeQL conflicts with
-# GitHub "default setup" — the analyze step fails with "CodeQL analyses from advanced
-# configurations cannot be processed when the default setup is enabled". Switch repo
-# Settings → Code security → CodeQL from Default to Advanced, THEN restore the
-# push/pull_request/schedule triggers below. Until then this only runs on manual dispatch
-# so it never produces a red check on PRs. (The codeqlAlerts ratchet keeps working via the
-# default setup's alerts in the meantime.)
+name: CodeQL producer
+# Activate only after reviewed Default Setup readback. This workflow is called
+# from CI so admission cannot outrun its matrix. No independent PR trigger.
 on:
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      admission:
+        type: boolean
+        required: true
+      ci-workflow-ref:
+        type: string
+        required: false
+        default: ""
+      ci-workflow-sha:
+        type: string
+        required: false
+        default: ""
 permissions:
   contents: read
 jobs:
   analyze:
-    name: Analyze (javascript-typescript)
+    name: Analyze (${{ matrix.language }})
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     permissions:
-      security-events: write
-      actions: read
       contents: read
+      actions: read
+      # GitHub supports SARIF uploads for pull_request with a downgraded fork token.
+      # Do not enable write tokens or repository secrets for forks.
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [actions, c-cpp, javascript-typescript, python]
+        build-mode: [none]
+        include:
+          - language: actions
+            category: /language:actions
+          - language: c-cpp
+            category: /language:c-cpp
+          - language: javascript-typescript
+            category: /language:javascript-typescript
+          - language: python
+            category: /language:python
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          ref: ${{ github.sha }}
           persist-credentials: false
-      - uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
-          languages: javascript-typescript
-          queries: security-extended
-      - uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+          package-manager-cache: false
+          node-version: "24"
+      - name: Require reviewed scanner activation and finite target
+        run: node scripts/quality/codeql-producer.mjs preflight
+      - uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
-          category: "/language:javascript-typescript"
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+      # No project install/build or external secrets; extraction uses none for all languages.
+      - id: analyze
+        uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          category: ${{ matrix.category }}
+          output: .artifacts/codeql-sarif
+          wait-for-processing: true
+      # The action can warn and continue when processing lookup fails. Record its
+      # actual upload ID; the dependent admission checks processing again, fail-closed.
+      - name: Record this exact upload
+        if: ${{ inputs.admission }}
+        env:
+          CI_WORKFLOW_REF: ${{ inputs.ci-workflow-ref }}
+          CI_WORKFLOW_SHA: ${{ inputs.ci-workflow-sha }}
+          CODEQL_LANGUAGE: ${{ matrix.language }}
+          CODEQL_CATEGORY: ${{ matrix.category }}
+          CODEQL_BUILD_MODE: ${{ matrix.build-mode }}
+          CODEQL_SARIF_ID: ${{ steps.analyze.outputs.sarif-id }}
+        run: node scripts/quality/codeql-producer.mjs write
+      - name: Retain this language upload receipt
+        if: ${{ inputs.admission }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: codeql-upload-${{ github.run_id }}-${{ matrix.language }}-${{ github.run_attempt }}
+          path: .artifacts/codeql-uploads/codeql-${{ matrix.language }}-${{ github.run_attempt }}.json
+          if-no-files-found: error
+          retention-days: 14
+      # A successful upload can still leave an invalid analysis on the server.
+      # Retain original findings for diagnosis; admission still reads exact receipts.
+      - name: Retain original CodeQL SARIF for diagnosis
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: codeql-sarif-${{ github.run_id }}-${{ matrix.language }}-${{ github.run_attempt }}
+          path: .artifacts/codeql-sarif
+          if-no-files-found: warn
+          retention-days: 14

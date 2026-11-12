@@ -54,7 +54,7 @@ A meglévő `SearchForm` + `ResultsPanel` + `RerankPanel` elemeket egy lappá fe
 - Bemenet: URL + teljes oldalas kapcsoló + formátumválasztó (markdown / szöveg / HTML).
 - Küldés → lekérés → `ScrapeResult.tsx` megjelenítése.
 - A `ScrapeResult` markdown-előnézetet és nyersnézet-kapcsolót jelenít meg.
-- Korlát: ha a válasz törzse nagyobb mint **256 KB**, a felhasználói felület megjeleníti a `(csonkolva, nyers tartalom megtekintése)` szöveget, és a nyers tartalmat egy Monaco modális ablakban nyitja meg (D21).
+- Korlát: ha a válasz törzse nagyobb mint **256 KB**, a felhasználói felület megjeleníti a `View full raw content` szöveget, és a nyers tartalmat egy modális ablakban nyitja meg (D21).
 - Metaadatpanel: szolgáltató (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), késleltetés, költség, válaszméret, hivatkozások száma.
 - A `useScrapeFetch.ts` hookot használja.
 

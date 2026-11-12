@@ -10,77 +10,76 @@ _पछिल्लो अद्यावधिक: 2026-06-28_
 
 ## कार्यकारी सारांश
 
-OmniRoute Next.js मा निर्मित स्थानीय AI रुटिङ गेटवे र ड्यासबोर्ड हो।
-यसले एउटै OpenAI-compatible endpoint (`/v1/*`) प्रदान गर्छ र अनुवाद, fallback, token refresh, तथा usage tracking सहित विभिन्न upstream प्रदायकहरूमा ट्राफिक रुट गर्छ।
+OmniRoute एक स्थानीय AI रूटिङ गेटवे र Next.js मा निर्मित ड्यासबोर्ड हो। यसले एकल ओपनएआई-कम्प्याटिबल एन्डपोइन्ट (`/v1/*`) प्रदान गर्दछ र अनुवाद, फलब्याक, टोकन रिफ्रेस, र प्रयोग ट्र्याकिङको साथ धेरै अपस्ट्रीम प्रदायकहरूमा ट्राफिकलाई मार्ग गर्दछ।
 
-मुख्य क्षमताहरू:
+मूल क्षमताहरू:
 
-- CLI/tools का लागि OpenAI-compatible API surface (380 प्रदायक, 159 executor modules)
-- प्रदायकका ढाँचाहरूबीच request/response अनुवाद
-- Model combo fallback (बहु-मोडल अनुक्रम)
-- Structured combo steps (`provider + model + connection`) र `compositeTiers` मार्फत runtime ordering
-- Account-level fallback (प्रति प्रदायक बहु-खाता)
-- मुख्य chat path मा quota preflight र quota-aware P2C account selection
-- OAuth + API-key प्रदायक connection management (27 OAuth provider modules)
-- `/v1/embeddings` मार्फत embedding generation (18 प्रदायक)
-- `/v1/images/generations` मार्फत image generation (10+ प्रदायक, 20+ मोडल)
-- `/v1/audio/transcriptions` मार्फत audio transcription (18 प्रदायक)
-- `/v1/audio/speech` मार्फत text-to-speech (24 built-in providers)
-- `/v1/videos/generations` मार्फत video generation (ComfyUI + SD WebUI)
-- `/v1/music/generations` मार्फत music generation (ComfyUI)
-- `/v1/search` मार्फत web search (20 प्रदायक)
-- `/v1/moderations` मार्फत moderations
-- `/v1/rerank` मार्फत reranking
-- Reasoning models का लागि think tag parsing (`<think>...</think>`)
-- Strict OpenAI SDK compatibility का लागि response sanitization
-- Cross-provider compatibility का लागि role normalization (developer→system, system→user)
-- Structured output conversion (json_schema → Gemini responseSchema)
-- Providers, keys, aliases, combos, settings, pricing का लागि local persistence (122 DB modules)
-- Usage/cost tracking र request logging
-- Multi-device/state sync का लागि वैकल्पिक cloud sync
-- API access control का लागि IP allowlist/blocklist
-- Thinking budget management (passthrough/auto/custom/adaptive)
-- Global system prompt injection
-- Session tracking र fingerprinting
-- Provider-specific profiles सहित per-account enhanced rate limiting
-- Provider resilience का लागि circuit breaker pattern
-- Mutex locking सहित anti-thundering herd protection
-- Signature-based request deduplication cache
-- Domain layer: cost rules, fallback policy, lockout policy
-- Context Relay: account rotation continuity का लागि session handoff summaries
-- Domain state persistence (fallbacks, budgets, lockouts, circuit breakers का लागि SQLite write-through cache)
-- Centralized request evaluation का लागि policy engine (lockout → budget → fallback)
-- p50/p95/p99 latency aggregation सहित request telemetry
-- `combo_execution_key` / `combo_step_id` मार्फत combo target telemetry र historical combo target health
-- End-to-end tracing का लागि Correlation ID (X-Request-Id)
-- प्रति API key opt-out सहित compliance audit logging
-- LLM quality assurance का लागि eval framework
-- Real-time provider circuit breaker status सहित health dashboard
-- 3 transports (stdio/SSE/Streamable HTTP) सहित MCP Server (110 tools)
-- Skills र task lifecycle सहित A2A Server (JSON-RPC 2.0 + SSE)
-- Memory system (extraction, injection, retrieval, summarization)
-- Skills system (registry, executor, sandbox, built-in skills)
-- Certificate management र DNS handling सहित MITM proxy
-- Prompt injection guard middleware
-- Caveman, RTK, stacked pipelines, compression combos, language packs, तथा analytics सहित prompt compression pipeline
-- ACP (Agent Communication Protocol) registry
-- Modular OAuth providers (`src/lib/oauth/providers/` अन्तर्गत 22 individual modules)
-- Uninstall/full-uninstall scripts
-- OAuth environment repair action
-- OpenAI-compatible WS clients (`/v1/ws`) का लागि WebSocket bridge
-- Sync token management (issue/revoke, ETag-versioned config bundle download)
-- GLM Thinking (`glmt`) first-class provider preset
-- Hybrid token counting (estimation fallback सहित provider-side `/messages/count_tokens`)
-- Model alias auto-seeding (startup मा 30+ cross-proxy dialect normalizations)
-- SSRF guard, private URL blocking, तथा configurable retry सहित safe outbound fetch
-- Configurable `requestRetry` र `maxRetryIntervalSec` सहित cooldown-aware chat retries
-- Startup मा Zod सहित runtime environment validation
-- Pagination, provider CRUD events, तथा SSRF-blocked validation logging सहित compliance audit v2
+- CLI/tools को लागि OpenAI- संगत API सतह (380 प्रदायकहरू, 162 निर्वाहक मोड्युलहरू)
+- प्रदायक ढाँचाहरूमाRequest/response अनुवाद
+- मोडेल कम्बो फलब्याक (बहु मोडेल अनुक्रम)
+- `compositeTiers` द्वारा रनटाइम अर्डरको साथ संरचित कम्बो चरणहरू (`provider + model + connection`)
+- खाता-स्तर फलब्याक (बहु-खाता प्रति प्रदायक)
+- मुख्य च्याट मार्गमा कोटा प्रीफ्लाइट र कोटा-सचेत P2C खाता चयन
+- OAuth + API-कुञ्जी प्रदायक जडान व्यवस्थापन (27 OAuth प्रदायक मोड्युलहरू)
+- `/v1/embeddings` (18 प्रदायकहरू) मार्फत एम्बेडिङ जेनरेशन
+- `/v1/images/generations` मार्फत छवि उत्पादन (10 + प्रदायकहरू, 20 + मोडेलहरू)
+- `/v1/audio/transcriptions` मार्फत अडियो ट्रान्सक्रिप्शन (१८ प्रदायकहरू)
+- `/v1/audio/speech` मार्फत टेक्स्ट-टू-स्पीच (24 बिल्ट-इन प्रदायकहरू)
+- `/v1/videos/generations` मार्फत भिडियो उत्पादन (ComfyUI + SD WebUI)
+- `/v1/music/generations` (ComfyUI) मार्फत संगीत उत्पादन
+- `/v1/search` मार्फत वेब खोज (२० प्रदायकहरू)
+- `/v1/moderations` मार्फत मध्यस्थता
+- `/v1/rerank` मार्फत पुन: रैंकिंग
+- तर्क मोडेलहरूको लागि ट्याग पार्सिङ (`<think>...</think>`) सोच्नुहोस्
+- कडा OpenAI SDK अनुकूलताको लागि प्रतिक्रिया सेनिटाइजेशन
+- क्रस-प्रदायक अनुकूलताको लागि भूमिका सामान्यीकरण (विकासकर्ता→ प्रणाली, प्रणाली→ प्रयोगकर्ता)
+- संरचित आउटपुट रूपान्तरण (json_schema → Gemini responseSchema)
+- प्रदायकहरू, कुञ्जीहरू, उपनामहरू, कम्बोहरू, सेटिङहरू, मूल्य निर्धारण (१२२ DB मोड्युलहरू) को लागि स्थानीय दृढता
+- Usage/cost ट्र्याकिङ र अनुरोध लगिङ
+- multi-device/state सिंकको लागि वैकल्पिक क्लाउड सिंक
+- API पहुँच नियन्त्रणको लागिIP allowlist/blocklist
+- सोच बजेट व्यवस्थापन (passthrough/auto/custom/adaptive)
+- ग्लोबल सिस्टम प्रम्प्ट इंजेक्शन
+- सत्र ट्र्याकिङ र फिंगरप्रिन्टिङ
+- प्रति-खाता विस्तारित दर प्रदायक-विशेष प्रोफाइलहरूको साथ सीमित
+- प्रदायक लचिलोपनको लागि सर्किट ब्रेकर ढाँचा
+- म्युटेक्स लकको साथ एन्टी-थन्डरिङ झुण्ड सुरक्षा
+- हस्ताक्षर-आधारित अनुरोध डुप्लिकेशन क्यास
+- डोमेन तह: लागत नियम, फलब्याक नीति, तालाबन्दी नीति
+- सन्दर्भ रिले: खाता रोटेशन निरन्तरताको लागि सत्र ह्यान्डअफ सारांश
+- डोमेन राज्य दृढता (फलब्याकहरू, बजेटहरू, लकआउटहरू, सर्किट ब्रेकरहरूको लागिSQLite राइट-थ्रु क्यास)
+- केन्द्रीकृत अनुरोध मूल्याङ्कनको लागि नीति इन्जिन (लकआउट → बजेट → फलब्याक)
+- p50/p95/p99 विलम्बता एकत्रीकरणको साथ टेलिमेट्री अनुरोध गर्नुहोस्
+- `combo_execution_key` / `combo_step_id` मार्फत कम्बो लक्ष्य टेलिमेट्री र ऐतिहासिक कम्बो लक्ष्य स्वास्थ्य
+- अन्त-देखि-अन्त ट्रेसिङको लागि सहसंबंध ID (X-अनुरोध-Id)
+- प्रति API कुञ्जी अप्ट-आउटको साथ अनुपालन अडिट लगिङ
+- LLM गुणस्तर आश्वासनको लागि Eval फ्रेमवर्क
+- वास्तविक समय प्रदायक सर्किट ब्रेकर स्थिति संग स्वास्थ्य ड्यासबोर्ड
+- MCP सर्भर (110 उपकरणहरू) 3 यातायात (stdio/SSE/Streamable HTTP) संग
+- A2A सर्भर (JSON-RPC 2.0 + SSE) सीप र कार्य जीवनचक्रको साथ
+- मेमोरी प्रणाली (निकासी, इंजेक्शन, पुन: प्राप्ति, सारांश)
+- कौशल प्रणाली (रजिस्ट्री, कार्यकारी, स्यान्डबक्स, निर्मित कौशल)
+- प्रमाणपत्र व्यवस्थापन र DNS ह्यान्डलिंगको साथ MITM प्रोक्सी
+- प्रम्प्ट इन्जेक्शन गार्ड मिडलवेयर
+- Caveman, RTK, स्ट्याक्ड पाइपलाइनहरू, कम्प्रेसन कम्बोहरू, भाषा प्याकहरू, र एनालिटिक्सको साथ प्रम्प्ट कम्प्रेसन पाइपलाइन
+- ACP (एजेन्ट कम्युनिकेसन प्रोटोकल) रजिस्ट्री
+- मोड्युलर OAuth प्रदायकहरू ( `src/lib/oauth/providers/` अन्तर्गत 22 व्यक्तिगत मोड्युलहरू)
+- Uninstall/full-uninstall लिपिहरू
+- OAuth वातावरण मर्मत कार्य
+- ओपनएआई-कम्प्याटिबल WS ग्राहकहरूका लागिWebSocket ब्रिज (`/v1/ws`)
+- सिंक टोकन व्यवस्थापन (issue/revoke, ETag-संस्करण कन्फिग बन्डल डाउनलोड)
+- GLM सोच (`glmt`) प्रथम श्रेणी प्रदायक प्रिसेट
+- हाइब्रिड टोकन गणना (प्रदायक पक्ष `/messages/count_tokens` अनुमान फलब्याक संग)
+- मोडेल उपनाम स्वत: सीडिङ (स्टार्टअपमा 30 + क्रस-प्रोक्सी बोली सामान्यीकरण)
+- SSRF गार्ड, निजी URL अवरुद्ध, र कन्फिगर योग्य पुन: प्रयासको साथ सुरक्षित आउटबाउन्ड ल्याउनुहोस्
+- कूलडाउन-अवेयर च्याट कन्फिगर योग्य `requestRetry` र `maxRetryIntervalSec` सँग पुन: प्रयासहरू
+- स्टार्टअपमा Zod सँग रनटाइम वातावरण प्रमाणीकरण
+- पृष्ठांकन, प्रदायक CRUD घटनाहरू, र SSRF-ब्लक गरिएको प्रमाणीकरण लगिङको साथ अनुपालन अडिट v2
 
-प्राथमिक runtime model:
+प्राथमिक रनटाइम मोडेल:
 
-- `src/app/api/*` अन्तर्गतका Next.js app routes ले dashboard APIs र compatibility APIs दुवै कार्यान्वयन गर्छन्
-- `src/sse/*` + `open-sse/*` मा रहेको shared SSE/routing core ले provider execution, translation, streaming, fallback, तथा usage सम्हाल्छ
+- `src/app/api/*` अन्तर्गत Next.js एप मार्गहरूले ड्यासबोर्ड APIs र अनुकूलता APIs दुवै लागू गर्दछ
+- `src/sse/*` + `open-sse/*` मा एक साझा SSE/routing कोर प्रदायक कार्यान्वयन, अनुवाद, स्ट्रिमिङ, फलब्याक, र उपयोग ह्यान्डल गर्दछ
 
 ## सन्दर्भ आरेखहरू
 
@@ -399,27 +398,27 @@ OmniRoute ले स्थानीय रूपमा चलिरहेका 
 - मोड्युल रूट: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
 - तातो पुन: लोड: रजिस्ट्रीले कन्फिगरेसन परिवर्तनहरूको लागि हेर्छ र ठाउँमा चेन पुन: निर्माण गर्दछ
 - तार-इन बिन्दुहरू: च्याट ह्यान्डलर प्रविष्टि, छवि उत्पादन ह्यान्डलर, प्रतिक्रिया सेनिटाइजर
-- HTTP अनुबंध: उल्लङ्घनहरू `503` को रूपमा `error.code = "GUARDRAIL_VIOLATION"` सँग
+- HTTP अनुबंध: उल्लङ्घनहरू `error.code = "GUARDRAIL_VIOLATION"` सँग `503` को रूपमा
 
 नियमावली संलेखन र थ्रेसहोल्ड ट्युनिङको लागि, [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) हेर्नुहोस्।
 
 ### D. डोमेन तह
 
-`src/domain/` नेमस्पेसले नीतिगत निर्णयहरूलाई केन्द्रीकृत गर्दछ त्यसैले मार्ग ह्यान्डलरहरूले lockout/budget/fallback तर्क आफैंमा जम्मा गर्नुपर्दैन।
+`src/domain/` नेमस्पेसले नीति निर्णयहरूलाई केन्द्रीकृत गर्दछ त्यसैले मार्ग ह्यान्डलरहरूले lockout/budget/fallback तर्क आफैंलाई भेला गर्नु पर्दैन।
 
 - नीति इन्जिन: पूर्व कार्यान्वयन मूल्याङ्कनको लागि `src/domain/policyEngine.ts` — एकल प्रविष्टि बिन्दु (लकआउट → बजेट → फलब्याक अर्डरिङ)
 - लागत नियम: `src/domain/costRules.ts`
 - फलब्याक नीति: `src/domain/fallbackPolicy.ts`
 - तालाबन्दी नीति: `src/domain/lockoutPolicy.ts`
 - ट्याग-आधारित मार्ग: `src/domain/tagRouter.ts`
-- कम्बो रिजोल्भर: `src/domain/comboResolver.ts` — ले ठोस कार्यान्वयन योजनाहरूमा कम्बो नामहरू, स्वतः/\* उपसर्गहरू, र वाइल्डकार्ड मोडेल लक्ष्यहरू समाधान गर्दछ।
-- Connection/model नियम जोड्ने: `src/domain/connectionModelRules.ts`
-- मोडेल उपलब्धता स्न्यापशटहरू: `src/domain/modelAvailability.ts`
+- कम्बो रिजोल्भर: `src/domain/comboResolver.ts` — कम्बो नामहरू, स्वतः/\* उपसर्गहरू, र वाइल्डकार्ड मोडेल लक्ष्यहरू ठोस कार्यान्वयन योजनाहरू समाधान गर्दछ।
+- Connection/model नियम योजक: `src/domain/connectionModelRules.ts`
+- मोडेल उपलब्धता स्न्यापसटहरू: `src/domain/modelAvailability.ts`
 - प्रदायकको म्याद सकिने ट्र्याकिङ: `src/domain/providerExpiration.ts`
 - कोटा क्यास: `src/domain/quotaCache.ts`
 - पतन अवस्था: `src/domain/degradation.ts`
 - कन्फिगरेसन अडिट: `src/domain/configAudit.ts`
-- OmniRoute प्रतिक्रिया मेटाडाटा बिल्डर: `src/domain/omnirouteResponseMeta.ts`
+- OmniRoute प्रतिक्रिया मेटाडेटा निर्माणकर्ता: `src/domain/omnirouteResponseMeta.ts`
 - मूल्याङ्कन उपप्रणाली: `src/domain/assessment/` — आवधिक मूल्याङ्कन कार्यहरू
 
 ### E. प्राधिकरण पाइपलाइन
@@ -1058,11 +1057,11 @@ flowchart LR
 - स्टार्टअपमा SQLite स्किमा माइग्रेसनहरू र स्वतः-अपग्रेड हुकहरू
 - लिगेसी JSON → SQLite माइग्रेसन अनुकूलता मार्ग
 
-## 6) SSRF / आउटबाउन्ड URL गार्ड
+## 6) SSRF / बाह्यगामी URL सुरक्षा
 
-- `src/shared/network/outboundUrlGuard.ts` ले प्रदायक एक्जिक्युटरहरूसम्म पुग्नुअघि सबै निजी/लुपब्याक/लिङ्क-लोकल लक्षित URL हरू रोक्छ
-- प्रदायक मोडेल खोज र प्रमाणीकरण रुटहरूले `src/shared/network/safeOutboundFetch.ts` प्रयोग गर्छन्, जसले प्रत्येक आउटबाउन्ड अनुरोधअघि गार्ड लागू गर्छ
-- गार्ड त्रुटिहरू HTTP 422 सहित `URL_GUARD_BLOCKED` का रूपमा देखिन्छन् र `providerAudit.ts` मार्फत अनुपालन अडिट ट्रेलमा लग गरिन्छन्
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) ले `BaseExecutor.execute()` मार्फत पठाइएका च्याट अनुरोधहरूमा `src/shared/network/outboundUrlGuard.ts` लागू गर्छ। सार्वजनिक-मात्र मोडमा (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` र निजी फ्ल्याग निष्क्रिय हुँदा) यसले निजी तथा लुपब्याक होस्टहरू र 169.254.0.0/16 लाई रोक्छ; अन्य सबै मोडमा यसले क्लाउड-मेटाडेटा होस्टहरूलाई रोक्छ। कुनै पनि DNS खोजीअघि, लेखिएकै रूपमा रहेको होस्टनाम वा IP लिटरल जाँचिन्छ। अन्तर्निर्मित स्थानीय प्रदायकहरूले यसलाई प्रयोग गर्दैनन्।
+- प्रदायक मोडेल खोज र प्रमाणीकरण रुटहरूले `src/shared/network/safeOutboundFetch.ts` प्रयोग गर्छन्, जसले प्रत्येक बाह्यगामी अनुरोधअघि सुरक्षा जाँच लागू गर्छ।
+- सुरक्षा जाँचका त्रुटिहरू HTTP 503 सहित `URL_GUARD_BLOCKED` का रूपमा देखिन्छन् (`getSafeOutboundFetchErrorStatus`; मोडेल-खोज रुटले 400 फर्काउँछ), र प्रमाणीकरणका क्रममा भएका वास्तविक SSRF अवरोधहरू `provider.validation.ssrf_blocked` घटनाका रूपमा अडिट ट्रेलमा लग गरिन्छन्।
 
 ## अवलोकनयोग्यता र सञ्चालन सङ्केतहरू
 
@@ -1113,7 +1112,7 @@ flowchart LR
 4. क्लाउडको व्यवहार सही `NEXT_PUBLIC_BASE_URL` र क्लाउड एन्डपोइन्टको पहुँचयोग्यतामा निर्भर हुन्छ।
 5. `open-sse/` डाइरेक्टरीलाई `@omniroute/open-sse` **npm workspace package** का रूपमा प्रकाशित गरिन्छ। स्रोत कोडले यसलाई `@omniroute/open-sse/...` मार्फत आयात गर्छ (Next.js `transpilePackages` द्वारा रिजल्भ गरिन्छ)। एकरूपताका लागि यस कागजातका फाइल पथहरूले अझै पनि `open-sse/` डाइरेक्टरी नाम प्रयोग गर्छन्।
 6. ड्यासबोर्डका चार्टहरूले पहुँचयोग्य, अन्तरक्रियात्मक एनालिटिक्स दृश्याङ्कनहरू (मोडेल प्रयोगका बार चार्टहरू, सफलता दरसहितका प्रदायक विभाजन तालिकाहरू) का लागि **Recharts** (SVG-आधारित) प्रयोग गर्छन्।
-7. E2E परीक्षणहरूले **Playwright** (`tests/e2e/`) प्रयोग गर्छन् र `npm run test:e2e` मार्फत चलाइन्छन्। एकाइ परीक्षणहरूले **Node.js test runner** (`tests/unit/`) प्रयोग गर्छन् र `npm run test:unit` मार्फत चलाइन्छन्। `src/` अन्तर्गतको स्रोत कोड **TypeScript** (`.ts`/`.tsx`) मा छ; `open-sse/` workspace भने JavaScript (`.js`) मै रहन्छ।
+7. E2E परीक्षणहरूले **Playwright** (`tests/e2e/`) प्रयोग गर्छन् र `npm run test:e2e` मार्फत चलाइन्छन्। एकाइ परीक्षणहरूले **Node.js test runner** (`tests/unit/`) प्रयोग गर्छन् र `npm run test:unit` मार्फत चलाइन्छन्। `src/` अन्तर्गतको स्रोत कोड **TypeScript** (`.ts`/`.tsx`) मा छ; `open-sse/` workspace भने TypeScript (`.ts`) मै रहन्छ।
 8. सेटिङ पृष्ठलाई 7 वटा ट्याबमा व्यवस्थित गरिएको छ: सामान्य, रूपरङ, AI, सुरक्षा, राउटिङ, लचिलोपन, उन्नत। लचिलोपन पृष्ठले अनुरोध पङ्क्ति, जडान कुलडाउन, प्रदायक ब्रेकर र कुलडाउनका लागि प्रतीक्षा गर्ने व्यवहार मात्र कन्फिगर गर्छ; लाइभ ब्रेकर रनटाइम अवस्था स्वास्थ्य पृष्ठमा देखाइन्छ।
 9. **Context Relay** रणनीति (`context-relay`) दुई तहमा विभाजित छ: `combo.ts` ले ह्यान्डअफ उत्पन्न गर्नुपर्छ कि पर्दैन भन्ने निर्णय गर्छ, `chat.ts` ले खाता रिजल्भ भएपछि ह्यान्डअफ इन्जेक्ट गर्छ। ह्यान्डअफ डेटा `context_handoffs` SQLite तालिकामा रहन्छ। यो विभाजन जानाजानी गरिएको हो, किनभने वास्तविक खाता परिवर्तन भयो कि भएन भन्ने जानकारी `chat.ts` लाई मात्र हुन्छ।
 10. **प्रोक्सी कार्यान्वयन** अब व्यापक छ: `tokenHealthCheck.ts` ले प्रत्येक जडानका लागि प्रोक्सी रिजल्भ गर्छ, `/api/providers/validate` ले `runWithProxyContext` प्रयोग गर्छ, र `proxyFetch.ts` ले Node 22 मा डिस्प्याचर अनुकूलता कायम राख्न `undici.fetch()` प्रयोग गर्छ।

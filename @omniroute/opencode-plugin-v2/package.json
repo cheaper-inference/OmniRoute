@@ -27,7 +27,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@opencode/plugin": "2.0.12",
+    "@opencode/plugin": "2.1.4",
     "@types/node": "^22.19.19",
     "tsup": "^8.5.1",
     "tsx": "^4.22.3",
@@ -67,6 +67,8 @@
   },
   "overrides": {
     "esbuild": "^0.28.1",
-    "zod": "$zod"
+    "zod": "$zod",
+    "minimatch@>=7.0.0 <11.0.1": "11.0.4",
+    "glob@>=9.0.0 <14.0.2": "14.0.3"
   }
 }

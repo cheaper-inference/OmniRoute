@@ -19,32 +19,47 @@ OmniRoute objavljuje npm + Docker artefakte. Ove kontrole pružaju provjerljivos
 
 CVE ratchet slike koristi **dva koraka** u `docker-publish.yml`: SARIF korak (`HIGH,CRITICAL`, `exit-code: 0`) održava HIGH+CRITICAL vidljivim u kartici Sigurnost bez blokiranja; korak _CRITICAL kontrole_ (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) ne uspijeva izdanje na CRITICAL CVE-u **s dostupnim popravkom**. `ignore-unfixed` sprječava blokiranje izdanja za CVE osnovne slike bez uzvodne zakrpe.
 
-## ⚠️ CVE Odstupanje (blokirajuće osv/Trivy kontrole)
+## ⚠️ Varijabilnost CVE-ova (blokirajuće osv/Trivy provjere)
 
-osv i Trivy uspoređuju ovisnosti s CVE bazama podataka koje **kontinuirano rastu**. PR koji **ne dira ovisnosti** može iznenada postati crven jer je novi CVE otkriven u postojećoj ovisnosti (osv: izmjereni `vulnCount` > osnovna vrijednost; Trivy: novi popravljivi CRITICAL u slici). **Ovo je OČEKIVANO operativno ponašanje blokirajuće CVE kontrole, a ne regresija proizvoda.**
+osv i Trivy uspoređuju ovisnosti s bazama podataka CVE-ova koje **neprestano rastu**. PR
+koji **ne mijenja nijednu ovisnost** može iznenada postati crven jer je objavljen novi CVE
+u postojećoj ovisnosti (osv: izmjereni `vulnCount` > osnovna vrijednost; Trivy: novi
+popravljivi CRITICAL u slici). **To je OČEKIVANO operativno ponašanje blokirajuće
+CVE provjere, a ne regresija proizvoda.**
 
-Kada osv ili Trivy postanu crveni zbog novootkrivenog CVE-a, rješenje je:
+Kada osv ili Trivy postanu crveni zbog novoobjavljenog CVE-a, rješenje je:
 
-1.  **Ažurirajte zahvaćenu ovisnost (preferirano)** — nadogradite na zakrpanu verziju putem `package.json` `overrides` (tranzitivne ovisnosti) ili ponovno izgradite sliku na zakrpanoj osnovi.
-2.  **Ako nema uzvodnog popravka:**
-    - **osv:** ponovno postavite osnovnu vrijednost `metrics.vulnCount` u `config/quality/quality-baseline.json` (`npm run quality:ratchet -- --update` ne pokriva namjenske kontrole — ručno uredite vrijednost, `direction:down`) s bilješkom o opravdanju + problemom za praćenje.
-    - **Trivy:** dodajte unos u `.trivyignore` (CVE-ID po retku) s komentarom o opravdanju + problemom za praćenje. `ignore-unfixed: true` već automatski pokriva CVE-ove bez zakrpa.
+1. **Ažurirajte pogođenu ovisnost** (preporučeno) — nadogradite je na zakrpanu verziju putem
+   `package.json` `overrides` (tranzitivne ovisnosti) ili ponovno izgradite sliku na zakrpanoj
+   osnovnoj slici.
+2. **Ako sanacija nije dostupna:** zadržati izmjereni nalaz i pratiti pogođenu ovisnost ili sliku. Nemojte podizati osnovnu vrijednost ranjivosti kako bi neuspjeli kandidat prošao. Trivyjev `ignore-unfixed: true` već isključuje ranjivosti slike bez upstream zakrpe. Svaka iznimka zahtijeva pregledanu ranjivost ID, točan put paketa, istek i problem praćenja u politici; to nije automatska posljedica neuspjelog skeniranja.
 
-Obje kontrole **graciozno PRESKAČU** (izlaz 0) kada alat nedostaje ili mjerenje ne uspije (osv-scanner nije u PATH-u, osv.dev/network nedostupan, nevažeći JSON) — neuspjeh **mjerenja** nikada ne blokira, samo **izmjerena** regresija blokira.
+Obvezna izvršavanja OSV-a (`check:vuln-ratchet -- --ratchet`) zatvoreno ne uspijevaju sa
+statusom `INCOMPLETE` i izlaznim kodom 2 kada se skener, izvješće ili osnovna vrijednost ne mogu
+provjeriti. Izmjerena regresija završava izlaznim kodom 1. Savjetodavno izvršavanje i dalje može
+prijaviti `SKIP` s izlaznim kodom 0, što ne potvrđuje da su ovisnosti prošle skeniranje. Blokirajući
+korak Trivyja također zahtijeva uspješno mjerenje: nedostupni alati, neuspjeli poslovi i
+nedostajući dokazi o slici ne mogu potvrditi da je slika čista.
 
-## Poznati prihvaćeni rizici
+## Politika skeniranja slika
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Trenutačni `.trivyignore.yaml` ne sadrži iznimke ranjivosti. `npm run check:trivy-ignore-policy` potvrđuje strukturiranu politiku u lokalnim profilima skeniranja, CI i kvaliteti. Nepoznati IDs, šire staze, dvostruki unosi i istekle iznimke se odbijaju; naslijeđeni `.trivyignore` nije ulaz u migrirana skeniranja.
 
-`extract-zip@2.0.1` sadrži dva nekrpana savjeta o ranjivosti visoke ozbiljnosti tipa symlink-traversal. Prema grani "nema uzvodnog popravka" gore navedenog rješenja za varijancu CVE-a, ovo je **prihvaćeni rizik**, a ne ažuriranje:
+Docker provjerava alate pravila iz `github.workflow_sha` a i pravila izvora slike s istim biračem izvora kao i međugradnja. Izbornik pravila odbija nekompatibilne opsege i priprema jednu datoteku za oba Trivy skeniranja. Povijesni izvor bez strukturirane politike nema iznimaka. Oba skeniranja prikvače Trivy `v0.70.0`. Validacija politike dokazuje dosljednost konfiguracije; sliku još treba uspješno skenirati.
 
-- **Lanac:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`. Potvrđeno putem `package-lock.json` — točno jedan paket u cijelom stablu ovisnosti (`@openai/codex-security`) deklarira `extract-zip`, i točno jedan paket (`promptfoo`) deklarira `@openai/codex-security`.
-- **Ne postoji popravljeno izdanje nigdje u lancu.** `extract-zip@2.0.1` (objavljen 2020.) je konačno izdanje paketa — ne održava se. Trenutni npm-latest (`0.1.29`) paketa `@openai/codex-security` i dalje povlači `extract-zip@2.0.1`.
-- **Nedostupno iz produkcije.** `promptfoo` je samo devDependency (nikada nije naveden pod `dependencies`), i nijedna datoteka pod `src/`, `open-sse/` ili `bin/` ne uvozi npm paket `extract-zip` — OmniRouteov vlastiti `extractZip()` pomoćnik (`src/lib/versionManager/binaryManager.ts:93`) koristi izvorne `unzip`/`tar` i nije povezan. `@openai/codex-security` također isporučuje vlastitu zaštitu od symlink-traversal napada povrh extract-zip-ovog onEntry callbacka.
-- **Nemojte** aliasirati `extract-zip` putem `package.json` `overrides` — jedina održiva zamjena je Electron-org-internal i API-nekompatibilna s vlastitim onEntry/defaultDirMode/defaultFileMode provjerama paketa `@openai/codex-security`; premošćivanje bi tiho prekinulo sigurnosne provjere tog paketa.
-- **Osnovna linija:** izmjereni osv `vulnCount` (3) je već znatno ispod zamrznute osnovne linije `config/quality/quality-baseline.json` (27) — nije potrebna promjena ratcheta.
-- **Zaštita od regresije:** `tests/unit/extract-zip-14482-exposure.test.ts` potvrđuje lanac i gornju invarijantu bez uvoza u produkciju; CI će pasti ako se bilo što od toga ikada prekrši (npr. budući PR učini `extract-zip` dostupnim iz produkcije).
-- **Praćenje:** problem #14482.
+## Rizik povučene ovisnosti
+
+Korijenska datoteka zaključavanja više ne uključuje `extract-zip` ni vezu ovisnosti prema njemu nakon
+nadogradnje prikvačenog razvojnog alata promptfoo. Time se uklanja prethodno prihvaćeni
+lanac `promptfoo` → `@openai/codex-security` → `extract-zip` praćen u #14482.
+Regresijske provjere u `tests/unit/extract-zip-14482-exposure.test.ts` sprječavaju njegovo
+ponovno uvođenje i zadržavaju zabranu uvoza iz produkcijskog koda.
+
+Trenutačni popravak ovisnosti također ograničava nadjačavanja kompatibilnosti na MSAL klijent
+Azure Identityja, FTP klijent paketa get-uri i ovisnost Zod SDK-a OpenCode v1. Dohvaćanje Azure
+tokena i dohvaćanje putem FTP-a testiraju se pomoću kontroliranih prijenosnih slojeva; oba paketa
+OpenCode pokreću vlastite skupove za izgradnju i testiranje. Broj upozorenja u registru predstavlja
+mjerenje u određenom trenutku i može se promijeniti nakon potvrđivanja datoteke zaključavanja.
 
 ## Zaostatak: Scorecard savjet → blokiranje
 

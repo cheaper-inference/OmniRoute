@@ -74,7 +74,7 @@
 |                                    |        v3.8.50         | **v3.8.51** |       `v3.8.53+`       |
 | ---------------------------------- | :--------------------: | :---------: | :--------------------: |
 | 🌐 Àwọn olùpèsè                    |          352           |   **358**   |          380           |
-| 🧠 Àwọn ID àwòṣe ìjíròrò aláìlẹ́gbẹ́ |          1320          |  **1374**   |          1491          |
+| 🧠 Àwọn ID àwòṣe ìjíròrò aláìlẹ́gbẹ́ |          1320          |  **1374**   |          1499          |
 | 🖼️ Afárá ìrú                       | 🆕 ìran + ohun + fídíò |      ✓      |           ✓            |
 | 📡 Kátálọ́ọ̀gù Radar ọ̀fẹ́             | 🆕 ìforúkọsílẹ̀ àṣàyàn  |      ✓      |           ✓            |
 | ⚖️ Ìṣètò ètò tí ó mọ́ kòtà          |     🆕 Quota-Share     |      ✓      |           ✓            |
@@ -91,62 +91,57 @@
 
 ## 🧩 Wa
 
-[![Ẹya npm](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-![NPM Oṣooṣu](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
-![Iwe-aṣẹ: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)
-![Awọn igbasilẹ Docker](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Awọn igbasilẹ Electron](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+[![npm version](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm) ](https://www.npmjs.com/package/omniroute) ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm) [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED) ](https://hub.docker.com/r/diegosouzapw/omniroute) [![Aṣẹ: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square) ](LICENSE) ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED) ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
-    <td align="right"><b>🚀 Bẹrẹ</b></td>
-    <td align="center"><a href="#-quick-start">🚀 Bẹrẹ ni kíákíá</a></td>
-    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Fi sori ẹrọ</a></td>
-    <td align="center"><a href="#first-run">🆓 Sopọ mọ olupese</a></td>
+    <td align="right"><b>🚀 Start</b></td>
+    <td align="center"><a href="#-quick-start">🚀 Quick Start</a></td>
+    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Install</a></td>
+    <td align="center"><a href="#first-run">🆓 Connect a provider</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💡 Kọ́ ẹ̀kọ́</b></td>
-    <td align="center"><a href="#-the-promise">💥 Ìlérí náà</a></td>
-    <td align="center"><a href="#-why-omniroute">🤔 Kí nìdí OmniRoute</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 Ohun tó yà á sọ́tọ̀</a></td>
+    <td align="right"><b>💡 Learn</b></td>
+    <td align="center"><a href="#-the-promise">💥 The Promise</a></td>
+    <td align="center"><a href="#-why-omniroute">🤔 Why OmniRoute</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 What Sets Apart</a></td>
   </tr>
   <tr>
-    <td align="right"><b>⚙️ Àwọn àbùdá</b></td>
-    <td align="center"><a href="#-combos--the-flagship">🎯 Àwọn akojọpọ̀</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Àwọn olupese</a></td>
+    <td align="right"><b>⚙️ Features</b></td>
+    <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
+    <td align="center"><a href="#-380-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
     <td align="right"></td>
-    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Ìkópọ̀</a></td>
-    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Ibi tí ó ti ń ṣiṣẹ́</a></td>
-    <td align="center"><a href="#-private--local-first">🔒 Aládàáni</a></td>
+    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Compression</a></td>
+    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Where It Runs</a></td>
+    <td align="center"><a href="#-private--local-first">🔒 Private</a></td>
   </tr>
   <tr>
-    <td align="right"><b>👀 Rí i</b></td>
-    <td align="center"><a href="#-omniroute-in-action">🎬 Nígbà tó ń ṣiṣẹ́</a></td>
-    <td align="center"><a href="#-whats-new">✨ Kí ló ṣẹ̀ṣẹ̀ wá</a></td>
-    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 Àwọn CLI tó bá mu</a></td>
+    <td align="right"><b>👀 See it</b></td>
+    <td align="center"><a href="#-omniroute-in-action">🎬 In Action</a></td>
+    <td align="center"><a href="#-whats-new">✨ What's New</a></td>
+    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 Compatible CLIs</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💚 Ṣe àtìlẹ́yìn</b></td>
-    <td align="center"><a href="#-support-omniroute">💚 Ṣe àtìlẹ́yìn / Ṣe ẹ̀bùn</a></td>
-    <td align="center"><a href="#-community--help">💬 Àwùjọ</a></td>
-    <td align="center"><a href="#-sponsors">💖 Àwọn olùgbọ́wọ́</a></td>
+    <td align="right"><b>💚 Support</b></td>
+    <td align="center"><a href="#-support-omniroute">💚 Support / Donate</a></td>
+    <td align="center"><a href="#-community--help">💬 Community</a></td>
+    <td align="center"><a href="#-sponsors">💖 Sponsors</a></td>
   </tr>
   <tr>
-    <td align="right"><b>📦 Iṣẹ́ akanṣe</b></td>
-    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Àkójọpọ̀ ẹ̀rọ</a></td>
-    <td align="center"><a href="#-documentation">📖 Àwọn ìwé ìtọ́nisọ́nà</a></td>
-    <td align="center"><a href="#-1000-contributors">👥 Àwọn olùkópa</a></td>
+    <td align="right"><b>📦 Project</b></td>
+    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Tech Stack</a></td>
+    <td align="center"><a href="#-documentation">📖 Docs</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 Contributors</a></td>
   </tr>
 </table>
 
 </div>
 
 <div align="center">
-  <b>🌐 Ní àwọn èdè 67</b>
+  <b>🌐 Ni awọn ede 67</b>
   <br/><br/>
   <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="English (en)" title="English (en)"></a>
   <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
@@ -698,15 +693,15 @@ nínú ìtàn shell rẹ. → [Àwọn Ìṣọ̀kan CLI](docs/guides/CLI-INTEGR
 
 <div align="center">
 
-## 🌐 380 AI Providers — 153 Catalog-Marked Free
+## 🌐 380 AI Olupese — 156 Katalogi-Sami Ọfẹ
 
 </div>
 
-> **Àwọn olupese 380 tí a forúkọsílẹ̀** káàkiri àwọn àkójọpọ̀ chat, media, search, local, cloud-agent àti system tó jẹ́ canonical, pẹ̀lú **153 tó ní metadata ìṣàwárí `hasFree: true`**. Àkọsílẹ̀ àwọn chat model bo **àwọn olupese 239 / 3,059 provider-model pairs ọ̀tọ̀ọ̀tọ̀ / 1,475 raw model IDs**; catalog ìṣúná ọ̀fẹ́ tó yàtọ̀ ní **àwọn ìlà 471 fún model kọ̀ọ̀kan**, **àwọn pool 34 tó ń tún ṣẹlẹ̀** àti **àwọn olupese 54 tó jẹ́ ọ̀fẹ́ títí láé láìsí ìsanwó tàbí kọ́kọ́rọ́**. Àwọn wọ̀nyí jẹ́ àwọn denominator tó yàtọ̀ nípa ìṣètò; àwọn ìtumọ̀ àti ìṣirò tí a dín pool ṣe wà nínú [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) àti [Free Tiers](docs/reference/FREE_TIERS.md).
+> **380 aami-olupese** kọja iwiregbe canonical, media, wiwa, agbegbe, aṣoju-awọsanma ati awọn akojọpọ eto, pẹlu **156 ti n gbe metadata iwari `hasFree: true`** . Iforukọsilẹ awoṣe iwiregbe ni wiwa **Awọn olupese 241 / 3,114 awọn orisii olupese-awoṣe pato / 1,499 awoṣe aise IDs** ; awọn lọtọ free-isuna katalogi ni o ni **485 fun-awoṣe kana** ,**34 loorekoore adagun** ati **54 recurring/keyless free-lailai olupese** . Awọn wọnyi ni o yatọ si iyeida nipa oniru; awọn asọye ati awọn iṣiro ti a yọkuro adagun n gbe ni [Itọkasi Olupese](docs/reference/PROVIDER_REFERENCE.md) ati [Awọn ipele Ọfẹ](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
-### 🏢 Gbogbo yàrá ìwádìí pàtàkì — nípasẹ̀ endpoint kan
+### 🏢 Gbogbo pataki lab — nipasẹ ọkan endpoint
 
 <table>
   <tr>
@@ -735,7 +730,7 @@ nínú ìtàn shell rẹ. → [Àwọn Ìṣọ̀kan CLI](docs/guides/CLI-INTEGR
   </tr>
 </table>
 
-<sub>…àti àwọn míì tó ju 350 lọ — gbogbo àmì aṣojú olupese ló ń ṣí láàyè láti inú katalogi àwọn olupese dashboard. 📖 [Ìtọ́kasí Olupese](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>ati 350 + diẹ sii — gbogbo aami ṣe ipinnu laaye lati inu iwe akọọlẹ olupese ti dasibodu. [Itọkasi Olupese](docs/reference/PROVIDER_REFERENCE.md) 📖</sub>
 
 <br/>
 
@@ -767,80 +762,92 @@ nínú ìtàn shell rẹ. → [Àwọn Ìṣọ̀kan CLI](docs/guides/CLI-INTEGR
 
 <div align="center">
 
-## 🖥️ Ibi OmniRoute nṣiṣẹ - nibikibi
+## 🖥️ Ibi tí OmniRoute Ti Ń Ṣiṣẹ́ — Níbikíbi
 
 </div>
 
-> Ohun elo kanna, ẹrọ rẹ, awọn ofin rẹ. Lati fi sori ẹrọ npm agbaye si** foonu rẹ** nipasẹ Termux.
+> Ètò kan náà, ẹ̀rọ rẹ, àwọn òfin rẹ. Láti ìfìsórí npm àgbáyé títí dé **fóònù rẹ** nípasẹ̀ Termux.
 
 <table>
-  <tr><th align="left"> Platform </th><th align="left"> Fi sori ẹrọ </th><th align="left"> Awọn ifojusi </th></tr>
-  <tr><td align="left" nowrap>📦 <b> npm (agbaye)</b></td><td align="left" nowrap><code> npm fi sori ẹrọ -g omniroute </code></td><td align="left"> Aṣẹ kan, eyikeyi OS</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Bun (agbaye)</b></td><td align="left" nowrap><code> bun fi -g omniroute </code></td><td align="left"> Tarball iforukọsilẹ kanna, fifi sori ẹrọ ni kiakia </td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> docker run … diegosouzapw/omniroute</code></td><td align="left"> Olona-arch <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b> Desktop (Electron)</b></td><td align="left" nowrap><code> npm ṣiṣe elekitironi:</code></td><td align="left"> Native window + eto atẹ — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b> Akojọ aṣyn-bar (OmniRouteTray)</b></td><td align="left" nowrap><code> pọnti fi sori ẹrọ --cask zoispag/tap/omniroute-tray</code></td><td align="left"> Abojuto &amp; adaṣe imudojuiwọn olupin — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap> abinibi <code> arm64 </code></td><td align="left"> Rasipibẹri Pi, ARM olupin, Apple Silicon </td></tr>
-  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg fi sori ẹrọ nodejs && npx -y omniroute </code></td><td align="left"> Ṣiṣe <b> lori foonu rẹ </b>, 24/7, ko si root </td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Fikun-un si Iboju ile"</td><td align="left"> Iboju ni kikun, offline, fifi sori ẹrọ lati aṣawakiri </td></tr>
-  <tr><td align="left" nowrap>🧩 <b>OpenCode itanna </b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">OpenCode zqn isọpọ </td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Wiregbe </b></td><td align="left" nowrap> fi sori ẹrọ <b>OmniCopilot</b> itẹsiwaju </td><td align="left"> Gbogbo OmniRoute awoṣe ni abinibi Copilot Awo picker — idurosinsin &amp; Insiders </td></tr>
-  <tr><td align="left" nowrap>🛠️ <b> Lati orisun </b></td><td align="left" nowrap><code> npm fi sori ẹrọ && npm ṣiṣe dev </code></td><td align="left"> gige lori rẹ, ṣe alabapin </td></tr>
+  <tr><th align="left">Pẹpẹ</th><th align="left">Ìfìsórí</th><th align="left">Àwọn Ànfàní Pàtàkì</th></tr>
+  <tr><td align="left" nowrap>📦 <b>npm (àgbáyé)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Àṣẹ kan, OS èyíkéyìí</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (àgbáyé)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Ìbámu ní ìwọ̀n agbára tó dára jù láìsí ìdánilójú àtìlẹ́yìn; Node.js ni runtime tí a ṣe àtìlẹ́yìn fún.</td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Ọ̀pọ̀ àkitektọ̀ <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🖥️ <b>Desktop (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Fèrèsé abínibí + àpótí ètò — <b>Windows / macOS / Linux</b></td></tr>
+  <tr><td align="left" nowrap>🎩 <b>Àkójọ-àṣàyàn (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Ń ṣàkóso &amp; ń ṣe ìmúdójúìwọ̀n olupin fúnra rẹ̀ — <b>macOS</b></td></tr>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>abínibí <code>arm64</code></td><td align="left">Raspberry Pi, àwọn olupin ARM, Apple Silicon</td></tr>
+  <tr><td align="left" nowrap>📱 <b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left">Ń ṣiṣẹ́ <b>lórí fóònù rẹ</b>, 24/7, láìsí root</td></tr>
+  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Ṣàfikún sí Ojú Ìbẹ̀rẹ̀"</td><td align="left">Ojú-kíkún, láìsí ayélujára, ó ṣeé fi sórí láti inú aṣàwákiri</td></tr>
+  <tr><td align="left" nowrap>🧩 <b>Àfikún OpenCode</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">Ìṣọ̀kan OpenCode abínibí</td></tr>
+  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap>fi àfikún <b>OmniCopilot</b> sórí</td><td align="left">Gbogbo àwòṣe OmniRoute nínú aṣàyàn Copilot Chat abínibí — stable &amp; Insiders</td></tr>
+  <tr><td align="left" nowrap>🛠️ <b>Láti kóòdù orísun</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">Ṣàtúnṣe rẹ̀, kópa nínú rẹ̀</td></tr>
 </table>
 
-<sub>📖 [Docker Itọsọna](docs/guides/DOCKER_GUIDE.md) · [Ojú-iṣẹ](electron/README.md) · [Akojọ atẹ-bar atẹ](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+<sub>📖 [Ìtọ́sọ́nà Docker](docs/guides/DOCKER_GUIDE.md) · [Desktop](electron/README.md) · [Àpótí àkójọ-àṣàyàn](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-### 🧩 Tuntun: OmniRoute inu VS Code ká abinibi Copilot Wiregbe
+### 🧩 Tuntun: OmniRoute nínú Copilot Chat abínibí ti VS Code
 
 </div>
 
-> Ko si titun legbe, ko si titun iwiregbe UI - gbogbo awoṣe OmniRoute sìn fihan soke ọtun ninu awọn**Copilot Chat awoṣe picker ti o ti lo tẹlẹ** . Lati koodu VS 1.122, awọn awoṣe olupese n ṣiṣẹ laisi iwọle GitHub tabi ṣiṣe alabapin Copilot — ipo aṣoju, pipe irinṣẹ ati iran, fun ọfẹ.
+> Kò sí pẹpẹ-ẹ̀gbẹ́ tuntun, kò sí ojú ìbánisọ̀rọ̀ tuntun — gbogbo àwòṣe tí OmniRoute ń pèsè yóò hàn ní tààràtà nínú
+> **aṣàyàn àwòṣe Copilot Chat tí o ti ń lò**. Láti VS Code 1.122, àwọn àwòṣe olùpèsè ń ṣiṣẹ́
+> láìsí wíwọlé GitHub tàbí ìforúkọsílẹ̀ Copilot — ipò aṣojú, pípè irinṣẹ́ àti ìríran, lọ́fẹ̀ẹ́.
 
-Fi sori ẹrọ naa** [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** itẹsiwaju, tọka si olupin OmniRoute rẹ (aiyipada si `localhost:20128`), lẹhinna ṣii Copilot Chat → awoṣe picker →** Ṣakoso Awọn awoṣe…** →**OmniRoute** .
+Fi àfikún **[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** sórí, darí rẹ̀
+sí olupin OmniRoute rẹ (àtìlẹ́yìn àkọ́kọ́ ni `localhost:20128`), lẹ́yìn náà ṣí Copilot Chat → aṣàyàn àwòṣe
+→ **Ṣàkóso Àwọn Àwòṣe…** → **OmniRoute**.
 
 <table>
-  <tr><th align="left"> Itaja </th><th align="left"> Ọna asopọ </th><th align="left"> Ṣiṣẹ pẹlu </th></tr>
-  <tr><td align="left" nowrap>🧩 <b>VS Code Ibi ọja </b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot"> Fi sori ẹrọ →</a ></td >< td mö ="osi">VS Code — idurosinsin &amp; Insiders </td></tr>
-  <tr><td align="left" nowrap>🔓 <b> iforukọsilẹ VSX </b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"> Fi sori ẹrọ →</a ></td >< td align ="osi">Cursor, Windsurf, VSCodium, Theia, koodu-server, Gitpod, Antigravity, Kiro...</td></tr>
+  <tr><th align="left">Ilé Ìtajà</th><th align="left">Ọ̀nà Àsopọ̀</th><th align="left">Ń ṣiṣẹ́ pẹ̀lú</th></tr>
+  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">Fi sórí →</a></td><td align="left">VS Code — stable &amp; Insiders</td></tr>
+  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">Fi sórí →</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro…</td></tr>
 </table>
 
-Lati inu olootu: ṣii** Awọn amugbooro** wo, àwárí** "OmniRoute"** , tẹ** Fi sori ẹrọ** - ṣiṣẹ ni ọna kanna lori awọn ile itaja mejeeji. Orisun, awọn ọran ati iwe ṣiṣe titẹjade n gbe ni [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
+Láti inú olóòtú: ṣí ojú **Àwọn Àfikún**, wá **"OmniRoute"**, tẹ **Fi sórí**
+— ó ń ṣiṣẹ́ lọ́nà kan náà lórí ilé ìtajà méjèèjì. Kóòdù orísun, àwọn ìṣòro àti ìwé ìtọ́sọ́nà ìtẹ̀jáde wà ní
+[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
 
-<sub>📖 [VS Koodu Copilot Itọsọna Wiregbe](docs/guides/VSCODE-COPILOT.md) - iṣeto, kini oluyan fihan, dasibodu-in-a-tab, laasigbotitusita </sub>
+<sub>📖 [Ìtọ́sọ́nà VS Code Copilot Chat](docs/guides/VSCODE-COPILOT.md) — ìṣètò, ohun tí aṣàyàn náà ń fi hàn, àtẹ ìṣàkóso nínú taabu, yíyanjú ìṣòro</sub>
 
 <br/>
 
 <div align="center">
 
-### 🎩 Tuntun: OmniRouteTray — ẹnu-ọna ẹnu-ọna rẹ, ti ngbe inu ọpa akojọ aṣayan
+### 🎩 Tuntun: OmniRouteTray — ẹnubodè rẹ, tí ń gbé inú ọ̀pá àkójọ-àṣàyàn
 
 </div>
 
-> `omniroute serve` ni idunnu julọ nigbati o ba wa nigbagbogbo.** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)** yi iyẹn pada si eto-ati-gbagbe mẹnu-bar app fun macOS: o bẹrẹ olupin naa, jẹ ki o wa laaye kọja awọn atunbere, ṣe imudojuiwọn rẹ ni aaye, ati fi eto-inawo tokini laaye laaye ni titẹ kan kuro -** ko si ferese ebute oko ti o wa ni sisi, ko si `npm install -g omniroute` si ibi omo.**
+> `omniroute serve` máa ń dára jù lọ nígbà tí ó bá ń ṣiṣẹ́ ní gbogbo ìgbà. **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)**
+> ń yí èyí padà sí ètò ọ̀pá àkójọ-àṣàyàn fún macOS tí o lè ṣètò kí o sì gbàgbé rẹ̀: ó ń bẹ̀rẹ̀ olupin, ó ń jẹ́ kí ó máa ṣiṣẹ́
+> lẹ́yìn àwọn àtún-bẹ̀rẹ̀, ó ń ṣe ìmúdójúìwọ̀n rẹ̀ níbi kan náà, ó sì ń jẹ́ kí ìwọ̀n token rẹ ní àkókò gidi wà ní ìtẹ̀ kan — **kò sí
+> fèrèsé terminal tí a fi sílẹ̀ ní ṣíṣí, kò sí `npm install -g omniroute` tí o ní láti máa tọ́jú.**
 
-Ti a ṣe pẹlu [Tauri v2](https://v2.tauri.app/) (ikọkọ Rust kan ti o jẹ iwọn aṣiṣe iyipo), o firanṣẹ akoko asiko Node 24 ti o fowo si ati ṣakoso fifi sori OmniRoute ti ohun elo kan, nitorinaa ko ja `node`/`bun` agbaye rẹ rara. O** pin atunto `~/.omniroute/` ti o wa tẹlẹ ati data data** - nitorina o jẹ OmniRoute kanna ti o ti ṣiṣe tẹlẹ, o kan pẹlu ijanilaya lori. 🎩
+A kọ́ ọ pẹ̀lú [Tauri v2](https://v2.tauri.app/) (ìpìlẹ̀ Rust tí ó kéré gan-an), ó mú
+runtime Node 24 tirẹ̀ tí a fọwọ́sí wá, ó sì ń ṣàkóso ìfìsórí OmniRoute tí ètò náà ní, nítorí náà kò ní bá
+`node`/`bun` àgbáyé rẹ figagbága. Ó **ń pín àtòpọ̀ àti ibi ìpamọ́ dátà `~/.omniroute/` rẹ tí ó ti wà tẹ́lẹ̀** — nítorí náà,
+OmniRoute kan náà tí o ti ń ṣiṣẹ́ ni, ó kàn wọ fìlà ni. 🎩
 
 <table>
-  <tr><th align="left"> Ohun ti o ṣe </th><th align="left"> Bawo ni </th></tr>
-  <tr><td align="left" nowrap>🟢 <b> Abojuto olupin </b></td><td align="left"> Spawns <code> omniroute serve </code>, gba apẹẹrẹ ti nṣiṣẹ tẹlẹ dipo ṣiṣe ẹda </td></tr>
-  <tr><td align="left" nowrap>📊 <b> Lilo Live ni iwo kan </b></td><td align="left"> Awọn ifi ipin ipin Olupese, awọn opin Claude session/weekly pẹlu awọn kika atunto, didenukole idiyele ọjọ 30 </td></tr>
-  <tr><td align="left" nowrap>🔄 <b> Awọn imudojuiwọn aifọwọyi ni aye </b></td><td align="left"> Ti ṣeto fifi sori ẹrọ, atomiki swap, yiyi pada lori ikuna - nigbagbogbo lori itusilẹ tuntun </td></tr>
-  <tr><td align="left" nowrap>🚀 <b> Bẹrẹ ni iwọle </b></td><td align="left"> Ifilọlẹ iyan ni wiwọle; atẹ-nikan, ko si aami ibi iduro </td></tr>
-  <tr><td align="left" nowrap>🩺 <b> Dókítà &amp; àkọọlẹ </b></td><td align="left"> Awọn ayẹwo-ọkan-ọkan ati wiwọle wiwọle olupin </td></tr>
+  <tr><th align="left">Ohun tí ó ń ṣe</th><th align="left">Bí ó ṣe ń ṣe é</th></tr>
+  <tr><td align="left" nowrap>🟢 <b>Ó ń ṣàkóso olupin</b></td><td align="left">Ó ń ṣe ìpilẹ̀ṣẹ̀ <code>omniroute serve</code>, ó ń gba instance tí ó ti ń ṣiṣẹ́ dípò ṣíṣe ẹ̀dà rẹ̀ méjì</td></tr>
+  <tr><td align="left" nowrap>📊 <b>Ìlò ní àkókò gidi ní ojú kan</b></td><td align="left">Àwọn ọ̀pá ìpín olùpèsè, ààlà session/ọ̀sẹ̀ Claude pẹ̀lú ìṣírò àkókò tó kù sí àtúntò, ìpín iye owó ọjọ́ 30</td></tr>
+  <tr><td align="left" nowrap>🔄 <b>Ó ń ṣe ìmúdójúìwọ̀n fúnra rẹ̀ níbi kan náà</b></td><td align="left">Ìfìsórí ní ìpele, ìpàrọ̀ atomic, ìpadà sí ẹ̀yà àtijọ́ nígbà ìkùnà — ó máa ń wà lórí ìtẹ̀jáde tuntun jù lọ ní gbogbo ìgbà</td></tr>
+  <tr><td align="left" nowrap>🚀 <b>Bẹ̀rẹ̀ nígbà wíwọlé</b></td><td align="left">Ìpilẹ̀ṣẹ̀ àṣàyàn nígbà wíwọlé; àpótí nìkan, kò sí àmì dock</td></tr>
+  <tr><td align="left" nowrap>🩺 <b>Àyẹ̀wò &amp; àwọn àkọsílẹ̀</b></td><td align="left">Àyẹ̀wò ìṣòro pẹ̀lú ìtẹ̀ kan àti ìráyè sí àkọsílẹ̀ olupin</td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub> o fẹ igbasilẹ kan? Ja gba tuntun <code>.dmg </code> lati
-<a href="https://github.com/zoispag/omniroute-tray/releases"> Tu </a> silẹ. Orisun, awọn oran ati kọ
-docs gbe ni <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
-<br/>💛 Ise agbese agbegbe kan nipasẹ <a href="https://github.com/zoispag">@zoispag </a> - kii ṣe idasilẹ OmniRoute osise kan.</sub>
+<sub>Ṣé o fẹ́ràn ìgbàsílẹ̀? Gba <code>.dmg</code> tuntun láti
+<a href="https://github.com/zoispag/omniroute-tray/releases">Àwọn Ẹ̀yà Tí A Ti Tu Sílẹ̀</a>. Kóòdù orísun, àwọn ìṣòro àti àwọn àkọsílẹ̀ ìkọ́lé
+wà ní <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
+<br/>💛 Iṣẹ́ àkànṣe àwùjọ láti ọwọ́ <a href="https://github.com/zoispag">@zoispag</a> — kì í ṣe ẹ̀yà OmniRoute tí a tú sílẹ̀ ní ọ̀nà ìjọba.</sub>
 
 <br/>
 
@@ -1080,7 +1087,7 @@ Lò àwọn wọ̀nyí fún àwọn kọ́láìntì tí kò le fi `Authorization
 
 <br/>
 
-## 📦 Àwọn ọ̀nà ìfisílẹ̀ míì — Docker, source, pnpm, Arch
+## 📦 Àwọn ọ̀nà ìfi sori ẹrọ míì — Docker, source, pnpm, Arch
 
 **🐳 Docker**
 
@@ -1089,13 +1096,13 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
 ```
 
-`:latest` ń tẹ̀lé ẹ̀yà SemVer tó dúró ṣinṣin tó ga jù lọ tí a ti **tẹ̀ jáde**. Kò tẹ̀lé git `main`. Lo `:X.Y.Z` pàtó fún GitOps. Wo [Àwọn Ikanni Ìtújáde Docker](docs/guides/DOCKER_GUIDE.md#release-channels).Àwòrán náà ṣètò **`OMNIROUTE_MEMORY_MB=1024`** gẹ́gẹ́ bí iye pàtó. Ìyẹn tó fún dashboard àti ìfọ̀rọ̀wérọ̀ kékeré. **Àwọn aṣojú coding** (`POST /v1/responses` láti Claude Code, Codex, Grok, …) nílò V8 heap tó tóbi púpọ̀ sí i, bí bẹ́ẹ̀ kọ́ process náà yóò ṣe `FATAL ERROR` ní nǹkan bí 12 GiB lábẹ́ àwọn context gígùn méjì tó bẹ̀rẹ̀ sí í lé ara wọn lórí. Ṣètò container náà kí ó tóbi ju heap lọ (àwọn native buffer wà ní òde V8):
+`:latest` ń tẹ̀lé ẹ̀yà SemVer dúróṣinṣin tó ga jù lọ tí a ti **ṣe àtẹ̀jáde**. Kò tẹ̀lé git `main`. Lo `:X.Y.Z` kan pàtó fún GitOps. Wo [Àwọn Ikànnì Àtẹ̀jáde Docker](docs/guides/DOCKER_GUIDE.md#release-channels). Image náà ṣètò **`OMNIROUTE_MEMORY_MB=1024`** sí iye pàtó. Ìyẹn tó fún dashboard àti ìjíròrò kékeré. **Àwọn aṣojú kóòdù** (`POST /v1/responses` láti Claude Code, Codex, Grok, …) nílò heap V8 tó tóbi púpọ̀ sí i, bí bẹ́ẹ̀ kọ́ process náà yóò ṣe `FATAL ERROR` ní nǹkan bí ~12 GiB lábẹ́ àwọn context gígùn méjì tó bo ara wọn. Ṣètò ìwọ̀n container náà ju heap lọ (àwọn buffer abinibi wà níta V8):
 
-| Irú iṣẹ́                               | Heap (`-e OMNIROUTE_MEMORY_MB`) | Container (`--memory`) |
-| ------------------------------------- | ------------------------------- | ---------------------- |
-| Dashboard / ìfọ̀rọ̀wérọ̀ kékeré          | `1024` (ìpìlẹ̀ àwòrán)           | ≥2 g                   |
-| Aṣojú coding kan                      | `8192`                          | ≥10 g                  |
-| `/v1/responses` gígùn méjì lẹ́ẹ̀kan náà | `10240`–`12288`                 | ≥12–16 g               |
+| Ẹrù iṣẹ́                                    | Heap (`-e OMNIROUTE_MEMORY_MB`) | Container (`--memory`) |
+| ------------------------------------------ | ------------------------------- | ---------------------- |
+| Dashboard / ìjíròrò kékeré                 | `1024` (ìwọ̀n àiyípadà image)    | ≥2 g                   |
+| Aṣojú kóòdù kan                            | `8192`                          | ≥10 g                  |
+| Àwọn `/v1/responses` gígùn méjì lẹ́ẹ̀kan náà | `10240`–`12288`                 | ≥12–16 g               |
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
@@ -1103,24 +1110,24 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
 ```
 
-Tábìlì kíkún: [Ìtọ́sọ́nà Docker — RAM àsìkò ìṣiṣẹ́](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
+Tábìlì kíkún: [Ìtọ́sọ́nà Docker — RAM àkókò ìṣiṣẹ́](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
 
-> **Ikanni Docker ṣáájú ìtújáde:** `diegosouzapw/omniroute:next` àti
-> `diegosouzapw/omniroute:next-web` ń tẹ̀lé ẹ̀ka `release/v*` tó jẹ́ àìyẹsẹ̀ lọ́wọ́lọ́wọ́.
-> Àwọn tag tí ó lè yí padà wọ̀nyí wà fún dídán àwọn àtúnṣe tí a kò tíì tú jáde wò nìkan, wọn kò sì
-> **ní àtìlẹ́yìn fún production**. Wo
-> [Àwọn Ikanni Ìtújáde Docker](docs/guides/DOCKER_GUIDE.md#release-channels).
+> **Ikànnì Docker àkọ́sọ-àtẹ̀jáde:** `diegosouzapw/omniroute:next` àti
+> `diegosouzapw/omniroute:next-web` ń tẹ̀lé ẹ̀ka `release/v*` àiyípadà lọ́wọ́lọ́wọ́.
+> Àwọn tag tó ṣeé yí padà wọ̀nyí jẹ́ fún dídán àwọn àtúnṣe tí a kò tíì ṣe àtẹ̀jáde wò nìkan,
+> a kò sì **ṣe àtìlẹ́yìn wọn fún production**. Wo
+> [Àwọn Ikànnì Àtẹ̀jáde Docker](docs/guides/DOCKER_GUIDE.md#release-channels).
 
 **🥟 Bun**
 
-A ṣàtìlẹ́yìn fún `bun install` àtijọ́ àti ìfisílẹ̀ kárí-ayé (`bun install -g omniroute`) nípasẹ̀ ìṣàwárí runtime Bun:
+A ṣe àtìlẹ́yìn fún `bun install` boṣewa àti ìfi sori ẹrọ àgbáyé (`bun install -g omniroute`) nípasẹ̀ ìṣàwárí runtime Bun:
 
-- **`bun:sqlite` tí a kọ sínú rẹ̀**: OmniRoute máa ń lo driver `bun:sqlite` tí a kọ sínú Bun nígbà tó bá ń ṣiṣẹ́ lábẹ́ Bun, yóò sì yí padà sí `better-sqlite3` lórí Node.js tàbí `sql.js`.
-- **Yíyan bundler Webpack láìfọwọ́ṣe ní dev**: Development (`bun run dev`) máa ń ṣàwárí Bun láìfọwọ́ṣe, yóò sì pa Turbopack láti lo Webpack dípò rẹ̀ láti dènà àìbáramu native V8 binding. Àwọn build production (`bun run build`) ń tẹ̀lé `OMNIROUTE_USE_TURBOPACK` gan-an bíi ti Node: Turbopack gẹ́gẹ́ bí àìyẹsẹ̀, `OMNIROUTE_USE_TURBOPACK=0` láti build pẹ̀lú Webpack (`Dockerfile.bun` ń mú un wà gẹ́gẹ́ bí `--build-arg`).
-- **Dockerfile Bun àkànṣe**: `Dockerfile.bun` alápele-púpọ̀ fún àwọn deployment production Bun native (`docker build -f Dockerfile.bun -t omniroute:bun .`).
+- **`bun:sqlite` tí a kọ sínú rẹ̀:** OmniRoute máa ń lo driver `bun:sqlite` tí a kọ sínú Bun nígbà tó bá ń ṣiṣẹ́ lábẹ́ Bun, yóò sì padà lo `better-sqlite3` lórí Node.js tàbí `sql.js`.
+- **Yíyan bundler Webpack láìfọwọ́yí ní dev:** Development (`bun run dev`) máa ń ṣàwárí Bun láìfọwọ́yí, yóò sì pa Turbopack kí ó lè lo Webpack dípò rẹ̀ láti dènà àìbáramu binding V8 abinibi. Àwọn build production (`bun run build`) ń tẹ̀lé `OMNIROUTE_USE_TURBOPACK` gan-an bíi ti Node: Turbopack ní àìyípadà, `OMNIROUTE_USE_TURBOPACK=0` láti build pẹ̀lú Webpack (`Dockerfile.bun` mú un wà gẹ́gẹ́ bí `--build-arg`).
+- **Dockerfile Bun àkànṣe:** `Dockerfile.bun` ọlọ́pọ̀-ìpele fún àwọn deployment production Bun abinibi (`docker build -f Dockerfile.bun -t omniroute:bun .`).
 
 ```bash
-# Fi sílẹ̀ kí o sì ṣiṣẹ́ pẹ̀lú Bun
+# Fi sori ẹrọ kí o sì ṣiṣẹ́ pẹ̀lú Bun
 bun install
 bun run dev
 ```
@@ -1160,46 +1167,48 @@ devbox run npm run dev
 **🦭 Podman**
 
 ```bash
-# 1. Pèsè àkọsílẹ̀ data tí a so mọ́ nípasẹ̀ bind
+# 1. Pèsè àpótí data tí a fi bind mount sílẹ̀
 mkdir -p data
 
-# 2. Linux + Podman rootless ti agbègbè nìkan (kì í ṣe client Podman Machine jíjìn rárá):
+# 2. Linux + Podman rootless agbègbè nìkan (má ṣe lò ó pẹ̀lú client Podman Machine tó jìnnà láé):
 podman unshare chown 1000:1000 ./data
 
-# 3. Ṣètò ìtọ́kasí runtime, build àwòrán Compose agbègbè, kí o sì bẹ̀rẹ̀
+# 3. Ṣètò ìtọ́kasí runtime, build image Compose agbègbè, kí o sì bẹ̀rẹ̀
 echo "CONTAINER_HOST=podman" >> .env
 podman compose --profile base up -d --build
 ```
 
-Lórí macOS tàbí Windows, Podman máa ń lo Podman Machine jíjìn: má ṣe lo `podman unshare`, kí o sì
-tẹ̀lé [ìtọ́sọ́nà àkọsílẹ̀ data tó dá lórí topology](contrib/podman/README.md#data-directory-permissions-by-topology).
+Lórí macOS tàbí Windows, Podman máa ń lo Podman Machine tó jìnnà: fo `podman unshare` kí o sì
+tẹ̀lé [ìtọ́sọ́nà àpótí data tó bá topology mu](contrib/podman/README.md#data-directory-permissions-by-topology).
 
 📖 [Ìtọ́sọ́nà Podman](contrib/podman/README.md) — Àwọn build Compose, Podman Machine, àti
 ìṣètò Quadlet Linux/systemd.
 
-**⚡ Ìfisílẹ̀ tó yára / fẹ́ẹrẹ̀ sí i (fo native build)**
+**⚡ Ìfi sori ẹrọ tó yára / tó fẹẹrẹ̀ sí i (fo build abinibi)**
 
-Ẹ̀rọ SQLite native (`better-sqlite3`) jẹ́ dependency **àṣàyàn**, nítorí náà ìfisílẹ̀
-kárí-ayé kì í dúró de compilation láti source: ó máa ń lo binary tí a ti kọ́ tẹ́lẹ̀ nígbà tí èyí tó bá
-platform/Node rẹ mu bá wà, bí bẹ́ẹ̀ kọ́ yóò yí padà láìsí ìdíwọ́ sí ẹ̀rọ pure-JS
-(`node:sqlite` lórí Node 22+, tàbí WASM `sql.js` tí a kó pọ̀ mọ́ ọn) — kò nílò àwọn irinṣẹ́ build.
+Ẹ́ńjìnnì SQLite abinibi (`better-sqlite3`) jẹ́ dependency **àṣàyàn**, nítorí náà ìfi sori ẹrọ
+àgbáyé kì í dúró de compilation láti source: ó máa ń lo binary tí a ti build tẹ́lẹ̀ nígbà tí ọ̀kan bá
+bá platform/Node rẹ mu, bí bẹ́ẹ̀ kọ́, yóò padà lo ẹ́ńjìnnì pure-JS láìsí ìṣòro
+(`node:sqlite` lórí Node 22+, bí bẹ́ẹ̀ kọ́ WASM `sql.js` tí a kó sínú rẹ̀) — kò nílò irinṣẹ́ build.
 
-Láti fo ìmúrúgbóná native lẹ́yìn ìfisílẹ̀ pátápátá (CI, headless, tàbí àwọn ẹ̀rọ tó lọ́ra):
+Láti fo **native warm-up** lẹ́yìn ìfi sori ẹrọ pátápátá (CI, headless, tàbí àwọn ẹ̀rọ tó lọ́ra).
+Àkíyèsí: èyí fo ìgbésẹ̀ native warm-up SQLite (`scripts/postinstall.mjs`) nìkan; hook
+binary-copy/repair (`scripts/build/postinstall.mjs`) ṣì máa ń ṣiṣẹ́ gẹ́gẹ́ bí ó ti yẹ:
 
 ```bash
-OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 náà máa ń fò ó
+OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 náà tún máa ń fò ó
 ```
 
-Fún ìfisílẹ̀ tó yára jù lọ, yan **pnpm** (ibi ìpamọ́ tó dá lórí àkóónú + àwọn hard link — wo òkè).
-Fún runtime headless tí kò ní dashboard, lo profile `base` Docker (lókè) tàbí
-[ìtọ́sọ́nà Termux](docs/guides/TERMUX_GUIDE.md). Process kan náà ló ń pèsè CLI àti dashboard wẹ́ẹ̀bù lórí
-port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
+Fún ìfi sori ẹrọ tó yára jù lọ, yan **pnpm** (ibi ìpamọ́ tó dá lórí àkóónú + àwọn hard link — wo òkè).
+Fún runtime headless tí kò ní dashboard, lo profile Docker `base` (lókè) tàbí
+[ìtọ́sọ́nà Termux](docs/guides/TERMUX_GUIDE.md). Process kan náà ló ń pèsè CLI àti dashboard wẹ́ẹ̀bù
+lórí port kan, nítorí náà kò sí package CLI-nìkan lọ́wọ́lọ́wọ́.
 
 <br/>
 
 <div align="center">
 
-# 🎬 OmniRoute Níbi Iṣẹ́
+# 🎬 OmniRoute ní Iṣẹ́
 
 </div>
 
@@ -1207,7 +1216,7 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
 
 <div align="center">
 
-<sub>Àwòrán ìgbà kan ti pánẹ́ẹ̀lì ní 2026-10-18 · Àkójọ àìṣàtúnṣe: YT 1.352 | TT 334 | IG 290 · Bí ó ṣe jẹ́ tuntun (ọjọ́): YT 5 | TT 48 | IG 49</sub>
+<sub>Àwòrán ìgbà-díẹ̀ ti pánẹ́ẹ̀lì ní 2026-10-18 · Àkójọ aláìṣe àtúnṣe: YT 1.352 | TT 334 | IG 290 · Ìgbàtuntun (ọjọ́): YT 5 | TT 48 | IG 49</sub>
 
 <table>
   <tr>
@@ -1216,42 +1225,42 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
         <img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+nick_saraev&font=montserrat&bold=true" alt="Instagram Reel — nick_saraev" width="300"/>
       </a><br/>
       <b>🎬 #1 — Instagram</b><br/>
-      <sub>nick_saraev — àwọn ìwòran 3,042,474</sub>
+      <sub>nick_saraev — ìwòran 3,042,474</sub>
     </td>
     <td align="center" width="320">
       <a href="https://www.instagram.com/reel/Dbp7wv_CIO0/">
         <img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+nnapier7&font=montserrat&bold=true" alt="Instagram Reel — nnapier7" width="300"/>
       </a><br/>
       <b>🎬 #2 — Instagram</b><br/>
-      <sub>nnapier7 — àwọn ìwòran 1,454,535</sub>
+      <sub>nnapier7 — ìwòran 1,454,535</sub>
     </td>
     <td align="center" width="320">
       <a href="https://www.youtube.com/watch?v=NJ0TQ-pyMDY">
         <img src="https://img.youtube.com/vi/NJ0TQ-pyMDY/maxresdefault.jpg" alt="YouTube — Amidia AI & Tech" width="300"/>
       </a><br/>
       <b>🎬 #3 — YouTube</b><br/>
-      <sub>Amidia AI & Tech — àwọn ìwòran 794,974</sub>
+      <sub>Amidia AI & Tech — ìwòran 794,974</sub>
     </td>
     <td align="center" width="320">
       <a href="https://www.instagram.com/reel/DaSs65mMrHk/">
         <img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+theopenstack&font=montserrat&bold=true" alt="Instagram Reel — theopenstack" width="300"/>
       </a><br/>
       <b>🎬 #4 — Instagram</b><br/>
-      <sub>theopenstack — àwọn ìwòran 692,419</sub>
+      <sub>theopenstack — ìwòran 692,419</sub>
     </td>
     <td align="center" width="320">
       <a href="https://www.tiktok.com/@migue.baena/video/7670919268216622358">
         <img src="https://placehold.co/320x180/111827/FFFFFF?text=TikTok+%7C+migue.baena&font=montserrat&bold=true" alt="TikTok — migue.baena" width="300"/>
       </a><br/>
       <b>🎬 #5 — TikTok</b><br/>
-      <sub>migue.baena — àwọn ìwòran 685,788</sub>
+      <sub>migue.baena — ìwòran 685,788</sub>
     </td>
   </tr>
 </table>
 
 </div>
 
-**Àtòjọ ipò kíkún (àwọn URL àṣẹ tí a ti yọ àdáwòkọ wọn kúrò, `v > 0`, ìwọ̀n àṣeyọrí tó ga jù):**
+**Ìpele kíkún (àwọn URL àṣẹwọlé tí a ti yọ àdàkọ kúrò, `v > 0`, ìwọ́le tó ga jù):**
 
 | #1                                                                                     | #2                                                                                  | #3                                                                                      | #4                                                                                    | #5                                                                                                  |
 | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
@@ -1261,9 +1270,9 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
 | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | [milesreevesai — TikTok](https://www.tiktok.com/@milesreevesai/video/7667980059189366019) — **620,400** | [nikothetech — TikTok](https://www.tiktok.com/@nikothetech/video/7671890769665477918) — **610,803** | [Vaibhav Sisinty — YouTube](https://www.youtube.com/watch?v=QucgvbO5gsM) — **509,281** | [buildwithai.club — Instagram](https://www.instagram.com/reel/DbIt9AjK7-U/) — **347,652** | [nivedan.ai — Instagram](https://www.instagram.com/reel/DbIrCksJiqq/) — **331,973** |
 
-Àwọn ìwọ̀n àṣẹ ní 2026-10-18: **àwọn fídíò aláìlẹ́ẹ̀kejì 1.976** · **àwọn ìwòran tí a mọ̀ 20.220.289** (`v > 0`) · **àwọn ikanni/prófáìlì 1.210 ní ìbámu pẹ̀lú nẹ́tíwọ́ọ̀kì**. Pánẹ́ẹ̀lì àìṣàtúnṣe ní àwọn ìlà 1.976 (YouTube 1.352 = àwọn fídíò gígùn 740 + Shorts 612 · TikTok 334 · Instagram 290); kò sí àdáwòkọ kankan tó ṣẹ́ kù lẹ́yìn ìṣètò sí ìwọ̀n kan nípasẹ̀ URL àṣẹ, èyí tó ń pa iye tó ga jù mọ́ fún fídíò kọ̀ọ̀kan. A ti dá ìkórè dátà YouTube dúró sí 2026-10-13 (ìpín API ti tán láti 14 sí 18/10), àti ti TikTok/Instagram láti 2026-09-02 (kò sí kirẹ́díìtì ìkórè dátà); àwọn fídíò 76 kò tíì ní iye ìwòran.
+Àwọn òṣùwọ̀n àṣẹwọlé ní 2026-10-18: **fídíò aláìlẹ́gbẹ́ 1.976** · **ìwòran tí a mọ̀ 20.220.289** (`v > 0`) · **ikanni/prófáìlì 1.210 fún nẹ́tíwọ́ọ̀kì kọ̀ọ̀kan**. Pánẹ́ẹ̀lì aláìṣe àtúnṣe ní ìlà 1.976 (YouTube 1.352 = gígùn 740 + Shorts 612 · TikTok 334 · Instagram 290); kò sí àdàkọ kankan tó ṣẹ́ kù lẹ́yìn ìṣọ̀kan nípasẹ̀ URL àṣẹwọlé, èyí tó pa iye ìwòran tó ga jù mọ́ fún fídíò kọ̀ọ̀kan. A ti dá ìkójọ YouTube dúró ní 2026-10-13 (ààlà API ti tán láti 14 sí 18/10), àti ti TikTok/Instagram láti 2026-09-02 (kò sí kirẹ́díìtì ìkójọ); fídíò 76 kò tíì ní iye ìwòran.
 
-> 🎬 **Ṣé o ṣe fídíò kan nípa OmniRoute?** Ṣí [ọ̀ràn](https://github.com/diegosouzapw/OmniRoute/issues/new) tàbí [ìjíròrò](https://github.com/diegosouzapw/OmniRoute/discussions) pẹ̀lú líńkì náà — a ó gbé e hàn níbí.
+> 🎬 **Ṣé o ṣe fídíò kan nípa OmniRoute?** Ṣí [ọ̀ràn](https://github.com/diegosouzapw/OmniRoute/issues/new) tàbí [ìjíròrò](https://github.com/diegosouzapw/OmniRoute/discussions) pẹ̀lú ìjápọ̀ náà — a ó fi hàn níbí.
 
 <br/>
 
@@ -1271,22 +1280,22 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
 
 # 📧 Àwùjọ & Ìrànlọ́wọ́
 
-> Gbogbo nǹkan ní ibi kan — tẹ̀lé olùtọ́jú náà, bá àwùjọ sọ̀rọ̀, tàbí ṣí ọ̀ràn kan.
+> Ohun gbogbo ní ibi kan — tẹ̀lé olùtọ́jú náà, bá àwùjọ sọ̀rọ̀, tàbí ṣí ọ̀ràn kan.
 
-| Ikànnì                                        | Ibi / bí a ṣe lè lò ó                                                                                                 |
-| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| 💼 **LinkedIn** — tẹ̀lé olùtọ́jú náà            | [linkedin.com/in/diegosouzapw](https://www.linkedin.com/in/diegosouzapw/)                                             |
-| 🐙 **GitHub** — tẹ̀lé fún àwọn ìtújáde àti àbá | [@diegosouzapw](https://github.com/diegosouzapw)                                                                      |
-| 💬 **Discord**                                | [discord.gg/U47eFqAXCn](https://discord.gg/U47eFqAXCn)                                                                |
-| ✈️ **Telegram**                               | [t.me/omnirouteOficial](https://t.me/omnirouteOficial)                                                                |
-| 🟢 **WhatsApp — 🌍 Àgbáyé**                   | [darapọ̀ mọ́ ẹgbẹ́ náà](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)                                 |
-| 🟢 **WhatsApp — 🇧🇷 Brazil**                   | [darapọ̀ mọ́ ẹgbẹ́ náà](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                 |
-| 🌍 **Ààyè ayélujára**                         | [omniroute.online](https://omniroute.online)                                                                          |
-| 🌍 **🌍Àwùjọ StHub OmniRoute (ọ̀fẹ́)**          | [ojú-ọ̀nà StHub](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                |
-| 📦 **Kóòdù orísun**                           | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                        |
-| 🐛 **Jábọ̀ àṣìṣe kan**                         | [ṣí ìṣòro kan](https://github.com/diegosouzapw/OmniRoute/issues) — so àbájáde `npm run system-info` mọ́ ọn             |
-| 🤝 **Ṣe àfikún**                              | [CONTRIBUTING.md](CONTRIBUTING.md) · [Àwoṣe Ẹ̀ka àti Ìtújáde](docs/ops/BRANCHING_MODEL.md) · yan `ìṣòro àkọ́kọ́ tó dára` |
-| 💚 **Ṣe àtìlẹ́yìn fún iṣẹ́ náà**                | [Àwọn ọ̀nà láti ṣe àtìlẹ́yìn ↑](#-support-omniroute) · [Àwọn Olùgbọ́wọ́ GitHub](https://github.com/sponsors/diegosouzapw) |
+| Ikànnì                                           | Ibi / bí o ṣe lè                                                                                                   |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| 💼 **LinkedIn** — tẹ̀lé olùtọ́jú                   | [linkedin.com/in/diegosouzapw](https://www.linkedin.com/in/diegosouzapw/)                                          |
+| 🐙 **GitHub** — tẹ̀lé fún àwọn ìtújáde àti ìmọ̀ràn | [@diegosouzapw](https://github.com/diegosouzapw)                                                                   |
+| 💬 **Discord**                                   | [discord.gg/U47eFqAXCn](https://discord.gg/U47eFqAXCn)                                                             |
+| ✈️ **Telegram**                                  | [t.me/omnirouteOficial](https://t.me/omnirouteOficial)                                                             |
+| 🟢 **WhatsApp — 🌍 Àgbáyé**                      | [darapọ̀ mọ́ ẹgbẹ́ náà](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)                              |
+| 🟢 **WhatsApp — 🇧🇷 Brazil**                      | [darapọ̀ mọ́ ẹgbẹ́ náà](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                              |
+| 🌍 **Wẹ́ẹ̀bù**                                     | [omniroute.online](https://omniroute.online)                                                                       |
+| 🌍 **🌍Àwùjọ StHub OmniRoute (ọ̀fẹ́)**             | [ojú-ọ̀nà StHub](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)             |
+| 📦 **Kóòdù orísun**                              | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                     |
+| 🐛 **Jábọ̀ àṣìṣe kan**                            | [ṣí ìṣòro kan](https://github.com/diegosouzapw/OmniRoute/issues) — so àbájáde `npm run system-info` mọ́ ọn          |
+| 🤝 **Ṣe àfikún**                                 | [CONTRIBUTING.md](CONTRIBUTING.md) · [Àwoṣe Ẹ̀ka àti Ìtújáde](docs/ops/BRANCHING_MODEL.md) · yan `good first issue` |
+| 💚 **Ṣe àtìlẹ́yìn fún iṣẹ́ náà**                   | [Àwọn ọ̀nà láti ṣe àtìlẹ́yìn ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)   |
 
 </div>
 

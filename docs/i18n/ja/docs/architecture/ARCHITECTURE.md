@@ -10,77 +10,76 @@ _最終更新日: 2026-06-28_
 
 ## エグゼクティブサマリー
 
-OmniRoute は Next.js 上に構築されたローカル AI ルーティングゲートウェイ兼ダッシュボードです。
-単一の OpenAI 互換エンドポイント（`/v1/*`）を提供し、変換、フォールバック、トークン更新、使用状況の追跡に対応しながら、複数の上流プロバイダーにトラフィックをルーティングします。
+OmniRoute 、 Next.js上に構築されたローカルAIルーティング ゲートウェイおよびダッシュボードです。単一の OpenAI 互換エンドポイント (`/v1/*`) を提供し、変換、フォールバック、トークン更新、使用状況追跡を使用して複数の上流プロバイダー間でトラフィックをルーティングします。
 
-主な機能:
+コア機能:
 
-- CLI/ツール向けの OpenAI 互換 API サーフェス（380 プロバイダー、159 エグゼキューターモジュール）
-- プロバイダー形式間のリクエスト/レスポンス変換
-- モデルコンボフォールバック（複数モデルのシーケンス）
-- 構造化コンボステップ（`provider + model + connection`）と、`compositeTiers` による実行時の順序付け
-- アカウントレベルのフォールバック（プロバイダーごとの複数アカウント）
-- メインチャットパスにおけるクォータの事前確認と、クォータを考慮した P2C アカウント選択
-- OAuth + API キーによるプロバイダー接続管理（27 の OAuth プロバイダーモジュール）
-- `/v1/embeddings` による埋め込み生成（18 プロバイダー）
-- `/v1/images/generations` による画像生成（10 以上のプロバイダー、20 以上のモデル）
-- `/v1/audio/transcriptions` による音声文字起こし（18 プロバイダー）
-- `/v1/audio/speech` によるテキスト読み上げ（組み込みプロバイダー 24）
-- `/v1/videos/generations` による動画生成（ComfyUI + SD WebUI）
-- `/v1/music/generations` による音楽生成（ComfyUI）
-- `/v1/search` によるウェブ検索（20 プロバイダー）
-- `/v1/moderations` によるモデレーション
-- `/v1/rerank` による再ランキング
-- 推論モデル向けの Think タグ解析（`<think>...</think>`）
-- 厳密な OpenAI SDK 互換性のためのレスポンスサニタイズ
-- プロバイダー間の互換性を確保するためのロール正規化（developer→system、system→user）
-- 構造化出力の変換（json_schema → Gemini responseSchema）
-- プロバイダー、キー、エイリアス、コンボ、設定、料金のローカル永続化（122 DB モジュール）
-- 使用状況/コストの追跡とリクエストログ
-- マルチデバイス/状態同期向けのオプションのクラウド同期
-- API アクセス制御向けの IP 許可リスト/ブロックリスト
-- 思考予算の管理（passthrough/auto/custom/adaptive）
-- グローバルシステムプロンプトの注入
-- セッションの追跡とフィンガープリント
-- プロバイダー固有のプロファイルに対応したアカウント単位の拡張レート制限
-- プロバイダーの耐障害性を高めるサーキットブレーカー・パターン
-- Mutex ロックによるサンダリングハードの防止
+- CLI/tools用の OpenAI 互換APIサーフェス (プロバイダー 380 個、エグゼキューター モジュール 162 個)
+- プロバイダ形式間のRequest/response変換
+- モデル コンボ フォールバック (マルチモデル シーケンス)
+- `compositeTiers`によるランタイム順序付けを備えた構造化コンボ ステップ (`provider + model + connection`)
+- アカウントレベルのフォールバック (プロバイダーごとにマルチアカウント)
+- メイン チャット パスでのクォータ プリフライトとクォータ対応P2Cアカウントの選択
+- OAuth + API キープロバイダー接続管理 (27 のOAuthプロバイダーモジュール)
+- `/v1/embeddings`による埋め込み生成 (18 プロバイダー)
+- `/v1/images/generations`による画像生成 (10 の+プロバイダー、20 の+モデル)
+- `/v1/audio/transcriptions`による音声転写 (18 プロバイダー)
+- `/v1/audio/speech`によるテキスト読み上げ (24 の組み込みプロバイダー)
+- `/v1/videos/generations`によるビデオ生成 (ComfyUI + SD WebUI)
+- `/v1/music/generations` (ComfyUI) による音楽生成
+- `/v1/search`による Web 検索 (20 プロバイダー)
+- `/v1/moderations`によるモデレーション
+- `/v1/rerank`による再ランキング
+- 推論モデルのための Think タグ解析 (`<think>...</think>`)
+- 厳密なOpenAI SDK互換性のための応答のサニタイズ
+- プロバイダー間の互換性のための役割の正規化 (開発者→システム、システム→ユーザー)
+- 構造化出力変換 (json_schema → Gemini responseSchema)
+- プロバイダー、キー、エイリアス、コンボ、設定、価格設定のローカル永続性 (122 DBモジュール)
+- Usage/cost追跡とリクエストのロギング
+- multi-device/state同期のためのオプションのクラウド同期
+- IP allowlist/blocklist ( APIアクセス制御用)
+- 考える予算管理（passthrough/auto/custom/adaptive）
+- グローバル システム プロンプト インジェクション
+- セッション追跡とフィンガープリンティング
+- プロバイダー固有のプロファイルによるアカウントごとの強化されたレート制限
+- プロバイダーの回復力を高めるサーキット ブレーカー パターン
+- ミューテックスロックによるアンチサンダーリングハード保護
 - 署名ベースのリクエスト重複排除キャッシュ
-- ドメイン層: コストルール、フォールバックポリシー、ロックアウトポリシー
-- Context Relay: アカウントローテーションの継続性を確保するセッション引き継ぎサマリー
-- ドメイン状態の永続化（フォールバック、予算、ロックアウト、サーキットブレーカー向けの SQLite 書き込みスルーキャッシュ）
-- 集中型リクエスト評価のためのポリシーエンジン（ロックアウト → 予算 → フォールバック）
-- p50/p95/p99 レイテンシ集計を備えたリクエストテレメトリ
-- `combo_execution_key` / `combo_step_id` によるコンボターゲットのテレメトリと、過去のコンボターゲットの健全性
-- エンドツーエンドトレーシング用の相関 ID（X-Request-Id）
-- API キーごとのオプトアウトに対応したコンプライアンス監査ログ
-- LLM 品質保証向けの評価フレームワーク
-- プロバイダーのサーキットブレーカー状態をリアルタイムで表示するヘルスダッシュボード
-- 3 つのトランスポート（stdio/SSE/Streamable HTTP）に対応した MCP Server（110 ツール）
-- スキルとタスクライフサイクルを備えた A2A Server（JSON-RPC 2.0 + SSE）
-- メモリシステム（抽出、注入、検索、要約）
-- スキルシステム（レジストリ、エグゼキューター、サンドボックス、組み込みスキル）
-- 証明書管理と DNS 処理を備えた MITM プロキシ
+- ドメイン層: コスト ルール、フォールバック ポリシー、ロックアウト ポリシー
+- コンテキスト リレー: アカウント ローテーションの継続性のためのセッション ハンドオフの概要
+- ドメイン状態の永続性 (フォールバック、バジェット、ロックアウト、サーキット ブレーカー用のSQLiteライトスルー キャッシュ)
+- 一元化されたリクエスト評価のためのポリシー エンジン (ロックアウト→バジェット→フォールバック)
+- p50/p95/p99レイテンシ集約を使用したテレメトリのリクエスト
+- `combo_execution_key` / `combo_step_id`を介したコンボ ターゲット テレメトリと履歴コンボ ターゲット ヘルス
+- エンドツーエンド トレースのための相関ID (X-Request-Id)
+- APIキーごとのオプトアウトによるコンプライアンス監査ログ
+- LLM品質保証の評価フレームワーク
+- リアルタイムのプロバイダーのサーキット ブレーカー ステータスを表示するヘルス ダッシュボード
+- 3 つのトランスポート (stdio/SSE/Streamable HTTP) を備えたMCPサーバー (110 ツール)
+- スキルとタスクのライフサイクルを備えたA2Aサーバー (JSON-RPC 2.0 + SSE)
+- 記憶システム（抽出、挿入、検索、要約）
+- スキル システム (レジストリ、エグゼキューター、サンドボックス、組み込みスキル)
+- 証明書管理とDNS処理を備えたMITMプロキシ
 - プロンプトインジェクションガードミドルウェア
-- Caveman、RTK、スタック型パイプライン、圧縮コンボ、言語パック、分析機能を備えたプロンプト圧縮パイプライン
-- ACP（Agent Communication Protocol）レジストリ
-- モジュール式 OAuth プロバイダー（`src/lib/oauth/providers/` 配下の 22 個の個別モジュール）
-- アンインストール/完全アンインストールスクリプト
-- OAuth 環境修復アクション
-- OpenAI 互換 WS クライアント向け WebSocket ブリッジ（`/v1/ws`）
-- 同期トークン管理（発行/取り消し、ETag バージョン管理された設定バンドルのダウンロード）
-- GLM Thinking（`glmt`）のファーストクラスプロバイダープリセット
-- ハイブリッドトークンカウント（プロバイダー側の `/messages/count_tokens` と推定フォールバック）
-- モデルエイリアスの自動シード（起動時に 30 以上のクロスプロキシ方言を正規化）
-- SSRF ガード、プライベート URL ブロック、設定可能なリトライを備えた安全な外向きフェッチ
-- 設定可能な `requestRetry` と `maxRetryIntervalSec` に対応したクールダウン考慮型チャットリトライ
-- 起動時の Zod によるランタイム環境検証
-- ページネーション、プロバイダー CRUD イベント、SSRF ブロック検証ログに対応したコンプライアンス監査 v2
+- Caveman、 RTK、スタックされたパイプライン、圧縮コンボ、言語パック、分析を使用したプロンプト圧縮パイプライン
+- ACP (エージェント通信プロトコル) レジストリ
+- モジュラーOAuthプロバイダー ( `src/lib/oauth/providers/`の下に 22 個の個別モジュール)
+- Uninstall/full-uninstallスクリプト
+- OAuth環境修復アクション
+- OpenAI 互換WSクライアント用のWebSocketブリッジ (`/v1/ws`)
+- 同期トークン管理 (issue/revoke、ETag バージョンの構成バンドルのダウンロード)
+- GLM Thinking (`glmt`) ファーストクラスプロバイダープリセット
+- ハイブリッド トークン カウンティング (推定フォールバックを備えたプロバイダー側`/messages/count_tokens` )
+- モデルエイリアスの自動シード (起動時に 30 個の+クロスプロキシ方言正規化)
+- SSRFガード、プライベートURLブロック、構成可能な再試行による安全なアウトバウンドフェッチ
+- 構成可能な`requestRetry`および`maxRetryIntervalSec`によるクールダウンを意識したチャットの再試行
+- 起動時のZodによるランタイム環境の検証
+- ページネーション、プロバイダーCRUDイベント、SSRF ブロックされた検証ログを備えたコンプライアンス監査 v2
 
-主要なランタイムモデル:
+プライマリ ランタイム モデル:
 
-- `src/app/api/*` 配下の Next.js アプリルートが、ダッシュボード API と互換性 API の両方を実装
-- `src/sse/*` + `open-sse/*` の共有 SSE/ルーティングコアが、プロバイダーの実行、変換、ストリーミング、フォールバック、使用状況を処理
+- `src/app/api/*`の下のNext.jsアプリ ルートは、ダッシュボードAPIsと互換性APIs両方を実装します
+- `src/sse/*` + `open-sse/*`の共有SSE/routingコアは、プロバイダーの実行、変換、ストリーミング、フォールバック、および使用を処理します
 
 ## 参照図
 
@@ -395,14 +394,14 @@ Cloud Agents は、統一された DB ベースのタスク ライフサイク�
 
 ### D. ドメイン層
 
-`src/domain/`名前空間はポリシーの決定を一元化するため、ルート ハンドラーはlockout/budget/fallbackロジック自体を組み立てる必要がありません。
+`src/domain/`名前空間はポリシーの決定を一元化するため、ルート ハンドラーがlockout/budget/fallbackロジック自体を組み立てる必要がありません。
 
-- ポリシー エンジン: `src/domain/policyEngine.ts` —実行前評価用の単一エントリ ポイント (ロックアウト→バジェット→フォールバック順序付け)
+- ポリシー エンジン: `src/domain/policyEngine.ts` —実行前評価用の単一エントリ ポイント (ロックアウト→予算→フォールバック注文)
 - コストルール: `src/domain/costRules.ts`
 - フォールバック ポリシー: `src/domain/fallbackPolicy.ts`
 - ロックアウト ポリシー: `src/domain/lockoutPolicy.ts`
 - タグベースのルーティング: `src/domain/tagRouter.ts`
-- コンボ リゾルバー: `src/domain/comboResolver.ts` —は、コンボ名、auto/\* プレフィックス、およびワイルドカード モデル ターゲットを具体的な実行プランに解決します。
+- コンボ リゾルバー: `src/domain/comboResolver.ts` — 、コンボ名、auto/\* プレフィックス、およびワイルドカード モデル ターゲットを具体的な実行プランに解決します。
 - Connection/modelルール結合者: `src/domain/connectionModelRules.ts`
 - モデルの可用性スナップショット: `src/domain/modelAvailability.ts`
 - プロバイダーの有効期限追跡: `src/domain/providerExpiration.ts`
@@ -1047,11 +1046,11 @@ flowchart LR
 - 起動時の SQLite スキーママイグレーションおよび自動アップグレードフック
 - レガシー JSON → SQLite マイグレーションの互換パス
 
-## 6) SSRF／送信先 URL ガード
+## 6) SSRF / 外向き URL ガード
 
-- `src/shared/network/outboundUrlGuard.ts` は、プロバイダーエグゼキューターに到達する前に、すべてのプライベート／ループバック／リンクローカルのターゲット URL をブロックします
-- プロバイダーモデルの検出および検証ルートでは、すべての送信リクエストの前にガードを適用する `src/shared/network/safeOutboundFetch.ts` を使用します
-- ガードエラーは HTTP 422 の `URL_GUARD_BLOCKED` として通知され、`providerAudit.ts` を介してコンプライアンス監査証跡に記録されます
+- `BaseExecutor.assertOutboundUrlAllowed`（`open-sse/executors/base.ts`）は、`BaseExecutor.execute()` を通じて送信されるチャットリクエストに `src/shared/network/outboundUrlGuard.ts` を適用します。公開 URL のみを許可するモード（`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` かつプライベートフラグがオフ）では、プライベートホスト、ループバックホスト、および 169.254.0.0/16 をブロックします。それ以外のすべてのモードでは、クラウドメタデータホストをブロックします。DNS ルックアップを実行する前に、記述されたとおりのホスト名または IP リテラルを確認します。組み込みのローカルプロバイダーでは、このチェックはスキップされます。
+- プロバイダーモデルの検出および検証ルートでは、すべての外向きリクエストの前にガードを適用する `src/shared/network/safeOutboundFetch.ts` を使用します
+- ガードエラーは、HTTP 503（`getSafeOutboundFetchErrorStatus`。モデル検出ルートは 400 を返します）とともに `URL_GUARD_BLOCKED` として表面化し、検証中に実際に発生した SSRF ブロックは、`provider.validation.ssrf_blocked` イベントとして監査証跡に記録されます
 
 ## オブザーバビリティと運用シグナル
 
@@ -1102,7 +1101,7 @@ flowchart LR
 4. クラウドの動作は、正しい `NEXT_PUBLIC_BASE_URL` とクラウドエンドポイントへの到達可能性に依存する。
 5. `open-sse/` ディレクトリは、`@omniroute/open-sse` **npm ワークスペースパッケージ**として公開される。ソースコードでは `@omniroute/open-sse/...` を介してインポートされる（Next.js の `transpilePackages` によって解決される）。一貫性を保つため、このドキュメント内のファイルパスでは引き続きディレクトリ名 `open-sse/` を使用する。
 6. ダッシュボードのチャートでは、アクセシブルでインタラクティブな分析可視化（モデル使用量の棒グラフ、成功率を含むプロバイダー内訳表）のために、**Recharts**（SVG ベース）を使用する。
-7. E2E テストでは **Playwright**（`tests/e2e/`）を使用し、`npm run test:e2e` で実行する。ユニットテストでは **Node.js test runner**（`tests/unit/`）を使用し、`npm run test:unit` で実行する。`src/` 配下のソースコードは **TypeScript**（`.ts`／`.tsx`）であり、`open-sse/` ワークスペースは引き続き JavaScript（`.js`）を使用する。
+7. E2E テストでは **Playwright**（`tests/e2e/`）を使用し、`npm run test:e2e` で実行する。ユニットテストでは **Node.js test runner**（`tests/unit/`）を使用し、`npm run test:unit` で実行する。`src/` 配下のソースコードは **TypeScript**（`.ts`／`.tsx`）であり、`open-sse/` ワークスペースは引き続き TypeScript（`.ts`）を使用する。
 8. 設定ページは、General、Appearance、AI、Security、Routing、Resilience、Advanced の 7 つのタブで構成される。Resilience ページでは、リクエストキュー、接続クールダウン、プロバイダーブレーカー、およびクールダウン待機動作のみを設定する。ブレーカーの実行時状態は Health ページに表示される。
 9. **Context Relay** ストラテジー（`context-relay`）は 2 つのレイヤーに分割されている。`combo.ts` はハンドオフを生成すべきかどうかを決定し、`chat.ts` はアカウント解決後にハンドオフを挿入する。ハンドオフデータは SQLite の `context_handoffs` テーブルに格納される。この分割は、実際のアカウントが変更されたかどうかを把握できるのが `chat.ts` だけであるため、意図的に行われている。
 10. **プロキシの適用**は現在包括的に行われる。`tokenHealthCheck.ts` は接続ごとにプロキシを解決し、`/api/providers/validate` は `runWithProxyContext` を使用し、`proxyFetch.ts` は Node 22 でディスパッチャーの互換性を維持するために `undici.fetch()` を使用する。

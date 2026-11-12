@@ -18,6 +18,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { load } from "js-yaml";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const workflow = fs.readFileSync(path.join(repoRoot, ".github/workflows/quality.yml"), "utf-8");
@@ -31,19 +32,19 @@ function jobBlock(job: string): string {
   return next ? rest.slice(0, next.index) : rest;
 }
 
-test("lint-guard carries the quality-ratchet engine (collect → ratchet → require-tighten → codeql)", () => {
+test("lint-guard carries the quality-ratchet engine (collect → ratchet → require-tighten)", () => {
   const block = jobBlock("lint-guard");
   for (const needle of [
     "npm run quality:collect",
     "check-quality-ratchet.mjs --allow-missing",
     "--require-tighten",
-    "npm run check:codeql-ratchet",
   ]) {
     assert.ok(block.includes(needle), `lint-guard must run "${needle}"`);
   }
-  // The CodeQL ratchet reads open code-scanning alerts; without this permission
-  // the API call 403s and the gate silently self-skips forever.
-  assert.match(block, /security-events:\s*read/, "lint-guard needs security-events: read");
+  // CodeQL's producer → admission chain is covered by codeql-dag-contract.test.mjs.
+  // This numeric-ratchet job must not restore an early duplicate API poll or its permission.
+  assert.doesNotMatch(block, /check[:-]codeql-ratchet/, "CodeQL admission belongs to Gate / CI");
+  assert.doesNotMatch(block, /security-events:/, "lint-guard does not query code-scanning alerts");
 });
 
 test("fast-gates carries the deterministic ratchets and security scanners from the main rail", () => {
@@ -95,15 +96,31 @@ test("fast-gates carries the deterministic ratchets and security scanners from t
     ),
     "oasdiff must receive the origin-prefixed base ref fetched by actions/checkout"
   );
-  for (const version of [
-    "GITLEAKS_VERSION=v",
-    "OSV_SCANNER_VERSION=v",
-    "ACTIONLINT_VERSION=v",
-    "ZIZMOR_VERSION=",
-    "OASDIFF_VERSION=v",
-  ]) {
+  for (const version of ["GITLEAKS_VERSION=v", "OSV_SCANNER_VERSION=v", "OASDIFF_VERSION=v"]) {
     assert.ok(block.includes(version), `fast-gates must pin ${version.split("=")[0]}`);
   }
+  const parsed = load(workflow) as {
+    jobs: Record<
+      string,
+      { steps: Array<{ run?: string; if?: string; "continue-on-error"?: boolean }> }
+    >;
+  };
+  const installers = parsed.jobs["fast-gates"].steps.filter(
+    (step) => step.run === "bash scripts/ci/install-workflow-scanners.sh"
+  );
+  assert.equal(installers.length, 1, "fast-gates must invoke the shared scanner installer once");
+  assert.equal(installers[0].if, undefined, "required scanners cannot be conditionally skipped");
+  assert.equal(installers[0]["continue-on-error"], undefined, "scanner installation must block");
+  const installer = fs.readFileSync(
+    path.join(repoRoot, "scripts/ci/install-workflow-scanners.sh"),
+    "utf8"
+  );
+  assert.ok(installer.includes("gh release download v1.7.12 --repo rhysd/actionlint"));
+  assert.ok(
+    installer.includes(
+      "https://github.com/zizmorcore/zizmor/releases/download/v1.25.2/zizmor-x86_64-unknown-linux-gnu.tar.gz"
+    )
+  );
   assert.doesNotMatch(
     block,
     /download-actionlint\.bash\) latest/,

@@ -356,24 +356,24 @@ Model: cc/claude-opus-4-7
 
 ## 🚀 Implementare
 
-### Instalare globală cu npm (recomandat)
+### Instalare globală npm (recomandat)
 
 ```bash
 npm install -g omniroute
 
-# Creează directorul de configurare
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Creează fișierul .env (consultă .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Pornește serverul
+# Start server
 omniroute
-# Sau cu un port personalizat:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI-ul încarcă automat `.env` din `~/.omniroute/.env` sau `./.env`.
+CLI încarcă automat `.env` din `~/.omniroute/.env` sau `./.env`.
 
 ### Modul bară de sistem
 
@@ -599,28 +599,28 @@ post_install() {
 
 ### Variabile de mediu
 
-| Variabilă                               | Valoare implicită                    | Descriere                                                                                                                                                                                                    |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Secret pentru semnarea JWT (**modificați-l în producție**)                                                                                                                                                   |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Parola pentru prima autentificare                                                                                                                                                                            |
-| `DATA_DIR`                              | `~/.omniroute`                       | Director de date (bază de date, utilizare, jurnale)                                                                                                                                                          |
-| `PORT`                                  | valoarea implicită a cadrului        | Portul serviciului (`20128` în exemple)                                                                                                                                                                      |
-| `HOSTNAME`                              | valoarea implicită a cadrului        | Gazda de ascultare (valoarea implicită pentru Docker este `0.0.0.0`)                                                                                                                                         |
-| `NODE_ENV`                              | valoarea implicită a mediului        | Setați la `production` pentru implementare                                                                                                                                                                   |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | URL-ul de bază public afișat în panoul de control și expus serverului (înlocuiește vechiul `BASE_URL`)                                                                                                       |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | URL-ul de bază al punctului final pentru sincronizarea în cloud (înlocuiește vechiul `CLOUD_URL`)                                                                                                            |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Secret HMAC pentru cheile API generate                                                                                                                                                                       |
-| `REQUIRE_API_KEY`                       | `false`                              | Impune o cheie API Bearer pentru `/v1/*`                                                                                                                                                                     |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Permite utilizatorilor autentificați ai panoului de control să afișeze la cerere valorile complete ale cheilor API stocate                                                                                   |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Intervalul de reîmprospătare pe server pentru datele memorate în cache privind limitele furnizorilor; butoanele de reîmprospătare din interfața de utilizare declanșează în continuare sincronizarea manuală |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Dezactivează instantaneele SQLite automate înainte de scriere/importare/restaurare; copiile de siguranță manuale funcționează în continuare                                                                  |
-| `APP_LOG_TO_FILE`                       | `true`                               | Activează scrierea pe disc a jurnalelor aplicației și de audit                                                                                                                                               |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Impune atributul `Secure` pentru cookie-ul de autentificare (în spatele unui proxy invers HTTPS)                                                                                                             |
-| `CLOUDFLARED_BIN`                       | nesetat                              | Utilizează un binar `cloudflared` existent în locul descărcării gestionate                                                                                                                                   |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Transportul pentru tunelurile rapide gestionate (`http2`, `quic` sau `auto`)                                                                                                                                 |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Limita heap-ului Node.js în MB                                                                                                                                                                               |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Numărul maxim de intrări în memoria cache pentru prompturi                                                                                                                                                   |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Numărul maxim de intrări în memoria cache semantică                                                                                                                                                          |
+| Variabilă                               | Valoare implicită             | Descriere                                                                                                                                                                                                    |
+| --------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `JWT_SECRET`                            | _(generat automat)_           | Secret pentru semnarea JWT — generat automat la prima pornire și păstrat în `server.env`; setați-l explicit când directorul de date este temporar                                                            |
+| `INITIAL_PASSWORD`                      | _(nesetată)_                  | Parola pentru prima autentificare. Instalările npm/din surse pornesc cu `CHANGEME`: înlocuiți-o. Nesetată: expert de inițializare                                                                            |
+| `DATA_DIR`                              | `~/.omniroute`                | Director de date (bază de date, utilizare, jurnale)                                                                                                                                                          |
+| `PORT`                                  | valoarea implicită a cadrului | Portul serviciului (`20128` în exemple)                                                                                                                                                                      |
+| `HOSTNAME`                              | valoarea implicită a cadrului | Gazda de ascultare (valoarea implicită pentru Docker este `0.0.0.0`)                                                                                                                                         |
+| `NODE_ENV`                              | valoarea implicită a mediului | Setați la `production` pentru implementare                                                                                                                                                                   |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`      | URL-ul de bază public afișat în panoul de control și expus serverului (înlocuiește vechiul `BASE_URL`)                                                                                                       |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`       | URL-ul de bază al punctului final pentru sincronizarea în cloud (înlocuiește vechiul `CLOUD_URL`)                                                                                                            |
+| `API_KEY_SECRET`                        | _(generat automat)_           | Secret de sumă de control pentru chei API legate de mașină — bootstrapul de pornire îl generează automat când nu este setat și îl salvează într-un `server.env` inscriptibil                                 |
+| `REQUIRE_API_KEY`                       | `false`                       | Impune o cheie API Bearer pentru `/v1/*`                                                                                                                                                                     |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                       | Permite utilizatorilor autentificați ai panoului de control să afișeze la cerere valorile complete ale cheilor API stocate                                                                                   |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                          | Intervalul de reîmprospătare pe server pentru datele memorate în cache privind limitele furnizorilor; butoanele de reîmprospătare din interfața de utilizare declanșează în continuare sincronizarea manuală |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                       | Dezactivează instantaneele SQLite automate înainte de scriere/importare/restaurare; copiile de siguranță manuale funcționează în continuare                                                                  |
+| `APP_LOG_TO_FILE`                       | `true`                        | Activează scrierea pe disc a jurnalelor aplicației și de audit                                                                                                                                               |
+| `AUTH_COOKIE_SECURE`                    | `false`                       | Impune atributul `Secure` pentru cookie-ul de autentificare (în spatele unui proxy invers HTTPS)                                                                                                             |
+| `CLOUDFLARED_BIN`                       | nesetat                       | Utilizează un binar `cloudflared` existent în locul descărcării gestionate                                                                                                                                   |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                       | Transportul pentru tunelurile rapide gestionate (`http2`, `quic` sau `auto`)                                                                                                                                 |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                         | Limita heap-ului Node.js în MB                                                                                                                                                                               |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                          | Numărul maxim de intrări în memoria cache pentru prompturi                                                                                                                                                   |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                         | Numărul maxim de intrări în memoria cache semantică                                                                                                                                                          |
 
 Pentru referința completă a variabilelor de mediu, consultați [README](../README.md).
 
@@ -685,58 +685,77 @@ Pentru referința completă a variabilelor de mediu, consultați [README](../REA
 
 ---
 
-## 🧩 Funcții avansate
+## 🧩 Funcționalități avansate
 
 ### Modele personalizate
 
-Adăugați orice model ID oricărui furnizor fără a aștepta o actualizare a aplicației:
+Adăugați orice ID de model la orice furnizor fără să așteptați o actualizare a aplicației:
 
 ```bash
-# Via API
+# Prin API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# List: curl http://localhost:20128/api/provider-models?provider=openai
-# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# Listare: curl http://localhost:20128/api/provider-models?provider=openai
+# Eliminare: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-Sau folosiți Dashboard:** Furnizori → [Furnizor] → Modele personalizate** .
+Sau utilizați Panoul de control: **Furnizori → [Furnizor] → Modele personalizate**.
 
 Note:
 
-- Furnizorii OpenRouter și OpenAI/Anthropic-compatible sunt gestionați de la** Modele disponibile** numai. Adăugarea manuală, importarea și sincronizarea automată ajung toate în aceeași listă de modele disponibile, așa că nu există o secțiune separată de modele personalizate pentru acei furnizori.
-- The** Modele personalizate** secțiunea este destinată furnizorilor care nu expun importurile gestionate de modele disponibile.
+- Furnizorii compatibili cu OpenRouter și OpenAI/Anthropic sunt gestionați exclusiv din **Modele disponibile**. Adăugarea manuală, importul și sincronizarea automată ajung toate în aceeași listă de modele disponibile, astfel încât nu există o secțiune separată Modele personalizate pentru acești furnizori.
+- Secțiunea **Modele personalizate** este destinată furnizorilor care nu oferă importuri gestionate de modele disponibile.
 
 ### Furnizori personalizați compatibili cu OpenAI
 
-Orice gateway care rostește OpenAI API (un proxy auto-găzduit, vLLM, un agregator terță parte) poate fi adăugat ca propriul nod de furnizor:
+Orice gateway care utilizează API-ul OpenAI (un proxy găzduit local, vLLM, un agregator terț)
+poate fi adăugat ca nod de furnizor separat:
 
-1. **Furnizori → Adaugă OpenAI Compatibil** .
-2. **Nume** : o etichetă de afișare pentru nod.
-3. **Prefix** : numele de rutare. Clienții numesc modelele ca `<prefix>/<model>`, deci un nod cu prefixul `mygw` servește `mygw/gpt-4o-mini`. Necesar; nu există nicio restricție de caracter.
-4. **API Tip** : familia de puncte finale pe care o deservește gateway-ul (finalizări de chat, răspunsuri, încorporare, audio, imagini).
-5. **Baza URL** : rădăcina API, până la `/v1` inclusiv (de exemplu `https://gateway.example.com/v1`), nu calea `/chat/completions` completă. Gateway-uri cu căi non-standard le setează sub** Setări avansate** (cale de chat, cale de modele).
-6. The** cheie API (pentru verificare)** câmpul testează doar conexiunea. După crearea nodului, deschideți-l și utilizați** Adăugați o conexiune** pentru a stoca cheia pe care o vor folosi cererile.
+1. **Furnizori → Adăugați un furnizor compatibil cu OpenAI**.
+2. **Nume**: o etichetă afișată pentru nod.
+3. **Prefix**: numele pentru rutare. Clienții apelează modelele ca `<prefix>/<model>`, astfel încât un nod cu
+   prefixul `mygw` deservește `mygw/gpt-4o-mini`. Obligatoriu; nu există restricții privind caracterele.
+4. **Tip API**: familia de endpointuri deservită de gateway (Chat Completions, Responses,
+   Embeddings, audio, imagini).
+5. **URL de bază**: rădăcina API-ului, până la și inclusiv `/v1` (de exemplu,
+   `https://gateway.example.com/v1`), nu calea completă `/chat/completions`. Gateway-urile cu
+   căi nestandardizate le configurează în **Setări avansate** (calea pentru chat, calea pentru modele).
+6. Câmpul **Cheie API (pentru verificare)** doar testează conexiunea. După crearea nodului,
+   deschideți-l și utilizați **Adăugați o conexiune** pentru a stoca cheia pe care o vor utiliza solicitările.
 
-Nodul primește un id intern de forma `openai-compatible-<apiType>-<uuid>`; nu trebuie să-l tastați niciodată, prefixul este numele public.
+Nodul primește un ID intern de forma `openai-compatible-<apiType>-<uuid>`; nu trebuie
+să îl introduceți niciodată, prefixul fiind numele public.
 
 #### Prefixe rezervate
 
-Un prefix nu poate fi id-ul sau alias-ul unui furnizor încorporat (de exemplu `openai`, `cf`), nici id-ul unui furnizor retras. Rezolvatorul model verifică ID-urile și aliasurile încorporate înainte de nodurile personalizate, astfel încât un nod care folosește unul dintre aceste prefixe nu ar primi niciodată trafic: `<prefix>/model` ar merge la furnizorul încorporat sau nu ar fi închis dacă acel furnizor ar fi retras. Crearea sau editarea unui nod cu un astfel de prefix este respinsă cu:
+Un prefix nu poate fi ID-ul sau aliasul unui furnizor încorporat (de exemplu, `openai`, `cf`) și nici
+ID-ul unui furnizor retras. Resolverul de modele verifică ID-urile și aliasurile încorporate înaintea
+nodurilor personalizate, astfel încât un nod care utilizează unul dintre aceste prefixe nu va primi niciodată trafic:
+`<prefix>/model` va fi direcționat în schimb către furnizorul încorporat sau va eșua în mod securizat dacă furnizorul
+respectiv a fost retras. Crearea sau editarea unui nod cu un astfel de prefix este respinsă cu:
 
 ```text
-prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
+prefix: "<prefix>" este un prefix rezervat pentru furnizori — alegeți un prefix diferit (ID-urile/aliasurile rezervate nu pot fi utilizate pentru noduri personalizate, deoarece solicitările precum <prefix>/model sunt direcționate către un furnizor încorporat sau eșuează în mod securizat atunci când acesta este retras)
 ```
 
-Alegeți un prefix distinct (`mygw`, `acme-proxy`). Dacă cererile către un nod personalizat eșuează cu o eroare care denumește un furnizor încorporat sau acreditările acestuia, verificați dacă prefixul nodului este rezervat: nodurile salvate înainte de a exista această regulă sunt încă stocate, dar rutele lor de prefix către furnizorul încorporat. Editați nodul și dați-i un nou prefix.
+Alegeți un prefix distinct (`mygw`, `acme-proxy`). Dacă solicitările către un nod personalizat eșuează cu o
+eroare care menționează un furnizor încorporat sau acreditările acestuia, verificați dacă prefixul nodului este
+rezervat: nodurile salvate înainte de introducerea acestei reguli sunt încă păstrate, dar prefixul lor direcționează solicitările
+către furnizorul încorporat. Editați nodul și atribuiți-i un prefix nou.
 
 #### Opțiuni de gateway per conexiune
 
-Aceste chei merg în `providerSpecificData` a unei conexiuni (de exemplu, prin `PUT /api/providers/{id}`):
+Aceste chei se introduc în `providerSpecificData` al unei conexiuni (de exemplu, prin
+`PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (întreg, 1–1024) — pentru conexiuni compatibile cu formatul de chat OpenAI al căror gateway respinge numele lungi de instrumente. Numele mai lungi sunt trimise ca aliasuri scurte și restaurate în răspuns.
-- `quotaEndpoint` — punctul final quota/credits al gateway-ului, citit pentru banda de cote din tabloul de bord și rutare în funcție de cotă. Funcționează atât pe conexiuni compatibile cu OpenAI, cât și cu Anthropic; forma completă este documentată în `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (număr întreg, 1–1024) — pentru conexiunile compatibile cu formatul de chat OpenAI al căror
+  gateway respinge numele lungi ale instrumentelor. Numele mai lungi sunt trimise ca aliasuri scurte și restabilite în
+  răspuns.
+- `quotaEndpoint` — endpointul gateway-ului pentru cote/credite, consultat pentru bara de cote din tabloul de bord și
+  rutarea bazată pe cote. Funcționează atât pentru conexiunile compatibile cu OpenAI, cât și pentru cele compatibile cu Anthropic; structura completă
+  este documentată în `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -751,11 +770,12 @@ Aceste chei merg în `providerSpecificData` a unei conexiuni (de exemplu, prin `
 }
 ```
 
-### Înlănțuirea OmniRoute Peers
+### Înlănțuirea instanțelor OmniRoute omoloage
 
-Un alt gateway OmniRoute poate fi adăugat ca a** Compatibil cu OpenAI personalizat** furnizor. Utilizați baza `/v1` URL a peer-ului și o cheie API dedicată, cu cel mai mic privilegiu, emisă de acel peer.
+Un alt gateway OmniRoute poate fi adăugat ca furnizor **personalizat compatibil cu OpenAI**. Utilizați
+URL-ul de bază `/v1` al instanței omoloage și o cheie API dedicată, cu privilegii minime, emisă de aceasta.
 
-Pentru lanțuri reciproce sau multi-hop, activați protecția buclei opt-in pe fiecare gateway:
+Pentru lanțurile reciproce sau cu mai multe salturi, activați protecția opțională împotriva buclelor pe fiecare gateway:
 
 ```bash
 # gateway-a
@@ -771,13 +791,18 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Doar cererile trimise către un peer URL listat în mod explicit primesc antetul `X-OmniRoute-Peer-Trace`. Un gateway respinge o instanță repetată ID sau un buget hop epuizat cu HTTP `508 Loop Detected`; furnizorii obișnuiți din amonte nu primesc metadate de la egal la egal.
+Doar solicitările trimise către un URL de instanță omoloagă inclus explicit în lista de permisiuni primesc antetul
+`X-OmniRoute-Peer-Trace`. Un gateway respinge un ID de instanță repetat sau epuizarea numărului
+de salturi cu HTTP `508 Loop Detected`; furnizorii upstream obișnuiți nu primesc metadate despre instanțele omoloage.
 
-Înlănțuirea peer nu este o replicare a bazei de date sau un failover al gazdei. Fiecare gateway păstrează starea SQLite, cache-urile, contoarele de rate și sesiunile independente. Utilizați un proxy invers verificat de starea de sănătate sau un failover al clientului pentru disponibilitatea active/passive sau active/active și nu montați niciodată o bază de date SQLite în mai multe instanțe OmniRoute care rulează.
+Înlănțuirea instanțelor omoloage nu reprezintă replicarea bazei de date sau failover-ul gazdei. Fiecare gateway păstrează
+independent starea SQLite, cache-urile, contoarele de rată și sesiunile. Utilizați un proxy invers cu verificări de stare sau mecanisme
+de failover la nivel de client pentru disponibilitate activă/pasivă sau activă/activă și nu montați niciodată aceeași bază de date SQLite
+în mai multe instanțe OmniRoute care rulează simultan.
 
-### Rute de furnizori dedicate
+### Rute dedicate furnizorilor
 
-Direcționați cererile direct către un anumit furnizor cu validarea modelului:
+Direcționați solicitările direct către un anumit furnizor, cu validarea modelului:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -785,140 +810,140 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-Prefixul furnizorului este adăugat automat dacă lipsește. Modelele nepotrivite returnează `400`.
+Prefixul furnizorului este adăugat automat dacă lipsește. Modelele incompatibile returnează `400`.
 
-### Configurare proxy de rețea
+### Configurarea proxy-ului de rețea
 
 ```bash
-# Set global proxy
+# Configurarea proxy-ului global
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# Per-provider proxy
+# Proxy per furnizor
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# Test proxy
+# Testarea proxy-ului
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**Prioritate:** → specifice combo → specifică furnizorului → Mediu → global.
+**Precedență:** Specific cheii → Specific combinației → Specific furnizorului → Global → Mediu.
 
-### Catalog de modele API
+### API-ul catalogului de modele
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-Returnează modele grupate după furnizor cu tipuri (`chat`, `embedding`, `image`).
+Returnează modelele grupate după furnizor, împreună cu tipurile (`chat`, `embedding`, `image`).
 
 ### Sincronizare în cloud
 
-- Sincronizați furnizorii, combo-urile și setările pe dispozitive
-- Sincronizare automată în fundal cu timeout + fail-rapid
-- În producție, preferați `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` pe partea de server
+- Sincronizați furnizorii, combinațiile și setările între dispozitive
+- Sincronizare automată în fundal, cu expirare și oprire rapidă în caz de eroare
+- Preferați `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` pe partea de server în producție
 
-### Cloudflare Quick Tunnel
+### Tunel rapid Cloudflare
 
-- Disponibil în** Tabloul de bord → Endpoints** pentru Docker și alte implementări auto-găzduite
-- Creează un `https://*.trycloudflare.com` URL temporar care redirecționează către punctul final `/v1` compatibil cu OpenAI
-- Mai întâi, activați instalează `cloudflared` numai când este necesar; repornirile ulterioare reutilizează același binar gestionat
-- Tunelurile rapide nu sunt restaurate automat după repornirea unui OmniRoute sau a containerului; reactivați-le din tabloul de bord când este necesar
-- Tunnel URLs sunt efemere și se schimbă de fiecare dată când stop/start tunelul
-- Tunelele rapide gestionate se folosesc implicit de transport HTTP/2 pentru a evita avertismentele zgomotoase QUIC UDP buffer în containerele constrânse
-- Setați `CLOUDFLARED_PROTOCOL=quic` sau `auto` dacă doriți să înlocuiți opțiunea de transport gestionat
-- Setați `CLOUDFLARED_BIN` dacă preferați să utilizați un binar `cloudflared` preinstalat în loc de descărcarea gestionată
-- Panourile Cloudflare Quick Tunnel, Tailscale Funnel și ngrok Tunnel pot fi afișate sau ascunse în** Setări → Aspect** . Ascunderea unui panou nu oprește un tunel care rulează.
+- Disponibil în **Dashboard → Endpoints** pentru Docker și alte implementări auto-găzduite
+- Creează un URL temporar `https://*.trycloudflare.com` care redirecționează către endpointul `/v1` curent, compatibil cu OpenAI
+- La prima activare, instalează `cloudflared` numai când este necesar; repornirile ulterioare reutilizează același binar gestionat
+- Tunelurile rapide nu sunt restaurate automat după repornirea OmniRoute sau a containerului; reactivați-le din tabloul de bord când este necesar
+- URL-urile tunelurilor sunt efemere și se schimbă de fiecare dată când opriți/porniți tunelul
+- Tunelurile rapide gestionate utilizează implicit transportul HTTP/2 pentru a evita avertismentele zgomotoase privind bufferul UDP QUIC în containerele cu resurse limitate
+- Setați `CLOUDFLARED_PROTOCOL=quic` sau `auto` dacă doriți să suprascrieți alegerea gestionată a transportului
+- Setați `CLOUDFLARED_BIN` dacă preferați să utilizați un binar `cloudflared` preinstalat în locul descărcării gestionate
+- Panourile Cloudflare Quick Tunnel, Tailscale Funnel și ngrok Tunnel pot fi afișate sau ascunse în **Settings → Appearance**. Ascunderea unui panou nu oprește un tunel care rulează.
 
-### LLM Gateway Intelligence (Faza 9)
+### Inteligența gateway-ului LLM (Faza 9)
 
-- **Cache semantic** — Auto-cache non-streaming, temperatură = 0 răspunsuri (ocolire cu `X-OmniRoute-No-Cache: true`)
-- **Cere Idempotenta** — Deduplică cererile în 5 secunde prin antetul `Idempotency-Key` sau `X-Request-Id`
-- **Urmărirea progresului** — Înscrieți-vă evenimentele SSE `event: progress` prin antetul `X-OmniRoute-Progress: true`
+- **Cache semantic** — Memorează automat în cache răspunsurile fără streaming, cu temperature=0 (ocoliți cu `X-OmniRoute-No-Cache: true`)
+- **Idempotența cererilor** — Deduplică cererile într-un interval de 5s prin antetul `Idempotency-Key` sau `X-Request-Id`
+- **Urmărirea progresului** — Evenimente SSE `event: progress` opționale prin antetul `X-OmniRoute-Progress: true`
 
 ---
 
-### Loc de joacă pentru traducător
+### Spațiu de testare pentru traducător
 
-Acces prin** Tabloul de bord → Translator** . Depanați și vizualizați modul în care OmniRoute traduce cererile API între furnizori.
+Accesați prin **Dashboard → Translator**. Depanați și vizualizați modul în care OmniRoute traduce cererile API între furnizori.
 
-| Modul               | Scop                                                                                                  |
-| ------------------- | ----------------------------------------------------------------------------------------------------- |
-| **Loc de joacă**    | Selectați formatele source/target, inserați o solicitare și vedeți instantaneu rezultatul tradus      |
-| **Tester de chat**  | Trimiteți mesaje de chat live prin proxy și inspectați întregul ciclu request/response                |
-| **Banc de testare** | Efectuați teste de lot în mai multe combinații de formate pentru a verifica corectitudinea traducerii |
-| **Monitor live**    | Urmărește traducerile în timp real pe măsură ce solicitările trec prin proxy                          |
+| Mod                   | Scop                                                                                                    |
+| --------------------- | ------------------------------------------------------------------------------------------------------- |
+| **Spațiu de testare** | Selectați formatele sursă/țintă, lipiți o cerere și vedeți instantaneu rezultatul tradus                |
+| **Tester de chat**    | Trimiteți mesaje de chat live prin proxy și inspectați întregul ciclu cerere/răspuns                    |
+| **Banc de testare**   | Rulați teste în lot pentru mai multe combinații de formate, pentru a verifica corectitudinea traducerii |
+| **Monitorizare live** | Urmăriți traducerile în timp real pe măsură ce cererile trec prin proxy                                 |
 
 **Cazuri de utilizare:**
 
-- Depanați de ce o anumită combinație client/provider eșuează
-- Verificați dacă etichetele de gândire, apelurile de instrumente și instrucțiunile de sistem se traduc corect
+- Depanați motivul pentru care o anumită combinație client/furnizor eșuează
+- Verificați dacă etichetele de raționament, apelurile de instrumente și prompturile de sistem sunt traduse corect
 - Comparați diferențele de format dintre formatele OpenAI, Claude, Gemini și Responses API
 
 ---
 
 ### Strategii de rutare
 
-Configurați prin** Tabloul de bord → Setări → Rutare** . Tabloul de bord expune cele mai utilizate șase strategii; combo-urile și auto-ruterul acceptă intern un set mai larg.
+Configurați prin **Dashboard → Settings → Routing**. Tabloul de bord prezintă cele șase strategii utilizate cel mai frecvent; combinațiile și routerul automat acceptă intern un set mai larg.
 
 **Strategii vizibile în tabloul de bord (rutare la nivel de cont):**
 
-| Strategie                            | Descriere                                                                                                                   |
-| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| **Umpleți mai întâi**                | Utilizează conturile în ordine de prioritate — contul principal gestionează toate solicitările până când nu este disponibil |
-| **Round Robin**                      | Parcurge toate conturile cu o limită stabilă configurabilă (implicit: 3 apeluri per cont)                                   |
-| **P2C (Puterea celor două opțiuni)** | Alege 2 conturi aleatorii și rută către cel mai sănătos — echilibrează sarcina cu conștientizarea sănătății                 |
-| **Aleatoriu**                        | Selectează aleatoriu un cont pentru fiecare solicitare folosind Fisher-Yates shuffle                                        |
-| **Cel mai puțin folosit**            | Rute către contul cu cea mai veche ștampilă de timp `lastUsedAt`, distribuind traficul uniform                              |
-| **Cost optimizat**                   | Rute către contul cu cea mai mică valoare de prioritate, optimizând pentru furnizorii cu cel mai mic cost                   |
+| Strategie                        | Descriere                                                                                                          |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **Umplere în ordine**            | Utilizează conturile în ordinea priorității — contul principal gestionează toate cererile până devine indisponibil |
+| **Round Robin**                  | Parcurge ciclic toate conturile, cu o limită configurabilă de persistență (implicit: 3 apeluri per cont)           |
+| **P2C (Puterea a două opțiuni)** | Alege 2 conturi aleatorii și rutează către cel mai sănătos — echilibrează încărcarea ținând cont de starea lor     |
+| **Aleatoriu**                    | Selectează aleatoriu un cont pentru fiecare cerere folosind amestecarea Fisher-Yates                               |
+| **Cel mai puțin utilizat**       | Rutează către contul cu cel mai vechi marcaj temporal `lastUsedAt`, distribuind traficul uniform                   |
+| **Optimizat pentru cost**        | Rutează către contul cu cea mai mică valoare a priorității, optimizând pentru furnizorii cu cel mai redus cost     |
 
-**Combo avansate și strategii automate** (configurabil per combo sau prin prefixe `auto/*` - vezi [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Strategii avansate pentru combinații și rutare automată** (configurabile pentru fiecare combinație sau prin prefixe `auto/*` — consultați [AUTO-COMBO.md](../routing/AUTO-COMBO.md)):
 
-- `priority` — ordine strictă, niciodată round-robins
-- `weighted` — trafic proporțional împărțit în funcție de ponderile pe model
-- `fill-first` — goliți primul model până când atingeți limitele
+- `priority` — ordine strictă, fără utilizarea strategiei round-robin
+- `weighted` — împărțire proporțională a traficului în funcție de ponderile fiecărui model
+- `fill-first` — utilizează primul model până la atingerea limitelor
 - `round-robin` / `strict-random` / `random`
-- `p2c` (Puterea celor două opțiuni)
+- `p2c` (Puterea a două opțiuni)
 - `least-used` și `cost-optimized`
-- `auto` — bazat pe scor pentru toți candidații
-- `lkgp` (Ultimul furnizor bun cunoscut) — fixează ultimul furnizor de succes, apoi revine la reguli
+- `auto` — rutare bazată pe scor pentru toți candidații
+- `lkgp` (Ultimul furnizor cunoscut ca funcțional) — menține rutarea către ultimul furnizor care a răspuns cu succes, apoi revine la reguli
 - `context-optimized` — alege modelul cu cea mai mare fereastră de context liberă
-- `context-relay` — înlănțuiește modele de context lung pentru virajele ulterioare
+- `context-relay` — înlănțuie modele cu context extins pentru interacțiunile ulterioare
 
-#### Antet de sesiune lipicios extern
+#### Antet extern pentru sesiuni persistente
 
-Pentru afinitatea sesiunii externe (de exemplu, agenți Claude Code/Codex din spatele proxy-urilor inverse), trimiteți:
+Pentru afinitatea externă a sesiunilor (de exemplu, agenți Claude Code/Codex aflați în spatele unor proxy-uri inverse), trimiteți:
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute acceptă, de asemenea, `x_session_id` și returnează cheia de sesiune efectivă în `X-OmniRoute-Session-Id`.
+OmniRoute acceptă și `x_session_id` și returnează cheia efectivă a sesiunii în `X-OmniRoute-Session-Id`.
 
-Dacă utilizați Nginx și trimiteți antete pentru formulare de subliniere, activați:
+Dacă utilizați Nginx și trimiteți antete care conțin caractere de subliniere, activați:
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### Aliasuri ale modelului wildcard
+#### Aliasuri de modele cu metacaractere
 
-Creați modele de metacara pentru a remapa numele modelelor:
+Creați tipare cu metacaractere pentru a remapa numele modelelor:
 
 ```
-Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
-Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
+Tipar: claude-sonnet-*     →  Țintă: cc/claude-sonnet-4-6
+Tipar: gpt-*               →  Țintă: gh/gpt-5.3-codex
 ```
 
-Wildcardurile acceptă `*` (orice caractere) și `?` (un singur caracter).
+Metacaracterele acceptă `*` (orice caractere) și `?` (un singur caracter).
 
 #### Lanțuri de rezervă
 
-Definiți lanțuri globale de rezervă care se aplică tuturor solicitărilor:
+Definiți lanțuri globale de rezervă care se aplică tuturor cererilor:
 
 ```
-Chain: production-fallback
+Lanț: production-fallback
   1. cc/claude-opus-4-7
   2. gh/gpt-5.3-codex
   3. glm/glm-4.7
@@ -926,22 +951,22 @@ Chain: production-fallback
 
 ---
 
-### Combinații comune de furnizori și modele de rutare
+### Combinații uzuale de furnizori și modele de rutare
 
-Iată exemple de modele pentru combinarea mai multor furnizori și rutarea între ei în OmniRoute:
+Mai jos sunt exemple de modele pentru combinarea mai multor furnizori și rutarea între aceștia în OmniRoute:
 
-#### 1. Combo de agent de codare: raționament de vârf cu Cost/Speed Fallback
+#### 1. Combinație pentru agenți de programare: raționament avansat cu soluție de rezervă pentru cost/viteză
 
-Ideal pentru agenți de codificare (OpenCode, Claude Code, Cursor, Cline). Rute inițial către modele de raționament de frontieră, revenind la modele de codificare rapidă privind epuizarea cotelor sau erori.
+Ideală pentru agenții de programare (OpenCode, Claude Code, Cursor, Cline). Rutează inițial către modele de raționament de ultimă generație, trecând la modele rapide pentru programare în cazul epuizării cotei sau apariției erorilor.
 
-- **Bord** : Combo → Nou Combo → Nume: `agent-coding` → Strategie: `Priority`
-- **Modele** :
-  1. `claude/claude-sonnet-4-6` (agent de codificare primar)
-  2. `openai/gpt-4o` (backup secundar de mare capacitate)
-  3. `deepseek/deepseek-v4-flash` (funcție de rezervă de înaltă eficiență, rentabilă)
+- **Tablou de bord**: Combos → New Combo → Name: `agent-coding` → Strategy: `Priority`
+- **Modele**:
+  1. `claude/claude-sonnet-4-6` (Agent principal de programare)
+  2. `openai/gpt-4o` (Soluție de rezervă secundară, de mare capacitate)
+  3. `deepseek/deepseek-v4-flash` (Soluție de rezervă de înaltă eficiență și rentabilă)
 
 ```bash
-# Example via API
+# Exemplu prin API
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
@@ -956,174 +981,178 @@ curl -X POST http://localhost:20128/api/combos \
   }'
 ```
 
-#### 2. Combo de failover automat la nivel gratuit
+#### 2. Combinație cu failover automat pentru nivelul gratuit
 
-Conectează mai mulți furnizori gratuit și fără cheie pentru a maximiza timpul de funcționare fără costuri API.
+Înlănțuie mai mulți furnizori cu nivel gratuit și fără cheie pentru a maximiza disponibilitatea fără costuri pentru API.
 
-- **Strategie** : `Least Used` sau `Round Robin` (distribuie încărcarea pe cote)
-- **Modele** :
+- **Strategie**: `Least Used` sau `Round Robin` (distribuie sarcina între cote)
+- **Modele**:
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
   3. `cerebras/gpt-oss-120b`
 
 ```bash
-# Example via CLI
+# Exemplu prin CLI
 omniroute combo create free-stack \
   --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
   --strategy round-robin
 ```
 
-#### 3. Multimodal / Vision & Text Pipeline
+#### 3. Flux multimodal / de procesare a imaginilor și textului
 
-Împerecherea modelelor de viziune specializate cu generarea de text de mare viteză pentru fluxuri de lucru care implică înțelegerea imaginilor și generarea de cod.
+Asocierea modelelor specializate în procesarea imaginilor cu generarea de text de mare viteză pentru fluxuri de lucru care implică înțelegerea imaginilor și generarea de cod.
 
-- **Model** : O combinație `Priority` care listează mai întâi modelele capabile de viziune și ultimul model text/code cu randament ridicat.
-- **Modele** :
-  1. `gemini/gemini-2.5-pro` (înțelegere puternică image/multimodal )
-  2. `openai/gpt-4o` (viziunea echilibrată și utilizarea instrumentelor)
-  3. `deepseek/deepseek-v4-flash` (generația Text/code )
+- **Model de utilizare**: O combinație `Priority` care listează mai întâi modelele capabile să proceseze imagini și la final un model cu debit ridicat pentru text/cod.
+- **Modele**:
+  1. `gemini/gemini-2.5-pro` (Înțelegere avansată a imaginilor și a conținutului multimodal)
+  2. `openai/gpt-4o` (Procesare echilibrată a imaginilor și utilizare a instrumentelor)
+  3. `deepseek/deepseek-v4-flash` (Generare de text/cod)
 
 ---
 
 ### Reziliență și întrerupătoare de circuit
 
-Configurați prin** Tabloul de bord → Setări → Reziliență** .
+Configurați prin **Panou de control → Setări → Reziliență**.
 
-OmniRoute implementează rezistența la nivel de furnizor cu cinci componente:
+OmniRoute implementează reziliența la nivel de furnizor prin cinci componente:
 
-1. **Solicitare coadă și ritm** — Formarea cererilor la nivel de sistem:
-   - **Solicitări pe minut (RPM)** — Numărul maxim de solicitări pe minut per cont
-   - **Timp minim între solicitări** — Intervalul minim în milisecunde între solicitări
-   - **Max solicitări simultane** — Numărul maxim de solicitări simultane pe cont
+1. **Coadă de solicitări și ritmare** — Modelarea solicitărilor la nivel de sistem:
+   - **Solicitări pe minut (RPM)** — Numărul maxim de solicitări pe minut pentru fiecare cont
+   - **Timp minim între solicitări** — Intervalul minim, în milisecunde, dintre solicitări
+   - **Număr maxim de solicitări simultane** — Numărul maxim de solicitări simultane pentru fiecare cont
 
-2. **Răcirea conexiunii** — Configurație de tip per-auth pentru o singură conexiune după erori care pot fi reîncercate:
-   - **Răcire de bază** — Fereastra de răcire implicită pentru eșecurile din amonte care pot fi reîncercate
-   - **Utilizați sfaturi de reîncercare în amonte** — Onorează `Retry-After` autorizat sau indicii de resetare atunci când sunt furnizate
-   - **Pași de retragere maximă** — Nivelul maxim de retragere exponențială pentru defecțiuni repetate
+2. **Perioadă de așteptare a conexiunii** — Configurare pentru fiecare tip de autentificare al unei singure conexiuni, după erori care permit reîncercarea:
+   - **Perioadă de așteptare de bază** — Fereastra implicită de așteptare pentru erorile serviciilor din amonte care permit reîncercarea
+   - **Utilizarea indicațiilor de reîncercare din amonte** — Respectă indicațiile furnizate de sursa autorizată prin `Retry-After` sau cele de resetare, atunci când sunt disponibile
+   - **Număr maxim de pași pentru temporizare progresivă** — Nivelul maxim de temporizare exponențială pentru erori repetate
 
-3. **Furnizor Circuit Breaker** — Urmărește eșecurile furnizorului de la capăt la capăt, marchează un furnizor degradat la pragul de avertizare configurat și deschide întrerupătorul atunci când este atins pragul de eșec configurat:
-   - **Pragul de degradare** — Eșecuri consecutive ale furnizorului înainte de a introduce `DEGRADED`
-   - **Pragul de eșec** — Eșecuri consecutive ale furnizorului înainte de a introduce `OPEN`
-   - **Reset Timeout** — Fereastra de timp înainte ca furnizorul să fie testat din nou
-   - **CLOSED** (Sanatoasa) — Cererile curg normal
-   - **DEGRADED** — Solicitările continuă să curgă în timp ce eșecurile ridicate sunt urmărite
-   - **OPEN** — Furnizorul este blocat temporar după defecțiuni repetate
-   - **HALF_OPEN** — Testarea dacă furnizorul și-a revenit
+3. **Întrerupătorul de circuit al furnizorului** — Urmărește erorile complete ale furnizorului, marchează un furnizor ca degradat la atingerea pragului de avertizare configurat și deschide întrerupătorul când este atins pragul de eroare configurat:
+   - **Prag de degradare** — Numărul de erori consecutive ale furnizorului înainte de intrarea în starea `DEGRADED`
+   - **Prag de eroare** — Numărul de erori consecutive ale furnizorului înainte de intrarea în starea `OPEN`
+   - **Timp de așteptare pentru resetare** — Intervalul de timp înainte ca furnizorul să fie testat din nou
+   - **CLOSED** (Funcțional) — Solicitările sunt procesate normal
+   - **DEGRADED** — Solicitările continuă să fie procesate în timp ce este monitorizat numărul crescut de erori
+   - **OPEN** — Furnizorul este blocat temporar după erori repetate
+   - **HALF_OPEN** — Se testează dacă furnizorul și-a revenit
 
-   Limitele de rată `429` stabilite pentru conexiune rămân în vigoare** Răcirea conexiunii** și nu contați pentru întrerupătorul furnizorului.
+   Limitările de rată `429` aferente conexiunilor rămân în **Perioada de așteptare a conexiunii** și nu sunt luate în calcul de întrerupătorul furnizorului.
 
-   Starea de rulare a întreruptorului furnizorului este afișată** Tabloul de bord → Health** numai.
+   Starea de execuție a întrerupătorului furnizorului este afișată numai în **Panou de control → Stare de funcționare**.
 
-4. **Așteptați răcirea** — Dacă fiecare conexiune candidată se răcește deja, OmniRoute poate aștepta cea mai devreme rece și poate reîncerca automat aceeași cerere de client.
+4. **Așteptarea încheierii perioadei de așteptare** — Dacă toate conexiunile candidate se află deja într-o perioadă de așteptare, OmniRoute poate aștepta încheierea celei mai apropiate perioade și poate reîncerca automat aceeași solicitare a clientului.
 
-5. **Detectare automată a limitei ratei** — Când furnizorii din amonte returnează ferestre de așteptare explicite, acele indicii înlocuiesc timpul de răcire a conexiunii locale atunci când setarea este activată.
+5. **Detectarea automată a limitării ratei** — Când furnizorii din amonte returnează ferestre explicite de așteptare, aceste indicații suprascriu perioada locală de așteptare a conexiunii dacă setarea este activată.
 
-**Sfat pro:** Utilizați** Sănătate** pagina pentru a inspecta și a reseta întreruptoarele live ale furnizorului după o întrerupere. Pagina Reziliență modifică doar configurația.
+**Sfat util:** Utilizați pagina **Stare de funcționare** pentru a inspecta și reseta întrerupătoarele active ale furnizorilor după o întrerupere. Pagina Reziliență modifică numai configurația.
 
 ---
 
-### Export / Import baze de date
+### Exportarea/importarea bazei de date
 
-Gestionați backup-urile bazei de date în** Tabloul de bord → Setări → Sistem și stocare** .
+Gestionați copiile de rezervă ale bazei de date în **Panou de control → Setări → Sistem și stocare**.
 
-| Acţiune                       | Descriere                                                                                                                                                                             |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Exportați baza de date**    | Descarcă baza de date SQLite curentă ca fișier `.sqlite`                                                                                                                              |
-| **Exportați toate (.tar.gz)** | Descărcă o arhivă de rezervă completă, inclusiv: bază de date, setări, combinații, conexiuni la furnizor (fără acreditări), metadatele cheii API                                      |
-| **Importă baza de date**      | Încărcați un fișier `.sqlite` pentru a înlocui baza de date curentă. O copie de rezervă pre-import este creată automat, cu excepția cazului în care `DISABLE_SQLITE_AUTO_BACKUP=true` |
+| Acțiune                           | Descriere                                                                                                                                                                                      |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Exportarea bazei de date**      | Descarcă baza de date SQLite curentă ca fișier `.sqlite`                                                                                                                                       |
+| **Exportarea completă (.tar.gz)** | Descarcă o arhivă completă de rezervă care include: baza de date, setările, combinațiile, conexiunile furnizorilor (fără date de autentificare), metadatele cheilor API                        |
+| **Importarea bazei de date**      | Încarcă un fișier `.sqlite` pentru a înlocui baza de date curentă. O copie de rezervă anterioară importului este creată automat, cu excepția cazului în care `DISABLE_SQLITE_AUTO_BACKUP=true` |
 
 ```bash
-# API: Export database
+# API: Exportarea bazei de date
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: Export all (full archive)
+# API: Exportarea completă (arhivă completă)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: Import database
+# API: Importarea bazei de date
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**Validare import:** Fișierul importat este validat pentru integritate (verificare SQLite pragma), tabelele necesare (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) și dimensiune (maxim 100 MB).
+**Validarea importului:** Fișierul importat este validat în privința integrității (verificare prin pragma SQLite), a tabelelor obligatorii (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) și a dimensiunii (maximum 100 MB).
 
 **Cazuri de utilizare:**
 
-- Migrați OmniRoute între mașini
-- Creați copii de rezervă externe pentru recuperarea în caz de dezastru
-- Partajați configurațiile între membrii echipei (exportați toate arhivele de partajare → )
+- Migrarea OmniRoute între sisteme
+- Crearea unor copii de rezervă externe pentru recuperarea în caz de dezastru
+- Partajarea configurațiilor între membrii echipei (exportare completă → partajarea arhivei)
 
 ---
 
-### Tabloul de bord pentru setări
+### Panoul de control pentru setări
 
-Pagina de setări este organizată în** 7 file** pentru navigare usoara:
+Pagina de setări este organizată în **7 file** pentru o navigare ușoară:
 
-| Tab            | Cuprins                                                                                                                                                                        |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **General**    | Instrumente de stocare a sistemului, comportament implicit, vizibilitatea tunelului endpoint                                                                                   |
-| **Aspect**     | Controale ale temei (light/dark/system), vizibilitate din bara laterală, comutări de panou pentru cardurile de tunel Cloudflare/Tailscale/ngrok                                |
-| **AI**         | Bugetul de gândire (passthrough / auto-strip / personalizat / adaptiv - vezi [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), prompt de sistem global, prompt statistici cache    |
-| **Securitate** | setări Login/Password, control acces IP, autentificare API pentru `/models`, blocare furnizor, protecție pentru injecție promptă                                               |
-| **Dirijare**   | Strategie de rutare globală (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), aliasuri de model cu wildcard, lanțuri de rezervă, setări implicite combo |
-| **Reziliență** | Coada de solicitări, răcirea conexiunii, configurarea întrerupătorului furnizorului și comportamentul de așteptare pentru răcire                                               |
-| **Avansat**    | Configurație globală de proxy (HTTP/SOCKS5), înlocuiri de proxy pentru fiecare furnizor                                                                                        |
+| Filă           | Conținut                                                                                                                                                                                                                          |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Generale**   | Instrumente de stocare ale sistemului, comportament implicit, vizibilitatea tunelurilor Endpoint                                                                                                                                  |
+| **Aspect**     | Controale pentru temă (luminoasă/întunecată/sistem), vizibilitatea barei laterale, comutatoare de panou pentru cardurile tunelurilor Cloudflare/Tailscale/ngrok                                                                   |
+| **IA**         | Buget de raționare (transmitere / eliminare automată / personalizat / adaptiv — consultați [THINKING_BUDGET.md](./THINKING_BUDGET.md)), prompt global de sistem, statistici cache pentru prompturi                                |
+| **Securitate** | Setări de autentificare/parolă, controlul accesului IP, autentificare API pentru `/models`, blocarea furnizorilor, protecție împotriva injectării de prompturi                                                                    |
+| **Rutare**     | Strategie globală de rutare (Completare prioritară / Round Robin / P2C / Aleatoriu / Cel mai puțin utilizat / Optimizat pentru cost), aliasuri de modele cu metacaractere, lanțuri de rezervă, valori implicite pentru combinații |
+| **Reziliență** | Coadă de cereri, perioadă de așteptare pentru conexiuni, configurarea întrerupătorului pentru furnizori și comportamentul de așteptare a perioadei de răcire                                                                      |
+| **Avansate**   | Configurarea globală a proxy-ului (HTTP/SOCKS5), suprascrieri ale proxy-ului pentru fiecare furnizor                                                                                                                              |
 
-General nu mai dublează înregistrările doar pentru citire și notele din cache. Setările de reținere și optimizare a bazei de date sunt menținute prin `/api/settings/database`; ștergerea manuală a memoriei cache folosește `DELETE /api/cache`. Limitele rândurilor de jurnal de solicitare și proxy sunt controlate de `CALL_LOGS_TABLE_MAX_ROWS` și `PROXY_LOGS_TABLE_MAX_ROWS`.
+Secțiunea Generale nu mai duplică notele doar în citire privind jurnalizarea și memoria cache. Setările pentru păstrarea și
+optimizarea bazei de date sunt salvate prin `/api/settings/database`; golirea manuală a memoriei cache utilizează
+`DELETE /api/cache`. Limitele numărului de rânduri pentru jurnalele de cereri și proxy sunt controlate de
+`CALL_LOGS_TABLE_MAX_ROWS` și `PROXY_LOGS_TABLE_MAX_ROWS`.
 
 ---
 
-### Managementul costurilor și bugetului
+### Gestionarea costurilor și a bugetelor
 
-Acces prin** Tabloul de bord → Costuri** .
+Accesați prin **Panou de control → Costuri**.
 
-| Tab         | Scop                                                                                                         |
-| ----------- | ------------------------------------------------------------------------------------------------------------ |
-| **Buget**   | Setați limite de cheltuieli pentru fiecare cheie API cu bugete daily/weekly/monthly și urmărire în timp real |
-| **Prețuri** | Vizualizați și editați intrările de prețuri ale modelului - cost pe 1K jetoane input/output per furnizor     |
+| Filă        | Scop                                                                                                                          |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Buget**   | Setați limite de cheltuieli pentru fiecare cheie API, cu bugete zilnice/săptămânale/lunare și monitorizare în timp real       |
+| **Prețuri** | Vizualizați și editați intrările de preț pentru modele — cost per 1.000 de tokenuri de intrare/ieșire pentru fiecare furnizor |
 
 ```bash
-# API: Set a budget
+# API: Setați un buget
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: Get current budget status
+# API: Obțineți starea actuală a bugetului
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Urmărirea costurilor:** Fiecare solicitare înregistrează utilizarea simbolurilor și calculează costul folosind tabelul de prețuri. Vedeți defecțiuni în** Tabloul de bord → Utilizare** după furnizor, model și cheie API.
+**Monitorizarea costurilor:** Fiecare cerere înregistrează utilizarea tokenurilor și calculează costul folosind tabelul de prețuri. Vizualizați defalcările în **Panou de control → Utilizare**, după furnizor, model și cheie API.
 
 ---
 
 ### Transcriere audio
 
-OmniRoute acceptă transcrierea audio prin punctul final compatibil cu OpenAI:
+OmniRoute acceptă transcrierea audio prin endpointul compatibil OpenAI:
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# Example with curl
+# Exemplu cu curl
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` este ruta nativă Deepgram și are nevoie de o cheie Deepgram API. Dacă este configurat numai OpenRouter, utilizați `openrouter/deepgram/nova-3`.
+`deepgram/nova-3` este ruta nativă Deepgram și necesită o cheie API Deepgram.
+Dacă este configurat numai OpenRouter, utilizați `openrouter/deepgram/nova-3`.
 
-**Speech-to-Text (transcriere)** furnizori:
+Furnizori pentru **conversia vorbirii în text (transcriere)**:
 
-- `openai/` (compatibil cu șoaptă)
+- `openai/` (compatibil cu Whisper)
 - `groq/` (Groq Whisper Turbo)
 - `deepgram/` (familia Nova)
 - `assemblyai/`
-- `nvidia/` (Parakeet, Canare)
-- `huggingface/` (variante șoaptă)
+- `nvidia/` (Parakeet, Canary)
+- `huggingface/` (variante Whisper)
 - `qwen/`
 
-**Text-to-speech (`POST /v1/audio/speech`)** furnizori:
+Furnizori pentru **conversia textului în vorbire (`POST /v1/audio/speech`)**:
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
@@ -1144,41 +1173,51 @@ Formate audio acceptate pentru transcriere: `mp3`, `wav`, `m4a`, `flac`, `ogg`, 
 
 ---
 
-### Strategii de echilibrare combinate
+### Strategii de echilibrare a combinațiilor
 
-Configurați echilibrarea per-combo în** Tabloul de bord → Combo → Create/Edit → Strategie** .
+Configurați echilibrarea pentru fiecare combinație în **Panou de control → Combinații → Creare/Editare → Strategie**.
 
-| Strategie                    | Descriere                                                                             |
-| ---------------------------- | ------------------------------------------------------------------------------------- |
-| **Round-Robin**              | Se rotește succesiv prin modele                                                       |
-| **Prioritate**               | Încearcă întotdeauna primul model; cade înapoi doar din greșeală                      |
-| **Aleatoriu**                | Alege un model aleatoriu din combo pentru fiecare cerere                              |
-| **ponderat**                 | Rute proporționale pe baza greutăților atribuite per model                            |
-| **Cel mai puțin folosit**    | Rute către modelul cu cele mai puține solicitări recente (folosește valori combinate) |
-| **Optimizat pentru costuri** | Rute către cel mai ieftin model disponibil (folosește tabelul de prețuri)             |
+| Strategie                  | Descriere                                                                                  |
+| -------------------------- | ------------------------------------------------------------------------------------------ |
+| **Round-Robin**            | Parcurge modelele secvențial                                                               |
+| **Prioritate**             | Încearcă întotdeauna primul model; recurge la rezervă numai în caz de eroare               |
+| **Aleatoriu**              | Alege un model aleatoriu din combinație pentru fiecare cerere                              |
+| **Ponderat**               | Rutează proporțional pe baza ponderilor atribuite fiecărui model                           |
+| **Cel mai puțin utilizat** | Rutează către modelul cu cele mai puține cereri recente (utilizează metricile combinației) |
+| **Optimizat pentru cost**  | Rutează către cel mai ieftin model disponibil (utilizează tabelul de prețuri)              |
 
-Pot fi setate setările implicite globale pentru combo** Dashboard → Settings → Routing → Combo Defaults** . Timeout-urile țintă combinate moștenesc în mod prestabilit timpul de expirare a solicitării curente. Utilizare** Timeout țintă (secunde)** pentru setările implicite de combo sau pentru o combo individuală numai atunci când o limită mai scurtă pe țintă ar trebui să declanșeze o rezervă mai rapidă.
+Valorile implicite globale pentru combinații pot fi setate în **Panou de control → Setări → Rutare → Valori implicite pentru combinații**.
+În mod implicit, timpii de expirare ai țintelor combinației moștenesc timpul de expirare curent al cererii. Utilizați **Timp de expirare al țintei
+(secunde)** în valorile implicite pentru combinații sau într-o combinație individuală numai atunci când o limită mai scurtă pentru fiecare țintă ar trebui
+să declanșeze mai rapid trecerea la rezerva următoare.
 
-Optimizările combinate cu latență zero sunt opt-in. Pleacă** Optimizări cu latență zero** dezactivat pentru a împiedica aceste caracteristici de latență să concureze ținte de rezervă, să omite ținte pe baza istoricului TTFT sau să comprima solicitările de rezervă; activarea acestuia permite acoperirea configurată, ochiurile TTFT predictive și compresia proactivă de rezervă pentru a tranzacționa fidelitatea routing/request pentru o latență mai mică.
+Optimizările cu latență zero sunt opționale. Lăsați **Optimizări cu latență zero** dezactivate pentru
+a împiedica aceste funcționalități de latență să lanseze în paralel țintele de rezervă, să omită ținte pe baza istoricului
+TTFT sau să comprime cererile de rezervă; activarea permite lansarea speculativă configurată, omiterile predictive bazate pe TTFT
+și comprimarea proactivă a rezervelor, sacrificând fidelitatea rutării/cererii în favoarea unei latențe de coadă mai mici.
 
-Dezactivați** Tampon pentru token de raționament** atunci când furnizorii din amonte solicită limite stricte `max_tokens` / `maxOutputTokens`. Când este activată, rutarea combinată adaugă doar un spațiu liber pentru modelul de raționament pentru modelele cu o limită de ieșire cunoscută și lasă neschimbată limita de simboluri client atunci când valoarea tamponului sigur ar depăși această limită. Dacă limita clientului este deja peste o limită cunoscută, OmniRoute o limitează la acel plafon înainte de a trimite cererea în amonte.
+Dezactivați **Memoria tampon pentru tokenuri de raționament** atunci când furnizorii din amonte impun limite stricte pentru
+`max_tokens` / `maxOutputTokens`. Când este activată, rutarea combinată adaugă spațiu suplimentar pentru modelele de raționament
+doar în cazul modelelor cu o limită de ieșire cunoscută și lasă neschimbată limita de tokenuri a clientului atunci când
+valoarea sigură cu memorie tampon ar depăși limita respectivă. Dacă limita clientului depășește deja o limită cunoscută,
+OmniRoute o reduce la acea limită înainte de a trimite cererea în amonte.
 
 ---
 
-### Tabloul de bord pentru sănătate
+### Panoul de monitorizare a stării
 
-Acces prin** Tabloul de bord → Health** . Prezentare generală a stării sistemului în timp real cu 6 carduri:
+Accesați-l prin **Panou de control → Stare**. Prezentare generală în timp real a stării sistemului, cu 6 carduri:
 
-| Card                       | Ce arată                                                                  |
-| -------------------------- | ------------------------------------------------------------------------- |
-| **Stare sistem**           | Uptime, versiune, utilizare a memoriei, director de date                  |
-| **Sanatatea furnizorului** | Starea de funcționare a întreruptorului de circuit al furnizorului global |
-| **Limite de rate**         | Conexiuni active pentru fiecare cont cu timpul rămas                      |
-| **Blocări active**         | Blocări active în funcție de model și excluderi temporare                 |
-| **Cache pentru semnături** | Statistici cache de deduplicare (chei active, rata de accesare)           |
-| **Telemetria latenței**    | agregarea latenței p50/p95/p99 per furnizor                               |
+| Card                    | Ce afișează                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------------ |
+| **Starea sistemului**   | Timpul de funcționare, versiunea, utilizarea memoriei, directorul de date            |
+| **Starea furnizorilor** | Starea de execuție a întrerupătorului global de circuit al furnizorilor              |
+| **Limite de rată**      | Perioadele de așteptare active ale conexiunilor pentru fiecare cont, cu timpul rămas |
+| **Blocări active**      | Blocările active specifice modelelor și excluderile temporare                        |
+| **Cache de semnături**  | Statisticile cache-ului de deduplicare (chei active, rata de accesări)               |
+| **Telemetria latenței** | Agregarea latenței p50/p95/p99 pentru fiecare furnizor                               |
 
-**Sfat pro:** Pagina Sănătate se reîmprospătează automat la fiecare 10 secunde. Utilizați cardul de întrerupător pentru a identifica furnizorii care se confruntă cu probleme.
+**Sfat util:** Pagina Stare se reîmprospătează automat la fiecare 10 secunde. Utilizați cardul întrerupătorului de circuit pentru a identifica furnizorii care întâmpină probleme.
 
 ---
 

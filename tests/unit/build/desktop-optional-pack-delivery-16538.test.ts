@@ -16,7 +16,7 @@ import { test } from "node:test";
 import * as yaml from "js-yaml";
 
 const root = path.resolve(import.meta.dirname, "../../..");
-type Step = { name?: string; uses?: string; run?: string; with?: { files?: string } };
+type Step = { name?: string; uses?: string; run?: string };
 const workflow = yaml.load(
   readFileSync(path.join(root, ".github/workflows/electron-release.yml"), "utf8")
 ) as {
@@ -86,19 +86,27 @@ test("Electron release collection preserves the generated browser-runtime pack",
   }
 });
 
-test("Electron release attachment selection includes browser-runtime tarballs", () => {
-  const release = workflow.jobs.release.steps.find((s) =>
-    s.uses?.startsWith("softprops/action-gh-release@")
-  );
-  const patterns = release?.with?.files?.split(/\s+/).filter(Boolean) ?? [];
-  assert.ok(
-    patterns.some((pattern) => path.matchesGlob("release-assets/OmniRoute.AppImage", pattern)),
-    "installer control published"
-  );
-  assert.ok(
-    patterns.some((pattern) =>
-      path.matchesGlob("release-assets/optional-pack-browser-runtime.tar.gz", pattern)
-    ),
-    "collected browser-runtime pack must be selected for GitHub release upload"
-  );
+test("Electron release attachment selection includes browser-runtime tarballs", async () => {
+  const release = workflow.jobs.release.steps.find((s) => s.name === "Create Release");
+  assert.equal(release?.run, "node scripts/release/upload-desktop-assets.mjs");
+  const { desktopAssets } = await import("../../../scripts/release/upload-desktop-assets.mjs");
+  const fixture = mkdtempSync(path.join(tmpdir(), "desktop-pack-selection-"));
+  try {
+    for (const name of [
+      "OmniRoute.AppImage",
+      "optional-pack-browser-runtime.tar.gz",
+      "unrelated.tar.gz",
+    ]) {
+      writeFileSync(path.join(fixture, name), "fixture");
+    }
+    const selected = desktopAssets(fixture).map((file: string) => path.basename(file));
+    assert.ok(selected.includes("OmniRoute.AppImage"), "installer control published");
+    assert.ok(
+      selected.includes("optional-pack-browser-runtime.tar.gz"),
+      "collected browser-runtime pack must be selected for GitHub release upload"
+    );
+    assert.equal(selected.includes("unrelated.tar.gz"), false, "selection stays an allowlist");
+  } finally {
+    rmSync(fixture, { recursive: true, force: true });
+  }
 });

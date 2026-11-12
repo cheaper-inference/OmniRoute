@@ -7,12 +7,14 @@ import http from "node:http";
 import net from "node:net";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { drainTestWorkers } from "../_helpers/forkedTestWorkers.mjs";
 import { stopTestProcess } from "../_helpers/stopTestProcess.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-batch-e2e-rl-"));
 const REPO_ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const RELAY_PORT = await getFreePort();
 const SERVER_PORT = await getFreePort();
+const TEST_API_KEY_SECRET = "batch-e2e-rl-secret";
 
 type FileUploadResponse = {
   id?: string;
@@ -170,29 +172,40 @@ function createServerProcess() {
   // loopback peer, and locality comes from the TCP-peer stamp that only the custom server in
   // run-next.mjs writes. Bare `next dev` (run-next-playwright.mjs) has no stamp, so they fail
   // closed with 401 — the same trap #11535 and #14403 fixed in the protocol and ecosystem harnesses.
-  const child = spawn(process.execPath, ["scripts/dev/run-next.mjs", "dev"], {
-    cwd: REPO_ROOT,
-    env: {
-      ...process.env,
-      DATA_DIR: TEST_DATA_DIR,
-      PORT: String(SERVER_PORT),
-      DASHBOARD_PORT: String(SERVER_PORT),
-      API_PORT: String(SERVER_PORT),
-      HOST: "127.0.0.1",
-      REQUIRE_API_KEY: "false",
-      API_KEY_SECRET: "batch-e2e-rl-secret",
-      DISABLE_SQLITE_AUTO_BACKUP: "true",
-      INITIAL_PASSWORD: "",
-      NEXT_TELEMETRY_DISABLED: "1",
-      OMNIROUTE_E2E_BOOTSTRAP_MODE: "open",
-      OMNIROUTE_DISABLE_BACKGROUND_SERVICES: "false",
-      OMNIROUTE_DISABLE_TOKEN_HEALTHCHECK: "true",
-      OMNIROUTE_DISABLE_LOCAL_HEALTHCHECK: "true",
-      OMNIROUTE_HIDE_HEALTHCHECK_LOGS: "true",
-      PATH: process.env.PATH,
-    },
-    stdio: ["ignore", "pipe", "pipe"],
-  });
+  const child = spawn(
+    process.execPath,
+    [
+      "--max-old-space-size=8192",
+      "--import",
+      "./tests/_helpers/forkedTestWorkers.mjs",
+      "scripts/dev/run-next.mjs",
+      "dev",
+    ],
+    {
+      cwd: REPO_ROOT,
+      env: {
+        ...process.env,
+        DATA_DIR: TEST_DATA_DIR,
+        PORT: String(SERVER_PORT),
+        DASHBOARD_PORT: String(SERVER_PORT),
+        API_PORT: String(SERVER_PORT),
+        HOST: "127.0.0.1",
+        REQUIRE_API_KEY: "false",
+        API_KEY_SECRET: TEST_API_KEY_SECRET,
+        DISABLE_SQLITE_AUTO_BACKUP: "true",
+        INITIAL_PASSWORD: "",
+        NEXT_TELEMETRY_DISABLED: "1",
+        OMNIROUTE_E2E_BOOTSTRAP_MODE: "open",
+        // The test owns the batch worker separately; catalog/quota jobs must stay off.
+        OMNIROUTE_DISABLE_BACKGROUND_SERVICES: "true",
+        OMNIROUTE_DISABLE_TOKEN_HEALTHCHECK: "true",
+        OMNIROUTE_DISABLE_LOCAL_HEALTHCHECK: "true",
+        OMNIROUTE_HIDE_HEALTHCHECK_LOGS: "true",
+        PATH: process.env.PATH,
+      },
+      stdio: ["ignore", "pipe", "pipe", "ipc"],
+    }
+  );
 
   child.once("exit", (code, signal) => {
     exitInfo = { code, signal };
@@ -217,6 +230,42 @@ function createServerProcess() {
       return exitInfo;
     },
   };
+}
+
+// Run only the real batch processor against the same private SQLite database.
+// Dispatch still traverses the application's loopback HTTP endpoint and the fake relay.
+function createBatchWorker(app: ReturnType<typeof createServerProcess>) {
+  const child = spawn(
+    process.execPath,
+    ["--import", "tsx/esm", "tests/fixtures/batch/process-pending.ts"],
+    {
+      cwd: REPO_ROOT,
+      env: {
+        ...process.env,
+        DATA_DIR: TEST_DATA_DIR,
+        DASHBOARD_PORT: String(SERVER_PORT),
+        API_KEY_SECRET: TEST_API_KEY_SECRET,
+        NODE_ENV: "test",
+        APP_LOG_TO_FILE: "false",
+        DISABLE_SQLITE_AUTO_BACKUP: "true",
+        OMNIROUTE_DISABLE_BACKGROUND_SERVICES: "true",
+      },
+      stdio: ["ignore", "pipe", "pipe"],
+    }
+  );
+  const closed = new Promise<{ code: number | null; signal: NodeJS.Signals | null }>((resolve) =>
+    child.once("close", (code, signal) => resolve({ code, signal }))
+  );
+  for (const [stream, lines] of [
+    [child.stdout, app.stdoutLines],
+    [child.stderr, app.stderrLines],
+  ] as const) {
+    stream.on("data", (chunk) => {
+      lines.push(...String(chunk).split(/\r?\n/).filter(Boolean));
+      if (lines.length > 500) lines.splice(0, lines.length - 500);
+    });
+  }
+  return { child, closed };
 }
 
 async function waitForServer(baseUrl: string, proc: ReturnType<typeof createServerProcess>) {
@@ -279,6 +328,7 @@ const RELAY_BASE = `http://127.0.0.1:${RELAY_PORT}`;
 // through the management API (open bootstrap mode, same path that seeds the
 // provider node) and present it on every `/v1` call below.
 let clientAuthHeaders: Record<string, string> = {};
+let batchWorker: ReturnType<typeof createBatchWorker> | null = null;
 
 test.before(async () => {
   await relay.start();
@@ -320,7 +370,17 @@ test.before(async () => {
 
 test.after(async () => {
   try {
-    if (app) await stopTestProcess(app.child);
+    try {
+      if (batchWorker) await stopTestProcess(batchWorker.child);
+    } finally {
+      if (app) {
+        try {
+          await drainTestWorkers(app.child);
+        } finally {
+          await stopTestProcess(app.child);
+        }
+      }
+    }
   } finally {
     try {
       await relay.stop();
@@ -383,6 +443,27 @@ test("batch E2E: upload file, create batch, verify rate-limit logs appear", asyn
   const batchId = batchBody.id;
   assert.ok(batchId, "batch id missing from create response");
 
+  // Compile the dynamic status route before dispatching items. Compiling it during
+  // the first poll competes with the worker and can exhaust the first item deadline.
+  const readyResponse = await fetch(`${app.baseUrl}/api/v1/batches/${batchId}`, {
+    headers: clientAuthHeaders,
+  });
+  const readyBatch = await readJsonForTest<BatchResponse>(readyResponse, "Batch readiness", app);
+  assert.equal(readyBatch.status, "validating", "The test owns the only batch worker");
+
+  // Next dev compiles this route lazily. Finish compilation before the batch's
+  // production item deadline starts; invalid input never dispatches to a provider.
+  const warmup = await fetch(`${app.baseUrl}/v1/embeddings`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...clientAuthHeaders },
+    body: JSON.stringify({}),
+    signal: AbortSignal.timeout(240_000),
+  });
+  await warmup.arrayBuffer();
+  assert.equal(warmup.status, 400, "The compiled embedding route must reject missing input");
+
+  batchWorker = createBatchWorker(app);
+
   // 3. Poll for batch completion
   let batchStatus = "";
   let attempts = 0;
@@ -390,6 +471,11 @@ test("batch E2E: upload file, create batch, verify rate-limit logs appear", asyn
   const maxAttempts = 120;
   while (attempts < maxAttempts) {
     await sleep(2_000);
+    assert.ok(
+      batchWorker.child.exitCode === null || batchWorker.child.exitCode === 0,
+      `Batch worker exited with code ${batchWorker.child.exitCode}. ${formatServerTail(app)}`
+    );
+    assert.equal(batchWorker.child.signalCode, null, "Batch worker must finish without a signal");
     attempts++;
     const sr = await fetch(`${app.baseUrl}/api/v1/batches/${batchId}`, {
       headers: clientAuthHeaders,
@@ -422,6 +508,19 @@ test("batch E2E: upload file, create batch, verify rate-limit logs appear", asyn
       `Last poll: ${lastPollSummary}\n` +
       `Server [BATCH] logs:\n${[...app.stdoutLines, ...app.stderrLines].filter((l) => l.includes("[BATCH]")).join("\n")}`
   );
+
+  let workerDeadline: NodeJS.Timeout;
+  try {
+    const exit = await Promise.race([
+      batchWorker.closed,
+      new Promise<never>((_, reject) => {
+        workerDeadline = setTimeout(() => reject(new Error("Batch worker did not stop")), 5_000);
+      }),
+    ]);
+    assert.deepEqual(exit, { code: 0, signal: null }, "Batch worker must finish cleanly");
+  } finally {
+    clearTimeout(workerDeadline!);
+  }
 
   // 4. Check server stdout for throttle-related log messages
   const allLogs = [...app.stdoutLines, ...app.stderrLines];

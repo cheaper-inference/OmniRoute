@@ -8,79 +8,78 @@
 
 _နောက်ဆုံးအပ်ဒိတ်လုပ်ထားသည့်ရက်: 2026-06-28_
 
-## အုပ်ချုပ်ရေးအကျဉ်းချုပ်
+## စီမံကိန်း၏အဓိကအချက်အလက်များ
 
-OmniRoute သည် Next.js ပေါ်တွင် တည်ဆောက်ထားသော local AI routing gateway နှင့် dashboard ဖြစ်သည်။
-၎င်းသည် OpenAI-compatible endpoint တစ်ခု (`/v1/*`) ကို ပံ့ပိုးပေးပြီး translation၊ fallback၊ token refresh နှင့် အသုံးပြုမှုခြေရာခံခြင်းတို့ဖြင့် upstream provider အများအပြားအကြား traffic ကို လမ်းကြောင်းခွဲပေးသည်။
+OmniRoute သည် Next.js တွင်တည်ဆောက်ထားသော ပြည်တွင်း AI လမ်းကြောင်းနှင့် ဒက်ရှ်ဘုတ်တစ်ခုဖြစ်သည်။ ၎င်းသည် OpenAI-သဟဇာတဖြစ်သော အဆုံးမှတ် (`/v1/*`) တစ်ခုတည်းကို ပံ့ပိုးပေးပြီး ဘာသာပြန်ခြင်း၊ တုံ့ပြန်ခြင်း၊ တိုကင်ပြန်လည်ဆန်းသစ်ခြင်းနှင့် အသုံးပြုမှုခြေရာခံခြင်းတို့ဖြင့် လမ်းကြောင်းပေးသည်။
 
-အဓိကလုပ်ဆောင်နိုင်စွမ်းများ -
+ပင်မစွမ်းရည်များ-
 
-- CLI/tools များအတွက် OpenAI-compatible API surface (provider 380 ခု၊ executor module 159 ခု)
-- Provider format များအကြား request/response translation
-- Model combo fallback (model အများအပြားပါဝင်သော sequence)
-- Structured combo steps (`provider + model + connection`) နှင့် `compositeTiers` အားဖြင့် runtime ordering
-- Account-level fallback (provider တစ်ခုလျှင် account အများအပြား)
-- Main chat path တွင် quota preflight နှင့် quota-aware P2C account selection
-- OAuth + API-key provider connection စီမံခန့်ခွဲမှု (OAuth provider module 27 ခု)
-- `/v1/embeddings` မှတစ်ဆင့် embedding ထုတ်လုပ်ခြင်း (provider 18 ခု)
-- `/v1/images/generations` မှတစ်ဆင့် ပုံထုတ်လုပ်ခြင်း (provider 10+ ခု၊ model 20+ ခု)
-- `/v1/audio/transcriptions` မှတစ်ဆင့် အသံမှတ်တမ်းပြန်ရေးခြင်း (provider 18 ခု)
-- `/v1/audio/speech` မှတစ်ဆင့် text-to-speech (built-in provider 24 ခု)
-- `/v1/videos/generations` မှတစ်ဆင့် video ထုတ်လုပ်ခြင်း (ComfyUI + SD WebUI)
-- `/v1/music/generations` မှတစ်ဆင့် music ထုတ်လုပ်ခြင်း (ComfyUI)
-- `/v1/search` မှတစ်ဆင့် web search (provider 20 ခု)
-- `/v1/moderations` မှတစ်ဆင့် moderation များ
-- `/v1/rerank` မှတစ်ဆင့် reranking
-- Reasoning model များအတွက် think tag parsing (`<think>...</think>`)
-- Strict OpenAI SDK compatibility အတွက် response sanitization
-- Cross-provider compatibility အတွက် role normalization (developer→system၊ system→user)
-- Structured output conversion (json_schema → Gemini responseSchema)
-- Provider များ၊ key များ၊ alias များ၊ combo များ၊ setting များနှင့် pricing များအတွက် local persistence (DB module 122 ခု)
-- Usage/cost tracking နှင့် request logging
-- Multi-device/state sync အတွက် ရွေးချယ်အသုံးပြုနိုင်သော cloud sync
-- API access control အတွက် IP allowlist/blocklist
-- Thinking budget စီမံခန့်ခွဲမှု (passthrough/auto/custom/adaptive)
-- Global system prompt injection
-- Session tracking နှင့် fingerprinting
-- Provider-specific profile များဖြင့် account တစ်ခုချင်းစီအလိုက် enhanced rate limiting
-- Provider resilience အတွက် circuit breaker pattern
-- Mutex locking ဖြင့် anti-thundering herd ကာကွယ်မှု
-- Signature-based request deduplication cache
-- Domain layer: cost rules၊ fallback policy၊ lockout policy
-- Context Relay: account rotation ဆက်လက်လုပ်ဆောင်နိုင်ရန် session handoff summaries
-- Domain state persistence (fallback များ၊ budget များ၊ lockout များနှင့် circuit breaker များအတွက် SQLite write-through cache)
-- ဗဟိုပြု request evaluation အတွက် policy engine (lockout → budget → fallback)
-- p50/p95/p99 latency aggregation ပါဝင်သော request telemetry
-- `combo_execution_key` / `combo_step_id` မှတစ်ဆင့် combo target telemetry နှင့် ယခင် combo target health
-- End-to-end tracing အတွက် Correlation ID (X-Request-Id)
-- API key တစ်ခုချင်းစီအလိုက် opt-out ပြုလုပ်နိုင်သော compliance audit logging
-- LLM quality assurance အတွက် eval framework
-- Real-time provider circuit breaker status ပါဝင်သော health dashboard
-- MCP Server (tool 110 ခု) နှင့် transport 3 မျိုး (stdio/SSE/Streamable HTTP)
-- Skills နှင့် task lifecycle ပါဝင်သော A2A Server (JSON-RPC 2.0 + SSE)
-- Memory system (extraction၊ injection၊ retrieval၊ summarization)
-- Skills system (registry၊ executor၊ sandbox၊ built-in skills)
-- Certificate management နှင့် DNS handling ပါဝင်သော MITM proxy
-- Prompt injection guard middleware
-- Caveman၊ RTK၊ stacked pipelines၊ compression combos၊ language packs နှင့် analytics ပါဝင်သော prompt compression pipeline
-- ACP (Agent Communication Protocol) registry
-- Modular OAuth provider များ (`src/lib/oauth/providers/` အောက်ရှိ individual module 22 ခု)
-- Uninstall/full-uninstall script များ
-- OAuth environment repair action
-- OpenAI-compatible WS client များအတွက် WebSocket bridge (`/v1/ws`)
-- Sync token စီမံခန့်ခွဲမှု (issue/revoke၊ ETag-versioned config bundle download)
-- GLM Thinking (`glmt`) first-class provider preset
-- Hybrid token counting (provider-side `/messages/count_tokens` နှင့် estimation fallback)
-- Model alias auto-seeding (startup အချိန်တွင် cross-proxy dialect normalization 30+ ခု)
-- SSRF guard၊ private URL blocking နှင့် configurable retry ပါဝင်သော safe outbound fetch
-- Configurable `requestRetry` နှင့် `maxRetryIntervalSec` ပါဝင်သော cooldown-aware chat retries
-- Startup တွင် Zod ဖြင့် runtime environment validation
-- Pagination၊ provider CRUD event များနှင့် SSRF-blocked validation logging ပါဝင်သော compliance audit v2
+- CLI/tools အတွက် OpenAI-သဟဇာတဖြစ်သော API မျက်နှာပြင် (380 ဝန်ဆောင်မှုပေးသူ၊ 162 executor modules)
+- ပံ့ပိုးသူဖော်မတ်များမှတဆင့်Request/response ဘာသာပြန်ဆိုချက်
+- မော်ဒယ်ပေါင်းစည်းမှု နောက်ပြန်ဆုတ်ခြင်း (မော်ဒယ်လ်အစုံ)
+- `compositeTiers` မှ runtime မှာယူခြင်းဖြင့် ဖွဲ့စည်းတည်ဆောက်ထားသော ပေါင်းစပ်အဆင့်များ (`provider + model + connection`)
+- အကောင့်အဆင့် လှည့်ပြန်ခြင်း (ပံ့ပိုးသူ တစ်ဦးလျှင် အကောင့်များစွာ)
+- ပင်မချတ်လမ်းကြောင်းရှိ Quota preflight နှင့် quota-aware P2C အကောင့်ရွေးချယ်ခြင်း။
+- OAuth + API-သော့ပံ့ပိုးပေးသူချိတ်ဆက်မှုစီမံခန့်ခွဲမှု (27 OAuth ပံ့ပိုးပေးသူမော်ဂျူး)
+- `/v1/embeddings` (ဝန်ဆောင်မှုပေးသူ ၁၈ ဦး) မှတစ်ဆင့် မျိုးဆက်ကို မြှုပ်နှံခြင်း
+- `/v1/images/generations` (+ ပံ့ပိုးပေးသူ 10 ဦး၊+ မော်ဒယ် 20) မှတဆင့် ပုံထုတ်လုပ်ခြင်း
+- `/v1/audio/transcriptions` (ဝန်ဆောင်မှုပေးသူ 18 ဦး) မှတစ်ဆင့် အသံမှတ်တမ်းရယူခြင်း
+- `/v1/audio/speech` (24 built-in ပံ့ပိုးပေးသူများ) မှတဆင့် စာတိုပေးပို့ခြင်း
+- `/v1/videos/generations` (ComfyUI + SD WebUI) မှတဆင့် ဗီဒီယိုထုတ်လုပ်ခြင်း
+- `/v1/music/generations` (ComfyUI) မှတဆင့် ဂီတမျိုးဆက်
+- `/v1/search` (ပံ့ပိုးပေးသူ 20) မှတစ်ဆင့် ဝဘ်ရှာဖွေမှု
+- `/v1/moderations` မှတစ်ဆင့် စိစစ်မှုများ
+- `/v1/rerank` မှတဆင့် အဆင့်သတ်မှတ်ခြင်း
+- ကျိုးကြောင်းဆင်ခြင်ခြင်းမော်ဒယ်များအတွက် tag parsing (`<think>...</think>`) ကိုစဉ်းစားပါ။
+- တင်းကျပ်သော OpenAI SDK လိုက်ဖက်ညီမှုအတွက် တုံ့ပြန်သန့်ရှင်းရေးပြုလုပ်ခြင်း။
+- ဝန်ဆောင်မှုပေးသူအချင်းချင်း လိုက်ဖက်ညီမှုအတွက် အခန်းကဏ္ဍပုံမှန်ဖြစ်စေခြင်း (ဆော့ဖ်ဝဲအင်ဂျင်နီယာ→ စနစ်၊ စနစ်→ အသုံးပြုသူ)
+- ဖွဲ့စည်းတည်ဆောက်ထားသော အထွက်နှုန်းပြောင်းလဲခြင်း (json_schema → Gemini responseSchema)
+- ဝန်ဆောင်မှုပေးသူများ၊ သော့များ၊ နာမည်တူများ၊ ပေါင်းစပ်မှုများ၊ ဆက်တင်များ၊ စျေးနှုန်းများ (122 DB မော်ဂျူး) အတွက် ဒေသတွင်း စွဲမြဲနေ
+- Usage/cost ခြေရာခံခြင်းနှင့် သစ်ခုတ်ခြင်းတောင်းဆိုခြင်း။
+- multi-device/state စင့်ခ်အတွက် ရွေးချယ်နိုင်သော cloud ထပ်တူပြုခြင်း။
+- API ဝင်ရောက်ထိန်းချုပ်မှုအတွက်IP allowlist/blocklist
+- တွေးခေါ်ဘတ်ဂျက်စီမံခန့်ခွဲမှု (passthrough/auto/custom/adaptive)
+- ကမ္ဘာလုံးဆိုင်ရာစနစ်မျာ ထိုးဆေး
+- ဆက်ရှင်ခြေရာခံခြင်းနှင့် လက်ဗွေနှိပ်ခြင်း။
+- ဝန်ဆောင်မှုပေးသူ သီးသန့်ပရိုဖိုင်များဖြင့် အကောင့်တစ်ခုချင်းတိုးနှုန်း ကန့်သတ်ချက်
+- ပံ့ပိုးပေးသူ ခံနိုင်ရည်ရှိမှုအတွက် circuit breaker ပုံစံ
+- mutex လော့ခ်ချခြင်းဖြင့် မိုးခြိမ်းသံဆန့်ကျင်သော နွားများကို အကာအကွယ်ပေးသည်။
+- လက်မှတ်အခြေခံ တောင်းဆိုချက် ထုတ်ယူမှု ကက်ရှ်
+- ဒိုမိန်းအလွှာ- ကုန်ကျစရိတ်စည်းမျဉ်းများ၊ နောက်ပြန်ဆွဲမူဝါဒ၊ လော့ခ်ချမှုမူဝါဒ
+- Context Relay- အကောင့်လည်ပတ်မှုအဆက်မပြတ်အတွက် ဆက်ရှင်လက်လွှဲမှု အနှစ်ချုပ်
+- Domain state မြဲမြံမှု (နောက်ပြန်ဆုတ်ခြင်းများအတွက်SQLite ကက်ရှ်မှတဆင့် စာရေးခြင်း၊ ဘတ်ဂျက်များ၊ လော့ခ်ချမှုများ၊ ဆားကစ်ဖြတ်ပိုင်းများ)
+- ဗဟိုမှတောင်းဆိုမှုအကဲဖြတ်ခြင်းအတွက် မူဝါဒအင်ဂျင် ( → ဘတ်ဂျက် → ဆုတ်ယုတ်မှု)
+- p50/p95/p99 latency စုစည်းမှုဖြင့် telemetry ကို တောင်းဆိုပါ။
+- `combo_execution_key` / `combo_step_id` မှတစ်ဆင့် ပေါင်းစပ်ပစ်မှတ် တယ်လီမီတာနှင့် သမိုင်းဝင် ပေါင်းစပ်ပစ်မှတ် ကျန်းမာရေး
+- အဆုံးမှအဆုံး ခြေရာခံခြင်းအတွက် ဆက်စပ် ID (X-Request-Id)
+- API သော့အလိုက် ဖယ်ထုတ်ခြင်းဖြင့် လိုက်နာမှုစာရင်းစစ် မှတ်တမ်းရယူခြင်း။
+- LLM အရည်အသွေးအာမခံမှုအတွက် Eval မူဘောင်
+- အချိန်နှင့်တစ်ပြေးညီ ပံ့ပိုးပေးသူ circuit breaker အနေအထားပါရှိသော ကျန်းမာရေး ဒက်ရှ်ဘုတ်
+- ပို့ဆောင်မှု 3 ခု (stdio/SSE/Streamable HTTP) ပါရှိသောMCP ဆာဗာ (ကိရိယာ 110)
+- ကျွမ်းကျင်မှုများနှင့် လုပ်ငန်းသက်တမ်းလည်ပတ်မှုနှင့်အတူA2A ဆာဗာ (JSON-RPC 2.0 + SSE)
+- မှတ်ဉာဏ်စနစ် (ထုတ်ယူခြင်း၊ ဆေးထိုးခြင်း၊ ပြန်လည်ထုတ်ယူခြင်း၊ အကျဉ်းချုပ်)
+- ကျွမ်းကျင်မှုစနစ် (registry၊ executor၊ sandbox၊ built-in ကျွမ်းကျင်မှုများ)
+- လက်မှတ်စီမံခန့်ခွဲမှုနှင့် DNS ကိုင်တွယ်မှုနှင့်အတူMITM ပရောက်စီ
+- Injection guard Middleware ကို အချက်ပြပါ။
+- Caveman၊ RTK၊ တန်းစီထားသော ပိုက်လိုင်းများ၊ compression combos၊ language packs နှင့် ခွဲခြမ်းစိတ်ဖြာချက်များဖြင့် အချက်ပြပေးသော ပိုက်လိုင်း
+- ACP (Agent Communication Protocol) မှတ်ပုံတင်ခြင်း
+- Modular OAuth ဝန်ဆောင်မှုပေးသူများ ( `src/lib/oauth/providers/` အောက်တွင် တစ်ဦးချင်းစီ module 22 ခု)
+- Uninstall/full-uninstall ဇာတ်ညွှန်းများ
+- OAuth ပတ်ဝန်းကျင် ပြုပြင်ခြင်း လုပ်ဆောင်ချက်
+- OpenAI-သဟဇာတ WS ဖောက်သည်များအတွက်WebSocket တံတား (`/v1/ws`)
+- စင့်ခ်လုပ်ရန် တိုကင်စီမံခန့်ခွဲမှု (issue/revoke၊ ETag-ဗားရှင်းဖြင့် ပုံစံတူပြင်ဆင်မှုအစုအဝေး ဒေါင်းလုဒ်လုပ်ခြင်း)
+- GLM Thinking (`glmt`) ပထမတန်းစားဝန်ဆောင်မှုပေးသူ ကြိုတင်သတ်မှတ်မှု
+- စပ်ဟပ်တိုကင်ရေတွက်ခြင်း (ခန့်မှန်းခြေပြန်ပြောင်းနှင့်အတူ ဝန်ဆောင်မှုပေးသူဘက်မှ `/messages/count_tokens` )
+- မော်ဒယ်အမည်များ အလိုအလျောက်မျိုးစေ့ချခြင်း (စတင်ချိန်တွင် 30 + အပြန်အလှန် ပရောက်စီ ဒေသိယစကား ပုံမှန်ပြုလုပ်ခြင်း)
+- SSRF အစောင့်၊ သီးသန့် URL ပိတ်ဆို့ခြင်း၊ နှင့် ပြင်ဆင်သတ်မှတ်နိုင်သော ထပ်စမ်းခြင်းဖြင့် ဘေးကင်းသော အပြင်သို့ ထုတ်ယူနိုင်သည်။
+- Cooldown-aware chat သည် configureable `requestRetry` နှင့် `maxRetryIntervalSec` ဖြင့် ပြန်ကြိုးစားသည်။
+- စတင်ချိန်တွင် Zod ဖြင့် Runtime ပတ်ဝန်းကျင် validation
+- pagination၊ ပံ့ပိုးပေးသူ CRUD ဖြစ်ရပ်များနှင့် SSRF-ပိတ်ဆို့ထားသော တရားဝင်အထောက်အထားမှတ်တမ်းနှင့်အတူ လိုက်နာမှုစာရင်းစစ် v2
 
-အဓိက runtime model -
+အဓိက runtime မော်ဒယ်-
 
-- `src/app/api/*` အောက်ရှိ Next.js app routes များသည် dashboard API များနှင့် compatibility API များကို နှစ်မျိုးလုံး အကောင်အထည်ဖော်ပေးသည်
-- `src/sse/*` + `open-sse/*` ရှိ shared SSE/routing core သည် provider execution၊ translation၊ streaming၊ fallback နှင့် usage တို့ကို ကိုင်တွယ်ပေးသည်
+- Next.js အက်ပ်လမ်းကြောင်းများသည် `src/app/api/*` အောက်တွင် ဒက်ရှ်ဘုတ် APIs နှင့် လိုက်ဖက်ညီသော APIs နှစ်ခုလုံးကို အကောင်အထည်ဖော်ပါ။
+- `src/sse/*` + `open-sse/*` တွင် မျှဝေထားသော SSE/routing core သည် ဝန်ဆောင်မှုပေးသူကို လုပ်ဆောင်ခြင်း၊ ဘာသာပြန်ခြင်း၊ တိုက်ရိုက်ထုတ်လွှင့်ခြင်း၊ နောက်ပြန်ဆွဲခြင်းနှင့် အသုံးပြုခြင်းကို ဆောင်ရွက်ပေးသည်
 
 ## ကိုးကားပုံကြမ်းများ
 
@@ -394,22 +393,22 @@ guardrails module သည် PII၊ ချက်ခြင်းထိုးသွ
 
 ### D. Domain Layer
 
-`src/domain/` namespace သည် မူဝါဒဆိုင်ရာ ဆုံးဖြတ်ချက်များကို ဗဟိုချုပ်ကိုင်ထားသောကြောင့် လမ်းကြောင်းကိုင်တွယ်သူများသည် lockout/budget/fallback logic ကို ၎င်းတို့ကိုယ်တိုင် စုဝေးနေရန် မလိုအပ်ပါ။
+`src/domain/` namespace သည် မူဝါဒဆိုင်ရာ ဆုံးဖြတ်ချက်များကို ဗဟိုချုပ်ကိုင်ထားသောကြောင့် လမ်းကြောင်းကိုင်တွယ်သူများသည် lockout/budget/fallback ယုတ္တိဗေဒကို ၎င်းတို့ကိုယ်တိုင် စုစည်းရန် မလိုအပ်ပါ။
 
-- မူဝါဒအင်ဂျင်- `src/domain/policyEngine.ts` — အကြိုလုပ်ဆောင်မှုအကဲဖြတ်မှုအတွက် တစ်ခုတည်းသောဝင်ခွင့်အမှတ် ( → ဘတ်ဂျက် → ဆုတ်ယုတ်မှုအမိန့်စာ)
+- မူဝါဒအင်ဂျင်- `src/domain/policyEngine.ts` — အကြိုအကဲဖြတ်ခြင်းအတွက် တစ်ခုတည်းသောဝင်ခွင့်အမှတ် ( → ဘတ်ဂျက် → ဆုတ်ယုတ်မှုအမိန့်ထုတ်ခြင်း)
 - ကုန်ကျစရိတ်စည်းမျဉ်းများ- `src/domain/costRules.ts`
 - နောက်ပြန်ဆုတ်ရေးမူဝါဒ- `src/domain/fallbackPolicy.ts`
 - လော့ခ်ချခြင်းမူဝါဒ- `src/domain/lockoutPolicy.ts`
 - တဂ်အခြေခံလမ်းကြောင်း- `src/domain/tagRouter.ts`
 - ပေါင်းစပ်ဖြေရှင်းသူ- `src/domain/comboResolver.ts` — ပေါင်းစပ်အမည်များ၊ အလိုအလျောက်/\* ရှေ့ဆက်များနှင့် သင်္ကေတပုံစံပစ်မှတ်များကို ခိုင်မာသော အကောင်အထည်ဖော်မှုအစီအစဉ်များအတွက် ဖြေရှင်းသည်
-- Connection/model စည်းမျဉ်း joiner: `src/domain/connectionModelRules.ts`
+- Connection/model စည်းမျဉ်းပါဝင်သူ- `src/domain/connectionModelRules.ts`
 - မော်ဒယ်ရရှိနိုင်မှု လျှပ်တစ်ပြက်ပုံများ- `src/domain/modelAvailability.ts`
-- ဝန်ဆောင်မှုပေးသူ သက်တမ်းကုန်ဆုံးမှုကို ခြေရာခံခြင်း- `src/domain/providerExpiration.ts`
-- Quota cache: `src/domain/quotaCache.ts`
+- ဝန်ဆောင်မှုပေးသူ၏ သက်တမ်းကုန်ဆုံးမှုကို ခြေရာခံခြင်း- `src/domain/providerExpiration.ts`
+- Quota cache- `src/domain/quotaCache.ts`
 - ပျက်စီးခြင်းအခြေအနေ- `src/domain/degradation.ts`
 - ဖွဲ့စည်းမှုစာရင်းစစ်- `src/domain/configAudit.ts`
 - OmniRoute တုံ့ပြန်မှု မက်တာဒေတာ တည်ဆောက်သူ- `src/domain/omnirouteResponseMeta.ts`
-- အကဲဖြတ်စနစ်ခွဲ- `src/domain/assessment/` — အပိုင်းအလိုက် အကဲဖြတ်ခြင်းအလုပ်များ
+- အကဲဖြတ်စနစ်ခွဲ- `src/domain/assessment/` — အချိန်အလိုက် အကဲဖြတ်ခြင်းအလုပ်များ
 
 ### E. ခွင့်ပြုချက် ပိုက်လိုင်း
 
@@ -1047,11 +1046,11 @@ Bypass handler (`open-sse/utils/bypassHandler.ts`) သည် Claude CLI မှ�
 - startup တွင် SQLite schema migration များနှင့် အလိုအလျောက် upgrade hook များ
 - legacy JSON → SQLite migration နှင့် ကိုက်ညီမှုရှိသော လမ်းကြောင်း
 
-## 6) SSRF / Outbound URL ကာကွယ်မှု
+## 6) SSRF / အပြင်ဘက် URL ကာကွယ်မှု
 
-- `src/shared/network/outboundUrlGuard.ts` သည် provider executor များထံ မရောက်ရှိမီ private/loopback/link-local target URL အားလုံးကို ပိတ်ဆို့သည်
-- Provider model ရှာဖွေမှုနှင့် validation route များသည် outbound request တစ်ခုစီမတိုင်မီ guard ကို အသုံးပြုသည့် `src/shared/network/safeOutboundFetch.ts` ကို အသုံးပြုသည်
-- Guard error များကို HTTP 422 နှင့်အတူ `URL_GUARD_BLOCKED` အဖြစ် ဖော်ပြပေးပြီး `providerAudit.ts` မှတစ်ဆင့် compliance audit trail တွင် မှတ်တမ်းတင်သည်
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) သည် `BaseExecutor.execute()` မှတစ်ဆင့် ပေးပို့သည့် ချတ်တောင်းဆိုမှုများတွင် `src/shared/network/outboundUrlGuard.ts` ကို အသုံးပြုသည်။ အများသုံးသီးသန့်မုဒ် (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` ဖြစ်ပြီး private flag ကို ပိတ်ထားသည့်အခါ) တွင် private နှင့် loopback host များအပြင် 169.254.0.0/16 ကိုပါ ပိတ်ဆို့သည်။ အခြားမုဒ်အားလုံးတွင် cloud-metadata host များကို ပိတ်ဆို့သည်။ DNS ရှာဖွေမှုမပြုလုပ်မီ ရေးသားထားသည့်အတိုင်း hostname သို့မဟုတ် IP literal ကို စစ်ဆေးသည်။ ပါဝင်ပြီးသား local provider များအတွက် ဤစစ်ဆေးမှုကို ကျော်သွားသည်။
+- Provider model ရှာဖွေခြင်းနှင့် အတည်ပြုခြင်း route များသည် အပြင်ဘက်တောင်းဆိုမှုတိုင်းမပြုလုပ်မီ ကာကွယ်မှုကို အသုံးပြုသည့် `src/shared/network/safeOutboundFetch.ts` ကို အသုံးပြုသည်
+- ကာကွယ်မှုဆိုင်ရာ error များကို HTTP 503 နှင့်အတူ `URL_GUARD_BLOCKED` အဖြစ် ဖော်ပြသည် (`getSafeOutboundFetchErrorStatus`; model ရှာဖွေရေး route သည် 400 ကို ပြန်ပေးသည်)။ အတည်ပြုခြင်းအတွင်း အမှန်တကယ်ဖြစ်ပေါ်သော SSRF ပိတ်ဆို့မှုများကို audit trail တွင် `provider.validation.ssrf_blocked` event များအဖြစ် မှတ်တမ်းတင်သည်
 
 ## စောင့်ကြည့်နိုင်မှုနှင့် လုပ်ငန်းလည်ပတ်ရေး Signal များ
 
@@ -1102,7 +1101,7 @@ Runtime အခြေအနေကို မြင်နိုင်သည့် �
 4. Cloud လုပ်ဆောင်ပုံသည် မှန်ကန်သော `NEXT_PUBLIC_BASE_URL` နှင့် cloud endpoint သို့ ရောက်ရှိနိုင်မှုအပေါ် မူတည်သည်။
 5. `open-sse/` directory ကို `@omniroute/open-sse` **npm workspace package** အဖြစ် ဖြန့်ချိထားသည်။ Source code သည် ၎င်းကို `@omniroute/open-sse/...` မှတစ်ဆင့် import လုပ်သည် (Next.js `transpilePackages` က resolve လုပ်ပေးသည်)။ ဤစာတမ်းရှိ file path များတွင် တစ်သမတ်တည်းဖြစ်စေရန် directory အမည် `open-sse/` ကို ဆက်လက်အသုံးပြုထားသည်။
 6. Dashboard ရှိ chart များသည် အသုံးပြုရလွယ်ကူပြီး အပြန်အလှန်တုံ့ပြန်နိုင်သော analytics visualization များ (model အသုံးပြုမှု bar chart များ၊ အောင်မြင်မှုနှုန်းများပါဝင်သော provider ခွဲခြမ်းဇယားများ) အတွက် **Recharts** (SVG အခြေပြု) ကို အသုံးပြုသည်။
-7. E2E test များသည် **Playwright** (`tests/e2e/`) ကို အသုံးပြုပြီး `npm run test:e2e` မှတစ်ဆင့် run သည်။ Unit test များသည် **Node.js test runner** (`tests/unit/`) ကို အသုံးပြုပြီး `npm run test:unit` မှတစ်ဆင့် run သည်။ `src/` အောက်ရှိ source code သည် **TypeScript** (`.ts`/`.tsx`) ဖြစ်ပြီး `open-sse/` workspace သည် JavaScript (`.js`) အဖြစ် ဆက်လက်တည်ရှိသည်။
+7. E2E test များသည် **Playwright** (`tests/e2e/`) ကို အသုံးပြုပြီး `npm run test:e2e` မှတစ်ဆင့် run သည်။ Unit test များသည် **Node.js test runner** (`tests/unit/`) ကို အသုံးပြုပြီး `npm run test:unit` မှတစ်ဆင့် run သည်။ `src/` အောက်ရှိ source code သည် **TypeScript** (`.ts`/`.tsx`) ဖြစ်ပြီး `open-sse/` workspace သည် TypeScript (`.ts`) အဖြစ် ဆက်လက်တည်ရှိသည်။
 8. Settings page ကို tab 7 ခုအဖြစ် စီစဉ်ထားသည်- General, Appearance, AI, Security, Routing, Resilience, Advanced။ Resilience page သည် request queue၊ connection cooldown၊ provider breaker နှင့် wait-for-cooldown အပြုအမူတို့ကိုသာ configure လုပ်သည်။ လက်ရှိ breaker runtime state ကို Health page တွင် ပြသသည်။
 9. **Context Relay** မဟာဗျူဟာ (`context-relay`) ကို layer နှစ်ခုအဖြစ် ခွဲထားသည်- `combo.ts` က handoff တစ်ခု ထုတ်ပေးသင့်၊ မသင့် ဆုံးဖြတ်ပြီး `chat.ts` က account resolution ပြီးနောက် handoff ကို ထည့်သွင်းသည်။ Handoff data သည် `context_handoffs` SQLite table ထဲတွင် ရှိသည်။ အမှန်တကယ် account ပြောင်းသွားခြင်း ရှိ၊ မရှိကို `chat.ts` သာ သိရှိသောကြောင့် ဤသို့ခွဲထားခြင်းသည် ရည်ရွယ်ချက်ရှိရှိ ပြုလုပ်ထားခြင်းဖြစ်သည်။
 10. **Proxy enforcement** သည် ယခုအခါ အပြည့်အဝ အကျုံးဝင်သည်- `tokenHealthCheck.ts` က connection တစ်ခုချင်းစီအတွက် proxy ကို resolve လုပ်သည်၊ `/api/providers/validate` က `runWithProxyContext` ကို အသုံးပြုပြီး `proxyFetch.ts` က Node 22 တွင် dispatcher compatibility ကို ထိန်းသိမ်းရန် `undici.fetch()` ကို အသုံးပြုသည်။

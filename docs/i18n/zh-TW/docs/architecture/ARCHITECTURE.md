@@ -4,90 +4,82 @@
 
 ---
 
-title: "OmniRoute 架構"
-version: 3.8.40
-lastUpdated: 2026-06-28
----
-
-# OmniRoute 架構
-
 🌐 **Languages:** 🇺🇸 [English](../../../../architecture/ARCHITECTURE.md) · 🇪🇹 [am](../../../am/docs/architecture/ARCHITECTURE.md) · 🇸🇦 [ar](../../../ar/docs/architecture/ARCHITECTURE.md) · 🇦🇿 [az](../../../az/docs/architecture/ARCHITECTURE.md) · 🇧🇬 [bg](../../../bg/docs/architecture/ARCHITECTURE.md) · 🇧🇩 [bn](../../../bn/docs/architecture/ARCHITECTURE.md) · 🇧🇦 [bs](../../../bs/docs/architecture/ARCHITECTURE.md) · 🇨🇿 [cs](../../../cs/docs/architecture/ARCHITECTURE.md) · 🇩🇰 [da](../../../da/docs/architecture/ARCHITECTURE.md) · 🇩🇪 [de](../../../de/docs/architecture/ARCHITECTURE.md) · 🇬🇷 [el](../../../el/docs/architecture/ARCHITECTURE.md) · 🇪🇸 [es](../../../es/docs/architecture/ARCHITECTURE.md) · 🇪🇪 [et](../../../et/docs/architecture/ARCHITECTURE.md) · 🇮🇷 [fa](../../../fa/docs/architecture/ARCHITECTURE.md) · 🇫🇮 [fi](../../../fi/docs/architecture/ARCHITECTURE.md) · 🇫🇷 [fr](../../../fr/docs/architecture/ARCHITECTURE.md) · 🇮🇪 [ga](../../../ga/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [gu](../../../gu/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [ha](../../../ha/docs/architecture/ARCHITECTURE.md) · 🇮🇱 [he](../../../he/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [hi](../../../hi/docs/architecture/ARCHITECTURE.md) · 🇭🇷 [hr](../../../hr/docs/architecture/ARCHITECTURE.md) · 🇭🇺 [hu](../../../hu/docs/architecture/ARCHITECTURE.md) · 🇦🇲 [hy](../../../hy/docs/architecture/ARCHITECTURE.md) · 🇮🇩 [id](../../../id/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [ig](../../../ig/docs/architecture/ARCHITECTURE.md) · 🇮🇹 [it](../../../it/docs/architecture/ARCHITECTURE.md) · 🇯🇵 [ja](../../../ja/docs/architecture/ARCHITECTURE.md) · 🇬🇪 [ka](../../../ka/docs/architecture/ARCHITECTURE.md) · 🇰🇭 [km](../../../km/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [kn](../../../kn/docs/architecture/ARCHITECTURE.md) · 🇰🇷 [ko](../../../ko/docs/architecture/ARCHITECTURE.md) · 🇱🇹 [lt](../../../lt/docs/architecture/ARCHITECTURE.md) · 🇱🇻 [lv](../../../lv/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [ml](../../../ml/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [mr](../../../mr/docs/architecture/ARCHITECTURE.md) · 🇲🇾 [ms](../../../ms/docs/architecture/ARCHITECTURE.md) · 🇲🇹 [mt](../../../mt/docs/architecture/ARCHITECTURE.md) · 🇲🇲 [my](../../../my/docs/architecture/ARCHITECTURE.md) · 🇳🇵 [ne](../../../ne/docs/architecture/ARCHITECTURE.md) · 🇳🇱 [nl](../../../nl/docs/architecture/ARCHITECTURE.md) · 🇳🇴 [no](../../../no/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [or](../../../or/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [pa](../../../pa/docs/architecture/ARCHITECTURE.md) · 🇵🇭 [phi](../../../phi/docs/architecture/ARCHITECTURE.md) · 🇵🇱 [pl](../../../pl/docs/architecture/ARCHITECTURE.md) · 🇵🇹 [pt](../../../pt/docs/architecture/ARCHITECTURE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/ARCHITECTURE.md) · 🇷🇴 [ro](../../../ro/docs/architecture/ARCHITECTURE.md) · 🇷🇺 [ru](../../../ru/docs/architecture/ARCHITECTURE.md) · 🇱🇰 [si](../../../si/docs/architecture/ARCHITECTURE.md) · 🇸🇰 [sk](../../../sk/docs/architecture/ARCHITECTURE.md) · 🇸🇮 [sl](../../../sl/docs/architecture/ARCHITECTURE.md) · 🇷🇸 [sr](../../../sr/docs/architecture/ARCHITECTURE.md) · 🇸🇪 [sv](../../../sv/docs/architecture/ARCHITECTURE.md) · 🇰🇪 [sw](../../../sw/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [ta](../../../ta/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [te](../../../te/docs/architecture/ARCHITECTURE.md) · 🇹🇭 [th](../../../th/docs/architecture/ARCHITECTURE.md) · 🇹🇷 [tr](../../../tr/docs/architecture/ARCHITECTURE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/architecture/ARCHITECTURE.md) · 🇵🇰 [ur](../../../ur/docs/architecture/ARCHITECTURE.md) · 🇺🇿 [uz](../../../uz/docs/architecture/ARCHITECTURE.md) · 🇻🇳 [vi](../../../vi/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [yo](../../../yo/docs/architecture/ARCHITECTURE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/ARCHITECTURE.md)
 
 _最後更新：2026-06-28_
 
 ## 執行摘要
 
-OmniRoute 是建置於 Next.js 上的本機 AI 路由閘道與儀表板。
-它提供單一 OpenAI 相容端點（`/v1/*`），並透過轉譯、回退、權杖重新整理與使用量追蹤，在多個上游提供者之間路由流量。
+OmniRoute是基於Next.js建構的本地AI路由閘道和儀表板。它提供單一 OpenAI 相容端點 (`/v1/*`)，並透過轉換、回退、令牌刷新和使用追蹤在多個上游提供者之間路由流量。
 
-核心功能：
+核心能力：
 
-- CLI/工具使用的 OpenAI 相容 API 介面（380 個提供者、159 個執行器模組）
-- 跨提供者格式的請求／回應轉譯
-- 模型組合回退（多模型序列）
-- 結構化組合步驟（`provider + model + connection`），依 `compositeTiers` 在執行時排序
-- 帳戶層級回退（每個提供者支援多個帳戶）
-- 主要聊天路徑中的配額預檢查與具配額感知的 P2C 帳戶選擇
-- OAuth + API 金鑰提供者連線管理（27 個 OAuth 提供者模組）
-- 透過 `/v1/embeddings` 產生嵌入（18 個提供者）
-- 透過 `/v1/images/generations` 產生影像（10+ 個提供者、20+ 個模型）
-- 透過 `/v1/audio/transcriptions` 進行音訊轉錄（18 個提供者）
-- 透過 `/v1/audio/speech` 進行文字轉語音（24 個內建提供者）
-- 透過 `/v1/videos/generations` 產生影片（ComfyUI + SD WebUI）
-- 透過 `/v1/music/generations` 產生音樂（ComfyUI）
-- 透過 `/v1/search` 進行網路搜尋（20 個提供者）
-- 透過 `/v1/moderations` 進行內容審核
-- 透過 `/v1/rerank` 進行重新排序
-- 思考標籤解析（`<think>...</think>`），適用於推理模型
-- 回應清理，以嚴格相容 OpenAI SDK
-- 角色正規化（developer→system、system→user），以實現跨提供者相容性
+- 適用於CLI/tools的 OpenAI 相容API表面（380 個提供者，162 個執行器模組）
+- 跨提供者格式的Request/response翻譯
+- 模型組合後備（多模型序列）
+- 結構化組合步驟 (`provider + model + connection`) 以及`compositeTiers`運行時排序
+- 帳戶級回退（每個提供者多個帳戶）
+- 主聊天路徑中的配額預檢和配額感知P2C帳戶選擇
+- OAuth + API 金鑰提供者連線管理（27 個OAuth提供者模組）
+- 透過`/v1/embeddings`嵌入產生（18 個提供者）
+- 透過`/v1/images/generations`產生影像（10 個+提供者，20 個+模型）
+- 透過`/v1/audio/transcriptions`進行音訊轉錄（18 個提供者）
+- 透過`/v1/audio/speech`進行文字轉語音（24 個內建提供者）
+- 透過`/v1/videos/generations`產生影片（ComfyUI + SD WebUI）
+- 透過`/v1/music/generations` (ComfyUI) 生成音樂
+- 透過`/v1/search`進行網路搜尋（20 個提供者）
+- 透過`/v1/moderations`進行審核
+- 透過`/v1/rerank`重新排名
+- 考慮標籤解析（`<think>...</think>`）用於推理模型
+- 回應清理以實現嚴格的OpenAI SDK相容性
+- 角色規範化（開發者→系統、系統→用戶）以實現跨提供者相容性
 - 結構化輸出轉換（json_schema → Gemini responseSchema）
-- 提供者、金鑰、別名、組合、設定與定價的本機持久化（122 個資料庫模組）
-- 使用量／成本追蹤與請求記錄
-- 可選的雲端同步，支援多裝置／狀態同步
-- API 存取控制的 IP 允許清單／封鎖清單
-- 思考預算管理（passthrough/auto/custom/adaptive）
+- 提供者、金鑰、別名、組合、設定、定價的本地持久性（122 個DB模組）
+- Usage/cost追蹤和請求記錄
+- 用於multi-device/state同步的可選雲端同步
+- IP allowlist/blocklist用於API存取控制
+- 預算管理思維（passthrough/auto/custom/adaptive）
 - 全域系統提示注入
-- 工作階段追蹤與指紋識別
-- 具提供者特定設定檔的每帳戶增強速率限制
-- 提供者復原能力的斷路器模式
-- 使用互斥鎖定防止驚群效應
-- 以簽章為基礎的請求去重快取
-- 領域層：成本規則、回退原則、鎖定政策
-- Context Relay：用於帳戶輪替連續性的工作階段交接摘要
-- 領域狀態持久化（用於回退、預算、鎖定與斷路器的 SQLite 寫入直通快取）
-- 集中式請求評估的政策引擎（鎖定 → 預算 → 回退）
-- 請求遙測，彙總 p50/p95/p99 延遲
-- 組合目標遙測，以及透過 `combo_execution_key` / `combo_step_id` 追蹤歷史組合目標健康狀態
-- 關聯 ID（X-Request-Id），用於端到端追蹤
-- 合規稽核記錄，支援依 API 金鑰選擇退出
-- 用於 LLM 品質保證的評估框架
-- 健康狀態儀表板，提供即時提供者斷路器狀態
-- MCP Server（110 個工具），支援 3 種傳輸方式（stdio/SSE/Streamable HTTP）
-- A2A Server（JSON-RPC 2.0 + SSE），支援技能與工作生命週期
-- 記憶體系統（擷取、注入、檢索、摘要）
-- 技能系統（登錄表、執行器、沙箱、內建技能）
-- MITM 代理伺服器，支援憑證管理與 DNS 處理
+- 會話追蹤和指紋識別
+- 透過特定於提供者的設定檔增強每個帳戶的速率限制
+- 提供者彈性的斷路器模式
+- 透過互斥鎖實現防雷群保護
+- 基於簽名的請求重複資料刪除快取
+- 領域層：成本規則、回退策略、鎖定策略
+- 上下文中繼：帳戶輪換連續性的會話切換摘要
+- 網域狀態持久性（用於回退、預算、鎖定、斷路器的SQLite直寫式快取）
+- 用於集中請求評估的策略引擎（鎖定→預算→後備）
+- 使用p50/p95/p99延遲聚合請求遙測
+- 透過`combo_execution_key` / `combo_step_id`組合目標遙測和歷史組合目標運行狀況
+- 用於端對端追蹤的關聯ID (X-Request-Id)
+- 根據API金鑰選擇退出的合規性審核日誌記錄
+- LLM品質保證評估框架
+- 具有即時提供者斷路器狀態的健康儀表板
+- MCP伺服器（110 個工具），具有 3 個傳輸（stdio/SSE/Streamable HTTP）
+- A2A伺服器（JSON-RPC 2.0 + SSE）具有技能和任務生命週期
+- 記憶系統（擷取、注射、檢索、總結）
+- 技能係統（註冊中心、執行器、沙箱、內建技能）
+- 具有證書管理和DNS處理功能的MITM代理
 - 提示注入防護中介軟體
-- 提示壓縮管線，支援 Caveman、RTK、堆疊管線、壓縮組合、語言套件與分析
-- ACP（Agent Communication Protocol）登錄表
-- 模組化 OAuth 提供者（`src/lib/oauth/providers/` 下的 22 個個別模組）
-- 解除安裝／完整解除安裝指令碼
-- OAuth 環境修復動作
-- OpenAI 相容 WS 用戶端的 WebSocket 橋接器（`/v1/ws`）
-- 同步權杖管理（核發／撤銷、下載具 ETag 版本控制的設定套件）
-- GLM Thinking（`glmt`）一級提供者預設設定
-- 混合式權杖計數（提供者端 `/messages/count_tokens`，並在失敗時回退至估算）
-- 模型別名自動植入（啟動時進行 30+ 種跨代理方言正規化）
-- 安全的對外擷取，具備 SSRF 防護、私人 URL 封鎖與可設定重試
-- 具冷卻感知的聊天重試，支援可設定的 `requestRetry` 與 `maxRetryIntervalSec`
-- 啟動時使用 Zod 進行執行環境驗證
-- 合規稽核 v2，支援分頁、提供者 CRUD 事件，以及 SSRF 封鎖驗證記錄
+- 使用 Caveman、 RTK、堆疊管道、壓縮組合、語言套件和分析來提示壓縮管道
+- ACP （代理通訊協定）註冊表
+- 模組化OAuth提供者（ `src/lib/oauth/providers/`下有 22 個獨立模組）
+- Uninstall/full-uninstall腳本
+- OAuth環境修復行動
+- 用於相容 OpenAI 的WS客戶端 (`/v1/ws`) 的WebSocket橋
+- 同步令牌管理（issue/revoke、ETag 版本設定包下載）
+- GLM思維（`glmt`）一流提供者預設
+- 混合代幣計數（具有估計回退功能的提供者方`/messages/count_tokens` ）
+- 模型別名自動播種（啟動時 30 個+跨代理方言標準化）
+- 透過SSRF防護、私人URL阻止和可設定重試進行安全出站提取
+- 透過可設定的`requestRetry`和`maxRetryIntervalSec`進行冷卻感知聊天重試
+- 啟動時使用Zod驗證運行時環境
+- 具有分頁、提供者CRUD事件和 SSRF 阻止的驗證日誌記錄的合規性審核 v2
 
-主要執行時模型：
+主要運行時模型：
 
-- `src/app/api/*` 下的 Next.js 應用程式路由同時實作儀表板 API 與相容性 API
-- `src/sse/*` + `open-sse/*` 中的共用 SSE／路由核心負責提供者執行、轉譯、串流、回退與使用量處理
+- `src/app/api/*`下的Next.js應用程式路由同時實現儀表板APIs和相容性APIs
+- `src/sse/*` + `open-sse/*`中的共享SSE/routing核心處理提供者執行、翻譯、串流、回退和使用
 
 ## 參考圖表
 
@@ -409,8 +401,8 @@ Guardrails 模組是一個可熱重載的中間件層，用於檢查PII、提示
 
 `src/domain/`命名空間集中了策略決策，因此路由處理程序不必自行組裝lockout/budget/fallback邏輯。
 
-- 策略引擎： `src/domain/policyEngine.ts` —執行前評估的單一入口點（鎖定→預算→後備排序）
-- 費用規則： `src/domain/costRules.ts`
+- 策略引擎： `src/domain/policyEngine.ts` —預執行評估單一入口點（鎖定→預算→後備排序）
+- 成本規則： `src/domain/costRules.ts`
 - 後備策略： `src/domain/fallbackPolicy.ts`
 - 鎖定政策： `src/domain/lockoutPolicy.ts`
 - 基於標籤的路由： `src/domain/tagRouter.ts`
@@ -420,7 +412,7 @@ Guardrails 模組是一個可熱重載的中間件層，用於檢查PII、提示
 - 提供者到期追蹤： `src/domain/providerExpiration.ts`
 - 配額快取： `src/domain/quotaCache.ts`
 - 降解狀態： `src/domain/degradation.ts`
-- 設定審核： `src/domain/configAudit.ts`
+- 配置審核： `src/domain/configAudit.ts`
 - OmniRoute回應元資料產生器： `src/domain/omnirouteResponseMeta.ts`
 - 評量子系統： `src/domain/assessment/` —定期評量作業
 
@@ -475,31 +467,31 @@ FSM轉換納入 Auto Combo 的評分中，偏向於background/automation任務�
   - DB層： `src/lib/db/reasoningCache.ts`
   - 服務層： `open-sse/services/reasoningCache.ts`
   - 有關重播語義，請參閱[`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md) 。
-- **讀取快取**—短期回應快取，由簽名鍵控，用於崩潰來自損壞的上游SDKs相同重試。
+- **讀取快取**—短期回應快取，由簽章鍵入，用於崩潰來自損壞的上游SDKs相同重試。
   - DB層： `src/lib/db/readCache.ts`
   - 統計端點： `GET /api/cache/stats`，儀表板位於`/dashboard/cache`
 
 ## 3) 持久化層
 
-主要狀態 DB（SQLite）：
+主要狀態資料庫（SQLite）：
 
 - 核心基礎設施：`src/lib/db/core.ts`（better-sqlite3、遷移、WAL）
-- 重新匯出外觀：`src/lib/localDb.ts`（供呼叫者使用的薄相容層）
-- 檔案：`${DATA_DIR}/storage.sqlite`（或設定了 `$XDG_CONFIG_HOME/omniroute/storage.sqlite` 時使用該路徑，否則為 `~/.omniroute/storage.sqlite`）
-- 實體（表格 + KV 命名空間）：providerConnections、providerNodes、modelAliases、combos、apiKeys、settings、pricing、**customModels**、**proxyConfig**、**ipFilter**、**thinkingBudget**、**systemPrompt**
+- 資料庫存取：直接匯入特定的 `src/lib/db/*` 模組（舊的 `localDb.ts` 彙整模組已移除）
+- 檔案：`${DATA_DIR}/storage.sqlite`（若已設定，則為 `$XDG_CONFIG_HOME/omniroute/storage.sqlite`，否則為 `~/.omniroute/storage.sqlite`）
+- 實體（資料表 + KV 命名空間）：providerConnections、providerNodes、modelAliases、combos、apiKeys、settings、pricing、**customModels**、**proxyConfig**、**ipFilter**、**thinkingBudget**、**systemPrompt**
 
-用量持久化：
+使用量持久化：
 
-- 外觀：`src/lib/usageDb.ts`（`src/lib/usage/*` 中的分解模組）
-- `storage.sqlite` 中的 SQLite 表格：`usage_history`、`call_logs`、`proxy_logs`
-- 為相容性/除錯目的保留的選用檔案工件（`${DATA_DIR}/log.txt`、`${DATA_DIR}/call_logs/`、`<repo>/logs/...`）
-- 舊版 JSON 檔案在啟動遷移時會移轉至 SQLite（若存在）
+- 門面：`src/lib/usageDb.ts`（已拆分的模組位於 `src/lib/usage/*`）
+- `storage.sqlite` 中的 SQLite 資料表：`usage_history`、`call_logs`、`proxy_logs`
+- 為相容性／除錯保留的選用檔案成品（`${DATA_DIR}/log.txt`、`${DATA_DIR}/call_logs/`、`<repo>/logs/...`）
+- 啟動遷移會在偵測到舊版 JSON 檔案時，將其遷移至 SQLite
 
-領域狀態 DB（SQLite）：
+領域狀態資料庫（SQLite）：
 
 - `src/lib/db/domainState.ts` — 領域狀態的 CRUD 操作
-- 表格（在 `src/lib/db/core.ts` 中建立）：`domain_fallback_chains`、`domain_budgets`、`domain_cost_history`、`domain_lockout_state`、`domain_circuit_breakers`
-- 寫穿透快取模式：記憶體中的 Maps 在執行時期具有權威性；變更同步寫入 SQLite；冷啟動時從 DB 恢復狀態
+- 資料表（建立於 `src/lib/db/core.ts`）：`domain_fallback_chains`、`domain_budgets`、`domain_cost_history`、`domain_lockout_state`、`domain_circuit_breakers`
+- 寫入穿透快取模式：記憶體內的 Map 在執行階段為權威資料來源；變更會同步寫入 SQLite；冷啟動時會從資料庫還原狀態
 
 ## 4) 驗證 + 安全介面
 
@@ -804,63 +796,63 @@ flowchart LR
     Next --> SyncCloud
 ```
 
-## 模組對映（決策關鍵）
+## 模組對應（決策關鍵）
 
 ### 路由與 API 模組
 
 - `src/app/api/v1/*`、`src/app/api/v1beta/*`：相容性 API
-- `src/app/api/v1/providers/[provider]/*`：專屬的每個提供者路由（聊天、嵌入、圖片）
-- `src/app/api/providers*`：提供者 CRUD、驗證、測試
+- `src/app/api/v1/providers/[provider]/*`：各提供者專用路由（聊天、嵌入、圖像）
+- `src/app/api/providers*`：提供者 CRUD、驗證與測試
 - `src/app/api/provider-nodes*`：自訂相容節點管理
 - `src/app/api/provider-models`：自訂模型管理（CRUD）
 - `src/app/api/models/route.ts`：模型目錄 API（別名 + 自訂模型）
-- `src/app/api/oauth/*`：OAuth/裝置碼流程
-- `src/app/api/keys*`：本地 API 金鑰生命週期
+- `src/app/api/oauth/*`：OAuth／裝置代碼流程
+- `src/app/api/keys*`：本機 API 金鑰生命週期
 - `src/app/api/models/alias`：別名管理
 - `src/app/api/combos*`：備援組合管理
-- `src/app/api/pricing`：用於成本計算的定價覆蓋
-- `src/app/api/settings/proxy`：代理設定（GET/PUT/DELETE）
-- `src/app/api/settings/proxy/test`：外送代理連線測試（POST）
-- `src/app/api/usage/*`：用量與記錄 API
-- `src/app/api/sync/*` + `src/app/api/cloud/*`：雲端同步與雲端面向輔助
-- `src/app/api/cli-tools/*`：本地 CLI 設定寫入器/檢查器
-- `src/app/api/settings/ip-filter`：IP 允許清單/封鎖清單（GET/PUT）
-- `src/app/api/settings/thinking-budget`：思考令牌預算設定（GET/PUT）
-- `src/app/api/settings/system-prompt`：全域系統提示（GET/PUT）
+- `src/app/api/pricing`：用於成本計算的定價覆寫
+- `src/app/api/settings/proxy`：代理伺服器設定（GET/PUT/DELETE）
+- `src/app/api/settings/proxy/test`：對外代理伺服器連線測試（POST）
+- `src/app/api/usage/*`：用量與日誌 API
+- `src/app/api/sync/*` + `src/app/api/cloud/*`：雲端同步與面向雲端的輔助功能
+- `src/app/api/cli-tools/*`：本機 CLI 設定寫入器／檢查器
+- `src/app/api/settings/ip-filter`：IP 允許清單／封鎖清單（GET/PUT）
+- `src/app/api/settings/thinking-budget`：思考 token 預算設定（GET/PUT）
+- `src/app/api/settings/system-prompt`：全域系統提示詞（GET/PUT）
 - `src/app/api/settings/compression`：全域壓縮設定（GET/PUT）
 - `src/app/api/compression/*`：壓縮預覽、規則中繼資料與語言套件
 - `src/app/api/context/caveman/config`：Caveman 設定別名（GET/PUT）
-- `src/app/api/context/rtk/*`：RTK 設定、過濾器目錄、測試端點與原始輸出恢復
+- `src/app/api/context/rtk/*`：RTK 設定、篩選器目錄、測試端點與原始輸出復原
 - `src/app/api/context/combos*`：壓縮組合 CRUD 與路由組合指派
 - `src/app/api/context/analytics`：壓縮分析別名
-- `src/app/api/sessions`：活躍工作階段列表（GET）
-- `src/app/api/rate-limits`：每個帳戶的速率限制狀態（GET）
-- `src/app/api/sync/tokens`：同步令牌 CRUD（GET/POST）
-- `src/app/api/sync/tokens/[id]`：同步令牌取得/刪除（GET/DELETE）
-- `src/app/api/sync/bundle`：設定套件下載（GET，ETag 版本化）
-- `src/app/api/v1/ws`：OpenAI 相容 WS 客戶端的 WebSocket 升級處理器
+- `src/app/api/sessions`：作用中工作階段清單（GET）
+- `src/app/api/rate-limits`：各帳戶的速率限制狀態（GET）
+- `src/app/api/sync/tokens`：同步權杖 CRUD（GET/POST）
+- `src/app/api/sync/tokens/[id]`：取得／刪除同步權杖（GET/DELETE）
+- `src/app/api/sync/bundle`：設定套件下載（GET，ETag 版本控制）
+- `src/app/api/v1/ws`：供 OpenAI 相容 WS 用戶端使用的 WebSocket 升級處理常式
 
 ### 路由與執行核心
 
 - `src/sse/handlers/chat.ts`：請求解析、組合處理、帳戶選擇迴圈
-- `open-sse/handlers/chatCore.ts`：轉換、執行器調度、重試/刷新處理、串流設定
+- `open-sse/handlers/chatCore.ts`：轉譯、執行器分派、重試／重新整理處理、串流設定
 - `open-sse/executors/*`：提供者特定的網路與格式行為
 
-### 轉換註冊表與格式轉換器
+### 轉譯器登錄檔與格式轉換器
 
-- `open-sse/translator/index.ts`：轉換器註冊表與協調
-- 請求轉換器：`open-sse/translator/request/*`（9 個模組 — `antigravity-to-openai`、`claude-to-gemini`、`claude-to-openai`、`gemini-to-openai`、`openai-responses`、`openai-to-claude`、`openai-to-cursor`、`openai-to-gemini`、`openai-to-kiro`）
-- 回應轉換器：`open-sse/translator/response/*`（8 個模組 — `claude-to-openai`、`cursor-to-openai`、`gemini-to-claude`、`gemini-to-openai`、`kiro-to-openai`、`openai-responses`、`openai-to-antigravity`、`openai-to-claude`）
-- 輔助工具：`open-sse/translator/helpers/*`（8 個模組 — `claudeHelper`、`geminiHelper`、`geminiToolsSanitizer`、`maxTokensHelper`、`openaiHelper`、`responsesApiHelper`、`schemaCoercion`、`toolCallHelper`）
+- `open-sse/translator/index.ts`：轉譯器登錄檔與協調流程
+- 請求轉譯器：`open-sse/translator/request/*`（9 個模組 — `antigravity-to-openai`、`claude-to-gemini`、`claude-to-openai`、`gemini-to-openai`、`openai-responses`、`openai-to-claude`、`openai-to-cursor`、`openai-to-gemini`、`openai-to-kiro`）
+- 回應轉譯器：`open-sse/translator/response/*`（11 個模組 — `claude-to-openai`、`cursor-to-openai`、`gemini-to-claude`、`gemini-to-openai`、`kiro-to-openai`、`openai-responses`、`openai-to-antigravity`、`openai-to-claude`、`openai-to-gemini`、`openai-to-gemini-sse`、`responsesToolItem`）
+- 輔助程式：`open-sse/translator/helpers/*`（12 個模組 — `claudeHelper`、`geminiHelper`、`geminiToolsSanitizer`、`jsonUtil`、`markdownBoundary`、`maxTokensHelper`、`openaiHelper`、`responsesApiHelper`、`schemaCoercion`、`strictSystemHoist`、`toolCallHelper`、`toolCallShim`）
 - 格式常數：`open-sse/translator/formats.ts`
-- 啟動與註冊表：`open-sse/translator/bootstrap.ts`、`open-sse/translator/registry.ts`
-- 圖片格式輔助：`open-sse/translator/image/`
+- 啟動程序與登錄檔：`open-sse/translator/bootstrap.ts`、`open-sse/translator/registry.ts`
+- 圖像格式輔助程式：`open-sse/translator/image/`
 
 ### 持久化
 
-- `src/lib/db/*`：SQLite 上的持久設定/狀態與領域持久化
-- `src/lib/localDb.ts`：DB 模組的相容性重新匯出
-- `src/lib/usageDb.ts`：基於 SQLite 表格的用量歷史/呼叫記錄外觀
+- `src/lib/db/*`：SQLite 上的持久化設定／狀態與領域資料持久化
+- `src/lib/db/*`：直接匯入特定模組，不使用彙整模組（舊的 `localDb.ts` 重新匯出層已移除）
+- `src/lib/usageDb.ts`：建立於 SQLite 資料表之上的用量歷程／呼叫日誌外觀層
 
 ## 提供者執行器覆蓋範圍（策略模式）
 
@@ -1060,11 +1052,11 @@ flowchart LR
 - SQLite 架構遷移與啟動時的自動升級鉤子
 - 舊版 JSON → SQLite 遷移相容性路徑
 
-## 6) SSRF / 外送 URL 防護
+## 6) SSRF／對外連線 URL 防護
 
-- `src/shared/network/outboundUrlGuard.ts` 在請求到達提供者執行器前封鎖所有私人/迴路/鏈結本地目標 URL
-- 提供者模型探索與驗證路由使用 `src/shared/network/safeOutboundFetch.ts`，該函數在每個外送請求前應用防護
-- 防護錯誤以 `URL_GUARD_BLOCKED` 呈現，附 HTTP 422，並透過 `providerAudit.ts` 記錄到合規稽核軌跡
+- `BaseExecutor.assertOutboundUrlAllowed`（`open-sse/executors/base.ts`）會將 `src/shared/network/outboundUrlGuard.ts` 套用於透過 `BaseExecutor.execute()` 傳送的聊天請求。在僅限公開網路模式下（`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` 且私人旗標關閉），它會封鎖私人與回送主機，以及 169.254.0.0/16；在其他所有模式下，它會封鎖雲端中繼資料主機。它會在任何 DNS 查詢之前，依照原樣檢查主機名稱或 IP 常值。內建的本機提供者會略過此檢查。
+- 提供者模型探索與驗證路由會使用 `src/shared/network/safeOutboundFetch.ts`，在每個對外請求之前套用防護機制
+- 防護錯誤會以 `URL_GUARD_BLOCKED` 呈現，並回傳 HTTP 503（`getSafeOutboundFetchErrorStatus`；模型探索路由則回傳 400）；驗證期間真正的 SSRF 封鎖會以 `provider.validation.ssrf_blocked` 事件記錄至稽核軌跡
 
 ## 可觀測性與操作訊號
 
@@ -1099,7 +1091,6 @@ flowchart LR
 
 - 應用程式/驗證：`JWT_SECRET`、`INITIAL_PASSWORD`
 - 儲存：`DATA_DIR`
-- 相容節點行為：`ALLOW_MULTI_CONNECTIONS_PER_COMPAT_NODE`
 - 選用儲存基底覆蓋（Linux/macOS 上未設定 `DATA_DIR` 時）：`XDG_CONFIG_HOME`
 - 安全雜湊：`API_KEY_SECRET`、`MACHINE_ID_SALT`
 - 記錄：`APP_LOG_TO_FILE`、`APP_LOG_RETENTION_DAYS`、`CALL_LOG_RETENTION_DAYS`
@@ -1116,7 +1107,7 @@ flowchart LR
 4. 雲端行為取決於正確的 `NEXT_PUBLIC_BASE_URL` 與雲端端點可達性。
 5. `open-sse/` 目錄以 `@omniroute/open-sse` **npm workspace 套件**形式發布。原始碼透過 `@omniroute/open-sse/...` 匯入（由 Next.js `transpilePackages` 解析）。本文件中的檔案路徑為求一致仍使用目錄名稱 `open-sse/`。
 6. 儀表板中的圖表使用 **Recharts**（基於 SVG）實現可存取、互動式的分析視覺化（模型用量長條圖、含成功率的提供者 breakdown 表格）。
-7. E2E 測試使用 **Playwright**（`tests/e2e/`），透過 `npm run test:e2e` 執行。單元測試使用 **Node.js test runner**（`tests/unit/`），透過 `npm run test:unit` 執行。`src/` 下的原始碼為 **TypeScript**（`.ts`/`.tsx`）；`open-sse/` workspace 保持 JavaScript（`.js`）。
+7. E2E 測試使用 **Playwright**（`tests/e2e/`），透過 `npm run test:e2e` 執行。單元測試使用 **Node.js test runner**（`tests/unit/`），透過 `npm run test:unit` 執行。`src/` 下的原始碼為 **TypeScript**（`.ts`/`.tsx`）；`open-sse/` workspace 保持 TypeScript（`.ts`）。
 8. 設定頁面分為 7 個分頁：一般、外觀、AI、安全性、路由、韌性、進階。韌性頁面僅設定請求佇列、連線冷卻、提供者斷路器與等待冷卻行為；斷路器執行時期狀態顯示在健康狀態頁面上。
 9. **上下文轉接**策略（`context-relay`）分跨兩層：`combo.ts` 決定是否應產生交接，`chat.ts` 在帳戶解析後注入交接。交接資料存在 `context_handoffs` SQLite 表格中。這種拆分是有意為之，因為只有 `chat.ts` 知道實際帳戶是否已變更。
 10. **代理強制**現在是全方位的：`tokenHealthCheck.ts` 根據連線解析代理，`/api/providers/validate` 使用 `runWithProxyContext`，而 `proxyFetch.ts` 使用 `undici.fetch()` 以在 Node 22 上維持調度器相容性。

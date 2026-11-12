@@ -18,48 +18,36 @@ OmniRoute publica artefatos npm + Docker. Esses portões fornecem proveniência,
 
 O ajuste de CVE da imagem usa **duas etapas** em `docker-publish.yml`: a etapa SARIF (`HIGH,CRITICAL`, `exit-code: 0`) mantém ALTO+CRÍTICO visível na aba de Segurança sem bloquear; a etapa _CRITICAL gate_ (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) falha o lançamento em um CVE CRÍTICO **com uma correção disponível**. `ignore-unfixed` impede o bloqueio do lançamento para um CVE de imagem base sem um patch upstream.
 
-## ⚠️ Variação de CVE (portões osv/Trivy bloqueantes)
+## ⚠️ Variação de CVEs (bloqueando os gates do osv/Trivy)
 
-osv e Trivy comparam dependências com bancos de dados de CVE que **crescem continuamente**. Um PR que **não toca em dependências** pode de repente ficar vermelho porque um novo CVE foi divulgado em uma dependência existente (osv: `vulnCount` medido > linha de base; Trivy: um novo CRÍTICO corrigível na imagem). **Este é o comportamento operacional ESPERADO de um portão de CVE bloqueante, não uma regressão do produto.**
+O osv e o Trivy comparam as dependências com bancos de dados de CVEs que **crescem continuamente**. Um PR que **não altera nenhuma dependência** pode repentinamente ficar vermelho porque uma nova CVE foi divulgada em uma dependência existente (osv: `vulnCount` medido > baseline; Trivy: uma nova vulnerabilidade CRITICAL corrigível na imagem). **Esse é o comportamento operacional ESPERADO de um gate de CVEs bloqueante, não uma regressão do produto.**
 
-Quando osv ou Trivy ficam vermelhos devido a um CVE recém-divulgado, o remédio é:
+Quando o osv ou o Trivy ficarem vermelhos devido a uma CVE recém-divulgada, a solução será:
 
-1.  **Atualizar a dependência afetada** (preferencial) — fazer upgrade para a versão corrigida via `overrides` do `package.json` (dependências transitivas) ou reconstruir a imagem em uma base corrigida.
-2.  **Se não houver correção upstream:**
-    - **osv:** redefinir a linha de base de `metrics.vulnCount` em `config/quality/quality-baseline.json` (`npm run quality:ratchet -- --update` não cobre portões dedicados — edite o valor manualmente, `direction:down`) com uma nota de justificativa + issue de acompanhamento.
-    - **Trivy:** adicionar uma entrada em `.trivyignore` (CVE-ID por linha) com um comentário de justificativa + issue de acompanhamento. `ignore-unfixed: true` já cobre CVEs sem patches automaticamente.
+1. **Atualizar a dependência afetada** (preferencial) — atualize para a versão corrigida por meio de `package.json` e `overrides` (dependências transitivas) ou reconstrua a imagem usando uma base corrigida.
+2. **Se uma correção não estiver disponível:** mantenha o resultado medido e acompanhe a dependência ou imagem afetada. Não aumente o baseline de vulnerabilidades para aprovar uma candidata com falhas. A opção `ignore-unfixed: true` do Trivy já exclui vulnerabilidades de imagem sem uma correção upstream. Qualquer exceção na política exige revisão do ID da vulnerabilidade, do caminho exato do pacote, do prazo de validade e da issue de acompanhamento; ela não decorre automaticamente de um scan com falha.
 
-Ambos os portões **IGNORAM graciosamente** (exit 0) quando a ferramenta está ausente ou a medição falha (osv-scanner não está no PATH, osv.dev/rede inalcançável, JSON inválido) — uma falha de **medição** nunca bloqueia, apenas uma regressão **medida** bloqueia.
+As execuções obrigatórias do OSV (`check:vuln-ratchet -- --ratchet`) falham de forma restritiva com `INCOMPLETE` e código de saída 2 quando o scanner, o relatório ou o baseline não podem ser validados. Uma regressão medida resulta no código de saída 1. Uma execução consultiva ainda pode relatar `SKIP` com código de saída 0, o que não comprova que as dependências passaram pela verificação. A etapa bloqueante do Trivy também exige uma medição bem-sucedida: ferramentas indisponíveis, jobs com falha e ausência de evidências da imagem não podem certificar uma imagem como limpa.
 
-## Riscos Conhecidos Aceitos
+## Política de scan de imagens
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+O arquivo `.trivyignore.yaml` atual não contém exceções de vulnerabilidade. O comando `npm run check:trivy-ignore-policy` valida a política estruturada nos perfis locais, na CI e no workflow Quality. IDs desconhecidos, caminhos mais abrangentes, entradas duplicadas e exceções vencidas são rejeitados; os scans migrados não usam o arquivo legado `.trivyignore`.
 
-`extract-zip@2.0.1` contém dois avisos de travessia de symlink de alta gravidade não corrigidos.
-De acordo com o ramo "sem correção upstream" da solução de Variação de CVE acima,
-este é um **risco aceito**, não um aumento de versão:
+O workflow Docker obtém as ferramentas da política de `github.workflow_sha` e o arquivo de política da imagem com o mesmo seletor de origem usado no build. O seletor de política rejeita escopos incompatíveis e prepara um único arquivo para os dois scans Trivy. Uma versão histórica sem política estruturada não recebe exceções. Ambos os scans fixam a versão `v0.70.0` do Trivy. A validação da política comprova a consistência da configuração; a imagem ainda precisa passar por um scan bem-sucedido.
 
-- **Cadeia:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  Confirmado via `package-lock.json` — exatamente um pacote em toda a árvore de dependências
-  (`@openai/codex-security`) declara `extract-zip`, e exatamente um pacote
-  (`promptfoo`) declara `@openai/codex-security`.
-- **Nenhuma versão corrigida existe em qualquer parte da cadeia.** `extract-zip@2.0.1` (publicado em 2020) é a versão final do pacote — ele não é mantido. O `npm-latest` atual de `@openai/codex-security` (`0.1.29`) ainda puxa `extract-zip@2.0.1`.
-- **Inalcançável da produção.** `promptfoo` é apenas uma devDependency (nunca listado
-  em `dependencies`), e nenhum arquivo em `src/`, `open-sse/`, ou `bin/` importa o
-  pacote npm `extract-zip` — o próprio auxiliar `extractZip()` do OmniRoute
-  (`src/lib/versionManager/binaryManager.ts:93`) executa `unzip`/`tar` nativos
-  e não está relacionado. `@openai/codex-security` também inclui sua própria proteção
-  contra travessia de symlink além do callback onEntry do extract-zip.
-- **Não** crie um alias para `extract-zip` via `overrides` em `package.json` — o único
-  substituto direto viável é interno da Electron-org e incompatível com a API das
-  próprias verificações onEntry/defaultDirMode/defaultFileMode de `@openai/codex-security`;
-  substituí-lo quebraria silenciosamente as verificações de segurança desse pacote.
-- **Linha de base:** o `vulnCount` osv medido (3) já está bem abaixo da linha de base
-  congelada `config/quality/quality-baseline.json` (27) — nenhuma alteração de ratchet é necessária.
-- **Proteção contra regressão:** `tests/unit/extract-zip-14482-exposure.test.ts` afirma a
-  cadeia e o invariante de não-importação em produção acima; ele falha no CI se qualquer
-  um deles quebrar (por exemplo, um PR futuro torna `extract-zip` alcançável da produção).
-- **Rastreamento:** issue #14482.
+## Risco de dependência descontinuada
+
+O lockfile raiz não inclui mais `extract-zip` nem uma relação de dependência com ele após
+a atualização da ferramenta de desenvolvimento promptfoo para a versão fixada. Isso elimina a cadeia
+`promptfoo` → `@openai/codex-security` → `extract-zip`, anteriormente aceita e rastreada em #14482.
+As verificações de regressão em `tests/unit/extract-zip-14482-exposure.test.ts` rejeitam sua
+reintrodução e mantêm a proibição de importações provenientes do código de produção.
+
+A correção atual das dependências também restringe as substituições de compatibilidade ao
+cliente MSAL do Azure Identity, ao cliente FTP do get-uri e à dependência Zod do SDK OpenCode v1. A aquisição
+de tokens do Azure e a recuperação via FTP são testadas com transportes controlados; ambos os pacotes OpenCode
+executam seus próprios conjuntos de compilação e testes. As contagens de avisos do registro são medições
+em um determinado momento e podem mudar após o commit do lockfile.
 
 ## Backlog: Aviso do Scorecard → bloqueio
 

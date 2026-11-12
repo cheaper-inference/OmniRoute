@@ -4,7 +4,8 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { MockAgent, setGlobalDispatcher } from "undici";
+import { setTimeout as delay } from "node:timers/promises";
+import { getGlobalDispatcher, MockAgent, setGlobalDispatcher } from "undici";
 
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "provider-binding-15970-"));
 Object.assign(process.env, {
@@ -15,6 +16,7 @@ Object.assign(process.env, {
   API_KEY_SECRET: "provider-binding-fixture-secret",
   JWT_SECRET: "provider-binding-fixture-session-secret",
 });
+const originalDispatcher = getGlobalDispatcher();
 const network = new MockAgent();
 network.disableNetConnect();
 setGlobalDispatcher(network);
@@ -24,20 +26,36 @@ const connections = await import("../../src/lib/db/providers.ts");
 const { POST } = await import("../../src/app/api/providers/route.ts");
 const { makeManagementSessionRequest } = await import("../helpers/managementSession.ts");
 const fetchCalls: string[] = [];
+const originalFetch = globalThis.fetch;
+let pendingFetches = 0;
 globalThis.fetch = async (input) => {
   fetchCalls.push(String(input instanceof Request ? input.url : input));
-  return Response.json({ data: [], models: [] });
+  pendingFetches++;
+  try {
+    // Exercise a probe that outlives the old 20 ms fixture sleep, without external traffic.
+    await delay(75);
+    return Response.json({ data: [], models: [] });
+  } finally {
+    pendingFetches--;
+  }
 };
 
 test.beforeEach(() => {
+  assert.equal(
+    pendingFetches,
+    0,
+    "previous creation probe must settle before resetting the fixture"
+  );
   core.resetDbInstance();
   fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(dataDir, { recursive: true });
   fetchCalls.length = 0;
 });
 test.after(async () => {
-  await new Promise<void>((resolve) => setTimeout(resolve, 20));
+  assert.equal(pendingFetches, 0, "no credential probe may outlive the fixture");
   core.resetDbInstance();
+  globalThis.fetch = originalFetch;
+  setGlobalDispatcher(originalDispatcher);
   await network.close();
   fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
@@ -70,7 +88,17 @@ async function post(provider: string, providerSpecificData?: Record<string, unkn
       },
     })
   );
-  await new Promise<void>((resolve) => setTimeout(resolve, 20));
+  if (result.status === 201) {
+    const body = await result.clone().json();
+    const connectionId = body.connection.id;
+    const deadline = Date.now() + 5_000;
+    while (true) {
+      const row = await connections.getProviderConnectionById(connectionId);
+      if (row?.lastTested || row?.isActive === true) break;
+      assert.ok(Date.now() < deadline, "created connection's automatic probe did not settle");
+      await delay(5);
+    }
+  }
   return result;
 }
 

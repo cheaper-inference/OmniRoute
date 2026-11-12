@@ -74,7 +74,7 @@
 |                                  |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | -------------------------------- | :----------------------: | :---------: | :-------------------: |
 | 🌐 Pakalpojumu sniedzēji         |           352            |   **358**   |          380          |
-| 🧠 Unikālie tērzēšanas modeļu ID |           1320           |  **1374**   |         1491          |
+| 🧠 Unikālie tērzēšanas modeļu ID |           1320           |  **1374**   |         1499          |
 | 🖼️ Modalitāšu tilts              | 🆕 redze + audio + video |      ✓      |           ✓           |
 | 📡 Radar bezmaksas katalogs      |      🆕 pēc izvēles      |      ✓      |           ✓           |
 | ⚖️ Kvotu apzināta plānošana      |      🆕 Quota-Share      |      ✓      |           ✓           |
@@ -89,57 +89,52 @@
 
 <br/>
 
-## 🧩 Pieejams
+## Pieejams 🧩
 
-[![npm versija](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-![NPM mēnesī](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
-![Licence: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-![Docker lejupielādes](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron lejupielādes](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+[![npm versija](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm) ](https://www.npmjs.com/package/omniroute) ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm) [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED) ](https://hub.docker.com/r/diegosouzapw/omniroute) [![Licence: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square) ](LICENSE) ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED) ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
-    <td align="right"><b>🚀 Sākt</b></td>
-    <td align="center"><a href="#-quick-start">🚀 Ātrā sākšana</a></td>
-    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Instalēt</a></td>
-    <td align="center"><a href="#first-run">🆓 Savienot pakalpojumu sniedzēju</a></td>
+    <td align="right"><b>🚀 Start</b></td>
+    <td align="center"><a href="#-quick-start">🚀 Quick Start</a></td>
+    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Install</a></td>
+    <td align="center"><a href="#first-run">🆓 Connect a provider</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💡 Uzzināt</b></td>
-    <td align="center"><a href="#-the-promise">💥 Solījums</a></td>
-    <td align="center"><a href="#-why-omniroute">🤔 Kāpēc OmniRoute</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 Ar ko tas izceļas</a></td>
+    <td align="right"><b>💡 Learn</b></td>
+    <td align="center"><a href="#-the-promise">💥 The Promise</a></td>
+    <td align="center"><a href="#-why-omniroute">🤔 Why OmniRoute</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 What Sets Apart</a></td>
   </tr>
   <tr>
-    <td align="right"><b>⚙️ Funkcijas</b></td>
-    <td align="center"><a href="#-combos--the-flagship">🎯 Kombinācijas</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Pakalpojumu sniedzēji</a></td>
-    <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI un MCP</a></td>
+    <td align="right"><b>⚙️ Features</b></td>
+    <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
+    <td align="center"><a href="#-380-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
     <td align="right"></td>
-    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Saspiešana</a></td>
-    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Kur tas darbojas</a></td>
-    <td align="center"><a href="#-private--local-first">🔒 Privāts</a></td>
+    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Compression</a></td>
+    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Where It Runs</a></td>
+    <td align="center"><a href="#-private--local-first">🔒 Private</a></td>
   </tr>
   <tr>
-    <td align="right"><b>👀 Apskatīt</b></td>
-    <td align="center"><a href="#-omniroute-in-action">🎬 Darbībā</a></td>
-    <td align="center"><a href="#-whats-new">✨ Kas jauns</a></td>
-    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 Saderīgie CLI</a></td>
+    <td align="right"><b>👀 See it</b></td>
+    <td align="center"><a href="#-omniroute-in-action">🎬 In Action</a></td>
+    <td align="center"><a href="#-whats-new">✨ What's New</a></td>
+    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 Compatible CLIs</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💚 Atbalsts</b></td>
-    <td align="center"><a href="#-support-omniroute">💚 Atbalstīt / ziedot</a></td>
-    <td align="center"><a href="#-community--help">💬 Kopiena</a></td>
-    <td align="center"><a href="#-sponsors">💖 Atbalstītāji</a></td>
+    <td align="right"><b>💚 Support</b></td>
+    <td align="center"><a href="#-support-omniroute">💚 Support / Donate</a></td>
+    <td align="center"><a href="#-community--help">💬 Community</a></td>
+    <td align="center"><a href="#-sponsors">💖 Sponsors</a></td>
   </tr>
   <tr>
-    <td align="right"><b>📦 Projekts</b></td>
-    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Tehnoloģiju steks</a></td>
-    <td align="center"><a href="#-documentation">📖 Dokumentācija</a></td>
-    <td align="center"><a href="#-1000-contributors">👥 Līdzautori</a></td>
+    <td align="right"><b>📦 Project</b></td>
+    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Tech Stack</a></td>
+    <td align="center"><a href="#-documentation">📖 Docs</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 Contributors</a></td>
   </tr>
 </table>
 
@@ -148,73 +143,73 @@
 <div align="center">
   <b>🌐 67 valodās</b>
   <br/><br/>
-  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="Angļu (en)" title="Angļu (en)"></a>
-  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Portugāļu — Brazīlija (pt-BR)" title="Portugāļu — Brazīlija (pt-BR)"></a>
-  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Portugāļu (pt)" title="Portugāļu (pt)"></a>
-  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Spāņu (es)" title="Spāņu (es)"></a>
-  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Franču (fr)" title="Franču (fr)"></a>
-  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Itāļu (it)" title="Itāļu (it)"></a>
-  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Vācu (de)" title="Vācu (de)"></a>
-  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Nīderlandiešu (nl)" title="Nīderlandiešu (nl)"></a>
-  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Krievu (ru)" title="Krievu (ru)"></a>
-  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Ukraiņu (uk-UA)" title="Ukraiņu (uk-UA)"></a>
-  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Poļu (pl)" title="Poļu (pl)"></a>
-  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Čehu (cs)" title="Čehu (cs)"></a>
-  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Slovāku (sk)" title="Slovāku (sk)"></a>
-  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Rumāņu (ro)" title="Rumāņu (ro)"></a>
-  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Ungāru (hu)" title="Ungāru (hu)"></a>
-  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Bulgāru (bg)" title="Bulgāru (bg)"></a>
-  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Dāņu (da)" title="Dāņu (da)"></a>
-  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Somu (fi)" title="Somu (fi)"></a>
-  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Norvēģu (no)" title="Norvēģu (no)"></a>
-  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Zviedru (sv)" title="Zviedru (sv)"></a>
-  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="Ķīniešu — vienkāršotā (zh-CN)" title="Ķīniešu — vienkāršotā (zh-CN)"></a>
-  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="Ķīniešu — tradicionālā (zh-TW)" title="Ķīniešu — tradicionālā (zh-TW)"></a>
-  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="Japāņu (ja)" title="Japāņu (ja)"></a>
-  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="Korejiešu (ko)" title="Korejiešu (ko)"></a>
-  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="Taju (th)" title="Taju (th)"></a>
-  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Vjetnamiešu (vi)" title="Vjetnamiešu (vi)"></a>
-  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Indonēziešu (id)" title="Indonēziešu (id)"></a>
-  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Malajiešu (ms)" title="Malajiešu (ms)"></a>
-  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filipīniešu (phi)" title="Filipīniešu (phi)"></a>
-  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Hindi (hi)" title="Hindi (hi)"></a>
-  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Gudžaratu (gu)" title="Gudžaratu (gu)"></a>
-  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Marathu (mr)" title="Marathu (mr)"></a>
-  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Tamilu (ta)" title="Tamilu (ta)"></a>
-  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Telugu (te)" title="Telugu (te)"></a>
-  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="Bengāļu (bn)" title="Bengāļu (bn)"></a>
-  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="Urdu (ur)" title="Urdu (ur)"></a>
-  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="Persiešu (fa)" title="Persiešu (fa)"></a>
-  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="Arābu (ar)" title="Arābu (ar)"></a>
-  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="Ivrits (he)" title="Ivrits (he)"></a>
-  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Turku (tr)" title="Turku (tr)"></a>
-  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Azerbaidžāņu (az)" title="Azerbaidžāņu (az)"></a>
-  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Svahili (sw)" title="Svahili (sw)"></a>
-  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Grieķu (el)" title="Grieķu (el)"></a>
-  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Horvātu (hr)" title="Horvātu (hr)"></a>
-  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Serbu (sr)" title="Serbu (sr)"></a>
-  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Lietuviešu (lt)" title="Lietuviešu (lt)"></a>
-  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Igauņu (et)" title="Igauņu (et)"></a>
+  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="English (en)" title="English (en)"></a>
+  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
+  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Português (pt)" title="Português (pt)"></a>
+  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Español (es)" title="Español (es)"></a>
+  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Français (fr)" title="Français (fr)"></a>
+  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Italiano (it)" title="Italiano (it)"></a>
+  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Deutsch (de)" title="Deutsch (de)"></a>
+  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Nederlands (nl)" title="Nederlands (nl)"></a>
+  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Русский (ru)" title="Русский (ru)"></a>
+  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Українська (uk-UA)" title="Українська (uk-UA)"></a>
+  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Polski (pl)" title="Polski (pl)"></a>
+  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Čeština (cs)" title="Čeština (cs)"></a>
+  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Slovenčina (sk)" title="Slovenčina (sk)"></a>
+  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Română (ro)" title="Română (ro)"></a>
+  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Magyar (hu)" title="Magyar (hu)"></a>
+  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Български (bg)" title="Български (bg)"></a>
+  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Dansk (da)" title="Dansk (da)"></a>
+  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Suomi (fi)" title="Suomi (fi)"></a>
+  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Norsk (no)" title="Norsk (no)"></a>
+  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Svenska (sv)" title="Svenska (sv)"></a>
+  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="中文 — 简体 (zh-CN)" title="中文 — 简体 (zh-CN)"></a>
+  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="中文 — 繁體 (zh-TW)" title="中文 — 繁體 (zh-TW)"></a>
+  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="日本語 (ja)" title="日本語 (ja)"></a>
+  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="한국어 (ko)" title="한국어 (ko)"></a>
+  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="ไทย (th)" title="ไทย (th)"></a>
+  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Tiếng Việt (vi)" title="Tiếng Việt (vi)"></a>
+  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Bahasa Indonesia (id)" title="Bahasa Indonesia (id)"></a>
+  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Bahasa Melayu (ms)" title="Bahasa Melayu (ms)"></a>
+  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filipino (phi)" title="Filipino (phi)"></a>
+  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="हिन्दी (hi)" title="हिन्दी (hi)"></a>
+  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ગુજરાતી (gu)" title="ગુજરાતી (gu)"></a>
+  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="मराठी (mr)" title="मराठी (mr)"></a>
+  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="தமிழ் (ta)" title="தமிழ் (ta)"></a>
+  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="తెలుగు (te)" title="తెలుగు (te)"></a>
+  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="বাংলা (bn)" title="বাংলা (bn)"></a>
+  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="اردو (ur)" title="اردو (ur)"></a>
+  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="فارسی (fa)" title="فارسی (fa)"></a>
+  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="العربية (ar)" title="العربية (ar)"></a>
+  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="עברית (he)" title="עברית (he)"></a>
+  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Türkçe (tr)" title="Türkçe (tr)"></a>
+  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Azərbaycan (az)" title="Azərbaycan (az)"></a>
+  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Kiswahili (sw)" title="Kiswahili (sw)"></a>
+  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Ελληνικά (el)" title="Ελληνικά (el)"></a>
+  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Hrvatski (hr)" title="Hrvatski (hr)"></a>
+  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Српски (sr)" title="Српски (sr)"></a>
+  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Lietuvių (lt)" title="Lietuvių (lt)"></a>
+  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Eesti (et)" title="Eesti (et)"></a>
   <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Latviešu (lv)" title="Latviešu (lv)"></a>
-  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Slovēņu (sl)" title="Slovēņu (sl)"></a>
-  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Maltiešu (mt)" title="Maltiešu (mt)"></a>
-  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Īru (ga)" title="Īru (ga)"></a>
-  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kannadu (kn)" title="Kannadu (kn)"></a>
-  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Malajalu (ml)" title="Malajalu (ml)"></a>
-  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Odiju (or)" title="Odiju (or)"></a>
-  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Pandžabu (pa)" title="Pandžabu (pa)"></a>
-  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="Nepāliešu (ne)" title="Nepāliešu (ne)"></a>
-  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="Singāļu (si)" title="Singāļu (si)"></a>
-  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="Birmiešu (my)" title="Birmiešu (my)"></a>
-  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="Khmeru (km)" title="Khmeru (km)"></a>
-  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Hausu (ha)" title="Hausu (ha)"></a>
-  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Jorubu (yo)" title="Jorubu (yo)"></a>
+  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Slovenščina (sl)" title="Slovenščina (sl)"></a>
+  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Malti (mt)" title="Malti (mt)"></a>
+  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Gaeilge (ga)" title="Gaeilge (ga)"></a>
+  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ಕನ್ನಡ (kn)" title="ಕನ್ನಡ (kn)"></a>
+  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="മലയാളം (ml)" title="മലയാളം (ml)"></a>
+  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ଓଡ଼ିଆ (or)" title="ଓଡ଼ିଆ (or)"></a>
+  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ਪੰਜਾਬੀ (pa)" title="ਪੰਜਾਬੀ (pa)"></a>
+  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="नेपाली (ne)" title="नेपाली (ne)"></a>
+  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="සිංහල (si)" title="සිංහල (si)"></a>
+  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="မြန်မာ (my)" title="မြန်မာ (my)"></a>
+  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="ខ្មែរ (km)" title="ខ្មែរ (km)"></a>
+  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Hausa (ha)" title="Hausa (ha)"></a>
+  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Yorùbá (yo)" title="Yorùbá (yo)"></a>
   <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Igbo (ig)" title="Igbo (ig)"></a>
-  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="Amharu (am)" title="Amharu (am)"></a>
-  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Uzbeku (uz)" title="Uzbeku (uz)"></a>
-  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="Gruzīnu (ka)" title="Gruzīnu (ka)"></a>
-  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Armēņu (hy)" title="Armēņu (hy)"></a>
-  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bosniešu (bs)" title="Bosniešu (bs)"></a>
+  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="አማርኛ (am)" title="አማርኛ (am)"></a>
+  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Oʻzbekcha (uz)" title="Oʻzbekcha (uz)"></a>
+  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="ქართული (ka)" title="ქართული (ka)"></a>
+  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Հայերեն (hy)" title="Հայերեն (hy)"></a>
+  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bosanski (bs)" title="Bosanski (bs)"></a>
 </div>
 
 <br/>
@@ -688,11 +683,11 @@ parāda precīzu vidi/argumentus pirms izpildes, un `--api-key-env NAME` pasarg�
 
 <div align="center">
 
-## 🌐 380 MI nodrošinātāji — 153 katalogā atzīmēti kā bezmaksas
+## 🌐 380 AI nodrošinātāji — 156 ar katalogu atzīmēti bez maksas
 
 </div>
 
-> **380 reģistrētu nodrošinātāju** kanoniskajās tērzēšanas, multivides, meklēšanas, lokālajās, mākoņa aģentu un sistēmu kolekcijās, tostarp **153 ar `hasFree: true` atklāšanas metadatiem**. Tērzēšanas modeļu reģistrā ir **239 nodrošinātāji / 3,059 atšķirīgi nodrošinātāja–modeļa pāri / 1,475 neapstrādāti modeļu ID**; atsevišķajā bezmaksas budžeta katalogā ir **471 rinda katram modelim**, **34 periodiski baseini** un **54 periodiski/bezatlīdzības bezmaksas nodrošinātāji**. Šie ir apzināti atšķirīgi saucēji; definīcijas un pēc baseiniem deduplicētie aprēķini ir pieejami [Nodrošinātāju uzziņā](docs/reference/PROVIDER_REFERENCE.md) un [Bezmaksas līmeņos](docs/reference/FREE_TIERS.md).
+> **380 reģistrēti pakalpojumu sniedzēji** kanoniskajās tērzēšanas, multivides, meklēšanas, vietējās, mākoņa aģentu un sistēmu kolekcijās, tostarp **156, kas satur `hasFree: true` atklāšanas metadatus** . Tērzēšanas modeļu reģistrs aptver **241 pakalpojumu sniedzējs / 3114 atšķirīgi nodrošinātāja-modeļu pāri / 1499 neapstrādāts IDs modelis** ; ir atsevišķajā brīvbudžeta katalogā **485 rindas katram modelim** ,**34 periodiski baseini** un **54 recurring/keyless bezmaksas uz visiem laikiem pakalpojumu sniedzēji** . Tie ir dažādi saucēji pēc dizaina; definīcijas un pūla atdalītie aprēķini ir pieejami [pakalpojumu sniedzēja atsaucē](docs/reference/PROVIDER_REFERENCE.md) un [bezmaksas līmeņos](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -725,7 +720,7 @@ parāda precīzu vidi/argumentus pirms izpildes, un `--api-key-env NAME` pasarg�
   </tr>
 </table>
 
-<sub>…un vēl vairāk nekā 350 — katra ikona tiek dinamiski ielādēta no informācijas paneļa nodrošinātāju kataloga. 📖 [Nodrošinātāju uzziņa](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>…un vēl 350 + — katra ikona tiek atrisināta tiešraidē no informācijas paneļa pakalpojumu sniedzēju kataloga. 📖 [nodrošinātāja atsauce](docs/reference/PROVIDER_REFERENCE.md)</sub>
 
 <br/>
 
@@ -757,80 +752,93 @@ parāda precīzu vidi/argumentus pirms izpildes, un `--api-key-env NAME` pasarg�
 
 <div align="center">
 
-## 🖥️ Kur OmniRoute skrien — jebkur
+## 🖥️ Kur darbojas OmniRoute — jebkur
 
 </div>
 
-> Tā pati lietotne, jūsu mašīna, jūsu noteikumi. No globālās npm instalēšanas līdz** savu tālruni** izmantojot Termux.
+> Tā pati lietotne, tava ierīce, tavi noteikumi. No globālas npm instalācijas līdz pat **tavam tālrunim**, izmantojot Termux.
 
 <table>
-  <tr><th align="left"> Platforma </th><th align="left"> Instalēt </th><th align="left"> Izceltie elementi </th></tr>
-  <tr><td align="left" nowrap>📦 <b> npm (globāls)</b></td><td align="left" nowrap><code> npm instalēt -g omniroute </code></td><td align="left"> Viena komanda, jebkura OS</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Bun (globāls)</b></td><td align="left" nowrap><code> bun pievienot -g omniroute </code></td><td align="left"> Tas pats reģistra tarbols, ātrāka instalēšana </td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> docker palaist … diegosouzapw/omniroute</code></td><td align="left"> Daudzloku <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b> Darbvirsma </tr>Electron)</b></td><td align="left" nowrap><code> npm palaist elektronu: veidojums </code></td><td align="left"> Native logs + sistēmas teknē — <b>Windows / macOS / Linux</b></td>
-  <tr><td align="left" nowrap>🎩 <b> Izvēlņu josla </tr>OmniRouteTray)</b></td><td align="left" nowrap><code> brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left"> Uzrauga &amp; automātisko servera atjaunināšanu — <b>macOS</b></td>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap> native <code> arm64 </code></td><td align="left"> Raspberry Pi, ARM serveri, Apple Silicon </td></tr>
-  <tr><td align="left" nowrap>📱 <b></b></td><td align="left" nowrap><code>-y </code></td><td align="left"><b></b>24/7</td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Pievienot sākuma ekrānam"</td><td align="left"> Pilnekrāna režīms, bezsaistē, instalējams no pārlūkprogrammas </td></tr>
-  <tr><td align="left" nowrap>🧩 <b>OpenCode spraudnis </b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left"> Vietējā OpenCode integrācija </td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS Kods Copilot Tērzēšana </b></td><td align="left" nowrap> instalēt <b>OmniCopilot</b> paplašinājums </td><td align="left"> Katrs OmniRoute modelis vietējā Copilot tērzēšanas atlasītājā — stabils &amp; Insiders </td></tr>
-  <tr><td align="left" nowrap>🛠️ <b> No avota </b></td><td align="left" nowrap><code> npm instalējiet && npm palaist dev </code></td><td align="left"> Uzlauziet to, veiciniet </td></tr>
+  <tr><th align="left">Platforma</th><th align="left">Instalēšana</th><th align="left">Galvenās priekšrocības</th></tr>
+  <tr><td align="left" nowrap>📦 <b>npm (globāli)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Viena komanda, jebkura operētājsistēma</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (globāli)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Iespēju robežās nodrošināta saderība bez atbalsta garantijām; Node.js ir atbalstītā izpildvide.</td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Vairāku arhitektūru atbalsts: <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🖥️ <b>Darbvirsma (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Vietējais logs un sistēmas tekne — <b>Windows / macOS / Linux</b></td></tr>
+  <tr><td align="left" nowrap>🎩 <b>Izvēļņu josla (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Uzrauga un automātiski atjaunina serveri — <b>macOS</b></td></tr>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>vietējais <code>arm64</code></td><td align="left">Raspberry Pi, ARM serveri, Apple Silicon</td></tr>
+  <tr><td align="left" nowrap>📱 <b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left">Darbojas <b>tavā tālrunī</b> visu diennakti, bez root piekļuves</td></tr>
+  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>„Pievienot sākuma ekrānam”</td><td align="left">Pilnekrāna režīms, darbība bezsaistē, instalēšana no pārlūkprogrammas</td></tr>
+  <tr><td align="left" nowrap>🧩 <b>OpenCode spraudnis</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">Vietēja OpenCode integrācija</td></tr>
+  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap>instalē <b>OmniCopilot</b> paplašinājumu</td><td align="left">Visi OmniRoute modeļi vietējā Copilot Chat modeļu izvēlnē — stabilajā un Insiders versijā</td></tr>
+  <tr><td align="left" nowrap>🛠️ <b>No pirmkoda</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">Pārveido un papildini to</td></tr>
 </table>
 
-<sub>📖 [Docker rokasgrāmata](docs/guides/DOCKER_GUIDE.md) · [Darbvirsma](electron/README.md) · [Izvēlņu joslas paliktnis](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+<sub>📖 [Docker ceļvedis](docs/guides/DOCKER_GUIDE.md) · [Darbvirsma](electron/README.md) · [Izvēļņu joslas tekne](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-### 🧩 Jaunums: OmniRoute iekšā VS Code vietējā Copilot tērzēšana
+### 🧩 Jaunums: OmniRoute tieši VS Code vietējā Copilot Chat saskarnē
 
 </div>
 
-> Nav jaunas sānjoslas, nav jaunas tērzēšanas UI — katrs OmniRoute modelis tiek rādīts tieši šeit**Copilot Tērzēšanas modeļu atlasītājs, kuru jau izmantojat** . Kopš VS koda 1.122 pakalpojumu sniedzēju modeļi darbojas bez GitHub pierakstīšanās vai Copilot abonementa — aģenta režīms, rīku izsaukšana un redze bez maksas.
+> Nekādas jaunas sānjoslas vai jaunas tērzēšanas saskarnes — ikviens OmniRoute nodrošinātais modelis tiek parādīts tieši
+> **jau izmantotajā Copilot Chat modeļu izvēlnē**. Kopš VS Code 1.122 nodrošinātāju modeļi darbojas
+> bez pierakstīšanās GitHub kontā vai Copilot abonementa — aģenta režīms, rīku izsaukšana un attēlu apstrāde
+> bez maksas.
 
-Instalējiet** [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** paplašinājumu, novirziet to uz savu OmniRoute serveri (pēc noklusējuma `localhost:20128`), pēc tam atveriet Copilot Chat → modeļu atlasītāju →** Pārvaldīt modeļus…** →**OmniRoute** .
+Instalē **[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** paplašinājumu, norādi tam
+savu OmniRoute serveri (pēc noklusējuma `localhost:20128`), pēc tam atver Copilot Chat → modeļu izvēlni
+→ **Pārvaldīt modeļus…** → **OmniRoute**.
 
 <table>
-  <tr><th align="left"> Veikals </th><th align="left"> Saite </th><th align="left"> Darbojas ar </th></tr>
-  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace </b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot"> Instalējiet →</a ></td >< td izlīdziniet ="pa kreisi">VS Kods — stabils &amp; Insiders </td></tr>
-  <tr><td align="left" nowrap>🔓 <b> Atvērt VSX reģistru </b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"> Instalēt →</a ></td >< td līdzināt ="pa kreisi">Cursor, Windsurf, VSCodium, Theia, Antigravity zq </tr> koda serveris </td>Kiro
+  <tr><th align="left">Veikals</th><th align="left">Saite</th><th align="left">Darbojas ar</th></tr>
+  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">Instalēt →</a></td><td align="left">VS Code — stabilo un Insiders versiju</td></tr>
+  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">Instalēt →</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro…</td></tr>
 </table>
 
-No redaktora iekšpuses: atveriet** Paplašinājumi** apskatīt, meklēt** "OmniRoute"** , noklikšķiniet** Instalējiet** — darbojas vienādi abos veikalos. Avots, izdevumi un publicēšanas rokasgrāmata tiešraidē vietnē [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
+Redaktorā atver **Paplašinājumu** skatu, meklē **„OmniRoute”** un noklikšķini uz **Instalēt**
+— abos veikalos tas darbojas vienādi. Pirmkods, problēmu pieteikumi un publicēšanas instrukcija ir pieejama
+[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
 
-<sub>📖 [VS Kods Copilot Tērzēšanas ceļvedis](docs/guides/VSCODE-COPILOT.md) — iestatīšana, atlasītāja rādītā informācija, informācijas panelis cilnē, problēmu novēršana </sub>
+<sub>📖 [VS Code Copilot Chat ceļvedis](docs/guides/VSCODE-COPILOT.md) — iestatīšana, modeļu izvēlnes saturs, informācijas panelis cilnē, problēmu novēršana</sub>
 
 <br/>
 
 <div align="center">
 
-### 🎩 Jaunums: OmniRouteTray — jūsu vārteja, kas atrodas izvēļņu joslā
+### 🎩 Jaunums: OmniRouteTray — tava vārteja izvēļņu joslā
 
 </div>
 
-> `omniroute serve` ir vislaimīgākais, kad tas vienmēr ir ieslēgts.** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)** pārvērš to par macOS izvēlņu joslas iestatīšanas un aizmirstības lietojumprogrammu: tā palaiž serveri, uztur to darbināmu pēc atkārtotas palaišanas, atjaunina to vietā un novieto jūsu reāllaika marķiera budžetu viena klikšķa attālumā —** neviens termināļa logs nav atstāts atvērts, nav `npm install -g omniroute` lai auklētu.**
+> `omniroute serve` vislabāk darbojas, ja tas vienmēr ir ieslēgts. **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)**
+> pārvērš to par vienreiz iestatāmu un aizmirstamu macOS izvēļņu joslas lietotni: tā palaiž serveri, uztur to aktīvu
+> pēc pārstartēšanas, atjaunina to uz vietas un padara tavu aktuālo tokenu budžetu pieejamu ar vienu klikšķi — **nav
+> jāatstāj atvērts termināļa logs un nav jāuzrauga `npm install -g omniroute`.**
 
-Tas ir izveidots, izmantojot [Tauri v2](https://v2.tauri.app/) (Rust kodols, kas ir noapaļošanas kļūdas lielums), un tas nodrošina savu parakstīto Node 24 izpildlaiku un pārvalda lietotnei piederošu OmniRoute instalāciju, tāpēc tas nekad necīnās ar jūsu globālo `node`/`bun`. Tas** koplieto jūsu esošo `~/.omniroute/` konfigurāciju un datu bāzi** — tātad tas pats OmniRoute ko tu jau skrien, tikai ar cepuri galvā. 🎩
+Tā ir veidota ar [Tauri v2](https://v2.tauri.app/) (Rust kodols, kura izmērs ir niecīgs), un komplektācijā ietver
+savu parakstīto Node 24 izpildvidi, kā arī pārvalda lietotnei piederošu OmniRoute instalāciju, tāpēc tā nekad nekonfliktē ar tavu
+globālo `node`/`bun`. Tā **koplieto tavu esošo `~/.omniroute/` konfigurāciju un datubāzi** — tātad tas ir
+tas pats OmniRoute, kuru jau izmanto, tikai tagad ar cepuri. 🎩
 
 <table>
-  <tr><th align="left"> Ko tas dara </th><th align="left"> Kā </th></tr>
-  <tr><td align="left" nowrap>🟢 <b> Pārrauga serveri </b></td><td align="left"> Izveido <code> omniroute serve </code>, pieņem jau darbojošu instanci, nevis to dublē </td></tr>
-  <tr><td align="left" nowrap>📊 <b> Tiešsaistes lietojums īsumā </b></td><td align="left"> Pakalpojumu sniedzēja kvotu joslas, Claude session/weekly ierobežojumi ar atiestatītu atpakaļskaitīšanu, 30 dienu izmaksu sadalījums </td></tr>
-  <tr><td align="left" nowrap>🔄 <b> Automātiskie atjauninājumi vietā </b></td><td align="left"> Pakāpeniska instalēšana, atomu maiņa, atcelšana kļūmes gadījumā — vienmēr jaunākajā versijā </td></tr>
-  <tr><td align="left" nowrap>🚀 <b> Sākt, piesakoties </b></td><td align="left"> Izvēles palaišana pie pieteikšanās; tikai paplātei, nav doka ikonas </td></tr>
-  <tr><td align="left" nowrap>🩺 <b> Doctor &amp; žurnāli </b></td><td align="left"> diagnostika ar vienu klikšķi un servera žurnāla piekļuve </td></tr>
+  <tr><th align="left">Ko tas dara</th><th align="left">Kā</th></tr>
+  <tr><td align="left" nowrap>🟢 <b>Uzrauga serveri</b></td><td align="left">Palaiž <code>omniroute serve</code> un pievienojas jau palaistai instancei, nevis to dublē</td></tr>
+  <tr><td align="left" nowrap>📊 <b>Aktuālais lietojums vienā acu uzmetienā</b></td><td align="left">Nodrošinātāju kvotu joslas, Claude sesijas un nedēļas ierobežojumi ar laika atskaiti līdz atiestatīšanai, 30 dienu izmaksu sadalījums</td></tr>
+  <tr><td align="left" nowrap>🔄 <b>Automātiski atjauninājumi uz vietas</b></td><td align="left">Pakāpeniska instalēšana, atomāra nomaiņa, atgriešana iepriekšējā stāvoklī kļūmes gadījumā — vienmēr jaunākais laidiens</td></tr>
+  <tr><td align="left" nowrap>🚀 <b>Palaišana piesakoties</b></td><td align="left">Izvēles palaišana, piesakoties sistēmā; tikai sistēmas teknē, bez ikonas Dock joslā</td></tr>
+  <tr><td align="left" nowrap>🩺 <b>Diagnostika un žurnāli</b></td><td align="left">Diagnostika ar vienu klikšķi un piekļuve servera žurnāliem</td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub> Vai vēlaties lejupielādēt? Paņemiet jaunāko <code>.dmg </code> no
-<a href="https://github.com/zoispag/omniroute-tray/releases"> Izlaiž </a>. Avots, problēmas un uzbūve
-docs tiešraidē <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
-<br/>💛 <a href="https://github.com/zoispag">@zoispag </a> kopienas projekts — nevis oficiāls OmniRoute laidiens.</sub>
+<sub>Vēlaties lejupielādēt? Iegūstiet jaunāko <code>.dmg</code> no sadaļas
+<a href="https://github.com/zoispag/omniroute-tray/releases">Laidieni</a>. Pirmkods, problēmu ziņojumi un būvēšanas
+dokumentācija ir pieejama vietnē <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
+<br/>💛 Kopienas projekts, ko izveidojis <a href="https://github.com/zoispag">@zoispag</a> — tas nav oficiāls OmniRoute laidiens.</sub>
 
 <br/>
 
@@ -1079,7 +1087,7 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
 ```
 
-`:latest` seko augstākajai **publicētajai** stabilajai SemVer versijai. Tas neseko git zaram `main`. GitOps vajadzībām piesaistiet `:X.Y.Z`. Skatiet [Docker laidienu kanālus](docs/guides/DOCKER_GUIDE.md#release-channels). Attēlā ir iestatīts **`OMNIROUTE_MEMORY_MB=1024`**. Ar to pietiek informācijas panelim un nelielai tērzēšanai. **Programmēšanas aģentiem** (`POST /v1/responses` no Claude Code, Codex, Grok, …) ir nepieciešama daudz lielāka V8 kaudze, citādi process beidzas ar `FATAL ERROR` pie aptuveni 12 GiB, ja pārklājas divi gari konteksti. Konteinera atmiņu iestatiet lielāku par kaudzi (vietējie buferi atrodas ārpus V8):
+`:latest` seko jaunākajai **publicētajai** stabilajai SemVer versijai. Tas neseko git `main`. GitOps vajadzībām fiksējiet `:X.Y.Z`. Skatiet [Docker laidienu kanāli](docs/guides/DOCKER_GUIDE.md#release-channels). Attēlā ir fiksēts **`OMNIROUTE_MEMORY_MB=1024`**. Ar to pietiek informācijas panelim un nelielai tērzēšanai. **Programmēšanas aģentiem** (`POST /v1/responses` no Claude Code, Codex, Grok, …) nepieciešama daudz lielāka V8 kaudze, pretējā gadījumā process beidzas ar `FATAL ERROR` pie aptuveni 12 GiB, ja pārklājas divi gari konteksti. Konteineram piešķiriet vairāk atmiņas nekā kaudzei (vietējie buferi atrodas ārpus V8):
 
 | Darba slodze                             | Kaudze (`-e OMNIROUTE_MEMORY_MB`) | Konteiners (`--memory`) |
 | ---------------------------------------- | --------------------------------- | ----------------------- |
@@ -1099,15 +1107,15 @@ Pilna tabula: [Docker ceļvedis — izpildlaika RAM](docs/guides/DOCKER_GUIDE.md
 > `diegosouzapw/omniroute:next-web` seko pašreizējam noklusējuma `release/v*`
 > zaram. Šie mainīgie tagi ir paredzēti tikai neizlaistu labojumu testēšanai un
 > **netiek atbalstīti produkcijas vidē**. Skatiet
-> [Docker laidienu kanālus](docs/guides/DOCKER_GUIDE.md#release-channels).
+> [Docker laidienu kanāli](docs/guides/DOCKER_GUIDE.md#release-channels).
 
 **🥟 Bun**
 
-Standarta `bun install` un globālā instalēšana (`bun install -g omniroute`) tiek atbalstīta, izmantojot Bun izpildvides noteikšanu:
+Standarta `bun install` un globālā instalēšana (`bun install -g omniroute`) tiek atbalstīta, nosakot Bun izpildvidi:
 
 - **Iebūvētais `bun:sqlite`**: darbojoties Bun vidē, OmniRoute izmanto Bun iebūvēto `bun:sqlite` draiveri, bet Node.js vidē atkāpjas uz `better-sqlite3` vai `sql.js`.
-- **Automātiska Webpack komplektētāja atlase izstrādes laikā**: izstrādes režīms (`bun run dev`) automātiski nosaka Bun un atspējo Turbopack par labu Webpack, lai novērstu nesaderību ar vietējiem V8 saistījumiem. Produkcijas būvējumi (`bun run build`) precīzi ievēro `OMNIROUTE_USE_TURBOPACK` tāpat kā Node vidē: pēc noklusējuma Turbopack, bet `OMNIROUTE_USE_TURBOPACK=0`, lai būvētu ar Webpack (`Dockerfile.bun` to nodrošina kā `--build-arg`).
-- **Atsevišķs Bun Dockerfile**: vairākposmu `Dockerfile.bun` vietējiem Bun produkcijas izvietojumiem (`docker build -f Dockerfile.bun -t omniroute:bun .`).
+- **Automātiska Webpack komplektētāja izvēle izstrādes vidē**: izstrādes režīms (`bun run dev`) automātiski nosaka Bun un atspējo Turbopack par labu Webpack, lai novērstu nesaderību ar vietējiem V8 saistījumiem. Produkcijas būvējumi (`bun run build`) precīzi ievēro `OMNIROUTE_USE_TURBOPACK` tāpat kā Node vidē: pēc noklusējuma Turbopack, bet `OMNIROUTE_USE_TURBOPACK=0`, lai būvētu ar Webpack (`Dockerfile.bun` to nodrošina kā `--build-arg`).
+- **Īpašs Bun Dockerfile**: vairākposmu `Dockerfile.bun` vietējai Bun izvietošanai produkcijas vidē (`docker build -f Dockerfile.bun -t omniroute:bun .`).
 
 ```bash
 # Instalēšana un palaišana ar Bun
@@ -1162,28 +1170,30 @@ podman compose --profile base up -d --build
 ```
 
 macOS vai Windows vidē Podman izmanto attālu Podman Machine: izlaidiet `podman unshare` un
-ievērojiet [konkrētajai topoloģijai paredzētos norādījumus par datu direktoriju](contrib/podman/README.md#data-directory-permissions-by-topology).
+ievērojiet [topoloģijai specifiskos norādījumus par datu direktoriju](contrib/podman/README.md#data-directory-permissions-by-topology).
 
 📖 [Podman ceļvedis](contrib/podman/README.md) — Compose būvējumi, Podman Machine un
 Linux/systemd Quadlet iestatīšana.
 
 **⚡ Ātrāka / kompaktāka instalēšana (izlaižot vietējo būvēšanu)**
 
-Vietējais SQLite dzinis (`better-sqlite3`) ir **neobligāta** atkarība, tādēļ globāla
-instalēšana nekad netiek bloķēta, gaidot kompilēšanu no pirmkoda: tā izmanto iepriekš kompilētu bināro failu, ja tāds atbilst
-jūsu platformai/Node, bet citādi nemanāmi pāriet uz tīru JS dzini
-(`node:sqlite` Node 22+ vidē, pretējā gadījumā uz komplektācijā iekļauto `sql.js` WASM) — būvēšanas rīki nav nepieciešami.
+Vietējais SQLite dzinis (`better-sqlite3`) ir **neobligāta** atkarība, tāpēc globālā
+instalēšana nekad neaizkavējas, kompilējot no pirmkoda: tā izmanto iepriekš kompilētu bināro failu, ja tāds atbilst
+jūsu platformai/Node, bet pretējā gadījumā nemanāmi pāriet uz tīru JS dzini
+(`node:sqlite` ar Node 22+, citādi komplektā iekļauto `sql.js` WASM) — būvēšanas rīki nav nepieciešami.
 
-Lai pilnībā izlaistu vietējo pēcieinstalēšanas iesildīšanu (CI, bezgrafikas vai lēnās iekārtās):
+Lai pilnībā izlaistu **vietējo iesildīšanu** pēc instalēšanas (CI, bezgrafikas vai lēnās iekārtās).
+Piezīme: tas izlaiž tikai vietējā SQLite iesildīšanas darbību (`scripts/postinstall.mjs`);
+binārā faila kopēšanas/labošanas āķis (`scripts/build/postinstall.mjs`) joprojām darbojas kā parasti:
 
 ```bash
 OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # Arī CI=1 to izlaiž
 ```
 
-Visātrākai instalēšanai dodiet priekšroku **pnpm** (pēc satura adresēta krātuve + cietās saites — skatiet iepriekš).
-Izpildvidei bez informācijas paneļa un grafiskās saskarnes izmantojiet Docker `base` profilu (iepriekš) vai
-[Termux ceļvedi](docs/guides/TERMUX_GUIDE.md). CLI un tīmekļa informācijas paneli nodrošina viens un tas pats
-process vienā portā, tādēļ pašlaik nav atsevišķas, tikai CLI paredzētas pakotnes.
+Ātrākai instalēšanai dodiet priekšroku **pnpm** (pēc satura adresēta krātuve + cietās saites — skatiet iepriekš).
+Darbībai bez informācijas paneļa un grafiskās saskarnes izmantojiet Docker `base` profilu (iepriekš) vai
+[Termux ceļvedi](docs/guides/TERMUX_GUIDE.md). CLI un tīmekļa informācijas paneli apkalpo viens un tas pats
+process vienā portā, tāpēc pašlaik nav atsevišķas tikai CLI paredzētas pakotnes.
 
 <br/>
 

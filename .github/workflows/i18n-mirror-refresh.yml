@@ -1,26 +1,24 @@
 name: i18n mirror refresh
 
-# Post-merge refresh of the translated docs mirrors (docs/i18n/<locale>/…). Since #18420 the
-# docs drift gate is advisory on PRs and the merge train, so drifted mirrors pile up on the
-# release branch until somebody runs `npm run i18n:run` by hand. This workflow does that run
-# on a schedule and turns the result into ONE pull request:
+# Scheduled recovery of translated docs mirrors (docs/i18n/<locale>/…). Ordinary PR
+# preparation may leave proven English-only work pending, but queue/base admission requires
+# all five drift classes to pass. Maintainers refresh the composed candidate before merge;
+# this workflow separately repairs debt already present on a public base in ONE pull request:
 #
 #   1. target = the highest release/v* branch (or the `base` input); skipped with a notice while
 #      an open `release-freeze` issue names that branch (Hard Rule #21);
-#   2. drifted sources = `check-translation-drift.mjs --json --warn` (drifted, missing,
-#      hand-edited and stale mirrors);
+#   2. drifted sources = `check-translation-drift.mjs --json --warn` (all five reported
+#      drift classes, including stale targets and inconsistent section caches);
 #   3. translate them: the LLM chain first when the backend secrets are configured (model, then
 #      OMNIROUTE_TRANSLATION_FALLBACK_MODELS, then a re-split, then Google as the last resort),
 #      otherwise the structure-safe Google engine alone;
 #   4. `npm run check:docs-all` + the drift check must both pass; then the mirrors are committed
-#      to the fixed branch `chore/i18n-mirror-refresh` (force-reset from the target every run)
-#      and one PR is opened, or the open one is updated by the force-push;
-#   5. a partial translation (run-translation exit 3: some (source, locale) units failed, the
-#      rest translated) still opens the PR with the translated mirrors. The failed units keep
-#      their mirror and state record, the drift check excuses exactly those units, and the PR
-#      body lists them for the next run (#18538);
-#   6. a run where nothing translated, any other translation error, or any other check failure
-#      opens NO PR and fails the job with a step summary that lists the failing files / locales.
+#      to the fixed branch `chore/i18n-mirror-refresh` (rebuilt from an exact target tip)
+#      and one draft PR is opened, or an owned PR is updated under a head lease;
+#   5. exit 3 retains successful translations and proposes a draft with exact failed units listed;
+#      all five drift classes are checked, with exceptions only for unchanged failed units;
+#   6. before and after hooks, failed mirror bytes and locale records must equal the selected base.
+#      Other translation/check failures open NO PR and remain failures.
 #
 # PRs opened with the default GITHUB_TOKEN do not trigger other workflows (no CI on the refresh
 # PR). Set the `I18N_REFRESH_TOKEN` secret (fine-grained PAT or App token with contents +
@@ -46,7 +44,7 @@ on:
   workflow_dispatch:
     inputs:
       base:
-        description: "Branch to refresh (default: the highest release/v* branch)"
+        description: "main or release/vX.Y.Z (default: the highest release/v* branch)"
         required: false
         type: string
 
@@ -64,6 +62,7 @@ jobs:
     runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && fromJSON('["self-hosted","omni-light"]')) || 'ubuntu-latest' }}
     timeout-minutes: 330
     permissions:
+      issues: read # release-freeze and base-red incident index; never mutate issues
       contents: write # push chore/i18n-mirror-refresh
       pull-requests: write # open / retarget the refresh PR
     env:
@@ -79,79 +78,82 @@ jobs:
         run: |
           set -euo pipefail
           if [ -n "${INPUT_BASE:-}" ]; then
-            if ! printf '%s' "$INPUT_BASE" | grep -qE '^[A-Za-z0-9._/-]+$'; then
-              echo "::error::refusing base input with unexpected characters" >&2
-              exit 1
-            fi
             BASE="$INPUT_BASE"
           else
             BASE=$(gh api --paginate "repos/$REPO/git/matching-refs/heads/release/v" --jq '.[].ref' \
               | sed 's#^refs/heads/##' | grep -E '^release/v[0-9]+\.[0-9]+\.[0-9]+$' \
               | sort -V | tail -1)
           fi
-          if [ -z "$BASE" ]; then
-            echo "::error::could not resolve the target branch" >&2
+          # The workflow executes the selected tree with translation credentials. Only public base
+          # branches are eligible; a tag, SHA or contributor feature branch is not a trusted base.
+          if ! printf '%s' "$BASE" | grep -qE '^(main|release/v[0-9]+\.[0-9]+\.[0-9]+)$'; then
+            echo "::error::expected main or a release/vX.Y.Z base branch" >&2
             exit 1
           fi
+          BASE_SHA=$(gh api "repos/$REPO/git/ref/heads/$BASE" --jq .object.sha)
+          [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]] || { echo "::error::invalid base SHA"; exit 1; }
           echo "base=$BASE" >> "$GITHUB_OUTPUT"
+          echo "base_sha=$BASE_SHA" >> "$GITHUB_OUTPUT"
 
-          # Hard Rule #21: never refresh a frozen release branch. A freeze issue is titled
-          # "🔒 release-freeze: vX.Y.Z in progress"; one that names no version freezes everything.
           VER="${BASE#release/}"
           VER_RE=$(printf '%s' "$VER" | sed 's/\./\\./g')
+          # Capture the command exit before iteration: process substitution hides API failure.
+          FREEZES=$(GH_TOKEN="${REFRESH_READ_TOKEN:-${GH_TOKEN:-}}" gh api --paginate "repos/$REPO/issues?state=open&labels=release-freeze&per_page=100" \
+            --jq '.[] | select(.pull_request == null) | [.number, .title] | @tsv')
           FROZEN=""
           while IFS=$'\t' read -r NUM TITLE; do
             [ -n "$NUM" ] || continue
-            if printf '%s' "$TITLE" | grep -qE "(^|[^0-9.])${VER_RE}([^0-9]|$)" \
+            if printf '%s' "$TITLE" | grep -qE "(^|[^0-9.])${VER_RE}([^0-9.]|$)" \
               || ! printf '%s' "$TITLE" | grep -qE 'v[0-9]+\.[0-9]+\.[0-9]+'; then
               FROZEN="#$NUM"
             fi
-          done < <(gh issue list --repo "$REPO" --label release-freeze --state open \
-            --json number,title --jq '.[] | "\(.number)\t\(.title)"')
+          done <<< "$FREEZES"
+
           if [ -n "$FROZEN" ]; then
             echo "::notice::$BASE is under release-freeze ($FROZEN) — skipping the mirror refresh."
             echo "Skipped: \`$BASE\` is under release-freeze ($FROZEN)." >> "$GITHUB_STEP_SUMMARY"
             echo "skip=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "skip=false" >> "$GITHUB_OUTPUT"
-            echo "Target branch: \`$BASE\`" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
           fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "Target: \`$BASE\` at \`$BASE_SHA\`. Base health: UNKNOWN (not certified by this refresh)." >> "$GITHUB_STEP_SUMMARY"
+          # The empty matching-refs response is a legitimate absent branch; an API failure is not.
+          REFRESH_SHA=$(gh api "repos/$REPO/git/matching-refs/heads/$REFRESH_BRANCH" \
+            --jq '[.[] | select(.ref == "refs/heads/chore/i18n-mirror-refresh")] | if length == 0 then "" elif length == 1 then .[0].object.sha else error("ambiguous refresh ref") end')
+          [[ -z "$REFRESH_SHA" || "$REFRESH_SHA" =~ ^[a-f0-9]{40}$ ]] || { echo "::error::invalid refresh SHA"; exit 1; }
+          echo "refresh_sha=$REFRESH_SHA" >> "$GITHUB_OUTPUT"
 
       - name: Checkout the target branch
         if: steps.target.outputs.skip == 'false'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ steps.target.outputs.base }}
+          ref: ${{ steps.target.outputs.base_sha }}
           fetch-depth: 1
           persist-credentials: false
 
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        if: steps.target.outputs.skip == 'false'
+        with:
+          package-manager-cache: false
+          node-version: "24"
+
       - name: Find the drifted sources
         id: drift
+        env:
+          BASE_SHA: ${{ steps.target.outputs.base_sha }}
         if: steps.target.outputs.skip == 'false'
         run: |
           set -euo pipefail
+          [ "$(git rev-parse HEAD)" = "$BASE_SHA" ] || { echo "::error::checkout differs from selected base"; exit 1; }
           node scripts/i18n/check-translation-drift.mjs --json --warn > "$RUNNER_TEMP/drift-before.json"
-          # every source with a drifted / missing / hand-edited / stale mirror, as repo-relative paths
-          FILES=$(DRIFT_JSON="$RUNNER_TEMP/drift-before.json" node -e '
-            const r = JSON.parse(require("fs").readFileSync(process.env.DRIFT_JSON, "utf8"));
-            const keys = ["driftedSources", "missingTargets", "driftedTargets", "staleTargets"];
-            const rels = keys.flatMap((k) => r[k] ?? [])
-              .map((x) => x.rel).filter(Boolean);
-            process.stdout.write([...new Set(rels)].sort().join(","));
-          ')
+          FILES=$(node scripts/i18n/mirror-refresh-report.mjs select "$RUNNER_TEMP/drift-before.json")
           if [ -z "$FILES" ]; then
-            echo "No drifted mirrors — nothing to refresh." >> "$GITHUB_STEP_SUMMARY"
+            echo "No drift in the five reported buckets; this is not full base-health or semantic certification." >> "$GITHUB_STEP_SUMMARY"
             echo "files=" >> "$GITHUB_OUTPUT"
           else
             echo "Drifted sources: \`${FILES//,/\`, \`}\`" >> "$GITHUB_STEP_SUMMARY"
             echo "files=$FILES" >> "$GITHUB_OUTPUT"
           fi
-
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        if: steps.drift.outputs.files != ''
-        with:
-          package-manager-cache: false
-          node-version: "24"
 
       - uses: ./.github/actions/npm-ci-retry
         if: steps.drift.outputs.files != ''
@@ -179,27 +181,31 @@ jobs:
               echo "::warning::LLM backend partially configured (API key, API URL and vars.OMNIROUTE_TRANSLATION_MODEL are all required) — using Google."
             fi
           fi
+          # The runner logs URL/model diagnostics. Register optional vars as masks too;
+          # secrets are supplied through env, never interpolated into shell source.
+          node -e '
+            for (const key of ["OMNIROUTE_TRANSLATION_API_KEY", "OMNIROUTE_TRANSLATION_API_URL", "OMNIROUTE_TRANSLATION_MODEL", "OMNIROUTE_TRANSLATION_FALLBACK_MODELS", "OMNIROUTE_TRANSLATION_GOOGLE_API_KEY"]) {
+              const raw = process.env[key] || "";
+              const values = key.endsWith("FALLBACK_MODELS") ? raw.split(",").map((v) => v.trim()) : [raw];
+              for (const value of values.filter(Boolean)) console.log("::add-mask::" + value.replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A"));
+            }
+          '
           export OMNIROUTE_TRANSLATION_ENGINE="$ENGINE"
           export OMNIROUTE_TRANSLATION_GOOGLE_FALLBACK=1
           echo "engine=$ENGINE" >> "$GITHUB_OUTPUT"
           echo "Engine: \`$ENGINE\`" >> "$GITHUB_STEP_SUMMARY"
-          # The default `bash -e` would end the step on a non-zero pipeline before RC is read, so
-          # catch the status here (pipefail makes it the translator's exit code).
-          RC=0
+          git diff --exit-code -- docs/i18n .i18n-state.json
+          git diff --cached --exit-code -- docs/i18n .i18n-state.json
+          set +e
           node scripts/i18n/run-translation.mjs --files="$FILES" \
-            --failures-json="$RUNNER_TEMP/translate-failures.json" 2>&1 \
-            | tee "$RUNNER_TEMP/translate.log" || RC=$?
+            --failures-json="$RUNNER_TEMP/translate-failures.json" 2>&1 | tee "$RUNNER_TEMP/translate.log"
+          TRANSLATE_PIPE=("${PIPESTATUS[@]}")
+          set -e
+          RC=${TRANSLATE_PIPE[0]}
+          if [ "${TRANSLATE_PIPE[1]}" -ne 0 ]; then RC=1; fi
           if [ "$RC" -eq 3 ]; then
-            # Partial: the translated units are written and recorded, the failed ones are untouched.
             echo "partial=true" >> "$GITHUB_OUTPUT"
-            {
-              echo "### Partial translation (exit 3): failed locales left as they were"
-              echo
-              echo '```'
-              grep -E '^  - .+ \[[^]]+\]: ' "$RUNNER_TEMP/translate.log" | head -100 || true
-              grep -E 'summary: translated=' "$RUNNER_TEMP/translate.log" | tail -1 || true
-              echo '```'
-            } >> "$GITHUB_STEP_SUMMARY"
+            echo "### Partial translation: failed units require unchanged-preimage validation before any draft is proposed" >> "$GITHUB_STEP_SUMMARY"
           elif [ "$RC" -ne 0 ]; then
             {
               echo "### Translation failed (exit $RC) — no PR opened"
@@ -213,45 +219,91 @@ jobs:
           fi
 
       - name: Check the refreshed mirrors
+        env:
+          BASE_SHA: ${{ steps.target.outputs.base_sha }}
+          PARTIAL: ${{ steps.translate.outputs.partial }}
         if: steps.drift.outputs.files != ''
         run: |
           set -uo pipefail
-          FAILED=0
+          # Actions starts Bash with -e. Disable it only while preserving both process exits.
+          set +e
           npm run check:docs-all 2>&1 | tee "$RUNNER_TEMP/docs-all.log"
-          DOCS_RC=${PIPESTATUS[0]}
+          DOCS_PIPE=("${PIPESTATUS[@]}")
           node scripts/i18n/check-translation-drift.mjs --json --warn > "$RUNNER_TEMP/drift-after.json"
-          # Drift left by the failed units of a partial run is excused; any other drift blocks.
-          if ! BLOCKING=$(DRIFT_JSON="$RUNNER_TEMP/drift-after.json" \
-            FAILURES_JSON="$RUNNER_TEMP/translate-failures.json" node --input-type=module -e '
-            import { existsSync, readFileSync } from "node:fs";
-            import { blockingDrift } from "./scripts/i18n/run-translation.mjs";
-            const read = (p) => JSON.parse(readFileSync(p, "utf8"));
-            const run = existsSync(process.env.FAILURES_JSON) ? read(process.env.FAILURES_JSON) : {};
-            const left = blockingDrift(read(process.env.DRIFT_JSON), run.failures ?? [], run.translatedUnits ?? []);
-            for (const x of left) console.log(x.kind + ": " + x.rel + (x.locale ? " [" + x.locale + "]" : ""));
-          '); then
-            echo "::error::could not evaluate the drift report"
-            exit 1
+          CHECKER_RC=$?
+          if [ "${PARTIAL:-}" = "true" ]; then
+            DRIFT_JSON="$RUNNER_TEMP/drift-after.json" \
+            FAILURES_JSON="$RUNNER_TEMP/translate-failures.json" node --input-type=module > "$RUNNER_TEMP/refresh-check.txt" 2>&1 <<'I18N_PARTIAL_CHECK'
+              import { readFileSync, lstatSync } from "node:fs";
+              import { execFileSync } from "node:child_process";
+              import { createHash } from "node:crypto";
+              import {
+                readTranslationSummary,
+                blockingDrift,
+                assertFailedUnitsUnchanged,
+                translationExitCode,
+                EXIT_PARTIAL,
+              } from "./scripts/i18n/run-translation.mjs";
+
+              try {
+                const read = (filename) => JSON.parse(readFileSync(filename, "utf8"));
+                const base = process.env.BASE_SHA;
+                if (!/^[a-f0-9]{40}$/.test(base || "")) throw new Error("invalid-base");
+                const run = readTranslationSummary(read(process.env.FAILURES_JSON));
+                if (translationExitCode(run) !== EXIT_PARTIAL) throw new Error("not-partial");
+                const git = (args) => execFileSync("git", args, {
+                  stdio: ["ignore", "pipe", "pipe"],
+                  // The current state is already over 4 MB; the default 1 MB would reject every partial run.
+                  maxBuffer: 64 * 1024 * 1024,
+                  timeout: 30000,
+                });
+                const hash = (value) => createHash("sha256").update(value).digest("hex");
+                if (!lstatSync(".i18n-state.json").isFile()) throw new Error("invalid-state-file");
+                const before = JSON.parse(git(["show", `${base}:.i18n-state.json`]).toString("utf8"));
+                const after = read(".i18n-state.json");
+                const targets = run.failures.map(({ rel, locale }) => {
+                  const filename = `docs/i18n/${locale}/${rel}`;
+                  const entry = git(["ls-tree", "-z", base, "--", filename]).toString("utf8");
+                  if (entry && !/^100644 blob [a-f0-9]{40}\t/.test(entry)) {
+                    throw new Error("invalid-base-target");
+                  }
+                  if (entry && entry.slice(entry.indexOf("\t") + 1) !== filename + "\u0000") {
+                    throw new Error("unexpected-base-target");
+                  }
+                  const beforeHash = entry ? hash(git(["show", `${base}:${filename}`])) : null;
+                  let afterHash = null;
+                  try {
+                    if (!lstatSync(filename).isFile()) throw new Error("invalid-target-file");
+                    afterHash = hash(readFileSync(filename));
+                  } catch (error) {
+                    if (error.code !== "ENOENT") throw error;
+                  }
+                  return { rel, locale, beforeHash, afterHash };
+                });
+                assertFailedUnitsUnchanged(run.failures, before, after, targets);
+                const left = blockingDrift(read(process.env.DRIFT_JSON), run.failures, run.translatedUnits);
+                console.log(`[i18n-refresh] partial: ${run.translated} translated, ${run.failed} unchanged failed units`);
+                for (const unit of left) console.log(`${unit.kind}: ${unit.rel}${unit.locale ? ` [${unit.locale}]` : ""}`);
+                process.exitCode = left.length ? 1 : 0;
+              } catch {
+                console.error("[i18n-refresh] INCOMPLETE: invalid report, summary or failed-unit preimages");
+                process.exitCode = 2;
+              }
+          I18N_PARTIAL_CHECK
+          else
+            node scripts/i18n/mirror-refresh-report.mjs check "$RUNNER_TEMP/drift-after.json" > "$RUNNER_TEMP/refresh-check.txt" 2>&1
           fi
-          if [ "$DOCS_RC" -ne 0 ]; then
+          REPORT_RC=$?
+          set -e
+          FAILED=0
+          if [ "${DOCS_PIPE[0]}" -ne 0 ] || [ "${DOCS_PIPE[1]}" -ne 0 ]; then
             FAILED=1
-            {
-              echo "### \`npm run check:docs-all\` failed (exit $DOCS_RC) — no PR opened"
-              echo
-              echo '```'
-              grep -E 'docs/i18n/|FAIL|✗|✖|ERROR' "$RUNNER_TEMP/docs-all.log" | head -100 || true
-              echo '```'
-            } >> "$GITHUB_STEP_SUMMARY"
+            echo "### \`npm run check:docs-all\` or log retention failed (exits ${DOCS_PIPE[*]}) — no PR opened" >> "$GITHUB_STEP_SUMMARY"
           fi
-          if [ -n "$BLOCKING" ]; then
+          if [ "$CHECKER_RC" -ne 0 ] || [ "$REPORT_RC" -ne 0 ]; then
             FAILED=1
-            {
-              echo "### Drift check still reports drift — no PR opened"
-              echo
-              echo '```'
-              printf '%s\n' "$BLOCKING" | head -100
-              echo '```'
-            } >> "$GITHUB_STEP_SUMMARY"
+            echo "### Refresh drift validation failed or was incomplete (checker $CHECKER_RC, report $REPORT_RC) — no PR opened" >> "$GITHUB_STEP_SUMMARY"
+            cat "$RUNNER_TEMP/refresh-check.txt" >> "$GITHUB_STEP_SUMMARY"
           fi
           exit "$FAILED"
 
@@ -259,76 +311,207 @@ jobs:
         if: steps.drift.outputs.files != ''
         env:
           GH_TOKEN: ${{ secrets.I18N_REFRESH_TOKEN || github.token }}
+          REFRESH_READ_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           BASE: ${{ steps.target.outputs.base }}
+          BASE_SHA: ${{ steps.target.outputs.base_sha }}
+          REFRESH_SHA: ${{ steps.target.outputs.refresh_sha }}
           ENGINE: ${{ steps.translate.outputs.engine }}
           PARTIAL: ${{ steps.translate.outputs.partial }}
           FILES: ${{ steps.drift.outputs.files }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
+          [ "$(git rev-parse HEAD)" = "$BASE_SHA" ] || { echo "::error::checkout moved during translation"; exit 1; }
+          # Base health is not inferred from an incident search. The index is recorded for review;
+          # a draft repair may address the base's own i18n debt without requiring that debt to pass first.
+          BASE_RED_ISSUES=$(GH_TOKEN="$REFRESH_READ_TOKEN" gh api --paginate "repos/$REPO/issues?state=open&labels=base-red&per_page=100" \
+            --jq '.[] | select(.pull_request == null) | [.number, .title] | @tsv')
+          BASE_RED=""
+          while IFS=$'\t' read -r NUM TITLE; do
+            [ -n "$NUM" ] || continue
+            if [[ "$TITLE" == *": $BASE" ]]; then BASE_RED="${BASE_RED} #${NUM}"; fi
+          done <<< "$BASE_RED_ISSUES"
+
           git add -A docs/i18n .i18n-state.json
           if git diff --cached --quiet; then
             echo "Translation produced no change — nothing to commit." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
+          git diff --cached --name-only -z > "$RUNNER_TEMP/refresh-paths.bin"
+          PROTECTED=$(PATHS_FILE="$RUNNER_TEMP/refresh-paths.bin" node -e '
+            const fs = require("fs");
+            const paths = fs.readFileSync(process.env.PATHS_FILE, "utf8").split("\0").filter(Boolean);
+            if (!paths.length || paths.some((p) => p !== ".i18n-state.json" && !p.startsWith("docs/i18n/"))) process.exit(1);
+            const protectedPaths = paths.filter((p) => /(^|\/)(AGENTS\.md|CLAUDE\.md|GEMINI\.md|llm\.txt|SKILL\.md)$/.test(p) || /(^|\/)(\.agents|\.claude|\.cursor|\.github)\//.test(p));
+            process.stdout.write(String(protectedPaths.length > 0));
+          ')
           COUNT=$(git diff --cached --name-only -- docs/i18n | wc -l | tr -d ' ')
           FAILED_UNITS=""
-          if [ "${PARTIAL:-}" = "true" ]; then
-            FAILED_UNITS=$(FAILURES_JSON="$RUNNER_TEMP/translate-failures.json" node -e '
-              const r = JSON.parse(require("fs").readFileSync(process.env.FAILURES_JSON, "utf8"));
-              const one = (e) => String(e ?? "").replace(/\s+/g, " ").replace(/`/g, "\x27").slice(0, 200);
-              for (const f of r.failures) console.log("- `" + f.rel + "` [" + f.locale + "]: " + one(f.error));
-            ')
-          fi
           NOTE=""
-          [ -z "$FAILED_UNITS" ] || NOTE=" $(printf '%s\n' "$FAILED_UNITS" | wc -l | tr -d ' ') unit(s) failed and were left as they were."
-          # CI bot commit: the bot identity is the author, no Co-Authored-By trailer.
+          if [ "${PARTIAL:-}" = "true" ]; then
+            FAILED_UNITS=$(FAILURES_JSON="$RUNNER_TEMP/translate-failures.json" node --input-type=module <<'I18N_FAILURE_SUMMARY'
+              import { readFileSync } from "node:fs";
+              import { readTranslationSummary, translationExitCode, EXIT_PARTIAL } from "./scripts/i18n/run-translation.mjs";
+              try {
+                const run = readTranslationSummary(JSON.parse(readFileSync(process.env.FAILURES_JSON, "utf8")));
+                if (translationExitCode(run) !== EXIT_PARTIAL) throw new Error("not-partial");
+                for (const unit of run.failures) console.log("- `" + unit.rel + "` [" + unit.locale + "]: translation failed; mirror and locale record unchanged");
+              } catch { console.error("[i18n-refresh] invalid partial summary"); process.exit(2); }
+          I18N_FAILURE_SUMMARY
+            )
+            NOTE=" $(printf '%s\n' "$FAILED_UNITS" | wc -l | tr -d ' ') unit(s) failed and remain unchanged."
+          fi
+          # CI bot commit: retain normal hooks and no Co-Authored-By trailer.
           git -c user.name="github-actions[bot]" \
             -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
             commit --quiet -m "$PR_TITLE" \
             -m "Engine: ${ENGINE}. Sources: ${FILES//,/, }. ${COUNT} mirror file(s).${NOTE}" \
-            -m "Run: ${RUN_URL}"
-          gh auth setup-git
-          # Fixed branch, reset from the target on every run: the open PR always shows exactly
-          # one refresh commit on top of the current target.
-          git push --force --quiet origin "HEAD:refs/heads/${REFRESH_BRANCH}"
+            -m "Run: ${RUN_URL}. Base: ${BASE_SHA}."
+          CANDIDATE_SHA=$(git rev-parse HEAD)
+          [ "$(git rev-parse HEAD^)" = "$BASE_SHA" ] || { echo "::error::unexpected refresh ancestry"; exit 1; }
+          # Hooks may format mirrors. Recheck the exact committed tree before publishing it.
+          git diff --exit-code
+          git diff --cached --exit-code
+          node scripts/i18n/check-translation-drift.mjs --json --warn > "$RUNNER_TEMP/drift-committed.json"
+          if [ "${PARTIAL:-}" = "true" ]; then
+            DRIFT_JSON="$RUNNER_TEMP/drift-committed.json" \
+            FAILURES_JSON="$RUNNER_TEMP/translate-failures.json" node --input-type=module <<'I18N_COMMITTED_CHECK'
+              import { readFileSync, lstatSync } from "node:fs";
+              import { execFileSync } from "node:child_process";
+              import { createHash } from "node:crypto";
+              import {
+                readTranslationSummary,
+                blockingDrift,
+                assertFailedUnitsUnchanged,
+                translationExitCode,
+                EXIT_PARTIAL,
+              } from "./scripts/i18n/run-translation.mjs";
 
+              try {
+                const read = (filename) => JSON.parse(readFileSync(filename, "utf8"));
+                const base = process.env.BASE_SHA;
+                if (!/^[a-f0-9]{40}$/.test(base || "")) throw new Error("invalid-base");
+                const run = readTranslationSummary(read(process.env.FAILURES_JSON));
+                if (translationExitCode(run) !== EXIT_PARTIAL) throw new Error("not-partial");
+                const git = (args) => execFileSync("git", args, {
+                  stdio: ["ignore", "pipe", "pipe"],
+                  // The current state is already over 4 MB; the default 1 MB would reject every partial run.
+                  maxBuffer: 64 * 1024 * 1024,
+                  timeout: 30000,
+                });
+                const hash = (value) => createHash("sha256").update(value).digest("hex");
+                if (!lstatSync(".i18n-state.json").isFile()) throw new Error("invalid-state-file");
+                const before = JSON.parse(git(["show", `${base}:.i18n-state.json`]).toString("utf8"));
+                const after = read(".i18n-state.json");
+                const targets = run.failures.map(({ rel, locale }) => {
+                  const filename = `docs/i18n/${locale}/${rel}`;
+                  const entry = git(["ls-tree", "-z", base, "--", filename]).toString("utf8");
+                  if (entry && !/^100644 blob [a-f0-9]{40}\t/.test(entry)) {
+                    throw new Error("invalid-base-target");
+                  }
+                  if (entry && entry.slice(entry.indexOf("\t") + 1) !== filename + "\u0000") {
+                    throw new Error("unexpected-base-target");
+                  }
+                  const beforeHash = entry ? hash(git(["show", `${base}:${filename}`])) : null;
+                  let afterHash = null;
+                  try {
+                    if (!lstatSync(filename).isFile()) throw new Error("invalid-target-file");
+                    afterHash = hash(readFileSync(filename));
+                  } catch (error) {
+                    if (error.code !== "ENOENT") throw error;
+                  }
+                  return { rel, locale, beforeHash, afterHash };
+                });
+                assertFailedUnitsUnchanged(run.failures, before, after, targets);
+                const left = blockingDrift(read(process.env.DRIFT_JSON), run.failures, run.translatedUnits);
+                console.log(`[i18n-refresh] partial: ${run.translated} translated, ${run.failed} unchanged failed units`);
+                for (const unit of left) console.log(`${unit.kind}: ${unit.rel}${unit.locale ? ` [${unit.locale}]` : ""}`);
+                process.exitCode = left.length ? 1 : 0;
+              } catch {
+                console.error("[i18n-refresh] INCOMPLETE: invalid report, summary or failed-unit preimages");
+                process.exitCode = 2;
+              }
+          I18N_COMMITTED_CHECK
+          else
+            node scripts/i18n/mirror-refresh-report.mjs check "$RUNNER_TEMP/drift-committed.json"
+          fi
+
+
+          VER="${BASE#release/}"
+          VER_RE=$(printf '%s' "$VER" | sed 's/\./\\./g')
+          # Capture the command exit before iteration: process substitution hides API failure.
+          FREEZES=$(GH_TOKEN="${REFRESH_READ_TOKEN:-${GH_TOKEN:-}}" gh api --paginate "repos/$REPO/issues?state=open&labels=release-freeze&per_page=100" \
+            --jq '.[] | select(.pull_request == null) | [.number, .title] | @tsv')
+          FROZEN=""
+          while IFS=$'\t' read -r NUM TITLE; do
+            [ -n "$NUM" ] || continue
+            if printf '%s' "$TITLE" | grep -qE "(^|[^0-9.])${VER_RE}([^0-9.]|$)" \
+              || ! printf '%s' "$TITLE" | grep -qE 'v[0-9]+\.[0-9]+\.[0-9]+'; then
+              FROZEN="#$NUM"
+            fi
+          done <<< "$FREEZES"
+
+          [ -z "$FROZEN" ] || { echo "::error::base became frozen — no push or PR update"; exit 1; }
+          CURRENT_BASE_SHA=$(GH_TOKEN="$REFRESH_READ_TOKEN" gh api "repos/$REPO/git/ref/heads/$BASE" --jq .object.sha)
+          [ "$CURRENT_BASE_SHA" = "$BASE_SHA" ] || { echo "::error::base moved — rerun against its new tip"; exit 1; }
+
+          # A previous workflow-owned PR, including a closed one, establishes ownership of an
+          # existing fixed branch. An unknown branch/PR is held rather than force-overwritten.
+          gh pr list --repo "$REPO" --head "$REFRESH_BRANCH" --state all --limit 100 \
+            --json number,baseRefName,headRefOid,state,body,isDraft,headRefName,headRepository,isCrossRepository > "$RUNNER_TEMP/refresh-prs.json"
+          PR=$(PR_JSON="$RUNNER_TEMP/refresh-prs.json" EXPECTED_REFRESH_SHA="$REFRESH_SHA" EXPECTED_REPO="$REPO" EXPECTED_BRANCH="$REFRESH_BRANCH" node -e '
+            const rows = JSON.parse(require("fs").readFileSync(process.env.PR_JSON, "utf8"));
+            if (!Array.isArray(rows)) process.exit(1);
+            const marker = "<!-- omniroute:i18n-mirror-refresh:v1 -->";
+            const expected = process.env.EXPECTED_REFRESH_SHA;
+            const open = rows.filter((p) => p.state === "OPEN");
+            const owned = (p) => Number.isSafeInteger(p.number) && p.number > 0 && typeof p.baseRefName === "string" && typeof p.body === "string" && p.body.includes(marker) && typeof p.isDraft === "boolean" && p.headRefName === process.env.EXPECTED_BRANCH && p.headRepository?.nameWithOwner === process.env.EXPECTED_REPO && p.isCrossRepository === false;
+            if (open.length > 1 || open.some((p) => !owned(p) || p.headRefOid !== expected)) process.exit(1);
+            if (expected && !rows.some((p) => owned(p) && p.headRefOid === expected)) process.exit(1);
+            if (!expected && open.length) process.exit(1);
+            if (open.length) process.stdout.write(open[0].number + " " + open[0].isDraft);
+          ')
           {
-            echo "Automatic refresh of the translated docs mirrors, opened by the \`i18n-mirror-refresh\` workflow (${RUN_URL})."
+            echo '<!-- omniroute:i18n-mirror-refresh:v1 -->'
+            echo "Draft translation repair from the \`i18n-mirror-refresh\` workflow (${RUN_URL})."
             echo
-            echo "- Target: \`${BASE}\`"
-            echo "- Engine: \`${ENGINE}\` (LLM chain first, Google as the last resort; \`google\` when no LLM backend is configured)"
-            echo "- Drifted sources: \`${FILES//,/\`, \`}\`"
-            echo "- Mirror files changed: ${COUNT}"
+            echo "- Target: \`${BASE}\` at \`${BASE_SHA}\`"
+            echo "- Candidate: \`${CANDIDATE_SHA}\`"
+            echo "- Base health: UNKNOWN; incident index:${BASE_RED:- none found (not proof of green)}"
+            echo "- Engine: \`${ENGINE}\` (LLM chain first; Google fallback when configured, or Google without a complete LLM configuration)"
+            echo "- Sources: \`${FILES//,/\`, \`}\`; ${COUNT} mirror file(s) changed"
+            echo "- protected_surface: ${PROTECTED}"
             echo
-            echo "\`npm run check:docs-all\` and \`check-translation-drift.mjs\` passed on the refreshed tree before this PR was opened."
             if [ -n "$FAILED_UNITS" ]; then
-              echo
-              echo "Partial run: these (source, locale) units failed to translate. Their mirrors and \`.i18n-state.json\` records are unchanged, so they still show as stale or drifted and the next run retries them. The drift check excused only these units:"
+              echo "Partial repair: the docs check passed; all five drift classes were evaluated. Only the following failed units were excused after their mirror bytes and locale records matched the selected base, including after hooks. Remaining drift is not zero."
               echo
               printf '%s\n' "$FAILED_UNITS"
+              echo
+              echo "Those units remain stale or drifted and are retried by a later run. Translation meaning still requires review; hashes and structural checks do not certify it."
+            else
+              echo "The docs check and all five drift buckets passed locally on this refresh. Translation meaning still requires review; hashes and structural checks do not certify it."
             fi
-            echo
-            echo "The branch \`${REFRESH_BRANCH}\` is force-reset from the target on every run, so a later run replaces this commit."
-            echo "PRs opened with the default \`GITHUB_TOKEN\` do not trigger other workflows; set the \`I18N_REFRESH_TOKEN\` secret so CI runs here."
+            echo "This draft does not establish base/candidate acceptance. Required checks must pass for the current candidate. Any protected instruction mirror needs specific owner approval before merge."
+            echo "The fixed branch is replaced only with a lease against the observed head; a moved base or freeze stops publication. A later run supersedes this candidate and its review."
+            echo "PRs opened with \`GITHUB_TOKEN\` do not trigger CI. Configure \`I18N_REFRESH_TOKEN\` for CI, or obtain applicable exact-candidate runs before admission."
           } > "$RUNNER_TEMP/pr-body.md"
-
-          PR=$(gh pr list --repo "$REPO" --head "$REFRESH_BRANCH" --state open \
-            --json number,baseRefName --jq '.[0] | select(.) | "\(.number) \(.baseRefName)"')
+          gh auth setup-git
+          # Make an existing ready PR a draft before changing its candidate; already-draft PRs
+          # need no ready-state mutation. A closed owned PR permits creating the next draft.
+          if [ -n "$PR" ] && [ "${PR#* }" = "false" ]; then
+            gh pr ready "${PR%% *}" --repo "$REPO" --undo
+          fi
+          # An empty expected SHA is an explicit lease requiring a new branch.
+          git push --force-with-lease="refs/heads/${REFRESH_BRANCH}:${REFRESH_SHA}" --quiet origin "HEAD:refs/heads/${REFRESH_BRANCH}"
           if [ -z "$PR" ]; then
-            URL=$(gh pr create --repo "$REPO" --base "$BASE" --head "$REFRESH_BRANCH" \
+            URL=$(gh pr create --repo "$REPO" --base "$BASE" --head "$REFRESH_BRANCH" --draft \
               --title "$PR_TITLE" --body-file "$RUNNER_TEMP/pr-body.md")
-            echo "Opened $URL" >> "$GITHUB_STEP_SUMMARY"
+            echo "Opened draft $URL" >> "$GITHUB_STEP_SUMMARY"
           else
-            NUM="${PR%% *}"
-            OLD_BASE="${PR#* }"
-            if [ "$OLD_BASE" != "$BASE" ]; then
-              gh pr edit "$NUM" --repo "$REPO" --base "$BASE"
-              NEW_BASE=$(gh pr view "$NUM" --repo "$REPO" --json baseRefName --jq .baseRefName)
-              [ "$NEW_BASE" = "$BASE" ] || { echo "::error::retarget of #$NUM to $BASE did not apply"; exit 1; }
-            fi
-            # The force-push already updated the PR; a comment (not a body edit) records the run.
-            gh pr comment "$NUM" --repo "$REPO" --body-file "$RUNNER_TEMP/pr-body.md"
-            echo "Updated #$NUM" >> "$GITHUB_STEP_SUMMARY"
+            PR="${PR%% *}"
+            gh pr edit "$PR" --repo "$REPO" --base "$BASE" --body-file "$RUNNER_TEMP/pr-body.md"
+            NEW_BASE=$(gh pr view "$PR" --repo "$REPO" --json baseRefName --jq .baseRefName)
+            [ "$NEW_BASE" = "$BASE" ] || { echo "::error::retarget did not apply"; exit 1; }
+            echo "Updated draft #$PR" >> "$GITHUB_STEP_SUMMARY"
           fi

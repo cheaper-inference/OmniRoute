@@ -11,7 +11,7 @@
 # impact map (config/quality/test-impact-map.json, gitignored):
 # - Changed test files → run those directly
 # - Changed source files → run every unit test whose import graph reaches them
-# - Hub files (tsconfig, package.json, …) or unmapped sources → full suite (fail-safe)
+# - Shared helpers, hub files or unmapped sources → full suite required (fail-safe)
 #
 # The map is a snapshot of the import graph: rebuild it (`--full`) after adding tests,
 # moving files, or pulling a big base update — a stale map falls back to __RUN_ALL__
@@ -42,10 +42,10 @@ done
 
 # ── 1. Determine changed files ───────────────────────────────────────────────
 if [ "$STAGED" = true ]; then
-  CHANGED=$(git -C "$REPO_ROOT" diff --name-only --diff-filter=ACMR --cached)
+  CHANGED=$(git -C "$REPO_ROOT" diff --name-status --cached)
 else
-  CHANGED=$(git -C "$REPO_ROOT" diff --name-only --diff-filter=ACMR HEAD~1...HEAD 2>/dev/null || \
-            git -C "$REPO_ROOT" diff --name-only --diff-filter=ACMR)
+  CHANGED=$(git -C "$REPO_ROOT" diff --name-status HEAD~1...HEAD 2>/dev/null || \
+            git -C "$REPO_ROOT" diff --name-status)
 fi
 
 if [ -z "$CHANGED" ]; then
@@ -60,10 +60,10 @@ if [ "$FULL" = true ] || [ ! -f "$MAP_FILE" ]; then
 fi
 
 # ── 3. Select impacted tests (same selector as the CI TIA gate) ──────────────
-SEL=$(printf '%s\n' "$CHANGED" | node "$REPO_ROOT/scripts/quality/select-impacted-tests.mjs" --stdin)
+SEL=$(printf '%s\n' "$CHANGED" | node "$REPO_ROOT/scripts/quality/select-impacted-tests.mjs" --stdin-name-status)
 
 if echo "$SEL" | grep -q "__RUN_ALL__"; then
-  echo "[test:scoped] Hub file or unmapped source changed — run the full suite: npm run test:unit"
+  echo "[test:scoped] Shared helper, hub file or unmapped source changed — run the full suite: npm run test:unit"
   echo "[test:scoped] (if you just added a source file, rebuild the map: npm run test:scoped:full)"
   exit 1
 fi

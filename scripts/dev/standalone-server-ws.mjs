@@ -103,7 +103,7 @@ process.on("SIGHUP", () => void shutdown("SIGHUP"));
 
 const { wrapRequestListenerWithMethodGuard } = methodGuard;
 const { wrapRequestListenerWithHeadResponseGuard } = headResponseGuard;
-const { handleH2cUpgrade } = h2cUpgradeGuard;
+const { handleH2cUpgrade, createH2cUpgradeCallback } = h2cUpgradeGuard;
 
 // Opt-in native HTTPS (#5242). Resolved once at boot: when both OMNIROUTE_TLS_CERT
 // and OMNIROUTE_TLS_KEY point at readable files we terminate TLS on the same
@@ -252,6 +252,11 @@ http.createServer = function createServerWithResponsesWs(...args) {
   // When TLS is configured, return an https.Server (terminating TLS on the same
   // listener); otherwise the original http.Server. The downstream .on/.addListener
   // patches below apply identically to both (https.Server extends http.Server).
+  const options = args[0] == null || typeof args[0] === "object" ? args.shift() || {} : {};
+  args.unshift({
+    ...options,
+    shouldUpgradeCallback: createH2cUpgradeCallback(() => server, options.shouldUpgradeCallback),
+  });
   const server = createServerListener(args, tlsOptions, { createHttp: originalCreateServer });
   createdServers.add(server);
   server.once("close", () => createdServers.delete(server));

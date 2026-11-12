@@ -1,0 +1,1 @@
+- Block newly stale or unverifiable translation provenance in PR comparisons while preserving unchanged inherited warnings and the advisory policy outside PR comparison.

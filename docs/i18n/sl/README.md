@@ -74,7 +74,7 @@
 |                                       |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------------------- | :-----------------------: | :---------: | :-------------------: |
 | 🌐 Ponudniki                          |            352            |   **358**   |          380          |
-| 🧠 Enolični ID-ji klepetalnih modelov |           1320            |  **1374**   |         1491          |
+| 🧠 Enolični ID-ji klepetalnih modelov |           1320            |  **1374**   |         1499          |
 | 🖼️ Most za modalnosti                 |   🆕 vid + zvok + video   |      ✓      |           ✓           |
 | 📡 Katalog brezplačnih vsebin Radar   | 🆕 z možnostjo privolitve |      ✓      |           ✓           |
 | ⚖️ Razporejanje z upoštevanjem kvot   |      🆕 Quota-Share       |      ✓      |           ✓           |
@@ -89,57 +89,52 @@
 
 <br/>
 
-## 🧩 Razpoložljivo
+## 🧩 na voljo
 
-[![npm version](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+[![npm različica](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm) ](https://www.npmjs.com/package/omniroute) ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm) [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED) ](https://hub.docker.com/r/diegosouzapw/omniroute) [![Licenca: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square) ](LICENSE) ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED) ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
-    <td align="right"><b>🚀 Začetek</b></td>
-    <td align="center"><a href="#-quick-start">🚀 Hitri začetek</a></td>
-    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Namestitev</a></td>
-    <td align="center"><a href="#first-run">🆓 Povežite ponudnika</a></td>
+    <td align="right"><b>🚀 Start</b></td>
+    <td align="center"><a href="#-quick-start">🚀 Quick Start</a></td>
+    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Install</a></td>
+    <td align="center"><a href="#first-run">🆓 Connect a provider</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💡 Spoznajte</b></td>
-    <td align="center"><a href="#-the-promise">💥 Obljuba</a></td>
-    <td align="center"><a href="#-why-omniroute">🤔 Zakaj OmniRoute</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 Kaj ga ločuje od drugih</a></td>
+    <td align="right"><b>💡 Learn</b></td>
+    <td align="center"><a href="#-the-promise">💥 The Promise</a></td>
+    <td align="center"><a href="#-why-omniroute">🤔 Why OmniRoute</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 What Sets Apart</a></td>
   </tr>
   <tr>
-    <td align="right"><b>⚙️ Funkcije</b></td>
-    <td align="center"><a href="#-combos--the-flagship">🎯 Kombinacije</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Ponudniki</a></td>
+    <td align="right"><b>⚙️ Features</b></td>
+    <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
+    <td align="center"><a href="#-380-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
     <td align="right"></td>
-    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Stiskanje</a></td>
-    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Kje se izvaja</a></td>
-    <td align="center"><a href="#-private--local-first">🔒 Zasebno</a></td>
+    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Compression</a></td>
+    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Where It Runs</a></td>
+    <td align="center"><a href="#-private--local-first">🔒 Private</a></td>
   </tr>
   <tr>
-    <td align="right"><b>👀 Oglejte si</b></td>
-    <td align="center"><a href="#-omniroute-in-action">🎬 V praksi</a></td>
-    <td align="center"><a href="#-whats-new">✨ Kaj je novega</a></td>
-    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 Združljivi CLI-ji</a></td>
+    <td align="right"><b>👀 See it</b></td>
+    <td align="center"><a href="#-omniroute-in-action">🎬 In Action</a></td>
+    <td align="center"><a href="#-whats-new">✨ What's New</a></td>
+    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 Compatible CLIs</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💚 Podpora</b></td>
-    <td align="center"><a href="#-support-omniroute">💚 Podprite / Donirajte</a></td>
-    <td align="center"><a href="#-community--help">💬 Skupnost</a></td>
-    <td align="center"><a href="#-sponsors">💖 Sponzorji</a></td>
+    <td align="right"><b>💚 Support</b></td>
+    <td align="center"><a href="#-support-omniroute">💚 Support / Donate</a></td>
+    <td align="center"><a href="#-community--help">💬 Community</a></td>
+    <td align="center"><a href="#-sponsors">💖 Sponsors</a></td>
   </tr>
   <tr>
-    <td align="right"><b>📦 Projekt</b></td>
-    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Tehnološki sklad</a></td>
-    <td align="center"><a href="#-documentation">📖 Dokumentacija</a></td>
-    <td align="center"><a href="#-1000-contributors">👥 Sodelujoči</a></td>
+    <td align="right"><b>📦 Project</b></td>
+    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Tech Stack</a></td>
+    <td align="center"><a href="#-documentation">📖 Docs</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 Contributors</a></td>
   </tr>
 </table>
 
@@ -148,73 +143,73 @@
 <div align="center">
   <b>🌐 V 67 jezikih</b>
   <br/><br/>
-  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="Angleščina (en)" title="Angleščina (en)"></a>
-  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Portugalščina — Brazilija (pt-BR)" title="Portugalščina — Brazilija (pt-BR)"></a>
-  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Portugalščina (pt)" title="Portugalščina (pt)"></a>
-  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Španščina (es)" title="Španščina (es)"></a>
-  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Francoščina (fr)" title="Francoščina (fr)"></a>
-  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Italijanščina (it)" title="Italijanščina (it)"></a>
-  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Nemščina (de)" title="Nemščina (de)"></a>
-  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Nizozemščina (nl)" title="Nizozemščina (nl)"></a>
-  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Ruščina (ru)" title="Ruščina (ru)"></a>
-  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Ukrajinščina (uk-UA)" title="Ukrajinščina (uk-UA)"></a>
-  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Poljščina (pl)" title="Poljščina (pl)"></a>
-  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Češčina (cs)" title="Češčina (cs)"></a>
-  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Slovaščina (sk)" title="Slovaščina (sk)"></a>
-  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Romunščina (ro)" title="Romunščina (ro)"></a>
-  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Madžarščina (hu)" title="Madžarščina (hu)"></a>
-  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Bolgarščina (bg)" title="Bolgarščina (bg)"></a>
-  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Danščina (da)" title="Danščina (da)"></a>
-  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Finščina (fi)" title="Finščina (fi)"></a>
-  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Norveščina (no)" title="Norveščina (no)"></a>
-  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Švedščina (sv)" title="Švedščina (sv)"></a>
-  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="Kitajščina — poenostavljena (zh-CN)" title="Kitajščina — poenostavljena (zh-CN)"></a>
-  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="Kitajščina — tradicionalna (zh-TW)" title="Kitajščina — tradicionalna (zh-TW)"></a>
-  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="Japonščina (ja)" title="Japonščina (ja)"></a>
-  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="Korejščina (ko)" title="Korejščina (ko)"></a>
-  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="Tajščina (th)" title="Tajščina (th)"></a>
-  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Vietnamščina (vi)" title="Vietnamščina (vi)"></a>
-  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Indonezijščina (id)" title="Indonezijščina (id)"></a>
-  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Malajščina (ms)" title="Malajščina (ms)"></a>
-  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filipinščina (phi)" title="Filipinščina (phi)"></a>
-  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Hindijščina (hi)" title="Hindijščina (hi)"></a>
-  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Gudžaratščina (gu)" title="Gudžaratščina (gu)"></a>
-  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Maratščina (mr)" title="Maratščina (mr)"></a>
-  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Tamilščina (ta)" title="Tamilščina (ta)"></a>
-  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Telugijščina (te)" title="Telugijščina (te)"></a>
-  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="Bengalščina (bn)" title="Bengalščina (bn)"></a>
-  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="Urdujščina (ur)" title="Urdujščina (ur)"></a>
-  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="Perzijščina (fa)" title="Perzijščina (fa)"></a>
-  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="Arabščina (ar)" title="Arabščina (ar)"></a>
-  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="Hebrejščina (he)" title="Hebrejščina (he)"></a>
-  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Turščina (tr)" title="Turščina (tr)"></a>
-  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Azerbajdžanščina (az)" title="Azerbajdžanščina (az)"></a>
-  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Svahilščina (sw)" title="Svahilščina (sw)"></a>
-  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Grščina (el)" title="Grščina (el)"></a>
-  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Hrvaščina (hr)" title="Hrvaščina (hr)"></a>
-  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Srbščina (sr)" title="Srbščina (sr)"></a>
-  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Litovščina (lt)" title="Litovščina (lt)"></a>
-  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Estonščina (et)" title="Estonščina (et)"></a>
-  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Latvijščina (lv)" title="Latvijščina (lv)"></a>
+  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="English (en)" title="English (en)"></a>
+  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
+  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Português (pt)" title="Português (pt)"></a>
+  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Español (es)" title="Español (es)"></a>
+  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Français (fr)" title="Français (fr)"></a>
+  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Italiano (it)" title="Italiano (it)"></a>
+  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Deutsch (de)" title="Deutsch (de)"></a>
+  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Nederlands (nl)" title="Nederlands (nl)"></a>
+  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Русский (ru)" title="Русский (ru)"></a>
+  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Українська (uk-UA)" title="Українська (uk-UA)"></a>
+  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Polski (pl)" title="Polski (pl)"></a>
+  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Čeština (cs)" title="Čeština (cs)"></a>
+  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Slovenčina (sk)" title="Slovenčina (sk)"></a>
+  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Română (ro)" title="Română (ro)"></a>
+  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Magyar (hu)" title="Magyar (hu)"></a>
+  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Български (bg)" title="Български (bg)"></a>
+  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Dansk (da)" title="Dansk (da)"></a>
+  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Suomi (fi)" title="Suomi (fi)"></a>
+  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Norsk (no)" title="Norsk (no)"></a>
+  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Svenska (sv)" title="Svenska (sv)"></a>
+  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="中文 — 简体 (zh-CN)" title="中文 — 简体 (zh-CN)"></a>
+  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="中文 — 繁體 (zh-TW)" title="中文 — 繁體 (zh-TW)"></a>
+  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="日本語 (ja)" title="日本語 (ja)"></a>
+  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="한국어 (ko)" title="한국어 (ko)"></a>
+  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="ไทย (th)" title="ไทย (th)"></a>
+  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Tiếng Việt (vi)" title="Tiếng Việt (vi)"></a>
+  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Bahasa Indonesia (id)" title="Bahasa Indonesia (id)"></a>
+  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Bahasa Melayu (ms)" title="Bahasa Melayu (ms)"></a>
+  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filipino (phi)" title="Filipino (phi)"></a>
+  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="हिन्दी (hi)" title="हिन्दी (hi)"></a>
+  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ગુજરાતી (gu)" title="ગુજરાતી (gu)"></a>
+  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="मराठी (mr)" title="मराठी (mr)"></a>
+  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="தமிழ் (ta)" title="தமிழ் (ta)"></a>
+  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="తెలుగు (te)" title="తెలుగు (te)"></a>
+  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="বাংলা (bn)" title="বাংলা (bn)"></a>
+  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="اردو (ur)" title="اردو (ur)"></a>
+  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="فارسی (fa)" title="فارسی (fa)"></a>
+  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="العربية (ar)" title="العربية (ar)"></a>
+  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="עברית (he)" title="עברית (he)"></a>
+  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Türkçe (tr)" title="Türkçe (tr)"></a>
+  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Azərbaycan (az)" title="Azərbaycan (az)"></a>
+  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Kiswahili (sw)" title="Kiswahili (sw)"></a>
+  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Ελληνικά (el)" title="Ελληνικά (el)"></a>
+  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Hrvatski (hr)" title="Hrvatski (hr)"></a>
+  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Српски (sr)" title="Српски (sr)"></a>
+  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Lietuvių (lt)" title="Lietuvių (lt)"></a>
+  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Eesti (et)" title="Eesti (et)"></a>
+  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Latviešu (lv)" title="Latviešu (lv)"></a>
   <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Slovenščina (sl)" title="Slovenščina (sl)"></a>
-  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Malteščina (mt)" title="Malteščina (mt)"></a>
-  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Irščina (ga)" title="Irščina (ga)"></a>
-  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kanada (kn)" title="Kanada (kn)"></a>
-  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Malajalščina (ml)" title="Malajalščina (ml)"></a>
-  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Odijščina (or)" title="Odijščina (or)"></a>
-  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Pandžabščina (pa)" title="Pandžabščina (pa)"></a>
-  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="Nepalščina (ne)" title="Nepalščina (ne)"></a>
-  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="Sinhala (si)" title="Sinhala (si)"></a>
-  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="Burmščina (my)" title="Burmščina (my)"></a>
-  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="Kmerščina (km)" title="Kmerščina (km)"></a>
-  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Havščina (ha)" title="Havščina (ha)"></a>
-  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Jorubščina (yo)" title="Jorubščina (yo)"></a>
-  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Igbojščina (ig)" title="Igbojščina (ig)"></a>
-  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="Amharščina (am)" title="Amharščina (am)"></a>
-  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Uzbeščina (uz)" title="Uzbeščina (uz)"></a>
-  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="Gruzijščina (ka)" title="Gruzijščina (ka)"></a>
-  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Armenščina (hy)" title="Armenščina (hy)"></a>
-  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bosanski jezik (bs)" title="Bosanski jezik (bs)"></a>
+  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Malti (mt)" title="Malti (mt)"></a>
+  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Gaeilge (ga)" title="Gaeilge (ga)"></a>
+  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ಕನ್ನಡ (kn)" title="ಕನ್ನಡ (kn)"></a>
+  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="മലയാളം (ml)" title="മലയാളം (ml)"></a>
+  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ଓଡ଼ିଆ (or)" title="ଓଡ଼ିଆ (or)"></a>
+  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ਪੰਜਾਬੀ (pa)" title="ਪੰਜਾਬੀ (pa)"></a>
+  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="नेपाली (ne)" title="नेपाली (ne)"></a>
+  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="සිංහල (si)" title="සිංහල (si)"></a>
+  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="မြန်မာ (my)" title="မြန်မာ (my)"></a>
+  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="ខ្មែរ (km)" title="ខ្មែរ (km)"></a>
+  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Hausa (ha)" title="Hausa (ha)"></a>
+  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Yorùbá (yo)" title="Yorùbá (yo)"></a>
+  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Igbo (ig)" title="Igbo (ig)"></a>
+  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="አማርኛ (am)" title="አማርኛ (am)"></a>
+  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Oʻzbekcha (uz)" title="Oʻzbekcha (uz)"></a>
+  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="ქართული (ka)" title="ქართული (ka)"></a>
+  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Հայերեն (hy)" title="Հայերեն (hy)"></a>
+  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bosanski (bs)" title="Bosanski (bs)"></a>
 </div>
 
 <br/>
@@ -697,15 +692,15 @@ izven zgodovine vaše lupine. → [CLI integracije](docs/guides/CLI-INTEGRATIONS
 
 <div align="center">
 
-## 🌐 380 ponudnikov umetne inteligence — 153 označenih kot brezplačni v katalogu
+## 🌐 380 Ponudniki AI — 156 Katalog z oznako Brezplačno
 
 </div>
 
-> **380 registriranih ponudnikov** v kanoničnih zbirkah za klepet, medije, iskanje, lokalne storitve, agente v oblaku in sistemske storitve, vključno s **153 ponudniki z metapodatki za odkrivanje `hasFree: true`**. Register modelov za klepet zajema **239 ponudnikov / 3.059 različnih parov ponudnik–model / 1.475 neobdelanih ID-jev modelov**; ločeni katalog brezplačnih paketov ima **471 vrstic na model**, **34 ponavljajočih se paketov** in **54 ponudnikov z brezplačnim dostopom za vedno, ki se ponavlja oziroma ne zahteva ključa**. To so namerno različni imenovalci; definicije in izračuni z odstranitvijo podvojenih paketov so na voljo v [referenci ponudnikov](docs/reference/PROVIDER_REFERENCE.md) in [brezplačnih paketih](docs/reference/FREE_TIERS.md).
+> **380 registriranih ponudnikov** v kanoničnem klepetu, medijih, iskalnikih, lokalnih zbirkah, zbirkah agentov v oblaku in sistemskih zbirkah, vključno z **156, ki nosi metapodatke o odkritju `hasFree: true`** . Pokriva register modela klepeta **241 ponudnikov / 3114 različnih parov ponudnik-model / 1499 neobdelanih modelov IDs** ; ima ločen brezplačni katalog **485 vrstic na model** ,**34 ponavljajočih se skupin** in **54 brezplačnih ponudnikov recurring/keyless za vedno** . To so po zasnovi različni imenovalci; definicije in izračuni, odstranjeni iz skupine, so v živo v [referenci ponudnika](docs/reference/PROVIDER_REFERENCE.md) in [brezplačnih ravneh](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
-### 🏢 Vsi večji laboratoriji — prek ene končne točke
+### 🏢 Vsak večji laboratorij — prek ene končne točke
 
 <table>
   <tr>
@@ -734,7 +729,7 @@ izven zgodovine vaše lupine. → [CLI integracije](docs/guides/CLI-INTEGRATIONS
   </tr>
 </table>
 
-<sub>…in več kot 350 drugih — vsaka ikona se v živo razreši iz kataloga ponudnikov nadzorne plošče. 📖 [Referenca ponudnikov](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>… in še 350 + — vsaka ikona se razreši v živo iz kataloga ponudnika na nadzorni plošči. [Referenca ponudnika](docs/reference/PROVIDER_REFERENCE.md) 📖</sub>
 
 <br/>
 
@@ -766,80 +761,93 @@ izven zgodovine vaše lupine. → [CLI integracije](docs/guides/CLI-INTEGRATIONS
 
 <div align="center">
 
-## 🖥️ Kjer teče OmniRoute — kjerkoli
+## 🖥️ Kje deluje OmniRoute — kjer koli
 
 </div>
 
-> Ista aplikacija, vaš stroj, vaša pravila. Od globalne namestitve npm do** vaš telefon** prek Termuxa.
+> Ista aplikacija, vaša naprava, vaša pravila. Od globalne namestitve npm do **vašega telefona** prek Termuxa.
 
 <table>
-  <tr><th align="left"> Platforma </th><th align="left"> Namestite </th><th align="left"> Poudarki </th></tr>
-  <tr><td align="left" nowrap>📦 <b> npm (globalno)</b></td><td align="left" nowrap><code> npm namestitev -g omniroute </code></td><td align="left"> En ukaz, OS</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Bun (globalno)</b></td><td align="left" nowrap><code> bun add -g omniroute </code></td><td align="left"> Isti registrski tarball, hitrejše namestitve </td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> docker run … diegosouzapw/omniroute</code></td><td align="left"> Multi-arch <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b> namizje (Electron)</b></td><td align="left" nowrap><code> npm run electron:build </code></td><td align="left"> izvorno okno + sistemski pladenj — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b> Menijska vrstica (OmniRouteTray)</b></td><td align="left" nowrap><code> brew namestitev --cask zoispag/tap/omniroute-tray</code></td><td align="left"> Nadzoruje &amp; samodejno posodabljanje strežnika — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap> domači <code> arm64 </code></td><td align="left"> Raspberry Pi, strežniki ARM, Apple Silicon </td></tr>
-  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg install nodejs && npx -y omniroute </code></td><td align="left"> Zažene <b> v vašem telefonu </b>, 24/7, brez korena </td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Dodaj na začetni zaslon"</td><td align="left"> Celozaslonski način, brez povezave, možnost namestitve iz brskalnika </td></tr>
-  <tr><td align="left" nowrap>🧩 <b>OpenCode vtičnik </b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">OpenCode integracija </td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS koda Copilot klepet </b></td><td align="left" nowrap> namestitev <b>OmniCopilot</b> razširitev </td><td align="left">OmniRoute model zqo v izvornem izbirniku Copilot klepeta — stabilen &amp; Insajderji </td></tr>
-  <tr><td align="left" nowrap>🛠️ <b> Iz vira </b></td><td align="left" nowrap><code> npm namestite && npm zaženite dev </code></td><td align="left"> Hack on it, prispevajte </td></tr>
+  <tr><th align="left">Platforma</th><th align="left">Namestitev</th><th align="left">Prednosti</th></tr>
+  <tr><td align="left" nowrap>📦 <b>npm (globalno)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">En ukaz, kateri koli OS</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (globalno)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Združljivost po najboljših močeh brez zagotovil podpore; Node.js je podprto izvajalno okolje.</td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Več arhitektur: <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🖥️ <b>Namizje (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Izvorno okno + sistemski pladenj — <b>Windows / macOS / Linux</b></td></tr>
+  <tr><td align="left" nowrap>🎩 <b>Menijska vrstica (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Nadzira &amp; samodejno posodablja strežnik — <b>macOS</b></td></tr>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>izvorni <code>arm64</code></td><td align="left">Raspberry Pi, strežniki ARM, Apple Silicon</td></tr>
+  <tr><td align="left" nowrap>📱 <b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left">Deluje <b>na vašem telefonu</b>, 24/7, brez korenskega dostopa</td></tr>
+  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Dodaj na začetni zaslon"</td><td align="left">Celozaslonsko delovanje, delovanje brez povezave in namestitev iz brskalnika</td></tr>
+  <tr><td align="left" nowrap>🧩 <b>Vtičnik OpenCode</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">Izvorna integracija z OpenCode</td></tr>
+  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap>namestite razširitev <b>OmniCopilot</b></td><td align="left">Vsi modeli OmniRoute v izvornem izbirniku Copilot Chat — stabilna različica &amp; Insiders</td></tr>
+  <tr><td align="left" nowrap>🛠️ <b>Iz izvorne kode</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">Prilagajajte ga in prispevajte</td></tr>
 </table>
 
-<sub>📖 [Docker Vodnik](docs/guides/DOCKER_GUIDE.md) · [Namizje](electron/README.md) · [Pladenj menijske vrstice](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+<sub>📖 [Vodnik za Docker](docs/guides/DOCKER_GUIDE.md) · [Namizje](electron/README.md) · [Pladenj v menijski vrstici](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-### 🧩 Novo: OmniRoute znotraj izvornega klepeta VS kode Copilot
+### 🧩 Novo: OmniRoute znotraj izvornega vmesnika Copilot Chat v VS Code
 
 </div>
 
-> Brez nove stranske vrstice, brez novega klepeta UI – vsak model, ki ga ponuja OmniRoute se prikaže neposredno v** izbirnik modela Copilot Chat, ki ga že uporabljate** . Od kode VS 1.122 modeli ponudnikov delujejo brez prijave GitHub ali naročnine na Copilot – agentski način, klicanje orodja in vizija, brezplačno.
+> Brez nove stranske vrstice in brez novega uporabniškega vmesnika za klepet — vsak model, ki ga ponuja OmniRoute, se prikaže neposredno v
+> **izbirniku modelov Copilot Chat, ki ga že uporabljate**. Od različice VS Code 1.122 modeli ponudnikov delujejo
+> brez prijave v GitHub ali naročnine na Copilot — agentski način, klicanje orodij in vid, vse
+> brezplačno.
 
-Namestite** [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** razširitev, jo usmerite na svoj strežnik OmniRoute (privzeto na `localhost:20128`), nato odprite Copilot Chat → model picker →** Upravljanje modelov …** →**OmniRoute** .
+Namestite razširitev **[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)**, usmerite jo
+na svoj strežnik OmniRoute (privzeto `localhost:20128`), nato odprite Copilot Chat → izbirnik modelov
+→ **Upravljanje modelov …** → **OmniRoute**.
 
 <table>
-  <tr><th align="left"> Trgovina </th><th align="left"> Povezava </th><th align="left"> Deluje z </th></tr>
-  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace </b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot"> Namestite →</a ></td >< td poravnajte ="levo">VS Koda — stabilna &amp; Insajderji </td></tr>
-  <tr><td align="left" nowrap>🔓 <b> Odprite VSX register </b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"> Namestite →</a ></td >< td poravnajte ="levo">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro…</td></tr>
+  <tr><th align="left">Trgovina</th><th align="left">Povezava</th><th align="left">Deluje z</th></tr>
+  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">Namesti →</a></td><td align="left">VS Code — stabilna različica &amp; Insiders</td></tr>
+  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">Namesti →</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro …</td></tr>
 </table>
 
-V urejevalniku: odprite** Razširitve** pogled, iskanje** "OmniRoute"** , kliknite** Namestite** — deluje na enak način v obeh trgovinah. Vir, izdaje in založniški zbornik v živo na [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
+V urejevalniku odprite pogled **Razširitve**, poiščite **"OmniRoute"** in kliknite **Namesti**
+— v obeh trgovinah deluje enako. Izvorna koda, težave in navodila za objavljanje so na voljo na
+[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
 
-<sub>📖 [koda VS Copilot Vodnik za klepet](docs/guides/VSCODE-COPILOT.md) — nastavitev, kaj prikazuje izbirnik, nadzorna plošča v zavihku, odpravljanje težav </sub>
+<sub>📖 [Vodnik za VS Code Copilot Chat](docs/guides/VSCODE-COPILOT.md) — nastavitev, vsebina izbirnika, nadzorna plošča v zavihku, odpravljanje težav</sub>
 
 <br/>
 
 <div align="center">
 
-### 🎩 Novo: OmniRouteTray — vaš prehod, ki živi v menijski vrstici
+### 🎩 Novo: OmniRouteTray — vaš prehod v menijski vrstici
 
 </div>
 
-> `omniroute serve` je najsrečnejša, ko je vedno prižgana.** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)** to spremeni v aplikacijo menijske vrstice nastavi in pozabi za macOS: zažene strežnik, ga ohranja pri življenju med ponovnimi zagoni, ga posodobi na mestu in postavi vaš živi žetonski proračun na en klik stran —** nobeno terminalsko okno ni ostalo odprto, ni `npm install -g omniroute` za varuško.**
+> `omniroute serve` najbolje deluje, ko je vedno vklopljen. **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)**
+> ga spremeni v aplikacijo za menijsko vrstico sistema macOS, ki jo nastavite in nanjo pozabite: zažene strežnik, ga ohranja pri delovanju
+> med ponovnimi zagoni, ga sproti posodablja in omogoča dostop do trenutne omejitve žetonov z enim klikom — **brez
+> odprtega terminalskega okna in brez potrebe po nadzorovanju ukaza `npm install -g omniroute`.**
 
-Ustvarjen s [Tauri v2](https://v2.tauri.app/) (jedro Rust velikosti napake zaokroževanja), pošilja lastno podpisano izvajalno okolje Node 24 in upravlja namestitev OmniRoute v lasti aplikacije, tako da se nikoli ne bori z vašim globalnim `node`/`bun`. to** deli vašo obstoječo konfiguracijo `~/.omniroute/` in bazo podatkov** — torej je isti OmniRoute ki ga že tečeš, samo s klobukom na glavi. 🎩
+Zgrajen je s [Tauri v2](https://v2.tauri.app/) (jedrom Rust, majhnim kot zaokrožitvena napaka) ter vključuje
+lastno podpisano izvajalno okolje Node 24 in upravlja namestitev OmniRoute v lasti aplikacije, zato nikoli ne prihaja v spor z vašim
+globalnim okoljem `node`/`bun`. **Souporablja vašo obstoječo konfiguracijo in podatkovno zbirko v `~/.omniroute/`** — zato je to
+isti OmniRoute, ki ga že uporabljate, le da zdaj nosi klobuk. 🎩
 
 <table>
-  <tr><th align="left"> Kaj počne </th><th align="left"> Kako </th></tr>
-  <tr><td align="left" nowrap>🟢 <b> Nadzoruje strežnik </b></td><td align="left"> Ustvari <code> omniroute serve </code>, sprejme primerek, ki se že izvaja, namesto da ga podvoji </td></tr>
-  <tr><td align="left" nowrap>📊 <b> Kratek pregled uporabe v živo </b></td><td align="left"> Vrstice kvot ponudnika, Claude session/weekly omejitve z odštevanji ponastavitve, 30-dnevna razčlenitev stroškov </td></tr>
-  <tr><td align="left" nowrap>🔄 <b> Samodejne posodobitve na mestu </b></td><td align="left"> Postopna namestitev, atomska zamenjava, povrnitev ob napaki — vedno na najnovejši izdaji </td></tr>
-  <tr><td align="left" nowrap>🚀 <b> Zaženi ob prijavi </b></td><td align="left"> Izbirni zagon ob prijavi; samo pladenj, brez ikone priklopne </td></tr>
-  <tr><td align="left" nowrap>🩺 <b> Doctor &amp; beleži </b></td><td align="left"> Diagnostika z enim klikom in dostop do dnevnika strežnika </td></tr>
+  <tr><th align="left">Kaj počne</th><th align="left">Kako</th></tr>
+  <tr><td align="left" nowrap>🟢 <b>Nadzira strežnik</b></td><td align="left">Zažene <code>omniroute serve</code> in prevzame že delujoči primerek, namesto da bi ga podvojil</td></tr>
+  <tr><td align="left" nowrap>📊 <b>Sprotni pregled uporabe</b></td><td align="left">Vrstice kvot ponudnikov, omejitve seje/tedna za Claude z odštevanjem do ponastavitve in 30-dnevna razčlenitev stroškov</td></tr>
+  <tr><td align="left" nowrap>🔄 <b>Samodejno sprotno posodabljanje</b></td><td align="left">Postopna namestitev, atomska zamenjava in povrnitev ob napaki — vedno uporablja najnovejšo izdajo</td></tr>
+  <tr><td align="left" nowrap>🚀 <b>Zagon ob prijavi</b></td><td align="left">Izbirni zagon ob prijavi; samo v pladnju, brez ikone v vrstici Dock</td></tr>
+  <tr><td align="left" nowrap>🩺 <b>Diagnostika &amp; dnevniki</b></td><td align="left">Diagnostika in dostop do dnevnika strežnika z enim klikom</td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub> Raje prenos? Zgrabite najnovejši <code>.dmg </code> iz
-<a href="https://github.com/zoispag/omniroute-tray/releases"> Izdaja </a>. Vir, težave in zgradba
-dokumenti v živo na <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
-<br/>💛 Skupnostni projekt <a href="https://github.com/zoispag">@zoispag </a> — ni uradna izdaja OmniRoute.</sub>
+<sub>Imate raje prenos? Prenesite najnovejšo datoteko <code>.dmg</code> iz razdelka
+<a href="https://github.com/zoispag/omniroute-tray/releases">Izdaje</a>. Izvorna koda, težave in dokumentacija za gradnjo
+so na voljo v repozitoriju <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
+<br/>💛 Skupnostni projekt avtorja <a href="https://github.com/zoispag">@zoispag</a> — ni uradna izdaja OmniRoute.</sub>
 
 <br/>
 

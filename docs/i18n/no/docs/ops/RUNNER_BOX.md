@@ -4,68 +4,42 @@
 
 ---
 
-Den selvhostede poolen kjører på **.113**-boksen (`tomni-proxmox-113`). Siden 2026-10-18 har hver
-OmniRoute-runner hatt **én rolle**, én etikett og et minne-/CPU-budsjett dimensjonert etter den målte
-arbeidsbelastningen. Turbopack-plassen får det bygget trenger, mens de andre plassene er dimensjonert etter
-de målte toppene. Boksen overallokerer bare når et Turbopack-bygg sammenfaller med et Release-Green-
-webpack-bygg og en lint-jobb. Vertens swap (16 GB) absorberer dette, og fordi bygg for pull-forespørsler kjører
-hostet, er Turbopack-plassen inaktiv mesteparten av tiden:
+Det selvbetjente bassenget går på **.113** boks (`tomni-proxmox-113`). Siden 2026-10-18 har hver OmniRoute -løper **én rolle** , én etikett og et memory/CPU budsjett som er dimensjonert til det arbeidsmengden målt. Turbopack sporet får det bygget trenger; de andre sporene er dimensjonert til sine målte topper. Boksen overbeviser bare når en Turbopack konstruksjon faller sammen med en Release-Green webpack-konstruksjon og en lojobb; vertsbytte (16 GB) absorberer dette, og fordi pull-request Builds kjører vert, er Turbopack sporet inaktivt mesteparten av tiden:
 
-| runner               | etikett        | rolle                                                                                                                                               | `MemoryHigh` / `MemoryMax` | `CPUQuota` |
-| -------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------- |
-| `omniroute-113-5`    | `omni-build`   | Turbopack-bygg: `ci.yml` `Build` (kun push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, det nattlige a11y-bygget | 56 GB / 60 GB (swap 0)     | 1600 %     |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), webpack-bygg                                                                                        | 20 GB / 24 GB (swap 4 GB)  | 800 %      |
-| `omniroute-113-2`    | `omni-light`   | nattlige jobber (Schemathesis, promptfoo, garak, k6) og `quality.yml` `lint-guard`                                                                  | 12 GB / 16 GB (swap 4 GB)  | 600 %      |
-| `omniroute-113`      | `omni-light`   | samme pool som ovenfor                                                                                                                              | 8 GB / 12 GB               | 400 %      |
-| OmniHeuris, OmniMind | (deres repoer) | kun Dependabot (topp på 155 MB hver, 2026-10-18)                                                                                                    | 4 GB / 6 GB                | 200 % hver |
+| løper                | merkelapp                       | rolle                                                                                                                                                | `MemoryHigh` / `MemoryMax` | `CPUQuota` |
+| -------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack -bygg: `ci.yml` `Build` (bare push/dispatch ), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, den nattlige bygningen | 56 GB / 60 GB (bytte 0)    | 1600 %     |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack build                                                                                        | 20 GB / 24 GB (bytt 4 GB)  | 800 %      |
+| `omniroute-113-2`    | `omni-light`                    | nattlys (Schemathesis, promptfoo, garak, k6) og `quality.yml` `lint-guard`                                                                           | 12 GB / 16 GB (bytt 4 GB)  | 600 %      |
+| `omniroute-113`      | `omni-light`                    | samme basseng som ovenfor                                                                                                                            | 8 GB / 12 GB               | 400 %      |
+| OmniHeuris, OmniMind | (reposene deres)                | Bare Dependabot (topp 155 MB hver, 2026-10-18)                                                                                                       | 4 GB / 6 GB                | 200 % hver |
 
 Målt 2026-10-18:
 
-| ressurs   | verdi                                    | hva det betyr for planlegging                                                                                                                                                                                                                                                                                                                                                       |
-| --------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| RAM / CPU | **78 GB / 32 kjerner**                   | et Turbopack-produksjonsbygg nådde en topp på 49 GB uten begrensning (`tests/unit/ci-build-bundler-webpack.test.ts`); på Next 16.3.8 bruker kompileringsfasen alene ~40 GB (36 GB RSS i `next-build` pluss 17 loader-workers på 3 GB, målt 2026-10-18); et webpack-bygg bruker ~14–16 GB. Ett Turbopack-bygg + ett webpack-bygg får plass samtidig; to Turbopack-bygg gjør ikke det |
-| swap      | 16 GB                                    | `omniroute-113-5` kjører med swap slått av (`MemorySwapMax=0`), slik at et løpsk bygg stoppes ved grensen i stedet for å få boksen til å bruke swap                                                                                                                                                                                                                                 |
-| `/tmp`    | **12 GB tmpfs = RAM**                    | alt som plasseres der, bruker minne; gjenværende filer ryddes etter 3 t                                                                                                                                                                                                                                                                                                             |
-| CPU       | belastning på 60 observert på 32 kjerner | før kvotene førte ett Turbopack-bygg (~1166 % CPU) pluss en dekningssuite på samme boks til at de andre lytternes livstegn ble sultet ut (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                      |
-| runnere   | **7 lyttere** (2026-10-28)               | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` bærer også `omni-build`; `omniroute-113-3/-4/-8` ble slettet fra repoet (2026-10-28)                                                                                                                                                                                                                                         |
+| ressurs   | verdi                                 | hva det betyr for planlegging                                                                                                                                                                                                                                                                                                                                                  |
+| --------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| RAM / CPU | **78 GB / 32 kjerner**                | en Turbopack -produksjonsbygging nådde en topp på 49 GB uncapped (`tests/unit/ci-build-bundler-webpack.test.ts`); neste 16.3.8 inneholder kompileringsfasen alene ~ 40 GB (36 GB RSS i `next-build` pluss 17 lastearbeidere på 3 GB, målt 2026-10-18); en webpack bygget på ~ 14–16 GB. Én Turbopack + én webpack-konstruksjon passer sammen; to Turbopack -bygg gjør det ikke |
+| bytte     | 16 GB                                 | `omniroute-113-5` kjører med swap off (`MemorySwapMax=0`) slik at en løpsk konstruksjon kuttes ved hetten i stedet for å bytte boksen                                                                                                                                                                                                                                          |
+| `/tmp`    | **12 GB tmpfs = RAM**                 | alt som er parkert der er minne; rester feies etter 3 timer                                                                                                                                                                                                                                                                                                                    |
+| CPU       | belastning 60 på 32 kjerner observert | før kvotene sultet en Turbopack bygg (~ 1166 % CPU) pluss en dekningspakke på samme boks de andre lytternes hjerteslag (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                   |
+| løpere    | **7 lyttere** (2026-10-28)            | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` har også `omni-build-60gb`; `omniroute-113-3/-4/-8` ble slettet fra repoen (2026-10-28)                                                                                                                                                                                                                                 |
 
-Grensene ligger i hver enhets `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
-(tidligere verdier er beholdt som `override.conf.bak-20261018`) og ble tatt i bruk direkte med
-`systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — uten omstart, så ingen
-kjørende jobb ble berørt. Etiketter endres gjennom runner-API-et (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
-`gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), også direkte.
+Grensene ligger i hver enhets `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` (tidligere verdier holdt som `override.conf.bak-20261018`) og ble brukt live med `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — ingen omstart, så ingen løpende jobb ble berørt. Etiketter endres gjennom løperne API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` / `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), også live.
 
-## Installer oppryddingsskriptet (én gang, på maskinen)
+## Installer vaktmesteren (en gang, på esken)
 
 ```bash
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
-# cron (root): hvert 30. minutt, logg til /var/log/runner-janitor.log
+# cron (root): every 30 min, log to /var/log/runner-janitor.log
 */30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
-`lsof` er påkrevd: Oppryddingsskriptet bekrefter at en bane er inaktiv med ett øyeblikksbilde av åpne
-filer før den fjernes. Uten verktøyet fjerner skriptet ingenting og varsler om dette
-(exit 1). Prøv alltid endringer med `--dry-run` først — det skriver ut nøyaktig hva det ville
-gjort, uten å endre noe.
+`lsof` er påkrevd: vaktmesteren beviser at en bane er inaktiv med ett øyeblikksbilde av åpne filer før den fjerner den, og uten verktøyet fjerner den ingenting og sier det (avslutt 1). Prøv hvilken som helst endring med `--dry-run` først — den skriver ut nøyaktig hva den ville gjøre og rører ingenting.
 
-Dette gjør skriptet ved hver kjøring: rydder opp i våre egne etterlatenskaper (`runner-*`, `omniroute-*`,
-`next-build*`, `e2e-build.tar.gz`) etter **3 t på tmpfs** og 24 t på disken
-`_work/_temp`; avslutter en `next-build` som er eldre enn 75 min (ingen jobber kjører så lenge — den
-2026-08-27 kjørte én i 70 min etter at GitHub hadde erklært jobben som tapt); fjerner 48 timer gamle
-utsjekkinger for runners med enheter som er **stoppet**; varsler ved diskbruk ≥ 85 %, minne-PSI
-`full/avg60` ≥ 10 % og flere lytterprosesser enn `MAX_ACTIVE_RUNNERS` (med en
-fordeling mellom omniroute/andre). Exit 1 = krever oppmerksomhet; les loggen.
+Hva den gjør hver løpetur: feier våre egne rester (`runner-*`, `omniroute-*`, `next-build*`, `e2e-build.tar.gz`) etter **3 timer på tmpfs** og 24 timer på disk `_work/_temp`; varsler på en `next-build` eldre enn 75 min og holder den i gang; beskjærer 48 t gamle kasser av løpere hvis enhet er **stoppet** ; varsler på disk ≥ 85 %, minne PSI `full/avg60` ≥ 10 %, og flere lyttere enn `MAX_ACTIVE_RUNNERS` (med en omniroute/other sammenbrudd). Avslutt 1 = oppmerksomhet nødvendig; les loggen.
 
-75-minuttersregelen fanger ikke opp en build der GitHub allerede har gitt opp jobben. Når
-`Runner.Listener` ikke kan fornye jobben, viser `_diag/Runner_*.log`
-`POST request to …/renewjob timed out after 100 seconds`, API-et rapporterer jobben som `completed`
-(feil) omtrent ti minutter etter siste vellykkede fornyelse, og `next-build` fortsetter å kjøre uten
-noen tilknyttet jobb (2026-10-18: Build for #17066 feilet kl. 19:43, og builden holdt fortsatt av
-40 GB fem minutter senere). Bekreft referansen i den nyeste `_diag/Worker_*.log`, og send deretter
-SIGTERM kun til build-treet etter PID — `next-build`, `npm run build`, `build-next-isolated.mjs` og
-arbeidsprosessene i `_work`. Berør aldri `Runner.Listener`, `RunnerService.js` eller `Runner.Worker`:
-Arbeidsprosessen rapporterer jobben som avbrutt, og lytterprosessen kobler seg til igjen av seg selv.
+Medgått tid alene beviser ikke at en prosess er foreldreløs. Vaktmesteren sender aldri signaler basert på alder. De eksisterende `ZOMBIE_BUILD_MAX_MIN` og `ZOMBIE_BUILD_COMM` -miljønavnene støttes fortsatt for cron-konfigurasjoner. Før du rydder opp i en mistenkt foreldreløs, må du bekrefte at den nøyaktige GitHub jobben er terminal og identifisere prosessene som hører til den jobben. Når `Runner.Listener` ikke kan fornye jobben sin, viser `_diag/Runner_*.log` `POST request to …/renewjob timed out after 100 seconds`, API rapporterer jobben `completed` (feil) omtrent ti minutter etter den siste vellykkede fornyelsen, og `next-build` fortsetter å kjøre uten noen jobb tilknyttet (2026-10-18: Bygget av #17066 ble mislykket kl. GB og bygget holdt seg fortsatt 5 minutter senere). Bekreft ref. i den nyeste `_diag/Worker_*.log`, deretter SIGTERM bare byggetreet av PID — `next-build`, `npm run build`, `build-next-isolated.mjs` og `_work` arbeiderne. Berør aldri `Runner.Listener`, `RunnerService.js` eller `Runner.Worker`: Arbeideren rapporterer jobben som kansellert og lytteren går tilbake på nett av seg selv.
 
 ## Runner-enheter: KillMode
 
@@ -80,7 +54,7 @@ gangen, kun når den er inaktiv**, med inaktivitetskontrollen og omstarten i sam
 ## Driftsregler
 
 - **Én Turbopack-bygging om gangen — håndhevet med etikett.** Hver jobb som kjører en fullstendig Turbopack-
-  `next build`, bruker `[self-hosted, omni-build]`, og bare **`omniroute-113-5`** har denne
+  `next build`, bruker `[self-hosted, omni-build, omni-build-60gb]`, og bare **`omniroute-113-5`** har denne
   etiketten: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   den nattlige a11y-byggingen (#16853) og **amd64** i `docker-publish.yml` (webpack i BuildKit —
   Turbopack fikk panikk der, kjøring 33253576569). Docker-etappen for arm64 forblir på `ubuntu-24.04-arm`.

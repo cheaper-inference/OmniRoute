@@ -372,6 +372,60 @@
             "ui",
             "workflow"
           ]
+        },
+        "dast-smoke": {
+          "when": "code",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "docs",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
+        "codeql-scan": {
+          "when": "always",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "docs",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
+        "codeql-admission": {
+          "when": "always",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "docs",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
         }
       }
     },

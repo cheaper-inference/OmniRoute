@@ -55,7 +55,7 @@ Filă nouă pentru extragerea conținutului dintr-un URL prin `POST /v1/web/fetc
 - Intrare: URL + comutator pentru pagina completă + selector de format (markdown / text / HTML).
 - Trimitere → preluare → afișare în `ScrapeResult.tsx`.
 - `ScrapeResult` afișează previzualizarea markdown + un comutator pentru conținutul brut.
-- Limită: dacă corpul răspunsului depășește **256 KB**, interfața afișează `(trunchiat, vizualizează conținutul brut)` și deschide conținutul brut într-o fereastră modală Monaco (D21).
+- Limită: dacă corpul răspunsului depășește **256 KB**, interfața afișează `View full raw content` și deschide conținutul brut într-o fereastră modală (D21).
 - Panou de metadate: furnizor (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latență, cost, dimensiunea răspunsului, numărul de linkuri.
 - Utilizează hook-ul `useScrapeFetch.ts`.
 

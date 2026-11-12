@@ -12,8 +12,11 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  readFileSync,
   realpathSync,
   rmSync,
+  statSync,
+  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -91,6 +94,18 @@ function runScriptAsync(main: string, branch: string) {
     child.stderr.on("data", (chunk) => (stderr += chunk));
     child.on("close", (status) => resolve({ status, stdout, stderr }));
   });
+}
+
+function fakeNode(root: string, script: string) {
+  const bin = join(root, "fake-bin");
+  mkdirSync(bin);
+  const node = join(bin, "node");
+  writeFileSync(
+    node,
+    `#!/usr/bin/env bash\nset -euo pipefail\n${script}\nexec ${JSON.stringify(process.execPath)} "$@"\n`
+  );
+  chmodSync(node, 0o755);
+  return bin;
 }
 
 /** Holds `lock` with flock for `seconds`, resolving once the holder has really acquired it. */
@@ -181,4 +196,119 @@ test("never deletes a branch that already existed before the failed run", () => 
   const r = runScript(main, "fix/mine");
   assert.notEqual(r.status, 0);
   assert.ok(branchExists(main, "fix/mine"), "pre-existing branch must survive");
+});
+
+test("capacity denial aborts before fetch, branch creation, or checkout", () => {
+  const { root, main } = makeFixture();
+  git(main, "remote", "set-url", "origin", join(root, "missing-origin.git"));
+  const bin = fakeNode(
+    root,
+    'if [[ "${1:-}" == *resource-budget.mjs && "${2:-}" == "reserve" ]]; then echo "fixture capacity denied before fetch" >&2; exit 75; fi'
+  );
+  const r = runScript(main, "fix/no-capacity", { PATH: `${bin}:${ENV.PATH}` });
+  assert.equal(r.status, 75, `stdout:\n${r.stdout}\nstderr:\n${r.stderr}`);
+  assert.match(r.stderr, /capacity denied before fetch/);
+  assert.equal(branchExists(main, "fix/no-capacity"), false);
+  assert.equal(existsSync(join(main, ".claude", "worktrees", "no-capacity")), false);
+});
+
+test("a dangling compatibility-lock symlink fails before creating its target", () => {
+  const { root, main } = makeFixture();
+  const commonDir = git(main, "rev-parse", "--path-format=absolute", "--git-common-dir");
+  const target = join(root, "dangling-lock-target");
+  symlinkSync(target, join(commonDir, "omniroute-new-worktree.lock"));
+  const r = runScript(main, "fix/dangling-lock");
+  assert.equal(r.status, 78, `stdout:\n${r.stdout}\nstderr:\n${r.stderr}`);
+  assert.match(r.stderr, /must not be a symlink/);
+  assert.equal(existsSync(target), false);
+  assert.equal(branchExists(main, "fix/dangling-lock"), false);
+});
+
+test("a denied pre-check never reaches git worktree add", () => {
+  const { root, main } = makeFixture();
+  const log = join(root, "budget-before-add.log");
+  const bin = fakeNode(
+    root,
+    [
+      `LOG=${JSON.stringify(log)}`,
+      'if [[ "${1:-}" == *resource-budget.mjs ]]; then',
+      '  command="${2:-}"; echo "$command" >> "$LOG"',
+      '  case "$command" in',
+      '    reserve) echo \'{"lease":{"id":"fixture","handle":"fixture.aaaaaaaa"}}\'; exit 0 ;;',
+      '    resize) echo \'{"resized":"fixture"}\'; exit 0 ;;',
+      '    check) echo "fixture denied before add" >&2; exit 75 ;;',
+      '    release) echo \'{"released":"fixture"}\'; exit 0 ;;',
+      "  esac",
+      "fi",
+    ].join("\n")
+  );
+  const r = runScript(main, "fix/no-checkout", { PATH: `${bin}:${ENV.PATH}` });
+  assert.equal(r.status, 75, `stdout:\n${r.stdout}\nstderr:\n${r.stderr}`);
+  assert.match(r.stderr, /denied before add/);
+  assert.equal(branchExists(main, "fix/no-checkout"), false);
+  assert.equal(existsSync(join(main, ".claude", "worktrees", "no-checkout")), false);
+  assert.deepEqual(readFileSync(log, "utf8").trim().split("\n"), [
+    "reserve",
+    "resize",
+    "check",
+    "release",
+  ]);
+});
+
+test("a second check denial preserves checkout and hooks but never starts cp -al", () => {
+  const { root, main } = makeFixture();
+  const log = join(root, "budget-before-cpal.log");
+  mkdirSync(join(main, "node_modules"));
+  writeFileSync(join(main, "node_modules", "sentinel.txt"), "hard-link me\n");
+  const bin = fakeNode(
+    root,
+    [
+      `LOG=${JSON.stringify(log)}`,
+      'if [[ "${1:-}" == *resource-budget.mjs ]]; then',
+      '  command="${2:-}"; echo "$command" >> "$LOG"',
+      '  case "$command" in',
+      '    reserve) echo \'{"lease":{"id":"fixture","handle":"fixture.aaaaaaaa"}}\'; exit 0 ;;',
+      '    resize) echo \'{"resized":"fixture"}\'; exit 0 ;;',
+      "    check)",
+      '      count=$(grep -c "^check$" "$LOG")',
+      '      if [[ "$count" -ge 2 ]]; then echo "fixture state failure before cp -al" >&2; exit 78; fi',
+      '      echo \'{"checked":"fixture"}\'; exit 0 ;;',
+      '    release) echo \'{"released":"fixture"}\'; exit 0 ;;',
+      "  esac",
+      "fi",
+    ].join("\n")
+  );
+  const r = runScript(main, "fix/no-cpal", { PATH: `${bin}:${ENV.PATH}` });
+  assert.equal(r.status, 78, `stdout:\n${r.stdout}\nstderr:\n${r.stderr}`);
+  assert.match(r.stderr, /state failure before cp -al/);
+  const worktree = join(main, ".claude", "worktrees", "no-cpal");
+  assert.ok(branchExists(main, "fix/no-cpal"));
+  assert.ok(existsSync(join(worktree, ".husky", "_", "pre-commit")));
+  assert.equal(existsSync(join(worktree, "node_modules")), false);
+  assert.deepEqual(readFileSync(log, "utf8").trim().split("\n"), [
+    "reserve",
+    "resize",
+    "check",
+    "check",
+    "release",
+  ]);
+});
+
+test("the allowed path preserves hook activation and hard-linked dependencies", () => {
+  const { main } = makeFixture();
+  const source = join(main, "node_modules", "fixture-package", "index.js");
+  mkdirSync(join(main, "node_modules", "fixture-package"), { recursive: true });
+  writeFileSync(source, "export default 1;\n");
+
+  const r = runScript(main, "fix/budgeted-success");
+  assert.equal(r.status, 0, `stdout:\n${r.stdout}\nstderr:\n${r.stderr}`);
+  const worktree = join(main, ".claude", "worktrees", "budgeted-success");
+  const copied = join(worktree, "node_modules", "fixture-package", "index.js");
+  assert.ok(existsSync(join(worktree, ".husky", "_", "pre-commit")));
+  assert.ok(existsSync(copied));
+  assert.equal(
+    statSync(copied).ino,
+    statSync(source).ino,
+    "node_modules was copied, not hard-linked"
+  );
 });

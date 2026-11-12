@@ -2,9 +2,14 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import test from "node:test";
+import Ajv from "ajv";
+import { parse } from "yaml";
 
 const require = createRequire(import.meta.url);
-const { maybeHandleDisallowedMethod } = require("../../scripts/dev/http-method-guard.cjs");
+const {
+  maybeHandleDisallowedMethod,
+  wrapRequestListenerWithMethodGuard,
+} = require("../../scripts/dev/http-method-guard.cjs");
 
 test("raw HTTP guard rejects high-risk unsupported methods before Next.js handles them", () => {
   const cases: Array<{
@@ -129,4 +134,268 @@ test("OpenAPI documents high-risk route auth and setup responses", () => {
   assert.match(login, /"401":\n\s+description: Invalid password/);
   assert.match(login, /"403":\n\s+description: Password setup required/);
   assert.match(login, /"429":\n\s+description: Too many failed attempts/);
+});
+
+function responseRecorder() {
+  return {
+    statusCode: 200,
+    headers: new Map<string, string>(),
+    body: "",
+    setHeader(name: string, value: string) {
+      this.headers.set(name.toLowerCase(), value);
+    },
+    end(payload = "") {
+      this.body += payload;
+    },
+  };
+}
+
+test("group collection POST reaches the next handler instead of the key-id method rule", () => {
+  for (const url of ["/api/keys/groups", "/api/keys/groups/", "/api/keys/groups?view=all"]) {
+    const response = responseRecorder();
+    let calls = 0;
+    const listener = wrapRequestListenerWithMethodGuard(
+      (_request: unknown, result: ReturnType<typeof responseRecorder>) => {
+        calls += 1;
+        result.statusCode = 201;
+        result.end();
+      }
+    );
+    listener({ method: "POST", url }, response);
+    assert.equal(calls, 1, url);
+    assert.equal(response.statusCode, 201, url);
+    assert.equal(response.headers.has("allow"), false, url);
+  }
+  for (const method of ["GET", "PUT", "DELETE"]) {
+    assert.equal(
+      maybeHandleDisallowedMethod({ method, url: "/api/keys/groups/qg-group" }, responseRecorder()),
+      false,
+      method
+    );
+  }
+  assert.equal(
+    maybeHandleDisallowedMethod({ method: "POST", url: "/api/keys/qg-key" }, responseRecorder()),
+    true,
+    "ordinary key detail still rejects POST"
+  );
+});
+
+test("group QUERY returns 405 and Allow before authentication or body validation", () => {
+  for (const downstreamStatus of [400, 401]) {
+    for (const url of [
+      "/api/keys/groups/qg-group",
+      "/api/keys/groups/qg-group/",
+      "/api/keys/groups/qg-group?view=all",
+    ]) {
+      const response = responseRecorder();
+      let calls = 0;
+      const listener = wrapRequestListenerWithMethodGuard(
+        (_request: unknown, result: ReturnType<typeof responseRecorder>) => {
+          calls += 1;
+          result.statusCode = downstreamStatus;
+          result.end();
+        }
+      );
+      listener(
+        {
+          method: "QUERY",
+          url,
+          get headers() {
+            throw new Error("method rejection must precede authentication");
+          },
+          on() {
+            throw new Error("method rejection must precede request body consumption");
+          },
+        },
+        response
+      );
+      assert.equal(calls, 0, url);
+      assert.equal(response.statusCode, 405, url);
+      assert.equal(response.headers.get("allow"), "GET, PUT, DELETE", url);
+      assert.match(response.body, /METHOD_NOT_ALLOWED/, url);
+    }
+  }
+});
+
+test("affected management operations document authentication without allowing arbitrary failures", () => {
+  const spec = parse(readFileSync("docs/openapi.yaml", "utf8"));
+  const targets = [
+    "/api/auth/csrf",
+    "/api/keys/{id}/regenerate",
+    "/api/keys/{id}/reveal",
+    "/api/keys/{id}/usage-limits",
+    "/api/keys/groups",
+    "/api/keys/groups/{id}",
+    "/api/keys/groups/{id}/keys",
+    "/api/keys/groups/{id}/permissions",
+  ];
+  for (const path of targets) {
+    const item = spec.paths[path];
+    for (const method of ["get", "post", "put", "delete"]) {
+      const operation = item[method];
+      if (!operation) continue;
+      assert.ok(
+        operation.responses["401"],
+        `${method} ${path}: authentication is a declared error`
+      );
+      assert.equal(
+        operation.responses.default,
+        undefined,
+        `${method} ${path}: no catch-all response`
+      );
+      assert.equal(
+        operation.responses["4XX"],
+        undefined,
+        `${method} ${path}: no blanket client error`
+      );
+      assert.equal(
+        operation.responses["405"],
+        undefined,
+        `${method} ${path}: valid methods cannot be rejected`
+      );
+      assert.deepEqual(operation.security, [{ BearerAuth: [] }, { ManagementSessionAuth: [] }]);
+      if (path.includes("{id}")) {
+        const parameters = [...(item.parameters ?? []), ...(operation.parameters ?? [])];
+        assert.ok(
+          parameters.some((parameter) => parameter.$ref === "#/components/parameters/ResourceId")
+        );
+      }
+    }
+  }
+  for (const path of [
+    "/api/keys/groups",
+    "/api/keys/groups/{id}/keys",
+    "/api/keys/groups/{id}/permissions",
+  ]) {
+    assert.ok(spec.paths[path].post.responses["201"], `creation status for ${path}`);
+    assert.equal(
+      spec.paths[path].post.responses["200"],
+      undefined,
+      `no invented creation status for ${path}`
+    );
+  }
+});
+
+const groupBodyCases = [
+  {
+    method: "post",
+    path: "/api/keys/groups",
+    valid: [{ name: "research" }, { name: " research ", description: "" }],
+    invalid: [
+      {},
+      { name: "" },
+      { name: "   " },
+      { name: 1 },
+      { name: "research", description: null },
+    ],
+  },
+  {
+    method: "put",
+    path: "/api/keys/groups/{id}",
+    valid: [{ isActive: false }, { description: "" }, { name: "research" }],
+    invalid: [{}, { unknown: true }, { name: "   " }, { isActive: "false" }],
+  },
+  {
+    method: "post",
+    path: "/api/keys/groups/{id}/keys",
+    valid: [{ keyId: "qg-key" }],
+    invalid: [{}, { keyId: "" }, { keyId: "\t" }, { keyId: 1 }],
+  },
+  {
+    method: "post",
+    path: "/api/keys/groups/{id}/permissions",
+    valid: [
+      { modelPattern: "*", accessType: "allow" },
+      { modelPattern: "model-*", accessType: "deny", provider: "openai" },
+    ],
+    invalid: [
+      {},
+      { modelPattern: "*" },
+      { modelPattern: " ", accessType: "allow" },
+      { modelPattern: "*", accessType: "other" },
+    ],
+  },
+];
+
+for (const { method, path, valid, invalid } of groupBodyCases) {
+  test(`OpenAPI request examples follow the handler validation for ${method.toUpperCase()} ${path}`, () => {
+    const spec = parse(readFileSync("docs/openapi.yaml", "utf8"));
+    const body = spec.paths[path][method].requestBody;
+    assert.equal(body?.required, true, "a body is required by the handler");
+    const validate = new Ajv({ strict: true, strictRequired: false }).compile(
+      body.content["application/json"].schema
+    );
+    for (const data of valid) assert.equal(validate(data), true, JSON.stringify(data));
+    for (const data of invalid) assert.equal(validate(data), false, JSON.stringify(data));
+  });
+}
+
+test("status and key-access QUERY return 405 and Allow before authentication or body handling", () => {
+  for (const [path, allow] of [
+    ["/api/auth/status", "GET, HEAD"],
+    ["/api/keys/qg-key/access", "POST"],
+  ]) {
+    for (const suffix of ["", "/", "?view=all"]) {
+      for (const downstreamStatus of [400, 401]) {
+        const url = path + suffix;
+        const response = responseRecorder();
+        let calls = 0;
+        const listener = wrapRequestListenerWithMethodGuard(
+          (_request: unknown, result: ReturnType<typeof responseRecorder>) => {
+            calls += 1;
+            result.statusCode = downstreamStatus;
+            result.end();
+          }
+        );
+        listener(
+          {
+            method: "QUERY",
+            url,
+            get headers() {
+              throw new Error("method rejection must precede authentication");
+            },
+            on() {
+              throw new Error("method rejection must precede request body consumption");
+            },
+          },
+          response
+        );
+        assert.equal(calls, 0, url);
+        assert.equal(response.statusCode, 405, url);
+        assert.equal(response.headers.get("allow"), allow, url);
+        assert.equal(response.headers.get("cache-control"), "no-store", url);
+        assert.equal(JSON.parse(response.body).error.code, "METHOD_NOT_ALLOWED", url);
+      }
+    }
+  }
+});
+
+test("status and key-access retain their implemented and automatic methods", () => {
+  for (const [url, methods] of [
+    ["/api/auth/status", ["GET", "HEAD", "OPTIONS"]],
+    ["/api/keys/qg-key/access", ["POST", "OPTIONS"]],
+  ] as const) {
+    for (const method of methods) {
+      const response = responseRecorder();
+      let calls = 0;
+      const listener = wrapRequestListenerWithMethodGuard(
+        (_request: unknown, result: ReturnType<typeof responseRecorder>) => {
+          calls += 1;
+          result.statusCode = 204;
+          result.end();
+        }
+      );
+      listener({ method, url }, response);
+      assert.equal(calls, 1, `${method} ${url}`);
+      assert.equal(response.statusCode, 204, `${method} ${url}`);
+      assert.equal(response.headers.has("allow"), false, `${method} ${url}`);
+    }
+  }
+  for (const url of ["/api/auth/status/extra", "/api/keys/qg-key/access/extra"]) {
+    assert.equal(
+      maybeHandleDisallowedMethod({ method: "QUERY", url }, responseRecorder()),
+      false,
+      `the finite rules must not capture unrelated descendants: ${url}`
+    );
+  }
 });

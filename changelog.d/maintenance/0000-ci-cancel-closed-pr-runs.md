@@ -1,0 +1,1 @@
+- **ci:** closing a same-repository PR now cleans up only runs whose PR, head, and run identities are revalidated, rejects ambiguous API metadata, and reports success only after GitHub confirms the authorized run reached a terminal state.

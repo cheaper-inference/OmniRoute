@@ -8,6 +8,7 @@ import http from "node:http";
 import net from "node:net";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { createTestProcessStopper } from "../_helpers/stopTestProcess.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-resilience-http-e2e-"));
 const DASHBOARD_PORT = await getFreePort();
@@ -207,6 +208,7 @@ function createServerProcess(dataDir: string, port: number) {
     stdio: ["ignore", "pipe", "pipe"],
   });
 
+  const stop = createTestProcessStopper(child);
   child.once("exit", (code, signal) => {
     exitInfo = { code, signal };
   });
@@ -223,6 +225,7 @@ function createServerProcess(dataDir: string, port: number) {
 
   return {
     child,
+    stop,
     stdoutLines,
     stderrLines,
     baseUrl: `http://127.0.0.1:${port}`,
@@ -276,19 +279,6 @@ async function waitForServer(
       ...logs.stderrLines.slice(-40),
     ].join("\n")
   );
-}
-
-async function stopProcess(child: ReturnType<typeof spawn>) {
-  if (child.killed) return;
-  child.kill("SIGTERM");
-  const exited = await Promise.race([
-    new Promise<boolean>((resolve) => child.once("exit", () => resolve(true))),
-    sleep(5_000).then(() => false),
-  ]);
-  if (!exited && !child.killed) {
-    child.kill("SIGKILL");
-    await new Promise<void>((resolve) => child.once("exit", () => resolve()));
-  }
 }
 
 async function seedCompatibleProvider(prefix: string, apiKey: string, baseUrl: string) {
@@ -440,6 +430,7 @@ const relay = createFakeOpenAiRelay();
 let app:
   | {
       child: ReturnType<typeof spawn>;
+      stop: () => Promise<void>;
       stdoutLines: string[];
       stderrLines: string[];
       baseUrl: string;
@@ -543,7 +534,7 @@ test.before(async () => {
 
 test.after(async () => {
   if (app) {
-    await stopProcess(app.child);
+    await app.stop();
   }
   await relay.stop();
   core.closeDbInstance();

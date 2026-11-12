@@ -1,71 +1,143 @@
-name: DAST smoke (PR)
-# PRs into main only since #11946. The job's "Build CLI bundle" step is a backend-only
-# `next build`; on the hosted 7 GB runner it fits main's tree (~5.5 min) but dies on
-# release/v3.8.51 (VM shutdown ~7 min in, before the server even starts), and because the
-# job is continue-on-error the result was a permanently red advisory check on every
-# release PR — noise, not signal. DAST coverage for release/** lives on the nightly rail
-# (nightly-schemathesis.yml, nightly-llm-security.yml); dispatch this workflow by hand
-# to smoke a release branch on demand.
+name: DAST smoke (verified CI build)
+# Same-run consumer only. CI owns the build, event and admission result.
+# Fork code runs on a hosted runner with read-only permissions and no repository secrets.
 on:
-  workflow_dispatch:
-  pull_request:
-    branches: ["main"]
-    # Runner-cost guard (#8084): the CLI-bundle build alone is 6-11min; a docs-only PR
-    # cannot change DAST behavior, so skip the whole workflow for pure docs/markdown
-    # changes. Any code path in the diff still runs the full smoke.
-    paths-ignore:
-      - "docs/**"
-      - "**/*.md"
+  workflow_call:
+    inputs:
+      artifact-id:
+        required: true
+        type: string
+      artifact-digest:
+        required: true
+        type: string
+      manifest-sha256:
+        required: true
+        type: string
+      archive-sha256:
+        required: true
+        type: string
+      node-version:
+        required: true
+        type: string
+      bundler:
+        required: true
+        type: string
+      producer-attempt:
+        required: true
+        type: string
+      ci-workflow-ref:
+        required: true
+        type: string
+      ci-workflow-sha:
+        required: true
+        type: string
 permissions:
   contents: read
-
-# Superseded runs on the same PR must not stack 25-minute advisory builds
-# (force-push storms were holding 2-3 runners each). Same group rule as quality.yml.
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 jobs:
   dast-smoke:
     runs-on: ubuntu-latest
-    # ADVISORY while this new gate matures (repo convention: advisory -> blocking).
-    # Flip to blocking (remove continue-on-error) once it's proven stable across a few PRs.
-    continue-on-error: true
-    # Build CLI bundle alone varies 6-11min on GitHub-hosted runners (3 consecutive
-    # timeouts observed on 2026-07-14 with the old 12min cap killing schemathesis
-    # mid-run) — 25min leaves real headroom for the actual DAST steps.
     timeout-minutes: 25
     env:
+      OMNIROUTE_SKIP_SYSTEM_TRUST: "1"
       JWT_SECRET: ci-build-secret-with-sufficient-length-for-validation
       API_KEY_SECRET: ci-api-key-secret-with-sufficient-length-aaaa
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          ref: ${{ github.sha }}
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: "24"
-          cache: npm
-      - uses: ./.github/actions/npm-ci-retry
-      - name: Build CLI bundle
+      - name: Validate producer identifiers
         env:
-          OMNIROUTE_BUILD_BACKEND_ONLY: "1"
-        run: npm run build:cli
-      - name: Start OmniRoute
-        env:
-          PORT: "20128"
-          INJECTION_GUARD_MODE: block
-          REQUIRE_API_KEY: "false"
+          BUILD_ARTIFACT_ID: ${{ inputs.artifact-id }}
+          BUILD_NODE_VERSION: ${{ inputs.node-version }}
+          BUILD_PRODUCER_ATTEMPT: ${{ inputs.producer-attempt }}
         run: |
-          node dist/server.js > server.log 2>&1 &
-          echo $! > server.pid
-          for _ in $(seq 1 30); do
-            if curl -sf http://localhost:20128/api/monitoring/health >/dev/null; then echo up; break; fi
-            sleep 2
-          done
+          [[ "$BUILD_ARTIFACT_ID" =~ ^[1-9][0-9]*$ ]]
+          [[ "$BUILD_NODE_VERSION" =~ ^24\.[0-9]+\.[0-9]+$ ]]
+          [[ "$BUILD_PRODUCER_ATTEMPT" =~ ^[1-9][0-9]*$ ]]
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ inputs.node-version }}
+      - uses: ./.github/actions/npm-ci-retry
+        with:
+          cache: false
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
-      - run: pip install schemathesis
+      - name: Verify ZIP extraction controls
+        run: python -m unittest discover -s tests/unit/build -p 'test_unpack_ci_build.py'
+      - name: Download exact CI build
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          artifact-ids: ${{ inputs.artifact-id }}
+          path: next-build-download
+          merge-multiple: true
+          skip-decompress: true
+          digest-mismatch: error
+      - name: Verify uploaded ZIP and extract only build members
+        env:
+          NEXT_BUILD_ARTIFACT_ID: ${{ inputs.artifact-id }}
+          NEXT_BUILD_ARTIFACT_DIGEST: ${{ inputs.artifact-digest }}
+        run: python scripts/ci/unpack-ci-build.py next-build-download next-build-artifact
+      - name: Verify CI build identity and bytes
+        env:
+          NEXT_BUILD_ARTIFACT_ID: ${{ inputs.artifact-id }}
+          NEXT_BUILD_ARTIFACT_DIGEST: ${{ inputs.artifact-digest }}
+          NEXT_BUILD_MANIFEST_SHA256: ${{ inputs.manifest-sha256 }}
+          NEXT_BUILD_ARCHIVE_SHA256: ${{ inputs.archive-sha256 }}
+          NEXT_BUILD_PRODUCER_ATTEMPT: ${{ inputs.producer-attempt }}
+          CI_WORKFLOW_REF: ${{ inputs.ci-workflow-ref }}
+          CI_WORKFLOW_SHA: ${{ inputs.ci-workflow-sha }}
+          OMNIROUTE_USE_TURBOPACK: ${{ inputs.bundler == 'webpack' && '0' || inputs.bundler == 'turbopack' && '1' || 'invalid' }}
+        run: |
+          node scripts/ci/next-build-provenance.mjs verify \
+            next-build-artifact/e2e-build.tar.gz \
+            next-build-artifact/next-build-provenance.json
+      - name: Assemble CLI from verified standalone
+        env:
+          OMNIROUTE_REQUIRE_PREBUILT_NEXT: "1"
+        run: |
+          tar -xzf next-build-artifact/e2e-build.tar.gz
+          npm run build:cli
+          test -f dist/server.js
+      - name: Start OmniRoute and require health
+        env:
+          DATA_DIR: ${{ runner.temp }}/omniroute-dast-${{ github.run_id }}-${{ github.run_attempt }}
+          PORT: "20128"
+          INJECTION_GUARD_MODE: block
+          REQUIRE_API_KEY: "true"
+          # Synthetic fixture for this isolated runner; never supplied to Schemathesis.
+          OMNIROUTE_API_KEY: ci-dast-promptfoo-local-fixture
+        run: |
+          mkdir -p "$DATA_DIR"
+          node dist/server.js > server.log 2>&1 &
+          pid=$!
+          echo "$pid" > server.pid
+          for _ in $(seq 1 30); do
+            if ! kill -0 "$pid" 2>/dev/null; then
+              echo "DAST server exited before readiness" >&2
+              exit 1
+            fi
+            if curl -sf http://localhost:20128/api/monitoring/health >/dev/null; then
+              echo "DAST server ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "DAST server failed readiness within 60 seconds" >&2
+          exit 1
+      - name: Install locked DAST Python tools
+        run: python -m pip install --disable-pip-version-check -r config/quality/requirements-dast.txt
+      - name: Verify scanner CLI contracts without requests
+        env:
+          PROMPTFOO_DISABLE_TELEMETRY: "1"
+          PROMPTFOO_DISABLE_UPDATE_CHECK: "1"
+        run: |
+          python -m unittest discover -s tests/unit/build -p 'test_dast_toolchain.py'
+          python -m unittest discover -s tests/unit/build -p 'test_dast_body_size_contract.py'
+          ./node_modules/.bin/promptfoo --version
+          ./node_modules/.bin/promptfoo eval -c promptfooconfig.yaml --no-cache --help > /dev/null
       - name: Schemathesis smoke (high-risk endpoints, blocking)
         run: |
           # /api/auth/oidc/* is a BROWSER redirect flow (302 to the IdP, 302 back to
@@ -75,24 +147,29 @@ jobs:
           # still right (operators need it); fuzzing it is not what this smoke is for.
           # /api/auth/login has brute-force rate limiting: repeated failed logins return 429,
           # which Schemathesis flags as rejection of schema-compliant requests.
-          schemathesis run docs/openapi.yaml --url http://localhost:20128 \
-            --include-path-regex '^/v1/(chat/completions|models)$|^/api/(auth|keys)' \
+          schemathesis --config-file config/quality/dast-smoke.toml run docs/openapi.yaml --url http://localhost:20128 \
+            --include-path-regex '^/api/v1/(chat/completions|models)$|^/api/(auth|keys)' \
             --exclude-path-regex '^/api/auth/(oidc/|login)' \
             --max-examples 8 --workers 4 --checks all --max-response-time 30 \
             --request-timeout 20 --suppress-health-check all --no-color
-      - name: Install promptfoo
-        run: npm install -g promptfoo@0.122.0
       - name: promptfoo injection-guard (blocking)
         env:
           OMNIROUTE_URL: http://localhost:20128
-          OMNIROUTE_API_KEY: not-needed-blocked-before-upstream
-        run: promptfoo eval -c promptfooconfig.yaml --no-cache
+          OMNIROUTE_API_KEY: ci-dast-promptfoo-local-fixture
+        run: ./node_modules/.bin/promptfoo eval -c promptfooconfig.yaml --no-cache
       - name: Stop server
         if: always()
-        run: kill "$(cat server.pid)" || true
+        run: |
+          if [ -f server.pid ]; then
+            pid=$(cat server.pid)
+            if kill -0 "$pid" 2>/dev/null; then kill "$pid"; fi
+          fi
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
-          name: dast-smoke-logs
-          path: server.log
+          name: dast-smoke-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            server.log
+            dast-build-receipt.json
+          if-no-files-found: error
           retention-days: 7

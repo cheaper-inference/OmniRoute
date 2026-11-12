@@ -444,146 +444,129 @@ An raba shi zuwa ƙananan kundin adireshi masu takamaiman manufa:
 
 ---
 
-## 4. `open-sse/` — Wurin aikin injin watsa bayanai
+## 4. `open-sse/` — Filin aikin injin yawo
 
-Wurin aikin npm na daban da ake wallafawa a matsayin `@omniroute/open-sse`. Yana da alhakin
-sarrafa buƙatu, masu aiwatarwa, masu fassara, ayyuka, mai canza tsari, da sabar MCP.
+Wani filin aikin npm ne na daban da ake wallafawa a matsayin `@omniroute/open-sse`. Yana kula da sarrafa buƙatu, masu aiwatarwa, masu fassara, ayyuka, mai sauyawa, da sabar MCP.
 
 ```
 open-sse/
-├── index.ts                Fitarwar jama'a
-├── package.json            Bayanin wurin aiki
+├── index.ts                Fitarwa na jama'a
+├── package.json            Bayanin filin aiki
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 Rijistar masu samar da sabis, bayanan kanun kai, asali, …
+├── config/                 Rijistocin masu samarwa, bayanan martabar kanun bayanai, shaida, …
 ├── handlers/               Masu sarrafa buƙatu (taɗi, embeddings, sauti, hoto, …)
-├── executors/              Rukunan masu aiwatarwa na masu samar da sabis 159 (azuzuwan masu aiwatarwa + mataimaka na kowane mai samarwa)
+├── executors/              Modulolin masu aiwatarwa na masu samarwa guda 162 (azuzuwan aiwatarwa + mataimaka na kowane mai samarwa)
 ├── translator/             Sauya tsari (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
-├── transformer/            Mai sauya rafin Responses API ↔ Chat Completions
-├── services/               Rukunan ayyuka sama da 80 (haɗe-haɗe, madadin, ƙididdigar amfani, asali, …)
-├── utils/                  Mataimakan watsa bayanai, abokin ciniki na TLS, AWS SigV4, fetch ta wakili, …
-└── mcp-server/             Sabar MCP (hanyoyin sufuri 3, iyakokin aiki 33, kayan aiki 110)
+├── transformer/            Mai sauya Responses API ↔ Chat Completions stream
+├── services/               Modulolin sabis sama da 80 (haɗe-haɗe, madadin, ƙididdiga, shaida, …)
+├── utils/                  Mataimakan yawo, abokin cinikin TLS, AWS SigV4, proxy fetch, …
+└── mcp-server/             Sabar MCP (hanyoyin sufuri 3, iyakoki 33, kayan aiki 110)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| Handler                 | Purpose                                                                                        |
-| ----------------------- | ---------------------------------------------------------------------------------------------- |
-| `chatCore.ts`           | Babban tsarin taɗi (ma'ajiyar wucin gadi, iyakar sauri, tura haɗe-haɗe, rarraba mai aiwatarwa) |
-| `responsesHandler.ts`   | Wurin shigar OpenAI Responses API                                                              |
-| `embeddings.ts`         | Embeddings                                                                                     |
-| `imageGeneration.ts`    | Samar da hoto                                                                                  |
-| `audioSpeech.ts`        | Mayar da rubutu zuwa magana                                                                    |
-| `audioTranscription.ts` | Mayar da magana zuwa rubutu                                                                    |
-| `videoGeneration.ts`    | Samar da bidiyo                                                                                |
-| `musicGeneration.ts`    | Samar da kiɗa                                                                                  |
-| `rerank.ts`             | Sake jera matsayi                                                                              |
-| `moderations.ts`        | Daidaitawa                                                                                     |
-| `search.ts`             | Binciken yanar gizo                                                                            |
-| `sseParser.ts`          | Mai tantance abubuwan SSE                                                                      |
-| `usageExtractor.ts`     | Ciro ƙididdigar tokens daga rafukan sama                                                       |
-| `responseSanitizer.ts`  | Cire hayaniyar da ta shafi takamaiman mai samar da sabis                                       |
-| `responseTranslator.ts` | Haɗa amsar mai samar da sabis da ɓangaren mai fassara                                          |
+| Mai sarrafawa           | Manufa                                                                                          |
+| ----------------------- | ----------------------------------------------------------------------------------------------- |
+| `chatCore.ts`           | Babban tsarin taɗi (ma'ajiyar wucin gadi, iyakar ƙima, tura haɗe-haɗe, aika zuwa mai aiwatarwa) |
+| `responsesHandler.ts`   | Mashigar OpenAI Responses API                                                                   |
+| `embeddings.ts`         | Embeddings                                                                                      |
+| `imageGeneration.ts`    | Samar da hoto                                                                                   |
+| `audioSpeech.ts`        | Rubutu-zuwa-magana                                                                              |
+| `audioTranscription.ts` | Magana-zuwa-rubutu                                                                              |
+| `videoGeneration.ts`    | Samar da bidiyo                                                                                 |
+| `musicGeneration.ts`    | Samar da kiɗa                                                                                   |
+| `rerank.ts`             | Sake jera matsayi                                                                               |
+| `moderations.ts`        | Daidaita abun ciki                                                                              |
+| `search.ts`             | Binciken yanar gizo                                                                             |
+| `sseParser.ts`          | Mai tantance aukuwar SSE                                                                        |
+| `usageExtractor.ts`     | Ciro ƙididdigar token daga rafukan tushe                                                        |
+| `responseSanitizer.ts`  | Cire gurɓatattun bayanai na musamman ga mai samarwa                                             |
+| `responseTranslator.ts` | Haɗin tsakanin martanin mai samarwa da matakin fassara                                          |
 
 ### 4.2 `open-sse/executors/`
 
-Rukunan masu aiwatarwa 159 na matakin farko (`*.ts` ban da `base.ts`, `index.ts` da gwaje-gwaje — ƙididdigar
-`npm run check:docs-counts` ce ke aunawa). Kowane ajin mai aiwatarwa yana faɗaɗa `BaseExecutor` (`base.ts`),
-kai tsaye ko ta `DefaultExecutor` ko wani mai aiwatarwa; sauran rukunan kuwa mataimaka ne na kowane mai samar da sabis
-(tsare-tsaren kayan aiki, adaftocin fetch/TTS, masu kula da bambance-bambance). Masu aiwatarwa sun haɗa da:
+162 babban matakin zartarwa modules (`*.ts` debe `base.ts`, `index.ts` da gwada — da ƙidaya `npm run check:docs-counts` matakan). Kowane aji na zartarwa yana ƙara `BaseExecutor` (`base.ts`), kai tsaye ko ta hanyar `DefaultExecutor` ko wani mai zartarwa; ragowar kayayyaki sune mataimakan mai bayarwa (tsarin tsara kayan aiki, adaftar fetch/TTS, masu sarrafa quirk). Masu zartar da hukuncin sun hada da:
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
-`chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
-`muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
-`pollinations`, `qoder`, `vertex`, `devin-desktop`, tare da `claudeIdentity.ts`
-(mataimakin asali na tarayya) da `index.ts` (rajista).
+`antigravity` `azure-openai` `blackbox-web` `chatgpt-web-codex` `cloudflare-ai` `cliproxyapi` `codex` `commandCode` `cursor` `default` `devin-cli` `muse-spark-web` `nlpcloud` `opencode` `perplexity-web` `petals` `pollinations` `qoder` `vertex` `devin-desktop` `claudeIdentity.ts` `index.ts`
 
-> Lura: masu samar da sabis da ba a lissafa a nan ba, `default.ts` ne ke yi musu hidima ta amfani da mai aiwatarwa na
-> OpenAI mai dacewa da tsarin gama-gari. Cikakken kundin masu samar da sabis (380) yana cikin
-> `src/shared/constants/providers.ts`.
+> Lura: `default.ts` ne ke ba da sabis ɗin da ba a jera su ba ta amfani da babban mai aiwatar da OpenAI mai jituwa. Cikakken kundin mai bada (masu samarwa 380) yana zaune a cikin `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
-Fassarar tsarin cibiya da rassansa (OpenAI ita ce cibiyar).
+Fassara ta tsarin cibiya-da-rassa (OpenAI ne cibiyar).
 
-- **Masu fassara buƙatu 9** (`translator/request/`):
+- **Masu fassara buƙatu guda 9** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
   `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
   `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
-- **Masu fassara amsa 9** (`translator/response/`):
+- **Masu fassara martani guda 9** (`translator/response/`):
   `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
-  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
-- **Mataimaka 9** (`translator/helpers/`):
+  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
+  `openai-to-claude`.
+- **Mataimaka guda 9** (`translator/helpers/`):
   `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
-  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, tare da
+  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, da
   gwaje-gwajen mataimaka.
 - **Mataimakan hoto** (`translator/image/sizeMapper.ts`).
-- A matakin farko: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
+- Babban mataki: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — Mai sauya Responses API ↔ Chat
-  Completions da aka gina bisa `TransformStream` (ana amfani da shi ta hanyar kama-duka ta hanyar `responses/`).
+- `responsesTransformer.ts` — Mai sauya Responses API ↔ Chat Completions mai amfani da `TransformStream`
+  (hanyar `responses/` mai kama duk buƙatun da ba su dace da wata hanya ba ce ke amfani da shi).
 
 ### 4.5 `open-sse/services/`
 
 Muhimman abubuwa (cikakken jeri yana ƙarƙashin `open-sse/services/`):
 
-| Damuwa                      | Fayiloli                                                                                                                                                                                                                                                 |
+| Abin damuwa                 | Fayiloli                                                                                                                                                                                                                                                 |
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Hanyar Combo                | `combo.ts` (dabaru 20), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                        |
+| Jagorantar Combo            | `combo.ts` (dabaru 20), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                        |
 | Injin Auto Combo            | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
 | Juriya                      | `accountFallback.ts` (lokacin jira + kullewa), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                     |
 | Ƙayyadaddun amfani          | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| Adanawa                     | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| Basirar hanyar sadarwa      | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| Sarrafa samfurin            | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Matsewa                     | `compression/` — cikakkiyar haɗa wayar injin matsewa                                                                                                                                                                                                     |
-| Alama + zaman               | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| Matsayi / bayyanannen tsari | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| Adana bayanai na wucin gadi | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| Basirar jagorantar buƙatu   | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| Sarrafa samfuri             | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| Matsawa                     | `compression/` — cikakken haɗin injin matsawa                                                                                                                                                                                                            |
+| Token + zaman               | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| Mataki / manifest           | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / hanyar sadarwa         | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| Rukunai                     | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| Rukunin sarrafawa           | `batchProcessor.ts`                                                                                                                                                                                                                                      |
 | Amfani                      | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **Kayan aiki 110 na musamman** da aka haɗa a cikin `server.ts` (45 na asali a `schemas/tools.ts` +
-  ƙwaƙwalwa, ƙwarewa, ƙwarewar GitHub, tafkin, tsarin lada, plugin, Notion, Obsidian,
-  tarin bayanan gida da na’urorin matsewa — an ƙirga haɗin su ta amfani da `countUniqueMcpTools`).
+- **Kayan aiki na musamman 110** da aka haɗa a cikin `server.ts` (na asali 45 a cikin `schemas/tools.ts` +
+  ƙwaƙwalwa, ƙwarewa, GitHub-skills, pool, gamification, plugin, Notion, Obsidian,
+  local-corpus da manhajojin matsawa — haɗin jimillar da `countUniqueMcpTools` ya ƙirga).
 - **Hanyoyin sufuri 3**: stdio, HTTP Streamable, SSE.
-- **Fannoni 33** da ake tilastawa a lokacin aiki — jerin asali yana cikin `src/shared/constants/mcpScopes.ts`, cikakken saitin kuwa shi ne haɗin fannoni da kowane tsarin kayan aiki ya ayyana.
-- Teburin binciken aiki: `mcp_tool_audit` (wanda `audit.ts` ke cike).
+- **Scopes 33** da ake tilasta wa yayin aiki — jerin asali yana cikin `src/shared/constants/mcpScopes.ts`, cikakken jerin kuwa haɗin scopes ne da kowace manhajar kayan aiki ta ayyana.
+- Teburin binciken bin diddigi: `mcp_tool_audit` (wanda `audit.ts` ke cike wa).
 - Fayiloli: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
-  tare da gwaje-gwaje a ƙarƙashin `__tests__/`.
+  tare da gwaje-gwajen da ke ƙarƙashin `__tests__/`.
 - Duba [MCP-SERVER.md](../frameworks/MCP-SERVER.md) don cikakken kundin kayan aiki.
 
 ### 4.7 `open-sse/config/`
 
-Rajistar masu samarwa (`providerRegistry.ts`, `providerModels.ts`,
-`providerHeaderProfiles.ts`), rajistar samfura bisa tsarin fayil (`audioRegistry.ts`,
+Rajistocin masu samarwa (`providerRegistry.ts`, `providerModels.ts`,
+`providerHeaderProfiles.ts`), rajistocin samfuri na kowane tsari (`audioRegistry.ts`,
 `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
 `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
 mataimakan tantance ainihi (`codexIdentity.ts`, `codexInstructions.ts`,
 `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
 `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
-mataimakan bayanan shaidar shiga (`credentialLoader.ts`, `codexClient.ts`), da masu
-daidaita tsarin gajimare (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
+mataimakan bayanan shaidar shiga (`credentialLoader.ts`, `codexClient.ts`), da
+adaftocin cloud (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
 `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
 `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 
-Abubuwan asali na streaming da mataimakan masu samarwa: `stream.ts`, `streamHandler.ts`,
-`streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
-`sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
-`networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
-`cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`,
-`comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`,
-`thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`,
-`progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`,
-`ollamaTransform.ts`.
+Hotuna masu gudana da masu taimakawa masu bada sabis: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts` `ollamaTransform.ts` `sseHeartbeat.ts` `sleep.ts` `proxyFetch.ts` `requestLogger.ts` `tlsClient.ts` `cursorVersionDetector.ts` `proxyDispatcher.ts` `networkProxy.ts` `cursorAgentProtobuf.ts` `awsSigV4.ts` `cacheControlPolicy.ts` `cursorChecksum.ts` `thinkTagParser.ts` `comfyuiClient.ts` `progressTracker.ts` `kieTask.ts` `cors.ts` `bypassHandler.ts` `error.ts` `aiSdkCompat.ts` `logger.ts` `urlSanitize.ts` `usageTracking.ts`
 
 ---
 
@@ -781,7 +764,7 @@ Duba [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) da kuma sashen da aka keɓe a 
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Sanya scope(s) da suka dace a `src/shared/constants/mcpScopes.ts`.
 3. Yi rajistar kayan aikin a `open-sse/mcp-server/server.ts`.
-4. Ƙara gwaje-gwaje a ƙarƙashin `open-sse/mcp-server/__tests__/`.
+4. Ƙara gwaje-gwaje a ƙarƙashin `tests/unit/`.
 5. Sabunta [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Ƙara sabuwar ƙwarewar A2A
@@ -799,7 +782,7 @@ Duba [A2A-SERVER.md § Ƙara Sabuwar Ƙwarewa](../frameworks/A2A-SERVER.md). Ƙw
 - **Sanya suna**: files su kasance `camelCase` ko `kebab-case`, components su kasance `PascalCase`,
   constants su kasance `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` a ko'ina;
-  `no-explicit-any` = `warn` a `open-sse/` da `tests/`, error a sauran wurare.
+  `no-explicit-any` = `error` a `open-sse/**/*.ts` da `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (tsarin legacy). Fi son bayyanannun types maimakon
   inference a iyakokin tsakanin modules.
 - **Database**: kada a taɓa rubuta raw SQL a routes ko handlers — koyaushe a bi ta
@@ -829,8 +812,7 @@ Duba [A2A-SERVER.md § Ƙara Sabuwar Ƙwarewa](../frameworks/A2A-SERVER.md). Ƙw
   `a2a`, `memory`, `skills`.
 - **Branches**: prefixes `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Kada a taɓa yin commit kai tsaye zuwa `main`.
-- **Husky**: pre-commit yana gudanar da `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pre-push yana gudanar da `check:any-budget:t11` + `check:tracked-artifacts` (fast gates; baya haɗa `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

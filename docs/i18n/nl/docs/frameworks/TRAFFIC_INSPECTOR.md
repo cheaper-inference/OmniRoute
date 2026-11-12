@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Mechanisme:** Gebruikt API's van het besturingssysteem om al het HTTP/HTTPS-verkeer via de HTTP_PROXY-listener om te leiden:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` en de HTTP/HTTPS-instellingen voor host/poort
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Bereik:** Elke toepassing op de machine die de systeemproxy-instellingen respecteert
   **Opmerking:** `source` = `"system-proxy"`
 
 **Veiligheidsmechanismen:**
 
-- Timer voor automatisch uitschakelen (standaard 30 min., configureerbaar via `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- De vorige status van de systeemproxy wordt in de database opgeslagen en bij terugdraaien hersteld
-- Het dashboard toont de melding "Systeemproxy terugdraaien" als de gebruiker weg navigeert terwijl deze actief is
-- De UI toont de badge `⚠ Geavanceerd` + een expliciet bevestigingsvakje
+- Het toepassen van de proxy plant een proceslokale timer voor herstel naar beste vermogen (standaard 30 min, instelbaar via `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). De timer blijft niet bestaan wanneer het serverproces stopt.
+- De vorige proxystatus blijft in het procesgeheugen; deze opslag voor de vastlegstatus bewaart die niet in een database. Herstel zet de opgeslagen macOS/GNOME-instellingen terug; op Windows wordt de WinHTTP-proxy gereset in plaats van de vorige configuratie hersteld.
+- Zolang de proxy als toegepast wordt gemeld, verstuurt het ontladen van de pagina naar beste vermogen een keepalive-herstelverzoek en vraagt het om een ingebouwde bevestiging waarvan de browser de tekst bepaalt. Ook het ontkoppelen van de inspector tijdens SPA-navigatie probeert herstel, zonder die browsermelding.
+- De vastlegwerkbalk toont de vertaalde bediening `System-wide` met een waarschuwingspictogram. Een klik verandert momenteel alleen de lokale UI-status; er verschijnt geen bevestigingsvakje en de systeemproxy wordt niet toegepast of hersteld.
 
 ### Modus 5 — Transparante TPROXY-ontsleuteling (Linux, root, opt-in)
 
@@ -113,13 +113,13 @@ Dit is een omvangrijk subsysteem met een eigen, specifieke beheerdershandleiding
 
 ### Vergelijking van vastlegmodi
 
-| Modus               | Configuratie                      |            Sudo?             | Bereik                           | Opmerkingen                                                                                                                              |
-| ------------------- | --------------------------------- | :--------------------------: | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge      | Automatisch                       | Eenmalig (certificaat+hosts) | 9 IDE-agents                     | Standaard ingeschakeld                                                                                                                   |
-| 2. Custom Hosts     | Invoer per host                   |      Ja (hosts-bestand)      | Elke app die die host gebruikt   | Opgeslagen in DB                                                                                                                         |
-| 3. HTTP_PROXY       | `export HTTPS_PROXY=...`          |             Nee              | Apps die de omgeving respecteren | Poort 8080; HTTPS wordt via CONNECT getunneld (alleen metadata, nooit ontsleuteld)                                                       |
-| 4. Systeembreed     | Schakelaar + bevestiging          |              Ja              | Alle apps op de machine          | Automatisch uitschakelen na 30 min                                                                                                       |
-| 5. TPROXY-decryptie | Schakelaar (Linux + native addon) |  Ja (root + CA-installatie)  | Elke host op de doelpoort        | Ontsleutelt willekeurige hosts; standaard uitgeschakeld — zie `docs/security/MITM-TPROXY-DECRYPT.md` (git; niet gecompileerd in `/docs`) |
+| Modus               | Configuratie                                                   |            Sudo?             | Bereik                           | Opmerkingen                                                                                                                              |
+| ------------------- | -------------------------------------------------------------- | :--------------------------: | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge      | Automatisch                                                    | Eenmalig (certificaat+hosts) | 9 IDE-agents                     | Standaard ingeschakeld                                                                                                                   |
+| 2. Custom Hosts     | Invoer per host                                                |      Ja (hosts-bestand)      | Elke app die die host gebruikt   | Opgeslagen in DB                                                                                                                         |
+| 3. HTTP_PROXY       | `export HTTPS_PROXY=...`                                       |             Nee              | Apps die de omgeving respecteren | Poort 8080; HTTPS wordt via CONNECT getunneld (alleen metadata, nooit ontsleuteld)                                                       |
+| 4. Systeembreed     | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |              Ja              | Alle apps op de machine          | Timer voor herstel naar beste vermogen (standaard 30 min)                                                                                |
+| 5. TPROXY-decryptie | Schakelaar (Linux + native addon)                              |  Ja (root + CA-installatie)  | Elke host op de doelpoort        | Ontsleutelt willekeurige hosts; standaard uitgeschakeld — zie `docs/security/MITM-TPROXY-DECRYPT.md` (git; niet gecompileerd in `/docs`) |
 
 ---
 
@@ -317,7 +317,7 @@ volgt later).
 ### 5.1 Een sessie opnemen
 
 1. Klik op **"● Sessie opnemen"** in de werkbalk → voer een naam in (optioneel)
-2. De live-uitvoer gaat normaal door; een rood pulserende indicator toont `◉ REC · <naam> · 00:42 · 23 verzoeken`
+2. De liveweergave gaat normaal verder; de opnamebalk toont een pulserende rode stip, de verstreken tijd, de sessienaam indien beschikbaar en een vertaalde Stop-bediening.
 3. Klik op **"⏹ Stoppen"** → de sessiemomentopname wordt opgeslagen in `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Een opgenomen sessie bekijken
@@ -325,7 +325,7 @@ volgt later).
 De vervolgkeuzelijst **Sessies** in de werkbalk bevat de opgeslagen sessies. Wanneer u er een selecteert:
 
 - Wordt de momentopname van de sessie geladen (bevroren status)
-- Wordt een banner weergegeven: `Opgenomen sessie "<naam>" bekijken — [Terug naar live]`
+- Een banner toont een vertaald label voor de opgenomen sessie en de sessienaam (of een vertaalde terugvaltekst voor een sessie zonder titel), naast een vertaalde knop Terug naar live.
 - Wordt het tabblad Statistieken beschikbaar met aggregaties van Recharts
 
 ### 5.3 Exportindelingen
@@ -349,7 +349,7 @@ Traffic Inspector toont **al het onderschepte HTTPS-verkeer**, inclusief autoris
 | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**                  | Alle routes en het WebSocket-endpoint zijn uitsluitend toegankelijk via loopback (afgedwongen in `routeGuard.ts` vóór authenticatie)                                                                     |
 | **Maskering van geheimen**      | De lineaire `maskSecret()`-scanner maskeert RFC 6750 Bearer-referenties, providerspecifieke sleutels en lange ondoorzichtige tokens vóór `TrafficBuffer.push()`                                          |
-| **Limiet voor bodygrootte**     | Body's > `INSPECTOR_MAX_BODY_KB` (standaard 1024 KB) worden afgekapt met de melding `"(afgekapt om prestatieredenen)"`                                                                                   |
+| **Limiet voor bodygrootte**     | Body's > `INSPECTOR_MAX_BODY_KB` (standaard 1024 KB) worden afgekapt met de melding `"(truncated for performance)"`                                                                                      |
 | **Headeropschoning**            | Namen worden omgezet naar kleine letters; framing-, hop-by-hop- en proxy-auth-headers worden verwijderd; cookies worden volledig gemaskeerd; waarden van referenties worden verwerkt door `maskSecret()` |
 | **CSP**                         | Strikt Content Security Policy-beleid op Traffic Inspector-pagina's om XSS via geïnjecteerde responsebody's te voorkomen                                                                                 |
 | **Standaard geen persistentie** | De `TrafficBuffer` bevindt zich in het geheugen en gaat verloren wanneer de server opnieuw wordt gestart. Sessies worden alleen opgeslagen wanneer ze expliciet worden opgenomen                         |
@@ -417,7 +417,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-Het dashboard biedt bij de volgende keer laden ook de optie "Systeemproxy terugzetten" als het detecteert dat de databasestatus aangeeft dat de proxy actief was.
+De opgeslagen proxystatus bestaat alleen in het serverproces. Na een crash of herstart kan de huidige opslag voor de vastlegstatus die momentopname niet uit een database herstellen; gebruik de bovenstaande herstelopdrachten voor het platform als handmatig herstel nodig is.
 
 ### Buffer vol
 

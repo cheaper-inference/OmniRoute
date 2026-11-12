@@ -4,85 +4,82 @@
 
 ---
 
-# OmniRoute arhitektura
-
 🌐 **Languages:** 🇺🇸 [English](../../../../architecture/ARCHITECTURE.md) · 🇪🇹 [am](../../../am/docs/architecture/ARCHITECTURE.md) · 🇸🇦 [ar](../../../ar/docs/architecture/ARCHITECTURE.md) · 🇦🇿 [az](../../../az/docs/architecture/ARCHITECTURE.md) · 🇧🇬 [bg](../../../bg/docs/architecture/ARCHITECTURE.md) · 🇧🇩 [bn](../../../bn/docs/architecture/ARCHITECTURE.md) · 🇧🇦 [bs](../../../bs/docs/architecture/ARCHITECTURE.md) · 🇨🇿 [cs](../../../cs/docs/architecture/ARCHITECTURE.md) · 🇩🇰 [da](../../../da/docs/architecture/ARCHITECTURE.md) · 🇩🇪 [de](../../../de/docs/architecture/ARCHITECTURE.md) · 🇬🇷 [el](../../../el/docs/architecture/ARCHITECTURE.md) · 🇪🇸 [es](../../../es/docs/architecture/ARCHITECTURE.md) · 🇪🇪 [et](../../../et/docs/architecture/ARCHITECTURE.md) · 🇮🇷 [fa](../../../fa/docs/architecture/ARCHITECTURE.md) · 🇫🇮 [fi](../../../fi/docs/architecture/ARCHITECTURE.md) · 🇫🇷 [fr](../../../fr/docs/architecture/ARCHITECTURE.md) · 🇮🇪 [ga](../../../ga/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [gu](../../../gu/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [ha](../../../ha/docs/architecture/ARCHITECTURE.md) · 🇮🇱 [he](../../../he/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [hi](../../../hi/docs/architecture/ARCHITECTURE.md) · 🇭🇺 [hu](../../../hu/docs/architecture/ARCHITECTURE.md) · 🇦🇲 [hy](../../../hy/docs/architecture/ARCHITECTURE.md) · 🇮🇩 [id](../../../id/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [ig](../../../ig/docs/architecture/ARCHITECTURE.md) · 🇮🇹 [it](../../../it/docs/architecture/ARCHITECTURE.md) · 🇯🇵 [ja](../../../ja/docs/architecture/ARCHITECTURE.md) · 🇬🇪 [ka](../../../ka/docs/architecture/ARCHITECTURE.md) · 🇰🇭 [km](../../../km/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [kn](../../../kn/docs/architecture/ARCHITECTURE.md) · 🇰🇷 [ko](../../../ko/docs/architecture/ARCHITECTURE.md) · 🇱🇹 [lt](../../../lt/docs/architecture/ARCHITECTURE.md) · 🇱🇻 [lv](../../../lv/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [ml](../../../ml/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [mr](../../../mr/docs/architecture/ARCHITECTURE.md) · 🇲🇾 [ms](../../../ms/docs/architecture/ARCHITECTURE.md) · 🇲🇹 [mt](../../../mt/docs/architecture/ARCHITECTURE.md) · 🇲🇲 [my](../../../my/docs/architecture/ARCHITECTURE.md) · 🇳🇵 [ne](../../../ne/docs/architecture/ARCHITECTURE.md) · 🇳🇱 [nl](../../../nl/docs/architecture/ARCHITECTURE.md) · 🇳🇴 [no](../../../no/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [or](../../../or/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [pa](../../../pa/docs/architecture/ARCHITECTURE.md) · 🇵🇭 [phi](../../../phi/docs/architecture/ARCHITECTURE.md) · 🇵🇱 [pl](../../../pl/docs/architecture/ARCHITECTURE.md) · 🇵🇹 [pt](../../../pt/docs/architecture/ARCHITECTURE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/ARCHITECTURE.md) · 🇷🇴 [ro](../../../ro/docs/architecture/ARCHITECTURE.md) · 🇷🇺 [ru](../../../ru/docs/architecture/ARCHITECTURE.md) · 🇱🇰 [si](../../../si/docs/architecture/ARCHITECTURE.md) · 🇸🇰 [sk](../../../sk/docs/architecture/ARCHITECTURE.md) · 🇸🇮 [sl](../../../sl/docs/architecture/ARCHITECTURE.md) · 🇷🇸 [sr](../../../sr/docs/architecture/ARCHITECTURE.md) · 🇸🇪 [sv](../../../sv/docs/architecture/ARCHITECTURE.md) · 🇰🇪 [sw](../../../sw/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [ta](../../../ta/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [te](../../../te/docs/architecture/ARCHITECTURE.md) · 🇹🇭 [th](../../../th/docs/architecture/ARCHITECTURE.md) · 🇹🇷 [tr](../../../tr/docs/architecture/ARCHITECTURE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/architecture/ARCHITECTURE.md) · 🇵🇰 [ur](../../../ur/docs/architecture/ARCHITECTURE.md) · 🇺🇿 [uz](../../../uz/docs/architecture/ARCHITECTURE.md) · 🇻🇳 [vi](../../../vi/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [yo](../../../yo/docs/architecture/ARCHITECTURE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/ARCHITECTURE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/ARCHITECTURE.md)
 
 _Posljednje ažurirano: 2026-06-28_
 
 ## Izvršni sažetak
 
-OmniRoute je lokalni pristupnik za usmjeravanje umjetne inteligencije i nadzorna ploča izgrađena na platformi Next.js.
-Pruža jednu krajnju točku kompatibilnu s OpenAI-jem (`/v1/*`) i usmjerava promet kroz više uzvodnih pružatelja uz prevođenje, pričuvni mehanizam, osvježavanje tokena i praćenje upotrebe.
+OmniRoute je lokalni AI pristupnik za usmjeravanje i nadzorna ploča izgrađena na Next.js. Omogućuje jednu OpenAI-kompatibilnu krajnju točku (`/v1/*`) i usmjerava promet preko višestrukih uzvodnih pružatelja usluga s prijevodom, zamjenom, osvježavanjem tokena i praćenjem upotrebe.
 
-Glavne mogućnosti:
+Osnovne mogućnosti:
 
-- API sučelje kompatibilno s OpenAI-jem za CLI/alate (380 pružatelja, 159 modula izvršitelja)
-- Prevođenje zahtjeva/odgovora između formata pružatelja
-- Pričuvni mehanizam kombinacije modela (slijed više modela)
-- Strukturirani koraci kombinacije (`provider + model + connection`) s izvođenjem redoslijeda tijekom rada putem `compositeTiers`
-- Pričuvni mehanizam na razini računa (više računa po pružatelju)
-- Predprovjera kvote i odabir računa P2C-a svjestan kvote u glavnom tijeku razgovora
-- Upravljanje vezama pružatelja putem OAutha i API ključa (27 OAuth modula pružatelja)
-- Generiranje ugrađivanja putem `/v1/embeddings` (18 pružatelja)
-- Generiranje slika putem `/v1/images/generations` (više od 10 pružatelja, više od 20 modela)
-- Transkripcija zvuka putem `/v1/audio/transcriptions` (18 pružatelja)
-- Pretvaranje teksta u govor putem `/v1/audio/speech` (24 ugrađena pružatelja)
-- Generiranje videozapisa putem `/v1/videos/generations` (ComfyUI + SD WebUI)
+- OpenAI-kompatibilna API površina za CLI/tools (380 pružatelja usluga, 162 izvršna modula)
+- Request/response prijevod preko formata pružatelja usluga
+- Rezervni kombinirani model (slijed više modela)
+- Strukturirani kombinirani koraci (`provider + model + connection`) s redoslijedom vremena izvođenja prema `compositeTiers`
+- Zamjena na razini računa (više računa po davatelju)
+- Odabir P2C računa prije provjere i kvote u glavnom putu za chat
+- OAuth + API-ključ upravljanja vezom pružatelja (27 OAuth modula pružatelja)
+- Generiranje ugradnje putem `/v1/embeddings` (18 pružatelja)
+- Generiranje slike putem `/v1/images/generations` (10 + pružatelja usluga, 20 + modela)
+- Prijepis zvuka putem `/v1/audio/transcriptions` (18 pružatelja)
+- Pretvorba teksta u govor putem `/v1/audio/speech` (24 ugrađena pružatelja)
+- Video generiranje putem `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Generiranje glazbe putem `/v1/music/generations` (ComfyUI)
 - Pretraživanje weba putem `/v1/search` (20 pružatelja)
-- Moderiranje putem `/v1/moderations`
+- Moderacije putem `/v1/moderations`
 - Ponovno rangiranje putem `/v1/rerank`
-- Raščlanjivanje oznaka razmišljanja (`<think>...</think>`) za modele zaključivanja
-- Sanitizacija odgovora za strogu kompatibilnost s OpenAI SDK-om
-- Normalizacija uloga (developer→system, system→user) za kompatibilnost između pružatelja
-- Pretvaranje strukturiranog izlaza (json_schema → Gemini responseSchema)
-- Lokalna trajna pohrana pružatelja, ključeva, aliasa, kombinacija, postavki i cijena (122 modula baze podataka)
-- Praćenje upotrebe/troška i zapisivanje zahtjeva
-- Neobavezna sinkronizacija s oblakom za sinkronizaciju između uređaja/stanja
-- Popis dopuštenih/blokiranih IP adresa za kontrolu pristupa API-ju
-- Upravljanje proračunom razmišljanja (prosljeđivanje/automatski/prilagođeni/prilagodljivi)
-- Umetanje globalnog sistemskog upita
-- Praćenje sesija i izrada otiska
-- Napredno ograničavanje brzine po računu s profilima specifičnima za pružatelja
-- Obrazac prekidača strujnog kruga za otpornost pružatelja
-- Zaštita od istodobnog naleta zahtjeva uz zaključavanje mutexom
-- Predmemorija deduplikacije zahtjeva na temelju potpisa
-- Domenska razina: pravila troškova, pravila pričuvnog mehanizma, pravila zaključavanja
-- Context Relay: sažeci za predaju sesije radi kontinuiteta pri rotaciji računa
-- Trajna pohrana stanja domene (SQLite predmemorija s izravnim zapisivanjem za pričuvne mehanizme, proračune, zaključavanja i prekidače strujnog kruga)
-- Mehanizam pravila za centraliziranu procjenu zahtjeva (zaključavanje → proračun → pričuvni mehanizam)
-- Telemetrija zahtjeva s agregacijom latencije p50/p95/p99
-- Telemetrija cilja kombinacije i povijesno stanje cilja kombinacije putem `combo_execution_key` / `combo_step_id`
-- ID korelacije (X-Request-Id) za praćenje od početka do kraja
-- Zapisivanje revizije usklađenosti s mogućnošću isključivanja po API ključu
-- Okvir za evaluaciju radi osiguranja kvalitete LLM-a
-- Nadzorna ploča stanja s prikazom statusa prekidača strujnog kruga pružatelja u stvarnom vremenu
-- MCP Server (110 alata) s 3 transporta (stdio/SSE/Streamable HTTP)
-- A2A Server (JSON-RPC 2.0 + SSE) s vještinama i životnim ciklusom zadataka
-- Sustav memorije (izdvajanje, umetanje, dohvaćanje, sažimanje)
+- Raščlanjivanje oznake razmišljanja (`<think>...</think>`) za modele razmišljanja
+- Response sanitization za strogu OpenAI SDK kompatibilnost
+- Normalizacija uloga (programer → sustav, sustav → korisnik) za kompatibilnost između pružatelja usluga
+- Pretvorba strukturiranog izlaza (json_schema → Gemini responseSchema)
+- Lokalna postojanost za pružatelje, ključeve, pseudonime, kombinacije, postavke, cijene (122 DB modula)
+- Usage/cost praćenje i bilježenje zahtjeva
+- Dodatna sinkronizacija u oblaku za multi-device/state sinkronizaciju
+- IP allowlist/blocklist za API kontrolu pristupa
+- Razmišljanje o upravljanju proračunom (passthrough/auto/custom/adaptive)
+- Brzo ubrizgavanje globalnog sustava
+- Praćenje sesije i otisak prsta
+- Poboljšano ograničenje stope po računu s profilima specifičnim za pružatelja usluga
+- Uzorak prekidača za otpornost pružatelja usluga
+- Zaštita stada od grmljavine s mutex zaključavanjem
+- Predmemorija deduplikacije zahtjeva temeljena na potpisu
+- Sloj domene: pravila troškova, rezervna politika, politika zaključavanja
+- Context Relay: sažeci prijenosa sesije za kontinuitet rotacije računa
+- Postojanost stanja domene (SQLite predmemorija za upisivanje za rezerve, proračune, zaključavanja, prekidače strujnog kruga)
+- Mehanizam pravila za centraliziranu procjenu zahtjeva (zaključavanje → proračuna → rezervni)
+- Zatražite telemetriju sa p50/p95/p99 agregacijom latencije
+- Telemetrija kombiniranog cilja i povijesno zdravlje kombiniranog cilja putem `combo_execution_key` / `combo_step_id`
+- Korelacija ID (X-Request-Id) za praćenje od kraja do kraja
+- Zapisivanje revizije usklađenosti s isključivanjem po API ključu
+- Eval okvir za LLM osiguranje kvalitete
+- Zdravstvena nadzorna ploča sa statusom prekidača dobavljača u stvarnom vremenu
+- MCP poslužitelj (110 alata) s 3 prijenosa (stdio/SSE/Streamable HTTP)
+- A2A poslužitelj (JSON-RPC 2.0 + SSE) s vještinama i životnim ciklusom zadataka
+- Memorijski sustav (ekstrakcija, ubrizgavanje, dohvaćanje, sažimanje)
 - Sustav vještina (registar, izvršitelj, sandbox, ugrađene vještine)
-- MITM proxy s upravljanjem certifikatima i rukovanjem DNS-om
-- Middleware zaštite od ubrizgavanja upita
-- Cjevovod kompresije upita s alatima Caveman, RTK, složenim cjevovodima, kombinacijama kompresije, jezičnim paketima i analitikom
-- Registar ACP-a (Agent Communication Protocol)
-- Modularni OAuth pružatelji (22 pojedinačna modula u `src/lib/oauth/providers/`)
-- Skripte za deinstalaciju/potpunu deinstalaciju
-- Radnja popravka OAuth okruženja
-- WebSocket most za WS klijente kompatibilne s OpenAI-jem (`/v1/ws`)
-- Upravljanje tokenima sinkronizacije (izdavanje/opoziv, preuzimanje konfiguracijskog paketa s verzioniranjem putem ETag-a)
-- Prvoklasna unaprijed postavljena postavka pružatelja GLM Thinking (`glmt`)
-- Hibridno brojanje tokena (pružateljeva strana `/messages/count_tokens` s pričuvnim procjenjivanjem)
-- Automatsko početno punjenje aliasa modela (više od 30 normalizacija dijalekata između proxyja pri pokretanju)
-- Sigurno dohvaćanje izlaznih resursa sa SSRF zaštitom, blokiranjem privatnih URL-ova i podesivim ponovnim pokušajem
-- Ponovni pokušaji razgovora svjesni razdoblja hlađenja s podesivim `requestRetry` i `maxRetryIntervalSec`
-- Provjera okruženja tijekom rada pomoću Zoda pri pokretanju
-- Revizija usklađenosti v2 s paginacijom, CRUD događajima pružatelja i zapisivanjem provjere blokirane SSRF aktivnosti
+- MITM proxy s upravljanjem certifikatima i rukovanjem DNS
+- Srednji softver za brzu zaštitu od ubrizgavanja
+- Brzi cjevovod za kompresiju s Caveman-om, RTK, naslaganim cjevovodima, kombinacijama kompresije, jezičnim paketima i analitikom
+- ACP (Agent Communication Protocol) registar
+- Modularni pružatelji OAuth (22 pojedinačna modula pod `src/lib/oauth/providers/`)
+- Uninstall/full-uninstall skripte
+- OAuth akcija popravka okoliša
+- WebSocket most za OpenAI-kompatibilne WS klijente (`/v1/ws`)
+- Upravljanje tokenom sinkronizacije (issue/revoke, preuzimanje konfiguracijskog paketa s verzijom ETaga)
+- GLM Thinking (`glmt`) unaprijed postavljena prvoklasna usluga
+- Hibridno brojanje tokena ( `/messages/count_tokens` na strani pružatelja s rezervnom procjenom)
+- Automatsko postavljanje pseudonima modela (30 normalizacija dijalekta + unakrsnog proxyja pri pokretanju)
+- Sigurno odlazno dohvaćanje sa SSRF zaštitnikom, privatnim URL blokiranjem i podesivim ponovnim pokušajem
+- Ponovni pokušaji čavrljanja s obzirom na hlađenje s podesivim `requestRetry` i `maxRetryIntervalSec`
+- Validacija runtime okruženja sa Zod pri pokretanju
+- Revizija usklađenosti v2 s paginacijom, CRUD događajima davatelja i SSRF-blokiranim bilježenjem valjanosti
 
-Primarni model izvođenja:
+Primarni model vremena izvođenja:
 
-- Rute aplikacije Next.js u `src/app/api/*` implementiraju API-je nadzorne ploče i API-je kompatibilnosti
-- Zajednička jezgra SSE-a/usmjeravanja u `src/sse/*` + `open-sse/*` upravlja izvršavanjem pružatelja, prevođenjem, strujanjem, pričuvnim mehanizmom i upotrebom
+- Rute aplikacije Next.js pod `src/app/api/*` implementiraju APIs nadzorne ploče i APIs kompatibilnosti
+- Zajednička SSE/routing jezgra u `src/sse/*` + `open-sse/*` upravlja izvršavanjem pružatelja usluga, prijevodom, strujanjem, povratnim informacijama i upotrebom
 
 ## Referentni dijagrami
 
@@ -408,19 +405,19 @@ Za izradu skupa pravila i podešavanje praga, pogledajte [`docs/security/GUARDRA
 
 `src/domain/` imenski prostor centralizira odluke o politici tako da rukovatelji rutama ne moraju sami sastavljati lockout/budget/fallback logiku.
 
-- Motor pravila: `src/domain/policyEngine.ts` — jedna ulazna točka za procjenu prije izvršenja (zaključavanje → proračun → rezervno naručivanje)
+- Motor pravila: `src/domain/policyEngine.ts` — jedinstvena ulazna točka za procjenu prije izvršenja (zaključavanje → proračuna → rezervno naručivanje)
 - Pravila troškova: `src/domain/costRules.ts`
 - Zamjenska politika: `src/domain/fallbackPolicy.ts`
 - Politika zaključavanja: `src/domain/lockoutPolicy.ts`
 - Usmjeravanje temeljeno na oznakama: `src/domain/tagRouter.ts`
 - Kombinirani razrješivač: `src/domain/comboResolver.ts` — razrješava kombinirana imena, auto/\* prefikse i ciljeve modela zamjenskih znakova u konkretne planove izvršenja
-- Connection/model pravilo spajanje: `src/domain/connectionModelRules.ts`
+- Connection/model spajač pravila: `src/domain/connectionModelRules.ts`
 - Snimke dostupnosti modela: `src/domain/modelAvailability.ts`
 - Praćenje isteka pružatelja: `src/domain/providerExpiration.ts`
-- Kvota predmemorije: `src/domain/quotaCache.ts`
+- Predmemorija kvota: `src/domain/quotaCache.ts`
 - Stanje razgradnje: `src/domain/degradation.ts`
 - Revizija konfiguracije: `src/domain/configAudit.ts`
-- graditelj metapodataka odgovora OmniRoute : `src/domain/omnirouteResponseMeta.ts`
+- Graditelj metapodataka odgovora OmniRoute : `src/domain/omnirouteResponseMeta.ts`
 - Podsustav ocjenjivanja: `src/domain/assessment/` — periodični poslovi ocjenjivanja
 
 ### E. Autorizacijski cjevovod
@@ -976,24 +973,24 @@ Ciljni formati uključuju:
 
 - OpenAI chat/Responses
 - Claude
-- Gemini/Antigravity omotnicu (envelope)
+- Gemini/Antigravity omotnicu
 - Kiro
 - Cursor
 
-Prijevodi koriste **OpenAI kao središnji (hub) format** — svi se pretvaraju posredstvom OpenAI formata:
+Prijevodi koriste **OpenAI kao središnji format** — sve pretvorbe prolaze kroz OpenAI kao međukorak:
 
 ```
-Izvorni format → OpenAI (hub) → Ciljni format
+Izvorni format → OpenAI (središnji format) → Ciljni format
 ```
 
-Prijevodi se dinamički odabiru na temelju oblika izvornog payloada i ciljnog formata pružatelja usluge.
+Prijevodi se odabiru dinamički na temelju strukture izvornog korisnog sadržaja i ciljnog formata pružatelja usluge.
 
-Dodatni sloj obrade u pipelineu prijevoda:
+Dodatni slojevi obrade u procesu prijevoda:
 
-- **Sanitizacija odgovora** — Uklanja nestandardna polja iz odgovora u OpenAI formatu (i streaming i non-streaming) radi osiguravanja stroge usklađenosti sa SDK-om
-- **Normalizacija ulogâ** — Pretvara `developer` → `system` za ciljeve koji nisu OpenAI; spaja `system` → `user` za modele koji odbijaju ulogu system (GLM, ERNIE)
-- **Ekstrakcija think tagova** — Parsira blokove `` iz sadržaja u polje `reasoning_content`
-- **Strukturirani izlaz** — Pretvara OpenAI `response_format.json_schema` u Geminijev `responseMimeType` + `responseSchema`
+- **Pročišćavanje odgovora** — Uklanja nestandardna polja iz odgovora u OpenAI formatu (i protočnih i neprotočnih) kako bi se osigurala stroga usklađenost sa SDK-om
+- **Normalizacija uloga** — Pretvara `developer` → `system` za ciljeve koji nisu OpenAI; spaja `system` → `user` za modele koji odbacuju ulogu sustava (GLM, ERNIE)
+- **Izdvajanje oznaka razmišljanja** — Raščlanjuje blokove `<think>...</think>` iz sadržaja u polje `reasoning_content`
+- **Strukturirani izlaz** — Pretvara OpenAI `response_format.json_schema` u Gemini `responseMimeType` + `responseSchema`
 
 ## Podržani API krajnje točke (endpoints)
 
@@ -1059,11 +1056,11 @@ kompatibilnosti sa starijim verzijama. Trenutni ugovor za vrijeme izvođenja kor
 - SQLite migracije sheme i kuke za automatsko nadograđivanje pri pokretanju
 - put kompatibilnosti za migraciju sa starijeg JSON formata na SQLite
 
-## 6) SSRF / zaštita izlaznih URL-ova
+## 6) SSRF / zaštita odlaznih URL-ova
 
-- `src/shared/network/outboundUrlGuard.ts` blokira sve privatne/loopback/link-local ciljne URL-ove prije nego što dođu do izvršitelja pružatelja usluge
-- Rute za otkrivanje i validaciju modela pružatelja usluge koriste `src/shared/network/safeOutboundFetch.ts` koji primjenjuje zaštitu prije svakog izlaznog zahtjeva
-- Greške zaštite prikazuju se kao `URL_GUARD_BLOCKED` s HTTP 422 statusom i bilježe se u revizijski trag usklađenosti putem `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) primjenjuje `src/shared/network/outboundUrlGuard.ts` na zahtjeve za razgovor poslane putem `BaseExecutor.execute()`. U načinu rada samo za javne adrese (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` uz isključenu oznaku za privatne adrese) blokira privatna i povratna (loopback) računala te raspon 169.254.0.0/16; u svakom drugom načinu rada blokira računala s metapodacima oblaka. Provjerava naziv računala ili doslovno zapisanu IP adresu prije bilo kakvog DNS pretraživanja. Ugrađeni lokalni pružatelji preskaču ovu provjeru.
+- Rute za otkrivanje i provjeru valjanosti modela pružatelja koriste `src/shared/network/safeOutboundFetch.ts`, koji primjenjuje zaštitu prije svakog odlaznog zahtjeva
+- Pogreške zaštite prikazuju se kao `URL_GUARD_BLOCKED` uz HTTP 503 (`getSafeOutboundFetchErrorStatus`; ruta za otkrivanje modela vraća 400), a stvarne SSRF blokade tijekom provjere valjanosti bilježe se u revizijski trag kao događaji `provider.validation.ssrf_blocked`
 
 ## Vidljivost i operativni signali
 
@@ -1114,7 +1111,7 @@ Varijable okruženja koje se aktivno koriste u kodu:
 4. Ponašanje u oblaku ovisi o ispravnom `NEXT_PUBLIC_BASE_URL` i dostupnosti krajnje točke oblaka.
 5. Direktorij `open-sse/` objavljen je kao **npm workspace paket** `@omniroute/open-sse`. Izvorni kod ga uvozi putem `@omniroute/open-sse/...` (razrješava ga Next.js `transpilePackages`). Putanje datoteka u ovom dokumentu i dalje koriste naziv direktorija `open-sse/` za konzistentnost.
 6. Grafikoni na nadzornoj ploči koriste **Recharts** (temeljen na SVG-u) za pristupačne, interaktivne vizualizacije analitike (grafikoni upotrebe modela, tablice raspodjele po pružateljima usluga sa stopama uspješnosti).
-7. E2E testovi koriste **Playwright** (`tests/e2e/`), pokreću se putem `npm run test:e2e`. Jedinični testovi koriste **Node.js test runner** (`tests/unit/`), pokreću se putem `npm run test:unit`. Izvorni kod u `src/` je **TypeScript** (`.ts`/`.tsx`); workspace `open-sse/` ostaje u JavaScriptu (`.js`).
+7. E2E testovi koriste **Playwright** (`tests/e2e/`), pokreću se putem `npm run test:e2e`. Jedinični testovi koriste **Node.js test runner** (`tests/unit/`), pokreću se putem `npm run test:unit`. Izvorni kod u `src/` je **TypeScript** (`.ts`/`.tsx`); workspace `open-sse/` ostaje u TypeScriptu (`.ts`).
 8. Stranica postavki organizirana je u 7 kartica: General, Appearance, AI, Security, Routing, Resilience, Advanced. Stranica Resilience konfigurira samo red čekanja zahtjeva, hlađenje veze (connection cooldown), prekidač pružatelja (provider breaker) i ponašanje čekanja na hlađenje; stanje prekidača u stvarnom vremenu prikazuje se na stranici Health.
 9. Strategija **Context Relay** (`context-relay`) podijeljena je na dva sloja: `combo.ts` odlučuje treba li se generirati predaja (handoff), `chat.ts` ubacuje predaju nakon razrješenja računa. Podaci o predaji čuvaju se u SQLite tablici `context_handoffs`. Ova podjela je namjerna jer samo `chat.ts` zna je li se stvarni račun promijenio.
 10. **Provedba proxyja** je sada opsežna: `tokenHealthCheck.ts` razrješava proxy po vezi, `/api/providers/validate` koristi `runWithProxyContext`, a `proxyFetch.ts` koristi `undici.fetch()` za održavanje kompatibilnosti dispatchera na Node 22.

@@ -74,7 +74,7 @@
 |                                    |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | ---------------------------------- | :----------------------: | :---------: | :-------------------: |
 | 🌐 Poskytovatelé                   |           352            |   **358**   |          380          |
-| 🧠 Jedinečná ID chatovacích modelů |           1320           |  **1374**   |         1491          |
+| 🧠 Jedinečná ID chatovacích modelů |           1320           |  **1374**   |         1499          |
 | 🖼️ Most modalit                    | 🆕 vidění + zvuk + video |      ✓      |           ✓           |
 | 📡 Bezplatný katalog Radar         |  🆕 s možností aktivace  |      ✓      |           ✓           |
 | ⚖️ Plánování s ohledem na kvótu    |      🆕 Quota-Share      |      ✓      |           ✓           |
@@ -89,57 +89,52 @@
 
 <br/>
 
-## 🧩 Dostupné
+## 🧩 k dispozici
 
-[![verze npm](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-![Měsíční počet stažení z NPM](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
-[![Licence: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-![Stažení z Dockeru](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Stažení Electronu](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+[![npm verze](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm) ](https://www.npmjs.com/package/omniroute) ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm) [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED) ](https://hub.docker.com/r/diegosouzapw/omniroute) [![Licence: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square) ](LICENSE) ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED) ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
-    <td align="right"><b>🚀 Začít</b></td>
-    <td align="center"><a href="#-quick-start">🚀 Rychlý začátek</a></td>
-    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Instalace</a></td>
-    <td align="center"><a href="#first-run">🆓 Připojit poskytovatele</a></td>
+    <td align="right"><b>🚀 Start</b></td>
+    <td align="center"><a href="#-quick-start">🚀 Quick Start</a></td>
+    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Install</a></td>
+    <td align="center"><a href="#first-run">🆓 Connect a provider</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💡 Zjistit více</b></td>
-    <td align="center"><a href="#-the-promise">💥 Příslib</a></td>
-    <td align="center"><a href="#-why-omniroute">🤔 Proč OmniRoute</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 V čem vyniká</a></td>
+    <td align="right"><b>💡 Learn</b></td>
+    <td align="center"><a href="#-the-promise">💥 The Promise</a></td>
+    <td align="center"><a href="#-why-omniroute">🤔 Why OmniRoute</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 What Sets Apart</a></td>
   </tr>
   <tr>
-    <td align="right"><b>⚙️ Funkce</b></td>
-    <td align="center"><a href="#-combos--the-flagship">🎯 Kombinace</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Poskytovatelé</a></td>
+    <td align="right"><b>⚙️ Features</b></td>
+    <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
+    <td align="center"><a href="#-380-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
     <td align="right"></td>
-    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Komprese</a></td>
-    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Kde běží</a></td>
-    <td align="center"><a href="#-private--local-first">🔒 Soukromí</a></td>
+    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Compression</a></td>
+    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Where It Runs</a></td>
+    <td align="center"><a href="#-private--local-first">🔒 Private</a></td>
   </tr>
   <tr>
-    <td align="right"><b>👀 Prohlédnout</b></td>
-    <td align="center"><a href="#-omniroute-in-action">🎬 V akci</a></td>
-    <td align="center"><a href="#-whats-new">✨ Co je nového</a></td>
-    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 Kompatibilní CLI</a></td>
+    <td align="right"><b>👀 See it</b></td>
+    <td align="center"><a href="#-omniroute-in-action">🎬 In Action</a></td>
+    <td align="center"><a href="#-whats-new">✨ What's New</a></td>
+    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 Compatible CLIs</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💚 Podpora</b></td>
-    <td align="center"><a href="#-support-omniroute">💚 Podpořit / Přispět</a></td>
-    <td align="center"><a href="#-community--help">💬 Komunita</a></td>
-    <td align="center"><a href="#-sponsors">💖 Sponzoři</a></td>
+    <td align="right"><b>💚 Support</b></td>
+    <td align="center"><a href="#-support-omniroute">💚 Support / Donate</a></td>
+    <td align="center"><a href="#-community--help">💬 Community</a></td>
+    <td align="center"><a href="#-sponsors">💖 Sponsors</a></td>
   </tr>
   <tr>
-    <td align="right"><b>📦 Projekt</b></td>
-    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Technologický stack</a></td>
-    <td align="center"><a href="#-documentation">📖 Dokumentace</a></td>
-    <td align="center"><a href="#-1000-contributors">👥 Přispěvatelé</a></td>
+    <td align="right"><b>📦 Project</b></td>
+    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Tech Stack</a></td>
+    <td align="center"><a href="#-documentation">📖 Docs</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 Contributors</a></td>
   </tr>
 </table>
 
@@ -697,15 +692,15 @@ mimo historii vašeho shellu. → [Integrace CLI](docs/guides/CLI-INTEGRATIONS.m
 
 <div align="center">
 
-## 🌐 380 poskytovatelů AI — 153 označených v katalogu jako bezplatní
+## 🌐 380 Poskytovatelé AI — 156 katalogově označeno zdarma
 
 </div>
 
-> **380 registrovaných poskytovatelů** napříč kanonickými kolekcemi pro chat, média, vyhledávání, místní prostředí, cloudové agenty a systémové služby, včetně **153 poskytovatelů s metadaty pro vyhledávání `hasFree: true`**. Registr chatovacích modelů zahrnuje **239 poskytovatelů / 3,059 různých dvojic poskytovatel–model / 1,475 nezpracovaných ID modelů**; samostatný katalog bezplatných rozpočtů obsahuje **471 řádků pro jednotlivé modely**, **34 opakujících se fondů** a **54 opakujících se / bezklíčových poskytovatelů bezplatných navždy**. Záměrně jde o různé základy výpočtu; definice a výpočty s odstraněnými duplicitami fondů najdete v dokumentech [Referenční příručka poskytovatelů](docs/reference/PROVIDER_REFERENCE.md) a [Bezplatné úrovně](docs/reference/FREE_TIERS.md).
+> **380 registrovaných poskytovatelů** v rámci kanonických chat, médií, vyhledávání, místních kolekcí, cloudových agentů a systémových kolekcí, včetně **156 nesoucí metadata objevu `hasFree: true`** . Registr modelu chatu pokrývá **241 poskytovatelů / 3 114 různých párů poskytovatel-model / 1 499 nezpracovaných modelů IDs** ; samostatný katalog s volným rozpočtem má **485 řad na model** ,**34 opakujících se bazénů** a **54 bezplatných poskytovatelů recurring/keyless** . Jedná se o různé jmenovatele záměrně; definice a kalkulace zbavené duplicitních zdrojů jsou k dispozici v referenčních a [bezplatných úrovních](docs/reference/FREE_TIERS.md) [poskytovatele](docs/reference/PROVIDER_REFERENCE.md).
 
 <div align="center">
 
-### 🏢 Všechny významné laboratoře — prostřednictvím jediného koncového bodu
+### 🏢 Každá velká laboratoř — přes jeden koncový bod
 
 <table>
   <tr>
@@ -734,7 +729,7 @@ mimo historii vašeho shellu. → [Integrace CLI](docs/guides/CLI-INTEGRATIONS.m
   </tr>
 </table>
 
-<sub>…a více než 350 dalších — každá ikona se načítá živě z katalogu poskytovatelů na řídicím panelu. 📖 [Referenční příručka poskytovatelů](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>…a 350 + více — každá ikona vyřeší živě z katalogu poskytovatelů řídicího panelu. [Reference poskytovatele](docs/reference/PROVIDER_REFERENCE.md) 📖</sub>
 
 <br/>
 
@@ -770,76 +765,89 @@ mimo historii vašeho shellu. → [Integrace CLI](docs/guides/CLI-INTEGRATIONS.m
 
 </div>
 
-> Stejná aplikace, váš stroj, vaše pravidla. Od globální instalace npm po** váš telefon** přes Termux.
+> Stejná aplikace, vaše zařízení, vaše pravidla. Od globální instalace přes npm až po **váš telefon** prostřednictvím Termuxu.
 
 <table>
-  <tr><th align="left"> Platforma </th><th align="left"> Instalovat </th><th align="left"> Přednosti </th></tr>
-  <tr><td align="left" nowrap>📦 <b> npm (globálně)</b></td><td align="left" nowrap><code> npm instalace -g omniroute </code></td><td align="left"> Jeden příkaz, libovolný OS</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Bun (globální)</b></td><td align="left" nowrap><code> bun add -g omniroute </code></td><td align="left"> Stejný tarball registru, rychlejší instalace </td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> dokovací běh … diegosouzapw/omniroute</code></td><td align="left"> Víceobloukový <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b> Desktop (Electron)</b></td><td align="left" nowrap><code> npm spustit electron:build </code></td><td align="left"> Nativní okno + systémová lišta — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b> Panel nabídek (OmniRouteTray)</b></td><td align="left" nowrap><code> brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left"> Dohlíží &amp; automatické aktualizace serveru — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap> nativní <code> arm64 </code></td><td align="left"> Raspberry Pi, servery ARM, Apple Silicon </td></tr>
-  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg install nodejs && npx -y omniroute </code></td><td align="left"> Spustí <b> na vašem telefonu </b>, 24/7, no root </td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Přidat na domovskou obrazovku"</td><td align="left"> Celá obrazovka, offline, instalovatelné z prohlížeče </td></tr>
-  <tr><td align="left" nowrap>🧩 <b>OpenCode plugin </b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">OpenCode integrace </td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS Kód Copilot Chat </b></td><td align="left" nowrap> instalace <b>OmniCopilot</b> rozšíření </td><td align="left"> Každý model OmniRoute v nativním výběru chatu Copilot — stabilní &amp; Insiders </td></tr>
-  <tr><td align="left" nowrap>🛠️ <b> Ze zdroje </b></td><td align="left" nowrap><code> npm nainstalovat && npm spustit dev </code></td><td align="left"> Nabourat se do toho, přispět </td></tr>
+  <tr><th align="left">Platforma</th><th align="left">Instalace</th><th align="left">Hlavní výhody</th></tr>
+  <tr><td align="left" nowrap>📦 <b>npm (globálně)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Jeden příkaz, libovolný OS</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (globálně)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Kompatibilita poskytovaná v rámci možností bez záruk podpory; podporovaným běhovým prostředím je Node.js.</td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Více architektur: <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🖥️ <b>Desktop (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Nativní okno + systémová lišta — <b>Windows / macOS / Linux</b></td></tr>
+  <tr><td align="left" nowrap>🎩 <b>Řádek nabídek (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Dohlíží na server a automaticky jej aktualizuje — <b>macOS</b></td></tr>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>nativní <code>arm64</code></td><td align="left">Raspberry Pi, servery ARM, Apple Silicon</td></tr>
+  <tr><td align="left" nowrap>📱 <b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left">Běží <b>na vašem telefonu</b>, nepřetržitě, bez rootu</td></tr>
+  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>„Přidat na plochu“</td><td align="left">Přes celou obrazovku, offline, instalovatelné z prohlížeče</td></tr>
+  <tr><td align="left" nowrap>🧩 <b>Plugin OpenCode</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">Nativní integrace s OpenCode</td></tr>
+  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap>nainstalujte rozšíření <b>OmniCopilot</b></td><td align="left">Každý model OmniRoute v nativním výběru Copilot Chat — stabilní verze i Insiders</td></tr>
+  <tr><td align="left" nowrap>🛠️ <b>Ze zdrojového kódu</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">Upravujte jej a přispívejte</td></tr>
 </table>
 
-[Docker](docs/guides/DOCKER_GUIDE.md)<sub>📖 zqc · [Plocha](electron/README.md) · [Panel nabídek](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+<sub>📖 [Průvodce Dockerem](docs/guides/DOCKER_GUIDE.md) · [Desktop](electron/README.md) · [Ikona v řádku nabídek](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-### 🧩 Novinka: OmniRoute v nativním chatu VS kódu Copilot
+### 🧩 Novinka: OmniRoute přímo v nativním Copilot Chatu ve VS Code
 
 </div>
 
-> Žádný nový postranní panel, žádný nový chat UI – každý model OmniRoute poskytuje, se zobrazí přímo v**Copilot nástroj pro výběr modelu chatu, který již používáte** . Od VS Code 1.122 fungují modely poskytovatelů bez přihlášení GitHub nebo předplatného Copilot – režim agenta, volání nástrojů a vidění zdarma.
+> Žádný nový postranní panel, žádné nové chatovací rozhraní — každý model poskytovaný OmniRoute se zobrazí přímo ve
+> **výběru modelu Copilot Chat, který už používáte**. Od VS Code 1.122 fungují modely poskytovatelů
+> bez přihlášení ke GitHubu i bez předplatného Copilot — režim agenta, volání nástrojů a zpracování obrazu,
+> zdarma.
 
-Nainstalujte** [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** rozšíření, nasměrujte jej na váš server OmniRoute (výchozí `localhost:20128`), poté otevřete Copilot Chat → model picker →** Spravovat modely…** →**OmniRoute** .
+Nainstalujte rozšíření **[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)**, nasměrujte jej
+na svůj server OmniRoute (ve výchozím nastavení `localhost:20128`) a poté otevřete Copilot Chat → výběr modelu
+→ **Spravovat modely…** → **OmniRoute**.
 
 <table>
-  <tr><th align="left"> Store </th><th align="left"> Link </th><th align="left"> Funguje s </th></tr>
-  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace </b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot"> Instalace →</a ></td >< td zarovnání ="doleva">VS Kód — stabilní &amp; Insiders </td></tr>
-  <tr><td align="left" nowrap>🔓 <b> Otevřít VSX registr </b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"> Instalovat →</a ></td >< td zarovnat ="doleva">Cursor, Windsurf, VSCodium, Theia, kódový server </td> Gitpod, Antigravity, Kiro</tr>
+  <tr><th align="left">Obchod</th><th align="left">Odkaz</th><th align="left">Funguje s</th></tr>
+  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">Nainstalovat →</a></td><td align="left">VS Code — stabilní verze i Insiders</td></tr>
+  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">Nainstalovat →</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro…</td></tr>
 </table>
 
-Zevnitř editoru: otevřete soubor** Rozšíření** prohlížet, hledat** "OmniRoute"** , klikněte** Instalovat** — funguje stejně v obou obchodech. Zdroj, vydání a publikační sada Runbook žijí na [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
+Přímo v editoru otevřete zobrazení **Rozšíření**, vyhledejte **„OmniRoute“** a klikněte na **Nainstalovat**
+— v obou obchodech vše funguje stejně. Zdrojový kód, hlášení problémů a postup publikování najdete na
+[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
 
-<sub>📖 [VS Code Copilot Průvodce chatem](docs/guides/VSCODE-COPILOT.md) – nastavení, co ukazuje výběr, panel na kartě, řešení problémů </sub>
+<sub>📖 [Průvodce VS Code Copilot Chat](docs/guides/VSCODE-COPILOT.md) — nastavení, obsah výběru modelu, řídicí panel na kartě, řešení problémů</sub>
 
 <br/>
 
 <div align="center">
 
-### 🎩 Novinka: OmniRouteTray — vaše brána, která se nachází v liště nabídek
+### 🎩 Novinka: OmniRouteTray — vaše brána přímo v řádku nabídek
 
 </div>
 
-> `omniroute serve` je nejšťastnější, když je stále zapnutá.** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)** promění to v aplikaci s panelem nabídek pro macOS: spustí server, udrží ho při životě i po restartu, aktualizuje ho na místě a na jedno kliknutí dá váš rozpočet na token –** žádné okno terminálu nezůstalo otevřené, žádné `npm install -g omniroute` na hlídání dětí.**
+> `omniroute serve` funguje nejlépe, když je neustále spuštěný. **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)**
+> z něj dělá bezúdržbovou aplikaci pro řádek nabídek systému macOS: spouští server, udržuje jej v chodu
+> i po restartu, aktualizuje jej na místě a zpřístupňuje váš aktuální rozpočet tokenů jediným kliknutím — **bez
+> otevřeného okna terminálu a bez nutnosti dohlížet na `npm install -g omniroute`.**
 
-Postaven s [Tauri v2](https://v2.tauri.app/) (jádro Rust velikosti chyby zaokrouhlení), dodává vlastní podepsané runtime Node 24 a spravuje instalaci OmniRoute vlastněnou aplikací, takže nikdy nebojuje s vaším globálním `node`/`bun`. To** sdílí vaši stávající konfiguraci a databázi `~/.omniroute/`** — takže je to stejný OmniRoute který už běžíš, jen s kloboukem na hlavě. 🎩
+Je vytvořen pomocí [Tauri v2](https://v2.tauri.app/) (jádro v Rustu zanedbatelné velikosti), obsahuje
+vlastní podepsané běhové prostředí Node 24 a spravuje instalaci OmniRoute vlastněnou aplikací, takže se nikdy nedostane do konfliktu s vaším
+globálním `node`/`bun`. **Sdílí vaši stávající konfiguraci a databázi v `~/.omniroute/`** — jde tedy o
+stejný OmniRoute, který už používáte, jen s kloboukem. 🎩
 
 <table>
-  <tr><th align="left"> Co to dělá </th><th align="left"> Jak </th></tr>
-  <tr><td align="left" nowrap>🟢 <b> Dohlíží na server </b></td><td align="left"> Vytvoří <code> omniroute serve </code>, převezme již běžící instanci místo jejího duplikování </td></tr>
-  <tr><td align="left" nowrap>📊 <b> Živé využití na první pohled </b></td><td align="left"> Lišty kvót poskytovatele, limity Claude session/weekly s resetovaným odpočítáváním, 30denní rozpis nákladů </td></tr>
-  <tr><td align="left" nowrap>🔄 <b> Probíhají automatické aktualizace </b></td><td align="left"> Postupná instalace, atomická výměna, vrácení při selhání — vždy na nejnovější verzi </td></tr>
-  <tr><td align="left" nowrap>🚀 <b> Start při přihlášení </b></td><td align="left"> Volitelné spuštění při přihlášení; pouze zásobník, žádná ikona doku </td></tr>
-  <tr><td align="left" nowrap>🩺 <b> Lékař &amp; protokoly </b></td><td align="left"> Diagnostika jedním kliknutím a přístup k protokolu serveru </td></tr>
+  <tr><th align="left">Co dělá</th><th align="left">Jak</th></tr>
+  <tr><td align="left" nowrap>🟢 <b>Dohlíží na server</b></td><td align="left">Spouští <code>omniroute serve</code> a převezme již spuštěnou instanci, místo aby ji duplikoval</td></tr>
+  <tr><td align="left" nowrap>📊 <b>Aktuální využití na první pohled</b></td><td align="left">Ukazatele kvót poskytovatelů, limity relace a týdenní limity Claude s odpočtem do obnovení, přehled nákladů za 30 dní</td></tr>
+  <tr><td align="left" nowrap>🔄 <b>Automaticky se aktualizuje na místě</b></td><td align="left">Přípravná instalace, atomická výměna, návrat zpět při selhání — vždy používá nejnovější vydání</td></tr>
+  <tr><td align="left" nowrap>🚀 <b>Spouští se při přihlášení</b></td><td align="left">Volitelné spuštění při přihlášení; pouze v řádku nabídek, bez ikony v Docku</td></tr>
+  <tr><td align="left" nowrap>🩺 <b>Diagnostika a protokoly</b></td><td align="left">Diagnostika jedním kliknutím a přístup k protokolům serveru</td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub> Preferujete stahování? Získejte nejnovější <code>.dmg </code> z
-<a href="https://github.com/zoispag/omniroute-tray/releases"> Uvolňuje </a>. Zdroj, problémy a sestavení
-dokumenty žijí na <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
-<br/>💛 Komunitní projekt od <a href="https://github.com/zoispag">@zoispag </a> — není oficiální vydání OmniRoute.</sub>
+<sub>Dáváte přednost stažení? Získejte nejnovější soubor <code>.dmg</code> ze stránky
+<a href="https://github.com/zoispag/omniroute-tray/releases">Vydání</a>. Zdrojový kód, hlášení problémů a dokumentace
+k sestavení jsou k dispozici v repozitáři <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
+<br/>💛 Komunitní projekt od <a href="https://github.com/zoispag">@zoispag</a> — nejde o oficiální vydání OmniRoute.</sub>
 
 <br/>
 
@@ -1088,13 +1096,13 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
 ```
 
-`:latest` odkazuje na nejvyšší **publikovanou** stabilní verzi SemVer. Nesleduje větev git `main`. Pro GitOps použijte pevnou verzi `:X.Y.Z`. Viz [Kanály vydání Dockeru](docs/guides/DOCKER_GUIDE.md#release-channels). Image nastavuje **`OMNIROUTE_MEMORY_MB=1024`**. To stačí pro ovládací panel a nenáročný chat. **Programovací agenti** (`POST /v1/responses` z Claude Code, Codex, Grok, …) potřebují mnohem větší haldu V8, jinak proces skončí s chybou `FATAL ERROR` při přibližně 12 GiB a dvou překrývajících se dlouhých kontextech. Nastavte velikost kontejneru nad velikost haldy (nativní buffery se nacházejí mimo V8):
+`:latest` odkazuje na nejvyšší **publikovanou** stabilní verzi SemVer. Nesleduje větev git `main`. Pro GitOps připněte `:X.Y.Z`. Viz [Kanály vydání Dockeru](docs/guides/DOCKER_GUIDE.md#release-channels). Image nastavuje **`OMNIROUTE_MEMORY_MB=1024`**. To stačí pro ovládací panel a nenáročný chat. **Programovací agenti** (`POST /v1/responses` z Claude Code, Codex, Grok, …) potřebují mnohem větší haldu V8, jinak proces skončí s `FATAL ERROR` při přibližně 12 GiB u dvou překrývajících se dlouhých kontextů. Nastavte velikost kontejneru nad velikost haldy (nativní buffery se nacházejí mimo V8):
 
 | Pracovní zátěž                      | Halda (`-e OMNIROUTE_MEMORY_MB`) | Kontejner (`--memory`) |
 | ----------------------------------- | -------------------------------- | ---------------------- |
 | Ovládací panel / nenáročný chat     | `1024` (výchozí hodnota image)   | ≥2 g                   |
 | Jeden programovací agent            | `8192`                           | ≥10 g                  |
-| Dvě souběžné dlouhé `/v1/responses` | `10240`–`12288`                  | ≥12–16 g               |
+| Dva souběžné dlouhé `/v1/responses` | `10240`–`12288`                  | ≥12–16 g               |
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
@@ -1102,7 +1110,7 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
 ```
 
-Úplná tabulka: [Průvodce Dockerem — operační paměť za běhu](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
+Kompletní tabulka: [Průvodce Dockerem — operační paměť za běhu](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
 
 > **Kanál předběžných vydání Dockeru:** `diegosouzapw/omniroute:next` a
 > `diegosouzapw/omniroute:next-web` sledují aktuální výchozí větev `release/v*`.
@@ -1114,9 +1122,9 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 
 Standardní `bun install` a globální instalace (`bun install -g omniroute`) jsou podporovány prostřednictvím detekce běhového prostředí Bun:
 
-- **Vestavěný `bun:sqlite`**: Při spuštění pod Bun používá OmniRoute vestavěný ovladač `bun:sqlite`; v Node.js případně použije `better-sqlite3` nebo `sql.js`.
-- **Automatický výběr bundleru Webpack při vývoji**: Vývojové prostředí (`bun run dev`) automaticky detekuje Bun a zakáže Turbopack ve prospěch Webpacku, aby zabránilo nekompatibilitě s nativními vazbami V8. Produkční sestavení (`bun run build`) se řídí proměnnou `OMNIROUTE_USE_TURBOPACK` přesně stejně jako v Node: ve výchozím nastavení používá Turbopack, zatímco `OMNIROUTE_USE_TURBOPACK=0` sestaví aplikaci pomocí Webpacku (`Dockerfile.bun` tuto možnost zpřístupňuje jako `--build-arg`).
-- **Samostatný Dockerfile pro Bun**: Vícefázový `Dockerfile.bun` pro nativní produkční nasazení Bun (`docker build -f Dockerfile.bun -t omniroute:bun .`).
+- **Vestavěný `bun:sqlite`**: Při spuštění v prostředí Bun používá OmniRoute vestavěný ovladač `bun:sqlite`; v Node.js přechází na `better-sqlite3` nebo `sql.js`.
+- **Automatický výběr bundleru Webpack ve vývojovém prostředí**: Vývojový režim (`bun run dev`) automaticky rozpozná Bun a zakáže Turbopack ve prospěch Webpacku, aby zabránil nekompatibilitám nativních vazeb V8. Produkční sestavení (`bun run build`) se řídí proměnnou `OMNIROUTE_USE_TURBOPACK` přesně stejně jako v Node: ve výchozím nastavení používá Turbopack; chcete-li sestavovat pomocí Webpacku, použijte `OMNIROUTE_USE_TURBOPACK=0` (`Dockerfile.bun` ji zpřístupňuje jako `--build-arg`).
+- **Vyhrazený Dockerfile pro Bun**: Vícefázový `Dockerfile.bun` pro nativní produkční nasazení Bun (`docker build -f Dockerfile.bun -t omniroute:bun .`).
 
 ```bash
 # Instalace a spuštění pomocí Bun
@@ -1146,7 +1154,7 @@ yay -S omniroute-bin && systemctl --user enable --now omniroute.service
 **🔧 Nix (Flake)**
 
 ```bash
-# Použití flakes systému Nix
+# Pomocí Nix flakes
 nix develop
 npm run dev
 
@@ -1154,7 +1162,7 @@ npm run dev
 devbox run npm run dev
 ```
 
-📖 [Průvodce Dockerem](docs/guides/DOCKER_GUIDE.md) — Profily Compose, HTTPS přes Caddy, tunely Cloudflare.
+📖 [Průvodce Dockerem](docs/guides/DOCKER_GUIDE.md) — profily Compose, Caddy HTTPS, tunely Cloudflare.
 
 **🦭 Podman**
 
@@ -1162,7 +1170,7 @@ devbox run npm run dev
 # 1. Připravte datový adresář připojený pomocí bind mount
 mkdir -p data
 
-# 2. Pouze pro Linux + místní rootless Podman (nikdy pro vzdáleného klienta Podman Machine):
+# 2. Pouze Linux + místní rootless Podman (nikdy vzdálený klient Podman Machine):
 podman unshare chown 1000:1000 ./data
 
 # 3. Nastavte údaj o běhovém prostředí, sestavte místní image Compose a spusťte jej
@@ -1170,26 +1178,28 @@ echo "CONTAINER_HOST=podman" >> .env
 podman compose --profile base up -d --build
 ```
 
-V macOS nebo Windows používá Podman vzdálený Podman Machine: vynechte `podman unshare` a
-postupujte podle [pokynů k datovému adresáři pro konkrétní topologii](contrib/podman/README.md#data-directory-permissions-by-topology).
+V systémech macOS nebo Windows používá Podman vzdálený Podman Machine: krok `podman unshare` přeskočte a
+postupujte podle [pokynů pro datový adresář specifických pro danou topologii](contrib/podman/README.md#data-directory-permissions-by-topology).
 
-📖 [Průvodce Podmanem](contrib/podman/README.md) — Sestavení pomocí Compose, Podman Machine a
-nastavení Quadlet se systémem Linux/systemd.
+📖 [Průvodce Podmanem](contrib/podman/README.md) — sestavení Compose, Podman Machine a
+nastavení Quadlet pro Linux/systemd.
 
-**⚡ Rychlejší / úspornější instalace (bez nativního sestavení)**
+**⚡ Rychlejší / úspornější instalace (přeskočení nativního sestavení)**
 
 Nativní databázový engine SQLite (`better-sqlite3`) je **volitelná** závislost, takže globální
 instalace nikdy nečeká na kompilaci ze zdrojového kódu: použije předem sestavený binární soubor, pokud odpovídá
-vaší platformě/Node, a v opačném případě automaticky přejde na engine implementovaný čistě v JS
-(`node:sqlite` v Node 22+, jinak přibalený WASM modul `sql.js`) — bez nutnosti nástrojů pro sestavení.
+vaší platformě/verzi Node, a jinak transparentně přejde na čistě javascriptový engine
+(`node:sqlite` v Node 22+, jinak přibalený WASM modul `sql.js`) — bez nutnosti sestavovacích nástrojů.
 
-Chcete-li zcela přeskočit nativní inicializaci po instalaci (CI, bezobslužné nebo pomalé počítače):
+Chcete-li zcela přeskočit **nativní inicializaci** po instalaci (CI, bezobslužná nebo pomalá zařízení),
+použijte následující nastavení. Poznámka: přeskočí se pouze krok inicializace nativního SQLite (`scripts/postinstall.mjs`);
+hook pro kopírování/opravu binárních souborů (`scripts/build/postinstall.mjs`) se nadále spouští běžným způsobem:
 
 ```bash
-OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ji také přeskočí
+OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # Přeskočí jej také CI=1
 ```
 
-Pro nejrychlejší instalace upřednostněte **pnpm** (úložiště adresované podle obsahu + pevné odkazy — viz výše).
+Pro nejrychlejší instalaci upřednostněte **pnpm** (úložiště adresované podle obsahu + pevné odkazy — viz výše).
 Pro bezobslužné běhové prostředí bez ovládacího panelu použijte profil Dockeru `base` (výše) nebo
 [průvodce pro Termux](docs/guides/TERMUX_GUIDE.md). CLI a webový ovládací panel obsluhuje
 stejný proces na jednom portu, takže v současnosti neexistuje samostatný balíček pouze pro CLI.

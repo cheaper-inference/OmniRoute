@@ -1,0 +1,1013 @@
+--- a/generate-release/SKILL.md
++++ b/generate-release/SKILL.md
+@@ -18,7 +18,7 @@
+
+ > **🔴 INTEGRATION BRANCH RULE**: The `release/vX.Y.Z` branch is the **integration target** for the entire release cycle. Bug fixes and feature implementations land here **via per-issue PRs from short-lived `fix/<ISSUE>-<short>` or `feat/<ISSUE>-<short>` worktrees** (see `/implement-fix-bugs`, `/implement-features`). Contributor PRs from `/review-prs` / `/review-group-prs` likewise merge into this branch via `/merge-prs`. The release branch is then merged to `main` via a single release PR at the end of the cycle.
+ >
+-> **🆕 PARALLEL-CYCLE MODEL (2026-07-04, `_tasks/release-flow/2026-07-04_proposta-ciclo-paralelo-v2.md`)**: the moment `/generate-release` raises the freeze (0a.0), it ALSO cuts `release/vX+1` from the frozen tip (0a.0b) and re-homes open PRs there. From that instant the **frozen `release/vX` belongs exclusively to the release captain** (base-red fixes, reconciliation) and **all development/campaign merges continue on `release/vX+1` without waiting**. Closing fixes reach the new cycle via the Phase 5 sync-back (`main → release/vX+1`). Never more than 1 version "generating" + 1 "in development" at a time.
++> **PARALLEL-CYCLE MODEL:** raise the freeze immediately, then prepare the next cycle using [candidate admission](phases/candidate-admission.md). Cut only from the exact certified source; publish the bump through its own admitted PR. Re-home development only after `NEXT_READY`, not merely after the branch exists. While readiness is incomplete, campaign merges HOLD and the captain repairs the frozen base. Closing fixes reach the new cycle through an admitted fast-forward sync-back. Keep at most one version generating and one ready development cycle.
+
+ > **🔴 POST-MERGE READ-ONLY RULE**: the moment the release PR squash-merges into `main`, the `release/vX.Y.Z` branch becomes **read-only for code**. Any post-merge fix (VPS homologation finding, broken publish) lands on `main` first (via a `fix/release-vX.Y.Z-*` PR) or — when it must also live on the branch — is cherry-picked to `main` **in the same step, CHANGELOG bullet included**. Never leave a commit only on a released branch. Precedent (audit 2026-06-12, `_tasks/release-audit/release-leftovers-audit-2026-06-12.md`): that is how #3590's changelog bullet (v3.8.20), the v3.8.21 pack-artifact fix and the v3.8.0 Codex Fast Tier feature were stranded — each had to be rediscovered/re-implemented later. The gates in steps 12b and 19b enforce this rule mechanically.
+
+@@ -32,32 +32,32 @@
+ ## ⚠️ Five-Phase Flow — DOIS STOPS OBRIGATÓRIOS
+
+ ```
+-🔴 EXECUTION ORDER — 0a.0 and 0a.0b run BEFORE Phase 0, despite the numbering.
+-   The phase files are numbered by topic, not by sequence, and phase-0 used to
+-   claim it was "the very first action — even before reconciliation". That was
+-   wrong and it is now corrected in the file itself. The real order is:
++🔴 EXECUTION ORDER — freeze first; start next-cycle preparation immediately.
++   Publication/retargeting waits for candidate admission. If source evidence is
++   missing, Phase 0 supplies the missing local profile before SOURCE_READY;
++   do not manufacture a second run when current exact evidence already covers it.
+
+-     0a.0   raise the release-freeze                       (minutes)
+-     0a.0b  cut release/vX+1 + BACK-MERGE main into the
+-            release branch                                 (minutes)
++     0a.0   raise the release-freeze
++     0a.0a  resolve the living PR; ready it and verify eligible execution
++     0a.0b  source admission → exact cut → bump PR → NEXT_READY
++            (HOLD publication/retargeting until evidence is complete)
+      0     the pre-flight                                  (6-8 h, historically)
+      0a    the rest of reconciliation
+
+-   Two reasons, both paid for: the pre-flight is the longest phase, so running
+-   it before the freeze runs it against a tip parallel campaigns can still move
++   Freeze before the long pre-flight so parallel campaigns cannot move its tip
+    (v3.8.40/.41: a campaign advanced the branch by 34 commits mid-run, forcing a
+-   full CHANGELOG re-reconciliation); and the back-merge at 0a.0b is what keeps
+-   the release PR out of CONFLICTING, where it runs ZERO CI in complete silence
+-   (see phase-0a step 0a.0a).
++   full CHANGELOG re-reconciliation). Verify mergeability and eligible workflow
++   evidence explicitly (0a.0a); repair conflicts through the admitted sync/repair
++   path, without assuming a ready flip or a branch cut made CI run.
+
+ Phase 0  → 🟢 PRE-FLIGHT (Solution E): `npm run check:release-green` on the release
+-           branch; fix HARD reds + rebaseline ratchet DRIFT so the release PR is
++           branch; fix required failures and measure DRIFT without loosening baselines so the release PR is
+            green on its FIRST CI run (no more 40-min layered cycles).
+ Phase 0a → 🧾 RECONCILIATION (FIRST STEP, MANDATORY): raise the release-freeze,
+            then 🆕 0a.0b CUT THE NEXT CYCLE (parallel-cycle model, 2026-07-04):
+-           branch release/vX+1 from the frozen tip + /version-bump + living
++           source-bound cut + /version-bump task PR + NEXT_READY + living
+            release PR + re-home open PRs — development continues on vX+1
+-           IMMEDIATELY while the captain closes vX. Then: commit↔changelog
++           only after NEXT_READY while the captain closes vX. Then: commit↔changelog
+            coverage + cherry-pick/closed-PR credit audit + sync full CHANGELOG
+            & Contributors hall into the open release PR (`npm run release:reconcile`;
+            PR body = templates/release-pr-body.md).
+@@ -77,11 +77,10 @@
+            (política do dono, 2026-10-19 — ver phase-4 §17a).
+ Phase 5 → (após os fragments RÁPIDOS verdes; o sync-back é INCREMENTAL e pode começar
+            antes) 🔒 leftover sweep (19b) → 🆕 SYNC-BACK
+-           main → release/vX+1 (`scripts/release/sync-next-cycle.mjs`): traz os
++           main → release/vX+1 (PR candidata exata + FF autorizado): traz os
+            fixes de fechamento (base-reds, homologação, CHANGELOG final da vX)
+-           para o ciclo que já roda desde 0a.0b. NÃO cria mais o ciclo aqui
+-           (fallback: se 0a.0b não rodou — release antiga — abre o ciclo à moda
+-           clássica; ver phase-5).
++           para o ciclo admitido em 0a.0b. Se a criação antecipada não terminou,
++           o fallback usa as mesmas transições e gates; ver phase-5.
+ ```
+
+ **REGRA CRÍTICA: Sem "OK" explícito do usuário após o deploy VPS → Phase 3 não existe.**
+@@ -95,14 +94,14 @@
+
+ | Phase | File | Contains |
+ | ----- | ---- | -------- |
+-| 0 — Pre-flight | `phases/phase-0-preflight.md` | nightly issue as base-red worklist; check:release-green; FULL unit+integration sweep; PR-context gates (test-masking/file-size/pr-evidence); drift rebaseline |
+-| 0a — Reconciliation | `phases/phase-0a-reconciliation.md` | **0a.0 raise release-freeze (Hard Rule #21)**; **🆕 0a.0a flip living PR draft→ready (arms heavy CI)**; **🆕 0a.0b cut the next cycle (branch vX+1 + /version-bump + living PR as DRAFT + re-home PRs)**; commit↔CHANGELOG coverage; closed-PR credit audit; 🙌 Contributors section (mandatory); release-PR body sync; gate |
++| 0 — Pre-flight | `phases/phase-0-preflight.md` | nightly issue as base-red worklist; check:release-green; FULL unit+integration sweep; PR-context gates (test-masking/file-size/pr-evidence); measured drift, no automatic baseline change |
++| 0a — Reconciliation | `phases/phase-0a-reconciliation.md` | **0a.0 raise release-freeze (Hard Rule #21)**; **🆕 0a.0a flip living PR draft→ready (arms heavy CI)**; **0a.0b source admission + exact branch cut + admitted bump PR + NEXT_READY before draft/default/retargeting**; commit↔CHANGELOG coverage; closed-PR credit audit; 🙌 Contributors section (mandatory); release-PR body sync; gate |
+ | 0b — Security | `phases/phase-0b-security.md` | npm audit + CodeQL + Dependabot triage |
+ | 1 — Pre-merge | `phases/phase-1-pre-merge.md` | branch/version parity; atomic bump; CHANGELOG build + coverage assertion; versioned-file sync; docs/i18n sync; feature-doc sync; full quality gate; commit; open PR (Evidence block BEFORE first push); **STOP #1**; one-pass CI/CodeQL handling |
+ | 2 — VPS homologation | `phases/phase-2-vps-homologation.md` | deploy main via `/deploy-vps-local` (REF=origin/main); health checks; **STOP #2 (mandatory owner OK)** |
+ | 3 — Launch | `phases/phase-3-launch.md` | **12b parity gate (title-matched release PR)**; **12c lift the release-freeze**; tag + GitHub release; Docker; npm; rollback playbook |
+ | 4 — Monitoring | `phases/phase-4-monitoring.md` | **17a fast/slow split (fast = npm, Docker, Electron linux/windows/macOS-intel → must be green; slow = macOS arm64 → trails, attached later)**; watch loop; failure handling (Electron lockfile precedent, re-dispatch on `main`); manual relay of finished legs; preserve release branch |
+-| 5 — Next cycle | `phases/phase-5-next-cycle.md` | **19b leftover sweep (all release/* branches)**; **🆕 sync-back `main → release/vX+1`** via `scripts/release/sync-next-cycle.mjs` (anti-CHANGELOG-eat + i18n resync); classic cycle-open kept only as FALLBACK when 0a.0b didn't run |
++| 5 — Next cycle | `phases/phase-5-next-cycle.md` | **19b leftover sweep (all release/* branches)**; **sync-back `main → release/vX+1`** through an exact candidate PR and authorized FF (anti-CHANGELOG-eat + i18n resync); fallback uses the same cycle-admission contract |
+ | CI pitfalls | `phases/ci-pitfalls.md` | recurring CI failures table (docs-sync, fpm, Docker 502, coverage) |
+
+ **Execution protocol:**
+@@ -122,8 +121,9 @@
+   the freeze stays up — the next `/generate-release` run reuses it (0a.0 is idempotent).
+   **🆕 Freeze semantics (parallel-cycle):** the freeze means "release/vX is the captain's —
+   do not merge there"; it does NOT stop development, which continues on the `release/vX+1`
+-  branch cut at 0a.0b. Campaigns finding an open freeze must RETARGET to the highest
+-  `release/v*` branch, and HOLD only during the short window before vX+1 exists.
++  branch admitted at 0a.0b. Campaigns finding an open freeze retarget only to the
++  owner-selected next cycle with current `NEXT_READY` evidence. Until then HOLD;
++  the highest version name or an existing branch alone is not readiness.
+ - **Two STOPs are user gates, not formalities:** no tag/release/publish before STOP #2's
+   explicit "OK". Any other reply = keep waiting.
+ - **Atomicity:** bump + features + changelog + i18n in ONE commit (`git show vX.Y.Z` must
+--- /dev/null
++++ b/generate-release/phases/candidate-admission.md
+@@ -0,0 +1,117 @@
++# Candidate admission for cycle creation, bumps and sync-back
++
++Read this before creating a release branch, publishing a bump or landing a sync-back.
++Read `../../_shared/base-green.md` and `../../_shared/validation-gate.md` for the
++canonical evidence and resource rules. This file specifies the release transitions;
++it does not grant merge, publication, administrative or protected-instruction approval.
++Reuse authorization already given for the exact action; ask only for missing authority.
++
++## Bind the evidence before using it
++
++Record repository, target branch, live target SHA `B`, candidate/head SHA `H`, tree,
++PR number and draft state, GitHub test-merge SHA/tree when present, workflow source
++SHA/path, event, run ID/attempt, check name/App ID, terminal result and observation time.
++For a branch cut, record the certified source SHA/tree `S` separately. For sync-back,
++also record the exact `main` SHA `M`. A PR API `.base.sha` snapshot is not a live branch
++tip: query the branch/ref itself and re-read it immediately before publication.
++
++Use the candidate's `config/quality/admission-policy.json` and current workflows to
++enumerate required lanes. In the reviewed OmniRoute policy the aggregate names are
++`Gate / CI` and `Gate / Quality`, issued by GitHub Actions (App ID `15368`); verify that
++binding and the workflow/policy source at execution time. A matching name or App ID
++alone does not establish the policy that ran. Also read all effective rulesets and
++classic branch protections for the actual target, including creation, PR, strictness,
++review, signing and merge-method constraints. Missing native checks are a control gap,
++not permission to skip the policy or silently edit the rules.
++
++Before editing, verify every referenced script and flag against source on the selected
++candidate. Skills may be installed ahead of a branch's tooling. A missing required helper
++means HOLD for compatibility repair; do not import a different checkout's implementation
++or invent an equivalent flag to continue the release.
++
++Require terminal `success` from both aggregate verdicts and every applicable required
++lane. Preserve the policy's explicit exclusions, but do not accept a draft fast path,
++unexpected skip/neutral, queued/cancelled/timed-out/missing result or `action_required`
++as PASS. The latter is pending execution authorization, not contributor failure.
++An issue's status, a clean merge, five displayed checks, a local quick result and a
++full observer profile are not interchangeable with complete candidate acceptance.
++Use `../../validate-release-green/SKILL.md` for exact local profile and comparison
++binding; record required lanes outside that profile separately. A changed source,
++target, candidate, workflow or policy invalidates the corresponding acceptance.
++
++For PR admission, verify the commit GitHub evaluates: it may be the test-merge commit
++rather than the head. Bind both and prove the checked tree corresponds to the proposed
++landing; do not relabel a merge-tree PASS as validation of a different source tree.
++Only eligible event evidence counts. A `workflow_dispatch` job on a PR head does not
++satisfy a ruleset's required workflow check; a merge queue needs `merge_group`.
++[GitHub required-check evaluation](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/troubleshooting-required-status-checks).
++
++## Release cut and bump: four separate transitions
++
++1. **SOURCE_READY** — freeze and pin `S`; prove the exact source tree against the
++   applicable policy. If the frozen source is red or its evidence is missing, keep the
++   cut and retargeting on HOLD while repairing the base in its own authorized task.
++   Do not silently substitute `main`. A PR test-merge with a different tree is not `S`.
++2. **BRANCH_CREATED** — once authorized and eligible under the current creation rules,
++   create the new release ref at exactly `S`, without adding a bump commit. Re-read the
++   remote ref and require equality to `S`. A GitHub rejection is HOLD: preserve the
++   response classification and do not bypass, change enforcement or try another base.
++   Existing branch names are resume inputs, not proof these transitions happened.
++3. **BUMP_ADMITTED** — prepare `/version-bump` in an owned worktree on a dedicated task
++   branch based on that release tip. Publish only the task branch and open a **non-draft**
++   PR against the new release. Complete exact-candidate admission and use the authorized
++   normal merge path. Never push the new bump directly to the integration branch.
++4. **NEXT_READY** — read back the bump's actual landed SHA/tree and the applicable
++   complete acceptance evidence. If the merge method produced a different SHA/tree,
++   establish that identity's evidence instead of carrying the PR label forward.
++   Only then open/reuse the living draft release PR to `main`, change the default branch,
++   retarget the selected queue and announce the new cycle ready. Re-read each mutation;
++   drift or a partial handoff remains HOLD with completed substeps recorded.
++
++The living draft PR is release-note organization, not admission evidence. Do not depend
++on release-branch push/create events to produce missing checks: inspect the triggers;
++the reviewed CI/Quality workflows run on PRs and only `main` for push. Creation under
++`do_not_enforce_on_create: false` and the exact landing path require an authorized GitHub
++trial before claiming operational compatibility. This document is not that trial.
++
++## Sync-back: keep the tested merge commit
++
++Prepare a dedicated task branch from `B` in an owned worktree, merge pinned `M`, resolve
++conflicts with source evidence and run the required validation. Keep `B` and `M` ancestral
++to the final `H`. Publish the task branch and open a non-draft PR with base equal to the
++live next-cycle branch and head exactly `H`. Re-run admission when that tuple changes.
++Strict policy requires the candidate to include the current target; do not weaken it.
++
++After exact-candidate admission, fresh rules/ref readback and existing landing authority,
++land by **fast-forward, never squash**. Re-read the target and `main` immediately before
++the push; if they differ from `B`/`M`, reconcile and revalidate first. A normal non-forced
++push preserves Git's ancestry check but is not an atomic snapshot of all GitHub state.
++Record the server outcome, fetch and verify the resulting ref equals `H`, and prove both
++captured `M` and freshly fetched `origin/main` are ancestors. If main advances concurrently,
++report the residual sync explicitly. Read the PR's actual merged state instead of assuming
++the push marked it merged. Rejection or ambiguous readback is HOLD; preserve the candidate,
++with no bypass, force push, squash fallback, automatic rule edit or retry loop.
++
++GitHub's PR rule requires an open associated PR, not necessarily an approving review.
++Its warning about manually pushed merge commits is conditional on stale-review/last-push
++settings and matching merge contents. These facts neither forbid every associated FF nor
++guarantee this candidate will be accepted: validate current rules and the actual outcome.
++[GitHub ruleset semantics](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets).
++
++## Ownership and completion
++
++Create/reuse worktrees only after resource and compatibility-lock admission. Verify the
++expected common Git directory, physical root, dedicated branch and source identity before
++the first write; dependencies are physical/hard-linked and hooks must execute. A lifecycle
++fix in a helper does not prove that its caller has resource admission or PR publication.
++Do not invoke a combined merge-and-push script without the separation this contract needs.
++If there is no implemented prepare-only mode, use the reviewed manual candidate procedure;
++do not invent a flag. Quick checks and `--skip-green-gate` cannot waive required acceptance.
++
++Before removing an owned worktree, require no active readers/processes, a clean owned tree,
++and HEAD equal to the published candidate recorded for that task. Preserve unlanded work
++and evidence. Keep instructions touching protected surfaces behind their specific operator
++approval before installation/merge; preparation and read-only validation can continue.
++
++Report each transition with exact identities and evidence, remaining HOLD/UNKNOWN items,
++and the live default/target/PR readback. Branch existence alone never means cycle ready.
+--- a/generate-release/phases/phase-0a-reconciliation.md
++++ b/generate-release/phases/phase-0a-reconciliation.md
+@@ -25,46 +25,27 @@
+ fi
+ ```
+
+-The campaign workflows (`/implement-fix-bugs`, `/merge-prs`, `/implement-features`, `/green-prs`, `/port-upstream-*`) check this label before merging into the FROZEN release branch. Under the parallel-cycle model they **retarget to the next cycle's branch** (cut in 0a.0b below) instead of holding — they only hold during the short window between 0a.0 and 0a.0b. **Close the freeze after the release PR squash-merges to `main`** (Phase 3, alongside the parity gate) — see step 12c.
+-
+-### 0a.0a — 🆕 Flip the living release PR from draft → ready (arm the heavy CI)
+-
+-> **RULE (2026-07-04, plano mestre testes+CI): the living release PR is opened as a DRAFT at the
+-> previous cycle's 0a.0b, and `ci.yml` skips the heavy jobs on drafts** — that is what stops every
+-> mid-cycle merge into `release/vX` from re-triggering the full ~95-job pipeline (v3.8.44 cycle:
+-> 123 heavy runs, 88 cancelled, 0 useful). From reconciliation onwards the captain NEEDS that full
+-> signal (the .44 heavy CI caught 3 real production bugs) — so flip it ready NOW, right after the
+-> freeze:
+-
+-> **🔴🔴 GATE BEFORE THE FLIP — the single most expensive failure mode in this skill.**
+-> **A release PR runs ZERO CI while `mergeable` is `CONFLICTING`.** GitHub cannot compute the merge
+-> ref, so **no `pull_request` workflow fires at all** — not `ci.yml`, not semgrep, not DAST. There
+-> is no error, no red check, no queued run: the runs simply do not exist. Flipping draft→ready does
+-> not help. Pushing again does not help. In the v3.8.49 run this cost ~25 minutes of diagnosing the
+-> wrong thing (I believed `ready_for_review` was failing to arm the pipeline).
+->
+-> An absent run is indistinguishable from a pipeline that has not started yet, which is why this
+-> has to be an explicit assertion and not something you notice.
+->
+-> ```bash
+-> gh pr view "$PR" --repo cheaper-inference/OmniRoute --json mergeable,mergeStateStatus
+-> # MERGEABLE  → proceed with the flip
+-> # CONFLICTING → STOP. Back-merge main into the release branch, push, re-check. Only then flip.
+-> ```
+->
+-> **The real fix is upstream of here:** back-merge `main` into the release branch at **0a.0b**, when
+-> the cycle is cut, so divergence never accumulates for two weeks and the PR is never
+-> `CONFLICTING` in the first place. This gate is the safety net, not the plan.
++The campaign workflows (`/implement-fix-bugs`, `/merge-prs`, `/implement-features`, `/green-prs`, `/port-upstream-*`) check this label before merging into the FROZEN release branch. Under the parallel-cycle model they retarget only after the next cycle reaches `NEXT_READY` under [candidate admission](candidate-admission.md). Until then they HOLD campaign merges; branch existence alone is insufficient. **Close the freeze after the release PR squash-merges to `main`** (Phase 3, alongside the parity gate) — see step 12c.
++
++### 0a.0a — Ready the living release PR and verify actual execution
++
++Read the candidate workflows' current draft/event conditions before changing the living
++release PR from draft to ready. Confirm one exact open PR from this release to `main`,
++record its head/base identities and inspect mergeability. Conflicts can prevent a PR merge
++ref and its eligible `pull_request` execution; do not generalize that to every event or
++workflow. Unknown/missing/conflicting state means HOLD for diagnosis or an admitted repair.
++A ready flip arms the configured event; it does not prove that jobs started or passed.
+
+ ```bash
+ RELEASE_PR=$(gh pr list --repo cheaper-inference/OmniRoute --head "release/v$VERSION" --base main \
+-  --state open --json number,isDraft,mergeable --jq '.[0]')
++  --state open --json number,isDraft,mergeable --jq 'if length == 1 then .[0] else null end')
+ PR_NUM=$(echo "$RELEASE_PR" | jq -r '.number')
+
+-# Arming the CI is pointless while the merge ref cannot be computed — see the gate above.
+-if [ "$(echo "$RELEASE_PR" | jq -r '.mergeable')" = "CONFLICTING" ]; then
+-  echo "❌ PR #$PR_NUM is CONFLICTING — NO pull_request workflow will run, silently." >&2
+-  echo "   Back-merge main into release/v$VERSION, push, and re-check before flipping." >&2
++# A missing/ambiguous PR or unresolved mergeability is not execution evidence.
++case "$PR_NUM" in ""|null|*[!0-9]*) echo "HOLD: one exact release PR required" >&2; exit 1 ;; esac
++if [ "$(echo "$RELEASE_PR" | jq -r '.mergeable')" != "MERGEABLE" ]; then
++  echo "HOLD: PR #$PR_NUM mergeability is not confirmed." >&2
++  echo "   Prepare and admit a dedicated repair PR, then re-check before flipping." >&2
+   exit 1
+ fi
+
+@@ -74,73 +55,76 @@
+   echo "living PR already ready (pre-draft-model cycle or resumed run) — nothing to do"
+ fi
+
+-# Prove the flip actually armed something. An empty list here means the gate above missed a case.
+-sleep 20
+-gh pr checks "$PR_NUM" --repo cheaper-inference/OmniRoute 2>&1 | head -5 \
+-  || echo "⚠️  no checks reported yet — re-check mergeable before assuming the pipeline is queued"
+-```
+-
+-The first `synchronize` after the flip runs the full pipeline on the reconciled tip; from here to
+-the squash-merge the captain owns a normal, fully-gated release PR. (Coverage during the cycle is
+-NOT lost: every contributor PR runs the `quality.yml` fast-gates, and `nightly-release-green`
+-validates the release tip daily.)
+-
+-### 0a.0b — 🆕 Cut the NEXT cycle NOW (parallel-cycle model — do this right after the freeze)
+-
+-> **🔴 RULE (2026-07-04, `_tasks/release-flow/2026-07-04_proposta-ciclo-paralelo-v2.md`): development must NOT wait for the release.** The freeze hands `release/vX` to the captain; everyone else needs a home *immediately*. Cut `release/vX+1` from the frozen tip, bump it, open its living release PR, and re-home the open PRs — all before starting the reconciliation. Closing fixes (base-reds, homologation, final CHANGELOG) reach this branch later via the Phase 5 sync-back; do NOT try to keep the two branches in sync during the release.
+-
+-```bash
+-VERSION=$(node -p "require('./package.json').version")            # the version being released (X)
+-NEXT=$(node -p "const [a,b,c]='$VERSION'.split('.').map(Number); c>=999 ? a+'.'+(b+1)+'.0' : a+'.'+b+'.'+(c+1)")
+-git fetch origin "release/v$VERSION" --quiet
+-
+-# Idempotent: skip if the next branch already exists (resumed release)
+-if git ls-remote --exit-code origin "release/v$NEXT" >/dev/null 2>&1; then
+-  echo "release/v$NEXT already exists — 0a.0b already done (resumed run)"
+-else
+-  # Cut from the FROZEN tip (never from the shared checkout's working tree)
+-  git branch "release/v$NEXT" "origin/release/v$VERSION"
+-  git push origin "release/v$NEXT"
+-fi
+-```
+-
+-Then, **in an isolated worktree on `release/v$NEXT`** (Rule #19 — never the shared checkout):
+-1. Run the `/version-bump` skill for `$NEXT` (bump package.json ×3 + openapi + `## [$NEXT] — TBD` CHANGELOG section + `npm install` lockfile + i18n mirrors via `npm run release:sync-changelog-i18n -- $NEXT $VERSION`), **then the current-version claims of README.md / llm.txt and their 66 mirrors: `node scripts/release/bump-version-claims.mjs --from $VERSION --to $NEXT` and assert with `--check --to $NEXT`** (without it `release/v$NEXT` is born red on Docs sync strict — v3.8.53, 2026-10-19), commit + push.
+-2. Open the living release PR **as a DRAFT**: `gh pr create --draft --base main --head "release/v$NEXT" --title "Release v$NEXT" --body "🚧 Living release notes — cycle opened at v$VERSION freeze (parallel-cycle model). Synced at each /generate-release phase. DRAFT during the cycle: heavy ci.yml jobs skip drafts (plano mestre testes+CI); flipped ready at the next release's Phase 0a.0a."` (the title MUST be exactly `Release v$NEXT` — the 12b parity gate title-matches it; draft does not affect the title-match). The draft is what prevents every mid-cycle merge from re-triggering the ~95-job heavy pipeline — it gets flipped to ready by the NEXT `/generate-release` at 0a.0a.
+-3. **Re-home open PRs** — run the script, do NOT hand-roll the loop:
++# Read the full status list for discovery; command success/existence is not acceptance.
++gh pr checks "$PR_NUM" --repo cheaper-inference/OmniRoute
++```
++
++Verify actual run/event/head/base/attempt and complete terminal results under
++[candidate admission](candidate-admission.md). Missing or approval-pending runs remain HOLD;
++do not infer that a flip, sleep or first `synchronize` completed the policy. The captain
++owns the release PR, but each changed candidate needs its own evidence. Contributor PR and nightly runs are
++separate evidence sources: verify their actual candidate, required scope and result before
++reusing them. Their configured triggers alone do not establish coverage or a green base.
++
++### 0a.0b — Prepare the next cycle; publish only after admission
++
++Read [candidate admission](candidate-admission.md), including the four transitions
++`SOURCE_READY → BRANCH_CREATED → BUMP_ADMITTED → NEXT_READY`. The freeze can happen
++immediately; the branch/default/queue handoff waits for verified readiness. Continue
++independent reconciliation while required evidence is pending; do not create a known-red
++development base to shorten that wait.
++
++1. Pin the frozen release's exact SHA/tree `S` and calculate `$NEXT` with the existing patch
++   version rule. Complete source admission and inspect the new branch's effective rules.
++   If a next-cycle ref already exists, read its tip and the previous transition receipts;
++   reconcile drift without overwriting it or declaring the phase complete by name.
++2. With the authorized source still equal to `S`, create `release/v$NEXT` at exactly `S`
++   and read back the remote ref. GitHub rejection or unequal readback means HOLD.
++   This initial cut contains no new bump commit and is not yet `NEXT_READY`.
++3. In an owned isolated worktree on a dedicated `chore/*` or `fix/*` task branch based on
++   the new release, delegate `/version-bump` with instruction mode **next-cycle**, the
++   exact source/version pins and authorized target `$NEXT`. This mode creates/verifies
++   `## [$NEXT] — TBD`, preserves any existing next-cycle bullets/credits and all previous
++   release sections, and skips historical regeneration/dating and the no-commits STOP.
++   It is an instruction branch, not a new product CLI flag. Preserve the touchpoints:
++   package versions and locks, OpenAPI, `## [$NEXT] — TBD`, CHANGELOG mirrors through
++   `npm run release:sync-changelog-i18n -- "$NEXT" "$VERSION"`, and current-version
++   README/llm claims through `node scripts/release/bump-version-claims.mjs --from "$VERSION" --to "$NEXT" --no-state`
++   plus the root-only `--check --to "$NEXT" --no-state`. Enumerate and verify affected mirrors
++   separately; the root check does not cover them. Follow version-bump's per-leaf source/
++   target/prior-state proof before any later state update; until then i18n admission is HOLD. Never run the bump in the shared checkout or directly on
++   the release integration branch. Retain hooks and the protected-instruction approval rule.
++4. Publish that task branch and open a **non-draft bump PR** against `release/v$NEXT`.
++   Bind its final head, current base and checked candidate; complete applicable local and
++   eligible GitHub admission. Merge through the authorized normal path, then read back the
++   actual landed SHA/tree and evidence. Inherited failures still require a base repair;
++   neither their explanation nor a draft skip is a passing result.
++5. Only after `NEXT_READY`, create/reuse the living **draft** PR from `release/v$NEXT` to
++   `main`, titled exactly `Release v$NEXT`. This PR holds release notes; it did not admit
++   the bump. Change the repository default to the verified new branch under the existing
++   release authority and re-read `.default_branch`. Refresh the tip and effective rules
++   after the default changes, because default-targeted rules now apply to this branch.
++6. Re-home the authorized queue using the existing script, with the dry-run inspected:
+
+    ```bash
+-   node scripts/release/rehome-open-prs.mjs "$VERSION" "$NEXT" --dry-run   # inspect first
++   node scripts/release/rehome-open-prs.mjs "$VERSION" "$NEXT" --dry-run
+    node scripts/release/rehome-open-prs.mjs "$VERSION" "$NEXT"
+    ```
+
+-   It reads the base back after every `gh pr edit --base` (that command **exits 0 without
+-   applying** — v3.8.42 lesson), uses `--limit 300` (`gh pr list` silently caps at **30**, so a
+-   hand-run loop re-homes a third of the queue and reports success), comments on each PR, is
+-   idempotent for a resumed release, and exits non-zero listing any retarget that did not take.
+-   The v3.8.49 freeze had **148** open PRs — ~450 API calls. Not a hand loop.
+-
+-4. 🆕 **Flip the repo's default branch to the new cycle** — this is the half the script *cannot* do,
+-   because it only sees PRs that already exist:
+-
+-   ```bash
+-   gh api -X PATCH repos/cheaper-inference/OmniRoute -f default_branch="release/v$NEXT"
+-   gh api repos/cheaper-inference/OmniRoute --jq '.default_branch'   # verify
+-   ```
+-
+-   **WHY:** contributors open PRs against the **default branch**. While it points at `main`, every
+-   new contributor PR targets `main` — never a release branch — and step 3 never sees them (it
+-   filters on `--base release/v$VERSION`). On 2026-07-15 there were **6 such PRs**, and they are not
+-   contributor error: it is the GitHub default doing exactly what it is configured to do. Worse,
+-   PRs on `main` run the full `ci.yml` including `Build`; retargeting them to a release branch later
+-   makes a real `Build` failure **vanish unmeasured** rather than fixed (#7307).
+-
+-   Checked and safe: Mergify reads `.mergify.yml` from the default branch, and the file exists on the
+-   release branches too (it travels with the 0a.0b cut). `ci.yml`/`quality.yml` trigger on explicit
+-   branch names, not the default. What does change: the repo landing page and a fresh `git clone`
+-   land on the live cycle instead of `main` — which is where a contributor should start anyway.
+-5. Comment on the freeze issue announcing the new active branch, so campaign sessions know where to merge: `gh issue comment <FREEZE#> --body "🚀 Development continues NOW on release/v$NEXT (cut at the freeze tip). release/v$VERSION is the captain's — do not merge there."`
+-6. Tear down the worktree. The captain returns to `release/v$VERSION` work and never touches `release/v$NEXT` again until the Phase 5 sync-back.
++   Respect active worktree ownership; do not retarget another session's live PR. Check the
++   script's current scope against that ownership list before invoking it; if it cannot
++   exclude a held PR, stop and prepare the explicit eligible subset instead of using the
++   broad invocation. Read back every selected PR's base, preserving partial results on
++   failure. Revalidate new candidates against their new base before any later admission.
++7. Announce readiness on the existing freeze issue only after the tip/default/queue readback
++   matches the completed transitions. Report any held PRs separately. Tear down only the
++   owned task worktree after published-head, clean-tree and process checks; preserve branch,
++   commit and receipts. The captain returns to closing the frozen release. Phase 5 carries
++   subsequent closing fixes through the admitted sync-back flow.
++
++An interrupted or rejected phase resumes from its recorded completed transition. Do not
++repeat public writes merely because a later readback failed, and do not claim all PRs were
++retargeted when a finite selection or ownership HOLD limited the run.
+
+ ### 0a.1 — Commit ↔ CHANGELOG coverage
+
+--- a/generate-release/phases/phase-5-next-cycle.md
++++ b/generate-release/phases/phase-5-next-cycle.md
+@@ -7,7 +7,8 @@
+ > **Run ONLY after Phase 4 confirms every fragment is green.**
+ >
+ > **🆕 PARALLEL-CYCLE MODEL (2026-07-04)**: the next cycle (`release/vX+1`) was cut at Phase 0a.0b —
+-> at the freeze — and development has been running there the whole time. This phase no longer
++> from an admitted source and handed off only after `NEXT_READY`. Confirm that receipt;
++> a branch existing since the freeze is not proof it was ready. This phase no longer
+ > CREATES the cycle; it (a) sweeps for stranded commits (19b) and (b) **syncs `main` back into
+ > `release/vX+1`** so the closing fixes (base-red fixes, homologation findings, the finalized
+ > `## [vX]` CHANGELOG section) reach the live cycle. Design doc:
+@@ -73,45 +74,40 @@
+ > Also: **never `git stash`** to get a clean tree during this merge (Hard Rule #22a) — compare
+ > against a ref with `git show <ref>:<path>` instead.
+
+-The cycle branch was cut at the freeze tip (0a.0b), so everything the captain landed AFTER the
+-freeze — base-red fixes, CI-round fixes, homologation findings, the finalized `## [vX]` CHANGELOG +
+-Contributors — exists on `main` but not on `release/vX+1`. Bring it over with the mechanical
+-script (merge + anti-CHANGELOG-eat + i18n resync), from an isolated worktree it creates itself:
+-
+-```bash
+-NEXT=<the next cycle version, e.g. 3.8.45>
+-node scripts/release/sync-next-cycle.mjs "$NEXT"
+-```
+-
+-The script:
+-1. Fetches and creates a temp worktree on `release/v$NEXT` (under `.claude/worktrees/`).
+-2. `git merge origin/main` — resolving `CHANGELOG.md` with the anti-eat protocol: take **main's**
+-   CHANGELOG verbatim, re-insert the `## [$NEXT] — TBD` section (with any bullets the cycle already
+-   accumulated) on top, and ASSERT the result is net-additive (main's `## [vX]` section intact).
+-3. Re-syncs the i18n CHANGELOG mirrors (`release:sync-changelog-i18n $NEXT vX`).
+-4. Commits, then **runs `validate-release-green --quick` on the MERGED tree before pushing**
+-   (WS0.3, v3.8.49 plan): the sync-back is the one write path to the release branch with no CI
+-   gate — a red merged tree pushed here turns the whole PR queue red. On HARD failure the commit
+-   stays LOCAL in the sync worktree; fix the reds there and re-run. `--skip-green-gate` is the
+-   emergency hatch, allowed ONLY after verifying the reds pre-exist on the branch tip.
+-5. Pushes; prints the conflicts it could NOT auto-resolve (those are yours: renumber
+-   migrations per the cross-PR collision precedent, re-run `npm install` for the lockfile, then
+-   re-run the script — it is idempotent).
+-
+-> **Conflict rules learned on v3.8.52 → v3.8.53 (2026-10-19) — apply before re-running the script:**
+->
+-> - **The 0a.0b worktree blocks the script.** `cycle-vX+1` still holds `release/vX+1` →
+->   `fatal: 'release/vX+1' is already used by worktree`. Remove it first (process guard, clean tree),
+->   or point the script at it.
+-> - **Resolve `package.json` BEFORE anything runs `npm`.** The script calls
++Read [candidate admission](candidate-admission.md) before preparing or publishing the
++sync-back. Capture the live target `B` and `main` `M`, create an owned task worktree/branch,
++and form the merge candidate `H` there. Preserve the next-cycle version and bullets while
++bringing over the closing fixes and finalized previous-release notes. Resolve all conflicts
++before generators or validation; a warning from a failed generator is not completion.
++
++The reviewed `scripts/release/sync-next-cycle.mjs` combines merge, local quick validation,
++direct release push and teardown; it has no prepare-only mode. **Do not invoke that combined
++publisher for this flow.** Until a reviewed caller separates these transitions, use the
++manual candidate procedure below and the script's source as the mechanical reference for
++anti-CHANGELOG-eat/i18n checks. Do not invent a flag or treat `--skip-green-gate` as admission.
++
++The pending lifecycle repair (physical/hard-linked dependencies, hooks, reuse identity and
++published-head teardown) must be reviewed and validated before adoption; it does not itself
++add exact-PR admission or resource admission to the caller. Worktree creation/reuse still
++requires the current resource/compatibility-lock protocol before writes. Keep the main
++checkout and other sessions' worktrees untouched.
++
++> **Conflict rules learned on v3.8.52 → v3.8.53 (2026-10-19) — verify while preparing the candidate:**
++>
++> - **Use a task branch for the sync.** Do not reuse or remove another session's
++>   cycle worktree to free the integration branch. Verify ownership/common root/branch
++>   before any reuse and preserve active worktrees.
++> - **Resolve `package.json` BEFORE anything runs `npm`.** The legacy script calls
+ >   `npm run release:sync-changelog-i18n` while `package.json` is still conflicted → `EJSONPARSE`,
+->   caught by a `try/catch` that only warns — the commit then lands with the mirrors NOT resynced
+->   (v3.8.51's "[3.8.51] velha na .52"). Resolve the version conflicts, re-run, and check one mirror
++>   caught by a `try/catch` that only warns — the legacy path could land with mirrors NOT resynced
++>   (v3.8.51's "[3.8.51] velha na .52"). Resolve the version conflicts, run the required resync,
++>   require its successful exit and validate all affected mirrors; check the section ordering
+ >   shows `## [vX] — <date>` (not `— TBD`) below `## [vX+1] — TBD`.
+-> - **Version conflicts are "ours" (`release/vX+1` side) — EXCEPT lockfiles.** `package.json`,
++> - **Prove version-only conflicts before selecting a side.** For `package.json`,
+ >   `open-sse/package.json`, `electron/package.json`, `docs/openapi.yaml`, `llm.txt` + the 66
+->   `docs/i18n/*/llm.txt` only differ by `X → X+1`: `git checkout --ours` is right (73 files on
+->   v3.8.52). `package-lock.json` and `electron/package-lock.json` are NOT just version lines: main
++>   `docs/i18n/*/llm.txt`, the historical 73-file case differed only by `X → X+1`, so ours
++>   preserved the next version. Re-prove that per file; names alone do not justify ours.
++>   `package-lock.json` and `electron/package-lock.json` are NOT just version lines: main
+ >   may carry a post-release lock repair (#15157, #17212). Take **main's** lock, re-apply only the
+ >   two version fields (or `npm install --package-lock-only --ignore-scripts`), then prove it:
+ >   `npm ci --dry-run --ignore-scripts` in `.` AND in `electron/` must pass. A blind `--ours` here
+@@ -122,26 +118,48 @@
+ >   `git diff origin/main --name-only --diff-filter=A -- changelog.d` ∩
+ >   `git show --name-only --diff-filter=D <release commit> -- changelog.d` → `git rm` (74 on v3.8.52).
+ >   Fragments main added AFTER the release (post-merge fixes) stay.
+-> - **The `--quick` gate on the merged tree may be red for the cycle's own reasons.** On v3.8.52 the
+->   only HARD was `README.md` still saying `3.8.52` against `package.json` 3.8.53 — the 0a.0b bump
+->   does not touch README version mentions (`#15966` added them). Prove it pre-exists on the pure
+->   tip (`git diff origin/release/vX+1 <sync commit> -- README.md` empty) and it qualifies for
+->   `--skip-green-gate`; the README itself is cycle work (`fix/release-vX+1-basereds`), not the sync's.
+-> - **Hooks.** The script's worktree has no `.husky/_` → the sync commit runs no pre-commit gate.
+->   `cp -a <main>/.husky/_ <wt>/.husky/_` before committing (the ban on `git stash` applies here too).
+-
+-### How a sync-back LANDS when it needs a PR (v3.8.50 → v3.8.51 precedent, 2026-08-28)
+-
+-When the merged tree cannot be pushed straight (a hard red the `--quick` gate refuses, repairs
+-that deserve review), open the PR — but land it by **fast-forward push, never squash**:
++> - **Base failures remain blocking.** An unchanged README or other inherited defect explains
++>   a red; it does not waive the required gate. Repair the base in the authorized base-red
++>   task and recompose the sync candidate. A local quick profile is diagnostic only.
++> - **Hooks.** Require an active `.husky/_` and normal commit hooks in the owned worktree.
++>   The lifecycle patch must be adopted only after its own review/tests; missing hooks HOLD.
++
++### How every sync-back lands: admitted PR, then authorized fast-forward
++
++Publish the dedicated task branch and open a **non-draft PR** to `release/v$NEXT` with head
++exactly `H`. Complete [candidate admission](candidate-admission.md), including the checked
++head/test-merge tree, current target `B`, `main` `M`, eligible gates and fresh effective rules.
++Preserve existing operator landing authority and protected-instruction approval. The final
++publication remains **fast-forward, never squash**; an associated PR is required by this
++procedure, but its existence/check names alone do not prove that GitHub will accept the push.
++
++After those preconditions, inside the owned worktree:
+
+ ```bash
+-H=$(git rev-parse <sync-branch>)
+-git fetch origin "release/v$NEXT"
+-git merge-base --is-ancestor "origin/release/v$NEXT" "$H" || echo "NOT FF — merge the tip in first"
+-git push origin "$H:refs/heads/release/v$NEXT"     # GitHub marks the PR merged by itself
+-git merge-base --is-ancestor origin/main "origin/release/v$NEXT" && echo "main ⊂ release/v$NEXT ✓"
++set -e
++: "${NEXT:?reviewed next-cycle version required}"
++: "${H:?admitted candidate SHA required}"
++: "${B:?reviewed target SHA required}"
++: "${M:?reviewed main SHA required}"
++git fetch origin main "release/v$NEXT"
++test "$(git rev-parse HEAD)" = "$H"
++test "$(git rev-parse "origin/release/v$NEXT")" = "$B"
++test "$(git rev-parse origin/main)" = "$M"
++git merge-base --is-ancestor "$B" "$H"
++git merge-base --is-ancestor "$M" "$H"
++# Execute only after the PR/rules/check readback and authorization above.
++git push origin "$H:refs/heads/release/v$NEXT"
++git fetch origin main "release/v$NEXT"
++test "$(git rev-parse "origin/release/v$NEXT")" = "$H"
++git merge-base --is-ancestor "$M" "origin/release/v$NEXT"
++git merge-base --is-ancestor origin/main "origin/release/v$NEXT"
+ ```
++
++Any failed precondition, server rejection or uncertain readback is HOLD. Preserve the
++candidate and classify the outcome; do not force, squash, bypass rules, auto-edit policy
++or loop retries. Read the PR state after the push and record what GitHub actually reports.
++If `main` advanced during publication, report the remaining sync without rewriting the
++published head. Current rules, not this example, decide whether an associated FF is allowed.
+
+ Squash-merging a sync PR drops `main` from the release branch's ancestry, and the NEXT sync-back
+ re-conflicts on every file main touched (551 conflicts on this cycle's first step, 102 real after
+@@ -158,41 +176,23 @@
+    before the push — `check:test-discovery` proves collection, not execution; a `../../../`
+    import one level off fails at load time and paints a whole unit shard red.
+
+-Verify after it finishes:
+-
+-```bash
+-git fetch origin "release/v$NEXT" --quiet
+-git rev-list --count "origin/release/v$NEXT..origin/main"   # must print 0 — main fully contained
+-```
+-
+-### 21. Fallback — classic cycle-open (ONLY if 0a.0b never ran)
+-
+-If this release predates the parallel-cycle model (no `release/vX+1` exists — check
+-`git ls-remote origin 'refs/heads/release/v*'`), open the cycle the classic way from `main`:
+-branch `release/v$NEXT` from `origin/main`, run `/version-bump`, commit
+-`chore(release): open v$NEXT development cycle`, push, open the living release PR titled exactly
+-`Release v$NEXT` (base `main`, **`--draft`** — heavy ci.yml jobs skip drafts during the cycle;
+-the next release's Phase 0a.0a flips it ready), and re-home ALL open PRs:
+-
+-```bash
+-VERSION=$(node -p "require('./package.json').version")
+-NEWBASE="release/v$VERSION"
+-# Re-target every open PR whose base is NOT already the new release branch — PARALLEL
+-# (xargs -P8; sequential over ~140 PRs costs ~5-10 min, parallel ran in 44s — benchmark v3.8.35).
+-# The `headRefName != $NEWBASE` filter excludes the release PR itself (head=release/vX.Y.Z).
+-gh pr list --repo cheaper-inference/OmniRoute --state open --limit 500 \
+-  --json number,baseRefName,headRefName \
+-  --jq ".[] | select(.baseRefName != \"$NEWBASE\" and .headRefName != \"$NEWBASE\") | .number" | \
+-  xargs -P8 -I{} gh pr edit {} --repo cheaper-inference/OmniRoute --base "$NEWBASE"
+-```
+-
+-(Under the parallel-cycle model this re-home already happened at 0a.0b; here only stragglers —
+-PRs opened against `main` or the shipped branch DURING the release — may need it. Verify with
+-`gh pr list --state open --json number,baseRefName` that nothing still targets the shipped branch.
+-After any `gh pr edit --base`, re-verify with `gh pr view <N> --json baseRefName` — the edit can
+-fail silently.)
+-
+-> Redirecting the base does NOT merge anything. Never `gh pr close` here (credit-theft; see `/review-prs`).
++The post-push readback above proves captured-main inclusion and checks the freshly fetched
++main tip separately. Keep both observations; a concurrent later main commit is new work,
++not evidence that an older receipt covered it.
++
++### 21. Fallback — same admission when the early cut never completed
++
++If no next-cycle branch exists, use Phase 0a.0b's four transitions. The source may be the
++just-published `main` only when that exact source is explicitly selected for this fallback
++and certified; record its SHA/tree. Do not silently replace a red frozen source with main.
++Create only the admitted source ref, prepare the bump on a dedicated task branch, admit its
++non-draft PR, and establish `NEXT_READY` before the living draft/default/queue handoff.
++
++If the branch already exists, resume from the last proven transition instead of recreating
++it. For PR stragglers, enumerate the authorized eligible selection, honor live ownership,
++revalidate the new base and read back every selected `baseRefName`. Use the reviewed rehome
++script only when its whole scope is authorized. A base edit does not merge a contribution;
++preserve open PRs and human credit. Never close a contributor PR as a retargeting shortcut.
+
+ ### 22. Living release PR hygiene
+
+@@ -205,8 +205,9 @@
+
+ ### 23. Done — report
+
+-Report to the user: published version, all-green fragment checklist, the sync-back result
+-(`origin/release/v$NEXT..origin/main` == 0), and any PR stragglers re-homed. The repo has been
+-ready for development since 0a.0b — this phase only reconciled it.
++Report the published version, verified fragment scope, admitted PR/head/base and server
++landing result, captured/fresh main ancestry, and exact `NEXT_READY`/default/queue readbacks.
++List held or unverified transitions and PRs. Do not call the cycle ready merely because the
++branch or living draft exists.
+
+ ---
+--- a/version-bump/SKILL.md
++++ b/version-bump/SKILL.md
+@@ -17,34 +17,69 @@
+
+ ## Phase 1: Determine Version
+
++### Select the instruction mode before editing
++
++Resolve one of these modes from the authorized caller/request; do not silently switch:
++
++- **next-cycle** — `/generate-release` Phase 0a.0b (or its Phase 5 fallback) opens the
++  specified future version. Retain the caller's exact source SHA/tree, previous version
++  and target version. Create/verify its `TBD` section without recycling the frozen
++  release's history. A resumed bump uses the same target, not another patch increment.
++- **release** — an explicitly requested release/changelog bump uses the historical
++  generation steps below and the release date rules. It does not open an empty cycle.
++
++These are branches of this instruction document, not implemented CLI flags. If the
++request/caller does not establish which operation is authorized, finish read-only
++inspection and resolve that ambiguity before editing; preserve already given authority.
++
+ ### 1. Read current version and last tag
+
+-```bash
+-# Default: the main checkout. 🆕 When delegated from /generate-release Phase 0a.0b
+-# (parallel-cycle model), run INSIDE the isolated worktree on release/vX+1 instead —
+-# never bump in the shared checkout while the captain is closing vX (Rule #19/#22):
+-#   cd /home/diegosouzapw/dev/proxys/OmniRoute/.claude/worktrees/<cycle-open-worktree>
+-cd /home/diegosouzapw/dev/proxys/OmniRoute
++Read [release candidate admission](../generate-release/phases/candidate-admission.md)
++when this bump opens a cycle or will be published. The operator-confirmed integration target
++is `BASE_BRANCH`; perform all edits on the owned `TASK_BRANCH` under `.claude/worktrees/`,
++never directly on the integration branch. Reuse an already confirmed base; do not ask again.
++Create/reuse the worktree under the current resource/lock protocol before entering it.
++
++```bash
++: "${TASK_WT:?owned isolated worktree required}"
++: "${TASK_BRANCH:?dedicated task branch required}"
++: "${BASE_BRANCH:?operator-confirmed target required}"
++cd "$TASK_WT"
++case "$(pwd -P)" in
++  /home/diegosouzapw/dev/proxys/OmniRoute/.claude/worktrees/*) ;;
++  *) echo "HOLD: not an isolated task worktree" >&2; exit 1 ;;
++esac
++test "$(git rev-parse --show-toplevel)" = "$(pwd -P)" || exit 1
++test "$(git rev-parse --path-format=absolute --git-common-dir)" = "/home/diegosouzapw/dev/proxys/OmniRoute/.git" || exit 1
++CURRENT_BRANCH=$(git branch --show-current)
++test "$CURRENT_BRANCH" = "$TASK_BRANCH" || exit 1
++case "$CURRENT_BRANCH" in
++  main|release/*|"") echo "HOLD: use a dedicated task branch" >&2; exit 1 ;;
++esac
++test "$CURRENT_BRANCH" != "$BASE_BRANCH" || exit 1
+ CURRENT_VERSION=$(node -p "require('./package.json').version")
+ LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+-CURRENT_BRANCH=$(git branch --show-current)
+ echo "Current version: $CURRENT_VERSION"
+ echo "Last tag: $LAST_TAG"
+-echo "Current branch: $CURRENT_BRANCH"
+-case "$CURRENT_BRANCH" in
+-  release/v*) : ;;  # expected — the bump belongs on a release branch
+-  *) echo "⚠️  Not on a release/v* branch — confirm the correct base with the operator (Hard Rule #19) BEFORE continuing. Phase 6 will refuse to commit on main." ;;
+-esac
+-```
++echo "Task branch: $CURRENT_BRANCH; target: $BASE_BRANCH"
++```
++
++Every later block stays in `TASK_WT`. After a context reset, repeat these identity checks
++before resuming; setting a path variable alone is not ownership or base confirmation.
+
+ ### 2. Calculate new version
+
+-Apply the patch bump rule (same threshold as `/generate-release` — see the VERSION RULE above):
++For **next-cycle**, use the exact target passed by the caller and verify it follows the
++patch rule relative to the pinned previous version; do not recalculate from a partially
++bumped working copy. For **release**, calculate the target with the patch rule below
++(same threshold as `/generate-release`):
+
+ - If the current patch number is `>= 999`, the new version is `3.(minor+1).0`
+ - Otherwise, increment patch: `3.x.y` → `3.x.(y+1)`
+
+-If the version was ALREADY bumped (e.g. you are on a release branch and package.json already has the new version), **skip the npm version bump** and use the existing version.
++If the owned candidate already has the exact authorized target version, verify the recorded
++base/head and complete touchpoints before skipping the version command. Branch naming or
++one package version alone does not establish that the bump was completed.
+
+ ### 3. Bump package.json (if needed)
+
+@@ -63,12 +98,28 @@
+
+ ---
+
+-## Phase 2: Generate CHANGELOG from Git History
+-
+-### 4. Collect commits since last tag
+-
+-```bash
+-cd /home/diegosouzapw/dev/proxys/OmniRoute
++## Phase 2: CHANGELOG — branch by instruction mode
++
++### next-cycle: preserve notes, prepare the TBD header, then continue at Phase 3
++
++Read the current CHANGELOG and identify the exact target section before writing.
++If `## [TARGET_VERSION] — TBD` already exists, preserve its entire body, bullets,
++contributors and ordering; do not replace it with an empty template. If absent, insert
++only the new target `TBD` heading at the current-version position, keeping the surrounding
++format and all previous version sections unchanged. A conflicting date, duplicate target
++heading or changed source identity means HOLD for review, not overwrite.
++
++Compare the before/after sections: all existing next-cycle contributions and all prior
++release sections must be preserved. Do not collect/reclassify commits since the last tag,
++copy the frozen release's bullets, regenerate its contributors into NEXT, stamp today's
++date or stop because no feature commits arrived yet. Skip steps 4–6 below and continue
++at Phase 3. If a later version/documentation gate needs a formatting repair, make that
++repair without inventing release content or replacing existing notes.
++
++### release only — 4. Collect commits since last tag
++
++```bash
++cd "${TASK_WT:?owned isolated worktree required}"
+ LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null)
+ echo "=== Commits since $LAST_TAG ==="
+ git log "$LAST_TAG"..HEAD --pretty=format:"%h %s" --no-merges | head -100
+@@ -77,7 +128,7 @@
+ git log "$LAST_TAG"..HEAD --merges --pretty=format:"%h %s" | head -50
+ ```
+
+-### 5. Classify commits and generate CHANGELOG section
++### release only — 5. Classify commits and generate CHANGELOG section
+
+ Analyze each commit message and classify into the **same section set every shipped version uses**
+ (this MUST mirror `/generate-release` Phase 1 step 4c — grep `^### ` under any recent `## [3.8.x]`
+@@ -109,7 +160,7 @@
+ npm run release:contributors -- "$VERSION" --inject   # insert/replace it in CHANGELOG.md (idempotent)
+ ```
+
+-### 6. Update CHANGELOG.md
++### release only — 6. Update CHANGELOG.md
+
+ Replace the `## [Unreleased]` section content with the generated entries, then add the new versioned section:
+
+@@ -148,7 +199,7 @@
+ ...
+ ```
+
+-The date must be today's date in `YYYY-MM-DD` format.
++In **release** mode the date is today's date in `YYYY-MM-DD` format. In **next-cycle** mode the target header stays `TBD`; the historical steps above do not run.
+
+ ---
+
+@@ -157,7 +208,7 @@
+ ### 7. Update workspace package.json files and openapi.yaml
+
+ ```bash
+-cd /home/diegosouzapw/dev/proxys/OmniRoute
++cd "${TASK_WT:?owned isolated worktree required}"
+ VERSION=$(node -p "require('./package.json').version")
+
+ # Update docs/openapi.yaml version — guard first so a wrong path fails LOUDLY, never a silent "✓"
+@@ -181,23 +232,51 @@
+ > 🔴 The two `sed`s that used to live here covered llm.txt only. `release/v3.8.53` was born red on
+ > Docs sync strict (2026-10-19) because the README's footer, compatibility floor (`` `vX+` ``),
+ > highlights range (`**vA → vX**`) and npm-11 note still said the previous version. The script
+-> below rewrites every claim shape the gate (`check-docs-counts-sync.mjs`) knows, in the root files
+-> and in the 66 `docs/i18n` mirrors, and refreshes `.i18n-state.json` only when the mirrors were in
+-> sync (never certifying an already-drifted source).
+-
+-```bash
+-cd /home/diegosouzapw/dev/proxys/OmniRoute
++> below rewrites the supported claim shapes in the root files and discovered `docs/i18n`
++> mirrors. Use `--no-state`: the reviewed helper's default state update checks the root
++> source hash but does not prove each locale's previous source/target tuple. Its default
++> `--check` covers the selected root files only; it does not traverse their mirrors.
++
++```bash
++cd "${TASK_WT:?owned isolated worktree required}"
+ VERSION=$(node -p "require('./package.json').version")
+-OLD=$(git show HEAD:package.json | node -pe "JSON.parse(require('fs').readFileSync(0,'utf8')).version")   # HEAD still has the previous version
+-node scripts/release/bump-version-claims.mjs --from "$OLD" --to "$VERSION"          # README.md + llm.txt + mirrors
+-node scripts/release/bump-version-claims.mjs --check --to "$VERSION" || { echo "❌ stale version claims remain"; exit 1; }
+-echo "✓ version claims → $VERSION"
+-```
++# OLD comes from the recorded pre-bump source/version; HEAD may already contain a resumed bump.
++: "${OLD:?recorded previous version required}"
++node scripts/release/bump-version-claims.mjs --from "$OLD" --to "$VERSION" --no-state
++node scripts/release/bump-version-claims.mjs --check --to "$VERSION" --no-state || { echo "HOLD: stale root version claims"; exit 1; }
++echo "Root claims checked; mirror validation and i18n state admission remain pending"
++```
++
++Before the rewrite, retain the intended files' prior bytes and each relevant state leaf.
++After it, require the state file to remain byte-identical; enumerate every discovered
++README/llm mirror and verify its expected claims and preserved non-version text. Record
++the actual file count instead of interpreting the root check as proof of all locales.
++
++For the finite reviewed mirror list, the existing `--files` option can check those
++paths explicitly. First verify every listed path is an existing regular intended mirror:
++the helper skips missing paths, so a successful exit alone does not prove collection.
++Bind `MIRROR_FILES` to that exact comma-separated inventory, then run:
++
++```bash
++node scripts/release/bump-version-claims.mjs --check --to "$VERSION" --files "${MIRROR_FILES:?reviewed complete mirror inventory required}" --no-state
++```
++
++Record the inventory/count and successful checks of the helper's supported claim shapes.
++This checks version claims, not semantic translation accuracy or prior state validity.
++
++State reconciliation is a separate requirement: prove the previous canonical source bytes,
++target bytes and per-leaf source_hash/target_hash, then prove the new bytes and staged
++content before updating only the affected leaves. A stale/missing/ambiguous tuple means
++HOLD for that leaf; do not certify it by generic rehash or by the root source hash alone.
++Keep unaffected state entries unchanged. A missing proof leaves i18n admission pending,
++even when the mechanical claims edit and root check passed. This instruction change does
++not repair or certify the state-mutating helper and does not authorize another translation
++backend/model. Follow the already authorized translation contract if translation is needed.
+
+ ### 9. Regenerate lock file
+
+ ```bash
+-cd /home/diegosouzapw/dev/proxys/OmniRoute
++cd "${TASK_WT:?owned isolated worktree required}"
+ npm install
+ echo "✓ Lock file regenerated"
+ ```
+@@ -206,7 +285,9 @@
+
+ ## Phase 4: Update Root Documentation
+
+-Based on the CHANGELOG entries generated in Phase 2, review and update these root-level files if relevant changes warrant updates:
++In **release** mode, review documentation against the CHANGELOG generated in Phase 2.
++In **next-cycle** mode, make only the intended version/touchpoint changes and documented
++changes actually present in that cycle; the frozen release's history is not new NEXT work:
+
+ ### 10. Review and update root documentation files
+
+@@ -268,14 +349,15 @@
+
+ ## Phase 5: Verify
+
+-### 12-13. Full quality gate (same set as `/generate-release` step 7 — lint+test alone is NOT enough)
+-
+-> **Precedent**: the v3.8.2 cycle shipped with 49 broken tests because only `npm test` was
+-> running — lint caught none of them. Run the full gate, and **STOP on the first failure**
+-> (`set -e`): fix and re-run until all five pass. Never proceed to the summary/commit with a red.
+-
+-```bash
+-cd /home/diegosouzapw/dev/proxys/OmniRoute
++### 12-13. Focused validation and the candidate acceptance plan
++
++Read `../_shared/validation-gate.md` and `../validate-release-green/SKILL.md`. Determine
++required lanes from this candidate's current workflows/policy and actual test collectors.
++Run focused version/docs checks first, then the applicable checks for the changed content.
++The legacy five-command list is useful diagnosis, not a complete gate:
++
++```bash
++cd "${TASK_WT:?owned isolated worktree required}"
+ set -e
+ npm run lint
+ npm run typecheck:core
+@@ -284,10 +366,18 @@
+ npm test
+ ```
+
+-### 14. Verify version sync across all files
+-
+-```bash
+-cd /home/diegosouzapw/dev/proxys/OmniRoute
++`check:cycles` is advisory; it does not replace the blocking ratchet. Record every required
++Node/Vitest/UI/coverage/security/build/package lane not covered by this focused work. Do
++not relabel a quick/full observer profile as the entire workflow policy or loosen a baseline.
++Report failures and incomplete lanes honestly. After the authorized commit and normal hooks,
++bind acceptance to its final SHA/tree; changed hook output invalidates earlier content-based
++evidence. Complete exact-candidate local and eligible GitHub validation before merging the
++bump PR. A commit used to form that candidate is not a declaration of release readiness.
++
++### 14. Verify version sync across all files
++
++```bash
++cd "${TASK_WT:?owned isolated worktree required}"
+ VERSION=$(node -p "require('./package.json').version")
+ echo "Expected version: $VERSION"
+ echo ""
+@@ -318,32 +408,43 @@
+ - Old version → New version
+ - CHANGELOG entries generated
+ - Files modified
+-- Test results
++- Focused test results, final candidate identity and each still-pending acceptance lane
+ - Any documentation updates made
+
+-**Wait for the user to confirm before committing.**
++**Commit only with operator authorization.** Reuse explicit authorization already given
++for this bump; otherwise present the concrete diff and request the missing approval. If the
++diff touches protected instruction surfaces, retain their specific approval before merge.
+
+ ---
+
+ ## Phase 6: Commit (only after user approval)
+
+-### 16. Stage and commit — guarded against `main`
+-
+-> The commit lands on the **release branch** confirmed in Phase 1 (Hard Rule #19 — this skill is
+-> normally invoked from `/generate-release` Phase 5, already inside the new `release/vX.Y.Z`).
+-> The guard below makes committing to `main` impossible (Hard Rule #4). No AI attribution in the
+-> commit message (Hard Rule #16).
+-
+-```bash
+-cd /home/diegosouzapw/dev/proxys/OmniRoute
++### 16. Commit on the owned task branch and hand off the candidate
++
++Repeat Phase 1's worktree/common-root/branch checks before staging. The commit stays on the
++dedicated task branch and reaches the operator-confirmed release target through its own PR.
++Preserve normal hooks, intended-file staging and the no-AI-attribution rule (Hard Rules 10/16).
++
++```bash
++cd "${TASK_WT:?owned isolated worktree required}"
+ BRANCH=$(git branch --show-current)
+-if [ "$BRANCH" = "main" ] || [ -z "$BRANCH" ]; then
+-  echo "❌ On '$BRANCH' — never commit a version bump to main/detached. Switch to the release branch (confirm the base with the operator) and re-run."; exit 1
+-fi
+-git add -A
++test "$BRANCH" = "${TASK_BRANCH:?dedicated task branch required}" || exit 1
++test "$BRANCH" != "${BASE_BRANCH:?confirmed integration target required}" || exit 1
++case "$BRANCH" in
++  main|release/*|"") echo "HOLD: integration/detached branch" >&2; exit 1 ;;
++esac
++# Review the diff and stage only the approved version/docs paths, then inspect the index.
++git diff --cached --name-only
+ VERSION=$(node -p "require('./package.json').version")
+ git commit -m "chore(release): bump to v$VERSION — changelog, docs, version sync"
+-```
++git rev-parse HEAD HEAD^{tree}
++```
++
++Hand the exact candidate and validation gaps back to the invoking release flow. When
++publication is authorized, publish the task branch and use a **non-draft bump PR** to the
++confirmed release target; complete candidate admission before its merge. Do not push the
++bump directly to the release branch. A living draft PR to `main` is created/reused only
++after the landed next-cycle base reaches `NEXT_READY`.
+
+ ---
+
+@@ -351,9 +452,9 @@
+
+ - This workflow does **NOT** create tags, releases, or deploy. Use `/generate-release` for the full release cycle after this.
+ - This workflow does **NOT** update `docs/i18n/` translations. Translation updates are handled manually or via release tooling — the `/update-i18n` command does not currently exist as a Claude Code slash command.
+-- The CHANGELOG generation is based on git commits since the last tag. If there are no new commits, the workflow should inform the user and stop.
++- In **release** mode, CHANGELOG generation uses commits since the last tag; no new commits means report and stop. In **next-cycle** mode, an empty new cycle is expected: preserve the `TBD` header and any existing contributions, then validate the version/documentation changes.
+ - Always verify the generated CHANGELOG entries make sense — raw commit messages may need rewriting for clarity.
+-- If the version was already bumped (e.g. you're on a `release/vX.Y.Z` branch), skip the `npm version` step and use the existing version.
++- Resume an already bumped owned candidate only after verifying the exact authorized version, source identity and touchpoints; do not infer completion from a release branch name.
+
+ ## Version Touchpoints Checklist
+
+@@ -364,4 +465,4 @@
+ | `electron/package.json`       | `"version": "X.Y.Z"`                                        |
+ | `docs/openapi.yaml`           | `version: X.Y.Z`                                            |
+ | `llm.txt`                     | `**Current version:** X.Y.Z` and `## Key Features (vX.Y.Z)` |
+-| `CHANGELOG.md`                | `## [X.Y.Z] — YYYY-MM-DD`                                   |
++| `CHANGELOG.md`                | release: `## [X.Y.Z] — YYYY-MM-DD`; next-cycle: `## [X.Y.Z] — TBD` |

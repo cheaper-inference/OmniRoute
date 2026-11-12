@@ -74,7 +74,7 @@ OMNIROUTE pul tejashingizga va ishingizni osonlashtirishga yordam bergan bo‘ls
 |                                           |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
 | ----------------------------------------- | :------------------------: | :---------: | :-------------------: |
 | 🌐 Provayderlar                           |            352             |   **358**   |          380          |
-| 🧠 Noyob chat model ID'lari               |            1320            |  **1374**   |         1491          |
+| 🧠 Noyob chat model ID'lari               |            1320            |  **1374**   |         1499          |
 | 🖼️ Modallik ko‘prigi                      | 🆕 ko‘rish + audio + video |      ✓      |           ✓           |
 | 📡 Radar bepul katalogi                   |        🆕 ixtiyoriy        |      ✓      |           ✓           |
 | ⚖️ Kvotani hisobga oluvchi rejalashtirish |       🆕 Quota-Share       |      ✓      |           ✓           |
@@ -89,57 +89,52 @@ OMNIROUTE pul tejashingizga va ishingizni osonlashtirishga yordam bergan bo‘ls
 
 <br/>
 
-## 🧩 Mavjud
+## 🧩 mavjud
 
-[![npm versiyasi](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-![NPM oylik](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
-[![Litsenziya: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-![Docker yuklab olishlari](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron yuklab olishlari](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+[![npm versiyasi](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm) ](https://www.npmjs.com/package/omniroute) ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm) [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED) ](https://hub.docker.com/r/diegosouzapw/omniroute) [![Litsenziya: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square) ](LICENSE) ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED) ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
-    <td align="right"><b>🚀 Boshlash</b></td>
-    <td align="center"><a href="#-quick-start">🚀 Tezkor boshlash</a></td>
-    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Oʻrnatish</a></td>
-    <td align="center"><a href="#first-run">🆓 Provayderni ulash</a></td>
+    <td align="right"><b>🚀 Start</b></td>
+    <td align="center"><a href="#-quick-start">🚀 Quick Start</a></td>
+    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Install</a></td>
+    <td align="center"><a href="#first-run">🆓 Connect a provider</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💡 Oʻrganish</b></td>
-    <td align="center"><a href="#-the-promise">💥 Va’da</a></td>
-    <td align="center"><a href="#-why-omniroute">🤔 Nima uchun OmniRoute</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 Uni nimasi ajratib turadi</a></td>
+    <td align="right"><b>💡 Learn</b></td>
+    <td align="center"><a href="#-the-promise">💥 The Promise</a></td>
+    <td align="center"><a href="#-why-omniroute">🤔 Why OmniRoute</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 What Sets Apart</a></td>
   </tr>
   <tr>
-    <td align="right"><b>⚙️ Imkoniyatlar</b></td>
-    <td align="center"><a href="#-combos--the-flagship">🎯 Kombinatsiyalar</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Provayderlar</a></td>
-    <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI va MCP</a></td>
+    <td align="right"><b>⚙️ Features</b></td>
+    <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
+    <td align="center"><a href="#-380-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
     <td align="right"></td>
-    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Siqish</a></td>
-    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Qayerda ishlaydi</a></td>
-    <td align="center"><a href="#-private--local-first">🔒 Maxfiy</a></td>
+    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Compression</a></td>
+    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Where It Runs</a></td>
+    <td align="center"><a href="#-private--local-first">🔒 Private</a></td>
   </tr>
   <tr>
-    <td align="right"><b>👀 Koʻring</b></td>
-    <td align="center"><a href="#-omniroute-in-action">🎬 Amalda</a></td>
-    <td align="center"><a href="#-whats-new">✨ Yangiliklar</a></td>
-    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 Mos keluvchi CLI’lar</a></td>
+    <td align="right"><b>👀 See it</b></td>
+    <td align="center"><a href="#-omniroute-in-action">🎬 In Action</a></td>
+    <td align="center"><a href="#-whats-new">✨ What's New</a></td>
+    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 Compatible CLIs</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💚 Qoʻllab-quvvatlash</b></td>
-    <td align="center"><a href="#-support-omniroute">💚 Qoʻllab-quvvatlash / Xayriya</a></td>
-    <td align="center"><a href="#-community--help">💬 Hamjamiyat</a></td>
-    <td align="center"><a href="#-sponsors">💖 Homiylar</a></td>
+    <td align="right"><b>💚 Support</b></td>
+    <td align="center"><a href="#-support-omniroute">💚 Support / Donate</a></td>
+    <td align="center"><a href="#-community--help">💬 Community</a></td>
+    <td align="center"><a href="#-sponsors">💖 Sponsors</a></td>
   </tr>
   <tr>
-    <td align="right"><b>📦 Loyiha</b></td>
-    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Texnologiyalar toʻplami</a></td>
-    <td align="center"><a href="#-documentation">📖 Hujjatlar</a></td>
-    <td align="center"><a href="#-1000-contributors">👥 Hissa qoʻshuvchilar</a></td>
+    <td align="right"><b>📦 Project</b></td>
+    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Tech Stack</a></td>
+    <td align="center"><a href="#-documentation">📖 Docs</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 Contributors</a></td>
   </tr>
 </table>
 
@@ -148,73 +143,73 @@ OMNIROUTE pul tejashingizga va ishingizni osonlashtirishga yordam bergan bo‘ls
 <div align="center">
   <b>🌐 67 tilda</b>
   <br/><br/>
-  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="Inglizcha (en)" title="Inglizcha (en)"></a>
-  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Portugalcha — Braziliya (pt-BR)" title="Portugalcha — Braziliya (pt-BR)"></a>
-  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Portugalcha (pt)" title="Portugalcha (pt)"></a>
-  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Ispancha (es)" title="Ispancha (es)"></a>
-  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Fransuzcha (fr)" title="Fransuzcha (fr)"></a>
-  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Italyancha (it)" title="Italyancha (it)"></a>
-  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Nemischa (de)" title="Nemischa (de)"></a>
-  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Niderlandcha (nl)" title="Niderlandcha (nl)"></a>
-  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Ruscha (ru)" title="Ruscha (ru)"></a>
-  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Ukraincha (uk-UA)" title="Ukraincha (uk-UA)"></a>
-  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Polyakcha (pl)" title="Polyakcha (pl)"></a>
-  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Chexcha (cs)" title="Chexcha (cs)"></a>
-  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Slovakcha (sk)" title="Slovakcha (sk)"></a>
-  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Rumincha (ro)" title="Rumincha (ro)"></a>
-  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Vengercha (hu)" title="Vengercha (hu)"></a>
-  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Bolgarcha (bg)" title="Bolgarcha (bg)"></a>
-  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Daniyacha (da)" title="Daniyacha (da)"></a>
-  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Fincha (fi)" title="Fincha (fi)"></a>
-  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Norvegcha (no)" title="Norvegcha (no)"></a>
-  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Shvedcha (sv)" title="Shvedcha (sv)"></a>
-  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="Xitoycha — soddalashtirilgan (zh-CN)" title="Xitoycha — soddalashtirilgan (zh-CN)"></a>
-  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="Xitoycha — an’anaviy (zh-TW)" title="Xitoycha — an’anaviy (zh-TW)"></a>
-  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="Yaponcha (ja)" title="Yaponcha (ja)"></a>
-  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="Koreyscha (ko)" title="Koreyscha (ko)"></a>
-  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="Taycha (th)" title="Taycha (th)"></a>
-  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Vyetnamcha (vi)" title="Vyetnamcha (vi)"></a>
-  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Indonezcha (id)" title="Indonezcha (id)"></a>
-  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Malaycha (ms)" title="Malaycha (ms)"></a>
-  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filippincha (phi)" title="Filippincha (phi)"></a>
-  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Hindcha (hi)" title="Hindcha (hi)"></a>
-  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Gujaratiycha (gu)" title="Gujaratiycha (gu)"></a>
-  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Marathicha (mr)" title="Marathicha (mr)"></a>
-  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Tamilcha (ta)" title="Tamilcha (ta)"></a>
-  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Telugucha (te)" title="Telugucha (te)"></a>
-  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="Bengalcha (bn)" title="Bengalcha (bn)"></a>
-  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="Urducha (ur)" title="Urducha (ur)"></a>
-  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="Forscha (fa)" title="Forscha (fa)"></a>
-  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="Arabcha (ar)" title="Arabcha (ar)"></a>
-  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="Ibroniycha (he)" title="Ibroniycha (he)"></a>
-  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Turkcha (tr)" title="Turkcha (tr)"></a>
-  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Ozarbayjoncha (az)" title="Ozarbayjoncha (az)"></a>
-  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Suahili (sw)" title="Suahili (sw)"></a>
-  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Yunoncha (el)" title="Yunoncha (el)"></a>
-  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Xorvatcha (hr)" title="Xorvatcha (hr)"></a>
-  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Serbcha (sr)" title="Serbcha (sr)"></a>
-  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Litvacha (lt)" title="Litvacha (lt)"></a>
-  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Estoncha (et)" title="Estoncha (et)"></a>
-  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Latishcha (lv)" title="Latishcha (lv)"></a>
-  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Slovencha (sl)" title="Slovencha (sl)"></a>
-  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Malta tili (mt)" title="Malta tili (mt)"></a>
-  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Irlandcha (ga)" title="Irlandcha (ga)"></a>
-  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kannadacha (kn)" title="Kannadacha (kn)"></a>
-  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Malayalamcha (ml)" title="Malayalamcha (ml)"></a>
-  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Oriyacha (or)" title="Oriyacha (or)"></a>
-  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Panjobcha (pa)" title="Panjobcha (pa)"></a>
-  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="Nepalcha (ne)" title="Nepalcha (ne)"></a>
-  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="Singalcha (si)" title="Singalcha (si)"></a>
-  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="Birma tili (my)" title="Birma tili (my)"></a>
-  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="Kxmercha (km)" title="Kxmercha (km)"></a>
-  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Hausa tili (ha)" title="Hausa tili (ha)"></a>
-  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Yoruba tili (yo)" title="Yoruba tili (yo)"></a>
-  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Igbo tili (ig)" title="Igbo tili (ig)"></a>
-  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="Amxarcha (am)" title="Amxarcha (am)"></a>
+  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="English (en)" title="English (en)"></a>
+  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
+  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Português (pt)" title="Português (pt)"></a>
+  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Español (es)" title="Español (es)"></a>
+  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Français (fr)" title="Français (fr)"></a>
+  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Italiano (it)" title="Italiano (it)"></a>
+  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Deutsch (de)" title="Deutsch (de)"></a>
+  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Nederlands (nl)" title="Nederlands (nl)"></a>
+  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Русский (ru)" title="Русский (ru)"></a>
+  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Українська (uk-UA)" title="Українська (uk-UA)"></a>
+  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Polski (pl)" title="Polski (pl)"></a>
+  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Čeština (cs)" title="Čeština (cs)"></a>
+  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Slovenčina (sk)" title="Slovenčina (sk)"></a>
+  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Română (ro)" title="Română (ro)"></a>
+  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Magyar (hu)" title="Magyar (hu)"></a>
+  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Български (bg)" title="Български (bg)"></a>
+  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Dansk (da)" title="Dansk (da)"></a>
+  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Suomi (fi)" title="Suomi (fi)"></a>
+  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Norsk (no)" title="Norsk (no)"></a>
+  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Svenska (sv)" title="Svenska (sv)"></a>
+  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="中文 — 简体 (zh-CN)" title="中文 — 简体 (zh-CN)"></a>
+  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="中文 — 繁體 (zh-TW)" title="中文 — 繁體 (zh-TW)"></a>
+  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="日本語 (ja)" title="日本語 (ja)"></a>
+  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="한국어 (ko)" title="한국어 (ko)"></a>
+  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="ไทย (th)" title="ไทย (th)"></a>
+  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Tiếng Việt (vi)" title="Tiếng Việt (vi)"></a>
+  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Bahasa Indonesia (id)" title="Bahasa Indonesia (id)"></a>
+  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Bahasa Melayu (ms)" title="Bahasa Melayu (ms)"></a>
+  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filipino (phi)" title="Filipino (phi)"></a>
+  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="हिन्दी (hi)" title="हिन्दी (hi)"></a>
+  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ગુજરાતી (gu)" title="ગુજરાતી (gu)"></a>
+  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="मराठी (mr)" title="मराठी (mr)"></a>
+  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="தமிழ் (ta)" title="தமிழ் (ta)"></a>
+  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="తెలుగు (te)" title="తెలుగు (te)"></a>
+  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="বাংলা (bn)" title="বাংলা (bn)"></a>
+  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="اردو (ur)" title="اردو (ur)"></a>
+  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="فارسی (fa)" title="فارسی (fa)"></a>
+  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="العربية (ar)" title="العربية (ar)"></a>
+  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="עברית (he)" title="עברית (he)"></a>
+  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Türkçe (tr)" title="Türkçe (tr)"></a>
+  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Azərbaycan (az)" title="Azərbaycan (az)"></a>
+  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Kiswahili (sw)" title="Kiswahili (sw)"></a>
+  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Ελληνικά (el)" title="Ελληνικά (el)"></a>
+  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Hrvatski (hr)" title="Hrvatski (hr)"></a>
+  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Српски (sr)" title="Српски (sr)"></a>
+  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Lietuvių (lt)" title="Lietuvių (lt)"></a>
+  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Eesti (et)" title="Eesti (et)"></a>
+  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Latviešu (lv)" title="Latviešu (lv)"></a>
+  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Slovenščina (sl)" title="Slovenščina (sl)"></a>
+  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Malti (mt)" title="Malti (mt)"></a>
+  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Gaeilge (ga)" title="Gaeilge (ga)"></a>
+  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ಕನ್ನಡ (kn)" title="ಕನ್ನಡ (kn)"></a>
+  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="മലയാളം (ml)" title="മലയാളം (ml)"></a>
+  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ଓଡ଼ିଆ (or)" title="ଓଡ଼ିଆ (or)"></a>
+  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ਪੰਜਾਬੀ (pa)" title="ਪੰਜਾਬੀ (pa)"></a>
+  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="नेपाली (ne)" title="नेपाली (ne)"></a>
+  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="සිංහල (si)" title="සිංහල (si)"></a>
+  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="မြန်မာ (my)" title="မြန်မာ (my)"></a>
+  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="ខ្មែរ (km)" title="ខ្មែរ (km)"></a>
+  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Hausa (ha)" title="Hausa (ha)"></a>
+  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Yorùbá (yo)" title="Yorùbá (yo)"></a>
+  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Igbo (ig)" title="Igbo (ig)"></a>
+  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="አማርኛ (am)" title="አማርኛ (am)"></a>
   <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Oʻzbekcha (uz)" title="Oʻzbekcha (uz)"></a>
-  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="Gruzincha (ka)" title="Gruzincha (ka)"></a>
-  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Armancha (hy)" title="Armancha (hy)"></a>
-  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bosniyacha (bs)" title="Bosniyacha (bs)"></a>
+  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="ქართული (ka)" title="ქართული (ka)"></a>
+  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Հայերեն (hy)" title="Հայերեն (hy)"></a>
+  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bosanski (bs)" title="Bosanski (bs)"></a>
 </div>
 
 <br/>
@@ -689,15 +684,15 @@ shell tarixidan tashqarida saqlaydi. → [CLI Integratsiyalari](docs/guides/CLI-
 
 <div align="center">
 
-## 🌐 380 ta AI provayderi — katalogda bepul deb belgilanganlari 153 ta
+## 🌐 380 AI Provayderlari — 156 Katalogda Bepul deb belgilangan
 
 </div>
 
-> **380 ta roʻyxatdan oʻtgan provayder** kanonik chat, media, qidiruv, lokal, bulut-agent va tizim toʻplamlari boʻylab mavjud bo‘lib, ulardan **153 tasi `hasFree: true` aniqlash metamaʼlumotiga ega**. Chat modellari reyestri **239 ta provayder / 3,059 ta noyob provayder-model juftligi / 1,475 ta xom model ID**ni qamrab oladi; alohida bepul byudjet katalogida esa **har bir model uchun 471 ta qator**, **34 ta takrorlanuvchi hovuz** va **54 ta takrorlanuvchi/kalitsiz, doimo bepul provayder** mavjud. Bular ataylab turlicha maxrajlardir; taʼriflar va hovuzlar bo‘yicha takrorlanishlar olib tashlangan hisob-kitoblar [Provayder maʼlumotnomasi](docs/reference/PROVIDER_REFERENCE.md) va [Bepul tariflar](docs/reference/FREE_TIERS.md)da keltirilgan.
+> **380 ta provayder roʻyxatdan oʻtgan** kanonik chat, media, qidiruv, mahalliy, bulut-agent va tizim to'plamlari, shu jumladan **156 `hasFree: true` kashfiyot metama'lumotlarini olib yuradi** . Suhbat modeli registrini qamrab oladi **241 ta provayder / 3114 ta provayder-model juftligi / 1499 ta IDs xom modeli** ; alohida bepul byudjet katalogiga ega **Har bir model uchun 485 qator** ,**34 ta takroriy basseyn** va **54 recurring/keyless bepul va abadiy provayderlar** . Bu dizayn bo'yicha turli xil maxrajlardir; ta'riflar va hovuzdan olingan hisob-kitoblar [Provayder ma'lumotnomasi](docs/reference/PROVIDER_REFERENCE.md) va [bepul darajalarda](docs/reference/FREE_TIERS.md) mavjud.
 
 <div align="center">
 
-### 🏢 Har bir yirik laboratoriya — bitta endpoint orqali
+### 🏢 Har bir yirik — laboratoriyasi bitta so'nggi nuqta orqali
 
 <table>
   <tr>
@@ -726,7 +721,7 @@ shell tarixidan tashqarida saqlaydi. → [CLI Integratsiyalari](docs/guides/CLI-
   </tr>
 </table>
 
-<sub>…va yana 350 dan ortiq — har bir ikonka panelning provayder katalogidan jonli tarzda yuklanadi. 📖 [Provayder maʼlumotnomasi](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>…va yana 350 + — har bir belgi boshqaruv panelidagi provayderlar katalogidan jonli ravishda hal qilinadi. 📖 [provayder ma'lumotnomasi](docs/reference/PROVIDER_REFERENCE.md)</sub>
 
 <br/>
 
@@ -758,7 +753,7 @@ shell tarixidan tashqarida saqlaydi. → [CLI Integratsiyalari](docs/guides/CLI-
 
 <div align="center">
 
-## 🖥️ Qayerda OmniRoute ishlaydi — Har qanday joyda
+## 🖥️ OmniRoute qayerda ishlaydi — istalgan joyda
 
 </div>
 
@@ -766,26 +761,26 @@ shell tarixidan tashqarida saqlaydi. → [CLI Integratsiyalari](docs/guides/CLI-
 
 <table>
   <tr><th align="left">Platforma</th><th align="left">O'rnatish</th><th align="left">Tavsif</th></tr>
-  <tr><td align="left" nowrap>📦 <b> npm (global)</b></td><td align="left" nowrap><code> npm o‘rnatish -g omniroute </code></td><td align="left"> Bitta buyruq, har qanday OS</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Bun (global)</b></td><td align="left" nowrap><code> bun add -g omniroute </code></td><td align="left"> Xuddi shu registr tarball, tezroq o‘rnatish </td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> docker run … diegosouzapw/omniroute</code></td><td align="left"> Multi-arch <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>📦 <b> npm (global)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left"> Bitta buyruq, har qanday OS</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (global)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Qoʻllab-quvvatlash kafolatlarisiz imkon qadar muvofiqlik; Node.js qoʻllab-quvvatlanadigan bajarish muhitidir.</td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left"> Multi-arch <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>Desktop (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Mahalliy + tizim tepsisi — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b> Menyu-bar (OmniRouteTray)</b></td><td align="left" nowrap><code> brew o‘rnatish --cask zoispag/tap/omniroute-tray</code></td><td align="left">&amp; serverni avtomatik yangilashini nazorat qiladi — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap> mahalliy <code> arm64 </code></td><td align="left"> Raspberry Pi, ARM serverlari, Apple Silicon </td></tr>
-  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg install nodejs && npx -y omniroute </code></td><td align="left"> Telefoningizda <b> ishlaydi </b>, 24/7, root</td></tr>
+  <tr><td align="left" nowrap>🎩 <b> Menyu-bar (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">&amp; serverni avtomatik yangilashini nazorat qiladi — <b>macOS</b></td></tr>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap> mahalliy <code>arm64</code></td><td align="left"> Raspberry Pi, ARM serverlari, Apple Silicon </td></tr>
+  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left"> Telefoningizda <b> ishlaydi </b>, 24/7, root</td></tr>
   <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Bosh ekranga qo‘shish"</td><td align="left"> To‘liq ekran, oflayn, brauzerdan o‘rnatilishi mumkin </td></tr>
   <tr><td align="left" nowrap>🧩 <b>OpenCode plagin </b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left"> Native OpenCode integratsiyasi </td></tr>
   <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat </b></td><td align="left" nowrap> o‘rnatish <b>OmniCopilot</b> kengaytmasi </td><td align="left"> Mahalliy Copilot har bir OmniRoute modeli Chat tanlagich — barqaror &amp; Insiderlar </td></tr>
-  <tr><td align="left" nowrap>🛠️ <b> Manbadan </b></td><td align="left" nowrap><code> npm install && npm run dev </code></td><td align="left"> Hack on it, hissa </td></tr>
+  <tr><td align="left" nowrap>🛠️ <b> Manbadan </b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left"> Hack on it, hissa </td></tr>
 </table>
 
-<sub>📖 [Docker qo‘llanma](docs/guides/DOCKER_GUIDE.md) · [Ish stoli](electron/README.md) · [Menyu-bar laganda](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+<sub>📖 [Docker qoʻllanmasi](docs/guides/DOCKER_GUIDE.md) · [Ish stoli](electron/README.md) · [Menyu paneli treyi](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-### 🧩 Yangi: OmniRoute ichidagi VS Code Copilot Chat
+### 🧩 Yangi: OmniRoute VS Code’ning mahalliy Copilot Chat ichida
 
 </div>
 
@@ -801,13 +796,13 @@ shell tarixidan tashqarida saqlaydi. → [CLI Integratsiyalari](docs/guides/CLI-
 
 Muharrir ichidan: **Kengaytmalar** ko'rishni oching, "OmniRoute" ni qidiring, **O'rnatish** tugmasini bosing — ikkala do'konda ham xuddi shunday ishlaydi. Manba, muammolar va nashriyot kitobi [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) da jonli.
 
-<sub>📖 [VS Code Copilot Chat qo‘llanmasi](docs/guides/VSCODE-COPILOT.md) — sozlash, tanlovchi nimani ko‘rsatadi, paneldagi panel, muammolarni bartaraf etish </sub>
+<sub>📖 [VS Code Copilot Chat qoʻllanmasi](docs/guides/VSCODE-COPILOT.md) — sozlash, tanlagich nimalarni koʻrsatishi, panelni ichki varaqda ochish, muammolarni bartaraf etish</sub>
 
 <br/>
 
 <div align="center">
 
-### 🎩 Yangi: OmniRouteTray — menyu satrida yashovchi sizning shlyuzingiz
+### 🎩 Yangi: OmniRouteTray — menyu panelida yashovchi shlyuzingiz
 
 </div>
 
@@ -816,22 +811,22 @@ Muharrir ichidan: **Kengaytmalar** ko'rishni oching, "OmniRoute" ni qidiring, **
 [Tauri v2](https://v2.tauri.app/) (yaxlitlash xatosi oʻlchamidagi Rust yadrosi) bilan yaratilgan u oʻzining imzolangan 24-tugun ish vaqtini joʻnatadi va ilovaga tegishli OmniRoute oʻrnatishni boshqaradi, shuning uchun u hech qachon global `node`/`bun` bilan kurashmaydi. Bu **mavjud `~/.omniroute/` konfiguratsiyasi va ma'lumotlar bazasini baham ko'radi** — demak, siz allaqachon shlyapa bilan OmniRoute. 🎩
 
 <table>
-  <tr><th align="left"> nima qiladi </th><th align="left"> Qanday qilib </th></tr>
-  <tr><td align="left" nowrap>🟢 <b> Serverni nazorat qiladi </b></td><td align="left"> Spawns <code> omniroute service </code>, uni takrorlash o‘rniga allaqachon ishlayotgan misolni qabul qiladi </td></tr>
-  <tr><td align="left" nowrap>📊 <b> Bir qarashda jonli foydalanish </b></td><td align="left"> Provayder kvotalari, Claude session/weekly chegaralari qayta o‘rnatish bilan ortga hisoblash, 30 kunlik xarajatlar taqsimoti </td></tr>
-  <tr><td align="left" nowrap>🔄 <b> Avtomatik yangilanishlar joyida </b></td><td align="left"> Bosqichli o‘rnatish, atom almashinuvi, muvaffaqiyatsizlikka uchraganda orqaga qaytish — har doim eng yangi versiyada </td></tr>
-  <tr><td align="left" nowrap>🚀 <b> Tizimga kirishda boshlash </b></td><td align="left"> Tizimga kirishda ixtiyoriy ishga tushirish; faqat laganda uchun, dock belgisi yo'q </td></tr>
-  <tr><td align="left" nowrap>🩺 <b> Doktor &amp; jurnallari </b></td><td align="left"> Bir marta bosish orqali diagnostika va server jurnaliga kirish </td></tr>
+  <tr><th align="left">Nima qiladi</th><th align="left">Qanday</th></tr>
+  <tr><td align="left" nowrap>🟢 <b>Serverni nazorat qiladi</b></td><td align="left"><code>omniroute serve</code> jarayonini ishga tushiradi, yangi nusxa yaratish oʻrniga allaqachon ishlayotgan nusxani qabul qiladi</td></tr>
+  <tr><td align="left" nowrap>📊 <b>Joriy foydalanishni bir qarashda koʻrsatadi</b></td><td align="left">Provayder kvotasi panellari, qayta tiklanishgacha qolgan vaqt koʻrsatiladigan Claude seans/haftalik cheklovlari, 30 kunlik xarajatlar taqsimoti</td></tr>
+  <tr><td align="left" nowrap>🔄 <b>Joyida avtomatik yangilanadi</b></td><td align="left">Bosqichma-bosqich oʻrnatish, atomar almashtirish, xatolik yuz bersa ortga qaytarish — doimo eng yangi relizda</td></tr>
+  <tr><td align="left" nowrap>🚀 <b>Tizimga kirganda ishga tushadi</b></td><td align="left">Tizimga kirganda ixtiyoriy ishga tushirish; faqat treyda, dock belgisisiz</td></tr>
+  <tr><td align="left" nowrap>🩺 <b>Diagnostika va jurnallar</b></td><td align="left">Bir marta bosish orqali diagnostika va server jurnallariga kirish</td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub> Yuklab olishni afzal ko'rasizmi? Oxirgi <code>.dmg </code> ni oling
-<a href="https://github.com/zoispag/omniroute-tray/releases"></a> chiqaradi. Manba, muammolar va qurilish
-docs <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a> yashaydi.
-<br/>💛 Jamiyat loyihasi <a href="https://github.com/zoispag">@zoispag </a> - rasmiy OmniRoute nashri emas.</sub>
+<sub>Yuklab olishni afzal ko‘rasizmi? Eng so‘nggi <code>.dmg</code> faylini
+<a href="https://github.com/zoispag/omniroute-tray/releases">Relizlar</a> sahifasidan oling. Manba kodi, muammolar va yig‘ish
+hujjatlari <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a> sahifasida joylashgan.
+<br/>💛 <a href="https://github.com/zoispag">@zoispag</a> tomonidan yaratilgan hamjamiyat loyihasi — bu rasmiy OmniRoute relizi emas.</sub>
 
 <br/>
 
@@ -1080,12 +1075,12 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
 ```
 
-`:latest` eng yuqori **eʼlon qilingan** barqaror SemVer versiyasiga mos keladi. U git `main` tarmogʻini kuzatmaydi. GitOps uchun `:X.Y.Z` versiyasini aniq belgilang. [Docker reliz kanallari](docs/guides/DOCKER_GUIDE.md#release-channels)ga qarang. Tasvirda **`OMNIROUTE_MEMORY_MB=1024`** qatʼiy belgilangan. Bu boshqaruv paneli va yengil chat uchun yetarli. **Kodlash agentlari** (Claude Code, Codex, Grok va boshqalardan `POST /v1/responses`) ancha katta V8 uyumini talab qiladi, aks holda bir-biriga ustma-ust tushgan ikkita uzun kontekstda, taxminan 12 GiB darajasida jarayon `FATAL ERROR` bilan yakunlanadi. Konteyner hajmini uyumdan kattaroq qilib belgilang (mahalliy buferlar V8 tashqarisida joylashadi):
+`:latest` eng yuqori **eʼlon qilingan** barqaror SemVer versiyasiga ergashadi. U git `main` tarmogʻini kuzatmaydi. GitOps uchun `:X.Y.Z` versiyasini qatʼiy belgilang. [Docker reliz kanallari](docs/guides/DOCKER_GUIDE.md#release-channels) bilan tanishing. Tasvirda **`OMNIROUTE_MEMORY_MB=1024`** qatʼiy belgilangan. Bu boshqaruv paneli va yengil chat uchun yetarli. **Dasturlash agentlari** (Claude Code, Codex, Grok va boshqalardan `POST /v1/responses`) uchun ancha katta V8 heap kerak boʻladi, aks holda bir-biriga ustma-ust tushadigan ikkita uzun kontekstda jarayon taxminan 12 GiB da `FATAL ERROR` bilan toʻxtaydi. Konteyner hajmini heap hajmidan kattaroq belgilang (mahalliy buferlar V8 dan tashqarida joylashadi):
 
-| Ish yuklamasi                            | Uyum (`-e OMNIROUTE_MEMORY_MB`) | Konteyner (`--memory`) |
+| Ish yuklamasi                            | Heap (`-e OMNIROUTE_MEMORY_MB`) | Konteyner (`--memory`) |
 | ---------------------------------------- | ------------------------------- | ---------------------- |
 | Boshqaruv paneli / yengil chat           | `1024` (tasvir standarti)       | ≥2 g                   |
-| Bitta kodlash agenti                     | `8192`                          | ≥10 g                  |
+| Bitta dasturlash agenti                  | `8192`                          | ≥10 g                  |
 | Bir vaqtdagi ikkita uzun `/v1/responses` | `10240`–`12288`                 | ≥12–16 g               |
 
 ```bash
@@ -1098,17 +1093,17 @@ Toʻliq jadval: [Docker qoʻllanmasi — bajarilish vaqtidagi RAM](docs/guides/D
 
 > **Relizoldi Docker kanali:** `diegosouzapw/omniroute:next` va
 > `diegosouzapw/omniroute:next-web` joriy standart `release/v*`
-> tarmogʻini kuzatadi. Bu oʻzgaruvchan teglar faqat hali chiqarilmagan tuzatishlarni sinash uchun moʻljallangan va
-> **ishlab chiqarish muhiti uchun qoʻllab-quvvatlanmaydi**.
-> [Docker reliz kanallari](docs/guides/DOCKER_GUIDE.md#release-channels)ga qarang.
+> tarmogʻiga ergashadi. Bu oʻzgaruvchan teglar faqat hali chiqarilmagan tuzatishlarni sinash uchun moʻljallangan va
+> **ishlab chiqarish muhiti uchun qoʻllab-quvvatlanmaydi**. Batafsil:
+> [Docker reliz kanallari](docs/guides/DOCKER_GUIDE.md#release-channels).
 
 **🥟 Bun**
 
 Standart `bun install` va global oʻrnatish (`bun install -g omniroute`) Bun bajarilish muhitini aniqlash orqali qoʻllab-quvvatlanadi:
 
-- **Ichki `bun:sqlite`**: OmniRoute Bun muhitida ishlaganda uning ichki `bun:sqlite` drayveridan foydalanadi, Node.js muhitida esa `better-sqlite3` yoki `sql.js`ga qaytadi.
-- **Ishlab chiqishda Webpack toʻplagichini avtomatik tanlash**: Ishlab chiqish rejimi (`bun run dev`) Bunʼni avtomatik aniqlaydi va mahalliy V8 bogʻlamalaridagi nomuvofiqliklarning oldini olish uchun Turbopackʼni oʻchirib, Webpackʼdan foydalanadi. Ishlab chiqarish tuzilmalari (`bun run build`) xuddi Nodeʼdagi kabi `OMNIROUTE_USE_TURBOPACK`ga aniq amal qiladi: standart holatda Turbopack, Webpack bilan tuzish uchun `OMNIROUTE_USE_TURBOPACK=0` (`Dockerfile.bun` uni `--build-arg` sifatida taqdim etadi).
-- **Maxsus Bun Dockerfile**: Mahalliy Bun ishlab chiqarish muhitlari uchun koʻp bosqichli `Dockerfile.bun` (`docker build -f Dockerfile.bun -t omniroute:bun .`).
+- **Ichki `bun:sqlite`**: OmniRoute Bun ostida ishlaganda uning ichki `bun:sqlite` drayveridan foydalanadi, Node.js da esa `better-sqlite3` yoki `sql.js` ga qaytadi.
+- **Ishlab chiqishda Webpack toʻplagichini avtomatik tanlash**: Ishlab chiqish rejimi (`bun run dev`) Bun muhitini avtomatik aniqlaydi va mahalliy V8 bogʻlanishlaridagi nomuvofiqliklarning oldini olish uchun Turbopack oʻrniga Webpack dan foydalanadi. Ishlab chiqarish tuzilmalari (`bun run build`) xuddi Node dagidek `OMNIROUTE_USE_TURBOPACK` qiymatiga toʻliq amal qiladi: standart holatda Turbopack, Webpack bilan tuzish uchun `OMNIROUTE_USE_TURBOPACK=0` (`Dockerfile.bun` uni `--build-arg` sifatida taqdim etadi).
+- **Maxsus Bun Dockerfile fayli**: Mahalliy Bun ishlab chiqarish joylashtirishlari uchun koʻp bosqichli `Dockerfile.bun` (`docker build -f Dockerfile.bun -t omniroute:bun .`).
 
 ```bash
 # Bun bilan o‘rnating va ishga tushiring
@@ -1151,18 +1146,18 @@ devbox run npm run dev
 **🦭 Podman**
 
 ```bash
-# 1. Bog‘lab ulanadigan ma’lumotlar katalogini tayyorlang
+# 1. Bog‘lab ulangan ma’lumotlar katalogini tayyorlang
 mkdir -p data
 
-# 2. Faqat Linux + mahalliy rootless Podman uchun (hech qachon masofaviy Podman Machine mijozi uchun emas):
+# 2. Faqat Linux + mahalliy rootsiz Podman uchun (hech qachon masofaviy Podman Machine mijozi uchun emas):
 podman unshare chown 1000:1000 ./data
 
-# 3. Bajarilish muhiti ko‘rsatmasini sozlang, mahalliy Compose tasvirini tuzing va ishga tushiring
+# 3. Bajarilish muhiti ko‘rsatmasini belgilang, mahalliy Compose tasvirini tuzing va ishga tushiring
 echo "CONTAINER_HOST=podman" >> .env
 podman compose --profile base up -d --build
 ```
 
-macOS yoki Windowsʼda Podman masofaviy Podman Machineʼdan foydalanadi: `podman unshare`ni oʻtkazib yuboring va
+macOS yoki Windows da Podman masofaviy Podman Machine dan foydalanadi: `podman unshare` bosqichini oʻtkazib yuboring va
 [topologiyaga xos maʼlumotlar katalogi boʻyicha koʻrsatmalar](contrib/podman/README.md#data-directory-permissions-by-topology)ga amal qiling.
 
 📖 [Podman qoʻllanmasi](contrib/podman/README.md) — Compose tuzilmalari, Podman Machine va
@@ -1171,20 +1166,22 @@ Linux/systemd Quadlet sozlamalari.
 **⚡ Tezroq / ixchamroq oʻrnatish (mahalliy tuzishni oʻtkazib yuborish)**
 
 Mahalliy SQLite mexanizmi (`better-sqlite3`) **ixtiyoriy** bogʻliqlikdir, shuning uchun global
-oʻrnatish hech qachon manba kodidan kompilyatsiya qilishni kutib qolmaydi: platformangiz/Nodeʼingizga mos kelsa,
-oldindan tuzilgan ikkilik fayldan foydalanadi, aks holda shaffof tarzda sof JS mexanizmiga
-(Node 22+ da `node:sqlite`, aks holda toʻplamga kiritilgan `sql.js` WASM) qaytadi — tuzish vositalari talab qilinmaydi.
+oʻrnatish hech qachon manba kodidan kompilyatsiya qilinishini kutib qolmaydi: platformangiz/Node versiyangizga mos kelsa,
+oldindan tuzilgan binar fayldan foydalanadi, aks holda shaffof tarzda sof JS mexanizmiga
+(Node 22+ da `node:sqlite`, aks holda paketga kiritilgan `sql.js` WASM) qaytadi — tuzish vositalari talab qilinmaydi.
 
-Oʻrnatishdan keyingi mahalliy tayyorlashni butunlay oʻtkazib yuborish uchun (CI, grafik interfeyssiz yoki sekin qurilmalar):
+Oʻrnatishdan keyingi **mahalliy dastlabki tayyorlash** bosqichini butunlay oʻtkazib yuborish uchun (CI, grafik interfeyssiz yoki sekin mashinalar).
+Eslatma: bu faqat mahalliy SQLite dastlabki tayyorlash bosqichini (`scripts/postinstall.mjs`) oʻtkazib yuboradi;
+binar faylni nusxalash/tiklash hook’i (`scripts/build/postinstall.mjs`) odatdagidek bajariladi:
 
 ```bash
 OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ham uni o‘tkazib yuboradi
 ```
 
-Eng tez oʻrnatish uchun **pnpm**dan foydalaning (kontentga asoslangan ombor + qattiq havolalar — yuqoriga qarang).
-Boshqaruv panelisiz, grafik interfeyssiz bajarilish muhiti uchun Dockerʼning `base` profilidan (yuqorida) yoki
-[Termux qoʻllanmasi](docs/guides/TERMUX_GUIDE.md)dan foydalaning. CLI va veb-boshqaruv paneliga bir portdagi
-bitta jarayon xizmat koʻrsatadi, shu sababli hozircha faqat CLI uchun alohida paket mavjud emas.
+Eng tez oʻrnatish uchun **pnpm** ni afzal koʻring (kontent asosida manzillanadigan saqlash joyi + qattiq havolalar — yuqoriga qarang).
+Boshqaruv panelisiz, grafik interfeyssiz bajarilish muhiti uchun Docker `base` profilidan (yuqorida) yoki
+[Termux qoʻllanmasi](docs/guides/TERMUX_GUIDE.md)dan foydalaning. CLI va veb-boshqaruv paneliga bir xil jarayon tomonidan
+bitta port orqali xizmat koʻrsatiladi, shuning uchun hozircha faqat CLI uchun alohida paket mavjud emas.
 
 <br/>
 
