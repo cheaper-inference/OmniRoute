@@ -67,10 +67,44 @@ test("a served session continues with tool calls another provider issued", async
   assert.equal(claimMuseSession(scope, { messages }, candidates).connectionId, owner.connectionId);
 });
 
-// A fresh session that starts with imported tool history is adopted only when exactly one
-// Muse account is usable (upstream's adoption rule). Multi-account adoption is a separate
-// follow-up: plain call ids carry no provider-bound payload, but widening it changes how an
-// owner is invented for a session that never had one, so it stays a deliberate decision.
+test("a fresh session adopts plain tool history and keeps account rotation", () => {
+  resetOwnership();
+  const first = museSessionScope({ session_id: "fresh-plain-1" }, undefined, "client");
+  const second = museSessionScope({ session_id: "fresh-plain-2" }, undefined, "client");
+  const a = claimMuseSession(first, { input: foreignToolTurn("2") }, candidates);
+  const b = claimMuseSession(second, { input: foreignToolTurn("3") }, candidates);
+  assert.notEqual(a.connectionId, b.connectionId);
+  // The claim is durable: the next turn stays on the same account.
+  assert.equal(
+    claimMuseSession(first, { input: foreignToolTurn("4") }, candidates).connectionId,
+    a.connectionId
+  );
+});
+
+for (const forced of [false, true]) {
+  test(`fresh plain history selects a healthy owner from the pool (forced=${forced})`, () => {
+    resetOwnership();
+    const scope = museSessionScope({ session_id: `pool-history-${forced}` }, undefined, "client");
+    const pool = [
+      { id: "unavailable", unavailable: true },
+      { id: "healthy-a" },
+      { id: "healthy-b" },
+    ];
+    const body = { input: foreignToolTurn(`pool-${forced}`) };
+    const before = structuredClone(body);
+    const owner = claimMuseSession(scope, body, pool, forced ? "healthy-b" : undefined);
+    assert.ok(["healthy-a", "healthy-b"].includes(owner.connectionId));
+    if (forced) assert.equal(owner.connectionId, "healthy-b");
+    const generation = bindMuseGeneration(scope, owner.connectionId, "pool-key", "pool-identity");
+    assert.equal(claimMuseSession(scope, body, pool).connectionId, owner.connectionId);
+    assert.equal(
+      bindMuseGeneration(scope, owner.connectionId, "pool-key", "pool-identity"),
+      generation
+    );
+    assert.deepEqual(body, before);
+    assert.throws(() => claimMuseSession(scope, body, [{ id: "another-account" }]), /unavailable/);
+  });
+}
 
 test("encrypted reasoning and item references stay bound to their issuing session", async () => {
   resetOwnership();

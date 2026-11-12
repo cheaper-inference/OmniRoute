@@ -231,7 +231,7 @@ function assertKeptOwnerUsable(
   }
 }
 
-/** A never-owned scope may adopt plain tool history only with exactly one usable candidate. */
+/** A never-owned scope can assign plain tool history to any eligible initial owner. */
 function canAdoptPlainHistory(
   prior: Owner | null,
   references: Set<string>,
@@ -243,9 +243,9 @@ function canAdoptPlainHistory(
     !prior &&
     references.size > 0 &&
     !hasForbiddenHistory &&
-    candidates.length === 1 &&
-    !candidates[0].unavailable &&
-    (!forcedId || forcedId === candidates[0].id)
+    candidates.some(
+      (candidate) => !candidate.unavailable && (!forcedId || candidate.id === forcedId)
+    )
   );
 }
 
@@ -296,8 +296,16 @@ function verifyContinuationReferences(scope: string, owner: Owner, references: S
     // Client threads carry tool items issued under other models or restored by
     // compaction; record them under the scope's bound generation. Opaque and item:
     // history stays fail-closed.
-    if (owner.generation && id.startsWith("call:")) {
-      save(`reference:${scope}:${hash}`, owner.generation);
+    if (id.startsWith("call:")) {
+      if (owner.generation) {
+        save(`reference:${scope}:${hash}`, owner.generation);
+      } else {
+        // A claim can be revisited before credentials are bound. Plain call ids
+        // still carry no account state; bind them with the actual credential,
+        // just like the initial adopted history, rather than rejecting the retry.
+        owner.pendingReferences = [...new Set([...(owner.pendingReferences || []), hash])];
+        save(`session:${scope}`, JSON.stringify(owner));
+      }
       continue;
     }
     throw new MuseOwnershipError(
