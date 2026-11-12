@@ -185,6 +185,11 @@ function normalizeNestedSubObjects(
   }
 }
 
+/**
+ * Return a sanitized copy of a connection's `providerSpecificData` for storage: malformed
+ * request-default fields and non-boolean flags such as `nativeJsonSchema` are dropped, and an
+ * empty record yields `undefined`.
+ */
 export function normalizeProviderSpecificData(
   provider: string | null | undefined,
   value: unknown

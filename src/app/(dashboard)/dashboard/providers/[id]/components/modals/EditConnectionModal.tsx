@@ -116,6 +116,10 @@ export interface EditConnectionModalProps {
   onClose: () => void;
 }
 const stringField = (value: unknown) => (typeof value === "string" ? value : "");
+/**
+ * Modal for editing an existing provider connection (credentials, base URL, request defaults
+ * and, for OpenAI-compatible chat connections, the native JSON schema toggle).
+ */
 export default function EditConnectionModal({
   isOpen,
   connection,
