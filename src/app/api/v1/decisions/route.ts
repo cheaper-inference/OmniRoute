@@ -13,6 +13,9 @@ import {
 } from "@/shared/validation/schemas/geminiDecisions";
 import { handleGeminiDecisionRequest } from "@omniroute/open-sse/handlers/geminiDecisionWorkflow.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
+import { recordUnpricedBudgetUsage } from "@/domain/costRules";
+import { recordKeyQuotaUsage } from "@/domain/keyQuota";
+import { recordTokenUsage } from "@omniroute/open-sse/services/tokenLimitCounter.ts";
 
 export const dynamic = "force-dynamic";
 
@@ -84,7 +87,18 @@ export async function POST(request: Request): Promise<Response> {
   // provider-qualified blockedModels rule (for example "gemini/*").
   const scope = await enforceApiKeyPolicyWithScope(request, GEMINI_DECISION_PUBLIC_MODEL);
   if (scope.rejection) return scope.rejection;
+  const apiKeyId = scope.policy.apiKeyInfo?.id ?? null;
   return handleGeminiDecisionRequest(
-    parsed.data, scope.allowedConnections, request.signal, scope.policy.apiKeyInfo?.id ?? null
+    parsed.data, scope.allowedConnections, request.signal,
+    (tokens, startedAt) => {
+      if (!apiKeyId) return;
+      recordKeyQuotaUsage(apiKeyId, tokens);
+      recordTokenUsage(apiKeyId, "gemini", GEMINI_DECISION_PUBLIC_MODEL, tokens, startedAt);
+      // Google Decisions has no verified USD price. A limited metered budget
+      // must not silently treat the inference as a free $0 call.
+      recordUnpricedBudgetUsage(apiKeyId, {
+        provider: "gemini", model: GEMINI_DECISION_PUBLIC_MODEL,
+      });
+    }
   );
 }
