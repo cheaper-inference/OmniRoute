@@ -607,6 +607,8 @@ curl http://localhost:20128/api/cli-tools/hermes-agent-settings \
 
 POST cli tools › hermes agent settings
 
+Optional body fields `profile` (apply to one named Hermes profile) and `applyToAll` (apply to every listed profile; the response then carries one result per profile). Use at most one of them. Without either, the default Hermes home is written as before.
+
 ```bash
 curl -X POST http://localhost:20128/api/cli-tools/hermes-agent-settings \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \

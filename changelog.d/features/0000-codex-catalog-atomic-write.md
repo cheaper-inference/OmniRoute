@@ -1,1 +1,0 @@
-- **feat(cli-tools):** applying Codex settings no longer rewrites the OmniRoute model catalog when its content is unchanged, and a changed catalog is published through a temp file and rename, so an interrupted write leaves the old file whole.
