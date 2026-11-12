@@ -25,6 +25,7 @@ import {
   type PricingByProvider,
 } from "@/lib/modelsDevSync";
 import { getSyncedPricing } from "@/lib/pricingSync";
+import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 import {
   lookupUserCatalogPricing,
   readUserPricingMemoized,
@@ -359,66 +360,78 @@ export function findInsensitive<T>(
   return index.get(key.toLowerCase()) as T | undefined;
 }
 
+/** Fail closed: any resolution error keeps the first-source catalog pricing. */
+function isCatalogPricingFieldMergeEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("CATALOG_PRICING_FIELD_MERGE_ENABLED");
+  } catch {
+    return false;
+  }
+}
+
 function resolveCatalogPricing(
   provider: string | null,
   model: string | null,
   snapshot?: CatalogEnrichmentSnapshot
-): Record<string, number> | null {
+): ReturnType<typeof getDefaultPricingForModel> {
   if (!provider || !model) return null;
-  const base = resolveBaseCatalogPricing(provider, model, snapshot);
+  const mergeFields = isCatalogPricingFieldMergeEnabled();
+  const base = mergeFields
+    ? mergeCatalogPricingLayers(provider, model, snapshot)
+    : resolveFirstCatalogPricingSource(provider, model, snapshot);
   // #15528: user overrides win per-field over models.dev / LiteLLM / defaults.
   const user = lookupUserCatalogPricing(
     snapshot?.userPricing !== undefined ? snapshot.userPricing : readUserPricingMemoized(),
     provider,
     model,
-    findInsensitive
+    findInsensitive,
+    mergeFields
   );
   return user ? { ...(base || {}), ...user } : base;
 }
 
-function lookupCatalogPricing(
-  source: Record<string, Record<string, Record<string, number>>>,
+function findCatalogModelPricing(
+  source: Record<string, Record<string, Record<string, unknown>>>,
   provider: string,
   model: string
-): Record<string, number> | null {
+): Record<string, unknown> | undefined {
   const providerPricing =
     findInsensitive(source, provider) || findInsensitive(source, provider.replace(/-cn$/, ""));
-  if (providerPricing) {
-    const modelPricing =
-      findInsensitive(providerPricing, model) ||
-      findInsensitive(providerPricing, model.replace(/\./g, "-")) ||
-      findInsensitive(
-        providerPricing,
-        model.includes("/") ? model.split("/").pop() || model : model
-      );
-    if (modelPricing && typeof modelPricing === "object") {
-      const input = modelPricing.input;
-      const output = modelPricing.output;
-      if (typeof input === "number" || typeof output === "number") {
-        const pricing: Record<string, number> = {};
-        if (typeof input === "number") pricing.input = input;
-        if (typeof output === "number") pricing.output = output;
-        if (typeof modelPricing.cached === "number") pricing.cached = modelPricing.cached;
-        if (typeof modelPricing.cache_creation === "number") {
-          pricing.cache_creation = modelPricing.cache_creation;
-        }
-        return pricing;
-      }
-    }
-  }
-  return null;
+  if (!providerPricing) return undefined;
+  return (
+    findInsensitive(providerPricing, model) ||
+    findInsensitive(providerPricing, model.replace(/\./g, "-")) ||
+    findInsensitive(providerPricing, model.includes("/") ? model.split("/").pop() || model : model)
+  );
 }
 
-function resolveBaseCatalogPricing(
+function lookupCatalogPricing(
+  source: Record<string, Record<string, Record<string, unknown>>>,
+  provider: string,
+  model: string,
+  includeReasoning = false
+): Record<string, number> | null {
+  const modelPricing = findCatalogModelPricing(source, provider, model);
+  if (!modelPricing || typeof modelPricing !== "object") return null;
+  const { input, output, cached, reasoning, cache_creation: cacheCreation } = modelPricing;
+  if (typeof input !== "number" && typeof output !== "number") return null;
+  const pricing: Record<string, number> = {};
+  if (typeof input === "number") pricing.input = input;
+  if (typeof output === "number") pricing.output = output;
+  if (typeof cached === "number") pricing.cached = cached;
+  if (includeReasoning && typeof reasoning === "number") pricing.reasoning = reasoning;
+  if (typeof cacheCreation === "number") pricing.cache_creation = cacheCreation;
+  return pricing;
+}
+
+/** The first source that prices the model wins: models.dev, then LiteLLM, then defaults. */
+function resolveFirstCatalogPricingSource(
   provider: string,
   model: string,
   snapshot?: CatalogEnrichmentSnapshot
-): Record<string, number> | null {
-  // Prefer models.dev synced pricing when present; fall back to hardcoded defaults.
+): ReturnType<typeof getDefaultPricingForModel> {
   try {
-    const modelsDev = (
-      snapshot ? snapshot.modelsDevPricing || {} : getModelsDevPricing()
-    ) as Record<string, Record<string, Record<string, number>>>;
+    const modelsDev = snapshot ? snapshot.modelsDevPricing || {} : getModelsDevPricing();
     const pricing = lookupCatalogPricing(modelsDev, provider, model);
     if (pricing) return pricing;
   } catch {
@@ -427,21 +440,15 @@ function resolveBaseCatalogPricing(
 
   // LiteLLM-synced pricing (`pricing_synced` namespace) — Layer 3 in the
   // documented resolution order (user > models.dev > LiteLLM > defaults).
-  // Consulted only when models.dev returned nothing, matching the order
-  // already implemented in db/settings/pricing.ts::getPricing().
   try {
-    const litellm = getSyncedPricing() as unknown as Record<
-      string,
-      Record<string, Record<string, number>>
-    >;
-    const pricing = lookupCatalogPricing(litellm, provider, model);
+    const pricing = lookupCatalogPricing(getSyncedPricing(), provider, model);
     if (pricing) return pricing;
   } catch {
     // pricing lookup must never break catalog assembly
   }
 
   try {
-    const defaults = getDefaultPricingForModel(provider, model) as Record<string, number> | null;
+    const defaults = getDefaultPricingForModel(provider, model);
     if (defaults && (typeof defaults.input === "number" || typeof defaults.output === "number")) {
       return defaults;
     }
@@ -449,6 +456,39 @@ function resolveBaseCatalogPricing(
     // ignore
   }
   return null;
+}
+
+/** CATALOG_PRICING_FIELD_MERGE_ENABLED: runtime per-field order, defaults → LiteLLM → models.dev. */
+function mergeCatalogPricingLayers(
+  provider: string,
+  model: string,
+  snapshot?: CatalogEnrichmentSnapshot
+): ReturnType<typeof getDefaultPricingForModel> {
+  let merged: ReturnType<typeof getDefaultPricingForModel> = null;
+  try {
+    const defaults = getDefaultPricingForModel(provider, model);
+    if (defaults && (typeof defaults.input === "number" || typeof defaults.output === "number")) {
+      merged = defaults;
+    }
+  } catch {
+    // pricing lookup must never break catalog assembly
+  }
+
+  try {
+    const pricing = lookupCatalogPricing(getSyncedPricing(), provider, model, true);
+    if (pricing) merged = { ...(merged || {}), ...pricing };
+  } catch {
+    // pricing lookup must never break catalog assembly
+  }
+
+  try {
+    const modelsDev = snapshot ? snapshot.modelsDevPricing || {} : getModelsDevPricing();
+    const pricing = lookupCatalogPricing(modelsDev, provider, model, true);
+    if (pricing) merged = { ...(merged || {}), ...pricing };
+  } catch {
+    // ignore
+  }
+  return merged;
 }
 
 /** Expose normalized capability and input-modality metadata to model-list clients. */

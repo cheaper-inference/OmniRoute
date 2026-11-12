@@ -7,6 +7,7 @@ import { backupDbFile } from "../backup";
 import { getCachedPricing, invalidateDbCache } from "../readCache";
 import { PROVIDER_ID_TO_ALIAS } from "@omniroute/open-sse/config/providerModels.ts";
 import { invalidateUserPricingMemo } from "@/lib/catalogUserPricing";
+import { normalizeLiteLLMPricingProviders } from "@/lib/litellmPricingProviderAliases";
 import { remapHistoricalLitellmRows } from "@/lib/litellmProviderMap";
 import { type JsonRecord, toRecord } from "./shared";
 
@@ -108,7 +109,8 @@ async function getPricingLayers() {
 
   // Layer 1: Hardcoded defaults (lowest priority)
   const { getDefaultPricing } = await import("@/shared/constants/pricing");
-  const litellm = readPricingNamespace(db, "pricing_synced");
+  // Merge the opencode_go spellings per field first, then re-apply the provider map.
+  const litellm = normalizeLiteLLMPricingProviders(readPricingNamespace(db, "pricing_synced"));
   remapHistoricalLitellmRows(litellm);
   return {
     defaults: getDefaultPricing(),

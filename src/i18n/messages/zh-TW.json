@@ -1157,6 +1157,7 @@
   "featureFlagXaiOauthLiveModelDiscoveryDescription": "使用 OAuth bearer token，從 https://api.x.ai/v1/models 擷取 xai-oauth 連線的即時 xAI 模型目錄，而非固定不變的靜態種子。預設關閉：xai-oauth 會繼續提供未變更的靜態種子。發生任何解析錯誤時，探索功能會回退至該種子。",
   "featureFlagDbHealthcheckStartupDeferredEnabledDescription": "伺服器開始接受請求後再執行啟動時的資料庫完整性／健康狀況檢查，而非在檢查完成前阻擋啟動程序。預設關閉：啟動程序會像此變更前一樣等待檢查完成，因此損壞的資料庫仍會在處理第一個請求前被偵測到。",
   "featureFlagCatalogMirrorRefinementsEnabledDescription": "完善 /v1/models 上的 claude/ 探索與 functional-gateway 鏡像功能。預設關閉：兩種鏡像處理方式的行為都與先前完全相同。開啟時：claude/ 探索鏡像也會涵蓋列出的推理強度變體（-low/-medium/-high/-xhigh），略過請求路徑無法具現化的內建 auto/* ID，並略過已列出的別名；functional-gateway 鏡像會略過組合與 OmniRoute 合成的 ID（claude/、no-think/），從 owned_by 取得擁有者，絕不將擁有者本身用作其閘道，並略過 blockedProviders 中已停用的閘道，以及不在閘道權威即時目錄中的模型。",
+  "featureFlagCatalogPricingFieldMergeEnabledDescription": "__MISSING__:Show /v1/models pricing the way cost tracking resolves it. Off by default: the catalog uses the first source that prices the model (models.dev, then LiteLLM, then built-in defaults) and omits user and synced reasoning rates. On: fields merge per field with defaults below LiteLLM below models.dev below user overrides, and reasoning rates are listed, so a model can show fields its top source does not price.",
   "featureFlagOpencodePublishedCatalogRoutingEnabledDescription": "允許沒有明確登錄端點的 OpenCode Zen 與 OpenCode Go 模型，從已發布的 models.opencode.ai 目錄取得其請求介面（@ai-sdk/openai 使用 Responses，@ai-sdk/anthropic 使用 Messages）；該目錄每 6 小時於背景讀取一次。預設關閉：端點會完全比照先前方式，依登錄啟發式規則決定，且絕不擷取該目錄。",
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "在 OpenCode Zen/Go 請求中傳送 OpenCode v2 CLI 用戶端指紋：opencode/latest/<2.x>/cli User-Agent 與 x-opencode-client cli；在免費方案請求中，則傳送 v2 工作階段標頭、v2 CLI read/shell 工具結構描述，且不使用 tool_choice \"none\"。預設關閉：每個 OpenCode 請求都會維持目前的識別資訊、標頭與主體不變。",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "當自動組合的候選池在工具呼叫預篩選執行前便已為空（所有目標皆因冷卻、鎖定或耗盡而被略過）時，回應 503 no_eligible_targets，而不是舊版的 400「沒有任何目標支援工具呼叫」capability_mismatch。預設為關閉：候選池為空時仍維持舊版的 400 回應。",
@@ -14937,6 +14938,10 @@
       "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
         "label": "目錄映象細化",
         "description": "細化 /v1/models 上的 claude/ 發現和功能閘道器映象。預設關閉：兩個映象通道與之前行為完全一致。開啟：claude/ 發現映象還覆蓋列出的推理檔位變體（-low/-medium/-high/-xhigh），跳過請求路徑無法實體化的內建 auto/* id，跳過已列出的別名；功能閘道器映象跳過組合和 OmniRoute 合成的 id（claude/、no-think/），從 owned_by 取屬主，絕不把屬主當自己的閘道器，跳過在 blockedProviders 中禁用的閘道器和不在閘道器權威實時目錄中的模型。"
+      },
+      "CATALOG_PRICING_FIELD_MERGE_ENABLED": {
+        "label": "__MISSING__:Catalog Pricing Field Merge",
+        "description": "__MISSING__:Show /v1/models pricing the way cost tracking resolves it. Off by default: the catalog uses the first source that prices the model (models.dev, then LiteLLM, then built-in defaults) and omits user and synced reasoning rates. On: fields merge per field with defaults below LiteLLM below models.dev below user overrides, and reasoning rates are listed, so a model can show fields its top source does not price."
       },
       "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
         "label": "代理健康：被拒重置失敗連擊",
