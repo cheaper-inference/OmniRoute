@@ -246,6 +246,7 @@
       "tests/unit/authz/oauth-autoimport-local-only.test.ts",
       "tests/unit/authz/route-guard-local-prefix.test.ts",
       "tests/unit/authz/route-guard-providers-spawn-local-only.test.ts",
+      "tests/unit/opencode-server-launcher.test.ts",
       "tests/unit/authz/route-guard-skills-collect.test.ts",
       "tests/unit/authz/route-guard-tunnel-processes-local-only.test.ts",
       "tests/unit/authz/route-guard-version-get-exemption.test.ts",
