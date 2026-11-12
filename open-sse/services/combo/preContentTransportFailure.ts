@@ -123,6 +123,12 @@ export function isStreamingUpstreamError(parsed: unknown, eventType: string): bo
 // Response identities carry only the shared veto; headers cannot establish it.
 const replayVetoes = new WeakMap<Response, { observed: boolean }>();
 
+export function inheritTransportReplayVeto(source: Response, target: Response): Response {
+  const state = replayVetoes.get(source);
+  if (state) replayVetoes.set(target, state);
+  return target;
+}
+
 export function hasObservedTransportReplayVeto(response: Response): boolean {
   return replayVetoes.get(response)?.observed === true;
 }

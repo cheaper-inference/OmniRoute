@@ -1,3 +1,5 @@
+import { runRoundRobinAttempt } from "./roundRobinAdmission.ts";
+import { isPrivateAdmissionError, releaseAuxiliaryAdmissionOwner } from "./auxiliaryAdmission.ts";
 /** Round-robin combo dispatcher. Lift-as-is from combo.ts. @internal */
 import { cloneForQuality } from "./preContentTransportFailure.ts";
 import {
@@ -134,7 +136,6 @@ import { waitForCooldownAwareRetry } from "../../../src/sse/services/cooldownAwa
 import { getCachedProviderConnectionById } from "../../../src/lib/db/readCache.ts";
 import { applyComboTargetExhaustion } from "./targetExhaustion.ts";
 import { isRetryAfterEligibleStatus } from "./unavailableRetryGate.ts";
-import { isRecord } from "./comboData.ts";
 import { createRRDashboardEvents, selectedConnectionIdOf } from "./rrDashboardEvents.ts";
 import { attemptCompatRejectedFallback } from "./comboCompatFallback.ts";
 import { applyRequestTagRouting } from "./autoStrategy.ts";
@@ -597,7 +598,7 @@ export async function handleRoundRobinCombo({
 
   // Try each model starting from the round-robin target
   try {
-    for (let offset = 0; offset < modelCount; offset++) {
+    targetLoop: for (let offset = 0; offset < modelCount; offset++) {
       if (clientGone()) return errorResponse(499, "Client disconnected");
       // G4: stop launching new work once the safety timer fired.
       if (rrExpired) break;
@@ -724,28 +725,8 @@ export async function handleRoundRobinCombo({
         continue;
       }
 
-      // Acquire semaphore slot (may wait in queue). Honor the connection's own
-      // maxConcurrent cap when set; else fall back to the combo-level concurrency.
       const targetConcurrency = await resolveTargetConcurrency(target.connectionId);
-      let release: () => void;
-      try {
-        release = await semaphore.acquire(semaphoreKey, {
-          maxConcurrency: targetConcurrency,
-          timeoutMs: queueTimeout,
-          maxQueueSize: queueDepth,
-        });
-      } catch (err) {
-        const errCode = isRecord(err) && typeof err.code === "string" ? err.code : null;
-        if (errCode === "SEMAPHORE_TIMEOUT" || errCode === "SEMAPHORE_QUEUE_FULL") {
-          log.warn(
-            "COMBO-RR",
-            `Semaphore ${errCode === "SEMAPHORE_QUEUE_FULL" ? "queue full" : "timeout"} for ${modelStr}, trying next model`
-          );
-          fallbackCount++;
-          continue;
-        }
-        throw err;
-      }
+      const auxiliaryOwner = {};
 
       // Retry loop within this model
       let emptyTurnConnectionId: string | null = null;
@@ -844,16 +825,32 @@ export async function handleRoundRobinCombo({
 
           if (preContentTransportRecovery && signal?.aborted)
             return errorResponse(499, "Client disconnected");
-          rrEvents.attempt();
-          const result = await Promise.race([
-            handleSingleModel(attemptBody, modelStr, {
-              ...targetForAttempt,
-              emptyTurnConnectionId,
-              effectiveComboStrategy: "round-robin",
-              failoverBeforeRetry: config.failoverBeforeRetry,
-            }),
-            rrSafetyPromise,
-          ]);
+          const admitted = await runRoundRobinAttempt(
+            {
+              owner: auxiliaryOwner,
+              key: semaphoreKey,
+              maxConcurrency: targetConcurrency,
+              timeoutMs: queueTimeout,
+              maxQueueSize: queueDepth,
+            },
+            () =>
+              Promise.race([
+                handleSingleModel(attemptBody, modelStr, {
+                  ...targetForAttempt,
+                  emptyTurnConnectionId,
+                  effectiveComboStrategy: "round-robin",
+                  failoverBeforeRetry: config.failoverBeforeRetry,
+                }),
+                rrSafetyPromise,
+              ]),
+            () => rrEvents.attempt()
+          );
+          if (!admitted.response) {
+            if (!admitted.attempted) globalAttempts--;
+            fallbackCount++;
+            continue targetLoop;
+          }
+          const result = admitted.response;
           if (preContentTransportRecovery && signal?.aborted) {
             releaseRejectedQualityResponse(result, result);
             return errorResponse(499, "Client disconnected");
@@ -1416,11 +1413,12 @@ export async function handleRoundRobinCombo({
           break;
         }
       } finally {
-        // ALWAYS release semaphore slot
-        release();
+        releaseAuxiliaryAdmissionOwner(auxiliaryOwner);
       }
     }
   } catch (err) {
+    if (signal?.aborted) return errorResponse(499, "Client disconnected");
+    if (isPrivateAdmissionError(err)) throw err;
     // G4: unexpected exception in the round-robin loop must never crash the
     // request silently — surface a 500 instead of hanging the client.
     log.error?.("COMBO-RR", "Unexpected error in round-robin loop", err);

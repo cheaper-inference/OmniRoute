@@ -1,3 +1,17 @@
+import { capacityRequestDeadline } from "../../services/combo/capacityBudgetContext.ts";
+import { resolveConnectionConcurrencyCeiling } from "../../../src/sse/services/connectionConcurrencyFields.ts";
+import {
+  acquireAuxiliaryAdmissions,
+  markAuxiliaryExecutionStarted,
+} from "../../services/combo/auxiliaryAdmission.ts";
+import {
+  beginAccountCapacityAdmission,
+  tightenAccountCapacityAdmissionDeadline,
+  markAccountCapacityExecutionStarted,
+  accountCapacityAdmissionSignal,
+  remainingAccountCapacityBudgetMs,
+  waitForAccountCapacityAdmission,
+} from "../../services/accountSemaphore.ts";
 import type {
   HttpAttemptSelection,
   HttpAttemptRejectionSlot,
@@ -15,6 +29,7 @@ import type { AgentGoalPolicy } from "../../utils/agentGoalPolicy.ts";
 import { prepareUpstreamBody } from "./upstreamBody.ts";
 import { getExecutionConnectionId } from "./executionCredentials.ts";
 import {
+  isAccountSemaphoreConcurrencyOverridden,
   resolveAccountSemaphoreKey,
   resolveAccountSemaphoreMaxConcurrency,
   resolveModelSemaphore,
@@ -255,6 +270,8 @@ export async function executeProviderRequest(
         const maxAttempts = isModelScopeForRequest ? 3 : provider === "codex" ? 3 : 1;
 
         while (attempts < maxAttempts) {
+          beginAccountCapacityAdmission();
+          const admissionSignal = accountCapacityAdmissionSignal(streamController.signal)!;
           trace("pre_executor", { attempt: attempts });
           updatePendingScope(pendingScope, {
             stage: "sending_to_provider",
@@ -295,13 +312,18 @@ export async function executeProviderRequest(
               stage: "waiting_account_slot",
             });
           }
-          const maxWaitMs = resolveRequestQueueMaxWaitMs(
+          const configuredWaitMs = resolveRequestQueueMaxWaitMs(
             provider,
             undefined,
             attemptConnectionId ?? undefined
           );
+          if (accountSemaphoreKey)
+            tightenAccountCapacityAdmissionDeadline(
+              capacityRequestDeadline(accountSemaphoreKey, configuredWaitMs)
+            );
+          const maxWaitMs = remainingAccountCapacityBudgetMs(configuredWaitMs);
           const gateStartedAt = Date.now();
-          const releaseAccountSemaphore = await acquireConcurrencyGates(
+          const releaseComposite = await acquireConcurrencyGates(
             [
               {
                 key: "global",
@@ -314,6 +336,14 @@ export async function executeProviderRequest(
               {
                 key: accountSemaphoreKey || "",
                 maxConcurrency: accountSemaphoreKey ? accountSemaphoreMaxConcurrency : null,
+                connectionId:
+                  typeof attemptConnectionId === "string" ? attemptConnectionId : undefined,
+                connectionCapacity: resolveAccountSemaphoreMaxConcurrency(execCreds, false),
+                concurrencyCeiling: resolveConnectionConcurrencyCeiling(canonicalProviderKey),
+                followConnectionCapacity: !isAccountSemaphoreConcurrencyOverridden(
+                  execCreds,
+                  typeof attemptConnectionId === "string" && isRateLimitEnabled(attemptConnectionId)
+                ),
               },
               {
                 key: modelGate.key || "",
@@ -323,9 +353,14 @@ export async function executeProviderRequest(
             {
               timeoutMs: maxWaitMs,
               maxQueueSize: resilienceSettings.requestQueue.maxQueueDepth,
-              signal: streamController.signal,
+              signal: admissionSignal,
             }
           ).catch(rethrowAdmissionError);
+          let releaseAuxiliary = () => {};
+          const releaseAccountSemaphore = () => {
+            releaseAuxiliary();
+            releaseComposite();
+          };
           const remainingAfterGate = remainingQueueBudgetMs(maxWaitMs, gateStartedAt);
           trace("post_semaphore", { maxWaitMs, remainingAfterGate });
           updatePendingScope(pendingScope, {
@@ -333,6 +368,12 @@ export async function executeProviderRequest(
           });
 
           try {
+            releaseAuxiliary = await acquireAuxiliaryAdmissions(
+              attemptConnectionId,
+              admissionSignal,
+              remainingAfterGate
+            );
+            beginAccountCapacityAdmission();
             trace("pre_rate_limit", { connectionId: attemptConnectionId });
             const rawExecutorResult = await withRateLimit(
               provider,
@@ -354,6 +395,8 @@ export async function executeProviderRequest(
                   log,
                   execute: (signal) =>
                     runWithCapture(providerRequestCapture, () => {
+                      markAccountCapacityExecutionStarted(signal);
+                      markAuxiliaryExecutionStarted();
                       noteUpstreamDispatch();
                       return executor.execute({
                         model: modelToCall,
@@ -374,8 +417,8 @@ export async function executeProviderRequest(
                     }),
                 });
               },
-              streamController.signal,
-              remainingAfterGate,
+              admissionSignal,
+              remainingQueueBudgetMs(maxWaitMs, gateStartedAt),
               correlationId ?? undefined,
               {
                 executor: executor as unknown as { getTimeoutMs?: () => unknown },
@@ -478,7 +521,7 @@ export async function executeProviderRequest(
                   `429 ${decision.kind}; retrying in ${delay}ms (model remaining: ${decision.snapshot.modelRemaining ?? "unknown"})`
                 );
                 releaseAccountSemaphore();
-                await new Promise((r) => setTimeout(r, delay));
+                await waitForAccountCapacityAdmission(delay, streamController.signal);
                 attempts++;
                 continue;
               }
@@ -559,6 +602,8 @@ export async function executeProviderRequest(
                       log,
                       execute: (signal) =>
                         runWithCapture(providerRequestCapture, () => {
+                          markAccountCapacityExecutionStarted(signal);
+                          markAuxiliaryExecutionStarted();
                           noteUpstreamDispatch();
                           return executor.execute({
                             model: modelToCall,

@@ -1,3 +1,4 @@
+import { resolveAccountConcurrencyLimit } from "../../../src/sse/services/connectionConcurrencyFields.ts";
 import { FORMATS } from "../../translator/formats.ts";
 import {
   buildAccountSemaphoreKey,
@@ -41,15 +42,25 @@ export function resolveAccountSemaphoreAccountKey(
   return null;
 }
 
+export function isAccountSemaphoreConcurrencyOverridden(
+  credentials: Record<string, unknown> | null | undefined,
+  rateLimitProtectionEnabled = true
+): boolean {
+  return (
+    rateLimitProtectionEnabled &&
+    (toFiniteNumberOrNull(credentials?.rateLimitMaxConcurrent) ?? 0) > 0
+  );
+}
+
 export function resolveAccountSemaphoreMaxConcurrency(
   credentials: Record<string, unknown> | null | undefined,
   rateLimitProtectionEnabled = true
 ): number | null {
-  const rateLimitOverride = toFiniteNumberOrNull(credentials?.rateLimitMaxConcurrent);
-  if (rateLimitProtectionEnabled && rateLimitOverride !== null && rateLimitOverride > 0) {
-    return rateLimitOverride;
-  }
-  return toFiniteNumberOrNull(credentials?.maxConcurrent);
+  return resolveAccountConcurrencyLimit(
+    toFiniteNumberOrNull(credentials?.maxConcurrent),
+    toFiniteNumberOrNull(credentials?.rateLimitMaxConcurrent),
+    rateLimitProtectionEnabled
+  );
 }
 
 /**

@@ -1,10 +1,18 @@
-/**
- * Retry loop for a combo target that already passed pre-dispatch gates.
- * Lift-as-is from combo.ts:1533–2616. Classify helpers live in
- * executeTargetClassify.ts. Pin/LKGP side effects go through deps.
- *
- * @internal — not part of the public combo.ts barrel.
- */
+import {
+  clearPendingCapacityCharge,
+  runDetachedHandoff,
+  refundPendingCapacityAttempt,
+  createPendingCapacityCharge,
+} from "./commonCapacity.ts";
+import { isHedgeCancelledSignal, isHedgeCancelledReasonError } from "./comboAbortReasons.ts";
+import {
+  accountCapacityExecutionSerial,
+  isAccountCapacityContextError,
+  beginAccountCapacityAdmission,
+  assertAccountCapacityAdmissionAlive,
+  waitForAccountCapacityAdmission,
+} from "../accountSemaphore.ts";
+/** Retry and response validation for a target that passed pre-dispatch gates. */
 import { cloneForQuality } from "./preContentTransportFailure.ts";
 import {
   checkFallbackError,
@@ -126,7 +134,6 @@ import {
   isReadinessFailure,
 } from "./emptyContentRetry.ts";
 import { isEmptyStreamSiblingRecoveryEnabled } from "../streamRecovery.ts";
-import { waitForCooldownAwareRetry } from "../../../src/sse/services/cooldownAwareRetry.ts";
 
 /**
  * Executes an admitted target with configured retries and response validation. Returns a
@@ -134,6 +141,35 @@ import { waitForCooldownAwareRetry } from "../../../src/sse/services/cooldownAwa
  */
 export async function executeTargetAttempt(
   opts: ExecuteTargetAttemptOptions
+): Promise<ExecuteTargetResult> {
+  const owned = new Set<Response>();
+  const chargeOwner = accountCapacityExecutionSerial() === undefined ? null : {};
+  const signal = opts.state.abortControllers.get(opts.index)?.signal;
+  try {
+    const result = await executeTargetAttemptInner(opts, owned, chargeOwner);
+    if (result?.response) owned.delete(result.response);
+    return result;
+  } catch (error) {
+    if (
+      chargeOwner &&
+      (isAccountCapacityContextError(error) ||
+        opts.deps.signal?.aborted ||
+        (isHedgeCancelledSignal(signal) && isHedgeCancelledReasonError(error)))
+    )
+      refundPendingCapacityAttempt(opts.state, opts.index, chargeOwner);
+    throw error;
+  } finally {
+    // Held responses transfer to their existing fallback owner rather than this call.
+    if (opts.state.heldTruncatedResponse) owned.delete(opts.state.heldTruncatedResponse);
+    for (const response of owned) void response.body?.cancel().catch(() => {});
+    clearPendingCapacityCharge(opts.state, opts.index, chargeOwner);
+  }
+}
+
+async function executeTargetAttemptInner(
+  opts: ExecuteTargetAttemptOptions,
+  owned: Set<Response>,
+  chargeOwner: object | null
 ): Promise<ExecuteTargetResult> {
   const { index: i, state, deps, targetForAttempt, protectedPriorityTarget } = opts;
   const profile = opts.profile as ProviderProfile | undefined;
@@ -164,6 +200,10 @@ export async function executeTargetAttempt(
     });
 
   const targetSignal = state.abortControllers.get(i)?.signal;
+  const assertAttemptAlive = () => {
+    assertAccountCapacityAdmissionAlive();
+    if (isHedgeCancelledSignal(targetSignal)) throw targetSignal!.reason;
+  };
   const cooldownWait = resolveRetryCooldownWait(deps);
   const familyTried = new Set<string>();
   // #16438 opt-in (EMPTY_STREAM_SIBLING_RECOVERY_ENABLED): an empty_content turn spends
@@ -174,14 +214,16 @@ export async function executeTargetAttempt(
     deps.clientRequestedStream && deps.resilienceSettings.streamRecovery.enabled === true;
   // Retry loop for transient errors
   for (let retry = 0; retry <= deps.maxRetries; retry++) {
+    // A normal continue retires its old identity before any next-iteration fence/await.
+    clearPendingCapacityCharge(state, i, chargeOwner);
+    beginAccountCapacityAdmission();
     // Fix #1681: Bail out immediately if the client has disconnected
     if (deps.signal?.aborted) {
       deps.log.info("COMBO", `Client disconnected — aborting combo loop before model ${modelStr}`);
       return { ok: false, response: errorResponse(499, "Client disconnected") };
     }
     if (state.comboExpired || targetSignal?.aborted) return null;
-    state.globalAttempts++;
-    if (state.globalAttempts > maxGlobalAttempts) {
+    if (state.globalAttempts >= maxGlobalAttempts) {
       deps.log.warn(
         "COMBO",
         `Maximum combo attempts (${maxGlobalAttempts}) exceeded across all targets and fallbacks. Terminating loop to prevent runaway background requests.`
@@ -195,6 +237,8 @@ export async function executeTargetAttempt(
         response: buildBudgetExhaustedResponse(state, deps.traceInvocationId),
       };
     }
+    state.globalAttempts++;
+    const charge = createPendingCapacityCharge(state, i, chargeOwner);
     // Predictive TTFT Circuit Breaker (skip slow models)
     if (
       deps.config.zeroLatencyOptimizationsEnabled === true &&
@@ -256,7 +300,9 @@ export async function executeTargetAttempt(
       ...(target.connectionId ? { connectionId: target.connectionId } : {}),
     });
     // QA P0 diagnostics: capture the attempt order (provider/model ids only).
-    state.comboAttemptOrder.push({ provider: provider ?? "unknown", model: modelStr });
+    const attemptEntry = { provider: provider ?? "unknown", model: modelStr };
+    state.comboAttemptOrder.push(attemptEntry);
+    if (charge) charge.entry = attemptEntry;
 
     // Copy-on-write, not a deep clone (#7847 — 9.53 MiB at 3 targets). Writes here are
     // top-level scalars. Invariant: tests/unit/combo-attempt-body-isolation-7847.test.ts.
@@ -371,13 +417,15 @@ export async function executeTargetAttempt(
       }
       if (state.comboExpired || targetSignal?.aborted) return null;
     }
+    assertAccountCapacityAdmissionAlive();
     const result = await deps.handleSingleModelWithTimeout(attemptBody, modelStr, {
       ...targetForAttempt,
       emptyTurnConnectionId,
       effectiveComboStrategy: deps.strategy,
       failoverBeforeRetry: deps.config.failoverBeforeRetry,
     });
-
+    owned.add(result);
+    assertAttemptAlive();
     if (preContentTransportRecovery && deps.signal?.aborted) {
       releaseRejectedQualityResponse(result, result);
       return { ok: false, response: errorResponse(499, "Client disconnected") };
@@ -408,6 +456,7 @@ export async function executeTargetAttempt(
       // via getReader() which locks the stream. The clone's body is consumed
       // by the quality check; the original stays unlocked for piping.
       const qualityClone = cloneForQuality(result);
+      if (qualityClone !== result) owned.add(qualityClone);
       const quality = await validateResponseQuality(
         qualityClone,
         deps.clientRequestedStream,
@@ -425,7 +474,11 @@ export async function executeTargetAttempt(
         await isTrustedEmptyTurn(provider, result, target.connectionId),
         preContentTransportRecovery
       );
+      if (quality.clonedResponse) owned.add(quality.clonedResponse);
       releaseQualityClone(qualityClone, result, quality);
+      owned.delete(qualityClone);
+      if (quality.clonedResponse) owned.delete(quality.clonedResponse);
+      assertAttemptAlive();
       if (preContentTransportRecovery && deps.signal?.aborted) {
         void quality.clonedResponse?.body?.cancel().catch(() => {});
         releaseRejectedQualityResponse(qualityClone, result);
@@ -440,6 +493,7 @@ export async function executeTargetAttempt(
         return null;
       }
       if (!quality.valid) {
+        if (charge) charge.spent = true;
         releaseRejectedQualityResponse(qualityClone, result);
         deps.log.warn(
           "COMBO",
@@ -461,6 +515,7 @@ export async function executeTargetAttempt(
           undefined,
           target
         );
+        assertAccountCapacityAdmissionAlive();
         recordComboRequest(deps.combo.name, modelStr, {
           success: false,
           latencyMs: Date.now() - deps.startTime,
@@ -536,6 +591,7 @@ export async function executeTargetAttempt(
         )
           return qualityValidationFailure(quality);
         familyTried.add(modelStr);
+        beginAccountCapacityAdmission();
         const familyNext = await getNextComboFamilyFallback({
           model: modelStr,
           tried: familyTried,
@@ -555,16 +611,17 @@ export async function executeTargetAttempt(
       }
 
       // #13954 (opt-in): a quality-valid 200 that narrates instead of calling the next tool.
-      if (
-        await isAgenticStallComboAttempt({
-          body: deps.body,
-          result,
-          modelStr,
-          hasNextTarget: i + 1 < state.orderedTargets.length,
-          protectedPriorityTarget,
-          log: deps.log,
-        })
-      ) {
+      const stalled = await isAgenticStallComboAttempt({
+        body: deps.body,
+        result,
+        modelStr,
+        hasNextTarget: i + 1 < state.orderedTargets.length,
+        protectedPriorityTarget,
+        log: deps.log,
+      });
+      assertAttemptAlive();
+      if (stalled) {
+        if (charge) charge.spent = true;
         recordAgenticStallAttempt({
           result,
           modelStr,
@@ -577,6 +634,54 @@ export async function executeTargetAttempt(
         return null;
       }
 
+      let relayPreparation: (() => void) | null = null;
+      // Prepare relay quota before the synchronous success commit.
+      const relayConfig = deps.relayConfig;
+      if (
+        getStrategyTraits(deps.strategy).contextRelay &&
+        deps.relayOptions?.sessionId &&
+        handoffSessionId &&
+        relayConfig &&
+        (relayConfig.handoffProviders ?? []).includes(provider) &&
+        provider === "codex"
+      ) {
+        const connectionId = getSessionConnection(deps.relayOptions.sessionId);
+        if (connectionId) {
+          const quotaInfo = await fetchCodexQuota(connectionId).catch(() => null);
+          if (quotaInfo) {
+            const resetCandidates = [
+              quotaInfo.windows?.session?.resetAt,
+              quotaInfo.windows?.weekly?.resetAt,
+              quotaInfo.resetAt,
+            ]
+              .filter((value): value is string => typeof value === "string" && value.length > 0)
+              .sort((a, b) => a.localeCompare(b));
+            const handoffSourceMessages =
+              Array.isArray(deps.body?.messages) && deps.body.messages.length > 0
+                ? deps.body.messages
+                : Array.isArray(deps.body?.input)
+                  ? deps.body.input
+                  : [];
+
+            relayPreparation = () => {
+              runDetachedHandoff(() =>
+                maybeGenerateHandoff({
+                  sessionId: handoffSessionId,
+                  comboName: deps.combo.name,
+                  connectionId,
+                  percentUsed: quotaInfo.percentUsed,
+                  messages: handoffSourceMessages,
+                  model: modelStr,
+                  expiresAt: resetCandidates[0] || null,
+                  config: relayConfig,
+                  handleSingleModel: deps.handleSingleModelWithTimeout,
+                })
+              );
+            };
+          }
+        }
+      }
+      assertAttemptAlive();
       if (Boolean(deps.clientManagedResponsesContext) && effectiveConnectionId) {
         if (deps.nativeCodexAutoResume) {
           const nextGen = advanceNativeCodexTurnGeneration(deps.body, deps.combo.name);
@@ -628,6 +733,8 @@ export async function executeTargetAttempt(
         "COMBO",
         `Model ${modelStr} succeeded (${latencyMs}ms, ${state.fallbackCount} fallbacks)`
       );
+      assertAttemptAlive();
+      if (charge) charge.spent = true;
       recordComboRequest(deps.combo.name, modelStr, {
         success: true,
         latencyMs,
@@ -728,15 +835,17 @@ export async function executeTargetAttempt(
                 ? deps.body.input
                 : [];
 
-          maybeGenerateUniversalHandoff({
-            sessionId: handoffSessionId,
-            comboName: deps.combo.name,
-            messages: handoffSourceMessages as MessageLike[],
-            prevModel,
-            currModel: modelStr,
-            universalConfig: universalHandoffConfig,
-            handleSingleModel: deps.handleSingleModelWithTimeout,
-          });
+          runDetachedHandoff(() =>
+            maybeGenerateUniversalHandoff({
+              sessionId: handoffSessionId,
+              comboName: deps.combo.name,
+              messages: handoffSourceMessages as MessageLike[],
+              prevModel,
+              currModel: modelStr,
+              universalConfig: universalHandoffConfig,
+              handleSingleModel: deps.handleSingleModelWithTimeout,
+            })
+          );
         }
 
         recordSessionModelUsage(
@@ -747,49 +856,7 @@ export async function executeTargetAttempt(
           target.connectionId ?? undefined
         );
       }
-      // Context-relay intentionally splits responsibilities:
-      // combo.ts decides whether a successful turn should generate a handoff,
-      // while chat.ts injects the handoff after the real connectionId is resolved.
-      if (
-        getStrategyTraits(deps.strategy).contextRelay &&
-        deps.relayOptions?.sessionId &&
-        handoffSessionId &&
-        deps.relayConfig &&
-        (deps.relayConfig.handoffProviders ?? []).includes(provider) &&
-        provider === "codex"
-      ) {
-        const connectionId = getSessionConnection(deps.relayOptions.sessionId);
-        if (connectionId) {
-          const quotaInfo = await fetchCodexQuota(connectionId).catch(() => null);
-          if (quotaInfo) {
-            const resetCandidates = [
-              quotaInfo.windows?.session?.resetAt,
-              quotaInfo.windows?.weekly?.resetAt,
-              quotaInfo.resetAt,
-            ]
-              .filter((value): value is string => typeof value === "string" && value.length > 0)
-              .sort((a, b) => a.localeCompare(b));
-            const handoffSourceMessages =
-              Array.isArray(deps.body?.messages) && deps.body.messages.length > 0
-                ? deps.body.messages
-                : Array.isArray(deps.body?.input)
-                  ? deps.body.input
-                  : [];
-
-            maybeGenerateHandoff({
-              sessionId: handoffSessionId,
-              comboName: deps.combo.name,
-              connectionId,
-              percentUsed: quotaInfo.percentUsed,
-              messages: handoffSourceMessages,
-              model: modelStr,
-              expiresAt: resetCandidates[0] || null,
-              config: deps.relayConfig,
-              handleSingleModel: deps.handleSingleModelWithTimeout,
-            });
-          }
-        }
-      }
+      relayPreparation?.();
       if (deps.sticky.messageHash && target.connectionId)
         recordStickyBinding(deps.sticky.messageHash, target.connectionId); // LKGP (#919):
       if (provider) {
@@ -809,6 +876,8 @@ export async function executeTargetAttempt(
     }
 
     const failure = await readAttemptFailure(result, { log: deps.log, modelStr });
+    assertAttemptAlive();
+    if (charge) charge.spent = true;
     const { errorText, errorBody, structuredError } = failure;
     // Return the original verdict before retry hints, health or affinity mutations.
     // The attempt loop treats this as fatal and cancels already-running hedges.
@@ -871,6 +940,8 @@ export async function executeTargetAttempt(
     // There is no point trying fallback models when nobody is listening.
     if (result.status === 499) {
       deps.log.info("COMBO", `Client disconnected (499) during ${modelStr} — stopping combo loop`);
+      assertAttemptAlive();
+      if (charge) charge.spent = true;
       recordComboRequest(deps.combo.name, modelStr, {
         success: false,
         latencyMs: Date.now() - deps.startTime,
@@ -897,6 +968,8 @@ export async function executeTargetAttempt(
         "COMBO",
         `Local rate-limit queue capacity reached for ${modelStr} — returning without upstream fallback`
       );
+      assertAttemptAlive();
+      if (charge) charge.spent = true;
       recordComboRequest(deps.combo.name, modelStr, {
         success: false,
         latencyMs: Date.now() - deps.startTime,
@@ -945,6 +1018,8 @@ export async function executeTargetAttempt(
         "COMBO",
         `Input-bound request failure from ${modelStr} — stopping combo and returning the refusal`
       );
+      assertAttemptAlive();
+      if (charge) charge.spent = true;
       recordComboRequest(deps.combo.name, modelStr, {
         success: false,
         latencyMs: Date.now() - deps.startTime,
@@ -957,6 +1032,8 @@ export async function executeTargetAttempt(
       // the combo aborts instead of moving on — no fallback happened.
       return { ok: false, response: result };
     }
+    const dailyReset = await resolveComboDailyReset(provider);
+    assertAttemptAlive();
     const fallbackResult = checkFallbackError(
       result.status,
       errorText,
@@ -967,7 +1044,7 @@ export async function executeTargetAttempt(
       profile,
       structuredError,
       null,
-      await resolveComboDailyReset(provider)
+      dailyReset
     );
     const { cooldownMs } = fallbackResult;
     const targetFailure = applyComboTargetExhaustion(target, {
@@ -1050,6 +1127,8 @@ export async function executeTargetAttempt(
         `400 Bad Request with body-specific error detected on ${modelStr} — skipping fallback to other targets to prevent infinite loop`
       );
       // Record the failure and break to avoid trying other targets with the same bad request
+      assertAttemptAlive();
+      if (charge) charge.spent = true;
       recordComboRequest(deps.combo.name, modelStr, {
         success: false,
         latencyMs: Date.now() - deps.startTime,
@@ -1275,6 +1354,8 @@ export async function executeTargetAttempt(
       !isContextOverflowFailure(errorText, structuredError) &&
       (!protectedTargetTrust?.observedFailure || !protectedTargetTrust.allObservedFailuresQuota)
     ) {
+      assertAttemptAlive();
+      if (charge) charge.spent = true;
       recordComboRequest(deps.combo.name, modelStr, {
         success: false,
         latencyMs: Date.now() - deps.startTime,
@@ -1285,6 +1366,7 @@ export async function executeTargetAttempt(
       state.recordedAttempts++;
       return { ok: false, response: result };
     }
+    assertAccountCapacityAdmissionAlive();
     recordComboRequest(deps.combo.name, modelStr, {
       success: false,
       latencyMs: Date.now() - deps.startTime,
@@ -1420,13 +1502,12 @@ export async function executeTargetAttempt(
         : 0;
     if ([502, 503, 504].includes(result.status) && fallbackWaitMs > 0) {
       deps.log.debug?.("COMBO", `Waiting ${fallbackWaitMs}ms before fallback to next model`);
-      await waitForCooldownAwareRetry(fallbackWaitMs, deps.signal);
+      await waitForAccountCapacityAdmission(fallbackWaitMs, deps.signal);
       if (deps.signal?.aborted) {
         deps.log.info("COMBO", `Client disconnected during fallback wait — aborting`);
         return { ok: false, response: errorResponse(499, "Client disconnected") };
       }
     }
-
     return null;
   }
   return null;

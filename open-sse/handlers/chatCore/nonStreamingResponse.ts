@@ -1,3 +1,5 @@
+import { getTrustedLocalRateLimitError } from "../../services/rateLimitManager/errors.ts";
+import { isPrivateAdmissionError } from "../../services/combo/auxiliaryAdmission.ts";
 import type { HttpAttemptSelection } from "../../utils/providerHttpAttempts.ts";
 /**
  * Non-streaming response path, lifted out of handleChatCore.
@@ -393,7 +395,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         "";
       const errHeaders = err?.upstreamHeaders || err?.response?.headers;
       const errUpstreamBody = err?.upstreamErrorBody;
-      if (err) {
+      if (err && !getTrustedLocalRateLimitError(err.originalError)) {
         await applyProviderFailureClassification({
           statusCode: err.status,
           message: errMessage,
@@ -1185,6 +1187,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       undefined,
       pendingScope.owner ?? pendingRequestId
     );
+    if (isPrivateAdmissionError(error)) throw error;
     const errorMetadata = getSafeErrorMetadata(error);
     const managedLeaseFenceCode = getManagedLeaseFenceErrorCode(errorMetadata.code);
     if (managedLeaseFenceCode)

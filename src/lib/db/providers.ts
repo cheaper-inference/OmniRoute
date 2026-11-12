@@ -1,3 +1,7 @@
+import {
+  buildAccountSemaphoreKey,
+  updateAccountSemaphoreCapacity,
+} from "../../../open-sse/services/accountSemaphore.ts";
 /**
  * db/providers.js — Provider connections and nodes CRUD.
  */
@@ -1059,6 +1063,12 @@ export async function updateProviderConnection(
   backupDbFile("pre-write");
   invalidateConnectionUpdate(id, data, opts);
   bumpProxyConfigGeneration();
+  if (Object.prototype.hasOwnProperty.call(data, "maxConcurrent")) {
+    updateAccountSemaphoreCapacity(
+      buildAccountSemaphoreKey({ provider: String(merged.provider), accountKey: id }),
+      typeof merged.maxConcurrent === "number" ? merged.maxConcurrent : null
+    );
+  }
 
   // Zero is the internal move-to-top sentinel. Explicit positive priorities
   // are operator-selected values, not ranks to compact after every edit.

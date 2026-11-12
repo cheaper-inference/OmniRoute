@@ -1,3 +1,8 @@
+import {
+  releaseAuxiliaryAdmissionOwner,
+  withAuxiliaryAdmission,
+} from "./combo/auxiliaryAdmission.ts";
+import { runCapacityRequest } from "./combo/capacityBudgetContext.ts";
 /**
  * Shared combo (model combo) handling with fallback support
  * Supports: priority, weighted, round-robin, random, least-used, cost-optimized,
@@ -48,9 +53,6 @@ import { projectAccountTier, type ProviderCandidate } from "./autoCombo/scoring.
 import { getSessionConnection } from "./sessionManager.ts";
 import { getOAuthSessionAvailability } from "./oauthSessionOccupancy.ts";
 import { clearStickyBinding, peekStickyConnectionId } from "./combo/sessionStickiness.ts";
-
-import { lookupPositiveCap } from "./combo/concurrencyCaps.ts";
-import { acquireQuotaShareConcurrencySlot } from "./combo/quotaShareConcurrency.ts";
 
 import { resolveConnectionTimeoutMs } from "../handlers/chatCore/upstreamTimeouts.ts";
 import { getCachedProviderConnectionById } from "../../src/lib/db/readCache.ts";
@@ -1320,7 +1322,9 @@ async function handleComboChatInner({
     },
   };
 
+  const capacityAdmissionEnabled = !nesting || nesting.depth === 0;
   const deps: AttemptLoopDeps = {
+    capacityAdmissionEnabled,
     strategy,
     combo,
     config: config as AttemptLoopDeps["config"],
@@ -1367,35 +1371,33 @@ async function handleComboChatInner({
     compatRejectedTargets,
   };
 
-  // FASE 2.1: acquire the per-connection concurrency slot for the selected
-  // quota-share target once, around the whole dispatch (including any
-  // cooldown-aware re-dispatch), so concurrent requests to one subscription
-  // account are serialized through the connection's max_concurrent ceiling. The
-  // cap is read fresh from the selected connection; a null cap (no limit) or a
-  // saturated queue is a no-op (fail-open). Released in the finally below.
-  let quotaShareConcurrencyRelease: (() => void) | null = null;
-  const qsConnectionId = orderedTargets[0]?.connectionId;
-  const qsLimitEnabled = resilienceSettings.quotaShareConcurrencyLimit.enabled;
-  if (getStrategyTraits(strategy).quotaShareConcurrencySlot && qsLimitEnabled && qsConnectionId) {
-    const qsCap = await lookupPositiveCap(qsConnectionId);
-    quotaShareConcurrencyRelease = await acquireQuotaShareConcurrencySlot(
-      orderedTargets[0],
-      qsCap,
-      {
-        queueTimeoutMs: config.queueTimeoutMs ?? 30000,
-        maxQueueSize: resolveComboQueueDepth(config),
-      },
-      log
-    );
-  }
+  const quotaShareOwner = {};
+  const quotaShareAdmission =
+    getStrategyTraits(strategy).quotaShareConcurrencySlot &&
+    resilienceSettings.quotaShareConcurrencyLimit.enabled;
 
+  const dispatchCommon = () => dispatchWithCooldownRetry({ state, deps, extra });
+  const runCommon = () =>
+    capacityAdmissionEnabled ? runCapacityRequest(dispatchCommon) : dispatchCommon();
   try {
     return resolveHeldTruncatedResponse(
       state,
-      await dispatchWithCooldownRetry({ state, deps, extra })
+      await (quotaShareAdmission
+        ? withAuxiliaryAdmission(
+            {
+              owner: quotaShareOwner,
+              kind: "quota-share",
+              timeoutMs: Number(config.queueTimeoutMs ?? 30000),
+              maxQueueSize: resolveComboQueueDepth(config),
+              onFailOpen: () =>
+                log.warn("COMBO", "Quota-share auxiliary queue unavailable; proceeding"),
+            },
+            runCommon
+          )
+        : runCommon())
     );
   } finally {
-    quotaShareConcurrencyRelease?.();
+    if (quotaShareAdmission) releaseAuxiliaryAdmissionOwner(quotaShareOwner);
     // #11371: release the in-flight slot quota-share ordering reserved for its
     // winner — the counter must not leak monotonically upward across requests.
     targetResolution.quotaShareRelease?.();

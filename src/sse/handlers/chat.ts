@@ -1,3 +1,4 @@
+import { isPrivateAdmissionError } from "../../../open-sse/services/combo/auxiliaryAdmission.ts";
 import { hasQoderCallerTools } from "@omniroute/open-sse/services/qoderCapabilities";
 import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { randomUUID } from "crypto";
@@ -376,6 +377,7 @@ const comboPromoteDeps = { updateCombo, info: log.info, warn: log.warn };
 // 100k-token /v1/messages body survived forced GC through `onStateChange` (JON-562). The
 // callbacks the breaker stores therefore never close over request state.
 function breakerCountsAsFailure(error: unknown): boolean {
+  if (isPrivateAdmissionError(error)) return false;
   return !isLocalStreamLifecycleError(error);
 }
 

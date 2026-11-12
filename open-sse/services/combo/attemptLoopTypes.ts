@@ -40,6 +40,8 @@ export type AttemptLoopState = {
   /** Deadline from a target skipped by the credential availability gate. */
   skippedConnectionCooldownUntil?: number;
   comboExpired: boolean;
+  capacityWaitDeadline?: number;
+  capacityWaitStartedAt?: number;
   exhaustedProviders: Set<string>;
   exhaustedConnections: Set<string>;
   transientRateLimitedProviders: Set<string>;
@@ -71,6 +73,7 @@ export type AttemptLoopState = {
 };
 
 export type AttemptLoopDeps = {
+  capacityAdmissionEnabled?: boolean;
   strategy: string;
   combo: ComboLike;
   config: Record<string, unknown> & {
@@ -106,6 +109,7 @@ export type AttemptLoopDeps = {
   signal?: AbortSignal | null;
   body: Record<string, unknown>;
   startTime: number;
+  comboDeadline?: number;
   /** Shares the existing request wait limits with an inline, already-authorized retry. */
   retryCooldownWait?: {
     attempt: { current: number };
@@ -142,7 +146,18 @@ export type AttemptLoopDeps = {
 };
 
 export type GateDecision =
-  | { kind: "skip"; result: ExecuteTargetResult }
+  | {
+      kind: "skip";
+      result: ExecuteTargetResult;
+      capacity?: {
+        key: string;
+        maxConcurrency: number;
+        followExecutionCapacity?: boolean;
+        capacityRevision?: number;
+      };
+      capacityRetryEligible?: boolean;
+      protectedPriorityTarget?: boolean;
+    }
   | {
       kind: "proceed";
       targetForAttempt: ResolvedComboTarget;

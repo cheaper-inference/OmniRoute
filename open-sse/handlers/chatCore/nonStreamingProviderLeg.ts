@@ -1,3 +1,8 @@
+import {
+  getClientSafeLocalRateLimitError,
+  markTrustedLocalRateLimitResponse,
+} from "../../services/rateLimitManager/errors.ts";
+import { isPrivateAdmissionError } from "../../services/combo/auxiliaryAdmission.ts";
 import type {
   HttpAttemptSelection,
   HttpAttemptRejectionSlot,
@@ -527,6 +532,7 @@ export async function runNonStreamingProviderLeg(
       );
     }
   } catch (error) {
+    if (isPrivateAdmissionError(error)) throw error;
     if (
       !!error &&
       typeof error === "object" &&
@@ -541,19 +547,22 @@ export async function runNonStreamingProviderLeg(
     // provider-failure default (#7907). chatCore classified this through
     // isLocalStreamLifecycleError before this leg took over the first send; mirror it.
     const isRequestAborted = isLocalStreamLifecycleError(error);
-    upstreamHttpSelection = isRequestAborted ? null : rejection.selection;
+    const localQueueFailure = getClientSafeLocalRateLimitError(error);
+    upstreamHttpSelection = isRequestAborted || localQueueFailure ? null : rejection.selection;
     const failureStatus = isRequestAborted
       ? 499
-      : error instanceof Error && error.name === "TimeoutError"
-        ? 504
-        : 502;
+      : localQueueFailure
+        ? localQueueFailure.status
+        : error instanceof Error && error.name === "TimeoutError"
+          ? 504
+          : 502;
     // A client abort is not a provider failure: formatProviderError would stamp the raw
     // upstream text as `[499]: <reason>`, leaking it to the client. chatCore has always
     // normalized this to the fixed "Request aborted".
     const failureMessage = isRequestAborted
       ? "Request aborted"
       : error instanceof Error
-        ? formatProviderError(error, provider, currentModel, failureStatus)
+        ? formatProviderError(localQueueFailure ?? error, provider, currentModel, failureStatus)
         : "Provider request failed";
     // The old non-streaming path reduced every TimeoutError to a bare 504.
     // Preserve only the explicit Antigravity pre-response marker, not arbitrary
@@ -590,13 +599,15 @@ export async function runNonStreamingProviderLeg(
       failureMessage,
       error,
       null,
-      requestScopedTimeout
-        ? REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE
-        : preResponseTimeout
-          ? ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE
-          : undefined,
+      localQueueFailure?.code ??
+        (requestScopedTimeout
+          ? REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE
+          : preResponseTimeout
+            ? ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE
+            : undefined),
       timeoutType
     );
+    markTrustedLocalRateLimitResponse(errorResult.response, error);
     return {
       kind: "error",
       upstreamHttpSelection,
