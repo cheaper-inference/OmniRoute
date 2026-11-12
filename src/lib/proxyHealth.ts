@@ -105,8 +105,9 @@ function noteProbeTransition(proxyUrl: string, verdict: ProxyProbeVerdict): void
   const previous = proxyHealthDegradedStates.get(proxyUrl);
   if (previous === healthy) return;
   proxyHealthDegradedStates.set(proxyUrl, healthy);
+  const isFirstObservation = previous === undefined;
   if (healthy) {
-    console.log(`${LOG_PREFIX} ${proxyUrl} restored`);
+    if (!isFirstObservation) console.log(`${LOG_PREFIX} ${proxyUrl} restored`);
   } else {
     console.warn(`${LOG_PREFIX} ${proxyUrl} degraded`);
   }

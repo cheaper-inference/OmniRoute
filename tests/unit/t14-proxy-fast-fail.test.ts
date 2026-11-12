@@ -391,3 +391,30 @@ test("HAC-107: degraded/restored logs once per definitive state change", async (
     invalidateProxyHealth(proxyUrl);
   }
 });
+test("HAC-107: a first-ever healthy probe does not log a restored transition", async () => {
+  const proxyUrl = "http://127.0.0.1:9105";
+  invalidateProxyHealth(proxyUrl);
+  const logged: string[] = [];
+  const originalLog = console.log;
+  const originalWarn = console.warn;
+  console.log = (...args: unknown[]) => {
+    logged.push(args.map(String).join(" "));
+  };
+  console.warn = (...args: unknown[]) => {
+    logged.push(args.map(String).join(" "));
+  };
+  __setProxyHealthTcpCheckForTesting(async () => "ok");
+  try {
+    assert.equal(await isProxyReachable(proxyUrl, 50, 0), true);
+    assert.deepEqual(
+      logged.filter((line) => line.includes(proxyUrl)),
+      [],
+      "nothing recovered when the proxy was never degraded"
+    );
+  } finally {
+    console.log = originalLog;
+    console.warn = originalWarn;
+    __setProxyHealthTcpCheckForTesting(null);
+    invalidateProxyHealth(proxyUrl);
+  }
+});
