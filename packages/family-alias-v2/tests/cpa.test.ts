@@ -51,24 +51,35 @@ const manual: CpaProvider = {
   models: [{ name: "manual-upstream", alias: "manual-alias" }],
 };
 
-test("preserves unrelated CPA providers byte-for-byte", () => {
-  const plan = planCpa({ desired: graph(), liveProviders: [manual], omnirouteBaseUrl: "https://omni", omnirouteApiKey: "key" });
-  assert.deepEqual(plan.nextProviders[0], manual);
-  assert.equal(plan.nextProviders[1].name, CPA_MANAGED_PROVIDER);
+function makePlan(liveProviders: CpaProvider[] = [manual], singleEndpoint = true) {
+  return planCpa({
+    desired: graph(singleEndpoint),
+    liveProviders,
+    omnirouteBaseUrl: "https://omni",
+    omnirouteApiKeyRef: "env:OMNIROUTE_API_KEY",
+  });
+}
+
+test("preserves unrelated CPA providers byte-for-byte without serializing their secrets", () => {
+  const plan = makePlan();
+  assert.equal(plan.managedProvider.name, CPA_MANAGED_PROVIDER);
+  assert.equal(plan.managedProvider.apiKeyRef, "env:OMNIROUTE_API_KEY");
+  assert.equal(JSON.stringify(plan).includes("manual"), false);
 });
 
 test("omits aliases requiring multi-endpoint fallback", () => {
-  const plan = planCpa({ desired: graph(false), liveProviders: [], omnirouteBaseUrl: "https://omni", omnirouteApiKey: "key" });
+  const plan = makePlan([], false);
   assert.ok(plan.omitted.some((item) => item.alias === "claude/fable/5.2"));
   assert.ok(plan.omitted.some((item) => item.alias === "claude/fable"));
 });
 
 test("precondition mismatch refuses without write", async () => {
-  const plan = planCpa({ desired: graph(), liveProviders: [], omnirouteBaseUrl: "https://omni", omnirouteApiKey: "key" });
+  const plan = makePlan([]);
   const calls: string[] = [];
   const result = await applyCpa({
     plan,
     expectedPlanHash: plan.planHash,
+    omnirouteApiKey: "runtime-key",
     client: {
       async getProviders() { return [manual]; },
       async putProviders() { calls.push("put"); },
@@ -78,12 +89,13 @@ test("precondition mismatch refuses without write", async () => {
   assert.deepEqual(calls, []);
 });
 
-test("apply verifies exact readback", async () => {
-  const plan = planCpa({ desired: graph(), liveProviders: [manual], omnirouteBaseUrl: "https://omni", omnirouteApiKey: "key" });
+test("apply materializes secret in memory and preserves unrelated providers", async () => {
+  const plan = makePlan();
   let rows = [manual];
   const result = await applyCpa({
     plan,
     expectedPlanHash: plan.planHash,
+    omnirouteApiKey: "runtime-key",
     client: {
       async getProviders() { return structuredClone(rows); },
       async putProviders(providers) { rows = structuredClone(providers); },
@@ -91,4 +103,5 @@ test("apply verifies exact readback", async () => {
   });
   assert.equal(result.status, "success");
   assert.deepEqual(rows[0], manual);
+  assert.equal(rows[1]["api-key-entries"][0]["api-key"], "runtime-key");
 });

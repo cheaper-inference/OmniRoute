@@ -93,7 +93,23 @@ export function planOmniRoute(desired: DesiredGraph, live: LiveCombo[]): TargetP
   });
   const staleNames = new Set(staleOwned.map((combo) => combo.name));
 
-  // Refuse stale deletes if any unmanaged/live desired combo still references them.
+  // Refuse stale deletes if any unmanaged/live desired combo references them.
+  // Protect the complete stale descendant closure, not only the directly referenced wrapper.
+  const staleByName = new Map(staleOwned.map((combo) => [combo.name, combo]));
+  const protectedNames = new Set<string>();
+  const protect = (name: string) => {
+    if (protectedNames.has(name)) return;
+    protectedNames.add(name);
+    const combo = staleByName.get(name);
+    if (!combo) return;
+    for (const step of combo.models ?? []) {
+      const record = step as { kind?: string; comboName?: string };
+      if (record.kind === "combo-ref" && record.comboName && staleNames.has(record.comboName)) {
+        protect(record.comboName);
+      }
+    }
+  };
+
   for (const combo of live) {
     if (staleNames.has(combo.name)) continue;
     for (const step of combo.models ?? []) {
@@ -104,13 +120,13 @@ export function planOmniRoute(desired: DesiredGraph, live: LiveCombo[]): TargetP
           liveId: combo.id,
           reason: `stale owned combo is referenced by ${combo.name}`,
         });
-        staleNames.delete(record.comboName);
+        protect(record.comboName);
       }
     }
   }
+  for (const name of protectedNames) staleNames.delete(name);
 
   const order = deletionOrder(live, staleNames);
-  const staleByName = new Map(staleOwned.map((combo) => [combo.name, combo]));
   const deletes = order.map((name) => ({ id: staleByName.get(name)!.id, name }));
   const preconditionHash = liveStateHash(live);
   const body = {

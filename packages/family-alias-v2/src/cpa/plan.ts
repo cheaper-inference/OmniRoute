@@ -20,12 +20,15 @@ export type CpaProvider = {
   models: CpaModel[];
 };
 
+export type PlannedCpaProvider = Omit<CpaProvider, "api-key-entries"> & {
+  apiKeyRef: string;
+};
+
 export type CpaPlan = {
   target: "cpa";
   preconditionHash: string;
   planHash: string;
-  nextProviders: CpaProvider[];
-  managedProvider: CpaProvider;
+  managedProvider: PlannedCpaProvider;
   omitted: Array<{ alias: string; reason: string }>;
 };
 
@@ -37,7 +40,7 @@ export function planCpa(opts: {
   desired: DesiredGraph;
   liveProviders: CpaProvider[];
   omnirouteBaseUrl: string;
-  omnirouteApiKey: string;
+  omnirouteApiKeyRef: string;
 }): CpaPlan {
   const versionByName = new Map(opts.desired.combos.map((combo) => [combo.name, combo]));
   const models: CpaModel[] = [];
@@ -70,19 +73,15 @@ export function planCpa(opts: {
     omitted.push({ alias: combo.name, reason: "CPA cannot faithfully represent ordered fallback" });
   }
 
-  const managedProvider: CpaProvider = {
+  const managedProvider: PlannedCpaProvider = {
     name: CPA_MANAGED_PROVIDER,
     priority: 100,
     disabled: false,
     "base-url": `${opts.omnirouteBaseUrl.replace(/\/$/, "")}/v1`,
-    "api-key-entries": [{ "api-key": opts.omnirouteApiKey, weight: 1 }],
+    apiKeyRef: opts.omnirouteApiKeyRef,
     models: models.sort((a, b) => a.alias.localeCompare(b.alias)),
   };
-  const nextProviders = [
-    ...opts.liveProviders.filter((provider) => provider.name !== CPA_MANAGED_PROVIDER),
-    managedProvider,
-  ];
   const preconditionHash = cpaStateHash(opts.liveProviders);
-  const body = { target: "cpa" as const, preconditionHash, nextProviders, managedProvider, omitted };
+  const body = { target: "cpa" as const, preconditionHash, managedProvider, omitted };
   return { ...body, planHash: stableHash(body) };
 }

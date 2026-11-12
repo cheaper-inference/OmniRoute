@@ -64,3 +64,17 @@ test("marks thinking/effort variants outside the base family chain", () => {
 test("returns null for unclassified model without curated metadata", () => {
   assert.equal(classifyLocalEndpoint(endpoint("mystery-model-7", "unknown")), null);
 });
+
+test("parses hyphen-delimited generations without merging releases", () => {
+  const sonnet45 = classifyLocalEndpoint(endpoint("claude-sonnet-4-5"), {
+    modelId: "claude-sonnet-4-5",
+    familyId: "claude/sonnet",
+  });
+  const sonnet41 = classifyLocalEndpoint(endpoint("claude-sonnet-4-1"), {
+    modelId: "claude-sonnet-4-1",
+    familyId: "claude/sonnet",
+  });
+  assert.deepEqual(sonnet45?.version.generation, [4, 5]);
+  assert.deepEqual(sonnet41?.version.generation, [4, 1]);
+  assert.notEqual(sonnet45?.version.display, sonnet41?.version.display);
+});

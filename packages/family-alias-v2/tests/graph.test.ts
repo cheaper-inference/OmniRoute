@@ -83,3 +83,36 @@ test("every generated combo carries a valid v2 ownership marker", () => {
     assert.equal(marker?.graphHash, graph.graphHash);
   }
 });
+
+test("temporary outage preserves last-known-good endpoint but permanent failure omits it", () => {
+  const enriched = enrichLocalEndpoints(
+    [
+      local("a", "claude", "claude-fable-5.2"),
+      local("b", "claude", "claude-fable-5.1"),
+    ],
+    [
+      { modelId: "claude-fable-5.2", familyId: "claude/fable" },
+      { modelId: "claude-fable-5.1", familyId: "claude/fable" },
+    ],
+  );
+  const graph = buildDesiredGraph({
+    enriched,
+    health: {
+      ["a\u0000claude-fable-5.2"]: {
+        key: "a\u0000claude-fable-5.2",
+        status: "temporary_failure",
+        checkedAt: 2,
+        lastSuccessAt: 1,
+        failureCount: 1,
+      },
+      ["b\u0000claude-fable-5.1"]: {
+        key: "b\u0000claude-fable-5.1",
+        status: "permanent_failure",
+        checkedAt: 2,
+        failureCount: 1,
+      },
+    },
+  });
+  assert.ok(graph.combos.some((combo) => combo.name === "claude/fable/5.2"));
+  assert.ok(!graph.combos.some((combo) => combo.name === "claude/fable/5.1"));
+});

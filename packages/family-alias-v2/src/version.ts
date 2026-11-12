@@ -13,30 +13,39 @@ function generationFromToken(token: string): number[] | null {
 
 export function parseVersionIdentity(tokens: string[]): VersionIdentity | null {
   let generation: number[] | null = null;
-  let display = "";
   let releaseTag: string | null = null;
   let contextSize: string | null = null;
 
-  for (const token of tokens) {
+  const generationTokens = tokens.filter((token) => {
     if (!contextSize && CONTEXT_RE.test(token)) {
       contextSize = token.toLowerCase();
-      continue;
+      return false;
     }
     if (!releaseTag && DATE_RE.test(token)) {
       releaseTag = token;
-      continue;
+      return false;
     }
-    if (!generation) {
-      const parsed = generationFromToken(token);
-      if (parsed) {
-        generation = parsed;
-        display = parsed.join(".");
-      }
+    return true;
+  });
+
+  for (let index = 0; index < generationTokens.length; index++) {
+    const parsed = generationFromToken(generationTokens[index]);
+    if (!parsed) continue;
+    generation = [...parsed];
+    for (let next = index + 1; next < generationTokens.length; next++) {
+      if (!/^\d+$/.test(generationTokens[next])) break;
+      generation.push(Number.parseInt(generationTokens[next], 10));
     }
+    break;
   }
 
   if (!generation) return null;
-  return { generation, display, releaseTag, contextSize };
+  return {
+    generation,
+    display: generation.join("."),
+    releaseTag,
+    contextSize,
+  };
 }
 
 export function compareVersionNewestFirst(a: VersionIdentity, b: VersionIdentity): number {
@@ -46,5 +55,9 @@ export function compareVersionNewestFirst(a: VersionIdentity, b: VersionIdentity
     const bv = b.generation[index] ?? 0;
     if (av !== bv) return bv - av;
   }
-  return (b.releaseTag ?? "").localeCompare(a.releaseTag ?? "");
+  const release = (b.releaseTag ?? "").localeCompare(a.releaseTag ?? "");
+  if (release !== 0) return release;
+  return (b.contextSize ?? "").localeCompare(a.contextSize ?? "", undefined, {
+    numeric: true,
+  });
 }

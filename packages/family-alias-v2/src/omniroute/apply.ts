@@ -58,8 +58,16 @@ export async function applyOmniRoute(opts: {
 
   // Leaves before wrappers for create/update; wrappers before leaves for delete
   // (delete order is already encoded in the plan).
-  const creates = [...opts.plan.creates].sort((a, b) => a.models.some((m) => m.kind === "combo-ref") ? 1 : -1);
-  const updates = [...opts.plan.updates].sort((a, b) => a.desired.models.some((m) => m.kind === "combo-ref") ? 1 : -1);
+  const wrapperRank = (models: Array<{ kind: string }>) =>
+    models.some((model) => model.kind === "combo-ref") ? 1 : 0;
+  const creates = [...opts.plan.creates].sort(
+    (a, b) => wrapperRank(a.models) - wrapperRank(b.models) || a.name.localeCompare(b.name),
+  );
+  const updates = [...opts.plan.updates].sort(
+    (a, b) =>
+      wrapperRank(a.desired.models) - wrapperRank(b.desired.models) ||
+      a.desired.name.localeCompare(b.desired.name),
+  );
   for (const item of creates) await opts.client.create(item);
   for (const item of updates) await opts.client.update(item.id, item.desired);
   for (const item of opts.plan.deletes) await opts.client.delete(item.id);

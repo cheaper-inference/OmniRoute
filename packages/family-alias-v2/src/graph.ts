@@ -71,7 +71,10 @@ export function buildDesiredGraph(opts: {
     }
     const health = opts.health[endpointHealthKey(item.endpoint.connectionId, item.endpoint.modelId)];
     const state = evaluateEndpoint(item.endpoint, health);
-    if (state.state !== "eligible") {
+    if (state.state === "temporarily_unavailable" && state.preserve) {
+      // Preserve last-known-good endpoint identity to avoid destructive graph churn.
+      // Runtime health/cooldown decides whether it can serve now.
+    } else if (state.state !== "eligible") {
       omitted.push({ modelId: item.endpoint.modelId, reason: state.state });
       continue;
     }

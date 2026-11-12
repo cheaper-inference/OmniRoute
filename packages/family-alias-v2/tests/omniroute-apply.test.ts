@@ -89,3 +89,32 @@ test("valid plan applies and verifies exact readback", async () => {
   assert.equal(result.status, "success");
   assert.deepEqual(mock.calls, ["create:claude/fable/5.2"]);
 });
+
+test("creates version leaves before family wrappers deterministically", async () => {
+  const graphHash = "a".repeat(64);
+  const wrapper = {
+    name: "claude/fable",
+    description: ownershipDescription(graphHash, "family"),
+    strategy: "priority" as const,
+    allowedModelFamilies: ["claude"],
+    models: [
+      {
+        id: "r",
+        kind: "combo-ref" as const,
+        comboName: "claude/fable/5.2",
+        weight: 0 as const,
+      },
+    ],
+  };
+  const leaf = desired().combos[0];
+  const graph = {
+    owner: "family-alias-maintainer/v2" as const,
+    graphHash,
+    omitted: [],
+    combos: [wrapper, leaf],
+  };
+  const mock = client([]);
+  const plan = planOmniRoute(graph, []);
+  await applyOmniRoute({ plan, client: mock, expectedPlanHash: plan.planHash });
+  assert.deepEqual(mock.calls, ["create:claude/fable/5.2", "create:claude/fable"]);
+});

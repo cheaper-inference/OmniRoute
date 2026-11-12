@@ -100,3 +100,32 @@ test("invalid desired DAG is rejected before plan emission", () => {
   ];
   assert.throws(() => planOmniRoute(desired, []), /missing combo reference/);
 });
+
+test("manual reference protects stale wrapper and its stale descendants", () => {
+  const hash = "b".repeat(64);
+  const plan = planOmniRoute(
+    { owner: "family-alias-maintainer/v2", graphHash: "a".repeat(64), combos: [], omitted: [] },
+    [
+      {
+        id: "wrapper",
+        name: "old/family",
+        description: ownershipDescription(hash, "family"),
+        models: [{ kind: "combo-ref", comboName: "old/family/1" }],
+      },
+      {
+        id: "leaf",
+        name: "old/family/1",
+        description: ownershipDescription(hash, "version"),
+        models: [],
+      },
+      {
+        id: "manual",
+        name: "manual",
+        description: "human",
+        models: [{ kind: "combo-ref", comboName: "old/family" }],
+      },
+    ],
+  );
+  assert.deepEqual(plan.deletes, []);
+  assert.equal(plan.conflicts.length, 1);
+});
