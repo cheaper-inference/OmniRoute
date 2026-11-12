@@ -773,21 +773,40 @@ export async function cleanupExpiredLogs() {
   let trimmedProxyLogs = 0;
 
   try {
-    // Archive into daily_usage_summary first, on a whole-day boundary: the rollup rewrites a
-    // day from the raw rows left, so a partly archived day would lose its totals next pass.
-    // If the rollup fails, keep the raw rows (same guard as cleanupUsageHistory).
-    const usageCutoffDate = usageCutoff.slice(0, 10);
-    const { rollupUsageHistoryBeforeDate } = await import("../usage/aggregateHistory");
-    const rollup = await rollupUsageHistoryBeforeDate(usageCutoffDate);
-    if (rollup.errors > 0) {
-      console.error("[Compliance] Skipping usage_history deletion: pre-delete rollup failed.");
-      usageRollupFailed = true;
-    } else {
-      const r1 = db.prepare("DELETE FROM usage_history WHERE timestamp < ?").run(usageCutoffDate);
-      deletedUsage = r1.changes;
+    const { tableExists, deleteWholeDaysBefore } = await import("../db/cleanup/usagePurge");
+    if (tableExists("usage_history")) {
+      // This pass runs at boot, before the periodic retention job, and the rows it
+      // removes are the only source daily_usage_summary and daily_team_usage_summary
+      // are built from. Roll them up first, or that usage leaves the summaries with
+      // the rows. A rollup that fails or reports errors leaves the rows alone instead
+      // of dropping them uncounted; the next pass collects them once it can roll up.
+      // Rollup and delete share cleanupUsageHistory()'s whole-day boundary: a rollup
+      // replaces a day's totals, so deleting part of a day would let the next rollup
+      // rebuild that day from the remaining rows only.
+      const usageCutoffDate = usageCutoff.split("T")[0];
+      let rolledUp = false;
+      try {
+        const { rollupUsageHistoryBeforeDate } = await import("../usage/aggregateHistory");
+        const rollup = await rollupUsageHistoryBeforeDate(usageCutoffDate);
+        rolledUp = rollup.errors === 0;
+        if (!rolledUp) {
+          console.error("[compliance] usage rollup reported errors; usage_history rows are kept");
+        }
+      } catch (error) {
+        console.error("[compliance] usage rollup failed; usage_history rows are kept", error);
+      }
+      // A skipped deletion is audited as partial, not success.
+      usageRollupFailed = !rolledUp;
+      if (rolledUp) {
+        try {
+          deletedUsage = await deleteWholeDaysBefore("usage_history", "timestamp", usageCutoffDate);
+        } catch (error) {
+          console.error("[compliance] could not delete old usage_history rows", error);
+        }
+      }
     }
-  } catch {
-    /* table may not exist */
+  } catch (error) {
+    console.error("[compliance] could not reach usage_history", error);
   }
 
   try {

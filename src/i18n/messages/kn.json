@@ -5679,6 +5679,7 @@
     "usageTracking": "ಬಳಕೆ ಟ್ರ್ಯಾಕಿಂಗ್",
     "securityDesc": "ನಿಮ್ಮ ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಅನ್ನು ರಕ್ಷಿಸಲು ಪಾಸ್ವರ್ಡ್ ಹೊಂದಿಸಿ ಅಥವಾ ಸದ್ಯಕ್ಕೆ ಬಿಟ್ಟುಬಿಡಿ.",
     "securityDescSkipWarning": "⚠️ ಪಾಸ್ವರ್ಡ್ ಇಲ್ಲದೆ, ಸೆಟಪ್ ಸಮಯದಲ್ಲಿ ಪೂರೈಕೆದಾರರನ್ನು ಸೇರಿಸಲು ನಿಮಗೆ ಸಾಧ್ಯವಾಗುವುದಿಲ್ಲ. ಪಾಸ್ವರ್ಡ್ ಹೊಂದಿಸಿದ ನಂತರ ಡ್ಯಾಶ್ಬೋರ್ಡ್ನಿಂದ ಅವುಗಳನ್ನು ಸೇರಿಸಬಹುದು.",
+    "passwordAlreadySet": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಪಾಸ್‌ವರ್ಡ್ ಈಗಾಗಲೇ ಹೊಂದಿಸಲಾಗಿದೆ. ನೀವು ಅದನ್ನು ನಂತರ ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಬದಲಾಯಿಸಬಹುದು.",
     "providerDesc": "ನಿಮ್ಮ ಮೊದಲ AI ಪೂರೈಕೆದಾರರನ್ನು ಸಂಪರ್ಕಿಸಿ. ನಂತರ ಇನ್ನಷ್ಟು ಪೂರೈಕೆದಾರರನ್ನು ಸೇರಿಸಬಹುದು.",
     "providerRequiresPassword": "ಪೂರೈಕೆದಾರರನ್ನು ಸೇರಿಸಲು ಮೊದಲು ನೀವು ಪಾಸ್ವರ್ಡ್ ಹೊಂದಿಸಬೇಕು. ದಯವಿಟ್ಟು ಭದ್ರತಾ ಹಂತಕ್ಕೆ ಹಿಂತಿರುಗಿ ಪಾಸ್ವರ್ಡ್ ಹೊಂದಿಸಿ ಅಥವಾ ನಂತರ ಡ್ಯಾಶ್ಬೋರ್ಡ್ನಿಂದ ಪೂರೈಕೆದಾರರನ್ನು ಸೇರಿಸಿ.",
     "apiKeyRequired": "API ಕೀ (ಅಗತ್ಯ)",
@@ -7227,7 +7228,8 @@
       "kiro": "ಉಚಿತ ಹಂತ: ತಿಂಗಳಿಗೆ 50 ಕ್ರೆಡಿಟ್ಗಳು (~25K–100K ಟೋಕನ್ಗಳು). ⚠️ Kiro ToS ಮೂರನೇ-ಪಕ್ಷದ proxy/harness ಬಳಕೆಯನ್ನು ನಿಷೇಧಿಸುತ್ತದೆ.",
       "codex": "ಈಗಿರುವ OAuth ಹರಿವಿನ ಮೂಲಕ OpenAI Codex ಅನ್ನು ಸಂಪರ್ಕಿಸಿ.",
       "qwen": "ಈಗಿರುವ OAuth ಹರಿವಿನ ಮೂಲಕ Qwen Code ಅನ್ನು ಸಂಪರ್ಕಿಸಿ.",
-      "github-models": "github.com/settings/tokens ನಲ್ಲಿ 'models: read' ಸ್ಕೋಪ್ನೊಂದಿಗೆ GitHub PAT ರಚಿಸಿ"
+      "github-models": "github.com/settings/tokens ನಲ್ಲಿ 'models: read' ಸ್ಕೋಪ್ನೊಂದಿಗೆ GitHub PAT ರಚಿಸಿ",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} ಪೂರೈಕೆದಾರ-ಸ್ಥಳೀಯ ಮಾಡೆಲ್ IDಗಳನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ. /models ನಿಂದ ಆಮದು ಮಾಡಿ ಅಥವಾ ರೂಟಿಂಗ್ಗಾಗಿ ಕಸ್ಟಮ್ IDಗಳನ್ನು ಸೇರಿಸಿ.",
     "bedrockModelsDescription": "Amazon Bedrock ಮಾಡೆಲ್ಗಳು AWS ಪ್ರದೇಶದ ವ್ಯಾಪ್ತಿಗೆ ಒಳಪಟ್ಟಿರುತ್ತವೆ. /models ನಿಂದ ಆಮದು ಮಾಡಿ ಅಥವಾ ಆಯ್ಕೆಮಾಡಿದ ಪ್ರದೇಶದಲ್ಲಿ ಸಕ್ರಿಯಗೊಳಿಸಲಾದ Bedrock ಮಾಡೆಲ್ IDಗಳನ್ನು ಸೇರಿಸಿ.",
@@ -10258,7 +10260,11 @@
     "mappingInvalidJson": "ಅಮಾನ್ಯ JSON.",
     "mappingMustBeObject": "ಮ್ಯಾಪಿಂಗ್ ಒಂದು JSON ಆಬ್ಜೆಕ್ಟ್ ಆಗಿರಬೇಕು, ಅರೇ ಅಥವಾ ಪ್ರಿಮಿಟಿವ್ ಮೌಲ್ಯವಾಗಿರಬಾರದು.",
     "mappingValueMustBeString": "“{key}” ಕೀಲಿಯ ಮೌಲ್ಯವು ಸ್ಟ್ರಿಂಗ್ ಆಗಿರಬೇಕು.",
-    "save": "ಉಳಿಸಿ"
+    "save": "ಉಳಿಸಿ",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman ಎಂಜಿನ್",
@@ -12870,6 +12876,8 @@
     },
     "attempts": "ಪ್ರಯತ್ನಗಳು",
     "detail": {
+      "tabOverview": "ಅವಲೋಕನ",
+      "tabPayloads": "ಪೇಲೋಡ್ಗಳು",
       "omittedHttpAttempts": "{count} HTTP ಕಳುಹಿಸುವಿಕೆಗಳನ್ನು ಉಳಿಸಲಾಗಿಲ್ಲ",
       "noHttpResponse": "ಯಾವುದೇ HTTP ಪ್ರತಿಕ್ರಿಯೆ ಕಂಡುಬಂದಿಲ್ಲ",
       "transportError": "ಸಾಗಣೆ ದೋಷ",

@@ -469,20 +469,8 @@ export class CodexAppServerExecutor extends BaseExecutor {
       const running = run();
       const collected = await events.collect();
       await running;
-      const drainFailure = collected.find(
-        (event) => event.type === "error" && event.status === 499
-      );
-      if (drainFailure?.type === "error") {
-        // Our own shutdown tore the app-server down under a request that was still
-        // in flight: the turn was never really served by the provider. Answer 499
-        // (client_disconnected) with the canonical body of the repo's errorResponse
-        // helper, so the runtime does not read our own teardown as provider ill
-        // health (see open-sse/utils/drainStatus.ts).
-        return {
-          response: canonicalErrorResponse(499, drainFailure.message),
-          url: config.url,
-        };
-      }
+      const failureResponse = nonStreamFailureResponse(collected);
+      if (failureResponse) return { response: failureResponse, url: config.url };
       const response = buildResponseJSON(collected, input.model, {
         toolNsMap: toolMaps.namespace,
         freeformToolNames: toolMaps.freeform,
@@ -509,6 +497,27 @@ export class CodexAppServerExecutor extends BaseExecutor {
       url: config.url,
     };
   }
+}
+
+/**
+ * The failures a non-streaming turn must answer with their own HTTP status, instead
+ * of the 200 Responses body that `buildResponseJSON` would wrap them in.
+ */
+function nonStreamFailureResponse(collected: AdapterEvent[]): Response | null {
+  for (const event of collected) {
+    if (event.type !== "error") continue;
+    // Our own shutdown tore the app-server down under a request that was still
+    // in flight: the turn was never really served by the provider. Answer 499
+    // (client_disconnected) with the canonical body of the repo's errorResponse
+    // helper, so the runtime does not read our own teardown as provider ill
+    // health (see open-sse/utils/drainStatus.ts).
+    if (event.status === 499) return canonicalErrorResponse(499, event.message);
+    // An exhausted account (usageLimitExceeded) has to reach the runtime as a 429:
+    // inside a 200 body the combo reads it as a quality failure, skips the quota
+    // cooldown and retries every sibling variant of the model (#19255).
+    if (event.status === 429) return canonicalErrorResponse(429, event.message);
+  }
+  return null;
 }
 
 function errorResponse(status: number, message: string, code: string): Response {

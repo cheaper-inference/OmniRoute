@@ -1,6 +1,7 @@
 import type { CredentialSelectionOptions } from "./credentialSelectionOptions";
 export type { CredentialSelectionOptions } from "./credentialSelectionOptions";
 import { qoderSupportsCallerTools } from "@omniroute/open-sse/services/qoderCapabilities";
+import { isCodexFreePlan } from "@omniroute/open-sse/executors/codex/tools.ts";
 import { randomUUID } from "crypto";
 import { getProviderSearchPool } from "@omniroute/open-sse/services/providerConnectionPool.ts";
 import { hydrateConnectionProviderSpecificData } from "./compatibleNodeBaseUrl.ts"; // #13452
@@ -13,9 +14,14 @@ import { isCooldownRetrySkipRefusalsEnabled } from "./cooldownAwareRetry.ts";
 import { isPerAccountCatalogProvider } from "./perAccountCatalogFilter.ts";
 import { describeUpstreamFailure } from "@/shared/utils/upstreamError";
 import { isRequestScopedMisalignmentRefusal } from "@omniroute/open-sse/utils/providerSafety.ts";
+import { isMusePolicyRefusal } from "@omniroute/open-sse/services/musePolicyRefusal.ts";
 import { buildAllExpiredCredentials } from "./authExpiredCredentials.ts";
 import { pickExpiryFirstConnection } from "./expiryFirstAccountSelection.ts";
-import { isModelScopedFailure, isQuotaExhaustedSignal } from "./modelScopedQuotaFailure.ts"; // #13548
+import {
+  isModelScopedFailure,
+  isQuotaExhaustedSignal,
+  isWorkspacePolicyBudget429,
+} from "./modelScopedQuotaFailure.ts"; // #13548, #19314
 import { isCIPayloadQuotaFailure } from "./ciPayloadQuotaFailure.ts";
 import {
   getCachedRawProviderConnections,
@@ -111,6 +117,7 @@ import {
   getRuntimeProviderProfile,
   recordModelLockoutFailure as recordModelLockoutFailureBase,
   retryHintBypassesMaxCooldownMs,
+  isAuthoritativeRetryHintSource,
   isProviderModelUnsupported400,
 } from "@omniroute/open-sse/services/accountFallback.ts";
 import { copilotRejectionFlag, lockCopilotModelNotSupported } from "./copilotModelNotSupportedLock";
@@ -161,6 +168,7 @@ import {
 import {
   getCodexChildCooldown,
   isCodexChildUnavailable,
+  isCodexTextQuotaPreflightCooldown,
   persistCodexChildCooldown,
 } from "@omniroute/open-sse/services/codexAccount/index.ts";
 import {
@@ -1144,7 +1152,10 @@ export async function getProviderCredentials(
     const isCodexScopeUnavailable = (
       connection: ProviderConnectionView,
       model: string | null
-    ): boolean => provider === "codex" && isCodexChildUnavailable(connection, model);
+    ): boolean =>
+      provider === "codex" &&
+      isCodexChildUnavailable(connection, model) &&
+      !(options.requirePaidCodexPlan && isCodexTextQuotaPreflightCooldown(connection, model));
 
     // Only Redis needs a snapshot for synchronous consumers; SQLite reads in place.
     const affinityStore = getSessionAffinityStore();
@@ -1166,6 +1177,7 @@ export async function getProviderCredentials(
           isTerminalConnectionStatus,
           isCodexScopeUnavailable,
           isQuotaPolicyBlocked: (c) =>
+            !bypassQuotaPolicy &&
             evaluateQuotaLimitPolicy(provider, c as ProviderConnectionView, requestedModel).blocked,
         }) ?? forcedConnectionId;
     }
@@ -1186,6 +1198,7 @@ export async function getProviderCredentials(
         allowRateLimitedConnections,
         bypassQuotaPolicy,
         isQuotaExhausted: (connectionId) => {
+          if (bypassQuotaPolicy) return false;
           const conn = connections.find((candidate) => candidate.id === connectionId);
           return isQuotaExhaustedForRequest(
             connectionId,
@@ -1195,6 +1208,7 @@ export async function getProviderCredentials(
           );
         },
         isQuotaPolicyBlocked: (connection) =>
+          !bypassQuotaPolicy &&
           evaluateQuotaLimitPolicy(provider, connection as ProviderConnectionView, requestedModel)
             .blocked,
       });
@@ -1389,6 +1403,14 @@ export async function getProviderCredentials(
         connectionFilterStatus.set(c.id, "excluded");
         return false;
       }
+      if (
+        provider === "codex" &&
+        options.requirePaidCodexPlan &&
+        isCodexFreePlan(c.providerSpecificData)
+      ) {
+        connectionFilterStatus.set(c.id, "freePlan");
+        return false;
+      }
       if (requestedModel && isModelExcludedByConnection(requestedModel, c.providerSpecificData)) {
         connectionFilterStatus.set(c.id, "modelExcluded");
         return false;
@@ -1421,7 +1443,7 @@ export async function getProviderCredentials(
           connectionFilterStatus.set(c.id, "terminalStatus");
           return false;
         }
-        if (provider === "codex" && isCodexScopeUnavailable(c, requestedModel)) {
+        if (isCodexScopeUnavailable(c, requestedModel)) {
           connectionFilterStatus.set(c.id, "codexScopeLimited");
           return false;
         }
@@ -1525,7 +1547,11 @@ export async function getProviderCredentials(
       const cooldownStates: CooldownInspectionState[] = planEligible.map((connection) => {
         const connectionCooldownMs = parseFutureDateMs(connection.rateLimitedUntil);
         const codexScopeCooldownMs =
-          provider === "codex"
+          provider === "codex" &&
+          !(
+            options.requirePaidCodexPlan &&
+            isCodexTextQuotaPreflightCooldown(connection, requestedModel)
+          )
             ? parseFutureDateMs(getCodexChildCooldown(connection, requestedModel))
             : null;
         const modelLockout = requestedModel
@@ -1751,12 +1777,14 @@ export async function getProviderCredentials(
     const withQuota: typeof policyEligibleConnections = [];
     const exhaustedQuota: typeof policyEligibleConnections = [];
     for (const c of policyEligibleConnections) {
-      const exhausted = isQuotaExhaustedForRequest(
-        c.id,
-        provider,
-        requestedModel,
-        c.providerSpecificData
-      );
+      // Hosted image requests have independent eligibility; cached text quota
+      // exhaustion cannot veto them or penalize their candidate ranking.
+      const exhausted = bypassQuotaPolicy
+        ? false
+        : isQuotaExhaustedForRequest(c.id, provider, requestedModel, c.providerSpecificData);
+      if (bypassQuotaPolicy) {
+        quotaResults.set(c.id, { blocked: false, exhausted: false });
+      }
       const existing = quotaResults.get(c.id);
       if (existing) existing.exhausted = exhausted;
       if (!exhausted) {
@@ -2118,10 +2146,13 @@ export async function getProviderCredentials(
     ) {
       const selectedPriority = connection.priority || 999;
       const selectedAvailability = getOAuthSessionAvailability(connection.id, options.sessionKey);
+      const isPriorityStrategy =
+        strategy === "fill-first" || strategy === "priority" || strategy === "cost-optimized";
+      const maxAllowedPriority = isPriorityStrategy ? selectedPriority : selectedPriority + 1;
       const moreAvailablePeer = [...orderedConnections]
         .filter(
           (candidate) =>
-            candidate.authType === "oauth" && (candidate.priority || 999) <= selectedPriority + 1
+            candidate.authType === "oauth" && (candidate.priority || 999) <= maxAllowedPriority
         )
         .sort(
           (a, b) =>
@@ -2584,6 +2615,9 @@ export async function markAccountUnavailable(
     structuredError?: { code?: string | null; type?: string | null } | null;
   } = {}
 ) {
+  if (provider === "muse-code" && isMusePolicyRefusal(status, errorText)) {
+    return { shouldFallback: true, cooldownMs: 0 };
+  }
   // Preserve the transport's original 429; cooling Opus would hide the cause and
   // prevent healthy small requests from using the same connection afterward.
   if (isCIPayloadQuotaFailure(provider, status, options.structuredError?.code))
@@ -3000,6 +3034,7 @@ export async function markAccountUnavailable(
     if (
       status === 429 &&
       egressBucketed &&
+      !isWorkspacePolicyBudget429(errorText) &&
       (fallbackResult.reason === RateLimitReason.QUOTA_EXHAUSTED ||
         fallbackResult.reason === RateLimitReason.RATE_LIMIT_EXCEEDED) &&
       !fallbackResult.permanent &&
@@ -3391,6 +3426,16 @@ export async function markAccountUnavailable(
           exactCooldownMs:
             fallbackResult.usedUpstreamRetryHint === true ? fallbackResult.cooldownMs : null,
           maxCooldownMs: mlSettings.maxCooldownMs,
+          // A structured upstream reset (reset_at/retry_after JSON or header) is the
+          // provider's own clock: a new, shorter hint must shrink a stale longer
+          // lock, otherwise the model stays parked after the provider recovered.
+          // Only an ACTUALLY-APPLIED upstream hint qualifies — the same condition as
+          // exactCooldownMs above. A locally scaled cooldown (usedUpstreamRetryHint
+          // === false, e.g. hints disabled in the profile while the body still
+          // carries a structured hint) must never shorten a longer lock (#CO-402).
+          authoritativeBodyReset:
+            fallbackResult.usedUpstreamRetryHint === true &&
+            isAuthoritativeRetryHintSource(fallbackResult.retryHintSource),
         }
       );
       updateProviderConnection(connectionId, {
