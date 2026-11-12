@@ -517,6 +517,25 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     cacheTTLMs: 10 * 60 * 1000,
     fallbackOnly: true,
   },
+  // DeepSeek (https://api-docs.deepseek.com/guides/search): the same API key also
+  // serves POST /v1/tools/fetch — see open-sse/executors/deepseek-fetch.ts. The official
+  // price is 5 CNY per 1000 successful requests; 0.0007 is an approximate USD figure
+  // and will drift with the exchange rate.
+  "deepseek-search": {
+    id: "deepseek-search",
+    name: "DeepSeek Search",
+    baseUrl: "https://api.deepseek.com/v1/tools/search",
+    method: "POST",
+    authType: "apikey",
+    authHeader: "bearer",
+    costPerQuery: 0.0007,
+    freeMonthlyQuota: 0,
+    searchTypes: ["web"],
+    defaultMaxResults: 10,
+    maxMaxResults: 50,
+    timeoutMs: 10_000,
+    cacheTTLMs: 5 * 60 * 1000,
+  },
 };
 
 /**
@@ -530,6 +549,7 @@ export const SEARCH_CREDENTIAL_FALLBACKS: Record<string, string | string[]> = {
   "jina-search": "jina-ai",
   "x-search": ["xai-oauth", "xao", "xai"],
   "codex-search": ["codex"],
+  "deepseek-search": "deepseek",
 };
 
 export function getSearchCredentialFallbacks(providerId: string): string[] {
@@ -573,6 +593,7 @@ export const SEARCH_PROVIDER_ALIASES: Record<string, string> = {
   anysearch_search: "anysearch-search",
   parallel: "parallel-search",
   codex_search: "codex-search",
+  deepseek: "deepseek-search",
 };
 
 export function resolveSearchProviderId(providerId: string): string {

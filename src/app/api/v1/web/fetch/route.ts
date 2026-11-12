@@ -106,10 +106,13 @@ function isRetryableWebFetchStatus(providerId: WebFetchProviderId, status?: numb
 /** Find the next untried, non-rate-limited, credentialed provider in pool order. */
 async function findNextFallbackProvider(
   tried: Set<WebFetchProviderId>,
-  allowedConnections: string[] | null
+  allowedConnections: string[] | null,
+  format: string
 ): Promise<{ providerId: WebFetchProviderId; credentials: WebFetchCredentials } | null> {
   for (const pid of WEB_FETCH_PROVIDERS) {
     if (EXPLICIT_ONLY_PROVIDERS.has(pid)) continue;
+    // DeepSeek returns markdown only, so it cannot satisfy any other format.
+    if (pid === "deepseek-search" && format !== "markdown") continue;
     if (tried.has(pid)) continue;
     const creds = await resolveCredentials(pid, allowedConnections);
     tried.add(pid);
@@ -156,7 +159,11 @@ async function executeWithFallback(
   }
 
   while (!result.success && isRetryableWebFetchStatus(provider, result.status)) {
-    const next = await findNextFallbackProvider(triedProviders, allowedConnections);
+    const next = await findNextFallbackProvider(
+      triedProviders,
+      allowedConnections,
+      reqBody.format
+    );
     if (!next) {
       return { result, provider, poolExhausted: true };
     }
@@ -230,7 +237,8 @@ async function resolveExplicitTarget(
  * rate-limited stubs instead of letting them short-circuit the loop (#8297).
  */
 async function resolveAutoSelectTarget(
-  allowedConnections: string[] | null
+  allowedConnections: string[] | null,
+  format: string
 ): Promise<ResolvedWebFetchTarget> {
   let firstRateLimited: {
     providerId: WebFetchProviderId;
@@ -239,6 +247,8 @@ async function resolveAutoSelectTarget(
 
   for (const pid of WEB_FETCH_PROVIDERS) {
     if (EXPLICIT_ONLY_PROVIDERS.has(pid)) continue;
+    // DeepSeek returns markdown only, so it cannot satisfy any other format.
+    if (pid === "deepseek-search" && format !== "markdown") continue;
     const creds = await resolveCredentials(pid, allowedConnections);
     if (isAllRateLimitedCredentials(creds)) {
       firstRateLimited ??= { providerId: pid, credentials: creds };
@@ -277,12 +287,13 @@ async function resolveAutoSelectTarget(
 /** Resolve the provider + credentials to use for this request (explicit or auto-select). */
 async function resolveWebFetchTarget(
   requestedProvider: string | undefined,
-  allowedConnections: string[] | null
+  allowedConnections: string[] | null,
+  format: string
 ): Promise<ResolvedWebFetchTarget> {
   if (requestedProvider) {
     return resolveExplicitTarget(requestedProvider as WebFetchProviderId, allowedConnections);
   }
-  return resolveAutoSelectTarget(allowedConnections);
+  return resolveAutoSelectTarget(allowedConnections, format);
 }
 
 export async function POST(request: Request) {
@@ -317,7 +328,11 @@ export async function POST(request: Request) {
   if (scope.rejection) return scope.rejection;
 
   // Resolve provider + credentials (explicit provider never falls back; #8297)
-  const target = await resolveWebFetchTarget(body.provider, scope.allowedConnections);
+  const target = await resolveWebFetchTarget(
+    body.provider,
+    scope.allowedConnections,
+    body.format
+  );
   if (!target.ok) return target.response;
 
   log.info("WEB_FETCH", `${target.provider} | ${body.url} | format=${body.format}`);

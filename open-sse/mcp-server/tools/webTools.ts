@@ -85,7 +85,8 @@ export async function handleWebFetch(args: {
     | "context7"
     | "nimble-search"
     | "anysearch-search"
-    | "parallel-search";
+    | "parallel-search"
+    | "deepseek-search";
   format?: "markdown" | "html" | "links" | "screenshot";
   include_metadata?: boolean;
   depth?: number;

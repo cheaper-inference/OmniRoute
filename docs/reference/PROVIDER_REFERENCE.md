@@ -1,16 +1,16 @@
 ---
 title: "Provider Reference"
 version: 3.8.54
-lastUpdated: 2026-11-10
+lastUpdated: 2026-11-12
 ---
 
 # Provider Reference
 
 > **Auto-generated** from `src/shared/constants/providers.ts` — do not edit by hand.
 > Regenerate with: `npm run gen:provider-reference`
-> **Last generated:** 2026-11-10
+> **Last generated:** 2026-11-12
 
-Total providers: **389**. See category breakdown below.
+Total providers: **390**. See category breakdown below.
 
 ## Categories
 
@@ -410,7 +410,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `vllm` | `vllm` | vLLM | Local, self-hosted | [link](https://github.com/vllm-project/vllm) | API key optional. Configure the local vLLM OpenAI-compatible base URL (default: http://localhost:8000/v1). |
 | `xinference` | `xinference` | XInference | Local, self-hosted | [link](https://inference.readthedocs.io) | API key optional. Configure the local XInference OpenAI-compatible base URL (default: http://localhost:9997/v1). |
 
-## Search Providers (20)
+## Search Providers (21)
 
 | ID | Alias | Name | Tags | Website | Notes |
 |----|-------|------|------|---------|-------|
@@ -418,6 +418,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `brave-search` | `brave-search` | Brave Search | Search | [link](https://brave.com/search/api) | Subscription token from Brave Search API dashboard |
 | `codex-search` | `codex_search` | Codex Web Search (ChatGPT) | Search | [link](https://chatgpt.com) | Uses your connected OpenAI Codex (ChatGPT) accounts — no separate key. Each search spends Codex subscription quota (~10k input tokens) and takes ~10–40 s. |
 | `context7` | `context7` | Context7 (library docs) | Search | [link](https://context7.com) | API key optional (ctx7sk-...) — anonymous tier works without a key; a key raises the rate limit |
+| `deepseek-search` | `deepseek-search` | DeepSeek Search | Search | [link](https://api-docs.deepseek.com/guides/search) | DeepSeek API key (sk-...) from platform.deepseek.com |
 | `exa-search` | `exa-search` | Exa Search | Search | [link](https://exa.ai) | API key from dashboard.exa.ai |
 | `firecrawl` | `fc` | Firecrawl | Search | [link](https://firecrawl.dev) | API key from firecrawl.dev/app/api-keys (or set your self-hosted Firecrawl base URL) |
 | `google-pse-search` | `google-pse` | Google Programmable Search | Search | [link](https://developers.google.com/custom-search/v1/overview) | Requires a Google API key and your Programmable Search Engine ID (cx) |
@@ -477,7 +478,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 
 - Catalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Registry (per-model details): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Executors: [`open-sse/executors/`](../../open-sse/executors/) (175 implementations)
+- Executors: [`open-sse/executors/`](../../open-sse/executors/) (176 implementations)
 - Translators: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## See Also
