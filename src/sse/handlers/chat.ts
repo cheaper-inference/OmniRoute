@@ -1,4 +1,5 @@
 import { hasQoderCallerTools } from "@omniroute/open-sse/services/qoderCapabilities";
+import { hasAlternateAntigravityAccount } from "./chat/antigravityAccountFailover.ts";
 import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { randomUUID } from "crypto";
 import { resolveChatRequestBody } from "./requestBody";
@@ -2315,6 +2316,16 @@ async function handleSingleModelChat(
       );
       // 4. Execute chat via core after breaker gate checks (with optional TLS tracking)
       if (telemetry) telemetry.startPhase("connect");
+      // Antigravity: when another account could take this request, a 503 (no Google capacity
+      // for the model on this account) goes straight to that account instead of waiting.
+      const accountFailoverAvailable = await hasAlternateAntigravityAccount({
+        provider,
+        model: effectiveModel,
+        connectionId: credentials.connectionId,
+        excludedConnectionIds,
+        allowedConnections: effectiveAllowedConnections,
+        pinned: hasForcedConnection || Boolean(museOwner),
+      });
       let execution: Awaited<ReturnType<typeof dispatchChatWithAffinityEviction>>;
       try {
         execution = await dispatchChatWithAffinityEviction(
@@ -2350,6 +2361,7 @@ async function handleSingleModelChat(
             providerProfile,
             cachedSettings: runtimeOptions.cachedSettings,
             skipUpstreamRetry: runtimeOptions.skipUpstreamRetry ?? false,
+            accountFailoverAvailable,
             correlationId: runtimeOptions?.correlationId ?? null,
             conversationId: runtimeOptions?.conversationId ?? null,
             modelPinned: runtimeOptions?.modelPinned ?? false,
@@ -2935,6 +2947,8 @@ async function handleSingleModelChat(
         !runtimeOptions.providerFailoverPending &&
         !comboName &&
         !forceLiveComboTest &&
+        // The executor already handed this 503 back so another account takes it.
+        !(accountFailoverAvailable && result.status === 503) &&
         shouldRetrySameAccountTransport({
           provider,
           status: result.status,
