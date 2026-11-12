@@ -766,6 +766,9 @@ async function resolveModelByProviderInference(modelId: string, extendedContext:
 
   // Auto-pick:
   // 1. If active providers match, pick from active candidates (first active provider).
+  //    The other active candidates serve the same id; they are returned as
+  //    `failoverTargets` so the chat handler can fail over to them instead of
+  //    failing the request on the first provider's quota or outage.
   // 2. If no active providers filter applied, but canonical candidates deduplicate to 1 provider, pick it.
   const effectiveCandidates = activeCandidates.length > 0 ? activeCandidates : canonicalCandidates;
 
@@ -773,7 +776,15 @@ async function resolveModelByProviderInference(modelId: string, extendedContext:
     if (activeCandidates.length > 0 || effectiveCandidates.length === 1) {
       const provider = effectiveCandidates[0];
       const canonicalModel = resolveInferredProviderModel(provider, modelId);
-      return { provider, model: canonicalModel, extendedContext };
+      const failoverTargets = activeCandidates
+        .slice(1)
+        .map((p) => `${p}/${resolveInferredProviderModel(p, modelId)}`);
+      return {
+        provider,
+        model: canonicalModel,
+        extendedContext,
+        ...(failoverTargets.length > 0 ? { failoverTargets } : {}),
+      };
     }
   }
 

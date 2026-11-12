@@ -118,9 +118,9 @@ const GPT_6_1_SOL_CODEX_PRICING = {
   ...GPT_6_SOL_CODEX_PRICING,
   cached: 0.1,
 };
-// Codex Standard: Terra 25 / 1.25 / 125 credits per MTok
-// (input / cached input / output), at the existing 25 credits/USD convention.
-// https://learn.chatgpt.com/docs/pricing#token-rates
+// GPT-6.1 Terra shares its API price with the Codex credit-equivalent rate:
+// 25 / 1.25 / 125 credits per MTok at 25 credits/USD.
+// https://learn.chatgpt.com/docs/pricing#token-rates (checked 2026-11-09)
 const GPT_6_1_TERRA_CODEX_PRICING = GPT_6_TERRA_PRICING;
 const GPT_6_LUNA_CODEX_PRICING = {
   input: 0.1,

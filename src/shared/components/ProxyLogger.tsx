@@ -488,7 +488,7 @@ export default function ProxyLogger() {
                 aria-pressed={isActive}
                 onClick={() => setSelectedProvider(isActive ? "" : p)}
                 className={cn(
-                  "h-7 min-h-7 rounded-full border px-3 text-xs font-bold uppercase",
+                  "h-7 min-h-7 rounded-full border px-3 text-xs font-semibold uppercase",
                   isActive
                     ? "border-border-strong ring-1 ring-border-strong"
                     : "border-transparent hover:bg-bg-subtle"
@@ -583,7 +583,7 @@ export default function ProxyLogger() {
                         <Badge
                           size="sm"
                           variant={proxyStatusTone(log.status)}
-                          className="min-w-[50px] justify-center font-bold uppercase"
+                          className="min-w-[50px] justify-center font-semibold uppercase"
                         >
                           {log.status}
                         </Badge>
@@ -600,7 +600,7 @@ export default function ProxyLogger() {
                           <Badge
                             size="sm"
                             variant="info"
-                            className="text-[9px] font-bold uppercase"
+                            className="text-[9px] font-semibold uppercase"
                             title={t("tlsFingerprint")}
                           >
                             <span aria-hidden="true">🔒</span> TLS
@@ -613,7 +613,7 @@ export default function ProxyLogger() {
                     {visibleColumns.type && (
                       <TableCell className="px-3 py-2">
                         <span
-                          className="inline-block rounded px-2 py-0.5 text-[9px] font-bold uppercase"
+                          className="inline-block rounded px-2 py-0.5 text-[9px] font-semibold uppercase"
                           style={{ backgroundColor: typeColor.bg, color: typeColor.text }}
                         >
                           {typeColor.label}
@@ -623,7 +623,7 @@ export default function ProxyLogger() {
                     {visibleColumns.level && (
                       <TableCell className="px-3 py-2">
                         <span
-                          className="inline-block rounded px-2 py-0.5 text-[9px] font-bold uppercase"
+                          className="inline-block rounded px-2 py-0.5 text-[9px] font-semibold uppercase"
                           style={{ backgroundColor: levelColor.bg, color: levelColor.text }}
                         >
                           {levelColor.label}
@@ -634,7 +634,7 @@ export default function ProxyLogger() {
                       <TableCell className="px-3 py-2">
                         {log.provider ? (
                           <span
-                            className="inline-block rounded px-2 py-0.5 text-[9px] font-bold uppercase"
+                            className="inline-block rounded px-2 py-0.5 text-[9px] font-semibold uppercase"
                             style={{
                               backgroundColor: providerColor.bg,
                               color: providerColor.text,

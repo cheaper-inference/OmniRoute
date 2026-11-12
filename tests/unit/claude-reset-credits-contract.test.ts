@@ -15,6 +15,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { _resetClaudeOauthUsageCooldown } from "../../open-sse/services/claudeUsageCooldown.ts";
 
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-claude-reset-contract-"));
 process.env.DATA_DIR = dataDir;
@@ -99,6 +100,7 @@ async function makeConnection(overrides: Record<string, unknown> = {}) {
 test.beforeEach(() => {
   resetCreditMemo._resetClaudeResetCreditCountCache();
   _resetClaudeLimitResetMemo();
+  _resetClaudeOauthUsageCooldown();
 });
 
 test.afterEach(() => {
@@ -181,6 +183,9 @@ test("list: upstream 401/403/429/5xx map to ClaudeResetCreditError and only a re
     { upstream: 500, status: 502, code: "claude_usage_failed", count: 3 },
   ] as const;
   for (const c of cases) {
+    // A 429 starts the shared OAuth-usage cooldown (claude-usage-cooldown-reset-credits.test.ts);
+    // let it expire so the next upstream status is observed.
+    _resetClaudeOauthUsageCooldown();
     stubUpstream({
       [`GET ${LIST_URL}`]: () =>
         Response.json({

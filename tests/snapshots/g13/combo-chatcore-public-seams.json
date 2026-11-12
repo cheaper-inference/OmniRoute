@@ -791,7 +791,7 @@
       {
         "input": "max_tokens must be between 1 and 4096",
         "output": {
-          "contextOverflow": true,
+          "contextOverflow": false,
           "modelScoped": false,
           "parameterValidation": true
         }
