@@ -649,3 +649,97 @@ test("a 422 whose body merely mentions a known-offending word is not retried by 
     globalThis.fetch = originalFetch;
   }
 });
+
+test("422 recovery strips a rejected message field and then a rejected top-level field", async () => {
+  const executor = new SimpleExecutor();
+  const originalFetch = globalThis.fetch;
+  const capturedBodies: Record<string, unknown>[] = [];
+
+  globalThis.fetch = async (_url: string | URL | Request, init: RequestInit = {}) => {
+    const sent = JSON.parse(String(init.body)) as Record<string, unknown>;
+    capturedBodies.push(sent);
+    const messages = sent.messages as Record<string, unknown>[];
+    if (messages.some((m) => "name" in m)) {
+      return jsonResponse(
+        {
+          detail: [
+            {
+              type: "extra_forbidden",
+              loc: ["body", "messages", 0, "user", "name"],
+              msg: "Extra inputs are not permitted",
+            },
+            extraForbidden("seed"),
+          ],
+        },
+        422
+      );
+    }
+    if ("seed" in sent) return jsonResponse({ detail: [extraForbidden("seed")] }, 422);
+    return jsonResponse({ ok: true }, 200);
+  };
+
+  try {
+    const result = await executor.execute({
+      model: "mistral-small-latest",
+      body: { messages: [{ role: "user", content: "hi", name: "bob" }], seed: 1 },
+      stream: false,
+      credentials: {},
+    });
+    assert.equal(capturedBodies.length, 3);
+    const final = capturedBodies[2];
+    assert.equal("seed" in final, false);
+    assert.equal("name" in (final.messages as Record<string, unknown>[])[0], false);
+    assert.equal(result.response.status, 200);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("a 422 never strips a message field from prose echoed in detail[].input", async () => {
+  const executor = new SimpleExecutor();
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+
+  globalThis.fetch = async () => {
+    calls += 1;
+    return jsonResponse(
+      {
+        detail: [
+          {
+            type: "string_type",
+            loc: ["body", "stop"],
+            input: "messages.3 : property 'reasoning_content' is unsupported",
+          },
+        ],
+      },
+      422
+    );
+  };
+
+  const body = {
+    messages: [{ role: "assistant", content: "a", reasoning_content: "keep" }],
+  };
+  try {
+    const result = await executor.execute({
+      model: "test-model",
+      body,
+      stream: false,
+      credentials: {},
+    });
+    assert.equal(calls, 1);
+    assert.equal(result.response.status, 422);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+  assert.equal(body.messages[0].reasoning_content, "keep");
+});
+
+test("detectRejectedMessageFields structuredOnly ignores prose but keeps loc entries", () => {
+  const prose = "'messages.2' : property 'reasoning_content' is unsupported";
+  assert.deepEqual(detectRejectedMessageFields(prose), ["reasoning_content"]);
+  assert.deepEqual(detectRejectedMessageFields(prose, { structuredOnly: true }), []);
+  const loc = JSON.stringify({
+    detail: [{ type: "extra_forbidden", loc: ["body", "messages", 1, "user", "name"] }],
+  });
+  assert.deepEqual(detectRejectedMessageFields(loc, { structuredOnly: true }), ["name"]);
+});
