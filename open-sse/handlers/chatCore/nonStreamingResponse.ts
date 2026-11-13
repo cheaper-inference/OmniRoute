@@ -59,6 +59,7 @@ import {
 import { runNonStreamingProviderLeg } from "../chatCore/nonStreamingProviderLeg.ts";
 import type { NonStreamingProviderLegResult } from "@/lib/skills/toolLoopTypes.ts";
 import { finalizeToolLoopError } from "../chatCore/nonStreamingFinalization.ts";
+import { toFailureUsageAggregate } from "./failureUsage.ts";
 import { markCodexScopeRateLimited } from "../chatCore/codexFailover.ts";
 import { deleteSessionAccountAffinityBestEffort } from "@/lib/db/sessionAccountAffinity";
 import { writeTerminalStatus } from "@/shared/utils/terminalStatus";
@@ -459,7 +460,13 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
           : buildErrorBody(err.status, err.error || "Provider request failed"),
         cacheSource: "upstream",
       });
-      persistFailureUsage(err.status, err.errorCode || `upstream_${err.status}`);
+      // The upstream may already have billed tokens (a failed Responses body carries usage):
+      // keep them on the failure row instead of recording zeros.
+      persistFailureUsage(
+        err.status,
+        err.errorCode || `upstream_${err.status}`,
+        toFailureUsageAggregate(legResult.usage)
+      );
       trackPendingRequest(
         model,
         provider,
@@ -965,7 +972,11 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         geminiPromptCache: cacheUsageLogMeta?.geminiPromptCache,
         cacheSource: "upstream",
       });
-      persistFailureUsage(HTTP_STATUS.BAD_GATEWAY, "malformed_translated_response");
+      persistFailureUsage(
+        HTTP_STATUS.BAD_GATEWAY,
+        "malformed_translated_response",
+        toFailureUsageAggregate(usage)
+      );
       trackPendingRequest(
         model,
         provider,
