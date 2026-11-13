@@ -290,7 +290,7 @@ function mentionsName(query: string, name: string): boolean {
   return false;
 }
 
-function collectHistoryToolNames(body: unknown, into: Set<string>): void {
+export function collectHistoryToolNames(body: unknown, into: Set<string>): void {
   for (const raw of conversationItems(body)) {
     if (!raw || typeof raw !== "object") continue;
     const item = raw as ToolRecord;

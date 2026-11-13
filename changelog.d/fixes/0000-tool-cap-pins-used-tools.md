@@ -1,0 +1,1 @@
+- **fix(sse):** the default tool cap (128 tools for non-Claude targets) now keeps the tool a forced `tool_choice` names and the tools the conversation already called, instead of cutting them by position.
