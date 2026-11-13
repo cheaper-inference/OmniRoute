@@ -271,6 +271,8 @@ export function createResponsesApiTransformStream(
     // response.completed — a trailing usage-only chunk (choices: [], usage: {...}) may
     // still arrive for stream_options.include_usage=true upstreams.
     awaitingTrailingUsage: false,
+    // A top-level `error` chunk from the upstream; the terminal event is then response.failed.
+    upstreamError: null as Record<string, unknown> | null,
     completionTimer: null as ReturnType<typeof setTimeout> | null,
   };
 
@@ -636,7 +638,19 @@ export function createResponsesApiTransformStream(
         response.usage = normalizeResponsesContextUsage(state.usage);
       }
 
-      const eventType = finalizeResponsesTerminalStatus(response, state.finishReason);
+      const eventType = finalizeResponsesTerminalStatus(
+        response,
+        state.finishReason,
+        state.upstreamError !== null
+      );
+      if (state.upstreamError) {
+        const failure = state.upstreamError as Record<string, unknown>;
+        response.status = "failed";
+        response.error = {
+          code: typeof failure.code === "string" ? failure.code : "upstream_error",
+          message: typeof failure.message === "string" ? failure.message : "Upstream failure",
+        };
+      }
       emit(controller, eventType, {
         type: eventType,
         response,
@@ -686,7 +700,11 @@ export function createResponsesApiTransformStream(
           if (!dataMatch) continue;
 
           const dataStr = dataMatch[1].trim();
-          if (dataStr === "[DONE]") continue;
+          if (dataStr === "[DONE]") {
+            // Items are already closed once completion was deferred for trailing usage.
+            if (state.awaitingTrailingUsage && !state.completedSent) sendCompleted(controller);
+            continue;
+          }
 
           let parsed;
           try {
@@ -711,7 +729,25 @@ export function createResponsesApiTransformStream(
           }
 
           if (parsed.usage) {
-            state.usage = normalizeResponsesUsage(state.usage, parsed.usage);
+            // Some upstreams put zeros (or {}) on every chunk. That is a placeholder: keep the
+            // earlier value, or none, so the real trailing usage chunk is still awaited.
+            const next = normalizeResponsesUsage(state.usage, parsed.usage);
+            if (
+              next &&
+              (usageNumber(next.input_tokens) ?? 0) + (usageNumber(next.output_tokens) ?? 0) > 0
+            ) {
+              state.usage = next;
+            }
+          }
+
+          // A top-level error chunk has no choices. End with response.failed, not an empty success.
+          if (parsed.error && typeof parsed.error === "object" && !parsed.choices?.length) {
+            state.upstreamError = parsed.error;
+            for (const i in state.msgItemAdded) closeMessage(controller, i);
+            closeReasoning(controller);
+            for (const i in state.funcCallIds) closeToolCall(controller, i);
+            sendCompleted(controller);
+            continue;
           }
 
           if (!parsed.choices?.length) {
