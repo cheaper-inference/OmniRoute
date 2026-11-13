@@ -157,12 +157,25 @@ function buildProviderRequest(
   };
 }
 
-function initProviderState(provider: ZedProviderName, model: string): Record<string, unknown> {
-  if (provider === ZED_PROVIDER.anthropic) return initState(FORMATS.CLAUDE);
-  if (provider === ZED_PROVIDER.google) return initState(FORMATS.GEMINI);
-  if (provider === ZED_PROVIDER.openai) return initState(FORMATS.OPENAI_RESPONSES);
-  const state = initState(FORMATS.OPENAI);
-  state.model = model;
+function initProviderState(
+  provider: ZedProviderName,
+  model: string,
+  options?: { toolNameMap?: Map<string, string> | null }
+): Record<string, unknown> {
+  let state: Record<string, unknown>;
+  if (provider === ZED_PROVIDER.anthropic) state = initState(FORMATS.CLAUDE);
+  else if (provider === ZED_PROVIDER.google) state = initState(FORMATS.GEMINI);
+  else if (provider === ZED_PROVIDER.openai) return initState(FORMATS.OPENAI_RESPONSES);
+  else {
+    state = initState(FORMATS.OPENAI);
+    state.model = model;
+  }
+  const tm = options?.toolNameMap;
+  state.toolNameMap = {
+    get(x: string) {
+      return tm?.get?.(x) || (typeof x === "string" && x.startsWith("proxy_") ? x.slice(6) : x);
+    },
+  };
   return state;
 }
 
@@ -301,13 +314,13 @@ function wrapZedCompletionStream(
   response: Response,
   provider: ZedProviderName,
   model: string,
-  options?: { suppressThinkClose?: boolean }
+  options?: { suppressThinkClose?: boolean; toolNameMap?: Map<string, string> | null }
 ): Response {
   if (!response.ok || !response.body) return response;
 
   const decoder = new TextDecoder();
   const encoder = new TextEncoder();
-  const state = initProviderState(provider, model);
+  const state = initProviderState(provider, model, options);
   if (options?.suppressThinkClose) {
     // Responses API clients (and UA/header-opted-out clients) must not see the
     // textual `</think>` close marker — same policy chatCore applies (#4633 /
@@ -549,14 +562,35 @@ export class ZedHostedExecutor extends BaseExecutor {
     // headers (same policy as chatCore / GLM, #5245 / kimi-coding leak).
     const suppressThinkClose = resolveZedSuppressThinkClose(clientHeaders, clientResponseFormat);
 
+    const toolNameMap =
+      (providerRequest as Record<string, unknown>)?._toolNameMap instanceof Map
+        ? ((providerRequest as Record<string, unknown>)._toolNameMap as Map<string, string>)
+        : (() => {
+            const b = body as Record<string, unknown> | null;
+            if (b?.tools && Array.isArray(b.tools)) {
+              const m = new Map<string, string>();
+              for (const t of b.tools) {
+                const fn = (t as Record<string, unknown>)?.function
+                  ? ((t as Record<string, unknown>).function as Record<string, unknown>)?.name
+                  : (t as Record<string, unknown>)?.name;
+                if (typeof fn === "string" && fn) {
+                  m.set("proxy_" + fn, fn);
+                  m.set(fn, fn);
+                }
+              }
+              return m;
+            }
+            return null;
+          })();
+
     const wrapped = response.ok
-      ? wrapZedCompletionStream(response, provider, model, { suppressThinkClose })
+      ? wrapZedCompletionStream(response, provider, model, { suppressThinkClose, toolNameMap })
       : response;
     return {
       response: wrapped,
       url: `${(this.config as Record<string, unknown>)?.llmBaseUrl || "https://cloud.zed.dev"}/completions`,
       headers: { "Content-Type": "application/json", Authorization: "Bearer <zed-llm-token>" },
-      transformedBody: payload,
+      transformedBody: toolNameMap ? { ...payload, _toolNameMap: toolNameMap } : payload,
     };
   }
 
