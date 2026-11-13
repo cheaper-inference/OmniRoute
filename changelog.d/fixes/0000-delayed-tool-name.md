@@ -1,0 +1,1 @@
+- **fix(sse):** Preserve a tool name received after its first argument delta in structured stream summaries.
