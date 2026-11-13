@@ -3007,6 +3007,7 @@ async function handleSingleModelChat(
                 avalancheCooldownMs: avalancheRisk?.suggestedCooldownMs,
                 suppressFallback: avalancheRisk?.shouldSuppressFallback ?? false,
                 structuredError: { code: result.errorCode, type: result.errorType },
+                upstreamErrorBody: result.upstreamErrorBody,
               })
             )
           );
