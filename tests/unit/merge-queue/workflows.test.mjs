@@ -1209,3 +1209,26 @@ for (const file of Object.values(PROFILES)) {
     assert.equal(String(render(npmCi.with.cache, pr)), "true");
   });
 }
+
+test("ci.yml: the candidate range is checked for AI attribution (merge-ff keeps commits)", () => {
+  const wf = loadWorkflow("ci.yml");
+  const lint = wf.jobs.lint;
+  assert.ok([lint.needs].flat().includes("changes"), "lint receives the candidate base");
+  const step = lint.steps.find(
+    (s) => s.name === "AI attribution in the omni-queue candidate range (Hard Rule #16)"
+  );
+  assert.ok(step, "candidate-range AI attribution step");
+  assert.equal(step.run, 'npm run check:ai-attribution -- --range "$CANDIDATE_BASE..$GITHUB_SHA"');
+  const cand = pushContext(CANDIDATE_REF);
+  cand.needs = { changes: { outputs: { candidateBase: BASE_SHA } } };
+  assert.equal(condition(step.if, cand), true);
+  assert.equal(render(step.env.CANDIDATE_BASE, cand), BASE_SHA);
+  // Not on main pushes nor on pull requests (the PR step covers those).
+  assert.equal(condition(step.if, pushContext("refs/heads/main")), false);
+  assert.equal(
+    condition(step.if, pushContext("refs/pull/7/merge", { eventName: "pull_request" })),
+    false
+  );
+  // The checkout carries the full history the range needs.
+  assert.equal(lint.steps[0].with["fetch-depth"], 0);
+});

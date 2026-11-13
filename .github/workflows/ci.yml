@@ -222,6 +222,14 @@ jobs:
         run: |
           printf '%s' "$PR_BODY" > "$RUNNER_TEMP/pr-body.md"
           npm run check:ai-attribution -- --range "$PR_BASE_SHA..$PR_HEAD_SHA" --pr-title "$PR_TITLE" --pr-body-file "$RUNNER_TEMP/pr-body.md"
+      # omni-queue/** candidates land fast-forward: the contributors' own commits enter the
+      # release as they are (no squash rewrites their messages), so the same range check runs on
+      # the candidate, from its base (Omni-Queue-Base) to the pushed head.
+      - name: "AI attribution in the omni-queue candidate range (Hard Rule #16)"
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/')
+        env:
+          CANDIDATE_BASE: ${{ needs.changes.outputs.candidateBase }}
+        run: npm run check:ai-attribution -- --range "$CANDIDATE_BASE..$GITHUB_SHA"
       # A test parked in vitest.config.ts's exclude list does not run, and looks like
       # coverage to whoever reads the tree. 62 files accumulated behind a comment pointing
       # at #8618 — closed in August while the list grew to 62; 51 of them passed when
