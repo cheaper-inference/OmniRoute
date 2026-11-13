@@ -16,6 +16,7 @@ export type HoistedCacheBoundary = "moved" | "kept" | "dropped";
 
 // Re-exported from its canonical home in claudeCodeConstraints.ts so existing
 // importers of this module keep working.
+import { detachClaudeCodeRewriteTargets } from "../../executors/claudeOauthBodyIsolation.ts";
 import { relocateDirectiveOnlyMessages } from "../../services/claudeCodeConstraints.ts";
 import { resolveClaudeMidConversationSystemPolicy } from "../../services/claudeMidConversationSystem.ts";
 import { FORMATS } from "../../translator/formats.ts";
@@ -107,6 +108,9 @@ export function relocateHoistedCacheBoundary(
 
 export function extractSystemRoleMessages(payload: Record<string, unknown>): void {
   if (!Array.isArray(payload.messages)) return;
+  // The payload is a shallow copy of the client body (combo legs share its messages): relocating a
+  // cache_control marker writes into message blocks, so edit this payload's own copies.
+  detachClaudeCodeRewriteTargets(payload);
   const messages = payload.messages as Array<{ role?: unknown; content?: unknown }>;
   // Treat both `system` and `developer` as system-equivalent (OpenAI's Responses
   // API renamed system → developer). Anthropic rejects either as a chat role, so
