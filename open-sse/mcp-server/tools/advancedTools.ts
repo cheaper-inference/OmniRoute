@@ -40,7 +40,7 @@ import type {
   RoutingStrategyValue,
 } from "../../../src/shared/constants/routingStrategies.ts";
 import { normalizeRoutingStrategy } from "../../../src/shared/constants/routingStrategies.ts";
-import { toNumber } from "../../../src/shared/utils/numeric.ts";
+import { toNumber } from "../../utils/numeric.ts";
 
 type JsonRecord = Record<string, unknown>;
 
