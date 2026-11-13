@@ -1,0 +1,1 @@
+- Reset `rateLimitedUntil` and `backoffLevel` in `buildOAuthTokenUpdate()` on re-authorizing existing OAuth connections to prevent stranded cooldown states when quotas reset early (#20067).
