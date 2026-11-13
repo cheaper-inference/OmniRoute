@@ -1,0 +1,1 @@
+- **fix(providers):** CodeBuddy CN requests now carry the `X-Conversation-ID`, `X-Conversation-Request-ID`, `X-Conversation-Message-ID` and `X-Request-ID` headers the official client sends, as CodeBuddy International already does. The conversation id stays stable for one client session.
