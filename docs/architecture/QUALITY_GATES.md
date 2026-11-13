@@ -206,7 +206,7 @@ Runs on every PR to `main`. Blocks merge on failure.
 | Script                         | Validates                                                                                                                                         | Blocking                   |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
 | `check:docs-all`               | Meta-gate that runs the 6 sub-gates below sequentially                                                                                            | Yes                        |
-| ↳ `check:docs-sync`            | CHANGELOG / OpenAPI / llm.txt version consistency                                                                                                 | Yes                        |
+| ↳ `check:docs-sync`            | CHANGELOG / OpenAPI version consistency; in release mode also the 66 `llm.txt` mirrors and translated CHANGELOG sections (PR mode skips those)    | Yes                        |
 | ↳ `check:docs-counts`          | Counts in prose (provider count, migration count, etc.) are within the ratchet window of the real counts                                          | Yes                        |
 | ↳ `check:env-doc-sync`         | Every env var in `.env.example` is documented in a docs table, and vice versa                                                                     | Yes                        |
 | ↳ `check:deprecated-versions`  | No deprecated version strings in docs                                                                                                             | Yes                        |
@@ -217,7 +217,34 @@ Runs on every PR to `main`. Blocks merge on failure.
 | `check:openapi-security-tiers` | Security tier annotations in `openapi.yaml` are consistent with `routeGuard.ts` classifications                                                   | **Advisory**               |
 | `check:openapi-routes`         | Every path in `openapi.yaml` resolves to a real `route.ts` (anti-hallucination)                                                                   | Yes                        |
 | `check:docs-symbols`           | Every `/api/...` reference in `docs/**/*.md` resolves to a real `route.ts` (anti-hallucination)                                                   | Yes                        |
-| `i18n translation drift`       | Untranslated keys in i18n locale files — warn only                                                                                                | **Advisory**               |
+| `i18n translation drift`       | `docs/i18n/**` mirrors vs `.i18n-state.json` — advisory on PRs (mirrors are refreshed by the translation wave), strict on push and nightly        | **Advisory** on PRs        |
+
+#### Translation mirrors are derived files (PR mode vs release mode)
+
+A feature PR edits only English sources. The `docs/i18n/<locale>/**` mirrors (including the 66
+`llm.txt` copies and the translated `CHANGELOG.md` files) and `.i18n-state.json` are rewritten in
+one step by the translation wave (`docs/i18n-*` / `chore/i18n-*` branches, the scheduled
+`i18n-mirror-refresh.yml`) and by the release (`npm run release:sync-changelog-i18n`). The mirror
+gates therefore run in two modes, resolved by `scripts/check/lib/gateMode.mjs` (`--mode=pr|release`,
+then `OMNIROUTE_GATE_MODE`, then the Actions event; a local run is `release`):
+
+- `check:docs-sync` — release mode runs every check. PR mode keeps the package.json/OpenAPI version,
+  the root CHANGELOG headings and the superseded-docs guard, and prints
+  `SKIP reason=pr-mode` for the `llm.txt` mirror copies and the translated CHANGELOG sections —
+  unless the PR writes mirrors: a head branch declared as a writer of the `docs/i18n/**` family in
+  `config/quality/derived-paths/*.json` runs both checks strictly, and a change whose own diff
+  edits `docs/i18n/<locale>/llm.txt` or `CHANGELOG.md` runs that check strictly.
+- Mirror-content unit tests (`tests/_helpers/mirrorFreshness.ts`: `cycle-docs-mirror-contract`,
+  `resilience-pre-dispatch-docs-mirrors`, `cli-env-quality-docs-mirrors`,
+  `docs/*-locales`) — release mode asserts every locale. PR mode asserts only the mirrors that are
+  current with the English source according to `.i18n-state.json` (whole-file hash, or the recorded
+  section hash of the section the test pins) and skips the stale ones with a reason. The
+  `target_hash` provenance checks run for every locale in both modes.
+- `i18n translation drift` — advisory on PRs, strict on push, nightly and the release cut, so a
+  stale mirror cannot ship in a release.
+
+`scripts/i18n/sync-llm-mirrors.mjs` (also exported as `syncLlmMirrors()`, with `--dry-run`)
+rewrites the `llm.txt` mirrors; the release refresh and the translation wave run it.
 
 The twelve README SVGs under `docs/diagrams/` are generated (`scripts/docs/gen-readme-<name>.mjs`;
 `npm run docs:readme-diagrams` regenerates all of them). Each has a byte-compare unit test
@@ -257,8 +284,8 @@ unnoticed until #8463 because:
 - `sync-ui-keys` only backfills keys that are **absent**, never ones that are **stale**;
 - `check-ui-keys-coverage` counts key _presence_, so a stale translation scores as covered;
 - `check-translation-drift` tracks the `docs/i18n/<locale>/**.md` documentation mirrors —
-  it never reads `src/i18n/messages/*.json`. Blocking in job `docs-sync-strict` since the
-  2026-09 re-sync: edit a core doc → `npm run i18n:run -- --files=<doc>` (section-level, cheap).
+  it never reads `src/i18n/messages/*.json`. It runs in job `docs-sync-strict`: advisory on PRs,
+  strict on push and nightly; the translation wave refreshes the mirrors, not the feature PR.
 
 **Diff-aware, not baseline-backed.** It compares `en.json` at the merge base against the
 working tree; for every key whose English value changed, any locale still holding an
