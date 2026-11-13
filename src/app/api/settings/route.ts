@@ -367,6 +367,63 @@ async function validateEntraSsoPatch(
   return null;
 }
 
+/**
+ * Same fail-closed contract as validateEntraSsoPatch, for the generic OIDC
+ * inference block: issuer+audience required, every referenced key group must
+ * exist and be active (a typo'd id would otherwise leave users in zero
+ * groups, which downstream reads as "no restrictions"), and at least one
+ * role mapping (or an explicit default group) is required.
+ */
+async function validateOidcInferencePatch(
+  body: Record<string, unknown>
+): Promise<OidcPolicyError | null> {
+  if (body.oidcInferenceEnabled !== true) return null;
+  const current = (await getSettings()) as Record<string, unknown>;
+  const pick = (key: string): unknown => (key in body ? body[key] : current[key]);
+
+  const issuer = String(pick("oidcInferenceIssuer") ?? "")
+    .trim()
+    .replace(/\/+$/, "");
+  const audience = String(pick("oidcInferenceAudience") ?? "").trim();
+  if (!issuer.startsWith("https://") || !audience) {
+    return {
+      code: "OIDC_INFERENCE_INCOMPLETE",
+      message:
+        "oidcInferenceIssuer (https URL) and oidcInferenceAudience are required " +
+        "when oidcInferenceEnabled is true",
+    };
+  }
+
+  const mappings = pick("oidcInferenceRoleMappings");
+  const defaultKeyGroupId = String(pick("oidcInferenceDefaultKeyGroupId") ?? "").trim();
+  const referenced = collectEntraKeyGroupIds(mappings, defaultKeyGroupId);
+  if (referenced.length > 0) {
+    const { filterExistingActiveKeyGroupIds } = await import("@/lib/db/apiKeyGroups");
+    const live = new Set(filterExistingActiveKeyGroupIds(referenced));
+    const unknown = [...new Set(referenced)].filter((id) => !live.has(id));
+    if (unknown.length > 0) {
+      return {
+        code: "OIDC_INFERENCE_UNKNOWN_KEY_GROUP",
+        message:
+          "oidcInferenceRoleMappings/oidcInferenceDefaultKeyGroupId reference key groups " +
+          `that do not exist or are inactive: ${unknown.join(", ")}`,
+      };
+    }
+  }
+
+  const hasMapping = Array.isArray(mappings) && mappings.length > 0;
+  if (!hasMapping && !defaultKeyGroupId) {
+    return {
+      code: "OIDC_INFERENCE_NO_ROLE_POLICY",
+      message:
+        "Configure at least one oidcInferenceRoleMappings entry or an " +
+        "oidcInferenceDefaultKeyGroupId when oidcInferenceEnabled is true, " +
+        "otherwise every SSO user is denied",
+    };
+  }
+  return null;
+}
+
 export async function PATCH(request: Request) {
   const authError = await requireManagementAuth(request);
   if (authError) return authError;
@@ -444,6 +501,12 @@ export async function PATCH(request: Request) {
     if (entraPolicyError) {
       emitSettingsFailureAudit(request, actor, entraPolicyError.code, attemptedKeys);
       return NextResponse.json({ error: entraPolicyError }, { status: 400 });
+    }
+
+    const oidcInferenceError = await validateOidcInferencePatch(body);
+    if (oidcInferenceError) {
+      emitSettingsFailureAudit(request, actor, oidcInferenceError.code, attemptedKeys);
+      return NextResponse.json({ error: oidcInferenceError }, { status: 400 });
     }
 
     // VALIDATED body so we never trip on stray unknown keys. If any security

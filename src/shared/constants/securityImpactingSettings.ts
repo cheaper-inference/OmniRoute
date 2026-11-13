@@ -63,6 +63,14 @@ export const SECURITY_IMPACTING_SETTINGS_KEYS = [
   "entraDefaultKeyGroupId",
   "entraGraphFallbackEnabled",
   "entraGraphClientSecret",
+  // Generic OIDC inference auth for /v1/* (src/server/authz/oidcInference/):
+  // which issuer's access tokens are trusted and which key-group policy users
+  // land in. Same rationale as the entra* block above.
+  "oidcInferenceEnabled",
+  "oidcInferenceIssuer",
+  "oidcInferenceAudience",
+  "oidcInferenceRoleMappings",
+  "oidcInferenceDefaultKeyGroupId",
 ] as const;
 
 /**

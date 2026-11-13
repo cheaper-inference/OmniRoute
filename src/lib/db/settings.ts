@@ -224,6 +224,14 @@ export async function getSettings() {
     entraDefaultKeyGroupId: null, // null = users matching no mapping are denied
     entraGraphFallbackEnabled: false,
     entraGraphClientSecret: "",
+    // Generic OIDC inference auth for /v1/* (see
+    // src/server/authz/oidcInference/). Off by default: enabling only ADDS a
+    // way to authenticate — static API keys keep working.
+    oidcInferenceEnabled: false,
+    oidcInferenceIssuer: "",
+    oidcInferenceAudience: "",
+    oidcInferenceRoleMappings: [],
+    oidcInferenceDefaultKeyGroupId: null, // null = users with no mapped role are denied
     mcpEnabled: false,
     a2aEnabled: false,
     hiddenSidebarItems: [],

@@ -216,6 +216,24 @@ export const updateSettingsSchema = z.object({
   entraGraphFallbackEnabled: z.boolean().optional(),
   /** Encrypted at rest. Only needed for the Graph fallback. */
   entraGraphClientSecret: z.string().max(500).optional(),
+  // Generic OIDC inference auth for /v1/*: any standards-compliant issuer
+  // (Keycloak first). Distinct from the dashboard oidc* block (id_token
+  // admin login) and entraSso* (Microsoft-shaped tokens).
+  oidcInferenceEnabled: z.boolean().optional(),
+  oidcInferenceIssuer: z.string().max(500).optional(),
+  oidcInferenceAudience: z.string().max(300).optional(),
+  /** Token role name (realm or client) → OmniRoute key_groups.id. */
+  oidcInferenceRoleMappings: z
+    .array(
+      z.object({
+        role: z.string().min(1).max(200),
+        keyGroupId: z.string().min(1).max(100),
+      })
+    )
+    .max(500)
+    .optional(),
+  /** Key group for users holding no mapped role. Empty/absent = deny. */
+  oidcInferenceDefaultKeyGroupId: z.string().max(100).nullable().optional(),
   enableSocks5Proxy: z.boolean().optional(),
   instanceName: z.string().max(100).optional(),
   customLogoUrl: z.string().max(2000).optional(),

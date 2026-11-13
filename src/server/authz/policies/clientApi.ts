@@ -5,6 +5,8 @@ import { isFeatureFlagEnabled, isRequireApiKeyEnabled } from "@/shared/utils/fea
 import { extractApiKeyCandidates } from "@/sse/services/clientApiKeyResolver.ts";
 import { isEntraSsoEnabled } from "../entra/config";
 import { evaluateSsoAuth, looksLikeEntraJwt } from "../entra/evaluate";
+import { evaluateOidcInferenceAuth, looksLikeOidcJwt } from "../oidcInference/evaluate";
+import { isOidcInferenceEnabled } from "../oidcInference/config";
 import type { AuthOutcome, PolicyContext, RoutePolicy } from "../context";
 import { allow, reject } from "../context";
 import { isViaProxyRequest, requestPeerAddress } from "../peerContext";
@@ -148,6 +150,26 @@ export const clientApiPolicy: RoutePolicy = {
         kind: "sso_user",
         id: verdict.oid,
         label: verdict.upn || undefined,
+      });
+    }
+
+    // Generic OIDC inference auth (e.g. Keycloak access tokens from Claude
+    // Desktop BYOD). Same fail-closed contract as the Entra branch above:
+    // once this branch claims a bearer its verdict is FINAL — falling
+    // through would let an IdP outage degrade into anonymous/key access.
+    if (
+      !looksLikeEntraJwt(primary) &&
+      looksLikeOidcJwt(primary) &&
+      (await isOidcInferenceEnabled())
+    ) {
+      const verdict = await evaluateOidcInferenceAuth(primary);
+      if (!verdict.ok) {
+        return reject(verdict.status, verdict.code, verdict.message);
+      }
+      return allow({
+        kind: "sso_user",
+        id: verdict.oid,
+        label: verdict.label || undefined,
       });
     }
 
