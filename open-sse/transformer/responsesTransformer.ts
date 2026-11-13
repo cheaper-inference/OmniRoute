@@ -263,6 +263,7 @@ export function createResponsesApiTransformStream(
       seq: number;
     }>,
     buffer: "",
+    pendingCr: false,
     completedSent: false,
     usage: null,
     finishReason: null as string | null,
@@ -688,7 +689,13 @@ export function createResponsesApiTransformStream(
       transform(chunk, controller) {
         const text = decoder.decode(chunk, { stream: true });
         if (text.trim()) logger?.logInput(text.trim());
-        state.buffer += text;
+        // CRLF framing (\r\n\r\n) would otherwise never split: normalize to LF before buffering.
+        // A CR that ends this chunk may be the first half of a CRLF pair cut across two writes,
+        // so it is held back (state.pendingCr) and rejoined with the next chunk.
+        let incoming = (state.pendingCr ? "\r" : "") + text;
+        state.pendingCr = incoming.endsWith("\r");
+        if (state.pendingCr) incoming = incoming.slice(0, -1);
+        state.buffer += incoming.replace(/\r\n/g, "\n");
 
         const messages = state.buffer.split("\n\n");
         state.buffer = messages.pop() || "";
@@ -1045,7 +1052,8 @@ export function createResponsesApiTransformStream(
         // still holding. With { stream:true } complete multi-byte chars are
         // emitted within transform(), so normally there is nothing left; this
         // only releases a terminating truncated byte and frees the decoder.
-        state.buffer += decoder.decode();
+        state.buffer += (state.pendingCr ? "\n" : "") + decoder.decode();
+        state.pendingCr = false;
         // Drain a final message that arrived without its "\n\n" terminator — typically
         // the last text delta, the finish_reason chunk or the usage chunk. Must run
         // BEFORE the close/complete calls below; sendCompleted() is idempotent

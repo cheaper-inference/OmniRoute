@@ -1,0 +1,1 @@
+- **fix(responses):** the Chat to Responses stream transformer now splits CRLF-framed SSE (`\r\n\r\n`), so every chunk is translated as it arrives instead of one blob at the end of the stream.
