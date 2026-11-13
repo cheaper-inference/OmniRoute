@@ -22,6 +22,7 @@ import { extractApiKey } from "@/sse/services/auth";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error";
 
 import { catalogPageCacheKey, catalogStringResponse, parseCatalogPage } from "./catalogPagination";
+import { launchViewCacheKeySuffix } from "./catalogLaunchView";
 import { isCodexModelCatalogClient } from "./catalogRequest";
 
 /** Fingerprint an API key for the catalog memo Map. Never store the raw secret. */
@@ -290,7 +291,9 @@ function buildCatalogCacheKey(request: Request, catalogSettings?: CatalogCacheOp
   // (the public /v1/models default) stays byte-identical.
   const reveal = catalogSettings?.revealHidden ? "|reveal" : "";
   const combosOnly = catalogSettings?.exposeCombosOnly ? "|combosOnly" : "";
-  return `${prefix}|${isCodex}|${fingerprintCatalogAuthKey(apiKey)}|${configuredOnly}|${hideAuto}|${hideNoThink}|${page}${reveal}${combosOnly}`;
+  // Launch-session server view (catalogLaunchView.ts): "" for every non-`olx_` bearer.
+  const launchView = launchViewCacheKeySuffix(apiKey);
+  return `${prefix}|${isCodex}|${fingerprintCatalogAuthKey(apiKey)}|${configuredOnly}|${hideAuto}|${hideNoThink}|${page}${reveal}${combosOnly}${launchView}`;
 }
 
 // Tracks the model-catalog cache version (src/lib/db/readCache.ts) as of the last

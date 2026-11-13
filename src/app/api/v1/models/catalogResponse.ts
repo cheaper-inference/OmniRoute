@@ -53,6 +53,11 @@ import {
 import { extractApiKey } from "@/sse/services/auth";
 import { maybeOmitCatalogModelName, withCatalogDisplayName } from "./catalogHelpers";
 import { applyCatalogPage, catalogJsonResponse, parseCatalogPage } from "./catalogPagination";
+import {
+  applyLaunchView,
+  launchViewFromKeyMetadata,
+  type CatalogLaunchView,
+} from "./catalogLaunchView";
 import { isCodexModelCatalogClient } from "./catalogRequest";
 import {
   attachCatalogPricing,
@@ -220,6 +225,8 @@ export async function applyCatalogPostFilters(
     /** Combo targets and node prefixes for the per-entry `pricing` object. */
     pricing?: CatalogPricingContext;
     allowCcDiscoveryAliases?: boolean;
+    /** Launch-session server view: applied last, so it only narrows authorized rows. */
+    launchView?: CatalogLaunchView | null;
   }
 ): Promise<Array<Record<string, any>>> {
   const yieldTurn = (): Promise<void> => new Promise((resolve) => setImmediate(resolve));
@@ -300,7 +307,9 @@ export async function applyCatalogPostFilters(
   // both mirror passes exactly as before; on mirrors claude/ effort variants, drops
   // mirrors that cannot resolve, and checks gateways against what they will receive.
   const mirrorRefinements = isCatalogMirrorRefinementsEnabled();
-  if (ctx.allowCcDiscoveryAliases !== false) {
+  // A launch view lists raw ids the launcher already selected; claude/ mirrors are never
+  // added to it, so the mirror pass is skipped (the intersect below would drop them anyway).
+  if (ctx.allowCcDiscoveryAliases !== false && !ctx.launchView) {
     finalModels = appendCcMirrorsWhenEnabled(
       finalModels,
       mirrorRefinements,
@@ -371,6 +380,9 @@ export async function applyCatalogPostFilters(
   // pair survives. Independent of MODELS_CATALOG_PREFIX_MODE; runs as the final guard.
   finalModels = dedupeExactCatalogIds(finalModels);
 
+  // Launch view LAST: intersect(authorized rows, view ids) in view order. Only ever drops.
+  if (ctx.launchView) finalModels = applyLaunchView(finalModels, ctx.launchView);
+
   return finalModels;
 }
 
@@ -415,9 +427,11 @@ export async function finalizeCatalogResponse(
   enrichmentSnapshot?: CatalogEnrichmentSnapshot
 ): Promise<Response> {
   const apiKey = extractApiKey(request);
+  let launchView: CatalogLaunchView | null = null;
   if (apiKey) {
     const { getApiKeyMetadata, isModelAllowedForKey } = await import("@/lib/db/apiKeys");
     const keyMeta = await getApiKeyMetadata(apiKey);
+    launchView = launchViewFromKeyMetadata(keyMeta);
     if (keyMeta && keyMeta.id !== "env-key" && !keyMeta.allowedQuotas?.length) {
       finalModels = await filterUnauthorizedFunctionalGatewayMirrors(
         finalModels,
@@ -468,7 +482,10 @@ export async function finalizeCatalogResponse(
   await yieldTurn();
   const enrichedModels = disambiguateCatalogModelNames(enriched);
   await yieldTurn();
-  const orderedModels = sortCatalogModelsProviderGrouped(enrichedModels);
+  // A launch view is served in view order (applyCatalogPostFilters already ordered it).
+  const orderedModels = launchView
+    ? enrichedModels
+    : sortCatalogModelsProviderGrouped(enrichedModels);
   await yieldTurn();
   // Codex CLI compatibility: its model-catalog refresh (codex_models_manager) does
   // GET /v1/models?client_version=<v> and decodes a JSON object with a TOP-LEVEL
