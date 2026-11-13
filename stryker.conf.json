@@ -37,6 +37,7 @@
   "plugins": ["@stryker-mutator/tap-runner"],
   "tap": {
     "testFiles": [
+      "tests/unit/chatcore-cache-write-snapshot.test.ts",
       "tests/unit/chatgpt-account-routing.test.ts",
       "tests/unit/chatgpt-siwc-lifecycle-contract-15201.test.ts",
       "tests/unit/chatgpt-siwc.test.ts",

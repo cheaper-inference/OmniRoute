@@ -1230,7 +1230,9 @@ async function handleChatCoreInner({
   // cache store path runs at Phase 9.1 (non-streaming) / Phase 9.2 (streaming).
   // Without this snapshot, the write-time signature differs from the read-time
   // one, producing 0% hit rate. (#cache-signature-asymmetry)
-  const bodyForCacheWrite = body;
+  // sanitizeChatRequestBody edits its argument in place (renames token fields, replaces
+  // messages/tools), so a plain alias would drift away from what the cache read just hashed.
+  const bodyForCacheWrite = body && typeof body === "object" ? { ...body } : body;
 
   // ── Phase 9.1: Semantic cache check (temp=0, any streaming mode) ──
   const cacheHit = await checkSemanticCache({
