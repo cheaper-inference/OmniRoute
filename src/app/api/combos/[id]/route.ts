@@ -147,7 +147,7 @@ export async function PUT(request, { params }) {
       normalizedUpdate.routes = normalizeComboCapabilityRoutes(normalizedUpdate.routes, {
         comboName: String(comboName),
         allCombos: allCombos as never,
-      });
+      }) as typeof normalizedUpdate.routes;
     }
     // #15251: the runtime reads `universal_handoff` before the camelCase alias,
     // so a stale stored alias must not shadow a validated update (or null-clear).

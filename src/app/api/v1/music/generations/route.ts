@@ -49,7 +49,7 @@ export async function GET(request?: Request) {
 /** Dispatch one resolved combo target through the provider's music executor. */
 async function dispatchMusicModel(
   request: Request,
-  body: Record<string, unknown> & { model: string; duration?: number },
+  body: Record<string, unknown> & { model: string; duration?: unknown },
   allowedConnections: string[] | null,
   apiKeyId: string | undefined,
   startTime: number
@@ -142,7 +142,7 @@ async function postHandler(request, context) {
         dispatch: (routedBody, allowedConnections) =>
           dispatchMusicModel(
             request,
-            routedBody as Record<string, unknown> & { model: string; duration?: number },
+            routedBody as Record<string, unknown> & { model: string; duration?: unknown },
             allowedConnections,
             scope.policy.apiKeyInfo?.id,
             startTime

@@ -1721,7 +1721,8 @@ async function handleSingleModelChat(
   if (!targetSupportsEndpoint(modelStr, "chat", provider)) {
     return errorResponse(
       400,
-      "This provider does not support chat completions; use POST /v1/search or POST /v1/web/fetch instead."
+      "This provider does not support chat completions; use POST /v1/search or POST /v1/web/fetch instead.",
+      { code: "search_provider_not_chat", type: "invalid_request_error" }
     );
   }
   const resolvedModelGate = resolvedPolicy.createVisibleResolvedModelGate({
