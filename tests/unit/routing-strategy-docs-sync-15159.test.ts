@@ -87,59 +87,43 @@ test("DOC-01: the code exposes a non-trivial public strategy set", () => {
   assert.deepEqual(INTERNAL, ["quota-share"]);
 });
 
-test("DOC-01: AGENTS.md states the real count and lists every public strategy", () => {
-  const text = doc("AGENTS.md");
+// Phase 2 of plan 2026-11-13: the agent-instruction files (AGENTS.md, its bs fork, the services
+// guide) no longer carry the strategy count or the inline list — both went stale (the bs fork said
+// "20 strategija", llm.txt's list had lost `expiry-first`). They point to the registry instead, so
+// there is no copy to drift. What #15159 DOC-01 guarded is still guarded: no instruction file can
+// state a wrong count or an incomplete list, because it states neither, and the counts gate's
+// "No derived counts (agent-instruction file …)" invariant keeps it that way. The one place that
+// names every strategy is the AUTO-COMBO.md table, checked against the code below.
+const REGISTRY = "`ROUTING_STRATEGY_VALUES` in `src/shared/constants/routingStrategies.ts`";
+const REGISTRY_BS = "`ROUTING_STRATEGY_VALUES` u `src/shared/constants/routingStrategies.ts`";
 
-  const count = text.match(/(\d+)\s+public strategies/);
-  assert.ok(count, "AGENTS.md must state a public-strategy count");
-  assert.equal(
-    Number(count[1]),
-    COUNT,
-    `AGENTS.md says ${count[1]} public strategies but derived-facts.json has ${COUNT}`
+function assertNoStrategyCountOrList(text: string, file: string) {
+  const count = text.match(
+    /(\d+)\*{0,2}\s+(?:public\s+|routing\s+|javn\p{L}*\s+)?strategi(?:es|j\p{L}*)\b/iu
   );
+  assert.equal(count, null, `${file} states a strategy count again: "${count?.[0]}"`);
+  // An inline list is a line naming most public strategies; a single mention (`fusion`,
+  // `quota-share`) is fine.
+  const listed = text.split("\n").find((l) => PUBLIC.filter((s) => l.includes(s)).length >= 8);
+  assert.equal(listed, undefined, `${file} carries an inline strategy list again: ${listed}`);
+}
 
-  const line = text.split("\n").find((l) => /public strategies/.test(l)) ?? "";
-  const missing = PUBLIC.filter((strategy) => !line.includes(strategy));
-  assert.deepEqual(
-    missing,
-    [],
-    `AGENTS.md's inline strategy list is missing: ${missing.join(", ")}`
+test("DOC-01: AGENTS.md points to the strategy registry and carries no count or list", () => {
+  const text = doc("AGENTS.md");
+  assert.ok(text.includes(REGISTRY), "AGENTS.md must point to the strategy registry");
+  assertNoStrategyCountOrList(text, "AGENTS.md");
+  assert.ok(
+    /Auto-Combo \(scoring factors, strategy table\) — `docs\/routing\/AUTO-COMBO\.md`/.test(text),
+    "the reference-table row must still send readers to the AUTO-COMBO.md strategy table"
   );
 });
 
-test("DOC-01: the AGENTS.md reference-table row agrees with the code", () => {
-  const text = doc("AGENTS.md");
-  const row = text.split("\n").find((l) => /Auto-Combo \(.*strategies\)/.test(l));
-
-  assert.ok(row, "AGENTS.md must have the Auto-Combo reference-table row");
-  const count = row.match(/(\d+)\s+strategies/);
-  assert.ok(count, "the reference-table row must state a strategy count");
-  assert.equal(
-    Number(count[1]),
-    COUNT,
-    `the reference-table row says ${count[1]} strategies, derived-facts.json has ${COUNT}`
-  );
-});
-
-test("DOC-01: open-sse/services/AGENTS.md states the real count and full list", () => {
+test("DOC-01: open-sse/services/AGENTS.md points to the registry and carries no count or list", () => {
   const text = doc("open-sse/services/AGENTS.md");
   const line = text.split("\n").find((l) => /\*\*Strategies\*\*/.test(l));
-
   assert.ok(line, "open-sse/services/AGENTS.md must document the strategies");
-
-  const count = line.match(/\((\d+)\)/);
-  assert.ok(count, "the strategies line must state a count in parentheses");
-  assert.equal(
-    Number(count[1]),
-    COUNT,
-    `open-sse/services/AGENTS.md says ${count[1]}, derived-facts.json has ${COUNT}`
-  );
-
-  // `P2C` is the one documented in caps; normalize so the check is not a
-  // formatting trap that hides a genuinely missing entry.
-  const normalized = line.replace(/`P2C`/g, "`p2c`");
-  const missing = PUBLIC.filter((strategy) => !normalized.includes(`\`${strategy}\``));
-  assert.deepEqual(missing, [], `open-sse/services/AGENTS.md is missing: ${missing.join(", ")}`);
+  assert.ok(line.includes(REGISTRY), "the strategies line must point to the registry");
+  assertNoStrategyCountOrList(text, "open-sse/services/AGENTS.md");
 });
 
 test("DOC-01: AUTO-COMBO.md count and full strategy table match the code", () => {
@@ -166,25 +150,11 @@ test("DOC-01: AUTO-COMBO.md count and full strategy table match the code", () =>
   );
 });
 
-test("DOC-01: the bs i18n fork agrees with the code too", () => {
-  // docs/i18n/bs/AGENTS.md is a hand-maintained translation fork (DOC-03), so it
-  // drifts silently. It is the only AGENTS.md mirror tracked in the repo.
+test("DOC-01: the bs i18n fork points to the registry too", () => {
+  // docs/i18n/bs/AGENTS.md is a hand-maintained translation fork (DOC-03), so it drifted
+  // silently ("20 strategija" while the code had 21). It is the only AGENTS.md mirror tracked in
+  // the repo; like the source it now points to the registry and states no count.
   const text = doc("docs/i18n/bs/AGENTS.md");
-  // Bosnian numerals govern the case of the noun phrase: 21 javna strategija,
-  // 22 javne strategije, 20 javnih strategija. Accept the three forms so a correct
-  // count is never forced into the wrong grammatical number.
-  const BS_COUNT = /(\d+)\s+javn(?:a|e|ih)\s+strategij[ae]\b/;
-  const line = text.split("\n").find((l) => BS_COUNT.test(l));
-
-  assert.ok(line, "the bs mirror must carry the strategy sentence");
-  const count = line.match(BS_COUNT);
-  assert.ok(count, "the bs mirror must state a strategy count");
-  assert.equal(
-    Number(count[1]),
-    COUNT,
-    `docs/i18n/bs/AGENTS.md says ${count[1]}, derived-facts.json has ${COUNT}`
-  );
-
-  const missing = PUBLIC.filter((strategy) => !line.includes(strategy));
-  assert.deepEqual(missing, [], `docs/i18n/bs/AGENTS.md is missing: ${missing.join(", ")}`);
+  assert.ok(text.includes(REGISTRY_BS), "the bs mirror must point to the strategy registry");
+  assertNoStrategyCountOrList(text, "docs/i18n/bs/AGENTS.md");
 });

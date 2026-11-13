@@ -457,6 +457,101 @@ const PROVIDER_COUNT_CLAIM = {
   skipAfter: /^\s+in\s+(?:>\s*)?OmniRoute v\d+\.\d+\.\d+/i,
 };
 
+const MIGRATIONS_CLAIM = {
+  what: "migrations",
+  pattern: /(\d+)\+? (?:versioned )?(?:SQL )?migrations?\b/gi,
+};
+const SCORING_FACTORS_CLAIM = { what: "scoring factors", pattern: /(\d+)[- ]factors?\b/gi };
+// "N public strategies" / "N routing strategies" / "**N** strategies" / "(…, N strategies)".
+const ROUTING_STRATEGIES_CLAIM = {
+  what: "routing strategies",
+  pattern: /(?<![\d.])(\d+)\*{0,2}\s+(?:public\s+|routing\s+)?strategies\b/gi,
+};
+const MCP_TOOLS_CLAIM = {
+  what: "MCP tools",
+  pattern: /(\d+)[- ]tools?\b/gi,
+  // per-module rows ("Memory tool definitions (3 tools)") and the CLI catalog
+  // total ("33 tools (25 CLI Code's …)") are not the MCP aggregate
+  // per-module rows read "… tool definitions (N tools" / "… management tools
+  // (N tools" — the word tool(s)/definitions sits right before the paren. The
+  // aggregate ("MCP Server (109 tools", "all 109 tools") never does.
+  // "Phase 2 tool handlers" is a phase number, not a tool count
+  skipBefore: /(tools?|definitions?)\s*\(\s*$|phase\s+$/i,
+  skipAfter: /^\s*\(\d+ CLI/,
+};
+const MCP_SCOPES_CLAIM = { what: "MCP scopes", pattern: /(\d+) scopes/gi };
+
+// --- Agent-instruction files carry no derived counts (plan 2026-11-13, phase 2) ------------
+// AGENTS.md, llm.txt (+ its mirrors, copies of it), the bs AGENTS.md fork, the services guide
+// and the skills are read as authority by every agent session. A count there is stale the
+// moment a sibling PR lands, and every provider PR used to rewrite it (on 2026-11-13, 37 open
+// PRs edited AGENTS.md's count lines, proposing 13 different provider totals). These files point
+// to the source and to `npm run facts` instead; this invariant keeps a count from coming back,
+// in both modes.
+const INSTRUCTION_COUNT_CLAIMS = [
+  PROVIDER_COUNT_CLAIM,
+  MIGRATIONS_CLAIM,
+  SCORING_FACTORS_CLAIM,
+  ROUTING_STRATEGIES_CLAIM,
+  { what: "routing strategies", pattern: /Strategies\*{0,2}\s*\((\d+)\)/g },
+  MCP_TOOLS_CLAIM,
+  MCP_SCOPES_CLAIM,
+  { what: "mode packs", pattern: MODE_PACK_CLAIM_PATTERN },
+];
+// The bs fork translates the prose; Bosnian declines the noun after the number.
+const INSTRUCTION_COUNT_CLAIMS_BS = [
+  { what: "provider count (bs)", pattern: /\b(\d{3,4})\s+(?:LLM\s+)?dobavlja\p{L}*/giu },
+  { what: "migrations (bs)", pattern: /\b(\d+)\s+migracij\p{L}*/giu },
+  { what: "MCP tools (bs)", pattern: /\b(\d{2,4})\s+alat\p{L}*/giu },
+  { what: "MCP scopes (bs)", pattern: /\b(\d+)\s+opseg\p{L}*/giu },
+  { what: "routing strategies (bs)", pattern: /\b(\d+)\s+(?:javn\p{L}*\s+)?strategij\p{L}*/giu },
+  { what: "scoring factors (bs)", pattern: /\b(\d+)\s+faktor\p{L}*/giu },
+];
+
+/** The agent-instruction files the invariant guards (skills listed from the tree). */
+export function agentInstructionFiles(root = ROOT) {
+  const skills = [];
+  const dir = path.join(root, "skills");
+  if (fs.existsSync(dir)) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.isDirectory() && fs.existsSync(path.join(dir, entry.name, "SKILL.md"))) {
+        skills.push(`skills/${entry.name}/SKILL.md`);
+      }
+    }
+  }
+  return [
+    "AGENTS.md",
+    "llm.txt",
+    "docs/i18n/bs/AGENTS.md",
+    "open-sse/services/AGENTS.md",
+    "src/shared/constants/agentSkills.ts",
+    "skills/README.md",
+    ...skills.sort(),
+  ];
+}
+
+/** PURE. Rejects any derived count in an agent-instruction file. */
+export function makeInstructionCountFreeValidator(file) {
+  const specs =
+    file === "docs/i18n/bs/AGENTS.md" ? INSTRUCTION_COUNT_CLAIMS_BS : INSTRUCTION_COUNT_CLAIMS;
+  return (content) => {
+    const found = [];
+    for (const spec of specs) {
+      for (const c of locateNumberClaims(content, spec)) {
+        const line = content.slice(0, c.start).split("\n").length;
+        found.push(`"${c.text}" (${spec.what}, line ${line})`);
+      }
+    }
+    if (!found.length) return { ok: true, detail: "no derived count" };
+    return {
+      ok: false,
+      detail:
+        `agent-instruction file carries derived count(s): ${found.join(", ")} — point to the ` +
+        "source and to `npm run facts` instead (plan 2026-11-13, phase 2)",
+    };
+  };
+}
+
 // --- Derived-check plumbing (PR diff + release refresh) ------------------------
 // A derived check keeps its release validator untouched and adds the locator its validator
 // reads (`extract`) plus the rewrite that brings a file to the live value (`plan`).
@@ -618,7 +713,7 @@ function assembleChecks(facts) {
       label: "Provider count",
       actual: providerTotal,
       docKey: "providers",
-      files: ["README.md", "AGENTS.md", "llm.txt"],
+      files: ["README.md"],
       claim: { ...PROVIDER_COUNT_CLAIM, requireClaim: true },
     }),
     numericClaimCheck({
@@ -636,10 +731,6 @@ function assembleChecks(facts) {
         "docs/getting-started/FREE-TIERS-GUIDE.md",
         "docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md",
         "docs/guides/FREE_PROVIDER_RANKINGS.md",
-        "src/shared/constants/agentSkills.ts",
-        "skills/README.md",
-        "skills/omni-auth/SKILL.md",
-        "skills/omni-providers/SKILL.md",
       ],
       claim: PROVIDER_COUNT_CLAIM,
     }),
@@ -658,11 +749,8 @@ function assembleChecks(facts) {
       label: "DB migrations count",
       actual: migrations,
       docKey: "migrations",
-      files: ["README.md", "AGENTS.md", "llm.txt"],
-      claim: {
-        what: "migrations",
-        pattern: /(\d+)\+? (?:versioned )?(?:SQL )?migrations?\b/gi,
-      },
+      files: ["README.md"],
+      claim: MIGRATIONS_CLAIM,
     }),
     {
       // The README footer and llm.txt each carry the product version as prose; both
@@ -754,26 +842,23 @@ function assembleChecks(facts) {
       docKey: "scoring factors",
       files: [
         "README.md",
-        "AGENTS.md",
         "docs/routing/AUTO-COMBO.md",
         "docs/guides/TIERS.md",
         "docs/guides/FEATURES.md",
         "docs/guides/FREE_PROVIDER_RANKINGS.md",
         "docs/diagrams/strategies-grid.svg",
         "docs/diagrams/auto-combo-scoring.mmd",
-        "llm.txt",
         "docs/architecture/ARCHITECTURE.md",
         "docs/architecture/REPOSITORY_MAP.md",
         "docs/architecture/RESILIENCE_GUIDE.md",
         "docs/frameworks/OPEN_SSE_ARCHITECTURE.md",
         "docs/getting-started/AUTO-COMBO-GUIDE.md",
-        "skills/omni-combos-routing/SKILL.md",
         "open-sse/services/autoCombo/routerStrategy.ts",
         "open-sse/services/taskAwareRouter.ts",
         "tests/unit/lkgp-enabled-context-11181.test.ts",
         "tests/integration/combo-matrix/auto.test.ts",
       ],
-      claim: { what: "scoring factors", pattern: /(\d+)[- ]factors?\b/gi },
+      claim: SCORING_FACTORS_CLAIM,
     }),
     {
       label: "Routing strategies count",
@@ -781,7 +866,7 @@ function assembleChecks(facts) {
       docKey: "strategies",
       strict: false,
       scope: "release-only",
-      files: ["docs/routing/AUTO-COMBO.md", "docs/architecture/RESILIENCE_GUIDE.md", "llm.txt"],
+      files: ["docs/routing/AUTO-COMBO.md", "docs/architecture/RESILIENCE_GUIDE.md"],
     },
     // The strategy COUNT as prose states it (#15159 DOC-01: AGENTS.md, AUTO-COMBO.md and
     // open-sse/services/AGENTS.md had drifted to 17 and 19). The soft `includes()` check above
@@ -795,30 +880,23 @@ function assembleChecks(facts) {
       actual: facts.routingStrategies,
       docKey: "strategies",
       files: [
-        "AGENTS.md",
         "README.md",
-        "llm.txt",
         "docs/routing/AUTO-COMBO.md",
         "docs/architecture/RESILIENCE_GUIDE.md",
         "docs/architecture/ARCHITECTURE.md",
         "docs/guides/FEATURES.md",
       ],
-      claim: {
-        what: "routing strategies",
-        pattern: /(?<![\d.])(\d+)\*{0,2}\s+(?:public\s+|routing\s+)?strategies\b/gi,
-      },
+      claim: ROUTING_STRATEGIES_CLAIM,
     }),
-    numericClaimCheck({
-      label: "Routing strategies count (services guide)",
-      actual: facts.routingStrategies,
-      docKey: "strategies",
-      files: ["open-sse/services/AGENTS.md"],
-      claim: {
-        what: "routing strategies",
-        pattern: /Strategies\*{0,2}\s*\((\d+)\)/g,
-        requireClaim: true,
-      },
-    }),
+    ...agentInstructionFiles().map((file) => ({
+      label: `No derived counts (agent-instruction file ${file})`,
+      actual: "count-free",
+      docKey: "instruction counts",
+      strict: true,
+      scope: "invariant",
+      files: [file],
+      validate: makeInstructionCountFreeValidator(file),
+    })),
     {
       label: "OAuth providers count",
       actual: facts.oauthProviders,
@@ -883,7 +961,6 @@ function buildCodeFactChecks(facts) {
       docKey: "mode packs",
       files: [
         "README.md",
-        "llm.txt",
         "docs/guides/FEATURES.md",
         "docs/architecture/ARCHITECTURE.md",
         "docs/architecture/REPOSITORY_MAP.md",
@@ -1015,31 +1092,13 @@ function buildCodeFactChecks(facts) {
       f.mcpTools,
       "MCP tools",
       {
-        pattern: /(\d+)[- ]tools?\b/gi,
-        // per-module rows ("Memory tool definitions (3 tools)") and the CLI catalog
-        // total ("33 tools (25 CLI Code's …)") are not the MCP aggregate
-        // per-module rows read "… tool definitions (N tools" / "… management tools
-        // (N tools" — the word tool(s)/definitions sits right before the paren. The
-        // aggregate ("MCP Server (109 tools", "all 109 tools") never does.
-        // "Phase 2 tool handlers" is a phase number, not a tool count
-        skipBefore: /(tools?|definitions?)\s*\(\s*$|phase\s+$/i,
-        skipAfter: /^\s*\(\d+ CLI/,
+        pattern: MCP_TOOLS_CLAIM.pattern,
+        skipBefore: MCP_TOOLS_CLAIM.skipBefore,
+        skipAfter: MCP_TOOLS_CLAIM.skipAfter,
       },
-      [
-        "README.md",
-        "AGENTS.md",
-        "docs/frameworks/MCP-SERVER.md",
-        "llm.txt",
-        "open-sse/mcp-server/README.md",
-        "skills/omni-mcp/SKILL.md",
-      ]
+      ["README.md", "docs/frameworks/MCP-SERVER.md", "open-sse/mcp-server/README.md"]
     ),
-    claim(f.mcpScopes, "MCP scopes", { pattern: /(\d+) scopes/gi }, [
-      "README.md",
-      "AGENTS.md",
-      "llm.txt",
-      "skills/omni-mcp/SKILL.md",
-    ]),
+    claim(f.mcpScopes, "MCP scopes", { pattern: MCP_SCOPES_CLAIM.pattern }, ["README.md"]),
     claim(f.cliTotal, "CLI tools", { pattern: /(\d+) tools(?=\s*\(\d+ CLI)/gi }, ["README.md"]),
     claim(
       f.freeForever,
