@@ -10,6 +10,7 @@
 
 import {
   appendNoThinkingVariants,
+  isNoThinkingAlias,
   stripNoThinkingAlias,
 } from "@omniroute/open-sse/utils/noThinkingAlias";
 import { appendClaudeEffortVariants } from "@omniroute/open-sse/utils/claudeEffortVariants";
@@ -412,6 +413,62 @@ export async function filterUnauthorizedFunctionalGatewayMirrors(
 }
 
 /**
+ * G4: a `no-think/<provider>/<model>` variant keeps the `no-think/` prefix in its `root`, so
+ * metadata lookups by root missed and the row lost its real `context_length` /
+ * `max_output_tokens`. Look the variant up by the model it routes to; every other row keeps
+ * the default lookup (undefined).
+ */
+export function catalogMetadataLookup(
+  model: Record<string, unknown>
+): { model: string } | undefined {
+  const root = typeof model.root === "string" ? model.root : "";
+  if (!isNoThinkingAlias(root)) return undefined;
+  const stripped = stripNoThinkingAlias(root);
+  return stripped ? { model: stripped } : undefined;
+}
+
+const TOKEN_LIMIT_FIELDS = ["context_length", "max_input_tokens", "max_output_tokens"] as const;
+
+/**
+ * Fills ONLY the missing token limits of a `no-think/` variant from the model it routes to.
+ * Nothing else is copied: pricing, names and capabilities keep their own per-row rules (a
+ * credit-metered provider must not gain per-token prices this way).
+ */
+function withRoutedModelTokenLimits<T extends Record<string, unknown>>(
+  entry: T,
+  model: Record<string, unknown>,
+  snapshot: Parameters<typeof enrichCatalogModelEntry>[2]
+): T {
+  const lookup = catalogMetadataLookup(model);
+  if (!lookup) return entry;
+  const routed = enrichCatalogModelEntry(model, lookup, snapshot) as Record<string, unknown>;
+  let next: Record<string, unknown> | null = null;
+  for (const field of TOKEN_LIMIT_FIELDS) {
+    const value = routed[field];
+    if (typeof entry[field] === "number" || typeof value !== "number" || !(value > 0)) continue;
+    next ??= { ...entry };
+    next[field] = value;
+  }
+  return (next ?? entry) as T;
+}
+
+/**
+ * G4: an unknown limit is ABSENT, never 0 (or negative / NaN). Clients such as crush and hermes
+ * treat a 0 window as real and reject the model. Returns the same object when nothing is wrong.
+ */
+export function withoutNonPositiveTokenLimits<T extends Record<string, unknown>>(model: T): T {
+  const bad = TOKEN_LIMIT_FIELDS.filter(
+    (field) =>
+      field in model &&
+      !(typeof model[field] === "number" && Number.isFinite(model[field]) && model[field] > 0)
+  );
+  if (bad.length === 0) return model;
+  const copy: Record<string, unknown> = { ...model };
+  for (const field of bad) delete copy[field];
+  return copy as T;
+}
+
+/**
  * Enrich the selected models and serialise the catalog response.
  *
  * Shared by the full build and by the quota-exclusive short-circuit so both emit a
@@ -461,10 +518,12 @@ export async function finalizeCatalogResponse(
     if (model.owned_by === "combo") {
       listedModel = maybeOmitCatalogModelName(model, includeModelNames);
     } else {
-      const entry = enrichCatalogModelEntry(model, undefined, {
-        ...enrichmentSnapshot,
-        capabilityResolutionSnapshot,
-      });
+      const snapshot = { ...enrichmentSnapshot, capabilityResolutionSnapshot };
+      const entry = withRoutedModelTokenLimits(
+        enrichCatalogModelEntry(model, undefined, snapshot),
+        model,
+        snapshot
+      );
       const fallbackContextLength = getContextFallback(entry);
       listedModel = fallbackContextLength
         ? { ...entry, context_length: fallbackContextLength }
@@ -473,7 +532,7 @@ export async function finalizeCatalogResponse(
       listedModel = withCatalogDisplayName(listedModel);
       listedModel = maybeOmitCatalogModelName(listedModel, includeModelNames);
     }
-    enriched.push(listedModel);
+    enriched.push(withoutNonPositiveTokenLimits(listedModel));
     catEnrichCount++;
     if (catEnrichCount % catYIELD_EVERY === 0) {
       await yieldTurn();

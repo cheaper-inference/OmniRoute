@@ -94,6 +94,7 @@ import {
   syntheticVariantListingIds,
 } from "./catalogResponse";
 import { launchAnonymousRemoteRejection, launchViewFromKeyMetadata } from "./catalogLaunchView";
+import { catalogMetadataLookup } from "./catalogResponse";
 import {
   isNoAuthProviderBlocked,
   isNoAuthProviderKey,
@@ -2325,7 +2326,9 @@ async function buildUnifiedModelsResponseCore(
       if (registryFallback) return registryFallback;
 
       const modelId =
-        model.root || (typeof model.id === "string" ? model.id.split("/").pop() : undefined);
+        catalogMetadataLookup(model)?.model ||
+        model.root ||
+        (typeof model.id === "string" ? model.id.split("/").pop() : undefined);
       return modelId
         ? getTokenLimit(canonicalId, modelId, capabilityResolutionSnapshot)
         : getTokenLimit(canonicalId, null, capabilityResolutionSnapshot);
