@@ -286,6 +286,7 @@
     "retentionOpt": "僅保留最近 N 個備份",
     "passphrasePrompt": "加密密碼：",
     "noPassphrase": "加密備份需要密碼。",
+    "restoreDecryptFailed": "無法解密備份 {name}（密碼錯誤或檔案已損毀）；未變更任何內容。",
     "cloudFailed": "警告：雲上傳失敗。本地備份已儲存。",
     "cloudUploaded": "雲備份已上傳：{url}",
     "auto": {

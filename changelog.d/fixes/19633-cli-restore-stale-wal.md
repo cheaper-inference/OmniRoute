@@ -1,0 +1,1 @@
+- **fix(cli):** `omniroute restore` refuses to run while the server is up or when the backup database is damaged, and it removes the old WAL files so they cannot replay over the restored database. ([#19633](https://github.com/cheaper-inference/OmniRoute/pull/19633))
