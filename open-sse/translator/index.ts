@@ -1,4 +1,5 @@
 import { FORMATS } from "./formats.ts";
+import { mapChatResponseFormatToResponsesText } from "./request/openai-responses/toResponses.ts";
 import {
   ensureToolCallIds,
   fixMissingToolResponses,
@@ -137,7 +138,9 @@ function normalizeOpenAIResponsesRequest(body, model) {
     delete normalized.max_completion_tokens;
   }
   if (normalized.response_format != null && normalized.text == null) {
-    normalized.text = { format: normalized.response_format };
+    // The Responses shape is flat ({type, name, schema, strict}); the Chat shape nests json_schema.
+    mapChatResponseFormatToResponsesText(normalized, normalized);
+    if (normalized.text == null) normalized.text = { format: normalized.response_format };
     delete normalized.response_format;
   } else if (normalized.response_format != null) {
     delete normalized.response_format;
