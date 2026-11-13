@@ -655,11 +655,17 @@ export function compressContext(
   const targetTokens = Math.max(0, maxTokens - reserveTokens);
 
   let messages = [...(body.messages as Record<string, unknown>[])];
+  // Claude bills `system` and `tools` outside messages[]. A messages-only check
+  // reports "fits" and the upstream answers 400 prompt-too-long.
+  const overheadTokens =
+    estimateTokens(body.system) + estimateTokens(body.tools) + estimateTokens(body.instructions);
   // #8594: pass the structured messages array directly — estimateTokens walks it for
   // inline base64 image blocks (#8368) and substitutes a bounded per-image estimate.
   // JSON.stringify()-ing first forces the char/4 text path and mis-measures a ~500KB
   // image as ~125k tokens, triggering needless compression / context loss.
-  let currentTokens = estimateTokens(messages);
+  const billedTokens = (candidate: Record<string, unknown>[]) =>
+    estimateTokens(candidate) + overheadTokens;
+  let currentTokens = billedTokens(messages);
   const stats = { original: currentTokens, layers: [] as { name: string; tokens: number }[] };
 
   // Already fits
@@ -669,7 +675,7 @@ export function compressContext(
 
   // Layer 1: Trim tool_result/tool messages
   messages = trimToolMessages(messages, 2000); // Max 2000 chars per tool result
-  currentTokens = estimateTokens(messages); // #8594: object-path keeps the #8368 image estimate
+  currentTokens = billedTokens(messages); // #8594: object-path keeps the #8368 image estimate
   stats.layers.push({ name: "trim_tools", tokens: currentTokens });
 
   if (currentTokens <= targetTokens) {
@@ -687,7 +693,7 @@ export function compressContext(
   });
   if (imagePrune.pruned > 0) {
     messages = imagePrune.messages;
-    currentTokens = estimateTokens(messages);
+    currentTokens = billedTokens(messages);
     stats.layers.push({ name: "prune_images", tokens: currentTokens });
     if (currentTokens <= targetTokens) {
       return {
@@ -700,7 +706,7 @@ export function compressContext(
 
   // Layer 2: Compress structured thinking blocks (remove from non-last assistant messages)
   messages = compressThinking(messages);
-  currentTokens = estimateTokens(messages); // #8594: object-path keeps the #8368 image estimate
+  currentTokens = billedTokens(messages); // #8594: object-path keeps the #8368 image estimate
   stats.layers.push({ name: "compress_thinking", tokens: currentTokens });
 
   if (currentTokens <= targetTokens) {
@@ -711,9 +717,11 @@ export function compressContext(
     };
   }
 
-  // Layer 3: Aggressive purification — drop oldest messages keeping system + last N pairs
-  messages = purifyHistory(messages, targetTokens);
-  currentTokens = estimateTokens(messages); // #8594: object-path keeps the #8368 image estimate
+  // Layer 3: Aggressive purification — drop oldest messages keeping system + last N pairs.
+  // The history search measures messages only, so the budget it receives is the
+  // window minus the system/tools/instructions already counted above.
+  messages = purifyHistory(messages, Math.max(0, targetTokens - overheadTokens));
+  currentTokens = billedTokens(messages); // #8594: object-path keeps the #8368 image estimate
   stats.layers.push({ name: "purify_history", tokens: currentTokens });
 
   return {

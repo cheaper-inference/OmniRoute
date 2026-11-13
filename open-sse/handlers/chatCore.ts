@@ -2059,11 +2059,13 @@ async function handleChatCoreInner({
 
       // Adapt Responses `input[]` → messages so compressContext can run, then restore.
       const ctxAdapter = adaptBodyForCompression(body as Record<string, unknown>);
+      // `threshold` only starts compaction. The fit target is the real window:
+      // a 70% budget deletes history the model can still hold, and reserveTokens: 0
+      // leaves no room for the reply.
       const compressionResult = compressContext(ctxAdapter.body, {
         provider,
         model: effectiveModel,
-        maxTokens: threshold,
-        reserveTokens: 0,
+        maxTokens: effectiveCompactionCeiling,
       });
 
       if (compressionResult.compressed && compressionResult.body) {
@@ -2129,7 +2131,6 @@ async function handleChatCoreInner({
   // getTokenLimit(provider, effectiveModel) re-fetch, which would silently
   // discard that combo-aware override and re-widen the last-resort budget.
   const finalContextLimit = contextLimit;
-  const toolsReserve = finalInputBreakdown.tools;
 
   const effectiveCompactionCeiling = getEffectiveCompactionCeiling(finalContextLimit);
 
@@ -2141,13 +2142,13 @@ async function handleChatCoreInner({
     finalEstimatedInputTokens >= effectiveCompactionCeiling &&
     body
   ) {
-    const lastResortTarget = Math.max(1, effectiveCompactionCeiling - toolsReserve - 1);
     const lastResortAdapter = adaptBodyForCompression(body as Record<string, unknown>);
+    // compressContext already counts tools, system, and the output reserve.
+    // Subtracting tools here again would purge history the window still holds.
     const lastResortResult = compressContext(lastResortAdapter.body, {
       provider,
       model: effectiveModel,
-      maxTokens: lastResortTarget,
-      reserveTokens: 0,
+      maxTokens: effectiveCompactionCeiling,
     });
     if (lastResortResult.compressed && lastResortResult.body) {
       body = lastResortAdapter.adapted
