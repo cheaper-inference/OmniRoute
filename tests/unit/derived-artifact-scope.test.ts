@@ -68,6 +68,27 @@ test("pr mode without a resolvable base skips (same rule as the other diff-aware
   }
 });
 
+test("pr mode without a resolvable base can fail closed (onUnresolved: strict)", () => {
+  // The dedicated full-history check (check:generated-artifacts) must never pass an artifact
+  // it could not attribute: no base → every artifact is judged.
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "derived-scope-closed-"));
+  try {
+    const scope = resolveDerivedScope({
+      artifacts: [HERO, BUDGET],
+      argv: noArgs,
+      env: { ...PR_ENV, BASE_SHA: "deadbeef" },
+      cwd: dir,
+      onUnresolved: "strict",
+    });
+    assert.equal(scope.info.mode, "pr");
+    assert.deepEqual(scope.strict, [HERO, BUDGET]);
+    assert.deepEqual(scope.skipped, []);
+    assert.equal(scope.reason, "base-unresolved");
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("pr mode reads the change list from git when none is given", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "derived-scope-git-"));
   const git = (...args: string[]) =>
@@ -124,4 +145,21 @@ test("prModeSkipLine follows the shared SKIP wording", () => {
     prModeSkipLine("", "base-unresolved", "no base"),
     "SKIP reason=base-unresolved — no base; the strict check runs in release mode (release PR, Release-Green, nightly)"
   );
+});
+
+test("releaseOnlyUnlessTouched without a base names the full-history check that judges the edit", () => {
+  // test-unit checks out a shallow merge ref (no base): the test skips, and says where the
+  // edited-artifact comparison runs instead.
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "derived-scope-why-"));
+  try {
+    const reason = releaseOnlyUnlessTouched(HERO, {
+      argv: noArgs,
+      env: { ...PR_ENV, BASE_SHA: "deadbeef" },
+      cwd: dir,
+    });
+    assert.match(String(reason), /^SKIP reason=base-unresolved — /);
+    assert.match(String(reason), /npm run check:generated-artifacts/);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });

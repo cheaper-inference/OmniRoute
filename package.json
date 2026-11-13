@@ -255,6 +255,7 @@
     "check:licenses": "node scripts/check/check-licenses.mjs",
     "check:pr-evidence": "node scripts/check/check-pr-evidence.mjs",
     "check:pr-derived-paths": "node scripts/check/check-pr-derived-paths.mjs",
+    "check:generated-artifacts": "node --import tsx/esm scripts/check/check-generated-artifacts.mjs",
     "check:vuln-ratchet": "node scripts/check/check-vuln-ratchet.mjs",
     "check:codeql-ratchet": "node scripts/check/check-codeql-ratchet.mjs",
     "check:secrets": "node scripts/check/check-secrets.mjs",
