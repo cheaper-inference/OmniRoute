@@ -1,0 +1,1 @@
+- **fix(usage):** A non-streaming reply that a post-call guardrail blocks is recorded as one failed request with the tokens the provider billed, and it no longer marks the request as a success: the account's error state stays, and the 200 usage row is not written. The key's token and request counters still count the billed tokens.

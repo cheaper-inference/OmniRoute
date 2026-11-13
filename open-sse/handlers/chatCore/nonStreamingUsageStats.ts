@@ -95,6 +95,18 @@ function recordBillableTokens(
   }
 }
 
+/**
+ * Advance the key's tpm/rpm counters for tokens the upstream billed. A reply that the gateway
+ * then refuses (guardrail block, malformed body) still spent them, so its exit calls this too.
+ */
+export function recordNonStreamingKeyUsage(
+  usage: unknown,
+  ctx: RecordNonStreamingUsageStatsContext
+): void {
+  if (!usage || typeof usage !== "object") return;
+  recordBillableTokens(usage, ctx.apiKeyInfo, ctx.provider, ctx.model, ctx.startTime);
+}
+
 export function recordNonStreamingUsageStats(
   usage: unknown,
   ctx: RecordNonStreamingUsageStatsContext
@@ -103,5 +115,5 @@ export function recordNonStreamingUsageStats(
 
   if (ctx.traceEnabled) logUsageTrace(usage, ctx.provider, ctx.connectionId);
   persistUsageRow(usage, ctx);
-  recordBillableTokens(usage, ctx.apiKeyInfo, ctx.provider, ctx.model, ctx.startTime);
+  recordNonStreamingKeyUsage(usage, ctx);
 }

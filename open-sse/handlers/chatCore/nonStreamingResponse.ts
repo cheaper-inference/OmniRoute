@@ -59,6 +59,8 @@ import {
 import { runNonStreamingProviderLeg } from "../chatCore/nonStreamingProviderLeg.ts";
 import type { NonStreamingProviderLegResult } from "@/lib/skills/toolLoopTypes.ts";
 import { finalizeToolLoopError } from "../chatCore/nonStreamingFinalization.ts";
+import { toFailureUsageAggregate } from "./failureUsage.ts";
+import { recordNonStreamingKeyUsage } from "./nonStreamingUsageStats.ts";
 import { markCodexScopeRateLimited } from "../chatCore/codexFailover.ts";
 import { deleteSessionAccountAffinityBestEffort } from "@/lib/db/sessionAccountAffinity";
 import { writeTerminalStatus } from "@/shared/utils/terminalStatus";
@@ -693,9 +695,6 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       looksLikeSSE ? { _streamed: true, _format: "sse-json", summary: responseBody } : responseBody
     );
     effectiveServiceTier = resolveReportedServiceTier(responseBody) ?? effectiveServiceTier;
-    if (onRequestSuccess) {
-      await runWithCodexResponseFence(providerResponse, () => onRequestSuccess(), true);
-    }
     const successConnectionId = getCurrentConnectionId();
     await maybeSyncClaudeExtraUsageState({
       provider,
@@ -747,14 +746,9 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       skillRequestId,
       log,
     });
-    appendRequestLog({
-      model,
-      provider,
-      connectionId: successConnectionId,
-      tokens: usage,
-      status: "200 OK",
-    }).catch(() => {});
-    recordNonStreamingUsageStats(usage, {
+    // The 200 row, the account-success hook and the key counters wait for the post-call
+    // guardrail and malformed gates below: a reply the gateway refuses is not a success.
+    const usageStatsCtx = {
       traceEnabled,
       provider,
       connectionId: successConnectionId,
@@ -767,7 +761,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       endpoint: endpointPath,
       cpaAuthIndex: readCpaAuthIndex(providerResponse),
       agentContext,
-    });
+    };
 
     // #12150 P1b surface 3 (fix round 1): a video-bridge-observed request's
     // request- AND response-derived text both carry the full transcript (the
@@ -864,6 +858,13 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         geminiPromptCache: cacheUsageLogMeta?.geminiPromptCache,
         cacheSource: "upstream",
       });
+      // The upstream billed these tokens: keep them on one failure row and on the key counters.
+      persistFailureUsage(
+        HTTP_STATUS.BAD_REQUEST,
+        "guardrail_blocked",
+        toFailureUsageAggregate(usage)
+      );
+      recordNonStreamingKeyUsage(usage, usageStatsCtx);
       recordChatCallCost(
         apiKeyInfo,
         meteredBudgetCost(provider, estimatedCost),
@@ -965,6 +966,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         cacheSource: "upstream",
       });
       persistFailureUsage(HTTP_STATUS.BAD_GATEWAY, "malformed_translated_response");
+      recordNonStreamingKeyUsage(usage, usageStatsCtx);
       trackPendingRequest(
         model,
         provider,
@@ -1016,6 +1018,19 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         },
       };
     }
+
+    // Both gates passed: this is the success outcome.
+    if (onRequestSuccess) {
+      await runWithCodexResponseFence(providerResponse, () => onRequestSuccess(), true);
+    }
+    appendRequestLog({
+      model,
+      provider,
+      connectionId: successConnectionId,
+      tokens: usage,
+      status: "200 OK",
+    }).catch(() => {});
+    recordNonStreamingUsageStats(usage, usageStatsCtx);
 
     // ── Phase 9.1: Cache store (non-streaming, temp=0) ──
     storeSemanticCacheResponse({
