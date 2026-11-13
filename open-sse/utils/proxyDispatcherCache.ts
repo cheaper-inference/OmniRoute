@@ -41,10 +41,36 @@ class RoundRobinDispatcher {
     this.dispatchers = dispatchers;
   }
 
+  /**
+   * Requests an agent holds right now: running plus queued, from undici's public `stats`.
+   * An agent without `stats` counts as idle, which keeps plain rotation for it.
+   */
+  private load(dispatcher: Dispatcher): number {
+    const stats = (dispatcher as { stats?: Record<string, { running?: number; pending?: number }> })
+      .stats;
+    let load = 0;
+    for (const origin of Object.values(stats ?? {}))
+      load += (origin.running ?? 0) + (origin.pending ?? 0);
+    return load;
+  }
+
   dispatch(options: Dispatcher.DispatchOptions, handler: Dispatcher.DispatchHandler): boolean {
-    const dispatcher = this.dispatchers[this.nextIndex % this.dispatchers.length];
-    this.nextIndex = (this.nextIndex + 1) % this.dispatchers.length;
-    return dispatcher.dispatch(options, handler);
+    // Least loaded agent, scanning from the one after the previous pick so equal loads still
+    // rotate. A blind rotation could send a request to the agent that holds a long SSE stream
+    // while the other agents were idle.
+    const count = this.dispatchers.length;
+    let pick = this.nextIndex % count;
+    let pickLoad = this.load(this.dispatchers[pick]);
+    for (let step = 1; step < count && pickLoad > 0; step++) {
+      const index = (this.nextIndex + step) % count;
+      const load = this.load(this.dispatchers[index]);
+      if (load < pickLoad) {
+        pick = index;
+        pickLoad = load;
+      }
+    }
+    this.nextIndex = (pick + 1) % count;
+    return this.dispatchers[pick].dispatch(options, handler);
   }
 
   close(callback?: () => void): Promise<void> | void {
