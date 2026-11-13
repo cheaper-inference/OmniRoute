@@ -82,7 +82,7 @@ test("upgrade preserves legacy zeros and nullable aggregates", async () => {
     );
     db.exec(
       fs.readFileSync(
-        new URL("../../src/lib/db/migrations/238_truthful_usage_evidence.sql", import.meta.url),
+        new URL("../../src/lib/db/migrations/239_truthful_usage_evidence.sql", import.meta.url),
         "utf8"
       )
     );

@@ -6741,6 +6741,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Grok Web ქუქი-ფაილის ადგილმაჩვენებელი",
     "herokuBaseUrlHint": "Heroku-ს საბაზისო URL-ის მინიშნება",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "ელფოსტის დამალვა",
     "imageProviders": "სურათების პროვაიდერები",
     "videoProviders": "ვიდეოს გენერირება",
