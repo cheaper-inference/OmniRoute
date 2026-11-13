@@ -645,3 +645,10 @@ test("evaluateModeConditionalSkips reports a net increase, never a decrease", ()
     /tests\/unit\/docs\/readme-hero-svg\.test\.ts: 1 novo\(s\) skip\(s\) condicional/
   );
 });
+
+test("evaluateModeConditionalSkips ignores the gate's own self-test fixtures", () => {
+  const lines = evaluateModeConditionalSkips([
+    { file: "tests/unit/check-test-masking.test.ts", baseModeSkips: 0, headModeSkips: 2 },
+  ]);
+  assert.deepEqual(lines, []);
+});

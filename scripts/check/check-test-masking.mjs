@@ -59,6 +59,8 @@ export function countModeConditionalSkips(src) {
 export function evaluateModeConditionalSkips(perFile) {
   const lines = [];
   for (const f of perFile) {
+    // The gate's own self-tests quote releaseOnlyUnlessTouched( as fixture text.
+    if (isSelfTestFixtureFile(f.file)) continue;
     const delta = (f.headModeSkips ?? 0) - (f.baseModeSkips ?? 0);
     if (delta > 0)
       lines.push(
