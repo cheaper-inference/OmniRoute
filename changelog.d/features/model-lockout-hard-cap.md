@@ -1,0 +1,1 @@
+- **feat(accounts):** New opt-in `OMNIROUTE_MODEL_LOCKOUT_HARD_CAP` (off by default): a positive integer N caps the in-memory model-lockout map at max(N, 1000). After the expired entries are removed, the active lockouts closest to expiring are dropped first, so routing may retry a model that is about to be free. Without it an active lockout is never evicted, as before.
