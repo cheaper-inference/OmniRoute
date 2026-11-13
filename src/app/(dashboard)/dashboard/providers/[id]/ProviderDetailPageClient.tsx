@@ -69,6 +69,7 @@ import VolcengineConnectModal from "./components/VolcengineConnectModal";
 import ProviderAccountRoutingCard from "../../settings/components/ProviderAccountRoutingCard";
 import ZedImportCard from "./components/ZedImportCard";
 import CursorAgentNudge from "./components/CursorAgentNudge";
+import ClaudeAgentSignIn from "./components/ClaudeAgentSignIn";
 import ProviderPageHeader from "./components/ProviderPageHeader";
 import CompatibleNodeCard from "./components/CompatibleNodeCard";
 import ProviderModalsPanel from "./components/ProviderModalsPanel";
@@ -628,6 +629,7 @@ export default function ProviderDetailPageClient() {
         <ZedImportCard fetchConnections={fetchConnections} notify={notify} />
       )}
       {providerId === "cursor" && <CursorAgentNudge />}
+      {providerId === "claude-agent" && <ClaudeAgentSignIn />}
       {isCompatible && providerNode && (
         <CompatibleNodeCard
           providerId={providerId}

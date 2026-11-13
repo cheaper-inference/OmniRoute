@@ -1229,6 +1229,29 @@
       "stream": "https://api.anthropic.com/v1/messages?beta=true"
     }
   },
+  "claude-agent": {
+    "format": "claude",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "claude-agent://stdio",
+      "stream": "claude-agent://stdio"
+    }
+  },
   "claude-web": {
     "format": "openai",
     "headers": {

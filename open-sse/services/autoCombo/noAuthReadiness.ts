@@ -19,7 +19,7 @@ export type NoAuthReadinessProbe = () => boolean;
  * if the app layer never registered the probe (non-server entry, boot failure), the
  * provider is treated as not ready rather than silently admitted.
  */
-const PROBE_REQUIRED = new Set<string>(["devin-cli-agentic"]);
+const PROBE_REQUIRED = new Set<string>(["devin-cli-agentic", "claude-agent"]);
 
 const probes = new Map<string, NoAuthReadinessProbe>();
 

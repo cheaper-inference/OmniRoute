@@ -1,5 +1,6 @@
 import { registerNoAuthReadiness } from "@omniroute/open-sse/services/autoCombo/noAuthReadiness.ts";
 import { peekDevinAgenticAuthStatus } from "./devinAgenticAuthStatus";
+import { peekClaudeAgentAuthStatus } from "./claudeAgentAuthStatus";
 
 /**
  * Registers the app-layer readiness probes consulted by the auto-combo no-auth pool
@@ -12,5 +13,9 @@ export function registerNoAuthAutoRoutingReadiness(): void {
   registerNoAuthReadiness(
     "devin-cli-agentic",
     () => peekDevinAgenticAuthStatus() === "authenticated"
+  );
+  registerNoAuthReadiness(
+    "claude-agent",
+    () => peekClaudeAgentAuthStatus().loggedIn
   );
 }
