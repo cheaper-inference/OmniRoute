@@ -1,0 +1,1 @@
+- **fix(sse):** a Claude tool whose `type` is `null`, an empty string or an explicit `undefined` now gets `type: "custom"`, so strict Anthropic-compatible gateways (for example MiniMax) no longer answer 400 for it.
