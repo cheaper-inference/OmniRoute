@@ -117,9 +117,10 @@ function adapterFiles(dir: string): string[] {
 }
 
 function scanDir(dir: string): string[] {
-  return adapterFiles(dir).flatMap((file) =>
-    adapterViolations(readFileSync(file, "utf8"), relative(ROOT, file))
-  );
+  // adapters/index.mjs is the registration list (static imports of ./<id>.mjs), not an adapter.
+  return adapterFiles(dir)
+    .filter((file) => !file.endsWith("index.mjs"))
+    .flatMap((file) => adapterViolations(readFileSync(file, "utf8"), relative(ROOT, file)));
 }
 
 test("every adapter imports only ../contract.mjs and reads no process/fetch (vacuous when none)", () => {
@@ -195,6 +196,16 @@ test("contract scanner rejects an undocumented import", () => {
     []
   );
   assert.match(contractViolations(`import fs from "node:fs";`)[0], /undocumented import/);
+});
+
+test("adapters/index.mjs imports only sibling adapters (./<id>.mjs)", () => {
+  const index = join(ADAPTERS_DIR, "index.mjs");
+  if (!existsSync(index)) return;
+  const specs = listImports(readFileSync(index, "utf8"));
+  assert.ok(specs.length > 0, "index.mjs registers adapters");
+  for (const spec of specs) {
+    assert.match(spec, /^\.\/[a-z0-9][a-z0-9-]*\.mjs$/, `index.mjs: forbidden import ${spec}`);
+  }
 });
 
 test("every adapter satisfies the plan invariants under a throwing process/fetch proxy", async () => {
