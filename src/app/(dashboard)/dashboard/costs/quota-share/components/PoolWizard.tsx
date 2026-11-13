@@ -12,7 +12,7 @@
  *   2. PUT  /api/quota/plans/[connId]  → only when user edited dimensions
  *   3. PATCH /api/quota/pools/[id]     → allocations + exclusive flag
  *
- * Visually mirrors BuildWizard's Stepper from the Playground.
+ * Rendered with the kit Wizard (progress, per-step heading and the Back/Next actions).
  *
  * Phase C1 — Quota Share Redesign.
  */
@@ -20,6 +20,7 @@
 import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { useTranslations } from "next-intl";
 import { Button, Modal } from "@/shared/components";
+import ModalWizard, { MODAL_WIZARD_BODY_CLASS } from "@/shared/components/ModalWizard";
 import Badge from "@/shared/components/Badge";
 import Checkbox from "@/shared/components/Checkbox";
 import Input from "@/shared/components/Input";
@@ -108,67 +109,6 @@ const PREVIEW_MODELS_BY_PROVIDER: Record<string, string[]> = {
 
 function getPreviewModels(provider: string): string[] {
   return PREVIEW_MODELS_BY_PROVIDER[provider] ?? PREVIEW_MODELS_BY_PROVIDER["default"];
-}
-
-// ────────────────────────────────────────────────────────────────────────────
-// Stepper header (mirrors BuildWizard's Stepper)
-// ────────────────────────────────────────────────────────────────────────────
-
-function Stepper({ currentStep }: { currentStep: 1 | 2 | 3 }) {
-  const t = useTranslations("quotaShare");
-
-  const steps: Array<{ num: 1 | 2 | 3; label: string }> = [
-    { num: 1, label: t("wizardStep1Label") },
-    { num: 2, label: t("wizardStep2Label") },
-    { num: 3, label: t("wizardStep3Label") },
-  ];
-
-  // Built from kit tokens, not the kit Wizard: its step/back/skip/save copy is hard-coded
-  // English and it always renders a Skip action (see the lote 6 pendências).
-  return (
-    <ol
-      aria-label={t("wizardTitle")}
-      className="flex shrink-0 flex-wrap items-center gap-y-2 border-b border-border bg-bg-subtle px-4 py-3"
-    >
-      {steps.map((step, idx) => (
-        <li
-          key={step.num}
-          className="flex items-center"
-          aria-current={currentStep === step.num ? "step" : undefined}
-        >
-          {idx > 0 && (
-            <div
-              aria-hidden="true"
-              className={`mx-2 h-px w-8 transition-colors ${
-                currentStep > step.num ? "bg-primary" : "bg-border"
-              }`}
-            />
-          )}
-          <div className="flex items-center gap-1.5">
-            <span
-              aria-hidden="true"
-              className={`flex size-5 items-center justify-center rounded-full text-[11px] font-semibold transition-colors ${
-                currentStep === step.num
-                  ? "bg-primary text-accent-foreground"
-                  : currentStep > step.num
-                    ? "bg-primary/20 text-primary"
-                    : "bg-border text-text-muted"
-              }`}
-            >
-              {currentStep > step.num ? <Icon name="check" size={12} /> : step.num}
-            </span>
-            <span
-              className={`text-xs font-medium transition-colors ${
-                currentStep === step.num ? "text-text-main" : "text-text-muted"
-              }`}
-            >
-              {step.label}
-            </span>
-          </div>
-        </li>
-      ))}
-    </ol>
-  );
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -625,26 +565,55 @@ export default function PoolWizard({
 
   if (!open) return null;
 
+  const dialogTitle = editPool ? t("editPoolTitle") : t("wizardTitle");
+  const stepHeading = {
+    1: { title: t("wizardStep1Title"), subtitle: t("wizardStep1Subtitle") },
+    2: { title: t("wizardStep2Title"), subtitle: t("wizardStep2Subtitle") },
+    3: { title: t("wizardStep3Title"), subtitle: t("wizardStep3Subtitle") },
+  }[step];
+  const nextBlocked = step === 1 ? connectionIds.length === 0 : step === 3 && totalWeight > 100;
+  const createLabel = editPool ? t("saveChanges") : t("wizardCreatePool");
+  const finishLabel = step === 3 ? createLabel : undefined;
+  const handleNext = () => {
+    if (step === 3) void handleFinish();
+    else setStep(step === 1 ? 2 : 3);
+  };
+
   return (
     <Modal
       isOpen
       onClose={onClose}
-      title={editPool ? t("editPoolTitle") : t("wizardTitle")}
+      title={dialogTitle}
       size="lg"
+      bodyClassName={MODAL_WIZARD_BODY_CLASS}
     >
-      <div className="flex flex-col" style={{ minHeight: 420 }}>
-        <Stepper currentStep={step} />
-
+      <ModalWizard
+        steps={[
+          { id: "account", title: t("wizardStep1Label") },
+          { id: "limit", title: t("wizardStep2Label") },
+          { id: "keys", title: t("wizardStep3Label") },
+        ]}
+        activeStep={step - 1}
+        completedSteps={["account", "limit", "keys"].slice(0, step - 1)}
+        title={stepHeading.title}
+        description={stepHeading.subtitle}
+        busy={saving}
+        error={error ?? undefined}
+        onBack={() => setStep((current) => (current === 3 ? 2 : 1))}
+        allowBack={step > 1}
+        onNext={handleNext}
+        nextBlocked={nextBlocked}
+        nextLabel={finishLabel}
+        labels={{
+          progress: dialogTitle,
+          back: t("wizardBack"),
+          next: t("wizardNext"),
+          saving: t("loading"),
+        }}
+      >
         {/* ── Step 1: Conta ───────────────────────────────────────────── */}
         {step === 1 && (
-          <div className="flex-1 p-4 space-y-4 overflow-y-auto">
-            <div>
-              <h2 className="text-sm font-semibold text-text-main mb-0.5">
-                {t("wizardStep1Title")}
-              </h2>
-              <p className="text-[11px] text-text-muted">{t("wizardStep1Subtitle")}</p>
-            </div>
-
+          <div className="space-y-4">
             {/* Connection multi-select (checkboxes) */}
             <div>
               <span
@@ -756,6 +725,7 @@ export default function PoolWizard({
                   {t("policyLabel")}
                 </span>
                 <SegmentedControl
+                  semantics="radio"
                   aria-label={t("policyLabel")}
                   size="sm"
                   value={defaultPolicy}
@@ -772,33 +742,16 @@ export default function PoolWizard({
                 />
               </div>
             )}
-
-            <div className="flex justify-end pt-2">
-              <Button
-                onClick={() => setStep(2)}
-                disabled={connectionIds.length === 0}
-                iconRight="arrow_forward"
-              >
-                {t("wizardNext")}
-              </Button>
-            </div>
           </div>
         )}
 
         {/* ── Step 2: Limite ──────────────────────────────────────────── */}
         {step === 2 && (
-          <div className="flex-1 p-4 space-y-4 overflow-y-auto">
-            <div>
-              <h2 className="text-sm font-semibold text-text-main mb-0.5">
-                {t("wizardStep2Title")}
-              </h2>
-              <p className="text-[11px] text-text-muted">{t("wizardStep2Subtitle")}</p>
-            </div>
-
+          <div className="space-y-4">
             {/* Dimensions editor (ported from ProviderPlanConfigClient) */}
             <div className="rounded-lg border border-border bg-bg-subtle p-3">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] uppercase tracking-wide font-bold text-text-muted">
+                <span className="text-[11px] uppercase tracking-wide font-semibold text-text-muted">
                   {tPlans("dimensionLabel")}
                 </span>
                 <Button variant="ghost" size="sm" icon="add" onClick={addDimension}>
@@ -807,7 +760,7 @@ export default function PoolWizard({
               </div>
 
               {editDimensions.length === 0 && (
-                <div className="text-[11px] text-text-muted italic py-3 text-center">
+                <div className="text-xs text-text-muted italic py-3 text-center">
                   {tPlans("unconfiguredLabel")} — {tPlans("addDimension")}
                 </div>
               )}
@@ -880,28 +833,12 @@ export default function PoolWizard({
                 {t("wizardAdditionalConnectionsNote")}
               </p>
             )}
-
-            <div className="flex items-center justify-between pt-2">
-              <Button variant="outline" icon="arrow_back" onClick={() => setStep(1)}>
-                {t("wizardBack")}
-              </Button>
-              <Button iconRight="arrow_forward" onClick={() => setStep(3)}>
-                {t("wizardNext")}
-              </Button>
-            </div>
           </div>
         )}
 
         {/* ── Step 3: Chaves ──────────────────────────────────────────── */}
         {step === 3 && (
-          <div className="flex-1 p-4 space-y-4 overflow-y-auto">
-            <div>
-              <h2 className="text-sm font-semibold text-text-main mb-0.5">
-                {t("wizardStep3Title")}
-              </h2>
-              <p className="text-[11px] text-text-muted">{t("wizardStep3Subtitle")}</p>
-            </div>
-
+          <div className="space-y-4">
             {/* Allocation rows (ported from EditAllocationsModal) */}
             {allocations.length === 0 ? (
               <div className="rounded-md bg-bg-subtle py-4 text-center text-[12px] italic text-text-muted">
@@ -978,7 +915,7 @@ export default function PoolWizard({
             {/* Add key + equal split controls */}
             <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-1 text-[11px]">
               <span
-                className={`font-bold tabular-nums ${
+                className={`font-semibold tabular-nums ${
                   totalWeight === 100
                     ? "text-success"
                     : totalWeight > 100
@@ -1069,34 +1006,9 @@ export default function PoolWizard({
                 </div>
               </div>
             )}
-
-            {error && (
-              <p role="alert" className="rounded bg-error/10 px-3 py-2 text-[11px] text-error">
-                {error}
-              </p>
-            )}
-
-            <div className="flex items-center justify-between border-t border-border pt-2">
-              <Button
-                variant="outline"
-                icon="arrow_back"
-                onClick={() => setStep(2)}
-                disabled={saving}
-              >
-                {t("wizardBack")}
-              </Button>
-              <Button
-                variant="primary"
-                onClick={() => void handleFinish()}
-                loading={saving}
-                disabled={totalWeight > 100 || saving}
-              >
-                {saving ? t("loading") : editPool ? t("saveChanges") : t("wizardCreatePool")}
-              </Button>
-            </div>
           </div>
         )}
-      </div>
+      </ModalWizard>
     </Modal>
   );
 }

@@ -344,25 +344,25 @@ export default function ModelsDevSyncTab() {
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="p-4 rounded-lg bg-surface/30 border border-border/30 text-center">
-              <p className="text-2xl font-bold text-info">
+              <p className="text-2xl font-semibold text-info">
                 {status.providerCount.toLocaleString()}
               </p>
               <p className="text-xs text-text-muted mt-1">{t("providers")}</p>
             </div>
             <div className="p-4 rounded-lg bg-surface/30 border border-border/30 text-center">
-              <p className="text-2xl font-bold text-success">
+              <p className="text-2xl font-semibold text-success">
                 {status.modelCount.toLocaleString()}
               </p>
               <p className="text-xs text-text-muted mt-1">{t("modelsWithPricing")}</p>
             </div>
             <div className="p-4 rounded-lg bg-surface/30 border border-border/30 text-center">
-              <p className="text-2xl font-bold text-primary">
+              <p className="text-2xl font-semibold text-primary">
                 {status.capabilityCount.toLocaleString()}
               </p>
               <p className="text-xs text-text-muted mt-1">{t("capabilities")}</p>
             </div>
             <div className="p-4 rounded-lg bg-surface/30 border border-border/30 text-center">
-              <p className="text-2xl font-bold text-warning">
+              <p className="text-2xl font-semibold text-warning">
                 {status.lastSyncModelCount > 0 ? status.lastSyncModelCount.toLocaleString() : "—"}
               </p>
               <p className="text-xs text-text-muted mt-1">{t("lastSyncCount")}</p>

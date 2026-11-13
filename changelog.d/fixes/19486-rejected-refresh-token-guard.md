@@ -1,0 +1,1 @@
+- **fix(oauth):** A refresh token that the server rejected as dead (invalid_grant, refresh_token_reused, invalid_token, expired token) is no longer sent upstream again for 30 minutes. A new token from a re-login is tried at once. ([#19486](https://github.com/cheaper-inference/OmniRoute/pull/19486))
