@@ -1,0 +1,1 @@
+- **fix(logs):** one proxy log row that the database rejects no longer drops the other rows written in the same batch. ([#19470](https://github.com/cheaper-inference/OmniRoute/pull/19470))

@@ -122,6 +122,9 @@ for (const stream of [false, true]) {
               "UPDATE key_value SET value = ? WHERE namespace = 'databaseSettings' AND key = 'semanticCacheEnabled'"
             )
             .run(JSON.stringify(enabled));
+          // A raw edit bypasses updateDatabaseSettings(), so the cached flag only sees it
+          // after its 5 s window or a DB reset. Drop the cached flag the way a DB swap does.
+          core.resetDbInstance();
         }
       };
       const invoke = () =>

@@ -153,7 +153,7 @@ describe("Analytics Token Display Mode (Compact vs Exact)", () => {
     await renderUsageAnalytics();
 
     // In default compact mode, values should be compact (e.g. 3.7B)
-    const kpiValues = container.querySelectorAll(".text-2xl.font-bold");
+    const kpiValues = container.querySelectorAll(".text-2xl.font-semibold");
     expect(kpiValues[0]?.textContent).toBe("3.7B");
     expect(kpiValues[1]?.textContent).toBe("3.7B");
     expect(kpiValues[2]?.textContent).toBe("12.5M");
@@ -187,7 +187,7 @@ describe("Analytics Token Display Mode (Compact vs Exact)", () => {
     const exactBtn = container.querySelector('button[role="radio"][title="Exact"]');
     expect(exactBtn?.getAttribute("aria-checked")).toBe("true");
 
-    const kpiValues = container.querySelectorAll(".text-2xl.font-bold");
+    const kpiValues = container.querySelectorAll(".text-2xl.font-semibold");
     expect(kpiValues[0]?.textContent).toBe(fmtFull(3712481200));
   });
 

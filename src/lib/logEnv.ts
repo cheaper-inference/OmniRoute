@@ -10,6 +10,7 @@ const DEFAULT_CALL_LOG_MAX_ENTRIES = 10000;
 const DEFAULT_CALL_LOGS_TABLE_MAX_ROWS = 100000;
 const DEFAULT_CALL_LOG_PIPELINE_MAX_SIZE_KB = 512;
 const DEFAULT_PROXY_LOGS_TABLE_MAX_ROWS = 100000;
+const DEFAULT_CALL_LOG_MIN_FREE_DISK_MB = 512;
 /**
  * Default app log path, anchored to DATA_DIR (never `process.cwd()`).
  *
@@ -146,6 +147,14 @@ export function getCallLogPipelineMaxSizeBytes(): number {
       DEFAULT_CALL_LOG_PIPELINE_MAX_SIZE_KB
     ) * 1024
   );
+}
+
+/** Free bytes on the call_logs volume under which artifact writes are skipped. 0 disables the check. */
+export function getCallLogMinFreeDiskBytes(): number {
+  // Whole digits only: "0.5" must not parse to 0 and turn the check off.
+  const raw = process.env.CALL_LOG_MIN_FREE_DISK_MB?.trim();
+  const mb = raw && /^\d+$/.test(raw) ? Number(raw) : DEFAULT_CALL_LOG_MIN_FREE_DISK_MB;
+  return mb * 1024 * 1024;
 }
 
 export function getProxyLogsTableMaxRows(): number {

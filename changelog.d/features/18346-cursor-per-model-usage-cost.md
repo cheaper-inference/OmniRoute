@@ -1,0 +1,1 @@
+- **feat(usage):** The Cursor Quota card shows per-model API tokens (input, output, cache read/write) and the cost Cursor billed for the current cycle, fetched fail-open so the existing % bars render unchanged when that call fails ([#18346](https://github.com/cheaper-inference/OmniRoute/pull/18346)) — thanks @AMSeify
