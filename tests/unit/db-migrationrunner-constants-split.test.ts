@@ -77,8 +77,8 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
 // ── large tables — count + shape + spot-checks (corruption guard) ─────────────
 
 describe("migrationRunner/constants — large-table integrity", () => {
-  it("RENAMED_MIGRATION_COMPATIBILITY has 105 well-formed entries", () => {
-    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 105);
+  it("RENAMED_MIGRATION_COMPATIBILITY has 107 well-formed entries", () => {
+    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 107);
     assert.deepEqual(
       RENAMED_MIGRATION_COMPATIBILITY.filter(
         (entry) => entry.fromName === "usage_history_calculated_cost"
@@ -162,8 +162,23 @@ describe("migrationRunner/constants — large-table integrity", () => {
   });
 
   it("RENAMED_MIGRATION_COMPATIBILITY spot-checks the boundary renames", () => {
-    const first = RENAMED_MIGRATION_COMPATIBILITY[0];
-    assert.deepEqual(first, {
+    // Free the published daily row's slot before rehoming receipt evidence into 239.
+    assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.slice(0, 2), [
+      {
+        fromVersion: "239",
+        fromName: "daily_usage_evidence",
+        toVersion: "240",
+        toName: "daily_usage_evidence",
+      },
+      {
+        fromVersion: "238",
+        fromName: "truthful_usage_evidence",
+        toVersion: "239",
+        toName: "truthful_usage_evidence",
+      },
+    ]);
+    // The original historical boundary follows both new, order-sensitive renames.
+    assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY[2], {
       fromVersion: "022",
       fromName: "call_logs_summary_storage",
       toVersion: "025",
