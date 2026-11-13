@@ -212,7 +212,7 @@ Runs on every PR to `main`. Blocks merge on failure.
 | ↳ `check:deprecated-versions`  | No deprecated version strings in docs                                                                                                             | Yes                        |
 | ↳ `check:doc-links`            | Internal markdown links in docs resolve to real files (`[text]`/`(path)` form)                                                                    | Yes                        |
 | ↳ `check:fabricated-docs`      | Routes, env vars, CLI commands, hook names, and file paths cited in docs exist in the codebase. Hard gate via `--strict`; soft-fail without flag. | Yes (via `--strict` in CI) |
-| `check:cli-i18n`               | CLI command strings are present in all i18n locale files                                                                                          | Yes                        |
+| `check:cli-i18n`               | CLI `t()` keys exist in `bin/cli/locales/en.json` (both modes); pt-BR / zh-CN / zh-TW parity with `en.json` in release mode only                  | Yes                        |
 | `check:openapi-coverage`       | OpenAPI spec covers at least a ratcheted floor of real routes                                                                                     | Yes                        |
 | `check:openapi-security-tiers` | Security tier annotations in `openapi.yaml` are consistent with `routeGuard.ts` classifications                                                   | **Advisory**               |
 | `check:openapi-routes`         | Every path in `openapi.yaml` resolves to a real `route.ts` (anti-hallucination)                                                                   | Yes                        |
@@ -234,14 +234,31 @@ provider display name reds CI until that file is regenerated.
 
 ### Job: `i18n-ui-coverage`
 
-| Script                            | Validates                                                                                                                                                                             | Blocking     |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
-| `check-ui-keys-coverage` (inline) | UI i18n key coverage is ≥ 65%                                                                                                                                                         | Yes          |
-| `check-ui-value-drift` (inline)   | A rewritten English **value** leaves no stale translation behind                                                                                                                      | Yes          |
-| `check-new-key-coverage` (inline) | A **new** English key is translated in every locale — a `__MISSING__:` marker is rejected                                                                                             | Yes          |
-| `check-translation-ratio`         | Real-translation ratio per locale (identical-to-English / placeholder / missing leaves outside the allowlist) must not exceed `config/quality/i18n-translation-baseline.json` + slack | **Advisory** |
+| Script                            | Validates                                                                                                                                                                             | Blocking                |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| `check-ui-keys-coverage` (inline) | UI i18n key coverage is ≥ 65%                                                                                                                                                         | Yes (both modes)        |
+| `check:ui-icu`                    | Every message of every UI catalog compiles with `IntlMessageFormat`                                                                                                                   | Yes (both modes)        |
+| `check-ui-value-drift` (inline)   | A rewritten English **value** leaves no stale translation behind                                                                                                                      | Yes (release mode only) |
+| `check-new-key-coverage` (inline) | A **new** English key is translated in every locale — a `__MISSING__:` marker is rejected                                                                                             | Yes (release mode only) |
+| `check-key-completeness` (inline) | Every UI catalog (and, with `--catalog=cli`, every CLI catalog) carries exactly the key set of its `en.json`                                                                          | Yes (release mode only) |
+| `check-translation-ratio`         | Real-translation ratio per locale (identical-to-English / placeholder / missing leaves outside the allowlist) must not exceed `config/quality/i18n-translation-baseline.json` + slack | Yes (release mode only) |
 
 Needs `fetch-depth: 0` — the value-drift gate diffs `en.json` against the merge base.
+
+**Two modes (since 2026-11-13).** A feature PR adds or rewrites keys in `en.json` (and
+`bin/cli/locales/en.json`) and touches no other locale; `check:pr-derived-paths` (job
+`pr-test-policy`, family `config/quality/derived-paths/translation.json`) fails a feature PR that
+does. The other locales are completed once per release by `release:refresh-derived`, which calls
+`syncUiKeys()` in `scripts/i18n/sync-ui-keys.mjs` (add missing keys, prune dropped ones, mark
+translations of rewritten English with `rewrittenSinceRef`, translate), or by a translation wave.
+The gates read the mode from `scripts/check/lib/gateMode.mjs`: in `pr` mode (feature PRs,
+`merge_group`, `omni-queue/**`) the release-mode gates above print `SKIP reason=pr-mode` and exit
+0; in `release` mode (the release PR, pushes to `main`, `workflow_dispatch`, local runs) they are
+strict as before, and on the release PR the diff-aware ones get `BASE_REF=origin/main`, so they
+judge every key the cycle added or rewrote. Preview the feature-PR verdict locally with
+`--mode=pr`. The locale-parity unit tests (`cli-i18n-catalog`, `i18n-pt-br`,
+`i18n-vi-completeness`) skip their parity assertions the same way
+(`tests/_helpers/localeParityMode.ts`).
 
 #### `check-ui-value-drift` — stale-translation gate
 
@@ -283,7 +300,9 @@ BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
 Exits 0 with `SKIP reason=base-unresolved` when the base catalog cannot be read (shallow
-clone without the base ref), mirroring `check-openapi-breaking`.
+clone without the base ref), mirroring `check-openapi-breaking`. Release mode only: a feature PR
+rewrites the English and stops there; the release refresh marks the translations it left behind
+(`node scripts/i18n/sync-ui-keys.mjs --rewritten-since=<ref>`, same `findStaleTranslations`).
 
 ### Job: `i18n`
 
@@ -661,9 +680,12 @@ its branch is cut and translates for days while the base keeps adding keys; the 
 key itself, so both siblings stayed silent when batch 1 (#13044) landed 43 keys short in nine
 locales and batch 2 (#13660) 10 keys short in eight (2026-09-15). Fix a red with
 `node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers`; an `extra` leaf
-means the source dropped it — delete it from the locale. `--warn` reports without failing.
+means the source dropped it — `sync-ui-keys` drops it (`--prune-extra`, the default). `--warn`
+reports without failing.
 `--catalog=cli` runs the same comparison over `bin/cli/locales` (`npm run i18n:check-keys:cli`);
-both steps live in job `i18n-ui-coverage`.
+both steps live in job `i18n-ui-coverage`. Release mode only: a feature PR sees
+`SKIP reason=pr-mode` and the fix runs in the release refresh or a translation wave, never in a
+feature PR.
 
 #### `check-new-key-coverage` — new-key i18n gate
 
@@ -690,7 +712,9 @@ documented deferral — the runtime falls back to correct English — until eigh
 2026-09-16 added 61 keys and stamped the marker into all 65 locales instead of translating: this
 gate accepted every one, nothing blocked the PRs, and the blocking real-translation ratio gate
 then failed on the release tip for everybody (pt-BR 3.2 % > 2.5 % + 0.5). A marker is now judged
-as an absent translation. Fix a red with
+as an absent translation. Release mode only since 2026-11-13: a feature PR sees
+`SKIP reason=pr-mode`, and on the release PR (`BASE_REF=origin/main`) the gate judges every key
+the cycle added. Fix a red in the release refresh or a translation wave with
 `node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers --batch-size=40`, or
 all locales in parallel with `npm run i18n:translate-new-keys` (`scripts/i18n/translate-new-keys.sh`,
 detached-safe, refuses to start without the `OMNIROUTE_TRANSLATION_*` env). A key that must stay
