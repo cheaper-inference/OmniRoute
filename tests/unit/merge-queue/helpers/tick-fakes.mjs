@@ -5,6 +5,7 @@
 import { createHash } from "node:crypto";
 import { loadConfig } from "../../../../scripts/merge-queue/config.mjs";
 import {
+  APPROVAL_CONTEXTS,
   CANDIDATE_PREFIX,
   STATE_BRANCH,
   commentMarker,
@@ -242,14 +243,67 @@ export function createFakeGitHub({ readOnly = false } = {}) {
   return gh;
 }
 
-/** Fake git runner: records argv, always succeeds. */
-export function createFakeGit(cwd = "/fake/compose.git") {
+const SHA40 = /^[0-9a-f]{40}$/;
+
+/**
+ * Fake git runner over a fake object store (`objects`, emptied by the fake prepareRepo like the
+ * fresh scratch repository of every real tick). Records argv. Without `gh` every command
+ * succeeds; with `gh`:
+ *  - `fetch origin +refs/heads/<b>:<dst>` fails (like gitexec: throws unless allowFail) when the
+ *    branch is absent on the fake origin, else brings its commit and ancestry;
+ *  - `fetch origin +<sha>:<dst>` succeeds only for a SHA reachable from an origin branch or listed
+ *    in `world.fetchableShas` (GitHub may still serve an unreferenced object);
+ *  - `cat-file -e <sha>^{commit}` succeeds only when the object is local.
+ * Ancestry: a composed candidate's parent is the base it was composed on (world.compositions).
+ */
+export function createFakeGit({ gh = null, world = null, cwd = "/fake/compose.git" } = {}) {
   const runs = [];
-  return {
+  const objects = new Set();
+  const parentsOf = (sha) => {
+    const composition = world?.compositions.get(sha);
+    return composition ? [composition.baseSha] : [];
+  };
+  const ancestry = (sha) => {
+    const out = new Set();
+    const stack = [sha];
+    while (stack.length) {
+      const next = stack.pop();
+      if (!next || out.has(next)) continue;
+      out.add(next);
+      stack.push(...parentsOf(next));
+    }
+    return out;
+  };
+  const reachable = (sha) =>
+    Boolean(world?.fetchableShas?.has(sha)) ||
+    [...gh.branches.values()].some((tip) => ancestry(tip).has(sha));
+  const fail = (args, allowFail, stderr) => {
+    if (allowFail) return { code: 128, stdout: "", stderr };
+    throw new Error(`git ${args.join(" ")} failed (128): ${stderr}`);
+  };
+  const git = {
     cwd,
     runs,
-    run(args) {
+    objects,
+    addWithAncestry(sha) {
+      for (const s of ancestry(sha)) objects.add(s);
+    },
+    run(args, { allowFail = false } = {}) {
       runs.push(args);
+      if (gh && args[0] === "fetch") {
+        const source = String(args.at(-1)).replace(/^\+/, "").split(":")[0];
+        if (source.startsWith("refs/heads/")) {
+          const sha = gh.branches.get(source.slice("refs/heads/".length));
+          if (!sha) return fail(args, allowFail, `fatal: couldn't find remote ref ${source}`);
+          git.addWithAncestry(sha);
+        } else if (SHA40.test(source)) {
+          if (!reachable(source)) return fail(args, allowFail, `fatal: not our ref ${source}`);
+          git.addWithAncestry(source);
+        }
+      } else if (gh && args[0] === "cat-file") {
+        const sha = String(args.at(-1)).replace(/\^\{commit\}$/, "");
+        if (!objects.has(sha)) return fail(args, allowFail, "");
+      }
       return { code: 0, stdout: "", stderr: "" };
     },
     out(args) {
@@ -257,6 +311,7 @@ export function createFakeGit(cwd = "/fake/compose.git") {
       return "";
     },
   };
+  return git;
 }
 
 /**
@@ -272,6 +327,12 @@ export function createWorld(gh, clock) {
     brokenBases: new Set(),
     baseConflicts: new Set(),
     batchConflicts: new Set(),
+    /** pairs of PRs that only fail together (an interaction across bisection segments) */
+    interactions: [],
+    /** PRs whose diff touches a protected surface (need the protected approval label) */
+    protectedPrs: new Set(),
+    /** unreferenced SHAs GitHub still serves to `git fetch origin <sha>` */
+    fetchableShas: new Set(),
     failureKey: "tests/unit/widget.test.ts",
     eligibilityActions: () => [],
     pushes: [],
@@ -297,9 +358,29 @@ export function createFakeModules(world) {
       const labeledAt = labeled.length ? labeled[labeled.length - 1].createdAt : null;
       const inFlight = ctx.state?.inFlight?.prs?.some((p) => p.n === pr.number) ?? false;
       const processed = ctx.state?.shadow?.processed?.[String(pr.number)] === pr.headSha;
+      // newest status of the approval context on the head (approve.mjs writes `failure` when the
+      // label is removed; a re-label by a non-approver writes nothing)
+      const approval = pr.headStatuses.find((st) => st.context === APPROVAL_CONTEXTS.queue);
+      const frozen = ctx.freezeIssues.some((i) =>
+        new RegExp(`(^|\\s)${pr.baseRef.replace(/[.]/g, "\\.")}($|\\s)`).test(
+          `${i.title} ${i.body}`
+        )
+      );
       const reasons = [];
       if (!pr.labels.includes(label)) reasons.push({ code: "no-label", detail: "" });
-      if (!labeledAt) reasons.push({ code: "approval-missing", detail: "" });
+      if (pr.labels.some((l) => ctx.config.blockLabels.includes(l))) {
+        reasons.push({ code: "blocked-label", detail: "" });
+      }
+      if (frozen) reasons.push({ code: "base-frozen", detail: `freeze on ${pr.baseRef}` });
+      if (!labeledAt || (approval && approval.state !== "success")) {
+        reasons.push({ code: "approval-missing", detail: "" });
+      }
+      if (
+        world.protectedPrs.has(pr.number) &&
+        !pr.labels.includes(ctx.config.protectedApprovalLabel)
+      ) {
+        reasons.push({ code: "protected-approval-missing", detail: "" });
+      }
       if (inFlight) reasons.push({ code: "in-flight", detail: "" });
       if (processed) reasons.push({ code: "shadow-processed", detail: "" });
       return {
@@ -381,15 +462,20 @@ export function createFakeModules(world) {
   const compose = {
     prepareRepo({ git, remoteUrl }) {
       world.prepareCalls += 1;
-      void git;
+      git.objects?.clear(); // every tick starts from an empty scratch repository
       void remoteUrl;
     },
-    fetchInputs({ base, prs }) {
+    fetchInputs({ git, base, prs }) {
       const heads = {};
       for (const pr of prs) heads[pr.n] = gh.pulls.get(pr.n)?.headSha ?? null;
-      return { baseSha: gh.branches.get(base), heads };
+      const baseSha = gh.branches.get(base);
+      git.addWithAncestry?.(baseSha);
+      return { baseSha, heads };
     },
-    composeCandidate({ base, baseSha, prs, batchId, heads }) {
+    composeCandidate({ git, base, baseSha, prs, batchId, heads }) {
+      if (git.objects && !git.objects.has(baseSha)) {
+        throw new Error(`compose: base ${baseSha} is not in the scratch repository`);
+      }
       world.composeCalls.push({ base, baseSha, prs: prs.map((p) => p.n), batchId });
       const included = [];
       const excludedBatchConflict = [];
@@ -414,6 +500,7 @@ export function createFakeModules(world) {
       }
       const candidateSha = fakeSha(`${baseSha}|${batchId}|${included.map((p) => p.head)}`);
       world.compositions.set(candidateSha, { baseSha, prs: included.map((p) => p.n) });
+      git.objects?.add(candidateSha);
       return {
         candidateSha,
         treeSha: fakeSha(`tree:${candidateSha}`),
@@ -424,8 +511,10 @@ export function createFakeModules(world) {
         excludedHeadMoved,
       };
     },
-    pushCandidate({ sha, ref }) {
+    pushCandidate({ git, sha, ref }) {
       if (!ref.startsWith(CANDIDATE_PREFIX)) throw new Error(`push outside prefix: ${ref}`);
+      if (git.objects && !git.objects.has(sha)) throw new Error(`push: ${sha} is not local`);
+      if (gh.branches.has(ref)) throw new Error(`push: ${ref} exists (would need a force)`);
       world.pushes.push({ ref, sha });
       gh.branches.set(ref, sha);
     },
@@ -446,7 +535,10 @@ export function createFakeModules(world) {
   }
 
   const land = {
-    landMergeFf({ base, candidateSha, expectedBaseSha }) {
+    landMergeFf({ git, base, candidateSha, expectedBaseSha }) {
+      if (git.objects && !git.objects.has(candidateSha)) {
+        throw new Error(`land: ${candidateSha} is not in the scratch repository`);
+      }
       world.lands.push({ mode: "merge-ff", base, candidateSha, expectedBaseSha });
       const tip = gh.branches.get(base);
       if (tip !== expectedBaseSha) return { ok: false, reason: "base-moved", newBaseSha: tip };
@@ -461,7 +553,12 @@ export function createFakeModules(world) {
         expectedBaseSha,
         candidateTreeSha,
       });
-      if (world.squashResult) return world.squashResult;
+      if (world.squashResult) {
+        for (const n of world.squashResult.merged ?? []) {
+          Object.assign(gh.pulls.get(n), { merged: true, state: "closed" });
+        }
+        return world.squashResult;
+      }
       if (gh.branches.get(base) !== expectedBaseSha) return { ok: false, reason: "base-moved" };
       return {
         ok: true,
@@ -498,7 +595,7 @@ export function createHarness({ mode = "live", landing = "merge-ff", infraRetrie
   const modules = createFakeModules(world);
   const base = loadConfig();
   const config = { ...base, mode, landing: { mode: landing }, infraRetries };
-  const git = createFakeGit();
+  const git = createFakeGit({ gh, world });
   const store = createStateStore({ gh, now: clock.now });
   const logs = [];
   const baseSha = fakeSha("base-0");
@@ -567,20 +664,31 @@ export function createHarness({ mode = "live", landing = "merge-ff", infraRetrie
     tick(options = {}) {
       return runTick(deps, { base: BASE, action: "tick", ...options });
     },
+    /** PRs contained in `sha`: its composition plus every composition it was stacked on. */
+    prsIn(sha) {
+      const prs = new Set();
+      for (let c = world.compositions.get(sha); c; c = world.compositions.get(c.baseSha)) {
+        for (const n of c.prs) prs.add(n);
+      }
+      return prs;
+    },
     /**
-     * Report CI on `sha`: red (a "Gate / CI" failure) when the composition contains a culprit or
-     * the base SHA is broken; `infra` reports a startup_failure; `kind` "base-check" tests the
-     * bare base SHA.
+     * Report CI on `sha`: red (a "Gate / CI" failure) when the composition contains a culprit, a
+     * full interaction pair (counting the PRs it was stacked on) or sits on a broken base SHA;
+     * `infra` reports a startup_failure; `kind` "base-check" tests the bare base SHA. `at` pins
+     * the run time; `headBranch` tags the runs with the ref that triggered them.
      */
-    runCi(sha, { infra = false, kind = "batch" } = {}) {
+    runCi(sha, { infra = false, kind = "batch", at: pinned = null, headBranch } = {}) {
       clock.advance(1);
-      const at = clock.now();
+      const at = pinned ?? clock.now();
       let red;
       if (kind === "base-check") red = world.brokenBases.has(sha);
       else {
         const composition = world.compositions.get(sha);
+        const prs = h.prsIn(sha);
         red =
           composition.prs.some((n) => world.culprits.has(n)) ||
+          world.interactions.some((pair) => pair.every((n) => prs.has(n))) ||
           world.brokenBases.has(composition.baseSha);
       }
       const runs = config.requiredChecks.map((name) => {
@@ -601,6 +709,7 @@ export function createHarness({ mode = "live", landing = "merge-ff", infraRetrie
           htmlUrl: `https://github.com/${REPOSITORY}/actions/runs/1/job/${id}`,
           appSlug: "github-actions",
           output: { title: null, summary: null, text: null },
+          ...(headBranch ? { headBranch } : {}),
         };
       });
       gh.checkRuns.set(sha, [...(gh.checkRuns.get(sha) ?? []), ...runs]);

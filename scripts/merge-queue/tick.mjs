@@ -21,8 +21,15 @@
 // Every network side effect happens BEFORE the state save that records it, and every step is
 // safe to repeat when the save loses the CAS race (the next tick re-observes GitHub):
 //   - candidate refs are unique per SHA (never force-pushed) and orphans are deleted by cleanup;
+//     the refs of the STORED in-flight work are deleted only after the save that supersedes them;
+//   - a push whose ref already holds the SHA is skipped; a candidate whose object is gone from
+//     origin (every ref deleted, SHA not served) is recomposed instead of wedging the queue;
 //   - comments go through gh.commentOnce, label removal of an absent label is a no-op;
-//   - a merge-ff landing that already happened is recognized (base tip == candidate SHA).
+//   - a merge-ff landing that already happened is recognized (base tip == candidate SHA), and an
+//     open tree-divergence issue re-pauses squash-api landings whose pause was lost.
+// Before landing (or composing a bisection segment) every PR is re-read and re-run through the
+// eligibility rules: block labels, approval status on the head, protected approval and an open
+// release-freeze (which holds the green batch in flight instead of landing it).
 //
 // The PR snapshot + eligibility run on EVERY tick (dashboard queue, eligibility comments and
 // label removals); only the batch selection/composition waits for an idle, unpaused queue.
@@ -156,23 +163,55 @@ export function readOnlyGitHub(gh, violations) {
   });
 }
 
+/** Eligibility reasons caused by the batch itself: never a reason to drop one of its PRs. */
+const SELF_REASONS = new Set(["in-flight", "shadow-processed"]);
+
 const head12 = (sha) => String(sha ?? "").slice(0, 12);
 const prNumbers = (prs) => (prs ?? []).map((pr) => pr.n);
 const formatPrs = (prs) =>
   prNumbers(prs)
     .map((n) => `#${n}`)
     .join(", ") || "none";
-const escapeMd = (text) => String(text ?? "").replace(/[[\]<>`*_|\\]/g, (ch) => `\\${ch}`);
+
+/**
+ * Inline code span for untrusted text (check-run names come from workflows of the PR under
+ * test): GitHub renders no @mention, autolink or markdown inside a code span.
+ */
+const codeSpan = (text) =>
+  `\`${
+    String(text ?? "")
+      .replace(/[`\r\n]+/g, "'")
+      .trim()
+      .slice(0, 200) || "?"
+  }\``;
+
+/** Title of the issue opened when a squash-api landing leaves a tree CI did not validate. */
+const divergenceTitle = (base) => `🛑 omni-queue tree divergence: ${base}`;
 
 function stripUndefined(object) {
   return Object.fromEntries(Object.entries(object).filter(([, v]) => v !== undefined));
 }
 
-/** Timestamp of a check run or status, for "is this result from the current attempt?" */
-function resultTime(item) {
-  const raw = item.startedAt ?? item.completedAt ?? item.createdAt ?? null;
+const toMs = (raw) => {
   const ms = raw ? Date.parse(raw) : Number.NaN;
   return Number.isNaN(ms) ? null : ms;
+};
+
+/** Timestamp of a check run or status, for "is this result from the current attempt?" */
+function resultTime(item) {
+  return toMs(item.startedAt ?? item.completedAt ?? item.createdAt ?? null);
+}
+
+/** Newest GitHub-side timestamp among check runs / statuses (ms), null when none. */
+function newestResultTime(items) {
+  let newest = null;
+  for (const item of items) {
+    for (const raw of [item.startedAt, item.completedAt, item.createdAt]) {
+      const ms = toMs(raw);
+      if (ms !== null && (newest === null || ms > newest)) newest = ms;
+    }
+  }
+  return newest;
 }
 
 function prGreenCheckState(runs, name) {
@@ -201,6 +240,9 @@ class Tick {
     /** PRs whose queue label this tick removed (GitHub may still list them for a while). */
     this.touched = new Set();
     this.git = null;
+    /** Newest GitHub timestamp among the results of the in-flight attempt read this tick. */
+    this.inFlightObservedMs = null;
+    this.freezeCache = null;
     this.repoWeb = String(deps.remoteUrl ?? "").startsWith("http")
       ? String(deps.remoteUrl).replace(/\.git$/, "")
       : `https://github.com/${deps.repository}`;
@@ -237,15 +279,76 @@ class Tick {
     return this.git;
   }
 
-  /** Bring an existing remote candidate (and its ancestry) into the scratch repository. */
-  fetchExisting(ref) {
-    this.gitRepo().run([
-      "fetch",
-      "--no-tags",
-      "--no-write-fetch-head",
-      "origin",
-      `+refs/heads/${ref}:${INFLIGHT_LOCAL_REF}`,
-    ]);
+  /**
+   * Make sure commit `sha` is in the scratch repository (a fresh one every tick). Tries each
+   * remote branch of `refs` (one holding `sha` or a descendant of it), then the SHA itself, so a
+   * candidate ref deleted by a lost state save or by hand never wedges the queue.
+   * @returns {boolean} false when the object could not be fetched from anywhere
+   */
+  fetchObject(sha, refs = []) {
+    const git = this.gitRepo();
+    const present = () =>
+      git.run(["cat-file", "-e", `${sha}^{commit}`], { allowFail: true }).code === 0;
+    if (present()) return true;
+    const sources = [...new Set((refs ?? []).filter(Boolean))].map((ref) => `refs/heads/${ref}`);
+    sources.push(sha);
+    for (const source of sources) {
+      const fetched = git.run(
+        [
+          "fetch",
+          "--no-tags",
+          "--no-write-fetch-head",
+          "origin",
+          `+${source}:${INFLIGHT_LOCAL_REF}`,
+        ],
+        { allowFail: true }
+      );
+      if (fetched.code === 0 && present()) return true;
+      this.note(`fetch of ${source} did not bring ${head12(sha)}`);
+    }
+    return false;
+  }
+
+  /** Open issue left by a tree divergence on this base, if any (survives a lost state save). */
+  async openDivergenceIssue() {
+    const title = divergenceTitle(this.base);
+    const issues = await this.gh.listIssues({ labels: [DASHBOARD_LABEL], state: "open" });
+    return issues.find((issue) => issue.title === title) ?? null;
+  }
+
+  async freezeIssues() {
+    if (!this.freezeCache) {
+      const issues = await this.gh.listIssues({ labels: [FREEZE_LABEL], state: "open" });
+      this.freezeCache = issues.map((i) => ({
+        number: i.number,
+        title: i.title,
+        body: i.body ?? "",
+      }));
+    }
+    return this.freezeCache;
+  }
+
+  /** Candidate refs a state document keeps alive (in-flight candidate + parked red batch). */
+  refsOf(f) {
+    const refs = new Set();
+    if (!f) return refs;
+    refs.add(f.candidateRef);
+    const parked = f.pendingRed ? this.parkedRef(f.pendingRed) : null;
+    if (parked) refs.add(parked);
+    return refs;
+  }
+
+  parkedRef(parked) {
+    try {
+      return candidateRef(this.base, parked.batchId, parked.candidateSha);
+    } catch {
+      return null; // malformed parked batch: no ref to keep or read
+    }
+  }
+
+  /** History already holds an event matching `predicate` (dedupe of repeated observations). */
+  hasEvent(predicate) {
+    return this.s.history.some(predicate);
   }
 
   async comment(n, key, body) {
@@ -259,12 +362,29 @@ class Tick {
     await this.gh.removeLabel(n, label);
   }
 
-  /** Push `sha` to a NEW candidate ref; `fetchFrom` = existing ref holding the object. */
-  pushRef(sha, ref, fetchFrom = null) {
-    if (this.dryRun) return this.note(`would push ${head12(sha)} to ${ref}`);
+  /**
+   * Push `sha` to the NEW candidate ref `ref` (never forced). `sources` = remote branches that may
+   * hold the object when this tick did not compose it (infra retry, base-check).
+   * @returns {Promise<"pushed"|"existed"|"lost">} existed = a previous tick (whose state save was
+   *   lost) already pushed it; lost = the object is gone from origin
+   */
+  async pushRef(sha, ref, sources = null) {
+    if (this.dryRun) {
+      this.note(`would push ${head12(sha)} to ${ref}`);
+      return "pushed";
+    }
+    const existing = await this.gh.getBranchSha(ref);
+    if (existing === sha) {
+      this.note(`${ref} already points at ${head12(sha)}: not pushed again`);
+      return "existed";
+    }
+    if (existing) {
+      throw new Error(`${ref} exists at ${head12(existing)}, not ${head12(sha)}: never forced`);
+    }
     const git = this.gitRepo();
-    if (fetchFrom) this.fetchExisting(fetchFrom);
+    if (sources && !this.fetchObject(sha, sources)) return "lost";
     this.m.compose.pushCandidate({ git, sha, ref });
+    return "pushed";
   }
 
   async deleteRef(ref) {
@@ -278,6 +398,9 @@ class Tick {
     const { store } = this.deps;
     const { state, version } = await store.load(this.base);
     this.s = structuredClone(state);
+    // Refs of the stored in-flight work stay on origin until the save that supersedes them
+    // succeeds: if this save loses the CAS race, the redo still finds them.
+    const loadedRefs = this.refsOf(state.inFlight);
 
     this.handleAction();
     await this.maybeAutoResume();
@@ -289,7 +412,7 @@ class Tick {
     if (!this.s.paused && !this.s.inFlight) await this.startBatch(queue);
     else if (this.s.paused) this.note(`paused (${this.s.paused.reason}): nothing composed`);
 
-    await this.cleanupRefs();
+    await this.cleanupRefs(loadedRefs);
     await this.updateDashboard(queue.entries);
 
     if (this.violations.length) {
@@ -302,6 +425,7 @@ class Tick {
       }
       if (result.state) this.s = result.state;
     }
+    await this.deleteSuperseded(loadedRefs);
     return { base: this.base, decisions: this.decisions, state: this.s };
   }
 
@@ -344,9 +468,17 @@ class Tick {
 
   // ─────────────────────────── in-flight candidate ───────────────────────────
 
-  async readChecks(sha, since) {
+  /**
+   * Check runs and statuses of `sha` for ONE candidate ref: runs that name another head branch
+   * (the base's own push on a base-check SHA, the other ref of an infra retry) are not ours.
+   * `since` additionally drops results older than the attempt (statuses carry no branch).
+   */
+  async readChecks(sha, { since = null, ref = null } = {}) {
     let runs = await this.gh.listCheckRuns(sha);
     let statuses = await this.gh.listCommitStatuses(sha);
+    if (ref) {
+      runs = runs.filter((run) => typeof run.headBranch !== "string" || run.headBranch === ref);
+    }
     if (since) {
       // Same SHA tested before (infra retry, or a base-check on the base's own SHA): ignore
       // results that predate this attempt so an old verdict is never re-read as the new one.
@@ -361,25 +493,26 @@ class Tick {
     return { runs, statuses };
   }
 
-  async evaluate(sha, startedAt, since) {
-    const { runs, statuses } = await this.readChecks(sha, since);
-    return this.m.checks.evaluateChecks({
+  async evaluate(sha, startedAt, options) {
+    const { runs, statuses } = await this.readChecks(sha, options);
+    const verdict = this.m.checks.evaluateChecks({
       checkRuns: runs,
       statuses,
       config: this.config,
       startedAt,
       now: this.now(),
     });
+    return { verdict, observedMs: newestResultTime([...runs, ...statuses]) };
   }
 
   async processInFlight() {
     const f = this.s.inFlight;
     const reusedSha = f.attempts > 0 || f.kind === "base-check";
-    const verdict = await this.evaluate(
-      f.candidateSha,
-      f.startedAt,
-      reusedSha ? f.startedAt : null
-    );
+    const { verdict, observedMs } = await this.evaluate(f.candidateSha, f.startedAt, {
+      ref: f.candidateRef,
+      since: reusedSha ? f.startedAt : null,
+    });
+    this.inFlightObservedMs = observedMs;
     switch (verdict.verdict) {
       case "pending":
         this.note(`${f.batchId} (${head12(f.candidateSha)}): checks pending`);
@@ -409,7 +542,16 @@ class Tick {
   }
 
   async onGreen(f) {
-    this.event("checks-green", { batchId: f.batchId, prs: prNumbers(f.prs), sha: f.candidateSha });
+    const seen = this.hasEvent(
+      (e) => e.type === "checks-green" && e.batchId === f.batchId && e.sha === f.candidateSha
+    );
+    if (!seen) {
+      this.event("checks-green", {
+        batchId: f.batchId,
+        prs: prNumbers(f.prs),
+        sha: f.candidateSha,
+      });
+    }
     if (f.kind === "base-check") {
       this.recordBaseCheck({
         baseSha: f.baseSha,
@@ -422,15 +564,16 @@ class Tick {
       this.note(`base-check ${head12(f.baseSha)} green: the parked batch is PR-red`);
       const parked = f.pendingRed;
       if (!parked) return;
-      const failures = await this.failuresOf(parked.candidateSha, f.startedAt);
-      return this.onPrRed({ ...parked, failures, baseSha: f.baseSha });
+      const ref = this.parkedRef(parked);
+      const failures = await this.failuresOf(parked.candidateSha, f.startedAt, ref);
+      return this.onPrRed({ ...parked, failures, baseSha: f.baseSha, candidateRef: ref });
     }
     return this.landOrWouldLand(f);
   }
 
-  async failuresOf(sha, startedAt) {
+  async failuresOf(sha, startedAt, ref) {
     try {
-      const verdict = await this.evaluate(sha, startedAt, null);
+      const { verdict } = await this.evaluate(sha, startedAt, { ref });
       return verdict.failures ?? [];
     } catch (error) {
       this.note(`could not re-read the failures of ${head12(sha)}: ${error.message}`);
@@ -438,21 +581,71 @@ class Tick {
     }
   }
 
-  /** Re-read every PR of a green batch right before landing: approval must still hold. */
+  /**
+   * Re-read every PR right before landing it (or composing it into a bisection segment) and run
+   * the full eligibility rules on fresh data: approval status on the head, block labels,
+   * protected approval, release-freeze. Reasons caused by the batch itself are tolerated.
+   * Read errors propagate (the tick fails and the next one retries; nothing is dropped blindly).
+   * @param {PrRef[]} prs
+   * @returns {Promise<{valid: PrRef[], dropped: {pr: PrRef, why: string}[],
+   *   frozen: string|null}>} frozen = the base is under an open release-freeze
+   */
   async revalidate(prs) {
     const valid = [];
     const dropped = [];
+    let frozen = null;
+    if (!prs.length) return { valid, dropped, frozen };
+    const ctx = {
+      config: this.config,
+      freezeIssues: await this.freezeIssues(),
+      state: this.s,
+      now: this.now(),
+    };
     for (const pr of prs) {
-      const pull = await this.gh.getPull(pr.n);
+      const snap = await this.snapshotPull(pr.n, { greenCheck: false });
       let why = null;
-      if (pull.merged) why = "already merged";
-      else if (pull.state !== "open") why = "closed";
-      else if (pull.headSha !== pr.head) why = `head moved to ${head12(pull.headSha)}`;
-      else if (!(pull.labels ?? []).includes(this.config.label)) why = "queue label removed";
+      if (snap.merged) why = "already merged";
+      else if (snap.state !== "open") why = "closed";
+      else if (snap.headSha !== pr.head) why = `head moved to ${head12(snap.headSha)}`;
+      else if (!snap.labels.includes(this.config.label)) why = "queue label removed";
+      else {
+        const verdict = this.m.eligibility.evaluateEligibility(snap, ctx);
+        const reasons = (verdict.reasons ?? []).filter((r) => !SELF_REASONS.has(r.code));
+        const freeze = reasons.find((r) => r.code === "base-frozen");
+        if (freeze) frozen = frozen ?? (freeze.detail || "release-freeze open");
+        const blocking = reasons.filter((r) => r.code !== "base-frozen");
+        if (blocking.length) why = blocking.map((r) => r.code).join(", ");
+      }
       if (why) dropped.push({ pr, why });
       else valid.push(pr);
     }
-    return { valid, dropped };
+    return { valid, dropped, frozen };
+  }
+
+  /** Shadow bisection: would-land segments are not on the base; keep composing on top of them. */
+  shadowStack(bisect, sha, refs) {
+    if (this.config.mode !== "shadow" || !bisect?.landed?.length || !sha) return null;
+    return { sha, refs: refs ?? [] };
+  }
+
+  /** Green batch on a frozen base (Hard Rule #21): keep it in flight, land after the freeze. */
+  holdFrozen(f, detail) {
+    const message = `base-frozen: ${detail}; ${f.batchId} waits for the freeze to lift`;
+    const seen = this.hasEvent(
+      (e) =>
+        e.type === "land-rejected" &&
+        e.batchId === f.batchId &&
+        String(e.detail ?? "").startsWith("base-frozen")
+    );
+    if (!seen) {
+      this.event("land-rejected", {
+        batchId: f.batchId,
+        prs: prNumbers(f.prs),
+        sha: f.candidateSha,
+        detail: message,
+      });
+    }
+    this.note(message);
   }
 
   async landOrWouldLand(f) {
@@ -467,8 +660,14 @@ class Tick {
         return this.afterLanded(f, f.candidateSha);
       }
     }
+    if (live && !mergeFf) {
+      // A divergence whose pause was lost with a state save must not be landed over.
+      const issue = await this.openDivergenceIssue();
+      if (issue) return this.pauseForDivergence(f, issue);
+    }
 
-    const { valid, dropped } = await this.revalidate(f.prs);
+    const { valid, dropped, frozen } = await this.revalidate(f.prs);
+    if (frozen) return this.holdFrozen(f, frozen);
     if (dropped.length) {
       const detail = dropped.map((d) => `#${d.pr.n} ${d.why}`).join("; ");
       this.event("land-rejected", {
@@ -478,7 +677,10 @@ class Tick {
         detail: `batch changed before landing: ${detail}`,
       });
       this.note(`not landing ${f.batchId}: ${detail}`);
-      return this.recompose(valid, f.bisect);
+      return this.recompose(valid, f.bisect, {
+        checked: true,
+        onto: this.shadowStack(f.bisect, f.baseSha, [f.candidateRef]),
+      });
     }
 
     if (!live) {
@@ -500,7 +702,7 @@ class Tick {
 
     let result;
     if (mergeFf) {
-      this.fetchExisting(f.candidateRef);
+      if (!this.fetchObject(f.candidateSha, [f.candidateRef])) return this.candidateLost(f);
       result = await this.m.land.landMergeFf({
         git: this.gitRepo(),
         base: this.base,
@@ -526,7 +728,7 @@ class Tick {
         detail: `base moved${result.detail ? `: ${result.detail}` : ""}; recomposing`,
       });
       this.note(`${f.batchId}: base moved, recomposing ${formatPrs(f.prs)}`);
-      return this.recompose(f.prs, f.bisect);
+      return this.recompose(f.prs, f.bisect, { checked: true }); // revalidated just above
     }
     if (result.reason === "tree-divergence") return this.onTreeDivergence(f, result);
 
@@ -572,12 +774,51 @@ class Tick {
     this.s.inFlight = null;
     if (!f.bisect) return;
     const advanced = this.m.bisect.advanceBisection(f.bisect, "green");
-    if (advanced.bisect) return this.composeSegments(advanced.bisect);
+    if (advanced.bisect) {
+      return this.composeSegments(advanced.bisect, {
+        onto: this.shadowStack(advanced.bisect, f.candidateSha, [f.candidateRef]),
+      });
+    }
     this.note(`bisection of ${f.bisect.rootBatchId} finished`);
   }
 
+  /** The candidate's commit is gone from origin (ref deleted, object unreachable): start over. */
+  async candidateLost(f) {
+    const parked = f.kind === "base-check" ? f.pendingRed : null;
+    const prs = parked ? parked.prs : f.prs;
+    const bisect = parked ? (parked.bisect ?? null) : f.bisect;
+    const detail = `candidate ${f.candidateRef} (${head12(f.candidateSha)}) is gone from origin`;
+    this.event("error", {
+      batchId: f.batchId,
+      prs: prNumbers(prs),
+      sha: f.candidateSha,
+      detail: `${detail}; recomposing ${formatPrs(prs)}`,
+    });
+    this.note(`${detail}: recomposing ${formatPrs(prs)}`);
+    return this.recompose(prs, bisect, { onto: this.shadowStack(bisect, f.baseSha, []) });
+  }
+
+  /** An open divergence issue exists although the state has no pause: restore the pause. */
+  pauseForDivergence(f, issue) {
+    this.s.paused = {
+      reason: "tree-divergence",
+      since: this.now(),
+      baseSha: f.baseSha,
+      detail: `divergence issue #${issue.number} is open: close it, then resume the queue`,
+      issue: issue.number,
+    };
+    this.s.inFlight = null;
+    this.event("tree-divergence", {
+      batchId: f.batchId,
+      prs: prNumbers(f.prs),
+      sha: f.candidateSha,
+      detail: `issue #${issue.number} still open: ${f.batchId} not landed`,
+    });
+    this.note(`paused: tree divergence issue #${issue.number} is open`);
+  }
+
   async onTreeDivergence(f, result) {
-    const title = `🛑 omni-queue tree divergence: ${this.base}`;
+    const title = divergenceTitle(this.base);
     const body = [
       `omni-queue paused \`${this.base}\`: after the squash-api landing of batch \`${f.batchId}\` the`,
       "tree of the base differs from the tree that CI validated.",
@@ -588,14 +829,18 @@ class Tick {
       `- Batch: ${formatPrs(f.prs)}`,
       this.deps.runUrl ? `- Run: ${this.deps.runUrl}` : null,
       "",
-      "Investigate, fix the base if needed, then resume the queue (`workflow_dispatch` action",
-      "`resume`).",
+      "Investigate and fix the base if needed, close this issue, then resume the queue",
+      "(`workflow_dispatch` action `resume`). While this issue is open, squash-api landings stay",
+      "paused.",
     ]
       .filter((line) => line !== null)
       .join("\n");
-    let issue = null;
-    if (this.dryRun) this.note(`would open issue "${title}"`);
-    else issue = (await this.gh.createIssue({ title, body })).number;
+    // The issue is labeled so the next tick can find it even if this tick's state save is lost.
+    const existing = await this.openDivergenceIssue();
+    let issue = existing?.number ?? null;
+    if (existing) await this.comment(existing.number, `divergence:${f.batchId}`, body);
+    else if (this.dryRun) this.note(`would open issue "${title}"`);
+    else issue = (await this.gh.createIssue({ title, body, labels: [DASHBOARD_LABEL] })).number;
     this.s.paused = {
       reason: "tree-divergence",
       since: this.now(),
@@ -673,8 +918,14 @@ class Tick {
       if (verdict.kind === "base-red") {
         return this.pauseBaseRed({ ...parked, baseSha: f.baseSha }, issue, verdict.detail);
       }
-      const parkedFailures = await this.failuresOf(parked.candidateSha, f.startedAt);
-      return this.onPrRed({ ...parked, failures: parkedFailures, baseSha: f.baseSha });
+      const ref = this.parkedRef(parked);
+      const parkedFailures = await this.failuresOf(parked.candidateSha, f.startedAt, ref);
+      return this.onPrRed({
+        ...parked,
+        failures: parkedFailures,
+        baseSha: f.baseSha,
+        candidateRef: ref,
+      });
     }
 
     this.s.counters.redBatches += 1;
@@ -710,6 +961,15 @@ class Tick {
     }
   }
 
+  /**
+   * Start of a retry whose ref a lost tick already pushed: results newer than the failed attempt
+   * (GitHub clock, not the runner's) belong to the retry. Falls back to now when none was read.
+   */
+  retryCutoff() {
+    if (this.inFlightObservedMs === null) return this.now();
+    return new Date(Math.min(this.inFlightObservedMs + 1, Date.parse(this.now()))).toISOString();
+  }
+
   async infraPath(f, detail) {
     if (f.attempts < this.config.infraRetries) {
       const attempts = f.attempts + 1;
@@ -718,8 +978,11 @@ class Tick {
           ? `basecheck-${head12(f.baseSha)}-r${attempts}`
           : retryBatchId(f.batchId, attempts);
       const ref = candidateRef(this.base, batchId, f.candidateSha);
-      const startedAt = this.now();
-      this.pushRef(f.candidateSha, ref, f.candidateRef);
+      const pushedAt = this.now();
+      const sources = f.kind === "base-check" ? [f.candidateRef, this.base] : [f.candidateRef];
+      const pushed = await this.pushRef(f.candidateSha, ref, sources);
+      if (pushed === "lost") return this.candidateLost(f);
+      const startedAt = pushed === "existed" ? this.retryCutoff() : pushedAt;
       this.s.inFlight = { ...f, batchId, candidateRef: ref, attempts, startedAt, stage: "testing" };
       this.s.counters.ciRuns += 1;
       this.event("infra-retry", {
@@ -748,11 +1011,14 @@ class Tick {
     this.note(`paused (infra): ${f.batchId} failed again after ${f.attempts} retry(ies)`);
   }
 
-  startBaseCheck(f, signatures) {
+  async startBaseCheck(f, signatures) {
     const ref = baseCheckRef(this.base, f.baseSha);
     const batchId = `basecheck-${head12(f.baseSha)}`;
-    const startedAt = this.now();
-    this.pushRef(f.baseSha, ref, f.candidateRef);
+    const pushedAt = this.now();
+    const pushed = await this.pushRef(f.baseSha, ref, [f.candidateRef, this.base]);
+    if (pushed === "lost") return this.candidateLost(f);
+    // Already pushed by a tick whose save was lost: its runs started after the red batch did.
+    const startedAt = pushed === "existed" ? f.startedAt : pushedAt;
     this.s.inFlight = {
       batchId,
       kind: "base-check",
@@ -784,10 +1050,14 @@ class Tick {
   }
 
   async pauseBaseRed(batch, issue, detail) {
+    // A shadow-stacked segment is composed on a would-land candidate, never the base tip: the
+    // pause must wait for the real tip to move, not resume on the next tick.
+    const stacked = this.shadowStack(batch.bisect, batch.baseSha, []);
+    const pauseSha = stacked ? await this.gh.getBranchSha(this.base) : batch.baseSha;
     this.s.paused = {
       reason: "base-red",
       since: this.now(),
-      baseSha: batch.baseSha,
+      baseSha: pauseSha,
       detail: detail || `${batch.batchId} failed like the bare base`,
       issue: issue?.number ?? null,
     };
@@ -808,7 +1078,7 @@ class Tick {
           `\`${batch.baseSha}\`. The PRs stay queued; the queue resumes by itself when the base moves.`,
           "",
           `- Candidate: ${this.checksUrl(batch.candidateSha)}`,
-          detail ? `- Verdict: ${detail}` : null,
+          detail ? `- Verdict: ${codeSpan(detail)}` : null,
           this.deps.runUrl ? `- Run: ${this.deps.runUrl}` : null,
         ]
           .filter((line) => line !== null)
@@ -834,7 +1104,11 @@ class Tick {
           detail: `segment of ${prs.length} red: testing ${formatPrs(advanced.next)} next`,
         });
       }
-      if (advanced.bisect) return this.composeSegments(advanced.bisect);
+      if (advanced.bisect) {
+        return this.composeSegments(advanced.bisect, {
+          onto: this.shadowStack(advanced.bisect, red.baseSha, [red.candidateRef]),
+        });
+      }
       this.note(`bisection of ${bisect.rootBatchId} finished`);
       return;
     }
@@ -854,8 +1128,8 @@ class Tick {
     const lines = failures.length
       ? failures.map(
           (run) =>
-            `  - ${run.htmlUrl ? `[${escapeMd(run.name)}](${run.htmlUrl})` : escapeMd(run.name)}` +
-            ` — ${run.conclusion ?? "failed"}`
+            `  - ${run.htmlUrl ? `[${codeSpan(run.name)}](${run.htmlUrl})` : codeSpan(run.name)}` +
+            ` — ${codeSpan(run.conclusion ?? "failed")}`
         )
       : ["  - (no failing check could be read; see the candidate checks)"];
     await this.removeLabel(pr.n, this.config.label);
@@ -886,12 +1160,22 @@ class Tick {
 
   // ─────────────────────────── composition ───────────────────────────
 
-  /** Compose `prs` (or the head segment of `bisect`) on the current base and push it. */
-  async composeAndPush(prs, bisect) {
+  /**
+   * Compose `prs` (or the head segment of `bisect`) on the current base and push it. `onto` (shadow
+   * bisection only) = the would-land commit to compose on instead of the base tip, so the shadow
+   * run tests the same combination the live queue would.
+   */
+  async composeAndPush(prs, bisect, { onto = null } = {}) {
     this.s.counters.batchSeq += 1;
     const batchId = batchIdFor(this.s.counters.batchSeq);
     const git = this.gitRepo();
-    const { baseSha, heads } = this.m.compose.fetchInputs({ git, base: this.base, prs });
+    const { baseSha: tip, heads } = this.m.compose.fetchInputs({ git, base: this.base, prs });
+    let baseSha = tip;
+    if (onto && onto.sha !== tip) {
+      if (this.fetchObject(onto.sha, onto.refs)) baseSha = onto.sha;
+      else this.note(`shadow stack ${head12(onto.sha)} unavailable: composing on the base tip`);
+    }
+    const stackNote = baseSha === tip ? "" : ` (shadow stack over ${head12(tip)})`;
     const result = this.m.compose.composeCandidate({
       git,
       base: this.base,
@@ -928,7 +1212,7 @@ class Tick {
     }
     const ref = candidateRef(this.base, batchId, result.candidateSha);
     const startedAt = this.now();
-    this.pushRef(result.candidateSha, ref);
+    await this.pushRef(result.candidateSha, ref);
     this.s.inFlight = {
       batchId,
       kind: "batch",
@@ -954,48 +1238,85 @@ class Tick {
       sha: result.candidateSha,
       detail:
         `${bisect ? `bisect of ${bisect.rootBatchId}: ` : ""}` +
-        `${included.length} PR(s) on ${head12(result.baseSha ?? baseSha)}` +
+        `${included.length} PR(s) on ${head12(result.baseSha ?? baseSha)}${stackNote}` +
         (excluded.length ? `; excluded ${excluded.join(", ")}` : ""),
     });
     this.note(`${batchId}: pushed ${formatPrs(included)} as ${ref}`);
     return true;
   }
 
-  /** Compose the next bisection segment; segments with nothing composable are skipped. */
-  async composeSegments(bisect) {
+  /**
+   * Drop the PRs that no longer qualify (label withdrawn, head moved, approval gone, ...) before
+   * spending a CI run on them; a frozen base does not drop anything (landing holds instead).
+   */
+  async withdrawStale(prs, batchId) {
+    const { valid, dropped } = await this.revalidate(prs);
+    for (const { pr, why } of dropped) {
+      this.event("pr-dequeued", {
+        batchId: batchId ?? undefined,
+        prs: [pr.n],
+        detail: `withdrawn: ${why}`,
+      });
+      this.note(`#${pr.n} left the batch before composition: ${why}`);
+    }
+    return valid;
+  }
+
+  /**
+   * Compose the next bisection segment; PRs withdrawn since the split are left out and segments
+   * with nothing composable are skipped. `checked` = segments[0] was just revalidated.
+   */
+  async composeSegments(bisect, { onto = null, checked = false } = {}) {
     let current = bisect;
+    let fresh = checked;
     while (current && current.segments.length) {
-      if (await this.composeAndPush(current.segments[0], current)) return;
+      const segment = fresh
+        ? current.segments[0]
+        : await this.withdrawStale(current.segments[0], current.rootBatchId);
+      fresh = false;
+      if (segment.length) {
+        const next = { ...current, segments: [segment, ...current.segments.slice(1)] };
+        if (await this.composeAndPush(segment, next, { onto })) return;
+      }
       current =
         current.segments.length > 1 ? { ...current, segments: current.segments.slice(1) } : null;
     }
     this.note(`bisection of ${bisect.rootBatchId} finished`);
   }
 
-  /** Re-run the same PRs on the current base (base moved / batch changed before landing). */
-  async recompose(prs, bisect) {
+  /**
+   * Re-run the same PRs on the current base (base moved, batch changed before landing, candidate
+   * lost). `checked` = `prs` were just revalidated; otherwise withdrawn PRs are left out first.
+   */
+  async recompose(prs, bisect, { onto = null, checked = false } = {}) {
     this.s.inFlight = null;
     if (bisect) {
       const rest = bisect.segments.slice(1);
       const segments = prs.length ? [prs, ...rest] : rest;
       if (!segments.length) return this.note(`bisection of ${bisect.rootBatchId} finished`);
-      return this.composeSegments({ ...bisect, segments });
+      return this.composeSegments(
+        { ...bisect, segments },
+        { onto, checked: checked && prs.length > 0 }
+      );
     }
-    if (prs.length) await this.composeAndPush(prs, null);
+    const fresh = checked ? prs : await this.withdrawStale(prs, null);
+    if (fresh.length) await this.composeAndPush(fresh, null);
   }
 
   // ─────────────────────────── queue snapshot / selection ───────────────────────────
 
-  async snapshotPull(summary) {
-    const pull = await this.gh.getPull(summary.number);
+  /** PrSnapshot (eligibility.mjs) of PR `number`, read fresh from GitHub. */
+  async snapshotPull(number, { greenCheck = true } = {}) {
+    const pull = await this.gh.getPull(number);
     const [files, timeline, headStatuses] = [
       await this.gh.listPullFiles(pull.number),
       await this.gh.listIssueTimeline(pull.number),
       await this.gh.listCommitStatuses(pull.headSha),
     ];
-    const prGreenCheck = this.config.preferGreenPrChecks
-      ? prGreenCheckState(await this.gh.listCheckRuns(pull.headSha), this.config.prGreenCheck)
-      : null;
+    const prGreenCheck =
+      greenCheck && this.config.preferGreenPrChecks
+        ? prGreenCheckState(await this.gh.listCheckRuns(pull.headSha), this.config.prGreenCheck)
+        : null;
     return {
       number: pull.number,
       state: pull.state,
@@ -1026,20 +1347,14 @@ class Tick {
       (p) =>
         p.baseRef === this.base && (p.labels ?? []).includes(label) && !this.touched.has(p.number)
     );
-    const freezeIssues = labeled.length
-      ? (await this.gh.listIssues({ labels: [FREEZE_LABEL], state: "open" })).map((i) => ({
-          number: i.number,
-          title: i.title,
-          body: i.body ?? "",
-        }))
-      : [];
+    const freezeIssues = labeled.length ? await this.freezeIssues() : [];
     const ctx = { config: this.config, freezeIssues, state: this.s, now: this.now() };
     const entries = [];
     const candidates = [];
     for (const summary of labeled) {
       let pr;
       try {
-        pr = await this.snapshotPull(summary);
+        pr = await this.snapshotPull(summary.number);
       } catch (error) {
         this.note(`#${summary.number}: snapshot failed (${error.message}); skipped this tick`);
         continue;
@@ -1085,20 +1400,13 @@ class Tick {
 
   // ─────────────────────────── housekeeping ───────────────────────────
 
-  async cleanupRefs() {
+  /**
+   * Delete candidate refs of this base that no state references. `loadedRefs` (the stored
+   * in-flight work) are kept here and removed by deleteSuperseded once the new state is saved.
+   */
+  async cleanupRefs(loadedRefs = new Set()) {
     const prefix = `${CANDIDATE_PREFIX}${sanitizeBase(this.base)}/`;
-    const keep = new Set();
-    const f = this.s.inFlight;
-    if (f) {
-      keep.add(f.candidateRef);
-      if (f.pendingRed) {
-        try {
-          keep.add(candidateRef(this.base, f.pendingRed.batchId, f.pendingRed.candidateSha));
-        } catch {
-          // malformed parked batch: nothing to keep for it
-        }
-      }
-    }
+    const keep = new Set([...this.refsOf(this.s.inFlight), ...loadedRefs]);
     let refs;
     try {
       refs = await this.gh.listMatchingBranches(prefix);
@@ -1112,6 +1420,20 @@ class Tick {
         await this.deleteRef(name);
       } catch (error) {
         this.note(`could not delete ${name}: ${error.message}`);
+      }
+    }
+  }
+
+  /** After a successful save: delete the refs of the previous in-flight work it superseded. */
+  async deleteSuperseded(loadedRefs) {
+    const keep = this.refsOf(this.s.inFlight);
+    for (const ref of loadedRefs) {
+      if (keep.has(ref)) continue;
+      try {
+        await this.deleteRef(ref);
+      } catch (error) {
+        // harmless: the next tick's cleanup sees it as a stray
+        this.note(`could not delete ${ref}: ${error.message}`);
       }
     }
   }
