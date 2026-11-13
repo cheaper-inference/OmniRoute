@@ -696,6 +696,8 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     );
     effectiveServiceTier = resolveReportedServiceTier(responseBody) ?? effectiveServiceTier;
     const successConnectionId = getCurrentConnectionId();
+    // After a model-family fallback the sibling answered: usage and cost belong to it.
+    const responseModel = modelAfterFamilyFallback(model, currentModel, effectiveModel, finalBody);
     await maybeSyncClaudeExtraUsageState({
       provider,
       connectionId: successConnectionId,
@@ -752,7 +754,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       traceEnabled,
       provider,
       connectionId: successConnectionId,
-      model,
+      model: responseModel,
       startTime,
       apiKeyInfo,
       effectiveServiceTier,
@@ -828,14 +830,14 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         : null;
     const costUsage = normalizeUsage(responseUsage);
     const costResult = costUsage
-      ? await calculateCostDetailed(provider, model, costUsage, {
+      ? await calculateCostDetailed(provider, responseModel, costUsage, {
           serviceTier: effectiveServiceTier,
         })
       : null;
     const estimatedCost = costResult?.costUsd ?? 0;
     // A metered model with no price must not pass the dollar budget as $0.
     const unpricedBudgetCost = isUnpricedMeteredCost(provider, costResult);
-    const chatCostCtx = buildCostCtx(provider, model, usage, effectiveServiceTier, traceId);
+    const chatCostCtx = buildCostCtx(provider, responseModel, usage, effectiveServiceTier, traceId);
 
     if (postCallGuardrails.blocked) {
       const guardrailMessage = postCallGuardrails.message || "Response blocked by guardrail";
@@ -1024,7 +1026,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       await runWithCodexResponseFence(providerResponse, () => onRequestSuccess(), true);
     }
     appendRequestLog({
-      model,
+      model: responseModel,
       provider,
       connectionId: successConnectionId,
       tokens: usage,
@@ -1099,7 +1101,6 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       providerResponse: responseBody,
       clientResponse: translatedResponse,
     });
-    const responseModel = modelAfterFamilyFallback(model, currentModel, effectiveModel, finalBody);
     const responseHeaders = buildNonStreamingResponseHeaders({
       provider,
       model: responseModel,
