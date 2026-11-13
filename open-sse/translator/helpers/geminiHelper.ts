@@ -35,6 +35,15 @@ export const GEMINI_UNSUPPORTED_SCHEMA_KEYS = new Set([
   // decolua/9router#4283: ajv-errors `errorMessage` keyword emitted by some tool
   // generators — "Unknown name \"errorMessage\" ... Cannot find field".
   "errorMessage",
+  // Same class: the plural ajv-errors spelling, editor hints (`doNotSuggest`,
+  // `suggestSortText`) and OpenAPI-only annotations that a Pydantic/OpenAPI
+  // generator emits next to `oneOf` (`discriminator`, `xml`, `externalDocs`).
+  "errorMessages",
+  "doNotSuggest",
+  "suggestSortText",
+  "discriminator",
+  "xml",
+  "externalDocs",
   // decolua/9router#4169: Anthropic prompt-caching annotation leaking into tool
   // schemas — "Unknown name \"cache_control\" ... Cannot find field".
   "cache_control",
@@ -230,13 +239,14 @@ function normalizeGeminiMediaResolution(...values: unknown[]): JsonRecord | unde
 export function convertOpenAIContentToParts(content: unknown): JsonRecord[] {
   const parts: JsonRecord[] = [];
 
+  // Gemini rejects a part with an empty or missing `text`.
   if (typeof content === "string") {
-    parts.push({ text: content });
+    if (content) parts.push({ text: content });
   } else if (Array.isArray(content)) {
     for (const item of content) {
       const rec = toRecord(item);
       if (rec.type === "text") {
-        parts.push({ text: rec.text });
+        if (typeof rec.text === "string" && rec.text) parts.push({ text: rec.text });
       } else if (rec.type === "video_url" || rec.type === "input_video") {
         const video = videoPartToGemini(rec);
         if (video) parts.push(video);
