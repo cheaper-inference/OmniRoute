@@ -486,8 +486,8 @@ const ERROR_BODY_READ_TIMEOUT_MS = 5_000;
  * text read so far is returned. Past the byte cap the body is cancelled and
  * {@link NonStreamingResponseTooLargeError} is thrown.
  */
-export async function readErrorBodyText(response: Response): Promise<string> {
-  const maxBytes = Math.min(ERROR_BODY_MAX_BYTES, getMaxNonStreamingResponseBytes());
+export async function readErrorBodyText(response: Response, capBytes?: number): Promise<string> {
+  const maxBytes = capBytes ?? Math.min(ERROR_BODY_MAX_BYTES, getMaxNonStreamingResponseBytes());
   const declared = Number.parseInt(response.headers.get("content-length") ?? "", 10);
   if (Number.isFinite(declared) && declared > maxBytes) {
     void response.body?.cancel().catch(() => {});
@@ -530,7 +530,11 @@ export async function readErrorBodyText(response: Response): Promise<string> {
  * @param {string} provider - Provider name (for Antigravity-specific parsing)
  * @returns {Promise<{statusCode: number, message: string, retryAfterMs: number|null, responseBody: unknown}>}
  */
-export async function parseUpstreamError(response: Response, provider: string | null = null) {
+export async function parseUpstreamError(
+  response: Response,
+  provider: string | null = null,
+  opts?: { maxBodyBytes?: number }
+) {
   // Cap maximum retry time at 24 hours to prevent infinite wait
   const MAX_RETRY_MS = 24 * 60 * 60 * 1000;
   let message = "";
@@ -541,7 +545,7 @@ export async function parseUpstreamError(response: Response, provider: string | 
   let rawText = "";
 
   try {
-    const text = await readErrorBodyText(response);
+    const text = await readErrorBodyText(response, opts?.maxBodyBytes);
     rawText = text;
     responseBody = normalizePayloadForLog(text);
 

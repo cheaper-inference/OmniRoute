@@ -12,7 +12,7 @@ import type {
   lockModel,
   recordCoreOwnedAntigravityQuotaState,
 } from "../../services/accountFallback.ts";
-import { createErrorResult } from "../../utils/error.ts";
+import { createErrorResult, parseUpstreamError } from "../../utils/error.ts";
 import { applyStatusRestatement } from "../../config/upstreamStatusRestatement.ts";
 import { appendGoogleDailyQuotaViolation } from "../../services/googleDailyQuota.ts";
 import { recoverAnthropicThinkingSignature } from "./thinkingSignatureRecovery.ts";
@@ -34,7 +34,10 @@ import {
   isCodexResponseCurrent,
 } from "../../services/codexAccount/fences.ts";
 import { isTransientCodexCapacity429 } from "../../services/codexAccount/capacity429.ts";
-import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
+import {
+  getMaxNonStreamingResponseBytes,
+  readResponseTextWithinCap,
+} from "../../utils/responseBodyCap.ts";
 
 export interface ChatCoreExecutorResult {
   response: Response;
@@ -261,16 +264,33 @@ function leaseMismatch(model: string, connectionId: string): ProviderExecutionOu
   };
 }
 
-interface UpstreamErrorFields {
-  message?: string;
-  code?: string;
-  type?: string;
-}
-
-function readUpstreamErrorFields(body: unknown): UpstreamErrorFields {
-  const err = (body as { error?: Record<string, unknown> } | null)?.error;
-  const text = (value: unknown) => (typeof value === "string" && value ? value : undefined);
-  return { message: text(err?.message), code: text(err?.code), type: text(err?.type) };
+/**
+ * Read a non-2xx attempt with the streaming leg's parser, so both legs get the same message,
+ * code, type and retry hint from one upstream response (array bodies, flat/detail/string
+ * errors, header and body retry hints). clone() is the drain: sendProviderAttempt must not
+ * cancel() a streaming non-2xx body before we get here (BYOP 422 / Codex 429 Retry-After). A
+ * non-JSON body stays the message; buildErrorBody()/sanitizeErrorMessage() still sanitize and
+ * truncate it before it reaches any response body (Hard Rule #12). This leg keeps its own,
+ * larger body cap.
+ */
+async function readUpstreamError(attempt: ChatCoreExecutorResult, provider: string) {
+  let details: Awaited<ReturnType<typeof parseUpstreamError>> | null = null;
+  try {
+    details = await parseUpstreamError(attempt.response.clone(), provider, {
+      maxBodyBytes: getMaxNonStreamingResponseBytes(),
+    });
+  } catch {
+    // Body unreadable (already consumed) — keep statusText.
+  }
+  return {
+    message: details?.message || attempt.response.statusText || "upstream error",
+    body: details?.responseBody || attempt.transformedBody,
+    fields: {
+      code: typeof details?.errorCode === "string" ? details.errorCode : undefined,
+      type: typeof details?.errorType === "string" ? details.errorType : undefined,
+    },
+    retryAfterMs: details?.retryAfterMs ?? null,
+  };
 }
 
 async function toOutcome(
@@ -293,34 +313,13 @@ async function toOutcome(
       connectionId,
     };
   }
-  let message = attempt.response.statusText || "upstream error";
-  let body: unknown = attempt.transformedBody;
-  let fields: UpstreamErrorFields = {};
-  try {
-    // clone() is the drain. sendProviderAttempt must not cancel() a streaming
-    // non-2xx body before we get here (BYOP 422 / Codex 429 Retry-After).
-    const text = await readResponseTextWithinCap(attempt.response.clone());
-    try {
-      body = JSON.parse(text);
-      fields = readUpstreamErrorFields(body);
-      if (fields.message) message = fields.message;
-    } catch {
-      // Non-JSON upstream body (plain-text 429, HTML error page). parseUpstreamError
-      // — the pre-pipeline path this replaced — surfaces the raw text as the message;
-      // collapsing it to statusText ("upstream error") hides what the provider said.
-      // buildErrorBody()/sanitizeErrorMessage() still sanitize and truncate it before
-      // it reaches any response body (Hard Rule #12).
-      if (text.trim()) message = text;
-    }
-  } catch {
-    // Body unreadable (already consumed) — keep statusText.
-  }
+  const { message, body, fields, retryAfterMs } = await readUpstreamError(attempt, provider);
   const restatement = applyStatusRestatement({
     provider,
     status,
     message,
     body,
-    retryAfterMs: null,
+    retryAfterMs,
   });
   const result = createErrorResult(
     restatement.status,
@@ -338,6 +337,7 @@ async function toOutcome(
       error: result.error,
       errorCode: result.errorCode,
       errorType: result.errorType,
+      retryAfterMs: result.retryAfterMs,
       rawMessage: appendGoogleDailyQuotaViolation(message, body),
       upstreamErrorBody: body,
       upstreamHeaders: attempt.response.headers,
