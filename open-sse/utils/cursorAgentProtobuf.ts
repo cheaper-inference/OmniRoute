@@ -390,7 +390,7 @@ function resolveGrokRequestedModel(
     // only a -fast alias should send fast=true. Keep older Grok families
     // unchanged because their default speed semantics differ.
     if (
-      /^(?:cursor-)?grok-4\\.7$/.test(effortSplit.modelId) &&
+      /^(?:cursor-)?grok-4\.7$/.test(effortSplit.modelId) &&
       extraParams.length === 0
     ) {
       parameters.push({ id: "fast", value: "false" });
