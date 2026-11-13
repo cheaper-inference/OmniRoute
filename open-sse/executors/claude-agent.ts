@@ -19,7 +19,7 @@
  * responses are emitted as Anthropic messages / Anthropic SSE event streams,
  * so the existing Claude-format translators handle client-side conversion.
  */
-import type { ExecutorExecuteResult, ExecuteInput } from "./base.ts";
+import type { ExecutorExecuteResult, ExecuteInput, ProviderCredentials } from "./base.ts";
 import { BaseExecutor } from "./base.ts";
 import { buildErrorBody, sanitizeErrorMessage } from "../utils/error.ts";
 import { resolveClaudeAgentSdk, resolveClaudeCodeExecutable } from "../utils/claudeAgentSdk.ts";
@@ -208,6 +208,26 @@ export function historyPrompt(body: AnthropicRequestBody): AsyncGenerator<SDKUse
   })();
 }
 
+/**
+ * Multi-account: map connection credentials to CLI env overrides.
+ * Returns null when no credential is stored (keep the host's ~/.claude login).
+ */
+export function connectionEnv(credentials: ProviderCredentials): Record<string, string> | null {
+  const accessToken =
+    typeof credentials.accessToken === "string" && credentials.accessToken.length > 0
+      ? credentials.accessToken
+      : null;
+  const apiKey =
+    typeof credentials.apiKey === "string" && credentials.apiKey.length > 0
+      ? credentials.apiKey
+      : null;
+  if (!accessToken && !apiKey) return null;
+  return {
+    ...(accessToken ? { CLAUDE_CODE_OAUTH_TOKEN: accessToken } : {}),
+    ...(apiKey ? { ANTHROPIC_API_KEY: apiKey } : {}),
+  };
+}
+
 function buildOptions(
   input: ExecuteInput,
   body: AnthropicRequestBody,
@@ -240,13 +260,14 @@ function buildOptions(
   const budget = asRecord(body.thinking)?.budget_tokens;
   // No max_tokens passthrough: the CLI owns its own output cap.
   if (typeof budget === "number" && budget > 0) options.maxThinkingTokens = budget;
+  // Multi-account: connection credentials override the host CLI login so each
+  // connection routes through its own Claude account.
+  const env = connectionEnv(input.credentials);
+  if (env) options.env = { ...process.env, ...env };
   return options;
 }
 
-export function unmangleContent(
-  content: unknown,
-  rename: (name: string) => string
-): unknown {
+export function unmangleContent(content: unknown, rename: (name: string) => string): unknown {
   if (!Array.isArray(content)) return content;
   return content.map((block) => {
     const record = asRecord(block);
@@ -268,10 +289,9 @@ function clearToolUsesEdit(body: AnthropicRequestBody): Record<string, unknown> 
   const edits = asRecord(body.context_management)?.edits;
   if (!Array.isArray(edits)) return null;
   return (
-    edits.find((edit) => asRecord(edit)?.type === CLEAR_TOOL_USES_STRATEGY) as
-      | Record<string, unknown>
-      | undefined
-  ) ?? null;
+    (edits.find((edit) => asRecord(edit)?.type === CLEAR_TOOL_USES_STRATEGY) as
+      Record<string, unknown> | undefined) ?? null
+  );
 }
 
 export function hasClearToolUsesEdit(body: AnthropicRequestBody): boolean {
@@ -288,9 +308,7 @@ export function clearOldToolUses(body: AnthropicRequestBody): AnthropicRequestBo
   const edit = clearToolUsesEdit(body);
   const keep = Math.max(
     0,
-    typeof edit?.keep?.value === "number"
-      ? edit.keep.value
-      : CONTEXT_EDITING_DEFAULT_KEEP_TOOL_USES
+    typeof edit?.keep?.value === "number" ? edit.keep.value : CONTEXT_EDITING_DEFAULT_KEEP_TOOL_USES
   );
   const trigger =
     typeof edit?.trigger?.value === "number"
@@ -314,7 +332,8 @@ export function clearOldToolUses(body: AnthropicRequestBody): AnthropicRequestBo
   const cleaned = messages.map((message) => {
     const record = asRecord(message);
     if (!record || !Array.isArray(record.content)) return message;
-    const kind = record.role === "assistant" ? "tool_use" : record.role === "user" ? "tool_result" : null;
+    const kind =
+      record.role === "assistant" ? "tool_use" : record.role === "user" ? "tool_result" : null;
     if (!kind) return message;
     const idField = kind === "tool_use" ? "id" : "tool_use_id";
     return {
@@ -356,21 +375,36 @@ export class ClaudeAgentExecutor extends BaseExecutor {
 
     const rename = buildClientTools(sdk, body);
     const toolsServer = rename ? (rename.config as McpServerConfig) : null;
-    const options = buildOptions(input, body, resolveClaudeCodeExecutable(sdk), toolsServer, abortController);
+    const options = buildOptions(
+      input,
+      body,
+      resolveClaudeCodeExecutable(sdk),
+      toolsServer,
+      abortController
+    );
     const requestedStream = Boolean(input.stream);
-    const model =
-      typeof body.model === "string" && body.model ? body.model : input.model;
+    const model = typeof body.model === "string" && body.model ? body.model : input.model;
 
     try {
       const cleanBody =
-        input.contextEditing?.enabled || hasClearToolUsesEdit(body)
-          ? clearOldToolUses(body)
-          : body;
+        input.contextEditing?.enabled || hasClearToolUsesEdit(body) ? clearOldToolUses(body) : body;
       const query = sdk.query({ prompt: historyPrompt(cleanBody), options });
       if (requestedStream) {
-        return this.streamResponse(query, rename?.rename ?? ((name) => name), onAbort, input.signal ?? null, abortController, input.log ?? null);
+        return this.streamResponse(
+          query,
+          rename?.rename ?? ((name) => name),
+          onAbort,
+          input.signal ?? null,
+          abortController,
+          input.log ?? null
+        );
       }
-      return await this.jsonResponse(query, model, rename?.rename ?? ((name) => name), input.log ?? null);
+      return await this.jsonResponse(
+        query,
+        model,
+        rename?.rename ?? ((name) => name),
+        input.log ?? null
+      );
     } catch (error) {
       input.signal?.removeEventListener("abort", onAbort);
       abortController.abort();
@@ -439,10 +473,7 @@ export class ClaudeAgentExecutor extends BaseExecutor {
           close();
         } catch (error) {
           if (closed) return;
-          log?.error(
-            "CLAUDE_AGENT",
-            `stream failed: ${String(error)}`.slice(0, 300)
-          );
+          log?.error("CLAUDE_AGENT", `stream failed: ${String(error)}`.slice(0, 300));
           emit({
             type: "error",
             error: {
@@ -518,8 +549,8 @@ export class ClaudeAgentExecutor extends BaseExecutor {
       frames.flatMap((frame) => (Array.isArray(frame.content) ? frame.content : [])),
       rename
     );
-    const usage =
-      asRecord(result?.usage) ?? asRecord(last.usage) ?? { input_tokens: 0, output_tokens: 0 };
+    const usage = asRecord(result?.usage) ??
+      asRecord(last.usage) ?? { input_tokens: 0, output_tokens: 0 };
     const responseBody = {
       id: typeof first.id === "string" ? first.id : `msg_${crypto.randomUUID()}`,
       type: "message",

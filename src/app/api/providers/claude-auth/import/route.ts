@@ -43,7 +43,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsedBody.error }, { status: 400 });
   }
 
-  const { source, name, email, overwriteExisting } = parsedBody.data;
+  const { source, name, email, overwriteExisting, provider } = parsedBody.data;
+  // Import path serves the claude family only; schema enum is the real allowlist.
+  const targetProvider = provider ?? "claude";
 
   let rawJson: unknown;
   try {
@@ -62,6 +64,7 @@ export async function POST(request: Request) {
       name,
       email,
       overwriteExisting,
+      provider: targetProvider,
     });
 
     logAuditEvent({
@@ -73,7 +76,7 @@ export async function POST(request: Request) {
       ipAddress: auditContext.ipAddress || undefined,
       requestId: auditContext.requestId,
       metadata: {
-        provider: "claude",
+        provider: targetProvider,
         created,
         email: enriched.email || email,
         hasAccountUUID: !!enriched.accountUUID,

@@ -43,7 +43,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsedBody.error }, { status: 400 });
   }
 
-  const { entries, overwriteExisting } = parsedBody.data;
+  const { entries, overwriteExisting, provider } = parsedBody.data;
+  const targetProvider = provider ?? "claude";
 
   const created: Record<string, unknown>[] = [];
   const errors: { index: number; name: string; message: string }[] = [];
@@ -58,6 +59,7 @@ export async function POST(request: Request) {
         name: e.name,
         email: e.email,
         overwriteExisting,
+        provider: targetProvider,
       });
 
       const safe = sanitizeConnectionForResponse(connection as Record<string, unknown>);
@@ -72,7 +74,7 @@ export async function POST(request: Request) {
         ipAddress: auditContext.ipAddress || undefined,
         requestId: auditContext.requestId,
         metadata: {
-          provider: "claude",
+          provider: targetProvider,
           email: enriched.email || e.email,
           bulkIndex: i,
         },
@@ -97,7 +99,7 @@ export async function POST(request: Request) {
     ipAddress: auditContext.ipAddress || undefined,
     requestId: auditContext.requestId,
     metadata: {
-      provider: "claude",
+      provider: targetProvider,
       total: entries.length,
       success: created.length,
       failed: errors.length,

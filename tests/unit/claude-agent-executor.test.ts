@@ -5,6 +5,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  connectionEnv,
   effortFrom,
   historyPrompt,
   sanitizeToolName,
@@ -119,7 +120,8 @@ describe("claude-agent executor helpers", () => {
     });
 
     it("adds a synthetic trigger for trailing assistant prefill", async () => {
-      const yielded: Array<{ shouldQuery: boolean; message: { role: string; content: string } }> = [];
+      const yielded: Array<{ shouldQuery: boolean; message: { role: string; content: string } }> =
+        [];
       for await (const message of historyPrompt({
         messages: [
           { role: "user", content: "hi" },
@@ -139,11 +141,48 @@ describe("claude-agent executor helpers", () => {
     it("drops non-conversation roles", async () => {
       const yielded: Array<{ message: { role: string } }> = [];
       for await (const message of historyPrompt({
-        messages: [{ role: "system", content: "x" }, { role: "user", content: "q" }],
+        messages: [
+          { role: "system", content: "x" },
+          { role: "user", content: "q" },
+        ],
       })) {
         yielded.push({ message: message.message as { role: string } });
       }
-      assert.deepEqual(yielded.map((entry) => entry.message.role), ["user"]);
+      assert.deepEqual(
+        yielded.map((entry) => entry.message.role),
+        ["user"]
+      );
+    });
+  });
+});
+
+// ──── connectionEnv: multi-account credential → CLI env mapping ──────────────
+describe("connectionEnv", () => {
+  it("returns null without credentials (keep host ~/.claude login)", () => {
+    assert.equal(connectionEnv({}), null);
+    assert.equal(connectionEnv({ apiKey: null }), null);
+  });
+
+  it("ignores empty-string credentials", () => {
+    assert.equal(connectionEnv({ accessToken: "", apiKey: "" }), null);
+  });
+
+  it("maps accessToken to CLAUDE_CODE_OAUTH_TOKEN", () => {
+    assert.deepEqual(connectionEnv({ accessToken: "sk-ant-oat01-x" }), {
+      CLAUDE_CODE_OAUTH_TOKEN: "sk-ant-oat01-x",
+    });
+  });
+
+  it("maps apiKey to ANTHROPIC_API_KEY", () => {
+    assert.deepEqual(connectionEnv({ apiKey: "sk-ant-api01-y" }), {
+      ANTHROPIC_API_KEY: "sk-ant-api01-y",
+    });
+  });
+
+  it("maps both credentials at once", () => {
+    assert.deepEqual(connectionEnv({ accessToken: "tok", apiKey: "key" }), {
+      CLAUDE_CODE_OAUTH_TOKEN: "tok",
+      ANTHROPIC_API_KEY: "key",
     });
   });
 });

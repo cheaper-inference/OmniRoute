@@ -77,3 +77,37 @@ test("#3061 pollinations anonymous-fallback: excluding 'noauth' returns null (br
     "excluded synthetic noauth must not be re-selected for the pollinations keyless path"
   );
 });
+
+// ── Multi-account: imported connections outrank the synthetic host login ──
+
+test("claude-agent with no connections still resolves to synthetic noauth (host login)", async () => {
+  const creds = await getProviderCredentials("claude-agent", null, null, null);
+  assert.ok(creds, "connection-less claude-agent must fall back to the host CLI login");
+  assert.equal((creds as { connectionId?: string }).connectionId, "noauth");
+});
+
+test("claude-agent with an imported connection resolves that connection instead of noauth", async () => {
+  const { createProviderConnection } = await import("../../src/lib/db/providers.ts");
+  const connection = await createProviderConnection({
+    provider: "claude-agent",
+    authType: "oauth",
+    name: "Imported account",
+    accessToken: "sk-ant-oat01-test-multi-account",
+    refreshToken: "rt-test",
+    providerSpecificData: { cliUserID: "0123456789abcdef" },
+  });
+
+  const creds = await getProviderCredentials("claude-agent", null, null, null);
+  assert.ok(creds, "imported connection must be selected");
+  assert.notEqual((creds as { connectionId?: string }).connectionId, "noauth");
+  assert.equal(
+    (creds as { accessToken?: string }).accessToken,
+    "sk-ant-oat01-test-multi-account",
+    "the executor maps this to CLAUDE_CODE_OAUTH_TOKEN"
+  );
+
+  // Cleanup so the previous test's invariant (no connections → synthetic) is not
+  // weakened for runs where tests within this file share the DB.
+  const { deleteProviderConnection } = await import("../../src/lib/db/providers.ts");
+  await deleteProviderConnection(connection.id as string);
+});

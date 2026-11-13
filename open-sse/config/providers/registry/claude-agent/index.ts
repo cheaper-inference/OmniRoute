@@ -7,11 +7,11 @@ export const claude_agentProvider: RegistryEntry = {
   format: "claude",
   executor: "claude-agent",
   baseUrl: "claude-agent://stdio",
-  // Authentication is owned by the user's existing Claude Code login: the
-  // @anthropic-ai/claude-agent-sdk spawns its bundled Claude Code CLI, which
-  // uses the host's ~/.claude credentials. OmniRoute never stores an Anthropic
-  // OAuth token or calls the Anthropic API directly.
-  authType: "none",
+  // Auth: per-connection OAuth credentials are imported from a Claude
+  // `.credentials.json` (same path as the `claude` provider); the executor
+  // passes them to the spawned CLI via CLAUDE_CODE_OAUTH_TOKEN. Without a
+  // connection the CLI keeps authenticating with the host's ~/.claude login.
+  authType: "oauth",
   authHeader: "none",
   defaultContextLength: 200000,
   // Mirror the native claude registry's full model list (Fable 5.1 included);

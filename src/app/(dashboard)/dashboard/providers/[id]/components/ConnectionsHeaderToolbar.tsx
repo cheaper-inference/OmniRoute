@@ -391,7 +391,7 @@ export default function ConnectionsHeaderToolbar({
                     {providerText(t, "importCodexAuth", "Import auth")}
                   </Button>
                 )}
-                {providerId === "claude" && (
+                {(providerId === "claude" || providerId === "claude-agent") && (
                   <Button
                     size="sm"
                     variant="secondary"

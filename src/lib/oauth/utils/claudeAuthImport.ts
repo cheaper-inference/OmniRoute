@@ -44,6 +44,8 @@ export interface CreateConnectionOptions {
   name?: string;
   email?: string;
   overwriteExisting?: boolean;
+  /** Target provider for the connection ("claude" default; "claude-agent" allowed). */
+  provider?: string;
 }
 
 // ──── Parse & validate ────────────────────────────────────────────────────────
@@ -174,9 +176,10 @@ export async function enrichWithBootstrap(
 
 export async function findExistingClaudeConnection(
   accountUUID: string,
-  organizationUUID: string | null = null
+  organizationUUID: string | null = null,
+  provider: string = "claude"
 ): Promise<JsonRecord | null> {
-  const connections = await getProviderConnections({ provider: "claude" });
+  const connections = await getProviderConnections({ provider });
   return (
     (connections.find((c) =>
       isSameClaudeIdentity(
@@ -229,7 +232,8 @@ export async function createConnectionFromAuthFile(
   if (enriched.accountUUID) {
     const existing = await findExistingClaudeConnection(
       enriched.accountUUID,
-      enriched.organizationUUID
+      enriched.organizationUUID,
+      options.provider
     );
 
     if (existing) {
@@ -284,7 +288,7 @@ export async function createConnectionFromAuthFile(
   const name = options.name || options.email || enriched.email || "Claude (imported)";
 
   const connection = await createProviderConnection({
-    provider: "claude",
+    provider: options.provider ?? "claude",
     authType: "oauth",
     name,
     email,

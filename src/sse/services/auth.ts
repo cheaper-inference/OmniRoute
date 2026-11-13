@@ -664,6 +664,16 @@ function isAnonymousFallbackOnlyProvider(providerId: string): boolean {
     webCookieProviderDef?.noAuth !== true
   );
 }
+/** True when the provider has real DB connections — they outrank the synthetic no-auth host login. */
+async function providerHasRealConnections(providerId: string): Promise<boolean> {
+  try {
+    const connections = await getProviderConnections({ provider: providerId });
+    return connections.length > 0;
+  } catch {
+    return false; // fail open: keep the synthetic host login usable
+  }
+}
+
 async function maybeSyntheticNoAuthFallback(
   providerId: string,
   excludedConnectionIds: Set<string>,
@@ -1058,7 +1068,12 @@ export async function getProviderCredentials(
       }
       // #9057: an allowlist that does not name "noauth" falls through to the normal
       // connection-selection path so the allowlist is respected.
-      if (allowlistPermitsSyntheticNoAuth(allowedConnections)) {
+      // Multi-account imports (claude-agent etc.): real connections take priority
+      // over the synthetic host-login; synthetic stays the zero-config fallback.
+      if (
+        allowlistPermitsSyntheticNoAuth(allowedConnections) &&
+        !(await providerHasRealConnections(resolvedId))
+      ) {
         // #13483: check model-only lockout before handing back the synthetic
         // connection. Without this, a locked model (e.g. 400 model_capacity)
         // is retried on every request because the noauth path short-circuits

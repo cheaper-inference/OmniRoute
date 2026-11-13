@@ -446,6 +446,7 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
       return await refreshM365Token(credentials.refreshToken, credentials, log, proxyConfig);
 
     case "claude":
+    case "claude-agent": // imported OAuth accounts share the claude token shape
       return await refreshClaudeOAuthToken(credentials.refreshToken, log, proxyConfig);
 
     case "codex":
@@ -534,6 +535,7 @@ export function supportsTokenRefresh(provider) {
     "antigravity",
     "agy",
     "claude",
+    "claude-agent",
     "codex",
     "openference",
     "renderhour",
@@ -884,6 +886,7 @@ export function formatProviderCredentials(provider, credentials, log) {
       };
 
     case "claude":
+    case "claude-agent":
       return {
         apiKey: credentials.apiKey,
         accessToken: credentials.accessToken,

@@ -15,6 +15,7 @@ const importClaudeAuthSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   email: z.string().email("Must be a valid email").optional(),
   overwriteExisting: z.boolean().optional(),
+  provider: z.enum(["claude", "claude-agent"]).optional(),
 });
 
 const importClaudeAuthBulkSchema = z.object({
@@ -29,6 +30,7 @@ const importClaudeAuthBulkSchema = z.object({
     .min(1, "At least one entry is required")
     .max(50, "At most 50 entries per bulk import"),
   overwriteExisting: z.boolean().optional(),
+  provider: z.enum(["claude", "claude-agent"]).optional(),
 });
 
 // ──── Single schema ───────────────────────────────────────────────────────────
@@ -310,4 +312,29 @@ test("apply-local: audit metadata includes provider 'claude'", () => {
   };
   assert.equal(metadata.provider, "claude");
   assert.ok(typeof metadata.mcpOAuthPreserved === "boolean");
+});
+
+// ──── Multi-account: provider targets the connection family ──────────────────
+
+test("import schema: provider defaults to 'claude' and accepts 'claude-agent'", () => {
+  const base = { source: { kind: "json" as const, json: {} } };
+  const defaulted = importClaudeAuthSchema.safeParse(base);
+  assert.ok(defaulted.success);
+  assert.equal(defaulted.data.provider, undefined);
+
+  const agent = importClaudeAuthSchema.safeParse({ ...base, provider: "claude-agent" });
+  assert.ok(agent.success);
+  assert.equal(agent.data.provider, "claude-agent");
+
+  const rejected = importClaudeAuthSchema.safeParse({ ...base, provider: "codex" });
+  assert.notEqual(rejected.success, true);
+});
+
+test("bulk import schema: provider accepts 'claude-agent'", () => {
+  const result = importClaudeAuthBulkSchema.safeParse({
+    entries: [{ json: {} }],
+    provider: "claude-agent",
+  });
+  assert.ok(result.success);
+  assert.equal(result.data.provider, "claude-agent");
 });

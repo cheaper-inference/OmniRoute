@@ -148,9 +148,9 @@ export const NOAUTH_PROVIDERS = {
     isLocalCli: true,
     toolCalling: "emulated",
     authHint:
-      "Authentication is owned by the user's existing Claude Code login on this host. OmniRoute never stores an Anthropic credential.",
+      "Without a connection, the bundled Claude Code CLI uses the host's existing Claude Code login. Imported per-connection accounts (Import auth) are authenticated via CLAUDE_CODE_OAUTH_TOKEN instead.",
     notice: {
-      text: "Requests are served by the bundled Claude Code CLI (via @anthropic-ai/claude-agent-sdk) using the host's existing Claude Code authentication. No Anthropic API key or OAuth token is stored by OmniRoute.",
+      text: "Requests are served by the bundled Claude Code CLI (via @anthropic-ai/claude-agent-sdk). With no connection it uses the host's Claude Code authentication; imported connections authenticate with their own stored OAuth token (encrypted at rest, refreshable).",
     },
   },
   "codex-app-server": {

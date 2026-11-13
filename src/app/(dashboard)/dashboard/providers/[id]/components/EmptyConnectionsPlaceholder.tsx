@@ -145,7 +145,7 @@ function EmptyConnectionsActions({
                 : "Import auth"}
             </Button>
           )}
-          {providerId === "claude" && (
+          {(providerId === "claude" || providerId === "claude-agent") && (
             <Button
               variant="secondary"
               icon="upload_file"

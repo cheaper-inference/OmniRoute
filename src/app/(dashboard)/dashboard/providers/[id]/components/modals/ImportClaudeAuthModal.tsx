@@ -18,6 +18,8 @@ import {
 interface ImportClaudeAuthModalProps {
   onClose: () => void;
   onSuccess: () => void;
+  /** Target provider for imported connections (defaults to "claude"). */
+  provider?: string;
 }
 
 type ClaudeImportTopTab = "single" | "bulk";
@@ -60,7 +62,11 @@ function previewClaudeJson(json: unknown): { valid: boolean; email: string | nul
   }
 }
 
-export function ImportClaudeAuthModal({ onClose, onSuccess }: ImportClaudeAuthModalProps) {
+export function ImportClaudeAuthModal({
+  onClose,
+  onSuccess,
+  provider = "claude",
+}: ImportClaudeAuthModalProps) {
   const t = useTranslations("providers");
   const notify = useNotificationStore();
 
@@ -142,6 +148,7 @@ export function ImportClaudeAuthModal({ onClose, onSuccess }: ImportClaudeAuthMo
               name: singleName || undefined,
               email: singleEmail || undefined,
               overwriteExisting,
+              provider,
             };
 
       const res = await fetch("/api/providers/claude-auth/import", {
@@ -326,6 +333,7 @@ export function ImportClaudeAuthModal({ onClose, onSuccess }: ImportClaudeAuthMo
             email: e.email || undefined,
           })),
           overwriteExisting,
+          provider,
         }),
       });
       const data = await res.json().catch(() => ({}));

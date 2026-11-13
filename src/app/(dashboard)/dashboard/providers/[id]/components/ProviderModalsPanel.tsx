@@ -429,9 +429,10 @@ export default function ProviderModalsPanel({
           onClose={() => setApplyClaudeModalConnectionId(null)}
         />
       )}
-      {providerId === "claude" && importClaudeModalOpen && (
+      {(providerId === "claude" || providerId === "claude-agent") && importClaudeModalOpen && (
         <ImportClaudeAuthModal
-          key="import-claude-modal"
+          key={`import-claude-modal-${providerId}`}
+          provider={providerId}
           onClose={() => setImportClaudeModalOpen(false)}
           onSuccess={() => {
             setImportClaudeModalOpen(false);

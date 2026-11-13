@@ -50,6 +50,7 @@ export const importCodexAuthBulkSchema = z.object({
 // ──── Claude Auth Import Schema ────
 
 export const importClaudeAuthSchema = z.object({
+  provider: z.enum(["claude", "claude-agent"]).optional(),
   source: z.discriminatedUnion("kind", [
     z.object({ kind: z.literal("json"), json: z.unknown() }),
     z.object({
@@ -65,6 +66,7 @@ export const importClaudeAuthSchema = z.object({
 // ──── Claude Auth Import Bulk Schema ────
 
 export const importClaudeAuthBulkSchema = z.object({
+  provider: z.enum(["claude", "claude-agent"]).optional(),
   entries: z
     .array(
       z.object({
