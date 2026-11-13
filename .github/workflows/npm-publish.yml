@@ -89,6 +89,7 @@ jobs:
         with:
           node-version: ${{ env.NPM_PUBLISH_NODE_VERSION }}
           registry-url: https://registry.npmjs.org
+          package-manager-cache: false
 
       - name: Install dependencies (skip scripts to avoid heavy build)
         run: npm install --ignore-scripts --no-audit --no-fund
@@ -406,6 +407,7 @@ jobs:
         with:
           node-version: ${{ env.NPM_PUBLISH_NODE_VERSION }}
           registry-url: https://registry.npmjs.org
+          package-manager-cache: false
 
       - name: Ensure npm supports staged publishing
         run: |
@@ -505,6 +507,7 @@ jobs:
         with:
           node-version: ${{ env.NPM_PUBLISH_NODE_VERSION }}
           registry-url: https://registry.npmjs.org
+          package-manager-cache: false
 
       - name: Auto-bump plugin version if plugin changed since last release
         id: bump
@@ -594,6 +597,7 @@ jobs:
         with:
           node-version: ${{ env.NPM_PUBLISH_NODE_VERSION }}
           registry-url: https://registry.npmjs.org
+          package-manager-cache: false
 
       - name: Auto-bump plugin-v2 version if plugin-v2 changed since last release
         id: bump
