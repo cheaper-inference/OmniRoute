@@ -430,7 +430,7 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
               // signed functionCall (#8979 / #3688).
               if (!hasSignedToolUse) {
                 parts.push({
-                  text: buildHistoricalToolResultContext(name, content),
+                  text: buildHistoricalToolResultContext(name, content, block.is_error === true),
                 });
                 afterLastToolResult = parts.length;
                 break;

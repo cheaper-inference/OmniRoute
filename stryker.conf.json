@@ -821,7 +821,8 @@
       "tests/unit/stream-lifecycle-timer-cleanup-18669.test.ts",
       "tests/unit/auth-selection-skips-full-account.test.ts",
       "tests/unit/kiro-conversation-id-stable.test.ts",
-      "tests/unit/claude-to-gemini-thinking-disabled.test.ts"
+      "tests/unit/claude-to-gemini-thinking-disabled.test.ts",
+      "tests/unit/claude-to-gemini-unsigned-tool-error.test.ts"
     ],
     "nodeArgs": [
       "--import",
