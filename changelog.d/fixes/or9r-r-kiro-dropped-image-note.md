@@ -1,0 +1,1 @@
+- **fix(kiro):** a Kiro request now says in the text when an image was left out (remote image URL, or a model that takes no images), so the model does not answer as if none was sent.

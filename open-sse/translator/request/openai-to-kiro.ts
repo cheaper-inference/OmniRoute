@@ -367,6 +367,7 @@ function convertMessages(messages, tools, model) {
 
         // Extract images (OpenAI image_url and Anthropic image formats).
         // Skip entirely for models that do not support images — see supportsImages.
+        const imagesBefore = pendingImages.length;
         for (const block of msg.content) {
           if (supportsImages && block.type === "image_url") {
             const url: string = block.image_url?.url || "";
@@ -391,6 +392,17 @@ function convertMessages(messages, tools, model) {
               if (bytes) pendingImages.push({ format, source: { bytes } });
             }
           }
+        }
+
+        // Kiro takes only inline bytes, and only for Claude models. Say so in the text, so the
+        // model does not answer as if no image was sent.
+        const imageBlocks = msg.content.filter(
+          (c) => c.type === "image_url" || c.type === "image"
+        ).length;
+        const omittedImages = imageBlocks - (pendingImages.length - imagesBefore);
+        if (omittedImages > 0) {
+          const note = `[${omittedImages} ${omittedImages === 1 ? "image" : "images"} omitted: Kiro accepts only inline image data, and only for Claude models]`;
+          content = content ? `${content}\n${note}` : note;
         }
 
         // Check for tool_result blocks
@@ -747,16 +759,15 @@ function convertMessages(messages, tools, model) {
   const answeredToolUseIds = new Set<string>();
   for (const item of mergedHistory) {
     const toolResults = item.userInputMessage?.userInputMessageContext?.toolResults as
-      | Array<{ toolUseId?: string }>
-      | undefined;
+      Array<{ toolUseId?: string }> | undefined;
     if (Array.isArray(toolResults)) {
       for (const result of toolResults) {
         if (result?.toolUseId) answeredToolUseIds.add(result.toolUseId);
       }
     }
   }
-  const currentToolResultsForOrphanCheck = currentMessage?.userInputMessage
-    ?.userInputMessageContext?.toolResults as Array<{ toolUseId?: string }> | undefined;
+  const currentToolResultsForOrphanCheck = currentMessage?.userInputMessage?.userInputMessageContext
+    ?.toolResults as Array<{ toolUseId?: string }> | undefined;
   if (Array.isArray(currentToolResultsForOrphanCheck)) {
     for (const result of currentToolResultsForOrphanCheck) {
       if (result?.toolUseId) answeredToolUseIds.add(result.toolUseId);
@@ -764,8 +775,7 @@ function convertMessages(messages, tools, model) {
   }
   for (const item of mergedHistory) {
     const toolUses = item.assistantResponseMessage?.toolUses as
-      | Array<{ toolUseId?: string }>
-      | undefined;
+      Array<{ toolUseId?: string }> | undefined;
     if (!Array.isArray(toolUses)) continue;
     const filtered = toolUses.filter(
       (use) => use?.toolUseId && answeredToolUseIds.has(use.toolUseId)
