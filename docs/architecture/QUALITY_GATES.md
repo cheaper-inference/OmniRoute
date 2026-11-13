@@ -234,14 +234,14 @@ provider display name reds CI until that file is regenerated.
 
 ### Job: `i18n-ui-coverage`
 
-| Script                            | Validates                                                                                                                                                                             | Blocking                |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| `check-ui-keys-coverage` (inline) | UI i18n key coverage is ≥ 65%                                                                                                                                                         | Yes (both modes)        |
-| `check:ui-icu`                    | Every message of every UI catalog compiles with `IntlMessageFormat`                                                                                                                   | Yes (both modes)        |
-| `check-ui-value-drift` (inline)   | A rewritten English **value** leaves no stale translation behind                                                                                                                      | Yes (release mode only) |
-| `check-new-key-coverage` (inline) | A **new** English key is translated in every locale — a `__MISSING__:` marker is rejected                                                                                             | Yes (release mode only) |
-| `check-key-completeness` (inline) | Every UI catalog (and, with `--catalog=cli`, every CLI catalog) carries exactly the key set of its `en.json`                                                                          | Yes (release mode only) |
-| `check-translation-ratio`         | Real-translation ratio per locale (identical-to-English / placeholder / missing leaves outside the allowlist) must not exceed `config/quality/i18n-translation-baseline.json` + slack | Yes (release mode only) |
+| Script                            | Validates                                                                                                                                                                                | Blocking                |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| `check-ui-keys-coverage` (inline) | UI i18n key coverage is ≥ 65%                                                                                                                                                            | Yes (both modes)        |
+| `check:ui-icu`                    | Every message of every UI catalog compiles with `IntlMessageFormat`                                                                                                                      | Yes (both modes)        |
+| `check-ui-value-drift` (inline)   | A rewritten English **value** leaves no stale translation behind                                                                                                                         | Yes (release mode only) |
+| `check-new-key-coverage` (inline) | A **new** English key is translated in every locale — a `__MISSING__:` marker is rejected                                                                                                | Yes (release mode only) |
+| `check-key-completeness` (inline) | Every UI catalog (and, with `--catalog=cli`, every CLI catalog) carries exactly the key set of its `en.json`; in `pr` mode, each catalog the PR changed against itself at the merge base | Yes (both modes)        |
+| `check-translation-ratio`         | Real-translation ratio per locale (identical-to-English / placeholder / missing leaves outside the allowlist) must not exceed `config/quality/i18n-translation-baseline.json` + slack    | Yes (release mode only) |
 
 Needs `fetch-depth: 0` — the value-drift gate diffs `en.json` against the merge base.
 
@@ -256,9 +256,24 @@ The gates read the mode from `scripts/check/lib/gateMode.mjs`: in `pr` mode (fea
 0; in `release` mode (the release PR, pushes to `main`, `workflow_dispatch`, local runs) they are
 strict as before, and on the release PR the diff-aware ones get `BASE_REF=origin/main`, so they
 judge every key the cycle added or rewrote. Preview the feature-PR verdict locally with
-`--mode=pr`. The locale-parity unit tests (`cli-i18n-catalog`, `i18n-pt-br`,
-`i18n-vi-completeness`) skip their parity assertions the same way
-(`tests/_helpers/localeParityMode.ts`).
+`--mode=pr`.
+
+A PR that still changes locale catalogs in `pr` mode (a translation wave, the release refresh, a
+translation-only fix) is not skipped: `check-key-completeness` judges each catalog it changed
+against the same catalog at the merge base (`scripts/i18n/lib/touched-catalogs.mjs`) and fails on
+a key the catalog lost, a key `en.json` lacks, a real translation turned into a `__MISSING__:`
+marker or into the English text, or a value that no longer interpolates the placeholders/tags of
+an English string the PR did not touch. A catalog new in the PR must carry the whole `en.json` key
+set. That covers, for the catalogs a PR touches, what the ratio and CLI-parity gates would see.
+
+The locale-parity unit tests (`cli-i18n-catalog`, `i18n-pt-br`, `i18n-vi-completeness`,
+`i18n-placeholder-parity`) follow the same modes through `tests/_helpers/localeParityMode.ts`: in
+`pr` mode they skip key-parity assertions and leave to the release refresh the placeholder parity
+of keys whose English changed since the merge base (every key when the unit-test job's shallow
+checkout cannot read it). That helper is the **only** sanctioned mode-conditional skip:
+`check:test-masking` counts `.skip(` and `{ skip: true }` but not the computed
+`{ skip: "<reason>" }` it returns, so `tests/unit/locale-parity-mode.test.ts` pins the list of
+tests allowed to use it — adding one is a reviewed edit to that list.
 
 #### `check-ui-value-drift` — stale-translation gate
 
@@ -683,9 +698,10 @@ locales and batch 2 (#13660) 10 keys short in eight (2026-09-15). Fix a red with
 means the source dropped it — `sync-ui-keys` drops it (`--prune-extra`, the default). `--warn`
 reports without failing.
 `--catalog=cli` runs the same comparison over `bin/cli/locales` (`npm run i18n:check-keys:cli`);
-both steps live in job `i18n-ui-coverage`. Release mode only: a feature PR sees
-`SKIP reason=pr-mode` and the fix runs in the release refresh or a translation wave, never in a
-feature PR.
+both steps live in job `i18n-ui-coverage`. The absolute check is release mode only: a feature PR
+sees `SKIP reason=pr-mode` and the fix runs in the release refresh or a translation wave, never in
+a feature PR; a PR that changes locale catalogs has each of them judged against the merge base
+instead (see "Two modes" under job `i18n-ui-coverage`).
 
 #### `check-new-key-coverage` — new-key i18n gate
 

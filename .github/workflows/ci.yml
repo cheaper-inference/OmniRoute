@@ -612,7 +612,10 @@ jobs:
     #             UI + CLI, translation ratio) print `SKIP reason=pr-mode` and exit 0. Coverage
     #             floor and ICU compilation still run: they judge what the PR wrote. That the PR
     #             leaves the other locales alone is enforced by PR Test Policy →
-    #             check:pr-derived-paths (config/quality/derived-paths/translation.json).
+    #             check:pr-derived-paths (config/quality/derived-paths/translation.json). A PR
+    #             that does change locale catalogs (translation wave, release refresh) gets each
+    #             changed catalog judged against the merge base by the key-completeness steps
+    #             (lost keys or translations, new markers, broken placeholders).
     #   release — the release PR (release/v* → main), pushes to main, workflow_dispatch: every
     #             gate strict, as before; the diff-aware ones get BASE_REF=origin/main on the
     #             release PR, so they judge the whole cycle after the release refresh
@@ -674,12 +677,12 @@ jobs:
       # batch 1 (#13044) landed 43 keys short in nine locales, batch 2 (#13660) 10 keys short
       # in eight. Fix (release refresh or translation wave, never a feature PR):
       # `sync-ui-keys --locale=<codes> --translate-markers`.
-      - name: i18n key completeness (every locale carries every en.json key, release mode)
+      - name: i18n key completeness (every en.json key in every locale; pr mode — changed catalogs)
         run: node scripts/i18n/check-key-completeness.mjs
       # Same gate for the CLI catalogs (bin/cli/locales). check:cli-i18n only compares
       # pt-BR / zh-CN / zh-TW; 38 locales shipped with 1–24 of 830 keys for months
       # (audit 2026-09-16) and the CLI silently fell back to English for them.
-      - name: i18n key completeness (CLI catalogs, release mode)
+      - name: i18n key completeness (CLI catalogs; pr mode — changed catalogs)
         run: node scripts/i18n/check-key-completeness.mjs --catalog=cli
 
   # #8038: cheap glossary/protected-terms consistency gate —
