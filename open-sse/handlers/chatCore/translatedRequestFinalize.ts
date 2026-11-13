@@ -18,6 +18,7 @@ import { enforceResponsesToolHistory } from "../../translator/helpers/responsesT
 import { normalizeClaudeToolsForDispatch } from "./claudeToolDefaults.ts";
 import { normalizeToolSchemasForProvider } from "./openrouterToolSchemas.ts";
 import { buildClaudePassthroughToolNameMap } from "./passthroughToolNames.ts";
+import { dedupeDeepSeekTools } from "./dedupeDeepSeekTools.ts";
 import {
   extractRequestToolMetadata,
   resolveResponseToolNameMap,
@@ -84,6 +85,11 @@ export function finalizeTranslatedRequest({
   // regex in any tool schema; drop only those constraints before dispatch.
   if (Array.isArray(translatedBody?.tools)) {
     translatedBody.tools = normalizeToolSchemasForProvider(provider, translatedBody.tools, log);
+  }
+
+  // DeepSeek 400s on a repeated tool name (any endpoint); keep the first definition.
+  if (Array.isArray(translatedBody?.tools)) {
+    translatedBody.tools = dedupeDeepSeekTools(translatedBody.tools, effectiveModel);
   }
 
   // Kiro: sanitize tool schemas before dispatch. Kiro returns 400 "Improperly
