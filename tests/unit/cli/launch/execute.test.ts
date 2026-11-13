@@ -474,3 +474,69 @@ test("ENOENT -> ToolNotFound and tmp removed; onSpawn errors become warnings", a
   assert.equal(result.exitCode, 0);
   assert.deepEqual(result.warnings, ["onSpawn hook failed: spawn hook"]);
 });
+
+test("tempDirs (1.2) are created with their mode under tmp and state before spawn", async () => {
+  const root = await tempDir("dirs");
+  const stateDir = path.join(await tempDir("dirsstate"), "launch", "fake");
+  const seen: Record<string, { isDir: boolean; mode: number }> = {};
+  let tmpAtSpawn: string | undefined;
+  const result = await executePlan(
+    makePlan({
+      env: { set: { LOCKS: "${TMP}/locks" }, unset: [] },
+      tempDirs: [
+        { path: "locks" },
+        { path: "deep/er/dir", mode: 0o755 },
+        { path: "data/cache", root: "state", mode: 0o750 },
+      ],
+      cleanup: { removeTempDir: false, revokeSession: true },
+    }) as never,
+    baseOpts({
+      tmpRoot: root,
+      stateDir,
+      spawn: (_command: string, _args: string[], options: { env: Record<string, string> }) => {
+        tmpAtSpawn = path.dirname(options.env.LOCKS);
+        for (const [key, dir] of [
+          ["locks", path.join(tmpAtSpawn, "locks")],
+          ["deep", path.join(tmpAtSpawn, "deep", "er", "dir")],
+          ["state", path.join(stateDir, "data", "cache")],
+        ]) {
+          const stat = existsSync(dir) ? statSync(dir) : undefined;
+          seen[key] = { isDir: Boolean(stat?.isDirectory()), mode: (stat?.mode ?? 0) & 0o777 };
+        }
+        const child = new EventEmitter() as EventEmitter & { pid?: number; kill: () => void };
+        child.pid = 4242;
+        child.kill = () => {};
+        setImmediate(() => child.emit("close", 0, null));
+        return child;
+      },
+    })
+  );
+  assert.equal(result.exitCode, 0);
+  assert.equal(tmpAtSpawn, result.tmpDir);
+  for (const key of ["locks", "deep", "state"]) assert.equal(seen[key].isDir, true, key);
+  if (isPosix) {
+    assert.equal(seen.locks.mode, 0o700, "default mode 0700");
+    assert.equal(seen.deep.mode, 0o755);
+    assert.equal(seen.state.mode, 0o750);
+  }
+});
+
+test("tempDirs escaping their root fail before spawn and remove tmp", async () => {
+  const root = await tempDir("dirsbad");
+  let spawned = 0;
+  await assert.rejects(
+    executePlan(
+      makePlan({ tempDirs: [{ path: "../escape" }] }) as never,
+      baseOpts({
+        tmpRoot: root,
+        spawn: () => {
+          spawned += 1;
+          throw new Error("should not spawn");
+        },
+      })
+    ),
+    (error: { code?: string }) => error.code === "Internal"
+  );
+  assert.equal(spawned, 0);
+  assert.deepEqual(await readdir(root), []);
+});

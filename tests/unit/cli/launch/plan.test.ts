@@ -153,6 +153,59 @@ test("validatePlan rejects each broken invariant as Internal", () => {
   }
 });
 
+test("validatePlan: tempDirs (1.2) accepted under tmp and state, bad ones rejected", () => {
+  const ctx = fixtureCtx();
+  const adapter = adapterWith((c) => goodPlan(c));
+  const good = {
+    ...goodPlan(ctx),
+    tempDirs: [
+      { path: "locks" },
+      { path: "a/b", root: "tmp", mode: 0o755 },
+      { path: "data", root: "state", mode: 0o700 },
+    ],
+  };
+  assert.doesNotThrow(() => validatePlan(good, ctx, adapter));
+
+  const cases: Array<[string, any, RegExp]> = [
+    ["traversal", [{ path: "../x" }], /temp dir path "\.\.\/x" escapes its root/],
+    ["inner traversal", [{ path: "a/../../x" }], /escapes its root/],
+    ["absolute", [{ path: "/etc/x" }], /escapes its root/],
+    ["windows absolute", [{ path: "C:\\x" }], /escapes its root/],
+    ["empty", [{ path: "" }], /escapes its root/],
+    ["bad root", [{ path: "x", root: "home" }], /root must be tmp \| state/],
+    ["world writable", [{ path: "x", mode: 0o777 }], /mode must/],
+    ["owner cannot enter", [{ path: "x", mode: 0o600 }], /mode must/],
+    ["duplicate", [{ path: "x" }, { path: "x", root: "tmp" }], /declared twice/],
+    ["clashes with a file", [{ path: "c.json" }], /also a temp file/],
+    ["not an array", { path: "x" }, /tempDirs must be an array/],
+  ];
+  for (const [name, tempDirs, pattern] of cases) {
+    const plan = { ...goodPlan(ctx), tempDirs };
+    assert.throws(
+      () => validatePlan(plan, ctx, adapter),
+      (error: any) => error.code === "Internal" && pattern.test(error.message),
+      name
+    );
+  }
+
+  // A tmp-root tempDir alone requires the tmp dir.
+  const bare = createPlan("fixture-tool", {
+    tempDirs: [{ path: "locks" }],
+    needsTempDir: false,
+    modelList: { strategy: "inject", viewHash: ctx.view.hash, injected: 0 },
+  });
+  assert.throws(
+    () => validatePlan(bare, ctx, adapter),
+    (error: any) => error.code === "Internal" && /needsTempDir/.test(error.message)
+  );
+  const stateOnly = createPlan("fixture-tool", {
+    tempDirs: [{ path: "locks", root: "state" }],
+    modelList: { strategy: "inject", viewHash: ctx.view.hash, injected: 0 },
+  });
+  assert.equal(stateOnly.needsTempDir, false);
+  assert.doesNotThrow(() => validatePlan(stateOnly, ctx, adapter));
+});
+
 test("planLaunch runs middleware around plan(), adds modelWarnings, validates last", () => {
   const ctx = fixtureCtx();
   const adapter = adapterWith((c) => goodPlan(c, { notes: [c.settings.tag ?? "none"] }), {

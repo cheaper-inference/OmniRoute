@@ -62,6 +62,17 @@ function relativeSafe(path) {
   return !s.split(/[\\/]/).some((part) => part === ".." || part === "" || part === ".");
 }
 
+/** TempDirSpec.mode (1.2): an integer 0..0o777 with owner rwx and no group/other write. */
+function validDirMode(mode) {
+  return (
+    Number.isInteger(mode) &&
+    mode >= 0 &&
+    mode <= 0o777 &&
+    (mode & 0o700) === 0o700 &&
+    (mode & 0o022) === 0
+  );
+}
+
 const TEARDOWN_ENV = new Set([undefined, "plan", "base"]);
 const ON_ERROR = new Set(["warn", "ignore"]);
 
@@ -174,6 +185,24 @@ export function validatePlan(plan, ctx, adapter) {
     const key = `${root}:${file.path}`;
     if (seen.has(key)) fail(`temp file ${key} written twice`);
     seen.add(key);
+  }
+  if (plan.tempDirs !== undefined && !Array.isArray(plan.tempDirs)) {
+    fail("tempDirs must be an array");
+  }
+  const seenDirs = new Set();
+  for (const dir of Array.isArray(plan.tempDirs) ? plan.tempDirs : []) {
+    const root = dir?.root ?? "tmp";
+    if (!relativeSafe(dir?.path))
+      fail(`temp dir path ${JSON.stringify(dir?.path)} escapes its root`);
+    if (root !== "tmp" && root !== "state") fail(`temp dir ${dir?.path}: root must be tmp | state`);
+    if (root === "tmp") usesTmp = true;
+    if (dir?.mode !== undefined && !validDirMode(dir.mode)) {
+      fail(`temp dir ${dir?.path}: mode must give the owner rwx and refuse group/other write`);
+    }
+    const key = `${root}:${dir?.path}`;
+    if (seen.has(key)) fail(`temp dir ${key} is also a temp file`);
+    if (seenDirs.has(key)) fail(`temp dir ${key} declared twice`);
+    seenDirs.add(key);
   }
   if (usesTmp && plan.needsTempDir !== true) fail("plan uses ${TMP} but needsTempDir is false");
 

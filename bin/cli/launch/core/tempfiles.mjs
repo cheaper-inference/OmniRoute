@@ -55,6 +55,16 @@ export function ensurePrivateDir(path) {
 }
 
 /**
+ * mkdir -p `path`, then force `mode` on the leaf (mkdir's mode is masked by the umask).
+ * @param {string} path
+ * @param {{ mode?: number }} [options]
+ */
+export function ensureDirWithMode(path, { mode = 0o700 } = {}) {
+  mkdirSync(path, { recursive: true, mode });
+  chmodSync(path, mode);
+}
+
+/**
  * Write `contents` atomically with a private mode; parents are created 0700.
  * @param {string} absPath
  * @param {string} contents

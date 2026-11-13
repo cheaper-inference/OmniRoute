@@ -7,7 +7,10 @@
 // - a launcher-owned temp HERMES_HOME (${TMP}) holding one config.yaml with a `custom` provider
 //   pointed at OmniRoute's /v1, the key by env reference (`key_env`), the catalog context window
 //   pinned (`model.context_length`), update checks and telemetry consent pre-answered;
-// - HERMES_GATEWAY_LOCK_DIR inside ${TMP} so nothing lands in ~/.local/state/hermes;
+// - HERMES_GATEWAY_LOCK_DIR inside ${TMP} so nothing lands in ~/.local/state/hermes; core
+//   creates that dir before spawn because the plan declares it in `tempDirs` (contract 1.2);
+// - the key is always ${TOKEN}: core substitutes the minted olx_ session token on every launch,
+//   also when the gateway runs without auth, so there is no empty-key branch;
 // - `hermes gateway stop` as teardown, because every turn runs in a detached gateway daemon
 //   that would outlive the CLI and be orphaned when ${TMP} is removed.
 
@@ -26,6 +29,7 @@ import {
 const TOOL_ID = "hermes";
 const MIN_CONTEXT = 64000; // _enforce_minimum_context hard reject (dossier section 4)
 const KEY_ENV = "OMNIROUTE_API_KEY";
+const LOCK_DIR = "locks"; // HERMES_GATEWAY_LOCK_DIR, relative to ${TMP}
 const RECOMMENDED_VERSION = "0.16.0"; // "gate softly on >= v0.16.0 or unknown" (dossier 1)
 
 /** Flags the launcher owns through config.yaml (dossier section 3, user-args bullet). */
@@ -250,12 +254,13 @@ function plan(ctx) {
     env: {
       set: {
         HERMES_HOME: "${TMP}",
-        HERMES_GATEWAY_LOCK_DIR: ctx.util.tempPath("locks"),
+        HERMES_GATEWAY_LOCK_DIR: ctx.util.tempPath(LOCK_DIR),
         [KEY_ENV]: ctx.auth.token,
       },
       unset: ENV_UNSET.slice(),
     },
     tempFiles: [{ path: "config.yaml", contents: yaml(config), mode: 0o600, format: "yaml" }],
+    tempDirs: [{ path: LOCK_DIR, mode: 0o700 }],
     needsTempDir: true,
     notes,
     warnings,
@@ -269,7 +274,7 @@ function plan(ctx) {
 }
 
 export default defineAdapter({
-  contract: { major: 1, minor: 0 },
+  contract: { major: 1, minor: 2 },
   id: TOOL_ID,
   displayName: "Hermes Agent",
   binaries: ["hermes"],

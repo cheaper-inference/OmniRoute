@@ -106,7 +106,7 @@ function sampleAdapter(overrides: Record<string, unknown> = {}): LaunchAdapter {
 // ---------- versions and constants ----------
 
 test("contract version and plan version are frozen at 1.0 / 1", () => {
-  assert.deepEqual({ ...ADAPTER_CONTRACT }, { major: 1, minor: 1 });
+  assert.deepEqual({ ...ADAPTER_CONTRACT }, { major: 1, minor: 2 });
   assert.equal(contractVersion, ADAPTER_CONTRACT);
   assert.ok(Object.isFrozen(ADAPTER_CONTRACT));
   assert.equal(PLAN_VERSION, 1);
@@ -408,6 +408,16 @@ test("createPlan fills every required field and infers needsTempDir", () => {
   );
   assert.equal(createPlan("x", { env: { set: { H: "${TMP}" }, unset: [] } }).needsTempDir, true);
   assert.equal(createPlan("x", { argv: ["${TMP}/a"], needsTempDir: false }).needsTempDir, false);
+  assert.equal("tempDirs" in empty, false, "tempDirs (1.2) is omitted unless given");
+  assert.equal(createPlan("x", { tempDirs: [{ path: "locks" }] }).needsTempDir, true);
+  assert.equal(
+    createPlan("x", { tempDirs: [{ path: "locks", root: "state" }] }).needsTempDir,
+    false
+  );
+  const dirs = [{ path: "a/b", mode: 0o700 }];
+  const withDirs = createPlan("x", { tempDirs: dirs });
+  withDirs.tempDirs![0].path = "changed";
+  assert.equal(dirs[0].path, "a/b", "input tempDirs not aliased");
   const env = { set: { A: "1" }, unset: ["B"] };
   const plan = createPlan("x", { env });
   plan.env.set.C = "2";
@@ -868,10 +878,11 @@ test("checkPlanInvariants accepts asset files and asset tokens, rejects misuse",
   assert.ok(ASSETS_DIR.endsWith(join("bin", "cli", "launch", "assets")));
 });
 
-test("defineAdapter accepts contract minor 1 and refuses minor 2", () => {
+test("defineAdapter accepts contract minor 1 and 2 and refuses minor 3", () => {
   assert.ok(defineAdapter(sampleAdapter({ contract: { major: 1, minor: 1 } })));
+  assert.ok(defineAdapter(sampleAdapter({ contract: { major: 1, minor: 2 } })));
   assert.throws(
-    () => defineAdapter(sampleAdapter({ contract: { major: 1, minor: 2 } })),
+    () => defineAdapter(sampleAdapter({ contract: { major: 1, minor: 3 } })),
     /contract\.minor/
   );
 });

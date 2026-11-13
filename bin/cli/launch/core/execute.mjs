@@ -20,6 +20,7 @@ import { SIGNAL_EXIT_CODES, toLaunchError } from "./errors.mjs";
 import { assertPreflight, evaluatePreflight } from "./preflight.mjs";
 import {
   createPrivateTempDir,
+  ensureDirWithMode,
   ensurePrivateDir,
   removeDirSafe,
   resolveUnder,
@@ -99,6 +100,23 @@ export function defaultReadAsset(relpath) {
 }
 
 /**
+ * Create the declared temp dirs (contract 1.2), recursive, with their mode (default 0700).
+ * @param {import("../contract.d.ts").TempDirSpec[]} dirs
+ * @param {{ tmpDir?: string | null, stateDir?: string | null }} roots
+ * @returns {string[]} absolute paths created
+ */
+export function materializeTempDirs(dirs, { tmpDir, stateDir } = {}) {
+  const created = [];
+  for (const dir of dirs ?? []) {
+    const root = dir.root === "state" ? stateDir : tmpDir;
+    const target = resolveUnder(root, dir.path);
+    ensureDirWithMode(target, { mode: dir.mode ?? 0o700 });
+    created.push(target);
+  }
+  return created;
+}
+
+/**
  * Write the (already substituted) temp files.
  * @param {import("../contract.d.ts").TempFileSpec[]} files
  * @param {{ tmpDir?: string | null, stateDir?: string | null,
@@ -172,6 +190,7 @@ function defaultSignalTimeout() {
 
 function needsStateDir(plan) {
   if ((plan.tempFiles ?? []).some((file) => file.root === "state")) return true;
+  if ((plan.tempDirs ?? []).some((dir) => dir.root === "state")) return true;
   try {
     return JSON.stringify(plan).includes(PLACEHOLDERS.STATE);
   } catch {
@@ -319,6 +338,7 @@ export async function executePlan(plan, opts = {}) {
     });
     warnings.push(...assertPreflight(results));
 
+    materializeTempDirs(s.tempDirs ?? [], { tmpDir, stateDir });
     materializeTempFiles(s.tempFiles ?? [], {
       tmpDir,
       stateDir,

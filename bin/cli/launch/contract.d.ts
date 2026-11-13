@@ -1,6 +1,7 @@
 // bin/cli/launch/contract.d.ts: launcher contract types (architecture section 2), contract 1.0.
 // Frozen for every stream. Additive changes only (optional fields, optional methods): 13.1.
 // 1.1: launcher assets (TempFileSpec.asset, ${ASSET:...} tokens in contents, assetRef helpers).
+// 1.2 (additive): LaunchPlan.tempDirs (directories core creates under ${TMP} / ${STATE}).
 
 import type {
   ViewSelectSpec,
@@ -30,8 +31,8 @@ export interface ContractVersion {
 }
 
 /** Version of this contract; adapters declare `contract: { major: 1, minor: <= this.minor }`. */
-export declare const ADAPTER_CONTRACT: Readonly<{ major: 1; minor: 1 }>;
-export declare const contractVersion: Readonly<{ major: 1; minor: 1 }>;
+export declare const ADAPTER_CONTRACT: Readonly<{ major: 1; minor: 2 }>;
+export declare const contractVersion: Readonly<{ major: 1; minor: 2 }>;
 export declare const PLAN_VERSION: 1;
 
 // ---------- capability flags (static, declared by the adapter) ----------
@@ -182,7 +183,10 @@ export interface LaunchContext {
     readonly version?: string;
   };
   readonly auth: {
-    /** Always the literal "${TOKEN}" placeholder for `omnirouter launch`. */
+    /** Always the literal "${TOKEN}" placeholder for `omnirouter launch`. `${TOKEN}` is never
+     *  empty: core always substitutes the minted `olx_` session token, also when the gateway
+     *  runs without auth (the anonymous posture still mints one). Adapters therefore always send
+     *  it as the tool's key and never branch on "auth off" to send an empty or missing key. */
     readonly token: string;
     readonly source: "session" | "option" | "env" | "context" | "none";
     readonly sessionId?: string;
@@ -231,6 +235,16 @@ export interface TempFileSpec {
   mergeBase?: { path: string; format: "json" };
 }
 
+/** (1.2) A directory core creates before spawn (recursive), after ${TMP} exists. */
+export interface TempDirSpec {
+  /** Relative to ${TMP} (default) or ${STATE}; may contain subdirs. Same rules as
+   *  TempFileSpec.path: no absolute path, no "..", ".", or empty segment. */
+  path: string;
+  root?: "tmp" | "state";
+  /** Directory mode, default 0o700. Owner rwx is required; group/other write is refused. */
+  mode?: number;
+}
+
 /** Pre-spawn check, evaluated by core. */
 export type PreflightCheck =
   | { kind: "node-version"; range: string; binary?: string; why: string }
@@ -270,6 +284,8 @@ export interface LaunchPlan {
     unset: string[];
   };
   tempFiles: TempFileSpec[];
+  /** (1.2) Directories to create before spawn. A tmp-root entry requires needsTempDir. */
+  tempDirs?: TempDirSpec[];
   needsTempDir: boolean;
   cwd?: string;
   secretSites: SecretSite[];
@@ -321,6 +337,7 @@ export declare class LaunchError extends Error {
 export declare const PLACEHOLDERS: Readonly<{
   TMP: "${TMP}";
   STATE: "${STATE}";
+  /** Never empty at execute time: always the minted `olx_` session token (see auth.token). */
   TOKEN: "${TOKEN}";
   TOOL: "${TOOL}";
 }>;
