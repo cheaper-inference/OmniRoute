@@ -1,0 +1,1 @@
+- **fix(kiro):** the Kiro `conversationId` of a single-message request no longer depends on the clock (the timestamp line was part of its seed), so turn 1 and turn 2 of a conversation share one id and the upstream session cache can hit.

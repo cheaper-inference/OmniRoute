@@ -967,6 +967,9 @@ export function buildKiroPayload(model, body, stream, credentials) {
   const profileArn = credentials?.providerSpecificData?.profileArn || "";
 
   let finalContent = currentMessage?.userInputMessage?.content || "";
+  // Seed for the conversationId below: the user text BEFORE the clock line is prepended, so a
+  // single-message request (no history yet) gets the same id on every call and on turn 2.
+  const conversationSeedContent = finalContent;
   const timestamp = new Date().toISOString();
   finalContent = `[Context: Current time is ${timestamp}]\n\n${finalContent}`;
 
@@ -1058,7 +1061,9 @@ export function buildKiroPayload(model, body, stream, credentials) {
     : "";
   const firstRealUserTurn = history.find((h) => h?.userInputMessage?.content && !h.__synthetic);
   const firstContent =
-    seedFromPreCompression || firstRealUserTurn?.userInputMessage?.content || finalContent;
+    seedFromPreCompression ||
+    firstRealUserTurn?.userInputMessage?.content ||
+    conversationSeedContent;
 
   // Use uuidv5 with the hash of the system prompt / first message to maintain AWS Builder ID context cache
   payload.conversationState.conversationId = uuidv5(
