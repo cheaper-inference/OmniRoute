@@ -393,13 +393,16 @@ export async function executeWithUpstreamStartTimeout<T>({
   log?: { warn?: (tag: string, message: string) => void } | null;
   execute: (signal: AbortSignal) => Promise<T>;
 }): Promise<T> {
-  const { timeoutMs, requestScoped } = resolveEffectiveResponseStartBudget(
+  const budget = resolveEffectiveResponseStartBudget(
     executor,
     provider,
     model,
     connectionTimeoutMs,
     requestTimeoutMs
   );
+  const { requestScoped } = budget;
+  // A delay above 2^31-1 ms makes setTimeout fire after ~1 ms, so clamp it.
+  const timeoutMs = Math.min(budget.timeoutMs, MAX_TIMER_TIMEOUT_MS);
   if (timeoutMs <= 0) return execute(signal);
   if (signal.aborted) throw createAbortError(signal);
 
