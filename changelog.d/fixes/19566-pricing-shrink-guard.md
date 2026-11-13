@@ -1,0 +1,1 @@
+- **fix(pricing):** a price sync that returns an empty map, or less than half of the stored models, is now rejected and the stored prices stay, instead of wiping the cost data for every model. ([#19566](https://github.com/cheaper-inference/OmniRoute/pull/19566))
