@@ -18,6 +18,8 @@ vi.mock("next-intl", () => ({
         if (key === "kiloPassBonus") return "Available bonus";
         if (key === "kiloPassRemaining") return "Remaining";
         if (key === "kiloAccountBalance") return "Account Balance";
+        if (key === "kiloPassBandUsage")
+          return `${(values as { used?: string })?.used} of ${(values as { total?: string })?.total}`;
         if (key === "percentLeft") return `${values?.pct}% left`;
         return key;
       },
@@ -295,5 +297,32 @@ describe("KiloPassMeter segmented presentation", () => {
     expect(bar?.getAttribute("aria-valuenow")).toBe("0");
     expect(html).not.toContain('data-state="indeterminate"');
     expect(html).not.toContain("NaN");
+  });
+});
+
+describe("KiloPassMeter band text is translated", () => {
+  it("speaks each band through the usage.kiloPassBandUsage message", async () => {
+    vi.resetModules();
+    vi.doMock("next-intl", () => ({
+      useLocale: () => "de-DE",
+      useTranslations: () =>
+        Object.assign(
+          (key: string, values?: { used?: string; total?: string }) =>
+            key === "kiloPassBandUsage" ? `${values?.used} von ${values?.total}` : key,
+          { has: () => true }
+        ),
+    }));
+    const { default: Meter } =
+      await import("@/app/(dashboard)/dashboard/usage/components/ProviderLimits/parts/KiloPassMeter");
+    const doc = parse(
+      renderToStaticMarkup(
+        <Meter base={49} bonus={24.5} used={47.95} total={73.5} remaining={25.55} />
+      )
+    );
+    const texts = Array.from(doc.querySelectorAll('[role="progressbar"]')).map((bar) =>
+      bar.getAttribute("aria-valuetext")
+    );
+    expect(texts).toEqual(["$47.95 von $49.00", "$0.00 von $24.50"]);
+    vi.doUnmock("next-intl");
   });
 });

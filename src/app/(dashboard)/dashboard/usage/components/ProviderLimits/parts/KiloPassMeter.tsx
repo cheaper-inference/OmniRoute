@@ -132,6 +132,14 @@ export default function KiloPassMeter({
   const meterLabel = translateUsageOrFallback(t, "kiloPassMeterLabel", "Kilo Pass usage meter");
   const paidLabel = translateUsageOrFallback(t, "kiloPassPaid", "Paid");
   const bonusLabel = translateUsageOrFallback(t, "kiloPassBonus", "Available bonus");
+  // Spoken value of a band, e.g. "$12.00 of $19.00".
+  const bandUsage = (usedAmount: number, capacity: number) =>
+    translateUsageOrFallback(
+      t,
+      "kiloPassBandUsage",
+      `${formatCurrency(usedAmount)} of ${formatCurrency(capacity)}`,
+      { used: formatCurrency(usedAmount), total: formatCurrency(capacity) }
+    );
   // Bands without capacity are dropped by the kit; with none left it draws the empty `value` bar.
   const bands: ProgressBand[] = [
     {
@@ -140,7 +148,7 @@ export default function KiloPassMeter({
       value: model.paidUsed,
       max: model.paid,
       tone: "success",
-      valueText: `${formatCurrency(model.paidUsed)} of ${formatCurrency(model.paid)}`,
+      valueText: bandUsage(model.paidUsed, model.paid),
       legend: <BandLegend dotClassName="bg-success" label={paidLabel} amount={model.paid} />,
     },
     {
@@ -149,7 +157,7 @@ export default function KiloPassMeter({
       value: model.bonusUsed,
       max: model.bonus,
       tone: "info",
-      valueText: `${formatCurrency(model.bonusUsed)} of ${formatCurrency(model.bonus)}`,
+      valueText: bandUsage(model.bonusUsed, model.bonus),
       legend: <BandLegend dotClassName="bg-info" label={bonusLabel} amount={model.bonus} />,
     },
   ];

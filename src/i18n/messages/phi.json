@@ -10666,6 +10666,7 @@
     "grokAutoTopUpMonth": "buwan",
     "grokAdditionalCredits": "Karagdagang Kredito",
     "kiloAccountBalance": "Balanse ng Account",
+    "kiloPassBandUsage": "{used} sa {total}",
     "kiloPassBonus": "Magagamit na bonus",
     "kiloPassMeterLabel": "Meter ng paggamit ng Kilo Pass",
     "kiloPassPaid": "Bayad na",

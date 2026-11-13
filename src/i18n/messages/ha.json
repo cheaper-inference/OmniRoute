@@ -10666,6 +10666,7 @@
     "grokAutoTopUpMonth": "wata",
     "grokAdditionalCredits": "Ƙarin Kuɗin Amfani",
     "kiloAccountBalance": "Ragowar Kuɗin Asusu",
+    "kiloPassBandUsage": "{used} daga cikin {total}",
     "kiloPassBonus": "Kyautar da ake da ita",
     "kiloPassMeterLabel": "Ma'aunin amfani da Kilo Pass",
     "kiloPassPaid": "An biya",

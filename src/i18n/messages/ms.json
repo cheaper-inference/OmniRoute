@@ -10666,6 +10666,7 @@
     "grokAutoTopUpMonth": "bulan",
     "grokAdditionalCredits": "Kredit Tambahan",
     "kiloAccountBalance": "Baki Akaun",
+    "kiloPassBandUsage": "{used} daripada {total}",
     "kiloPassBonus": "Bonus tersedia",
     "kiloPassMeterLabel": "Meter penggunaan Kilo Pass",
     "kiloPassPaid": "Dibayar",
