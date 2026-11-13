@@ -105,6 +105,9 @@ export interface QuotaWindowObservation {
 const EXHAUSTED_TTL_MS = 5 * 60 * 1000; // 5 minutes for 429-sourced entries (no resetAt)
 const EXHAUSTED_REFRESH_MS = 5 * 60 * 1000; // 5 minutes: recheck exhausted accounts (aligned with TTL)
 const REFRESH_INTERVAL_MS = 60 * 1000; // Background tick every 1 minute
+// A window with no future reset, last seen this long ago, must not keep an account paused: a paused
+// account gets no fresh headers, so the sample would otherwise freeze the pause forever.
+const STALE_NO_RESET_RELEASE_MS = 2 * 60 * 60 * 1000;
 export const DEFAULT_QUOTA_THRESHOLD_PERCENT = 99;
 
 // ─── State ──────────────────────────────────────────────────────────────────
@@ -283,6 +286,10 @@ export function normalizeConnectionQuotas(rawQuotas: Record<string, unknown>, pr
 }
 
 // ─── Public API ─────────────────────────────────────────────────────────────
+
+function isStaleWithoutReset(entry: QuotaCacheEntry, resetAt: string | null, now: number): boolean {
+  return resetAt === null && now - entry.fetchedAt >= STALE_NO_RESET_RELEASE_MS;
+}
 
 /**
  * #17000 — opt-in (QUOTA_WINDOW_BOUNDED_PARK, default off): the per-window policy honours the
@@ -1179,6 +1186,7 @@ export function getQuotaWindowStatus(
     reachedThreshold:
       windowExpired ||
       window.fractionReported === false ||
+      isStaleWithoutReset(entry, resetAt, now) ||
       (entry.provider !== "codex" && isWindowParkReleased(entry, now))
         ? false
         : remainingPercentage <= 0
