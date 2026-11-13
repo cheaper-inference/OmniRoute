@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "Equilibra la cuota restante con los restablecimientos semanales y de 5 h, y luego realiza todos contra todos puntuaciones similares",
     "quotaWeighted": "Ponderado por cuota",
     "quotaWeightedDesc": "Omite las cuentas agotadas y elige entre las demás en proporción a la cuota restante, dividida entre la carga en curso. Las conversaciones existentes se mantienen fijadas.",
+    "expiryFirst": "Vencimiento primero",
+    "expiryFirstDesc": "Consume primero la cuenta cuya cuota, de otro modo, caducaría sin usarse: va primero el mayor remanente con el reinicio más cercano.",
     "strictRandom": "Aleatorio estricto",
     "strictRandomDesc": "Baraja — utiliza cada modelo una vez antes de volver a barajar",
     "fusion": "Fusión",
@@ -4033,6 +4035,11 @@
         "when": "Se enruta a través de varias cuentas con telemetría de cuotas y diferentes ventanas de restablecimiento.",
         "avoid": "La telemetría de cuotas no está disponible para la mayoría de las cuentas.",
         "example": "Prefiera un restablecimiento semanal del 60 % de la cuenta mañana a un restablecimiento del 80 % más tarde."
+      },
+      "expiry-first": {
+        "when": "Enruta entre cuentas cuyas cuotas se restablecen en horarios distintos y desea consumir la cuota que, de otro modo, caducaría sin usarse.",
+        "avoid": "Falta telemetría de cuotas en la mayoría de las cuentas o necesita un orden estable que ignore el momento del reinicio.",
+        "example": "Prefiera una cuenta con un 80 % restante que se restablece en 39 minutos frente a una con un 48 % restante que se restablece en 9 horas — la cuota a punto de vencer se consume antes de perderse."
       },
       "strict-random": {
         "when": "Úsalo cuando quieras una distribución perfectamente uniforme: cada modelo se usa una vez antes de repetirse.",
@@ -4249,6 +4256,13 @@
         "tip1": "Utilice pasos de cuenta explícitos o enrutamiento de etiquetas de cuenta para proveedores con telemetría de cuotas.",
         "tip2": "Sesión de ajuste versus pesas semanales cuando el agotamiento a corto plazo es más riesgoso.",
         "tip3": "Mantenga la banda de unión pequeña para que las cuentas equivalentes sigan rotando de manera justa."
+      },
+      "expiry-first": {
+        "title": "Cuota por vencer primero",
+        "description": "Ordena las cuentas según la presión de aprovechamiento: la cuota restante alta cercana a su plazo de reinicio va primero.",
+        "tip1": "Requiere telemetría de cuotas del proveedor; las cuentas sin ella mantienen su orden de prioridad indicado.",
+        "tip2": "Las puntuaciones casi empatadas rotan dentro de la banda de empate para que las cuentas similares sigan compartiendo la carga.",
+        "tip3": "Limite la clasificación al grupo de cuota con el que realmente factura cada modelo."
       },
       "strict-random": {
         "title": "Distribución por barajado",
@@ -4481,7 +4495,7 @@
     "spend7d": "Spend7D",
     "avgCostPerRequest": "Avg Cost Per Request",
     "noCostDataDescription": "No Cost Data Description",
-    "spendToday": "Gasto de hoy",
+    "spendToday": "Gasto 1 día",
     "overviewLoadFailed": "Overview Load Failed",
     "overviewDescription": "Overview Description",
     "providerShare": "Cuota del proveedor",
@@ -5679,6 +5693,7 @@
     "usageTracking": "Seguimiento de uso",
     "securityDesc": "Establezca una contraseña para proteger su panel u omítala por ahora.",
     "securityDescSkipWarning": "⚠️ Sin una contraseña, no podrás añadir proveedores durante la configuración. Puedes añadirlos más adelante desde el panel después de establecer una contraseña.",
+    "passwordAlreadySet": "Ya hay una contraseña configurada para el panel. Puedes cambiarla más tarde en Configuración.",
     "providerDesc": "Conecte su primer proveedor de IA. Puedes agregar más más tarde.",
     "providerRequiresPassword": "Primero debes establecer una contraseña para añadir proveedores. Vuelve al paso de seguridad y establece una contraseña, o añade los proveedores más adelante desde el panel.",
     "apiKeyRequired": "Clave API (obligatoria)",
@@ -6051,6 +6066,8 @@
     "importFromModels": "Importar desde /modelos",
     "modelsImported": "Se importaron {count} modelos",
     "allModelsAlreadyImported": "Todos los modelos ya están importados",
+    "providerPublishesNoModelList": "Este proveedor no publica una lista de modelos — su catálogo integrado está actualizado",
+    "modelsNoLongerListed": "{count, plural, one {# modelo ya no figura en la lista del proveedor} other {# modelos ya no figuran en la lista del proveedor}}",
     "noNewModelsToImport": "No hay modelos nuevos para importar — todos los modelos ya están en el registro o en la lista de modelos personalizados",
     "localCatalogFallbackStatus": "No se pudo acceder a la lista de modelos del proveedor: se muestra el catálogo integrado",
     "discoveryDegradedStatus": "Descubrimiento del modelo fallido {time}",
@@ -6736,6 +6753,7 @@
     "antigravityProjectIdPlaceholder": "mi-id-proyecto-gcp",
     "grokWebCookiePlaceholder": "Marcador de posición de la cookie web de Grok",
     "herokuBaseUrlHint": "Sugerencia de la URL base de Heroku",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Ocultar correo electrónico",
     "imageProviders": "Proveedores de imágenes",
     "videoProviders": "Generación de vídeo",
@@ -7234,7 +7252,8 @@
       "kiro": "Nivel gratuito: 50 créditos al mes (~25K–100K tokens). ⚠️ Los términos de servicio de Kiro prohíben el uso de proxies o herramientas de terceros.",
       "codex": "Conecta OpenAI Codex con el flujo de OAuth existente.",
       "qwen": "Conecta Qwen Code con el flujo de OAuth existente.",
-      "github-models": "Crea un PAT de GitHub con el permiso 'models: read' en github.com/settings/tokens"
+      "github-models": "Crea un PAT de GitHub con el permiso 'models: read' en github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} acepta ID de modelo nativo del proveedor. Importe desde /models o agregue ID personalizados para enrutamiento.",
     "bedrockModelsDescription": "Los modelos de Amazon Bedrock tienen como alcance la región de AWS. Importe desde /models o agregue ID de modelo Bedrock habilitados en la región seleccionada.",
@@ -8092,6 +8111,8 @@
     "resetAwareDesc": "Prefiere cuentas con cuota restante saludable y reinicios más cercanos",
     "quotaWeighted": "Ponderado por cuota",
     "quotaWeightedDesc": "Omite las cuentas agotadas y elige entre las demás en proporción a la cuota restante, dividida entre la carga en curso. Las conversaciones existentes se mantienen fijadas.",
+    "expiryFirst": "Vencimiento primero",
+    "expiryFirstDesc": "Consume primero la cuenta cuya cuota, de otro modo, caducaría sin usarse: va primero el mayor remanente con el reinicio más cercano.",
     "strictRandom": "Aleatorio estricto",
     "strictRandomDesc": "Baraja las cuentas: usa cada cuenta una vez antes de volver a barajar",
     "stickyLimit": "Límite fijo",
@@ -8804,6 +8825,8 @@
     "retentionUsageHistory": "Historial de uso (días)",
     "retentionMemoryEntries": "Entradas de memoria (días)",
     "retentionXpAuditLog": "Registro de auditoría de XP (días)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Guardar la configuración de retención",
     "storageAutoVacuumMode": "Modo de vacío automático",
     "storageScheduledVacuum": "Vacío programado",
@@ -10254,7 +10277,11 @@
     "mappingInvalidJson": "JSON no válido.",
     "mappingMustBeObject": "El mapeo debe ser un objeto JSON, no un array ni un valor primitivo.",
     "mappingValueMustBeString": "El valor de la clave “{key}” debe ser una cadena.",
-    "save": "Guardar"
+    "save": "Guardar",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Motor Caveman",
@@ -11981,6 +12008,7 @@
     "description": "Supervisa la eficiencia de la caché de prompts del proveedor y la reutilización local de respuestas semánticas.",
     "refresh": "Actualizar",
     "clearAll": "Clear All",
+    "clearAllConfirm": "Se eliminarán todas las entradas de esta caché. Esta acción no se puede deshacer.",
     "memoryEntries": "Entradas en memoria",
     "memoryEntriesSub": "LRU en memoria",
     "dbEntries": "Entradas de la base de datos",
@@ -12865,6 +12893,8 @@
     },
     "attempts": "intentos",
     "detail": {
+      "tabOverview": "Descripción general",
+      "tabPayloads": "Cargas útiles",
       "omittedHttpAttempts": "{count} envíos HTTP no conservados",
       "noHttpResponse": "No se observó ninguna respuesta HTTP",
       "transportError": "Error de transporte",
