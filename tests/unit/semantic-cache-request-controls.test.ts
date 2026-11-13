@@ -180,7 +180,14 @@ test("both stores use the read identity; complete replies cannot cross controls 
               deps
             );
       store(complete);
-      assert.deepEqual(entries.get(signature(body)), complete);
+      // The streaming store wraps the assembled body as a complete chat.completion.
+      const stored = entries.get(signature(body)) as { choices?: unknown; object?: unknown };
+      if (streaming) {
+        assert.equal(stored.object, "chat.completion");
+        assert.deepEqual(stored.choices, [{ index: 0, ...complete.choices[0] }]);
+      } else {
+        assert.deepEqual(stored, complete);
+      }
       assert.equal(entries.get(signature({ ...body, reasoning_effort: "low" })), undefined);
       assert.equal(entries.get(signature({ ...body, max_tokens: 2048 })), undefined);
       entries.clear();

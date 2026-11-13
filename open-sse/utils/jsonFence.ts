@@ -40,9 +40,10 @@ export function wantsJsonOutput(body: unknown): boolean {
 }
 
 /**
- * Unwrap content that is exactly one ```json (or bare ```) fenced block.
- * Anything else — prose around a fence, several blocks, another language tag,
- * non-strings — is returned unchanged.
+ * Unwrap content that is exactly one ```json (or bare ```) fenced block whose
+ * inner text parses as JSON. Anything else — prose around a fence, several
+ * blocks, another language tag, a fenced non-JSON block, non-strings — is
+ * returned unchanged.
  */
 export function stripJsonFence(content: unknown): unknown {
   if (typeof content !== "string") return content;
@@ -54,7 +55,14 @@ export function stripJsonFence(content: unknown): unknown {
   if (lang !== "" && lang !== "json") return content;
   const inner = trimmed.slice(firstNewline + 1, trimmed.length - FENCE.length);
   if (inner.includes(FENCE)) return content;
-  return inner.trim();
+  const unwrapped = inner.trim();
+  // Only unwrap when the inner text is JSON: a fenced non-JSON block is user-visible content.
+  try {
+    JSON.parse(unwrapped);
+  } catch {
+    return content;
+  }
+  return unwrapped;
 }
 
 function unfenceChatChoices(response: JsonRecord): void {

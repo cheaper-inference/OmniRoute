@@ -16,8 +16,10 @@ import { isPassiveCodex, resolvePassiveCodex } from "./tokenRefresh/passiveCodex
 import { PROVIDERS } from "../config/constants.ts";
 import { getCodexAuthIdentityHeaders } from "../config/codexClient.ts";
 import { runWithProxyContext } from "../utils/proxyFetch.ts";
+import { sanitizeErrorMessage } from "../utils/errorSanitization.ts";
 import { serializeRefresh, rotationGroupFor } from "./refreshSerializer.ts";
 import { parseTokenExpiryMs } from "@/lib/tokenHealthCheckExpiry";
+import { preservesRefreshTokenOnUnrecoverable } from "./refreshTokenPreservation.ts";
 import {
   extractOAuthErrorCode,
   isUnrecoverableRefreshError,
@@ -59,6 +61,7 @@ import {
 } from "./antigravityProjectBootstrap.ts";
 import { persistDiscoveredAntigravityProjectId } from "./antigravityProjectPersist.ts";
 import { refreshCodexToken } from "./tokenRefresh/providers/codex.ts";
+import { refreshChatGptToken } from "./tokenRefresh/providers/chatgpt.ts";
 import { refreshCursorToken } from "./tokenRefresh/providers/cursor.ts";
 import { refreshOpenferenceToken } from "./tokenRefresh/providers/openference.ts";
 import { refreshRenderhourToken } from "./tokenRefresh/providers/renderhour.ts";
@@ -120,6 +123,7 @@ export const TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000;
 // Providers with non-rotating tokens (Google, Anthropic) or where multi-
 // account is naturally isolated keep longer lead times.
 export const REFRESH_LEAD_MS: Record<string, number> = {
+  chatgpt: 60_000, // Official SIWC local SDK refresh window.
   // Rotating refresh tokens — minimize refresh frequency to avoid the
   // "refresh-invalidates-siblings" cascade documented for OpenAI Auth0.
   codex: 5 * 60 * 1000, // 5 minutes
@@ -313,7 +317,8 @@ async function refreshActiveAccessToken(
       const errorText = await response.text();
       log?.error?.("TOKEN_REFRESH", `Failed to refresh token for ${provider}`, {
         status: response.status,
-        error: errorText,
+        // The OAuth server can echo the refresh token or client secret back in its error body.
+        error: sanitizeErrorMessage(errorText),
       });
       const code = extractOAuthErrorCode(errorText);
       if (code === "invalid_grant" || code === "invalid_request") {
@@ -446,6 +451,9 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
     case "codex":
       return await refreshCodexToken(credentials.refreshToken, log, proxyConfig);
 
+    case "chatgpt":
+      return await refreshChatGptToken(credentials, proxyConfig);
+
     case "cursor":
       if (!credentials.refreshToken) {
         return { error: "unrecoverable_refresh_error", code: "no_refresh_token" };
@@ -520,6 +528,7 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
  */
 export function supportsTokenRefresh(provider) {
   const explicitlySupported = new Set([
+    "chatgpt",
     "copilot-m365-web",
     "gemini",
     "antigravity",
@@ -730,6 +739,42 @@ async function _getAccessTokenWithStalenessCheck(provider, credentials, log, pro
   );
 }
 
+// Refresh tokens the server rejected as dead, keyed by hash (never the token itself). A re-login
+// brings a new token with a new hash, so it is tried at once with no reset hook. In memory only;
+// entries expire so a server or config problem that was fixed later is retried.
+const REJECTED_REFRESH_TTL_MS = 30 * 60 * 1000;
+const REJECTED_REFRESH_MAX = 500;
+// Only codes that say the token itself is dead. invalid_request, unauthorized_client and
+// access_denied can come from our own client settings, so they stay retryable.
+const REJECTED_TOKEN_CODES = new Set([
+  "invalid_grant",
+  "refresh_token_reused",
+  "invalid_token",
+  "expired_token",
+  "token_expired",
+]);
+const rejectedRefreshTokens = new Map<string, { result: object; until: number }>();
+
+function skipRejectedRefresh(key: string, provider: string, log) {
+  const hit = rejectedRefreshTokens.get(key);
+  if (!hit || hit.until <= Date.now()) return null;
+  log?.info?.("TOKEN_REFRESH", `Skipping refresh for ${provider}: refresh token was rejected`);
+  return { ...hit.result };
+}
+
+function rememberRejectedRefresh(key: string, provider: string, result) {
+  const reason = result?.code ?? result?.error;
+  if (!isUnrecoverableRefreshError(result) || !REJECTED_TOKEN_CODES.has(reason)) return;
+  // Claude and Kimi Coding keep the token on purpose: their invalid_grant can be a race or a
+  // provider mistake, and the health check retries it within a bounded budget.
+  if (preservesRefreshTokenOnUnrecoverable(provider)) return;
+  rejectedRefreshTokens.delete(key);
+  if (rejectedRefreshTokens.size >= REJECTED_REFRESH_MAX) {
+    rejectedRefreshTokens.delete(rejectedRefreshTokens.keys().next().value);
+  }
+  rejectedRefreshTokens.set(key, { result, until: Date.now() + REJECTED_REFRESH_TTL_MS });
+}
+
 async function _refreshWithFreshCredentials(provider, credentials, log, proxyConfig) {
   const rotated = lookupRotation(provider, credentials.refreshToken);
   if (rotated) {
@@ -760,10 +805,17 @@ async function _refreshWithFreshCredentials(provider, credentials, log, proxyCon
               accessToken: dbConnection.accessToken,
               refreshToken: dbConnection.refreshToken,
               expiresAt: dbConnection.expiresAt,
+              ...(provider === "chatgpt"
+                ? { providerSpecificData: dbConnection.providerSpecificData }
+                : {}),
             };
           }
           credentials.refreshToken = dbConnection.refreshToken;
           credentials.accessToken = dbConnection.accessToken;
+          if (provider === "chatgpt") {
+            credentials.expiresAt = dbConnection.expiresAt;
+            credentials.providerSpecificData = dbConnection.providerSpecificData;
+          }
         }
       }
     } catch (e) {
@@ -774,8 +826,14 @@ async function _refreshWithFreshCredentials(provider, credentials, log, proxyCon
     }
   }
 
+  // The server already rejected this exact refresh token as dead; do not present it again.
+  const rejectedKey = getRefreshCacheKey(provider, credentials.refreshToken);
+  const skipped = skipRejectedRefresh(rejectedKey, provider, log);
+  if (skipped) return skipped;
+
   const oldRefreshToken = credentials.refreshToken;
   const result = await _getAccessTokenInternal(provider, credentials, log, proxyConfig);
+  rememberRejectedRefresh(rejectedKey, provider, result);
 
   if (
     result &&

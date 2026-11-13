@@ -1,0 +1,1 @@
+- **fix(providers):** an exhausted Codex app-server account now reports a rate limit instead of a 502: non-streaming turns answer HTTP 429, so combos record the quota cooldown, and streaming turns end in `response.failed` with `rate_limit_exceeded`, so combos stop retrying the same model ([#19485](https://github.com/cheaper-inference/OmniRoute/pull/19485)) — thanks @rafacpti23
