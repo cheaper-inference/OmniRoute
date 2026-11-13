@@ -1263,6 +1263,7 @@ export default function EvalsTab() {
         </div>
 
         <DataTable
+          framed={false}
           columns={HISTORY_COLUMNS.map((column) => ({
             key: column.key,
             label: t(column.labelKey),
