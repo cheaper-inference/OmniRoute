@@ -1,4 +1,4 @@
-import { hasQoderCallerTools } from "@omniroute/open-sse/services/qoderCapabilities";
+import { requiresQoderHttpTransport } from "@omniroute/open-sse/services/qoderCapabilities";
 import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { randomUUID } from "crypto";
 import { resolveChatRequestBody } from "./requestBody";
@@ -1196,7 +1196,7 @@ async function handleChatImplementation(
         resolvedModel,
         {
           connectionRestrictionSources: restrictions.sources,
-          requireToolCalling: hasQoderCallerTools(body),
+          requireToolCalling: requiresQoderHttpTransport(body),
           sessionKey: sessionAffinityKey,
           preferredConnectionIds: apiKeyInfo?.preferredConnections ?? null,
           ...(target?.allowRateLimitedConnection ? { allowRateLimitedConnections: true } : {}),
@@ -1940,7 +1940,7 @@ async function handleSingleModelChat(
           model,
           {
             connectionRestrictionSources: restrictions.sources,
-            requireToolCalling: hasQoderCallerTools(body),
+            requireToolCalling: requiresQoderHttpTransport(body),
             sessionKey: museOwner ? null : occupancySessionKey,
             preferredConnectionIds: apiKeyInfo?.preferredConnections ?? null,
             reserveOAuthSession: true,

@@ -24,7 +24,11 @@ import {
   runQoderCli,
 } from "../services/qoderCli.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
-import { hasQoderCallerTools, resolveQoderAuthToken } from "../services/qoderCapabilities.ts";
+import {
+  hasQoderCallerTools,
+  hasQoderImageParts,
+  resolveQoderAuthToken,
+} from "../services/qoderCapabilities.ts";
 
 /** Retry hint sent with a 429 `qodercli_busy` (local queue full). */
 const QODER_CLI_BUSY_RETRY_AFTER_SECONDS = 5;
@@ -245,6 +249,19 @@ export class QoderExecutor extends BaseExecutor {
             message:
               "Qoder PAT/CLI connections do not support caller tool calling. Use a compatible HTTP connection or another provider for agent requests.",
             code: "tool_calling_unsupported",
+          }),
+          url: "qodercli://stdio",
+          headers: {},
+          transformedBody: body,
+        };
+      }
+      if (hasQoderImageParts(body)) {
+        return {
+          response: createQoderErrorResponse({
+            status: 400,
+            message:
+              "Qoder PAT/CLI connections do not support image input. Use a compatible HTTP connection or another provider for image requests.",
+            code: "image_input_unsupported",
           }),
           url: "qodercli://stdio",
           headers: {},
