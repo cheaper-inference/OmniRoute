@@ -1,0 +1,1 @@
+- **fix(sse):** Preserve complete numeric Dots tool arguments and resolve schema definitions within their declaring tool, so unrelated tools cannot change argument types. ([#20150](https://github.com/cheaper-inference/OmniRoute/pull/20150)) — thanks @marcello-pichini

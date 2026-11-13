@@ -1,1 +1,0 @@
-- **fix(sse):** Preserve complete numeric Dots tool arguments and resolve schema definitions within their declaring tool, so unrelated tools cannot change argument types.
