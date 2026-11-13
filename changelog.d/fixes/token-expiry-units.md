@@ -1,0 +1,1 @@
+- **fix(sse):** `isTokenExpiringSoon` now reads a token expiry given in epoch seconds or as a numeric string, so a valid token is no longer reported as expiring (seconds) or as never expiring (numeric string).

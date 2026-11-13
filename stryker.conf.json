@@ -822,7 +822,8 @@
       "tests/unit/droid-user-agent-android.test.ts",
       "tests/unit/empty-turn-retry-credentials-replace.test.ts",
       "tests/unit/fallback-wrapper-cancels-native-body.test.ts",
-      "tests/unit/silent-catch-cooldown-logs.test.ts"
+      "tests/unit/silent-catch-cooldown-logs.test.ts",
+      "tests/unit/token-expiry-units.test.ts"
     ],
     "nodeArgs": [
       "--import",
