@@ -248,7 +248,7 @@ function DestinationForm({
       />
       {includeBodies ? (
         <div className="flex flex-col gap-2 pl-6">
-          <span className="text-[11px] text-text-muted">
+          <span className="text-xs text-text-muted">
             Ships the request and response payloads shown in the Logs detail pane, including the
             client and provider views of each call. Content is PII-sanitised and secret-redacted the
             same way the dashboard shows it, and calls made with a no-log API key carry none.

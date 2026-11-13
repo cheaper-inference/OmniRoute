@@ -827,6 +827,7 @@ export default function NoAuthAccountCard({
             {/* #5217 (Gap 1): pick a pre-saved Proxy Pool entry by reference,
                 or fall back to a one-off custom proxy. */}
             <SegmentedControl
+              semantics="radio"
               aria-label={t("configureProxy")}
               size="sm"
               className="w-full"

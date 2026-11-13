@@ -456,7 +456,7 @@ export default function BudgetTab() {
       <Card className="p-5">
         <div className="flex items-start justify-between gap-3 mb-4">
           <div>
-            <h2 className="text-xl font-bold flex items-center gap-2">
+            <h2 className="text-xl font-semibold flex items-center gap-2">
               <Icon name="account_balance_wallet" size={22} className="text-primary" />
               {t("budgetPageTitle")}
             </h2>
@@ -672,7 +672,7 @@ function KpiBlock({
       <div className="text-[10px] uppercase tracking-wide text-text-muted font-semibold truncate">
         {label}
       </div>
-      <div className={`text-xl font-bold tabular-nums leading-tight ${color}`}>{value}</div>
+      <div className={`text-xl font-semibold tabular-nums leading-tight ${color}`}>{value}</div>
       {hint && <div className="text-[10px] text-text-muted truncate">{hint}</div>}
     </div>
   );
@@ -801,7 +801,7 @@ function BudgetRow({
         </div>
         <div className="text-center">
           <span
-            className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-bold border ${meta.bg} ${meta.tone}`}
+            className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold border ${meta.bg} ${meta.tone}`}
           >
             {t(`budgetStatus.${status}`).toUpperCase()}
           </span>
@@ -879,7 +879,7 @@ function BudgetRowExpanded({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="rounded-md border border-border/40 bg-bg-base/30 p-3">
           <div className="flex items-center justify-between mb-2">
-            <h4 className="text-[11px] uppercase tracking-wide font-bold text-text-muted">
+            <h4 className="text-[11px] uppercase tracking-wide font-semibold text-text-muted">
               {t("budgetProjection")}
             </h4>
             <span className="text-[10px] text-text-muted">{t("budgetLinearExtrapolation")}</span>
@@ -887,13 +887,13 @@ function BudgetRowExpanded({
           <div className="flex items-baseline gap-3">
             <div>
               <div className="text-[10px] text-text-muted">{t("budgetThisMonthSoFar")}</div>
-              <div className="text-lg font-bold tabular-nums">{formatCurrency(month)}</div>
+              <div className="text-lg font-semibold tabular-nums">{formatCurrency(month)}</div>
             </div>
             <span className="text-text-muted">→</span>
             <div>
               <div className="text-[10px] text-text-muted">{t("budgetProjectedEndOfMonth")}</div>
               <div
-                className={`text-lg font-bold tabular-nums ${
+                className={`text-lg font-semibold tabular-nums ${
                   projectionOver ? "text-warning" : "text-success"
                 }`}
               >
@@ -910,17 +910,15 @@ function BudgetRowExpanded({
 
         <div className="rounded-md border border-border/40 bg-bg-base/30 p-3">
           <div className="flex items-center justify-between mb-2">
-            <h4 className="text-[11px] uppercase tracking-wide font-bold text-text-muted">
+            <h4 className="text-[11px] uppercase tracking-wide font-semibold text-text-muted">
               {t("budgetCostBreakdown30d")}
             </h4>
             <span className="text-[10px] text-text-muted">{t("budgetByProvider")}</span>
           </div>
           {breakdown === undefined ? (
-            <div className="text-[11px] text-text-muted py-2 animate-pulse">
-              {t("budgetLoading")}
-            </div>
+            <div className="text-xs text-text-muted py-2 animate-pulse">{t("budgetLoading")}</div>
           ) : breakdown.length === 0 ? (
-            <div className="text-[11px] text-text-muted py-2">{t("noSpendLast30Days")}</div>
+            <div className="text-xs text-text-muted py-2">{t("noSpendLast30Days")}</div>
           ) : (
             <div className="space-y-1.5">
               {breakdown.slice(0, 5).map((b) => (
@@ -946,7 +944,7 @@ function BudgetRowExpanded({
       </div>
 
       <div className="rounded-md border border-border/40 bg-bg-base/30 p-3">
-        <h4 className="text-[11px] uppercase tracking-wide font-bold text-text-muted mb-3">
+        <h4 className="text-[11px] uppercase tracking-wide font-semibold text-text-muted mb-3">
           {t("budgetLimits")}
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">

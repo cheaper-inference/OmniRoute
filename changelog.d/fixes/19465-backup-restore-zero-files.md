@@ -1,0 +1,1 @@
+- **fix(cli):** `omniroute restore` now fails with a clear message when a backup is encrypted or holds no restorable files, instead of printing "Restore complete." and returning success while it restored nothing. ([#19465](https://github.com/cheaper-inference/OmniRoute/pull/19465))
