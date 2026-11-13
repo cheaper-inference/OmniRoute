@@ -17,7 +17,7 @@ Objective feature comparison vs popular open-source AI routers.
 | **Free/no-auth catalog entries**                   |                   **155**                   |      n/a       |    passthrough    |     n/a     |
 | **Self-hostable**                                  |                     ✅                      |       ✅       |        ❌         |   ⚠ paid    |
 | **OAuth catalog entries**                          |                   **23**                    |    partial     |        ❌         |     ❌      |
-| **Auto-fallback combos**                           |              **20 strategies**              | priority-based |    tier-based     |  weighted   |
+| **Auto-fallback combos**                           |              **21 strategies**              | priority-based |    tier-based     |  weighted   |
 | **Fusion (parallel panel + judge synthesis)**      |                     ✅                      |       ❌       |        ❌         |     ❌      |
 | **Tier 1/2/3 fallback (subscription→cheap→free)**  |                   ✅ + UI                   |     manual     |        n/a        |   manual    |
 | **Token compression**                              | 12-engine stack (RTK + Caveman + LLMLingua) |      none      |       none        |    none     |
@@ -41,7 +41,7 @@ Objective feature comparison vs popular open-source AI routers.
 
 ## When to choose OmniRoute
 
-- You self-host and want **maximum provider coverage** (382 providers, 155 free/no-auth catalog entries)
+- You self-host and want **maximum provider coverage** (393 providers, 155 free/no-auth catalog entries)
 - You need a **built-in MCP server** (LLM tools, memory, skills exposed as tools)
 - You need **A2A protocol** for agent-to-agent workflows
 - You want **fingerprint stealth** (JA3/JA4) to avoid detection by upstream CAPTCHAs

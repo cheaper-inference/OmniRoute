@@ -244,9 +244,9 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dashboard component API: adapters over `packages/ui-kit` — see `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: icon names used by the screens → Lucide components (`<Icon>`)                           |
-| `constants/providers.ts`         | **382 providers** with Zod validation (source of truth)                                             |
+| `constants/providers.ts`         | **393 providers** with Zod validation (source of truth)                                             |
 | `constants/cliTools.ts`          | External CLI tool registry                                                                          |
-| `constants/routingStrategies.ts` | **20 routing strategies** with priorities                                                           |
+| `constants/routingStrategies.ts` | **21 routing strategies** with priorities                                                           |
 | `constants/publicApiRoutes.ts`   | Routes that require Bearer (vs management) auth                                                     |
 | `constants/upstreamHeaders.ts`   | Header denylist for upstream requests                                                               |
 | `validation/schemas.ts`          | ~80 Zod schemas (single source of truth for API contracts)                                          |
@@ -267,7 +267,7 @@ Separate npm workspace (`@omniroute/open-sse`). Handles request processing + pro
 ```
 open-sse/
 ├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
-├── executors/           # 150 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
 ├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
@@ -414,7 +414,7 @@ open-sse/
 | `CLI-TOOLS.md`              | External CLI integrations + Internal OmniRoute CLI                                    |
 | `I18N.md`                   | i18n architecture, adding a language, 67 locales                                      |
 | `UNINSTALL.md`              | Clean uninstall steps                                                                 |
-| `PROVIDER_REFERENCE.md`     | **Auto-generated** catalog of 382 providers (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Auto-generated** catalog of 393 providers (regen: `npm run gen:provider-reference`) |
 
 ### Subsystem deep-dives
 

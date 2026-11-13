@@ -911,6 +911,29 @@
       "stream": "https://api.cerebras.ai/v1/chat/completions"
     }
   },
+  "cerebrium": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://api.cerebrium.ai/v4",
+      "stream": "https://api.cerebrium.ai/v4"
+    }
+  },
   "charm-hyper": {
     "format": "openai",
     "headers": {
@@ -978,6 +1001,29 @@
     "url": {
       "nonStream": "https://api.chatanywhere.org/v1/chat/completions",
       "stream": "https://api.chatanywhere.org/v1/chat/completions"
+    }
+  },
+  "chatgpt": {
+    "format": "openai-responses",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://api.openai.com/v1/responses",
+      "stream": "https://api.openai.com/v1/responses"
     }
   },
   "chatgpt-web": {
@@ -3102,6 +3148,29 @@
       "stream": "https://grok.com/rest/app-chat/conversations/new"
     }
   },
+  "grokified": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://api.grokified.com/v1/chat/completions",
+      "stream": "https://api.grokified.com/v1/chat/completions"
+    }
+  },
   "groq": {
     "format": "openai",
     "headers": {
@@ -3238,6 +3307,29 @@
     "url": {
       "nonStream": "https://us.inference.heroku.com/v1/chat/completions",
       "stream": "https://us.inference.heroku.com/v1/chat/completions"
+    }
+  },
+  "hetzner": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://inference.hetzner.com/api/v1/chat/completions",
+      "stream": "https://inference.hetzner.com/api/v1/chat/completions"
     }
   },
   "huggingchat": {
@@ -4016,6 +4108,35 @@
     "url": {
       "nonStream": "https://api.maxai.me",
       "stream": "https://api.maxai.me"
+    }
+  },
+  "megabrain": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json",
+        "X-KILOCODE-EDITORNAME": "OmniRoute",
+        "X-KILOCODE-FEATURE": "omniroute"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json",
+        "X-KILOCODE-EDITORNAME": "OmniRoute",
+        "X-KILOCODE-FEATURE": "omniroute"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json",
+        "X-KILOCODE-EDITORNAME": "OmniRoute",
+        "X-KILOCODE-FEATURE": "omniroute"
+      }
+    },
+    "url": {
+      "nonStream": "https://api.getmegabrain.com/api/openrouter/chat/completions",
+      "stream": "https://api.getmegabrain.com/api/openrouter/chat/completions"
     }
   },
   "meganova-ai": {
@@ -4924,6 +5045,29 @@
       "stream": "https://opencode.ai/zen/go/v1"
     }
   },
+  "opencode-server": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "http://127.0.0.1:4096",
+      "stream": "http://127.0.0.1:4096"
+    }
+  },
   "opencode-zen": {
     "format": "openai",
     "headers": {
@@ -5118,6 +5262,29 @@
     "url": {
       "nonStream": "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions",
       "stream": "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions"
+    }
+  },
+  "paraloncloud": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://paraloncloud.com/v1/chat/completions",
+      "stream": "https://paraloncloud.com/v1/chat/completions"
     }
   },
   "perplexity": {
@@ -5564,6 +5731,29 @@
     "url": {
       "nonStream": "https://api.reka.ai/v1/chat/completions",
       "stream": "https://api.reka.ai/v1/chat/completions"
+    }
+  },
+  "replicate": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://api.replicate.com/v1",
+      "stream": "https://api.replicate.com/v1"
     }
   },
   "requesty": {
