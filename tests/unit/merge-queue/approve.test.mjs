@@ -5,7 +5,11 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
-import { handleLabelEvent, main } from "../../../scripts/merge-queue/approve.mjs";
+import {
+  handleLabelEvent,
+  main,
+  truncateDescription,
+} from "../../../scripts/merge-queue/approve.mjs";
 import { loadConfig } from "../../../scripts/merge-queue/config.mjs";
 import { APPROVAL_CONTEXTS, commentMarker } from "../../../scripts/merge-queue/contracts.mjs";
 import { createGitHubClient } from "../../../scripts/merge-queue/github.mjs";
@@ -126,6 +130,9 @@ test("irrelevant labels, unmanaged bases and other events are ignored without wr
     [{ ...labelEvent(), action: "synchronize" }, "pull_request_target"],
     [labelEvent(), "push"],
     [labelEvent(), "issues"],
+    // pull_request runs the PR's own copy of approve.mjs: never trusted to write an approval.
+    [labelEvent(), "pull_request"],
+    [labelEvent({ action: "unlabeled" }), "pull_request"],
   ];
   for (const [event, name] of cases) {
     assert.deepEqual(await handle(event, name), { action: "ignored" }, JSON.stringify(event));
@@ -136,7 +143,17 @@ test("irrelevant labels, unmanaged bases and other events are ignored without wr
   );
 });
 
-test("the status description is capped at 140 characters", async (t) => {
+test("truncateDescription caps at exactly 140 characters with an ellipsis", () => {
+  const long = `approved by ${"x".repeat(200)}`;
+  const out = truncateDescription(long);
+  assert.equal(out.length, 140);
+  assert.ok(out.endsWith("..."));
+  assert.equal(out, `${long.slice(0, 137)}...`);
+  assert.equal(truncateDescription("x".repeat(140)), "x".repeat(140), "140 is kept whole");
+  assert.equal(truncateDescription("x".repeat(141)).length, 140);
+});
+
+test("a maximum-length login keeps the whole status description", async (t) => {
   const { fake, gh } = await setup(t);
   const longLogin = `a${"b".repeat(38)}`;
   const wide = { ...config, approvers: [longLogin] };
@@ -192,4 +209,39 @@ test("main reads the event file and env, exits 0, and never prints the token", a
     1
   );
   for (const line of logs) assert.ok(!line.includes("ghs_mainSecretToken"), line);
+});
+
+test("main counts only the App's own marker: a planted marker does not mute the warning", async (t) => {
+  const fake = await startFakeGitHub({ token: "ghs_x", actor: "mallory" });
+  t.after(() => fake.close());
+  fake.addPull({ number: 5, head: { sha: HEAD } });
+  // A third party pre-posts the hidden marker to suppress the not-approver comment.
+  fake.comments.set(5, [
+    {
+      id: 1,
+      body: `nothing to see\n\n${commentMarker("not-approver")}`,
+      user: { login: "mallory", type: "User" },
+      created_at: "2026-11-13T10:00:00Z",
+    },
+  ]);
+  fake.actor = "omni-queue[bot]";
+  const dir = mkdtempSync(join(tmpdir(), "omni-queue-approve-"));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const eventPath = join(dir, "event.json");
+  writeFileSync(eventPath, JSON.stringify(labelEvent({ sender: "mallory" })));
+  const env = {
+    OMNI_QUEUE_TOKEN: "ghs_x",
+    GITHUB_REPOSITORY: fake.repository,
+    GITHUB_EVENT_NAME: "pull_request_target",
+    GITHUB_EVENT_PATH: eventPath,
+    GITHUB_API_URL: fake.url,
+  };
+  assert.equal(await main(env, { log: () => {} }), 0);
+  const comments = fake.comments.get(5);
+  assert.equal(comments.length, 2, "the bot posted its own warning despite the planted marker");
+  assert.equal(comments[1].user.login, "omni-queue[bot]");
+  assert.match(comments[1].body, /not an omni-queue approver/);
+  // A second run sees the bot's marker and stays quiet.
+  assert.equal(await main(env, { log: () => {} }), 0);
+  assert.equal(fake.comments.get(5).length, 2);
 });

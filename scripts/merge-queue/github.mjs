@@ -43,8 +43,10 @@ export class GitHubError extends Error {
  * @property {string} owner
  * @property {string} repo
  * @property {(method: string, path: string, opts?: {query?: object, body?: unknown,
- *            accept?: string, allowStatuses?: number[]}) => Promise<{status: number, data: any,
- *            headers: Headers}>} request
+ *            accept?: string, allowStatuses?: number[], retryServerErrors?: boolean})
+ *            => Promise<{status: number, data: any, headers: Headers}>} request
+ *            retryServerErrors:false = a 5xx / network error / timeout is thrown at once (for
+ *            non-idempotent writes whose outcome must be verified instead of replayed)
  * @property {(path: string, query?: object) => Promise<any[]>} paginate  follows Link rel="next";
  *            unwraps {total_count, <items>} envelopes (check_runs, workflow_runs, ...)
  *
@@ -61,6 +63,10 @@ export class GitHubError extends Error {
  * @property {(n: number, key: string, body: string) => Promise<{posted: boolean}>} commentOnce
  *            posts `body + "\n\n" + contracts.commentMarker(key)` unless a comment on issue/PR n
  *            already contains that marker (then {posted:false}). The ONLY way queue code comments.
+ *            After posting it re-reads the comments: when two writers raced (approval job + tick,
+ *            or a POST replayed after a 5xx), the lowest comment id wins and the newer duplicate
+ *            this call created is deleted ({posted:false}).
+ * @property {(commentId: number) => Promise<void>} deleteIssueComment   404 = already gone
  * @property {(opts: {labels?: string[], state?: "open"|"closed"|"all"}) => Promise<{number: number,
  *            title: string, body: string, labels: string[], state: string,
  *            updatedAt: string}[]>} listIssues   issues only (PRs filtered out)
@@ -80,10 +86,15 @@ export class GitHubError extends Error {
  * — merge (squash-api landing) —
  * @property {(n: number, opts: {method: "squash"|"merge", sha: string, commitTitle?: string,
  *            commitMessage?: string}) => Promise<{merged: boolean, sha: string|null,
- *            status: number, message: string}>} mergePull   405/409 → merged:false (no throw)
+ *            status: number, message: string}>} mergePull   405/409 → merged:false (no throw).
+ *            The PUT is never replayed blindly: after a 5xx / network error / timeout, and on
+ *            405/409, GET /pulls/{n} decides — merged with head === sha → merged:true (the
+ *            earlier attempt landed); otherwise a 5xx / network error is retried with backoff.
  *
  * — contents API (state store CAS) —
  * @property {(path: string, ref: string) => Promise<{content: string, sha: string}|null>} getFileContent
+ * @property {(path: string, ref: string) => Promise<{name: string, path: string, type: string,
+ *            sha: string}[]>} listDirectory   [] when the directory or the ref is absent
  * @property {(path: string, input: {branch: string, message: string, content: string,
  *            sha?: string|null}) => Promise<{ok: true, sha: string}|{ok: false,
  *            conflict: true}>} putFileContent   409/422 sha mismatch → conflict
@@ -111,6 +122,7 @@ const API_VERSION = "2022-11-28";
 const PER_PAGE = 100;
 const MAX_PAGES = 50;
 const MAX_STATUS_DESCRIPTION = 140;
+const DEFAULT_REQUEST_TIMEOUT_MS = 30_000;
 
 const defaultSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -321,9 +333,10 @@ function errorMessage(data, fallback) {
  * @param {{token: string, repository: string, apiUrl?: string, fetchImpl?: typeof fetch,
  *          sleep?: (ms: number) => Promise<void>, log?: (msg: string) => void,
  *          maxRetries?: number, userAgent?: string, baseDelayMs?: number, maxDelayMs?: number,
- *          nowMs?: () => number, botLogin?: string}} options
+ *          nowMs?: () => number, botLogin?: string, requestTimeoutMs?: number}} options
  *   baseDelayMs/maxDelayMs/nowMs tune the backoff (tests); botLogin, when set, makes commentOnce
- *   count only markers in comments authored by that login (a third party cannot pre-post one).
+ *   count only markers in comments authored by that login (a third party cannot pre-post one);
+ *   requestTimeoutMs (default 30 s) aborts a hung request, which then counts as a network error.
  * @returns {GitHubClient}
  */
 export function createGitHubClient(options) {
@@ -340,6 +353,7 @@ export function createGitHubClient(options) {
     maxDelayMs = 120_000,
     nowMs = () => Date.now(),
     botLogin,
+    requestTimeoutMs = DEFAULT_REQUEST_TIMEOUT_MS,
   } = options ?? {};
   if (!token || typeof token !== "string") throw new Error("createGitHubClient: token required");
   const m = /^([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)$/.exec(String(repository ?? ""));
@@ -371,7 +385,7 @@ export function createGitHubClient(options) {
   }
 
   async function request(method, path, opts = {}) {
-    const { query, body, accept, allowStatuses = [] } = opts;
+    const { query, body, accept, allowStatuses = [], retryServerErrors = true } = opts;
     const url = resolveUrl(path, query);
     const shown = `${url.pathname}${url.search}`;
     const headers = {
@@ -387,17 +401,25 @@ export function createGitHubClient(options) {
     }
     for (let attempt = 0; ; attempt++) {
       let res;
+      let text;
       try {
-        res = await fetchImpl(url.href, { method, headers, body: payload });
+        // The signal also bounds reading the body: a stalled response cannot hold the tick.
+        const signal = AbortSignal.timeout(requestTimeoutMs);
+        res = await fetchImpl(url.href, { method, headers, body: payload, signal });
+        text = await res.text();
       } catch (error) {
-        const message = redact(error?.message ?? error);
-        if (attempt >= maxRetries) throw new GitHubError(0, method, shown, `network: ${message}`);
+        const timedOut = error?.name === "TimeoutError" || error?.name === "AbortError";
+        const message = timedOut
+          ? `timed out after ${requestTimeoutMs} ms`
+          : redact(error?.message ?? error);
+        if (attempt >= maxRetries || !retryServerErrors) {
+          throw new GitHubError(0, method, shown, `network: ${message}`);
+        }
         const delay = retryDelayMs(attempt, null, { baseDelayMs, maxDelayMs, nowMs: nowMs() });
         log(`${method} ${shown} → network error (${message}); retry in ${delay} ms`);
         await sleep(delay);
         continue;
       }
-      const text = await res.text();
       let data = null;
       if (text) {
         try {
@@ -410,7 +432,9 @@ export function createGitHubClient(options) {
       if (status < 400 || allowStatuses.includes(status)) {
         return { status, data, headers: res.headers };
       }
-      const retryable = status >= 500 || isRateLimited(status, res.headers, data);
+      // A rate-limited request was not processed, so it is always safe to replay.
+      const retryable =
+        (status >= 500 && retryServerErrors) || isRateLimited(status, res.headers, data);
       if (retryable && attempt < maxRetries) {
         const delay = retryDelayMs(attempt, res.headers, {
           baseDelayMs,
@@ -463,6 +487,24 @@ export function createGitHubClient(options) {
     return { id: res.data?.id };
   }
 
+  async function deleteIssueComment(commentId) {
+    assertNumber(commentId);
+    await request("DELETE", r(`/issues/comments/${commentId}`), { allowStatuses: [404] });
+  }
+
+  /** Raw PR payload → a merge result when it is merged at `sha`, else null. */
+  async function mergedAt(n, sha) {
+    const raw = (await request("GET", r(`/pulls/${n}`))).data;
+    const merged = raw?.merged === true || Boolean(raw?.merged_at);
+    if (!merged || raw?.head?.sha !== sha) return null;
+    return {
+      merged: true,
+      sha: raw.merge_commit_sha ?? null,
+      status: 200,
+      message: "already merged (confirmed by GET /pulls)",
+    };
+  }
+
   return {
     owner,
     repo,
@@ -509,14 +551,24 @@ export function createGitHubClient(options) {
     listIssueComments,
     createIssueComment,
 
+    deleteIssueComment,
+
     async commentOnce(n, key, body) {
       const marker = commentMarker(key);
-      const existing = await listIssueComments(n);
-      const found = existing.some(
-        (c) => c.body.includes(marker) && (!botLogin || c.author === botLogin)
-      );
-      if (found) return { posted: false };
-      await createIssueComment(n, `${body}\n\n${marker}`);
+      const ours = (c) => c.body.includes(marker) && (!botLogin || c.author === botLogin);
+      if ((await listIssueComments(n)).some(ours)) return { posted: false };
+      const { id } = await createIssueComment(n, `${body}\n\n${marker}`);
+      // Read-then-write is not atomic: another writer (or a replayed POST) may have posted the
+      // same marker meanwhile. The lowest id wins; drop the newer one this call created.
+      const winner = (await listIssueComments(n))
+        .filter(ours)
+        .map((c) => c.id)
+        .sort((a, b) => a - b)[0];
+      if (winner !== undefined && id !== undefined && winner !== id) {
+        await deleteIssueComment(id);
+        log(`commentOnce #${n} ${key}: duplicate ${id} removed (kept ${winner})`);
+        return { posted: false };
+      }
       return { posted: true };
     },
 
@@ -597,21 +649,45 @@ export function createGitHubClient(options) {
     async mergePull(n, { method, sha, commitTitle, commitMessage }) {
       assertNumber(n);
       assertSha(sha);
-      const res = await request("PUT", r(`/pulls/${n}/merge`), {
-        body: {
-          merge_method: method,
-          sha,
-          ...(commitTitle !== undefined ? { commit_title: commitTitle } : {}),
-          ...(commitMessage !== undefined ? { commit_message: commitMessage } : {}),
-        },
-        allowStatuses: [405, 409],
-      });
-      return {
-        merged: res.status < 300 && res.data?.merged === true,
-        sha: res.status < 300 ? (res.data?.sha ?? null) : null,
-        status: res.status,
-        message: String(res.data?.message ?? ""),
+      const body = {
+        merge_method: method,
+        sha,
+        ...(commitTitle !== undefined ? { commit_title: commitTitle } : {}),
+        ...(commitMessage !== undefined ? { commit_message: commitMessage } : {}),
       };
+      for (let attempt = 0; ; attempt++) {
+        let res;
+        try {
+          // Never replayed by request(): a 5xx may hide a merge that did happen.
+          res = await request("PUT", r(`/pulls/${n}/merge`), {
+            body,
+            allowStatuses: [405, 409],
+            retryServerErrors: false,
+          });
+        } catch (error) {
+          const ambiguous =
+            error instanceof GitHubError && (error.status === 0 || error.status >= 500);
+          if (!ambiguous) throw error;
+          const confirmed = await mergedAt(n, sha);
+          if (confirmed) return confirmed;
+          if (attempt >= maxRetries) throw error;
+          const delay = retryDelayMs(attempt, null, { baseDelayMs, maxDelayMs, nowMs: nowMs() });
+          log(`mergePull #${n}: ${error.message}; not merged, retry in ${delay} ms`);
+          await sleep(delay);
+          continue;
+        }
+        if (res.status === 405 || res.status === 409) {
+          // "not mergeable" also answers a PR that an earlier (ambiguous) attempt merged.
+          const confirmed = await mergedAt(n, sha);
+          if (confirmed) return confirmed;
+        }
+        return {
+          merged: res.status < 300 && res.data?.merged === true,
+          sha: res.status < 300 ? (res.data?.sha ?? null) : null,
+          status: res.status,
+          message: String(res.data?.message ?? ""),
+        };
+      }
     },
 
     async getFileContent(path, ref) {
@@ -630,6 +706,20 @@ export function createGitHubClient(options) {
       // Files over 1 MB come back without inline content: read the blob instead.
       const blob = (await request("GET", r(`/git/blobs/${data.sha}`))).data;
       return { content: fromBase64(blob.content), sha: data.sha };
+    },
+
+    async listDirectory(path, ref) {
+      const res = await request("GET", r(`/contents/${encodePath(path)}`), {
+        query: { ref },
+        allowStatuses: [404],
+      });
+      if (res.status === 404 || !Array.isArray(res.data)) return [];
+      return res.data.map((e) => ({
+        name: String(e.name ?? ""),
+        path: String(e.path ?? ""),
+        type: String(e.type ?? ""),
+        sha: String(e.sha ?? ""),
+      }));
     },
 
     async putFileContent(path, { branch, message, content, sha }) {

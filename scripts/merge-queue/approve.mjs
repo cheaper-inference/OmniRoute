@@ -6,6 +6,11 @@
 // GitHub; an approval must never be lost). Reads only the event payload (GITHUB_EVENT_PATH) and
 // the API — never PR code.
 //
+// SECURITY: only `pull_request_target` is accepted. That event runs this script from the BASE
+// branch; a `pull_request` event runs the PR's own copy, so a PR could rewrite this file and
+// forge an approval status with the App token. Never wire the approval job to `pull_request`
+// (the sandbox repository uses pull_request_target too). Any other event name is ignored.
+//
 //   labeled config.label / config.protectedApprovalLabel by an approver → commit status
 //     `success` on pull_request.head.sha, context APPROVAL_CONTEXTS[kind],
 //     description "approved by <login>" (App token, so the creator is `<appSlug>[bot]`);
@@ -18,11 +23,12 @@ import { DEFAULT_CONFIG_PATH, isManagedBase, loadConfig } from "./config.mjs";
 import { APPROVAL_CONTEXTS, isSha } from "./contracts.mjs";
 import { createGitHubClient } from "./github.mjs";
 
-const EVENT_NAMES = ["pull_request_target", "pull_request"];
+const EVENT_NAMES = ["pull_request_target"];
 const LOGIN_RE = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})(?:\[bot\])?$/;
 const MAX_DESCRIPTION = 140;
 
-const truncate = (text) =>
+/** Commit-status descriptions are capped at 140 characters by GitHub. */
+export const truncateDescription = (text) =>
   text.length > MAX_DESCRIPTION ? `${text.slice(0, MAX_DESCRIPTION - 3)}...` : text;
 
 /** Comment posted (once per PR) when someone outside config.approvers applies a queue label. */
@@ -80,7 +86,7 @@ export async function handleLabelEvent(input) {
     await gh.createCommitStatus(sha, {
       state: "failure",
       context,
-      description: truncate(`approval withdrawn by ${actor}`),
+      description: truncateDescription(`approval withdrawn by ${actor}`),
       ...(targetUrl ? { targetUrl } : {}),
     });
     log(`#${pr.number} ${context} withdrawn by ${actor} on ${sha}`);
@@ -97,7 +103,7 @@ export async function handleLabelEvent(input) {
   await gh.createCommitStatus(sha, {
     state: "success",
     context,
-    description: truncate(`approved by ${actor}`),
+    description: truncateDescription(`approved by ${actor}`),
     ...(targetUrl ? { targetUrl } : {}),
   });
   log(`#${pr.number} ${context} approved by ${actor} on ${sha}`);
@@ -121,6 +127,8 @@ export async function main(env = process.env, { log = (m) => console.log(m) } = 
       token,
       repository: env.GITHUB_REPOSITORY,
       ...(env.GITHUB_API_URL ? { apiUrl: env.GITHUB_API_URL } : {}),
+      // Only markers written by the App count: a third party cannot pre-post one to mute us.
+      botLogin: `${config.appSlug}[bot]`,
       log,
     });
     const runUrl =

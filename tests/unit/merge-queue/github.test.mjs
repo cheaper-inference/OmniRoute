@@ -512,11 +512,172 @@ test("mergePull reports 405/409 as merged:false without throwing", async (t) => 
   assert.match(ok.sha, /^[0-9a-f]{40}$/);
   assert.equal(fake.merges.at(-1).body.commit_title, "t (#30)");
   assert.equal(fake.merges.at(-1).body.merge_method, "squash");
+  // A repeat at the same head is answered 405, but GET /pulls confirms it landed: idempotent.
   const again = await gh.mergePull(30, { method: "squash", sha: pr.head.sha });
-  assert.deepEqual([again.merged, again.status], [false, 405]);
+  assert.deepEqual([again.merged, again.status, again.sha], [true, 200, ok.sha]);
+  // Merged, but at another head than the one requested: still a rejection.
+  const other = await gh.mergePull(30, { method: "squash", sha: sha("other-head") });
+  assert.deepEqual([other.merged, other.status, other.sha], [false, 405, null]);
   fake.mergeResponses.set(31, { status: 422, body: { message: "nope" } });
   fake.addPull({ number: 31 });
   await assert.rejects(gh.mergePull(31, { method: "squash", sha: sha("x") }), /422/);
+});
+
+test("mergePull never replays a merge that GitHub applied before answering 502", async (t) => {
+  const { fake, gh, sleeps } = await setup(t);
+  const pr = fake.addPull({ number: 32 });
+  fake.inject({
+    method: "PUT",
+    path: "/pulls/32/merge",
+    status: 502,
+    body: { message: "Bad Gateway" },
+    apply: true,
+  });
+  const result = await gh.mergePull(32, { method: "squash", sha: pr.head.sha });
+  assert.equal(result.merged, true);
+  assert.equal(result.sha, fake.pulls.get(32).merge_commit_sha);
+  assert.match(result.sha, /^[0-9a-f]{40}$/);
+  assert.equal(fake.merges.length, 1, "the PUT was sent exactly once");
+  assert.deepEqual(sleeps, [], "no backoff: the GET confirmed the merge");
+  assert.ok(fake.requests.some((r) => r.method === "GET" && r.path === "/pulls/32"));
+});
+
+test("mergePull retries a 502 that did not merge, after checking the PR", async (t) => {
+  const { fake, gh, sleeps } = await setup(t);
+  const pr = fake.addPull({ number: 33 });
+  fake.inject({ method: "PUT", path: "/pulls/33/merge", status: 502, body: { message: "x" } });
+  const result = await gh.mergePull(33, { method: "merge", sha: pr.head.sha });
+  assert.equal(result.merged, true);
+  assert.equal(result.status, 200);
+  assert.equal(fake.merges.length, 1, "the injected 502 never reached the merge handler");
+  assert.equal(fake.requests.filter((r) => r.method === "PUT").length, 2);
+  assert.deepEqual(sleeps, [1000]);
+});
+
+test("mergePull gives up after maxRetries of unconfirmed 5xx", async (t) => {
+  const { fake, gh, sleeps } = await setup(t, {}, { maxRetries: 2 });
+  const pr = fake.addPull({ number: 34 });
+  fake.inject({ method: "PUT", path: "/pulls/34/merge", status: 503, body: {}, times: 10 });
+  await assert.rejects(
+    gh.mergePull(34, { method: "squash", sha: pr.head.sha }),
+    (e) => e instanceof GitHubError && e.status === 503
+  );
+  assert.equal(fake.requests.filter((r) => r.method === "PUT").length, 3);
+  assert.deepEqual(sleeps, [1000, 2000]);
+  assert.equal(fake.pulls.get(34).merged, false);
+});
+
+test("a hung request times out and is retried as a network error", async (t) => {
+  const { fake, gh, sleeps, logs } = await setup(t, {}, { requestTimeoutMs: 100 });
+  fake.addPull({ number: 35, title: "slow" });
+  fake.inject({ method: "GET", path: "/pulls/35", status: 200, body: {}, delayMs: 10_000 });
+  const started = Date.now();
+  assert.equal((await gh.getPull(35)).title, "slow");
+  assert.ok(Date.now() - started < 5000, "the stalled response did not hold the client");
+  assert.deepEqual(sleeps, [1000]);
+  assert.ok(logs.some((l) => /timed out after 100 ms/.test(l)));
+});
+
+test("a request that keeps timing out fails with GitHubError status 0", async (t) => {
+  const { fake, gh } = await setup(t, {}, { requestTimeoutMs: 50, maxRetries: 1 });
+  fake.inject({ path: "/pulls/36", status: 200, body: {}, delayMs: 10_000, times: 5 });
+  await assert.rejects(gh.getPull(36), (e) => {
+    assert.ok(e instanceof GitHubError);
+    assert.equal(e.status, 0);
+    assert.match(e.message, /timed out after 50 ms/);
+    return true;
+  });
+});
+
+test("commentOnce keeps the oldest when another writer posted the same marker meanwhile", async (t) => {
+  const fake = await startFakeGitHub({ token: TOKEN, actor: "omni-queue[bot]" });
+  t.after(() => fake.close());
+  fake.addPull({ number: 14 });
+  let planted = false;
+  const gh = createGitHubClient({
+    token: TOKEN,
+    repository: fake.repository,
+    apiUrl: fake.url,
+    botLogin: "omni-queue[bot]",
+    fetchImpl: async (url, init) => {
+      if (!planted && init.method === "POST" && url.endsWith("/issues/14/comments")) {
+        planted = true; // the approval job posts between our read and our write
+        fake.comments.set(14, [
+          {
+            id: 1,
+            body: `other writer\n\n${commentMarker("not-approver")}`,
+            user: { login: "omni-queue[bot]", type: "Bot" },
+            created_at: "2026-11-13T10:00:00Z",
+          },
+        ]);
+      }
+      return fetch(url, init);
+    },
+  });
+  assert.deepEqual(await gh.commentOnce(14, "not-approver", "mine"), { posted: false });
+  const comments = fake.comments.get(14);
+  assert.equal(comments.length, 1, "the newer duplicate was deleted");
+  assert.equal(comments[0].id, 1);
+  assert.ok(
+    fake.requests.some((r) => r.method === "DELETE" && /^\/issues\/comments\/\d+$/.test(r.path))
+  );
+});
+
+test("commentOnce removes the duplicate left by a POST replayed after a 502", async (t) => {
+  const { fake, gh } = await setup(t);
+  fake.addPull({ number: 15 });
+  fake.inject({
+    method: "POST",
+    path: "/issues/15/comments",
+    status: 502,
+    body: {},
+    apply: true,
+  });
+  await gh.commentOnce(15, "conflict", "body");
+  const comments = fake.comments.get(15);
+  assert.equal(comments.length, 1, "exactly one comment survives");
+  assert.equal(comments[0].body, `body\n\n${commentMarker("conflict")}`);
+  assert.deepEqual(await gh.commentOnce(15, "conflict", "body"), { posted: false });
+  assert.equal(fake.comments.get(15).length, 1);
+});
+
+test("deleteIssueComment tolerates an already-deleted comment", async (t) => {
+  const { fake, gh } = await setup(t);
+  fake.addPull({ number: 16 });
+  const { id } = await gh.createIssueComment(16, "x");
+  await gh.deleteIssueComment(id);
+  assert.equal(fake.comments.get(16).length, 0);
+  await gh.deleteIssueComment(id); // 404 → ok
+});
+
+test("listDirectory lists the children of a directory, [] when absent", async (t) => {
+  const { fake, gh } = await setup(t);
+  fake.commitFiles({
+    branch: "omni-queue-state",
+    files: {
+      "state/release-v3.8.54.json": "{}",
+      "state/release-v3.8.55.json": "{}",
+      "state/archive/old.json": "{}",
+      "README.md": "x",
+    },
+  });
+  const entries = await gh.listDirectory("state", "omni-queue-state");
+  assert.deepEqual(
+    entries.map((e) => [e.name, e.type, e.path]),
+    [
+      ["archive", "dir", "state/archive"],
+      ["release-v3.8.54.json", "file", "state/release-v3.8.54.json"],
+      ["release-v3.8.55.json", "file", "state/release-v3.8.55.json"],
+    ]
+  );
+  assert.match(entries[1].sha, /^[0-9a-f]{40}$/);
+  assert.deepEqual(await gh.listDirectory("nothing", "omni-queue-state"), []);
+  assert.deepEqual(await gh.listDirectory("state", "no-such-branch"), []);
+  assert.deepEqual(
+    await gh.listDirectory("README.md", "omni-queue-state"),
+    [],
+    "a file is not a dir"
+  );
 });
 
 test("getCommit and getBranchSha read the git object store", async (t) => {

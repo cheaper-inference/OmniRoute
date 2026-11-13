@@ -13,9 +13,13 @@
 //   fake.now            ISO clock used for created_at of writes (mutable)
 //   fake.requests       [{method, path, query, body, headers}] — every request, in order
 //                       (path is relative to /repos/<owner>/<repo>, e.g. "/pulls/7")
-//   fake.inject({method?, path, status, body?, headers?, times = 1})
+//   fake.inject({method?, path, status, body?, headers?, times = 1, apply = false, delayMs = 0})
 //                       answer the next `times` matching requests with this response instead of
-//                       routing them (path: exact relative path or RegExp; method default any)
+//                       routing them (path: exact relative path or RegExp; method default any).
+//                       apply:true routes the request normally FIRST (its side effects happen,
+//                       e.g. a merge lands) and then answers with the injected response — the
+//                       "GitHub did it but returned 502" case. delayMs holds the response that
+//                       long (timeouts; the server drops it when the client aborts).
 //   fake.close()        stop the server (await it in t.after / finally)
 //
 // Programmable state (plain Maps/arrays of RAW GitHub payloads; mutate freely):
@@ -50,7 +54,10 @@
 //     `sha` → 409; unknown branch → 404; returns {content: {sha}, commit: {sha}};
 //   - POST /git/refs on an existing ref → 422 "Reference already exists";
 //   - DELETE /issues/:n/labels/:name on an absent label → 404;
-//   - PUT /pulls/:n/merge: closed/merged → 405, `sha` ≠ head → 409, else merges (200).
+//   - PUT /pulls/:n/merge: closed/merged → 405, `sha` ≠ head → 409, else merges (200) and sets
+//     merged/merged_at/merge_commit_sha on the pull;
+//   - DELETE /issues/comments/:id removes a comment (404 when absent);
+//   - GET /contents/<dir> lists the direct children [{type: "file"|"dir", name, path, sha}].
 
 import { createHash } from "node:crypto";
 import { createServer } from "node:http";
@@ -106,8 +113,17 @@ export async function startFakeGitHub(options = {}) {
 
   const user = (login = fake.actor) => ({ login, type: /\[bot\]$/.test(login) ? "Bot" : "User" });
 
-  fake.inject = ({ method, path, status, body = {}, headers = {}, times = 1 }) => {
-    fake.injections.push({ method, path, status, body, headers, times });
+  fake.inject = ({
+    method,
+    path,
+    status,
+    body = {},
+    headers = {},
+    times = 1,
+    apply = false,
+    delayMs = 0,
+  }) => {
+    fake.injections.push({ method, path, status, body, headers, times, apply, delayMs });
   };
 
   fake.addPull = (input) => {
@@ -285,7 +301,12 @@ export async function startFakeGitHub(options = {}) {
           });
         }
         const sha = fakeSha({ merge: number, method: req.body?.merge_method });
-        Object.assign(pull, { state: "closed", merged: true, merged_at: fake.now() });
+        Object.assign(pull, {
+          state: "closed",
+          merged: true,
+          merged_at: fake.now(),
+          merge_commit_sha: sha,
+        });
         return json(200, { sha, merged: true, message: "Pull Request successfully merged" });
       },
     ],
@@ -393,6 +414,20 @@ export async function startFakeGitHub(options = {}) {
         return json(201, comment);
       },
     ],
+    [
+      "DELETE",
+      /^\/issues\/comments\/(\d+)$/,
+      (_req, [id]) => {
+        for (const list of fake.comments.values()) {
+          const index = list.findIndex((c) => c.id === +id);
+          if (index >= 0) {
+            list.splice(index, 1);
+            return json(204, null);
+          }
+        }
+        return notFound();
+      },
+    ],
 
     [
       "GET",
@@ -437,8 +472,28 @@ export async function startFakeGitHub(options = {}) {
         const ref = req.query.ref ?? fake.repoInfo.default_branch;
         const commitSha = resolveRef(ref);
         if (!commitSha) return json(404, { message: `No commit found for the ref ${ref}` });
-        const entry = fake.trees.get(fake.commits.get(commitSha).tree).find((e) => e.path === path);
-        if (!entry) return notFound();
+        const entries = fake.trees.get(fake.commits.get(commitSha).tree);
+        const entry = entries.find((e) => e.path === path);
+        if (!entry) {
+          const dir = `${path.replace(/\/+$/, "")}/`;
+          const children = new Map();
+          for (const e of entries) {
+            if (!e.path.startsWith(dir)) continue;
+            const [name, ...rest] = e.path.slice(dir.length).split("/");
+            const type = rest.length ? "dir" : "file";
+            children.set(name, {
+              type,
+              name,
+              path: `${dir}${name}`,
+              sha: rest.length ? "" : e.sha,
+            });
+          }
+          if (!children.size) return notFound();
+          return json(
+            200,
+            [...children.values()].sort((a, b) => a.name.localeCompare(b.name))
+          );
+        }
         const content = wrap60(fake.blobs.get(entry.sha).toString("base64"));
         return json(200, { type: "file", encoding: "base64", path, sha: entry.sha, content });
       },
@@ -650,8 +705,13 @@ export async function startFakeGitHub(options = {}) {
       const inj = fake.injections[index];
       inj.times -= 1;
       if (inj.times <= 0) fake.injections.splice(index, 1);
-      return json(inj.status, inj.body, inj.headers);
+      if (inj.apply) routeNormally(req);
+      return { ...json(inj.status, inj.body, inj.headers), delayMs: inj.delayMs };
     }
+    return routeNormally(req);
+  }
+
+  function routeNormally(req) {
     for (const [method, re, handler] of routes) {
       if (method !== req.method) continue;
       const m = re.exec(req.path);
@@ -696,8 +756,17 @@ export async function startFakeGitHub(options = {}) {
         }
       }
       const headers = { "content-type": "application/json; charset=utf-8", ...result.headers };
-      res.writeHead(result.status, headers);
-      res.end(result.body === null || result.status === 204 ? "" : JSON.stringify(result.body));
+      const send = () => {
+        if (res.destroyed) return;
+        res.writeHead(result.status, headers);
+        res.end(result.body === null || result.status === 204 ? "" : JSON.stringify(result.body));
+      };
+      if (result.delayMs > 0) {
+        const timer = setTimeout(send, result.delayMs);
+        res.on("close", () => clearTimeout(timer));
+      } else {
+        send();
+      }
     });
   });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
