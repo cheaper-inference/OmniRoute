@@ -8,6 +8,7 @@ import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import { v1betaGeminiGenerateSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { convertGeminiToInternal } from "./convertGeminiToInternal";
+import { estimateGeminiCountTokens, parseGeminiModelPath } from "./geminiRouteHelpers";
 
 let initialized = false;
 
@@ -37,6 +38,7 @@ export async function OPTIONS() {
 /**
  * POST /v1beta/models/{model}:generateContent        — non-streaming (JSON)
  * POST /v1beta/models/{model}:streamGenerateContent  — streaming (SSE)
+ * POST /v1beta/models/{model}:countTokens            (local token estimate, {totalTokens})
  *
  * Streaming intent is determined by the URL action suffix (the canonical
  * Gemini API convention), NOT by a body field. `generationConfig.stream` is
@@ -68,28 +70,21 @@ export async function POST(request, { params }) {
 
   try {
     const { path } = await params;
-    // path = ["provider", "model:action"] or ["model:action"]
+    // path = ["model:action"], ["provider", "model:action"] or deeper
+    // (["a", "b", "c:action"]); model ids may contain "/".
+    const parsed = parseGeminiModelPath(path);
+    if (!parsed) {
+      return Response.json(
+        { error: { message: "Missing model in path", code: 400, status: "INVALID_ARGUMENT" } },
+        { status: 400 }
+      );
+    }
+    const { model, action } = parsed;
 
-    let model;
-    let action: ":generateContent" | ":streamGenerateContent";
-    if (path.length >= 2) {
-      // Format: /v1beta/models/provider/model:action
-      const provider = path[0];
-      const modelAction = path[1];
-      action = modelAction.includes(":streamGenerateContent")
-        ? ":streamGenerateContent"
-        : ":generateContent";
-      const modelName = modelAction
-        .replace(":streamGenerateContent", "")
-        .replace(":generateContent", "");
-      model = `${provider}/${modelName}`;
-    } else {
-      // Format: /v1beta/models/model:action
-      const modelAction = path[0];
-      action = modelAction.includes(":streamGenerateContent")
-        ? ":streamGenerateContent"
-        : ":generateContent";
-      model = modelAction.replace(":streamGenerateContent", "").replace(":generateContent", "");
+    if (action === "countTokens") {
+      // Local estimate in Gemini's CountTokensResponse shape. Gemini CLI calls this for
+      // media parts and context calibration and falls back to its own estimate on error.
+      return Response.json({ totalTokens: estimateGeminiCountTokens(rawBody, model) });
     }
 
     const validation = validateBody(v1betaGeminiGenerateSchema, rawBody);
@@ -101,7 +96,7 @@ export async function POST(request, { params }) {
     // Streaming is determined by URL action suffix:
     //   :streamGenerateContent => stream: true  (SSE)
     //   :generateContent       => stream: false (plain JSON)
-    const stream = action === ":streamGenerateContent";
+    const stream = action === "streamGenerateContent";
 
     // Convert Gemini format to OpenAI/internal format
     const convertedBody = convertGeminiToInternal(body, model, stream);
