@@ -7,6 +7,8 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { describeGateMode, resolveGateModeInfo } from "../check/lib/gateMode.mjs";
+
 const cwd = process.cwd();
 function getArg(name, fallback) {
   const i = process.argv.indexOf(name);
@@ -47,10 +49,23 @@ const metrics = load(METRICS);
 // "measured better than baseline" is the expected state, not a forgotten tighten.
 // Closing the phase (v4.0) deletes `_policy` and the flag bites again.
 const POLICY = baseline._policy && typeof baseline._policy === "object" ? baseline._policy : null;
-const TIGHTEN_ENFORCED = REQUIRE_TIGHTEN && !(POLICY && POLICY.requireTighten === false);
-if (REQUIRE_TIGHTEN && !TIGHTEN_ENFORCED) {
+const VELOCITY_ADVISORY = Boolean(POLICY && POLICY.requireTighten === false);
+// Gate mode (scripts/check/lib/gateMode.mjs; plan 2026-11-13): baselines are banked by the
+// release refresh / nightly, never by a feature PR — two PRs that each tightened the same
+// number conflicted on quality-baseline.json. In `pr` mode an improvement is reported, not
+// failed; a regression fails in both modes. `release` mode (push, schedule, the release PR,
+// local runs) keeps --require-tighten exactly as before.
+const GATE_MODE = resolveGateModeInfo({ argv: process.argv, env: process.env });
+const PR_ADVISORY = REQUIRE_TIGHTEN && !VELOCITY_ADVISORY && GATE_MODE.mode === "pr";
+const TIGHTEN_ENFORCED = REQUIRE_TIGHTEN && !VELOCITY_ADVISORY && !PR_ADVISORY;
+if (REQUIRE_TIGHTEN && VELOCITY_ADVISORY) {
   console.log(
     `[quality-ratchet] --require-tighten advisory: velocity phase active (phase=${POLICY.phase}, until ${POLICY.until}, relax ${POLICY.relaxPct}%)`
+  );
+}
+if (PR_ADVISORY) {
+  console.log(
+    `[quality-ratchet] --require-tighten advisory: ${describeGateMode(GATE_MODE)} — a feature PR does not bank improvements; the release refresh / nightly does (strict in release mode)`
   );
 }
 const failures = [];
@@ -159,6 +174,13 @@ if (TIGHTEN_ENFORCED && !UPDATE && tightenFailures.length > 0) {
       tightenFailures.map((f) => "  ✗ " + f).join("\n")
   );
   process.exit(1);
+}
+
+if (PR_ADVISORY && !UPDATE && tightenFailures.length > 0) {
+  console.log(
+    "[quality-ratchet] melhoria(s) não bancada(s) — informativo em modo pr (o aperto é da release/noturno; este PR não edita o baseline):\n" +
+      tightenFailures.map((f) => "  · " + f).join("\n")
+  );
 }
 
 console.log(`[quality-ratchet] OK (${rows.length} métricas, ${improvements.length} melhoraram)`);
