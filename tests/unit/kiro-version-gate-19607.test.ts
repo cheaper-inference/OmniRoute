@@ -19,6 +19,11 @@
  * User-Agent returned 200. Connections that only use q.<region> (api_key, external_idp,
  * eu-central-1) therefore need the IDE identity; a kiro-cli identity is not enough.
  *
+ * Live re-check, 2026-11-13, same setup: the gate now answers with 400 instead of 403
+ * (same message). q.us-east-1 and codewhisperer.us-east-1 return the 400 for
+ * `kiro-ide/1.0.0`; `KiroIDE-1.4.121` (no suffix) and `KiroIDE-1.4.154-<machineId>` pass on
+ * all three hosts; runtime.us-east-1.kiro.dev passed every identity for this IdC token.
+ *
  * These tests pin the identities so a future drift fails here instead of as an
  * upstream 403 in production.
  */
@@ -32,6 +37,7 @@ import {
   classifyProviderError,
   PROVIDER_ERROR_TYPES,
 } from "../../open-sse/services/errorClassifier.ts";
+import { checkFallbackError } from "../../open-sse/services/accountFallback.ts";
 import { kiroRuntimeHost } from "../../open-sse/services/kiroRegion.ts";
 import { fetchKiroAvailableModels } from "../../open-sse/services/kiroModels.ts";
 import {
@@ -153,6 +159,37 @@ test("control: the version-gate wording on a non-Kiro oauth provider keeps FORBI
     classifyProviderError(403, KIRO_VERSION_GATE_403, "claude"),
     PROVIDER_ERROR_TYPES.FORBIDDEN
   );
+});
+
+/** Since 2026-11-12 the gate answers with 400 and the same message (live, 2026-11-13). */
+const KIRO_VERSION_GATE_400 = {
+  message:
+    "This version of Kiro is no longer supported. Please update to the latest version of Kiro to continue.",
+};
+
+test("version-gate 400 is recorded as a recoverable Kiro error", () => {
+  // Unclassified (null), the 400 left no trace on the connection: it stayed "active" with
+  // no lastError while every request failed (#19748). PROJECT_ROUTE_ERROR records the
+  // reason on the connection and never bans it.
+  for (const provider of ["kiro", "amazon-q"]) {
+    assert.equal(
+      classifyProviderError(400, KIRO_VERSION_GATE_400, provider),
+      PROVIDER_ERROR_TYPES.PROJECT_ROUTE_ERROR,
+      `${provider} version-gate 400 must be recorded without a ban`
+    );
+  }
+});
+
+test("version-gate 400 does not trigger account fallback or a cooldown", () => {
+  // Every account sends the same client identity, so another account cannot pass the gate.
+  const result = checkFallbackError(400, JSON.stringify(KIRO_VERSION_GATE_400), 0, null, "kiro");
+  assert.equal(result.shouldFallback, false);
+  assert.equal(result.cooldownMs, 0);
+  assert.notEqual(result.permanent, true);
+});
+
+test("control: the version-gate wording on a non-Kiro provider 400 stays unclassified", () => {
+  assert.equal(classifyProviderError(400, KIRO_VERSION_GATE_400, "claude"), null);
 });
 
 test("kiro service User-Agent identifies a Kiro IDE release above the next version floor", () => {
