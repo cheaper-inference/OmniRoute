@@ -71,8 +71,13 @@ function scopeRecovered(
 /** A live usage response hydrates display and releases only fully recovered quota scopes.
  * Compare the pre-fetch state inside the transaction so newer failures win.
  */
-export async function syncCodexQuotaObservation(id: string, usage: RecordValue, expected: unknown) {
-  if (usage.message) return null;
+export async function syncCodexQuotaObservation(
+  id: string,
+  usage: RecordValue,
+  expected: unknown,
+  observedAt = new Date().toISOString()
+) {
+  if (usage.message || usage._stale) return null;
   const quotas = toRecord(usage.quotas);
   if (!Object.keys(quotas).length) return null;
   const complete = isCompleteUsageReading(usage);
@@ -105,7 +110,7 @@ export async function syncCodexQuotaObservation(id: string, usage: RecordValue, 
       )
         continue;
       const byScope = { ...toRecord(data.codexQuotaStateByScope) };
-      const snapshot: RecordValue = { observedAt: new Date().toISOString() };
+      const snapshot: RecordValue = { observedAt };
       for (const [window, suffix] of [
         [session, "5h"],
         [weekly, "7d"],

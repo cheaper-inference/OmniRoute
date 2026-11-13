@@ -184,7 +184,7 @@ function normalizeWindowKey(value: unknown): string {
     .trim();
 }
 
-function resolveQuotaWindow(
+export function resolveQuotaWindow(
   quotas: Record<string, QuotaInfo>,
   windowName: string
 ): QuotaInfo | null {
@@ -829,7 +829,8 @@ export function isCodexSubscriptionExhaustedForRequest(
 function retainFreshCodexObservations(
   connectionId: string,
   quotas: Record<string, QuotaInfo>,
-  prior: QuotaCacheEntry | null
+  prior: QuotaCacheEntry | null,
+  observedAt: number
 ): Set<string> {
   const retained = new Set<string>();
   for (const [windowKey, quota] of Object.entries(quotas)) {
@@ -844,7 +845,7 @@ function retainFreshCodexObservations(
       quotas[windowKey] = { ...previous, observedAt: previous.observedAt ?? prior.fetchedAt };
       retained.add(windowKey);
     } else {
-      quota.observedAt = Date.now();
+      quota.observedAt = observedAt;
     }
   }
   return retained;
@@ -878,7 +879,7 @@ export function setQuotaCache(
   provider: string,
   reportedQuotas: Record<string, unknown>,
   rawModelQuotas: Record<string, unknown> = {},
-  options: { complete?: boolean } = {}
+  options: { complete?: boolean; observedAt?: number } = {}
 ) {
   if (provider === "codex") {
     withCodexConnectionWrite(connectionId, () =>
@@ -903,12 +904,26 @@ function tagCodexOwnerEpoch(entry: QuotaCacheEntry): string | null {
   return owner?.epoch ?? null;
 }
 
+function isStaleCodexReading(
+  provider: string,
+  prior: QuotaCacheEntry | null,
+  observedAt?: number
+): boolean {
+  return (
+    provider === "codex" &&
+    observedAt !== undefined &&
+    prior !== null &&
+    ((prior.completeAt ?? 0) > observedAt ||
+      Object.values(prior.quotas).some((quota) => (quota.observedAt ?? 0) > observedAt))
+  );
+}
+
 function setQuotaCacheInner(
   connectionId: string,
   provider: string,
   reportedQuotas: Record<string, unknown>,
   rawModelQuotas: Record<string, unknown>,
-  options: { complete?: boolean }
+  options: { complete?: boolean; observedAt?: number }
 ) {
   // Display-only Codex windows (reserve pool) must never drive routing/exhaustion.
   const rawQuotas =
@@ -918,9 +933,12 @@ function setQuotaCacheInner(
   // #4438 — capture the prior entry BEFORE overwriting the cache so we can skip
   // redundant snapshot writes for idle connections whose quota didn't change.
   const prior = priorQuotaEntry(connectionId, provider);
+  const observedAt = options.observedAt ?? Date.now();
+  // Polls are dated at dispatch, not completion: newer inference evidence wins.
+  if (isStaleCodexReading(provider, prior, options.observedAt)) return;
   const retainedCodexWindows =
     provider === "codex"
-      ? retainFreshCodexObservations(connectionId, quotas, prior)
+      ? retainFreshCodexObservations(connectionId, quotas, prior, observedAt)
       : new Set<string>();
   const exhausted = isExhausted(quotas);
   if (isTelemetryOnlyRefresh(prior, quotas, modelQuotas)) return;
@@ -929,7 +947,7 @@ function setQuotaCacheInner(
     provider,
     quotas,
     modelQuotas,
-    fetchedAt: Date.now(),
+    fetchedAt: observedAt,
     exhausted,
     // #14359 — cap the park; keep the prior deadline while the streak continues (monitor rewrites must not extend it).
     nextResetAt: exhausted ? preserveParkDeadline(earliestResetAt(quotas), prior) : null,

@@ -1,5 +1,12 @@
 import type { CredentialSelectionOptions } from "./credentialSelectionOptions";
-import { mayWriteCodexConnection } from "@/lib/db/codexConnectionFences";
+import { mayWriteCodexConnection, readCodexQuotaOwner } from "@/lib/db/codexConnectionFences";
+import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
+import {
+  recheckCodexQuotaRecovery,
+  refreshCodexQuotaForRecovery,
+  type CodexQuotaRecoveryBlocker,
+} from "./codexQuotaRecoveryRecheck";
+import { filterCodexQuotaWindows } from "@omniroute/open-sse/services/codexQuotaWindowPolicy.ts";
 export type { CredentialSelectionOptions } from "./credentialSelectionOptions";
 import { qoderSupportsCallerTools } from "@omniroute/open-sse/services/qoderCapabilities";
 import { isCodexFreePlan } from "@omniroute/open-sse/executors/codex/tools.ts";
@@ -70,6 +77,7 @@ import {
   getCachedClaudeQuotaScopeDecision as readClaudeScope,
   getQuotaCache,
   getQuotaWindowStatus,
+  resolveQuotaWindow,
   hydrateCodexQuotaCacheForRequest,
   isQuotaExhaustedForRequest,
   isCodexSubscriptionExhaustedForRequest,
@@ -858,6 +866,59 @@ function invalidateManagedLease(
   reason: Parameters<typeof invalidateManagedConnectionLease>[1]
 ) {
   invalidateManagedConnectionLease(options.lease, reason);
+}
+
+const QUOTA_REJECTION_META = Symbol("codexQuotaRejection");
+type QuotaRejectionMeta = { kind: "policy" | "exhausted"; blockers: CodexQuotaRecoveryBlocker[] };
+
+function quotaRecoveryBlocker(
+  connection: ProviderConnectionView,
+  requestedModel: string | null,
+  kind: QuotaRejectionMeta["kind"]
+): CodexQuotaRecoveryBlocker {
+  const entry = getQuotaCache(connection.id);
+  const policy = resolveQuotaLimitPolicy("codex", connection.providerSpecificData);
+  const scope = getCodexQuotaWindowFilterForModel(requestedModel);
+  const windowNames =
+    kind === "policy"
+      ? policy.windows
+          .map((name) => toCodexScopedQuotaWindowName(name, requestedModel))
+          .filter(
+            (name) =>
+              getQuotaWindowStatus(connection.id, name, policy.thresholdPercent)?.reachedThreshold
+          )
+      : Object.keys(
+          filterCodexQuotaWindows(entry?.quotas ?? {}, connection.providerSpecificData)
+        ).filter(
+          (name) =>
+            (!scope || scope(name)) &&
+            getQuotaWindowStatus(connection.id, name, 100)?.reachedThreshold
+        );
+  return {
+    connectionId: connection.id,
+    windowNames,
+    // Do not substitute fetchedAt: a Spark update cannot redate an old weekly denial.
+    observedAts: windowNames
+      .map((name) => resolveQuotaWindow(entry?.quotas ?? {}, name)?.observedAt ?? null)
+      .concat(
+        windowNames.length === 0 && entry && Object.keys(entry.quotas).length === 0
+          ? [entry.fetchedAt]
+          : []
+      ),
+  };
+}
+function quotaRejection<T extends object>(
+  result: T,
+  provider: string,
+  options: CredentialSelectionOptions,
+  meta: QuotaRejectionMeta
+): T {
+  if (provider === "codex" && options._deferQuotaLeaseInvalidation) {
+    Object.defineProperty(result, QUOTA_REJECTION_META, { value: meta });
+  } else {
+    invalidateManagedLease(options, "QUOTA_UNAVAILABLE");
+  }
+  return result;
 }
 
 type DeferredLeaseSelection = {
@@ -1781,14 +1842,23 @@ export async function getProviderCredentials(
         ? new Date(earliestResetMs).toISOString()
         : new Date(Date.now() + 5 * 60 * 1000).toISOString();
 
-      invalidateManagedLease(options, "QUOTA_UNAVAILABLE");
-      return {
-        allRateLimited: true,
-        retryAfter,
-        retryAfterHuman: formatRetryAfter(retryAfter),
-        lastError: `All ${provider} accounts reached configured quota threshold`,
-        lastErrorCode: 429,
-      };
+      return quotaRejection(
+        {
+          allRateLimited: true,
+          retryAfter,
+          retryAfterHuman: formatRetryAfter(retryAfter),
+          lastError: `All ${provider} accounts reached configured quota threshold`,
+          lastErrorCode: 429,
+        },
+        provider,
+        options,
+        {
+          kind: "policy",
+          blockers: peakHourEligibleConnections.map((connection) =>
+            quotaRecoveryBlocker(connection, requestedModel, "policy")
+          ),
+        }
+      );
     }
 
     // Quota-aware: partition accounts with and without quota for the requested scope.
@@ -1874,14 +1944,30 @@ export async function getProviderCredentials(
         };
       }
 
-      invalidateManagedLease(options, "QUOTA_UNAVAILABLE");
-      return {
-        allRateLimited: true,
-        retryAfter,
-        retryAfterHuman: formatRetryAfter(retryAfter),
-        lastError: `All ${provider} accounts have exhausted their quota (cached quota state, no upstream attempt; earliest ${formatRetryAfter(retryAfter)})`,
-        lastErrorCode: 429,
-      };
+      return quotaRejection(
+        {
+          allRateLimited: true,
+          retryAfter,
+          retryAfterHuman: formatRetryAfter(retryAfter),
+          lastError: `All ${provider} accounts have exhausted their quota (cached quota state, no upstream attempt; earliest ${formatRetryAfter(retryAfter)})`,
+          lastErrorCode: 429,
+        },
+        provider,
+        options,
+        {
+          kind: "exhausted",
+          blockers: [
+            ...peakHourEligibleConnections
+              .filter((connection) =>
+                blockedByPolicy.some((blocked) => blocked.id === connection.id)
+              )
+              .map((connection) => quotaRecoveryBlocker(connection, requestedModel, "policy")),
+            ...exhaustedQuota.map((connection) =>
+              quotaRecoveryBlocker(connection, requestedModel, "exhausted")
+            ),
+          ],
+        }
+      );
     }
 
     const subscriptionFirst = holdBackCodexCreditOnlyAccounts(provider, withQuota, requestedModel);
@@ -2303,6 +2389,10 @@ export async function getProviderCredentialsWithQuotaPreflight(
   const resilience = resolveResilienceSettings(await getCachedSettings());
   const { warnThresholdPercent } = resilience.quotaPreflight;
   let pendingCredentialSelection: Awaited<ReturnType<typeof getProviderCredentials>> | undefined;
+  let recoveryAttempted = false;
+  const finalQuotaRejection = () => {
+    if (provider === "codex") invalidateManagedLease(options, "QUOTA_UNAVAILABLE");
+  };
 
   while (true) {
     const credentials =
@@ -2310,12 +2400,14 @@ export async function getProviderCredentialsWithQuotaPreflight(
       (await getProviderCredentials(provider, null, allowedConnections, requestedModel, {
         ...options,
         excludeConnectionIds: Array.from(excludedConnectionIds),
+        ...(provider === "codex" ? { _deferQuotaLeaseInvalidation: true } : {}),
         ...(options.lease ? { deferLeaseClaim: true } : {}),
       }));
     pendingCredentialSelection = undefined;
 
     if (!credentials) {
       if (blockedByPreflight.length > 0) {
+        finalQuotaRejection();
         return buildQuotaPreflightRateLimitedResult(provider, blockedByPreflight);
       }
       return null;
@@ -2325,6 +2417,33 @@ export async function getProviderCredentialsWithQuotaPreflight(
       ("allRateLimited" in credentials && credentials.allRateLimited) ||
       ("allExpired" in credentials && credentials.allExpired)
     ) {
+      const meta = (credentials as { [QUOTA_REJECTION_META]?: QuotaRejectionMeta })[
+        QUOTA_REJECTION_META
+      ];
+      if (provider === "codex" && meta && !recoveryAttempted) {
+        recoveryAttempted = true;
+        const refreshed = await recheckCodexQuotaRecovery(
+          meta.blockers.filter((blocker) => !excludedConnectionIds.has(blocker.connectionId)),
+          {
+            ownerEpoch: (id) => readCodexQuotaOwner(id)?.epoch ?? null,
+            eligible: async (id) => {
+              if (options._leaseCandidateIds && !options._leaseCandidateIds.includes(id))
+                return false;
+              if (!options.lease) return !(await isConnectionUnavailableToAuxiliaryActivity(id));
+              const connection = await getCachedProviderConnectionById(id);
+              if (!connection) return false;
+              const policy = await applyExclusiveConnectionLeasePolicy(
+                [toProviderConnection(connection)],
+                options
+              );
+              return !policy.error && policy.connections.some((candidate) => candidate.id === id);
+            },
+            refresh: refreshCodexQuotaForRecovery,
+          }
+        );
+        if (refreshed) continue;
+      }
+      if (meta) finalQuotaRejection();
       if (
         "allRateLimited" in credentials &&
         credentials.allRateLimited &&
