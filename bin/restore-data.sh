@@ -42,17 +42,18 @@ if [ -f "$OMNIROUTE_SQLITE" ]; then
   mkdir -p "$safety"
   if command -v sqlite3 >/dev/null 2>&1; then
     ops_sqlite "$OMNIROUTE_SQLITE" "VACUUM INTO $(ops_sql_str "$safety/storage.sqlite")" \
-      || cp -a "$OMNIROUTE_SQLITE" "$safety/storage.sqlite"
+      || ops_cp_db "$OMNIROUTE_SQLITE" "$safety/storage.sqlite"
   else
-    cp -a "$OMNIROUTE_SQLITE" "$safety/storage.sqlite"
+    ops_cp_db "$OMNIROUTE_SQLITE" "$safety/storage.sqlite"
   fi
   ops_log "current data saved to $safety"
 fi
 
 mkdir -p "$OMNIROUTE_DATA_DIR"
-# Drop stale WAL/SHM so the restored DB is authoritative, then copy in.
+# Drop the live WAL/SHM so the restored DB is authoritative, then copy in the snapshot
+# with its own WAL (a snapshot made by an older script can carry rows there).
 rm -f "$OMNIROUTE_SQLITE" "${OMNIROUTE_SQLITE}-wal" "${OMNIROUTE_SQLITE}-shm"
-cp -a "$snap/storage.sqlite" "$OMNIROUTE_SQLITE"
+ops_cp_db "$snap/storage.sqlite" "$OMNIROUTE_SQLITE"
 
 # Restore sibling DBs captured in the snapshot.
 for f in "$snap"/*.sqlite; do

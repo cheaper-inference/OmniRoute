@@ -34,6 +34,13 @@ done
 
 [ -f "$OMNIROUTE_SQLITE" ] || ops_die "no storage.sqlite at $OMNIROUTE_SQLITE (set DATA_DIR?)"
 
+# Without sqlite3 the only copy is a file copy of the main file. That is a complete
+# snapshot only when the WAL holds no rows, so refuse while it does (stop OmniRoute first).
+wal_has_rows() { [ -s "${OMNIROUTE_SQLITE}-wal" ]; }
+if ! command -v sqlite3 >/dev/null 2>&1 && wal_has_rows; then
+  ops_die "sqlite3 not found and ${OMNIROUTE_SQLITE}-wal holds data a file copy would lose; stop OmniRoute (it checkpoints on exit) or install sqlite3"
+fi
+
 ts="$(date -u +%Y%m%dT%H%M%SZ)"
 id="${ts}${LABEL:+_$LABEL}"
 dest="$OMNIROUTE_BACKUPS_DIR/snapshot_$id"
@@ -43,11 +50,13 @@ if command -v sqlite3 >/dev/null 2>&1; then
   # VACUUM INTO yields a transactionally-consistent copy under WAL.
   ops_sqlite "$OMNIROUTE_SQLITE" "VACUUM INTO $(ops_sql_str "$dest/storage.sqlite")"
 else
-  ops_log "sqlite3 not found — copying files (stop writers first for a clean copy)"
+  ops_log "sqlite3 not found — copying the main file (the WAL is empty; stop writers first)"
   cp -a "$OMNIROUTE_SQLITE" "$dest/storage.sqlite"
-  for ext in -wal -shm; do
-    [ -f "${OMNIROUTE_SQLITE}${ext}" ] && cp -a "${OMNIROUTE_SQLITE}${ext}" "$dest/" || true
-  done
+  # A writer that committed during the copy leaves rows in the WAL: the copy is then incomplete.
+  if wal_has_rows; then
+    rm -rf "$dest"
+    ops_die "a write reached the WAL during the copy; snapshot discarded. Stop OmniRoute and retry"
+  fi
 fi
 
 # Capture sibling SQLite DBs (analytics, etc.) if present.
