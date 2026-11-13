@@ -187,8 +187,8 @@ Requires the `omniroute` CLI. See the install and global-flags sections above.
 ```bash
 omniroute                              # Start server (default port 20128)
 omniroute serve                        # Explicit alias
-omniroute --port 3000                  # Override port
-omniroute --no-open                    # Don't auto-open browser
+omniroute serve --port 3000            # Override port
+omniroute serve --no-open              # Don't auto-open browser
 omniroute --mcp                        # Start as MCP server (stdio transport)
 
 omniroute stop                         # Stop the running server
@@ -218,23 +218,19 @@ omniroute setup --non-interactive \
   --test-provider
 ```
 
-Environment variables for non-interactive setup:
+Every input has a flag (`--password`, `--provider`, `--provider-name`, `--provider-base-url`, `--api-key`, `--default-model`). Two environment variables are read as a fallback:
 
-| Variable                      | Purpose                                      |
-| ----------------------------- | -------------------------------------------- |
-| `OMNIROUTE_SETUP_PASSWORD`    | Admin password (≥8 chars)                    |
-| `OMNIROUTE_PROVIDER`          | Provider id (e.g. `openai`, `anthropic`)     |
-| `OMNIROUTE_PROVIDER_NAME`     | Display name for the connection              |
-| `OMNIROUTE_PROVIDER_BASE_URL` | Optional OpenAI-compatible base URL override |
-| `OMNIROUTE_API_KEY`           | Provider API key                             |
-| `OMNIROUTE_DEFAULT_MODEL`     | Optional default model                       |
-| `DATA_DIR`                    | Override OmniRoute data directory            |
+| Variable           | Purpose                                                         |
+| ------------------ | --------------------------------------------------------------- |
+| `INITIAL_PASSWORD` | Admin password, used when no password is stored and no `--password` is given |
+| `OMNIROUTE_API_KEY` | Provider API key, used when `--api-key` is not given           |
+| `DATA_DIR`         | Override OmniRoute data directory                               |
 
 ### Diagnostics
 
 ```bash
 omniroute doctor                       # Full health check
-omniroute doctor --json                # Machine-readable JSON
+omniroute doctor --output json         # Machine-readable JSON
 omniroute doctor --no-liveness         # Skip HTTP health probe
 omniroute doctor --host 0.0.0.0        # Override liveness host
 omniroute doctor --liveness-url <url>  # Full URL override
@@ -245,13 +241,13 @@ Checks performed: Config, Database, Storage/encryption, Port, Node runtime, Nati
 Exit code is non-zero if any check fails — useful in CI:
 
 ```bash
-omniroute doctor --json | jq '.checks[] | select(.status=="fail")'
+omniroute doctor --output json | jq '.checks[] | select(.status=="fail")'
 ```
 
 ### Backup & restore
 
 ```bash
-omniroute backup                       # Snapshot config + SQLite DB to ~/.omniroute/backups/
+omniroute backup create                # Snapshot config + SQLite DB to ~/.omniroute/backups/
 omniroute restore                      # Restore from a previous snapshot (interactive picker)
 ```
 
@@ -274,7 +270,7 @@ omniroute tunnel list                  # List active tunnels
 omniroute tunnel create cloudflare     # Start a Cloudflare Tunnel (free)
 omniroute tunnel create tailscale      # Start a Tailscale funnel
 omniroute tunnel create ngrok          # Start an ngrok tunnel
-omniroute tunnel stop <id>             # Stop a running tunnel
+omniroute tunnel stop <type>           # Stop a running tunnel (cloudflare, tailscale or ngrok)
 ```
 
 The tunnel URL is printed and can be used as `OMNIROUTE_BASE_URL` from remote machines.
@@ -282,7 +278,7 @@ The tunnel URL is printed and can be used as `OMNIROUTE_BASE_URL` from remote ma
 ### Config & environment
 
 ```bash
-omniroute config show                  # Display current effective configuration
+omniroute config list                  # List CLI tools and their config status
 omniroute env show                     # List all OmniRoute environment variables
 omniroute env get <KEY>                # Get a single env var value
 omniroute env set <KEY> <value>        # Set an env var (temporary — until restart)
@@ -302,8 +298,9 @@ Use `reset-encrypted-columns --force` only if `STORAGE_ENCRYPTION_KEY` was lost 
 
 ```bash
 omniroute logs                         # Stream live request logs
-omniroute logs --json                  # JSON log entries
-omniroute logs --search <term>         # Filter by term
+omniroute logs --output json           # JSON log entries
+omniroute logs --filter error          # Filter by level
+omniroute logs --request-id <id>       # Logs of one request
 omniroute logs --follow                # Tail mode (keep streaming)
 ```
 

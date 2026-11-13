@@ -249,8 +249,7 @@ omniroute keys expiration list                       # List key expiration times
 omniroute keys policy show <id>                      # Show rate-limit / permission policy
 omniroute keys policy set <id> \
   --rate-limit 100 \
-  --rate-window minute \
-  --permissions chat,models                          # Set policy on a key
+  --allowed-models openai/gpt-4o,anthropic/claude-sonnet-4-6  # Set policy on a key
 ```
 
 ## Models
@@ -265,24 +264,23 @@ omniroute models --json                              # JSON output
 ## OAuth providers
 
 ```bash
-omniroute oauth list                                 # List OAuth-configured providers
-omniroute oauth login <provider>                     # Start browser-based OAuth flow
-omniroute oauth logout <provider>                    # Revoke OAuth token
-omniroute oauth status <provider>                    # Show token state + expiry
-omniroute oauth refresh <provider>                   # Force token refresh
+omniroute oauth providers                            # List providers that support OAuth
+omniroute oauth start --provider <provider>          # Start browser-based OAuth flow
+omniroute oauth status --provider <provider>         # Show token state + expiry
+omniroute oauth revoke --provider <provider> --yes   # Revoke the OAuth token
 ```
 
-For OAuth providers (Gemini, Windsurf, Antigravity, etc.) the `login` command opens the OmniRoute dashboard OAuth flow in your browser.
+For OAuth providers (Gemini, Windsurf, Antigravity, etc.) the `start` command opens the OmniRoute dashboard OAuth flow in your browser.
 
 ## Provider nodes (multi-account routing)
 
 Provider nodes let you attach multiple API keys / accounts to one logical provider for round-robin or failover.
 
 ```bash
-omniroute nodes list <provider>                      # List nodes for a provider
-omniroute nodes add <provider> --api-key <key>       # Add a node
-omniroute nodes remove <provider> <nodeId>           # Remove a node
-omniroute nodes test <provider> <nodeId>             # Test one node
+omniroute nodes list --provider <provider>           # List nodes for a provider
+omniroute nodes add --provider <provider> --endpoint <url>  # Add a node
+omniroute nodes remove <nodeId> --yes                # Remove a node
+omniroute nodes test <nodeId>                        # Test one node
 ```
 
 ## Routing combos (CLI)
@@ -293,7 +291,7 @@ Create and manage routing combos from the terminal:
 omniroute combo list                                 # List all combos
 omniroute combo create <name> \
   --strategy priority \
-  --targets anthropic/claude-opus-4-7,openai/gpt-4o  # Create combo
+  --models anthropic/claude-opus-4-7,openai/gpt-4o   # Create combo
 omniroute combo switch <name>                        # Activate a combo as default
 omniroute combo delete <name>                        # Delete a combo
 omniroute combo suggest --task "code review"         # Ask OmniRoute to recommend a combo
@@ -313,10 +311,10 @@ omniroute cost                                       # Cost breakdown (by provid
 
 ```bash
 omniroute compression status                         # Current compression mode + savings stats
-omniroute compression set --mode rtk                 # Enable RTK compression
-omniroute compression set --mode stacked             # Enable stacked (RTK + Caveman)
-omniroute compression set --mode off                 # Disable compression
-omniroute compression preview --mode rtk --text "..."  # Preview savings for sample text
+omniroute compression engine set rtk                 # Enable RTK compression
+omniroute compression engine set stacked             # Enable stacked (RTK + Caveman)
+omniroute compression engine set off                 # Disable compression
+omniroute compression preview --file ./prompt.txt    # Preview savings for a sample file
 ```
 
 ## Health
@@ -328,6 +326,6 @@ omniroute health                                     # Detailed health: circuit 
 ## Errors
 
 - `providers test <id>` fails with 401 → API key stored for that provider is wrong; use `keys remove` + `keys add` to reset it
-- `oauth login` opens but doesn't complete → the OAuth token endpoint may be firewalled; use API key auth instead
+- `oauth start` opens but doesn't complete → the OAuth token endpoint may be firewalled; use API key auth instead
 - `combo create` fails with `strategy unknown` → use one of: `priority`, `weighted`, `round-robin`, `fill-first`, `least-used`, `cost-optimized`, `auto`, `random`, `strict-random`, `p2c`, `reset-aware`, `lkgp`, `context-optimized`, `context-relay`
 <!-- skill:custom-end -->

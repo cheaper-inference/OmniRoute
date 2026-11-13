@@ -165,7 +165,7 @@ Evals are automated test suites that score LLM outputs against expected answers 
 
 ```bash
 omniroute eval suites list                       # List all eval suites
-omniroute eval suites list --json                # JSON output
+omniroute eval suites list --output json         # JSON output
 
 omniroute eval suites get <suiteId>              # Full suite definition
 ```
@@ -173,28 +173,31 @@ omniroute eval suites get <suiteId>              # Full suite definition
 ### Create a suite
 
 ```bash
-omniroute eval suites create \
-  --name "code-quality" \
-  --rubric "exact-match" \
-  --samples-file ./samples.jsonl                 # JSONL: {input, expected_output}
+omniroute eval suites create --file ./suite.json  # JSON suite definition
 ```
 
-Rubric options: `exact-match`, `contains`, `llm-judge`, `regex`.
+`--file` takes one JSON object: a `name` and a list of `cases`. Each case has a `name`, an `input.messages` list and an `expected` check with a `strategy` (`exact`, `contains` or `regex`) and a `value`:
 
-`--samples-file` format (one JSON object per line):
-
-```jsonl
-{"input": "What is 2+2?", "expected_output": "4"}
-{"input": "Translate 'hello' to Spanish", "expected_output": "hola"}
+```json
+{
+  "name": "code-quality",
+  "cases": [
+    {
+      "name": "addition",
+      "input": { "messages": [{ "role": "user", "content": "What is 2+2?" }] },
+      "expected": { "strategy": "contains", "value": "4" }
+    }
+  ]
+}
 ```
 
 ## Run an eval
 
 ```bash
-omniroute eval suites run <suiteId> \
+omniroute eval run <suiteId> \
   --model claude-sonnet-4-6                      # Run suite against a specific model
 
-omniroute eval suites run <suiteId> \
+omniroute eval run <suiteId> \
   --model gpt-4o \
   --watch                                        # Live TUI progress (EvalWatch)
 ```
@@ -202,7 +205,7 @@ omniroute eval suites run <suiteId> \
 The run is asynchronous. Use `--watch` for a live terminal dashboard or poll manually:
 
 ```bash
-RUN_ID=$(omniroute eval suites run <suiteId> --model claude-sonnet-4-6 --output json | jq -r '.id')
+RUN_ID=$(omniroute eval run <suiteId> --model claude-sonnet-4-6 --output json | jq -r '.id')
 omniroute eval get $RUN_ID
 ```
 
@@ -210,7 +213,7 @@ omniroute eval get $RUN_ID
 
 ```bash
 omniroute eval list                              # List all eval runs
-omniroute eval list --json
+omniroute eval list --output json
 
 omniroute eval get <runId>                       # Run details (status, model, score)
 omniroute eval results <runId>                   # Per-sample results
@@ -243,7 +246,7 @@ Run the same suite against multiple models and compare:
 
 ```bash
 for MODEL in claude-sonnet-4-6 gpt-4o gemini-2.0-flash; do
-  omniroute eval suites run $SUITE_ID --model $MODEL --output json | jq '{model: .model, score: .score}'
+  omniroute eval run $SUITE_ID --model $MODEL --output json | jq '{model: .model, score: .score}'
 done
 ```
 
@@ -251,14 +254,14 @@ done
 
 ```bash
 # Run and fail CI if score drops below threshold
-SCORE=$(omniroute eval suites run $SUITE_ID --model claude-sonnet-4-6 --output json | jq -r '.score')
+SCORE=$(omniroute eval run $SUITE_ID --model claude-sonnet-4-6 --output json | jq -r '.score')
 python3 -c "import sys; score=float('$SCORE'); sys.exit(0 if score >= 0.90 else 1)"
 ```
 
 ## Errors
 
-- `suites create` fails with `invalid rubric` → use one of: `exact-match`, `contains`, `llm-judge`, `regex`
-- `suites run` returns `model not found` → verify model ID with `omniroute models --search <name>`
-- `eval get` shows `status: failed` → check `omniroute logs --search eval` for error details
+- `suites create` fails with HTTP 400 → the suite file is invalid: check that each case has `name`, `input.messages` and `expected.strategy` (`exact`, `contains` or `regex`) with a non-empty `expected.value`
+- `eval run` returns `model not found` → verify the model ID with `omniroute models --search <name>`
+- `eval get` shows `status: failed` → check `omniroute logs --filter error` for error details
 - `scorecard` returns empty results → the run may still be `running`; poll `omniroute eval get <runId>` until `status` is `completed`
 <!-- skill:custom-end -->
