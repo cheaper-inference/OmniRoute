@@ -751,6 +751,16 @@ jobs:
           node-version: ${{ env.CI_NODE_VERSION }}
       - name: Fetch base branch
         run: git fetch --no-tags origin "${GITHUB_BASE_REF}"
+      # Plan 2026-11-13 (derived files are written at release): translation mirrors, the
+      # non-English UI/CLI catalogs, generated docs and quality baselines each have ONE writer
+      # (a translation wave, `release:refresh-derived`, a nightly refresh PR). A feature PR that
+      # carries its own copy conflicts with every sibling that does the same (48 open PRs edited
+      # the same ~43 locale catalogs on 2026-11-13). Families + writer branches:
+      # config/quality/derived-paths/*.json. The diff base is the freshly fetched origin/<base>,
+      # not the event's base SHA: on a fast base the merge ref is newer than that SHA and the
+      # base's own commits would be judged as the PR's.
+      - name: Derived files stay out of feature PRs
+        run: npm run check:pr-derived-paths
       - name: Validate source changes include tests
         run: node scripts/check/check-pr-test-policy.mjs --summary-file .artifacts/pr-test-policy.md
       # Anti test-masking: flag net assert removal / new assert.ok(true) in changed tests.
