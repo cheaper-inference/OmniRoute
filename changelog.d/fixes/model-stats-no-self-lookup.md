@@ -1,0 +1,1 @@
+- **fix(db):** The model call statistics query filters wire observations on the row it already reads instead of looking the same row up again by primary key, so the provider statistics page reads each call log once (about half the query time on 300,000 rows in a local test).
