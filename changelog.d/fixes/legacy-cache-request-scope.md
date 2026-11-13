@@ -1,0 +1,1 @@
+- **fix(cache):** The default semantic cache now honors `x-omniroute-cache-key` (a reply stored under one tenant key is not served under another), `x-omniroute-cache-no-store`, `Cache-Control: no-store` and `Pragma: no-cache`, and keeps `previous_response_id`, `conversation` and `store` in the cache key. Existing cache entries are not reused after the update (key schema 3).

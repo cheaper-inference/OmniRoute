@@ -12,6 +12,7 @@
 import {
   generateSignature as defaultGenerateSignature,
   outputContractOf,
+  signatureScopeOf,
   setCachedResponse as defaultSetCachedResponse,
   isCacheableForWrite as defaultIsCacheableForWrite,
   isTruncatedStreamBody as defaultIsTruncatedStreamBody,
@@ -91,7 +92,8 @@ function writeStreamingCacheEntry(
       args.body.temperature,
       args.body.top_p,
       args.apiKeyId ?? undefined,
-      outputContractOf(args.body)
+      outputContractOf(args.body),
+      signatureScopeOf(args.headers)
     );
     const tokensSaved = streamTokensSaved(args.streamUsage);
     deps.setCachedResponse(sig, args.model, cleanBody, tokensSaved);
