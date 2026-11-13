@@ -200,7 +200,10 @@ export function openaiToClaudeRequest(
   // For models that don't force thinking (haiku, older sonnets), preserve temperature.
   // Note: Opus 4.7+/Fable 5 already drop sampling params upstream of the translator via
   // the registry `unsupportedParams` strip; this covers the remaining 4.x families.
-  const modelForcesThinking = /claude-(?:opus|sonnet)-4/i.test(String(model));
+  // Only the OAuth provider forces thinking; API-key and compatible providers keep temperature.
+  const modelForcesThinking =
+    (routedProvider === undefined || routedProvider === "claude") &&
+    /claude-(?:opus|sonnet)-4/i.test(String(model));
   if (body.temperature !== undefined && !modelForcesThinking) {
     result.temperature = body.temperature;
   }
@@ -267,7 +270,11 @@ export function openaiToClaudeRequest(
   // `body.reasoning_effort` (manual budget or adaptive effort), drop temperature
   // defensively. The model-name strip earlier already covers Claude OAuth's
   // forced-thinking case (claude-opus-4.x / claude-sonnet-4.x).
-  if (result.thinking && result.temperature !== undefined) {
+  if (
+    result.thinking &&
+    (result.thinking as Record<string, unknown>).type !== "disabled" &&
+    result.temperature !== undefined
+  ) {
     delete result.temperature;
   }
 
@@ -285,9 +292,10 @@ export function openaiToClaudeRequest(
     // for system-level instructions, and it must reach the Claude system field, not become an assistant turn.
     for (const msg of body.messages) {
       if (msg.role === "system" || msg.role === "developer") {
-        systemParts.push(
-          typeof msg.content === "string" ? msg.content : normalizeContentToString(msg.content)
-        );
+        const text =
+          typeof msg.content === "string" ? msg.content : normalizeContentToString(msg.content);
+        // Anthropic rejects an empty text block (400), so an empty system turn adds nothing.
+        if (text) systemParts.push(text);
       }
     }
 
