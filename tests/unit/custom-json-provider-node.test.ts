@@ -78,7 +78,7 @@ function updateNode(id: string, body: Json) {
   });
 }
 
-test("migration 237 adds provider_nodes.custom_json_config_json", () => {
+test("migration 240 adds provider_nodes.custom_json_config_json", () => {
   const db = core.getDbInstance() as unknown as {
     prepare: (sql: string) => { all: () => Json[] };
   };

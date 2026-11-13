@@ -379,10 +379,10 @@ export default function ModelRow({
         title={t("copyModel")}
         aria-label={t("copyModel")}
       />
-      {/* Line 2 (never wraps): source, alias (truncates) and the actions, in the name's column. */}
-      <div className="flex min-w-0 items-center gap-2 pl-6">
+      {/* Line 2: source, alias (truncates) and the actions, in the name's column. It wraps
+          (the actions drop to their own row) instead of spilling into the next card (#19543). */}
+      <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 pl-6">
         <ModelSourceBadge source={model.source} />
-        {combos && combos.length > 0 && <ModelComboBadge combos={combos} t={t} />}
         {onSaveContextWindowOverride && (
           <ContextWindowOverrideField
             editor={contextEditor}
@@ -392,7 +392,7 @@ export default function ModelRow({
           />
         )}
         {onSetAlias && (
-          <span className="flex min-w-0 flex-1 items-center text-[10px] gap-1">
+          <span className="flex min-w-0 flex-1 basis-16 items-center text-[10px] gap-1">
             {editing ? (
               <KitInput
                 ref={inputRef}
@@ -523,7 +523,13 @@ export default function ModelRow({
           />
         </div>
       </div>
-      {/* Line 3: endpoint capability tags (#16929) wrap freely, so line 2 stays one row. */}
+      {/* Combo badges get their own line: several of them never fit beside the actions (#19543). */}
+      {combos && combos.length > 0 && (
+        <div className="min-w-0 pl-6">
+          <ModelComboBadge combos={combos} t={t} />
+        </div>
+      )}
+      {/* Line 3: endpoint capability tags (#16929) wrap freely. */}
       {endpointInfo && (
         <div className="min-w-0 pl-6">
           <ModelEndpointTagsEditor provider={provider} modelId={model.id} t={t} {...endpointInfo} />

@@ -323,6 +323,7 @@ export const CONFIGURABLE_BASE_URL_PROVIDERS = new Set([
   "xiaomi-mimo",
   "siliconflow",
   "heroku",
+  "cerebrium",
   "databricks",
   "snowflake",
   "searxng-search",
@@ -440,6 +441,8 @@ export function getProviderBaseUrlHint(
       return t ? t("xiaomiMimoBaseUrlHint") : undefined;
     case "heroku":
       return t ? t("herokuBaseUrlHint") : undefined;
+    case "cerebrium":
+      return t ? t("cerebriumBaseUrlHint") : undefined;
     case "databricks":
       return t ? t("databricksBaseUrlHint") : undefined;
     case "snowflake":
@@ -459,6 +462,7 @@ const BUILTIN_BASE_URL_PLACEHOLDER_EXAMPLES: Readonly<Record<string, string>> = 
   "azure-openai": "https://my-resource.openai.azure.com",
   siliconflow: "https://api.siliconflow.cn/v1",
   heroku: "https://us.inference.heroku.com",
+  cerebrium: "https://api.cerebrium.ai/v4/p-xxxxxxxx/my-app/run",
   databricks: "https://adb-1234567890123456.7.azuredatabricks.net/serving-endpoints",
   snowflake: "https://example-account.snowflakecomputing.com",
   "searxng-search": "http://localhost:8888/search",

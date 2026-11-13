@@ -87,7 +87,7 @@ function StatCard({
         <Icon name={icon} size={18} />
         {label}
       </div>
-      <div className="text-2xl font-bold text-text">{value}</div>
+      <div className="text-2xl font-semibold text-text">{value}</div>
       {sub && <div className="text-xs text-text-muted">{sub}</div>}
     </div>
   );
