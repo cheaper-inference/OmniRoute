@@ -24,7 +24,9 @@ import { isSha, parseQueueTrailers } from "./contracts.mjs";
  */
 
 const FIELD = "\x1f";
-const RECORD = "\x1e";
+// `git log -z` ends each record with NUL, which (unlike \x1e/\x1f) can never occur in a commit
+// message: a body carrying control characters cannot shift fields or inject a record.
+const RECORD = "\0";
 
 /** Default git runner: argv only (no shell), trimmed stdout. */
 export function defaultRunGit(cwd = process.cwd()) {
@@ -52,7 +54,8 @@ export function titleFromMergeSubject(subject, pr) {
 }
 
 /**
- * Parse `git log --format=%H%x1f%P%x1f%B%x1e` output into merge records.
+ * Parse `git log -z --format=%H%x1f%P%x1f%B` output (NUL-terminated records) into merge records.
+ * SHA and parents come first, so a \x1f inside the body stays in the body.
  * @param {string} raw
  * @returns {{sha: string, parents: string[], body: string}[]}
  */
@@ -113,7 +116,7 @@ export function queuePrByCommit({ runGit, range = "HEAD", cwd } = {}) {
     throw new Error(`queuePrByCommit: invalid range ${JSON.stringify(range)}`);
   }
   const git = runGit ?? defaultRunGit(cwd);
-  const raw = git(["log", "--first-parent", "--merges", "--format=%H%x1f%P%x1f%B%x1e", r]);
+  const raw = git(["log", "-z", "--first-parent", "--merges", "--format=%H%x1f%P%x1f%B", r]);
   const map = new Map();
   for (const rec of parseMergeLog(raw)) {
     const info = queueMergeInfo(rec);

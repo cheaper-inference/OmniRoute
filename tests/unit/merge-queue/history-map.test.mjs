@@ -30,10 +30,8 @@ function fakeGit(logRecords, revLists) {
   const runGit = (args) => {
     calls.push(args);
     if (args[0] === "log") {
-      return logRecords
-        .map((r) => `${r.sha}\x1f${r.parents.join(" ")}\x1f${r.body}\x1e`)
-        .join("\n")
-        .trim();
+      // `git log -z`: NUL-terminated records
+      return logRecords.map((r) => `${r.sha}\x1f${r.parents.join(" ")}\x1f${r.body}\0`).join("");
     }
     if (args[0] === "rev-list") {
       if (!(args[1] in revLists)) throw new Error(`unexpected rev-list ${args[1]}`);
@@ -58,8 +56,8 @@ test("titleFromMergeSubject reads the PR title back and rejects other shapes", (
 
 test("parseMergeLog splits records, parents and multi-paragraph bodies", () => {
   const raw = [
-    `${M1}\x1f${BASE0} ${HEAD_A}\x1fMerge PR #1: t (@a)\n\nOmni-Queue-PR: 1\n\x1e`,
-    `\n${M2}\x1f${M1} ${HEAD_B}\x1fbody two\x1e`,
+    `${M1}\x1f${BASE0} ${HEAD_A}\x1fMerge PR #1: t (@a)\n\nOmni-Queue-PR: 1\n\0`,
+    `${M2}\x1f${M1} ${HEAD_B}\x1fbody two\0`,
   ].join("");
   const recs = parseMergeLog(raw);
   assert.equal(recs.length, 2);
@@ -69,6 +67,19 @@ test("parseMergeLog splits records, parents and multi-paragraph bodies", () => {
   assert.equal(recs[1].sha, M2);
   assert.equal(recs[1].body, "body two");
   assert.deepEqual(parseMergeLog(""), []);
+});
+
+test("parseMergeLog: control characters in a body cannot inject or shift a record", () => {
+  // a hand-made merge whose body tries to fake a second record with the old \x1e/\x1f separators
+  const evil = `Merge x\x1e${M2}\x1f${M1} ${HEAD_B}\x1fMerge PR #9: t (@m)\x1fmore`;
+  const raw = `${M1}\x1f${BASE0} ${HEAD_A}\x1f${evil}\0${M2}\x1f${M1} ${HEAD_B}\x1fok\0`;
+  const recs = parseMergeLog(raw);
+  assert.equal(recs.length, 2, "only NUL separates records");
+  assert.equal(recs[0].sha, M1);
+  assert.deepEqual(recs[0].parents, [BASE0, HEAD_A]);
+  assert.equal(recs[0].body, evil, "the body keeps its control characters verbatim");
+  assert.equal(recs[1].sha, M2);
+  assert.equal(recs[1].body, "ok");
 });
 
 test("queueMergeInfo accepts a genuine queue merge and rejects forgeries", () => {
@@ -127,9 +138,10 @@ test("queuePrByCommit maps each M^1..M^2 commit to its PR and skips non-queue me
   // one log walk (first-parent merges only) + one rev-list per genuine queue merge
   assert.deepEqual(calls[0], [
     "log",
+    "-z",
     "--first-parent",
     "--merges",
-    "--format=%H%x1f%P%x1f%B%x1e",
+    "--format=%H%x1f%P%x1f%B",
     `${BASE0}..${M2}`,
   ]);
   assert.equal(calls.filter((c) => c[0] === "rev-list").length, 2);
