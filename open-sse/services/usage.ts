@@ -97,6 +97,7 @@ import { getKilocodeUsage } from "./usage/kilocode.ts";
 import { getMegabrainUsage } from "./usage/megabrain.ts";
 import { getChatPlaygroundUsage } from "./usage/chatplayground.ts";
 import { getTokenRouterUsage } from "./usage/tokenrouter.ts";
+import { getTokenHarborUsage } from "./usage/tokenharbor.ts";
 import { getCloudflareAiUsage } from "./usage/cloudflareAi.ts";
 import { getXkiroUsage } from "./usage/xkiro.ts";
 import { getZedHostedUsage } from "./usage/zedHosted.ts";
@@ -298,6 +299,8 @@ export async function getUsageForProvider(
       return await getAgentrouterUsage(id, connection);
     case "tokenrouter":
       return await getTokenRouterUsage(apiKey || "", providerSpecificData);
+    case "tokenharbor":
+      return await getTokenHarborUsage(apiKey || "");
     case "kilocode":
       return await getKilocodeUsage(id, connection);
     case "megabrain":
