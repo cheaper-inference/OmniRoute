@@ -77,7 +77,7 @@ function StepRow({ step, maxTokens }: { step: CompressionEngineStep; maxTokens: 
         </div>
         {!skipped && (
           <div
-            className="text-[11px] font-bold"
+            className="text-[11px] font-semibold"
             style={{ color }}
             data-testid="waterfall-savings-text"
           >
@@ -150,7 +150,7 @@ export function WaterfallInspector({ run, className = "" }: WaterfallInspectorPr
             {t("tokenCount", { count: run.compressedTokens })}
           </div>
           <div
-            className="text-[11px] font-bold"
+            className="text-[11px] font-semibold"
             style={{ color: "var(--orch-status-success)" }}
             data-testid="waterfall-total-savings"
           >
@@ -164,7 +164,7 @@ export function WaterfallInspector({ run, className = "" }: WaterfallInspectorPr
         <span>
           {fmt(run.originalTokens)} → {fmt(run.compressedTokens)} {t("tokenShort")}
         </span>
-        <span className="text-success font-bold">−{run.savingsPercent.toFixed(1)}%</span>
+        <span className="text-success font-semibold">−{run.savingsPercent.toFixed(1)}%</span>
         {run.comboId && <span className="font-mono opacity-70">{run.comboId}</span>}
         <span className="ml-auto opacity-60">{run.mode}</span>
       </div>
