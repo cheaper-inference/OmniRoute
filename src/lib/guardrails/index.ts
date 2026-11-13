@@ -3,3 +3,4 @@ export * from "./piiMasker";
 export * from "./promptInjection";
 export * from "./registry";
 export * from "./credentialMasker";
+export { ResponseSanitizerGuardrail } from "./responseSanitizer";
