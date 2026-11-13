@@ -619,8 +619,9 @@ test("findReimplementedConditions: matches despite operator-spacing differences"
 
 // ─── Gate-mode conditional skips (plan 2026-11-13, derived artifacts) ──────────
 // `{ skip: releaseOnlyUnlessTouched(...) }` runs the test in release mode and, in a PR, only
-// when the PR edits the generated artifact. countSkips() cannot see it (it is not `.skip(` nor
-// `{ skip: true }`), so the gate reports it on its own line instead of answering a plain OK.
+// when the PR edits the generated artifact. countSkips() cannot see it (it is neither a skip
+// modifier call nor the literal true skip option), so the gate reports it on its own line
+// instead of answering a plain OK.
 
 test("countModeConditionalSkips counts releaseOnlyUnlessTouched( uses", () => {
   const src = [
