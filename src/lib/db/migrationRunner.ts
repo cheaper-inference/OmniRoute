@@ -1,10 +1,24 @@
 /**
  * Migration Runner — Versioned SQL Migrations for SQLite
  *
- * Reads numbered `.sql` files from the migrations directory and applies
- * them sequentially, tracking applied versions in a `schema_migrations` table.
+ * Reads `.sql` files from the migrations directory and applies them in version
+ * order, tracking applied versions in the `_omniroute_migrations` table.
  *
- * Naming convention: `NNN_description.sql` (e.g., `001_initial_schema.sql`)
+ * Naming convention — two formats share the directory:
+ * - `NNN_description.sql` (e.g. `001_initial_schema.sql`): the legacy sequential
+ *   set, frozen at `239_…` (exactly three digits; the known gaps stay gaps).
+ * - `YYYYMMDDHHMMSS_description.sql` (UTC timestamp, 14 digits): every new
+ *   migration. Create it with `npm run db:new-migration -- <description>`, so two
+ *   pull requests never race for the same number.
+ *
+ * Both record the bare digit prefix as the version. Ordering is by the NUMERIC
+ * value of that prefix (`compareMigrationVersions()` in
+ * `migrationRunner/ordering.ts`), never by text: as text `20261113120000` would
+ * sort before `235`. For the three-digit legacy set the two orders are identical.
+ * Pending means "not in the ledger", so a timestamped migration that reaches a
+ * database after a later-dated one still applies exactly once. Namespaced
+ * directories (`OMNIROUTE_EXTRA_MIGRATIONS_DIRS`, versions like `ee-134`) always
+ * run after the whole main set.
  *
  * All migrations run within a single transaction — all-or-nothing per file.
  *
@@ -26,6 +40,7 @@ import {
   SUPERSEDED_DUPLICATE_MIGRATIONS,
 } from "./migrationRunner/constants";
 import { getExtraMigrationFiles } from "./migrationRunner/extraDirs";
+import { compareMigrationFiles, compareMigrationVersions } from "./migrationRunner/ordering";
 import { migrationConsole as console } from "./migrationRunner/logger";
 import {
   createPreMigrationBackup,
@@ -110,6 +125,9 @@ function resolveMigrationsDir(): string {
 }
 
 const MIGRATIONS_DIR = resolveMigrationsDir();
+
+/** `YYYYMMDDHHMMSS` — the version of a timestamped (post-239) migration. */
+const TIMESTAMP_VERSION_PATTERN = /^\d{14}$/;
 
 /**
  * Default maximum number of migrations allowed to run in a single startup on an
@@ -215,27 +233,36 @@ function isDeferredUnsupportedMigration(
 }
 
 /**
- * Get all migration files sorted by version number.
+ * Get all migration files in application order: the main directory sorted by the
+ * numeric value of the version prefix (legacy `NNN` before timestamped
+ * `YYYYMMDDHHMMSS`; see `migrationRunner/ordering.ts`), then the namespaced extra
+ * directories in their declared order.
+ *
+ * Exported for the ordering tests; the runner itself is the only production caller.
  */
-function getMigrationFiles(): Array<{ version: string; name: string; path: string }> {
+export function getMigrationFiles(): Array<{ version: string; name: string; path: string }> {
   // The extra directories are an independent set: a missing core directory must not
   // make them vanish silently.
   if (!fs.existsSync(MIGRATIONS_DIR)) return getExtraMigrationFiles();
 
-  const files = fs
-    .readdirSync(MIGRATIONS_DIR)
-    .filter((f) => f.endsWith(".sql"))
-    .sort()
-    .map((filename) => {
-      const match = filename.match(/^(\d+)_(.+)\.sql$/);
-      if (!match) return null;
-      return {
-        version: match[1],
-        name: match[2],
-        path: path.join(MIGRATIONS_DIR, filename),
-      };
-    })
-    .filter(Boolean) as Array<{ version: string; name: string; path: string }>;
+  // Numeric, not text, order: as text `20261113120000_x.sql` would sort before
+  // `235_x.sql` and run ahead of the tables it depends on. Files sharing a slot
+  // (superseded duplicates) keep their file-name order, as with the old text sort.
+  const files = (
+    fs
+      .readdirSync(MIGRATIONS_DIR)
+      .filter((f) => f.endsWith(".sql"))
+      .map((filename) => {
+        const match = filename.match(/^(\d+)_(.+)\.sql$/);
+        if (!match) return null;
+        return {
+          version: match[1],
+          name: match[2],
+          path: path.join(MIGRATIONS_DIR, filename),
+        };
+      })
+      .filter(Boolean) as Array<{ version: string; name: string; path: string }>
+  ).sort(compareMigrationFiles);
 
   // Detect version collisions early: two files sharing the same numeric prefix
   // would otherwise be silently skipped by the runner (only the first applied
@@ -274,7 +301,9 @@ function getMigrationFiles(): Array<{ version: string; name: string; path: strin
   // the upstream one. Their versions are namespaced (`ee-134`), so they cannot
   // collide with a numeric slot, and every downstream consumer here — the applied
   // set, the gap reconciliation, the name-mismatch check — keys on the version
-  // string and needs no further change. Empty and filesystem-free when unset.
+  // string and needs no further change. Empty and filesystem-free when unset. The
+  // combined array is NOT re-sorted: the extras keep their declared order after the
+  // whole main set, including every timestamped migration.
   return [...files, ...getExtraMigrationFiles()];
 }
 
@@ -317,15 +346,16 @@ function getAppliedVersions(db: SqliteAdapter): Set<string> {
 }
 
 /**
- * Get applied migration records (version + name) for mismatch detection.
+ * Get applied migration records (version + name) for mismatch detection, in
+ * numeric version order. `version` is a TEXT column, so the SQL `ORDER BY version`
+ * would put `20261113120000` before `235`; the ordering happens here instead.
  */
 function getAppliedRecords(db: SqliteAdapter): Array<{ version: string; name: string }> {
-  return db
-    .prepare("SELECT version, name FROM _omniroute_migrations ORDER BY version")
-    .all() as Array<{
+  const rows = db.prepare("SELECT version, name FROM _omniroute_migrations").all() as Array<{
     version: string;
     name: string;
   }>;
+  return rows.sort((a, b) => compareMigrationVersions(a.version, b.version));
 }
 
 /**
@@ -1123,6 +1153,16 @@ export function runMigrations(
 
   for (const migration of pending) {
     if (Number(migration.version) < highestAppliedBeforeMigrations) {
+      if (TIMESTAMP_VERSION_PATTERN.test(migration.version)) {
+        // Timestamped migrations from parallel branches routinely land after a later-dated
+        // one; pending is "not in the ledger", so this is the normal path, not a gap.
+        console.log(
+          `[Migration] Applying ${migration.version}_${migration.name}, dated before the ` +
+            `latest applied migration ${highestAppliedBeforeMigrations}: it reached this ` +
+            `database later. Expected for timestamped migrations; each applies exactly once.`
+        );
+        continue;
+      }
       console.warn(
         `[Migration] 🔄 RECONCILIATION: Found missing intermediate migration ` +
           `${migration.version}_${migration.name} ` +
@@ -1241,9 +1281,14 @@ export function getMigrationStatus(db: SqliteAdapter): {
 } {
   ensureMigrationsTable(db);
 
-  const appliedRows = db
-    .prepare("SELECT version, name, applied_at FROM _omniroute_migrations ORDER BY version")
-    .all() as Array<{ version: string; name: string; applied_at: string }>;
+  // Numeric version order (see getAppliedRecords): never the TEXT `ORDER BY version`.
+  const appliedRows = (
+    db.prepare("SELECT version, name, applied_at FROM _omniroute_migrations").all() as Array<{
+      version: string;
+      name: string;
+      applied_at: string;
+    }>
+  ).sort((a, b) => compareMigrationVersions(a.version, b.version));
 
   const appliedVersions = new Set(appliedRows.map((r) => r.version));
   const allFiles = getMigrationFiles();
