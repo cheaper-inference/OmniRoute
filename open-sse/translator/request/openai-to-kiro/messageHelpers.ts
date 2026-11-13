@@ -73,6 +73,20 @@ export function normalizeKiroToolSchema(schema: unknown): Record<string, unknown
   return result;
 }
 
+/**
+ * claude-to-openai marks a failed tool run (`tool_result.is_error`) with this line at the
+ * start of the tool message, because the OpenAI tool role has no error flag.
+ */
+const CLAUDE_TOOL_ERROR_MARKER = /^\[tool_error: true\](?:\r?\n|$)/;
+
+/** Split the marker off a tool message so Kiro gets `status: "error"` and the plain text. */
+export function splitToolErrorMarker(content: unknown): { isError: boolean; content: unknown } {
+  if (typeof content !== "string" || !CLAUDE_TOOL_ERROR_MARKER.test(content)) {
+    return { isError: false, content };
+  }
+  return { isError: true, content: content.replace(CLAUDE_TOOL_ERROR_MARKER, "") };
+}
+
 export function serializeToolResultContent(content: unknown): string {
   if (typeof content === "string") {
     return content || "(no output)";

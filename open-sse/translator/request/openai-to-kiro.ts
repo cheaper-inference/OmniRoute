@@ -10,6 +10,7 @@ import {
   parseToolInput,
   normalizeKiroToolSchema,
   serializeToolResultContent,
+  splitToolErrorMarker,
 } from "./openai-to-kiro/messageHelpers.ts";
 import {
   resolveKiroModelAlias,
@@ -425,10 +426,11 @@ function convertMessages(messages, tools, model) {
         // blocks, images) is never collapsed to an empty string. CodeWhisperer rejects a
         // toolResult whose content is [{ text: "" }] with 400 "Improperly formed request"
         // — the same failure mode that hit the Anthropic tool_result path (issue #2446).
-        const toolContent = serializeToolResultContent(msg.content);
+        const toolResult = splitToolErrorMarker(msg.content);
+        const toolContent = serializeToolResultContent(toolResult.content);
         pendingToolResults.push({
           toolUseId: msg.tool_call_id,
-          status: "success",
+          status: toolResult.isError ? "error" : "success",
           content: [{ text: toolContent }],
         });
       } else if (content) {
