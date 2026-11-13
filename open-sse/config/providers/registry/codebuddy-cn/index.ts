@@ -18,6 +18,8 @@ export const codebuddy_cnProvider: RegistryEntry = {
   alias: "cbcn",
   format: "openai",
   executor: "codebuddy-cn",
+  // Its rate-limit message carries a naive China Standard Time stamp.
+  naiveResetTimezone: "+08:00",
   baseUrl: "https://copilot.tencent.com/v2/chat/completions",
   authType: "oauth",
   authHeader: "bearer",

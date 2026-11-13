@@ -101,6 +101,7 @@ export function parseDayGranularityResetMs(
  * fell back to WEEKLY_QUOTA_COOLDOWN_MS (24h) and the connection was dispatched
  * again — into a real upstream 429 — every day until the true reset ~6 days out.
  *
+ * CodeBuddy CN writes the same shape in Chinese: `请于 2026-11-14 14:30:00 后重试`.
  * The datetime may use a `T` or a space separator, and may carry `Z` or a
  * `±HH:MM` offset. A NAIVE datetime (no zone) defaults to UTC, or Asia/Shanghai (+08:00)
  * for Z.AI/GLM providers which output local China Standard Time (Issue #14479).
@@ -113,7 +114,7 @@ export function parseIsoDateTimeResetMs(
   providerOrZone?: string | null
 ): number | null {
   const match =
-    /\b(?:try again at|wait until|reset(?:s)?\s+at|available at|retry after)\s+(\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}(?::\d{2})?(?:\.\d+)?)\s*(Z|[+-]\d{2}:?\d{2})?/i.exec(
+    /(?:\b(?:try again at|wait until|reset(?:s)?\s+at|available at|retry after)\s+|请于\s*)(\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}(?::\d{2})?(?:\.\d+)?)\s*(Z|[+-]\d{2}:?\d{2})?/i.exec(
       msg
     );
   if (!match) return null;

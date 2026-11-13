@@ -1,0 +1,1 @@
+- **fix(providers):** The reset time in a CodeBuddy CN rate-limit message (`请于 <time> 后重试`, China Standard Time) is now read as a retry hint, so a connection with upstream retry hints on cools down until that time instead of the base cooldown.
