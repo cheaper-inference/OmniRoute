@@ -64,7 +64,6 @@ export function buildProviderValidateRequestBody(options: {
     runtimeKey: family.runtimeKey,
     tunnelId: family.tunnelId,
     connectorName: family.connectorName,
-    accountId: trimmedOrUndefined(formData.accountId || ""),
     zdrEnabled:
       provider === "command-code" && formData.commandCodeZdrEnabled === true ? true : undefined,
     accountId: formData.accountId ? trimmedOrUndefined(formData.accountId) : undefined,
