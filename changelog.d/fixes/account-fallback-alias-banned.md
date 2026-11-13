@@ -1,0 +1,1 @@
+- **fix(sse):** `clearProviderFailure` accepts a provider alias (the reset now clears the dedupe entries recorded under the canonical id), and `filterAvailableAccounts` drops banned, expired and credits-exhausted accounts.

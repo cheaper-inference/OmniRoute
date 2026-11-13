@@ -1458,6 +1458,8 @@ export function recordProviderSuccess(
  * Reset the shared provider breaker.
  */
 export function clearProviderFailure(provider: string | null | undefined): void {
+  // recordProviderFailure stores its dedupe keys under the canonical id, so resolve an alias first.
+  if (provider) provider = resolveProviderId(provider);
   if (provider) lastNetworkErrorByProvider.delete(provider); // #13887: fresh blip after reset counts
   for (const key of lastConnectionFailure.keys())
     if (provider && key.startsWith(`${provider}:`)) lastConnectionFailure.delete(key);
@@ -2621,6 +2623,9 @@ export function filterAvailableAccounts<T extends AccountState>(
   const now = Date.now();
   return accounts.filter((acc) => {
     if (excludeId && acc.id === excludeId) return false;
+    if (acc.status === "banned" || acc.status === "expired" || acc.status === "credits_exhausted") {
+      return false;
+    }
     if (acc.rateLimitedUntil) {
       const until = cooldownUntilMs(acc.rateLimitedUntil);
       if (Number.isFinite(until) && until > now) return false;
