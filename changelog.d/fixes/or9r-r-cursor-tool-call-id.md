@@ -1,0 +1,1 @@
+- **fix(cursor):** with a Cursor agent session, the assistant tool call id now matches the tool result id when the id has a newline.
