@@ -1,0 +1,1 @@
+- **perf(guardrails):** Requests and responses skip the PII scan, response clone and JSON serialization when their PII masking flags are off (the default). Opt-in masking is unchanged. ([#20122](https://github.com/cheaper-inference/OmniRoute/pull/20122))
