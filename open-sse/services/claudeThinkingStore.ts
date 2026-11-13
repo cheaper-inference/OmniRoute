@@ -40,15 +40,25 @@ type Entry = {
   segments: ClaudeThinkingSegment[];
   size: number;
   expiresAt: number;
+  /** Every tool_use id of the turn. All of them point at this one entry, so a turn leaves whole. */
+  ids: string[];
 };
 
 export const CLAUDE_THINKING_MEMORY_TTL_MS = 1000 * 60 * 60;
+/** Global cap, in turns (not tool_use ids). */
 export const MAX_CLAUDE_THINKING_ENTRIES = 1000;
 /** Upper bound for one assistant turn (sum of thinking text + signature/data chars). */
 export const MAX_CLAUDE_THINKING_ENTRY_CHARS = 2 * 1024 * 1024;
 const MAX_CLAUDE_THINKING_TOTAL_CHARS = 64 * 1024 * 1024;
+/** Signed blocks in one turn; a larger turn is not stored. */
+export const MAX_CLAUDE_THINKING_BLOCKS_PER_TURN = 512;
+// Per-connection share (the store's own binding scope; no session key reaches it), so one
+// runaway tool loop cannot push every other connection's turns out of the global cap.
+export const MAX_CLAUDE_THINKING_TURNS_PER_CONNECTION = 256;
+export const MAX_CLAUDE_THINKING_CHARS_PER_CONNECTION = 16 * 1024 * 1024;
 
-const entries = new Map<string, Entry>();
+const entries = new Map<string, Entry>(); // tool_use id -> its turn
+const turns = new Set<Entry>(); // insertion order = age; oldest first
 // Non-serialized provenance; weak references add no retention beyond the request.
 const restoredBlocks = new WeakSet<object>();
 
@@ -107,24 +117,49 @@ function blocksOf(entry: Entry): ClaudeSignedThinkingBlock[] {
   return entry.segments.flatMap((segment) => segment.blocks);
 }
 
+function dropTurn(turn: Entry) {
+  if (!turns.delete(turn)) return;
+  totalChars -= turn.size;
+  for (const id of turn.ids) if (entries.get(id) === turn) entries.delete(id);
+}
+
+/** Forget the whole turn that owns this tool_use id. */
 function deleteKey(key: string) {
-  const entry = entries.get(key);
-  if (!entry) return;
-  entries.delete(key);
-  totalChars -= entry.size;
+  const turn = entries.get(key);
+  if (turn) dropTurn(turn);
+}
+
+/** Evict one connection's oldest turns until it fits its share. */
+function trimConnection(connectionId: string) {
+  let count = 0;
+  let chars = 0;
+  for (const turn of turns) {
+    if (turn.connectionId !== connectionId) continue;
+    count += 1;
+    chars += turn.size;
+  }
+  for (const turn of turns) {
+    if (
+      count <= MAX_CLAUDE_THINKING_TURNS_PER_CONNECTION &&
+      chars <= MAX_CLAUDE_THINKING_CHARS_PER_CONNECTION
+    ) {
+      return;
+    }
+    if (turn.connectionId !== connectionId) continue;
+    dropTurn(turn);
+    count -= 1;
+    chars -= turn.size;
+  }
 }
 
 function pruneExpired(now: number) {
-  for (const [key, entry] of entries) {
-    if (entry.expiresAt <= now) deleteKey(key);
+  for (const turn of turns) {
+    if (turn.expiresAt <= now) dropTurn(turn);
   }
-  while (
-    entries.size > MAX_CLAUDE_THINKING_ENTRIES ||
-    totalChars > MAX_CLAUDE_THINKING_TOTAL_CHARS
-  ) {
-    const oldestKey = entries.keys().next().value;
-    if (oldestKey === undefined) break;
-    deleteKey(oldestKey);
+  while (turns.size > MAX_CLAUDE_THINKING_ENTRIES || totalChars > MAX_CLAUDE_THINKING_TOTAL_CHARS) {
+    const oldest = turns.values().next().value;
+    if (oldest === undefined) break;
+    dropTurn(oldest);
   }
 }
 
@@ -140,6 +175,7 @@ function collectThinkingSegments(
   const segments: ClaudeThinkingSegment[] = [];
   let pending: ClaudeSignedThinkingBlock[] = [];
   let size = 0;
+  let blockCount = 0;
   for (const block of content) {
     const record = (block ?? {}) as Record<string, unknown>;
     if (record.type === "thinking" || record.type === "redacted_thinking") {
@@ -147,12 +183,14 @@ function collectThinkingSegments(
       if (!normalized) return null;
       pending.push(normalized);
       size += blockSize(normalized);
+      blockCount += 1;
     } else if (record.type === "tool_use" && typeof record.id === "string" && record.id) {
       segments.push({ toolUseId: record.id, blocks: pending });
       pending = [];
     }
   }
   if (size === 0 || size > MAX_CLAUDE_THINKING_ENTRY_CHARS || pending.length > 0) return null;
+  if (blockCount > MAX_CLAUDE_THINKING_BLOCKS_PER_TURN) return null;
   if (segments.length === 0) return null;
   return { segments, size };
 }
@@ -184,18 +222,21 @@ export function storeClaudeThinkingBlocks(args: {
   // the next request that is equally unbound (""==="" would match). Refuse.
   const connectionId = typeof args.connectionId === "string" ? args.connectionId : "";
   if (connectionId.length === 0) return false;
-  for (const { toolUseId } of segments) {
-    deleteKey(toolUseId);
-    entries.set(toolUseId, {
-      provider,
-      model,
-      connectionId,
-      segments: cloneSegments(segments),
-      size,
-      expiresAt: now + CLAUDE_THINKING_MEMORY_TTL_MS,
-    });
-    totalChars += size;
-  }
+  const ids = segments.map((segment) => segment.toolUseId);
+  for (const id of ids) deleteKey(id);
+  const turn: Entry = {
+    provider,
+    model,
+    connectionId,
+    segments: cloneSegments(segments),
+    size,
+    expiresAt: now + CLAUDE_THINKING_MEMORY_TTL_MS,
+    ids,
+  };
+  for (const id of ids) entries.set(id, turn);
+  turns.add(turn);
+  totalChars += size;
+  trimConnection(connectionId);
   pruneExpired(now);
   return true;
 }
@@ -271,20 +312,18 @@ function sameBlock(stored: ClaudeSignedThinkingBlock, block: unknown): boolean {
 }
 
 function isStoredBlock(block: unknown): boolean {
-  for (const entry of entries.values()) {
+  for (const entry of turns) {
     if (blocksOf(entry).some((stored) => sameBlock(stored, block))) return true;
   }
   return false;
 }
 
 function forgetEntriesHolding(blocks: unknown[]) {
-  const keys: string[] = [];
-  for (const [key, entry] of entries) {
-    if (blocksOf(entry).some((stored) => blocks.some((block) => sameBlock(stored, block)))) {
-      keys.push(key);
+  for (const turn of turns) {
+    if (blocksOf(turn).some((stored) => blocks.some((block) => sameBlock(stored, block)))) {
+      dropTurn(turn);
     }
   }
-  for (const key of keys) deleteKey(key);
 }
 
 /**
@@ -347,6 +386,7 @@ export function forgetClaudeThinkingForClientResponse(responseBody: unknown): vo
 
 export function clearClaudeThinkingStore() {
   entries.clear();
+  turns.clear();
   totalChars = 0;
 }
 
