@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "Uravnotežuje preostalu kvotu uzimajući u obzir resetiranja nakon 5h i tjedan dana, zatim kružno raspoređuje modele sa sličnim rezultatima",
     "quotaWeighted": "Ponderirano prema kvoti",
     "quotaWeightedDesc": "Preskoči račune s iscrpljenom kvotom, a zatim odaberi među preostalima razmjerno preostaloj kvoti, podijeljenoj s opterećenjem zahtjeva u tijeku. Postojeći razgovori ostaju vezani uz isti račun.",
+    "expiryFirst": "Prvo istječuće",
+    "expiryFirstDesc": "Troši račun čija bi kvota inače istekla neiskorištena: prvi ide račun s najvećim ostatkom i najbližim resetiranjem.",
     "strictRandom": "Strogo nasumično",
     "strictRandomDesc": "Miješanje špila — koristi svaki model jednom prije ponovnog miješanja",
     "fusion": "Fuzija",
@@ -4033,6 +4035,11 @@
         "when": "Usmjeravate zahtjeve kroz više računa s telemetrijom kvote i različitim razdobljima resetiranja.",
         "avoid": "Telemetrija kvote nije dostupna za većinu računa.",
         "example": "Dajte prednost računu sa 60 % tjedne kvote koji se resetira sutra u odnosu na račun s 80 % kvote koji se resetira kasnije."
+      },
+      "expiry-first": {
+        "when": "Usmjeravate zahtjeve kroz račune čije se kvote resetiraju prema različitim rasporedima i želite potrošiti kvotu koja bi inače istekla neiskorištena.",
+        "avoid": "Telemetrija kvote nedostaje za većinu računa ili vam je potreban stabilan redoslijed koji zanemaruje vrijeme resetiranja.",
+        "example": "Dajte prednost računu s 80 % preostale kvote koji se resetira za 39 minuta u odnosu na račun s 48 % preostale kvote koji se resetira za 9 sati — kvota pred istekom troši se prije nego što propadne."
       },
       "strict-random": {
         "when": "Koristite kada želite savršeno ravnomjernu raspodjelu — svaki se model koristi jednom prije ponavljanja.",
@@ -4249,6 +4256,13 @@
         "tip1": "Koristite izričito definirane korake za račune ili usmjeravanje prema oznakama računa za pružatelje s telemetrijom kvote.",
         "tip2": "Podesite težine sesije u odnosu na tjedne težine kada je kratkoročna iscrpljenost rizičnija.",
         "tip3": "Zadržite pojas izjednačenosti malim kako bi jednakovrijedni računi i dalje ravnomjerno rotirali."
+      },
+      "expiry-first": {
+        "title": "Prvo kvota koja istječe",
+        "description": "Rangira račune prema pritisku iskorištavanja: velika preostala kvota blizu roka resetiranja ide prva.",
+        "tip1": "Zahtijeva telemetriju kvote pružatelja usluge; računi bez nje zadržavaju navedeni redoslijed prioriteta.",
+        "tip2": "Gotovo izjednačeni rezultati rotiraju unutar pojasa izjednačenosti, tako da srodni računi i dalje dijele opterećenje.",
+        "tip3": "Ograničite rangiranje na skupinu kvote prema kojoj se svaki model stvarno naplaćuje."
       },
       "strict-random": {
         "title": "Raspodjela miješanjem špila",
@@ -5679,6 +5693,7 @@
     "usageTracking": "Praćenje korištenja",
     "securityDesc": "Postavite lozinku za zaštitu vaše nadzorne ploče ili to preskočite za sada.",
     "securityDescSkipWarning": "⚠️ Bez lozinke nećete moći dodavati pružatelje tijekom postavljanja. Možete ih dodati kasnije s nadzorne ploče nakon što postavite lozinku.",
+    "passwordAlreadySet": "Lozinka za nadzornu ploču već je postavljena. Kasnije je možete promijeniti u Postavkama.",
     "providerDesc": "Povežite svog prvog AI pružatelja. Možete dodati više kasnije.",
     "providerRequiresPassword": "Prvo morate postaviti lozinku kako biste dodali pružatelje. Molimo vratite se na korak sigurnosti i postavite lozinku ili dodajte pružatelje kasnije s nadzorne ploče.",
     "apiKeyRequired": "API ključ (obavezno)",
@@ -6738,6 +6753,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Zamjenski tekst za web-kolačić Grok",
     "herokuBaseUrlHint": "Naznaka osnovnog URL-a za Heroku",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Sakrij adresu e-pošte",
     "imageProviders": "Pružatelji slika",
     "videoProviders": "Generiranje videozapisa",
@@ -7236,7 +7252,8 @@
       "kiro": "Besplatni plan: 50 kredita/mjesec (~25K–100K tokena). ⚠️ Uvjeti korištenja za Kiro zabranjuju upotrebu proxyja/alata trećih strana.",
       "codex": "Povežite OpenAI Codex putem postojećeg OAuth tijeka.",
       "qwen": "Povežite Qwen Code putem postojećeg OAuth tijeka.",
-      "github-models": "Kreirajte GitHub PAT s opsegom 'models: read' na github.com/settings/tokens"
+      "github-models": "Kreirajte GitHub PAT s opsegom 'models: read' na github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} prihvaća ID-ove modela izvorne za pružatelja. Uvezite iz /models ili dodajte prilagođene ID-ove za usmjeravanje.",
     "bedrockModelsDescription": "Amazon Bedrock modeli ograničeni su na određenu AWS regiju. Uvezite ih iz /models ili dodajte ID-ove Bedrock modela omogućenih u odabranoj regiji.",
@@ -8094,6 +8111,8 @@
     "resetAwareDesc": "Preferiraj račune s dovoljno preostale kvote i skorijim resetiranjem",
     "quotaWeighted": "Ponderirano prema kvoti",
     "quotaWeightedDesc": "Preskoči račune s iscrpljenom kvotom, a zatim odaberi među preostalima razmjerno preostaloj kvoti, podijeljenoj s opterećenjem zahtjeva u tijeku. Postojeći razgovori ostaju vezani uz isti račun.",
+    "expiryFirst": "Prvo istječuće",
+    "expiryFirstDesc": "Troši račun čija bi kvota inače istekla neiskorištena: prvi ide račun s najvećim ostatkom i najbližim resetiranjem.",
     "strictRandom": "Strogo nasumično",
     "strictRandomDesc": "Promiješaj špil — koristi svaki račun jednom prije ponovnog miješanja",
     "stickyLimit": "Ograničenje zadržavanja",
@@ -10258,7 +10277,11 @@
     "mappingInvalidJson": "Nevažeći JSON.",
     "mappingMustBeObject": "Mapiranje mora biti JSON objekt, a ne niz ili primitivna vrijednost.",
     "mappingValueMustBeString": "Vrijednost za ključ „{key}” mora biti znakovni niz.",
-    "save": "Spremi"
+    "save": "Spremi",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Pećinski čovjek Engine",

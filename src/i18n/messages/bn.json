@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "5h এবং সাপ্তাহিক রিসেটের বিপরীতে অবশিষ্ট কোটা ব্যালেন্স করে, তারপর রাউন্ড-রবিনের অনুরূপ স্কোর",
     "quotaWeighted": "কোটা-অনুপাতে ওজনযুক্ত",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "মেয়াদশেষ-প্রথম",
+    "expiryFirstDesc": "যে অ্যাকাউন্টের কোটা অন্যথায় অব্যবহৃত অবস্থায় মেয়াদোত্তীর্ণ হয়ে যেত, সেটি আগে খরচ করে: সবচেয়ে বেশি অবশিষ্ট এবং সবচেয়ে নিকট রিসেটযুক্ত অ্যাকাউন্ট প্রথমে যায়।",
     "strictRandom": "কঠোর র্যান্ডম নির্বাচন",
     "strictRandomDesc": "শাফল ডেক — পুনরায় শাফল করার আগে প্রতিটি মডেল একবার ব্যবহার করে",
     "fusion": "ফিউশন",
@@ -4033,6 +4035,11 @@
         "when": "আপনি কোটা টেলিমেট্রি এবং বিভিন্ন রিসেট উইন্ডো সহ একাধিক অ্যাকাউন্ট জুড়ে রুট করেন।",
         "avoid": "বেশিরভাগ অ্যাকাউন্টের জন্য কোটা টেলিমেট্রি অনুপলব্ধ৷",
         "example": "আগামীকাল একটি 60% সাপ্তাহিক অ্যাকাউন্ট রিসেট করা পছন্দ করুন এবং পরে 80% অ্যাকাউন্ট রিসেট করুন৷"
+      },
+      "expiry-first": {
+        "when": "আপনি এমন অ্যাকাউন্টগুলো জুড়ে রুট করেন যাদের কোটা ভিন্ন ভিন্ন সময়সূচিতে রিসেট হয় এবং অন্যথায় অব্যবহৃত অবস্থায় মেয়াদোত্তীর্ণ হতো এমন কোটা খরচ করতে চান।",
+        "avoid": "বেশিরভাগ অ্যাকাউন্টের কোটা টেলিমেট্রি নেই, অথবা আপনার এমন একটি স্থির ক্রম প্রয়োজন যা রিসেটের সময় উপেক্ষা করে।",
+        "example": "9 ঘণ্টায় রিসেট হওয়া 48% অবশিষ্ট অ্যাকাউন্টের চেয়ে 39 মিনিটে রিসেট হওয়া 80% অবশিষ্ট অ্যাকাউন্টকে অগ্রাধিকার দিন — মেয়াদ শেষের কাছাকাছি কোটা নষ্ট হওয়ার আগেই খরচ হয়।"
       },
       "strict-random": {
         "when": "যখন সম্পূর্ণ সমান বণ্টন চান তখন ব্যবহার করুন—পুনরাবৃত্তির আগে প্রতিটি মডেল একবার করে ব্যবহৃত হবে।",
@@ -4249,6 +4256,13 @@
         "tip1": "কোটা টেলিমেট্রি সহ প্রদানকারীদের জন্য স্পষ্ট অ্যাকাউন্ট পদক্ষেপ বা অ্যাকাউন্ট-ট্যাগ রাউটিং ব্যবহার করুন।",
         "tip2": "টিউন সেশন বনাম সাপ্তাহিক ওজন যখন স্বল্পমেয়াদী ক্লান্তি বেশি ঝুঁকিপূর্ণ।",
         "tip3": "টাই ব্যান্ড ছোট রাখুন যাতে সমান অ্যাকাউন্টগুলি এখনও মোটামুটিভাবে ঘোরে।"
+      },
+      "expiry-first": {
+        "title": "মেয়াদোত্তীর্ণ-প্রায় কোটা প্রথমে",
+        "description": "ব্যবহারের তাগিদ অনুযায়ী অ্যাকাউন্টগুলো সাজায়: রিসেটের সময়সীমার কাছাকাছি থাকা বেশি অবশিষ্ট কোটা প্রথমে যায়।",
+        "tip1": "প্রদানকারীর কোটা টেলিমেট্রি প্রয়োজন; যেসব অ্যাকাউন্টে এটি নেই সেগুলো তালিকাভুক্ত অগ্রাধিকার ক্রম বজায় রাখে।",
+        "tip2": "প্রায় সমান স্কোরগুলো টাই ব্যান্ডের মধ্যে ঘোরে, ফলে সমগোত্রীয় অ্যাকাউন্টগুলো এখনও লোড ভাগ করে নেয়।",
+        "tip3": "প্রতিটি মডেল আসলে যে কোটা বাকেটে বিল হয়, ক্রম নির্ধারণ সেটিতেই সীমাবদ্ধ রাখুন।"
       },
       "strict-random": {
         "title": "শাফল ডেক বণ্টন",
@@ -5679,6 +5693,7 @@
     "usageTracking": "ব্যবহার ট্র্যাকিং",
     "securityDesc": "আপনার ড্যাশবোর্ড সুরক্ষিত রাখতে একটি পাসওয়ার্ড সেট করুন, অথবা আপাতত এড়িয়ে যান।",
     "securityDescSkipWarning": "⚠️ পাসওয়ার্ড ছাড়া, সেটআপের সময় আপনি প্রোভাইডার যোগ করতে পারবেন না। পাসওয়ার্ড সেট করার পর ড্যাশবোর্ড থেকে সেগুলো যোগ করতে পারবেন।",
+    "passwordAlreadySet": "ড্যাশবোর্ডের পাসওয়ার্ড ইতিমধ্যে সেট করা আছে। আপনি পরে সেটিংসে এটি পরিবর্তন করতে পারেন।",
     "providerDesc": "আপনার প্রথম AI প্রোভাইডার সংযুক্ত করুন। পরে আরও যোগ করতে পারবেন।",
     "providerRequiresPassword": "প্রোভাইডার যোগ করতে প্রথমে আপনাকে একটি পাসওয়ার্ড সেট করতে হবে। অনুগ্রহ করে নিরাপত্তা ধাপে ফিরে গিয়ে একটি পাসওয়ার্ড সেট করুন, অথবা পরে ড্যাশবোর্ড থেকে প্রোভাইডার যোগ করুন।",
     "apiKeyRequired": "API কী (আবশ্যক)",
@@ -6729,6 +6744,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Grok ওয়েব কুকির প্লেসহোল্ডার",
     "herokuBaseUrlHint": "Heroku বেস URL-এর ইঙ্গিত",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "ইমেল লুকান",
     "imageProviders": "ছবি প্রদানকারী",
     "videoProviders": "ভিডিও জেনারেশন",
@@ -7227,7 +7243,8 @@
       "kiro": "ফ্রি টিয়ার: 50 ক্রেডিট/মাস (~25K–100K টোকেন)। ⚠️ Kiro ToS তৃতীয় পক্ষের প্রক্সি/হারনেস ব্যবহার নিষিদ্ধ করে।",
       "codex": "বিদ্যমান OAuth ফ্লো-এর সাথে OpenAI Codex সংযুক্ত করুন।",
       "qwen": "বিদ্যমান OAuth ফ্লো-এর সাথে Qwen Code সংযুক্ত করুন।",
-      "github-models": "github.com/settings/tokens-এ 'models: read' স্কোপ সহ একটি GitHub PAT তৈরি করুন"
+      "github-models": "github.com/settings/tokens-এ 'models: read' স্কোপ সহ একটি GitHub PAT তৈরি করুন",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} প্রদানকারী-নেটিভ মডেল আইডি গ্রহণ করে। /মডেল থেকে আমদানি করুন বা রাউটিং এর জন্য কাস্টম আইডি যোগ করুন।",
     "bedrockModelsDescription": "অ্যামাজন বেডরক মডেলগুলি AWS অঞ্চল দ্বারা স্কোপ করা হয়েছে৷ /মডেল থেকে আমদানি করুন বা নির্বাচিত অঞ্চলে সক্ষম বেডরক মডেল আইডি যোগ করুন।",
@@ -8094,6 +8111,8 @@
     "resetAwareDesc": "স্বাস্থ্যকর অবশিষ্ট কোটা এবং কাছাকাছি রিসেট সহ অ্যাকাউন্ট পছন্দ করুন",
     "quotaWeighted": "কোটা-অনুপাতে ওজনযুক্ত",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "মেয়াদশেষ-প্রথম",
+    "expiryFirstDesc": "যে অ্যাকাউন্টের কোটা অন্যথায় অব্যবহৃত অবস্থায় মেয়াদোত্তীর্ণ হয়ে যেত, সেটি আগে খরচ করে: সবচেয়ে বেশি অবশিষ্ট এবং সবচেয়ে নিকট রিসেটযুক্ত অ্যাকাউন্ট প্রথমে যায়।",
     "strictRandom": "সম্পূর্ণ এলোমেলো",
     "strictRandomDesc": "ডেক শাফল পদ্ধতি—পুনরায় শাফল করার আগে প্রতিটি অ্যাকাউন্ট একবার করে ব্যবহার করে",
     "stickyLimit": "স্টিকি সীমা",
@@ -10258,7 +10277,11 @@
     "mappingInvalidJson": "অকার্যকর JSON।",
     "mappingMustBeObject": "ম্যাপিংটি অবশ্যই একটি JSON অবজেক্ট হতে হবে, কোনো অ্যারে বা প্রিমিটিভ মান নয়।",
     "mappingValueMustBeString": "“{key}” কী-এর মান অবশ্যই একটি স্ট্রিং হতে হবে।",
-    "save": "সংরক্ষণ করুন"
+    "save": "সংরক্ষণ করুন",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
