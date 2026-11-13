@@ -5,7 +5,8 @@
 // sat queued against the account's 40 concurrent hosted slots — PR checks waited hours
 // and merges happened without them. Each change already ran the matrix on its PR; the
 // merged combination is Release-Green's job (nightly-release-green.yml). Pinned here:
-//   - ci.yml and quality.yml run on push only for `main` (the release squash);
+//   - ci.yml and quality.yml run on push only for `main` (the release squash) and for the
+//     omni-queue/** merge-queue candidates (2026-11-13; never release/** itself);
 //   - PRs into main and release/** and merge groups still get the full matrix;
 //   - Release-Green still fires on every push to release/v* and never cancels a started run;
 //   - its scheduled full sweep of `main` runs once a day (05:23) — main's SHA only moves on
@@ -36,8 +37,8 @@ for (const file of ["ci.yml", "quality.yml"]) {
     const on = load(file).on ?? {};
     assert.deepEqual(
       on.push?.branches,
-      ["main"],
-      `${file} must not run the matrix per release push`
+      ["main", "omni-queue/**"],
+      `${file} must not run the matrix per release push (omni-queue/** = queue candidates only)`
     );
     assert.deepEqual(on.pull_request?.branches, ["main", "release/**"]);
     assert.ok(on.merge_group, `${file} keeps the merge-queue trigger`);
