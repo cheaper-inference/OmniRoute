@@ -161,6 +161,8 @@ export function openAIChunkToGeminiChunk(
       }
       parts.push({ functionCall: { name: entry.name, args } });
     }
+    // A repeated finish chunk must not emit the same calls again.
+    state.toolCallAccum = {};
   }
 
   // Skip pure role-only deltas with no content and no finish signal.
