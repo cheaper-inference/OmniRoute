@@ -1,0 +1,1 @@
+- **fix(sse):** when a Claude thinking budget is too small and thinking is dropped, the request keeps the caller's own `max_tokens` (clamped to the model cap) instead of being raised to the full model cap.
