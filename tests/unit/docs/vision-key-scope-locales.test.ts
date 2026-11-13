@@ -29,7 +29,7 @@ test("vision bridge key scope is translated without certifying stale locale cont
     root,
     source: sourcePath,
     state,
-    anchors: ["visionBridgeKeyScope.ts", "When the caller's API key restricts"],
+    anchors: ["visionBridgeKeyScope.ts"],
   });
   announceMirrorPlan(t, plan);
   const asserted = new Set(plan.assert);

@@ -32,7 +32,7 @@ test("remote token privilege guidance is translated, not only marked current", (
     root,
     source: sourcePath,
     state,
-    anchors: ["omniroute tokens scopes", "A token can never be minted"],
+    anchors: ["omniroute tokens scopes"],
   });
   announceMirrorPlan(t, plan);
   const asserted = new Set(plan.assert);

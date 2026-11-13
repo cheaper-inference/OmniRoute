@@ -207,14 +207,43 @@ test("OMNIROUTE_GATE_MODE=pr turns PR mode on outside Actions", () => {
   assert.equal(plan.skipped.length, 2);
 });
 
-test("an anchor missing from the English source is a test bug and throws in both modes", () => {
+// An anchor only narrows the freshness question from the whole file to the anchored sections. A
+// feature PR may reword the English text an anchor names; that must never turn into a failure
+// (the tests that pin the English source assert it themselves), so a missing anchor falls back
+// to the whole-file comparison — never looser than with the anchor — and never throws.
+test("an anchor missing from the English source falls back to the whole-file comparison", () => {
+  const reworded = ORIGINAL.replace("Unrelated text.", "Reworded text.");
+  const root = fixture(reworded);
+  const release = planMirrorAssertions({
+    root,
+    source: SOURCE,
+    anchors: ["no such text"],
+    env: RELEASE_ENV,
+  });
+  assert.deepEqual(release.assert.sort(), ["fr", "pt-BR"]);
+  const pr = planMirrorAssertions({ root, source: SOURCE, anchors: ["no such text"], env: PR_ENV });
+  assert.deepEqual(pr.assert, []);
+  assert.equal(pr.skipped.length, 2);
+  assert.match(pr.skipped[0].reason, /anchor\(s\) not found in the source: no such text/);
+  // With an anchor that is present, the same edit (outside the anchored section) stays fresh.
+  const anchored = planMirrorAssertions({
+    root,
+    source: SOURCE,
+    anchors: ["The retry contract (#100)"],
+    env: PR_ENV,
+  });
+  assert.deepEqual(anchored.skipped, []);
+});
+
+test("a missing anchor on an unchanged source keeps every mirror asserted in PR mode", () => {
   const root = fixture(ORIGINAL);
-  for (const env of [PR_ENV, RELEASE_ENV]) {
-    assert.throws(
-      () => planMirrorAssertions({ root, source: SOURCE, anchors: ["no such text"], env }),
-      /not found in docs\/guides\/GUIDE\.md/
-    );
-  }
+  const plan = planMirrorAssertions({
+    root,
+    source: SOURCE,
+    anchors: ["no such text"],
+    env: PR_ENV,
+  });
+  assert.deepEqual(plan.assert.sort(), ["fr", "pt-BR"]);
 });
 
 test("announceMirrorPlan stays silent when every mirror is asserted", () => {

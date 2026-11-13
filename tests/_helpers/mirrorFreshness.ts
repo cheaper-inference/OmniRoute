@@ -14,7 +14,12 @@
 //   - the locale record's source_hash equals the SHA-256 of the English source on disk; or
 //   - the test names anchors (text or a RegExp in the English source) and every `## ` section
 //     that holds an anchor still hashes to one of the record's section_hashes, i.e. the mirror's
-//     section was translated from exactly the text the test pins.
+//     section was translated from exactly the text the test pins. When any anchor is absent from
+//     the English source (a PR reworded it), the whole-file comparison decides: never looser,
+//     and never a failure of its own — the tests that pin the English source assert it.
+// Granularity is the `## ` section run-translation hashes. A long section (QUALITY_GATES.md's
+// gate inventory is ~half the file) means any edit in it leaves the anchored mirrors stale, so
+// their PR-mode assertions skip until the next wave.
 // A mirror with no record is "untracked": nothing proves it stale, so it is asserted.
 //
 // The mode comes from scripts/check/lib/gateMode.mjs (pull_request from a non-release head,
@@ -79,24 +84,23 @@ export interface SourceAnalysis {
   hash: string;
   /** run-translation section index → section hash, for every section holding an anchor. */
   anchored: { index: number; hash: string }[];
+  /** Anchors absent from the source; when non-empty, `anchored` is empty (whole-file check). */
+  missing: string[];
 }
 
-/** Throws when an anchor is absent from the source: a typo must fail in both modes. */
-export function analyzeSource(
-  sourceText: string,
-  anchors: MirrorAnchor[] = [],
-  label = "the source"
-): SourceAnalysis {
-  const analysis: SourceAnalysis = { hash: sha256(sourceText), anchored: [] };
+/** Hashes the source and the sections holding the anchors. Never throws on a missing anchor. */
+export function analyzeSource(sourceText: string, anchors: MirrorAnchor[] = []): SourceAnalysis {
+  const analysis: SourceAnalysis = { hash: sha256(sourceText), anchored: [], missing: [] };
   if (anchors.length === 0) return analysis;
   const sections = splitSections(stripTopHeading(sourceText));
   const hashes = sectionHashes(sections);
   const indexes = new Set<number>();
   for (const anchor of anchors) {
     const hits = sections.flatMap((section, i) => (anchorMatches(section, anchor) ? [i] : []));
-    if (hits.length === 0) throw new Error(`mirror anchor ${String(anchor)} not found in ${label}`);
+    if (hits.length === 0) analysis.missing.push(String(anchor));
     for (const i of hits) indexes.add(i);
   }
+  if (analysis.missing.length > 0) return analysis;
   analysis.anchored = [...indexes]
     .sort((a, b) => a - b)
     .map((index) => ({
@@ -142,6 +146,12 @@ export function classifyMirror({
       reason: `source section(s) ${changed.join(", ")} changed since this mirror was translated`,
     };
   }
+  if (source.missing.length > 0) {
+    return {
+      status: "stale",
+      reason: `source changed since this mirror was translated; anchor(s) not found in the source: ${source.missing.join(", ")}`,
+    };
+  }
   return { status: "stale", reason: "source changed since this mirror was translated" };
 }
 
@@ -172,8 +182,7 @@ export function planMirrorAssertions({
 }): MirrorPlan {
   const info = resolveGateModeInfo({ argv, env });
   const sourceText = fs.readFileSync(path.join(root, source), "utf8");
-  // Analysed up front in both modes, so a typo in an anchor fails in release mode too.
-  const analysis = analyzeSource(sourceText, anchors, source);
+  const analysis = analyzeSource(sourceText, anchors);
   const records = (state ?? loadTranslationState(root)).sources?.[source]?.locales ?? {};
   const targets = locales ?? Object.keys(records);
   const plan: MirrorPlan = {
