@@ -1,18 +1,22 @@
 // The Claude extra-usage sync fetches the live usage endpoint (up to 10 s). The streaming path
 // fires it without waiting; the non-streaming path must not hold the client response for it.
+// The usage fetch is held open by the test until the client response has arrived, so the check is
+// about ordering, not wall-clock time (a timing check flaked under parallel CI load).
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createChatPipelineHarness } from "../integration/_chatPipelineHarness.ts";
 
-const USAGE_DELAY_MS = 1500;
 const h = await createChatPipelineHarness("nonstream-extra-usage-sync");
 const providersDb = await import("../../src/lib/db/providers.ts");
 let usageCalls = 0;
+let releaseUsage: () => void = () => {};
+let usageFinished = false;
 
 test.beforeEach(async () => {
   await h.resetStorage();
   h.BaseExecutor.RETRY_CONFIG.delayMs = 0;
   usageCalls = 0;
+  usageFinished = false;
   globalThis.fetch = async (input) => {
     const url = String(input instanceof Request ? input.url : input);
     if (/anthropic\.com\/v1\/messages/.test(url)) {
@@ -31,7 +35,9 @@ test.beforeEach(async () => {
     }
     if (/anthropic\.com\/api\/oauth\/usage/.test(url)) {
       usageCalls++;
-      await new Promise((resolve) => setTimeout(resolve, USAGE_DELAY_MS));
+      // Held open until the test releases it, after the client response has arrived.
+      await new Promise<void>((resolve) => (releaseUsage = resolve));
+      usageFinished = true;
       return new Response("{}", { status: 200, headers: { "Content-Type": "application/json" } });
     }
     return new Response("{}", { status: 404, headers: { "Content-Type": "application/json" } });
@@ -52,7 +58,8 @@ test("non-stream Claude success does not wait for the extra-usage sync", async (
     priority: 1,
     providerSpecificData: {},
   });
-  const started = Date.now();
+  // Without the fix the handler awaits the held usage fetch and never returns: bound the wait.
+  const watchdog = setTimeout(() => releaseUsage(), 20_000);
   const res = await h.handleChat(
     h.buildRequest({
       body: {
@@ -64,10 +71,12 @@ test("non-stream Claude success does not wait for the extra-usage sync", async (
     })
   );
   const body = await res.text();
-  const elapsed = Date.now() - started;
+  const finishedBeforeResponse = usageFinished;
+  clearTimeout(watchdog);
   assert.equal(res.status, 200, body);
   assert.ok(usageCalls >= 1, "the extra-usage sync still runs");
-  assert.ok(elapsed < USAGE_DELAY_MS, `client waited ${elapsed}ms for the usage fetch`);
+  assert.equal(finishedBeforeResponse, false, "the client response waited for the usage fetch");
   // Let the detached sync finish before the harness tears down the DB.
-  await new Promise((resolve) => setTimeout(resolve, USAGE_DELAY_MS + 200));
+  releaseUsage();
+  await new Promise<void>((resolve) => setImmediate(resolve));
 });
