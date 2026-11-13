@@ -3,7 +3,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { loadConfig } from "../../../scripts/merge-queue/config.mjs";
-import { evaluateChecks, latestByName } from "../../../scripts/merge-queue/checks.mjs";
+import {
+  NO_RUN_TIMEOUT_MINUTES,
+  evaluateChecks,
+  latestByName,
+} from "../../../scripts/merge-queue/checks.mjs";
 
 const config = loadConfig();
 const [GATE_CI, GATE_QUALITY, INTEGRITY] = config.requiredChecks;
@@ -289,7 +293,39 @@ test("the queue's own omni-queue/* statuses never count", () => {
 });
 
 test("no checks at all is pending, never vacuously green", () => {
-  const result = evaluate([]);
+  // Before NO_RUN_TIMEOUT_MINUTES: CI may still be queued.
+  const result = evaluate([], [], at(10));
   assert.equal(result.verdict, "pending");
   assert.deepEqual(result.pending.sort(), [...config.requiredChecks].sort());
+  // Later it is a "no CI run" timeout — still never green.
+  assert.equal(evaluate([]).verdict, "timeout");
+});
+
+test("no GitHub Actions run NO_RUN_TIMEOUT_MINUTES (45) after the push → timeout no-ci-run", () => {
+  assert.equal(NO_RUN_TIMEOUT_MINUTES, 45);
+  const justBefore = evaluate([], [], at(44));
+  assert.equal(justBefore.verdict, "pending");
+  assert.equal(justBefore.reason, undefined);
+  const noRun = evaluate([], [], at(45));
+  assert.equal(noRun.verdict, "timeout");
+  assert.equal(noRun.reason, "no-ci-run");
+  assert.deepEqual(noRun.failures, []);
+  // Only statuses / runs of other apps (or the queue's own statuses): CI still never ran.
+  const others = evaluate(
+    [run("external scan", "success", { appSlug: "some-other-app" })],
+    [status("ci/legacy", "pending"), status("omni-queue/approval", "success")],
+    at(46)
+  );
+  assert.equal(others.verdict, "timeout");
+  assert.equal(others.reason, "no-ci-run");
+});
+
+test("an Actions run in progress keeps the verdict pending until checksTimeoutMinutes", () => {
+  const running = [run(GATE_CI, null), run(GATE_QUALITY, null)];
+  assert.equal(evaluate(running, [], at(50)).verdict, "pending");
+  const late = evaluate(running, [], AFTER_TIMEOUT);
+  assert.equal(late.verdict, "timeout");
+  assert.equal(late.reason, "checks-timeout");
+  // a failure without any Actions run is still red, not a timeout
+  assert.equal(evaluate([], [status("ci/legacy", "failure")], at(60)).verdict, "red");
 });

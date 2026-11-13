@@ -178,6 +178,7 @@ test("normalizeCheckRun and normalizeStatus produce the pure-module shapes", () 
       completedAt: "b",
       htmlUrl: "https://x",
       appSlug: "github-actions",
+      headBranch: null,
       output: { title: "t", summary: null, text: null },
     }
   );
@@ -250,6 +251,53 @@ test("paginate unwraps {total_count, check_runs} envelopes over several pages", 
   );
   assert.equal(fake.requests.filter((r) => r.path.endsWith("/check-runs")).length, 2);
   assert.equal(fake.requests[0].query.filter, "all");
+});
+
+test("listCheckRuns maps each run to the head_branch of its check suite (paginated)", async (t) => {
+  const { fake, gh } = await setup(t, { maxPerPage: 1 });
+  const head = sha("candidate-on-two-refs");
+  const ref = "omni-queue/release-v3.8.54/b7-0123456789ab";
+  const ours = fake.addCheckRun(head, {
+    name: "Gate / CI",
+    headBranch: ref,
+    startedAt: "2026-11-13T10:00:00Z",
+    completedAt: "2026-11-13T10:30:00Z",
+  });
+  // Same suite, second job: both runs resolve through the one suite.
+  fake.addCheckRun(head, { name: "Gate / Quality", suiteId: ours.check_suite.id });
+  // The base's own push of the same SHA (another suite, another branch).
+  fake.addCheckRun(head, {
+    name: "Gate / CI",
+    conclusion: "failure",
+    headBranch: "release/v3.8.54",
+  });
+  // A suite GitHub reports without a branch, and a run whose suite is not listed at all.
+  fake.addCheckRun(head, { name: "external", appSlug: "some-app", headBranch: null });
+  fake.checkRuns.get(head).push({ id: 9001, name: "orphan", status: "queued", conclusion: null });
+
+  const runs = await gh.listCheckRuns(head);
+  assert.deepEqual(
+    runs.map((r) => [r.name, r.headBranch, r.appSlug]),
+    [
+      ["Gate / CI", ref, "github-actions"],
+      ["Gate / Quality", ref, "github-actions"],
+      ["Gate / CI", "release/v3.8.54", "github-actions"],
+      ["external", null, "some-app"],
+      ["orphan", null, null],
+    ]
+  );
+  assert.equal(runs[0].startedAt, "2026-11-13T10:00:00Z");
+  assert.equal(runs[0].completedAt, "2026-11-13T10:30:00Z");
+  assert.equal(runs[4].startedAt, null);
+  assert.equal(runs[4].completedAt, null);
+  // Every page of the suites was read (3 suites at 1 per page).
+  assert.equal(fake.requests.filter((r) => r.path.endsWith("/check-suites")).length, 3);
+});
+
+test("listCheckRuns skips the check-suites call when the SHA has no run", async (t) => {
+  const { fake, gh } = await setup(t);
+  assert.deepEqual(await gh.listCheckRuns(sha("no-runs")), []);
+  assert.equal(fake.requests.filter((r) => r.path.endsWith("/check-suites")).length, 0);
 });
 
 test("retries a 502 with backoff and then succeeds", async (t) => {
@@ -568,14 +616,15 @@ test("mergePull gives up after maxRetries of unconfirmed 5xx", async (t) => {
 });
 
 test("a hung request times out and is retried as a network error", async (t) => {
-  const { fake, gh, sleeps, logs } = await setup(t, {}, { requestTimeoutMs: 100 });
+  // 1 s, not 100 ms: on a loaded machine the retried (fast) request must not time out too.
+  const { fake, gh, sleeps, logs } = await setup(t, {}, { requestTimeoutMs: 1000 });
   fake.addPull({ number: 35, title: "slow" });
   fake.inject({ method: "GET", path: "/pulls/35", status: 200, body: {}, delayMs: 10_000 });
   const started = Date.now();
   assert.equal((await gh.getPull(35)).title, "slow");
   assert.ok(Date.now() - started < 5000, "the stalled response did not hold the client");
   assert.deepEqual(sleeps, [1000]);
-  assert.ok(logs.some((l) => /timed out after 100 ms/.test(l)));
+  assert.ok(logs.some((l) => /timed out after 1000 ms/.test(l)));
 });
 
 test("a request that keeps timing out fails with GitHubError status 0", async (t) => {

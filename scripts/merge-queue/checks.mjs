@@ -20,6 +20,8 @@
  * @property {string|null} completedAt
  * @property {string|null} htmlUrl
  * @property {string|null} appSlug   "github-actions" for workflow jobs
+ * @property {string|null} [headBranch] head_branch of the run's check suite (the ref whose push
+ *                                   started it); null/absent when unknown
  * @property {string|null} [workflow] workflow name, when the normalizer knows it (optional): runs of
  *                                   different workflows are never re-runs of each other
  * @property {{title: string|null, summary: string|null, text: string|null}} output
@@ -28,6 +30,9 @@
 /**
  * @typedef {object} ChecksVerdict
  * @property {"green"|"red"|"pending"|"timeout"} verdict
+ * @property {"no-ci-run"|"checks-timeout"} [reason]  timeout only: no GitHub Actions run at all
+ *                                   after NO_RUN_TIMEOUT_MINUTES, or no verdict after
+ *                                   config.checksTimeoutMinutes
  * @property {Object<string, string>} required   required name → conclusion | "missing" | "pending"
  * @property {CheckRun[]} failures         failed, non-advisory runs (latest attempt per name)
  * @property {CheckRun[]} advisoryFailures
@@ -53,6 +58,14 @@ const OWN_PREFIX = "omni-queue/";
  * actor with statuses:write / checks:write could otherwise forge a green Gate.
  */
 export const REQUIRED_CHECK_APP = "github-actions";
+
+/**
+ * A candidate with NO run of REQUIRED_CHECK_APP this long after its push will never get one:
+ * GitHub skips push workflows whose head commit message carries a skip marker, or the push
+ * triggered nothing. Waiting for config.checksTimeoutMinutes (240) would stall the queue for
+ * hours, so the verdict is "timeout" (reason "no-ci-run") and the tick takes the infra path.
+ */
+export const NO_RUN_TIMEOUT_MINUTES = 45;
 
 const toMs = (iso) => {
   const ms = Date.parse(String(iso ?? ""));
@@ -157,7 +170,9 @@ function severity(outcome) {
  *  - red: any completed non-advisory run/status with failure | cancelled | timed_out |
  *    action_required | startup_failure | stale, or a required check concluded other than success;
  *  - green: every config.requiredChecks is `success`, nothing pending, no non-advisory failure;
- *  - timeout: not decided after config.checksTimeoutMinutes since startedAt;
+ *  - timeout (reason "no-ci-run"): no run of REQUIRED_CHECK_APP at all after
+ *    NO_RUN_TIMEOUT_MINUTES since startedAt (CI never started for the candidate);
+ *  - timeout (reason "checks-timeout"): not decided after config.checksTimeoutMinutes;
  *  - pending: otherwise.
  * Statuses: failure/error → failure, pending → pending (advisory names tolerated as for runs).
  * A required check is `success` only through a check run of REQUIRED_CHECK_APP; a status or a
@@ -248,12 +263,15 @@ export function evaluateChecks(input) {
 
   const startedMs = Date.parse(String(input.startedAt ?? ""));
   const nowMs = Date.parse(String(input.now ?? ""));
-  if (
-    Number.isFinite(startedMs) &&
-    Number.isFinite(nowMs) &&
-    nowMs - startedMs >= config.checksTimeoutMinutes * 60 * 1000
-  ) {
-    return { verdict: "timeout", ...base };
+  const elapsedMs = Number.isFinite(startedMs) && Number.isFinite(nowMs) ? nowMs - startedMs : null;
+  const actionsRan = entries.some(
+    (e) => e.source === "run" && e.run?.appSlug === REQUIRED_CHECK_APP
+  );
+  if (!actionsRan && elapsedMs !== null && elapsedMs >= NO_RUN_TIMEOUT_MINUTES * 60 * 1000) {
+    return { verdict: "timeout", reason: "no-ci-run", ...base };
+  }
+  if (elapsedMs !== null && elapsedMs >= config.checksTimeoutMinutes * 60 * 1000) {
+    return { verdict: "timeout", reason: "checks-timeout", ...base };
   }
   return { verdict: "pending", ...base };
 }

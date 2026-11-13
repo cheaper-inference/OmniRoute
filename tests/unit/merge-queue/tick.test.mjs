@@ -1,7 +1,11 @@
 // One idempotent tick of omni-queue (scripts/merge-queue/tick.mjs) against in-memory fakes of
 // GitHub and of the WP1/WP2/WP4 modules; the real state store and bisection run underneath.
 import assert from "node:assert/strict";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import test from "node:test";
+import * as realChecks from "../../../scripts/merge-queue/checks.mjs";
 import {
   APPROVAL_CONTEXTS,
   STATE_BRANCH,
@@ -23,6 +27,7 @@ import {
   readOnlyGitHub,
   runTick,
 } from "../../../scripts/merge-queue/tick.mjs";
+import { startFakeGitHub } from "./helpers/fake-github.mjs";
 import { BASE, createHarness, fakeSha } from "./helpers/tick-fakes.mjs";
 
 const BASE0 = fakeSha("base-0");
@@ -106,7 +111,14 @@ test("green candidate, live merge-ff: lands with expectedBaseSha, unlabels and c
   const state = await h.state();
 
   assert.deepEqual(h.world.lands, [
-    { mode: "merge-ff", base: BASE, candidateSha: f.candidateSha, expectedBaseSha: f.baseSha },
+    {
+      mode: "merge-ff",
+      base: BASE,
+      candidateSha: f.candidateSha,
+      expectedBaseSha: f.baseSha,
+      // the in-flight PRs go to landMergeFf so stacked PRs are reported as merged too
+      prs: [1, 2, 3],
+    },
   ]);
   assert.ok(
     h.git.runs.some(
@@ -1126,4 +1138,162 @@ test("check runs pushed by another branch on the same SHA do not decide the verd
   const state = await h.state();
   assert.equal(h.world.lands.length, 1);
   assert.equal(state.counters.culprits, 0);
+});
+
+// ─────────────────────────── integration gaps between modules (INT) ───────────────────────────
+
+test("a PR whose head is already in the base is dequeued once and never recomposed", async () => {
+  const h = createHarness({ mode: "live" });
+  h.world.alreadyInBase.add(2);
+  for (const n of [1, 2, 3]) h.addPr(n);
+  await h.tick();
+  let state = await h.state();
+  assert.deepEqual(nums(state.inFlight.prs), [1, 3]);
+  const head2 = h.gh.pulls.get(2).headSha;
+  assert.deepEqual(
+    h.writesOf("removeLabel").map((w) => w.args),
+    [
+      [2, "omni-queue"],
+      [2, "protected-approved"],
+    ]
+  );
+  const comments = commentsWithKey(h, 2, `already-landed:${head12(head2)}`);
+  assert.equal(comments.length, 1);
+  assert.match(comments[0].body, /already part of/);
+  const dequeued = state.history.find((e) => e.type === "pr-dequeued");
+  assert.deepEqual(dequeued.prs, [2]);
+  assert.equal(dequeued.detail, "already-in-base");
+  assert.match(state.history.find((e) => e.type === "batch-started").detail, /#2 already-in-base/);
+
+  h.runCi(state.inFlight.candidateSha);
+  await h.tick(); // lands [1, 3]; #2 carries no label any more
+  await h.tick();
+  state = await h.state();
+  assert.equal(
+    h.world.composeCalls.filter((c) => c.prs.includes(2)).length,
+    1,
+    "#2 is offered to compose once, never again"
+  );
+  assert.equal(state.history.filter((e) => e.type === "pr-dequeued").length, 1);
+  assert.equal(commentsWithKey(h, 2, `already-landed:${head12(head2)}`).length, 1);
+});
+
+test("stacked PRs (alreadyContained) land and count with their batch", async () => {
+  const h = createHarness({ mode: "live" });
+  h.world.stacked.add(2);
+  const f = await startBatch(h, [1, 2]);
+  assert.deepEqual(nums(f.prs), [1, 2]);
+  let state = await h.state();
+  assert.match(
+    state.history.find((e) => e.type === "batch-started").detail,
+    /stacked #2 \(no merge commit of their own\)/
+  );
+  h.runCi(f.candidateSha);
+  await h.tick();
+  state = await h.state();
+  assert.equal(state.counters.landedPrs, 2);
+  assert.deepEqual(state.history.find((e) => e.type === "landed").prs, [1, 2]);
+  assert.deepEqual(h.world.lands[0].prs, [1, 2]);
+  assert.equal(commentsWithKey(h, 2, `landed:${head12(f.prs[1].head)}`).length, 1);
+  assert.deepEqual(h.gh.pulls.get(2).labels, []);
+});
+
+test("every batch-started event (batch, bisection segment, recomposition) carries labeledAt", async () => {
+  const h = createHarness({ mode: "live" });
+  h.world.culprits.add(2);
+  for (const n of [1, 2, 3, 4]) h.addPr(n);
+  const approvals = Object.fromEntries(
+    [1, 2, 3, 4].map((n) => [String(n), h.gh.timelines.get(n)[0].createdAt])
+  );
+  await h.drain();
+  // A recomposition after the base moved under a green candidate.
+  h.addPr(5);
+  approvals["5"] = h.gh.timelines.get(5)[0].createdAt;
+  await h.tick();
+  const f = (await h.state()).inFlight;
+  h.gh.branches.set(BASE, fakeSha("someone-else-merged"));
+  h.runCi(f.candidateSha);
+  await h.tick();
+  const state = await h.state();
+  const started = state.history.filter((e) => e.type === "batch-started");
+  assert.ok(started.length >= 5, `several batches started (${started.length})`);
+  assert.ok(
+    started.some((e) => /^bisect of /.test(e.detail)),
+    "bisection segments included"
+  );
+  assert.equal(started.at(-1).prs[0], 5, "the recomposition is the last one");
+  for (const event of started) {
+    assert.deepEqual(
+      event.labeledAt,
+      Object.fromEntries(event.prs.map((n) => [String(n), approvals[String(n)]])),
+      `${event.batchId}: one approval time per PR`
+    );
+  }
+});
+
+test("no CI run for the candidate after 45 min: checks-timeout via the infra path", async () => {
+  const h = createHarness({ mode: "live", infraRetries: 1 });
+  h.deps.modules = { ...h.modules, checks: realChecks };
+  const f = await startBatch(h, [1]);
+  h.clock.advance(realChecks.NO_RUN_TIMEOUT_MINUTES - 1);
+  await h.tick();
+  assert.equal((await h.state()).inFlight.attempts, 0, "still waiting before 45 min");
+
+  h.clock.advance(2);
+  await h.tick();
+  let state = await h.state();
+  const timeout = state.history.find((e) => e.type === "checks-timeout");
+  assert.match(timeout.detail, /no CI run for candidate after 45 min/);
+  const retry = state.history.find((e) => e.type === "infra-retry");
+  assert.match(retry.detail, /no CI run for candidate/);
+  assert.equal(state.inFlight.attempts, 1);
+  assert.equal(state.inFlight.candidateSha, f.candidateSha);
+
+  h.clock.advance(realChecks.NO_RUN_TIMEOUT_MINUTES + 1);
+  await h.tick();
+  state = await h.state();
+  assert.equal(state.paused.reason, "infra");
+  assert.match(state.paused.detail, /no CI run for candidate/);
+});
+
+test("main: the client counts only the App's own comment markers (botLogin)", async (t) => {
+  const fake = await startFakeGitHub({ token: "ghs_tick_main", actor: "omni-queue[bot]" });
+  t.after(() => fake.close());
+  const runnerTemp = mkdtempSync(join(tmpdir(), "omni-queue-tick-main-"));
+  t.after(() => rmSync(runnerTemp, { recursive: true, force: true }));
+  t.mock.method(console, "log", () => {});
+  t.mock.method(console, "error", () => {});
+  fake.addPull({ number: 7, labels: ["omni-queue"], base: { ref: "release/v3.8.54" } });
+  fake.timeline.set(7, [
+    {
+      id: 1,
+      event: "labeled",
+      label: { name: "omni-queue" },
+      actor: { login: "mallory", type: "User" },
+      created_at: "2026-11-13T10:00:00Z",
+    },
+  ]);
+  // A third party pre-posts the hidden marker to mute the queue's not-approver comment.
+  fake.comments.set(7, [
+    {
+      id: 1,
+      body: `nothing to see\n\n${commentMarker("not-approver")}`,
+      user: { login: "mallory", type: "User" },
+      created_at: "2026-11-13T10:00:00Z",
+    },
+  ]);
+  const env = {
+    OMNI_QUEUE_TOKEN: "ghs_tick_main",
+    GITHUB_REPOSITORY: fake.repository,
+    GITHUB_API_URL: fake.url,
+    RUNNER_TEMP: runnerTemp,
+  };
+  assert.equal(await main(["--base", "release/v3.8.54"], env), 0);
+  const comments = fake.comments.get(7);
+  assert.equal(comments.length, 2, "the bot posted its own comment despite the planted marker");
+  assert.equal(comments[1].user.login, "omni-queue[bot]");
+  assert.ok(comments[1].body.includes(commentMarker("not-approver")));
+  // The next tick sees the bot's marker and stays quiet.
+  assert.equal(await main(["--base", "release/v3.8.54"], env), 0);
+  assert.equal(fake.comments.get(7).length, 2);
 });

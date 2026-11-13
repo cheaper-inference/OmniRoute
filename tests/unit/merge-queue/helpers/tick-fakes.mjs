@@ -327,6 +327,10 @@ export function createWorld(gh, clock) {
     brokenBases: new Set(),
     baseConflicts: new Set(),
     batchConflicts: new Set(),
+    /** PRs whose head is already reachable from the bare base (ComposeResult.alreadyInBase) */
+    alreadyInBase: new Set(),
+    /** PRs stacked on an earlier PR of the batch (ComposeResult.alreadyContained) */
+    stacked: new Set(),
     /** pairs of PRs that only fail together (an interaction across bisection segments) */
     interactions: [],
     /** PRs whose diff touches a protected surface (need the protected approval label) */
@@ -481,9 +485,15 @@ export function createFakeModules(world) {
       const excludedBatchConflict = [];
       const excludedBaseConflict = [];
       const excludedHeadMoved = [];
+      const alreadyInBase = [];
+      const alreadyContained = [];
       for (const pr of prs) {
         if (heads[pr.n] !== pr.head) excludedHeadMoved.push(pr);
-        else if (world.baseConflicts.has(pr.n)) excludedBaseConflict.push(pr);
+        else if (world.alreadyInBase.has(pr.n)) alreadyInBase.push(pr);
+        else if (world.stacked.has(pr.n) && included.length) {
+          included.push(pr);
+          alreadyContained.push(pr);
+        } else if (world.baseConflicts.has(pr.n)) excludedBaseConflict.push(pr);
         else if (world.batchConflicts.has(pr.n) && included.length) excludedBatchConflict.push(pr);
         else included.push(pr);
       }
@@ -496,6 +506,8 @@ export function createFakeModules(world) {
           excludedBatchConflict,
           excludedBaseConflict,
           excludedHeadMoved,
+          alreadyContained,
+          alreadyInBase,
         };
       }
       const candidateSha = fakeSha(`${baseSha}|${batchId}|${included.map((p) => p.head)}`);
@@ -509,6 +521,8 @@ export function createFakeModules(world) {
         excludedBatchConflict,
         excludedBaseConflict,
         excludedHeadMoved,
+        alreadyContained,
+        alreadyInBase,
       };
     },
     pushCandidate({ git, sha, ref }) {
@@ -535,11 +549,17 @@ export function createFakeModules(world) {
   }
 
   const land = {
-    landMergeFf({ git, base, candidateSha, expectedBaseSha }) {
+    landMergeFf({ git, base, candidateSha, expectedBaseSha, prs }) {
       if (git.objects && !git.objects.has(candidateSha)) {
         throw new Error(`land: ${candidateSha} is not in the scratch repository`);
       }
-      world.lands.push({ mode: "merge-ff", base, candidateSha, expectedBaseSha });
+      world.lands.push({
+        mode: "merge-ff",
+        base,
+        candidateSha,
+        expectedBaseSha,
+        prs: prs === undefined ? undefined : prs.map((p) => p.n),
+      });
       const tip = gh.branches.get(base);
       if (tip !== expectedBaseSha) return { ok: false, reason: "base-moved", newBaseSha: tip };
       const merged = mergeComposition(base, candidateSha);
