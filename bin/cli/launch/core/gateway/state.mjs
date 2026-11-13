@@ -1,8 +1,9 @@
 // bin/cli/launch/core/gateway/state.mjs: private state helpers for the gateway lifecycle
 // (architecture section 4.3). Owned by stream C2.
 //
-// NOTE (integration): C1 owns core/state.mjs. These helpers are a private copy scoped to the
-// gateway files (lock, gateway.json, leases/); integration may dedupe them into core/state.mjs.
+// Paths and atomic JSON come from core/state.mjs. The lock stays here: unlike core/state.mjs's
+// acquireLock it is token-guarded on release, steals a stale lock atomically (rename aside) and
+// breaks a live holder only after LOCK_HARD_STALE_MS, which the reaper relies on.
 //
 // Layout under `stateDir` (= DATA_DIR/launch):
 //   lock                  exclusive create (open wx); {pid, at, token}
@@ -24,10 +25,9 @@ import {
   writeFileSync,
 } from "node:fs";
 import { join } from "node:path";
-import { resolveDataDir } from "../../../data-dir.mjs";
-import { writePrivateFileAtomic } from "../../../private-file.mjs";
 import { isPidRunning, sleep } from "../../../utils/pid.mjs";
 import { LaunchError } from "../../contract.mjs";
+import { launchRoot, readJson, writeJsonAtomic } from "../state.mjs";
 
 /** Default lock wait before StateLocked (section 10: "held by a live pid for > 30 s"). */
 export const DEFAULT_LOCK_TIMEOUT_MS = 30_000;
@@ -36,7 +36,7 @@ export const LOCK_HARD_STALE_MS = 5 * 60_000;
 const LOCK_POLL_MS = 25;
 
 export function defaultStateDir() {
-  return join(resolveDataDir(), "launch");
+  return launchRoot();
 }
 
 export function statePaths(stateDir) {
@@ -59,16 +59,11 @@ export function randomId(bytes = 8) {
 
 /** Parse a JSON file; null when missing or unparsable. */
 export function readJsonFile(path) {
-  try {
-    return JSON.parse(readFileSync(path, "utf8"));
-  } catch {
-    return null;
-  }
+  return readJson(path, null);
 }
 
-export function writeJsonFile(path, value) {
-  writePrivateFileAtomic(path, `${JSON.stringify(value, null, 2)}\n`);
-}
+/** Atomic private (0600) JSON write; parents created 0700. */
+export const writeJsonFile = writeJsonAtomic;
 
 export function removeFile(path) {
   try {
