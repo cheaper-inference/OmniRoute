@@ -831,7 +831,7 @@ function finalToolCallArgs(state, idx): string {
   return state.funcArgsBuf[idx] || "{}";
 }
 
-function closeToolCall(state, emit, idx, recordAsCompleted = true) {
+function closeToolCall(state, emit, idx) {
   // Wait until close to generate a missing id: an upstream may send its real id late.
   if (!state.funcCallIds[idx] && state.funcNames[idx])
     state.funcCallIds[idx] = fallbackToolCallId(Number(idx));
@@ -911,21 +911,17 @@ function closeToolCall(state, emit, idx, recordAsCompleted = true) {
       });
     }
 
-    // Only record as a completed output item when this is a final close (not a
-    // superseded-call eviction where a new call replaced this one at the same index).
-    if (recordAsCompleted) {
-      recordCompletedItem(state, normalizedIndex, funcItem);
-      // Mirror into the shared state.toolCalls map (populated by the other response
-      // translators) so stream.ts's completion-log summary reports finish_reason
-      // "tool_calls" and message.tool_calls instead of "stop" with no tool calls.
-      if (state.toolCalls instanceof Map) {
-        state.toolCalls.set(normalizedIndex, {
-          id: callId,
-          index: normalizedIndex,
-          type: isCustomTool ? "custom_tool_call" : "function",
-          function: { name: funcItem.name, arguments: args },
-        });
-      }
+    recordCompletedItem(state, normalizedIndex, funcItem);
+    // Mirror into the shared state.toolCalls map (populated by the other response
+    // translators) so stream.ts's completion-log summary reports finish_reason
+    // "tool_calls" and message.tool_calls instead of "stop" with no tool calls.
+    if (state.toolCalls instanceof Map) {
+      state.toolCalls.set(normalizedIndex, {
+        id: callId,
+        index: normalizedIndex,
+        type: isCustomTool ? "custom_tool_call" : "function",
+        function: { name: funcItem.name, arguments: args },
+      });
     }
 
     state.funcItemDone[idx] = true;
