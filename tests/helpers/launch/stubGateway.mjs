@@ -2,6 +2,11 @@
 import http from "node:http";
 import crypto from "node:crypto";
 
+// The SAME Zod schemas the G1 routes use, so schema drift fails core tests. schema.ts is kept
+// free of server imports (launchRouteHelpers.ts opens the DB at load time) for exactly this.
+import { launchMintSchema } from "../../../src/app/api/launch/sessions/schema.ts";
+import { launchSessionPatchSchema } from "../../../src/shared/validation/launchView.ts";
+
 const CAPS = { tool_calling: true };
 
 export const DEFAULT_MODELS = [
@@ -312,6 +317,28 @@ export async function startStubGateway(options = {}) {
     });
   });
 
+  const invalid = (res, error) =>
+    send(res, 400, { error: { message: error.issues[0]?.message || "invalid request body" } });
+
+  // Mirrors resolveLaunchCaller + callerOwnsSession (launchRouteHelpers.ts): the session's own
+  // live token, the parent key the session was minted with, or anonymous (no credential) when
+  // the gateway has no parent key. A bad or revoked credential is 401, never downgraded.
+  const resolveCaller = (auth) => {
+    if (auth) {
+      if (auth.startsWith("olx_")) {
+        const session = liveByToken(auth);
+        return session ? { kind: "session", session } : null;
+      }
+      return parentKey && auth === parentKey ? { kind: "key" } : null;
+    }
+    return parentKey ? null : { kind: "anonymous" };
+  };
+  const callerOwns = (caller, session) => {
+    if (caller.kind === "session") return caller.session.id === session.id;
+    if (caller.kind === "key") return Boolean(parentKey);
+    return !parentKey;
+  };
+
   const notFound = (res) => send(res, 404, { error: { message: "not found" } });
   const unauthorized = (res) => send(res, 401, { error: { message: "unauthorized" } });
 
@@ -368,16 +395,20 @@ export async function startStubGateway(options = {}) {
       if (options.mintStatus) {
         return send(res, options.mintStatus, { error: { message: "mint failed" } });
       }
-      if (!body || typeof body !== "object" || !body.tool) {
-        return send(res, 400, { error: { message: "tool is required" } });
+      const parsed = launchMintSchema.safeParse(body);
+      if (!parsed.success) return invalid(res, parsed.error);
+      if (parsed.data.policy !== undefined || parsed.data.mcp !== undefined) {
+        return send(res, 400, { error: { message: "policy and mcp blocks are not supported" } });
       }
+      const spec = parsed.data;
       const id = randomChars(16);
       const session = {
         id,
         token: `olx_${id}_${randomChars(32)}`,
-        tool: body.tool,
-        ttlSec: Number(body.ttlSec) > 0 ? Number(body.ttlSec) : 3600,
-        view: body.view || null,
+        tool: spec.tool || spec.toolId,
+        sessionTag: spec.sessionTag || `launch:${spec.tool || spec.toolId}:${id}`,
+        ttlSec: spec.ttlSec > 0 ? spec.ttlSec : 3600,
+        view: spec.view || null,
         heartbeats: 0,
         patches: [],
         revoked: false,
@@ -392,12 +423,12 @@ export async function startStubGateway(options = {}) {
     }
     const m = /^\/api\/launch\/sessions\/([^/]+)(\/usage)?$/.exec(path);
     if (!m) return notFound(res);
+    const caller = resolveCaller(auth);
+    if (!caller) return unauthorized(res);
     const session = sessions.get(m[1]);
+    if (!session || !callerOwns(caller, session)) return notFound(res);
     if (m[2]) {
       if (method !== "GET") return notFound(res);
-      if (!session || session.revoked || auth !== session.token) {
-        return session && !session.revoked ? unauthorized(res) : notFound(res);
-      }
       const mine = requests.filter(
         (r) => r.method === "POST" && COMPLETION_ROUTES[r.path] && r.auth === session.token
       );
@@ -420,22 +451,18 @@ export async function startStubGateway(options = {}) {
       });
     }
     if (method !== "PATCH" && method !== "DELETE") return notFound(res);
-    const ownerOk = (s) => auth && (auth === parentKey || (s && auth === s.token));
-    if (!ownerOk(session)) return unauthorized(res);
-    if (!session) return notFound(res);
     if (method === "DELETE") {
       session.revoked = true;
-      return send(res, 204);
+      session.revokedAt = session.revokedAt || new Date().toISOString();
+      return send(res, 200, { sessionId: session.id, revoked: true, revokedAt: session.revokedAt });
     }
     if (session.revoked) return notFound(res);
-    const b = body && typeof body === "object" ? body : {};
-    if (b.view !== undefined) {
-      const v = b.view;
-      if (!v || typeof v !== "object" || !v.hash || !Array.isArray(v.ids)) {
-        return send(res, 400, { error: { message: "invalid view" } });
-      }
-      session.view = v;
-    }
+    if (typeof body === "string")
+      return send(res, 400, { error: { message: "Invalid JSON body" } });
+    const parsed = launchSessionPatchSchema.safeParse(body === undefined ? {} : body);
+    if (!parsed.success) return invalid(res, parsed.error);
+    const b = parsed.data;
+    if (b.view !== undefined) session.view = b.view;
     if (b.heartbeat === true) session.heartbeats += 1;
     session.patches.push(b);
     return send(res, 200, { ok: true, expiresAt: expiresAt(session) });

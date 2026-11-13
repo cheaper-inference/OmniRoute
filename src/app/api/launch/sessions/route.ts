@@ -1,13 +1,9 @@
-import { z } from "zod";
-
-import { launchSessionViewSchema } from "@/shared/validation/launchView";
+import { launchMintSchema } from "./schema";
 
 import {
   firstIssueMessage,
   launchError,
   launchJson,
-  launchSessionTagSchema,
-  launchToolIdSchema,
   LAUNCH_SPEC_VERSION,
   publicSessionView,
   readJsonBody,
@@ -18,49 +14,6 @@ import {
 
 export const dynamic = "force-dynamic";
 
-const shortText = (max: number) => z.string().min(1).max(max);
-
-const metadataSchema = z
-  .object({
-    launchId: shortText(128).optional(),
-    cwd: shortText(256).optional(),
-    gitBranch: shortText(200).optional(),
-    preset: shortText(64).optional(),
-    tags: z
-      .record(shortText(64), z.string().max(256))
-      .refine((tags) => Object.keys(tags).length <= 16, { message: "at most 16 tags" })
-      .optional(),
-    parentSessionId: shortText(64).optional(),
-  })
-  .strict();
-
-/**
- * `POST /api/launch/sessions` body (architecture 12.1 LaunchSessionSpec). `tool` is the short
- * spelling of `toolId`. `policy` and `mcp` are reserved: rejected until capabilities lists them,
- * so a gateway never silently ignores a budget.
- */
-const mintSchema = z
-  .object({
-    specVersion: z.literal(LAUNCH_SPEC_VERSION).optional(),
-    tool: launchToolIdSchema.optional(),
-    toolId: launchToolIdSchema.optional(),
-    ttlSec: z.number().int().min(60).max(3600).optional(),
-    sessionTag: launchSessionTagSchema.optional(),
-    view: launchSessionViewSchema.optional(),
-    metadata: metadataSchema.optional(),
-    policy: z.unknown().optional(),
-    mcp: z.unknown().optional(),
-  })
-  .strict()
-  .refine((body) => Boolean(body.tool || body.toolId), {
-    message: "tool is required",
-    path: ["tool"],
-  })
-  .refine((body) => !body.tool || !body.toolId || body.tool === body.toolId, {
-    message: "tool and toolId disagree",
-    path: ["toolId"],
-  });
-
 export async function POST(request: Request) {
   const caller = await resolveLaunchCaller(request);
   if (!caller) return unauthorized();
@@ -70,7 +23,7 @@ export async function POST(request: Request) {
 
   const read = await readJsonBody(request);
   if (!read.ok) return launchError(400, "Invalid JSON body", "invalid_request_error");
-  const parsed = mintSchema.safeParse(read.body);
+  const parsed = launchMintSchema.safeParse(read.body);
   if (!parsed.success) {
     return launchError(400, firstIssueMessage(parsed.error), "invalid_request_error");
   }
