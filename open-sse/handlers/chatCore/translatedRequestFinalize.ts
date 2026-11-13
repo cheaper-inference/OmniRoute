@@ -186,10 +186,12 @@ export function finalizeTranslatedRequest({
           "PARAMS",
           `Stripped output_config.effort="${oc.effort}" because model "${finalModelToUpstream}" already encodes effort`
         );
-        delete oc.effort;
-        if (Object.keys(oc).length === 0) {
-          delete translatedBody.output_config;
-        }
+        // Copy-on-write: output_config is shared with the other targets of a combo (the body is
+        // only copied one level deep), so deleting in place also removed the client's effort
+        // from the next target.
+        const { effort: _effort, ...rest } = oc;
+        if (Object.keys(rest).length === 0) delete translatedBody.output_config;
+        else translatedBody.output_config = rest;
       }
     }
   }
