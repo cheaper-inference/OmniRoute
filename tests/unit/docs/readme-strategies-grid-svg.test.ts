@@ -6,6 +6,18 @@ import {
   STRATEGIES_GRID_COPY,
 } from "../../../scripts/docs/gen-readme-strategies-grid.mjs";
 import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
+import { loadFactsSnapshot } from "../../../scripts/release/facts.mjs";
+
+// The numbers drawn in this diagram are DERIVED (plan 2026-11-13): the release refresh
+// (`npm run release:refresh-derived`) regenerates the SVG from docs/reference/derived-facts.json.
+// Between releases the live code moves ahead of the drawing by design, so the counts gate's
+// readers are run here with the snapshot facts the drawing was generated from, never with the
+// live code. The live comparison is release mode's job.
+const snapshotFacts = loadFactsSnapshot();
+assert.ok(
+  snapshotFacts,
+  "docs/reference/derived-facts.json is missing — run npm run release:refresh-derived"
+);
 
 // The committed strategies grid must be exactly what the generator produces, draw the kit type as outlines, keep every string as text, keep the counts gate's "16-factor" claim readable
 // as text and declare both palettes. Same staleness contract as
@@ -45,9 +57,11 @@ test("every copy string stays in the file as text", async () => {
   assert.equal(STRATEGIES_GRID_COPY.names.length, 18);
 });
 
-test("the counts gate's own readers of this file accept the generated content (live code)", async () => {
+test("the counts gate's own readers of this file accept the generated content (snapshot facts)", async () => {
   const svg = await renderStrategiesGrid();
-  const checks = buildChecks().filter((c) => Array.isArray(c.files) && c.files.includes(FILE));
+  const checks = buildChecks({ facts: snapshotFacts }).filter(
+    (c) => Array.isArray(c.files) && c.files.includes(FILE)
+  );
   assert.ok(checks.length > 0, `no counts-gate check reads ${FILE}`);
   for (const c of checks) {
     const r = c.validate(svg);

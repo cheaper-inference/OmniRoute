@@ -1,19 +1,20 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-  __resetSpawnSyncForTest,
-  __setSpawnSyncForTest,
-  buildChecks,
-  tallyDrift,
-} from "../../scripts/check/check-docs-counts-sync.mjs";
+import { buildChecks, tallyDrift } from "../../scripts/check/check-docs-counts-sync.mjs";
+import { loadFactsSnapshot } from "../../scripts/release/facts.mjs";
 
-// Isolate provider prose validation from the unrelated runtime-facts subprocess.
-__setSpawnSyncForTest(() => ({ status: 1, stdout: "" }));
-const checks = buildChecks();
+// Provider prose validation runs on the committed facts snapshot: it is deterministic between
+// releases and keeps the test off the runtime-facts subprocess, which these asserts never need.
+const facts = loadFactsSnapshot();
+assert.ok(
+  facts,
+  "docs/reference/derived-facts.json is missing — run npm run release:refresh-derived"
+);
+const checks = buildChecks({ facts });
 const check = checks.find((entry) => entry.label === "Provider count");
-__resetSpawnSyncForTest();
 assert.ok(check);
 const expected = check.actual;
+assert.ok(Number(expected) >= 300, `implausible provider total from the snapshot: ${expected}`);
 const evaluate = (content) => tallyDrift([{ ...check, files: ["README.md"] }], () => content);
 
 for (const stale of [
