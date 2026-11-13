@@ -1,0 +1,1 @@
+- **fix(sessions):** The generated session id no longer hashes Claude Code's rotating `x-anthropic-billing-header` system line, so consecutive turns of one conversation keep the same session id (affinity, sticky routing, Cursor and OpenCode ids) instead of getting a new one each turn.

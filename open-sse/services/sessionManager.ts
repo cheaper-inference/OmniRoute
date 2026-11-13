@@ -354,17 +354,34 @@ function hashShort(text: string): string {
   return createHash("sha256").update(text).digest("hex").slice(0, 8);
 }
 
+// Claude Code starts its system prompt with a billing line that changes on every turn. It is
+// not part of the conversation, so the fingerprint must not hash it. The body is never changed.
+const BILLING_LINE = /^x-anthropic-billing-header:[^\n]*(?:\r?\n)?/i;
+
+function withoutBillingLine(system: unknown): unknown {
+  if (typeof system === "string") return system.replace(BILLING_LINE, "");
+  if (!Array.isArray(system)) return system;
+  return system.flatMap((block) => {
+    const text = (block as { text?: unknown } | null)?.text;
+    if (typeof text !== "string" || !BILLING_LINE.test(text)) return [block];
+    const rest = text.replace(BILLING_LINE, "");
+    return rest ? [{ ...block, text: rest }] : [];
+  });
+}
+
 function extractSystemPrompt(body: SessionBody | null | undefined): string | null {
   if (!body || typeof body !== "object") return null;
   // Claude format: body.system
-  if (body.system) {
-    return typeof body.system === "string" ? body.system : JSON.stringify(body.system);
+  const system = withoutBillingLine(body.system);
+  if (system) {
+    return typeof system === "string" ? system : JSON.stringify(system);
   }
   // OpenAI format: messages[0].role === "system"
   if (Array.isArray(body.messages)) {
     const sys = body.messages.find((m) => m?.role === "system" || m?.role === "developer");
     if (sys) {
-      return typeof sys.content === "string" ? sys.content : JSON.stringify(sys.content);
+      const content = withoutBillingLine(sys.content);
+      return typeof content === "string" ? content : JSON.stringify(content);
     }
   }
   return null;
