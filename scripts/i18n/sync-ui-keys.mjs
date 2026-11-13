@@ -53,7 +53,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { execFileSync } from "node:child_process";
 
 import { findStaleTranslations, flattenLeaves } from "./check-ui-value-drift.mjs";
-import { generateGlobalErrorMessages } from "./generate-global-error-messages.mjs";
+import { renderGlobalErrorCatalog } from "./generate-global-error-messages.mjs";
 import {
   backendConfig,
   translateBatch,
@@ -889,12 +889,16 @@ export async function processLocale(locale, source, config, opts, backend) {
  * `translate`, translate every marker through the translation backend
  * (`OMNIROUTE_TRANSLATION_*`, see lib/translate-backend.mjs — throws when it is not configured).
  * A dashboard (`ui`) run that changed a catalog also regenerates the compact error-boundary
- * catalogs under src/i18n/global-error-messages (generate-global-error-messages.mjs).
+ * catalogs under src/i18n/global-error-messages (renderGlobalErrorCatalog in
+ * generate-global-error-messages.mjs); they are rendered in memory, so a dry run lists in
+ * `changedFiles` exactly the files a real run writes.
  *
  * @param {object} [options]
  * @param {"ui" | "cli"} [options.catalog="ui"]
  * @param {string[] | null} [options.locales]  subset of locale codes (default: every locale of
- *   config/i18n.json that has a file, except en)
+ *   config/i18n.json that has a file, except en). A code outside that set — a typo, a locale
+ *   missing from config/i18n.json or without a catalog file, or `en` — throws before anything
+ *   is written.
  * @param {boolean} [options.translate=false]
  * @param {boolean} [options.pruneExtra=false]
  * @param {string | null} [options.rewrittenSinceRef]
@@ -942,7 +946,16 @@ export async function syncUiKeys(options = {}) {
   let targets = config.locales
     .map((l) => l.code)
     .filter((code) => code !== SOURCE_LOCALE && onDisk.has(code));
-  if (locales) targets = targets.filter((code) => locales.includes(code));
+  if (locales) {
+    // A typo in the release refresh must not read as "nothing to do".
+    const unknown = locales.filter((code) => !targets.includes(code));
+    if (unknown.length) {
+      throw new Error(
+        `syncUiKeys: unknown locale(s) for the ${catalog.name} catalog: ${unknown.join(", ")} (not in config/i18n.json, the source locale, or no ${catalog.rel}/<code>.json)`
+      );
+    }
+    targets = targets.filter((code) => locales.includes(code));
+  }
 
   const heads = new Map();
   for (const code of targets) heads.set(code, await loadJson(path.join(dir, `${code}.json`)));
@@ -964,6 +977,7 @@ export async function syncUiKeys(options = {}) {
 
   const results = [];
   const changedFiles = [];
+  const mergedByCode = new Map();
   for (const code of targets) {
     const file = path.join(dir, `${code}.json`);
     const before = await fs.readFile(file, "utf8");
@@ -983,6 +997,7 @@ export async function syncUiKeys(options = {}) {
         translateFns
       );
     }
+    mergedByCode.set(code, merged);
     const after = JSON.stringify(merged, null, 2) + "\n";
     const changed = before !== after;
     if (changed) {
@@ -1002,16 +1017,25 @@ export async function syncUiKeys(options = {}) {
     });
   }
 
-  if (catalog.name === "ui" && !dryRun && changedFiles.length && source.publicSystem?.globalError) {
+  // The compact error-boundary catalogs are derived from the full ones: rendered in memory from
+  // the merged catalogs (and from disk for the locales outside this run), so a dry run reports
+  // exactly the files a real run writes.
+  if (catalog.name === "ui" && changedFiles.length && source.publicSystem?.globalError) {
     const compactDir = path.join(root, "src", "i18n", "global-error-messages");
-    const snapshot = new Map();
+    if (!dryRun) await fs.mkdir(compactDir, { recursive: true });
     for (const { code } of config.locales) {
+      const full =
+        code === SOURCE_LOCALE
+          ? source
+          : (mergedByCode.get(code) ??
+            (onDisk.has(code) ? await loadJson(path.join(dir, `${code}.json`)) : null));
+      if (!full) continue;
       const file = path.join(compactDir, `${code}.json`);
-      snapshot.set(file, existsSync(file) ? await fs.readFile(file, "utf8") : null);
-    }
-    generateGlobalErrorMessages(root);
-    for (const [file, previous] of snapshot) {
-      if ((await fs.readFile(file, "utf8")) !== previous) changedFiles.push(rel(file));
+      const next = renderGlobalErrorCatalog(source, full);
+      const previous = existsSync(file) ? await fs.readFile(file, "utf8") : null;
+      if (next === previous) continue;
+      changedFiles.push(rel(file));
+      if (!dryRun) await fs.writeFile(file, next, "utf8");
     }
   }
 

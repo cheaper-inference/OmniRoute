@@ -227,6 +227,32 @@ test("syncUiKeys covers the CLI catalogs and a locale subset", async () => {
   }
 });
 
+test("syncUiKeys rejects a locale it would not process instead of reporting nothing to do", async () => {
+  const dir = makeRoot(["pt-BR", "es"]);
+  try {
+    writeJson(dir, "src/i18n/messages/en.json", { common: { save: "Save", panel: "Panel" } });
+    writeJson(dir, "src/i18n/messages/pt-BR.json", { common: { save: "Salvar" } });
+    const before = fs.readFileSync(path.join(dir, "src/i18n/messages/pt-BR.json"), "utf8");
+    // `pt-br` (typo), `xx` (not in config/i18n.json), `es` (in config, no catalog), `en` (source).
+    for (const code of ["pt-br", "xx", "es", "en"]) {
+      await assert.rejects(
+        syncUiKeys({ root: dir, locales: ["pt-BR", code], log: quiet }),
+        new RegExp(`unknown locale\\(s\\) for the ui catalog: ${code}\\b`),
+        code
+      );
+    }
+    assert.equal(
+      fs.readFileSync(path.join(dir, "src/i18n/messages/pt-BR.json"), "utf8"),
+      before,
+      "nothing is written when the locale list is rejected"
+    );
+    const ok = await syncUiKeys({ root: dir, locales: ["pt-BR"], log: quiet });
+    assert.deepEqual(ok.changedFiles, ["src/i18n/messages/pt-BR.json"]);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("a dashboard refresh that changed a catalog regenerates the compact global-error catalogs", async () => {
   const dir = makeRoot(["pt-BR"]);
   try {
@@ -239,11 +265,22 @@ test("a dashboard refresh that changed a catalog regenerates the compact global-
     writeJson(dir, "src/i18n/global-error-messages/pt-BR.json", {
       publicSystem: { globalError: { title: "Erro" } },
     });
-    const res = await syncUiKeys({ root: dir, log: quiet });
-    assert.deepEqual(res.changedFiles, [
+    const compactBefore = fs.readFileSync(
+      path.join(dir, "src/i18n/global-error-messages/pt-BR.json"),
+      "utf8"
+    );
+    // A dry run lists the compact catalogs a real run writes, and writes none of them.
+    const dry = await syncUiKeys({ root: dir, dryRun: true, log: quiet });
+    assert.deepEqual(dry.changedFiles, [
       "src/i18n/messages/pt-BR.json",
       "src/i18n/global-error-messages/pt-BR.json",
     ]);
+    assert.equal(
+      fs.readFileSync(path.join(dir, "src/i18n/global-error-messages/pt-BR.json"), "utf8"),
+      compactBefore
+    );
+    const res = await syncUiKeys({ root: dir, log: quiet });
+    assert.deepEqual(res.changedFiles, dry.changedFiles);
     assert.deepEqual(readJson(dir, "src/i18n/global-error-messages/pt-BR.json"), {
       publicSystem: { globalError: { title: "Erro", retry: "__MISSING__:Retry" } },
     });
