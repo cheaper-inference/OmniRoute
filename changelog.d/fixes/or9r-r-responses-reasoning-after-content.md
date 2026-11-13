@@ -1,0 +1,1 @@
+- **fix(responses):** in the Chat to Responses stream translator, reasoning that comes back after content opens a new reasoning item at a free `output_index`, so its text is no longer lost or sent after the item is done.

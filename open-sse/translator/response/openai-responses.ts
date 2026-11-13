@@ -448,8 +448,20 @@ function buildDenseOutput(state) {
 }
 
 // Helper functions
-function startReasoning(state, emit, idx) {
-  if (!state.reasoningId) {
+function startReasoning(state, emit, requestedIdx) {
+  // A done item takes no new deltas: reasoning that comes back after content opens a new item.
+  // The new item (and any reasoning after a message or tool call) needs a free output_index.
+  const reopen = state.reasoningId && state.reasoningDone;
+  if (!state.reasoningId || reopen) {
+    const idx =
+      reopen || state.msgItemAdded[requestedIdx] || state.funcAllocatedOutputIndexes?.[requestedIdx]
+        ? nextFreeMessageIndex(state, requestedIdx)
+        : requestedIdx;
+    if (reopen) {
+      state.reasoningBuf = "";
+      state.reasoningDone = false;
+      state.reasoningPartAdded = false;
+    }
     state.reasoningId = `rs_${state.responseId}_${idx}`;
     state.reasoningIndex = idx;
 
