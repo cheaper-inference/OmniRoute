@@ -200,6 +200,7 @@ import {
   selectSessionAffinityConnection,
   planSessionAffinityConnection,
   syncSessionAffinityRuntimeFields,
+  startsNewSessionsOnLru,
 } from "./sessionAffinityPin";
 import {
   EXPLICIT_INACTIVE_PROBE_INTERVAL_MS,
@@ -1951,6 +1952,11 @@ export async function getProviderCredentials(
         log.debug("AUTH", `${provider} api-key preference selected ${preferred.id.slice(0, 8)}...`);
       }
     }
+    // A session without a live pin starts where this strategy routes unpinned requests
+    // (fill-first: the first eligible account by priority); spreading strategies keep LRU.
+    const pickNewSessionPin = startsNewSessionsOnLru(strategy)
+      ? undefined
+      : (pool: ProviderConnectionView[]) => skipFullAccounts(provider, pool)[0];
     // Redis lease planning can use a pin evicted after prefetch (accepted synchronous window).
     // After claim, rejected CAS keeps the claimed account; it never overwrites the shared winner.
     const affinityPlan =
@@ -1960,7 +1966,8 @@ export async function getProviderCredentials(
             options.sessionKey,
             allOrderedConnections,
             sessionAffinityTtlMs,
-            affinityRecord
+            affinityRecord,
+            pickNewSessionPin
           )
         : null;
     const affinityConnection = connection
@@ -1971,14 +1978,16 @@ export async function getProviderCredentials(
             provider,
             options.sessionKey,
             allOrderedConnections,
-            sessionAffinityTtlMs
+            sessionAffinityTtlMs,
+            undefined,
+            pickNewSessionPin
           );
     if (affinityConnection) {
       connection = affinityConnection;
       if (options.lease) commitSelectionSideEffects = affinityPlan?.commit;
       else syncSessionAffinityRuntimeFields(connectionsRaw, connection);
     } else if (options.sessionKey) {
-      // Selection falls back to LRU, so a miss means affinity is off or no candidate is left.
+      // A miss gets a new pin, so null means affinity is off or no candidate is left.
       log.debug(
         "AUTH",
         `session_key=${formatSessionKeyForLog(options.sessionKey)} has no available affinity target`,
