@@ -1,0 +1,1 @@
+- **perf(usage):** the plausibility check for a provider-reported input token count no longer serializes the whole request body when the count is at most 8192 tokens, which is plausible for any body (two serializations per non-streaming success before).
