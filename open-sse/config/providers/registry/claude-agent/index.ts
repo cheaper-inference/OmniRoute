@@ -1,4 +1,5 @@
 import type { RegistryEntry } from "../../shared.ts";
+import { claudeProvider } from "../claude/index.ts";
 
 export const claude_agentProvider: RegistryEntry = {
   id: "claude-agent",
@@ -13,38 +14,11 @@ export const claude_agentProvider: RegistryEntry = {
   authType: "none",
   authHeader: "none",
   defaultContextLength: 200000,
+  // Mirror the native claude registry's full model list (Fable 5.1 included);
+  // the CLI host login decides what actually works, ids it lacks degrade
+  // gracefully in the executor. Sonnet 5.5 stays the default (listed first).
   models: [
-    {
-      id: "claude-sonnet-5-5",
-      name: "Claude Sonnet 5.5",
-      contextLength: 1000000,
-      maxOutputTokens: 128000,
-      toolCalling: true,
-      supportsXHighEffort: true,
-      unsupportedParams: ["temperature", "top_p", "top_k"],
-    },
-    {
-      id: "claude-opus-5-5",
-      name: "Claude Opus 5.5",
-      contextLength: 1000000,
-      maxOutputTokens: 128000,
-      toolCalling: true,
-      supportsReasoning: true,
-      supportsXHighEffort: true,
-      supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
-      supportsVision: true,
-      unsupportedParams: ["temperature", "top_p", "top_k"],
-    },
-    {
-      id: "claude-haiku-5-5",
-      name: "Claude Haiku 5.5",
-      contextLength: 1000000,
-      maxOutputTokens: 128000,
-      toolCalling: true,
-      supportsReasoning: true,
-      supportsXHighEffort: true,
-      supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
-      unsupportedParams: ["temperature", "top_p", "top_k"],
-    },
+    ...claudeProvider.models.filter((m) => m.id === "claude-sonnet-5-5"),
+    ...claudeProvider.models.filter((m) => m.id !== "claude-sonnet-5-5"),
   ],
 };

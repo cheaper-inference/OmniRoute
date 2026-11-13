@@ -29,21 +29,33 @@ test("claude-agent has no OAuth credential block (login owned by host Claude Cod
   );
 });
 
-test("claude-agent exposes the 5.5-generation Claude model catalog", () => {
+test("claude-agent mirrors the native claude model catalog (sonnet default, fable included)", () => {
   const ids = claude_agentProvider.models.map((m) => m.id);
+  // Same list as the native claude registry, sonnet 5.5 hoisted as default.
   assert.deepEqual(ids, [
     "claude-sonnet-5-5",
+    "claude-fable-5-1",
+    "claude-fable-5",
+    "claude-opus-5",
     "claude-opus-5-5",
+    "claude-opus-4-8",
+    "claude-opus-4-7",
+    "claude-opus-4-6",
+    "claude-opus-4-5-20251101",
+    "claude-sonnet-5",
+    "claude-sonnet-4-6",
+    "claude-sonnet-4-5-20250929",
+    "claude-haiku-4-5-20251001",
     "claude-haiku-5-5",
   ]);
-  for (const model of claude_agentProvider.models) {
-    assert.equal(model.contextLength, 1000000, model.id);
-    assert.equal(model.maxOutputTokens, 128000, model.id);
-    assert.deepEqual(
-      model.unsupportedParams,
-      ["temperature", "top_p", "top_k"],
-      model.id
-    );
+  // 5.5-generation entries keep the sampling-param restrictions; older
+  // generations may differ (mirrored from the native claude registry).
+  for (const id of ["claude-sonnet-5-5", "claude-opus-5-5", "claude-haiku-5-5"]) {
+    const model = claude_agentProvider.models.find((m) => m.id === id);
+    assert.ok(model, id);
+    assert.equal(model.contextLength, 1000000, id);
+    assert.equal(model.maxOutputTokens, 128000, id);
+    assert.deepEqual(model.unsupportedParams, ["temperature", "top_p", "top_k"], id);
   }
   const opus = claude_agentProvider.models.find((m) => m.id === "claude-opus-5-5");
   assert.ok(opus?.supportsVision, "opus supports vision");
