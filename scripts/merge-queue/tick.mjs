@@ -11,6 +11,11 @@
 //   OMNI_QUEUE_CONFIG      optional path to an alternative config file (sandbox)
 //   RUNNER_TEMP            scratch directory for the bare compose repository
 //   GITHUB_SERVER_URL, GITHUB_RUN_ID   for run links in history/dashboard
+//   GITHUB_API_URL         REST API root (default https://api.github.com; GHES / tests)
+//   OMNI_QUEUE_REMOTE_URL  TESTS/SANDBOX ONLY: git remote of the repository instead of
+//                          <GITHUB_SERVER_URL>/<repo>.git (e.g. the path of a local bare
+//                          repository; a non-http remote is fetched without a partial-clone
+//                          filter). The workflow never sets it.
 //
 // Tick algorithm (per base): load state (CAS) → handle action (pause/resume) → if paused:
 // auto-resume a base-red pause when the base tip moved, else stop → if inFlight: read checks of
@@ -83,6 +88,8 @@ export { StateConflictError };
  * @property {(cwd: string) => import("./gitexec.mjs").Git} gitFor  git runner factory
  * @property {string} repoDir                 scratch dir for the bare compose repository
  * @property {string} remoteUrl               https://github.com/<owner>/<repo>.git
+ * @property {string|null} [fetchFilter]      partial-clone filter for the scratch repository
+ *   (undefined = compose.prepareRepo default "blob:none"; null = full fetch, local remotes)
  * @property {{name: string, email: string}} identity
  * @property {() => string} now               ISO clock (injected for tests)
  * @property {(msg: string) => void} log
@@ -274,7 +281,11 @@ class Tick {
   gitRepo() {
     if (!this.git) {
       this.git = this.deps.gitFor(this.deps.repoDir);
-      this.m.compose.prepareRepo({ git: this.git, remoteUrl: this.deps.remoteUrl });
+      this.m.compose.prepareRepo({
+        git: this.git,
+        remoteUrl: this.deps.remoteUrl,
+        ...(this.deps.fetchFilter !== undefined ? { filter: this.deps.fetchFilter } : {}),
+      });
     }
     return this.git;
   }
@@ -521,14 +532,23 @@ class Tick {
         return this.onGreen(f);
       case "red":
         return this.onRed(f, verdict.failures ?? []);
-      case "timeout":
+      case "timeout": {
+        // "no-ci-run": GitHub never started CI for the candidate (skip marker, nothing triggered).
+        const noRun = verdict.reason === "no-ci-run";
+        const detail = noRun
+          ? `no CI run for candidate after ${checksModule.NO_RUN_TIMEOUT_MINUTES} min`
+          : `no verdict after ${this.config.checksTimeoutMinutes} min`;
         this.event("checks-timeout", {
           batchId: f.batchId,
           prs: prNumbers(f.prs),
           sha: f.candidateSha,
-          detail: `no verdict after ${this.config.checksTimeoutMinutes} min`,
+          detail,
         });
-        return this.infraPath(f, `checks timed out after ${this.config.checksTimeoutMinutes} min`);
+        return this.infraPath(
+          f,
+          noRun ? detail : `checks timed out after ${this.config.checksTimeoutMinutes} min`
+        );
+      }
       default:
         throw new Error(`unknown checks verdict: ${verdict.verdict}`);
     }
@@ -708,6 +728,7 @@ class Tick {
         base: this.base,
         candidateSha: f.candidateSha,
         expectedBaseSha: f.baseSha,
+        prs: f.prs, // stacked PRs (alreadyContained) count as merged too
       });
     } else {
       result = await this.m.land.landSquashApi({
@@ -1198,6 +1219,16 @@ class Tick {
       );
       this.event("pr-dequeued", { batchId, prs: [pr.n], detail: "base-conflict" });
     }
+    for (const pr of result.alreadyInBase ?? []) {
+      if (baseSha !== tip) {
+        // Contained in a would-land shadow stack, not in the real base: it would land with that
+        // stack, so it is done for this head in shadow mode (labels stay; nothing landed).
+        this.s.shadow.processed[String(pr.n)] = pr.head;
+        this.note(`#${pr.n} already in the shadow stack ${head12(baseSha)}`);
+        continue;
+      }
+      await this.dropAlreadyInBase(pr, batchId, result.baseSha ?? baseSha);
+    }
     for (const pr of result.excludedBatchConflict ?? []) {
       this.event("pr-skipped-conflict", {
         batchId,
@@ -1231,7 +1262,12 @@ class Tick {
       ...(result.excludedBatchConflict ?? []).map((pr) => `#${pr.n} batch-conflict`),
       ...(result.excludedBaseConflict ?? []).map((pr) => `#${pr.n} base-conflict`),
       ...(result.excludedHeadMoved ?? []).map((pr) => `#${pr.n} head-moved`),
+      ...(result.alreadyInBase ?? []).map((pr) => `#${pr.n} already-in-base`),
     ];
+    // Stacked PRs ride along without a merge commit of their own: they land with the batch.
+    const stacked = (result.alreadyContained ?? []).filter((pr) =>
+      included.some((inc) => inc.n === pr.n)
+    );
     this.event("batch-started", {
       batchId,
       prs: prNumbers(included),
@@ -1239,10 +1275,33 @@ class Tick {
       detail:
         `${bisect ? `bisect of ${bisect.rootBatchId}: ` : ""}` +
         `${included.length} PR(s) on ${head12(result.baseSha ?? baseSha)}${stackNote}` +
+        (stacked.length ? `; stacked ${formatPrs(stacked)} (no merge commit of their own)` : "") +
         (excluded.length ? `; excluded ${excluded.join(", ")}` : ""),
+      labeledAt: approvalTimes(included),
     });
     this.note(`${batchId}: pushed ${formatPrs(included)} as ${ref}`);
     return true;
+  }
+
+  /**
+   * The PR's head is already reachable from the bare base (its commits entered the base some
+   * other way): nothing to test or land. It leaves the queue for good (both labels removed, so
+   * no later tick recomposes it) with one comment per head.
+   */
+  async dropAlreadyInBase(pr, batchId, baseSha) {
+    await this.removeLabel(pr.n, this.config.label);
+    await this.removeLabel(pr.n, this.config.protectedApprovalLabel);
+    await this.comment(
+      pr.n,
+      `already-landed:${head12(pr.head)}`,
+      [
+        `ℹ️ **omni-queue**: the head of this PR (\`${head12(pr.head)}\`) is already part of`,
+        `\`${this.base}\` (base \`${head12(baseSha)}\`), so there is nothing left to test or land.`,
+        "It was removed from the queue.",
+      ].join("\n")
+    );
+    this.event("pr-dequeued", { batchId, prs: [pr.n], detail: "already-in-base" });
+    this.note(`#${pr.n} already in ${this.base}: dequeued`);
   }
 
   /**
@@ -1458,6 +1517,15 @@ class Tick {
   }
 }
 
+/** {"<n>": labeledAt} of the PRs of a batch (HistoryEvent.labeledAt, dashboard metrics). */
+function approvalTimes(prs) {
+  const out = {};
+  for (const pr of prs ?? []) {
+    if (typeof pr?.labeledAt === "string" && pr.labeledAt) out[String(pr.n)] = pr.labeledAt;
+  }
+  return out;
+}
+
 /** "b42" / "b42-r1" + attempt 2 → "b42-r2". */
 function retryBatchId(batchId, attempt) {
   const match = /^b(\d+)(?:-r\d+)?$/.exec(batchId);
@@ -1533,6 +1601,61 @@ export function parseArgs(argv) {
   return out;
 }
 
+/**
+ * Build the TickDeps exactly as the CLI does, from the environment (see the header). The GitHub
+ * client counts only comment markers written by `${config.appSlug}[bot]`, so a third party
+ * cannot pre-post a marker to mute a queue comment.
+ * @param {object} env   process.env-like
+ * @param {{now?: () => string, log?: (msg: string) => void, gitEnv?: object}} [overrides]
+ *   tests only: injected clock, logger and extra environment for every git process
+ * @returns {TickDeps}   throws on an invalid environment or config
+ */
+export function createTickDeps(env, overrides = {}) {
+  const token = env.OMNI_QUEUE_TOKEN;
+  if (!token) throw new Error("OMNI_QUEUE_TOKEN is not set");
+  const repository = env.GITHUB_REPOSITORY;
+  if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository ?? "")) {
+    throw new Error("GITHUB_REPOSITORY must be owner/repo");
+  }
+  const log = overrides.log ?? (() => {});
+  const config = loadConfig(
+    env.OMNI_QUEUE_CONFIG ? resolve(env.OMNI_QUEUE_CONFIG) : DEFAULT_CONFIG_PATH
+  );
+  const gh = createGitHubClient({
+    token,
+    repository,
+    apiUrl: env.GITHUB_API_URL || undefined,
+    botLogin: `${config.appSlug}[bot]`,
+    log,
+  });
+  const identity =
+    env.OMNI_QUEUE_GIT_NAME && env.OMNI_QUEUE_GIT_EMAIL
+      ? { name: env.OMNI_QUEUE_GIT_NAME, email: env.OMNI_QUEUE_GIT_EMAIL }
+      : botIdentity(config.appSlug);
+  const serverUrl = String(env.GITHUB_SERVER_URL || "https://github.com").replace(/\/+$/, "");
+  const repoDir = join(env.RUNNER_TEMP || tmpdir(), "omni-queue", "compose.git");
+  mkdirSync(repoDir, { recursive: true });
+  const remoteUrl = env.OMNI_QUEUE_REMOTE_URL || `${serverUrl}/${repository}.git`;
+  const gitEnv = overrides.gitEnv ?? {};
+  return {
+    config,
+    gh,
+    store: createStateStore({ gh, ...(overrides.now ? { now: overrides.now } : {}) }),
+    gitFor: (cwd) => createGit({ cwd, token, identity, log, env: gitEnv }),
+    repoDir,
+    remoteUrl,
+    // A local or file remote cannot serve a partial clone reliably: fetch everything.
+    ...(/^https?:\/\//.test(remoteUrl) ? {} : { fetchFilter: null }),
+    identity,
+    now: overrides.now ?? (() => new Date().toISOString()),
+    log,
+    runUrl: env.GITHUB_RUN_ID
+      ? `${serverUrl}/${repository}/actions/runs/${env.GITHUB_RUN_ID}`
+      : null,
+    repository,
+  };
+}
+
 /** CLI entry (argv without node/script). Exit code 0 on success, 1 on error. */
 export async function main(argv = process.argv.slice(2), env = process.env) {
   const token = env.OMNI_QUEUE_TOKEN;
@@ -1554,39 +1677,13 @@ export async function main(argv = process.argv.slice(2), env = process.env) {
     return fail(error.message);
   }
   if (!token) return fail("OMNI_QUEUE_TOKEN is not set");
-  const repository = env.GITHUB_REPOSITORY;
-  if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository ?? "")) {
+  if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(env.GITHUB_REPOSITORY ?? "")) {
     return fail("GITHUB_REPOSITORY must be owner/repo");
   }
 
   let deps;
   try {
-    const config = loadConfig(
-      env.OMNI_QUEUE_CONFIG ? resolve(env.OMNI_QUEUE_CONFIG) : DEFAULT_CONFIG_PATH
-    );
-    const gh = createGitHubClient({ token, repository, apiUrl: env.GITHUB_API_URL, log });
-    const identity =
-      env.OMNI_QUEUE_GIT_NAME && env.OMNI_QUEUE_GIT_EMAIL
-        ? { name: env.OMNI_QUEUE_GIT_NAME, email: env.OMNI_QUEUE_GIT_EMAIL }
-        : botIdentity(config.appSlug);
-    const serverUrl = String(env.GITHUB_SERVER_URL || "https://github.com").replace(/\/+$/, "");
-    const repoDir = join(env.RUNNER_TEMP || tmpdir(), "omni-queue", "compose.git");
-    mkdirSync(repoDir, { recursive: true });
-    deps = {
-      config,
-      gh,
-      store: createStateStore({ gh }),
-      gitFor: (cwd) => createGit({ cwd, token, identity, log }),
-      repoDir,
-      remoteUrl: `${serverUrl}/${repository}.git`,
-      identity,
-      now: () => new Date().toISOString(),
-      log,
-      runUrl: env.GITHUB_RUN_ID
-        ? `${serverUrl}/${repository}/actions/runs/${env.GITHUB_RUN_ID}`
-        : null,
-      repository,
-    };
+    deps = createTickDeps(env, { log });
   } catch (error) {
     return fail(`setup failed: ${error.message}`);
   }

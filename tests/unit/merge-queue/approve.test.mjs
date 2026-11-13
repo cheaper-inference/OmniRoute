@@ -35,6 +35,18 @@ function labelEvent({
   };
 }
 
+/**
+ * Make the fake PR's labels what GitHub shows right after `event` (the label was just added or
+ * removed): approve.mjs re-reads the PR and acts on the CURRENT label set (level-triggered).
+ */
+function reflectEvent(fake, event) {
+  const pull = fake.pulls.get(event?.pull_request?.number);
+  const name = event?.label?.name;
+  if (!pull || !name) return;
+  pull.labels = pull.labels.filter((l) => l.name !== name);
+  if (event.action === "labeled") pull.labels.push({ name });
+}
+
 async function setup(t) {
   const fake = await startFakeGitHub({ token: "app-token", actor: "omni-queue[bot]" });
   t.after(() => fake.close());
@@ -44,8 +56,10 @@ async function setup(t) {
     repository: fake.repository,
     apiUrl: fake.url,
   });
-  const handle = (event, eventName = "pull_request_target", extra = {}) =>
-    handleLabelEvent({ gh, config, event, eventName, ...extra });
+  const handle = (event, eventName = "pull_request_target", { reflect = true, ...extra } = {}) => {
+    if (reflect) reflectEvent(fake, event);
+    return handleLabelEvent({ gh, config, event, eventName, ...extra });
+  };
   return { fake, gh, handle };
 }
 
@@ -117,6 +131,56 @@ test("unlabeled withdraws the approval with a failure status", async (t) => {
   assert.equal(fake.statuses.get(HEAD)[0].context, "omni-queue/protected-approval");
 });
 
+test("level-triggered: a label already removed again when the job runs writes no success", async (t) => {
+  const { fake, handle } = await setup(t);
+  // labeled → unlabeled in quick succession; the unlabeled job ran first (failure written).
+  await handle(labelEvent({ action: "unlabeled" }));
+  assert.equal(fake.statuses.get(HEAD)[0].state, "failure");
+  // The late labeled job sees the label absent: it must not resurrect the approval.
+  const late = await handle(labelEvent(), "pull_request_target", { reflect: false });
+  assert.deepEqual(late, { action: "ignored" });
+  assert.equal(fake.statuses.get(HEAD).length, 1);
+  assert.equal(fake.statuses.get(HEAD)[0].state, "failure");
+});
+
+test("level-triggered: a removal whose label was applied again writes no failure", async (t) => {
+  const { fake, handle } = await setup(t);
+  // unlabeled → labeled in quick succession; the labeled job ran first (success written).
+  await handle(labelEvent());
+  assert.equal(fake.statuses.get(HEAD)[0].state, "success");
+  // The late unlabeled job sees the label present again: the approval stands.
+  const late = await handle(labelEvent({ action: "unlabeled" }), "pull_request_target", {
+    reflect: false,
+  });
+  assert.deepEqual(late, { action: "ignored" });
+  assert.equal(fake.statuses.get(HEAD).length, 1);
+  assert.equal(fake.statuses.get(HEAD)[0].state, "success");
+  // The protected label follows the same rule.
+  fake.pulls.get(5).labels.push({ name: "protected-approved" });
+  const protectedLate = await handle(
+    labelEvent({ action: "unlabeled", label: "protected-approved" }),
+    "pull_request_target",
+    { reflect: false }
+  );
+  assert.deepEqual(protectedLate, { action: "ignored" });
+  assert.equal(fake.statuses.get(HEAD).length, 1);
+});
+
+test("the status goes on the payload head even when the PR head moved since the event", async (t) => {
+  const { fake, handle } = await setup(t);
+  const newer = sha("pushed-after-the-label");
+  fake.pulls.get(5).head.sha = newer;
+  const result = await handle(labelEvent());
+  assert.equal(result.action, "approved");
+  assert.equal(result.sha, HEAD);
+  assert.equal(fake.statuses.get(HEAD)[0].state, "success");
+  assert.equal(fake.statuses.get(newer), undefined, "the new head is never approved");
+  const withdrawn = await handle(labelEvent({ action: "unlabeled" }));
+  assert.equal(withdrawn.sha, HEAD);
+  assert.equal(fake.statuses.get(HEAD)[0].state, "failure");
+  assert.equal(fake.statuses.get(newer), undefined);
+});
+
 test("irrelevant labels, unmanaged bases and other events are ignored without writes", async (t) => {
   const { fake, handle } = await setup(t);
   const cases = [
@@ -175,6 +239,7 @@ test("main reads the event file and env, exits 0, and never prints the token", a
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   const eventPath = join(dir, "event.json");
   writeFileSync(eventPath, JSON.stringify(labelEvent({ head: sha("main-head") })));
+  fake.addPull({ number: 5, head: { sha: sha("main-head") }, labels: ["omni-queue"] });
   const logs = [];
   const env = {
     OMNI_QUEUE_TOKEN: "ghs_mainSecretToken",

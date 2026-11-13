@@ -78,6 +78,8 @@ export class GitHubError extends Error {
  * @property {(sha: string) => Promise<{sha: string, treeSha: string, parents: string[],
  *            message: string}>} getCommit
  * @property {(sha: string) => Promise<import("./checks.mjs").CheckRun[]>} listCheckRuns
+ *            every run carries headBranch (head_branch of its check suite, read from
+ *            GET /commits/{sha}/check-suites; null when unknown), appSlug, startedAt, completedAt
  * @property {(checkRunId: number) => Promise<import("./classify.mjs").Annotation[]>} listCheckRunAnnotations
  * @property {(sha: string) => Promise<import("./eligibility.mjs").CommitStatus[]>} listCommitStatuses  newest first
  * @property {(sha: string, s: {state: string, context: string, description: string,
@@ -230,8 +232,14 @@ export function normalizeTimelineEvent(raw) {
   return out;
 }
 
-/** @returns {import("./checks.mjs").CheckRun} */
-export function normalizeCheckRun(raw) {
+/**
+ * @param {any} raw   check run payload
+ * @param {Map<number, string|null>} [branchBySuite]  check_suite.id → check suite head_branch
+ *   (GET /commits/{sha}/check-suites); headBranch is null when the suite is unknown
+ * @returns {import("./checks.mjs").CheckRun}
+ */
+export function normalizeCheckRun(raw, branchBySuite) {
+  const branch = branchBySuite?.get(raw.check_suite?.id);
   return {
     id: raw.id,
     name: String(raw.name ?? ""),
@@ -241,6 +249,7 @@ export function normalizeCheckRun(raw) {
     completedAt: raw.completed_at ?? null,
     htmlUrl: raw.html_url ?? null,
     appSlug: raw.app?.slug ?? null,
+    headBranch: typeof branch === "string" && branch ? branch : null,
     output: {
       title: raw.output?.title ?? null,
       summary: raw.output?.summary ?? null,
@@ -614,9 +623,15 @@ export function createGitHubClient(options) {
 
     async listCheckRuns(sha) {
       assertSha(sha);
-      return (await paginate(r(`/commits/${sha}/check-runs`), { filter: "all" })).map(
-        normalizeCheckRun
-      );
+      const runs = await paginate(r(`/commits/${sha}/check-runs`), { filter: "all" });
+      if (!runs.length) return [];
+      // A check run carries only its suite id; the suite says which branch push started it, so
+      // the tick reads only the runs of the candidate ref when one SHA lives on several refs.
+      const branchBySuite = new Map();
+      for (const suite of await paginate(r(`/commits/${sha}/check-suites`))) {
+        if (suite?.id !== undefined) branchBySuite.set(suite.id, suite.head_branch ?? null);
+      }
+      return runs.map((run) => normalizeCheckRun(run, branchBySuite));
     },
 
     async listCheckRunAnnotations(checkRunId) {

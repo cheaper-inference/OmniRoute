@@ -16,6 +16,13 @@
 //     description "approved by <login>" (App token, so the creator is `<appSlug>[bot]`);
 //   labeled by a non-approver → comment once (key "not-approver"), no status;
 //   unlabeled → status `failure` "approval withdrawn by <login>" on the same head/context.
+//
+// LEVEL-triggered: the jobs of a quick labeled→unlabeled (or unlabeled→labeled) pair can run in
+// any order, so before writing a status the PR is re-read and the CURRENT label set decides:
+// `labeled` writes `success` only while the label is still present, `unlabeled` writes `failure`
+// only while it is still absent (otherwise the newer event's job writes its own status). The
+// status always goes on the head of the event PAYLOAD (what the approver saw), never on the
+// current head: a push after the label must not inherit the approval.
 
 import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
@@ -79,10 +86,18 @@ export async function handleLabelEvent(input) {
   const actor = String(event?.sender?.login ?? "");
   if (!LOGIN_RE.test(actor)) return ignored("missing sender");
   const context = APPROVAL_CONTEXTS[kind];
+  /** Current label set of the PR: the event may already be stale when this job runs. */
+  const labelPresent = async () => {
+    const current = await gh.getPull(pr.number);
+    return (current.labels ?? []).includes(labelName);
+  };
   const targetUrl =
     typeof runUrl === "string" && runUrl.startsWith("https://") ? runUrl : undefined;
 
   if (action === "unlabeled") {
+    if (await labelPresent()) {
+      return ignored(`#${pr.number} ${labelName} was applied again after this removal`);
+    }
     await gh.createCommitStatus(sha, {
       state: "failure",
       context,
@@ -100,6 +115,9 @@ export async function handleLabelEvent(input) {
     return { action: "rejected-actor", kind, sha, actor };
   }
 
+  if (!(await labelPresent())) {
+    return ignored(`#${pr.number} ${labelName} was removed again after this label`);
+  }
   await gh.createCommitStatus(sha, {
     state: "success",
     context,

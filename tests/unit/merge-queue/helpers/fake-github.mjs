@@ -33,6 +33,12 @@
 //   fake.comments    Map<number, rawComment[]>
 //   fake.statuses    Map<sha, rawStatus[]>     newest first (POST /statuses/:sha unshifts)
 //   fake.checkRuns   Map<sha, rawCheckRun[]>   (GET wraps them in {total_count, check_runs})
+//   fake.checkSuites Map<sha, rawCheckSuite[]> (GET wraps them in {total_count, check_suites})
+//   fake.addCheckRun(sha, {name, conclusion = "success", status?, headBranch?, suiteId?,
+//                    appSlug = "github-actions", startedAt?, completedAt?, output?, htmlUrl?})
+//                       → raw check run linked to a check suite (`check_run.check_suite.id`);
+//                       a new suite {id, head_branch, head_sha, app} is created unless `suiteId`
+//                       names an existing one (headBranch null = suite without a branch)
 //   fake.annotations Map<runId, rawAnnotation[]>
 //   fake.workflowRuns rawRun[]                 (filters: branch, head_sha, event)
 //   fake.dispatches  [{workflow, ref, inputs}] recorded workflow_dispatch calls
@@ -42,6 +48,10 @@
 //   Git object store (real git blob hashing; tree/commit ids are fake but deterministic):
 //   fake.blobs Map<sha, Buffer>, fake.trees Map<sha, entry[]>, fake.commits Map<sha, commit>,
 //   fake.refs Map<"heads/<branch>", sha>
+//   fake.externalRefs  null | {get(key) → sha|null, list(prefix) → [key, sha][], delete(key) →
+//                       boolean} — refs NOT in fake.refs (keys "heads/<branch>") are served by
+//                       this backend: integration tests plug a real bare repository in, so the
+//                       branches the queue pushes with git and reads/deletes over the API agree
 //   fake.commitFiles({branch?, files: {path: content}, message?, parents?}) → commit sha
 //                       creates blobs/tree/commit (tree = parent tree + files) and moves the
 //                       branch when given
@@ -99,6 +109,8 @@ export async function startFakeGitHub(options = {}) {
     comments: new Map(),
     statuses: new Map(),
     checkRuns: new Map(),
+    checkSuites: new Map(),
+    externalRefs: null,
     annotations: new Map(),
     workflowRuns: [],
     dispatches: [],
@@ -155,6 +167,51 @@ export async function startFakeGitHub(options = {}) {
     };
     fake.pulls.set(number, pull);
     return pull;
+  };
+
+  fake.addCheckRun = (sha, input) => {
+    const {
+      name,
+      conclusion = "success",
+      status = conclusion === null ? "in_progress" : "completed",
+      headBranch = null,
+      suiteId,
+      appSlug = "github-actions",
+      startedAt = fake.now(),
+      completedAt = status === "completed" ? fake.now() : null,
+      output = { title: null, summary: null, text: null },
+      htmlUrl,
+    } = input;
+    if (!fake.checkSuites.has(sha)) fake.checkSuites.set(sha, []);
+    const suites = fake.checkSuites.get(sha);
+    let suite = suiteId === undefined ? null : suites.find((x) => x.id === suiteId);
+    if (!suite) {
+      suite = {
+        id: suiteId ?? nextId++,
+        head_branch: headBranch,
+        head_sha: sha,
+        status: "completed",
+        app: { slug: appSlug },
+      };
+      suites.push(suite);
+    }
+    const id = nextId++;
+    const run = {
+      id,
+      name,
+      head_sha: sha,
+      status,
+      conclusion,
+      started_at: startedAt,
+      completed_at: completedAt,
+      html_url: htmlUrl ?? `https://github.com/${owner}/${repo}/actions/runs/1/job/${id}`,
+      app: { slug: appSlug },
+      check_suite: { id: suite.id },
+      output,
+    };
+    if (!fake.checkRuns.has(sha)) fake.checkRuns.set(sha, []);
+    fake.checkRuns.get(sha).push(run);
+    return run;
   };
 
   fake.addIssue = (input) => {
@@ -436,6 +493,11 @@ export async function startFakeGitHub(options = {}) {
     ],
     [
       "GET",
+      /^\/commits\/([0-9a-f]{40})\/check-suites$/,
+      (req, [sha]) => paginated(req, fake.checkSuites.get(sha) ?? [], "check_suites"),
+    ],
+    [
+      "GET",
       /^\/check-runs\/(\d+)\/annotations$/,
       (req, [id]) => paginated(req, fake.annotations.get(+id) ?? []),
     ],
@@ -603,7 +665,9 @@ export async function startFakeGitHub(options = {}) {
         const ref = String(req.body?.ref ?? "");
         if (!ref.startsWith("refs/")) return json(422, { message: "Reference name is invalid" });
         const key = ref.replace(/^refs\//, "");
-        if (fake.refs.has(key)) return json(422, { message: "Reference already exists" });
+        if (fake.refs.has(key) || fake.externalRefs?.get(key)) {
+          return json(422, { message: "Reference already exists" });
+        }
         if (!fake.commits.has(req.body?.sha))
           return json(422, { message: "Object does not exist" });
         fake.refs.set(key, req.body.sha);
@@ -615,8 +679,9 @@ export async function startFakeGitHub(options = {}) {
       /^\/git\/ref\/(heads\/.+)$/,
       (_req, [raw]) => {
         const key = decodeURIComponent(raw);
-        return fake.refs.has(key)
-          ? json(200, { ref: `refs/${key}`, object: { sha: fake.refs.get(key), type: "commit" } })
+        const sha = fake.refs.get(key) ?? fake.externalRefs?.get(key) ?? null;
+        return sha
+          ? json(200, { ref: `refs/${key}`, object: { sha, type: "commit" } })
           : notFound();
       },
     ],
@@ -625,7 +690,9 @@ export async function startFakeGitHub(options = {}) {
       /^\/git\/matching-refs\/(heads\/.*)$/,
       (req, [raw]) => {
         const prefix = decodeURIComponent(raw);
-        const list = [...fake.refs.entries()]
+        const all = new Map(fake.externalRefs?.list(prefix) ?? []);
+        for (const [key, value] of fake.refs) all.set(key, value);
+        const list = [...all.entries()]
           .filter(([key]) => key.startsWith(prefix))
           .sort(([a], [b]) => (a < b ? -1 : 1))
           .map(([key, sha]) => ({ ref: `refs/${key}`, object: { sha, type: "commit" } }));
@@ -637,9 +704,12 @@ export async function startFakeGitHub(options = {}) {
       /^\/git\/refs\/(heads\/.+)$/,
       (_req, [raw]) => {
         const key = decodeURIComponent(raw);
-        if (!fake.refs.has(key)) return json(422, { message: "Reference does not exist" });
-        fake.refs.delete(key);
-        return json(204, null);
+        if (fake.refs.has(key)) {
+          fake.refs.delete(key);
+          return json(204, null);
+        }
+        if (fake.externalRefs?.delete(key)) return json(204, null);
+        return json(422, { message: "Reference does not exist" });
       },
     ],
 
