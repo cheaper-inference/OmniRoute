@@ -48,7 +48,8 @@
         "detect": false,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       }
     },
     "aider": {
@@ -60,7 +61,8 @@
         "detect": true,
         "run": true,
         "configure": true,
-        "generate": false
+        "generate": false,
+        "launch": true
       },
       "configureRecipe": {
         "mode": "module",
@@ -89,7 +91,8 @@
         "detect": false,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       },
       "agentBackend": {
         "mode": "stdio-adapter",
@@ -108,7 +111,8 @@
         "detect": true,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       }
     },
     "antigravity": {
@@ -120,7 +124,8 @@
         "detect": false,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       }
     },
     "claude": {
@@ -132,7 +137,8 @@
         "detect": true,
         "run": true,
         "configure": true,
-        "generate": true
+        "generate": true,
+        "launch": true
       },
       "configureRecipe": {
         "mode": "module",
@@ -156,7 +162,8 @@
         "detect": true,
         "run": false,
         "configure": true,
-        "generate": true
+        "generate": true,
+        "launch": true
       },
       "configureRecipe": {
         "mode": "module",
@@ -180,7 +187,8 @@
         "detect": true,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       }
     },
     "codex": {
@@ -192,7 +200,8 @@
         "detect": true,
         "run": true,
         "configure": true,
-        "generate": true
+        "generate": true,
+        "launch": true
       },
       "configureRecipe": {
         "mode": "codex-profile"
@@ -214,7 +223,8 @@
         "detect": true,
         "run": false,
         "configure": true,
-        "generate": true
+        "generate": true,
+        "launch": true
       },
       "configureRecipe": {
         "mode": "module",
@@ -225,13 +235,14 @@
     "copilot": {
       "displayName": "GitHub Copilot",
       "aliases": [],
-      "binaries": [],
+      "binaries": ["copilot"],
       "surfaces": {
         "catalog": true,
         "detect": false,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": true
       }
     },
     "crush": {
@@ -243,7 +254,8 @@
         "detect": true,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": true
       }
     },
     "cursor": {
@@ -255,7 +267,8 @@
         "detect": true,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       }
     },
     "cursor-cli": {
@@ -267,7 +280,8 @@
         "detect": false,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       },
       "agentBackend": {
         "mode": "stdio-adapter",
@@ -286,7 +300,21 @@
         "detect": false,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
+      }
+    },
+    "deepseek": {
+      "displayName": "DeepSeek Harness",
+      "aliases": ["dsh", "deepseek-harness"],
+      "binaries": ["dsh"],
+      "surfaces": {
+        "catalog": false,
+        "detect": false,
+        "run": false,
+        "configure": false,
+        "generate": false,
+        "launch": true
       }
     },
     "deepseek-tui": {
@@ -298,7 +326,8 @@
         "detect": true,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       }
     },
     "devin": {
@@ -310,7 +339,8 @@
         "detect": true,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       }
     },
     "droid": {
@@ -322,7 +352,8 @@
         "detect": true,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       }
     },
     "forge": {
@@ -334,7 +365,8 @@
         "detect": true,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       },
       "agentBackend": {
         "mode": "stdio-adapter",
@@ -353,7 +385,8 @@
         "detect": true,
         "run": true,
         "configure": true,
-        "generate": false
+        "generate": false,
+        "launch": true
       },
       "configureRecipe": {
         "mode": "module",
@@ -382,7 +415,8 @@
         "detect": true,
         "run": true,
         "configure": true,
-        "generate": false
+        "generate": false,
+        "launch": true
       },
       "configureRecipe": {
         "mode": "module",
@@ -406,7 +440,8 @@
         "detect": true,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       }
     },
     "hermes": {
@@ -418,7 +453,8 @@
         "detect": true,
         "run": false,
         "configure": false,
-        "generate": true
+        "generate": true,
+        "launch": true
       }
     },
     "hermes-agent": {
@@ -430,7 +466,8 @@
         "detect": true,
         "run": false,
         "configure": false,
-        "generate": true
+        "generate": true,
+        "launch": false
       }
     },
     "interpreter": {
@@ -442,7 +479,8 @@
         "detect": false,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       },
       "agentBackend": {
         "mode": "stdio-adapter",
@@ -461,7 +499,8 @@
         "detect": true,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       }
     },
     "kilo": {
@@ -473,12 +512,26 @@
         "detect": true,
         "run": false,
         "configure": true,
-        "generate": true
+        "generate": true,
+        "launch": true
       },
       "configureRecipe": {
         "mode": "module",
         "module": "./setup-kilo.mjs",
         "exportName": "runSetupKiloCommand"
+      }
+    },
+    "kimi": {
+      "displayName": "Kimi Code CLI",
+      "aliases": ["kimi-cli", "kimi-code"],
+      "binaries": ["kimi"],
+      "surfaces": {
+        "catalog": false,
+        "detect": false,
+        "run": false,
+        "configure": false,
+        "generate": false,
+        "launch": true
       }
     },
     "kiro": {
@@ -490,7 +543,8 @@
         "detect": false,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       }
     },
     "letta": {
@@ -502,7 +556,8 @@
         "detect": true,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       }
     },
     "omp": {
@@ -514,7 +569,8 @@
         "detect": true,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": true
       }
     },
     "openclaude": {
@@ -526,7 +582,8 @@
         "detect": false,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       }
     },
     "openclaw": {
@@ -538,7 +595,8 @@
         "detect": true,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": true
       },
       "agentBackend": {
         "mode": "stdio-adapter",
@@ -557,7 +615,8 @@
         "detect": true,
         "run": true,
         "configure": true,
-        "generate": true
+        "generate": true,
+        "launch": true
       },
       "configureRecipe": {
         "mode": "module",
@@ -586,7 +645,21 @@
         "detect": true,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": true
+      }
+    },
+    "pool": {
+      "displayName": "Poolside Pool",
+      "aliases": ["poolside"],
+      "binaries": ["pool"],
+      "surfaces": {
+        "catalog": false,
+        "detect": false,
+        "run": false,
+        "configure": false,
+        "generate": false,
+        "launch": true
       }
     },
     "prime-agent": {
@@ -598,7 +671,8 @@
         "detect": true,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       }
     },
     "qoder": {
@@ -610,7 +684,8 @@
         "detect": true,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       }
     },
     "qwen": {
@@ -622,7 +697,8 @@
         "detect": true,
         "run": true,
         "configure": true,
-        "generate": false
+        "generate": false,
+        "launch": true
       },
       "configureRecipe": {
         "mode": "module",
@@ -651,7 +727,8 @@
         "detect": false,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       }
     },
     "smelt": {
@@ -663,7 +740,8 @@
         "detect": true,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       }
     },
     "warp": {
@@ -675,7 +753,8 @@
         "detect": false,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       },
       "agentBackend": {
         "mode": "stdio-adapter",
@@ -694,7 +773,8 @@
         "detect": true,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       }
     },
     "zcode": {
@@ -706,7 +786,8 @@
         "detect": true,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       }
     },
     "zed": {
@@ -718,7 +799,8 @@
         "detect": false,
         "run": false,
         "configure": false,
-        "generate": false
+        "generate": false,
+        "launch": false
       }
     },
     "5dive": {
@@ -730,7 +812,8 @@
         "detect": true,
         "run": false,
         "configure": true,
-        "generate": false
+        "generate": false,
+        "launch": false
       },
       "configureRecipe": {
         "mode": "module",
@@ -747,7 +830,8 @@
         "detect": true,
         "run": true,
         "configure": true,
-        "generate": true
+        "generate": true,
+        "launch": false
       },
       "configureRecipe": {
         "mode": "module",

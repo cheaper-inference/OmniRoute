@@ -11,6 +11,7 @@
  *
  * Capability semantics:
  * - `run`: launchable through `omniroute run <target>`.
+ * - `launch`: launchable through `omnirouter launch <target>` (a launch adapter exists).
  * - `configure`: supported by the `omniroute configure <target>` picker.
  * - `runModel`: how `run` injects `--model` for the target (`null` when the
  *   model travels via env/provider args instead of a CLI flag).
@@ -27,6 +28,7 @@ export const CLI_TARGET_MANIFEST = Object.freeze(
         aliases: Object.freeze([...entry.aliases]),
         run: entry.surfaces.run,
         configure: entry.surfaces.configure,
+        launch: entry.surfaces.launch === true,
         configureRecipe: entry.configureRecipe ? Object.freeze({ ...entry.configureRecipe }) : null,
         runModel: entry.runModel ? Object.freeze({ ...entry.runModel }) : null,
         providerAlias: entry.agentBackend?.providerAlias || id,
@@ -39,7 +41,7 @@ export const CLI_TARGET_MANIFEST = Object.freeze(
 
 /**
  * List canonical target ids, optionally filtered by capability
- * (`"run"` or `"configure"`). Order follows manifest declaration order.
+ * (`"run"`, `"configure"` or `"launch"`). Order follows manifest declaration order.
  */
 export function listManifestTargets(capability) {
   return Object.entries(CLI_TARGET_MANIFEST)

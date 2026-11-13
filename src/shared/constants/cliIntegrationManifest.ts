@@ -1,6 +1,6 @@
 import rawManifest from "../../../config/cli-tools-manifest.json";
 
-export type CliSurface = "catalog" | "detect" | "run" | "configure" | "generate";
+export type CliSurface = "catalog" | "detect" | "run" | "configure" | "generate" | "launch";
 export type CliCapability = CliSurface | "agentBackend";
 export type CliPlatform = "linux" | "darwin" | "win32";
 
