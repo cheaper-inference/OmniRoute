@@ -225,6 +225,7 @@
       "tests/unit/repro-combo-persisted-cooldown-preskip.test.ts",
       "tests/unit/repro-glm-iso-reset-24h-cap.test.ts",
       "tests/unit/security-route-guard-tiers.test.ts",
+      "tests/unit/skill-write-routes-always-protected.test.ts",
       "tests/unit/egress-ip-lock-10880.test.ts",
       "tests/unit/egress-lock-allowlist-10880.test.ts",
       "tests/unit/api/jobs.test.ts",
