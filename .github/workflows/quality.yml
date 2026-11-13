@@ -51,6 +51,8 @@ jobs:
       # omni-queue candidate base (the merge_group.base_sha of a push to omni-queue/**);
       # empty on every other event.
       candidateBase: ${{ steps.candidate.outputs.BASE_SHA }}
+      # "self" on an omni-queue base-check candidate (the bare base), "trailer" on a batch.
+      candidateSource: ${{ steps.candidate.outputs.SOURCE }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -356,7 +358,19 @@ jobs:
           GITHUB_BASE_REF: ${{ github.base_ref }}
           # omni-queue/** candidates: select against the batch base, not HEAD~1.
           GITHUB_BASE_SHA: ${{ needs.changes.outputs.candidateBase }}
+          CANDIDATE_SOURCE: ${{ needs.changes.outputs.candidateSource }}
         run: |
+          # omni-queue base-check (the bare base, its own base): a base-relative selection is
+          # empty, so a test that fails in a red batch's subset could never fail here and the
+          # queue's base-red comparison (same check, same test) would blame the batch. Run the
+          # whole unit suite instead.
+          if [ "${CANDIDATE_SOURCE:-}" = "self" ]; then
+            echo "__OMNI_QUEUE_BASE_CHECK__" > tia-selection.txt
+            echo "TIA selection: omni-queue base-check — full unit suite" >> "$GITHUB_STEP_SUMMARY"
+            RC=0
+            npm run test:unit:ci || RC=$?
+            exit $RC
+          fi
           git fetch --no-tags origin "$GITHUB_BASE_REF" || true
           # The advisory sibling-test step generates the same map earlier in this job.
           [ -f config/quality/test-impact-map.json ] || node scripts/quality/build-test-impact-map.mjs

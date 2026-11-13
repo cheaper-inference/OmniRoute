@@ -224,7 +224,7 @@ function evaluate(node, ctx) {
     }
     case "call": {
       if (node.name === "always") return true;
-      if (node.name === "cancelled") return false;
+      if (node.name === "cancelled") return ctx.__cancelled ?? false;
       if (node.name === "failure") return false;
       if (node.name === "success") return ctx.__success ?? true;
       assert.ok(Object.hasOwn(FUNCTIONS, node.name), `unsupported function ${node.name}`);
@@ -337,6 +337,7 @@ function pushContext(ref, { eventName = "push", vars = anyVar("true") } = {}) {
         testsOnly: "false",
         queueCandidate: "false",
         candidateBase: ref.startsWith("refs/heads/omni-queue/") ? BASE_SHA : "",
+        candidateSource: ref.startsWith("refs/heads/omni-queue/") ? "trailer" : "",
         domains: "build,catalog,cli,core,db,docs,i18n,provider,routing,tests,ui,workflow",
       },
     },
@@ -629,6 +630,21 @@ test("approval runs only for label changes; the tick tolerates a skipped approva
     false,
     "a failed approval binding does not tick on a half-written approval"
   );
+  // An operator who cancels the run (mid-incident) stops the tick too: !cancelled(), not
+  // always(), so a cancelled run never starts writing refs or state.
+  for (const approvalResult of ["success", "skipped"]) {
+    const cancelledRun = queueContext("pull_request_target", {
+      action: "labeled",
+      approval: approvalResult,
+    });
+    cancelledRun.__cancelled = true;
+    assert.equal(
+      condition(tick.if, cancelledRun),
+      false,
+      `cancelled run, approval ${approvalResult}`
+    );
+  }
+  assert.doesNotMatch(String(tick.if), /\balways\(\)/);
   // Scheduled runs stay in the upstream repository (check-workflows scheduled-guard).
   const fork = queueContext("schedule", { approval: "skipped" });
   fork.github.repository = "someone/OmniRoute";
@@ -641,6 +657,10 @@ test("one global tick at a time, never cancelled; approvals outside that group",
     group: "omni-queue-tick",
     "cancel-in-progress": false,
   });
+  // No per-PR group either: GitHub keeps ONE pending run per group and drops the others, and
+  // approve.mjs handles each label event (labeled → success, unlabeled → failure, per context).
+  // Dropping "labeled protected-approved" behind a later "unlabeled omni-queue" would lose an
+  // approval; parallel runs instead converge once approve.mjs re-reads the current labels.
   assert.equal(queue.jobs.approval.concurrency, undefined);
 });
 
@@ -677,6 +697,8 @@ test("least privilege: no default token scopes, App token scoped per job", () =>
   });
   assert.deepEqual(scopes(appStep("tick")), {
     contents: "write",
+    // A pushed commit that touches .github/workflows/** needs it (candidates and landings).
+    workflows: "write",
     "pull-requests": "write",
     issues: "write",
     statuses: "read",
@@ -776,14 +798,19 @@ function runStep(t, step, env) {
   spawnSync("mkdir", [bin]);
   writeFake(bin, "node", `printf '%s\\n' "$@" > "$FAKE_ARGS"`);
   writeFake(bin, "gh", `printf '%s\\n' "$@" > "$FAKE_GH_ARGS"; printf '%s\\n' "$FAKE_GH_OUT"`);
+  writeFake(bin, "npm", `printf '%s\\n' "$@" >> "$FAKE_NPM_ARGS"; exit "\${FAKE_NPM_RC:-0}"`);
+  writeFake(bin, "git", "exit 0");
   const script = join(dir, "step.sh");
   writeFileSync(script, step.run);
   const files = {
     FAKE_ARGS: join(dir, "args"),
     FAKE_GH_ARGS: join(dir, "gh-args"),
+    FAKE_NPM_ARGS: join(dir, "npm-args"),
     GITHUB_OUTPUT: join(dir, "output"),
+    GITHUB_STEP_SUMMARY: join(dir, "summary"),
   };
   writeFileSync(files.GITHUB_OUTPUT, "");
+  writeFileSync(files.GITHUB_STEP_SUMMARY, "");
   const res = spawnSync("bash", ["--noprofile", "--norc", "-eo", "pipefail", script], {
     cwd: dir,
     encoding: "utf8",
@@ -802,6 +829,8 @@ function runStep(t, step, env) {
     stdout: res.stdout,
     args: read(files.FAKE_ARGS)?.split("\n").slice(0, -1) ?? null,
     ghArgs: read(files.FAKE_GH_ARGS)?.split("\n").slice(0, -1) ?? null,
+    npmArgs: read(files.FAKE_NPM_ARGS)?.split("\n").slice(0, -1) ?? null,
+    summary: read(files.GITHUB_STEP_SUMMARY),
     output: read(files.GITHUB_OUTPUT),
     dir,
   };
@@ -1111,3 +1140,72 @@ test("quality.yml: merge integrity and impact selection compare against the cand
   assert.equal(render(sibling.env.GITHUB_BASE_SHA, pr), "f".repeat(40));
   assert.equal(render(tia.env.GITHUB_BASE_SHA, pr), "", "PRs keep GITHUB_BASE_REF");
 });
+
+test("quality.yml: a base-check candidate runs the whole unit suite in the TIA step", (t) => {
+  const wf = loadWorkflow("quality.yml");
+  assert.equal(wf.jobs.changes.outputs.candidateSource, "${{ steps.candidate.outputs.SOURCE }}");
+  const tia = wf.jobs["fast-gates"].steps.find(
+    (s) => s.name === "Impacted unit tests (TIA subset; blocking)"
+  );
+  assert.equal(tia.env.CANDIDATE_SOURCE, "${{ needs.changes.outputs.candidateSource }}");
+  // Base-check (SOURCE=self): no base-relative selection (it would be empty), the full suite.
+  const baseCheck = runStep(t, tia, { CANDIDATE_SOURCE: "self", GITHUB_BASE_SHA: CANDIDATE_SHA });
+  assert.equal(baseCheck.code, 0, baseCheck.stderr);
+  assert.deepEqual(baseCheck.npmArgs, ["run", "test:unit:ci"]);
+  assert.equal(baseCheck.args, null, "the selector never runs on a base-check");
+  assert.equal(
+    readFileSync(join(baseCheck.dir, "tia-selection.txt"), "utf8"),
+    "__OMNI_QUEUE_BASE_CHECK__\n"
+  );
+  assert.match(baseCheck.summary, /omni-queue base-check — full unit suite/);
+  // A failing test on the bare base fails this same check (what classify compares).
+  const red = runStep(t, tia, { CANDIDATE_SOURCE: "self", FAKE_NPM_RC: "3" });
+  assert.equal(red.code, 3);
+  // Control: a batch candidate (or a PR) still selects, and an empty selection skips.
+  for (const source of ["trailer", ""]) {
+    const batch = runStep(t, tia, { CANDIDATE_SOURCE: source, GITHUB_BASE_SHA: BASE_SHA });
+    assert.equal(batch.code, 0, batch.stderr);
+    assert.equal(batch.npmArgs, null, `source '${source}' never runs the full suite`);
+    assert.deepEqual(batch.args, ["scripts/quality/select-impacted-tests.mjs"]);
+    assert.match(batch.stdout, /skipping unit tests/);
+  }
+});
+
+for (const file of Object.values(PROFILES)) {
+  test(`${file}: a candidate push writes no Actions cache (fresh ref per candidate)`, () => {
+    // Every candidate is a new branch; a cache saved there is readable by no other ref and only
+    // evicts release/main caches from the repository quota.
+    const wf = loadWorkflow(file);
+    const ctx = pushContext(CANDIDATE_REF);
+    const scheduled = scheduledJobs(wf, ctx);
+    let checked = 0;
+    for (const [id, job] of Object.entries(wf.jobs)) {
+      if (!scheduled[id]) continue;
+      const jobCtx = { ...ctx, needs: {} };
+      for (const step of job.steps ?? []) {
+        const uses = String(step.uses ?? "");
+        const where = `${file}:${id}:${step.name ?? uses}`;
+        if (/^actions\/cache@/.test(uses)) {
+          checked++;
+          assert.equal(condition(step.if, jobCtx), false, `${where} saves a cache`);
+        }
+        if (/^actions\/setup-node@/.test(uses)) {
+          checked++;
+          assert.equal(step.with?.["package-manager-cache"], false, where);
+          assert.ok(!truthy(render(step.with?.cache ?? "", jobCtx)), where);
+        }
+        if (/^\.\/\.github\/actions\//.test(uses) && step.with && "cache" in step.with) {
+          checked++;
+          assert.notEqual(String(render(step.with.cache, jobCtx)), "true", where);
+        }
+      }
+    }
+    assert.ok(checked >= 5, `${file}: the check must see the cache-capable steps (${checked})`);
+    // Control: the same steps do cache on a pull request.
+    const pr = pushContext("refs/pull/7/merge", { eventName: "pull_request" });
+    const npmCi = Object.values(wf.jobs)
+      .flatMap((j) => j.steps ?? [])
+      .find((s) => String(s.uses ?? "").startsWith("./.github/actions/npm-ci-retry"));
+    assert.equal(String(render(npmCi.with.cache, pr)), "true");
+  });
+}

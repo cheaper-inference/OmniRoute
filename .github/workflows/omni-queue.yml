@@ -10,8 +10,12 @@ name: omni-queue
 #     scripts/merge-queue + config/merge-queue only) and run zero-dependency Node scripts —
 #     no npm ci, no third-party install scripts next to the App token. The queue touches PR
 #     content only as git objects (merge-tree/commit-tree in a scratch bare repository).
-#   • The workflow file and the orchestrator must exist on the default branch: schedule,
-#     workflow_run and pull_request_target always run the default branch's copy.
+#   • Which copy of THIS file runs: schedule and workflow_run use the default branch's copy;
+#     pull_request_target uses the copy on the PR's BASE branch (a label on a PR whose base has
+#     no omni-queue.yml never reaches the approval job); workflow_dispatch uses the dispatched
+#     ref. The scripts, however, ALWAYS come from the default branch (explicit checkout ref), so
+#     nothing works until scripts/merge-queue is on the default branch, and labels only bind on
+#     bases that carry this file.
 #   • Writes use a GitHub App installation token minted per job with the minimum permissions
 #     (the GITHUB_TOKEN cannot be used: refs it pushes do not trigger the candidate's CI).
 #   • Kill switch: every job is inert unless the repository variable OMNI_QUEUE_ENABLED is
@@ -97,9 +101,10 @@ jobs:
   tick:
     name: Tick
     needs: approval
-    # always(): the approval job is skipped on every event but a label change.
+    # !cancelled() (not always()): the approval job is skipped on every event but a label
+    # change, and an operator who cancels the run mid-incident must stop the tick too.
     if: >-
-      always()
+      !cancelled()
       && vars.OMNI_QUEUE_ENABLED == 'true'
       && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
       && (needs.approval.result == 'success' || needs.approval.result == 'skipped')
@@ -121,6 +126,11 @@ jobs:
           app-id: ${{ secrets.OMNI_QUEUE_APP_ID }}
           private-key: ${{ secrets.OMNI_QUEUE_APP_PRIVATE_KEY }}
           permission-contents: write
+          # GitHub refuses a push by an App token that creates or updates a file under
+          # .github/workflows/ without this scope. A candidate's merge commits (parent 1 = base)
+          # and the fast-forward landing carry any workflow change of a batched PR — ci.yml and
+          # quality.yml change almost daily here — so without it every such batch fails to push.
+          permission-workflows: write
           permission-pull-requests: write
           permission-issues: write
           permission-statuses: read
