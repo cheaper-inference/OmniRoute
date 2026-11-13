@@ -105,6 +105,10 @@ function makeDiv() {
   return el;
 }
 
+// The kit Wizard keeps a blocked Next focusable: `aria-disabled`, not `disabled`.
+const nextEnabled = (button: Element | undefined) =>
+  button !== undefined && button.getAttribute("aria-disabled") !== "true";
+
 async function waitFor(fn: () => boolean, ms = 3000): Promise<void> {
   const start = Date.now();
   while (Date.now() - start < ms) {
@@ -179,7 +183,7 @@ describe("NewBatchWizard — error sanitization", () => {
     });
     await new Promise((r) => setTimeout(r, 100));
 
-    await waitFor(() => !((nextBtns()[0] as HTMLButtonElement)?.disabled ?? true));
+    await waitFor(() => nextEnabled(nextBtns()[0]));
 
     await act(async () => {
       nextBtns()[0]?.click();
@@ -187,7 +191,7 @@ describe("NewBatchWizard — error sanitization", () => {
 
     // Wait step 3 validation ok
     await waitFor(() => el.textContent!.includes("wizardValidationOk"));
-    await waitFor(() => !((nextBtns()[0] as HTMLButtonElement)?.disabled ?? true));
+    await waitFor(() => nextEnabled(nextBtns()[0]));
 
     await act(async () => {
       nextBtns()[0]?.click();

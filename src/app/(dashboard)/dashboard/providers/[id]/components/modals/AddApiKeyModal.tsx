@@ -448,7 +448,7 @@ export default function AddApiKeyModal({
 
   const handleBulkSubmit = async () => {
     if (!provider) return;
-    const parsed = parseBulkApiKeys(bulkText, { withAccountId: isCloudflare });
+    const parsed = parseBulkApiKeys(bulkText, { withAccountId: isCloudflare, provider });
     setBulkWarnings(parsed.warnings);
     if (parsed.entries.length === 0) return;
 
@@ -554,6 +554,8 @@ export default function AddApiKeyModal({
         )}
         {bulkSupported && (
           <SegmentedControl
+            semantics="radio"
+            aria-label={getAddCredentialModalTitle(t, providerDisplayName, webSessionCredential)}
             size="sm"
             value={mode}
             onChange={(next) => {
