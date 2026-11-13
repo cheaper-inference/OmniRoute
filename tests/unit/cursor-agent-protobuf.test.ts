@@ -351,6 +351,60 @@ test("encodeAgentRunRequest keeps RequestedModel + parameters alongside ModelDet
   );
 });
 
+test("Grok 4.7 effort aliases explicitly preserve standard speed", () => {
+  assert.deepEqual(resolveRequestedModel("grok-4.7-medium"), {
+    modelId: "grok-4.7",
+    parameters: [
+      { id: "effort", value: "medium" },
+      { id: "fast", value: "false" },
+    ],
+  });
+  assert.deepEqual(resolveRequestedModel("cursor-grok-4.7-medium"), {
+    modelId: "grok-4.7",
+    parameters: [
+      { id: "effort", value: "medium" },
+      { id: "fast", value: "false" },
+    ],
+  });
+  assert.deepEqual(resolveRequestedModel("grok-4.7-medium-fast"), {
+    modelId: "grok-4.7",
+    parameters: [
+      { id: "effort", value: "medium" },
+      { id: "fast", value: "true" },
+    ],
+  });
+  // Do not change speed defaults for the older Grok families.
+  assert.deepEqual(resolveRequestedModel("grok-4.6-medium"), {
+    modelId: "grok-4.6",
+    parameters: [{ id: "effort", value: "medium" }],
+  });
+});
+
+test("Grok 4.7 medium standard-speed alias encodes fast=false on the wire", () => {
+  const request = encodeAgentRunRequest({ modelId: "grok-4.7-medium", userText: "hi" });
+  const run = findField(decodeFields(request), 1);
+  assert.ok(run?.wireType === WT_LEN);
+  const fields = decodeFields(run.bytes);
+  const requestedModel = findField(fields, 9);
+  assert.ok(requestedModel?.wireType === WT_LEN);
+  const modelFields = decodeFields(requestedModel.bytes);
+  const text = (fields: ReturnType<typeof decodeFields>, number: number) => {
+    const field = findField(fields, number);
+    assert.ok(field?.wireType === WT_LEN);
+    return field.bytes.toString("utf8");
+  };
+  assert.equal(text(modelFields, 1), "grok-4.7");
+  const parameters = modelFields.filter((field) => field.fieldNumber === 3).map((field) => {
+    assert.ok(field.wireType === WT_LEN);
+    const pair = decodeFields(field.bytes);
+    return [text(pair, 1), text(pair, 2)];
+  });
+  assert.deepEqual(parameters, [
+    ["reasoning_effort", "medium"],
+    ["fast", "false"],
+  ]);
+});
+
 test("Grok 4.7 High 256K standard speed uses only RequestedModel", () => {
   const request = encodeAgentRunRequest({ modelId: "cursor-grok-4.7-high-256k", userText: "hi" });
   const run = findField(decodeFields(request), 1);
