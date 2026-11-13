@@ -188,17 +188,27 @@ The full list of ~30+ tables is in `src/lib/db/migrations/`.
 
 ## Migrations
 
-OmniRoute uses **versioned, idempotent migrations** in `src/lib/db/migrations/`. Each migration is a single SQL file named `NNN_description.sql`.
+OmniRoute uses **versioned, idempotent migrations** in `src/lib/db/migrations/`. Each migration is a single SQL file. Two naming formats coexist; the version recorded in `_omniroute_migrations` is the numeric prefix.
 
 ### Migration Naming
 
-```
-001_initial_schema.sql
-002_mcp_a2a_tables.sql
-003_provider_node_custom_paths.sql
-...
-021_combo_call_log_targets.sql
-```
+| Format                                            | Example                                  | Used for                                                                                |
+| ------------------------------------------------- | ---------------------------------------- | --------------------------------------------------------------------------------------- |
+| `NNN_description.sql` (exactly 3 digits)          | `239_call_logs_pending_detail_index.sql` | The old series `001`–`239`. Frozen on 2026-11-13: no new file gets a sequential number. |
+| `YYYYMMDDHHMMSS_description.sql` (14 digits, UTC) | `20261113120000_add_usage_index.sql`     | Every migration created from 2026-11-13 on.                                             |
+
+Why the change: with sequential numbers, parallel PRs picked the same next number and all but one had to renumber before merging. A UTC timestamp gives each PR its own version.
+
+Rules for the timestamp format (enforced by `npm run check:migration-numbering`, shared with the generator in `scripts/check/lib/migrationNaming.mjs`):
+
+- The timestamp is a real UTC date and time, not earlier than `20261113000000` and not more than 10 minutes in the future.
+- The description is lowercase `snake_case` starting with a letter (`a-z`, `0-9`, single `_` between words), at most 80 characters.
+- Two files with the same timestamp are a duplicate.
+- The no-gap rule applies only to the old series: every number from `001` to `239` must exist, except the known gaps `026`, `055` and `121`. Deleting `239` (or any old file) fails the gate. Timestamped files never create a gap.
+
+**Apply order.** The runner sorts by the numeric value of the prefix, not by text: the old `001`–`239` files first, then the timestamped files in timestamp order, then any namespaced directories registered with `OMNIROUTE_EXTRA_MIGRATIONS_DIRS` (versions such as `ee-001`). A pending migration is any file whose version is not in `_omniroute_migrations`, so a migration from an older branch that merges after a newer one still applies on existing databases.
+
+**The timestamp is creation order, not merge order.** If your migration depends on a table or column created by a migration with a **newer** timestamp (for example, one from another PR that merged first), a fresh database would run yours first and fail. Regenerate your file with `npm run db:new-migration` so it gets a newer timestamp, or make it independent. `npm run test:migrations:fresh` applies every migration to an empty database and catches this.
 
 ### How Migrations Run
 
@@ -243,16 +253,16 @@ Use `IF NOT EXISTS`, `IF EXISTS`, and `OR IGNORE` / `OR REPLACE` clauses liberal
 
 ### Adding a New Migration
 
-1. **Identify the next number**: `ls src/lib/db/migrations/ | tail -1`
-2. **Create the file**: `NNN_my_change.sql`
-3. **Use safe DDL**: `CREATE TABLE IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
-4. **Backfill data carefully**: use `UPDATE ... WHERE ...` to handle existing rows
+1. **Create the file with the generator**: `npm run db:new-migration -- <description>` (for example `npm run db:new-migration -- add combo priority`). It writes `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` with the current UTC time and a comment header, moves forward one second if that timestamp is taken, and never overwrites a file. Do not pick a number by hand.
+2. **Use safe DDL**: `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
+3. **Backfill data carefully**: use `UPDATE ... WHERE ...` to handle existing rows
+4. **Check order and naming**: `npm run test:migrations:fresh` (all migrations on an empty database) and `npm run check:migration-numbering`
 5. **Test on a copy**: never run untested migrations on production
 
 Example:
 
 ```sql
--- 022_add_combo_priority.sql
+-- 20261113120000_add_combo_priority.sql
 ALTER TABLE combos ADD COLUMN priority INTEGER DEFAULT 100;
 UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
