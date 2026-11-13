@@ -41,7 +41,7 @@ export function TelegramConfigForm({ value, onChange, t, isEditing }: TelegramCo
           <ol className="space-y-1.5 text-xs text-text-muted">
             {[1, 2, 3, 4].map((n) => (
               <li key={n} className="flex gap-2">
-                <span className="font-bold text-primary">{n}.</span>
+                <span className="font-semibold text-primary">{n}.</span>
                 {t(`telegram.tutorialStep${n}`)}
               </li>
             ))}

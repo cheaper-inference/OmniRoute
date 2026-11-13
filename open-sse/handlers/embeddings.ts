@@ -61,6 +61,8 @@ interface ClientRawRequest {
   headers: Record<string, string>;
 }
 
+import { recordEmbeddingConsumption } from "./embeddingUsage";
+
 interface EmbeddingCredentials {
   apiKey?: string | null;
   accessToken?: string | null;
@@ -91,6 +93,8 @@ interface HandleEmbeddingParams {
   connectionProvider?: string | null;
   requestedModel?: string | null;
   comboName?: string | null;
+  /** Internal observer: preserve absent usage before the public zero-count fallback. */
+  onUsage?: (usage: Record<string, unknown> | null) => void;
 }
 
 interface EmbeddingFailure {
@@ -182,6 +186,21 @@ function fillMissingEmbeddingIndex(item: unknown, position: number): void {
   if (typeof record.index !== "number" || !Number.isFinite(record.index)) {
     record.index = position;
   }
+}
+
+/**
+ * Many upstreams ignore `encoding_format` and answer with number arrays. The OpenAI Node SDK
+ * (v4+) asks for base64 and decodes the string, so a float array would be misread. Pack it as
+ * little-endian float32; a vector the upstream already encoded (a string) passes through.
+ */
+function packEmbeddingAsBase64(item: unknown): void {
+  if (!item || typeof item !== "object" || !("embedding" in item)) return;
+  const record = item as { embedding: unknown };
+  const vector = record.embedding;
+  if (!Array.isArray(vector) || !vector.every((value) => typeof value === "number")) return;
+  const bytes = Buffer.alloc(vector.length * 4);
+  vector.forEach((value, i) => bytes.writeFloatLE(value, i * 4));
+  record.embedding = bytes.toString("base64");
 }
 
 function failure(status: number, error: string, headers?: Headers): EmbeddingFailure {
@@ -547,9 +566,6 @@ function resolveSingleTexts(runtime: EmbeddingRuntime): string[] | EmbeddingFail
   ) {
     return failure(400, "CLOVA Studio embedding v2 accepts non-empty text strings only");
   }
-  if (runtime.body.encoding_format === "base64") {
-    return failure(400, "CLOVA Studio embedding v2 supports float encoding only");
-  }
   if (runtime.body.dimensions !== undefined && Number(runtime.body.dimensions) !== 1024) {
     return failure(400, "CLOVA Studio embedding v2 has a fixed dimension of 1024");
   }
@@ -728,9 +744,6 @@ async function prepareBedrockTransport(
 ): Promise<void> {
   const family = bedrockEmbeddingFamily(runtime.model || "");
   if (!family) throw new Error(`Unsupported Bedrock embedding model: ${runtime.model}`);
-  if (runtime.body.encoding_format === "base64") {
-    throw new Error("Bedrock embeddings support float encoding only");
-  }
   const items = await collectBedrockEmbeddingItems(runtime.body.input);
   if (items.length === 0) throw new Error("Embedding input was empty");
 
@@ -889,6 +902,7 @@ function normalizeEmbeddingData(
   if (Array.isArray(responseItems)) {
     responseItems.forEach(flattenSingleRowEmbedding);
     responseItems.forEach(fillMissingEmbeddingIndex);
+    if (runtime.body.encoding_format === "base64") responseItems.forEach(packEmbeddingAsBase64);
   }
   return {
     data,
@@ -936,29 +950,6 @@ function recordEmbeddingSuccess(
   }).catch(() => {});
 }
 
-async function recordEmbeddingConsumption(
-  runtime: EmbeddingRuntime,
-  data: ParsedEmbeddingResponse,
-  requestCount: number
-): Promise<void> {
-  if (!runtime.apiKeyId || !runtime.connectionId) return;
-  try {
-    const { scheduleRecordConsumption } = await import("@/lib/quota/spendRecorder");
-    scheduleRecordConsumption({
-      apiKeyId: runtime.apiKeyId,
-      connectionId: runtime.connectionId,
-      provider: runtime.provider,
-      model: runtime.model || undefined,
-      cost: {
-        tokens: data.usage?.prompt_tokens || data.usage?.total_tokens || 0,
-        requests: requestCount,
-      },
-    });
-  } catch {
-    // Quota accounting is fail-open.
-  }
-}
-
 async function handleUpstreamSuccess(
   runtime: EmbeddingRuntime,
   prepared: PreparedEmbeddingRequest,
@@ -973,6 +964,7 @@ async function handleUpstreamSuccess(
     prepared.normalizeProviderResponse
   );
   recordEmbeddingSuccess(runtime, data, normalizedResponse);
+  runtime.onUsage?.(data.usage ?? null);
   await recordEmbeddingConsumption(runtime, data, requestCount);
   return {
     success: true,

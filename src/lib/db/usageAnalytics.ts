@@ -10,6 +10,7 @@
  */
 
 import { getDbInstance } from "./core";
+import { rawCostSums } from "./usageAnalytics/billing";
 import type { AnalyticsParams } from "./usageAnalytics/sources";
 
 export { buildUnifiedSource, buildPresetUnifiedSource } from "./usageAnalytics/sources";
@@ -31,20 +32,6 @@ const UNIFIED_COST_TOKEN_SUMS = `
         COALESCE(SUM(cost_tokens_cache_read), 0) as costCacheReadTokens,
         COALESCE(SUM(cost_tokens_cache_creation), 0) as costCacheCreationTokens,
         COALESCE(SUM(cost_tokens_reasoning), 0) as costReasoningTokens`;
-
-/** The same split for queries that read usage_history directly. */
-function rawCostSums(table: string): string {
-  const priceable = (column: string) =>
-    `COALESCE(SUM(CASE WHEN ${table}.provider_cost_usd IS NULL THEN ${table}.${column} ELSE 0 END), 0)`;
-  return `
-        COALESCE(SUM(${table}.provider_cost_usd), 0.0) as storedCost,
-        0 as isAggregated,
-        ${priceable("tokens_input")} as costPromptTokens,
-        ${priceable("tokens_output")} as costCompletionTokens,
-        ${priceable("tokens_cache_read")} as costCacheReadTokens,
-        ${priceable("tokens_cache_creation")} as costCacheCreationTokens,
-        ${priceable("tokens_reasoning")} as costReasoningTokens`;
-}
 
 /** Priceable-token fields carried by every cost row. */
 export interface CostTokenFields {
@@ -409,7 +396,8 @@ export function getAccountCostRows(whereClause: string, params: AnalyticsParams)
           usage_history.tokens_cache_read,
           usage_history.tokens_cache_creation,
           usage_history.tokens_reasoning,
-          usage_history.provider_cost_usd
+          usage_history.provider_cost_usd,
+          usage_history.calculated_cost_usd
         FROM usage_history
         ${whereClause}
       )

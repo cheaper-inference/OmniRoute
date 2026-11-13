@@ -52,7 +52,7 @@ function CardHeader() {
     <div className="space-y-2">
       <div className="flex items-center gap-2">
         <Icon name="refresh" size={20} className="text-primary" />
-        <h2 className="text-lg font-bold">{t("resilienceTokenRefreshTitle")}</h2>
+        <h2 className="text-lg font-semibold">{t("resilienceTokenRefreshTitle")}</h2>
       </div>
       <div className="grid grid-cols-1 gap-2 text-xs text-text-muted sm:grid-cols-3">
         <div>

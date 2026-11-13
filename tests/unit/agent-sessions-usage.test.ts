@@ -13,6 +13,7 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
+const agentSessionsDb = await import("../../src/lib/db/agentSessions.ts");
 const usageHistory = await import("../../src/lib/usage/usageHistory.ts");
 
 test.after(() => {
@@ -191,6 +192,92 @@ test("traffic without an agent identity creates no session", async () => {
   assert.deepEqual(usageSessionIds("key-frank"), [null, null]);
 });
 
+test("session token totals count cached input once, and the tokens sort follows them", async () => {
+  // Stored input already includes cache reads and writes, so the total is input + output.
+  await recordUsage({
+    apiKeyId: "key-grace",
+    agentContext: agentContext({ clientSessionId: "sess-grace-plain" }),
+    timestamp: "2026-09-25T14:00:00.000Z",
+    tokens: { input: 1000, output: 500, cacheRead: 0, cacheCreation: 0 },
+  });
+  await recordUsage({
+    apiKeyId: "key-grace",
+    agentContext: agentContext({ clientSessionId: "sess-grace-cached" }),
+    timestamp: "2026-09-25T14:01:00.000Z",
+    tokens: { input: 1200, output: 100, cacheRead: 900, cacheCreation: 200 },
+  });
+
+  const db = core.getDbInstance();
+  const byTokens = (order: "asc" | "desc") =>
+    agentSessionsDb
+      .listAgentSessions(db, { apiKeyId: "key-grace", sort: "tokens", order })
+      .sessions.map((session) => [session.clientSessionId, session.tokens.total]);
+
+  assert.deepEqual(byTokens("desc"), [
+    ["sess-grace-plain", 1500],
+    ["sess-grace-cached", 1300],
+  ]);
+  assert.deepEqual(byTokens("asc"), [
+    ["sess-grace-cached", 1300],
+    ["sess-grace-plain", 1500],
+  ]);
+});
+
+test("the uncached input is input minus cache reads and writes, clamped at 0 and never corrected", async () => {
+  // Stored input includes cache reads and writes. Three one-request sessions probe the boundary.
+  const cases = [
+    {
+      id: "sess-ivan-normal",
+      tokens: { input: 10000, output: 50, cacheRead: 9000, cacheCreation: 900 },
+    },
+    {
+      id: "sess-ivan-equal",
+      tokens: { input: 9900, output: 50, cacheRead: 9000, cacheCreation: 900 },
+    },
+    // A row recorded without its cache (before the usage extractor fix) is not guessed at: the
+    // uncached input clamps to 0 and the stored input and total stay as recorded.
+    {
+      id: "sess-ivan-short",
+      tokens: { input: 100, output: 50, cacheRead: 9000, cacheCreation: 900 },
+    },
+  ];
+  for (const [index, { id, tokens }] of cases.entries()) {
+    await recordUsage({
+      apiKeyId: "key-ivan",
+      agentContext: agentContext({ clientSessionId: id }),
+      timestamp: `2026-09-25T15:0${index}:00.000Z`,
+      tokens,
+    });
+  }
+
+  const db = core.getDbInstance();
+  const sessions = agentSessionsDb.listAgentSessions(db, { apiKeyId: "key-ivan", limit: 10 });
+  const byClientId = new Map(sessions.sessions.map((s) => [s.clientSessionId, s]));
+  const split = (id: string) => {
+    const { input, uncachedInput, total } = byClientId.get(id)!.tokens;
+    return { input, uncachedInput, total };
+  };
+  assert.deepEqual(split("sess-ivan-normal"), { input: 10000, uncachedInput: 100, total: 10050 });
+  assert.deepEqual(split("sess-ivan-equal"), { input: 9900, uncachedInput: 0, total: 9950 });
+  assert.deepEqual(split("sess-ivan-short"), { input: 100, uncachedInput: 0, total: 150 });
+
+  // Each request carries the same split, so the request rows add up to the session.
+  const normal = byClientId.get("sess-ivan-normal")!;
+  const [request] = agentSessionsDb.getAgentSessionRecentUsage(db, normal.id);
+  assert.deepEqual(request.tokens, {
+    input: 10000,
+    uncachedInput: 100,
+    cacheRead: 9000,
+    cacheCreation: 900,
+    output: 50,
+    reasoning: 0,
+  });
+  const short = byClientId.get("sess-ivan-short")!;
+  const [shortRequest] = agentSessionsDb.getAgentSessionRecentUsage(db, short.id);
+  assert.equal(shortRequest.tokens.input, 100);
+  assert.equal(shortRequest.tokens.uncachedInput, 0);
+});
+
 test("a failing agent-session write never drops the usage_history row", async () => {
   const db = core.getDbInstance();
   // Simulate agent_sessions being unavailable (missing table / failed migration).
@@ -239,4 +326,31 @@ test("a write deferred by a database lock records the row and its session once, 
   assert.deepEqual(usageSessionIds("key-locked"), [session.id]);
   // The lock is not reported as a failed session write that dropped the attribution.
   assert.deepEqual(warnings, []);
+});
+
+test("client session row ids keep their persisted digest format (CodeQL #1239 migration)", () => {
+  // Vectors are the historical `as_` + sha256(apiKeyId \x1f clientSessionId)[0..32], computed once
+  // with node:crypto. The list filter looks sessions up by this id, so it must never drift.
+  const db = core.getDbInstance();
+  const usage = (apiKeyId: string | null) => ({
+    context: agentContext({ clientSessionId: "sess-pin", projectName: "pin" }),
+    apiKeyId,
+    apiKeyName: null,
+    timestamp: "2026-11-10T10:00:00.000Z",
+    success: true,
+    tokens: { input: 1, output: 1, cacheRead: 0, cacheCreation: 0, reasoning: 0 },
+    costUsd: 0,
+    priced: true,
+    provider: "openai",
+    model: "gpt-4o-mini",
+    connectionId: null,
+  });
+  const keyed = agentSessionsDb.recordAgentSessionUsage(db, usage("key-pin"));
+  assert.equal(keyed, "as_d70a21deaf1ed1a483a227ee1c2d7395");
+  assert.equal(agentSessionsDb.recordAgentSessionUsage(db, usage("key-pin")), keyed);
+  assert.equal(
+    agentSessionsDb.recordAgentSessionUsage(db, usage(null)),
+    "as_d2a4d57f0e77ac878eecd071ab88c4e4"
+  );
+  assert.equal(agentSessionsDb.getAgentSessionById(db, keyed)?.requestCount, 2);
 });
