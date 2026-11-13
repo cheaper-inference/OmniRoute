@@ -286,6 +286,7 @@
     "retentionOpt": "Keep only the last N backups",
     "passphrasePrompt": "Encryption passphrase: ",
     "noPassphrase": "Passphrase is required for encrypted backup.",
+    "restoreDecryptFailed": "Backup {name} could not be decrypted (wrong passphrase or damaged file); nothing was changed.",
     "cloudFailed": "Warning: cloud upload failed. Local backup was saved.",
     "cloudUploaded": "Cloud backup uploaded: {url}",
     "auto": {
