@@ -105,13 +105,34 @@ test("check names lose their matrix shard suffix only", () => {
   assert.equal(normalizeCheckName("Gate / CI"), "Gate / CI");
 });
 
-test("key parts drop ANSI codes, durations and case", () => {
+test("key parts drop ANSI codes, reporter durations and case", () => {
   assert.equal(
     normalizeKeyPart("\u001b[31mTests/Unit/A.test.ts\u001b[0m  Retries Once (12ms)"),
     "tests/unit/a.test.ts retries once"
   );
-  assert.equal(normalizeKeyPart("suite x 1.5s"), "suite x");
+  assert.equal(normalizeKeyPart("suite x (1.5s)"), "suite x");
+  assert.equal(normalizeKeyPart("✓ suite x 1.5s"), "suite x");
+  assert.equal(normalizeKeyPart("✖ suite x (31.2ms)\nnext line (2s)"), "suite x next line");
   assert.equal(normalizeKeyPart(null), "");
+});
+
+test("numbers inside a test title stay part of its identity", () => {
+  const five = normalizeKeyPart("tests/unit/t.test.ts times out after 5s (12ms)");
+  const ten = normalizeKeyPart("tests/unit/t.test.ts times out after 10s (9ms)");
+  assert.equal(five, "tests/unit/t.test.ts times out after 5s");
+  assert.equal(ten, "tests/unit/t.test.ts times out after 10s");
+  assert.notEqual(five, ten);
+  // a bare trailing duration without a reporter mark is part of the title
+  assert.equal(normalizeKeyPart("waits 2 min"), "waits 2 min");
+  assert.equal(normalizeKeyPart("suite x 1.5s"), "suite x 1.5s");
+  // so two failures that differ only by such a number are different failures
+  const result = classifyRed({
+    signatures: [sig("Unit Tests", ten)],
+    baseSha: BASE_SHA,
+    baseCheck: baseCheck("red", [sig("Unit Tests", five)]),
+    baseRedIssueOpen: true,
+  });
+  assert.equal(result.kind, "pr-red");
 });
 
 test("extractSignatures: annotations → key; output.title fallback; empty when unknown", () => {
@@ -189,10 +210,7 @@ test("classifyRed: no signatures is never infra", () => {
 
 test("classifyRed: base red with the same failures on other shards → base-red", () => {
   const candidate = [sig("Unit Tests", "tests/unit/a.test.ts a"), sig("Lint", "")];
-  const base = baseCheck("red", [
-    sig("Unit Tests", "tests/unit/a.test.ts a"),
-    sig("Lint", "eslint 2 errors"),
-  ]);
+  const base = baseCheck("red", [sig("Unit Tests", "tests/unit/a.test.ts a"), sig("Lint", "")]);
   const result = classifyRed({
     signatures: candidate,
     baseSha: BASE_SHA,
@@ -202,6 +220,9 @@ test("classifyRed: base red with the same failures on other shards → base-red"
   assert.equal(result.kind, "base-red");
   assert.deepEqual(result.matched, candidate);
   assert.deepEqual(result.unmatched, []);
+  assert.equal(result.nameOnly, 1, "Lint matched on the check name alone");
+  assert.match(result.detail, /1 matched by check name only/);
+  assert.equal(result.baseCheckPending, false);
 });
 
 test("classifyRed: base green on the same SHA → pr-red even with a base-red issue open", () => {
@@ -250,7 +271,7 @@ test("classifyRed: infra signatures are ignored when matching against the base",
   assert.equal(infraBase.kind, "pr-red");
 });
 
-test("classifyRed: different check name never matches; empty keys match within a check", () => {
+test("classifyRed: different check name never matches; both-empty keys match by name only", () => {
   const result = classifyRed({
     signatures: [sig("Typecheck", "")],
     baseSha: BASE_SHA,
@@ -258,22 +279,53 @@ test("classifyRed: different check name never matches; empty keys match within a
     baseRedIssueOpen: true,
   });
   assert.equal(result.kind, "pr-red");
-  const sameCheck = classifyRed({
+  // degraded mode (no failure annotations on either side): same check name is the evidence
+  const bothEmpty = classifyRed({
+    signatures: [sig("Unit Tests", "")],
+    baseSha: BASE_SHA,
+    baseCheck: baseCheck("red", [sig("Unit Tests", "")]),
+    baseRedIssueOpen: true,
+  });
+  assert.equal(bothEmpty.kind, "base-red");
+  assert.equal(bothEmpty.nameOnly, 1);
+});
+
+test("classifyRed: a key on only one side is unknown, never a base-red match", () => {
+  // candidate failed somewhere in Lint, base fails a specific known gate: not provably the same
+  const candidateEmpty = classifyRed({
     signatures: [sig("Lint", "")],
     baseSha: BASE_SHA,
     baseCheck: baseCheck("red", [sig("Lint", "eslint found 2 errors")]),
     baseRedIssueOpen: true,
   });
-  assert.equal(sameCheck.kind, "base-red");
+  assert.equal(candidateEmpty.kind, "pr-red");
+  assert.deepEqual(candidateEmpty.unmatched, [sig("Lint", "")]);
+  // the other way round: the candidate names a test the base check cannot be shown to fail
+  const baseEmpty = classifyRed({
+    signatures: [sig("Unit Tests", "tests/unit/new.test.ts breaks")],
+    baseSha: BASE_SHA,
+    baseCheck: baseCheck("red", [sig("Unit Tests", "")]),
+    baseRedIssueOpen: true,
+  });
+  assert.equal(baseEmpty.kind, "pr-red");
+  // equal non-empty keys still match
+  const same = classifyRed({
+    signatures: [sig("Lint", "eslint found 2 errors")],
+    baseSha: BASE_SHA,
+    baseCheck: baseCheck("red", [sig("Lint", "eslint found 2 errors")]),
+    baseRedIssueOpen: true,
+  });
+  assert.equal(same.kind, "base-red");
+  assert.equal(same.nameOnly, 0);
 });
 
-test("classifyRed: base-red issue open and no finished base check → needs-base-check", () => {
+test("classifyRed: base-red issue open and no base check for this SHA → needs-base-check", () => {
   const signatures = [sig("Unit Tests", "tests/unit/a.test.ts a")];
   for (const bc of [
     null,
-    baseCheck("pending"),
-    baseCheck("timeout"),
     baseCheck("red", signatures, OTHER_BASE_SHA),
+    baseCheck("timeout", [], OTHER_BASE_SHA),
+    baseCheck("pending", [], OTHER_BASE_SHA),
   ]) {
     const result = classifyRed({
       signatures,
@@ -282,7 +334,43 @@ test("classifyRed: base-red issue open and no finished base check → needs-base
       baseRedIssueOpen: true,
     });
     assert.equal(result.kind, "needs-base-check", JSON.stringify(bc));
+    assert.equal(result.baseCheckPending, false, JSON.stringify(bc));
   }
+});
+
+test("classifyRed: same-SHA base check still pending → wait for it, do not start another", () => {
+  const result = classifyRed({
+    signatures: [sig("Unit Tests", "tests/unit/a.test.ts a")],
+    baseSha: BASE_SHA,
+    baseCheck: baseCheck("pending"),
+    baseRedIssueOpen: true,
+  });
+  assert.equal(result.kind, "needs-base-check");
+  assert.equal(result.baseCheckPending, true);
+  assert.match(result.detail, /base check in progress/);
+  // without a base-red issue there is no base-red hypothesis to wait for
+  const noIssue = classifyRed({
+    signatures: [sig("Unit Tests", "tests/unit/a.test.ts a")],
+    baseSha: BASE_SHA,
+    baseCheck: baseCheck("pending"),
+    baseRedIssueOpen: false,
+  });
+  assert.equal(noIssue.kind, "pr-red");
+});
+
+test("classifyRed: same-SHA base check timed out → pr-red (it can never be redone)", () => {
+  // baseCheckRef is deterministic per SHA and the queue never force-pushes: asking for another
+  // base check on this SHA would loop forever.
+  const result = classifyRed({
+    signatures: [sig("Unit Tests", "tests/unit/a.test.ts a")],
+    baseSha: BASE_SHA,
+    baseCheck: baseCheck("timeout"),
+    baseRedIssueOpen: true,
+  });
+  assert.equal(result.kind, "pr-red");
+  assert.equal(result.baseCheckPending, false);
+  assert.match(result.detail, /timed out/);
+  assert.deepEqual(result.unmatched, [sig("Unit Tests", "tests/unit/a.test.ts a")]);
 });
 
 test("classifyRed: no base-red issue and no base check → pr-red", () => {

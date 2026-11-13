@@ -37,7 +37,12 @@ const GENERIC_PATTERNS = [
 ];
 
 const ANSI_RE = /\u001b\[[0-9;?]*[ -/]*[@-~]/g;
-const DURATION_RE = /\(?\b\d+(?:\.\d+)?\s?(?:ms|s|sec|secs|seconds|m|min|mins|minutes)\b\)?/gi;
+// Reporter timing only: a parenthesized duration at the end of a line ("(12ms)", "(1.5s)",
+// node:test / mocha style), or a bare one ending a line that starts with a pass/fail mark
+// ("✓ name 12ms", vitest style). Numbers inside a test title are part of its identity.
+const TRAILING_PAREN_DURATION_RE = /(?:\s*\(\s*\d+(?:\.\d+)?\s?(?:ms|s|m|min)\s*\))+\s*$/i;
+const REPORTER_MARK_RE = /^\s*[✔✖✓✗×]\s*/;
+const TRAILING_BARE_DURATION_RE = /\s+\d+(?:\.\d+)?\s?(?:ms|s)\s*$/i;
 const SHARD_SUFFIX_RE = /\s*\(\s*\d+\s*\/\s*\d+\s*\)\s*$/;
 
 const text = (v) => String(v ?? "");
@@ -85,12 +90,22 @@ export function isInfraFailure(run, annotations) {
   return isInfraText(haystack);
 }
 
-/** Lower-case, no ANSI codes, no durations, collapsed whitespace. */
+function stripReporterTiming(line) {
+  let out = line.replace(TRAILING_PAREN_DURATION_RE, "");
+  if (REPORTER_MARK_RE.test(out)) {
+    out = out.replace(REPORTER_MARK_RE, "").replace(TRAILING_BARE_DURATION_RE, "");
+  }
+  return out;
+}
+
+/** Lower-case, no ANSI codes, no reporter durations, collapsed whitespace. */
 export function normalizeKeyPart(value) {
   return text(value)
     .replace(ANSI_RE, "")
     .toLowerCase()
-    .replace(DURATION_RE, " ")
+    .split(/\r?\n/)
+    .map(stripReporterTiming)
+    .join(" ")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -132,9 +147,17 @@ export function extractSignatures(failures, annotationsByRunId) {
   });
 }
 
+/**
+ * Same check, and: both keys non-empty and equal, or both empty. When exactly one side has a
+ * key the failures cannot be shown to be the same → no match (pr-red / bisection, never a
+ * base-red pause on a guess). Both empty is the degraded "check name only" match: in this repo
+ * node:test/vitest emit no failure annotations, so it is the only base-red evidence available.
+ * classifyRed reports how many matches were name-only (`nameOnly`).
+ */
 function sameFailure(a, b) {
   if (a.check !== b.check) return false;
-  return !a.key || !b.key || a.key === b.key;
+  if (!a.key && !b.key) return true;
+  return Boolean(a.key) && Boolean(b.key) && a.key === b.key;
 }
 
 /**
@@ -142,17 +165,30 @@ function sameFailure(a, b) {
  *  - every signature infra → "infra" (needs at least one signature);
  *  - baseCheck for the SAME base SHA is "green" → "pr-red";
  *  - baseCheck "red" and every non-infra signature matches one of its non-infra signatures
- *    (same `check`, and same `key` when both keys are non-empty) → "base-red"; otherwise
- *    "pr-red";
- *  - no finished baseCheck for this base SHA and baseRedIssueOpen → "needs-base-check";
+ *    (same `check`, and equal keys — both empty counts as a name-only match, exactly one empty
+ *    never matches) → "base-red"; otherwise "pr-red";
+ *  - baseCheck for the SAME base SHA timed out → "pr-red": baseCheckRef is deterministic per
+ *    SHA and the queue never force-pushes, so that base check can never be redone (asking for it
+ *    again would loop forever);
+ *  - baseRedIssueOpen and a baseCheck for the SAME base SHA still "pending" →
+ *    "needs-base-check" with `baseCheckPending: true`: wait for it, do NOT start another;
+ *  - baseRedIssueOpen and no base check for this base SHA → "needs-base-check"
+ *    (`baseCheckPending: false`);
  *  - otherwise → "pr-red".
- * `matched`/`unmatched` partition the non-infra signatures against the base check.
+ * `matched`/`unmatched` partition the non-infra signatures against the base check; `nameOnly`
+ * counts the matches made on the check name alone (both keys empty).
  * @param {{signatures: FailureSignature[], baseSha: string, baseCheck: BaseCheck|null,
  *          baseRedIssueOpen: boolean}} input
  * @returns {{kind: "infra"|"base-red"|"pr-red"|"needs-base-check", detail: string,
- *            matched: FailureSignature[], unmatched: FailureSignature[]}}
+ *            matched: FailureSignature[], unmatched: FailureSignature[],
+ *            baseCheckPending: boolean, nameOnly: number}}
  */
 export function classifyRed(input) {
+  const result = classifyRedCore(input);
+  return { baseCheckPending: false, nameOnly: 0, ...result };
+}
+
+function classifyRedCore(input) {
   const signatures = input.signatures ?? [];
   const real = signatures.filter((s) => !s.infra);
   if (signatures.length > 0 && real.length === 0) {
@@ -180,12 +216,16 @@ export function classifyRed(input) {
     const unmatched = [];
     for (const sig of real)
       (baseReal.some((b) => sameFailure(sig, b)) ? matched : unmatched).push(sig);
+    const nameOnly = matched.filter((m) => !m.key).length;
     if (real.length > 0 && unmatched.length === 0) {
       return {
         kind: "base-red",
-        detail: `all ${matched.length} failure(s) also fail on base ${text(input.baseSha).slice(0, 12)}`,
+        detail:
+          `all ${matched.length} failure(s) also fail on base ${text(input.baseSha).slice(0, 12)}` +
+          (nameOnly ? ` (${nameOnly} matched by check name only: no test-level key)` : ""),
         matched,
         unmatched,
+        nameOnly,
       };
     }
     return {
@@ -195,13 +235,33 @@ export function classifyRed(input) {
         unmatched.map((s) => (s.key ? `${s.check} [${s.key}]` : s.check)).join("; "),
       matched,
       unmatched,
+      nameOnly,
+    };
+  }
+  if (sameBase && bc.status === "timeout") {
+    return {
+      kind: "pr-red",
+      detail:
+        `base check on ${text(input.baseSha).slice(0, 12)} timed out (it cannot be redone for ` +
+        "the same SHA): no base-red evidence",
+      matched: [],
+      unmatched: real,
     };
   }
 
   if (input.baseRedIssueOpen) {
+    if (sameBase && bc.status === "pending") {
+      return {
+        kind: "needs-base-check",
+        detail: `base check in progress for ${text(input.baseSha).slice(0, 12)}: wait for it`,
+        matched: [],
+        unmatched: real,
+        baseCheckPending: true,
+      };
+    }
     return {
       kind: "needs-base-check",
-      detail: "base-red issue open and no finished base check for this base SHA",
+      detail: "base-red issue open and no base check for this base SHA",
       matched: [],
       unmatched: real,
     };

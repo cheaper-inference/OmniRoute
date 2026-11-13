@@ -20,6 +20,8 @@
  * @property {string|null} completedAt
  * @property {string|null} htmlUrl
  * @property {string|null} appSlug   "github-actions" for workflow jobs
+ * @property {string|null} [workflow] workflow name, when the normalizer knows it (optional): runs of
+ *                                   different workflows are never re-runs of each other
  * @property {{title: string|null, summary: string|null, text: string|null}} output
  */
 
@@ -46,20 +48,56 @@ export const FAILING_CONCLUSIONS = Object.freeze([
 const OWN_PREFIX = "omni-queue/";
 
 /**
- * Keep only the latest run per check name (highest id) — re-runs and retried candidates report
- * several runs with the same name on one SHA. Output keeps the input order of the kept runs.
+ * The only app whose `success` satisfies a required check. A commit status, or a check run of
+ * another app, with a required name can still make the verdict red/pending, never green: any
+ * actor with statuses:write / checks:write could otherwise forge a green Gate.
+ */
+export const REQUIRED_CHECK_APP = "github-actions";
+
+const toMs = (iso) => {
+  const ms = Date.parse(String(iso ?? ""));
+  return Number.isNaN(ms) ? null : ms;
+};
+
+/**
+ * `newer` replaces `older` only when it is a genuine re-run: same name, higher id, not of a
+ * different workflow (when both name one), and started at or after `older` completed. Runs
+ * that overlap in time are parallel jobs of different workflows that happen to share a name
+ * (ci.yml and quality.yml both have "Change Classification") and must all be kept.
+ */
+function supersedes(newer, older) {
+  if (newer.name !== older.name || !(Number(newer.id) > Number(older.id))) return false;
+  if (newer.workflow && older.workflow && newer.workflow !== older.workflow) return false;
+  const done = toMs(older.completedAt);
+  const start = toMs(newer.startedAt);
+  return done !== null && start !== null && start >= done;
+}
+
+/**
+ * Drop runs superseded by a re-run (see supersedes): re-runs and retried candidates report
+ * several runs with the same name on one SHA, and only the latest attempt counts. Same-name runs
+ * that overlap in time (or lack timestamps) are all kept, so a failure is never hidden by an
+ * unrelated success (fail closed). Output keeps the input order of the kept runs.
  * @param {CheckRun[]} checkRuns
  * @returns {CheckRun[]}
  */
 export function latestByName(checkRuns) {
-  const best = new Map();
-  for (const run of checkRuns ?? []) {
-    if (!run || typeof run.name !== "string") continue;
-    const cur = best.get(run.name);
-    if (!cur || Number(run.id) > Number(cur.id)) best.set(run.name, run);
+  const runs = (checkRuns ?? []).filter((r) => r && typeof r.name === "string");
+  const byName = new Map();
+  for (const run of runs) {
+    if (!byName.has(run.name)) byName.set(run.name, []);
+    byName.get(run.name).push(run);
   }
-  const kept = new Set(best.values());
-  return (checkRuns ?? []).filter((r) => kept.has(r));
+  const superseded = new Set();
+  for (const group of byName.values()) {
+    if (group.length < 2) continue;
+    for (const older of group) {
+      if (group.some((newer) => newer !== older && supersedes(newer, older))) {
+        superseded.add(older);
+      }
+    }
+  }
+  return runs.filter((r) => !superseded.has(r));
 }
 
 /** Newest status per context (max createdAt; ties keep the earlier entry of a newest-first list). */
@@ -122,6 +160,8 @@ function severity(outcome) {
  *  - timeout: not decided after config.checksTimeoutMinutes since startedAt;
  *  - pending: otherwise.
  * Statuses: failure/error → failure, pending → pending (advisory names tolerated as for runs).
+ * A required check is `success` only through a check run of REQUIRED_CHECK_APP; a status or a
+ * run of another app reporting success for a required name leaves it "missing" (pending).
  * Contexts/names starting with "omni-queue/" (the queue's own approval statuses) are ignored.
  * Failed statuses appear in `failures` as CheckRun-shaped objects with id 0 and
  * `source: "status"`.
@@ -138,7 +178,7 @@ export function evaluateChecks(input) {
   const entries = [];
   for (const run of latestByName(input.checkRuns)) {
     if (run.name.startsWith(OWN_PREFIX)) continue;
-    entries.push({ name: run.name, outcome: runOutcome(run), run });
+    entries.push({ name: run.name, outcome: runOutcome(run), run, source: "run" });
   }
   for (const s of latestStatusByContext(input.statuses)) {
     if (s.context.startsWith(OWN_PREFIX)) continue;
@@ -148,7 +188,12 @@ export function evaluateChecks(input) {
         : s.state === "failure" || s.state === "error"
           ? "failure"
           : "pending";
-    entries.push({ name: s.context, outcome, run: outcome === "failure" ? statusAsRun(s) : null });
+    entries.push({
+      name: s.context,
+      outcome,
+      run: outcome === "failure" ? statusAsRun(s) : null,
+      source: "status",
+    });
   }
 
   const failures = [];
@@ -171,10 +216,22 @@ export function evaluateChecks(input) {
       if (!pendingNames.includes(name)) pendingNames.push(name);
       continue;
     }
-    // A name reported both as a check run and as a status: the worst outcome wins.
+    // A name reported several times (run + status, or parallel runs): the worst outcome wins.
     const worst = mine.reduce((a, b) => (severity(b.outcome) > severity(a.outcome) ? b : a));
-    if (worst.outcome === "success" || worst.outcome === "pending") {
-      required[name] = worst.outcome;
+    if (worst.outcome === "success") {
+      // Only a GitHub Actions check run can make a required check green.
+      const trusted = mine.some(
+        (e) =>
+          e.source === "run" && e.outcome === "success" && e.run?.appSlug === REQUIRED_CHECK_APP
+      );
+      if (trusted) {
+        required[name] = "success";
+      } else {
+        required[name] = "missing";
+        if (!pendingNames.includes(name)) pendingNames.push(name);
+      }
+    } else if (worst.outcome === "pending") {
+      required[name] = "pending";
     } else {
       required[name] = worst.run?.conclusion ?? "failure";
       // Fail closed: skipped/neutral (any non-success conclusion) on a required check is red.

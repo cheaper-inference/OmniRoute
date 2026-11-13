@@ -43,6 +43,11 @@ function status(context, state, createdAt = NOW, overrides = {}) {
 }
 
 const allRequiredGreen = () => [run(GATE_CI), run(GATE_QUALITY), run(INTEGRITY)];
+const at = (minutesAfterStart) =>
+  new Date(Date.parse(STARTED) + minutesAfterStart * 60000).toISOString();
+/** A completed run that started/finished at the given minutes after STARTED. */
+const timed = (name, conclusion, id, startMin, endMin, extra = {}) =>
+  run(name, conclusion, { id, startedAt: at(startMin), completedAt: at(endMin), ...extra });
 
 function evaluate(checkRuns, statuses = [], now = NOW) {
   return evaluateChecks({ checkRuns, statuses, config, startedAt: STARTED, now });
@@ -58,13 +63,44 @@ test("the committed config names the required and advisory checks this suite ass
   assert.equal(config.checksTimeoutMinutes, 240);
 });
 
-test("latestByName keeps the highest id per name, in input order", () => {
-  const old = run("Unit Tests (1/8)", "failure", { id: 10 });
-  const fresh = run("Unit Tests (1/8)", "success", { id: 20 });
-  const other = run("Lint", "success", { id: 15 });
+test("latestByName drops a run only when a later re-run started after it finished", () => {
+  const old = timed("Unit Tests (1/8)", "failure", 10, 0, 20);
+  const fresh = timed("Unit Tests (1/8)", "success", 20, 25, 40);
+  const other = timed("Lint", "success", 15, 0, 5);
   assert.deepEqual(latestByName([old, other, fresh]), [other, fresh]);
   assert.deepEqual(latestByName([fresh, old]), [fresh]);
   assert.deepEqual(latestByName([]), []);
+  // a lower id never supersedes a higher one, even if timestamps say so
+  const weird = timed("Unit Tests (1/8)", "success", 5, 25, 40);
+  assert.deepEqual(latestByName([old, weird]), [old, weird]);
+});
+
+test("same-name runs that overlap in time are all kept (different workflows)", () => {
+  // ci.yml and quality.yml both run a job named "Change Classification" on the candidate
+  const ciRun = timed("Change Classification", "failure", 1, 0, 3);
+  const qualityRun = timed("Change Classification", "success", 2, 1, 4);
+  assert.deepEqual(latestByName([ciRun, qualityRun]), [ciRun, qualityRun]);
+  const result = evaluate([...allRequiredGreen(), ciRun, qualityRun]);
+  assert.equal(result.verdict, "red");
+  assert.deepEqual(
+    result.failures.map((f) => f.id),
+    [1]
+  );
+  // without timestamps nothing is assumed to be a re-run either (fail closed)
+  const noTimes = [
+    run("Change Classification", "failure", { id: 3, startedAt: null, completedAt: null }),
+    run("Change Classification", "success", { id: 4, startedAt: null, completedAt: null }),
+  ];
+  assert.equal(evaluate([...allRequiredGreen(), ...noTimes]).verdict, "red");
+});
+
+test("runs naming different workflows are never re-runs of each other", () => {
+  const ciRun = timed("Change Classification", "failure", 1, 0, 3, { workflow: "CI" });
+  const later = timed("Change Classification", "success", 2, 10, 12, { workflow: "Quality" });
+  assert.deepEqual(latestByName([ciRun, later]), [ciRun, later]);
+  assert.equal(evaluate([...allRequiredGreen(), ciRun, later]).verdict, "red");
+  const rerun = timed("Change Classification", "success", 5, 10, 12, { workflow: "CI" });
+  assert.deepEqual(latestByName([ciRun, rerun]), [rerun]);
 });
 
 test("all required success and nothing pending → green", () => {
@@ -170,14 +206,14 @@ test("undecided after checksTimeoutMinutes → timeout; just before → pending"
 });
 
 test("a re-run whose newest attempt is green replaces the older failure", () => {
-  const failed = run("Unit Tests (2/8)", "failure", { id: 100 });
-  const rerun = run("Unit Tests (2/8)", "success", { id: 200 });
+  const failed = timed("Unit Tests (2/8)", "failure", 100, 0, 20);
+  const rerun = timed("Unit Tests (2/8)", "success", 200, 30, 50);
   assert.equal(evaluate([...allRequiredGreen(), rerun, failed]).verdict, "green");
   // and the opposite: an older success does not hide a newer failure
   const result = evaluate([
     ...allRequiredGreen(),
-    run("Unit Tests (2/8)", "success", { id: 300 }),
-    run("Unit Tests (2/8)", "failure", { id: 400 }),
+    timed("Unit Tests (2/8)", "success", 300, 0, 20),
+    timed("Unit Tests (2/8)", "failure", 400, 30, 50),
   ]);
   assert.equal(result.verdict, "red");
   assert.equal(result.failures[0].id, 400);
@@ -202,13 +238,39 @@ test("commit statuses: failure/error → red, pending → pending, newest per co
   assert.equal(recovered.verdict, "green");
 });
 
-test("a required check can be satisfied by a commit status", () => {
-  const result = evaluate([run(GATE_CI), run(GATE_QUALITY)], [status(INTEGRITY, "success")]);
-  assert.equal(result.verdict, "green");
-  assert.equal(result.required[INTEGRITY], "success");
+test("a commit status can fail a required check but never satisfy it", () => {
+  const forged = evaluate([run(GATE_CI), run(GATE_QUALITY)], [status(INTEGRITY, "success")]);
+  assert.notEqual(forged.verdict, "green");
+  assert.equal(forged.verdict, "pending");
+  assert.equal(forged.required[INTEGRITY], "missing");
+  assert.ok(forged.pending.includes(INTEGRITY));
+  // after the timeout it is a timeout, still never green
+  assert.equal(
+    evaluate([run(GATE_CI), run(GATE_QUALITY)], [status(INTEGRITY, "success")], AFTER_TIMEOUT)
+      .verdict,
+    "timeout"
+  );
   const failing = evaluate([run(GATE_CI), run(GATE_QUALITY)], [status(INTEGRITY, "failure")]);
   assert.equal(failing.verdict, "red");
   assert.equal(failing.required[INTEGRITY], "failure");
+  // a real Actions run plus a success status: green through the run
+  const both = evaluate(allRequiredGreen(), [status(INTEGRITY, "success")]);
+  assert.equal(both.verdict, "green");
+  // a real Actions success does not hide a failing status of the same name
+  const mixed = evaluate(allRequiredGreen(), [status(INTEGRITY, "failure")]);
+  assert.equal(mixed.verdict, "red");
+});
+
+test("a required check run from another app never satisfies it", () => {
+  const otherApp = run(INTEGRITY, "success", { appSlug: "some-other-app" });
+  const result = evaluate([run(GATE_CI), run(GATE_QUALITY), otherApp]);
+  assert.equal(result.verdict, "pending");
+  assert.equal(result.required[INTEGRITY], "missing");
+  const noApp = run(GATE_CI, "success", { appSlug: null });
+  assert.equal(evaluate([noApp, run(GATE_QUALITY), run(INTEGRITY)]).required[GATE_CI], "missing");
+  // but its failure still counts (fail closed)
+  const failing = run(INTEGRITY, "failure", { appSlug: "some-other-app" });
+  assert.equal(evaluate([...allRequiredGreen(), failing]).verdict, "red");
 });
 
 test("advisory statuses are tolerated like advisory runs", () => {
