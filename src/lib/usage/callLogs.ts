@@ -50,9 +50,15 @@ import {
   parseStoredPayload,
   protectErrorPayloadForLog,
   protectPayloadForLog,
+  protectRequestBodyForLog,
 } from "../logPayloads";
 import { pickDisplayValue } from "@/shared/utils/maskEmail";
-import { getCallLogsDir, type CallLogArtifact, type CallLogDetailState } from "./callLogArtifacts";
+import {
+  getCallLogsDir,
+  hasRoomForCallLogArtifact,
+  type CallLogArtifact,
+  type CallLogDetailState,
+} from "./callLogArtifacts";
 import { closeCallLogArtifactWriter, writeCallArtifactAsync } from "./callLogArtifactWriter";
 import { isWriteLockError, scheduleWriteRetry } from "./usageWriteRetry";
 import {
@@ -577,7 +583,7 @@ async function buildCallLogRow(entry: any, metadataOnly = false): Promise<Prepar
     : entry.connectionId || apiKeyContext?.connectionId || null;
   const noLogEnabled = Boolean(entry.noLog) || (apiKeyId ? isNoLog(apiKeyId) : false);
 
-  const protectedRequestBody = noLogEnabled ? null : protectPayloadForLog(entry.requestBody);
+  const protectedRequestBody = noLogEnabled ? null : protectRequestBodyForLog(entry.requestBody);
   const responseStatus = Number(entry.status);
   const failedResponse = Number.isFinite(responseStatus) && responseStatus >= 400;
   const protectedResponseBody = noLogEnabled
@@ -918,7 +924,10 @@ async function publishCallLogDetail(prepared: PreparedCallLogRow): Promise<void>
   if (buildDetailArtifact) {
     const id = String(logEntry.id);
     try {
-      const artifactResult = await writeCallArtifactAsync(buildDetailArtifact());
+      // A skipped write ends like a failed one: detail_state "missing" (see finally below).
+      const artifactResult = hasRoomForCallLogArtifact()
+        ? await writeCallArtifactAsync(buildDetailArtifact())
+        : null;
       if (artifactResult) publishPendingCallLogDetail(db, id, artifactResult);
     } finally {
       // A null result or a thrown write must not strand the export cursor.

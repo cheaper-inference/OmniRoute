@@ -73,7 +73,9 @@ export function RequestRow({ request, selected, onClick, onSameContext, style }:
             {formatTime(request.timestamp)}
           </span>
           <span className="font-mono font-medium text-text-main shrink-0">{request.method}</span>
-          <span className={cn("font-mono font-bold shrink-0", sc)}>{String(request.status)}</span>
+          <span className={cn("font-mono font-semibold shrink-0", sc)}>
+            {String(request.status)}
+          </span>
           <span className="text-text-muted shrink-0">{formatSize(request.responseSize)}</span>
           <span className="shrink-0">
             <AgentEmoji agentId={request.agent} />
