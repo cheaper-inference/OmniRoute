@@ -489,7 +489,7 @@ test("Claude -> Gemini prefers thinking.budget_tokens over output_config.effort"
   });
 });
 
-test("Claude -> Gemini skips thinkingConfig for output_config.effort=none", () => {
+test("Claude -> Gemini switches thinking off for output_config.effort=none", () => {
   const result = claudeToGeminiRequest(
     "gemini-2.5-pro",
     {
@@ -499,7 +499,12 @@ test("Claude -> Gemini skips thinkingConfig for output_config.effort=none", () =
     false
   );
 
-  assert.equal((result.generationConfig as any).thinkingConfig, undefined);
+  // Gemini 2.5 thinks dynamically without a thinkingConfig, so "none" must be explicit
+  // (the OpenAI path sends the same for reasoning_effort "none").
+  assert.deepEqual((result.generationConfig as any).thinkingConfig, {
+    thinkingBudget: 0,
+    includeThoughts: false,
+  });
 });
 
 // Regression for #3842: thinking.budget_tokens must be capped by the model's
