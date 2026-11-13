@@ -532,8 +532,13 @@ export function stripClaudeSystemPrefixBlocks(
   for (let i = sysBlocks.length - 1; i >= 0; i--) {
     const text = sysBlocks[i]?.text;
     if (typeof text !== "string") continue;
-    if (text.startsWith("x-anthropic-billing-header:") || text.startsWith(sentinel)) {
+    if (text.startsWith("x-anthropic-billing-header:")) {
       sysBlocks.splice(i, 1);
+    } else if (text.startsWith(sentinel)) {
+      // A client may send the sentinel and its own instructions in one block: keep the rest.
+      const rest = text.slice(sentinel.length).trimStart();
+      if (rest) sysBlocks[i] = { ...sysBlocks[i], text: rest };
+      else sysBlocks.splice(i, 1);
     }
   }
 }
