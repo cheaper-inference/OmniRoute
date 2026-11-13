@@ -27,6 +27,19 @@
  * cannot be parsed (or whose upstream call fails) is retried string by
  * string, so the worst case degrades to the default per-string behaviour.
  *
+ * Keys the source no longer has are dropped from every target locale (the merge walks the
+ * source tree). `--prune-extra` names that default explicitly; `--keep-extra` keeps them.
+ *
+ * --rewritten-since=<ref> marks as `__MISSING__:<new english>` every translation whose English
+ * value changed since <ref> (merge base with HEAD, like check-ui-value-drift.mjs) and that the
+ * locale left untouched — the stale translations check-ui-value-drift reports, computed by the
+ * same `findStaleTranslations`. With --translate-markers they are retranslated in the same run.
+ *
+ * Who runs it (plan "derived numbers and texts resolved only at release", 2026-11-13): a feature
+ * PR adds keys to en.json only and does NOT run this script. The locales are completed once per
+ * release by `release:refresh-derived`, which calls the programmatic API `syncUiKeys()` below,
+ * and by translation waves on their own branches.
+ *
  * Output examples:
  *   [i18n-ui-sync] pt-BR: +589 missing keys (589 __MISSING__, 0 translated)
  *   [i18n-ui-sync] pt-BR: +0 missing keys (already in sync)
@@ -37,12 +50,19 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
+import { execFileSync } from "node:child_process";
+
+import { findStaleTranslations, flattenLeaves } from "./check-ui-value-drift.mjs";
+import { generateGlobalErrorMessages } from "./generate-global-error-messages.mjs";
 import {
   backendConfig,
   translateBatch,
   translateMultiLocaleBatch,
   translateString,
 } from "./lib/translate-backend.mjs";
+
+const translateBatchDefault = translateBatch;
+const translateStringDefault = translateString;
 
 // ----- .env loader --------------------------------------------------------
 // Loads variables from a local `.env` (gitignored) into process.env without
@@ -81,11 +101,13 @@ const CONFIG_PATH = path.join(ROOT, "config", "i18n.json");
 const CATALOGS = {
   ui: {
     name: "ui",
+    rel: "src/i18n/messages",
     dir: path.join(ROOT, "src", "i18n", "messages"),
     allowlistPath: path.join(SCRIPT_DIR, "untranslatable-keys.json"),
   },
   cli: {
     name: "cli",
+    rel: "bin/cli/locales",
     dir: path.join(ROOT, "bin", "cli", "locales"),
     allowlistPath: path.join(SCRIPT_DIR, "untranslatable-cli-keys.json"),
   },
@@ -129,12 +151,18 @@ export function parseArgs(argv) {
     batchSize: 1,
     localesPerRequest: 1,
     catalog: "ui",
+    pruneExtra: true,
+    rewrittenSince: null,
   };
   for (const arg of argv.slice(2)) {
     if (arg === "--dry-run" || arg === "--dryrun") opts.dryRun = true;
     else if (arg === "--translate-markers") opts.translateMarkers = true;
     else if (arg === "--retranslate-identical") opts.retranslateIdentical = true;
-    else if (arg.startsWith("--catalog=")) opts.catalog = arg.slice(10).trim();
+    else if (arg === "--prune-extra") opts.pruneExtra = true;
+    else if (arg === "--keep-extra") opts.pruneExtra = false;
+    else if (arg.startsWith("--rewritten-since=")) {
+      opts.rewrittenSince = arg.slice("--rewritten-since=".length).trim() || null;
+    } else if (arg.startsWith("--catalog=")) opts.catalog = arg.slice(10).trim();
     else if (arg.startsWith("--locale=")) {
       opts.locales = arg
         .slice(9)
@@ -167,6 +195,11 @@ export function parseArgs(argv) {
           "  --retranslate-identical Flag leaves still identical to English (outside",
           "                          untranslatable-keys.json) as __MISSING__ so they get",
           "                          retranslated — only meaningful with --translate-markers",
+          "  --prune-extra           Drop keys en.json no longer has (the default, named)",
+          "  --keep-extra            Keep keys en.json no longer has",
+          "  --rewritten-since=<ref> Mark as __MISSING__:<new english> the translations of",
+          "                          values rewritten in English since <ref> (merge base)",
+          "                          that the locale left untouched",
           "  --dry-run               Report what would change, write nothing",
           "  --translate-markers     Call the translation backend to translate every",
           "                          __MISSING__:<en> placeholder",
@@ -245,11 +278,27 @@ const FORBIDDEN_KEYS = new Set(["__proto__", "prototype", "constructor"]);
  * prefixing scalar values with PLACEHOLDER_PREFIX. Existing translated keys
  * are preserved verbatim.
  *
- * Returns a tuple: { merged, addedPaths } so the caller can report the
- * additions and (optionally) translate them.
+ * Returns { merged, addedPaths, extraPaths } so the caller can report the
+ * additions and (optionally) translate them. `extraPaths` lists the target
+ * leaves the source no longer has: with `pruneExtra` (the default, and the
+ * only behaviour before the option existed) they are left out of `merged`;
+ * with `pruneExtra: false` they are kept, appended after the source keys of
+ * their object.
  */
-export function mergeMissing(source, target) {
+export function mergeMissing(source, target, { pruneExtra = true } = {}) {
   const addedPaths = [];
+  const extraPaths = [];
+
+  function collectLeafPaths(node, prefix) {
+    if (!isPlainObject(node)) {
+      extraPaths.push(prefix);
+      return;
+    }
+    for (const [key, value] of Object.entries(node)) {
+      if (FORBIDDEN_KEYS.has(key)) continue;
+      collectLeafPaths(value, `${prefix}.${key}`);
+    }
+  }
 
   function walk(srcNode, tgtNode, prefix) {
     if (!isPlainObject(srcNode)) {
@@ -276,11 +325,103 @@ export function mergeMissing(source, target) {
       }
       out[key] = walk(value, tgtChild, nextPrefix);
     }
+    if (isPlainObject(tgtNode)) {
+      for (const [key, value] of Object.entries(tgtNode)) {
+        if (FORBIDDEN_KEYS.has(key) || Object.prototype.hasOwnProperty.call(srcNode, key)) continue;
+        collectLeafPaths(value, prefix ? `${prefix}.${key}` : key);
+        if (!pruneExtra) out[key] = value;
+      }
+    }
     return out;
   }
 
   const merged = walk(source, target, "");
-  return { merged, addedPaths };
+  return { merged, addedPaths, extraPaths };
+}
+
+/**
+ * Sets every `staleKeys` leaf of `merged` to `__MISSING__:<current english>` — the translations
+ * of English values rewritten since a ref (see `findRewrittenTranslations`). A leaf that is
+ * absent, not a string, or already a placeholder is left alone. Mutates `merged`; returns the
+ * marked paths, sorted.
+ *
+ * @param {object} merged          locale tree (output of mergeMissing)
+ * @param {Iterable<string>} staleKeys  dotted paths
+ * @param {Record<string, unknown>} sourceFlat  flattened en.json (current English)
+ */
+export function markRewrittenAsMissing(merged, staleKeys, sourceFlat) {
+  const marked = [];
+  for (const key of staleKeys ?? []) {
+    const english = sourceFlat[key];
+    if (typeof english !== "string") continue;
+    const parts = key.split(".");
+    if (parts.some((part) => FORBIDDEN_KEYS.has(part))) continue;
+    let node = merged;
+    for (const part of parts.slice(0, -1)) {
+      node = isPlainObject(node) ? node[part] : undefined;
+    }
+    const leaf = parts[parts.length - 1];
+    if (!isPlainObject(node) || !Object.prototype.hasOwnProperty.call(node, leaf)) continue;
+    const value = node[leaf];
+    if (typeof value !== "string" || value.startsWith(PLACEHOLDER_PREFIX)) continue;
+    node[leaf] = `${PLACEHOLDER_PREFIX}${english}`;
+    marked.push(key);
+  }
+  return marked.sort();
+}
+
+function gitOut(args, cwd) {
+  return execFileSync("git", args, {
+    cwd,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "ignore"],
+    maxBuffer: 256 * 1024 * 1024,
+  });
+}
+
+function readJsonAtRef(root, ref, relPath) {
+  try {
+    return JSON.parse(gitOut(["show", `${ref}:${relPath}`], root));
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Stale translations of English values rewritten since `ref`, per locale — the exact set
+ * check-ui-value-drift.mjs reports (same `findStaleTranslations`, same merge-base rule: the
+ * merge base of HEAD and `ref`, or `ref` itself when there is none).
+ *
+ * @param {object} args
+ * @param {string} args.root        repository root
+ * @param {string} args.catalogRel  e.g. "src/i18n/messages"
+ * @param {string} args.ref         git ref the English is compared against
+ * @param {object} args.headEn      en.json of the working tree
+ * @param {Record<string, object>} args.headLocales  locale -> working-tree catalog
+ * @returns {{ base: string, staleByLocale: Map<string, Set<string>> }}
+ */
+export function findRewrittenTranslations({ root, catalogRel, ref, headEn, headLocales }) {
+  let base = ref;
+  try {
+    base = gitOut(["merge-base", "HEAD", ref], root).trim() || ref;
+  } catch {
+    /* no common history (shallow clone) — compare against the ref itself, like the gate */
+  }
+  const baseEn = readJsonAtRef(root, base, `${catalogRel}/en.json`);
+  if (!baseEn) {
+    throw new Error(`--rewritten-since: cannot read ${catalogRel}/en.json at ${ref}`);
+  }
+  const baseLocales = {};
+  for (const locale of Object.keys(headLocales)) {
+    baseLocales[locale] = readJsonAtRef(root, base, `${catalogRel}/${locale}.json`) ?? {};
+  }
+  const stale = findStaleTranslations({ baseEn, headEn, baseLocales, headLocales });
+  const staleByLocale = new Map();
+  for (const { key, locale } of stale) {
+    if (!staleByLocale.has(locale)) staleByLocale.set(locale, new Set());
+    staleByLocale.get(locale).add(key);
+  }
+  return { base, staleByLocale };
 }
 
 function countPlaceholders(node) {
@@ -438,8 +579,12 @@ export async function translatePlaceholdersExport(
   localeEntry,
   backend,
   concurrency,
-  batchSize = 1
+  batchSize = 1,
+  fns = {}
 ) {
+  // Injectable for tests (no translation backend in unit tests); the defaults are the real client.
+  const translateBatch = fns.translateBatch ?? translateBatchDefault;
+  const translateString = fns.translateString ?? translateStringDefault;
   const tasks = [];
   function collect(node, parent, key) {
     if (typeof node === "string") {
@@ -731,6 +876,163 @@ export async function processLocale(locale, source, config, opts, backend) {
   return writeLocaleResult(locale, merged, addedPaths, translateStats, opts);
 }
 
+/**
+ * Programmatic entry point for `release:refresh-derived` (plan "derived numbers and texts
+ * resolved only at release", 2026-11-13): completes the non-English catalogs of one family from
+ * its en.json in a single pass. Feature PRs no longer do this; the release refresh and the
+ * translation waves do.
+ *
+ * Per target locale, in order: add the keys en.json has and the locale lacks (as
+ * `__MISSING__:<en>`); with `pruneExtra`, drop the keys en.json no longer has; with
+ * `rewrittenSinceRef`, mark as `__MISSING__:<new en>` the translations of values rewritten in
+ * English since that ref (merge base with HEAD) that the locale left untouched; with
+ * `translate`, translate every marker through the translation backend
+ * (`OMNIROUTE_TRANSLATION_*`, see lib/translate-backend.mjs — throws when it is not configured).
+ * A dashboard (`ui`) run that changed a catalog also regenerates the compact error-boundary
+ * catalogs under src/i18n/global-error-messages (generate-global-error-messages.mjs).
+ *
+ * @param {object} [options]
+ * @param {"ui" | "cli"} [options.catalog="ui"]
+ * @param {string[] | null} [options.locales]  subset of locale codes (default: every locale of
+ *   config/i18n.json that has a file, except en)
+ * @param {boolean} [options.translate=false]
+ * @param {boolean} [options.pruneExtra=false]
+ * @param {string | null} [options.rewrittenSinceRef]
+ * @param {boolean} [options.dryRun=false]  compute everything, write nothing
+ * @param {string} [options.root]  repository root (default: this checkout)
+ * @param {number} [options.batchSize=40]  placeholders per translation request
+ * @param {number} [options.concurrency]   default OMNIROUTE_TRANSLATION_CONCURRENCY or 4
+ * @param {{ translateBatch?: Function, translateString?: Function }} [options.translateFns]
+ *   test seam; defaults to the real backend client
+ * @param {(line: string) => void} [options.log]
+ * @returns {Promise<{
+ *   catalog: "ui" | "cli",
+ *   dryRun: boolean,
+ *   changedFiles: string[],
+ *   added: number, pruned: number, markedRewritten: number, translated: number, failed: number,
+ *   locales: Array<{ locale: string, file: string, changed: boolean, added: string[],
+ *     pruned: string[], markedRewritten: string[], translated: number, failed: number,
+ *     placeholders: number }>
+ * }>}  paths are repo-relative POSIX paths
+ */
+export async function syncUiKeys(options = {}) {
+  const {
+    catalog: catalogName = "ui",
+    locales = null,
+    translate = false,
+    pruneExtra = false,
+    rewrittenSinceRef = null,
+    dryRun = false,
+    root = ROOT,
+    batchSize = 40,
+    concurrency = Number(process.env.OMNIROUTE_TRANSLATION_CONCURRENCY || 4),
+    translateFns = {},
+    log = (line) => logInfo(line),
+  } = options;
+  const catalog = resolveCatalog(catalogName);
+  const dir = path.join(root, catalog.rel);
+  const rel = (abs) => path.relative(root, abs).split(path.sep).join("/");
+  const config = JSON.parse(await fs.readFile(path.join(root, "config", "i18n.json"), "utf8"));
+  const source = await loadJson(path.join(dir, `${SOURCE_LOCALE}.json`));
+  const sourceFlat = flattenLeaves(source);
+
+  const onDisk = new Set(
+    (await fs.readdir(dir)).filter((f) => f.endsWith(".json")).map((f) => f.slice(0, -5))
+  );
+  let targets = config.locales
+    .map((l) => l.code)
+    .filter((code) => code !== SOURCE_LOCALE && onDisk.has(code));
+  if (locales) targets = targets.filter((code) => locales.includes(code));
+
+  const heads = new Map();
+  for (const code of targets) heads.set(code, await loadJson(path.join(dir, `${code}.json`)));
+
+  let staleByLocale = new Map();
+  if (rewrittenSinceRef) {
+    ({ staleByLocale } = findRewrittenTranslations({
+      root,
+      catalogRel: catalog.rel,
+      ref: rewrittenSinceRef,
+      headEn: source,
+      headLocales: Object.fromEntries(heads),
+    }));
+  }
+
+  let backend = null;
+  const injected = Boolean(translateFns.translateBatch || translateFns.translateString);
+  if (translate && !dryRun && !injected) backend = backendConfig();
+
+  const results = [];
+  const changedFiles = [];
+  for (const code of targets) {
+    const file = path.join(dir, `${code}.json`);
+    const before = await fs.readFile(file, "utf8");
+    const { merged, addedPaths, extraPaths } = mergeMissing(source, heads.get(code), {
+      pruneExtra,
+    });
+    const markedRewritten = markRewrittenAsMissing(merged, staleByLocale.get(code), sourceFlat);
+    let stats = { translated: 0, failed: 0 };
+    if (translate && !dryRun) {
+      const localeEntry = config.locales.find((l) => l.code === code);
+      stats = await translatePlaceholdersExport(
+        merged,
+        localeEntry,
+        backend,
+        concurrency,
+        batchSize,
+        translateFns
+      );
+    }
+    const after = JSON.stringify(merged, null, 2) + "\n";
+    const changed = before !== after;
+    if (changed) {
+      changedFiles.push(rel(file));
+      if (!dryRun) await fs.writeFile(file, after, "utf8");
+    }
+    results.push({
+      locale: code,
+      file: rel(file),
+      changed,
+      added: addedPaths,
+      pruned: pruneExtra ? extraPaths : [],
+      markedRewritten,
+      translated: stats.translated,
+      failed: stats.failed,
+      placeholders: countPlaceholders(merged),
+    });
+  }
+
+  if (catalog.name === "ui" && !dryRun && changedFiles.length && source.publicSystem?.globalError) {
+    const compactDir = path.join(root, "src", "i18n", "global-error-messages");
+    const snapshot = new Map();
+    for (const { code } of config.locales) {
+      const file = path.join(compactDir, `${code}.json`);
+      snapshot.set(file, existsSync(file) ? await fs.readFile(file, "utf8") : null);
+    }
+    generateGlobalErrorMessages(root);
+    for (const [file, previous] of snapshot) {
+      if ((await fs.readFile(file, "utf8")) !== previous) changedFiles.push(rel(file));
+    }
+  }
+
+  const sum = (pick) => results.reduce((total, r) => total + pick(r), 0);
+  const summary = {
+    catalog: catalog.name,
+    dryRun,
+    changedFiles,
+    added: sum((r) => r.added.length),
+    pruned: sum((r) => r.pruned.length),
+    markedRewritten: sum((r) => r.markedRewritten.length),
+    translated: sum((r) => r.translated),
+    failed: sum((r) => r.failed),
+    locales: results,
+  };
+  log(
+    `${dryRun ? "[DRY] " : ""}syncUiKeys ${catalog.name}: locales=${results.length}, changed=${changedFiles.length}, added=${summary.added}, pruned=${summary.pruned}, marked-rewritten=${summary.markedRewritten}, translated=${summary.translated}${summary.failed ? `, failed=${summary.failed}` : ""}`
+  );
+  return summary;
+}
+
 async function main() {
   const opts = parseArgs(process.argv);
   const catalog = resolveCatalog(opts.catalog);
@@ -760,6 +1062,30 @@ async function main() {
       logWarn(`--locale contains codes not in config/i18n.json: ${missingFromConfig.join(", ")}`);
     }
     targetLocales = targetLocales.filter((code) => opts.locales.includes(code));
+  }
+
+  if (opts.rewrittenSince) {
+    const headLocales = {};
+    for (const code of targetLocales) {
+      const file = path.join(MESSAGES_DIR, `${code}.json`);
+      try {
+        headLocales[code] = await loadJson(file);
+      } catch {
+        headLocales[code] = {};
+      }
+    }
+    const { base, staleByLocale } = findRewrittenTranslations({
+      root: ROOT,
+      catalogRel: catalog.rel,
+      ref: opts.rewrittenSince,
+      headEn: source,
+      headLocales,
+    });
+    opts.staleByLocale = staleByLocale;
+    const total = [...staleByLocale.values()].reduce((sum, keys) => sum + keys.size, 0);
+    logInfo(
+      `rewritten-since: ${opts.rewrittenSince} (base ${base.slice(0, 12)}) — ${total} stale translation(s) in ${staleByLocale.size} locale(s)`
+    );
   }
 
   logInfo(`source: ${path.relative(ROOT, sourcePath)}`);
@@ -869,7 +1195,17 @@ async function loadMergedLocale(locale, source, opts) {
   } else {
     logWarn(`${locale}: messages file did not exist — creating it`);
   }
-  const { merged, addedPaths } = mergeMissing(source, target);
+  const { merged, addedPaths, extraPaths } = mergeMissing(source, target, {
+    pruneExtra: opts.pruneExtra !== false,
+  });
+  if (opts.pruneExtra === false && extraPaths.length) {
+    logInfo(`${locale}: ${extraPaths.length} keys en.json no longer has kept (--keep-extra)`);
+  }
+  const stale = opts.staleByLocale?.get(locale);
+  if (stale && stale.size) {
+    const marked = markRewrittenAsMissing(merged, stale, flattenLeaves(source));
+    logInfo(`${locale}: ${marked.length} translations of rewritten English marked __MISSING__`);
+  }
   if (opts.retranslateIdentical && locale !== SOURCE_LOCALE) {
     const allow = new Set((await loadJson(resolveCatalog(opts.catalog).allowlistPath)).keys ?? []);
     const flagged = markIdenticalAsMissing(merged, source, allow);
@@ -897,7 +1233,8 @@ async function writeLocaleResult(locale, merged, addedPaths, stats, opts) {
   return { addedPaths, translated: stats.translated };
 }
 
-const isDirectRun = import.meta.url === pathToFileURL(process.argv[1]).href;
+const isDirectRun =
+  Boolean(process.argv[1]) && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isDirectRun) {
   main().catch((err) => {
     logError(err?.stack || err?.message || String(err));
