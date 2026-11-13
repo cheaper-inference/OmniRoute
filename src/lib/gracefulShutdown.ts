@@ -152,6 +152,12 @@ async function cleanup(): Promise<void> {
     } catch {
       /* proxy traffic metering never blocks shutdown; it reports its own persistence gaps */
     }
+    try {
+      const { flushSemanticCacheMetrics } = await import("@/lib/semanticCacheMetrics");
+      flushSemanticCacheMetrics();
+    } catch {
+      /* cache telemetry never blocks shutdown */
+    }
     if (closeAuditDb()) {
       console.log("[Shutdown] MCP audit database checkpointed and closed.");
     }

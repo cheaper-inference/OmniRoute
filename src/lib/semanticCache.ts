@@ -20,6 +20,12 @@ import { getDbInstance } from "./db/core";
 import { toNumber } from "@/shared/utils/numeric";
 import { conversationSignatureFields } from "../../open-sse/utils/conversationSignatureFields";
 import { startSemanticCachePruneJob } from "./jobs/semanticCachePruneJob";
+import {
+  bufferCacheHitCount,
+  bufferCacheMetric,
+  discardSemanticCacheMetrics,
+  flushSemanticCacheMetrics,
+} from "./semanticCacheMetrics";
 import { isCompleteToolCallArguments } from "../../open-sse/handlers/sseParser/truncation";
 
 // Like reasoning-cache cleanup, start from the consumer module, independent of boot path.
@@ -64,14 +70,7 @@ function ensureCacheMetricsTable() {
 }
 
 function incrementMetric(metric: "hits" | "misses" | "tokens_saved", amount = 1) {
-  try {
-    const db = getDbInstance();
-    db.prepare(
-      `UPDATE cache_metrics SET value = value + ?, updated_at = datetime('now') WHERE key = ?`
-    ).run(amount, metric);
-  } catch {
-    // DB not available — fall back to in-memory
-  }
+  bufferCacheMetric(metric, amount);
 }
 
 function getMetricValue(metric: string): number {
@@ -406,10 +405,8 @@ export function getCachedResponse(signature) {
           tokensSaved,
         });
       }
-      // Update hit count in DB
-      db.prepare("UPDATE semantic_cache SET hit_count = hit_count + 1 WHERE signature = ?").run(
-        signature
-      );
+      // Hit count and metrics are buffered (semanticCacheMetrics.ts), not written per hit.
+      bufferCacheHitCount(signature);
 
       incrementMetric("hits");
       incrementMetric("tokens_saved", tokensSaved);
@@ -541,6 +538,7 @@ export function invalidateStale(maxAgeMs: number): number {
  */
 export function clearCache(): number {
   getMemoryCache().clear();
+  discardSemanticCacheMetrics();
   let removed = 0;
   try {
     const db = getDbInstance();
@@ -554,6 +552,7 @@ export function clearCache(): number {
 }
 
 export function getCacheStats() {
+  flushSemanticCacheMetrics();
   const memStats = getMemoryCache().getStats();
   let dbSize = 0;
   try {
