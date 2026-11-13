@@ -282,6 +282,9 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
     return [];
   }
 
+  // Nothing may follow response.completed: a late content or tool chunk would add items after it.
+  if (state.completedSent) return [];
+
   const { events, emit } = createEventEmitter(state);
 
   const choice = chunk.choices[0];
