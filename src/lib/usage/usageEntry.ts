@@ -29,7 +29,8 @@ export interface UsageEntry {
   status?: string | null;
   success?: boolean;
   latencyMs?: number;
-  timeToFirstTokenMs?: number;
+  /** `null` = no first-token moment (non-streaming): stored as NULL. Omitted = falls back to `latencyMs`. */
+  timeToFirstTokenMs?: number | null;
   errorCode?: string | null;
   /** ISO timestamp; defaults to `new Date().toISOString()` when omitted. */
   timestamp?: string;

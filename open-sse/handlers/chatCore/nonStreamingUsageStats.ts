@@ -52,7 +52,8 @@ function persistUsageRow(usage: object, ctx: RecordNonStreamingUsageStatsContext
     status: "200",
     success: true,
     latencyMs: Date.now() - startTime,
-    timeToFirstTokenMs: Date.now() - startTime,
+    // No first-token moment in a buffered reply: store NULL so TTFT averages skip the row.
+    timeToFirstTokenMs: null,
     errorCode: null,
     timestamp: new Date().toISOString(),
     connectionId: connectionId || undefined,
