@@ -254,6 +254,9 @@ export function createResponsesApiTransformStream(
     // message state used to derive the base is no longer meaningful to
     // recompute — shares exactly the same output_index.
     funcOutputIndex: {} as Record<string, number>,
+    // Requested message index -> the index its message item really lives at, once text is
+    // re-homed past a done message or a tool call. Later deltas of that message reuse it.
+    msgIndexAlias: {} as Record<string, number>,
     completedOutputItems: [] as Array<{
       output_index: number;
       item: Record<string, unknown>;
@@ -317,8 +320,12 @@ export function createResponsesApiTransformStream(
   };
 
   // Helper to start reasoning
-  const startReasoning = (controller, idx) => {
+  const startReasoning = (controller, requestedIdx) => {
     if (!state.reasoningId) {
+      // Reasoning that follows a tool call must not reuse the tool call's output_index.
+      const idx = isToolOutputIndex(requestedIdx)
+        ? nextFreeMessageIndex(requestedIdx)
+        : requestedIdx;
       state.reasoningId = `rs_${state.responseId}_${idx}`;
       state.reasoningIndex = idx;
 
@@ -398,6 +405,9 @@ export function createResponsesApiTransformStream(
   // CLI aborts on "OutputTextDelta without active item". Allocate the next
   // free output_index instead, avoiding reasoning, messages and cached
   // tool-call indexes.
+  const isToolOutputIndex = (i) =>
+    Object.values(state.funcOutputIndex || {}).some((v) => normalizeOutputIndex(v) === i);
+
   const nextFreeMessageIndex = (requestedIdx) => {
     let candidate = normalizeOutputIndex(requestedIdx);
     const allocatedToolIndexes = new Set(
@@ -820,11 +830,18 @@ export function createResponsesApiTransformStream(
               // Use a distinct output_index for the message when reasoning was
               // emitted, so the message item does not collide with the
               // reasoning item's output_index.
-              let msgIdx = state.reasoningId ? state.reasoningIndex + 1 : idx;
+              const requestedIdx = state.reasoningId ? state.reasoningIndex + 1 : idx;
+              let msgIdx = state.msgIndexAlias[requestedIdx] ?? requestedIdx;
               // #13693: a done item must never receive new deltas — re-home
-              // the text on a fresh message item instead.
-              if (state.msgItemDone[msgIdx]) {
+              // the text on a fresh message item instead. Same for an index that a tool call
+              // already owns: a tool call that comes first closes no message, so nothing
+              // else keeps the text off its output_index.
+              if (
+                state.msgItemDone[msgIdx] ||
+                (!state.msgItemAdded[msgIdx] && isToolOutputIndex(msgIdx))
+              ) {
                 msgIdx = nextFreeMessageIndex(msgIdx);
+                state.msgIndexAlias[requestedIdx] = msgIdx;
               }
 
               // Fix for #1211: Strip leading double-newlines / blank spaces from the very first
@@ -887,7 +904,7 @@ export function createResponsesApiTransformStream(
               closeReasoning(controller);
             }
             const msgIdx = state.reasoningId ? state.reasoningIndex + 1 : idx;
-            closeMessage(controller, msgIdx);
+            closeMessage(controller, state.msgIndexAlias[msgIdx] ?? msgIdx);
 
             for (const tc of delta.tool_calls) {
               const tcIdx = tc.index ?? 0;
