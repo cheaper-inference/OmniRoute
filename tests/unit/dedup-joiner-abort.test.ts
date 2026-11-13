@@ -82,9 +82,12 @@ test("a dedup joiner survives the initiator's client disconnect", async () => {
   const initiator = new AbortController();
   const joiner = new AbortController();
   let calls = 0;
+  let firstStarted!: () => void;
+  const firstCallStarted = new Promise<void>((resolve) => (firstStarted = resolve));
   const execute = async (input: { signal?: AbortSignal }) => {
     calls++;
     if (calls === 1) {
+      firstStarted();
       await new Promise((_, reject) =>
         input.signal?.addEventListener("abort", () => reject(input.signal?.reason))
       );
@@ -101,9 +104,11 @@ test("a dedup joiner survives the initiator's client disconnect", async () => {
     "test-model",
     true
   ).catch((error: unknown) => error);
-  await new Promise((resolve) => setTimeout(resolve, 50));
+  // Wait on events, not on timers: the shared call has started, and the joiner has attached to it.
+  await firstCallStarted;
   const second = executeProviderRequest(makeDeps(joiner, execute as never), "test-model", true);
-  await new Promise((resolve) => setTimeout(resolve, 50));
+  await new Promise<void>((resolve) => setImmediate(resolve));
+  await new Promise<void>((resolve) => setImmediate(resolve));
   // Real disconnects abort with a string reason (streamHandler.getClientAbortReason).
   initiator.abort("request_signal_aborted");
   const joined = await second;
