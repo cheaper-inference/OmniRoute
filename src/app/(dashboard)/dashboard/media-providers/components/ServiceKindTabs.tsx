@@ -20,27 +20,25 @@ const KIND_ICON: Record<ServiceKind, string> = {
 
 interface ServiceKindTabsProps {
   kinds: ServiceKind[];
-  activeKind: ServiceKind;
-  onSelect: (kind: ServiceKind) => void;
   className?: string;
 }
 
 /**
  * Horizontal tab-strip for switching between provider service kinds
- * (embedding, image, tts, etc.) — the kit capsule tabs via the SegmentedControl adapter.
+ * (embedding, image, tts, etc.) — the kit capsule tabs via the SegmentedControl adapter. Sits
+ * inside the `SegmentedTabs` that holds the active kind and its panel.
  */
-export function ServiceKindTabs({ kinds, activeKind, onSelect, className }: ServiceKindTabsProps) {
+export function ServiceKindTabs({ kinds, className }: ServiceKindTabsProps) {
   const t = useTranslations("media");
 
   if (kinds.length <= 1) return null;
 
   return (
     <SegmentedControl
+      semantics="tabs"
       aria-label={t("serviceKindsAria")}
       className={className}
       size="sm"
-      value={activeKind}
-      onChange={(next) => onSelect(next as ServiceKind)}
       options={kinds.map((kind) => ({
         value: kind,
         label: t(`kinds.${kind}`),

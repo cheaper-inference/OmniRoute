@@ -109,19 +109,22 @@ test("token array input is rejected with 400 and a specific message", async () =
   assert.equal(calls.length, 0);
 });
 
-test("encoding_format base64 is rejected with 400 instead of silently returning floats", async () => {
+test("encoding_format base64 returns little-endian float32 base64 vectors", async () => {
   const { result, calls } = await withStubbedUpstream(
     {
       model: "bedrock/amazon.titan-embed-text-v2:0",
       input: "hello",
       encoding_format: "base64",
     },
-    () => Response.json({ embedding: [0.1] })
+    () => Response.json({ embedding: [0.5, -1.25, 3], inputTextTokenCount: 1 })
   );
-  assert.equal(result.success, false);
-  assert.equal(result.status, 400);
-  assert.match(String(result.error), /float encoding only/);
-  assert.equal(calls.length, 0);
+  assert.equal(result.success, true, JSON.stringify(result));
+  assert.equal(calls.length, 1);
+  assert.equal("encoding_format" in calls[0].body, false, "the field is not sent upstream");
+  assert.deepEqual(
+    result.data?.data.map((d) => (d as { embedding?: unknown }).embedding),
+    ["AAAAPwAAoL8AAEBA"]
+  );
 });
 
 test("a non-image media type is rejected with 400", async () => {

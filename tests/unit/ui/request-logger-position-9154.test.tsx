@@ -236,7 +236,7 @@ async function openOlderRow() {
     row!.click();
   });
   await settle();
-  expect(container.querySelector('[aria-label="Request log detail"]')).not.toBeNull();
+  expect(detailDialog()).not.toBeNull();
 }
 
 beforeEach(() => {
@@ -300,6 +300,13 @@ afterEach(async () => {
   window.history.replaceState(null, "", "/dashboard/logs");
 });
 
+// The detail is a kit Sheet now: portalled to <body>, named through its title.
+function detailDialog() {
+  const dialog = document.querySelector<HTMLElement>('[role="dialog"]');
+  const title = dialog && document.getElementById(dialog.getAttribute("aria-labelledby") ?? "");
+  return title?.textContent === "Request log detail" ? dialog : null;
+}
+
 describe("request-log position preservation (#9154)", () => {
   it(
     "opens an older row without changing the loaded, filtered, sorted, or scrolled view",
@@ -322,19 +329,24 @@ describe("request-log position preservation (#9154)", () => {
     [
       "close button",
       async () => {
-        container.querySelector<HTMLButtonElement>('[aria-label="Close detail modal"]')!.click();
+        detailDialog()!
+          .querySelector<HTMLButtonElement>('[aria-label="Close detail modal"]')!
+          .click();
       },
     ],
     [
       "Escape",
       async () => {
-        globalThis.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       },
     ],
     [
       "backdrop",
       async () => {
-        container.querySelector<HTMLElement>('[aria-label="Request log detail"]')!.click();
+        // A real click on the overlay: Radix waits for the click that follows the press.
+        const overlay = document.querySelector<HTMLElement>('[data-slot="sheet-overlay"]')!;
+        overlay.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
+        overlay.dispatchEvent(new MouseEvent("click", { bubbles: true }));
       },
     ],
   ])(
@@ -358,7 +370,7 @@ describe("request-log position preservation (#9154)", () => {
         { scroll: false }
       );
       commitPendingUrl();
-      expect(container.querySelector('[aria-label="Request log detail"]')).toBeNull();
+      expect(detailDialog()).toBeNull();
       assertRetainedView(scrollContainer);
     }
   );
@@ -371,7 +383,7 @@ describe("request-log position preservation (#9154)", () => {
     });
     await settle();
 
-    expect(container.querySelector('[aria-label="Request log detail"]')).not.toBeNull();
+    expect(detailDialog()).not.toBeNull();
   });
 
   it(
@@ -392,12 +404,14 @@ describe("request-log position preservation (#9154)", () => {
       await act(async () => {
         row!.click();
       });
-      expect(container.querySelector('[aria-label="Request log detail"]')).not.toBeNull();
+      expect(detailDialog()).not.toBeNull();
 
       await act(async () => {
-        container.querySelector<HTMLButtonElement>('[aria-label="Close detail modal"]')!.click();
+        detailDialog()!
+          .querySelector<HTMLButtonElement>('[aria-label="Close detail modal"]')!
+          .click();
       });
-      expect(container.querySelector('[aria-label="Request log detail"]')).toBeNull();
+      expect(detailDialog()).toBeNull();
 
       await act(async () => {
         deferredDetail!.resolve(Response.json(LOG_ROWS[0]));
@@ -405,7 +419,7 @@ describe("request-log position preservation (#9154)", () => {
       });
       await settle();
 
-      expect(container.querySelector('[aria-label="Request log detail"]')).toBeNull();
+      expect(detailDialog()).toBeNull();
     }
   );
 });

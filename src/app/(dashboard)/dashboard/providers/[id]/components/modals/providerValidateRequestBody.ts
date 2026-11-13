@@ -67,5 +67,6 @@ export function buildProviderValidateRequestBody(options: {
     accountId: trimmedOrUndefined(formData.accountId || ""),
     zdrEnabled:
       provider === "command-code" && formData.commandCodeZdrEnabled === true ? true : undefined,
+    accountId: formData.accountId ? trimmedOrUndefined(formData.accountId) : undefined,
   };
 }

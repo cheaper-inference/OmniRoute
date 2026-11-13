@@ -16,7 +16,7 @@ function TierCard({ number, colorClass, label, description, examples }: TierCard
   return (
     <div className={`p-4 rounded-xl border-2 ${colorClass}`}>
       <div className="flex items-baseline gap-2 mb-2">
-        <span className="text-2xl font-bold">{number}</span>
+        <span className="text-2xl font-semibold">{number}</span>
         <span className="font-semibold text-sm">{label}</span>
       </div>
       <p className="min-h-16 text-xs text-text-muted mb-3">{description}</p>
