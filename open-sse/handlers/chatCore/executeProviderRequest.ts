@@ -62,6 +62,7 @@ import {
 import { acquireMany as acquireConcurrencyGates } from "../../services/accountSemaphore.ts";
 import { rethrowAdmissionError, remainingQueueBudgetMs } from "./queueBudget.ts";
 import { deduplicate } from "../../services/requestDedup.ts";
+import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
 import {
   classifyModelScope429,
   getModelScopeRetryDelayMs,
@@ -810,7 +811,16 @@ export async function executeProviderRequest(
   };
 
   if (allowDedup && dedupEnabled && dedupHash) {
-    const dedupResult = await deduplicate(dedupHash, execute);
+    // The shared call is tied to the FIRST caller's client signal. When that client leaves, the
+    // shared promise rejects with its abort. A joiner whose own client is still connected must
+    // not inherit it: it runs its own call once, outside the dedup map.
+    let dedupResult;
+    try {
+      dedupResult = await deduplicate(dedupHash, execute);
+    } catch (error) {
+      if (streamController.signal.aborted || !isLocalStreamLifecycleError(error)) throw error;
+      return execute();
+    }
     if (dedupResult.wasDeduplicated) {
       log?.debug?.("DEDUP", `Joined in-flight request hash=${dedupHash}`);
     }
