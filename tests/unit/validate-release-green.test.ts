@@ -265,7 +265,7 @@ test("pre-flight reports pricing freshness as drift, not as a hard failure", asy
   );
 });
 
-test("migrations-fresh is a HARD gate that applies every migration to an empty database", async () => {
+test("migration-numbering and migrations-fresh are HARD gates, numbering first", async () => {
   const fs = await import("node:fs");
   const src = fs.readFileSync(
     new URL("../../scripts/quality/validate-release-green.mjs", import.meta.url),
@@ -279,9 +279,28 @@ test("migrations-fresh is a HARD gate that applies every migration to an empty d
     "migrations-fresh must run test:migrations:fresh as a HARD gate"
   );
   assert.doesNotMatch(src, /driftCmd\(\s*"migrations-fresh"/);
+  // The static numbering gate runs as a HARD step right before it (cheaper, clearer message
+  // for a duplicated timestamp than the runner's collision error inside the fresh run).
+  assert.match(
+    src,
+    /hardCmd\(\s*"migration-numbering"[\s\S]*?"run",\s*"check:migration-numbering"/,
+    "migration-numbering must run check:migration-numbering as a HARD gate"
+  );
+  assert.doesNotMatch(src, /driftCmd\(\s*"migration-numbering"/);
+  const numberingAt = src.search(/hardCmd\(\s*"migration-numbering"/);
+  const freshAt = src.search(/hardCmd\(\s*"migrations-fresh"/);
+  assert.ok(
+    numberingAt !== -1 && numberingAt < freshAt,
+    "migration-numbering must run before migrations-fresh"
+  );
   const pkg = JSON.parse(
     fs.readFileSync(new URL("../../package.json", import.meta.url), "utf8")
   ) as { scripts: Record<string, string> };
+  assert.match(
+    pkg.scripts["check:migration-numbering"] ?? "",
+    /scripts\/check\/check-migration-numbering\.mjs/,
+    "check:migration-numbering must run the numbering gate"
+  );
   assert.match(
     pkg.scripts["test:migrations:fresh"] ?? "",
     /tests\/unit\/db\/migrations-fresh-database\.test\.ts/,

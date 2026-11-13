@@ -9,20 +9,32 @@
  *   1. the comparator itself (legacy < timestamp, arbitrary precision, `ee-` after
  *      the main set, anything else last, deterministic ties);
  *   2. that the new order does NOT move any existing migration: for the real
- *      `src/lib/db/migrations` directory the runner's order is identical, file by
- *      file, to the previous `readdirSync().sort()` text order.
+ *      `src/lib/db/migrations` directory the runner lists the three-digit legacy
+ *      files exactly in the previous `readdirSync().sort()` text order, then every
+ *      timestamped file after them in numeric order;
+ *   3. a guard that re-runs the runner, ordering and fresh-database test files against
+ *      a copy of the directory with one real-looking timestamped migration added, so
+ *      their assertions cannot silently depend on there being no real one yet.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
-const REAL_MIGRATIONS_DIR = path.join(REPO_ROOT, "src", "lib", "db", "migrations");
+const REAL_MIGRATIONS_DIR =
+  process.env.OMNIROUTE_TEST_MIGRATIONS_SOURCE_DIR ||
+  path.join(REPO_ROOT, "src", "lib", "db", "migrations");
 
 // The runner resolves its directory once at module load. This file wants the real one.
-delete process.env.OMNIROUTE_MIGRATIONS_DIR;
+if (process.env.OMNIROUTE_TEST_MIGRATIONS_SOURCE_DIR) {
+  process.env.OMNIROUTE_MIGRATIONS_DIR = REAL_MIGRATIONS_DIR;
+} else {
+  delete process.env.OMNIROUTE_MIGRATIONS_DIR;
+}
 delete process.env.OMNIROUTE_EXTRA_MIGRATIONS_DIRS;
 
 const ordering = await import("../../../src/lib/db/migrationRunner/ordering.ts");
@@ -144,6 +156,35 @@ test("the comparator is a consistent total order (antisymmetric, transitive)", (
   }
 });
 
+test('a NULL/undefined ledger version is coerced to "" and still ordered consistently', () => {
+  // `version` is TEXT without NOT NULL; a row written without it reaches the comparator as
+  // null. It must order exactly like "" (group 2, plain string order), never ambiguously.
+  const nil = null as unknown as string;
+  const undef = undefined as unknown as string;
+  for (const other of ["legacy-074-discovery_results", "239", "ee-1", "", "20261113120000"]) {
+    for (const missing of [nil, undef]) {
+      assert.equal(
+        Math.sign(compareMigrationVersions(missing, other)) + 0,
+        Math.sign(compareMigrationVersions("", other)) + 0,
+        `${String(missing)} vs ${other} must compare like ""`
+      );
+      assert.equal(
+        Math.sign(compareMigrationVersions(missing, other)) + 0,
+        -Math.sign(compareMigrationVersions(other, missing)) + 0,
+        `antisymmetry broken for ${String(missing)} / ${other}`
+      );
+    }
+  }
+  assert.deepEqual(sorted(["legacy-x", nil, "239", "ee-1"]), ["239", "ee-1", nil, "legacy-x"]);
+});
+
+test("isTimestampVersion accepts exactly fourteen digits", () => {
+  assert.equal(ordering.isTimestampVersion("20261113120000"), true);
+  for (const value of ["239", "2026111312000", "202611131200000", "ee-20261113120000", ""]) {
+    assert.equal(ordering.isTimestampVersion(value), false, value);
+  }
+});
+
 test("files sharing a version slot keep the previous file-name order", () => {
   const files = [
     {
@@ -166,20 +207,36 @@ test("files sharing a version slot keep the previous file-name order", () => {
   );
 });
 
-test("the real migrations directory keeps exactly its previous text order", () => {
-  const textOrder = fs
+test("the real migrations directory keeps its legacy text order, timestamps after it", () => {
+  const migrationFiles = fs
     .readdirSync(REAL_MIGRATIONS_DIR)
     .filter((file) => file.endsWith(".sql"))
     .sort()
     .filter((file) => /^(\d+)_(.+)\.sql$/.test(file));
-  assert.ok(textOrder.length >= 236, `expected the full legacy set, got ${textOrder.length}`);
+  const legacyTextOrder = migrationFiles.filter((file) => /^\d{3}_/.test(file));
+  // Same-length digit prefixes: text order IS numeric order among the timestamped files.
+  const timestampTextOrder = migrationFiles.filter((file) => /^\d{14}_/.test(file));
+  assert.ok(
+    legacyTextOrder.length >= 236,
+    `expected the full legacy set, got ${legacyTextOrder.length}`
+  );
+  assert.equal(
+    legacyTextOrder.length + timestampTextOrder.length,
+    migrationFiles.length,
+    "every migration prefix is either three digits (legacy) or fourteen (timestamp)"
+  );
 
   const runnerOrder = runner.getMigrationFiles().map((file) => path.basename(file.path));
   assert.deepEqual(
-    runnerOrder,
-    textOrder,
+    runnerOrder.filter((file) => /^\d{3}_/.test(file)),
+    legacyTextOrder,
     "the numeric ordering must not move any legacy migration: every legacy file has a " +
       "three-digit prefix, so numeric order and text order have to match file by file"
+  );
+  assert.deepEqual(
+    runnerOrder,
+    [...legacyTextOrder, ...timestampTextOrder],
+    "every timestamped migration comes after the whole legacy set, in numeric order"
   );
 });
 
@@ -206,3 +263,105 @@ test("compareMigrationFiles orders a mixed legacy/timestamp listing numerically"
     ["001_init.sql", "235_a.sql", "20261112000000_c.sql", "20261113120000_b.sql"]
   );
 });
+
+// ── guard: the properties above must survive the first REAL timestamped migration ──────────
+
+const GUARDED_TEST_FILES = [
+  "tests/unit/check-migration-numbering.test.ts",
+  "tests/unit/db/migration-timestamp-runner.test.ts",
+  "tests/unit/db/migration-version-ordering.test.ts",
+  "tests/unit/db/migrations-fresh-database.test.ts",
+];
+
+function utcStamp(date: Date): string {
+  return date.toISOString().replace(/[-:T]/g, "").slice(0, 14);
+}
+
+test(
+  "guard: the runner, ordering and fresh-database tests stay green with a real timestamped migration",
+  {
+    // Inside the guard's own child run this file is one of the guarded files.
+    skip: process.env.OMNIROUTE_TEST_MIGRATIONS_SOURCE_DIR ? "running inside the guard" : false,
+    timeout: 600_000,
+  },
+  () => {
+    // Copy the real directory and add one migration dated like a real one would be (a minute
+    // ago), then run the three guarded files against that copy. Their assertions must hold
+    // for whatever real timestamped migrations exist, not only for an empty timestamped set.
+    const sandbox = fs.mkdtempSync(path.join(os.tmpdir(), "mig-real-ts-guard-"));
+    try {
+      const source = path.join(sandbox, "migrations");
+      fs.cpSync(REAL_MIGRATIONS_DIR, source, { recursive: true });
+      let when = Date.now() - 60_000;
+      const taken = () =>
+        fs.readdirSync(source).some((file) => file.startsWith(utcStamp(new Date(when))));
+      while (taken()) when -= 1000;
+      const injected = `${utcStamp(new Date(when))}_guard_real_timestamped.sql`;
+      fs.writeFileSync(
+        path.join(source, injected),
+        "CREATE TABLE IF NOT EXISTS guard_real_timestamped (id INTEGER PRIMARY KEY);\n"
+      );
+
+      const env: NodeJS.ProcessEnv = {
+        ...process.env,
+        OMNIROUTE_TEST_MIGRATIONS_SOURCE_DIR: source,
+        DISABLE_SQLITE_AUTO_BACKUP: "true",
+      };
+      // A nested runner needs its own test context; each child picks its own DATA_DIR.
+      delete env.NODE_TEST_CONTEXT;
+      delete env.DATA_DIR;
+      delete env.OMNIROUTE_MIGRATIONS_DIR;
+      delete env.OMNIROUTE_EXTRA_MIGRATIONS_DIRS;
+
+      // The nested runner's own stdout pipe can lose its tail under --test-force-exit
+      // (see tests/unit/test-force-exit-report-flush.test.ts), so the report goes to a file.
+      const reportPath = path.join(sandbox, "report.tap");
+      const fd = fs.openSync(reportPath, "w");
+      let result;
+      try {
+        result = spawnSync(
+          process.execPath,
+          [
+            "--max-old-space-size=8192",
+            "--import",
+            "tsx/esm",
+            "--import",
+            "./open-sse/utils/setupPolyfill.ts",
+            "--import",
+            "./tests/_setup/isolateDataDir.ts",
+            "--test",
+            "--test-force-exit",
+            "--test-concurrency=3",
+            "--test-reporter=tap",
+            ...GUARDED_TEST_FILES,
+          ],
+          {
+            cwd: REPO_ROOT,
+            env,
+            encoding: "utf8",
+            stdio: ["ignore", fd, "pipe"],
+            timeout: 540_000,
+          }
+        );
+      } finally {
+        fs.closeSync(fd);
+      }
+      const report = fs.readFileSync(reportPath, "utf8");
+      const count = (name: string) =>
+        Number(new RegExp(`^# ${name} (\\d+)$`, "m").exec(report)?.[1]);
+      const failures = report
+        .split("\n")
+        .filter((line) => /^\s*not ok \d+/.test(line))
+        .join("\n");
+      assert.equal(
+        result.status,
+        0,
+        `guarded tests failed with ${injected} in the directory:\n${failures}\n${result.stderr}`
+      );
+      assert.equal(count("fail"), 0, failures);
+      assert.ok(count("pass") >= 20, `expected the guarded tests to run, got ${count("pass")}`);
+    } finally {
+      fs.rmSync(sandbox, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    }
+  }
+);

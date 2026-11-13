@@ -23,16 +23,29 @@
  *      with arbitrary precision (no `Number`, so nothing past 2^53 can tie).
  *   1. namespaced — `<namespace>-<digits>` (`ee-134`), from the directories in
  *      OMNIROUTE_EXTRA_MIGRATIONS_DIRS: always after the whole main set, then by
- *      namespace and by numeric value inside it.
+ *      namespace and by numeric value inside it. NOTE: this is the LISTING order
+ *      (getMigrationStatus, getAppliedRecords), where namespaces come out in
+ *      alphabetical order. It is NOT the application order: getMigrationFiles()
+ *      appends the extra directories unsorted, in the declared order of
+ *      OMNIROUTE_EXTRA_MIGRATIONS_DIRS, so with `zz=…:ee=…` the `zz-` rows apply
+ *      first but are listed after the `ee-` ones.
  *   2. anything else the ledger may hold (`legacy-074-discovery_results`, rows
  *      rehomed by the compatibility layer): last, by plain string comparison.
  *
  * Equal numeric values written differently (`001` vs `1`) tie-break on the raw
- * string, so the order is total and never depends on the input order.
+ * string, so the order is total and never depends on the input order. A missing
+ * value (`version` is TEXT without NOT NULL, so a row written without it reads back
+ * as null) is compared as "" — group 2 — so the order stays antisymmetric.
  */
 
 const MAIN_VERSION_PATTERN = /^\d+$/;
 const NAMESPACED_VERSION_PATTERN = /^([a-z][a-z0-9]*)-(\d+)$/;
+const TIMESTAMP_VERSION_PATTERN = /^\d{14}$/;
+
+/** `YYYYMMDDHHMMSS` (exactly 14 digits): the version of a timestamped (post-239) migration. */
+export function isTimestampVersion(version: string): boolean {
+  return TIMESTAMP_VERSION_PATTERN.test(version);
+}
 
 type ParsedVersion =
   { group: 0; digits: string } | { group: 1; namespace: string; digits: string } | { group: 2 };
@@ -65,7 +78,10 @@ export function compareDigitStrings(a: string, b: string): number {
  * Total order over ledger versions (see the module header). Suitable for
  * `Array.prototype.sort`.
  */
-export function compareMigrationVersions(a: string, b: string): number {
+export function compareMigrationVersions(rawA: string, rawB: string): number {
+  // Defensive: the ledger column allows NULL; `String(null)` would be "null".
+  const a = String(rawA ?? "");
+  const b = String(rawB ?? "");
   const left = parseVersion(a);
   const right = parseVersion(b);
   if (left.group !== right.group) return left.group - right.group;

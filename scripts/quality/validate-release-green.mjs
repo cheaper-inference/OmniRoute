@@ -893,6 +893,15 @@ async function main() {
 
   await hardCmd("db-rules", "DB rules", npmCmd, ["run", "check:db-rules"]);
   await hardCmd("public-creds", "Public creds", npmCmd, ["run", "check:public-creds"]);
+  // Cheap static check first: two PRs can still pick the same timestamp, and a merge whose
+  // CI ran on an older base lands the duplicate. Its message names the files; the fresh run
+  // below only sees the runner's collision error.
+  await hardCmd(
+    "migration-numbering",
+    "Migration numbering (names, duplicates, legacy range)",
+    npmCmd,
+    ["run", "check:migration-numbering"]
+  );
   // Timestamped migrations (YYYYMMDDHHMMSS_…) no longer race for a number, so the real risk
   // is an earlier-dated migration that depends on a later one: green alone in each PR, red
   // on a fresh install once both land. Apply the whole set to an empty database, in order.

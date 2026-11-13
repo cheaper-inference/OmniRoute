@@ -6,8 +6,35 @@ import {
   RENAMED_MIGRATION_COMPATIBILITY,
 } from "./constants";
 import { migrationConsole as console } from "./logger";
+import { isTimestampVersion } from "./ordering";
 
 type MigrationFile = { version: string; name: string; path: string };
+
+/**
+ * Whether a RENAMED_MIGRATION_COMPATIBILITY entry may move its `fromVersion`/`fromName`
+ * ledger row (the target file is checked separately by every caller).
+ *
+ * - Every entry: the old slot is now occupied by ANOTHER file (the original rule).
+ * - Only when `toVersion` is a 14-digit timestamp: no file on disk is
+ *   `(fromVersion, fromName)` any more. The legacy set is frozen at 239, so a pull request
+ *   that ran as `240_x` and was merged as `<stamp>_x` leaves slot 240 empty for good; the
+ *   original rule could never fire for it and the migration would run a second time.
+ *
+ * Entries with a three-digit destination keep exactly the original rule.
+ */
+export function isCompatibilitySourceEligible(
+  files: ReadonlyArray<{ version: string; name: string }>,
+  compatibility: { fromVersion: string; fromName: string; toVersion: string }
+): boolean {
+  const slotReoccupied = files.some(
+    (file) => file.version === compatibility.fromVersion && file.name !== compatibility.fromName
+  );
+  if (slotReoccupied) return true;
+  if (!isTimestampVersion(compatibility.toVersion)) return false;
+  return !files.some(
+    (file) => file.version === compatibility.fromVersion && file.name === compatibility.fromName
+  );
+}
 
 export function hasTable(db: SqliteAdapter, tableName: string): boolean {
   const row = db
@@ -152,9 +179,7 @@ export function reconcileRenumberedMigrations(db: SqliteAdapter, files: Migratio
     const hasTargetFile = files.some(
       (file) => file.version === compatibility.toVersion && file.name === compatibility.toName
     );
-    const hasSourceFile = files.some(
-      (file) => file.version === compatibility.fromVersion && file.name !== compatibility.fromName
-    );
+    const hasSourceFile = isCompatibilitySourceEligible(files, compatibility);
 
     if (!hasTargetFile || !hasSourceFile) {
       continue;
@@ -296,9 +321,7 @@ export function hasLedgerRepairCandidates(db: SqliteAdapter, files: MigrationFil
     const hasTargetFile = files.some(
       (file) => file.version === compatibility.toVersion && file.name === compatibility.toName
     );
-    const hasSourceFile = files.some(
-      (file) => file.version === compatibility.fromVersion && file.name !== compatibility.fromName
-    );
+    const hasSourceFile = isCompatibilitySourceEligible(files, compatibility);
     if (!hasTargetFile || !hasSourceFile) continue;
     const row = db
       .prepare("SELECT 1 FROM _omniroute_migrations WHERE version = ? AND name = ?")

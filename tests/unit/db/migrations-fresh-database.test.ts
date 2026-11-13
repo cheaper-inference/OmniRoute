@@ -31,7 +31,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
-const REAL_MIGRATIONS_DIR = path.join(REPO_ROOT, "src", "lib", "db", "migrations");
+const REAL_MIGRATIONS_DIR =
+  process.env.OMNIROUTE_TEST_MIGRATIONS_SOURCE_DIR ||
+  path.join(REPO_ROOT, "src", "lib", "db", "migrations");
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-migrations-fresh-"));
 const savedEnv = {
@@ -40,22 +42,38 @@ const savedEnv = {
   OMNIROUTE_MIGRATIONS_DIR: process.env.OMNIROUTE_MIGRATIONS_DIR,
   OMNIROUTE_EXTRA_MIGRATIONS_DIRS: process.env.OMNIROUTE_EXTRA_MIGRATIONS_DIRS,
 };
+function removeDataDirAndRestoreEnv(): void {
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  for (const [key, value] of Object.entries(savedEnv)) {
+    if (value === undefined) delete process.env[key];
+    else process.env[key] = value;
+  }
+}
+
 process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
 // The real directory, and only it: no override, no namespaced extras.
 process.env.OMNIROUTE_MIGRATIONS_DIR = REAL_MIGRATIONS_DIR;
 delete process.env.OMNIROUTE_EXTRA_MIGRATIONS_DIRS;
 
-const runner = await import("../../../src/lib/db/migrationRunner.ts");
-const constants = await import("../../../src/lib/db/migrationRunner/constants.ts");
-const core = await import("../../../src/lib/db/core.ts");
+// TEST_DATA_DIR exists before these imports; if one throws, test.after never runs.
+const [runner, constants, core] = await Promise.all([
+  import("../../../src/lib/db/migrationRunner.ts"),
+  import("../../../src/lib/db/migrationRunner/constants.ts"),
+  import("../../../src/lib/db/core.ts"),
+]).catch((error: unknown) => {
+  removeDataDirAndRestoreEnv();
+  throw error;
+});
 
 const HOW_TO_FIX =
   "A migration could not run on an empty database in file order. If it is a timestamped " +
   "migration (YYYYMMDDHHMMSS_…) that depends on a table or column created by another, newer " +
-  "migration, its name is older than its dependency: regenerate the file name with " +
-  "`npm run db:new-migration -- <description>` (or rename it to a timestamp after the " +
-  "dependency) so it sorts after what it needs. Never edit an already released migration.";
+  "migration, its name is older than its dependency. If that migration is NOT merged yet " +
+  "(not on main or on any release/* branch), regenerate its file name with " +
+  "`npm run db:new-migration -- <description>` so it sorts after what it needs. If it is " +
+  "already merged, do not rename it: databases may have applied it under that name and " +
+  "would run it again. Create a new migration instead. Never edit an already merged migration.";
 
 let db: ReturnType<typeof core.getDbInstance>;
 let freshInstallError: unknown = null;
@@ -71,11 +89,7 @@ test.after(() => {
   } catch {
     /* best effort */
   }
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
-  for (const [key, value] of Object.entries(savedEnv)) {
-    if (value === undefined) delete process.env[key];
-    else process.env[key] = value;
-  }
+  removeDataDirAndRestoreEnv();
 });
 
 function ledgerInInsertionOrder(): Array<{ version: string; name: string }> {

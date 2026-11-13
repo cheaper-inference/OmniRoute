@@ -10,8 +10,16 @@
  * idempotent (`CREATE TABLE` without `IF NOT EXISTS`, plain `INSERT` into a table
  * with a UNIQUE key), so a migration that is ever applied twice makes the run throw.
  *
+ * The synthetic files are dated in 2099, so they always sort after every REAL
+ * timestamped migration (the runner does not reject future dates; the generator and
+ * the numbering gate do, which keeps 2099 out of the real directory). Assertions are
+ * restricted to the synthetic versions or derived from the real set, never pinned to
+ * fixed positions, so the file keeps passing as real timestamped migrations land.
+ * The guard at the end of migration-version-ordering.test.ts re-runs this file
+ * against a copy of the directory with one real-looking timestamped migration added.
+ *
  * Covered:
- *   (i)   all legacy applied + one new timestamped file → exactly that one applies,
+ *   (i)   all real migrations applied + one new timestamped file → exactly that one applies,
  *         once; the next run applies nothing.
  *   (ii)  empty database → everything applies in getMigrationFiles() order, legacy
  *         before timestamped, including a timestamped migration that depends on a
@@ -32,7 +40,7 @@
  * The real migration set cannot run on a bare SQLite file: `001` is seeded by
  * core.ts together with its inline base schema and column healers. So a "clean
  * install" here is the real one — `getDbInstance()` on a fresh DATA_DIR file —
- * and the scenarios that start from "every legacy migration applied" clone that
+ * and the scenarios that start from "every real migration applied" clone that
  * clean-install file into an in-memory database.
  */
 import test from "node:test";
@@ -44,7 +52,9 @@ import { fileURLToPath } from "node:url";
 import Database from "better-sqlite3";
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
-const REAL_MIGRATIONS_DIR = path.join(REPO_ROOT, "src", "lib", "db", "migrations");
+const REAL_MIGRATIONS_DIR =
+  process.env.OMNIROUTE_TEST_MIGRATIONS_SOURCE_DIR ||
+  path.join(REPO_ROOT, "src", "lib", "db", "migrations");
 
 const tempDirs: string[] = [];
 function mkTempDir(prefix: string): string {
@@ -61,7 +71,23 @@ for (const file of REAL_FILES) {
 const REAL_VERSIONS = REAL_FILES.map((file) => /^(\d+)_/.exec(file)?.[1]).filter(
   (version): version is string => version !== undefined
 );
-const HIGHEST_LEGACY = [...REAL_VERSIONS].sort().at(-1)!;
+
+const isTimestamp = (version: string): boolean => /^\d{14}$/.test(version);
+function numericOrder(versions: string[]): string[] {
+  return [...versions].sort((a, b) => {
+    const [x, y] = [BigInt(a), BigInt(b)];
+    return x < y ? -1 : x > y ? 1 : 0;
+  });
+}
+
+/** Highest three-digit (legacy) version; the timestamped set starts right after it. */
+const HIGHEST_LEGACY = REAL_VERSIONS.filter((version) => /^\d{3}$/.test(version))
+  .sort()
+  .at(-1)!;
+/** Real timestamped versions already in the directory (empty until the first one lands). */
+const REAL_TIMESTAMPS = numericOrder(REAL_VERSIONS.filter(isTimestamp));
+/** Every synthetic stamp is at or after this, i.e. after every real timestamped migration. */
+const SYNTHETIC_FLOOR = "20990101000000";
 
 const DATA_DIR = mkTempDir("mig-ts-data-");
 const savedEnv = {
@@ -70,13 +96,32 @@ const savedEnv = {
   OMNIROUTE_EXTRA_MIGRATIONS_DIRS: process.env.OMNIROUTE_EXTRA_MIGRATIONS_DIRS,
   DISABLE_SQLITE_AUTO_BACKUP: process.env.DISABLE_SQLITE_AUTO_BACKUP,
 };
+
+function removeTempDirsAndRestoreEnv(): void {
+  for (const dir of tempDirs.splice(0)) {
+    fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
+  for (const [key, value] of Object.entries(savedEnv)) {
+    if (value === undefined) delete process.env[key];
+    else process.env[key] = value;
+  }
+}
+
 process.env.DATA_DIR = DATA_DIR;
 process.env.OMNIROUTE_MIGRATIONS_DIR = CORE_DIR;
 delete process.env.OMNIROUTE_EXTRA_MIGRATIONS_DIRS;
 process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
 
-const runner = await import("../../../src/lib/db/migrationRunner.ts");
-const core = await import("../../../src/lib/db/core.ts");
+// The temporary directories exist before these imports (the runner reads
+// OMNIROUTE_MIGRATIONS_DIR at load); if an import throws, test.after never runs, so
+// clean up here before rethrowing.
+const [runner, core] = await Promise.all([
+  import("../../../src/lib/db/migrationRunner.ts"),
+  import("../../../src/lib/db/core.ts"),
+]).catch((error: unknown) => {
+  removeTempDirsAndRestoreEnv();
+  throw error;
+});
 const { resetDbInstance } = core;
 
 const openDbs: Database.Database[] = [];
@@ -94,21 +139,21 @@ test.after(() => {
   } catch {
     /* never opened */
   }
-  for (const dir of tempDirs) {
-    fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
-  }
-  for (const [key, value] of Object.entries(savedEnv)) {
-    if (value === undefined) delete process.env[key];
-    else process.env[key] = value;
-  }
+  removeTempDirsAndRestoreEnv();
 });
 
 // ── synthetic timestamped migrations ────────────────────────────────────────────
 const syntheticFiles = new Set<string>();
+/** Every synthetic version ever written by this file (never cleared). */
+const syntheticVersions = new Set<string>();
+const isSynthetic = (version: string): boolean => syntheticVersions.has(version);
 
 function addCoreMigration(fileName: string, sql: string): void {
+  const version = /^(\d{14})_/.exec(fileName)?.[1];
+  assert.ok(version && version >= SYNTHETIC_FLOOR, `synthetic ${fileName} must be dated 2099`);
   fs.writeFileSync(path.join(CORE_DIR, fileName), sql, "utf-8");
   syntheticFiles.add(fileName);
+  syntheticVersions.add(version);
 }
 
 function clearSyntheticMigrations(): void {
@@ -185,37 +230,53 @@ function cloneDb(bytes: Buffer): Database.Database {
   return db;
 }
 
-let legacyBaseline: Buffer | null = null;
-function applyLegacyBaseline(): Database.Database {
+/**
+ * Every REAL migration applied (legacy and, once they exist, real timestamped ones),
+ * none of the synthetic ones.
+ */
+let realBaseline: Buffer | null = null;
+function applyRealBaseline(): Database.Database {
   clearSyntheticMigrations();
-  legacyBaseline ??= cleanInstallBytes();
-  const db = cloneDb(legacyBaseline);
-  assert.equal(
-    ledger(db).filter((row) => /^\d{14}$/.test(row.version)).length,
-    0,
-    "baseline must contain only legacy migrations"
+  realBaseline ??= cleanInstallBytes();
+  const db = cloneDb(realBaseline);
+  assert.deepEqual(
+    ledger(db).filter((row) => isSynthetic(row.version)),
+    [],
+    "the baseline must not contain any synthetic migration"
   );
-  assert.equal(runner.runMigrations(db), 0, "the legacy baseline must be fully applied");
+  const applied = new Set(ledger(db).map((row) => row.version));
+  assert.deepEqual(
+    REAL_TIMESTAMPS.filter((version) => !applied.has(version)),
+    [],
+    "the baseline must contain every real timestamped migration"
+  );
+  assert.equal(runner.runMigrations(db), 0, "the real baseline must be fully applied");
   return db;
 }
 
-test("(i) all legacy applied + one new timestamped migration → only the new one applies, once", () => {
-  const db = applyLegacyBaseline();
-  const legacyRows = ledger(db).length;
-  assert.ok(legacyRows >= 230, `expected the legacy set to be applied, got ${legacyRows}`);
+test("synthetic stamps sort after every real timestamped migration", () => {
+  for (const version of REAL_TIMESTAMPS) {
+    assert.ok(version < SYNTHETIC_FLOOR, `real migration ${version} is dated 2099 or later`);
+  }
+});
 
-  addCoreMigration("20261113120000_ts_single.sql", nonIdempotentSql("ts_single"));
+test("(i) all real migrations applied + one new timestamped migration → only the new one applies, once", () => {
+  const db = applyRealBaseline();
+  const baselineRows = ledger(db).length;
+  assert.ok(baselineRows >= 230, `expected the legacy set to be applied, got ${baselineRows}`);
+
+  addCoreMigration("20991113120000_ts_single.sql", nonIdempotentSql("ts_single"));
 
   const second = runner.runMigrations(db);
   assert.equal(second, 1, "exactly the new timestamped migration must apply");
-  assert.equal(ledgerCount(db, "20261113120000"), 1);
-  assert.equal(ledger(db).length, legacyRows + 1);
-  assert.deepEqual(ledger(db).at(-1), { version: "20261113120000", name: "ts_single" });
+  assert.equal(ledgerCount(db, "20991113120000"), 1);
+  assert.equal(ledger(db).length, baselineRows + 1);
+  assert.deepEqual(ledger(db).at(-1), { version: "20991113120000", name: "ts_single" });
   assert.equal(tableRows(db, "ts_single"), 1);
 
   const third = runner.runMigrations(db);
   assert.equal(third, 0, "a third run must not re-apply anything");
-  assert.equal(ledgerCount(db, "20261113120000"), 1);
+  assert.equal(ledgerCount(db, "20991113120000"), 1);
   assert.equal(tableRows(db, "ts_single"), 1);
   clearSyntheticMigrations();
 });
@@ -224,14 +285,14 @@ test("(ii) empty database → every migration in getMigrationFiles() order, lega
   clearSyntheticMigrations();
   // Depends on a table that ONLY a high legacy migration creates
   // (238_codex_connection_fences; core.ts's inline schema does not have it, unlike
-  // key_templates). With the old text sort `20261101000000_…` sorted between
-  // `201_…` and `202_…`, ran before 238 and failed with "no such table".
+  // key_templates). With the old text sort `20991101000000_…` sorted between
+  // `209_…` and `210_…`, ran before 238 and failed with "no such table".
   addCoreMigration(
-    "20261101000000_ts_depends_on_codex_fences.sql",
+    "20991101000000_ts_depends_on_codex_fences.sql",
     "CREATE TABLE ts_dep (id INTEGER PRIMARY KEY);\n" +
       "INSERT INTO ts_dep (id) SELECT COUNT(*) FROM codex_connection_fences;\n"
   );
-  addCoreMigration("20261102000000_ts_second.sql", nonIdempotentSql("ts_second"));
+  addCoreMigration("20991102000000_ts_second.sql", nonIdempotentSql("ts_second"));
 
   const db = cloneDb(cleanInstallBytes());
   const order = expectedApplicationOrder();
@@ -241,27 +302,36 @@ test("(ii) empty database → every migration in getMigrationFiles() order, lega
     order,
     "ledger insertion order (rowid) must be exactly getMigrationFiles() order"
   );
-  const firstTimestamp = order.findIndex((version) => /^\d{14}$/.test(version));
-  assert.equal(order.indexOf(HIGHEST_LEGACY), firstTimestamp - 1);
-  assert.deepEqual(order.slice(firstTimestamp), ["20261101000000", "20261102000000"]);
+  const firstTimestamp = order.findIndex(isTimestamp);
+  assert.equal(order.indexOf(HIGHEST_LEGACY), firstTimestamp - 1, "legacy block, then timestamps");
+  const timestamped = order.slice(firstTimestamp);
+  assert.ok(timestamped.every(isTimestamp), "only timestamped migrations after the first one");
+  assert.deepEqual(timestamped, numericOrder(timestamped), "timestamped in numeric order");
+  assert.deepEqual(timestamped.filter(isSynthetic), ["20991101000000", "20991102000000"]);
+  assert.deepEqual(
+    timestamped.filter((version) => !isSynthetic(version)),
+    REAL_TIMESTAMPS,
+    "every real timestamped migration applies too"
+  );
+  assert.ok(order.indexOf("238") < order.indexOf("20991101000000"), "the dependency ran first");
   assert.equal(tableRows(db, "ts_dep"), 1);
   assert.equal(runner.runMigrations(db), 0, "a second run applies nothing");
   clearSyntheticMigrations();
 });
 
 test("(iii) two timestamped migrations arriving out of date order → both apply, once each", () => {
-  const db = applyLegacyBaseline();
+  const db = applyRealBaseline();
 
   // B (later date) reaches this database first.
-  addCoreMigration("20261114000000_ts_later_b.sql", nonIdempotentSql("ts_later_b"));
+  addCoreMigration("20991114000000_ts_later_b.sql", nonIdempotentSql("ts_later_b"));
   assert.equal(runner.runMigrations(db), 1);
-  assert.equal(ledgerCount(db, "20261114000000"), 1);
+  assert.equal(ledgerCount(db, "20991114000000"), 1);
 
   // A (earlier date) is merged afterwards — it must still apply; B must not re-run.
-  addCoreMigration("20261113000000_ts_earlier_a.sql", nonIdempotentSql("ts_earlier_a"));
+  addCoreMigration("20991113000000_ts_earlier_a.sql", nonIdempotentSql("ts_earlier_a"));
   assert.equal(runner.runMigrations(db), 1, "only A applies; B is already in the ledger");
-  assert.equal(ledgerCount(db, "20261113000000"), 1);
-  assert.equal(ledgerCount(db, "20261114000000"), 1);
+  assert.equal(ledgerCount(db, "20991113000000"), 1);
+  assert.equal(ledgerCount(db, "20991114000000"), 1);
   assert.equal(tableRows(db, "ts_earlier_a"), 1);
   assert.equal(tableRows(db, "ts_later_b"), 1);
 
@@ -270,15 +340,15 @@ test("(iii) two timestamped migrations arriving out of date order → both apply
     ledger(db)
       .slice(-2)
       .map((row) => row.version),
-    ["20261114000000", "20261113000000"]
+    ["20991114000000", "20991113000000"]
   );
   // …while the diagnostics list them numerically.
   assert.deepEqual(
     runner
       .getMigrationStatus(db)
-      .applied.slice(-2)
-      .map((row: { version: string }) => row.version),
-    ["20261113000000", "20261114000000"]
+      .applied.map((row: { version: string }) => row.version)
+      .filter(isSynthetic),
+    ["20991113000000", "20991114000000"]
   );
 
   assert.equal(runner.runMigrations(db), 0, "nothing left to apply");
@@ -291,7 +361,7 @@ test("(iv) ee- namespace runs after every main migration, timestamped ones inclu
   fs.writeFileSync(path.join(eeDir, "001_ee_first.sql"), nonIdempotentSql("ee_first"));
   fs.writeFileSync(path.join(eeDir, "002_ee_second.sql"), nonIdempotentSql("ee_second"));
   fs.writeFileSync(path.join(eeDir, "010_ee_tenth.sql"), nonIdempotentSql("ee_tenth"));
-  addCoreMigration("20261113120000_ts_main_one.sql", nonIdempotentSql("ts_main_one"));
+  addCoreMigration("20991113120000_ts_main_one.sql", nonIdempotentSql("ts_main_one"));
 
   process.env.OMNIROUTE_EXTRA_MIGRATIONS_DIRS = `ee=${eeDir}`;
   try {
@@ -303,12 +373,17 @@ test("(iv) ee- namespace runs after every main migration, timestamped ones inclu
       versions.slice(0, firstEe).every((version) => /^\d+$/.test(version)),
       "only main-set versions may precede the ee- namespace"
     );
-    assert.equal(versions[firstEe - 1], "20261113120000", "ee- comes after timestamped too");
+    const mainBeforeEe = new Set(versions.slice(0, firstEe));
+    assert.deepEqual(
+      ["20991113120000", ...REAL_TIMESTAMPS].filter((version) => !mainBeforeEe.has(version)),
+      [],
+      "ee- comes after every timestamped main migration, synthetic and real"
+    );
 
     // A newer main migration arrives after the ee- ones were applied.
-    addCoreMigration("20261115000000_ts_main_two.sql", nonIdempotentSql("ts_main_two"));
+    addCoreMigration("20991115000000_ts_main_two.sql", nonIdempotentSql("ts_main_two"));
     assert.equal(runner.runMigrations(db), 1);
-    assert.equal(ledgerCount(db, "20261115000000"), 1);
+    assert.equal(ledgerCount(db, "20991115000000"), 1);
     for (const version of ["ee-001", "ee-002", "ee-010"]) {
       assert.equal(ledgerCount(db, version), 1, `${version} must stay applied exactly once`);
     }
@@ -317,7 +392,11 @@ test("(iv) ee- namespace runs after every main migration, timestamped ones inclu
     // The file list keeps ee- last even with the new main migration on disk.
     const fileVersions = runner.getMigrationFiles().map((file) => file.version);
     assert.deepEqual(fileVersions.slice(-3), ["ee-001", "ee-002", "ee-010"]);
-    assert.equal(fileVersions.at(-4), "20261115000000");
+    assert.ok(
+      fileVersions.slice(0, -3).every((version) => /^\d+$/.test(version)),
+      "every main-set file is listed before the ee- namespace"
+    );
+    assert.ok(fileVersions.slice(0, -3).includes("20991115000000"));
 
     // getMigrationStatus keeps the namespace after the whole main set as well.
     const statusVersions = runner
@@ -357,10 +436,10 @@ function withNonTestEnvironment<T>(fn: () => T): T {
 }
 
 test("(v) a few pending timestamped migrations on an up-to-date database do not trip the mass-migration guard", () => {
-  const db = applyLegacyBaseline();
+  const db = applyRealBaseline();
   for (let index = 0; index < 5; index++) {
     addCoreMigration(
-      `2026111312000${index}_ts_guard_${index}.sql`,
+      `2099111312000${index}_ts_guard_${index}.sql`,
       nonIdempotentSql(`ts_guard_${index}`)
     );
   }
@@ -376,7 +455,7 @@ test("(v) a few pending timestamped migrations on an up-to-date database do not 
     // upgrade (getPlausiblePendingCount compares the numeric prefix).
     for (let index = 0; index < 3; index++) {
       addCoreMigration(
-        `2026111400000${index}_ts_guard_more_${index}.sql`,
+        `2099111400000${index}_ts_guard_more_${index}.sql`,
         nonIdempotentSql(`ts_guard_more_${index}`)
       );
     }
@@ -385,13 +464,13 @@ test("(v) a few pending timestamped migrations on an up-to-date database do not 
       withNonTestEnvironment(() => runner.runMigrations(db)),
       3
     );
-    assert.equal(ledgerCount(db, "20261114000002"), 1);
+    assert.equal(ledgerCount(db, "20991114000002"), 1);
 
     // Control: the guard itself is still live. A wiped ledger (only the 001 seed left
     // on a database whose tables exist) is still refused, timestamped files included,
     // and nothing is applied.
     process.env.OMNIROUTE_MAX_PENDING_MIGRATIONS = "50";
-    const wiped = cloneDb(legacyBaseline!);
+    const wiped = cloneDb(realBaseline!);
     wiped.prepare("DELETE FROM _omniroute_migrations WHERE version <> '001'").run();
     assert.throws(
       () => withNonTestEnvironment(() => runner.runMigrations(wiped)),
@@ -410,28 +489,30 @@ test("(v) a few pending timestamped migrations on an up-to-date database do not 
 });
 
 test("(vi) getMigrationStatus lists applied and pending migrations in numeric order", () => {
-  const db = applyLegacyBaseline();
-  addCoreMigration("20261113120000_ts_status_applied.sql", nonIdempotentSql("ts_status_applied"));
+  const db = applyRealBaseline();
+  addCoreMigration("20991113120000_ts_status_applied.sql", nonIdempotentSql("ts_status_applied"));
   assert.equal(runner.runMigrations(db), 1);
 
-  addCoreMigration("20261120000000_ts_status_late.sql", nonIdempotentSql("ts_status_late"));
-  addCoreMigration("20261110000000_ts_status_early.sql", nonIdempotentSql("ts_status_early"));
+  addCoreMigration("20991120000000_ts_status_late.sql", nonIdempotentSql("ts_status_late"));
+  addCoreMigration("20991110000000_ts_status_early.sql", nonIdempotentSql("ts_status_early"));
 
   const status = runner.getMigrationStatus(db);
-  const appliedVersions = status.applied.map((row: { version: string }) => row.version);
-  assert.equal(appliedVersions.at(-1), "20261113120000", "timestamped after the legacy set");
-  assert.equal(appliedVersions.at(-2), HIGHEST_LEGACY);
+  const appliedVersions: string[] = status.applied.map((row: { version: string }) => row.version);
+  assert.deepEqual(appliedVersions.filter(isSynthetic), ["20991113120000"]);
+  const firstTimestamp = appliedVersions.findIndex(isTimestamp);
+  assert.equal(
+    appliedVersions.indexOf(HIGHEST_LEGACY),
+    firstTimestamp - 1,
+    "timestamped after the legacy set"
+  );
   assert.deepEqual(
     appliedVersions,
-    [...appliedVersions].sort((a: string, b: string) => {
-      const [x, y] = [BigInt(a), BigInt(b)];
-      return x < y ? -1 : x > y ? 1 : 0;
-    }),
+    numericOrder(appliedVersions),
     "applied must be in numeric version order"
   );
   assert.deepEqual(
     status.pending.map((row: { version: string }) => row.version),
-    ["20261110000000", "20261120000000"]
+    ["20991110000000", "20991120000000"]
   );
   clearSyntheticMigrations();
 });

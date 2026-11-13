@@ -40,7 +40,11 @@ import {
   SUPERSEDED_DUPLICATE_MIGRATIONS,
 } from "./migrationRunner/constants";
 import { getExtraMigrationFiles } from "./migrationRunner/extraDirs";
-import { compareMigrationFiles, compareMigrationVersions } from "./migrationRunner/ordering";
+import {
+  compareMigrationFiles,
+  compareMigrationVersions,
+  isTimestampVersion,
+} from "./migrationRunner/ordering";
 import { migrationConsole as console } from "./migrationRunner/logger";
 import {
   createPreMigrationBackup,
@@ -56,6 +60,7 @@ import {
   hasPhysicalTable,
   hasTable,
   inferPhysicalSchemaBaseline,
+  isCompatibilitySourceEligible,
   reconcileRenumberedMigrations,
   rehomeLegacyVersionSlotMigrations,
 } from "./migrationRunner/schemaState";
@@ -125,9 +130,6 @@ function resolveMigrationsDir(): string {
 }
 
 const MIGRATIONS_DIR = resolveMigrationsDir();
-
-/** `YYYYMMDDHHMMSS` — the version of a timestamped (post-239) migration. */
-const TIMESTAMP_VERSION_PATTERN = /^\d{14}$/;
 
 /**
  * Default maximum number of migrations allowed to run in a single startup on an
@@ -290,9 +292,14 @@ export function getMigrationFiles(): Array<{ version: string; name: string; path
       .join("; ");
     throw new Error(
       `Migration version collision detected: ${summary}. ` +
-        `Each migration file must have a unique numeric prefix. Rename one of the ` +
-        `colliding files (and add a retroactive guard in isSchemaAlreadyApplied for ` +
-        `DBs that already applied the old number). See _tasks/features-v3.8.4/9route/POST-MERGE-AUDIT.md.`
+        `Each migration file must have a unique numeric prefix. Rename ONLY the file ` +
+        `that is not yet on main or on any release/* branch (regenerate its name with ` +
+        `\`npm run db:new-migration -- <description>\`); the other one may already have ` +
+        `run on user databases under its current name, and renaming it would apply it again. ` +
+        `If both are already merged, rename the later one and add a ` +
+        `RENAMED_MIGRATION_COMPATIBILITY entry from its old version and name to the new ` +
+        `ones, so databases that applied it under the old version do not run it again. ` +
+        `See _tasks/features-v3.8.4/9route/POST-MERGE-AUDIT.md.`
     );
   }
 
@@ -399,10 +406,7 @@ function validateRequiredPhysicalMigrationProvenance(
         files.some(
           (file) => file.version === compatibility.toVersion && file.name === compatibility.toName
         ) &&
-        files.some(
-          (file) =>
-            file.version === compatibility.fromVersion && file.name !== compatibility.fromName
-        )
+        isCompatibilitySourceEligible(files, compatibility)
     );
     const knownLegacySlotCollision = LEGACY_VERSION_SLOT_MIGRATIONS.some(
       (legacy) =>
@@ -1153,7 +1157,7 @@ export function runMigrations(
 
   for (const migration of pending) {
     if (Number(migration.version) < highestAppliedBeforeMigrations) {
-      if (TIMESTAMP_VERSION_PATTERN.test(migration.version)) {
+      if (isTimestampVersion(migration.version)) {
         // Timestamped migrations from parallel branches routinely land after a later-dated
         // one; pending is "not in the ledger", so this is the normal path, not a gap.
         console.log(
