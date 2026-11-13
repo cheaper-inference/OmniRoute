@@ -176,6 +176,17 @@ export function locateCoverageFloorClaims(content) {
   return claims;
 }
 
+// What the PR diff and the rewrite plan treat as a managed coverage floor: only tuples whose four
+// components can be percentages. The release validator keeps judging every tuple (a tuple above
+// the floors always passes there), but the diff must not call `408/500/502/503` — the provider
+// breaker's HTTP statuses in AGENTS.md — a managed value, or a PR editing that list would be told
+// to restore it.
+export function locateManagedCoverageFloorClaims(content) {
+  return locateCoverageFloorClaims(content).filter((claim) =>
+    claim.values.every((value) => value >= 0 && value <= 100)
+  );
+}
+
 // --- Free-tier headline -------------------------------------------------------------------
 // The docs publish a rounded aggregate headline ("~1.4B"). Only the AGGREGATE headline is a
 // claim, via an explicit whitelist. These files also carry figures that are legitimately not the

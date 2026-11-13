@@ -525,10 +525,13 @@ jobs:
       # judges only the managed numbers the PR itself edited (diff against BASE_SHA, or the merge
       # commit's first parent when the base moved), never a base that is behind the live code by
       # design. The release PR (release/v* → main) and pushes keep the strict comparison.
-      # Empty on push/dispatch: no PR, so release mode.
+      # A manual dispatch on a feature branch (`gh workflow run ci.yml --ref <branch>`) runs in pr
+      # mode too: with no PR to diff, the gate checks content invariants only. Dispatch on main or
+      # release/v* stays strict (empty mode = automatic = release).
       - run: npm run check:docs-all
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          OMNIROUTE_GATE_MODE: ${{ github.event_name == 'workflow_dispatch' && github.ref_name != 'main' && !startsWith(github.ref_name, 'release/v') && 'pr' || '' }}
       # Previously-orphaned contract gates (existed as files, never wired anywhere).
       # All exit 0 today: cli-i18n is a hard gate, openapi-coverage is a ratchet
       # (floor ~36), openapi-security-tiers is advisory (Hard Rules #15/#17).

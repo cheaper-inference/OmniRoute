@@ -10,6 +10,7 @@ import {
   readProviderTotal,
   countLocales,
   runCountsGate,
+  buildChecks,
 } from "../../scripts/check/check-docs-counts-sync.mjs";
 import { loadFactsSnapshot, readPackageVersion } from "../../scripts/release/facts.mjs";
 
@@ -128,15 +129,52 @@ assert.ok(
 // the same authority the version gate has always used.
 const treeFacts: Facts = { ...snapshotFacts, version: readPackageVersion() };
 
+type ScopedCheck = Parameters<typeof tally>[0][number] & {
+  scope: "derived" | "invariant" | "release-only";
+};
+const snapshotRoot = path.resolve(here, "../..");
+const readCommitted = (rel: string) => {
+  try {
+    return readFileSync(path.join(snapshotRoot, rel), "utf8");
+  } catch {
+    return null;
+  }
+};
+
 test("release mode accepts the committed tree under the snapshot facts", () => {
-  const r = runGate({ mode: "release", facts: treeFacts });
-  assert.equal(r.mode, "release");
+  // The snapshot governs the derived claims and the content invariants. Release-only checks
+  // compare a file with the LIVE code by definition (the provider reference total against the
+  // provider modules, mode-pack names, the manifest's free tier): between refreshes a feature PR
+  // may legitimately move the code or regenerate PROVIDER_REFERENCE.md, so judging those against
+  // the snapshot would red the base. They are covered by "the release refresh closes the cycle"
+  // below (live facts) and by the release-mode run of `release:refresh-derived --check`.
+  const checks = (buildChecks({ facts: treeFacts }) as ScopedCheck[]).filter(
+    (c) => c.scope !== "release-only"
+  );
+  const judged = new Set(checks.map((c) => c.label));
+  for (const label of [
+    "Provider count",
+    "Provider count (secondary docs and skills)",
+    "DB migrations count",
+    "MCP tools (live code)",
+    "SVG canonical numbers (live code)",
+  ]) {
+    assert.ok(judged.has(label), `the snapshot run no longer judges "${label}"`);
+  }
+  assert.ok(checks.length >= 20, `only ${checks.length} checks judged against the snapshot`);
+  const r = tally(checks, readCommitted);
   assert.equal(
-    r.exitCode,
+    r.strict,
     0,
     `the tree drifts from derived-facts.json (STRICT ${r.strict}):\n${r.lines.join("\n")}`
   );
-  assert.equal(r.strict, 0);
+});
+
+test("release mode with the snapshot facts runs end to end through the CLI entry point", () => {
+  const r = runGate({ mode: "release", facts: treeFacts });
+  assert.equal(r.mode, "release");
+  assert.ok(r.lines[0].startsWith("Docs counts sync report — mode=release"));
+  assert.equal(r.infra, null);
 });
 
 test("release mode with the snapshot facts still catches a stale managed number", () => {

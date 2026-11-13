@@ -726,3 +726,58 @@ test("planDerivedRewrites moves every strategy-count claim #15159 pins (real tre
   assert.ok(!live.files.some((f) => f.changes.some((c) => strategyLabels.test(c.label))));
   assert.ok(!plan.manual.some((m) => strategyLabels.test(m.label)), JSON.stringify(plan.manual));
 });
+
+// --- Review findings (2026-11-13) --------------------------------------------------------------
+
+test("pr: a slash-separated list that cannot be a coverage floor is not a managed value", () => {
+  // AGENTS.md lists the provider breaker's HTTP statuses as `408/500/502/503/504`. The coverage
+  // floor locator used to read any four slash-separated numbers, so adding a status was flagged
+  // as "PR edited a managed value" although release mode accepts the line.
+  const floor =
+    "Coverage gate (67.33 / 67.33 / 72.02 / 65.08 — statements/lines/functions/branches).";
+  const base = `${floor}\nOnly 408/500/502/503/504 trip the provider breaker.\n`;
+  const head = `${floor}\nOnly 408/429/500/502/503/504 trip the provider breaker.\n`;
+  const coverage = byLabel("Coverage floor (docs vs blocking ratchet)");
+  assert.equal(coverage.validate?.(head).ok, true, "release mode accepts the edited status list");
+  const { violations } = gate.evaluatePrDiff({
+    checks: derived,
+    readBase: mem({ "AGENTS.md": base }),
+    readHead: mem({ "AGENTS.md": head }),
+  });
+  assert.deepEqual(violations, []);
+
+  // The coverage floor itself is still a managed value: editing it is still caught.
+  const edited = gate.evaluatePrDiff({
+    checks: derived,
+    readBase: mem({ "AGENTS.md": base }),
+    readHead: mem({ "AGENTS.md": base.replace("72.02", "70") }),
+  });
+  assert.equal(edited.violations.length, 1, JSON.stringify(edited.violations));
+  assert.equal(edited.violations[0].label, "Coverage floor (docs vs blocking ratchet)");
+  assert.equal(edited.violations[0].kind, "edited-value");
+});
+
+test("pr: a declared batch (the merge train) skips the managed-value diff", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "docs-counts-batch-"));
+  try {
+    git(dir, "init", "-q");
+    commitFile(dir, "README.md", "OmniRoute routes 392 providers.\n", "base");
+    const baseSha = git(dir, "rev-parse", "HEAD");
+    commitFile(dir, "README.md", "OmniRoute routes 395 providers.\n", "nightly refresh");
+    // Detached, as the train's worktree is: no branch name tells a writer from a feature.
+    git(dir, "checkout", "-q", "--detach");
+
+    const asOnePr = gate.runCountsGate({ mode: "pr", root: dir, env: { BASE_REF: baseSha } });
+    assert.equal(asOnePr.exitCode, 1, "without the signal the sum is judged like one feature PR");
+
+    const batch = gate.runCountsGate({
+      mode: "pr",
+      root: dir,
+      env: { BASE_REF: baseSha, OMNIROUTE_GATE_BATCH: "1" },
+    });
+    assert.equal(batch.exitCode, 0, batch.lines.join("\n"));
+    assert.ok(batch.lines.some((l) => /batch run \(OMNIROUTE_GATE_BATCH=1\)/.test(l)));
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});

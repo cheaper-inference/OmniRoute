@@ -160,7 +160,14 @@ function assertPrDiffWiring(workflow: Workflow, jobId: string, stepMatch: (s: St
   assert.ok(docs, `${jobId}: no check:docs-all step`);
   assert.equal(docs.run?.trim(), "npm run check:docs-all");
   assert.equal(docs.env?.BASE_SHA, BASE_SHA);
+  // A manual dispatch on a feature branch has no PR to diff and a base behind the code by
+  // design: pr mode (content invariants only). main and release/v* stay strict.
+  assert.equal(docs.env?.OMNIROUTE_GATE_MODE, DISPATCH_FEATURE_PR_MODE);
 }
+
+const DISPATCH_FEATURE_PR_MODE =
+  "${{ github.event_name == 'workflow_dispatch' && github.ref_name != 'main' && " +
+  "!startsWith(github.ref_name, 'release/v') && 'pr' || '' }}";
 
 test("ci.yml docs-sync-strict: depth-2 checkout and BASE_SHA on check:docs-all", () => {
   assertPrDiffWiring(
@@ -174,4 +181,21 @@ test("quality.yml docs-gates: depth-2 checkout and BASE_SHA on Docs accuracy", (
   assertPrDiffWiring(load("quality.yml"), "docs-gates", (s) =>
     (s.name ?? "").startsWith("Docs accuracy")
   );
+});
+
+test("nightly refresh: a run with no diff closes the robot's stale refresh PR, never a hand-pushed one", () => {
+  assert.ok(publish?.run);
+  const run = publish.run;
+  const noDiff = run.slice(
+    run.indexOf("if git diff --cached --quiet; then"),
+    run.indexOf("CHANGED=")
+  );
+  assert.match(
+    noDiff,
+    /gh pr list --repo "\$GITHUB_REPOSITORY" --head "\$REFRESH_BRANCH" --state open/
+  );
+  assert.match(noDiff, /\[ "\$\(git log -1 --format=%ae FETCH_HEAD\)" = "\$BOT_EMAIL" \]/);
+  assert.match(noDiff, /gh pr close "\$STALE"/);
+  assert.match(noDiff, /has commits pushed by hand; left open/);
+  assert.doesNotMatch(noDiff, /--delete-branch/, "the robot branch is rebuilt on the next diff");
 });

@@ -70,14 +70,38 @@ export function findNumberOccurrences(text, literal) {
   return out;
 }
 
+// Mirrors may spell a number in their own digits (Persian ۲۳۶, Arabic-Indic ٢٣٦); the plan keeps
+// them, so a change the plan applied to a mirror is matched to the source change by value.
+const LOCAL_DIGITS = /[\u0660-\u0669\u06F0-\u06F9]/g;
+export const asciiDigits = (text) =>
+  String(text).replace(LOCAL_DIGITS, (d) => {
+    const code = d.charCodeAt(0);
+    return String(code >= 0x06f0 ? code - 0x06f0 : code - 0x0660);
+  });
+
 /**
  * PURE. Applies the plan's changes for ONE source file to ONE mirror.
  *
- * @param {{ sourceBefore: string, changes: Array<{label:string, from:string, to:string}>, mirrorText: string }} args
+ * `alreadyApplied`: the changes the gate's own plan already made to this mirror (its claim
+ * extractors cover some mirrors directly, e.g. the README mirrors' database row). `mirrorText`
+ * then holds the plan's result, and each such change counts as one occurrence of the matching
+ * source change already carried — so the remaining occurrences are carried, not double-counted.
+ *
+ * @param {{ sourceBefore: string, changes: Array<{label:string, from:string, to:string}>, mirrorText: string, alreadyApplied?: Array<{from:string, to:string}> }} args
  * @returns {{ content: string, replaced: number, manual: Array<{ label: string, detail: string }> }}
  */
-export function propagateChangesToMirror({ sourceBefore, changes, mirrorText }) {
+export function propagateChangesToMirror({
+  sourceBefore,
+  changes,
+  mirrorText,
+  alreadyApplied = [],
+}) {
   const manual = [];
+  const covered = new Map(); // "from→to" (ASCII digits) → occurrences the plan already rewrote
+  for (const c of alreadyApplied) {
+    const key = `${asciiDigits(c.from)}\u2192${asciiDigits(c.to)}`;
+    covered.set(key, (covered.get(key) ?? 0) + 1);
+  }
   const groups = new Map();
   for (const c of changes) {
     const from = String(c.from);
@@ -126,12 +150,15 @@ export function propagateChangesToMirror({ sourceBefore, changes, mirrorText }) 
     }
     const inSource = findNumberOccurrences(sourceBefore, g.from);
     const inMirror = findNumberOccurrences(mirrorText, g.from);
-    if (inSource.length !== g.n || inMirror.length !== inSource.length) {
+    const done = covered.get(`${g.from}\u2192${to}`) ?? 0;
+    if (inSource.length !== g.n || inMirror.length + done !== inSource.length) {
       manual.push({
         label,
         detail:
           `"${g.from}" → "${to}": source has ${inSource.length} occurrence(s), the plan rewrites ` +
-          `${g.n}, the mirror has ${inMirror.length} — not carried to the mirror`,
+          `${g.n}, the mirror has ${inMirror.length}` +
+          (done ? ` (+${done} already rewritten by the plan)` : "") +
+          ` — not carried to the mirror`,
       });
       continue;
     }
@@ -153,17 +180,27 @@ export function propagateChangesToMirror({ sourceBefore, changes, mirrorText }) 
 /**
  * Mutates `state` (.i18n-state.json) for one source file the refresh rewrote. Returns
  * "refreshed" | "drifted" | "untracked". Only a source that was in sync BEFORE the rewrite is
- * refreshed; its rewritten mirrors get the new source_hash and their own target_hash.
+ * refreshed. A rewritten mirror gets the new source_hash and its own target_hash only when its
+ * locale was itself in sync (recorded source_hash = the source hash before the rewrite): a locale
+ * that was already behind keeps its old source_hash, so the i18n wave still sees it as stale —
+ * refreshing it would certify a translation of an older source as current. Callers pass only the
+ * mirrors that received EVERY change of the source.
  */
 export function refreshI18nStateEntry(state, rel, { sourceBefore, sourceAfter, mirrors, now }) {
   const entry = state?.sources?.[rel];
   if (!entry) return "untracked";
-  if (entry.source_hash !== sha256(sourceBefore)) return "drifted";
+  const oldHash = sha256(sourceBefore);
+  if (entry.source_hash !== oldHash) return "drifted";
   const newHash = sha256(sourceAfter);
   entry.source_hash = newHash;
   for (const m of mirrors) {
     const info = entry.locales?.[m.locale];
     if (!info) continue;
+    if (info.source_hash && info.source_hash !== oldHash) {
+      // Already stale before this refresh: record the mirror's new content, keep it stale.
+      entry.locales[m.locale] = { ...info, target_hash: sha256(m.content), updated_at: now };
+      continue;
+    }
     entry.locales[m.locale] = {
       ...info,
       source_hash: newHash,
@@ -172,4 +209,19 @@ export function refreshI18nStateEntry(state, rel, { sourceBefore, sourceAfter, m
     };
   }
   return "refreshed";
+}
+
+/**
+ * Mutates `state` for a mirror the refresh rewrote while its source needed no change (the plan
+ * aligned the mirror's own claim). The translation still corresponds to the same source, so only
+ * the target hash moves, and only for a locale that was in sync with the current source.
+ * Returns true when the state changed.
+ */
+export function refreshI18nTargetHash(state, rel, locale, content, now) {
+  const entry = state?.sources?.[rel];
+  const info = entry?.locales?.[locale];
+  if (!entry || !info) return false;
+  if (info.source_hash !== entry.source_hash) return false;
+  entry.locales[locale] = { ...info, target_hash: sha256(content), updated_at: now };
+  return true;
 }

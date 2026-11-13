@@ -204,7 +204,12 @@ describe("mirror propagation (conservative)", () => {
       sources: {
         "a.md": {
           source_hash: sha256("old"),
-          locales: { de: { source_hash: "x", section_hashes: [1] } },
+          locales: {
+            // in sync with the source before the rewrite → refreshed
+            de: { source_hash: sha256("old"), section_hashes: [1] },
+            // already behind an older source → keeps its source hash (stays stale)
+            fr: { source_hash: "x", section_hashes: [2] },
+          },
         },
         "b.md": { source_hash: "drifted", locales: {} },
       },
@@ -213,7 +218,10 @@ describe("mirror propagation (conservative)", () => {
       refreshI18nStateEntry(state, "a.md", {
         sourceBefore: "old",
         sourceAfter: "new",
-        mirrors: [{ locale: "de", content: "neu" }],
+        mirrors: [
+          { locale: "de", content: "neu" },
+          { locale: "fr", content: "nouveau" },
+        ],
         now: "T",
       }),
       "refreshed"
@@ -223,6 +231,12 @@ describe("mirror propagation (conservative)", () => {
       source_hash: sha256("new"),
       target_hash: sha256("neu"),
       section_hashes: [1],
+      updated_at: "T",
+    });
+    assert.deepEqual(state.sources["a.md"].locales.fr, {
+      source_hash: "x",
+      target_hash: sha256("nouveau"),
+      section_hashes: [2],
       updated_at: "T",
     });
     assert.equal(
@@ -422,5 +436,113 @@ describe("provider reference comparison", () => {
       normalizeProviderReference(a),
       normalizeProviderReference(b.replace("393", "394"))
     );
+  });
+});
+
+// Review findings (2026-11-13): the REAL gate plan lists the README mirrors' database row BEFORE
+// README.md. The refresh must still carry everything once, refresh .i18n-state.json and leave no
+// manual item — and must never certify a mirror that kept an old value, nor a stale locale.
+describe("refreshDerived with the real gate plan (README + mirrors + state)", () => {
+  const REPO = path.resolve(import.meta.dirname, "../..");
+  const realFile = (rel: string) => fs.readFileSync(path.join(REPO, rel), "utf8");
+  const LOCALES = ["pt-BR", "fa"];
+
+  function realFixture(opts: { staleLocale?: string } = {}) {
+    const files: Record<string, string> = { "README.md": realFile("README.md") };
+    for (const l of LOCALES)
+      files[`docs/i18n/${l}/README.md`] = realFile(`docs/i18n/${l}/README.md`);
+    const src = sha256(files["README.md"]);
+    const locales: Record<string, object> = {};
+    for (const l of LOCALES) {
+      locales[l] = {
+        source_hash: opts.staleLocale === l ? "older-source" : src,
+        target_hash: sha256(files[`docs/i18n/${l}/README.md`]),
+        section_hashes: ["keep"],
+        updated_at: "2026-01-01T00:00:00.000Z",
+      };
+    }
+    files[".i18n-state.json"] =
+      JSON.stringify({ sources: { "README.md": { source_hash: src, locales } } }, null, 2) + "\n";
+    return tree(files);
+  }
+
+  async function snapshotFacts() {
+    const { loadFactsSnapshot } = await import("../../scripts/release/facts.mjs");
+    const facts = loadFactsSnapshot(REPO) as Record<string, unknown>;
+    assert.ok(facts, "docs/reference/derived-facts.json is missing");
+    return { ...facts, migrations: Number(facts.migrations) + 1 };
+  }
+
+  it("migrations+1: source and every mirror carry the new count, state refreshed, no manual", async () => {
+    const root = realFixture();
+    const facts = await snapshotFacts();
+    const before = Number(facts.migrations) - 1;
+    const r = await refreshDerived({ root, only: ["numbers"], facts });
+    assert.deepEqual(r.manual, [], JSON.stringify(r.manual, null, 1));
+    assert.equal(refreshExitCode(r, { check: false }), 0);
+
+    const readme = read(root, "README.md")!;
+    assert.ok(readme.includes(`${before + 1} migrations`), "README carries the new count");
+    assert.ok(!readme.includes(`${before} migrations`), "README lost the old count");
+    for (const l of LOCALES) {
+      const mirror = read(root, `docs/i18n/${l}/README.md`)!;
+      assert.notEqual(mirror, realFile(`docs/i18n/${l}/README.md`), `${l} mirror rewritten`);
+    }
+    const state = JSON.parse(read(root, ".i18n-state.json")!);
+    const entry = state.sources["README.md"];
+    assert.equal(entry.source_hash, sha256(readme), "top-level source hash refreshed");
+    for (const l of LOCALES) {
+      const mirror = read(root, `docs/i18n/${l}/README.md`)!;
+      assert.equal(entry.locales[l].source_hash, entry.source_hash, `${l} in sync`);
+      assert.equal(entry.locales[l].target_hash, sha256(mirror), `${l} target hash = file`);
+      assert.deepEqual(entry.locales[l].section_hashes, ["keep"], "section hashes untouched");
+    }
+  });
+
+  it("a locale that was already stale keeps its source hash (never certified)", async () => {
+    const root = realFixture({ staleLocale: "pt-BR" });
+    const r = await refreshDerived({ root, only: ["numbers"], facts: await snapshotFacts() });
+    assert.deepEqual(r.manual, []);
+    const entry = JSON.parse(read(root, ".i18n-state.json")!).sources["README.md"];
+    assert.equal(entry.locales["pt-BR"].source_hash, "older-source", "still stale");
+    assert.equal(
+      entry.locales["pt-BR"].target_hash,
+      sha256(read(root, "docs/i18n/pt-BR/README.md")!),
+      "its new content is recorded"
+    );
+    assert.equal(
+      entry.locales.fa.source_hash,
+      entry.source_hash,
+      "the in-sync locale is refreshed"
+    );
+  });
+});
+
+describe("propagateChangesToMirror: partial carry is never certified", () => {
+  it("one change reaches the mirror, another does not → manual", () => {
+    const source = "393 providers and 239 migrations; 239 SQL files.\n";
+    const mirror = "393 provedores e 239 migrações.\n"; // the translation merged the two 239s
+    const changes = [
+      { label: "Provider count", from: "393", to: "394", index: 0 },
+      { label: "DB migrations count", from: "239", to: "240", index: source.indexOf("239") },
+      { label: "DB migrations count", from: "239", to: "240", index: source.lastIndexOf("239") },
+    ];
+    const r = propagateChangesToMirror({ sourceBefore: source, changes, mirrorText: mirror });
+    assert.equal(r.manual.length, 1, JSON.stringify(r.manual));
+    assert.match(r.manual[0].detail, /"239" → "240"/);
+    assert.ok(r.content.startsWith("394 provedores"), "the safe change still lands");
+  });
+
+  it("a change the plan already applied in local digits counts as carried", () => {
+    const source = "Database: 236 migrations.\n";
+    const planned = "پایگاه داده: ۲۳۷ مایگریشن.\n"; // the plan rewrote ۲۳۶ → ۲۳۷ itself
+    const r = propagateChangesToMirror({
+      sourceBefore: source,
+      changes: [{ label: "DB migrations count", from: "236", to: "237", index: 10 }],
+      mirrorText: planned,
+      alreadyApplied: [{ from: "۲۳۶", to: "۲۳۷" }],
+    });
+    assert.deepEqual(r.manual, []);
+    assert.equal(r.content, planned);
   });
 });

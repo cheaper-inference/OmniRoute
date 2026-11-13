@@ -53,6 +53,7 @@ import {
   mirrorsOf,
   propagateChangesToMirror,
   refreshI18nStateEntry,
+  refreshI18nTargetHash,
 } from "./lib/derived-mirrors.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -366,7 +367,27 @@ async function stepNumbers(ctx) {
   let rewritten = 0;
   let mirrorsRewritten = 0;
 
+  // The plan lists files in check order, so a mirror the plan rewrites itself (the README
+  // mirrors' "translated database row") can come BEFORE its source. Applying it first would leave
+  // the relay below with nothing to carry and the state refresh with a stale target hash.
+  // Sources go first; a mirror the plan rewrites is applied together with its source and counts
+  // as a touched mirror with its final content; plan-only mirrors (no source change) go last.
+  const isMirrorPath = (rel) => rel.startsWith("docs/i18n/");
+  const mirrorParts = (rel) => {
+    const m = /^docs\/i18n\/([^/]+)\/(.+)$/.exec(rel);
+    return m ? { locale: m[1], source: m[2] } : null;
+  };
+  const planMirrors = new Map(); // `${source}\0${locale}` → plan file
   for (const file of files) {
+    const parts = isMirrorPath(file.path) ? mirrorParts(file.path) : null;
+    if (parts) planMirrors.set(`${parts.source}\0${parts.locale}`, file);
+  }
+  const manualPaths = new Set(ctx.manual.map((m) => m.path));
+  const consumedMirrors = new Set();
+
+  // Applies one plan file (honouring the nightly profile); returns the new content, or null when
+  // the file was not applied (reported as manual).
+  const applyPlanFile = (file) => {
     const current = ctx.vfs.read(file.path);
     if (current !== file.before) {
       ctx.manual.push({
@@ -374,7 +395,7 @@ async function stepNumbers(ctx) {
         label: "numbers",
         detail: "plan was computed on different content than the tree holds — not applied",
       });
-      continue;
+      return null;
     }
     let changes = Array.isArray(file.changes) ? file.changes : [];
     let after = file.after;
@@ -396,25 +417,55 @@ async function stepNumbers(ctx) {
             label: "numbers",
             detail: "could not separate version claims from the other changes — not applied",
           });
-          continue;
+          return null;
         }
       }
     }
-    if (after === file.before) continue;
+    return { after, changes, partial: changes.length !== (file.changes ?? []).length };
+  };
+
+  for (const file of files.filter((f) => !isMirrorPath(f.path))) {
+    const applied = applyPlanFile(file);
+    if (!applied || applied.after === file.before) continue;
+    const { after, changes } = applied;
     ctx.vfs.write(file.path, after);
     rewritten++;
 
-    if (file.path.startsWith("docs/i18n/")) continue;
     const touchedMirrors = [];
     for (const m of mirrorsOf(ctx.root, file.path)) {
+      // The plan may have rewritten this mirror itself, with the same claim extractors as the
+      // source (the README mirrors' database row): apply that first, then carry the source's
+      // remaining changes, counting the plan's own rewrites as already carried.
+      const planned = planMirrors.get(`${file.path}\0${m.locale}`);
+      let alreadyApplied = [];
+      let planPartial = false;
+      if (planned) {
+        consumedMirrors.add(planned.path);
+        const r = applyPlanFile(planned);
+        if (r) {
+          if (r.after !== planned.before) ctx.vfs.write(planned.path, r.after);
+          alreadyApplied = r.changes;
+          planPartial = r.partial || manualPaths.has(planned.path);
+        } else {
+          planPartial = true;
+        }
+      }
       const mirrorText = ctx.vfs.read(m.rel);
       if (mirrorText == null) continue;
-      const r = propagateChangesToMirror({ sourceBefore: file.before, changes, mirrorText });
+      const original = planned ? planned.before : mirrorText;
+      const r = propagateChangesToMirror({
+        sourceBefore: file.before,
+        changes,
+        mirrorText,
+        alreadyApplied,
+      });
       for (const x of r.manual) ctx.manual.push({ path: m.rel, label: x.label, detail: x.detail });
-      if (r.replaced > 0 && r.content !== mirrorText) {
-        ctx.vfs.write(m.rel, r.content);
+      if (r.content !== mirrorText) ctx.vfs.write(m.rel, r.content);
+      if (r.content !== original) mirrorsRewritten++;
+      // Certified as in sync only when EVERY change reached the mirror: a partial carry would
+      // record the new source hash next to a mirror that still states an old value.
+      if (r.content !== original && r.manual.length === 0 && !planPartial) {
         touchedMirrors.push({ locale: m.locale, content: r.content });
-        mirrorsRewritten++;
       }
     }
     if (state) {
@@ -425,6 +476,21 @@ async function stepNumbers(ctx) {
         now,
       });
       if (outcome === "refreshed") stateChanged = true;
+    }
+  }
+
+  // Mirrors the plan rewrote whose source needed no change: the translation still corresponds to
+  // the same source, so a locale that was in sync only gets its new target hash.
+  for (const file of files.filter((f) => isMirrorPath(f.path) && !consumedMirrors.has(f.path))) {
+    const applied = applyPlanFile(file);
+    if (!applied || applied.after === file.before) continue;
+    ctx.vfs.write(file.path, applied.after);
+    mirrorsRewritten++;
+    const parts = mirrorParts(file.path);
+    if (state && parts && !applied.partial && !manualPaths.has(file.path)) {
+      if (refreshI18nTargetHash(state, parts.source, parts.locale, applied.after, now)) {
+        stateChanged = true;
+      }
     }
   }
   if (stateChanged) ctx.vfs.write(I18N_STATE, JSON.stringify(state, null, 2) + "\n");

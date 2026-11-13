@@ -53,6 +53,7 @@ import { buildReadmeMigrationChecks } from "./lib/readmeMigrationCount.mjs";
 import {
   SVG_CANONICAL_PATTERNS,
   locateCoverageFloorClaims,
+  locateManagedCoverageFloorClaims,
   locateGatedClaims,
   locateHeadlineClaims,
   locateNumberClaims,
@@ -499,7 +500,7 @@ function coverageFloorPlan(floors) {
   const required = [floors.statements, floors.lines, floors.functions, floors.branches];
   return (content) => {
     const edits = [];
-    for (const claim of locateCoverageFloorClaims(content)) {
+    for (const claim of locateManagedCoverageFloorClaims(content)) {
       claim.values.forEach((claimed, i) => {
         if (claimed < required[i] && claim.parts[i].start >= 0) {
           edits.push({ ...claim.parts[i], to: String(required[i]) });
@@ -679,7 +680,7 @@ function assembleChecks(facts) {
       scope: "derived",
       files: ["AGENTS.md", "README.md"],
       validate: makeCoverageFloorClaimValidator(floors),
-      extract: locateCoverageFloorClaims,
+      extract: locateManagedCoverageFloorClaims,
       plan: coverageFloorPlan(floors),
     },
     {
@@ -1203,6 +1204,15 @@ export function resolveCountsDiffBase({ env = process.env, cwd = ROOT } = {}) {
 export function resolvePrDiffContext({ env = process.env, cwd = ROOT, branch } = {}) {
   const head = branch ?? resolveHeadBranch({ env, cwd });
   const event = env.GITHUB_EVENT_NAME || "";
+  // A local batch (the merge train's detached worktree) sums PRs whose own CI already judged
+  // their managed values; it cannot know which of them is a writer branch (the nightly refresh
+  // PR, a translation wave), so it declares itself a batch instead of being diffed as one PR.
+  if ((env.OMNIROUTE_GATE_BATCH || "").trim() === "1") {
+    return {
+      branch: head,
+      skip: "batch run (OMNIROUTE_GATE_BATCH=1) — the PRs it sums were judged one by one",
+    };
+  }
   if (event === "merge_group" || QUEUE_BRANCHES.some((re) => re.test(head))) {
     return {
       branch: head,

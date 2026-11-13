@@ -124,6 +124,21 @@ jobs:
           git add -A
           if git diff --cached --quiet; then
             echo "Every derived number on \`$BASE\` already matches the live code." >> "$GITHUB_STEP_SUMMARY"
+            # A refresh PR left open from an earlier run now carries values the base no longer
+            # needs (the code moved back, or the release refreshed itself): close it so it cannot
+            # be merged by mistake. A tip pushed by someone else is only reported.
+            STALE=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$REFRESH_BRANCH" --state open \
+              --json number --jq '.[0].number // empty')
+            if [ -n "$STALE" ]; then
+              git fetch -q --depth=1 origin "$REFRESH_BRANCH"
+              if [ "$(git log -1 --format=%ae FETCH_HEAD)" = "$BOT_EMAIL" ]; then
+                gh pr close "$STALE" --repo "$GITHUB_REPOSITORY" \
+                  --comment "Closed by the nightly derived refresh: \`$BASE\` already matches the live code (${RUN_URL})." > /dev/null
+                echo "Closed the stale refresh PR #$STALE." >> "$GITHUB_STEP_SUMMARY"
+              else
+                echo "Refresh PR #$STALE is no longer needed but has commits pushed by hand; left open." >> "$GITHUB_STEP_SUMMARY"
+              fi
+            fi
             exit 0
           fi
           CHANGED=$(git diff --cached --name-only)
