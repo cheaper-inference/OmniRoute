@@ -16,18 +16,21 @@ const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 
 // Release mode (and a change that edits this file) compares it byte for byte; a feature PR
 // leaves the drift to the release refresh (scripts/check/lib/derivedArtifactScope.mjs).
-const stalenessSkip = releaseOnlyUnlessTouched("docs/diagrams/comparison-table.svg");
+const stalenessCheck = { skip: releaseOnlyUnlessTouched("docs/diagrams/comparison-table.svg") };
 
-test("the committed comparison table is exactly what the generator produces", async (t) => {
-  if (stalenessSkip) return t.skip(stalenessSkip);
-  const generated = await renderComparisonTable();
-  const committed = readFileSync(FILE, "utf8");
-  assert.equal(
-    committed,
-    generated,
-    `${FILE} is stale — regenerate with \`node scripts/docs/gen-readme-comparison-table.mjs\``
-  );
-});
+test(
+  "the committed comparison table is exactly what the generator produces",
+  stalenessCheck,
+  async () => {
+    const generated = await renderComparisonTable();
+    const committed = readFileSync(FILE, "utf8");
+    assert.equal(
+      committed,
+      generated,
+      `${FILE} is stale — regenerate with \`node scripts/docs/gen-readme-comparison-table.mjs\``
+    );
+  }
+);
 
 test("no font is embedded (every string is outlined) and nothing is external", async () => {
   const svg = await renderComparisonTable();

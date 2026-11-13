@@ -71,10 +71,9 @@ test("weightItems gives unknown/new specs the median weight, not an extreme", ()
 // feature PRs (plan 2026-11-13): a feature PR that adds a spec is not asked to edit it, the
 // runtime gives the new spec the median weight. Release mode (and a change that edits the file)
 // keeps the completeness check.
-const seedSkip = releaseOnlyUnlessTouched("config/quality/e2e-timings.json");
+const seedCheck = { skip: releaseOnlyUnlessTouched("config/quality/e2e-timings.json") };
 
-test("the committed timings seed covers every current e2e spec (no drift)", (t) => {
-  if (seedSkip) return t.skip(seedSkip);
+test("the committed timings seed covers every current e2e spec (no drift)", seedCheck, () => {
   const timings = JSON.parse(
     fs.readFileSync(path.join(ROOT, "config", "quality", "e2e-timings.json"), "utf8")
   );

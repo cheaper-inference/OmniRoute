@@ -16,18 +16,21 @@ const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 
 // Release mode (and a change that edits this file) compares it byte for byte; a feature PR
 // leaves the drift to the release refresh (scripts/check/lib/derivedArtifactScope.mjs).
-const stalenessSkip = releaseOnlyUnlessTouched("docs/diagrams/tier-cascade.svg");
+const stalenessCheck = { skip: releaseOnlyUnlessTouched("docs/diagrams/tier-cascade.svg") };
 
-test("the committed tier cascade is exactly what the generator produces", async (t) => {
-  if (stalenessSkip) return t.skip(stalenessSkip);
-  const generated = await renderTierCascade();
-  const committed = readFileSync(FILE, "utf8");
-  assert.equal(
-    committed,
-    generated,
-    `${FILE} is stale — regenerate with \`node scripts/docs/gen-readme-tier-cascade.mjs\``
-  );
-});
+test(
+  "the committed tier cascade is exactly what the generator produces",
+  stalenessCheck,
+  async () => {
+    const generated = await renderTierCascade();
+    const committed = readFileSync(FILE, "utf8");
+    assert.equal(
+      committed,
+      generated,
+      `${FILE} is stale — regenerate with \`node scripts/docs/gen-readme-tier-cascade.mjs\``
+    );
+  }
+);
 
 test("the only embedded font is the mono subset for the endpoint URL, and nothing is external", async () => {
   const svg = await renderTierCascade();

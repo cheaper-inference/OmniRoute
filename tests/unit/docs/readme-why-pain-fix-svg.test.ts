@@ -14,18 +14,21 @@ const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 
 // Release mode (and a change that edits this file) compares it byte for byte; a feature PR
 // leaves the drift to the release refresh (scripts/check/lib/derivedArtifactScope.mjs).
-const stalenessSkip = releaseOnlyUnlessTouched("docs/diagrams/why-pain-fix.svg");
+const stalenessCheck = { skip: releaseOnlyUnlessTouched("docs/diagrams/why-pain-fix.svg") };
 
-test("the committed why-pain-fix diagram is exactly what the generator produces", async (t) => {
-  if (stalenessSkip) return t.skip(stalenessSkip);
-  const generated = await renderReadmeWhyPainFix();
-  const committed = readFileSync("docs/diagrams/why-pain-fix.svg", "utf8");
-  assert.equal(
-    committed,
-    generated,
-    "docs/diagrams/why-pain-fix.svg is stale — regenerate with `node scripts/docs/gen-readme-why-pain-fix.mjs`"
-  );
-});
+test(
+  "the committed why-pain-fix diagram is exactly what the generator produces",
+  stalenessCheck,
+  async () => {
+    const generated = await renderReadmeWhyPainFix();
+    const committed = readFileSync("docs/diagrams/why-pain-fix.svg", "utf8");
+    assert.equal(
+      committed,
+      generated,
+      "docs/diagrams/why-pain-fix.svg is stale — regenerate with `node scripts/docs/gen-readme-why-pain-fix.mjs`"
+    );
+  }
+);
 
 test("no font is embedded (every string is outlined) and nothing is external", async () => {
   const svg = await renderReadmeWhyPainFix();

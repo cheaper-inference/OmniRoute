@@ -14,18 +14,21 @@ const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 
 // Release mode (and a change that edits this file) compares it byte for byte; a feature PR
 // leaves the drift to the release refresh (scripts/check/lib/derivedArtifactScope.mjs).
-const stalenessSkip = releaseOnlyUnlessTouched("docs/diagrams/privacy-local.svg");
+const stalenessCheck = { skip: releaseOnlyUnlessTouched("docs/diagrams/privacy-local.svg") };
 
-test("the committed privacy-local diagram is exactly what the generator produces", async (t) => {
-  if (stalenessSkip) return t.skip(stalenessSkip);
-  const generated = await renderPrivacyLocal();
-  const committed = readFileSync("docs/diagrams/privacy-local.svg", "utf8");
-  assert.equal(
-    committed,
-    generated,
-    "docs/diagrams/privacy-local.svg is stale — regenerate with `node scripts/docs/gen-readme-privacy-local.mjs`"
-  );
-});
+test(
+  "the committed privacy-local diagram is exactly what the generator produces",
+  stalenessCheck,
+  async () => {
+    const generated = await renderPrivacyLocal();
+    const committed = readFileSync("docs/diagrams/privacy-local.svg", "utf8");
+    assert.equal(
+      committed,
+      generated,
+      "docs/diagrams/privacy-local.svg is stale — regenerate with `node scripts/docs/gen-readme-privacy-local.mjs`"
+    );
+  }
+);
 
 test("no font is embedded (every string is outlined) and nothing is external", async () => {
   const svg = await renderPrivacyLocal();

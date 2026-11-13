@@ -14,18 +14,21 @@ const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 
 // Release mode (and a change that edits this file) compares it byte for byte; a feature PR
 // leaves the drift to the release refresh (scripts/check/lib/derivedArtifactScope.mjs).
-const stalenessSkip = releaseOnlyUnlessTouched("docs/diagrams/works-zero-config.svg");
+const stalenessCheck = { skip: releaseOnlyUnlessTouched("docs/diagrams/works-zero-config.svg") };
 
-test("the committed works-zero-config diagram is exactly what the generator produces", async (t) => {
-  if (stalenessSkip) return t.skip(stalenessSkip);
-  const generated = await renderReadmeWorksZeroConfig();
-  const committed = readFileSync("docs/diagrams/works-zero-config.svg", "utf8");
-  assert.equal(
-    committed,
-    generated,
-    "docs/diagrams/works-zero-config.svg is stale — regenerate with `node scripts/docs/gen-readme-works-zero-config.mjs`"
-  );
-});
+test(
+  "the committed works-zero-config diagram is exactly what the generator produces",
+  stalenessCheck,
+  async () => {
+    const generated = await renderReadmeWorksZeroConfig();
+    const committed = readFileSync("docs/diagrams/works-zero-config.svg", "utf8");
+    assert.equal(
+      committed,
+      generated,
+      "docs/diagrams/works-zero-config.svg is stale — regenerate with `node scripts/docs/gen-readme-works-zero-config.mjs`"
+    );
+  }
+);
 
 test("the only embedded font is the mono subset for the commands and URLs, and nothing is external", async () => {
   const svg = await renderReadmeWorksZeroConfig();
