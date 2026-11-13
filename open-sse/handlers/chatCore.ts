@@ -2176,7 +2176,9 @@ async function handleChatCoreInner({
     }
   }
 
-  const calibrationEstimatedInputTokens = finalEstimatedInputTokens; // #14931 pairing
+  // #14931 pairing: learn actual / RAW estimate. The calibrated value is raw x the learned
+  // factor; pairing it would make the factor converge to sqrt(ratio).
+  const calibrationEstimatedInputTokens = finalInputBreakdown.total;
   const modelOutputCap = toPositiveInteger(
     getExplicitModelOutputCap({ provider, model: effectiveModel })
   );
