@@ -152,6 +152,25 @@ describe("ConsoleLogViewer follows the tail only while the reader is at it", () 
     expect(log.scrollTop).toBe(600);
   });
 
+  it("keeps the active Auto-scroll label in ink, not text-info on the info tint (#18074)", async () => {
+    // text-info on the 15% info tint is 4.07–4.34:1 in the light looks (Editions #526b80,
+    // Classic #2869d8), under AA 4.5:1 for 14 px text: the one contrast node on /logs/console.
+    const { container } = await renderViewer();
+    const toggle = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("logs.consoleViewer.autoScroll")
+    );
+    expect(toggle?.getAttribute("aria-pressed")).toBe("true");
+    expect(toggle?.className).toContain("bg-info/15");
+    expect(toggle?.className).toContain("text-text-main");
+    expect(toggle?.className).not.toMatch(/(^|\s)text-info(\s|$)/);
+    // The icon keeps the info hue (non-text, 3:1 is enough).
+    expect(toggle?.querySelector("svg")?.getAttribute("class") ?? "").toContain("text-info");
+
+    await act(async () => toggle?.click());
+    expect(toggle?.getAttribute("aria-pressed")).toBe("false");
+    expect(toggle?.className).not.toContain("bg-info/15");
+  });
+
   it("never scrolls while auto-scroll is switched off, even at the bottom", async () => {
     const { container, log } = await renderViewer();
     const toggle = Array.from(container.querySelectorAll("button")).find((b) =>

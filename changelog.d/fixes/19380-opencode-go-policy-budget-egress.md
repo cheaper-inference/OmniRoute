@@ -1,0 +1,1 @@
+- **fix(auth):** an OpenCode Go account that answers `429 Policy budget exceeded` no longer locks out healthy sibling accounts on the same egress IP: workspace policy budgets are per account, so only the failing account is locked ([#19314](https://github.com/cheaper-inference/OmniRoute/issues/19314)) — thanks @rafacpti23

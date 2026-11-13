@@ -15,6 +15,7 @@ import {
   isCacheableForWrite as defaultIsCacheableForWrite,
   isTruncatedCompletion as defaultIsTruncatedCompletion,
   isRefusalOrUnavailableCompletion as defaultIsRefusalOrUnavailableCompletion,
+  responseCarriesToolCalls,
 } from "@/lib/semanticCache";
 import { isSmallEnoughForSemanticCache as defaultIsSmallEnough } from "../../utils/estimateSize.ts";
 import { getSemanticCacheManager } from "../../services/cache/semanticCacheManager.ts";
@@ -73,6 +74,7 @@ export function storeSemanticCacheResponse(
     (deps.isRefusalOrUnavailableCompletion ?? defaultIsRefusalOrUnavailableCompletion)(
       args.translatedResponse
     ) ||
+    responseCarriesToolCalls(args.translatedResponse) ||
     !deps.isSmallEnoughForSemanticCache(args.translatedResponse)
   ) {
     return;

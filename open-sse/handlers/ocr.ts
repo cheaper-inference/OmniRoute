@@ -10,6 +10,7 @@ import {
   getOcrTransformation,
   parseOcrModel,
   OCR_PROVIDERS,
+  type OcrResponseShape,
 } from "../config/ocrRegistry.ts";
 import { errorResponse, sanitizeErrorMessage } from "../utils/error.ts";
 import { isSameOrigin } from "../utils/sameOrigin.ts";
@@ -93,6 +94,54 @@ export async function resolveVertexOcrAccessToken<
   return { ...credentials, accessToken };
 }
 
+type OcrSuccessRecorder = (result: {
+  provider: string;
+  model: string;
+  usageInfo?: Record<string, unknown>;
+  requestId: string;
+}) => Promise<number | null>;
+
+/**
+ * Record a delivered OCR result (best-effort) and build its 200 response with
+ * OmniRoute meta headers. An unknown cost (null) omits the response-cost header.
+ */
+async function buildOcrSuccessResponse({
+  parsed,
+  provider,
+  model,
+  startTime,
+  onSuccess,
+}: {
+  parsed: OcrResponseShape;
+  provider: string;
+  model: string;
+  startTime: number;
+  onSuccess: OcrSuccessRecorder | null;
+}): Promise<Response> {
+  const requestId = generateRequestId();
+  let costUsd: number | null = 0;
+  if (onSuccess) {
+    try {
+      costUsd = await onSuccess({ provider, model, usageInfo: parsed.usage_info, requestId });
+    } catch {
+      // Accounting is best-effort; never turn a delivered OCR result into a
+      // provider error (which would invite a duplicate, billable extraction).
+      console.error("[OCR accounting] Failed to record completed request");
+      costUsd = null;
+    }
+  }
+  const headers = new Headers({ ...CORS_HEADERS, "Content-Type": "application/json" });
+  attachOmniRouteMetaHeaders(headers, {
+    provider,
+    model,
+    costUsd,
+    latencyMs: Date.now() - startTime,
+    requestId,
+  });
+  if (costUsd === null) headers.delete("X-OmniRoute-Response-Cost");
+  return new Response(JSON.stringify(parsed), { status: 200, headers });
+}
+
 /**
  * Handle OCR request
  *
@@ -114,6 +163,7 @@ export async function handleOcr({
   credentials,
   fetchImpl = fetch,
   sleepImpl = defaultSleep,
+  onSuccess = null as OcrSuccessRecorder | null,
 }) {
   const startTime = Date.now();
   if (!body.document) {
@@ -177,15 +227,13 @@ export async function handleOcr({
     }
 
     const parsed = transformation.parseResponse(data);
-    const headers = new Headers({ ...CORS_HEADERS, "Content-Type": "application/json" });
-    attachOmniRouteMetaHeaders(headers, {
+    return await buildOcrSuccessResponse({
+      parsed,
       provider: providerId,
       model: modelId,
-      costUsd: 0,
-      latencyMs: Date.now() - startTime,
-      requestId: generateRequestId(),
+      startTime,
+      onSuccess,
     });
-    return new Response(JSON.stringify(parsed), { status: 200, headers });
   } catch (err) {
     const safeErrorMessage = sanitizeErrorMessage(err).trim() || "OCR request failed";
     console.error("[OCR]", safeErrorMessage);

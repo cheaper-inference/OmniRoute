@@ -77,13 +77,13 @@ export default function LandingPage() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button
                   onClick={() => router.push("/dashboard")}
-                  className="w-full sm:w-auto h-14 px-10 rounded-lg bg-primary hover:bg-primary-hover text-accent-foreground text-lg font-bold transition-all shadow-[0_0_20px_color-mix(in_srgb,var(--color-primary)_50%,transparent)]"
+                  className="w-full sm:w-auto h-14 px-10 rounded-lg bg-primary hover:bg-primary-hover text-accent-foreground text-lg font-semibold transition-all shadow-[0_0_20px_color-mix(in_srgb,var(--color-primary)_50%,transparent)]"
                 >
                   {t("startFree")}
                 </button>
                 <button
                   onClick={() => router.push("/docs")}
-                  className="w-full sm:w-auto h-14 px-10 rounded-lg border border-border hover:bg-surface text-text-main text-lg font-bold transition-all"
+                  className="w-full sm:w-auto h-14 px-10 rounded-lg border border-border hover:bg-surface text-text-main text-lg font-semibold transition-all"
                 >
                   {t("readDocumentation")}
                 </button>

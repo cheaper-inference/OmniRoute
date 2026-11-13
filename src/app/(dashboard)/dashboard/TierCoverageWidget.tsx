@@ -107,7 +107,7 @@ export function TierCoverageWidget() {
       <div className="grid grid-cols-3 gap-3">
         {tiers.map(({ key, label, colorClass, configured, active }) => (
           <div key={key} className="text-center">
-            <div className={`text-2xl font-bold ${colorClass}`}>{active}</div>
+            <div className={`text-2xl font-semibold ${colorClass}`}>{active}</div>
             <div className="text-xs text-text-muted mt-0.5">{label}</div>
             {configured > 0 && active < configured && (
               <div className="text-xs text-warning mt-0.5">{configured - active} inactive</div>
