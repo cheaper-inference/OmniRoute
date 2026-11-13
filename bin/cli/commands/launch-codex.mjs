@@ -1,42 +1,13 @@
-import { spawn, execFileSync } from "node:child_process";
 import { t } from "../i18n.mjs";
 import { contextCredentialFor, resolveActiveContext } from "../contexts.mjs";
-import { quoteShellArgs, quoteShellArgsForSpawn } from "../utils/winShellArgs.mjs";
+import { quoteShellArgs } from "../utils/winShellArgs.mjs";
 import { buildSafeCliLaunchEnv } from "../launch-env.mjs";
-
-/**
- * Probe PATH for a Windows executable via `where.exe`, preferring a `.exe` over
- * a `.cmd`/`.bat` shim. Returns the absolute path to the preferred binary, or
- * `null` when `where.exe` finds nothing (or cannot run). Mirrors the same probe
- * in launch.mjs and `locateCommand()` in `src/shared/services/cliRuntime.ts`.
- *
- * @param {string} command  bare command name to look up
- * @returns {Promise<string|null>} absolute path to the preferred match, or null
- */
-function probeWindowsBinary(command) {
-  try {
-    const out = execFileSync("where.exe", [command], {
-      stdio: ["ignore", "pipe", "ignore"],
-      encoding: "utf8",
-      timeout: 3000,
-      windowsHide: true,
-    });
-    const lines = out
-      .split(/\r?\n/)
-      .map((l) => l.trim())
-      .filter(Boolean);
-    if (lines.length === 0) return null;
-    const winExt = /\.(exe|cmd|bat|com)$/i;
-    return lines.find((l) => winExt.test(l)) || null;
-  } catch {
-    return null;
-  }
-}
+import { executeLegacyLaunch, legacyDeprecationNote, legacyProbeWindowsBinary } from "./launch.mjs";
 
 /** OpenAI/Codex env keys stripped from the child so a stale OpenAI key/base-url
  *  in the shell can't shadow the omniroute provider (defense-in-depth). Mirrors
  *  free-claude-code's codex adapter. NOTE: this does NOT silence codex's
- *  `refresh_token` log noise — that comes from a stored OpenAI session in
+ *  `refresh_token` log noise: that comes from a stored OpenAI session in
  *  ~/.codex/auth.json, not the env; it is cosmetic and does not block requests. */
 const STRIPPED_CODEX_ENV_KEYS = [
   "OPENAI_API_KEY",
@@ -56,7 +27,7 @@ const NO_AUTH_SENTINEL = "omniroute-no-auth";
 //
 // #9454: the native codex installer may ship a real `codex.exe` instead of the
 // npm `.cmd` shim. Probe PATH for `codex` first: when `where.exe` resolves a
-// `.exe`, spawn it directly (no shell — cmd.exe would split an absolute path
+// `.exe`, spawn it directly (no shell: cmd.exe would split an absolute path
 // with spaces); otherwise fall back to `codex.cmd` + shell. Off Windows the bare
 // binary is spawned unchanged (no shell, no probe).
 /**
@@ -66,7 +37,7 @@ const NO_AUTH_SENTINEL = "omniroute-no-auth";
  */
 export async function resolveCodexSpawn(platform, opts = {}) {
   if (platform !== "win32") return { command: "codex", shell: undefined };
-  const probe = opts.probe ?? probeWindowsBinary;
+  const probe = opts.probe ?? legacyProbeWindowsBinary;
   const located = await probe("codex");
   if (located && /\.exe$/i.test(located)) {
     return { command: located, shell: undefined };
@@ -224,72 +195,20 @@ export async function runLaunchCodexCommand(opts = {}, codexArgs = []) {
 
   const { command: codexLaunch, shell: shellValue } = await resolveCodexSpawn(process.platform);
 
-  return await new Promise((resolve) => {
-    const child = spawn(
-      codexLaunch,
-      quoteShellArgsForSpawn(extraArgs, process.platform, shellValue),
-      {
-        env,
-        stdio: "inherit",
-        shell: shellValue,
-      }
-    );
-    let settled = false;
-    let requestedSignalCode;
-    let escalationTimer;
-    const signalExitCode = { SIGINT: 130, SIGTERM: 143, SIGHUP: 129 };
-    const signalHandlers = {};
-    const cleanupSignalHandlers = () => {
-      for (const signal of Object.keys(signalExitCode)) {
-        process.removeListener(signal, signalHandlers[signal]);
-      }
-    };
-    const finish = (code) => {
-      if (settled) return;
-      settled = true;
-      if (escalationTimer) clearTimeout(escalationTimer);
-      cleanupSignalHandlers();
-      resolve(code);
-    };
-    for (const signal of Object.keys(signalExitCode)) {
-      signalHandlers[signal] = () => {
-        if (requestedSignalCode !== undefined) return;
-        requestedSignalCode = signalExitCode[signal];
-        try {
-          child.kill(signal);
-        } catch {
-          // The child may have already exited; its close event will settle.
-        }
-        const configuredTimeout = Number(
-          opts.signalTimeoutMs ?? process.env.OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS
-        );
-        const timeoutMs =
-          Number.isFinite(configuredTimeout) && configuredTimeout > 0 ? configuredTimeout : 5000;
-        escalationTimer = setTimeout(() => {
-          try {
-            child.kill("SIGKILL");
-          } catch {
-            // A close event may have raced with escalation.
-          }
-        }, timeoutMs);
-        escalationTimer.unref?.();
-      };
-      process.once(signal, signalHandlers[signal]);
-    }
-    child.on("error", (err) => {
-      if (err?.code === "ENOENT") {
-        console.error(
-          "The 'codex' CLI was not found in PATH. Install with:\n  npm install -g @openai/codex"
-        );
-        finish(127);
-      } else {
-        console.error(String(err?.message || err));
-        finish(1);
-      }
-    });
-    child.on("close", (code, signalName) => {
-      finish(requestedSignalCode ?? code ?? signalExitCode[signalName] ?? 0);
-    });
+  // Env and argv deliberately stay on this legacy builder path (buildCodexEnv /
+  // buildCodexProviderArgs): tests pin them and they differ from the codex adapter plan
+  // (no model catalog, no telemetry overrides). Only spawn + signal forwarding goes through
+  // the launch core executor.
+  return await executeLegacyLaunch({
+    command: codexLaunch,
+    shell: shellValue,
+    // The core executor applies quoteShellArgsForSpawn itself, so pass raw argv.
+    args: extraArgs,
+    env,
+    notFoundMessage:
+      "The 'codex' CLI was not found in PATH. Install with:\n  npm install -g @openai/codex",
+    signalTimeoutMs: opts.signalTimeoutMs,
+    platform: process.platform,
   });
 }
 
@@ -318,6 +237,11 @@ export function registerLaunchCodex(program) {
     .allowExcessArguments(true)
     .argument("[codexArgs...]", "arguments passed through to the codex binary")
     .action(async (codexArgs, opts) => {
+      // Note lives here, not in runLaunchCodexCommand: `omniroute run codex` reuses that.
+      legacyDeprecationNote(
+        "`omniroute launch-codex` is deprecated, use `omnirouter launch codex` " +
+          "(silence with OMNIROUTE_NO_DEPRECATION=1)"
+      );
       const merged = { ...opts, profile: opts.profile ?? opts.p };
       // process.exit() here aborted the process with a libuv assertion on
       // Windows (`!(handle->flags & UV_HANDLE_CLOSING)`, async.c:94): it tears
