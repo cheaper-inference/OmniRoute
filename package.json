@@ -569,7 +569,7 @@
     "vite": "^8.3.3",
     "protobufjs": "^7.6.5",
     "@babel/core": "^7.29.6",
-    "hono": "^4.13.13",
+    "hono": "^4.13.16",
     "@hono/node-server": "^2.1.6",
     "fast-uri": "^3.1.9",
     "body-parser": "^2.4.0",
