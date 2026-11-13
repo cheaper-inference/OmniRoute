@@ -1,0 +1,1 @@
+- **fix(db):** Loading the database settings page no longer counts the rows and reads the page usage of every table (about 300 queries) just to show the database size; it reads the page size and page count instead. The explicit refresh-stats action still returns the full per-table statistics.
