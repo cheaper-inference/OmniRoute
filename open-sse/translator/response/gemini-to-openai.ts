@@ -839,6 +839,13 @@ export function geminiToOpenAIResponse(chunk, state) {
       }
     }
 
+    // A tag prefix held at a chunk boundary ("<", "<th") never became a tag: it is text.
+    // flushOpenTextualReasoning above already cleared it when a reasoning tag was open.
+    if (state.textualReasoningTagBuffer) {
+      emitTextDelta(state.textualReasoningTagBuffer, state, results);
+      state.textualReasoningTagBuffer = undefined;
+    }
+
     // Live incident (dashboard log id 1784489701456-d8c0e9): MALFORMED_FUNCTION_CALL /
     // UNEXPECTED_TOOL_CALL mean Gemini's OWN parser rejected an attempted tool call —
     // there is no real functionCall part to translate, only a human-readable
