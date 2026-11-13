@@ -464,13 +464,26 @@ function hasRemoteContextReference(value: unknown, depth = 0): boolean {
   return false;
 }
 
+const serializedBodyBytesCache = new WeakMap<object, number | null>();
+const estimatedInputTokensCache = new WeakMap<object, number>();
+
 function getSerializedBodyBytes(body: unknown): number | null {
-  if (!body || typeof body !== "object" || hasRemoteContextReference(body)) return null;
+  if (!body || typeof body !== "object") return null;
+  const cached = serializedBodyBytesCache.get(body);
+  if (cached !== undefined) return cached;
+
+  if (hasRemoteContextReference(body)) {
+    serializedBodyBytesCache.set(body, null);
+    return null;
+  }
+
   try {
     const serialized = JSON.stringify(body);
-    if (!serialized) return null;
-    return Buffer.byteLength(serialized, "utf8");
+    const result = serialized ? Buffer.byteLength(serialized, "utf8") : null;
+    serializedBodyBytesCache.set(body, result);
+    return result;
   } catch {
+    serializedBodyBytesCache.set(body, null);
     return null;
   }
 }
@@ -1036,6 +1049,9 @@ function estimateTokenCount(text: unknown) {
  */
 export function estimateInputTokens(body: unknown) {
   if (!body || typeof body !== "object") return 0;
+  const cached = estimatedInputTokensCache.get(body);
+  if (cached !== undefined) return cached;
+
   const record = body as Record<string, unknown>;
 
   try {
@@ -1053,9 +1069,12 @@ export function estimateInputTokens(body: unknown) {
       messageTokens = estimateTokenCount(JSON.stringify(record));
     }
 
-    return messageTokens + toolTokens;
+    const result = messageTokens + toolTokens;
+    estimatedInputTokensCache.set(body, result);
+    return result;
   } catch {
     // Fallback if stringify fails
+    estimatedInputTokensCache.set(body, 0);
     return 0;
   }
 }
