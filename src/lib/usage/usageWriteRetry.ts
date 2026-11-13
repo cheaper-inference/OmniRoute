@@ -14,6 +14,7 @@
  * @module lib/usage/usageWriteRetry
  */
 
+import { moneyForWrite } from "./moneyRound";
 import { getDbInstance } from "../db/core";
 import { resolveBillingTeamIdForApiKeyAt } from "../db/teams";
 import { resolveProviderId } from "@/shared/constants/providers";
@@ -221,12 +222,17 @@ function insertEntry(db: ReturnType<typeof getDbInstance>, prepared: PreparedEnt
     agentSessionId,
     timestamp,
     providerCredits,
-    providerCostUsd,
-    nonNegativeOrNull(entry.calculatedCostUsd),
+    moneyOrNull(providerCostUsd),
+    moneyOrNull(nonNegativeOrNull(entry.calculatedCostUsd)),
     entry.billingUnit || null,
     nonNegativeOrNull(entry.billingQuantity),
-    nonNegativeOrNull(entry.billingUnitPriceUsd)
+    moneyOrNull(nonNegativeOrNull(entry.billingUnitPriceUsd))
   );
+}
+
+/** USD amounts follow the opt-in 8-decimal rule (OMNIROUTE_MONEY_ROUND_8DP); null stays null. */
+function moneyOrNull(value: number | null): number | null {
+  return value === null ? null : moneyForWrite(value);
 }
 
 function nonNegativeOrNull(value: unknown): number | null {

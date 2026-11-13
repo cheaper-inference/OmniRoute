@@ -14,6 +14,7 @@ import { logicalCallSql } from "./logicalCallSql";
  * @module db/costLedger
  */
 
+import { moneyForWrite } from "@/lib/usage/moneyRound";
 import { getDbInstance } from "./core";
 import { toNumber } from "@/shared/utils/numeric";
 
@@ -99,7 +100,7 @@ export function recordLedgerEntry(entry: CostLedgerEntry): void {
     toNonNegative(entry.tokensReasoning),
     toNonNegative(entry.unitPriceInput),
     toNonNegative(entry.unitPriceOutput),
-    toNonNegative(entry.amountUsd),
+    moneyForWrite(toNonNegative(entry.amountUsd)),
     entry.serviceTier || "standard",
     entry.success === false ? 0 : 1,
     entry.timestamp || new Date().toISOString(),
@@ -149,7 +150,7 @@ export function recordLedgerEntries(entries: CostLedgerEntry[]): void {
         toNonNegative(entry.tokensReasoning),
         toNonNegative(entry.unitPriceInput),
         toNonNegative(entry.unitPriceOutput),
-        toNonNegative(entry.amountUsd),
+        moneyForWrite(toNonNegative(entry.amountUsd)),
         entry.serviceTier || "standard",
         entry.success === false ? 0 : 1,
         entry.timestamp || new Date().toISOString(),

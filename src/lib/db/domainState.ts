@@ -11,6 +11,7 @@
  * @module lib/db/domainState
  */
 
+import { moneyForWrite } from "@/lib/usage/moneyRound";
 import { getDbInstance } from "./core";
 
 type JsonRecord = Record<string, unknown>;
@@ -425,7 +426,7 @@ export function saveCostEntry(apiKeyId: string, cost: number, timestamp = Date.n
   const db = getDbInstance();
   db.prepare("INSERT INTO domain_cost_history (api_key_id, cost, timestamp) VALUES (?, ?, ?)").run(
     apiKeyId,
-    cost,
+    moneyForWrite(cost),
     timestamp
   );
 }
@@ -443,7 +444,7 @@ export function batchSaveCostEntries(
   const tx = db.transaction(
     (rows: Array<{ apiKeyId: string; cost: number; timestamp: number }>) => {
       for (const entry of rows) {
-        stmt.run(entry.apiKeyId, entry.cost, entry.timestamp);
+        stmt.run(entry.apiKeyId, moneyForWrite(entry.cost), entry.timestamp);
       }
     }
   );
