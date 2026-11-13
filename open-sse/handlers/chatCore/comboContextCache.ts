@@ -43,8 +43,13 @@ export async function getCombosCached(): Promise<unknown[]> {
   }
   _combosCacheTs = now;
   _combosCacheVersionSnapshot = version;
-  _combosPromise = getCombos();
-  return _combosPromise;
+  // A rejected read must not stay cached for the TTL: drop it so the next caller reads again.
+  const pending = getCombos();
+  _combosPromise = pending;
+  pending.catch(() => {
+    if (_combosPromise === pending) clearCombosCache();
+  });
+  return pending;
 }
 
 export function clearCombosCache() {
@@ -64,7 +69,18 @@ export function clearUpstreamProxyConfigCache(providerId?: string) {
 export async function getUpstreamProxyConfigCached(providerId: string) {
   const cached = _proxyConfigCache.get(providerId);
   if (cached && Date.now() - cached.ts < PROXY_CONFIG_CACHE_TTL) return cached;
-  const cfg = await getUpstreamProxyConfig(providerId).catch(() => null);
+  let failed = false;
+  const cfg = await getUpstreamProxyConfig(providerId).catch((error) => {
+    // Return the native default for this call only; caching it would route a provider that is set
+    // to the upstream proxy straight to the provider for the whole TTL after one failed read.
+    failed = true;
+    console.warn(
+      `[UPSTREAM_PROXY] config read failed for ${providerId}: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    return null;
+  });
   const result: UpstreamProxyConfigCacheEntry = cfg
     ? {
         mode: cfg.mode,
@@ -80,6 +96,6 @@ export async function getUpstreamProxyConfigCached(providerId: string) {
         fallbackBackend: "cliproxyapi" as const,
         ts: Date.now(),
       };
-  _proxyConfigCache.set(providerId, result);
+  if (!failed) _proxyConfigCache.set(providerId, result);
   return result;
 }

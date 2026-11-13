@@ -1,0 +1,1 @@
+- **fix(sse):** a failed combo-list or upstream-proxy-config read is no longer cached for 10 seconds. A provider set to the upstream proxy is not sent direct after one failed read, and the failure is logged.
