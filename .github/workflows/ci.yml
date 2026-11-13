@@ -605,6 +605,18 @@ jobs:
     # drafts (ciclo v3.8.44: 123 runs pesados re-disparados por merges na release, 88 cancelados).
     # UI keys move with dashboard code OR message catalogs.
     if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') && (needs.changes.outputs.i18n == 'true' || needs.changes.outputs.code == 'true')) }}
+    # Two modes (plan "derived numbers and texts resolved only at release", 2026-11-13; the
+    # scripts resolve it themselves through scripts/check/lib/gateMode.mjs, nothing to set here):
+    #   pr      — a feature PR (and a merge_group / omni-queue batch). The PR adds keys to en.json
+    #             only, so the completeness gates (value drift, new-key coverage, key completeness
+    #             UI + CLI, translation ratio) print `SKIP reason=pr-mode` and exit 0. Coverage
+    #             floor and ICU compilation still run: they judge what the PR wrote. That the PR
+    #             leaves the other locales alone is enforced by PR Test Policy →
+    #             check:pr-derived-paths (config/quality/derived-paths/translation.json).
+    #   release — the release PR (release/v* → main), pushes to main, workflow_dispatch: every
+    #             gate strict, as before; the diff-aware ones get BASE_REF=origin/main on the
+    #             release PR, so they judge the whole cycle after the release refresh
+    #             (syncUiKeys in scripts/i18n/sync-ui-keys.mjs) completed the catalogs.
     steps:
       # fetch-depth: 0 — the value-drift gate diffs en.json against the merge base to
       # find rewritten English strings. On a shallow clone the base ref is missing and
@@ -621,7 +633,13 @@ jobs:
         with:
           # PR acceleration is not release-candidate provenance.
           cache: ${{ github.event_name == 'pull_request' }}
-      - run: node scripts/i18n/check-ui-keys-coverage.mjs --threshold=65
+      # Both modes: a 65 % floor per locale is far from what one cycle of en.json-only keys
+      # moves (every locale measured 100 % on 2026-11-13; the largest recorded cycle added
+      # ~1,352 keys, ≈ 8 points on today's 15,249), so it only trips on a truncated or
+      # broken catalog.
+      - name: i18n UI coverage floor (≥ 65 % per locale)
+        run: node scripts/i18n/check-ui-keys-coverage.mjs --threshold=65
+      # Both modes: compiles the en.json the PR edits (and every catalog) with IntlMessageFormat.
       - name: i18n ICU compilation (all UI catalogs)
         run: npm run check:ui-icu
       # Real-translation ratchet: a leaf copied verbatim from en.json passes key
@@ -629,12 +647,12 @@ jobs:
       # Blocking since PR-4 retranslated the verbatim-English backlog: the share of
       # untranslated leaves per locale may only fall (ratchet baseline in
       # config/quality/i18n-translation-baseline.json; `npm run i18n:check-ratio:update`).
-      - name: i18n real-translation ratio
+      - name: i18n real-translation ratio (release mode)
         run: node scripts/i18n/check-translation-ratio.mjs
       # #8463: a rewritten English value used to leave its 39 translations behind
       # silently (googleOAuthWarning shipped wrong copy in 39 locales for months).
       # Key parity above cannot see it — a stale translation counts as covered.
-      - name: i18n UI value drift (stale translations)
+      - name: i18n UI value drift (stale translations, release mode)
         env:
           BASE_REF: ${{ github.base_ref && format('origin/{0}', github.base_ref) || '' }}
         run: node scripts/i18n/check-ui-value-drift.mjs
@@ -644,7 +662,7 @@ jobs:
       # locale, and 11 absent keys out of ~13,000 leaves coverage at 99.9%. Incident: the
       # Phase 3 canvas keys were translated across the 42 locales that existed, then the EU
       # batch (#13044) took the repo to 51 and the nine newcomers shipped untranslated.
-      - name: i18n new-key coverage (a new key must reach every locale)
+      - name: i18n new-key coverage (a new key must reach every locale, release mode)
         env:
           BASE_REF: ${{ github.base_ref && format('origin/{0}', github.base_ref) || '' }}
         run: node scripts/i18n/check-new-key-coverage.mjs
@@ -654,13 +672,14 @@ jobs:
       # adding keys — the batch PR adds no key itself, so the new-key gate stays silent and
       # 43 absent keys out of ~13,000 still read 99.7 % coverage. Incident 2026-09-15:
       # batch 1 (#13044) landed 43 keys short in nine locales, batch 2 (#13660) 10 keys short
-      # in eight. Fix is `sync-ui-keys --locale=<codes> --translate-markers`.
-      - name: i18n key completeness (every locale carries every en.json key)
+      # in eight. Fix (release refresh or translation wave, never a feature PR):
+      # `sync-ui-keys --locale=<codes> --translate-markers`.
+      - name: i18n key completeness (every locale carries every en.json key, release mode)
         run: node scripts/i18n/check-key-completeness.mjs
       # Same gate for the CLI catalogs (bin/cli/locales). check:cli-i18n only compares
       # pt-BR / zh-CN / zh-TW; 38 locales shipped with 1–24 of 830 keys for months
       # (audit 2026-09-16) and the CLI silently fell back to English for them.
-      - name: i18n key completeness (CLI catalogs)
+      - name: i18n key completeness (CLI catalogs, release mode)
         run: node scripts/i18n/check-key-completeness.mjs --catalog=cli
 
   # #8038: cheap glossary/protected-terms consistency gate —
