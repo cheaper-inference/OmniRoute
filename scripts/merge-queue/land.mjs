@@ -39,10 +39,15 @@ function assertBase(git, base) {
   return name;
 }
 
+/** True when the scratch store already has `sha` as a commit (no fetch). */
+function hasCommit(git, sha) {
+  return scratchGit(git).run(["cat-file", "-e", `${sha}^{commit}`], { allowFail: true }).code === 0;
+}
+
 /** Make sure a commit is in the scratch store (a later tick may run on a fresh runner). */
 function ensureCommit(git, sha) {
   const g = scratchGit(git);
-  const has = () => g.run(["cat-file", "-e", `${sha}^{commit}`], { allowFail: true }).code === 0;
+  const has = () => hasCommit(git, sha);
   if (has()) return;
   g.run(["fetch", "--no-tags", "--no-write-fetch-head", "--quiet", "origin", sha]);
   if (!has()) throw new Error(`land: commit ${sha} is not available from origin`);
@@ -72,6 +77,24 @@ export function mergedPrsBetween(git, expectedBaseSha, candidateSha) {
   return merged;
 }
 
+/**
+ * PRs landed by candidateSha: the trailer-carrying merge commits (mergedPrsBetween), then every
+ * other PR of `prs` whose head is reachable from candidateSha but not from expectedBaseSha (a
+ * stacked PR that compose reported in alreadyContained: it lands without a merge commit of its
+ * own). Heads unknown to the scratch store are not reachable from the candidate (its whole commit
+ * history is local after ensureCommit), so they are skipped without a fetch.
+ */
+function landedPrs(git, expectedBaseSha, candidateSha, prs) {
+  const merged = mergedPrsBetween(git, expectedBaseSha, candidateSha);
+  for (const pr of prs ?? []) {
+    if (!pr || merged.includes(pr.n) || !isSha(pr.head) || !hasCommit(git, pr.head)) continue;
+    if (isAncestor(git, pr.head, candidateSha) && !isAncestor(git, pr.head, expectedBaseSha)) {
+      merged.push(pr.n);
+    }
+  }
+  return merged;
+}
+
 /** Parse the porcelain line of `git push --porcelain` for one destination ref. */
 function porcelainStatus(stdout, dstRef) {
   for (const line of String(stdout).split("\n")) {
@@ -84,21 +107,36 @@ function porcelainStatus(stdout, dstRef) {
 }
 
 /**
- * merge-ff (default): `git push origin <candidateSha>:refs/heads/<base>` WITHOUT force. The
- * non-fast-forward refusal is the compare-and-swap: if the base moved since composition the
- * push fails → {ok:false, reason:"base-moved"} and the tick recomposes. Before pushing, verify
- * locally that expectedBaseSha is an ancestor of candidateSha ("not-descendant" otherwise).
- * Every PR head becomes reachable from the base, so GitHub marks each PR "Merged".
+ * merge-ff (default): `git push origin <candidateSha>:refs/heads/<base>` WITHOUT force. Before
+ * pushing, verify locally that expectedBaseSha is an ancestor of candidateSha ("not-descendant"
+ * otherwise). Every PR head becomes reachable from the base, so GitHub marks each PR "Merged".
+ *
+ * Compare-and-swap on the base: the remote tip read just before the push must be
+ *   - expectedBaseSha (the normal case), or
+ *   - candidateSha itself (re-landing after a crash between the push and the state save: no
+ *     push, ok:true, idempotent), or
+ *   - a commit between them (expectedBaseSha ⊑ tip ⊑ candidateSha, e.g. someone fast-forwarded
+ *     the base to one of the batch's PR heads): the push still lands the exact tested tree.
+ * Anything else is {ok:false, reason:"base-moved"} WITHOUT pushing — including a base that was
+ * REWOUND to an ancestor of expectedBaseSha (an admin removing a bad commit): a push without
+ * force would be a valid fast-forward there and would silently bring the removed commits back.
+ * The server's non-fast-forward refusal remains the CAS for a base that moves between that read
+ * and the push.
  *
  * A base branch that no longer exists on origin is "rejected" (the push would CREATE it).
  * Any other refusal (protected-branch hook, ruleset) is "rejected" with the redacted detail.
  * A transport failure with no porcelain verdict throws (outcome unknown; the next tick
  * re-observes the base).
  *
- * @param {{git: Git, base: string, candidateSha: string, expectedBaseSha: string}} input
+ * `merged` lists the PRs whose queue merge commits are on expectedBaseSha..candidateSha. With the
+ * optional `prs` (inFlight.prs), it also lists stacked PRs that landed without a merge commit of
+ * their own (ComposeResult.alreadyContained); without it they are not reported.
+ *
+ * @param {{git: Git, base: string, candidateSha: string, expectedBaseSha: string,
+ *          prs?: PrRef[]}} input
  * @returns {LandResult}   on success: {ok:true, newBaseSha: candidateSha, merged: number[]}
  */
-export function landMergeFf({ git, base, candidateSha, expectedBaseSha }) {
+export function landMergeFf({ git, base, candidateSha, expectedBaseSha, prs }) {
   const branch = assertBase(git, base);
   if (!isSha(candidateSha)) throw new Error("landMergeFf: invalid candidateSha");
   if (!isSha(expectedBaseSha)) throw new Error("landMergeFf: invalid expectedBaseSha");
@@ -114,11 +152,34 @@ export function landMergeFf({ git, base, candidateSha, expectedBaseSha }) {
       detail: `${expectedBaseSha} is not an ancestor of ${candidateSha}`,
     };
   }
-  const merged = mergedPrsBetween(git, expectedBaseSha, candidateSha);
+  const merged = landedPrs(git, expectedBaseSha, candidateSha, prs);
 
   const before = remoteBranchSha(git, branch);
   if (!before) {
     return { ok: false, reason: "rejected", merged: [], detail: `base ${branch} not found` };
+  }
+  if (before === candidateSha) {
+    return {
+      ok: true,
+      newBaseSha: candidateSha,
+      merged,
+      detail: `base ${branch} already at the candidate (landed earlier)`,
+    };
+  }
+  if (before !== expectedBaseSha) {
+    const between =
+      hasCommit(git, before) &&
+      isAncestor(git, expectedBaseSha, before) &&
+      isAncestor(git, before, candidateSha);
+    if (!between) {
+      return {
+        ok: false,
+        reason: "base-moved",
+        merged: [],
+        newBaseSha: before,
+        detail: `base ${branch} is at ${before}, expected ${expectedBaseSha} (or a commit between it and the candidate)`,
+      };
+    }
   }
 
   const dst = `refs/heads/${branch}`;

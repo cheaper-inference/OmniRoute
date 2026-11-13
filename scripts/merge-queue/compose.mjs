@@ -37,6 +37,9 @@ import {
  * @property {PrRef[]} alreadyContained   subset of `included` whose head was already reachable
  *                                        from the candidate-so-far (stacked PR): included WITHOUT a
  *                                        merge commit of its own, so it carries no queue trailers
+ * @property {PrRef[]} alreadyInBase      head already reachable from the bare base (the PR's
+ *                                        commits are on the base already): NOT included, nothing to
+ *                                        test or land; the tick drops it from the queue
  */
 
 /** Local refs of the scratch repository (never pushed anywhere). */
@@ -44,12 +47,36 @@ export const LOCAL_BASE_REF = "refs/omni-queue/base";
 export const localPrRef = (n) => `refs/omni-queue/pr/${n}`;
 
 /**
- * Wrap a Git runner so every call targets the scratch repository explicitly (GIT_DIR = cwd).
+ * Repository-location variables that git honours from the environment. createGit inherits
+ * process.env, so a tick (or a test suite) running inside a git hook or a wrapper could carry
+ * values that redirect the object store, index or work tree away from the scratch repository.
+ * scratchGit clears them (Node's spawn drops `undefined` entries). Identity, auth and config
+ * isolation variables are left alone on purpose.
+ */
+const INHERITED_LOCATION_VARS = Object.freeze([
+  "GIT_WORK_TREE",
+  "GIT_INDEX_FILE",
+  "GIT_OBJECT_DIRECTORY",
+  "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+  "GIT_COMMON_DIR",
+  "GIT_NAMESPACE",
+  "GIT_QUARANTINE_PATH",
+  "GIT_SHALLOW_FILE",
+  "GIT_GRAFT_FILE",
+  "GIT_REPLACE_REF_BASE",
+]);
+const CLEARED_LOCATION_ENV = Object.freeze(
+  Object.fromEntries(INHERITED_LOCATION_VARS.map((k) => [k, undefined]))
+);
+
+/**
+ * Wrap a Git runner so every call targets the scratch repository explicitly (GIT_DIR = cwd) and
+ * no inherited GIT_* location variable can point it anywhere else.
  * @param {Git} git
  */
 export function scratchGit(git) {
   const gitDir = resolve(git.cwd);
-  const env = (extra) => ({ GIT_DIR: gitDir, ...(extra ?? {}) });
+  const env = (extra) => ({ ...CLEARED_LOCATION_ENV, GIT_DIR: gitDir, ...(extra ?? {}) });
   return {
     cwd: gitDir,
     run: (args, opts = {}) => git.run(args, { ...opts, env: env(opts.env) }),
@@ -221,6 +248,7 @@ function haveCommonAncestor(git, a, b) {
  * - The fetched head must equal the approved `pr.head`, else excludedHeadMoved.
  * - A head with no common history with the candidate (unrelated histories) cannot merge with
  *   the base either → excludedBaseConflict.
+ * - A head already reachable from the bare base is reported in `alreadyInBase` and skipped.
  * - A head already reachable from the candidate-so-far (stacked on an earlier PR of the batch)
  *   is included WITHOUT a new commit, like `git merge` reporting "Already up to date": it lands
  *   with the batch (GitHub marks it merged once reachable) and is listed in `alreadyContained`.
@@ -245,12 +273,17 @@ export function composeCandidate({ git, base, baseSha, prs, batchId, heads }) {
     excludedBaseConflict: [],
     excludedHeadMoved: [],
     alreadyContained: [],
+    alreadyInBase: [],
   };
   let current = baseSha;
   for (const pr of prs ?? []) {
     const fetched = heads?.[pr.n] ?? null;
     if (!isSha(pr.head) || fetched !== pr.head) {
       result.excludedHeadMoved.push(pr);
+      continue;
+    }
+    if (isAncestor(git, pr.head, baseSha)) {
+      result.alreadyInBase.push(pr);
       continue;
     }
     if (isAncestor(git, pr.head, current)) {
@@ -276,7 +309,10 @@ export function composeCandidate({ git, base, baseSha, prs, batchId, heads }) {
     if (!isSha(current)) throw new Error("git commit-tree returned no commit id");
     result.included.push(pr);
   }
-  if (result.included.length > 0) {
+  // Only a candidate with at least one queue merge commit is worth testing and landing. (A PR in
+  // alreadyContained always follows a merge commit, since a head reachable from the bare base
+  // goes to alreadyInBase; the check on `current` keeps a no-op candidate impossible.)
+  if (result.included.length > 0 && current !== baseSha) {
     result.candidateSha = current;
     result.treeSha = g.out(["rev-parse", `${current}^{tree}`]);
   }
@@ -311,15 +347,35 @@ export function remoteBranchSha(git, branch) {
 }
 
 /**
+ * The ref name must encode the SHA it carries (D2: candidate refs are unique per SHA):
+ * `<batchId>-<sha12>` for a batch, `basecheck-<sha12>` for a base check. This is what makes a
+ * push without force safe: the only commit that may live under a name is the one it names.
+ */
+function assertRefNamesSha(name, sha) {
+  const parsed = parseCandidateRef(name);
+  const sha12 = sha.slice(0, 12);
+  const ok =
+    parsed.kind === "base-check"
+      ? parsed.id === `basecheck-${sha12}`
+      : parsed.id.endsWith(`-${sha12}`) && parsed.id.length > sha12.length + 1;
+  if (!ok) {
+    throw new Error(`pushCandidate: ref ${JSON.stringify(name)} does not name sha ${sha}`);
+  }
+}
+
+/**
  * Create refs/heads/<ref> on origin pointing at sha. Refuses any ref outside
- * contracts.CANDIDATE_PREFIX and never forces (candidate refs are unique per SHA): a ref that
- * already points at `sha` is fine (nothing pushed); a ref at another SHA is an error.
+ * contracts.CANDIDATE_PREFIX, any ref whose name does not encode `sha`, and never forces
+ * (candidate refs are unique per SHA): a ref that already points at `sha` is fine (nothing
+ * pushed); a ref at another SHA is an error. After the push the remote ref is read back and
+ * must equal `sha`.
  * @param {{git: Git, sha: string, ref: string}} input
  * @returns {{created: boolean}}
  */
 export function pushCandidate({ git, sha, ref }) {
   const name = assertCandidateRef(git, ref);
   if (!isSha(sha)) throw new Error(`pushCandidate: invalid sha ${sha}`);
+  assertRefNamesSha(name, sha);
   const existing = remoteBranchSha(git, name);
   if (existing === sha) return { created: false };
   if (existing) {
@@ -330,6 +386,12 @@ export function pushCandidate({ git, sha, ref }) {
   });
   if (res.code !== 0) {
     throw new Error(`pushCandidate: push of ${name} failed: ${pushDetail(res)}`);
+  }
+  const after = remoteBranchSha(git, name);
+  if (after !== sha) {
+    throw new Error(
+      `pushCandidate: ${name} is at ${after ?? "(absent)"} after push, expected ${sha}`
+    );
   }
   return { created: true };
 }
