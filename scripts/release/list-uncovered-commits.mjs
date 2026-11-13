@@ -98,6 +98,30 @@ export function typeOf(subject) {
 }
 
 /**
+ * Non-merge commits of `base..head` as {hash (short), subject}, plus the omni-queue map keyed by
+ * that same short hash (computeUncovered looks it up by `c.hash`).
+ * @param {string} base
+ * @param {{cwd?: string, head?: string, runGit?: (args: string[]) => string}} [options]
+ * @returns {{commits: {hash:string, subject:string}[], prByCommit: Map<string, {pr:number}>}}
+ */
+export function readCycleCommits(base, { cwd = ROOT, head = "HEAD", runGit } = {}) {
+  const run =
+    runGit ??
+    ((args) => execFileSync("git", args, { cwd, encoding: "utf8", maxBuffer: 1 << 28 }).trim());
+  const log = run(["log", "--no-merges", `${base}..${head}`, "--pretty=format:%H%x09%h%x09%s"]);
+  const queueMap = queuePrByCommit({ runGit: run, range: `${base}..${head}` });
+  const prByCommit = new Map();
+  const commits = log
+    ? log.split("\n").map((l) => {
+        const [full, hash, subject] = l.split("\t");
+        if (queueMap.has(full)) prByCommit.set(hash, queueMap.get(full));
+        return { hash, subject };
+      })
+    : [];
+  return { commits, prByCommit };
+}
+
+/**
  * @param {{hash:string, subject:string}[]} commits
  * @param {Set<number>} changelogRefs  every #N present in the CHANGELOG scan window
  * @param {Map<string, {pr:number}>|null} [prByCommit]  commit hash (same form as `c.hash`) → the
@@ -214,16 +238,7 @@ function main(argv) {
   const version = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8")).version;
   const { base, source } = resolveCycleBase(version);
   const lastTag = base ? git(["rev-parse", "--short", base]) : base;
-  const log = git(["log", "--no-merges", `${base}..HEAD`, "--pretty=format:%H%x09%h%x09%s"]);
-  const queueMap = queuePrByCommit({ range: `${base}..HEAD`, cwd: ROOT });
-  const prByCommit = new Map();
-  const commits = log
-    ? log.split("\n").map((l) => {
-        const [full, hash, subject] = l.split("\t");
-        if (queueMap.has(full)) prByCommit.set(hash, queueMap.get(full));
-        return { hash, subject };
-      })
-    : [];
+  const { commits, prByCommit } = readCycleCommits(base);
   const changelog = fs.readFileSync(path.join(ROOT, "CHANGELOG.md"), "utf8");
   const fragments = readChangelogFragments(ROOT);
   const refs = collectChangelogRefs(changelog, version, fragments);

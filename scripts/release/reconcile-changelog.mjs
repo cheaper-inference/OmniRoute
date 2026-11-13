@@ -416,7 +416,9 @@ export function repoSlug(cwd = ROOT) {
  * PR number: the `(#N)` suffix of a squash subject, or — for the original commits an omni-queue
  * merge-ff landing brought in (no `(#N)`) — the PR of the queue merge commit that carries them
  * (`prByCommit`, scripts/merge-queue/history-map.mjs). Such rows also get `queue` = {pr, author,
- * title, mergeSha}; a squash-only history maps nothing and reads exactly as before.
+ * title, mergeSha, subjectPr}; a squash-only history maps nothing and reads exactly as before.
+ * `subjectPr` keeps a `(#N)` suffix of a mapped commit: reconcile() restores it as the row's PR
+ * when N is a real merged PR (a foreign squash the contributor merged into their branch).
  */
 export function readCommits(
   base,
@@ -443,8 +445,10 @@ export function readCommits(
       const [hash, date, authorName, authorEmail, subject, coa] = r.split("\x1f");
       const refs = refsIn(subject);
       const prMatch = subject.match(/\(#(\d+)\)\s*$/);
-      // the queue merge knows which PR brought the commit in (a contributor `(#N)` may be an issue)
+      // the queue merge knows which PR brought the commit in (a contributor `(#N)` may be an
+      // issue); the suffix is kept as `queue.subjectPr` for reconcile()'s foreign-squash check
       const q = prByCommit?.get(hash) ?? null;
+      const subjectPr = prMatch ? Number(prMatch[1]) : null;
       return {
         hash,
         date,
@@ -452,10 +456,18 @@ export function readCommits(
         authorEmail,
         subject,
         refs,
-        pr: q ? q.pr : prMatch ? Number(prMatch[1]) : null,
+        pr: q ? q.pr : subjectPr,
         prAuthor: null,
         ...(q
-          ? { queue: { pr: q.pr, author: q.author, title: q.title, mergeSha: q.mergeSha } }
+          ? {
+              queue: {
+                pr: q.pr,
+                author: q.author,
+                title: q.title,
+                mergeSha: q.mergeSha,
+                subjectPr,
+              },
+            }
           : {}),
         coauthors: (coa || "")
           .split("\x1e")
@@ -575,6 +587,8 @@ export function readFragments(cwd = ROOT, prByCommit = null) {
         originHash: origin.hash ? origin.hash.slice(0, 9) : null,
         originPr: qPr ?? (om ? Number(om[1]) : null),
         prefixPr: pm ? Number(pm[1]) : null,
+        // the adding commit's own `(#N)`, for reconcile()'s foreign-squash check (merge-ff only)
+        ...(qPr !== null ? { originSubjectPr: om ? Number(om[1]) : null } : {}),
       });
     }
   }
@@ -605,6 +619,18 @@ export function reconcile({
   const prBy = new Map(prs.map((p) => [p.number, p]));
   for (const [n, p] of extraPrs) if (!prBy.has(n)) prBy.set(n, p);
   const prAuthor = (n) => prBy.get(n)?.author?.login || null;
+  // merge-ff rows: a `(#N)` subject naming a REAL merged PR other than the queue PR is a foreign
+  // squash the contributor merged into their branch; it keeps its own PR (row, credit, bullet).
+  // An N that is not a merged PR (an issue number) leaves the queue PR in place.
+  const foreignPr = (subjectPr, queuePr) =>
+    subjectPr && subjectPr !== queuePr && prBy.has(subjectPr) ? subjectPr : null;
+  for (const r of rows) {
+    const own = r.queue ? foreignPr(r.queue.subjectPr, r.queue.pr) : null;
+    if (own) {
+      r.pr = own;
+      delete r.queue;
+    }
+  }
   for (const r of rows) r.prAuthor = r.pr ? prAuthor(r.pr) || r.queue?.author || null : null;
   const issueToPrs = new Map();
   for (const p of prs)
@@ -659,7 +685,7 @@ export function reconcile({
       if (frag) {
         const refs0 = refsIn(normalizeLinks(b));
         const override = fragmentPr[frag.path];
-        const oPr = frag.originPr;
+        const oPr = foreignPr(frag.originSubjectPr, frag.originPr) || frag.originPr;
         const fPr = frag.prefixPr;
         let defPrs = override
           ? [override]

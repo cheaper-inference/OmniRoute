@@ -16,7 +16,10 @@ import {
   readFragments,
   reconcile,
 } from "../../../../scripts/release/reconcile-changelog.mjs";
-import { computeUncovered } from "../../../../scripts/release/list-uncovered-commits.mjs";
+import {
+  computeUncovered,
+  readCycleCommits,
+} from "../../../../scripts/release/list-uncovered-commits.mjs";
 
 const ENV = {
   ...process.env,
@@ -151,7 +154,9 @@ test("readCommits fills pr/queue for merge-ff commits; squash rows unchanged", (
     author: "alice",
     title: "feat(b): queue feature",
     mergeSha: r.merge34,
+    subjectPr: null,
   });
+  assert.equal(by.get(r.c2).queue.subjectPr, 777, "the subject suffix is kept for reconcile");
   assert.equal(by.get(r.c1).authorName, "Alice C");
   assert.equal(by.get(r.forgedCommit).pr, null);
   assert.equal("queue" in by.get(r.forgedCommit), false);
@@ -173,16 +178,15 @@ test("readFragments: the adding commit of a merge-ff landing resolves to the que
 
 test("list-uncovered: a merge-ff commit is covered when its PR is cited, hinted otherwise", (t) => {
   const r = makeMixedRepo(t);
-  // the same log + short-hash keying main() uses
-  const log = git(r.dir, ["log", "--no-merges", `${r.root}..HEAD`, "--format=%H%x09%h%x09%s"]);
-  const map = queuePrByCommit({ cwd: r.dir, range: `${r.root}..HEAD` });
-  const prByCommit = new Map();
-  const commits = log.split("\n").map((l) => {
-    const [full, hash, subject] = l.split("\t");
-    if (map.has(full)) prByCommit.set(hash, map.get(full));
-    return { hash, subject };
-  });
+  // the production reader main() uses: short-hash commits + the map keyed by that short hash
+  const { commits, prByCommit } = readCycleCommits(r.root, { cwd: r.dir });
   const short = (s) => commits.find((c) => s.startsWith(c.hash)).hash;
+  assert.equal(commits.length, 5, "--no-merges: squash, c1, c2, side, forged");
+  assert.deepEqual([...prByCommit.keys()].sort(), [short(r.c1), short(r.c2)].sort());
+  assert.ok(
+    commits.every((c) => c.hash.length < 40),
+    "keys and commits share the short form"
+  );
 
   const cited = computeUncovered(commits, new Set([12, 34]), prByCommit);
   const uncoveredHashes = cited.uncovered.map((c) => c.hash).sort();
@@ -273,4 +277,216 @@ test("squash-only history: map empty, readCommits identical to the pre-queue rea
   );
   const LEGACY_KEYS = "hash,date,authorName,authorEmail,subject,refs,pr,prAuthor,coauthors";
   for (const row of rows) assert.equal(Object.keys(row).join(","), LEGACY_KEYS, "no extra fields");
+});
+
+const BOB = { GIT_AUTHOR_NAME: "Bob D", GIT_AUTHOR_EMAIL: "bob@example.com" };
+const CAROL = { GIT_AUTHOR_NAME: "Carol E", GIT_AUTHOR_EMAIL: "carol@example.com" };
+
+/**
+ * A two-PR batch chained on first-parent (M34 -> M56). PR #34's branch merged the base into
+ * itself mid-flight (picking up base commit `b2`) and also merged a branch carrying a FOREIGN
+ * squash `(#500)` (with a changelog fragment) that is not on the base yet.
+ */
+function makeBatchRepo(t) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "omni-queue-batch-"));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const BASE = "release/v9.9.9";
+  git(dir, ["init", "-q", "-b", BASE]);
+  const root = commitFile(dir, "README.md", "root\n", "chore(release): open v9.9.9 cycle");
+  const b1 = commitFile(dir, "base1.txt", "1\n", "feat(base): before the batch (#10)");
+
+  git(dir, ["checkout", "-q", "-b", "other", root]);
+  const foreign = commitFile(
+    dir,
+    "changelog.d/fixes/other-o.md",
+    "- **fix(o):** other PR fragment\n",
+    "fix(o): other PR squash (#500)",
+    CAROL
+  );
+
+  git(dir, ["checkout", "-q", "-b", "pr-34", b1]);
+  const a1 = commitFile(dir, "a1.txt", "a1\n", "wip: start 34", ALICE);
+  git(dir, ["checkout", "-q", BASE]);
+  const b2 = commitFile(dir, "base2.txt", "2\n", "fix(base): concurrent base fix (#11)");
+  git(dir, ["checkout", "-q", "pr-34"]);
+  git(dir, ["merge", "-q", "--no-ff", "-m", `Merge branch '${BASE}' into pr-34`, BASE]);
+  const innerBase = git(dir, ["rev-parse", "HEAD"]);
+  const a2 = commitFile(dir, "a2.txt", "a2\n", "finish 34", ALICE);
+  git(dir, ["merge", "-q", "--no-ff", "-m", "Merge branch 'other' into pr-34", "other"]);
+  const innerOther = git(dir, ["rev-parse", "HEAD"]);
+
+  git(dir, ["checkout", "-q", "-b", "pr-56", b2]);
+  const c1 = commitFile(dir, "c1.txt", "c1\n", "fix(c): bob fix", BOB);
+
+  git(dir, ["checkout", "-q", BASE]);
+  const baseSha = git(dir, ["rev-parse", "HEAD"]);
+  const pr = (n, head, title, author) => ({ n, head, title, author, labeledAt: "" });
+  const m34 = mergeWithMessage(
+    dir,
+    innerOther,
+    buildMergeMessage({
+      pr: pr(34, innerOther, "feat(b): batch feature", "alice"),
+      base: BASE,
+      baseSha,
+      batchId: "b5",
+    })
+  );
+  const m56 = mergeWithMessage(
+    dir,
+    c1,
+    buildMergeMessage({
+      pr: pr(56, c1, "fix(c): bob fix", "bob"),
+      base: BASE,
+      baseSha,
+      batchId: "b5",
+    })
+  );
+  return { dir, root, b1, b2, foreign, a1, a2, innerBase, innerOther, c1, m34, m56 };
+}
+
+const EMPTY_CHANGELOG = [
+  "# Changelog",
+  "",
+  "## [9.9.9] — TBD",
+  "",
+  "### ✨ New Features",
+  "",
+  "### 🐛 Bug Fixes",
+  "",
+  "### 📝 Maintenance",
+  "",
+  "---",
+  "",
+  "## [9.9.8] — 2026-11-01",
+  "",
+  "---",
+  "",
+].join("\n");
+
+const ghPr = (number, login) => ({
+  number,
+  title: "x",
+  author: { login },
+  closingIssuesReferences: [],
+});
+
+function reconcileSection(rows, prs, fragments = []) {
+  const { changelog } = reconcile({
+    changelog: EMPTY_CHANGELOG,
+    version: "9.9.9",
+    repo: "o/r",
+    rows,
+    prs,
+    fragments,
+    today: "2026-11-13",
+    baseTip: "0000000",
+    headTip: "1111111",
+  });
+  return changelog.slice(changelog.indexOf("## [9.9.9]"), changelog.indexOf("## [9.9.8]"));
+}
+
+test("chained batch: each PR's commits map to their own merge; base commits never claimed", (t) => {
+  const r = makeBatchRepo(t);
+  assert.equal(git(r.dir, ["rev-parse", `${r.m56}^1`]), r.m34, "M56 sits on M34 (first parent)");
+  const map = queuePrByCommit({ cwd: r.dir, range: `${r.root}..HEAD` });
+  const of34 = [r.a1, r.a2, r.foreign, r.innerBase, r.innerOther];
+  assert.deepEqual([...map.keys()].sort(), [...of34, r.c1].sort());
+  for (const c of of34) {
+    assert.equal(map.get(c).pr, 34);
+    assert.equal(map.get(c).mergeSha, r.m34);
+    assert.equal(map.get(c).batch, "b5");
+  }
+  assert.deepEqual(map.get(r.c1), {
+    pr: 56,
+    author: "bob",
+    head: r.c1,
+    batch: "b5",
+    mergeSha: r.m56,
+    title: "fix(c): bob fix",
+  });
+  assert.equal(map.has(r.b1), false, "base commit before the batch");
+  assert.equal(map.has(r.b2), false, "base commit the PR merged into itself stays the base's");
+
+  const rows = readCommits(r.root, "HEAD", r.dir);
+  const hashes = new Set(rows.map((x) => x.hash));
+  for (const m of [r.innerBase, r.innerOther, r.m34, r.m56]) {
+    assert.equal(hashes.has(m), false, "--no-merges drops every merge commit");
+  }
+  const by = new Map(rows.map((x) => [x.hash, x]));
+  assert.equal(by.get(r.b2).pr, 11);
+  assert.equal("queue" in by.get(r.b2), false);
+  assert.equal(by.get(r.a2).pr, 34);
+  assert.equal(by.get(r.c1).pr, 56);
+  assert.equal(by.get(r.foreign).pr, 34, "readCommits alone: the queue PR, subject kept aside");
+  assert.equal(by.get(r.foreign).queue.subjectPr, 500);
+});
+
+test("reconcile: a foreign squash (#500) merged into a PR branch keeps its own PR", (t) => {
+  const r = makeBatchRepo(t);
+  const prs = [ghPr(10, "maint"), ghPr(11, "maint"), ghPr(34, "alice"), ghPr(56, "bob")];
+
+  // #500 is a real merged PR: its row, credit and bullet stay its own
+  const rows = readCommits(r.root, "HEAD", r.dir);
+  const section = reconcileSection(rows, [...prs, ghPr(500, "carol")]);
+  const foreignRow = rows.find((x) => x.hash === r.foreign);
+  assert.equal(foreignRow.pr, 500);
+  assert.equal("queue" in foreignRow, false, "no longer folded into the queue PR's bullet");
+  assert.equal(foreignRow.prAuthor, "carol");
+  assert.match(
+    section,
+    /- \*\*fix\(o\):\*\* other PR squash \(\[#500\]\(https:\/\/github\.com\/o\/r\/pull\/500\)\) — thanks @carol/
+  );
+  assert.equal((section.match(/pull\/34\)/g) || []).length, 1, "#34 still one bullet");
+  assert.ok(
+    section.includes("- **feat(b):** batch feature ([#34](https://github.com/o/r/pull/34))")
+  );
+  assert.ok(section.includes("- **fix(c):** bob fix ([#56](https://github.com/o/r/pull/56))"));
+
+  // #500 unknown to gh (e.g. an issue number): the queue PR stays authoritative
+  const rows2 = readCommits(r.root, "HEAD", r.dir);
+  const section2 = reconcileSection(rows2, prs);
+  assert.equal(rows2.find((x) => x.hash === r.foreign).pr, 34);
+  assert.doesNotMatch(section2, /pull\/500/);
+  assert.equal((section2.match(/pull\/34\)/g) || []).length, 1);
+});
+
+test("fragments: a foreign squash's fragment credits its own PR, else the queue PR", (t) => {
+  const r = makeBatchRepo(t);
+  const map = queuePrByCommit({ cwd: r.dir, range: `${r.root}..HEAD` });
+  const frags = readFragments(r.dir, map);
+  assert.equal(frags.length, 1);
+  assert.equal(frags[0].originPr, 34);
+  assert.equal(frags[0].originSubjectPr, 500);
+  assert.equal(frags[0].originHash, r.foreign.slice(0, 9));
+  assert.equal("originSubjectPr" in readFragments(r.dir)[0], false, "legacy shape without map");
+
+  const prs = [ghPr(34, "alice"), ghPr(56, "bob"), ghPr(500, "carol")];
+  const section = reconcileSection(readCommits(r.root, "HEAD", r.dir, map), prs, frags);
+  assert.match(
+    section,
+    /- \*\*fix\(o\):\*\* other PR fragment \(\[#500\]\(https:\/\/github\.com\/o\/r\/pull\/500\)\) — thanks @carol/
+  );
+  assert.equal((section.match(/pull\/500\)/g) || []).length, 1, "fragment covers the row");
+
+  const section2 = reconcileSection(
+    readCommits(r.root, "HEAD", r.dir, map),
+    prs.slice(0, 2),
+    frags
+  );
+  assert.match(section2, /other PR fragment \(\[#34\]\(https:\/\/github\.com\/o\/r\/pull\/34\)\)/);
+});
+
+test("readCycleCommits: chained batch keyed by short hash, foreign commit covered by #500", (t) => {
+  const r = makeBatchRepo(t);
+  const { commits, prByCommit } = readCycleCommits(r.root, { cwd: r.dir });
+  const short = (s) => commits.find((c) => s.startsWith(c.hash)).hash;
+  assert.equal(commits.length, 6, "b1, b2, foreign, a1, a2, c1 (root..HEAD, no merges)");
+  assert.equal(prByCommit.get(short(r.c1)).pr, 56);
+  assert.equal(prByCommit.get(short(r.a1)).pr, 34);
+  assert.equal(prByCommit.has(short(r.b2)), false);
+  // nothing cites #34: the foreign commit is still covered by its own #500
+  const res = computeUncovered(commits, new Set([10, 11, 56, 500]), prByCommit);
+  const un = res.uncovered.map((c) => c.hash).sort();
+  assert.deepEqual(un, [short(r.a1), short(r.a2)].sort());
+  assert.ok(res.uncovered.every((c) => c.queuePr === 34));
 });
