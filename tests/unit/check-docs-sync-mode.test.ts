@@ -255,3 +255,92 @@ test("PR mode judges the mirror a change itself edits, whatever the branch name"
   // The CHANGELOG mirrors were not touched: that check stays skipped.
   assert.match(edited.out, /SKIP reason=pr-mode — translated CHANGELOG\.md mirrors/);
 });
+
+// A shallow CI checkout (the docs-sync-strict job checks out at depth 1) cannot resolve the diff
+// base, so "did the change edit a mirror?" is unanswerable there. One check needs no base: the
+// llm.txt mirrors are exact copies, so a base that moved leaves them all equally stale, while a
+// hand edit leaves one mirror differing from the root AND from the others.
+const MIRROR_HEADER = (locale: string) => `# OmniRoute (${locale})\n\n🌐 bar\n\n---\n\n`;
+const LLM_BODY = LLM.replace(/^# .+\n+/, "");
+
+function addLocales(root: string, locales: string[], body = LLM_BODY) {
+  for (const locale of locales)
+    write(root, `docs/i18n/${locale}/llm.txt`, MIRROR_HEADER(locale) + body);
+}
+
+const PR_NO_BASE = { GITHUB_EVENT_NAME: "pull_request", GITHUB_HEAD_REF: "fix/fr-typo" };
+
+test("PR mode without a diff base fails a hand-edited llm.txt mirror (it agrees with nothing)", () => {
+  const root = fixture();
+  addLocales(root, ["de", "es"]);
+  write(
+    root,
+    "docs/i18n/fr/llm.txt",
+    `${MIRROR_HEADER("fr")}> A proxy.\n\n## Section\n\nmauvais\n`
+  );
+  const { status, out } = run(root, [], PR_NO_BASE);
+  assert.equal(status, 1, out);
+  assert.match(out, /mode=pr \(auto: pull_request\)/);
+  assert.match(
+    out,
+    /FAIL - docs\/i18n\/fr\/llm\.txt differs from root llm\.txt and from the other locales' mirrors/
+  );
+  assert.doesNotMatch(out, /FAIL - docs\/i18n\/(de|es)\//);
+});
+
+test("PR mode without a diff base passes mirrors that are all stale the same way", () => {
+  const root = fixture();
+  addLocales(root, ["de", "es"]);
+  staleMirrors(root);
+  const { status, out } = run(root, [], PR_NO_BASE);
+  assert.equal(status, 0, out);
+  assert.match(out, /llm\.txt mirrors agree with each other: 3 locales/);
+  assert.match(out, /SKIP reason=pr-mode — docs\/i18n\/<locale>\/llm\.txt mirrors are refreshed/);
+});
+
+test("PR mode accepts a mirror already synced to the root while the others are still stale", () => {
+  const root = fixture();
+  addLocales(root, ["de", "es"]);
+  staleMirrors(root);
+  // e.g. a locale added by add-locale after the root moved: it copies the current root.
+  write(
+    root,
+    "docs/i18n/es/llm.txt",
+    MIRROR_HEADER("es") +
+      fs.readFileSync(path.join(root, "llm.txt"), "utf8").replace(/^# .+\n+/, "")
+  );
+  const { status, out } = run(root, ["--mode=pr"]);
+  assert.equal(status, 0, out);
+});
+
+test("PR mode reports the release line when every llm.txt mirror already matches the root", () => {
+  const root = fixture();
+  addLocales(root, ["de", "es"]);
+  const { status, out } = run(root, ["--mode=pr"]);
+  assert.equal(status, 0, out);
+  assert.match(out, /\[docs-sync\] llm\.txt i18n mirrors match root content: 3 locales/);
+  assert.doesNotMatch(out, /SKIP reason=pr-mode — docs\/i18n\/<locale>\/llm\.txt/);
+});
+
+test("PR mode still fails a missing llm.txt mirror or a mirror without its separator", () => {
+  const root = fixture();
+  addLocales(root, ["de"]);
+  write(root, "docs/i18n/es/README.md", "x\n");
+  write(root, "docs/i18n/de/llm.txt", "no separator here\n");
+  const { status, out } = run(root, ["--mode=pr"]);
+  assert.equal(status, 1, out);
+  assert.match(out, /FAIL - docs\/i18n\/es\/llm\.txt is missing/);
+  assert.match(out, /FAIL - docs\/i18n\/de\/llm\.txt is missing the i18n mirror separator/);
+});
+
+// The pre-commit hook judges what the commit does, not what the base did: a local run defaults
+// to release mode, so without the flag one merged feature PR that edits llm.txt (allowed — the
+// wave syncs the mirrors) would block every later commit on that base until the wave runs.
+test("the pre-commit hook runs check-docs-sync in PR mode", () => {
+  const hook = fs.readFileSync(
+    path.resolve(path.dirname(SCRIPT), "../../.husky/pre-commit"),
+    "utf8"
+  );
+  const lines = hook.split("\n").filter((line) => line.includes("check-docs-sync.mjs"));
+  assert.deepEqual(lines, ["node scripts/check/check-docs-sync.mjs --mode=pr"]);
+});

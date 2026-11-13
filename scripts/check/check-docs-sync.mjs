@@ -8,7 +8,14 @@
 //             translation-mirror checks (docs/i18n/<locale>/llm.txt copies and the translated
 //             CHANGELOG.md sections) are skipped with a reason: feature PRs never write
 //             docs/i18n/**; the translation wave (scripts/i18n/sync-llm-mirrors.mjs) and the
-//             release (npm run release:sync-changelog-i18n) do.
+//             release (npm run release:sync-changelog-i18n) do. Two exceptions keep a mirror
+//             edit visible: a change that writes the mirrors (writer branch, or its own diff
+//             when the base resolves) is judged strictly, and the llm.txt mirrors must always
+//             agree with each other or with the root (a hand edit to one of them fails even
+//             in a depth-1 checkout).
+//
+// The pre-commit hook passes --mode=pr: a commit is judged on what it does, not on mirrors the
+// base left stale.
 
 import fs from "node:fs";
 import path from "node:path";
@@ -183,6 +190,74 @@ function checkI18nMirrorFile(fileName, sourcePath) {
 }
 
 /**
+ * PR mode, when the change is not judged strictly on the exact-copy mirrors (it does not write
+ * them, or its diff base is unresolvable — the depth-1 checkout of docs-sync-strict). A base that
+ * moved leaves every mirror equally stale; a hand edit leaves one mirror that matches neither the
+ * root nor the body most mirrors share. So each mirror must exist, keep its separator, and carry
+ * either the root body or that most common body — a check that needs no base.
+ * @returns {boolean} true when every mirror already matches the root body
+ */
+function checkI18nMirrorConsistency(fileName, sourcePath) {
+  if (!fs.existsSync(i18nDocsPath)) {
+    fail("docs/i18n directory is missing");
+    return false;
+  }
+
+  const sourceBody = normalizeMirrorBody(stripTopHeading(readText(sourcePath)));
+  const locales = fs
+    .readdirSync(i18nDocsPath, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort();
+
+  const bodies = new Map();
+  for (const locale of locales) {
+    const targetPath = path.join(i18nDocsPath, locale, fileName);
+    if (!fs.existsSync(targetPath)) {
+      fail(`docs/i18n/${locale}/${fileName} is missing`);
+      continue;
+    }
+    const body = extractI18nMirrorBody(readText(targetPath));
+    if (body === null) {
+      fail(`docs/i18n/${locale}/${fileName} is missing the i18n mirror separator`);
+      continue;
+    }
+    bodies.set(locale, normalizeMirrorBody(body));
+  }
+
+  const counts = new Map();
+  for (const body of bodies.values()) counts.set(body, (counts.get(body) ?? 0) + 1);
+  let shared = null;
+  let sharedCount = 0;
+  for (const [body, count] of counts) {
+    if (count > sharedCount) [shared, sharedCount] = [body, count];
+  }
+
+  let agreeing = 0;
+  let current = 0;
+  for (const [locale, body] of bodies) {
+    if (body === sourceBody) current += 1;
+    if (body === sourceBody || body === shared) {
+      agreeing += 1;
+      continue;
+    }
+    fail(
+      `docs/i18n/${locale}/${fileName} differs from root ${fileName} and from the other locales' mirrors (hand edit? run node scripts/i18n/sync-llm-mirrors.mjs)`
+    );
+  }
+
+  const allCurrent = current > 0 && current === locales.length;
+  if (allCurrent) {
+    console.log(`[docs-sync] ${fileName} i18n mirrors match root content: ${current} locales`);
+  } else if (agreeing > 0) {
+    console.log(
+      `[docs-sync] pr mode: ${fileName} mirrors agree with each other: ${agreeing} locales (${current} already match the root)`
+    );
+  }
+  return allCurrent;
+}
+
+/**
  * Check i18n CHANGELOG mirrors by verifying that all version sections from the
  * root CHANGELOG exist in each translation. Unlike strict mirror files (llm.txt),
  * CHANGELOG translations have translated section headings (e.g. "Security" →
@@ -312,7 +387,7 @@ try {
     if (scope.llm) {
       console.log(`[docs-sync] pr mode: ${scope.llm} — checking the llm.txt mirrors strictly`);
       checkI18nMirrorFile("llm.txt", llmPath);
-    } else {
+    } else if (!checkI18nMirrorConsistency("llm.txt", llmPath)) {
       console.log(
         `[docs-sync] SKIP reason=pr-mode — docs/i18n/<locale>/llm.txt mirrors are refreshed by the translation wave (scripts/i18n/sync-llm-mirrors.mjs), not by feature PRs; ${STRICT_ELSEWHERE}`
       );
