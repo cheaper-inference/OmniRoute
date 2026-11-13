@@ -14,6 +14,7 @@ import {
   orderTargetsByQuotaWeighted,
   orderTargetsByResetAwareQuota,
   orderTargetsByResetWindow,
+  orderTargetsByExpiryFirst,
 } from "./quotaStrategies.ts";
 import {
   orderTargetsByPowerOfTwoChoices,
@@ -335,6 +336,17 @@ const STRATEGY_ORDERERS: Record<
       exclusions
     );
     log.info("COMBO", `Reset-window ordering: ${describeFirstTarget(nextTargets)} first`);
+    return orderedOnly(nextTargets);
+  },
+  "expiry-first": async (orderedTargets, { combo, config, log, apiKeyAllowedConnections }) => {
+    const nextTargets = await orderTargetsByExpiryFirst(
+      orderedTargets,
+      combo.name,
+      config,
+      log,
+      apiKeyAllowedConnections
+    );
+    log.info("COMBO", `Expiry-first ordering: ${describeFirstTarget(nextTargets)} first`);
     return orderedOnly(nextTargets);
   },
   "context-optimized": (orderedTargets, { log }) => {
