@@ -177,6 +177,18 @@ export function extractSystemRoleMessages(payload: Record<string, unknown>): voi
 }
 
 /**
+ * A lifted message's own `output_config` (the directive Claude Code clients put on it) moves to
+ * the top-level parameter. An explicit top-level value wins, as in extractSystemRoleMessages.
+ */
+function foldDirective(payload: Record<string, unknown>, message: Record<string, unknown>): void {
+  const directive = message.output_config;
+  if (payload.output_config != null) return;
+  if (directive != null && typeof directive === "object" && !Array.isArray(directive)) {
+    payload.output_config = directive;
+  }
+}
+
+/**
  * Hoists the leading run of text-bearing system-role messages (everything
  * before the first real user/assistant turn) into the top-level `system`
  * parameter. Anthropic treats `messages[0]` as the initial system prompt
@@ -209,11 +221,18 @@ export function hoistLeadingTextSystemMessages(payload: Record<string, unknown>)
       let hoisted = false;
       for (const block of m.content as Array<Record<string, unknown>>) {
         if (block?.type === "text" && typeof block.text === "string" && block.text.length > 0) {
-          blocks.push({ type: "text", text: block.text });
+          // Keep the block's own cache_control: this run has no message ahead of it that could
+          // take the marker (extractSystemRoleMessages relocates it only to a preceding one).
+          blocks.push(
+            block.cache_control != null
+              ? { type: "text", text: block.text, cache_control: block.cache_control }
+              : { type: "text", text: block.text }
+          );
           hoisted = true;
         }
       }
       if (!hoisted) kept.push(m);
+      else foldDirective(payload, m);
       continue;
     }
     kept.push(m);
