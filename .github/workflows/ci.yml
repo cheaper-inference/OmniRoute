@@ -13,7 +13,12 @@ on:
     branches: [main]
   pull_request:
     branches: [main, "release/**"]
-    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft, edited]
+    # `edited` removed 2026-11-13: a title/body edit does not change code, yet the
+    # classifier still reported code=true and re-ran the full matrix. Bots (Blacksmith
+    # footer, Mergify summary) edit descriptions repeatedly; with ~200 open PRs this
+    # was a large share of the daily run volume. The queue-draft special case below
+    # is now unreachable; delete it when convenient.
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
   merge_group:
     types: [checks_requested]
   workflow_dispatch:
