@@ -17,10 +17,17 @@
  *
  * This gate is absolute, not diff-based: it compares the tree as it is.
  *
+ * Release mode only (plan "derived numbers and texts resolved only at release", 2026-11-13): a
+ * feature PR adds keys to en.json and touches no other locale; the release refresh completes the
+ * catalogs (`syncUiKeys` in sync-ui-keys.mjs, called by `release:refresh-derived`). In `pr` mode
+ * (scripts/check/lib/gateMode.mjs) the gate prints `SKIP reason=pr-mode` and exits 0; in
+ * `release` mode — the release PR, pushes to main, local runs — it is exactly the gate above.
+ *
  * Usage:
  *   node scripts/i18n/check-key-completeness.mjs               # blocking (dashboard catalogs)
  *   node scripts/i18n/check-key-completeness.mjs --warn        # report only, exit 0
  *   node scripts/i18n/check-key-completeness.mjs --catalog=cli # same gate over bin/cli/locales
+ *   node scripts/i18n/check-key-completeness.mjs --mode=pr     # what a feature PR sees (SKIP)
  *   npm run i18n:check-keys
  *   npm run i18n:check-keys:cli
  */
@@ -29,6 +36,8 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
+
+import { skipInPrMode } from "./lib/release-mode.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, "..", "..");
@@ -117,6 +126,12 @@ async function main() {
   const catalog = catalogArg ? catalogArg.slice(10) : "ui";
   const dir = catalogDir(catalog);
   const tag = `[i18n-keys:${catalog}]`;
+  const skipped = skipInPrMode({
+    tag,
+    motive:
+      "a feature PR adds keys to en.json only; the other locales are completed by the release refresh (syncUiKeys in scripts/i18n/sync-ui-keys.mjs)",
+  });
+  if (skipped) return;
   const { en, locales } = await readCatalogs(dir);
   const gaps = findIncompleteLocales({ en, locales });
   const total = leafPaths(en).size;

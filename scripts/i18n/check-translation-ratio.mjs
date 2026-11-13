@@ -17,11 +17,21 @@
  *   node scripts/i18n/check-translation-ratio.mjs --json
  *   node scripts/i18n/check-translation-ratio.mjs --update   # rewrite baseline with measured values
  *   node scripts/i18n/check-translation-ratio.mjs --locale=es,az
+ *   node scripts/i18n/check-translation-ratio.mjs --mode=pr   # what a feature PR sees (SKIP)
+ *
+ * Release mode only for the gate itself (plan "derived numbers and texts resolved only at
+ * release", 2026-11-13): every key a feature PR adds to en.json is missing in all the other
+ * locales until the release refresh translates it, so the share measured on a feature PR reflects
+ * the base, not the change. In `pr` mode (scripts/check/lib/gateMode.mjs) the gate prints
+ * `SKIP reason=pr-mode` and exits 0. `--report`, `--json` and `--update` are not gates and run in
+ * either mode.
  */
 import { promises as fs, existsSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
+
+import { skipInPrMode } from "./lib/release-mode.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, "..", "..");
@@ -93,6 +103,14 @@ async function loadJson(file) {
 
 async function main() {
   const opts = parseArgs(process.argv);
+  if (!opts.report && !opts.json && !opts.update) {
+    const skipped = skipInPrMode({
+      tag: "[i18n-ratio]",
+      motive:
+        "keys a feature PR adds to en.json stay missing in the other locales until the release refresh translates them (syncUiKeys in scripts/i18n/sync-ui-keys.mjs)",
+    });
+    if (skipped) return;
+  }
   const config = await loadJson(CONFIG_PATH);
   const allow = new Set((await loadJson(ALLOWLIST_PATH)).keys ?? []);
   const enFlat = flattenLeaves(await loadJson(path.join(MESSAGES_DIR, `${SOURCE_LOCALE}.json`)));
