@@ -1,0 +1,1 @@
+- **feat(executors):** New opt-in `OMNIROUTE_RECOVERY_RATIO_LIMIT` (off by default): per provider, the in-place 429 and WAF retries of the base executor are admitted only while they stay under 0.2 of the initial sends in the last 10 seconds (floor 3). A refused retry is not made, so the caller gets the upstream response at once and can rotate; initial sends are never refused.

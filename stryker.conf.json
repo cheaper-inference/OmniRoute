@@ -589,6 +589,8 @@
       "tests/unit/repro-9486.test.ts",
       "tests/unit/repro-9630-combo-false-503.test.ts",
       "tests/unit/repro-antigravity-404-family-cooldown-hijack.test.ts",
+      "tests/unit/recovery-ratio-limiter-executor.test.ts",
+      "tests/unit/recovery-ratio-limiter.test.ts",
       "tests/unit/reset-aware-request-scope-12600.test.ts",
       "tests/unit/resilience-connections.test.ts",
       "tests/unit/resilience-cooldown-manager.test.ts",
