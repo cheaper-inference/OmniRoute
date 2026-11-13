@@ -10,12 +10,13 @@ name: omni-queue
 #     scripts/merge-queue + config/merge-queue only) and run zero-dependency Node scripts —
 #     no npm ci, no third-party install scripts next to the App token. The queue touches PR
 #     content only as git objects (merge-tree/commit-tree in a scratch bare repository).
-#   • Which copy of THIS file runs: schedule and workflow_run use the default branch's copy;
-#     pull_request_target uses the copy on the PR's BASE branch (a label on a PR whose base has
-#     no omni-queue.yml never reaches the approval job); workflow_dispatch uses the dispatched
-#     ref. The scripts, however, ALWAYS come from the default branch (explicit checkout ref), so
-#     nothing works until scripts/merge-queue is on the default branch, and labels only bind on
-#     bases that carry this file.
+#   • Which copy of THIS file runs: schedule, workflow_run and pull_request_target use the
+#     default branch's copy (pull_request_target has done so since 2025-12-08, whatever the PR's
+#     base); workflow_dispatch uses the dispatched ref. The scripts ALWAYS come from the default
+#     branch (explicit checkout ref), so nothing works until scripts/merge-queue is there.
+#   • Public repositories block pull_request_target by default from 2026-12-02 unless an Actions
+#     policy allows this workflow file (docs/ops/OMNI_QUEUE.md → "Actions event policy"). A
+#     blocked approval job fails closed: no approval status, so nothing becomes eligible.
 #   • Writes use a GitHub App installation token minted per job with the minimum permissions
 #     (the GITHUB_TOKEN cannot be used: refs it pushes do not trigger the candidate's CI).
 #   • Kill switch: every job is inert unless the repository variable OMNI_QUEUE_ENABLED is
