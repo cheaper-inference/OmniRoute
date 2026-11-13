@@ -2447,10 +2447,12 @@ async function handleSingleModelChat(
         correlationId: rotationAttributionOn ? (runtimeOptions?.correlationId ?? null) : null,
       });
 
+      // An in-pipeline account rotation rewrites refreshedCredentials, not credentials.
+      const servedConnectionId = refreshedCredentials?.connectionId || credentials.connectionId;
       if (result.success) {
         if (isCodexResponseCurrent(result.response, true)) {
-          clearModelLock(provider, credentials.connectionId, model);
-          markQuotaHealthy(credentials.connectionId);
+          clearModelLock(provider, servedConnectionId, model);
+          markQuotaHealthy(servedConnectionId);
         }
         // Acquired probes were settled inside execute(); other successes settle here or in combo.
         if (
@@ -2466,7 +2468,7 @@ async function handleSingleModelChat(
         if (telemetry) telemetry.endPhase();
         const successResponse = withRoutingTelemetry(
           museOwner ? muse.museRecordOutput(museOwner, result.response) : result.response,
-          credentials?.connectionId
+          servedConnectionId
         );
         if (requestBody.stream === true) {
           return inheritResponsePolicies(

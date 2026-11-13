@@ -1,0 +1,1 @@
+- **fix(routing):** After a Codex 429 moves a request to a sibling account, the selected-connection header, the quota-healthy mark and the error-state reset name the account that served the request, not the account that was rate limited.
