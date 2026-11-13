@@ -826,7 +826,10 @@ describe("ChatGPT Web bridge installer (strict CSP, no blob module)", () => {
           }
           throw new TypeError("Failed to fetch dynamically imported module");
         }),
-        new RegExp(`^Error: csp: script-src-elem blocked ${ASSET.replace(/\./g, "\\.")}$`)
+        (error: unknown) => {
+          assert.equal(String(error), `Error: csp: script-src-elem blocked ${ASSET}`);
+          return true;
+        }
       );
       assert.equal(violations.size, 0);
     });
