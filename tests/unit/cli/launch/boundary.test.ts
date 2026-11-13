@@ -19,6 +19,9 @@ const LAUNCH_DIR = join(ROOT, "bin/cli/launch");
 const ADAPTERS_DIR = join(LAUNCH_DIR, "adapters");
 const CONTRACT_FILE = join(LAUNCH_DIR, "contract.mjs");
 
+/** Number of launcher adapters; bump together with a new adapters/<id>.mjs. */
+const REGISTRY_SIZE = 19;
+
 const ADAPTER_ALLOWED_IMPORTS = new Set(["../contract.mjs"]);
 /** The documented exceptions at the top of contract.mjs (section 1 rule 1). */
 const CONTRACT_ALLOWED_IMPORTS = new Set([
@@ -199,11 +202,19 @@ test("contract scanner rejects an undocumented import", () => {
 
 test("every adapter satisfies the plan invariants under a throwing process/fetch proxy", async () => {
   const files = adapterFiles(ADAPTERS_DIR).filter((file) => !file.endsWith("index.mjs"));
+  assert.equal(files.length, REGISTRY_SIZE, "adapters/ holds exactly the expected adapter files");
+  let checked = 0;
   for (const file of files) {
     const mod = await import(pathToFileURL(file).href);
     const adapter = mod.default;
     assert.ok(adapter && typeof adapter.plan === "function", `${file} default-exports an adapter`);
-    const ctx = fixtureCtx({ tool: adapter.id, viewSpec: adapter.capabilities.modelList.view });
+    const gate = adapter.capabilities.versionGate;
+    const version = gate ? (gate.recommended ?? gate.min ?? "999.0.0") : "999.0.0";
+    const ctx = fixtureCtx({
+      tool: adapter.id,
+      viewSpec: adapter.capabilities.modelList.view,
+      version,
+    });
     const realFetch = globalThis.fetch;
     const realEnv = process.env;
     const trap = new Proxy(
@@ -214,23 +225,19 @@ test("every adapter satisfies the plan invariants under a throwing process/fetch
         },
       }
     );
-    let plan: LaunchPlan | undefined;
+    let plan: LaunchPlan;
     try {
       globalThis.fetch = (() => {
         throw new Error(`${adapter.id}: plan() called fetch`);
       }) as typeof fetch;
       Object.defineProperty(process, "env", { value: trap, configurable: true, writable: true });
-      try {
-        plan = adapter.plan(ctx);
-      } catch (error) {
-        // ModelRequired etc. are fine for the default fixture; purity is what this test pins.
-        if ((error as { name?: string })?.name !== "LaunchError") throw error;
-        continue;
-      }
+      plan = adapter.plan(ctx);
     } finally {
       Object.defineProperty(process, "env", { value: realEnv, configurable: true, writable: true });
       globalThis.fetch = realFetch;
     }
-    if (plan) checkPlanInvariants(plan, ctx, { adapter });
+    checkPlanInvariants(plan, ctx, { adapter });
+    checked++;
   }
+  assert.equal(checked, REGISTRY_SIZE, "every registered adapter was planned and checked");
 });

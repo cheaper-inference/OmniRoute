@@ -26,14 +26,13 @@ import { assertGolden, checkPlanInvariants } from "../_helpers/golden.mjs";
 const viewSpec = adapter.capabilities.modelList.view;
 const base = { tool: adapter.id, viewSpec, version: "1.59.0" };
 
-// server-view injects nothing, so injectedIds is left out (the helper would compare it with the
-// whole view); the invariants still assert injected === 0 and viewHash === ctx.view.hash.
+// server-view injects nothing: `serverView: true` asserts injected === 0 (not the full view).
 type Plan = ReturnType<typeof adapter.plan>;
 type Ctx = Parameters<typeof adapter.plan>[0];
 const hasCode = (code: string) => (err: unknown) => (err as { code?: string }).code === code;
 
 function check(plan: Plan, ctx: Ctx) {
-  checkPlanInvariants(plan, ctx, { adapter });
+  checkPlanInvariants(plan, ctx, { adapter, serverView: true });
 }
 
 test("goose: default plan", () => {

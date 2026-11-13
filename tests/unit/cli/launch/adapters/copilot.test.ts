@@ -17,7 +17,7 @@ const version = "1.0.111";
 function run(name: string, overrides: Record<string, unknown> = {}) {
   const ctx = fixtureCtx({ tool: adapter.id, viewSpec, version, ...overrides });
   const plan = adapter.plan(ctx);
-  checkPlanInvariants(plan, ctx, { adapter });
+  checkPlanInvariants(plan, ctx, { adapter, singleModel: ctx.model.id });
   assertGolden(adapter.id, name, plan);
   return plan;
 }

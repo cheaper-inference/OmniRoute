@@ -18,7 +18,7 @@ function run(name: string, overrides: Record<string, unknown>, check?: (plan: La
   test(name, () => {
     const ctx = fixtureCtx({ ...base, ...overrides });
     const plan = adapter.plan(ctx);
-    checkPlanInvariants(plan, ctx, { adapter });
+    checkPlanInvariants(plan, ctx, { adapter, singleModel: ctx.model.id });
     check?.(plan);
     assertGolden(adapter.id, name, plan);
   });

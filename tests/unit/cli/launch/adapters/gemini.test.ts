@@ -20,7 +20,7 @@ const view = adapter.capabilities.modelList.view;
 function run(name: string, overrides: Record<string, unknown> = {}) {
   const ctx = fixtureCtx({ tool: adapter.id, viewSpec: view, ...overrides });
   const plan = adapter.plan(ctx);
-  checkPlanInvariants(plan, ctx, { adapter });
+  checkPlanInvariants(plan, ctx, { adapter, singleModel: ctx.model.id });
   assertGolden(adapter.id, name, plan);
   return { ctx, plan };
 }

@@ -17,6 +17,11 @@ assertGolden(adapter.id, "win32", plan); // tests/unit/cli/launch/golden/<id>.wi
 - `fixtureCtx` options: `platform`, `home`, `env`, `rows` (default `FIXTURE_ROWS`, with and without
   context), `viewSpec`, `prefs`, `model` (row id, or `null` for none), `binary`, `shell`, `version`,
   `features`, `args`, `passthroughJson`, `profile`, `cwd`, `rootUrl`, `origin`, `settings`.
+- `checkPlanInvariants` model-list options: `injectedIds` compares against the whole view (cut by
+  `injectLimit`). Server-view adapters pass `{ serverView: true }` (asserts `injected === 0`, and
+  `injectedIds` empty when given). Single-model tools pass `{ singleModel: ctx.model.id }` (asserts
+  `injected === 1`, `ctx.model.id` equals it, and `injectedIds` deep-equals `[id]` when given).
+  Both skip the full-view comparison and are mutually exclusive.
 - Cases to cover (section 16.2): no model, model with/without context, below `recommended`,
   win32, profile, user passthrough, empty view (`rows: []`, expect a `LaunchError`).
 - Create or refresh goldens with `UPDATE_GOLDEN=1`, then review the JSON diff before committing.
