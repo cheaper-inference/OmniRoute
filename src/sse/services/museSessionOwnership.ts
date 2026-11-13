@@ -273,7 +273,7 @@ function assignNewOwner(
       }
     : { connectionId: connection.id };
   save(`session:${scope}`, JSON.stringify(owner));
-  if (!forcedId) save("cursor", String(cursor + 1));
+  if (!forcedId) save("cursor", String((ordered.indexOf(connection) + 1) % ordered.length));
   return owner;
 }
 

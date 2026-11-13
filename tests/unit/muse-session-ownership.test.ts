@@ -91,6 +91,17 @@ test("fresh sessions alternate while tool continuations preserve exact encrypted
   );
 });
 
+test("fresh sessions rotate past unavailable candidates", () => {
+  getDbInstance()
+    .prepare("DELETE FROM key_value WHERE namespace = ?")
+    .run("muse_session_ownership");
+  const pool = [{ id: "account-a", unavailable: true }, { id: "account-b" }, { id: "account-c" }];
+  const first = museSessionScope({ prompt_cache_key: "rotation-first" }, undefined, "client");
+  const second = museSessionScope({ prompt_cache_key: "rotation-second" }, undefined, "client");
+  assert.equal(claimMuseSession(first, { input: "fresh" }, pool).connectionId, "account-b");
+  assert.equal(claimMuseSession(second, { input: "fresh" }, pool).connectionId, "account-c");
+});
+
 test("reminted same-account key is adopted when no replayable history was recorded", () => {
   const scope = museSessionScope({ prompt_cache_key: "remint-session" }, undefined, "client");
   const owner = claimMuseSession(scope, { input: "fresh" }, candidates);
