@@ -1,0 +1,1 @@
+- **fix(sse):** A Claude passthrough request whose tool is named with a leading `proxy_` (for example `proxy_search`) gets the same tool name back in the reply; the executor strips that prefix upstream and the reply used to show the stripped name.

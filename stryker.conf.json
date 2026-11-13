@@ -823,7 +823,8 @@
       "tests/unit/empty-turn-retry-credentials-replace.test.ts",
       "tests/unit/fallback-wrapper-cancels-native-body.test.ts",
       "tests/unit/silent-catch-cooldown-logs.test.ts",
-      "tests/unit/token-expiry-units.test.ts"
+      "tests/unit/token-expiry-units.test.ts",
+      "tests/unit/claude-passthrough-proxy-prefixed-tool.test.ts"
     ],
     "nodeArgs": [
       "--import",
