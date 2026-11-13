@@ -5,7 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { globSync } from "tinyglobby";
 
-import { resolveImport } from "../quality/build-test-impact-map.mjs";
+import { readTestImpactMap, resolveImport } from "../quality/build-test-impact-map.mjs";
 
 const DEFAULT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const SOURCE_ROOTS = ["src/", "open-sse/", "bin/"];
@@ -287,7 +287,7 @@ function main() {
   const summaryPath = arg("--summary-file", "");
   const jsonPath = arg("--json-file", "");
   const entries = changedEntries(root, base);
-  const impactMap = JSON.parse(fs.readFileSync(mapPath, "utf8"));
+  const impactMap = readTestImpactMap(mapPath);
   const allowlist = validateAllowlist(JSON.parse(fs.readFileSync(allowlistPath, "utf8")));
   const addedTestLines = git(root, ["diff", "--unified=0", `${base}...HEAD`, "--", "tests/"])
     .split(/\r?\n/)
