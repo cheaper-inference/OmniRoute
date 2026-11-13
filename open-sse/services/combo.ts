@@ -5,7 +5,12 @@
  * context-optimized, context-relay, and fusion strategies
  */
 
-import { errorResponse, errorResponseWithComboDiagnostics } from "../utils/error.ts";
+import {
+  errorResponse,
+  errorResponseWithComboDiagnostics,
+  sanitizeErrorMessage,
+} from "../utils/error.ts";
+import { logger } from "../utils/logger.ts";
 import { isProviderSafetyStopsEnabled } from "../utils/providerSafety.ts";
 import { createChaosHeaderBarrier } from "./combo/chaosHeaderBarrier.ts";
 import { runComboWithSafetyLatch } from "./combo/safetyStopLatch.ts";
@@ -377,6 +382,8 @@ export function maybeWarnBootstrapDominant(hasStats: boolean): void {
   console.warn(formatBootstrapWarning());
 }
 
+const scopeReadLog = logger("COMBO_AUTO");
+
 export async function buildAutoCandidates(
   targets: ResolvedComboTarget[],
   comboName: string,
@@ -421,8 +428,14 @@ export async function buildAutoCandidates(
         for (const connection of connections) connectionById.set(connection.id, connection);
       }
       targetsForExpansion = expandTargetsWithinConnectionScope(targets, grouped, connectionScope);
-    } catch {
-      targetsForExpansion = [];
+    } catch (error) {
+      // Fail open like the unscoped branch below. The caller already bound `targets` to
+      // permitted connections (expandAutoComboCandidatePool), and credential selection
+      // enforces the key's allowlist again at dispatch, so this only keeps scoring alive.
+      scopeReadLog.warn("Scoped auto candidates: active connection read failed; keeping targets", {
+        scopeSize: connectionScope.size,
+        error: sanitizeErrorMessage(error instanceof Error ? error.message : String(error)),
+      });
     }
   } else {
     const uniqueProviders = Array.from(
