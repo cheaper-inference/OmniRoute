@@ -13,6 +13,7 @@
  */
 import test from "node:test";
 import assert from "node:assert/strict";
+import { ANTIGRAVITY_CLI_FALLBACK_VERSION } from "../../open-sse/services/antigravityVersion.ts";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -146,7 +147,11 @@ test("getUsageForProvider(antigravity) merges weekly quotas with the selected CL
   globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = requestUrl(input);
     const headers = new Headers(init?.headers);
-    assert.match(headers.get("User-Agent") ?? "", /^antigravity\/cli\/1\.3\.4 /);
+    assert.ok(
+      (headers.get("User-Agent") ?? "").startsWith(
+        `antigravity/cli/${ANTIGRAVITY_CLI_FALLBACK_VERSION} `
+      )
+    );
     assert.equal(headers.get("X-Goog-Api-Client"), null);
 
     if (url.includes("retrieveUserQuotaSummary")) {

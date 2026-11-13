@@ -17,6 +17,7 @@
 
 import { test, describe, beforeEach } from "node:test";
 import assert from "node:assert/strict";
+import { ANTIGRAVITY_CLI_FALLBACK_VERSION } from "../../open-sse/services/antigravityVersion.ts";
 
 import {
   ensureAntigravityProjectAssigned,
@@ -141,9 +142,15 @@ describe("ensureAntigravityProjectAssigned", () => {
 
     await ensureAntigravityProjectAssigned("cli-token", mockFetch, "cli");
 
-    assert.match(
-      capturedHeaders?.get("User-Agent") || "",
-      /^antigravity\/cli\/1\.3\.4 \(aidev_client; os_type=.+; arch=.+; auth_method=consumer\)$/
+    // Derive the expected platform tokens from the host, not from the header
+    // builder, so a wrong mapping in the builder fails this test instead of
+    // feeding both sides of the assertion the same wrong value.
+    const expectedOs = process.platform === "win32" ? "windows" : process.platform;
+    const expectedArch =
+      process.arch === "x64" ? "amd64" : process.arch === "ia32" ? "386" : process.arch;
+    assert.equal(
+      capturedHeaders?.get("User-Agent"),
+      `antigravity/cli/${ANTIGRAVITY_CLI_FALLBACK_VERSION} (aidev_client; os_type=${expectedOs}; arch=${expectedArch}; auth_method=consumer)`
     );
     assert.equal(capturedHeaders?.get("X-Goog-Api-Client"), null);
     assert.equal(capturedHeaders?.get("Client-Metadata"), null);
