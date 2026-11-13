@@ -99,12 +99,13 @@ function normalizeResponsesInputItem(item) {
 // silently does not take effect. The cross-format path (openai -> openai-responses)
 // already performs the equivalent promotion in toResponses.ts; this covers the lane
 // that promotion never runs on.
-function promoteStrayReasoningEffort(body) {
+function promoteStrayReasoningEffort(body, model) {
   if (!body || typeof body !== "object") return body;
   if (body.reasoning !== undefined) return body;
   if (body.reasoning_effort === undefined) return body;
 
-  const effort = normalizeResponsesReasoningEffort(body.reasoning_effort);
+  // The model decides whether `max` survives, as on the cross-format path (toResponses.ts).
+  const effort = normalizeResponsesReasoningEffort(body.reasoning_effort, model ?? body.model);
   if (effort) {
     body.reasoning = { effort };
   }
@@ -112,10 +113,10 @@ function promoteStrayReasoningEffort(body) {
   return body;
 }
 
-function normalizeOpenAIResponsesRequest(body) {
+function normalizeOpenAIResponsesRequest(body, model) {
   if (!body || typeof body !== "object") return body;
 
-  const normalized = promoteStrayReasoningEffort({ ...body });
+  const normalized = promoteStrayReasoningEffort({ ...body }, model);
 
   // #10165 safety net: if a chat-shaped body reached Responses normalization
   // without input, promote messages → input and map token/format fields.
@@ -779,7 +780,7 @@ export function translateRequest(
 
   // Normalize openai-responses input shape for providers that require list input.
   if (targetFormat === FORMATS.OPENAI_RESPONSES) {
-    result = normalizeOpenAIResponsesRequest(result);
+    result = normalizeOpenAIResponsesRequest(result, model);
     // #12128: Sanitize reasoning input items for Responses targets (strip plaintext content for opaque backends)
     applyReasoningInputPolicy(result as Record<string, unknown>, "responses", {
       provider,

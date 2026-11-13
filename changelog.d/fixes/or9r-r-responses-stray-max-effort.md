@@ -1,0 +1,1 @@
+- **fix(responses):** a stray `reasoning_effort: "max"` on the Responses to Responses route keeps `max` for models that support it, as the Chat to Responses route does.
