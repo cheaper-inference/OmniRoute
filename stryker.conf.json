@@ -824,7 +824,8 @@
       "tests/unit/tool-cap-keeps-forced-and-called-tools.test.ts",
       "tests/unit/cache-usage-meta-undefined-keys.test.ts",
       "tests/unit/claude-tool-type-falsy.test.ts",
-      "tests/unit/combo-cache-failure.test.ts"
+      "tests/unit/combo-cache-failure.test.ts",
+      "tests/unit/context-estimate-system-instruction.test.ts"
     ],
     "nodeArgs": [
       "--import",

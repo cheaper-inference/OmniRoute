@@ -1,0 +1,1 @@
+- **fix(sse):** the final-input token estimate counts a Gemini-style `systemInstruction` (also `system_instruction` and the Cloud Code `request.systemInstruction` / `request.tools`), so the last-resort context guard and the learned estimator calibration no longer ignore a large system prompt.

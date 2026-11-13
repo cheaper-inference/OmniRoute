@@ -33,10 +33,20 @@ export function estimateFinalInputTokenBreakdown(
       : requestBody?.input && typeof requestBody.input === "object"
         ? requestBody.input
         : []);
+  const tools = requestBody?.tools ?? nestedRequest?.tools;
   const breakdown = {
     messages: estimateTokens(messages),
-    tools: Array.isArray(requestBody?.tools) ? estimateTokens(requestBody.tools) : 0,
-    system: estimateTokens(requestBody?.system),
+    tools: Array.isArray(tools) ? estimateTokens(tools) : 0,
+    // Gemini-shaped bodies keep the system prompt in systemInstruction (either spelling, also
+    // under `request` for Cloud Code), so count it next to `system`.
+    system:
+      estimateTokens(requestBody?.system) +
+      estimateTokens(
+        requestBody?.systemInstruction ??
+          requestBody?.system_instruction ??
+          nestedRequest?.systemInstruction ??
+          nestedRequest?.system_instruction
+      ),
     instructions: estimateTokens(requestBody?.instructions),
   };
   return { ...breakdown, total: Object.values(breakdown).reduce((sum, value) => sum + value, 0) };
