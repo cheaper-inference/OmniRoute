@@ -36,9 +36,9 @@ function addRun(db: Database.Database, id: string, skillId: string) {
 }
 
 const migrate = (db: Database.Database) =>
-  db.transaction(() => db.exec(read("239_skills_unique_owner_name_version.sql")))();
+  db.transaction(() => db.exec(read("240_skills_unique_owner_name_version.sql")))();
 
-test("migration 239 keeps the newest row per owner, name and version", () => {
+test("migration 240 keeps the newest row per owner, name and version", () => {
   const db = makeDb();
   try {
     addSkill(db, "old", "k1", "2026-01-01T00:00:00.000Z");
@@ -54,7 +54,7 @@ test("migration 239 keeps the newest row per owner, name and version", () => {
   }
 });
 
-test("migration 239 moves run history of removed rows to the kept row", () => {
+test("migration 240 moves run history of removed rows to the kept row", () => {
   const db = makeDb();
   try {
     addSkill(db, "old", "k1", "2026-01-01T00:00:00.000Z");
@@ -71,7 +71,7 @@ test("migration 239 moves run history of removed rows to the kept row", () => {
   }
 });
 
-test("migration 239 adds a unique index and is safe to run twice", () => {
+test("migration 240 adds a unique index and is safe to run twice", () => {
   const db = makeDb();
   try {
     addSkill(db, "a", "k1", "2026-01-01T00:00:00.000Z");
