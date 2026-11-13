@@ -1699,7 +1699,11 @@ export class BaseExecutor {
         }
 
         const serializeRetryBody = async (b: unknown) => {
-          let retryBody = JSON.stringify(b);
+          // A retry goes out with the same body-field order as the first send: the order is part of
+          // the CLI fingerprint (see above), and the live body keeps the client's order.
+          let retryBody = shouldFingerprint
+            ? applyFingerprint(fingerprintProvider, {}, b as Record<string, unknown>).bodyString
+            : JSON.stringify(b);
           if (usesClaudeCodeProtocol || this.provider === "claude") {
             retryBody = await signRequestBody(retryBody);
           }
