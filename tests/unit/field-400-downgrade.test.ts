@@ -1,7 +1,10 @@
-import { test, after } from "node:test";
+import { test } from "node:test";
 import assert from "node:assert/strict";
 import { BaseExecutor } from "../../open-sse/executors/base.ts";
-import { detectRejectedMessageFields } from "../../open-sse/config/providerFieldStrips.ts";
+import {
+  detectRejectedMessageFields,
+  detectRejectedTopLevelFields,
+} from "../../open-sse/config/providerFieldStrips.ts";
 
 // A minimal executor that passes through the body unchanged (no transformRequest
 // side-effects) so we can assert on exactly what base.ts sends upstream.
@@ -391,6 +394,187 @@ test("BaseExecutor.execute does NOT retry when no message carries the named fiel
     });
     assert.equal(callCount, 1);
     assert.equal(result.response.status, 400);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// pydantic/FastAPI 422 validation errors (Mistral): top-level `loc: ["body", field]`.
+// ──────────────────────────────────────────────────────────────────────────────
+
+// Captured from POST https://api.mistral.ai/v1/chat/completions with service_tier "flex".
+const MISTRAL_SERVICE_TIER_422 = {
+  detail: [
+    {
+      type: "enum",
+      loc: ["body", "service_tier"],
+      msg: "Input should be 'auto' or 'standard_only'",
+      input: "flex",
+      ctx: { expected: "'auto' or 'standard_only'" },
+    },
+  ],
+};
+
+const extraForbidden = (field: string) => ({
+  type: "extra_forbidden",
+  loc: ["body", field],
+  msg: "Extra inputs are not permitted",
+  input: 1,
+});
+
+test("detectRejectedTopLevelFields reads extra_forbidden and service_tier enum errors only", () => {
+  assert.deepEqual(detectRejectedTopLevelFields(JSON.stringify(MISTRAL_SERVICE_TIER_422)), [
+    "service_tier",
+  ]);
+  assert.deepEqual(
+    detectRejectedTopLevelFields(
+      JSON.stringify({ detail: [extraForbidden("seed"), extraForbidden("user")] })
+    ),
+    ["seed", "user"]
+  );
+  // Enum errors on other fields change what is asked for: not droppable.
+  assert.deepEqual(
+    detectRejectedTopLevelFields(
+      JSON.stringify({
+        detail: [{ type: "enum", loc: ["body", "tool_choice"], msg: "bad", input: "x" }],
+      })
+    ),
+    []
+  );
+  // Semantic fields and nested locs are never returned.
+  assert.deepEqual(
+    detectRejectedTopLevelFields(
+      JSON.stringify({
+        detail: [
+          extraForbidden("model"),
+          extraForbidden("messages"),
+          extraForbidden("tools"),
+          { type: "extra_forbidden", loc: ["body", "response_format", "x"], msg: "n" },
+        ],
+      })
+    ),
+    []
+  );
+  assert.deepEqual(detectRejectedTopLevelFields("not json"), []);
+  assert.deepEqual(detectRejectedTopLevelFields(""), []);
+});
+
+test("BaseExecutor.execute drops service_tier named by a Mistral 422 and retries once", async () => {
+  const executor = new SimpleExecutor();
+  const originalFetch = globalThis.fetch;
+  const capturedBodies: Record<string, unknown>[] = [];
+
+  globalThis.fetch = async (_url: string | URL | Request, init: RequestInit = {}) => {
+    capturedBodies.push(JSON.parse(String(init.body)));
+    if (capturedBodies.length === 1) return jsonResponse(MISTRAL_SERVICE_TIER_422, 422);
+    return jsonResponse({ ok: true }, 200);
+  };
+
+  try {
+    const result = await executor.execute({
+      model: "mistral-small-latest",
+      body: {
+        messages: [{ role: "user", content: "hi" }],
+        max_tokens: 5,
+        service_tier: "flex",
+      },
+      stream: false,
+      credentials: {},
+    });
+    assert.equal(capturedBodies.length, 2);
+    assert.equal(capturedBodies[0].service_tier, "flex");
+    assert.equal("service_tier" in capturedBodies[1], false);
+    assert.equal(capturedBodies[1].max_tokens, 5);
+    assert.equal(result.response.status, 200);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("BaseExecutor.execute follows staged 422 extra_forbidden reports within a bounded retry count", async () => {
+  const executor = new SimpleExecutor();
+  const originalFetch = globalThis.fetch;
+  const capturedBodies: Record<string, unknown>[] = [];
+
+  globalThis.fetch = async (_url: string | URL | Request, init: RequestInit = {}) => {
+    const sent = JSON.parse(String(init.body)) as Record<string, unknown>;
+    capturedBodies.push(sent);
+    for (const field of ["seed", "user", "store"]) {
+      if (field in sent) return jsonResponse({ detail: [extraForbidden(field)] }, 422);
+    }
+    return jsonResponse({ ok: true }, 200);
+  };
+
+  try {
+    const result = await executor.execute({
+      model: "mistral-small-latest",
+      body: { messages: [{ role: "user", content: "hi" }], seed: 1, user: "u", store: false },
+      stream: false,
+      credentials: {},
+    });
+    assert.equal(capturedBodies.length, 4);
+    assert.deepEqual(Object.keys(capturedBodies[3]).sort(), ["messages"]);
+    assert.equal(result.response.status, 200);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("BaseExecutor.execute never retries a 422 on protected, semantic or already-stripped fields", async () => {
+  const executor = new SimpleExecutor();
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+
+  globalThis.fetch = async () => {
+    calls += 1;
+    return jsonResponse({ detail: [extraForbidden("messages"), extraForbidden("nothere")] }, 422);
+  };
+
+  try {
+    const result = await executor.execute({
+      model: "mistral-small-latest",
+      body: { messages: [{ role: "user", content: "hi" }] },
+      stream: false,
+      credentials: {},
+    });
+    assert.equal(calls, 1);
+    assert.equal(result.response.status, 422);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("a 422 whose body merely mentions a known-offending word is not retried by prose heuristics", async () => {
+  const executor = new SimpleExecutor();
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+
+  globalThis.fetch = async () => {
+    calls += 1;
+    return jsonResponse(
+      {
+        detail: [
+          { type: "string_type", loc: ["body", "stop"], input: "reasoning_effort verbosity" },
+        ],
+      },
+      422
+    );
+  };
+
+  try {
+    const result = await executor.execute({
+      model: "test-model",
+      body: {
+        messages: [{ role: "user", content: "hi" }],
+        reasoning_effort: "low",
+        verbosity: "low",
+      },
+      stream: false,
+      credentials: {},
+    });
+    assert.equal(calls, 1);
+    assert.equal(result.response.status, 422);
   } finally {
     globalThis.fetch = originalFetch;
   }

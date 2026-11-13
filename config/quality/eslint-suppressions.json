@@ -3385,11 +3385,6 @@
       "count": 1
     }
   },
-  "tests/unit/field-400-downgrade.test.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "tests/unit/file-expiration-policy.test.ts": {
     "@typescript-eslint/no-explicit-any": {
       "count": 1
