@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@omniroute/ui-kit/table";
-import { DataTableShell } from "@omniroute/ui-kit/data-table-shell";
+import { TableLoadingRegion } from "@omniroute/ui-kit/table-loading";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
@@ -310,7 +310,7 @@ export default function TokensPage() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-text-muted">{t("tokensTokenBalance")}</p>
-            <p className="text-4xl font-bold mt-1">{balance.toLocaleString(locale)}</p>
+            <p className="text-4xl font-semibold mt-1">{balance.toLocaleString(locale)}</p>
           </div>
           <Icon name="toll" size={60} className="shrink-0 opacity-20" />
         </div>
@@ -359,12 +359,16 @@ export default function TokensPage() {
 
       {/* Transaction History */}
       <Card title={t("tokensTransactionHistory")} icon="history">
-        {/* Kit DataTableShell owns the loading overlay; no filters/pagination on this ledger. */}
-        <DataTableShell loading={historyLoading} loadingLabel={t("loading")}>
+        {/* The Card is the table's frame (#19620): the kit loading region and a borderless
+            Table, not a DataTableShell, whose own border would draw a second frame. */}
+        <TableLoadingRegion loading={historyLoading} loadingLabel={t("loading")}>
           {!historyLoading && history.length === 0 ? (
             <EmptyState icon="history" title={t("tokensNoTransactionsYet")} />
           ) : (
-            <Table scrollbarLabel={t("tokensTransactionHistory")}>
+            <Table
+              scrollbarLabel={t("tokensTransactionHistory")}
+              containerClassName="rounded-none border-0"
+            >
               <TableHeader>
                 <TableRow>
                   <TableHead>{t("type")}</TableHead>
@@ -409,7 +413,7 @@ export default function TokensPage() {
               </TableBody>
             </Table>
           )}
-        </DataTableShell>
+        </TableLoadingRegion>
       </Card>
 
       {/* Invite Panel */}
@@ -436,7 +440,7 @@ export default function TokensPage() {
               onDismiss={() => setNewInviteCode(null)}
             >
               {t("tokensInviteCreated")}:{" "}
-              <span className="font-mono font-bold">{newInviteCode}</span>
+              <span className="font-mono font-semibold">{newInviteCode}</span>
             </Alert>
           )}
 
@@ -474,7 +478,7 @@ export default function TokensPage() {
                     className="flex items-center justify-between p-3 rounded-lg bg-surface-2 border border-border"
                   >
                     <div>
-                      <span className="font-mono font-bold">{inv.code}</span>
+                      <span className="font-mono font-semibold">{inv.code}</span>
                       <span className="text-xs text-text-muted ml-3">
                         {t("tokensInviteUses", { used: inv.useCount, max: inv.maxUses })}
                       </span>

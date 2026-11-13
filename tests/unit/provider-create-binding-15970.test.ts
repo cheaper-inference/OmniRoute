@@ -5,6 +5,9 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "undici";
+import { settleConnectionFollowUpsAfterEachTest } from "../helpers/connectionFollowUps.ts";
+
+settleConnectionFollowUpsAfterEachTest();
 
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "provider-binding-15970-"));
 Object.assign(process.env, {
@@ -28,6 +31,8 @@ const { POST } = await import("../../src/app/api/providers/route.ts");
 const { waitForCallLogSaves, closeCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
 const { clearProxyLogs } = await import("../../src/lib/proxyLogger.ts");
 const { makeManagementSessionRequest } = await import("../helpers/managementSession.ts");
+const { waitForConnectionFollowUps } =
+  await import("../../src/lib/providers/connectionFollowUps.ts");
 const fetchCalls: string[] = [];
 let probeDelayMs = 0;
 globalThis.fetch = async (input) => {
@@ -126,6 +131,9 @@ async function post(provider: string, providerSpecificData?: Record<string, unkn
 }
 
 async function assertRejected(result: Response, reason = /conflict/i) {
+  // Anything the request started in the background has run, so every upstream call it made is
+  // already recorded below (and an earlier test's follow-ups settled before this test began).
+  assert.equal(await waitForConnectionFollowUps(10_000), true);
   const body = JSON.stringify(await result.json());
   assert.equal(result.status, 400, body);
   assert.match(body, reason);

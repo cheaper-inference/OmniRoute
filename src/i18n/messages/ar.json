@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "يوازن الحصة المتبقية بين نافذتي إعادة التعيين لخمس ساعات ولأسبوع، ثم يناوب بين النتائج المتقاربة",
     "quotaWeighted": "مرجّح حسب الحصة",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "الأقرب انتهاءً أولًا",
+    "expiryFirstDesc": "يستهلك أولًا الحساب الذي ستنتهي حصته دون استخدام: الحساب ذو المتبقي الأعلى وأقرب إعادة تعيين يأتي أولًا.",
     "strictRandom": "عشوائي صارم",
     "strictRandomDesc": "يخلط الترتيب ويستخدم كل نموذج مرة واحدة قبل إعادة الخلط",
     "fusion": "الدمج",
@@ -4033,6 +4035,11 @@
         "when": "يمكنك التوجيه عبر حسابات متعددة باستخدام قياس الحصص عن بعد ونوافذ إعادة التعيين المختلفة.",
         "avoid": "قياس الحصة عن بعد غير متاح لمعظم الحسابات.",
         "example": "تفضل إعادة ضبط الحساب الأسبوعي بنسبة 60% غدًا على إعادة ضبط الحساب بنسبة 80% لاحقًا."
+      },
+      "expiry-first": {
+        "when": "تقوم بالتوجيه عبر حسابات تُعاد تعيين حصصها وفق جداول مختلفة وتريد استهلاك الحصة التي كانت ستنتهي دون استخدام.",
+        "avoid": "قياس الحصص عن بعد غير متاح لمعظم الحسابات، أو تحتاج إلى ترتيب ثابت يتجاهل توقيت إعادة التعيين.",
+        "example": "فضّل حسابًا متبقيًا فيه 80% ويُعاد تعيينه خلال 39 دقيقة على حساب متبقٍ فيه 48% ويُعاد تعيينه خلال 9 ساعات — تُستهلك الحصة القريبة من الانتهاء قبل أن تضيع."
       },
       "strict-random": {
         "when": "استخدمها عندما تريد توزيعًا متساويًا تمامًا؛ يُستخدم كل نموذج مرة واحدة قبل التكرار.",
@@ -4249,6 +4256,13 @@
         "tip1": "استخدم خطوات حساب واضحة أو توجيه علامة الحساب لموفري الخدمة الذين لديهم قياس الحصص عن بعد.",
         "tip2": "قم بضبط الجلسة مقابل الأوزان الأسبوعية عندما يكون الإرهاق قصير المدى أكثر خطورة.",
         "tip3": "أبقِ هامش التعادل صغيرًا لتدور الحسابات المتكافئة بعدل."
+      },
+      "expiry-first": {
+        "title": "الحصة الأقرب إلى الانتهاء أولًا",
+        "description": "يرتّب الحسابات حسب إلحاح الاستهلاك: الحصة المتبقية الكبيرة القريبة من موعد إعادة تعيينها تأتي أولًا.",
+        "tip1": "يتطلب قياس حصص الموفر عن بعد؛ الحسابات التي لا تملكه تحتفظ بترتيب أولويتها المدرج.",
+        "tip2": "تتناوب النتائج شبه المتعادلة ضمن هامش التعادل لكي تظل الحسابات المماثلة تتقاسم الحمل.",
+        "tip3": "اقصر الترتيب على فئة الحصة التي يُحتسب عليها كل نموذج فعليًا."
       },
       "strict-random": {
         "title": "توزيع بالخلط دون تكرار",
@@ -4481,7 +4495,7 @@
     "spend7d": "أنفق7D",
     "avgCostPerRequest": "متوسط التكلفة لكل طلب",
     "noCostDataDescription": "لا يوجد وصف لبيانات التكلفة",
-    "spendToday": "أنفق اليوم",
+    "spendToday": "إنفاق يوم واحد",
     "overviewLoadFailed": "فشل تحميل النظرة العامة",
     "overviewDescription": "وصف نظرة عامة",
     "providerShare": "مشاركة المزود",
@@ -5679,6 +5693,7 @@
     "usageTracking": "تتبع الاستخدام",
     "securityDesc": "قم بتعيين كلمة مرور لحماية لوحة المعلومات الخاصة بك، أو قم بالتخطي الآن.",
     "securityDescSkipWarning": "⚠️ بدون كلمة مرور، لن تتمكن من إضافة موفّري الخدمة أثناء الإعداد. يمكنك إضافتهم لاحقًا من لوحة المعلومات بعد تعيين كلمة مرور.",
+    "passwordAlreadySet": "تم تعيين كلمة مرور للوحة التحكم بالفعل. يمكنك تغييرها لاحقًا من الإعدادات.",
     "providerDesc": "قم بتوصيل مزود الذكاء الاصطناعي الأول الخاص بك. يمكنك إضافة المزيد لاحقا.",
     "providerRequiresPassword": "يجب تعيين كلمة مرور أولًا لإضافة موفّري الخدمة. يُرجى الرجوع إلى خطوة الأمان وتعيين كلمة مرور، أو إضافة موفّري الخدمة لاحقًا من لوحة المعلومات.",
     "apiKeyRequired": "مفتاح واجهة برمجة التطبيقات (مطلوب)",
@@ -6051,6 +6066,8 @@
     "importFromModels": "استيراد من /models",
     "modelsImported": "تم استيراد {count} نموذج",
     "allModelsAlreadyImported": "جميع النماذج مستوردة بالفعل",
+    "providerPublishesNoModelList": "لا يَنشر هذا الموفر قائمة بالنماذج — الكتالوج المدمج لديه مُحدَّث",
+    "modelsNoLongerListed": "{count, plural, zero {لم تعد أي نماذج مُدرجة لدى الموفر} one {لم يعد نموذج واحد مُدرجًا لدى الموفر} two {لم يعد نموذجان مُدرجين لدى الموفر} few {لم تعد # نماذج مُدرجة لدى الموفر} many {لم يعد # نموذجًا مُدرجًا لدى الموفر} other {لم تعد # من النماذج مُدرجة لدى الموفر}}",
     "noNewModelsToImport": "لا توجد نماذج جديدة لاستيرادها — جميعها موجودة في السجل أو قائمة النماذج المخصصة",
     "localCatalogFallbackStatus": "تعذّر الوصول إلى قائمة نماذج المزود — يتم عرض الكتالوج المضمّن",
     "discoveryDegradedStatus": "فشل اكتشاف النموذج {time}",
@@ -6727,6 +6744,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "ملف تعريف ارتباط Grok",
     "herokuBaseUrlHint": "عنوان URL الأساسي لـ Heroku",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "إخفاء البريد الإلكتروني",
     "imageProviders": "مزودو الصور",
     "videoProviders": "مزودو الفيديو",
@@ -7225,7 +7243,8 @@
       "kiro": "الفئة المجانية: 50 رصيدًا شهريًا (~25 ألف–100 ألف توكن). ⚠️ تحظر شروط خدمة Kiro استخدام وكيل/أداة خارجية.",
       "codex": "ربط OpenAI Codex باستخدام تدفق OAuth الحالي.",
       "qwen": "ربط Qwen Code باستخدام تدفق OAuth الحالي.",
-      "github-models": "أنشئ رمز وصول شخصي (PAT) لـ GitHub بنطاق 'models: read' على github.com/settings/tokens"
+      "github-models": "أنشئ رمز وصول شخصي (PAT) لـ GitHub بنطاق 'models: read' على github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} يقبل معرفات النماذج الأصلية للموفر. قم بالاستيراد من /models أو قم بإضافة معرفات مخصصة للتوجيه.",
     "bedrockModelsDescription": "يتم تحديد نطاق نماذج Amazon Bedrock حسب منطقة AWS. قم بالاستيراد من /models أو قم بإضافة معرفات نماذج Bedrock الممكنة في المنطقة المحددة.",
@@ -8092,6 +8111,8 @@
     "resetAwareDesc": "تفضيل الحسابات ذات الحصة السليمة المتبقية وأقرب وقت لإعادة الضبط",
     "quotaWeighted": "مرجّح حسب الحصة",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "الأقرب انتهاءً أولًا",
+    "expiryFirstDesc": "يستهلك أولًا الحساب الذي ستنتهي حصته دون استخدام: الحساب ذو المتبقي الأعلى وأقرب إعادة تعيين يأتي أولًا.",
     "strictRandom": "عشوائي صارم",
     "strictRandomDesc": "يخلط المجموعة ويستخدم كل حساب مرة قبل إعادة الخلط",
     "stickyLimit": "حد الرسائل المثبتة",
@@ -8804,6 +8825,8 @@
     "retentionUsageHistory": "تاريخ الاستخدام (بالأيام)",
     "retentionMemoryEntries": "إدخالات الذاكرة (أيام)",
     "retentionXpAuditLog": "سجل تدقيق XP (أيام)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "حفظ إعدادات الاحتفاظ",
     "storageAutoVacuumMode": "وضع التنظيف التلقائي",
     "storageScheduledVacuum": "تنظيف مجدول",
@@ -10254,7 +10277,11 @@
     "mappingInvalidJson": "JSON غير صالح.",
     "mappingMustBeObject": "يجب أن يكون التعيين كائن JSON، وليس مصفوفة أو قيمة أولية.",
     "mappingValueMustBeString": "يجب أن تكون قيمة المفتاح “{key}” سلسلة نصية.",
-    "save": "حفظ"
+    "save": "حفظ",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "محرك Caveman",
@@ -12866,6 +12893,8 @@
     },
     "attempts": "محاولات",
     "detail": {
+      "tabOverview": "نظرة عامة",
+      "tabPayloads": "الحمولات",
       "omittedHttpAttempts": "لم يتم الاحتفاظ بـ {count} من عمليات إرسال HTTP",
       "noHttpResponse": "لم تُرصد أي استجابة HTTP",
       "transportError": "خطأ في النقل",

@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "Vyrovnává zbývající kvótu proti 5h a týdenním resetům a poté srovnává podobná skóre",
     "quotaWeighted": "Vážené podle kvóty",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Nejdřív expirující",
+    "expiryFirstDesc": "Čerpá účet, jehož kvóta by jinak propadla nevyužitá: jako první jde účet s nejvyšším zůstatkem a nejbližším resetem.",
     "strictRandom": "Přísná náhoda",
     "strictRandomDesc": "Zamíchejte balíček karet – každý model se před zamícháním jednou použije",
     "fusion": "Sloučení",
@@ -4033,6 +4035,11 @@
         "when": "Směrujete přes více účtů pomocí kvótové telemetrie a různých resetovacích oken.",
         "avoid": "Telemetrie kvót není pro většinu účtů dostupná.",
         "example": "Upřednostněte 60% týdenní resetování účtu zítra před 80% resetováním účtu později."
+      },
+      "expiry-first": {
+        "when": "Směrujete přes účty, jejichž kvóty se resetují podle různých plánů, a chcete vyčerpat kvótu, která by jinak propadla nevyužitá.",
+        "avoid": "Většina účtů nemá telemetrii kvót, nebo potřebujete stabilní pořadí, které ignoruje načasování resetu.",
+        "example": "Upřednostněte účet s 80 % zbývající kvóty a resetem za 39 minut před účtem se 48 % a resetem za 9 hodin — kvóta těsně před vypršením se vyčerpá dřív, než propadne."
       },
       "strict-random": {
         "when": "Použijte, když chcete rovnoměrné rozložení — každý model se použije jednou před opakováním.",
@@ -4249,6 +4256,13 @@
         "tip1": "Používejte explicitní kroky účtu nebo směrování značek účtu pro poskytovatele s telemetrií kvót.",
         "tip2": "Vylaďte sezení vs týdenní váhy, když je krátkodobé vyčerpání rizikovější.",
         "tip3": "Udržujte pásek na kravatě malý, aby se ekvivalentní účty stále střídaly spravedlivě."
+      },
+      "expiry-first": {
+        "title": "Nejdřív expirující kvóta",
+        "description": "Řadí účty podle tlaku na využití: vysoká zbývající kvóta blízko termínu resetu jde první.",
+        "tip1": "Vyžaduje telemetrii kvót od poskytovatele; účty bez ní si ponechají uvedené pořadí priority.",
+        "tip2": "Téměř shodná skóre se střídají v pásmu shody, takže sesterské účty stále sdílejí zátěž.",
+        "tip3": "Omezte pořadí na kvótový koš, ze kterého se daný model skutečně účtuje."
       },
       "strict-random": {
         "title": "Rozložení typu zamíchaného balíčku",
@@ -4481,7 +4495,7 @@
     "spend7d": "Spend7D",
     "avgCostPerRequest": "Avg Cost Per Request",
     "noCostDataDescription": "No Cost Data Description",
-    "spendToday": "Dnešní útrata",
+    "spendToday": "Útrata za 1 den",
     "overviewLoadFailed": "Overview Load Failed",
     "overviewDescription": "Overview Description",
     "providerShare": "Podíl podle poskytovatele",
@@ -5679,6 +5693,7 @@
     "usageTracking": "Sledování využití",
     "securityDesc": "Nastavte heslo pro ochranu nástěnky nebo to teď přeskočte.",
     "securityDescSkipWarning": "⚠️ Bez hesla nebudete moci během nastavení přidat poskytovatele. Můžete je přidat později z řídicího panelu po nastavení hesla.",
+    "passwordAlreadySet": "Heslo k řídicímu panelu je již nastaveno. Později ho můžete změnit v Nastavení.",
     "providerDesc": "Připojte svého prvního AI poskytovatele. Další můžete přidat později.",
     "providerRequiresPassword": "Chcete-li přidat poskytovatele, musíte nejprve nastavit heslo. Vraťte se prosím ke kroku zabezpečení a nastavte heslo, nebo přidejte poskytovatele později z řídicího panelu.",
     "apiKeyRequired": "API klíč (povinný)",
@@ -6051,6 +6066,8 @@
     "importFromModels": "Import z /models",
     "modelsImported": "{count} modelů importováno",
     "allModelsAlreadyImported": "Všechny modely jsou již importovány",
+    "providerPublishesNoModelList": "Tento poskytovatel nezveřejňuje seznam modelů — jeho integrovaný katalog je aktuální",
+    "modelsNoLongerListed": "{count, plural, one {# model již není poskytovatelem uváděn} few {# modely již nejsou poskytovatelem uváděny} other {# modelů již není poskytovatelem uváděno}}",
     "noNewModelsToImport": "Žádné nové modely k importu — všechny modely jsou již v registru nebo v seznamu vlastních modelů",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Objevení modelu selhalo {time}",
@@ -6736,6 +6753,7 @@
     "antigravityProjectIdPlaceholder": "moje-gcp-projekt-id",
     "grokWebCookiePlaceholder": "Zástupný text webového souboru cookie Grok",
     "herokuBaseUrlHint": "Nápověda k základní URL Heroku",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Skrýt e-mail",
     "imageProviders": "Poskytovatelé obrázků",
     "videoProviders": "Generování videa",
@@ -7234,7 +7252,8 @@
       "kiro": "Bezplatná úroveň: 50 kreditů/měsíc (~25–100 tis. tokenů). ⚠️ Podmínky používání Kiro zakazují používání proxy serverů či testovacích rozhraní třetích stran.",
       "codex": "Připojit OpenAI Codex pomocí stávajícího toku OAuth.",
       "qwen": "Připojit Qwen Code pomocí stávajícího toku OAuth.",
-      "github-models": "Vytvořte GitHub PAT s rozsahem 'models: read' na github.com/settings/tokens"
+      "github-models": "Vytvořte GitHub PAT s rozsahem 'models: read' na github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} přijímá ID modelu nativního poskytovatele. Importujte z /models nebo přidejte vlastní ID pro směrování.",
     "bedrockModelsDescription": "Modely Amazon Bedrock jsou vymezeny podle regionu AWS. Importujte z /models nebo přidejte ID modelu Bedrock povolené ve vybrané oblasti.",
@@ -8092,6 +8111,8 @@
     "resetAwareDesc": "Preferujte účty se zdravou zbývající kvótou a bližšími resety",
     "quotaWeighted": "Vážené podle kvóty",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Nejdřív expirující",
+    "expiryFirstDesc": "Čerpá účet, jehož kvóta by jinak propadla nevyužitá: jako první jde účet s nejvyšším zůstatkem a nejbližším resetem.",
     "strictRandom": "Přísná náhoda",
     "strictRandomDesc": "Zamíchá balíček karet – každý účet se použije jednou před zamícháním",
     "stickyLimit": "Lepkavý Limit",
@@ -8804,6 +8825,8 @@
     "retentionUsageHistory": "Historie využití (dny)",
     "retentionMemoryEntries": "Záznamy paměti (dny)",
     "retentionXpAuditLog": "Protokol auditu XP (dny)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Uložit nastavení uchovávání",
     "storageAutoVacuumMode": "Režim Auto Vacuum",
     "storageScheduledVacuum": "Plánované vakuum",
@@ -10254,7 +10277,11 @@
     "mappingInvalidJson": "Neplatný JSON.",
     "mappingMustBeObject": "Mapování musí být objekt JSON, nikoli pole nebo primitivní hodnota.",
     "mappingValueMustBeString": "Hodnota pro klíč “{key}” musí být řetězec.",
-    "save": "Uložit"
+    "save": "Uložit",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -12866,6 +12893,8 @@
     },
     "attempts": "pokusy",
     "detail": {
+      "tabOverview": "Přehled",
+      "tabPayloads": "Datové obsahy",
       "omittedHttpAttempts": "{count} odeslání HTTP nebylo uchováno",
       "noHttpResponse": "Nebyla zaznamenána žádná odpověď HTTP",
       "transportError": "Chyba přenosu",

@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "Balanserer gjenværende kvote mot 5 timer og ukentlige tilbakestillinger, og runder deretter lignende resultater",
     "quotaWeighted": "Kvotevektet",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Utløp først",
+    "expiryFirstDesc": "Bruker først kontoen der kvoten ellers ville utløpt ubrukt: største rest med nærmeste tilbakestilling går først.",
     "strictRandom": "Helt tilfeldig",
     "strictRandomDesc": "Bland kortstokken – bruker hver modell én gang før ny blanding",
     "fusion": "Fusjon",
@@ -4033,6 +4035,11 @@
         "when": "Du ruter over flere kontoer med kvotetelemetri og forskjellige tilbakestillingsvinduer.",
         "avoid": "Kvotetelemetri er utilgjengelig for de fleste kontoer.",
         "example": "Foretrekk en 60 % ukentlig kontotilbakestilling i morgen fremfor en 80 % kontotilbakestilling senere."
+      },
+      "expiry-first": {
+        "when": "Du ruter over kontoer der kvotene tilbakestilles etter ulike tidsplaner, og vil bruke kvote som ellers ville utløpt ubrukt.",
+        "avoid": "Kvotetelemetri mangler for de fleste kontoer, eller du trenger en stabil rekkefølge som ignorerer tilbakestillingstidspunktet.",
+        "example": "Foretrekk en konto med 80 % igjen som tilbakestilles om 39 minutter fremfor en konto med 48 % igjen som tilbakestilles om 9 timer — kvoten som snart utløper, brukes før den går tapt."
       },
       "strict-random": {
         "when": "Bruk når du ønsker helt jevn fordeling – hver modell brukes én gang før en modell brukes på nytt.",
@@ -4249,6 +4256,13 @@
         "tip1": "Bruk eksplisitte kontotrinn eller konto-tag-ruting for leverandører med kvotetelemetri.",
         "tip2": "Juster økten kontra ukentlige vekter når kortvarig utmattelse er mer risikabelt.",
         "tip3": "Hold båndet lite slik at tilsvarende kontoer fortsatt roterer ganske."
+      },
+      "expiry-first": {
+        "title": "Utløpende kvote først",
+        "description": "Rangerer kontoer etter utnyttelsespress: høy gjenværende kvote nær tilbakestillingsfristen går først.",
+        "tip1": "Krever kvotetelemetri fra leverandøren; kontoer uten den beholder sin oppførte prioritetsrekkefølge.",
+        "tip2": "Nesten like poengsummer roterer innenfor likhetsbåndet, slik at tilsvarende kontoer fortsatt deler belastningen.",
+        "tip3": "Avgrens rangeringen til kvotebøtten hver modell faktisk faktureres mot."
       },
       "strict-random": {
         "title": "Kortstokkfordeling",
@@ -4481,7 +4495,7 @@
     "spend7d": "Spend7D",
     "avgCostPerRequest": "Avg Cost Per Request",
     "noCostDataDescription": "No Cost Data Description",
-    "spendToday": "Forbruk i dag",
+    "spendToday": "Forbruk 1 dag",
     "overviewLoadFailed": "Overview Load Failed",
     "overviewDescription": "Overview Description",
     "providerShare": "Leverandørandel",
@@ -5679,6 +5693,7 @@
     "usageTracking": "Brukssporing",
     "securityDesc": "Angi et passord for å beskytte dashbordet ditt, eller hopp over nå.",
     "securityDescSkipWarning": "⚠️ Uten et passord kan du ikke legge til leverandører under oppsettet. Du kan legge dem til senere fra kontrollpanelet etter at du har angitt et passord.",
+    "passwordAlreadySet": "Et passord for dashbordet er allerede angitt. Du kan endre det senere under Innstillinger.",
     "providerDesc": "Koble til din første AI-leverandør. Du kan legge til flere senere.",
     "providerRequiresPassword": "Du må angi et passord før du kan legge til leverandører. Gå tilbake til sikkerhetstrinnet og angi et passord, eller legg til leverandører senere fra kontrollpanelet.",
     "apiKeyRequired": "API-nøkkel (påkrevd)",
@@ -6051,6 +6066,8 @@
     "importFromModels": "Importer fra /models",
     "modelsImported": "{count} modeller importert",
     "allModelsAlreadyImported": "Alle modeller er allerede importert",
+    "providerPublishesNoModelList": "Denne leverandøren publiserer ingen modelliste — den innebygde katalogen er oppdatert",
+    "modelsNoLongerListed": "{count, plural, one {# modell er} other {# modeller er}} ikke lenger oppført av leverandøren",
     "noNewModelsToImport": "Ingen nye modeller å importere — alle modeller finnes allerede i registeret eller listen over egendefinerte modeller",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Modell oppdagelse mislyktes {time}",
@@ -6736,6 +6753,7 @@
     "antigravityProjectIdPlaceholder": "min-gcp-prosjekt-ID",
     "grokWebCookiePlaceholder": "Plassholder for Grok Web-informasjonskapsel",
     "herokuBaseUrlHint": "Hint for Heroku-base-URL",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Skjul e-post",
     "imageProviders": "Bildeleverandører",
     "videoProviders": "Videogenerering",
@@ -7234,7 +7252,8 @@
       "kiro": "Gratisnivå: 50 kreditter/måned (~25K–100K tokens). ⚠️ Kiros brukervilkår forbyr bruk av tredjeparts proxy/harness.",
       "codex": "Koble til OpenAI Codex med den eksisterende OAuth-flyten.",
       "qwen": "Koble til Qwen Code med den eksisterende OAuth-flyten.",
-      "github-models": "Opprett et GitHub PAT med 'models: read'-omfang på github.com/settings/tokens"
+      "github-models": "Opprett et GitHub PAT med 'models: read'-omfang på github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} godtar leverandør-native modell-ID-er. Importer fra /models eller legg til egendefinerte ID-er for ruting.",
     "bedrockModelsDescription": "Amazon Bedrock-modeller er omfattet av AWS-regionen. Importer fra /models eller legg til berggrunnsmodell-IDer aktivert i den valgte regionen.",
@@ -8092,6 +8111,8 @@
     "resetAwareDesc": "Foretrekk kontoer med sunn gjenværende kvote og nærmere tilbakestillinger",
     "quotaWeighted": "Kvotevektet",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Utløp først",
+    "expiryFirstDesc": "Bruker først kontoen der kvoten ellers ville utløpt ubrukt: største rest med nærmeste tilbakestilling går først.",
     "strictRandom": "Rent tilfeldig",
     "strictRandomDesc": "Blandet kortstokk — bruker hver konto én gang før den blandes på nytt",
     "stickyLimit": "Sticky-grense",
@@ -8804,6 +8825,8 @@
     "retentionUsageHistory": "Brukshistorikk (dager)",
     "retentionMemoryEntries": "Minneoppføringer (dager)",
     "retentionXpAuditLog": "XP-revisjonslogg (dager)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Lagre oppbevaringsinnstillinger",
     "storageAutoVacuumMode": "Autovakuummodus",
     "storageScheduledVacuum": "Planlagt vakuum",
@@ -10254,7 +10277,11 @@
     "mappingInvalidJson": "Ugyldig JSON.",
     "mappingMustBeObject": "Tilordningen må være et JSON-objekt, ikke et array eller en primitiv verdi.",
     "mappingValueMustBeString": "Verdien for nøkkelen “{key}” må være en streng.",
-    "save": "Lagre"
+    "save": "Lagre",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -12866,6 +12893,8 @@
     },
     "attempts": "forsøk",
     "detail": {
+      "tabOverview": "Oversikt",
+      "tabPayloads": "Nyttelaster",
       "omittedHttpAttempts": "{count} HTTP-sendinger ble ikke lagret",
       "noHttpResponse": "Ingen HTTP-respons ble observert",
       "transportError": "Transportfeil",

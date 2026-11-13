@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "Balanserar återstående kvot mot 5 timmars och veckovisa återställningar och slår sedan runt liknande resultat",
     "quotaWeighted": "Kvotviktad",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Utgång först",
+    "expiryFirstDesc": "Förbrukar först kontot vars kvot annars skulle löpa ut oanvänd: störst återstod med närmast återställning går först.",
     "strictRandom": "Strikt slumpmässig",
     "strictRandomDesc": "Blanda kortleken — använder varje modell en gång innan den blandas om",
     "fusion": "Fusion",
@@ -4033,6 +4035,11 @@
         "when": "Du ruttar över flera konton med kvottelemetri och olika återställningsfönster.",
         "avoid": "Kvottelemetri är inte tillgängligt för de flesta konton.",
         "example": "Föredrar en kontoåterställning på 60 % per vecka i morgon framför en återställning på 80 % senare."
+      },
+      "expiry-first": {
+        "when": "Du ruttar över konton vars kvoter återställs enligt olika scheman och vill förbruka kvot som annars skulle löpa ut oanvänd.",
+        "avoid": "Kvottelemetri saknas för de flesta konton, eller så behöver du en stabil ordning som ignorerar återställningstidpunkten.",
+        "example": "Föredra ett konto med 80 % kvar som återställs om 39 minuter framför ett konto med 48 % kvar som återställs om 9 timmar — kvoten som snart löper ut förbrukas innan den går förlorad."
       },
       "strict-random": {
         "when": "Använd när du vill ha en helt jämn fördelning — varje modell används en gång innan någon upprepas.",
@@ -4249,6 +4256,13 @@
         "tip1": "Använd explicita kontosteg eller routing för kontotaggar för leverantörer med kvottelemetri.",
         "tip2": "Justera sessionen kontra veckovikter när kortvarig utmattning är mer riskabel.",
         "tip3": "Håll bandet litet så att motsvarande konton fortfarande roterar rättvist."
+      },
+      "expiry-first": {
+        "title": "Utgående kvot först",
+        "description": "Rangordnar konton efter utnyttjandetryck: hög återstående kvot nära återställningsfristen går först.",
+        "tip1": "Kräver kvottelemetri från leverantören; konton utan den behåller sin angivna prioritetsordning.",
+        "tip2": "Nästan lika poäng roterar inom likhetsbandet så att likvärdiga konton fortfarande delar på lasten.",
+        "tip3": "Avgränsa rangordningen till den kvothink som varje modell faktiskt debiteras mot."
       },
       "strict-random": {
         "title": "Kortleksbaserad fördelning",
@@ -4481,7 +4495,7 @@
     "spend7d": "Spend7D",
     "avgCostPerRequest": "Avg Cost Per Request",
     "noCostDataDescription": "No Cost Data Description",
-    "spendToday": "Utgifter idag",
+    "spendToday": "Utgifter 1 dag",
     "overviewLoadFailed": "Overview Load Failed",
     "overviewDescription": "Overview Description",
     "providerShare": "Leverantörsandel",
@@ -5679,6 +5693,7 @@
     "usageTracking": "Användningsspårning",
     "securityDesc": "Ställ in ett lösenord för att skydda din instrumentpanel, eller hoppa över nu.",
     "securityDescSkipWarning": "⚠️ Utan ett lösenord kan du inte lägga till leverantörer under konfigurationen. Du kan lägga till dem senare från kontrollpanelen efter att du har angett ett lösenord.",
+    "passwordAlreadySet": "Ett lösenord för instrumentpanelen är redan angivet. Du kan ändra det senare under Inställningar.",
     "providerDesc": "Anslut din första AI-leverantör. Du kan lägga till mer senare.",
     "providerRequiresPassword": "Du måste först ange ett lösenord för att kunna lägga till leverantörer. Gå tillbaka till säkerhetssteget och ange ett lösenord, eller lägg till leverantörer senare från kontrollpanelen.",
     "apiKeyRequired": "API-nyckel (krävs)",
@@ -6051,6 +6066,8 @@
     "importFromModels": "Importera från /models",
     "modelsImported": "{count} modeller importerade",
     "allModelsAlreadyImported": "Alla modeller är redan importerade",
+    "providerPublishesNoModelList": "Den här leverantören publicerar ingen modellista — den inbyggda katalogen är aktuell",
+    "modelsNoLongerListed": "{count, plural, one {# modell listas inte längre} other {# modeller listas inte längre}} av leverantören",
     "noNewModelsToImport": "Inga nya modeller att importera — alla modeller finns redan i registret eller listan över anpassade modeller",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Modellupptäckt misslyckades {time}",
@@ -6736,6 +6753,7 @@
     "antigravityProjectIdPlaceholder": "mitt-gcp-projekt-id",
     "grokWebCookiePlaceholder": "Platshållare för Grok-webbcookie",
     "herokuBaseUrlHint": "Tips för Heroku-bas-URL",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Dölj e-postadress",
     "imageProviders": "Bildleverantörer",
     "videoProviders": "Videogenerering",
@@ -7234,7 +7252,8 @@
       "kiro": "Gratisnivå: 50 krediter/månad (~25K–100K tokens). ⚠️ Kiros användarvillkor förbjuder användning av tredjepartsproxy/harness.",
       "codex": "Anslut OpenAI Codex med det befintliga OAuth-flödet.",
       "qwen": "Anslut Qwen Code med det befintliga OAuth-flödet.",
-      "github-models": "Skapa en GitHub PAT med omfånget 'models: read' på github.com/settings/tokens"
+      "github-models": "Skapa en GitHub PAT med omfånget 'models: read' på github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} accepterar leverantörsbaserade modell-ID:n. Importera från /models eller lägg till anpassade ID:n för routing.",
     "bedrockModelsDescription": "Amazon Bedrock-modeller omfattas av AWS-regionen. Importera från /models eller lägg till Bedrock-modell-ID:n aktiverade i den valda regionen.",
@@ -8092,6 +8111,8 @@
     "resetAwareDesc": "Föredrar konton med sund återstående kvot och närmare återställningar",
     "quotaWeighted": "Kvotviktad",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Utgång först",
+    "expiryFirstDesc": "Förbrukar först kontot vars kvot annars skulle löpa ut oanvänd: störst återstod med närmast återställning går först.",
     "strictRandom": "Strikt slumpval",
     "strictRandomDesc": "Blanda kortleken — använder varje konto en gång innan den blandas om",
     "stickyLimit": "Gräns för beständighet",
@@ -8804,6 +8825,8 @@
     "retentionUsageHistory": "Användningshistorik (dagar)",
     "retentionMemoryEntries": "Minnesposter (dagar)",
     "retentionXpAuditLog": "XP-granskningslogg (dagar)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Spara kvarhållningsinställningar",
     "storageAutoVacuumMode": "Autovakuumläge",
     "storageScheduledVacuum": "Schemalagt vakuum",
@@ -10254,7 +10277,11 @@
     "mappingInvalidJson": "Ogiltig JSON.",
     "mappingMustBeObject": "Mappningen måste vara ett JSON-objekt, inte en array eller ett primitivt värde.",
     "mappingValueMustBeString": "Värdet för nyckeln “{key}” måste vara en sträng.",
-    "save": "Spara"
+    "save": "Spara",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -12866,6 +12893,8 @@
     },
     "attempts": "försök",
     "detail": {
+      "tabOverview": "Översikt",
+      "tabPayloads": "Nyttolaster",
       "omittedHttpAttempts": "{count} HTTP-sändningar sparades inte",
       "noHttpResponse": "Inget HTTP-svar observerades",
       "transportError": "Transportfel",

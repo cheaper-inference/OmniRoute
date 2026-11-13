@@ -1,0 +1,1 @@
+- **fix(sse):** A streamed reply cut by the output-token limit now reaches the completion body and the semantic cache with `finish_reason: \"length\"` (kept from the provider), so the cache no longer stores and replays truncated streamed answers. ([#19601](https://github.com/cheaper-inference/OmniRoute/pull/19601))
