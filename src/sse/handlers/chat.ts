@@ -43,6 +43,7 @@ import { stripContextWindowSuffix } from "@omniroute/open-sse/services/model.ts"
 import { resolveBareModelToConnectionDefault } from "@omniroute/open-sse/services/model.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { trustedInternalTestMark } from "@omniroute/open-sse/utils/selfHop.ts";
+import { ASSESSMENT_PROBE_MARK, refuseUnisolatedChatProbe } from "@/lib/providers/chatProbePolicy";
 import { getImageModelEntry, isImageOnlyModel } from "@omniroute/open-sse/config/imageRegistry.ts";
 import { acceptHeaderForcesStream } from "@omniroute/open-sse/utils/aiSdkCompat.ts";
 import { normalizeVisionImagesInBody } from "@omniroute/open-sse/utils/visionImageNormalization.ts";
@@ -79,8 +80,15 @@ import {
   PROVIDER_ID_TO_ALIAS,
 } from "@omniroute/open-sse/config/providerModels.ts";
 import { getPassthroughProviders } from "@omniroute/open-sse/config/providerRegistry.ts";
+import { isPassiveCodex } from "@omniroute/open-sse/services/tokenRefresh/passiveCodex.ts";
 import * as log from "../utils/logger";
 import { checkAndRefreshToken } from "../services/tokenRefresh";
+import {
+  isCodexResponseCurrent,
+  runWithCodexResponseFence,
+  STALE_CODEX_OPERATION_CODE,
+  StaleCodexOperationError,
+} from "@/lib/db/codexConnectionFences";
 import { createHookContext, runHooks, initPreRequestRegistry } from "@/lib/middleware/registry";
 import { rejectPeerRequest } from "@/shared/resilience/peerRouting";
 import { isRuntimeProviderRetirementError } from "@/shared/constants/providerRetirement";
@@ -165,6 +173,7 @@ import {
   filterReasoningCombo,
 } from "./reasoningRouting";
 import { createVirtualAutoCombo, resolveAutoRoutingState } from "./autoRouting";
+import { dispatchWithProviderFailover } from "./chat/providerFailover.ts";
 import { getComboFailureLogError } from "./comboFailureLogging";
 import {
   logAdmissionRejection,
@@ -668,6 +677,12 @@ async function handleChatImplementation(
   }
 
   const isComboLiveTest = trustedInternalTestMark(request.headers) === "combo-health-check";
+  // Every automated probe, a live test or an assessment, is gated against leaving a conversation
+  // on a signed-in account; only the live test also bypasses breakers, cooldowns and quota policy.
+  // That bypass needs this process's token; the assessment mark only makes its own request
+  // stricter, so it is read as sent (assessment probes do not always reach the stamped listener).
+  const isAutomatedProbe =
+    isComboLiveTest || request.headers?.get?.("x-internal-test") === ASSESSMENT_PROBE_MARK;
 
   if (!modelStr) {
     log.warn("CHAT", "Missing model");
@@ -1269,6 +1284,7 @@ async function handleChatImplementation(
             sessionId,
             sessionAffinityKey,
             forceLiveComboTest: isComboLiveTest,
+            automatedProbe: isAutomatedProbe,
             ...resolvedPolicy.comboAuthorizationOptions(apiKeyInfo, resolvedModelStr),
             forcedConnectionId: target?.connectionId ?? null,
             allowedConnectionIds: target?.allowedConnectionIds ?? null,
@@ -1368,6 +1384,7 @@ async function handleChatImplementation(
                 sessionAffinityKey,
                 emergencyFallbackTried: true,
                 forceLiveComboTest: isComboLiveTest,
+                automatedProbe: isAutomatedProbe,
                 conversationId,
                 managedLease,
                 videoBridgeLog,
@@ -1446,34 +1463,60 @@ async function handleChatImplementation(
       } catch {}
     }
   }
-  const response = await handleSingleModelChat(
-    body,
-    resolvedModelStr,
-    clientRawRequest,
-    request,
-    null,
+  // A body that continues another provider's session (opaque reasoning, continuation
+  // ids, a response id) or an already-owned Muse session must not be replayed on a
+  // different provider: provider failover is pinned for it.
+  const bodyObject = (body ?? {}) as Record<string, unknown>;
+  const boundContinuation =
+    muse.bodyCarriesBoundContinuation(bodyObject) ||
+    (await muse.museSessionIsOwned({
+      body: bodyObject,
+      headers: request?.headers ?? null,
+      apiKeyId: apiKeyInfo?.id ?? null,
+    }));
+  const response = await dispatchWithProviderFailover({
+    modelStr: resolvedModelStr,
     apiKeyInfo,
-    telemetry,
-    {
-      sessionId,
-      sessionAffinityKey,
-      forceLiveComboTest: isComboLiveTest,
+    request,
+    signal: clientRawRequest?.signal ?? request?.signal ?? null,
+    pins: {
       forcedConnectionId: requestedConnectionId,
-      correlationId: reqId,
-      conversationId,
-      routingComboId,
-      reasoningDecision,
-      reasoningIntent,
-      reasoningRequestTags: requestRoutingTags.tags,
       managedLease,
-      videoBridgeLog,
-      previousResponseResumed:
-        (body as { _omniroutePreviousResponseResumed?: unknown })
-          ._omniroutePreviousResponseResumed === true || undefined,
+      comboLiveTest: isComboLiveTest,
+      boundContinuation,
     },
-    null,
-    false
-  );
+    dispatch: (targetModelStr, failoverOptions) =>
+      handleSingleModelChat(
+        body,
+        targetModelStr,
+        clientRawRequest,
+        request,
+        null,
+        apiKeyInfo,
+        telemetry,
+        {
+          ...failoverOptions,
+          sessionId,
+          sessionAffinityKey,
+          forceLiveComboTest: isComboLiveTest,
+          automatedProbe: isAutomatedProbe,
+          forcedConnectionId: requestedConnectionId,
+          correlationId: reqId,
+          conversationId,
+          routingComboId,
+          reasoningDecision,
+          reasoningIntent,
+          reasoningRequestTags: requestRoutingTags.tags,
+          managedLease,
+          videoBridgeLog,
+          previousResponseResumed:
+            (body as { _omniroutePreviousResponseResumed?: unknown })
+              ._omniroutePreviousResponseResumed === true || undefined,
+        },
+        null,
+        false
+      ),
+  });
   recordTelemetry(telemetry);
   return withModalityBridgeHeader(
     withConversationId(
@@ -1511,7 +1554,10 @@ async function handleSingleModelChat(
   telemetry: any = null,
   runtimeOptions: {
     emergencyFallbackTried?: boolean;
+    providerFailoverPending?: boolean; // another provider of this model is queued (providerFailover.ts)
     forceLiveComboTest?: boolean;
+    /** An automated probe (live test or assessment): must not leave an account conversation. */
+    automatedProbe?: boolean;
     sessionId?: string | null;
     sessionAffinityKey?: string | null;
     forcedConnectionId?: string | null;
@@ -1615,6 +1661,8 @@ async function handleSingleModelChat(
           {
             sessionId: "", // safety-net redirect doesn't have session context
             forceLiveComboTest: false,
+            // A probe stays a probe through the redirect, so each target is gated as one.
+            automatedProbe: runtimeOptions.automatedProbe === true,
             authorizationContextModel: runtimeOptions.authorizationContextModel ?? modelStr,
             forcedConnectionId: runtimeOptions?.forcedConnectionId ?? null,
             allowedConnectionIds: null,
@@ -1681,6 +1729,12 @@ async function handleSingleModelChat(
   const modelPolicyRejection = await resolvedModelGate([`${provider}/${model}`]);
   if (modelPolicyRejection) return modelPolicyRejection;
   const forceLiveComboTest = runtimeOptions.forceLiveComboTest === true;
+  // #14780: a probe must not leave a conversation on a signed-in account. Decided here,
+  // once the target's provider is final, so every probe path and combo target is covered.
+  const probeRefusal = runtimeOptions.automatedProbe
+    ? await refuseUnisolatedChatProbe(provider)
+    : null;
+  if (probeRefusal) return probeRefusal;
   const budgetRejection = rejectIfMeteredBudgetExceeded(apiKeyInfo?.id, provider, modelStr);
   if (budgetRejection) return budgetRejection;
   const bypassProviderQuotaPolicy = hasProviderQuotaBypassScope(apiKeyInfo?.scopes);
@@ -1768,7 +1822,8 @@ async function handleSingleModelChat(
     provider === "claude-web" ||
       isCombo ||
       forceLiveComboTest ||
-      runtimeOptions.emergencyFallbackTried === true
+      runtimeOptions.emergencyFallbackTried === true ||
+      runtimeOptions.providerFailoverPending === true
   );
   const requestSignal = clientRawRequest?.signal ?? request?.signal ?? null;
   // Cumulative cap across all waits for this request (#7360 follow-up) — mirrors
@@ -1805,6 +1860,9 @@ async function handleSingleModelChat(
   let preferredTimeoutOriginal: Response | null = null;
   let preferredFailoverUsed = false;
   const sameAccountTransportRetries = new Map<string, number>();
+  // An obsolete Codex selection/response is not a fault of the current account. Reselect once
+  // without cooling or excluding its connection ID; never replay a successful response.
+  let staleCodexReselected = false;
   let accountFallbacks = 0;
   let sameAccountRetries = 0;
   let routingWaitMs = 0;
@@ -2177,7 +2235,10 @@ async function handleSingleModelChat(
         );
       } catch (error) {
         releaseOAuthSession();
-        throw error;
+        if (!(error instanceof StaleCodexOperationError)) throw error;
+        if (staleCodexReselected) return errorResponse(error.status, error.message);
+        staleCodexReselected = true;
+        continue;
       }
       const museBindFailure =
         museOwner &&
@@ -2329,6 +2390,29 @@ async function handleSingleModelChat(
           )
         );
       else agyLease.release(leaseId);
+      const staleCodexFailure = !result.success && !isCodexResponseCurrent(result.response);
+      if (
+        staleCodexFailure &&
+        isPassiveCodex(provider) &&
+        (result.status === 401 || result.status === 403)
+      ) {
+        // Passive auth recovery already tried an eligible synchronized token below. Restarting
+        // the whole request loses its rejection history and can replay an expired or rejected
+        // token after an A -> B -> A rollback. Do not cool/exclude the replacement account.
+        return result.response;
+      }
+      if (result.errorCode === STALE_CODEX_OPERATION_CODE || staleCodexFailure) {
+        if (staleCodexReselected) {
+          return staleCodexFailure
+            ? withRoutingTelemetry(
+                errorResponse(409, new StaleCodexOperationError().message),
+                credentials?.connectionId
+              )
+            : result.response;
+        }
+        staleCodexReselected = true;
+        continue;
+      }
       const proxyLatency = Date.now() - proxyStartTime;
       const providerAlias = PROVIDER_ID_TO_ALIAS[provider] || provider;
       const effectiveTargetFormat =
@@ -2355,8 +2439,10 @@ async function handleSingleModelChat(
       });
 
       if (result.success) {
-        clearModelLock(provider, credentials.connectionId, model);
-        markQuotaHealthy(credentials.connectionId);
+        if (isCodexResponseCurrent(result.response, true)) {
+          clearModelLock(provider, credentials.connectionId, model);
+          markQuotaHealthy(credentials.connectionId);
+        }
         // Acquired probes were settled inside execute(); other successes settle here or in combo.
         if (
           !wasProviderProbe &&
@@ -2567,10 +2653,7 @@ async function handleSingleModelChat(
           // Retry spent and nothing emitted yet: one hop to a sibling (routing only, no mark).
           log.warn("STREAM", `${provider}/${model} early-EOF retry exhausted — trying one sibling`);
           noteAccountFallback("stream_early_eof", credentials.connectionId);
-          earlyEofOriginal = withRoutingTelemetry(
-            result.response,
-            credentials.connectionId
-          );
+          earlyEofOriginal = withRoutingTelemetry(result.response, credentials.connectionId);
           excludedConnectionIds.add(credentials.connectionId);
           continue;
         }
@@ -2702,7 +2785,8 @@ async function handleSingleModelChat(
       // Combo targets never emergency-hop: the combo is the operator's fallback policy
       // (target-level orchestration plus the global fallback #689 after it), and a
       // per-target hop burns extra upstream calls against exhausted providers (#1731).
-      if (!runtimeOptions.emergencyFallbackTried && !comboName) {
+      const emergencyHopAllowed = !runtimeOptions.providerFailoverPending && !comboName;
+      if (!runtimeOptions.emergencyFallbackTried && emergencyHopAllowed) {
         const fallbackDecision = await resolveEmergencyFallbackDecision(
           Number(result.status || 0),
           String(result.error || ""),
@@ -2848,6 +2932,7 @@ async function handleSingleModelChat(
       const transportAttempts = sameAccountTransportRetries.get(credentials.connectionId) || 0;
       if (
         !runtimeOptions.emergencyFallbackTried &&
+        !runtimeOptions.providerFailoverPending &&
         !comboName &&
         !forceLiveComboTest &&
         shouldRetrySameAccountTransport({
@@ -2902,26 +2987,29 @@ async function handleSingleModelChat(
 
       const { shouldFallback, cooldownMs } = skipConnectionDisable
         ? { shouldFallback: false, cooldownMs: 0 }
-        : await markAccountUnavailable(
-            credentials.connectionId,
-            result.status,
-            errorStr,
-            provider,
-            model,
-            providerProfile,
-            buildExhaustionOptions(runtimeOptions.correlationId ?? null, {
-              persistUnavailableState: !(
-                isCombo &&
-                result.status === 429 &&
-                (failureKind === "rate_limit" || failureKind === "transient")
-              ),
-              isCombo,
-              headers: result.response.headers,
-              isAvalancheRisk: avalancheRisk?.isAvalancheRisk ?? false,
-              avalancheCooldownMs: avalancheRisk?.suggestedCooldownMs,
-              suppressFallback: avalancheRisk?.shouldSuppressFallback ?? false,
-              structuredError: { code: result.errorCode, type: result.errorType },
-            })
+        : await runWithCodexResponseFence(result.response, () =>
+            markAccountUnavailable(
+              credentials.connectionId,
+              result.status,
+              errorStr,
+              provider,
+              model,
+              providerProfile,
+              buildExhaustionOptions(runtimeOptions.correlationId ?? null, {
+                persistUnavailableState: !(
+                  isCombo &&
+                  result.status === 429 &&
+                  (failureKind === "rate_limit" || failureKind === "transient")
+                ),
+                isCombo,
+                headers: result.response.headers,
+                isAvalancheRisk: avalancheRisk?.isAvalancheRisk ?? false,
+                avalancheCooldownMs: avalancheRisk?.suggestedCooldownMs,
+                suppressFallback: avalancheRisk?.shouldSuppressFallback ?? false,
+                structuredError: { code: result.errorCode, type: result.errorType },
+                upstreamErrorBody: result.upstreamErrorBody,
+              })
+            )
           );
 
       if (avalancheRisk?.shouldSuppressFallback) {

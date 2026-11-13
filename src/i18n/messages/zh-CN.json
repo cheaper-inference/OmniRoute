@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "平衡剩余配额与 5 小时和每周重置，然后对相似分数进行循环赛",
     "quotaWeighted": "配额加权",
     "quotaWeightedDesc": "踢掉没额度的账号，再按剩余额度除以在途请求数加权抽取。已有对话钉在原账号，空了才换。",
+    "expiryFirst": "临期优先",
+    "expiryFirstDesc": "优先消耗即将过期作废的配额：剩余最多且重置最近的账号先出队。",
     "strictRandom": "严格随机",
     "strictRandomDesc": "洗牌池模式：每个模型使用一次后再重新洗牌",
     "fusion": "融合",
@@ -4033,6 +4035,11 @@
         "when": "您可以使用配额遥测和不同的重置窗口跨多个帐户进行路由。",
         "avoid": "大多数帐户无法使用配额遥测。",
         "example": "宁愿明天每周重置 60% 的帐户，也不愿稍后重置 80% 的帐户。"
+      },
+      "expiry-first": {
+        "when": "在多个重置时间不同的账号间路由，且希望优先用掉即将过期作废的配额。",
+        "avoid": "大多数账号缺少配额遥测，或需要与重置时间无关的稳定顺序。",
+        "example": "优先选择 39 分钟后重置、剩余 80% 的账号，而不是 9 小时后重置、剩余 48% 的账号——临期配额先用掉。"
       },
       "strict-random": {
         "when": "适用于希望实现绝对均匀分配的场景，每个模型在重复前都会恰好使用一次。",
@@ -4249,6 +4256,13 @@
         "tip1": "对具有配额遥测的提供者使用显式帐户步骤或帐户标签路由。",
         "tip2": "当短期疲劳风险更大时，调整训练次数与每周重量。",
         "tip3": "保持领带较小，这样等值账户仍然可以公平地轮换。"
+      },
+      "expiry-first": {
+        "title": "临期配额优先",
+        "description": "按回收压力排序账号：剩余配额多且临近重置的账号优先。",
+        "tip1": "依赖供应商配额遥测；无遥测的账号保持列表中的优先级顺序。",
+        "tip2": "相近得分在并列带内轮换，同档账号仍能分摊负载。",
+        "tip3": "把排序限定在每个模型实际计费的配额桶上。"
       },
       "strict-random": {
         "title": "洗牌池分配",
@@ -4481,7 +4495,7 @@
     "spend7d": "7 天支出",
     "avgCostPerRequest": "平均每次请求成本",
     "noCostDataDescription": "发起请求后，成本数据会显示在这里。",
-    "spendToday": "今日支出",
+    "spendToday": "1天支出",
     "overviewLoadFailed": "加载成本概览失败",
     "overviewDescription": "按提供者、模型和时间段汇总成本。",
     "providerShare": "提供者占比",
@@ -5679,6 +5693,7 @@
     "usageTracking": "使用情况追踪",
     "securityDesc": "设置密码以保护您的仪表板，或暂时跳过。",
     "securityDescSkipWarning": "⚠️ 如果未设置密码，你将无法在设置过程中添加提供者。设置密码后，你可以稍后从仪表板添加提供者。",
+    "passwordAlreadySet": "已设置仪表板密码。你可以稍后在设置中更改。",
     "providerDesc": "连接你的第一个 AI 提供者。你之后还可以继续添加。",
     "providerRequiresPassword": "你需要先设置密码才能添加提供者。请返回安全设置步骤并设置密码，或稍后从仪表板添加提供者。",
     "apiKeyRequired": "API 密钥（必填）",
@@ -6051,6 +6066,8 @@
     "importFromModels": "从 /models 导入",
     "modelsImported": "已导入 {count} 个模型",
     "allModelsAlreadyImported": "所有模型已导入",
+    "providerPublishesNoModelList": "此提供者不发布模型列表 — 其内置目录已是最新",
+    "modelsNoLongerListed": "{count, plural, one {# 个模型已不再由提供者列出} other {# 个模型已不再由提供者列出}}",
     "noNewModelsToImport": "没有新模型可导入 — 所有模型已在注册表或自定义模型列表中",
     "localCatalogFallbackStatus": "无法获取提供者的模型列表，正在显示内置目录",
     "discoveryDegradedStatus": "模型发现失败 {time}",
@@ -6727,6 +6744,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Grok 网页 Cookie",
     "herokuBaseUrlHint": "Heroku 部署的 Base URL。",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "隐藏邮箱",
     "imageProviders": "图像 Provider",
     "videoProviders": "视频生成",
@@ -7225,7 +7243,8 @@
       "kiro": "免费层：50 积分/月（约 25K–100K 令牌）。⚠️ Kiro 服务条款禁止使用第三方代理/测试框架。",
       "codex": "使用现有的 OAuth 流程连接 OpenAI Codex。",
       "qwen": "使用现有的 OAuth 流程连接 Qwen Code。",
-      "github-models": "在 github.com/settings/tokens 创建具有 'models: read' 作用域的 GitHub PAT"
+      "github-models": "在 github.com/settings/tokens 创建具有 'models: read' 作用域的 GitHub PAT",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} 接受供应商本机模型 ID。从 /models 导入或添加用于路由的自定义 ID。",
     "bedrockModelsDescription": "Amazon Bedrock 模型的范围按 AWS 区域划分。从 /models 导入或添加在所选区域中启用的基岩模型 ID。",
@@ -8092,6 +8111,8 @@
     "resetAwareDesc": "优先选择剩余配额正常且重置时间较近的账户",
     "quotaWeighted": "按配额加权",
     "quotaWeightedDesc": "踢掉没额度的账号，再按剩余额度除以在途请求数加权抽取。已有对话钉在原账号，空了才换。",
+    "expiryFirst": "临期优先",
+    "expiryFirstDesc": "优先消耗即将过期作废的配额：剩余最多且重置最近的账号先出队。",
     "strictRandom": "严格随机",
     "strictRandomDesc": "洗牌池模式：每个账户使用一次后再重新洗牌",
     "stickyLimit": "粘性限制",
@@ -8804,6 +8825,8 @@
     "retentionUsageHistory": "使用历史（天）",
     "retentionMemoryEntries": "记忆条目（天）",
     "retentionXpAuditLog": "XP 审计日志（天数）",
+    "mediaStoreMaxMb": "媒体存储大小上限（MiB）",
+    "mediaStoreMaxMbHint": "已保存的生成媒体的总大小。先删除最旧的文件。设置环境变量 MEDIA_STORE_MAX_MB 时以它为准。默认 2048。",
     "saveRetentionSettings": "保存保留设置",
     "storageAutoVacuumMode": "自动 VACUUM 模式",
     "storageScheduledVacuum": "定时执行 VACUUM",
@@ -10254,7 +10277,11 @@
     "mappingInvalidJson": "无效的 JSON。",
     "mappingMustBeObject": "映射必须是一个 JSON 对象，不能是数组或原始值。",
     "mappingValueMustBeString": "键 “{key}” 的值必须是字符串。",
-    "save": "保存"
+    "save": "保存",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "原始人引擎",
@@ -11981,6 +12008,7 @@
     "description": "监控提供者侧 Prompt Cache 的效率，以及本地 Semantic Cache 的响应复用情况。",
     "refresh": "刷新",
     "clearAll": "清空语义缓存",
+    "clearAllConfirm": "此缓存中的所有条目都将被删除。此操作无法撤销。",
     "memoryEntries": "内存条目",
     "memoryEntriesSub": "内存 LRU",
     "dbEntries": "数据库条目",
@@ -12865,6 +12893,8 @@
     },
     "attempts": "尝试次数",
     "detail": {
+      "tabOverview": "概述",
+      "tabPayloads": "负载",
       "omittedHttpAttempts": "未保留 {count} 次 HTTP 发送",
       "noHttpResponse": "未观察到 HTTP 响应",
       "transportError": "传输错误",

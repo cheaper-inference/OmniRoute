@@ -71,6 +71,48 @@ export function mergeLocalCatalogModels<T extends LocalCatalogModel, U extends L
 // the curated catalog there would risk stale-duplicate/conflicting entries.
 const LIVE_DISCOVERY_SPECIALTY_MERGE_PROVIDERS = new Set<string>(["openrouter"]);
 
+// #19337 — capability fields the sync normalizer derives from an upstream card
+// (endpoints, provenance, vision, token limits, ...). The dashboard import reads
+// them from the live-discovery response, which otherwise only carries the raw
+// card, so imports defaulted endpoints to "Assumed" and lost vision/limits.
+const DISCOVERED_CAPABILITY_FIELDS = [
+  "supportedEndpoints",
+  "endpointCapabilitySource",
+  "supportsVision",
+  "supportsTools",
+  "supportsThinking",
+  "supportedThinkingEfforts",
+  "defaultThinkingEffort",
+  "inputTokenLimit",
+  "outputTokenLimit",
+  "contextWindow",
+  "dimensions",
+  "supportedInputTypes",
+  "modelType",
+] as const;
+
+// Copy the normalized capability fields onto the matching raw live models (by id).
+// The raw list, its order and every raw field are kept as they were: only the
+// capability fields above are added, and a raw model with no normalized twin
+// (filtered out as non-selectable) is returned unchanged.
+export function enrichLiveModelsWithDiscoveredCapabilities<T>(
+  liveModels: T[],
+  discoveredModels: ReadonlyArray<{ id: string }>
+): T[] {
+  const byId = new Map(discoveredModels.map((model) => [model.id, asRecord(model)]));
+  return liveModels.map((model) => {
+    const record = asRecord(model);
+    const id = toNonEmptyString(record.id);
+    const discovered = id ? byId.get(id) : undefined;
+    if (!discovered) return model;
+    const capabilities: JsonRecord = {};
+    for (const field of DISCOVERED_CAPABILITY_FIELDS) {
+      if (discovered[field] !== undefined) capabilities[field] = discovered[field];
+    }
+    return Object.keys(capabilities).length > 0 ? ({ ...record, ...capabilities } as T) : model;
+  });
+}
+
 // Fold the embeddings/rerank subset of the static catalog into a successful
 // live-discovery response, additively and deduped by id, without touching
 // chat/image/video/audio entries — scoped to
