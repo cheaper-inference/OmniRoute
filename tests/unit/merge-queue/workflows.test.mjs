@@ -713,6 +713,15 @@ test("least privilege: no default token scopes, App token scoped per job", () =>
   assert.doesNotMatch(queueText, /GITHUB_TOKEN|github\.token/, "the queue never uses GITHUB_TOKEN");
 });
 
+test("the tick's test/sandbox overrides are never set by the real workflow", () => {
+  // tick.createTickDeps honours them so the end-to-end test can point the queue at a local bare
+  // repository, an alternative config and a fake API; production must use the real remote, the
+  // config of the default branch and the API root that Actions provides.
+  for (const name of ["OMNI_QUEUE_REMOTE_URL", "OMNI_QUEUE_CONFIG", "GITHUB_API_URL"]) {
+    assert.ok(!queueText.includes(name), `omni-queue.yml must not set ${name}`);
+  }
+});
+
 test("the queue never checks out or runs PR code", () => {
   // Nothing PR-controlled is read anywhere in the file (refs, repos, titles, heads).
   assert.doesNotMatch(queueText, /github\.event\.pull_request|github\.head_ref|workflow_run\.head/);

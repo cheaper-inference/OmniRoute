@@ -33,7 +33,8 @@ approver labels the PR `omni-queue`
         │  (pull_request_target: labeled)
         ▼
 job "approval" ── approve.mjs writes commit status omni-queue/approval = success
-                  on the PR's CURRENT head SHA (App token, creator <appSlug>[bot])
+                  on the head SHA of the labeled event, the head the approver saw
+                  (App token, creator <appSlug>[bot])
         │
         ▼
 job "tick" (every 5 min, on label changes and when a candidate's CI completes;
@@ -86,8 +87,17 @@ App token.
   `Omni-Queue-Head`, `Omni-Queue-Author`, `Omni-Queue-Base`, `Omni-Queue-Target`,
   `Omni-Queue-Batch`. Nothing is written into the tree: CI reads the base SHA from the
   `Omni-Queue-Base` trailer of the top commit (`scripts/merge-queue/candidate-base.mjs`).
+- **Skip markers are disarmed**: GitHub skips push workflows when the head commit message carries
+  `[skip ci]`, `[ci skip]`, `[no ci]`, `[skip actions]` or `[actions skip]`. A PR title with one of
+  them would silence CI on its candidate, so `sanitizeTitle` puts each marker in parentheses
+  (`[skip ci]` → `(skip ci)`) before the title reaches a merge commit.
+- **Stacked PRs**: a PR whose head is already contained in another PR of the same batch gets no
+  merge commit of its own; it lands with the batch and is reported as merged with it.
 - **CI profile**: `ci.yml` and `quality.yml` treat a push to `omni-queue/**` like a `merge_group`
   event (full profile, hosted runners). Deploy and publish workflows never run on that prefix.
+- **AI attribution over the whole range**: with `merge-ff` the contributors' own commits land
+  unchanged, so `ci.yml` runs `check:ai-attribution` over `<candidate base>..<candidate>` (Hard
+  Rule #16), not only over the PR metadata.
 
 ### Landing modes (`landing.mode`)
 
@@ -121,6 +131,18 @@ new push creates a new SHA without that status, so the PR silently stops being e
 approver labels it again. Removing the label writes `failure` on the same context (approval
 withdrawn). A label applied by anyone else gets one comment and no status.
 
+- **The status goes on the head of the event**, not on the head the job finds when it runs: a push
+  that lands between the label and the job must not inherit the approval.
+- **Level-triggered**: the jobs of a quick label/unlabel pair can run in either order, so the job
+  re-reads the PR first. `labeled` writes `success` only while the label is still there, and
+  `unlabeled` writes `failure` only while it is still absent.
+- **Waiting for the status**: a labeled PR without its approval status is simply not eligible
+  (`approval-missing`, no action) for up to 6 hours after the label (`APPROVAL_STATUS_SKEW_SECONDS`),
+  which absorbs a backed-up Actions queue. After that the queue concludes the head changed after
+  the label (`head-changed-after-label`): it removes the label with one comment.
+- **Already in the base**: a PR whose head is already reachable from the base (its commits entered
+  some other way) leaves the queue for good, with both labels removed and one comment.
+
 The PR's own checks are **not** required (the candidate is what gets validated), but with
 `preferGreenPrChecks` the selection prefers PRs whose latest `prGreenCheck` (`Gate / Quality`)
 is green, so batches are not wasted on PRs that are already red.
@@ -135,6 +157,11 @@ is green, so batches are not wasted on PRs that are already red.
   `action_required`, `startup_failure` or `stale`, except the names in `advisoryChecks`
   (`Build (advisory)`);
 - nothing pending. Only the latest run per check name counts (re-runs report several);
+- a required check counts only as a check run of the `github-actions` app, and only runs started
+  by the push of the candidate ref (the `head_branch` of the run's check suite) are read, so a run
+  of the same SHA on another branch never decides the verdict;
+- no GitHub Actions run at all `NO_RUN_TIMEOUT_MINUTES` (45) after the push → `timeout` with
+  reason `no-ci-run` (the push triggered nothing), handled like an infra failure;
 - not decided after `checksTimeoutMinutes` (240) → `timeout`, handled like an infra failure.
 
 ## Red candidates: classification, base check, bisection
@@ -236,6 +263,24 @@ scheduled run in any other repository (a fork, or the sandbox used for the rehea
 ticks come from label changes, from a candidate's CI finishing (`workflow_run`), and from a
 manual "Run workflow".
 
+## Actions event policy (`pull_request_target` in public repositories)
+
+The `approval` job runs on `pull_request_target`: it is the only trigger that gives a labeled fork
+PR a job with the App secrets, and the job never checks out PR code. GitHub announced that
+**from December 2, 2026, `pull_request_target` is blocked by default in public repositories**
+unless an Actions policy explicitly allows it, with brownouts before that date
+([changelog](https://github.blog/changelog/2026-11-02-pull_request_target-blocked-by-default-december-2),
+[docs](https://docs.github.com/en/actions/how-tos/administer/control-workflow-execution)). A
+blocked run fails with an error annotation and the workflow does not execute.
+
+Blocked approvals fail closed: no status is written, so no labeled PR becomes eligible and the
+queue lands nothing. To run the queue in a public repository, the owner creates an Actions policy
+(Settings → Actions → Policies, or the organization's) that targets only the workflow file
+`.github/workflows/omni-queue.yml` and allows its events. Policy rules are an allowlist, so list
+every trigger of the workflow, not only `pull_request_target`: `pull_request_target`, `schedule`,
+`workflow_dispatch` and `workflow_run`. The sandbox rehearsal validates the policy before the
+production repository needs it.
+
 ## Installing the GitHub App
 
 The queue pushes with a GitHub App installation token: refs pushed with the `GITHUB_TOKEN` do not
@@ -255,11 +300,15 @@ action.
    | Pull requests   | Read and write |
    | Issues          | Read and write |
    | Commit statuses | Read and write |
+   | Workflows       | Read and write |
    | Checks          | Read-only      |
    | Actions         | Read-only      |
    | Metadata        | Read-only      |
 
-   No organization or account permissions. No events to subscribe to.
+   No organization or account permissions. No events to subscribe to. **Workflows** is needed
+   because GitHub refuses a push that adds or changes a file under `.github/workflows/` unless the
+   token has that permission: without it, every candidate (and every `merge-ff` landing) that
+   contains a PR touching a workflow would be rejected.
 
 5. **Where can this GitHub App be installed?** → "Only on this account". Create the App and note
    the **App ID** shown on its page.
@@ -384,7 +433,10 @@ two trees (`git diff <candidateSha> <base>`), fix the base by PR if needed, then
 `merge-ff`, which cannot diverge.
 
 **Infra failure or timeout.** One retry under a new ref (`-r1`); a second failure pauses the base
-with reason `infra`. Check the Actions status page and the candidate's run, then resume.
+with reason `infra`. Check the Actions status page and the candidate's run, then resume. A
+`checks-timeout` event whose detail says "no CI run for candidate" means GitHub never started a
+workflow for the candidate push: check the Actions policies and that `ci.yml` / `quality.yml`
+still trigger on `omni-queue/**`.
 
 **Dashboard stopped updating.** Check, in order: the latest `omni-queue` runs in the Actions tab;
 the OMNI_QUEUE_ENABLED variable; the App secrets (a rotated key or an uninstalled App fails at the
@@ -393,7 +445,13 @@ token step); a tick failing on an invalid state document (fix it with an ordinar
 time, by design).
 
 **Dequeued PR.** The PR lost the label and got a comment with the reason (culprit of a red batch,
-conflict with the base, head moved after approval). Fix it and label it again.
+conflict with the base, head moved after approval, head already part of the base). Fix it and
+label it again; a PR already in the base needs nothing more.
+
+**Labels with no effect.** If labeled PRs stay `approval-missing` and no `omni-queue/approval`
+status appears on their heads, the `approval` job is not running: look for failed
+`pull_request_target` runs with an "is not allowed to trigger Actions workflows" error (see
+[Actions event policy](#actions-event-policy-pull_request_target-in-public-repositories)).
 
 ## Cut-over and rollback
 
@@ -409,8 +467,12 @@ shadow mode on the real repository. In order:
    actors of "Require PR on default branch" (21899981), or exclude the release branches from it
    (see [Ruleset](#ruleset)). The script exits `1` while any foreign rule still blocks the landing
    push; rerun it until it exits `0` on every branch.
-4. Decide the label: keep `omni-queue` or set `label` to `queue`.
-5. Update the merge skills and `AGENTS.md` (agent-instruction surfaces: each change needs the
+4. Make sure the Actions policy that allows `.github/workflows/omni-queue.yml` exists on the
+   production repository (see
+   [Actions event policy](#actions-event-policy-pull_request_target-in-public-repositories)); it
+   is needed already for shadow mode.
+5. Decide the label: keep `omni-queue` or set `label` to `queue`.
+6. Update the merge skills and `AGENTS.md` (agent-instruction surfaces: each change needs the
    owner's explicit approval).
 
 Rollback: set OMNI_QUEUE_ENABLED to `false` (immediate; nothing in flight lands), re-enable the
