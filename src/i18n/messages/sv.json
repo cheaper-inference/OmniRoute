@@ -133,6 +133,17 @@
     "saveError": "Det gick inte att spara tjänsteläget. Försök igen."
   },
   "common": {
+    "usageEvidence": {
+      "compressedTokens": "{count} komprimerade token",
+      "reported": "rapporterat",
+      "estimated": "uppskattat",
+      "unknown": "Ej tillgängligt",
+      "unknownSource": "okänd källa",
+      "containsEstimates": "Innehåller uppskattad användning",
+      "historicalUnknown": "Ursprunget för vissa användningsuppgifter är okänt",
+      "catalogueCost": "Kostnadsuppskattning enligt prislista, inte leverantörens fakturering",
+      "loadError": "Kunde inte läsa in användningsloggar. Försök att uppdatera."
+    },
     "save": "Spara",
     "cancel": "Avbryt",
     "delete": "Ta bort",

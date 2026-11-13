@@ -45,6 +45,12 @@ test("canonical accounting includes cache creation while retaining individual ca
     prompt_tokens: 10,
     completion_tokens: 4,
     total_tokens: 14,
+    usage_evidence: {
+      input: { source: "reported" },
+      output: { source: "reported" },
+      cacheRead: { source: "reported" },
+      cacheCreation: { source: "reported" },
+    },
     cache_read_input_tokens: 3,
     cache_creation_input_tokens: 2,
     prompt_tokens_details: {
@@ -95,7 +101,8 @@ test("the existing implausible-input guard still applies to internal raw meterin
   const receipt = tracker.getUsage();
   assert.ok(receipt && receipt.prompt_tokens! < 300_000);
   assert.equal(receipt.completion_tokens, 4);
-  assert.equal(receipt.cache_read_input_tokens, 0);
+  assert.equal(receipt.cache_read_input_tokens, undefined);
+  assert.equal(receipt.usage_evidence?.cacheRead.source, "unknown");
   assert.equal(isEstimatedUsage(receipt), true, "a repaired input count is a local estimate");
 });
 

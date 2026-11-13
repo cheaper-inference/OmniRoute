@@ -133,6 +133,17 @@
     "saveError": "Načina storitve ni bilo mogoče shraniti. Poskusite znova."
   },
   "common": {
+    "usageEvidence": {
+      "compressedTokens": "{count} stisnjenih žetonov",
+      "reported": "sporočeno",
+      "estimated": "ocenjeno",
+      "unknown": "Ni na voljo",
+      "unknownSource": "neznan vir",
+      "containsEstimates": "Vključuje ocenjeno porabo",
+      "historicalUnknown": "Izvor nekaterih podatkov o porabi ni znan",
+      "catalogueCost": "Ocena po ceniku, ne obračun ponudnika",
+      "loadError": "Dnevnikov uporabe ni mogoče naložiti. Poskusite osvežiti."
+    },
     "save": "Shrani",
     "cancel": "Prekliči",
     "delete": "Izbriši",

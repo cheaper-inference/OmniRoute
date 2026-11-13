@@ -175,14 +175,11 @@ function writeJsonValue(write, value) {
  * "RangeError: Invalid string length" before it could report anything. Writing
  * entry by entry through a small buffer means no string here grows with the map.
  *
- * That removes the limit from the writer only. `select-impacted-tests.mjs` and
- * `check-forgotten-sibling-tests.mjs` still load the file with
- * `readFileSync(path, "utf8")`, which throws ERR_STRING_TOO_LONG once the file
- * passes the same limit (512 MiB). The compact output below only buys headroom
- * until then; the readers have to stream for the ceiling to go away.
+ * The selector and forgotten-sibling checker use readJsonFileChunked(), so neither
+ * writing nor reading requires a whole-document string beyond V8's 512 MiB limit.
  *
- * Top-level entries are separated by newlines; nested values stay compact
- * because the readers parse the whole thing anyway.
+ * Top-level entries are separated by newlines; nested values stay compact to keep
+ * this generated artifact small. The readers preserve the same JSON map contract.
  */
 export function writeTestImpactMap(out, map) {
   const fd = fs.openSync(out, "w");

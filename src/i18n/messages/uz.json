@@ -133,6 +133,17 @@
     "saveError": "Xizmat rejimini saqlab bo‘lmadi. Iltimos, qayta urinib ko‘ring."
   },
   "common": {
+    "usageEvidence": {
+      "compressedTokens": "{count} ta token siqildi",
+      "reported": "xabar qilingan",
+      "estimated": "taxminiy",
+      "unknown": "maʼlumot yoʻq",
+      "unknownSource": "manba nomaʼlum",
+      "containsEstimates": "Taxminiy foydalanish maʼlumotlarini oʻz ichiga oladi",
+      "historicalUnknown": "Ayrim foydalanish maʼlumotlarining manbasi nomaʼlum",
+      "catalogueCost": "Narxlar roʻyxati asosidagi xarajat taxmini, provayder hisob-fakturasi emas",
+      "loadError": "Foydalanish jurnallarini yuklab boʻlmadi. Sahifani yangilab koʻring."
+    },
     "save": "Saqlash",
     "cancel": "Bekor qilish",
     "delete": "Oʻchirish",

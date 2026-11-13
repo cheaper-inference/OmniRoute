@@ -133,6 +133,17 @@
     "saveError": "Ma setgħetx tiġi ssejvjata l-modalità tas-servizz. Jekk jogħġbok erġa’ pprova."
   },
   "common": {
+    "usageEvidence": {
+      "compressedTokens": "{count} tokens ikkompressati",
+      "reported": "irrappurtat",
+      "estimated": "stmat",
+      "unknown": "Mhux disponibbli",
+      "unknownSource": "sors mhux magħruf",
+      "containsEstimates": "Jinkludi użu stmat",
+      "historicalUnknown": "L-oriġini ta’ xi dejta tal-użu mhix magħrufa",
+      "catalogueCost": "Stima tal-ispiża skont il-katalgu, mhux kont tal-fornitur",
+      "loadError": "Ma setgħux jitgħabbew ir-reġistri tal-użu. Ipprova aġġorna."
+    },
     "save": "Issejvja",
     "cancel": "Ikkanċella",
     "delete": "Ħassar",

@@ -9,6 +9,20 @@
  */
 
 export const RENAMED_MIGRATION_COMPATIBILITY = [
+  // Rehome the published PR's daily row first, freeing 239 for receipt evidence.
+  // Exact names keep upstream 238_codex_connection_fences untouched.
+  {
+    fromVersion: "239",
+    fromName: "daily_usage_evidence",
+    toVersion: "240",
+    toName: "daily_usage_evidence",
+  },
+  {
+    fromVersion: "238",
+    fromName: "truthful_usage_evidence",
+    toVersion: "239",
+    toName: "truthful_usage_evidence",
+  },
   {
     fromVersion: "022",
     fromName: "call_logs_summary_storage",

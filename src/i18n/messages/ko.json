@@ -133,6 +133,17 @@
     "saveError": "서비스 모드를 저장할 수 없습니다. 다시 시도해 주세요."
   },
   "common": {
+    "usageEvidence": {
+      "compressedTokens": "토큰 {count}개 압축됨",
+      "reported": "보고값",
+      "estimated": "추정값",
+      "unknown": "데이터 없음",
+      "unknownSource": "출처 알 수 없음",
+      "containsEstimates": "추정 사용량이 포함되어 있습니다",
+      "historicalUnknown": "일부 사용량 데이터의 출처를 알 수 없습니다",
+      "catalogueCost": "요금표 기준 예상 비용이며, 공급자의 청구 금액이 아닙니다",
+      "loadError": "사용량 로그를 불러올 수 없습니다. 페이지를 새로고침해 보세요."
+    },
     "save": "저장",
     "cancel": "취소",
     "delete": "삭제",

@@ -38,10 +38,7 @@ test("computeCostFromPricing: xAI exact cost_in_usd_ticks overrides the token-ba
     ...TOKENS_1M_EACH,
     cost_in_usd_ticks: DOC_EXAMPLE_TICKS,
   });
-  assert.ok(
-    Math.abs(cost - DOC_EXAMPLE_USD) < 1e-9,
-    `expected ${DOC_EXAMPLE_USD}, got ${cost}`
-  );
+  assert.ok(Math.abs(cost - DOC_EXAMPLE_USD) < 1e-9, `expected ${DOC_EXAMPLE_USD}, got ${cost}`);
   assert.notEqual(cost, 3, "must not fall back to the $3 token-based estimate");
 });
 
@@ -131,7 +128,7 @@ test("extractUsageFromResponse: xAI OpenAI-shaped usage carries cost_in_usd_tick
   assert.equal(usage.cost_in_usd_ticks, DOC_EXAMPLE_TICKS);
 });
 
-test("extractUsageFromResponse CONTROL: non-xAI OpenAI usage without the field stays unchanged (no stray key)", () => {
+test("extractUsageFromResponse CONTROL: non-xAI OpenAI usage retains counters and evidence without a stray cost key", () => {
   const usage = extractUsageFromResponse(
     {
       usage: {
@@ -148,6 +145,12 @@ test("extractUsageFromResponse CONTROL: non-xAI OpenAI usage without the field s
     completion_tokens: 8,
     cached_tokens: 3,
     reasoning_tokens: 2,
+    usage_evidence: {
+      input: { source: "reported" },
+      output: { source: "reported" },
+      cacheRead: { source: "reported" },
+      cacheCreation: { source: "unknown" },
+    },
   });
   assert.ok(!("cost_in_usd_ticks" in usage), "must not add a stray undefined key");
 });

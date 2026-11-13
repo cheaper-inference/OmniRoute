@@ -133,6 +133,17 @@
     "saveError": "Hindi ma-save ang mode ng serbisyo. Pakisubukang muli."
   },
   "common": {
+    "usageEvidence": {
+      "compressedTokens": "{count} token ang na-compress",
+      "reported": "iniulat",
+      "estimated": "tinantiya",
+      "unknown": "walang datos",
+      "unknownSource": "hindi alam ang pinagmulan",
+      "containsEstimates": "May tinantiyang paggamit",
+      "historicalUnknown": "Hindi alam ang pinagmulan ng ilang datos ng paggamit",
+      "catalogueCost": "Tantiyang gastos batay sa listahan ng presyo, hindi singil ng tagapagbigay",
+      "loadError": "Hindi maikarga ang mga tala ng paggamit. Subukang i-refresh ang pahina."
+    },
     "save": "I-save",
     "cancel": "Kanselahin",
     "delete": "Tanggalin",

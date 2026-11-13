@@ -133,6 +133,17 @@
     "saveError": "Não foi possível salvar o modo de serviço. Tente novamente."
   },
   "common": {
+    "usageEvidence": {
+      "compressedTokens": "{count} tokens comprimidos",
+      "reported": "informado",
+      "estimated": "estimado",
+      "unknown": "Não disponível",
+      "unknownSource": "origem desconhecida",
+      "containsEstimates": "Inclui uso estimado",
+      "historicalUnknown": "A origem de alguns dados de uso é desconhecida",
+      "catalogueCost": "Estimativa pelo catálogo, não é cobrança do provedor",
+      "loadError": "Não foi possível carregar os registros de uso. Tente atualizar."
+    },
     "save": "Salvar",
     "cancel": "Cancelar",
     "delete": "Excluir",

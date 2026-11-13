@@ -166,7 +166,8 @@ test("impossible input usage is repaired for OpenAI, Responses, and Gemini shape
     FORMATS.OPENAI
   );
   assert.ok(openai.prompt_tokens < 300_000);
-  assert.equal(openai.prompt_tokens_details.cached_tokens, 0);
+  assert.equal(openai.prompt_tokens_details.cached_tokens, undefined);
+  assert.equal(openai.usage_evidence?.cacheRead.source, "unknown");
   assert.equal(openai.total_tokens, openai.prompt_tokens + 7);
 
   const responses = sanitizeProviderUsageForRequest(
@@ -180,7 +181,8 @@ test("impossible input usage is repaired for OpenAI, Responses, and Gemini shape
     FORMATS.OPENAI_RESPONSES
   );
   assert.ok(responses.input_tokens < 300_000);
-  assert.equal(responses.input_tokens_details.cached_tokens, 0);
+  assert.equal(responses.input_tokens_details.cached_tokens, undefined);
+  assert.equal(responses.usage_evidence?.cacheRead.source, "unknown");
   assert.equal(responses.total_tokens, responses.input_tokens + 8);
 
   const gemini = sanitizeProviderUsageForRequest(
@@ -195,7 +197,8 @@ test("impossible input usage is repaired for OpenAI, Responses, and Gemini shape
     FORMATS.GEMINI
   );
   assert.ok(gemini.promptTokenCount < 300_000);
-  assert.equal(gemini.cachedContentTokenCount, 0);
+  assert.equal(gemini.cachedContentTokenCount, undefined);
+  assert.equal(gemini.usage_evidence?.cacheRead.source, "unknown");
   assert.equal(gemini.totalTokenCount, gemini.promptTokenCount + 12);
 });
 
@@ -258,7 +261,11 @@ test("final usage frame without a trailing newline is still sanitized", async ()
   assert.equal(usagePayloads[0], providerPayload);
   const usage = providerPayload.usage as Record<string, unknown>;
   assert.ok((usage.prompt_tokens as number) < 300_000);
-  assert.equal((usage.prompt_tokens_details as Record<string, unknown>).cached_tokens, 0);
+  assert.equal((usage.prompt_tokens_details as Record<string, unknown>).cached_tokens, undefined);
+  assert.equal(
+    (usage.usage_evidence as { cacheRead: { source: string } }).cacheRead.source,
+    "unknown"
+  );
   assert.equal(
     usage.total_tokens,
     (usage.prompt_tokens as number) + (usage.completion_tokens as number)

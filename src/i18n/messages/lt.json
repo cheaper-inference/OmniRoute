@@ -133,6 +133,17 @@
     "saveError": "Nepavyko išsaugoti paslaugos režimo. Bandykite dar kartą."
   },
   "common": {
+    "usageEvidence": {
+      "compressedTokens": "{count} suglaudintų žetonų",
+      "reported": "pranešta",
+      "estimated": "apytiksliai įvertinta",
+      "unknown": "Nėra duomenų",
+      "unknownSource": "šaltinis nežinomas",
+      "containsEstimates": "Apima apytikslį naudojimą",
+      "historicalUnknown": "Kai kurių naudojimo duomenų kilmė nežinoma",
+      "catalogueCost": "Kainyno sąnaudų įvertis, ne teikėjo sąskaita",
+      "loadError": "Nepavyko įkelti naudojimo žurnalų. Pabandykite atnaujinti."
+    },
     "save": "Išsaugoti",
     "cancel": "Atšaukti",
     "delete": "Ištrinti",

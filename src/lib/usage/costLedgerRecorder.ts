@@ -1,3 +1,4 @@
+import { readUsageEvidence } from "./usageEvidence";
 /**
  * usage/costLedgerRecorder.ts — wire the per-request cost ledger into the
  * existing cost-recording call sites (RIC-741 / M3 D2).
@@ -57,6 +58,7 @@ export async function recordLedgerFromCost(input: CostLedgerRecorderInput): Prom
 
     recordLedgerEntrySafe({
       apiKeyId: input.apiKeyId,
+      usageEvidence: readUsageEvidence(input.tokens),
       provider: input.provider || "unknown",
       model: input.model || "unknown",
       tokensInput: getLoggedInputTokens(input.tokens),

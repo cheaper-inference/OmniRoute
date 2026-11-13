@@ -161,3 +161,67 @@ test("late artifact enrichment does not erase usage recorded after finalization"
   assert.equal(detail?.tokens?.in, 4321);
   assert.equal(detail?.tokens?.out, 65);
 });
+
+for (const finalizeFirst of [false, true]) {
+  test(`mixed evidence survives live reader without persistence (finalize first: ${finalizeFirst})`, async () => {
+    const usageEvidence = {
+      input: { source: "reported" as const },
+      output: { source: "estimated" as const, method: "characters" },
+      cacheRead: { source: "unknown" as const },
+      cacheCreation: { source: "reported" as const },
+    };
+    const id = history.trackPendingRequest("fixture", "synthetic", "fixture", true);
+    const finish = () =>
+      history.finalizePendingRequestById(id, {
+        status: 200,
+        providerResponse: {},
+        clientResponse: {},
+      });
+    if (finalizeFirst) finish();
+    await saveCallLog({
+      id,
+      tokens: {
+        prompt_tokens: 12,
+        completion_tokens: 3,
+        cache_creation_input_tokens: 0,
+        usage_evidence: usageEvidence,
+      },
+    });
+    const pendingRows = buildCallLogListRows({
+      logs: [],
+      connections: [],
+      pendingDetails: [...history.getPendingById().values()],
+      completedDetails: history.getCompletedDetails().values(),
+    });
+    assert.deepEqual(pendingRows.find((row) => row.id === id)?.usageEvidence, usageEvidence);
+    if (!finalizeFirst) finish();
+    const rows = buildCallLogListRows({
+      logs: [],
+      connections: [],
+      pendingDetails: [],
+      completedDetails: history.getCompletedDetails().values(),
+    });
+    const row = rows.find((row) => row.id === id);
+    assert.deepEqual(row?.usageEvidence, usageEvidence);
+    assert.equal(row?.estimated, true);
+    assert.equal(row?.costEstimated, true);
+    assert.equal(row?.tokens.cacheRead, null);
+    assert.equal(row?.tokens.cacheCreation, 0);
+    assert.equal(
+      getDbInstance().prepare("SELECT count(*) AS n FROM call_logs WHERE id = ?").get(id).n,
+      0
+    );
+  });
+}
+
+test("entry-level estimated marker survives the live reader", async () => {
+  const id = history.trackPendingRequest("fixture", "synthetic", "fixture", true);
+  await saveCallLog({ id, usageEstimated: true, tokens: { input: 12, output: 3 } });
+  const rows = buildCallLogListRows({
+    logs: [],
+    connections: [],
+    pendingDetails: [...history.getPendingById().values()],
+    completedDetails: [],
+  });
+  assert.equal(rows.find((row) => row.id === id)?.estimated, true);
+});

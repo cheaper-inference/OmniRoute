@@ -133,6 +133,17 @@
     "saveError": "לא ניתן לשמור את מצב השירות. נא לנסות שוב."
   },
   "common": {
+    "usageEvidence": {
+      "compressedTokens": "נדחסו {count} טוקנים",
+      "reported": "מדווח",
+      "estimated": "משוער",
+      "unknown": "לא זמין",
+      "unknownSource": "המקור לא ידוע",
+      "containsEstimates": "כולל נתוני שימוש משוערים",
+      "historicalUnknown": "המקור של חלק מנתוני השימוש אינו ידוע",
+      "catalogueCost": "אומדן עלות לפי מחירון, לא חיוב הספק",
+      "loadError": "לא ניתן לטעון את יומני השימוש. נסו לרענן את הדף."
+    },
     "save": "שמור",
     "cancel": "בטל",
     "delete": "מחק",

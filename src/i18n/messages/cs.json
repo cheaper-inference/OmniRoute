@@ -133,6 +133,17 @@
     "saveError": "Režim služby se nepodařilo uložit. Zkuste to prosím znovu."
   },
   "common": {
+    "usageEvidence": {
+      "compressedTokens": "{count} komprimovaných tokenů",
+      "reported": "nahlášeno",
+      "estimated": "odhadnuto",
+      "unknown": "Není k dispozici",
+      "unknownSource": "neznámý zdroj",
+      "containsEstimates": "Obsahuje odhadované využití",
+      "historicalUnknown": "Původ některých údajů o využití není znám",
+      "catalogueCost": "Odhad podle ceníku, nikoli vyúčtování poskytovatele",
+      "loadError": "Záznamy využití nelze načíst. Zkuste obnovit stránku."
+    },
     "save": "Uložit",
     "cancel": "Zrušit",
     "delete": "Smazat",

@@ -156,6 +156,10 @@ export function installBigQueryFetchFixture(config: Record<string, unknown>) {
     if (href.includes("oauth2.googleapis.com/token")) {
       return Response.json({ access_token: "stub-token", expires_in: 3600 });
     }
+    if (config.fixtureSchemaConflict && init?.method === "GET" && href.includes("/tables/"))
+      return Response.json({ etag: "stale", schema: { fields: [{ name: "id", type: "STRING" }] } });
+    if (config.fixtureSchemaConflict && init?.method === "PATCH")
+      return Response.json({ error: { message: "schema changed" } }, { status: 412 });
     if (href.endsWith("/insertAll")) {
       if (config.fixtureFailInsert)
         return Response.json({ error: { message: "backend error" } }, { status: 500 });

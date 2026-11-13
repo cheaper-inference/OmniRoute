@@ -133,6 +133,17 @@
     "saveError": "Palvelutilaa ei voitu tallentaa. Yritä uudelleen."
   },
   "common": {
+    "usageEvidence": {
+      "compressedTokens": "{count} pakattua tokenia",
+      "reported": "ilmoitettu",
+      "estimated": "arvioitu",
+      "unknown": "Ei saatavilla",
+      "unknownSource": "lähde tuntematon",
+      "containsEstimates": "Sisältää arvioitua käyttöä",
+      "historicalUnknown": "Joidenkin käyttötietojen alkuperä on tuntematon",
+      "catalogueCost": "Hinnastoon perustuva arvio, ei palveluntarjoajan laskutus",
+      "loadError": "Käyttölokeja ei voitu ladata. Kokeile päivittää sivu."
+    },
     "save": "Tallenna",
     "cancel": "Peruuta",
     "delete": "Poista",

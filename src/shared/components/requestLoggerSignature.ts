@@ -51,6 +51,8 @@ export function shouldTriggerInfiniteScroll(params: {
 export function computeLogsSignature(data: unknown): string {
   const arr = Array.isArray(data) ? data : [];
   return arr
-    .map((l: any) => l.id + ":" + l.status + ":" + l.duration + ":" + (l.tokens?.out || 0))
+    .map((l) =>
+      JSON.stringify([l.id, l.status, l.duration, l.tokens, l.usageEvidence, l.usageProvenance])
+    )
     .join("|");
 }

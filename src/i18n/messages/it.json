@@ -133,6 +133,17 @@
     "saveError": "Impossibile salvare la modalità di servizio. Riprova."
   },
   "common": {
+    "usageEvidence": {
+      "compressedTokens": "{count} token compressi",
+      "reported": "dichiarato",
+      "estimated": "stimato",
+      "unknown": "Non disponibile",
+      "unknownSource": "origine sconosciuta",
+      "containsEstimates": "Include utilizzo stimato",
+      "historicalUnknown": "L’origine di alcuni dati di utilizzo è sconosciuta",
+      "catalogueCost": "Stima da listino, non fatturazione del fornitore",
+      "loadError": "Impossibile caricare i registri di utilizzo. Prova ad aggiornare."
+    },
     "save": "Salva",
     "cancel": "Cancellare",
     "delete": "Eliminare",

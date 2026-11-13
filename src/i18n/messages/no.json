@@ -133,6 +133,17 @@
     "saveError": "Kunne ikke lagre tjenestemodusen. Prøv på nytt."
   },
   "common": {
+    "usageEvidence": {
+      "compressedTokens": "{count} komprimerte tokener",
+      "reported": "rapportert",
+      "estimated": "estimert",
+      "unknown": "Ikke tilgjengelig",
+      "unknownSource": "ukjent kilde",
+      "containsEstimates": "Inneholder estimert forbruk",
+      "historicalUnknown": "Opprinnelsen til noen forbrukstall er ukjent",
+      "catalogueCost": "Kostnadsanslag fra prisliste, ikke leverandørens fakturering",
+      "loadError": "Kunne ikke laste brukslogger. Prøv å oppdatere."
+    },
     "save": "Lagre",
     "cancel": "Avbryt",
     "delete": "Slett",

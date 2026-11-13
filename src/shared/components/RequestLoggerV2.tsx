@@ -35,6 +35,7 @@ import EmptyState from "./EmptyState";
 import Input from "./Input";
 import Select from "./Select";
 import RequestLoggerDetail from "./RequestLoggerDetail";
+import RequestLogTokens from "./RequestLogTokens";
 import RequestLogThroughput from "./RequestLogThroughput";
 import { copyToClipboard } from "@/shared/utils/clipboard";
 import { PROVIDER_COLORS, getProtocolColor, neutralBadge } from "@/shared/constants/colors";
@@ -44,7 +45,6 @@ import {
   maskAccount,
   stableAccountSuffix,
   formatApiKeyLabel,
-  formatCachePercentage,
 } from "@/shared/utils/formatting";
 import { getProviderDisplayLabel } from "@/shared/utils/providerDisplayLabel";
 import { mergeLogFilterOptions } from "@/shared/utils/logFilterOptions";
@@ -131,7 +131,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
   (props, ref) => {
     const { initialSelectedId, initialCorrelationId } = props;
     const t = useTranslations("requestLogger");
-    const tCache = useTranslations("cache");
+    const tEvidence = useTranslations("common.usageEvidence");
     const tCommon = useTranslations("common");
     const { emailsVisible } = useEmailPrivacyStore();
 
@@ -171,6 +171,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
 
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState(false);
     const [recording, setRecording] = useState(true);
     const [search, setSearch] = useState("");
     const [activeFilter, setActiveFilter] = useState("all");
@@ -289,7 +290,9 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
           params.set("limit", String(limit));
 
           const res = await fetch(`/api/usage/call-logs?${params}`);
+          if (!res.ok) throw new Error("Unable to load usage logs");
           if (res.ok) {
+            setLoadError(false);
             const data = await res.json();
             // If the server returned a full window, more rows may exist beyond it.
             setHasMore(Array.isArray(data) && data.length >= limit);
@@ -303,6 +306,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
             }
           }
         } catch (error) {
+          setLoadError(true);
           console.error("Failed to fetch call logs:", error);
         } finally {
           if (showLoading) setLoading(false);
@@ -1297,6 +1301,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
             })}
           </div>
 
+          {loadError && <p role="alert">{tEvidence("loadError")}</p>}
           {/* Table */}
           {loading && logs.length === 0 ? (
             <TableLoadingState label={t("loadingLogs")} className="min-h-[460px]" />
@@ -1643,47 +1648,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                           {isActive ? (
                             <span className="text-[10px] text-text-muted">—</span>
                           ) : (
-                            <>
-                              <span className="text-text-muted">TI:</span>{" "}
-                              <span className="text-primary">
-                                {log.tokens?.in?.toLocaleString() || 0}
-                              </span>
-                              <span className="mx-1 text-border">|</span>
-                              <span className="text-text-muted">TO:</span>{" "}
-                              <span className="text-success">
-                                {log.tokens?.out?.toLocaleString() || 0}
-                              </span>
-                              {log.tokens?.cacheRead != null && log.tokens.cacheRead > 0 && (
-                                <>
-                                  <span className="mx-1 text-border">|</span>
-                                  <span className="text-text-muted">CR:</span>{" "}
-                                  <span className="text-info" title={tCache("cachedTokensCol")}>
-                                    {log.tokens.cacheRead.toLocaleString()} (
-                                    {formatCachePercentage(log.tokens.in, log.tokens.cacheRead)}%)
-                                  </span>
-                                </>
-                              )}
-                              {log.tokens?.cacheWrite != null && log.tokens.cacheWrite > 0 && (
-                                <>
-                                  <span className="mx-1 text-border">|</span>
-                                  <span className="text-text-muted">CW:</span>{" "}
-                                  <span className="text-warning" title={tCache("cacheCreation")}>
-                                    {log.tokens.cacheWrite.toLocaleString()}
-                                  </span>
-                                </>
-                              )}
-                              {log.tokens?.compressed != null && log.tokens.compressed > 0 && (
-                                <>
-                                  <span className="mx-1 text-border">|</span>
-                                  <span
-                                    className="font-semibold text-chart-3"
-                                    title={`${log.tokens.compressed.toLocaleString()} tokens compressed`}
-                                  >
-                                    ↓{log.tokens.compressed.toLocaleString()}
-                                  </span>
-                                </>
-                              )}
-                            </>
+                            <RequestLogTokens log={log} />
                           )}
                         </TableCell>
                       )}

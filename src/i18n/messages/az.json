@@ -133,6 +133,17 @@
     "saveError": "Xidmət rejimini yadda saxlamaq mümkün olmadı. Lütfən, yenidən cəhd edin."
   },
   "common": {
+    "usageEvidence": {
+      "compressedTokens": "{count} token sıxıldı",
+      "reported": "bildirilmiş",
+      "estimated": "təxmini",
+      "unknown": "məlumat yoxdur",
+      "unknownSource": "mənbə məlum deyil",
+      "containsEstimates": "Təxmini istifadə məlumatları daxildir",
+      "historicalUnknown": "Bəzi istifadə məlumatlarının mənbəyi məlum deyil",
+      "catalogueCost": "Qiymət siyahısına əsaslanan xərc təxminidir, provayderin hesab-fakturası deyil",
+      "loadError": "İstifadə jurnallarını yükləmək mümkün olmadı. Səhifəni yeniləməyə çalışın."
+    },
     "save": "Yadda saxla",
     "cancel": "Ləğv et",
     "delete": "Sil",

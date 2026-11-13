@@ -133,6 +133,17 @@
     "saveError": "የአገልግሎት ሁነታውን ማስቀመጥ አልተቻለም። እባክዎ እንደገና ይሞክሩ።"
   },
   "common": {
+    "usageEvidence": {
+      "compressedTokens": "{count} ቶከኖች ታምቀዋል",
+      "reported": "የተዘገበ",
+      "estimated": "የተገመተ",
+      "unknown": "አይገኝም",
+      "unknownSource": "ምንጩ አይታወቅም",
+      "containsEstimates": "የተገመተ አጠቃቀም ይዟል",
+      "historicalUnknown": "የአንዳንድ አጠቃቀም መረጃ ምንጭ አይታወቅም",
+      "catalogueCost": "በዋጋ ዝርዝር የተገመተ ወጪ እንጂ የአቅራቢው ክፍያ አይደለም",
+      "loadError": "የአጠቃቀም መዝገቦችን መጫን አልተቻለም። ገጹን ለማደስ ይሞክሩ።"
+    },
     "save": "አስቀምጥ",
     "cancel": "ይቅር",
     "delete": "ሰርዝ",
