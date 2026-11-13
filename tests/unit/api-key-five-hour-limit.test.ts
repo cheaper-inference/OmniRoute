@@ -131,6 +131,75 @@ test("spend inside the rolling 5h window trips the limit; reset is the oldest sp
   assert.equal(status.weeklyExceeded, false);
 });
 
+test("five-hour limits count document cost snapshots once and retain the oldest-spend reset", async () => {
+  await updatePricing({ mistral: { "mistral-ocr-4-1": { input: 10, output: 10 } } });
+  const { created, metadata } = await makeFiveHourKey(0.5);
+  const spentAt = new Date(NOW - 2 * HOUR_MS).toISOString();
+  await usageHistory.saveRequestUsage({
+    provider: "mistral",
+    model: "mistral-ocr-4-1",
+    apiKeyId: created.id,
+    tokens: { input: 1_000_000, output: 0 },
+    calculatedCostUsd: 0.62,
+    billingUnit: "page",
+    billingQuantity: 155,
+    billingUnitPriceUsd: 0.004,
+    success: true,
+    timestamp: spentAt,
+  });
+  const status = await statusAt(metadata);
+  assert.equal(status.fiveHourSpentUsd, 0.62, "stored costs must not also be token-repriced");
+  assert.equal(status.fiveHourExceeded, true);
+  assert.equal(
+    status.fiveHourResetAtIso,
+    new Date(Date.parse(spentAt) + 5 * HOUR_MS).toISOString()
+  );
+});
+
+test("five-hour limits prefer provider-reported cost over a document tariff snapshot", async () => {
+  const { created, metadata } = await makeFiveHourKey(0.5);
+  const spentAt = new Date(NOW - HOUR_MS).toISOString();
+  await usageHistory.saveRequestUsage({
+    provider: "mistral",
+    model: "mistral-ocr-4-1",
+    apiKeyId: created.id,
+    tokens: { input: 1_000_000, output: 0, cost_usd: 0.1 },
+    calculatedCostUsd: 0.62,
+    billingUnit: "page",
+    billingQuantity: 155,
+    billingUnitPriceUsd: 0.004,
+    success: true,
+    timestamp: spentAt,
+  });
+  const status = await statusAt(metadata);
+  assert.equal(status.fiveHourSpentUsd, 0.1);
+  assert.equal(status.fiveHourExceeded, false);
+  assert.equal(
+    status.fiveHourResetAtIso,
+    new Date(Date.parse(spentAt) + 5 * HOUR_MS).toISOString()
+  );
+});
+
+test("five-hour limits preserve fail-closed treatment of an unpriced document request", async () => {
+  const { created, metadata } = await makeFiveHourKey(0.5);
+  await usageHistory.saveRequestUsage({
+    provider: "mistral",
+    model: "unpriced-ocr-fixture",
+    apiKeyId: created.id,
+    tokens: { input: 0, output: 0 },
+    billingUnit: "page",
+    billingQuantity: 2,
+    success: true,
+    timestamp: new Date(NOW - HOUR_MS).toISOString(),
+  });
+  const status = await usageLimits.getApiKeyUsageLimitStatus(
+    { ...metadata, allowedConnections: null },
+    { now: () => NOW, getUnpricedUsagePolicy: () => "fail_closed" }
+  );
+  assert.equal(status.fiveHourHasUnpricedUsage, true);
+  assert.equal(status.fiveHourExceeded, true);
+});
+
 test("spend older than 5h ages out of the window", async () => {
   await priceOneDollarPerMillion();
   const { created, metadata } = await makeFiveHourKey(1);

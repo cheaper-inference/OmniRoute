@@ -87,14 +87,14 @@ function ProviderBadge({ provider }: { provider: string | null }) {
   const style = PROVIDER_COLORS[provider];
   if (!style) {
     return (
-      <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold bg-bg-subtle text-text-muted border border-border">
+      <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-semibold bg-bg-subtle text-text-muted border border-border">
         {provider}
       </span>
     );
   }
   return (
     <span
-      className="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold"
+      className="inline-block px-2 py-0.5 rounded-full text-[9px] font-semibold"
       style={{ backgroundColor: style.bg, color: style.text }}
     >
       {style.label}
@@ -107,7 +107,7 @@ function StatusBadge({ status }: { status: number | null }) {
   const style = getHttpStatusStyle(status);
   return (
     <span
-      className="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold"
+      className="inline-block px-2 py-0.5 rounded-full text-[9px] font-semibold"
       style={{ backgroundColor: style.bg, color: style.text }}
     >
       {status}
