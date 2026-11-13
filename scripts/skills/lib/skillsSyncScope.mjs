@@ -12,7 +12,9 @@
 //     must leave it exactly as the generator writes it → that skill is checked strictly;
 //   - a change that edits only the hand-written custom block → nothing generated changed,
 //     so drift the base already carried is not this change's doing → not checked;
-//   - a skill the change does not touch → refreshed at release, not checked.
+//   - a skill the change does not touch, or touches only through a hand-written file beside
+//     SKILL.md (an example, a note — the generator writes only SKILL.md and references/**)
+//     → refreshed at release, not checked.
 //
 // The markers mirror CUSTOM_START_MARKER / CUSTOM_END_MARKER in src/lib/agentSkills/generator.ts.
 
@@ -42,7 +44,8 @@ export function touchedSkillIds(changedFiles) {
  * @param {string[]} args.changedFiles repo-relative paths the change touches
  * @param {(path: string) => string | null} args.readBase file content at the diff base (null = absent)
  * @param {(path: string) => string | null} args.readHead file content in the change (null = absent)
- * @returns {{ strict: string[], customOnly: string[] }}
+ * @returns {{ strict: string[], customOnly: string[] }} skills edited only through hand-written
+ *   files beside SKILL.md are in neither list
  */
 export function classifyTouchedSkills({ changedFiles, readBase, readHead }) {
   const strict = [];
@@ -50,10 +53,13 @@ export function classifyTouchedSkills({ changedFiles, readBase, readHead }) {
   for (const id of touchedSkillIds(changedFiles)) {
     const skillFile = `skills/${id}/SKILL.md`;
     const files = changedFiles.filter((file) => file.startsWith(`skills/${id}/`));
-    if (files.some((file) => file !== skillFile)) {
+    // references/** is generated end to end: any edit there is judged.
+    if (files.some((file) => file.startsWith(`skills/${id}/references/`))) {
       strict.push(id);
       continue;
     }
+    // Any other file beside SKILL.md (an example, a note) is hand-written: not the generator's.
+    if (!files.includes(skillFile)) continue;
     const before = readBase(skillFile);
     const after = readHead(skillFile);
     if (before === null || after === null || stripCustomBlock(before) !== stripCustomBlock(after)) {

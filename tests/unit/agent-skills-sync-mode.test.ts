@@ -111,3 +111,25 @@ test("pr mode with no skill edited skips with the shared SKIP line (exit 0)", ()
   assert.match(r.out, /mode=pr \(flag: --mode=pr\)/);
   assert.match(r.out, /the strict check runs in release mode/);
 });
+
+test("pr mode with --json keeps stdout pure JSON (the SKIP line goes to stderr)", () => {
+  const head = spawnSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" });
+  const res = spawnSync(process.execPath, ["--import", "tsx/esm", SCRIPT, "--mode=pr", "--json"], {
+    cwd: root,
+    encoding: "utf8",
+    env: {
+      PATH: process.env.PATH ?? "",
+      HOME: process.env.HOME ?? "",
+      BASE_SHA: head.stdout.trim(),
+      CI: "true",
+    },
+    timeout: 120_000,
+  });
+  assert.equal(res.status, 0, `${res.stdout}${res.stderr}`);
+  const parsed = JSON.parse(res.stdout);
+  assert.equal(parsed.skipped, true);
+  assert.equal(parsed.mode, "pr");
+  assert.equal(parsed.reason, "pr-mode");
+  assert.match(parsed.detail, /\[agent-skills-sync\] SKIP reason=pr-mode — /);
+  assert.match(res.stderr, /\[agent-skills-sync\] SKIP reason=pr-mode — /);
+});

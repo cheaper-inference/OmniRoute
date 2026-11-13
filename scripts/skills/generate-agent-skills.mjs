@@ -100,20 +100,31 @@ function readInChange(relPath) {
 }
 
 /**
- * pr mode: the skill ids this change must keep in sync, or null after printing the SKIP line
- * (nothing generated was edited, or no diff base to tell).
+ * Informative pr-mode lines. With --json, stdout carries only JSON, so they go to stderr.
+ * @param {string} line
+ */
+function info(line) {
+  if (jsonOutput) console.error(line);
+  else console.log(line);
+}
+
+/**
+ * pr mode: `{ ids }` — the skills this change must keep in sync — or `{ skip }` after printing
+ * the SKIP line (nothing generated was edited, or no diff base to tell).
+ * @returns {{ ids: string[] } | { skip: { reason: string, line: string } }}
  */
 function prModeScope() {
+  const skip = (reason, what) => {
+    const line = prModeSkipLine(SYNC_TAG, reason, what);
+    info(line);
+    return { skip: { reason, line } };
+  };
   const base = resolvePrDiffBase({ env: process.env, cwd: projectRoot });
   if (!base) {
-    console.log(
-      prModeSkipLine(
-        SYNC_TAG,
-        "base-unresolved",
-        `${describeGateMode(gateInfo)} and no diff base to tell which skills this change edits`
-      )
+    return skip(
+      "base-unresolved",
+      `${describeGateMode(gateInfo)} and no diff base to tell which skills this change edits`
     );
-    return null;
   }
   const changedFiles = listChangedFiles(base.sha, {
     cwd: projectRoot,
@@ -127,19 +138,15 @@ function prModeScope() {
   const ids = onlyIds ? strict.filter((id) => onlyIds.includes(id)) : strict;
   if (ids.length === 0) {
     const custom = customOnly.length ? ` (custom block only: ${customOnly.join(", ")})` : "";
-    console.log(
-      prModeSkipLine(
-        SYNC_TAG,
-        "pr-mode",
-        `${describeGateMode(gateInfo)}; this change edits no generated skill text${custom} vs ${base.ref} @ ${base.sha.slice(0, 10)}, so generated SKILL.md drift is the release refresh's (release:refresh-derived)`
-      )
+    return skip(
+      "pr-mode",
+      `${describeGateMode(gateInfo)}; this change edits no generated skill text${custom} vs ${base.ref} @ ${base.sha.slice(0, 10)}, so generated SKILL.md drift is the release refresh's (release:refresh-derived)`
     );
-    return null;
   }
-  console.log(
+  info(
     `${SYNC_TAG} ${describeGateMode(gateInfo)}; checking the ${ids.length} skill(s) whose generated text this change edits: ${ids.join(", ")}`
   );
-  return ids;
+  return { ids };
 }
 
 // ── Utility: print table ──────────────────────────────────────────────────────
@@ -196,9 +203,15 @@ async function main() {
   process.chdir(projectRoot);
 
   if (!applyMode && gateInfo.mode === "pr") {
-    const ids = prModeScope();
-    if (ids === null) process.exit(0);
-    onlyIds = ids;
+    const scope = prModeScope();
+    if ("skip" in scope) {
+      if (jsonOutput) {
+        const { reason, line } = scope.skip;
+        console.log(JSON.stringify({ skipped: true, mode: gateInfo.mode, reason, detail: line }));
+      }
+      process.exit(0);
+    }
+    onlyIds = scope.ids;
   }
 
   if (!jsonOutput) {
