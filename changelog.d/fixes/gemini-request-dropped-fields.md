@@ -1,0 +1,1 @@
+- **fix(translator):** Raw Gemini and Antigravity request bodies keep `generationConfig.stopSequences` (as `stop`) and `toolConfig` (as `tool_choice`) when they are translated to OpenAI; Antigravity also keeps `fileData` parts, and a Gemini turn with one image next to a function call keeps the image.

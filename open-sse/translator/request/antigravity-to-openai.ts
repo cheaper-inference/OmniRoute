@@ -3,6 +3,8 @@ import { FORMATS } from "../formats.ts";
 import { adjustMaxTokens } from "../helpers/maxTokensHelper.ts";
 import { createGeminiToolCallIdPairing } from "../helpers/geminiToolCallIds.ts";
 import { geminiFunctionParameters } from "../helpers/geminiFunctionParameters.ts";
+import { applyGeminiStopAndToolChoice } from "../helpers/geminiRequestParams.ts";
+import { geminiMediaToOpenAI } from "../helpers/mediaContentParts.ts";
 import { fixToolPairs } from "../../services/contextManager.ts";
 import { normalizeEffort } from "@/shared/reasoning/effortStandardization";
 
@@ -119,6 +121,8 @@ export function antigravityToOpenAIRequest(model, body, stream) {
       }
     }
   }
+
+  applyGeminiStopAndToolChoice(result, req.generationConfig, req.toolConfig);
 
   // Guard against orphan tool_result/tool_use pairs (#6026). Antigravity IDE can ship a
   // truncated history whose first turn is a `functionResponse` with no preceding
@@ -329,6 +333,12 @@ function convertContent(content, toolCallIds) {
           url: `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`,
         },
       });
+    }
+
+    // File reference (fileData): same carriers as gemini-to-openai (image, video, audio, file)
+    if (part.fileData) {
+      const media = geminiMediaToOpenAI(part);
+      if (media) textParts.push(media);
     }
 
     // Function call
