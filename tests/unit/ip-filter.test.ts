@@ -63,6 +63,68 @@ test("blacklist: wildcard match", () => {
   assert.equal(checkIP("10.1.0.1").allowed, true);
 });
 
+// ─── IPv6 ───────────────────────────────────────────────────────────────────
+// The list is judged against the real peer address, which is IPv6 whenever the
+// client (or the reverse proxy in front of the instance) connects over IPv6.
+// A CIDR entry used to match nothing at all: `matchesCIDR` bailed on any mask
+// above 32 and `ipToNum` required four dotted parts.
+
+test("blacklist: IPv6 literal match", () => {
+  configureIPFilter({ enabled: true, mode: "blacklist", blacklist: ["2001:db8::1"] });
+  assert.equal(checkIP("2001:db8::1").allowed, false);
+  assert.equal(checkIP("2001:db8::2").allowed, true);
+});
+
+test("blacklist: IPv6 /32 CIDR blocks the prefix", () => {
+  configureIPFilter({ enabled: true, mode: "blacklist", blacklist: ["2a01:4f8::/32"] });
+  assert.equal(checkIP("2a01:4f8:1c1c:1234::1").allowed, false);
+  assert.equal(checkIP("2a01:4f8:ffff:ffff:ffff:ffff:ffff:ffff").allowed, false);
+  assert.equal(checkIP("2a01:4f9::1").allowed, true);
+});
+
+test("blacklist: IPv6 /64 CIDR blocks the prefix", () => {
+  configureIPFilter({ enabled: true, mode: "blacklist", blacklist: ["2001:db8:aa:bb::/64"] });
+  assert.equal(checkIP("2001:db8:aa:bb:0:0:0:9").allowed, false);
+  assert.equal(checkIP("2001:db8:aa:bc::9").allowed, true);
+});
+
+test("blacklist: IPv6 /128 matches one address only", () => {
+  configureIPFilter({ enabled: true, mode: "blacklist", blacklist: ["2001:db8::9/128"] });
+  assert.equal(checkIP("2001:db8::9").allowed, false);
+  assert.equal(checkIP("2001:db8::a").allowed, true);
+});
+
+test("IPv6: equivalent spellings match the same entry", () => {
+  configureIPFilter({ enabled: true, mode: "blacklist", blacklist: ["::1"] });
+  assert.equal(checkIP("0:0:0:0:0:0:0:1").allowed, false);
+  assert.equal(checkIP("0000:0000:0000:0000:0000:0000:0000:0001").allowed, false);
+});
+
+test("IPv6: a mapped address stays judged as IPv4", () => {
+  configureIPFilter({ enabled: true, mode: "blacklist", blacklist: ["192.0.2.10"] });
+  assert.equal(checkIP("::ffff:192.0.2.10").allowed, false);
+});
+
+test("whitelist: IPv6 CIDR keeps unlisted IPv6 out", () => {
+  configureIPFilter({ enabled: true, mode: "whitelist", whitelist: ["2001:db8::/32"] });
+  assert.equal(checkIP("2001:db8:aa::9").allowed, true);
+  assert.equal(checkIP("2a01:4f8::1").allowed, false);
+});
+
+test("mixed families: an IPv6 CIDR does not match an IPv4 client and vice-versa", () => {
+  configureIPFilter({ enabled: true, mode: "blacklist", blacklist: ["0.0.0.0/0"] });
+  assert.equal(checkIP("203.0.113.5").allowed, false);
+  assert.equal(checkIP("2001:db8::1").allowed, true);
+});
+
+test("tempBan: matches across IPv6 spellings", () => {
+  configureIPFilter({ enabled: true, mode: "blacklist" });
+  tempBanIP("2001:db8::1", 60_000, "test");
+  assert.equal(checkIP("2001:db8:0:0:0:0:0:1").allowed, false);
+  removeTempBan("2001:db8:0:0:0:0:0:1");
+  assert.equal(checkIP("2001:db8::1").allowed, true);
+});
+
 // ─── Whitelist Mode ─────────────────────────────────────────────────────────
 
 test("whitelist: only allows listed IPs", () => {

@@ -115,6 +115,34 @@ export function getIPFilterConfig() {
  * @param {string} ip
  * @returns {{ allowed: boolean, reason?: string }}
  */
+/**
+ * Mode decision for an already-normalised address. Split out of `checkIP` to keep
+ * that function under the cognitive-complexity ratchet.
+ */
+function decideByMode(ip) {
+  switch (_config.mode) {
+    case "whitelist":
+      // A whitelist with no entries yet means the admin just switched mode and
+      // could not save an entry otherwise; the first entry arms enforcement.
+      if (_config.whitelist.size === 0) return { allowed: true };
+      return matchesAny(ip, _config.whitelist)
+        ? { allowed: true }
+        : { allowed: false, reason: "IP not in whitelist" };
+
+    case "whitelist-priority":
+      if (matchesAny(ip, _config.whitelist)) return { allowed: true };
+      return matchesAny(ip, _config.blacklist)
+        ? { allowed: false, reason: "IP blacklisted" }
+        : { allowed: true };
+
+    case "blacklist":
+    default:
+      return matchesAny(ip, _config.blacklist)
+        ? { allowed: false, reason: "IP blacklisted" }
+        : { allowed: true };
+  }
+}
+
 export function checkIP(ip) {
   ensureLoaded();
   if (!_config.enabled) return { allowed: true };
@@ -131,38 +159,7 @@ export function checkIP(ip) {
     _config.tempBans.delete(normalizedIP); // Expired
   }
 
-  switch (_config.mode) {
-    case "whitelist":
-      // Only whitelisted IPs allowed — but if the whitelist is empty the admin
-      // has just switched to this mode and has not added IPs yet.  Allow the
-      // request through so the admin can still reach the dashboard to populate
-      // the list.  Once at least one entry exists, enforcement kicks in.
-      if (_config.whitelist.size === 0) {
-        return { allowed: true };
-      }
-      if (!matchesAny(normalizedIP, _config.whitelist)) {
-        return { allowed: false, reason: "IP not in whitelist" };
-      }
-      return { allowed: true };
-
-    case "whitelist-priority":
-      // Whitelist overrides blacklist
-      if (matchesAny(normalizedIP, _config.whitelist)) {
-        return { allowed: true };
-      }
-      if (matchesAny(normalizedIP, _config.blacklist)) {
-        return { allowed: false, reason: "IP blacklisted" };
-      }
-      return { allowed: true };
-
-    case "blacklist":
-    default:
-      // Blacklisted IPs blocked
-      if (matchesAny(normalizedIP, _config.blacklist)) {
-        return { allowed: false, reason: "IP blacklisted" };
-      }
-      return { allowed: true };
-  }
+  return decideByMode(normalizedIP);
 }
 
 /**
@@ -263,10 +260,59 @@ export function checkRequestIP(request, trustedPeerIp) {
 
 // ─── Internal Helpers ───────────────────────────────────────────────────────
 
+/** 16-byte form of an IPv6 literal, or null when it is not one. */
+function ipv6ToBytes(ip) {
+  let clean = ip.split("%")[0].trim().toLowerCase();
+  if (isIP(clean) !== 6) return null;
+
+  // A trailing dotted quad is two 16-bit groups; folding it first keeps the
+  // group count arithmetic below honest.
+  const dotted = /(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(clean);
+  if (dotted) {
+    const o = dotted.slice(1).map(Number);
+    if (o.some((n) => n > 255)) return null;
+    clean =
+      clean.slice(0, dotted.index) +
+      `${((o[0] << 8) | o[1]).toString(16)}:${((o[2] << 8) | o[3]).toString(16)}`;
+  }
+
+  const halves = clean.split("::");
+  if (halves.length > 2) return null;
+  const head = halves[0] ? halves[0].split(":") : [];
+  const tail = halves.length === 2 && halves[1] ? halves[1].split(":") : [];
+  const missing = 8 - head.length - tail.length;
+  if (halves.length === 1 ? missing !== 0 : missing < 1) return null;
+
+  const groups = [...head, ...new Array(halves.length === 2 ? missing : 0).fill("0"), ...tail];
+  const out = Buffer.alloc(16);
+  for (let i = 0; i < 8; i += 1) {
+    const group = groups[i] ?? "0";
+    if (!/^[0-9a-f]{1,4}$/.test(group)) return null;
+    out.writeUInt16BE(Number.parseInt(group, 16), i * 2);
+  }
+  return out;
+}
+
+/** Full eight-group spelling, so every way of writing one address collapses to a single string. */
+function expandIpv6(ip) {
+  const bytes = ipv6ToBytes(ip);
+  if (!bytes) return null;
+  const groups = [];
+  for (let i = 0; i < 8; i += 1) groups.push(bytes.readUInt16BE(i * 2).toString(16));
+  return groups.join(":");
+}
+
+/**
+ * Canonical text form used by EVERY comparison: trimmed, lowercased, zone id
+ * dropped, IPv4-mapped IPv6 unwrapped and IPv6 fully expanded. Without this an
+ * entry stored as `::1` never matched a peer reported as
+ * `0:0:0:0:0:0:0:1`, which is the same address.
+ */
 function normalizeIP(ip) {
   if (!ip) return "";
-  // Remove IPv6 prefix from IPv4-mapped addresses
-  return ip.replace(/^::ffff:/, "").trim();
+  const value = ip.trim().replace(/^::ffff:/i, "");
+  if (!value) return "";
+  return expandIpv6(value) ?? value.toLowerCase();
 }
 
 function pickFirstValidIp(rawValue) {
@@ -281,32 +327,63 @@ function pickFirstValidIp(rawValue) {
   return null;
 }
 
-function matchesAny(ip, ipSet) {
-  // Direct match
-  if (ipSet.has(ip)) return true;
+/** Whether one list entry matches the canonical address. */
+function entryMatches(canonical, family, entry) {
+  if (entry.includes("*")) {
+    // Wildcards are an IPv4 shape ("192.168.*.*").
+    return family === 4 && matchesWildcard(canonical, entry);
+  }
+  if (entry.includes("/")) return matchesCIDR(canonical, entry);
+  return normalizeIP(entry) === canonical;
+}
 
-  // CIDR match
+function matchesAny(ip, ipSet) {
+  const canonical = normalizeIP(ip);
+  if (!canonical) return false;
+  // Direct match first: the common case for a small list.
+  if (ipSet.has(canonical)) return true;
+
+  const family = isIP(canonical);
   for (const entry of ipSet) {
-    if (entry.includes("/") && matchesCIDR(ip, entry)) return true;
-    // Wildcard match (e.g., "192.168.*.*")
-    if (entry.includes("*") && matchesWildcard(ip, entry)) return true;
+    if (entryMatches(canonical, family, entry)) return true;
   }
   return false;
 }
 
-function matchesCIDR(ip, cidr) {
-  try {
-    const [range, bits] = cidr.split("/");
-    const mask = parseInt(bits, 10);
-    if (isNaN(mask) || mask < 0 || mask > 32) return false;
-    const ipNum = ipToNum(ip);
-    const rangeNum = ipToNum(range);
-    if (ipNum === null || rangeNum === null) return false;
-    const maskBits = (-1 << (32 - mask)) >>> 0;
-    return (ipNum & maskBits) === (rangeNum & maskBits);
-  } catch {
-    return false;
+function matchesIpv4Cidr(ip, network, mask) {
+  const ipNum = ipToNum(ip);
+  const rangeNum = ipToNum(network);
+  if (ipNum === null || rangeNum === null) return false;
+  const maskBits = (-1 << (32 - mask)) >>> 0;
+  return (ipNum & maskBits) === (rangeNum & maskBits);
+}
+
+function matchesIpv6Cidr(ip, network, mask) {
+  const address = ipv6ToBytes(ip);
+  const range = ipv6ToBytes(network);
+  if (!address || !range) return false;
+  const whole = Math.floor(mask / 8);
+  for (let i = 0; i < whole; i += 1) {
+    if (address[i] !== range[i]) return false;
   }
+  const rest = mask % 8;
+  if (rest === 0) return true;
+  const bits = (0xff << (8 - rest)) & 0xff;
+  return (address[whole] & bits) === (range[whole] & bits);
+}
+
+function matchesCIDR(ip, cidr) {
+  const slash = cidr.indexOf("/");
+  if (slash <= 0) return false;
+
+  const network = normalizeIP(cidr.slice(0, slash));
+  const mask = Number.parseInt(cidr.slice(slash + 1), 10);
+  const family = isIP(ip);
+  if (!network || Number.isNaN(mask) || family === 0 || family !== isIP(network)) return false;
+  if (mask < 0 || mask > (family === 4 ? 32 : 128)) return false;
+  if (mask === 0) return true;
+
+  return family === 4 ? matchesIpv4Cidr(ip, network, mask) : matchesIpv6Cidr(ip, network, mask);
 }
 
 function ipToNum(ip) {
