@@ -34,6 +34,15 @@ interface TooltipProps {
   multiline?: boolean;
 }
 
+function isInactiveControl(props: unknown): boolean {
+  if (!props || typeof props !== "object") return false;
+  const p = props as { disabled?: unknown; loading?: unknown; "aria-disabled"?: unknown };
+  const ariaDisabled = p["aria-disabled"];
+  return (
+    Boolean(p.disabled) || p.loading === true || ariaDisabled === true || ariaDisabled === "true"
+  );
+}
+
 export default function Tooltip({
   children,
   content,
@@ -45,15 +54,20 @@ export default function Tooltip({
 }: TooltipProps) {
   if (content == null || content === "") return <>{children}</>;
   // A non-element child (text, numbers) gets a focusable span so keyboard users reach it.
-  // So does a disabled control: browsers deliver no pointer/focus events to it, so the
-  // tooltip explaining why it is disabled would never open (Radix's documented pattern).
-  const isDisabledElement =
-    isValidElement<{ disabled?: unknown }>(children) && Boolean(children.props.disabled);
+  // So does an inactive control: browsers deliver no pointer/focus events to a disabled one,
+  // and the kit gives disabled/aria-disabled buttons `pointer-events: none`, so the tooltip
+  // explaining why would never open. Radix's documented pattern: the span is the trigger
+  // and the control inside it takes no pointer events. The adapter Button also disables
+  // itself while `loading` (#19620).
+  const isDisabledElement = isValidElement(children) && isInactiveControl(children.props);
   const trigger =
     isValidElement(children) && !isDisabledElement ? (
       children
     ) : (
-      <span tabIndex={0} className={isDisabledElement ? "inline-flex" : undefined}>
+      <span
+        tabIndex={0}
+        className={isDisabledElement ? "inline-flex [&>*]:pointer-events-none" : undefined}
+      >
         {children}
       </span>
     );

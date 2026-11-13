@@ -86,4 +86,67 @@ describe("Tooltip adapters → kit Tooltip (Radix)", () => {
     await act(async () => {});
     expect((await screen.findByRole("tooltip")).textContent).toContain("Why disabled");
   });
+
+  // Radix's documented pattern: the span takes the events and the disabled control gets
+  // `pointer-events: none`, otherwise a browser may swallow the hover on a plain <button>.
+  it("takes pointer events off the disabled control inside the wrapper", () => {
+    render(
+      <Tooltip content="Why disabled">
+        <button type="button" disabled>
+          Import
+        </button>
+      </Tooltip>
+    );
+    const wrapper = screen.getByRole("button", { name: "Import" }).parentElement!;
+    expect(wrapper.className).toContain("[&>*]:pointer-events-none");
+  });
+
+  // #19620: the adapter Button disables itself while `loading`, and the kit gives
+  // `aria-disabled` buttons `pointer-events: none`. Neither carries a `disabled` prop, so
+  // the trigger used to be the inert control itself and the tooltip never opened.
+  it("wraps a loading adapter Button so its tooltip still opens", async () => {
+    const { default: Button } = await import("@/shared/components/Button");
+    render(
+      <Tooltip content="Saving" delayMs={0}>
+        <Button loading>Save</Button>
+      </Tooltip>
+    );
+    const button = screen.getByRole("button", { name: /Save/ });
+    expect(button.hasAttribute("disabled")).toBe(true);
+    const wrapper = button.parentElement!;
+    expect(wrapper.tagName).toBe("SPAN");
+    expect(wrapper.getAttribute("tabindex")).toBe("0");
+    expect(wrapper.getAttribute("data-slot")).toBe("tooltip-trigger");
+    fireEvent.focus(wrapper);
+    await act(async () => {});
+    expect((await screen.findByRole("tooltip")).textContent).toContain("Saving");
+  });
+
+  it("wraps an aria-disabled trigger so its tooltip still opens", async () => {
+    render(
+      <Tooltip content="Not yet" delayMs={0}>
+        <button type="button" aria-disabled="true">
+          Export
+        </button>
+      </Tooltip>
+    );
+    const wrapper = screen.getByRole("button", { name: "Export" }).parentElement!;
+    expect(wrapper.tagName).toBe("SPAN");
+    expect(wrapper.getAttribute("data-slot")).toBe("tooltip-trigger");
+    fireEvent.pointerMove(wrapper, { pointerType: "mouse" });
+    await act(async () => {});
+    expect((await screen.findByRole("tooltip")).textContent).toContain("Not yet");
+  });
+
+  it("keeps an enabled element as the trigger itself (no extra span)", () => {
+    render(
+      <Tooltip content="Help">
+        <button type="button" aria-disabled="false">
+          Go
+        </button>
+      </Tooltip>
+    );
+    const button = screen.getByRole("button", { name: "Go" });
+    expect(button.getAttribute("data-slot")).toBe("tooltip-trigger");
+  });
 });

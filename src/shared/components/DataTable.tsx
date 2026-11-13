@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { DataTableShell } from "@omniroute/ui-kit/data-table-shell";
+import { TableLoadingRegion } from "@omniroute/ui-kit/table-loading";
 import {
   Table,
   TableBody,
@@ -69,6 +70,12 @@ interface DataTableProps {
   maxHeight?: string;
   emptyIcon?: string;
   emptyMessage?: string;
+  /**
+   * Draw the table's own frame (the kit `DataTableShell`). Pass `false` when a `Card`
+   * already frames the table, so the two borders do not stack (#19620): the card is the
+   * frame, and the adapter keeps the kit loading region and a borderless table.
+   */
+  framed?: boolean;
 }
 
 export default function DataTable({
@@ -82,13 +89,16 @@ export default function DataTable({
   maxHeight = "calc(100vh - 320px)",
   emptyIcon = "inbox",
   emptyMessage,
+  framed = true,
 }: DataTableProps) {
   const t = useTranslations("common");
   const resolvedEmptyMessage = emptyMessage ?? t("noData");
   const hasRows = data.length > 0;
+  // Both take `loading` + `loadingLabel`; only the shell draws a border around the table.
+  const Frame = framed ? DataTableShell : TableLoadingRegion;
 
   return (
-    <DataTableShell loading={loading} loadingLabel={t("loading")}>
+    <Frame loading={loading} loadingLabel={t("loading")}>
       {!hasRows && !loading ? (
         <EmptyState icon={emptyIcon} title={resolvedEmptyMessage} />
       ) : !hasRows ? (
@@ -102,7 +112,7 @@ export default function DataTable({
           <Table
             className="min-w-0"
             persistentScrollbars={false}
-            containerClassName="!overflow-visible"
+            containerClassName={cn("!overflow-visible", !framed && "rounded-none border-0")}
           >
             <TableHeader>
               <TableRow>
@@ -161,6 +171,6 @@ export default function DataTable({
           </Table>
         </div>
       )}
-    </DataTableShell>
+    </Frame>
   );
 }
