@@ -41,7 +41,7 @@ test("every copy string stays in the file as text", async () => {
   for (const s of Object.values(STRATEGIES_GRID_COPY).flat()) {
     assert.ok(svg.includes(esc(s)), `string not drawn: ${s}`);
   }
-  // 18 of the 20 strategies by design — the README table carries the other two.
+  // 18 of the 21 strategies by design — the README table carries the other three.
   assert.equal(STRATEGIES_GRID_COPY.names.length, 18);
 });
 
