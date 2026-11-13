@@ -206,7 +206,7 @@ Runs on every PR to `main`. Blocks merge on failure.
 | Script                         | Validates                                                                                                                                         | Blocking                   |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
 | `check:docs-all`               | Meta-gate that runs the 6 sub-gates below sequentially                                                                                            | Yes                        |
-| ↳ `check:docs-sync`            | CHANGELOG / OpenAPI version consistency; in release mode also the 66 `llm.txt` mirrors and translated CHANGELOG sections (PR mode skips those)    | Yes                        |
+| ↳ `check:docs-sync`            | CHANGELOG / OpenAPI version consistency; release mode also the 66 `llm.txt` mirrors and translated CHANGELOG sections (PR mode: mirrors agree)    | Yes                        |
 | ↳ `check:docs-counts`          | Counts in prose (provider count, migration count, etc.) are within the ratchet window of the real counts                                          | Yes                        |
 | ↳ `check:env-doc-sync`         | Every env var in `.env.example` is documented in a docs table, and vice versa                                                                     | Yes                        |
 | ↳ `check:deprecated-versions`  | No deprecated version strings in docs                                                                                                             | Yes                        |
@@ -232,19 +232,33 @@ then `OMNIROUTE_GATE_MODE`, then the Actions event; a local run is `release`):
   the root CHANGELOG headings and the superseded-docs guard, and prints
   `SKIP reason=pr-mode` for the `llm.txt` mirror copies and the translated CHANGELOG sections —
   unless the PR writes mirrors: a head branch declared as a writer of the `docs/i18n/**` family in
-  `config/quality/derived-paths/*.json` runs both checks strictly, and a change whose own diff
-  edits `docs/i18n/<locale>/llm.txt` or `CHANGELOG.md` runs that check strictly.
+  `config/quality/derived-paths/*.json` runs both checks strictly, and, when the diff base
+  resolves, a change whose own diff edits `docs/i18n/<locale>/llm.txt` or `CHANGELOG.md` runs that
+  check strictly. The diff base does not resolve in a depth-1 checkout (the `docs-sync-strict`
+  job), so PR mode also runs one check that needs no base: every `llm.txt` mirror must exist, keep
+  its `---` separator and carry either the root body or the body most mirrors share. A base that
+  moved leaves all mirrors equally stale and passes; a hand edit to one mirror fails. The
+  translated `CHANGELOG.md` files have no such check in a depth-1 PR checkout.
+- The pre-commit hook runs `check-docs-sync.mjs --mode=pr`: a commit is judged on what it does.
+  Without the flag a local run is release mode, and one merged PR that edits the root `llm.txt`
+  would block every later commit on that base until the wave ran.
 - Mirror-content unit tests (`tests/_helpers/mirrorFreshness.ts`: `cycle-docs-mirror-contract`,
   `resilience-pre-dispatch-docs-mirrors`, `cli-env-quality-docs-mirrors`,
   `docs/*-locales`) — release mode asserts every locale. PR mode asserts only the mirrors that are
   current with the English source according to `.i18n-state.json` (whole-file hash, or the recorded
   section hash of the section the test pins) and skips the stale ones with a reason. The
-  `target_hash` provenance checks run for every locale in both modes.
+  `target_hash` provenance checks run for every locale in both modes. Freshness is per `## `
+  section, the unit `run-translation.mjs` hashes; a long section (the gate inventory of this file
+  is about half of it) means any edit in it leaves those mirrors stale, and their PR-mode
+  assertions skip until the next wave. An anchor the English source no longer contains falls back
+  to the whole-file comparison.
 - `i18n translation drift` — advisory on PRs, strict on push, nightly and the release cut, so a
   stale mirror cannot ship in a release.
 
 `scripts/i18n/sync-llm-mirrors.mjs` (also exported as `syncLlmMirrors()`, with `--dry-run`)
-rewrites the `llm.txt` mirrors; the release refresh and the translation wave run it.
+rewrites the `llm.txt` mirrors; the release refresh, the translation wave and the scheduled
+`i18n-mirror-refresh.yml` run it (the refresh detects stale `llm.txt` mirrors with a dry run, since
+the drift report does not list them, and syncs them before `check:docs-all`).
 
 The twelve README SVGs under `docs/diagrams/` are generated (`scripts/docs/gen-readme-<name>.mjs`;
 `npm run docs:readme-diagrams` regenerates all of them). Each has a byte-compare unit test
