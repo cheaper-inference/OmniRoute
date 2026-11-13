@@ -1,0 +1,89 @@
+{
+  "argv": [
+    "-c",
+    "model_provider=\"omniroute\"",
+    "-c",
+    "model_providers.omniroute.name=\"OmniRoute\"",
+    "-c",
+    "model_providers.omniroute.base_url=\"http://127.0.0.1:20128/v1\"",
+    "-c",
+    "model_providers.omniroute.wire_api=\"responses\"",
+    "-c",
+    "model_providers.omniroute.env_key=\"OMNIROUTE_API_KEY\"",
+    "-c",
+    "model_providers.omniroute.requires_openai_auth=false",
+    "-c",
+    "model_catalog_json=\"${STATE}/model.json\"",
+    "-c",
+    "service_tier=\"default\"",
+    "-c",
+    "check_for_update_on_startup=false",
+    "-c",
+    "analytics.enabled=false",
+    "-c",
+    "feedback.enabled=false",
+    "-c",
+    "model=\"anthropic/claude-sonnet-4-6\"",
+    "exec",
+    "--skip-git-repo-check",
+    "--json",
+    "Reply with exactly: OK"
+  ],
+  "cleanup": {
+    "removeTempDir": true,
+    "revokeSession": true
+  },
+  "env": {
+    "set": {
+      "OMNIROUTE_API_KEY": "${TOKEN}"
+    },
+    "unset": [
+      "OPENAI_API_KEY",
+      "OPENAI_BASE_URL",
+      "OPENAI_API_BASE",
+      "OPENAI_ORG_ID",
+      "OPENAI_ORGANIZATION",
+      "CODEX_API_KEY"
+    ]
+  },
+  "modelList": {
+    "injected": 5,
+    "strategy": "both",
+    "viewHash": "7f4f4066aebfbb84189d2f7f8adeb0a75a997acf4cbeb61c10b01800b593bba3"
+  },
+  "needsTempDir": false,
+  "notes": ["Codex model catalog: 5 OmniRoute model(s) in ${STATE}/model.json"],
+  "planVersion": 1,
+  "postExitChecks": [
+    {
+      "kind": "file-unchanged",
+      "message": "Codex changed its config.toml during the session (project trust or a /model choice); OmniRoute did not edit it. Check that its model setting still suits plain `codex`",
+      "path": "/home/fixture/.codex/config.toml"
+    }
+  ],
+  "preflight": [
+    {
+      "kind": "tool-version",
+      "min": "0.134.0",
+      "why": "Codex below 0.134.0 is untested with the -c provider and model_catalog_json recipe"
+    }
+  ],
+  "secretSites": [
+    {
+      "key": "OMNIROUTE_API_KEY",
+      "kind": "env"
+    }
+  ],
+  "teardown": [],
+  "tempFiles": [
+    {
+      "contents": "{\n  \"models\": [\n    {\n      \"base_instructions\": ${ASSET:codex/base-instructions.txt:json},\n      \"context_window\": 200000,\n      \"default_reasoning_level\": \"medium\",\n      \"description\": \"anthropic/claude-sonnet-4-6 via OmniRoute, 200k context\",\n      \"display_name\": \"Claude Sonnet 4.6\",\n      \"experimental_supported_tools\": [],\n      \"input_modalities\": [\n        \"text\",\n        \"image\"\n      ],\n      \"max_context_window\": 200000,\n      \"priority\": 0,\n      \"shell_type\": \"default\",\n      \"slug\": \"anthropic/claude-sonnet-4-6\",\n      \"support_verbosity\": false,\n      \"supported_in_api\": true,\n      \"supported_reasoning_levels\": [\n        {\n          \"description\": \"Fast responses with lighter reasoning\",\n          \"effort\": \"low\"\n        },\n        {\n          \"description\": \"Balanced reasoning depth for everyday tasks\",\n          \"effort\": \"medium\"\n        },\n        {\n          \"description\": \"Deeper reasoning for complex problems\",\n          \"effort\": \"high\"\n        }\n      ],\n      \"supports_parallel_tool_calls\": false,\n      \"supports_reasoning_summaries\": true,\n      \"truncation_policy\": {\n        \"limit\": 10000,\n        \"mode\": \"bytes\"\n      },\n      \"visibility\": \"list\"\n    },\n    {\n      \"base_instructions\": ${ASSET:codex/base-instructions.txt:json},\n      \"context_window\": 400000,\n      \"default_reasoning_level\": \"medium\",\n      \"description\": \"openai/gpt-5.2 via OmniRoute, 400k context\",\n      \"display_name\": \"GPT-5.2\",\n      \"experimental_supported_tools\": [],\n      \"input_modalities\": [\n        \"text\"\n      ],\n      \"max_context_window\": 400000,\n      \"priority\": 1,\n      \"shell_type\": \"default\",\n      \"slug\": \"openai/gpt-5.2\",\n      \"support_verbosity\": false,\n      \"supported_in_api\": true,\n      \"supported_reasoning_levels\": [\n        {\n          \"description\": \"Fast responses with lighter reasoning\",\n          \"effort\": \"low\"\n        },\n        {\n          \"description\": \"Balanced reasoning depth for everyday tasks\",\n          \"effort\": \"medium\"\n        },\n        {\n          \"description\": \"Deeper reasoning for complex problems\",\n          \"effort\": \"high\"\n        }\n      ],\n      \"supports_parallel_tool_calls\": false,\n      \"supports_reasoning_summaries\": true,\n      \"truncation_policy\": {\n        \"limit\": 10000,\n        \"mode\": \"bytes\"\n      },\n      \"visibility\": \"list\"\n    },\n    {\n      \"base_instructions\": ${ASSET:codex/base-instructions.txt:json},\n      \"context_window\": 128000,\n      \"description\": \"mystery/unknown-context via OmniRoute\",\n      \"display_name\": \"Unknown Context\",\n      \"experimental_supported_tools\": [],\n      \"input_modalities\": [\n        \"text\"\n      ],\n      \"priority\": 2,\n      \"shell_type\": \"default\",\n      \"slug\": \"mystery/unknown-context\",\n      \"support_verbosity\": false,\n      \"supported_in_api\": true,\n      \"supported_reasoning_levels\": [],\n      \"supports_parallel_tool_calls\": false,\n      \"supports_reasoning_summaries\": false,\n      \"supports_reasoning_summary_parameter\": false,\n      \"truncation_policy\": {\n        \"limit\": 10000,\n        \"mode\": \"bytes\"\n      },\n      \"visibility\": \"list\"\n    },\n    {\n      \"base_instructions\": ${ASSET:codex/base-instructions.txt:json},\n      \"context_window\": 32768,\n      \"description\": \"small/ctx-32k via OmniRoute, 33k context\",\n      \"display_name\": \"Small 32k\",\n      \"experimental_supported_tools\": [],\n      \"input_modalities\": [\n        \"text\"\n      ],\n      \"max_context_window\": 32768,\n      \"priority\": 3,\n      \"shell_type\": \"default\",\n      \"slug\": \"small/ctx-32k\",\n      \"support_verbosity\": false,\n      \"supported_in_api\": true,\n      \"supported_reasoning_levels\": [],\n      \"supports_parallel_tool_calls\": false,\n      \"supports_reasoning_summaries\": false,\n      \"supports_reasoning_summary_parameter\": false,\n      \"truncation_policy\": {\n        \"limit\": 10000,\n        \"mode\": \"bytes\"\n      },\n      \"visibility\": \"list\"\n    },\n    {\n      \"base_instructions\": ${ASSET:codex/base-instructions.txt:json},\n      \"context_window\": 128000,\n      \"description\": \"fastest via OmniRoute, 128k context\",\n      \"display_name\": \"Combo fastest\",\n      \"experimental_supported_tools\": [],\n      \"input_modalities\": [\n        \"text\"\n      ],\n      \"max_context_window\": 128000,\n      \"priority\": 4,\n      \"shell_type\": \"default\",\n      \"slug\": \"fastest\",\n      \"support_verbosity\": false,\n      \"supported_in_api\": true,\n      \"supported_reasoning_levels\": [],\n      \"supports_parallel_tool_calls\": false,\n      \"supports_reasoning_summaries\": false,\n      \"supports_reasoning_summary_parameter\": false,\n      \"truncation_policy\": {\n        \"limit\": 10000,\n        \"mode\": \"bytes\"\n      },\n      \"visibility\": \"list\"\n    }\n  ]\n}\n",
+      "format": "json",
+      "mode": 384,
+      "path": "model.json",
+      "root": "state"
+    }
+  ],
+  "tool": "codex",
+  "warnings": []
+}
