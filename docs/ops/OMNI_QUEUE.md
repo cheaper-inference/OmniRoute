@@ -231,6 +231,11 @@ repository variables.
 The workflow and the orchestrator must exist on the **default branch**: `schedule`,
 `workflow_run` and `pull_request_target` always run the default branch's copy of the workflow.
 
+The 5-minute `schedule` trigger only acts on `cheaper-inference/OmniRoute`: both jobs skip a
+scheduled run in any other repository (a fork, or the sandbox used for the rehearsal). There,
+ticks come from label changes, from a candidate's CI finishing (`workflow_run`), and from a
+manual "Run workflow".
+
 ## Installing the GitHub App
 
 The queue pushes with a GitHub App installation token: refs pushed with the `GITHUB_TOKEN` do not
@@ -287,10 +292,19 @@ it to what that job needs (the `approval` job writes statuses and comments only)
   landing push is accepted although it is not a PR merge, and the repository **admin** role
   (`RepositoryRole` 5), for sync-back fast-forward pushes and hotfixes.
 
-The existing repository ruleset **"Protect release branches"** (`deletion` + `non_fast_forward`
-on `refs/heads/release/*`, no bypass actors) keeps applying. Rulesets stack, so nobody, the App
-included, can delete or force-push a release branch; the queue's landing push is a fast-forward
-and satisfies both rulesets.
+Rulesets stack, and **a ruleset's bypass list only covers that ruleset's own rules**. Two
+existing repository rulesets also match release branches:
+
+| Ruleset (id)                              | Matches                | Rules                            | Effect on the landing push                                                                                                                |
+| ----------------------------------------- | ---------------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| "Protect release branches" (15605329)     | `refs/heads/release/*` | `deletion`, `non_fast_forward`   | None: nobody, the App included, can delete or force-push a release branch, and the landing push is a fast-forward.                        |
+| "Require PR on default branch" (21899981) | `~DEFAULT_BRANCH`      | `pull_request`, no bypass actors | **Rejects it** on whichever release branch is the default branch (the active release): the App bypass in our ruleset does not cover this. |
+
+So, at the cut-over, the owner must also either add the `omni-queue` App (`Integration`, the App
+ID, bypass mode `always`) to the bypass actors of "Require PR on default branch", or exclude the
+release branches from it. Without one of the two, the queue lands everywhere except on the active
+release. The sandbox rehearsal recreates an equivalent `~DEFAULT_BRANCH` `pull_request` ruleset to
+exercise this.
 
 `scripts/merge-queue/apply-ruleset.mjs` creates the ruleset `omni-queue release protection: <base>`,
 updates it when its normalized content drifted, or leaves it alone, printing a readable diff:
@@ -311,7 +325,19 @@ node scripts/merge-queue/apply-ruleset.mjs --base release/v3.8.55 \
   to the repository.
 - **Production lock**: a real apply on `cheaper-inference/OmniRoute` (or its old name
   `diegosouzapw/OmniRoute`) is refused unless `OMNI_QUEUE_ALLOW_PRODUCTION_RULESET` is `1`.
-  `--dry-run` is always allowed.
+  The `--repo` string is checked before any API call; before any write the repository is also
+  resolved through the API (`GET /repos/{repo}`, which follows renames and transfers) and the
+  check repeats on the returned full name. `--dry-run` is always allowed.
+- **Landing-path check**: after the apply (or the preview) it reads every rule GitHub enforces on
+  the branch (`GET /repos/{repo}/rules/branches/{base}`, organization rulesets included) and lists
+  the rules from **other** rulesets that would reject the App's fast-forward push (`pull_request`,
+  `required_status_checks`, `update`, `required_linear_history`, `required_signatures`, and the
+  other types in `LANDING_BLOCKING_RULE_TYPES`) because the App is not an `always` (or `exempt`)
+  bypass actor of that ruleset. On `--dry-run` this is a warning; on a real apply the script exits
+  `1`, after writing its own ruleset, until those rulesets are fixed. Rules whose ruleset is not
+  readable with the token count as not bypassed.
+- Exit codes: `0` ok, `1` failure (API error, or a foreign rule blocks the landing push), `2` usage
+  error or refused.
 - Run it once per new release branch, after the branch is cut.
 
 ## Security posture
@@ -379,12 +405,17 @@ shadow mode on the real repository. In order:
 2. Merge `mode: "live"` into `config/merge-queue/config.json` on the default branch.
 3. Apply the ruleset to every active release branch:
    `OMNI_QUEUE_ALLOW_PRODUCTION_RULESET=1 node scripts/merge-queue/apply-ruleset.mjs --base <branch> --repo cheaper-inference/OmniRoute --app-id <app-id>`.
+   With the owner's approval, add the App (`Integration`, the App ID, `always`) to the bypass
+   actors of "Require PR on default branch" (21899981), or exclude the release branches from it
+   (see [Ruleset](#ruleset)). The script exits `1` while any foreign rule still blocks the landing
+   push; rerun it until it exits `0` on every branch.
 4. Decide the label: keep `omni-queue` or set `label` to `queue`.
 5. Update the merge skills and `AGENTS.md` (agent-instruction surfaces: each change needs the
    owner's explicit approval).
 
 Rollback: set OMNI_QUEUE_ENABLED to `false` (immediate; nothing in flight lands), re-enable the
 Mergify queue rules, and, if non-admin pushes must be allowed again, delete the
-`omni-queue release protection: <base>` rulesets in Settings → Rules → Rulesets. Leftover
+`omni-queue release protection: <base>` rulesets in Settings → Rules → Rulesets. Remove the App
+from the bypass actors of "Require PR on default branch" (or restore its branch condition). Leftover
 `omni-queue/**` candidate branches can be deleted once nothing is in flight; the
 `omni-queue-state` branch can stay as an audit trail.
