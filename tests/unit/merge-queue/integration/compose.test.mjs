@@ -6,6 +6,7 @@ import { join } from "node:path";
 import test from "node:test";
 
 import {
+  baseCheckRef,
   candidateRef,
   parseQueueTrailers,
   TRAILERS,
@@ -16,7 +17,9 @@ import {
   fetchInputs,
   prepareRepo,
   pushCandidate,
+  scratchGit,
 } from "../../../../scripts/merge-queue/compose.mjs";
+import { createGit } from "../../../../scripts/merge-queue/gitexec.mjs";
 import { BOT, createSandbox, prRef } from "./helpers/git-sandbox.mjs";
 
 const BASE = "release/v1.0.0";
@@ -384,12 +387,138 @@ test("pushCandidate creates candidate refs only, never forces; deleteCandidate i
   assert.deepEqual(pushCandidate({ git, sha: res.candidateSha, ref }), { created: true });
   assert.equal(sb.branchSha(ref), res.candidateSha);
   assert.deepEqual(pushCandidate({ git, sha: res.candidateSha, ref }), { created: false });
-  // Same name, other SHA: refused (no force), remote ref unchanged.
-  assert.throws(() => pushCandidate({ git, sha: res.baseSha, ref }), /already exists/);
+  // Same name, other SHA: refused before any push (the name encodes the SHA), ref unchanged.
+  assert.throws(() => pushCandidate({ git, sha: res.baseSha, ref }), /does not name sha/);
   assert.equal(sb.branchSha(ref), res.candidateSha);
 
   assert.deepEqual(deleteCandidate({ git, ref }), { deleted: true });
   assert.equal(sb.branchSha(ref), null);
   assert.deepEqual(deleteCandidate({ git, ref }), { deleted: false });
   assert.equal(sb.baseSha(), res.baseSha);
+});
+
+test("pushCandidate refuses a ref whose name encodes another SHA (batch and base-check)", (t) => {
+  const { sb, git } = setup(t);
+  const res = compose(git, [prRef(1, sb.publishPr(1, { "one.txt": "1\n" }))]);
+  const other = res.baseSha;
+
+  const wrongBatch = candidateRef(BASE, "b1", other);
+  assert.throws(
+    () => pushCandidate({ git, sha: res.candidateSha, ref: wrongBatch }),
+    /does not name sha/
+  );
+  assert.equal(sb.branchSha(wrongBatch), null, "nothing was pushed");
+
+  const wrongCheck = baseCheckRef(BASE, res.candidateSha);
+  assert.throws(() => pushCandidate({ git, sha: other, ref: wrongCheck }), /does not name sha/);
+  assert.equal(sb.branchSha(wrongCheck), null);
+
+  // A batch id must precede the SHA suffix: "omni-queue/<base>/<sha12>" alone is not enough.
+  const bare12 = `omni-queue/release-v1.0.0/${res.candidateSha.slice(0, 12)}`;
+  assert.throws(
+    () => pushCandidate({ git, sha: res.candidateSha, ref: bare12 }),
+    /does not name sha/
+  );
+
+  // The matching names are accepted.
+  const check = baseCheckRef(BASE, other);
+  assert.deepEqual(pushCandidate({ git, sha: other, ref: check }), { created: true });
+  assert.equal(sb.branchSha(check), other);
+  const ok = candidateRef(BASE, "b1-r1", res.candidateSha);
+  assert.deepEqual(pushCandidate({ git, sha: res.candidateSha, ref: ok }), { created: true });
+  assert.equal(sb.branchSha(ok), res.candidateSha);
+});
+
+test("a PR whose head is already in the base is alreadyInBase, never a no-op candidate", (t) => {
+  const { sb, git } = setup(t);
+  const seed = sb.baseSha();
+  const tip = sb.advanceBase({ "landed.txt": "L\n" });
+  // #40 points at the base tip, #41 at an older commit of the base (both already merged).
+  sb.work(["push", "--quiet", "origin", `${tip}:refs/pull/40/head`]);
+  sb.work(["push", "--quiet", "origin", `${seed}:refs/pull/41/head`]);
+  const inTip = prRef(40, tip);
+  const inHistory = prRef(41, seed);
+
+  const res = compose(git, [inTip, inHistory]);
+  assert.equal(res.baseSha, tip);
+  assert.deepEqual(
+    res.alreadyInBase.map((p) => p.n),
+    [40, 41]
+  );
+  assert.deepEqual(res.included, []);
+  assert.deepEqual(res.alreadyContained, []);
+  assert.equal(res.candidateSha, null, "no candidate equal to the bare base");
+  assert.equal(res.treeSha, null);
+
+  // Mixed batch: the in-base PR stays out, the real one gets the only merge commit.
+  const real = prRef(42, sb.publishPr(42, { "forty-two.txt": "42\n" }));
+  const mixed = compose(git, [inTip, real]);
+  assert.deepEqual(
+    mixed.alreadyInBase.map((p) => p.n),
+    [40]
+  );
+  assert.deepEqual(
+    mixed.included.map((p) => p.n),
+    [42]
+  );
+  assert.notEqual(mixed.candidateSha, mixed.baseSha);
+  const merges = git
+    .out(["log", "--first-parent", "--format=%H", `${mixed.baseSha}..${mixed.candidateSha}`], {
+      env: { GIT_DIR: git.cwd },
+    })
+    .split("\n");
+  assert.equal(merges.length, 1);
+});
+
+test("inherited GIT_* location variables cannot redirect the scratch repository", (t) => {
+  const sb = createSandbox({ base: BASE });
+  t.after(() => sb.cleanup());
+  const decoyObjects = sb.newDir("decoy-objects");
+  const decoyWork = sb.newDir("decoy-work");
+  const decoyIndex = join(sb.root, "decoy-index");
+  const head = sb.publishPr(1, { "one.txt": "1\n" });
+
+  const saved = {};
+  const decoys = {
+    GIT_OBJECT_DIRECTORY: decoyObjects,
+    GIT_ALTERNATE_OBJECT_DIRECTORIES: decoyObjects,
+    GIT_INDEX_FILE: decoyIndex,
+    GIT_WORK_TREE: decoyWork,
+  };
+  for (const [k, v] of Object.entries(decoys)) {
+    saved[k] = process.env[k];
+    process.env[k] = v;
+  }
+  try {
+    const dir = sb.newDir("scratch-env");
+    // A raw createGit (not the sandbox helper) inherits the decoys from process.env.
+    const raw = createGit({ cwd: dir, identity: BOT, env: sb.isolationEnv });
+    prepareRepo({ git: raw, remoteUrl: sb.remoteUrl, filter: null });
+    assert.equal(scratchGit(raw).out(["rev-parse", "--git-path", "objects"]), join(dir, "objects"));
+    assert.equal(scratchGit(raw).out(["rev-parse", "--git-path", "index"]), join(dir, "index"));
+    // The sandbox helper clears them as well for the tests' own inspection calls.
+    assert.equal(
+      sb.scratchGit(dir).out(["rev-parse", "--git-path", "objects"], { env: { GIT_DIR: dir } }),
+      join(dir, "objects")
+    );
+
+    const res = compose(raw, [prRef(1, head)]);
+    assert.deepEqual(
+      res.included.map((p) => p.n),
+      [1]
+    );
+    pushCandidate({
+      git: raw,
+      sha: res.candidateSha,
+      ref: candidateRef(BASE, "b1", res.candidateSha),
+    });
+    assert.deepEqual(readdirSync(decoyObjects), [], "no object written to the decoy store");
+    assert.deepEqual(readdirSync(decoyWork), [], "no file written to the decoy work tree");
+    assert.equal(existsSync(decoyIndex), false, "no decoy index written");
+  } finally {
+    for (const [k, v] of Object.entries(saved)) {
+      if (v === undefined) delete process.env[k];
+      else process.env[k] = v;
+    }
+  }
 });

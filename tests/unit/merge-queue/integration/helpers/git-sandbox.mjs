@@ -151,15 +151,41 @@ export function createSandbox({ base = "release/v1.0.0" } = {}) {
       mkdirSync(dir, { recursive: true });
       return dir;
     },
-    /** createGit for a scratch repository, committing as the bot. */
+    /**
+     * createGit for a scratch repository, committing as the bot. createGit inherits process.env,
+     * so every GIT_* variable the test process carries (e.g. GIT_INDEX_FILE or
+     * GIT_OBJECT_DIRECTORY when the suite runs inside a git hook) is cleared here: Node's spawn
+     * drops `undefined` entries. The bot identity and the token's auth config are kept.
+     */
     scratchGit(dir, extra = {}) {
-      return createGit({ cwd: dir, identity: BOT, env: isolationEnv, ...extra });
+      return createGit({
+        cwd: dir,
+        identity: BOT,
+        env: { ...inheritedGitEnvCleared({ keepAuth: Boolean(extra.token) }), ...isolationEnv },
+        ...extra,
+      });
     },
     cleanup() {
       rmSync(root, { recursive: true, force: true });
     },
   };
   return sandbox;
+}
+
+/**
+ * Every GIT_* key of the current process.env mapped to undefined, except the identity variables
+ * createGit sets from `identity` and, with keepAuth, the GIT_CONFIG_* entries it sets for a token.
+ * @param {{keepAuth?: boolean}} [options]
+ */
+export function inheritedGitEnvCleared({ keepAuth = false } = {}) {
+  const keep = (key) =>
+    /^GIT_(AUTHOR|COMMITTER)_(NAME|EMAIL)$/.test(key) ||
+    (keepAuth && /^GIT_CONFIG_(COUNT|KEY_\d+|VALUE_\d+)$/.test(key));
+  return Object.fromEntries(
+    Object.keys(process.env)
+      .filter((key) => key.startsWith("GIT_") && !keep(key))
+      .map((key) => [key, undefined])
+  );
 }
 
 /**
