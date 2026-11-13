@@ -151,7 +151,7 @@ test("every check declares its scope, and every derived check has a locator", ()
     "DB migrations count (README mirrors)": "derived",
     "Provider count": "derived",
     "Provider count (secondary docs and skills)": "derived",
-    "Provider count (package.json description)": "release-only",
+    "No exact provider count (package.json description)": "invariant",
     "DB migrations count": "derived",
     "Package version (docs prose)": "derived",
     "Coverage floor (docs vs blocking ratchet)": "derived",
@@ -780,4 +780,22 @@ test("pr: a declared batch (the merge train) skips the managed-value diff", () =
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test("the package.json description guard is an invariant: an exact count fails in both modes", () => {
+  const guard = byLabel("No exact provider count (package.json description)");
+  assert.equal(guard.scope, "invariant");
+  const pkg = (description: string) => JSON.stringify({ name: "omniroute", description });
+  assert.equal(guard.validate?.(pkg("Unified AI router with hundreds of providers")).ok, true);
+  const counted = pkg("Unified AI router with 394 providers");
+  assert.equal(guard.validate?.(counted).ok, false);
+  const pr = gate.runCountsGate({
+    mode: "pr",
+    base: null,
+    readBase: mem({ "package.json": counted }),
+    readHead: mem({ "package.json": counted }),
+    changedFiles: ["package.json"],
+    env: {},
+  });
+  assert.equal(pr.exitCode, 1, `pr mode must reject it too:\n${pr.lines.join("\n")}`);
 });
