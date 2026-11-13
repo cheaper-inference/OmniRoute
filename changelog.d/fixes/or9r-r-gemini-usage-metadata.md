@@ -1,0 +1,1 @@
+- **fix(gemini):** OpenAI to Gemini usage no longer counts reasoning tokens twice in `candidatesTokenCount`, and it reads `input_tokens` / `output_tokens` when an upstream uses Responses names.

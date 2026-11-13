@@ -21,7 +21,7 @@ const USAGE = {
 };
 const EXPECTED_USAGE_METADATA = {
   promptTokenCount: 11,
-  candidatesTokenCount: 5,
+  candidatesTokenCount: 3,
   totalTokenCount: 16,
   thoughtsTokenCount: 2,
   cachedContentTokenCount: 4,

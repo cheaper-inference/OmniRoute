@@ -19,6 +19,11 @@ export interface OpenAIUsage {
   total_tokens?: number;
   prompt_tokens_details?: { cached_tokens?: number };
   completion_tokens_details?: { reasoning_tokens?: number };
+  // Responses naming: some OpenAI-compatible upstreams report these instead.
+  input_tokens?: number;
+  output_tokens?: number;
+  input_tokens_details?: { cached_tokens?: number };
+  output_tokens_details?: { reasoning_tokens?: number };
 }
 
 /** Per-stream flag: `usageMetadata` already reached the client. */
@@ -44,19 +49,29 @@ export function geminiExtraUsageCounts(
 ): Pick<GeminiUsageMetadata, "thoughtsTokenCount" | "cachedContentTokenCount"> {
   const u = (usage ?? {}) as OpenAIUsage;
   const out: Pick<GeminiUsageMetadata, "thoughtsTokenCount" | "cachedContentTokenCount"> = {};
-  const reasoning = u.completion_tokens_details?.reasoning_tokens;
+  const reasoning =
+    u.completion_tokens_details?.reasoning_tokens ?? u.output_tokens_details?.reasoning_tokens;
   if (reasoning) out.thoughtsTokenCount = reasoning;
-  const cached = u.prompt_tokens_details?.cached_tokens;
+  const cached = u.prompt_tokens_details?.cached_tokens ?? u.input_tokens_details?.cached_tokens;
   if (cached) out.cachedContentTokenCount = cached;
   return out;
 }
 
+/** Gemini `candidatesTokenCount` excludes thoughts; OpenAI `completion_tokens` includes them. */
+export function geminiCandidatesTokenCount(completionTokens: number, thoughtsTokenCount = 0) {
+  return Math.max(0, completionTokens - thoughtsTokenCount);
+}
+
 export function buildGeminiUsageMetadata(usage: OpenAIUsage): GeminiUsageMetadata {
+  const extra = geminiExtraUsageCounts(usage);
   return {
-    promptTokenCount: usage.prompt_tokens || 0,
-    candidatesTokenCount: usage.completion_tokens || 0,
+    promptTokenCount: usage.prompt_tokens || usage.input_tokens || 0,
+    candidatesTokenCount: geminiCandidatesTokenCount(
+      usage.completion_tokens || usage.output_tokens || 0,
+      extra.thoughtsTokenCount
+    ),
     totalTokenCount: usage.total_tokens || 0,
-    ...geminiExtraUsageCounts(usage),
+    ...extra,
   };
 }
 
