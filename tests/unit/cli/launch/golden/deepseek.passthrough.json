@@ -1,0 +1,56 @@
+{
+  "argv": [
+    "web",
+    "--patch",
+    "${TMP}/omniroute.cordis.yml",
+    "--port",
+    "3081",
+    "--no-open"
+  ],
+  "cleanup": {
+    "removeTempDir": true,
+    "revokeSession": true
+  },
+  "env": {
+    "set": {
+      "DSH_TELEMETRY_DISABLED": "1",
+      "OMNIROUTER_DSH_API_KEY": "${TOKEN}"
+    },
+    "unset": []
+  },
+  "modelList": {
+    "injected": 4,
+    "strategy": "inject",
+    "viewHash": "a0c26d8b81c230b86c9221f2161d557723c0b31766cc35c4de8136701965ec04"
+  },
+  "needsTempDir": true,
+  "notes": [
+    "DeepSeek Harness web UI opens in your browser (default http://127.0.0.1:3080); use --port after -- if it is taken."
+  ],
+  "planVersion": 1,
+  "postExitChecks": [],
+  "preflight": [
+    {
+      "kind": "node-version",
+      "range": ">=24.9.0",
+      "why": "DeepSeek Harness (dsh) requires Node 24.9 or newer."
+    }
+  ],
+  "secretSites": [
+    {
+      "key": "OMNIROUTER_DSH_API_KEY",
+      "kind": "env"
+    }
+  ],
+  "teardown": [],
+  "tempFiles": [
+    {
+      "contents": "- id: llm-pi-ai\n  config:\n    providers:\n      omniroute:\n        displayName: OmniRoute\n        api: openai-completions\n        baseURL: \"http://127.0.0.1:20128/v1\"\n        apiKeyEnv: OMNIROUTER_DSH_API_KEY\n        defaultContextWindow: 131072\n        models:\n          - id: anthropic/claude-sonnet-4-6\n            name: \"Claude Sonnet 4.6\"\n            input:\n              - text\n            contextWindow: 200000\n            maxTokens: 25000\n          - id: openai/gpt-5.2\n            name: GPT-5.2\n            input:\n              - text\n            contextWindow: 400000\n            maxTokens: 50000\n          - id: mystery/unknown-context\n            name: \"Unknown Context\"\n            input:\n              - text\n          - id: fastest\n            name: \"Combo fastest\"\n            input:\n              - text\n            contextWindow: 128000\n- id: agent-default-model\n  config:\n    provider: omniroute\n    model: anthropic/claude-sonnet-4-6\n",
+      "format": "yaml",
+      "mode": 384,
+      "path": "omniroute.cordis.yml"
+    }
+  ],
+  "tool": "deepseek",
+  "warnings": []
+}
