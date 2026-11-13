@@ -4,6 +4,10 @@ import { isOpencodeFreeTierRefusalForProvider } from "../../executors/opencodeGe
 import { isMusePolicyRefusal } from "../../services/musePolicyRefusal.ts";
 import { getM365FailureScope } from "../../services/m365ErrorPolicy.ts";
 import { isProviderSafetyRefusalBody } from "../../utils/providerSafety.ts";
+import {
+  isAnthropicOAuthProvider,
+  isAnthropicRequestNotAllowed,
+} from "../../services/errorClassifier.ts";
 
 /**
  * True when a 401/403 from `provider` cannot be cured by refreshing credentials.
@@ -14,6 +18,8 @@ import { isProviderSafetyRefusalBody } from "../../utils/providerSafety.ts";
  *   about the token, so a refresh only adds latency before the same answer.
  * - An explicit provider safety stop refuses the request's content; refreshing would
  *   re-send the refused conversation with a new token.
+ * - A Claude OAuth 403 "Request not allowed" refuses this request, not the token: a refresh
+ *   would rotate the refresh token and send the refused request into the enforcement again.
  *
  * The body is read from a clone so the caller can still consume the response.
  */
@@ -26,6 +32,14 @@ export async function shouldSkipCredentialRefresh(
   const bodyText = await readResponseTextWithinCap(response.clone()).catch(() => null); // an unreadable or over-cap body cannot carry a safety code; keep the refresh
   if (bodyText !== null && isProviderSafetyRefusalBody(response.status, bodyText)) return true;
   if (provider.toLowerCase() === "muse-code" && isMusePolicyRefusal(response.status, bodyText))
+    return true;
+  // Claude OAuth 403 "Request not allowed" refuses this request, not the token (REQUEST_REJECTED).
+  if (
+    response.status === 403 &&
+    bodyText !== null &&
+    isAnthropicOAuthProvider(provider) &&
+    isAnthropicRequestNotAllowed(bodyText)
+  )
     return true;
   // Neither model nor account licence entitlements change by rotating the token.
   if (response.status === 403 && getM365FailureScope(provider, response.status, bodyText) !== null)
