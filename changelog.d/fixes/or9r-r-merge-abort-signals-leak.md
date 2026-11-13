@@ -1,0 +1,1 @@
+- **fix(executors):** merged abort signals no longer leave listeners on the long-lived request signal when nothing aborts.

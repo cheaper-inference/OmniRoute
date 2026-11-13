@@ -1,47 +1,13 @@
-// Self-cleaning abort-signal merge. Extracted from base.ts so the frozen
-// executor host does not grow past its file-size cap for this leak fix.
+// Abort-signal merge. Extracted from base.ts so the frozen executor host does not grow
+// past its file-size cap.
 
 /**
- * Merge two abort signals into one that fires when either does.
+ * Merge two abort signals into one that fires when either does, with that source's reason.
  *
- * The `primary`/`secondary` abort listeners registered below MUST be removed once the
- * merged controller settles — otherwise they outlive this call and stay attached to
- * whichever input signal is longer-lived (typically the combo/client signal, which
- * stays open for the whole request while this merge is re-done per executor fetch
- * attempt/retry). A hedge cancellation or client disconnect arriving after this
- * particular merge's caller has already moved on then still fires the listener,
- * detached from anything that's still awaiting it. Mirrors the already-correct
- * self-cleaning pattern in `open-sse/utils/directResponseStartTimeout.ts`'s local
- * `mergeAbortSignals` (#hedge-cancelled-abort-listener-leak).
+ * `AbortSignal.any` keeps no listener on the inputs. The old manual merge removed its
+ * listeners only after an abort, so a merge that never aborted (the usual case: one per
+ * fetch attempt or retry) left two listeners on the long-lived combo/client signal.
  */
 export function mergeAbortSignals(primary: AbortSignal, secondary: AbortSignal): AbortSignal {
-  const controller = new AbortController();
-
-  const cleanup = () => {
-    primary.removeEventListener("abort", onPrimaryAbort);
-    secondary.removeEventListener("abort", onSecondaryAbort);
-  };
-
-  const abortFrom = (source: AbortSignal) => {
-    if (!controller.signal.aborted) {
-      controller.abort(source.reason);
-    }
-    cleanup();
-  };
-
-  const onPrimaryAbort = () => abortFrom(primary);
-  const onSecondaryAbort = () => abortFrom(secondary);
-
-  if (primary.aborted) {
-    abortFrom(primary);
-    return controller.signal;
-  }
-  if (secondary.aborted) {
-    abortFrom(secondary);
-    return controller.signal;
-  }
-
-  primary.addEventListener("abort", onPrimaryAbort, { once: true });
-  secondary.addEventListener("abort", onSecondaryAbort, { once: true });
-  return controller.signal;
+  return AbortSignal.any([primary, secondary]);
 }
