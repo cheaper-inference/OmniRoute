@@ -8,13 +8,16 @@
 // Every tile is rendered from the TILES data below (name, caption, four target slots, the
 // request dots and their windows); STRATEGIES_GRID_COPY (derived from it) is both the drawn text
 // and what the outlining step shapes. The "16-factor" claim stays in <text> because
-// scripts/check/check-docs-counts-sync.mjs reads it from the raw file. The grid shows 18 of the
-// 21 strategies by design — the README table next to it carries cache-optimized,
-// quota-weighted and expiry-first; do not add or remove tiles here.
+// scripts/check/check-docs-counts-sync.mjs reads it from the raw file; the factor count comes
+// from the facts snapshot (./readmeFacts.mjs). The strategy total (21) stays literal: the title
+// names the strategies the grid leaves out, so it is curated together with TILES. The grid
+// shows 18 of the 21 strategies by design — the README table next to it carries
+// cache-optimized, quota-weighted and expiry-first; do not add or remove tiles here.
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { outlineSvg } from "./readme-outline.mjs";
 import { svgOpen, gridDefs, esc, afterKicker } from "./readme-diagram-theme.mjs";
+import { RF } from "./readmeFacts.mjs";
 
 // Slot geometry inside a 173 × 158 tile: the request leaves (26,79), the four targets sit at
 // SLOT_Y; tracks end at the slot edge, dots stop just before it.
@@ -201,7 +204,7 @@ const TILES = [
   },
   {
     name: "auto",
-    caption: "live 16-factor scoring",
+    caption: `live ${RF.scoringFactors}-factor scoring`,
     dur: 3.6,
     tracks: ["", "solid", "", ""],
     picks: [1],
