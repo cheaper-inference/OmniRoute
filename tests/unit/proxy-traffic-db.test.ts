@@ -112,3 +112,36 @@ test(
     }
   }
 );
+
+test("legacy route keys keep their persisted HMAC format (CodeQL #1237 migration)", () => {
+  // Vectors are the historical HMAC-SHA-256(identitySalt, JSON tuple) hex, computed once with
+  // node:crypto. Persisted proxy_payload_traffic rows are keyed by them, so they must not drift.
+  const filename = path.join(fixtureDir, "fixture-pin.sqlite");
+  const db = createNodeSqliteAdapterFromDatabase(new DatabaseSync(filename), filename);
+  try {
+    db.exec(
+      "CREATE TABLE key_value (namespace TEXT, key TEXT, value TEXT, PRIMARY KEY(namespace,key));"
+    );
+    db.prepare(
+      "INSERT INTO key_value (namespace, key, value) VALUES ('proxyTraffic', 'identitySalt', ?)"
+    ).run("5".repeat(64));
+    const proxy = {
+      type: "http",
+      host: "shared.invalid",
+      port: 8080,
+      username: "fixture-a",
+      password: "fixture-secret-a",
+    };
+    assert.deepEqual(trafficRoute(proxy, db), {
+      key: "legacy:acd1666b72da973db2fd28cd639398d4b6bd83a3cef793060fec68f09c262f4d",
+      proxyId: null,
+      kind: "legacy",
+    });
+    assert.equal(
+      trafficRoute("http://u-fixture:p-fixture@Pin.Invalid:3128/?x=1", db).key,
+      "legacy:f4e575eabde9ed49225f2e810307c60b30059ae1b3b12b1a31f3d05e5003150a"
+    );
+  } finally {
+    db.close();
+  }
+});

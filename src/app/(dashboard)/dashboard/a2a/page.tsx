@@ -8,7 +8,6 @@ import { Switch } from "@omniroute/ui-kit/switch";
 import { Card } from "@/shared/components";
 import Badge from "@/shared/components/Badge";
 import EmptyState from "@/shared/components/EmptyState";
-import { cn } from "@/shared/utils/cn";
 import A2ADashboardPage from "../endpoint/components/A2ADashboard";
 
 type ServiceStatus = { online: boolean; loading: boolean };
@@ -27,7 +26,6 @@ function ServiceToggle({
   toggling: boolean;
 }) {
   const t = useTranslations("a2aDashboard");
-  const tCommon = useTranslations("common");
   const online = enabled && status.online;
   const loading = enabled && status.loading;
 
@@ -44,15 +42,6 @@ function ServiceToggle({
         aria-label={enabled ? t("disableLabel", { label }) : t("enableLabel", { label })}
         title={enabled ? t("disableLabel", { label }) : t("enableLabel", { label })}
       />
-
-      <span
-        className={cn(
-          "text-xs font-medium min-w-[24px]",
-          enabled ? "text-success" : "text-text-muted"
-        )}
-      >
-        {toggling ? "..." : enabled ? tCommon("on") : tCommon("off")}
-      </span>
     </div>
   );
 }

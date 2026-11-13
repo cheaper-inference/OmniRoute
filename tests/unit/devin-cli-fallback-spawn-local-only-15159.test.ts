@@ -185,13 +185,13 @@ test("S-01: the three test routes derive allowLocalSpawn from peer locality", as
   }
 
   // The flag must actually reach testSingleConnection in every route, or deriving
-  // it is pointless. Skip the `async function testSingleConnection(` DECLARATION in
-  // [id]/test by requiring the call to be preceded by `await`, `void` or `[` — the
-  // last covers test-batch, which calls it bare inside `Promise.race([ … ])`. Bounded
-  // window rather than `[^)]*`, which cannot cross the `)` in
+  // it is pointless. Every call counts, whatever precedes it (`await`, a follow-up's
+  // `() =>`, test-batch's bare call inside `Promise.race([ … ])`); only the
+  // `async function testSingleConnection(` DECLARATION in [id]/test is skipped.
+  // Bounded window rather than `[^)]*`, which cannot cross the `)` in
   // `testSingleConnection(id, validationModelId, { … })`.
   for (const [name, source] of sources) {
-    const callMatch = /(?:await\s+|void\s+|\[\s*)testSingleConnection\(/g;
+    const callMatch = /(?<!function\s+)\btestSingleConnection\(/g;
     let sawCall = false;
     let m: RegExpExecArray | null;
     while ((m = callMatch.exec(source)) !== null) {
