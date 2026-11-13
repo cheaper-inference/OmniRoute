@@ -1084,6 +1084,17 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
   if (state.responsesTextSnapshots?.closed) return null;
   if (!chunk) {
     closeResponsesTextSnapshots(state);
+    // EOF is not a terminal event. Without response.completed, a failure or a [DONE] marker, a
+    // cut stream must not end as a clean `stop`: surface it, as the Chat to Responses direction
+    // does. stream.ts sets doneMarkerSeen when it drops the [DONE] line.
+    if (state.started && !state.finishReasonSent && !state.doneMarkerSeen && !state.upstreamError) {
+      state.upstreamError = {
+        status: 502,
+        type: "server_error",
+        code: "stream_early_eof",
+        message: "Upstream stream ended without a terminal marker",
+      };
+    }
     // Iterate every still-open call with a buffered argument payload — argument
     // deltas are buffered for every tool, so an incomplete stream must flush every
     // buffered call, not only the historical uppercase Agent path.
