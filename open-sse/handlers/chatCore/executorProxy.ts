@@ -222,6 +222,8 @@ export async function resolveExecutorWithProxy(
       "UPSTREAM_PROXY",
       `${prov} native failed (${result.response.status}), retrying via ${backendLabel}`
     );
+    // The native response is dropped from here on: release its socket now, not at GC.
+    await result.response.body?.cancel().catch(() => {});
     try {
       return await proxyExec.execute(input);
     } catch (proxyErr) {
