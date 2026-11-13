@@ -5,8 +5,9 @@
  * (kirodotdev/Kiro#11335) with:
  *   403 "This version of Kiro is no longer supported. Please update to the latest
  *        version of Kiro to continue."
- * OmniRoute identified itself as `kiro-ide/1.0.0` (inference) and `KiroIDE-0.10.32`
- * (model catalog) — both below the floor.
+ * OmniRoute identified itself as `kiro-ide/1.0.0` on inference, below the floor. The model
+ * catalog's `KiroIDE-0.10.32` is below it too, but ListAvailableModels is not gated; it stays
+ * on that version (live re-check 2026-11-13, see the catalog tests below).
  *
  * Live matrix, 2026-11-10, real IdC token, invalid model id so nothing is generated:
  *   q.us-east-1             UA kiro-ide/1.0.0      -> 403 version gate
@@ -277,27 +278,83 @@ test("idc connection in us-east-1 uses only the regional Amazon Q host", async (
   assert.deepEqual(urls, ["https://q.us-east-1.amazonaws.com/generateAssistantResponse"]);
 });
 
-test("kiro catalog and inference advertise the same Kiro IDE version", async () => {
-  let catalogUa = "";
-  const fetchImpl = (async (_url: URL | string, init?: RequestInit) => {
-    const headers = (init?.headers ?? {}) as Record<string, string>;
-    catalogUa = String(headers["User-Agent"] ?? headers["user-agent"] ?? "");
-    return new Response(JSON.stringify({ models: [] }), {
-      status: 200,
+/**
+ * ListAvailableModels as measured live on 2026-11-13 (IdC, us-east-1, with a profileArn).
+ * Only the identities that were measured are modelled:
+ *   KiroIDE-0.10.32, origin only   -> 200, full catalog (22 models, Claude included)
+ *   KiroIDE-1.4.121, origin only   -> 400 "Invalid profileArn."
+ *   KiroIDE-1.4.121, + profileArn  -> 200; on the reporter's account a 9-model list, no Claude
+ */
+function liveCatalogUpstream() {
+  const calls: Array<{ url: string; ideVersion: string | null }> = [];
+  const json = (status: number, body: unknown) =>
+    new Response(JSON.stringify(body), {
+      status,
       headers: { "Content-Type": "application/json" },
     });
+  const fetchImpl = (async (url: URL | string, init?: RequestInit) => {
+    const headers = (init?.headers ?? {}) as Record<string, string>;
+    const ua = String(headers["User-Agent"] ?? headers["user-agent"] ?? "");
+    const ideVersion = kiroIdeVersion(ua)?.join(".") ?? null;
+    calls.push({ url: String(url), ideVersion });
+    if (String(url).includes("profileArn=")) {
+      return json(200, { models: [{ modelId: "auto" }, { modelId: "deepseek-3.2" }] });
+    }
+    if (ideVersion === "0.10.32") {
+      return json(200, {
+        models: [
+          { modelId: "auto" },
+          { modelId: "claude-sonnet-4.5" },
+          { modelId: "claude-opus-4.5" },
+          { modelId: "deepseek-3.2" },
+        ],
+      });
+    }
+    return json(400, { message: "Invalid profileArn.", missingPermissions: null, reason: null });
   }) as typeof fetch;
-  await fetchKiroAvailableModels({
-    accessToken: "token",
-    providerSpecificData: { authMethod: "idc", region: "us-east-1", clientId: "abc" },
+  return { calls, fetchImpl };
+}
+
+test("kiro catalog lists the full catalog from the origin-only call, without the profileArn retry", async () => {
+  // #19607 regression: the catalog advertised the inference version (KiroIDE-1.4.121). The
+  // origin-only call then answered 400 "Invalid profileArn.", discovery fell through to the
+  // profileArn retry, and on the reporter's account that returned 9 models with no Claude,
+  // which were saved as the account's catalog. The catalog is not behind the version gate.
+  const { calls, fetchImpl } = liveCatalogUpstream();
+  const result = await fetchKiroAvailableModels({
+    accessToken: "catalog-regression-token",
+    providerSpecificData: {
+      authMethod: "idc",
+      region: "us-east-1",
+      clientId: "catalog-regression-client",
+      profileArn: "arn:aws:codewhisperer:us-east-1:000000000000:profile/TEST",
+    },
     fetchImpl,
   });
-  // One shared version: the catalog advertised KiroIDE-0.10.32 while inference sent
-  // kiro-ide/1.0.0, and each drifted below the floor on its own (#19607).
-  const catalogVersion = kiroIdeVersion(catalogUa);
-  assert.ok(catalogVersion, `catalog UA must carry KiroIDE-<version>, got: ${catalogUa}`);
-  assert.deepEqual(catalogVersion, kiroIdeVersion(KIRO_SDK_USER_AGENT));
-  assert.ok(atLeast(catalogVersion, NEXT_IDE_FLOOR), `catalog UA below floor: ${catalogUa}`);
+  assert.equal(result.source, "api");
+  assert.ok(
+    result.models.some((model) => model.id === "claude-sonnet-4.5"),
+    `catalog lost Claude: ${JSON.stringify(result.models.map((model) => model.id))}`
+  );
+  assert.equal(calls.length, 1, `expected one origin-only call, got ${JSON.stringify(calls)}`);
+  assert.ok(!calls[0].url.includes("profileArn="), "the profileArn retry must not be needed");
+});
+
+test("kiro catalog keeps its own Kiro IDE identity, separate from inference", async () => {
+  const { calls, fetchImpl } = liveCatalogUpstream();
+  await fetchKiroAvailableModels({
+    accessToken: "catalog-identity-token",
+    // Unique seed: the catalog cache is module-level and keyed on it.
+    providerSpecificData: {
+      authMethod: "idc",
+      region: "us-east-1",
+      clientId: "catalog-identity-client",
+    },
+    fetchImpl,
+  });
+  assert.equal(calls[0]?.ideVersion, "0.10.32");
+  // Inference still needs the gated-era identity; the two versions differ on purpose.
+  assert.notDeepEqual(kiroIdeVersion(KIRO_SDK_USER_AGENT), [0, 10, 32]);
 });
 
 test("kiro usage fetches use the regional Amazon Q host in us-east-1", () => {

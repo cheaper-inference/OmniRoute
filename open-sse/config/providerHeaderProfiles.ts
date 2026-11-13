@@ -448,7 +448,8 @@ export function resetCodeBuddyCnVersionCache(): void {
 // 403 "This version of Kiro is no longer supported" (#19607). It reads the User-Agent only.
 // Live on 2026-11-10, q.us-east-1 rejected both `kiro-ide/1.0.0` and `kiro-cli/3.1.0` and
 // served this Kiro IDE identity (the IDE's own User-Agent shape, without its per-machine
-// suffix). The model catalog (kiroModels.ts) shares KIRO_IDE_VERSION so the two cannot drift.
+// suffix). The model catalog (kiroModels.ts) deliberately keeps its own older version: with
+// this one, ListAvailableModels drops the origin-only path and can return a short catalog.
 export const KIRO_IDE_VERSION = "1.4.121";
 export const KIRO_SDK_USER_AGENT =
   "aws-sdk-js/1.0.0 ua/2.1 os/windows#10.0.26200 lang/js md/nodejs#22.21.1 " +
