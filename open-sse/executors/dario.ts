@@ -254,7 +254,7 @@ export class DarioExecutor extends BaseExecutor {
       input.log?.warn?.("DARIO", `Dario rate limited: ${response.status}`);
     }
 
-    return { response, url, headers, transformedBody };
+    return { response, url, headers, transformedBody, transport: "dario" as const };
   }
 
   /**
