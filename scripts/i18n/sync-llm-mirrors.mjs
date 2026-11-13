@@ -16,7 +16,7 @@
  * that would change without writing them.
  */
 
-import { promises as fs } from "node:fs";
+import { promises as fs, realpathSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -118,7 +118,20 @@ export async function syncLlmMirrors({
   return result;
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+/** Was this file run directly (`node …/sync-llm-mirrors.mjs`), even through a symlinked path? */
+function isDirectRun() {
+  const invoked = process.argv[1];
+  if (!invoked) return false;
+  let real = invoked;
+  try {
+    real = realpathSync(invoked);
+  } catch {
+    // keep the path as invoked
+  }
+  return import.meta.url === pathToFileURL(real).href;
+}
+
+if (isDirectRun()) {
   syncLlmMirrors({
     dryRun: process.argv.includes("--dry-run"),
     log: (line) => console.log(line),

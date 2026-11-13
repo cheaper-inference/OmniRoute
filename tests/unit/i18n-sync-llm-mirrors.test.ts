@@ -116,3 +116,20 @@ test("the CLI prints the same lines as before and honours --dry-run", () => {
     "[sync-llm-mirrors] skip ja: missing --- separator",
   ]);
 });
+
+test("the CLI still runs when it is invoked through a symlinked path", () => {
+  // The direct-run guard compares the module URL (real path) with argv[1] (the path as invoked);
+  // a symlinked checkout must not turn the CLI into a silent no-op that exits 0.
+  const root = fixture();
+  write(root, "scripts/i18n/sync-llm-mirrors.mjs", fs.readFileSync(SCRIPT, "utf8"));
+  const link = `${root}-link`;
+  fs.symlinkSync(root, link, "dir");
+  roots.push(link);
+  const result = spawnSync(
+    process.execPath,
+    [path.join(link, "scripts/i18n/sync-llm-mirrors.mjs"), "--dry-run"],
+    { encoding: "utf8" }
+  );
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /done \(dry-run\) — updated=1 unchanged=1 missing=2 \(4 locales\)/);
+});
