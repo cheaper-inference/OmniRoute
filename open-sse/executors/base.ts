@@ -68,6 +68,7 @@ import {
 } from "../services/tokenRefresh.ts";
 import type { ProviderRequestDefaults } from "../services/providerRequestDefaults.ts";
 import { signRequestBody } from "../services/claudeCodeCCH.ts";
+import { repairUnpairedSurrogates } from "../utils/repairUnpairedSurrogates.ts";
 import { normalizeCacheControlTtl } from "../services/claudeCodeConstraints.ts";
 import {
   appendAnthropicBetaHeader,
@@ -1534,6 +1535,14 @@ export class BaseExecutor {
           claudeOAuth: this.provider === "claude" && hasClaudeOAuthToken,
         });
         stripInternalBodyFields(transformedBody);
+
+        // JSON.stringify writes a lone surrogate as `\ud800`. Anthropic serde_json
+        // answers 400 "unexpected end of hex escape" and the turn stops. Repair in
+        // place so the fingerprint path, the plain stringify, and a retry of this
+        // same object all send U+FFFD. A paired emoji stays.
+        if (this.provider === "claude" || usesClaudeCodeProtocol) {
+          repairUnpairedSurrogates(transformedBody);
+        }
 
         const shouldFingerprint =
           isCliCompatEnabled(fingerprintProvider) ||
