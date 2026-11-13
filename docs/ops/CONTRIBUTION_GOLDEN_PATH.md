@@ -41,8 +41,9 @@ behavior you changed.
 - Provider definition in `src/shared/constants/providers/` and its composition in
   `src/shared/constants/providers.ts`.
 - Models and capabilities in `open-sse/config/providerRegistry.ts` or its extracted registry files.
-- Executor/translator selection, OAuth or API-key configuration, dashboard assets, and generated
-  provider reference when applicable.
+- Executor/translator selection, OAuth or API-key configuration and dashboard assets. Do not
+  commit the regenerated `docs/reference/PROVIDER_REFERENCE.md` or README diagrams: the release
+  refresh rewrites them (`check:pr-derived-paths` fails a feature PR that carries them).
 - Public credentials must use `resolvePublicCred()`; error responses must use the shared sanitized
   error helpers. See `docs/security/PUBLIC_CREDS.md` (git; not compiled into `/docs`) and
   [Error Sanitization](../security/ERROR_SANITIZATION.md).
@@ -54,7 +55,7 @@ npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # when the catalog changes; commit the generated diff
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 

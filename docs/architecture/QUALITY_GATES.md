@@ -145,7 +145,7 @@ Runs on every PR to `main`. Blocks merge on failure.
 | `check:route-guard-membership`    | Every route that spawns a child process is classified by `isLocalOnlyPath()` (Hard Rules #15/#17)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Yes                                      |
 | `check:test-discovery`            | Every `*.test.ts` / `*.spec.ts` file in the repo is collected by at least one test runner (ratchet: orphan list in `test-discovery-baseline.json` can only shrink)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Yes                                      |
 | `check:test-tla-order`            | No `node:test` file under `tests/unit` registers a test, hits a top-level `await`, then registers more (#18045; ratchet: `test-tla-order-allowlist.json` can only shrink)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Yes                                      |
-| `check:agent-skills-sync`         | Generated agent-skills artifacts match their source catalog (no drift)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `check:agent-skills-sync`         | Generated agent-skills artifacts match their source catalog (no drift). Release mode checks every skill; a feature PR (`pr` mode) checks only the skills whose generated text it edits — see [Generated files and derived baselines](#generated-files-and-derived-baselines-written-at-release)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `check:provider-asset-provenance` | Provider logos/assets carry a recorded provenance entry                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `lint:json`                       | JSON config files parse and satisfy the repo lint rules                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `typecheck:core`                  | TypeScript compilation without errors (advisory warnings only)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Yes                                      |
@@ -222,7 +222,8 @@ Runs on every PR to `main`. Blocks merge on failure.
 The twelve README SVGs under `docs/diagrams/` are generated (`scripts/docs/gen-readme-<name>.mjs`;
 `npm run docs:readme-diagrams` regenerates all of them). Each has a byte-compare unit test
 (`tests/unit/docs/readme-*-svg.test.ts`, job `test-unit`) that fails when the committed file is
-stale, and `check:docs-counts` reads canonical numbers from their `<text>` nodes — which is why the
+stale — in release mode, or in a PR that edits that SVG; a feature PR leaves the drift to the release
+refresh (see [Generated files and derived baselines](#generated-files-and-derived-baselines-written-at-release)) — and `check:docs-counts` reads canonical numbers from their `<text>` nodes — which is why the
 outlining step keeps every outlined string in the file as invisible `<text>`. The SVG canonical-numbers check reads the files listed in
 `SVG_DIAGRAM_FILES` (`scripts/check/check-docs-counts-sync.mjs`): `docs/diagrams/readme-hero.svg`,
 `free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`, `cli-terminal.svg`,
@@ -230,7 +231,8 @@ outlining step keeps every outlined string in the file as invisible `<text>`. Th
 free-forever, catalog-entry, recurring-pool and scoring-factors claims also read
 `promise-pillars.svg`, `free-tier-budget.svg` and `strategies-grid.svg`. `free-tier-budget.svg`
 draws its figures from the live catalog loader, so a change to `FREE_MODEL_BUDGETS` or to a
-provider display name reds CI until that file is regenerated.
+provider display name leaves that file stale until the release refresh regenerates it (a
+release-mode run reds until then).
 
 ### Job: `i18n-ui-coverage`
 
@@ -434,9 +436,12 @@ git add quality-baseline.json
 ```
 
 The `--update` flag writes the current measured values into `quality-baseline.json`.
-Commit this file alongside the change that improved the metric. A PR that improves a
-metric without updating the baseline will be caught by `--require-tighten` (Fase 6A.5,
-pending implementation).
+Banking an improvement is release/nightly work, not a feature PR's: `--require-tighten`
+(Fase 6A.5) fails an un-banked improvement only in release mode (push, schedule, the release PR,
+local runs). In a feature PR (`pr` gate mode) it prints the improvement as information and
+passes; a regression fails in both modes. During the velocity phase it is advisory everywhere
+(`_policy.requireTighten: false`). See
+[Generated files and derived baselines](#generated-files-and-derived-baselines-written-at-release).
 
 ### CodeQL ratchet: refresh cadence and manual trigger
 
@@ -494,6 +499,51 @@ release branch**: prefer extraction/refactor; rebaseline only with the documente
 justification entry. Never push combination drift onto a contributor PR, and never
 rebaseline per-PR (that hides real regressions). Discriminate first: reproduce the
 red against the pure tip in a probe worktree before assuming your PR caused it.
+
+## Generated files and derived baselines (written at release)
+
+Plan 2026-11-13 ("derived numbers and texts resolved only at release"): a feature PR changes the
+**source** — `src/shared/constants/providers.ts`, `docs/openapi.yaml`, the skill catalog, the
+free-tier catalog, a new e2e spec. It does not regenerate the files computed from that source, and
+it does not bank a measured improvement into a baseline. Those files are rewritten once, by the
+release refresh (`release:refresh-derived`) or by a nightly refresh PR. Before this, every sibling
+PR carried its own regenerated copy and conflicted with the next merge (2026-11-13: 30 of 321 open
+PRs rewrote `PROVIDER_REFERENCE.md`, 26–28 rewrote the README diagrams).
+
+**The guard.** `check:pr-derived-paths` (job `pr-test-policy`) fails a feature PR that touches a
+file of a family in `config/quality/derived-paths/`:
+
+| Family      | Files                                                                                                                                              | Rewritten by                                                                          |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `generated` | `docs/reference/PROVIDER_REFERENCE.md`; the twelve generated README SVGs; `skills/*/references/**`; the `SKILL.md` files that have no custom block | `gen:provider-reference`, `docs:readme-diagrams`, `generate-agent-skills.mjs --apply` |
+| `baselines` | `config/quality/e2e-timings.json`                                                                                                                  | `balance-e2e-shards.mjs --sync` (`syncE2eTimings()`)                                  |
+
+Writers (`release/v*`, `chore/derived-*`, and `chore/bank-ratchet-*` for baselines) are exempt; so is
+a PR that changes only one family plus its companions (for `generated`: the generator scripts, their
+tests and `changelog.d/**`), e.g. a hero layout change with its regenerated SVG. A `SKILL.md` with a
+hand-written `<!-- skill:custom-start -->` block is not in the family: its custom block stays
+editable next to a feature.
+
+**The checks, per gate mode** (`scripts/check/lib/gateMode.mjs`; helper
+`scripts/check/lib/derivedArtifactScope.mjs`):
+
+| Check                                                                  | `release` (push, schedule, release PR, local)  | `pr` (feature PR, queue batch)                                                                                                 |
+| ---------------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `check:agent-skills-sync`                                              | every skill must equal the generator output    | only the skills whose generated text (outside the custom block) or `references/` the PR edits; otherwise `SKIP reason=pr-mode` |
+| README SVG byte-compare tests (`tests/unit/docs/readme-*-svg.test.ts`) | every SVG                                      | only an SVG the PR edits; otherwise skipped with `SKIP reason=pr-mode`                                                         |
+| e2e timings completeness (`tests/unit/balance-e2e-shards.test.ts`)     | every spec has an entry                        | only when the PR edits `e2e-timings.json` (a new spec runs with the median weight)                                             |
+| `check-quality-ratchet.mjs --require-tighten`                          | un-banked improvement fails (unless `_policy`) | improvement reported, never a failure; a regression still fails                                                                |
+
+Release mode is byte-for-byte the behaviour these checks had before the split. The provider-total
+cross-check of `check:docs-counts` ("Provider reference total (doc vs live modules)") is part of the
+counts gate and follows that gate's own modes.
+
+Not in a family, on purpose: policy files decided by people (`gate-manifest.json`, the allowlists,
+`admission-policy.json`, `provider-assets-provenance.jsonl`, `model-lifecycle.json`) and ceilings a
+feature PR may have to edit together with code (`quality-baseline.json` metric entries, the
+typecheck/file-size/complexity baselines, `eslint-suppressions.json` — pruned by the pre-commit
+ESLint run when a PR fixes a frozen violation). `src/i18n/routeNamespaces.generated.json` is also
+generated but stays in feature PRs: the app imports it at run time, so it cannot wait for a refresh.
 
 ## Banking Ratchet Shrinks — the downward direction (#8584)
 
