@@ -9,6 +9,7 @@
  * its throttle forward on success, so the next tick tries again.
  */
 
+import { getUserDatabaseSettings } from "@/lib/db/databaseSettings";
 import { cleanupOldSnapshots } from "@/lib/db/quotaSnapshots";
 import { isWriteLockError } from "@/lib/usage/usageWriteRetry";
 
@@ -23,9 +24,23 @@ type CleanupDeps = {
 const defaultSleep = (ms: number) =>
   new Promise<void>((resolve) => setTimeout(resolve, ms).unref?.());
 
+/**
+ * The dashboard's retention.quotaSnapshots is the one policy. An unreadable setting falls back to
+ * the built-in age, so the sweep still runs instead of stopping the tick.
+ */
+function cleanupWithConfiguredRetention(): number {
+  let retentionDays: number | undefined;
+  try {
+    retentionDays = getUserDatabaseSettings().retention.quotaSnapshots;
+  } catch {
+    retentionDays = undefined;
+  }
+  return cleanupOldSnapshots(retentionDays);
+}
+
 /** Returns false when the cleanup still failed after the last attempt. Never throws. */
 export async function runQuotaSnapshotCleanup(deps: CleanupDeps = {}): Promise<boolean> {
-  const cleanup = deps.cleanup ?? cleanupOldSnapshots;
+  const cleanup = deps.cleanup ?? cleanupWithConfiguredRetention;
   const sleep = deps.sleep ?? defaultSleep;
   for (let attempt = 0; ; attempt++) {
     try {
