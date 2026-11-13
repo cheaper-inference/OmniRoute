@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@omniroute/ui-kit/table";
-import { DataTableShell } from "@omniroute/ui-kit/data-table-shell";
+import { TableLoadingRegion } from "@omniroute/ui-kit/table-loading";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
@@ -359,12 +359,16 @@ export default function TokensPage() {
 
       {/* Transaction History */}
       <Card title={t("tokensTransactionHistory")} icon="history">
-        {/* Kit DataTableShell owns the loading overlay; no filters/pagination on this ledger. */}
-        <DataTableShell loading={historyLoading} loadingLabel={t("loading")}>
+        {/* The Card is the table's frame (#19620): the kit loading region and a borderless
+            Table, not a DataTableShell, whose own border would draw a second frame. */}
+        <TableLoadingRegion loading={historyLoading} loadingLabel={t("loading")}>
           {!historyLoading && history.length === 0 ? (
             <EmptyState icon="history" title={t("tokensNoTransactionsYet")} />
           ) : (
-            <Table scrollbarLabel={t("tokensTransactionHistory")}>
+            <Table
+              scrollbarLabel={t("tokensTransactionHistory")}
+              containerClassName="rounded-none border-0"
+            >
               <TableHeader>
                 <TableRow>
                   <TableHead>{t("type")}</TableHead>
@@ -409,7 +413,7 @@ export default function TokensPage() {
               </TableBody>
             </Table>
           )}
-        </DataTableShell>
+        </TableLoadingRegion>
       </Card>
 
       {/* Invite Panel */}
