@@ -5,6 +5,7 @@ import {
   getVertexHost,
   getVertexModelTransport,
   normalizeVertexModelId,
+  resolveVertexLocation,
 } from "../config/vertexModels.ts";
 
 interface ServiceAccount {
@@ -526,7 +527,10 @@ export class VertexExecutor extends BaseExecutor {
     }
     const project =
       projectIdFromServiceAccount(credentials) || configuredProject || "unknown-project";
-    const region = credentials?.providerSpecificData?.region || "us-central1";
+    const region = resolveVertexLocation(
+      canonicalModel,
+      credentials?.providerSpecificData?.region || "us-central1"
+    );
     return buildProjectScopedVertexUrl(canonicalModel, stream, project, region, opaqueApiKey);
   }
 
