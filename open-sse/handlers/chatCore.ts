@@ -3290,7 +3290,14 @@ async function handleChatCoreInner({
             }
           }
         }
-      } catch {}
+      } catch (err) {
+        // A rejected write must leave a trace: the account stays routable and the next request
+        // would call the same dead connection with nothing to explain why.
+        log?.warn?.(
+          "PROVIDER_FAILURE",
+          `classification not persisted for ${errorConnectionId.slice(0, 8)}: ${sanitizeErrorMessage(err)}`
+        );
+      }
     }
 
     if (headers) updateFromHeaders(provider, errorConnectionId, headers, statusCode, targetModel);
