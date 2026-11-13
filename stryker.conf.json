@@ -822,7 +822,8 @@
       "tests/unit/auth-selection-skips-full-account.test.ts",
       "tests/unit/pipeline-context-overflow-fallback.test.ts",
       "tests/unit/nonstream-leg-retry-errors.test.ts",
-      "tests/unit/nonstream-failure-usage-billed.test.ts"
+      "tests/unit/nonstream-failure-usage-billed.test.ts",
+      "tests/unit/nonstream-claude-extra-usage-sync-not-awaited.test.ts"
     ],
     "nodeArgs": [
       "--import",

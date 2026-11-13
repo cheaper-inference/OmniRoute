@@ -705,7 +705,9 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       await runWithCodexResponseFence(providerResponse, () => onRequestSuccess(), true);
     }
     const successConnectionId = getCurrentConnectionId();
-    await maybeSyncClaudeExtraUsageState({
+    // Fire and forget, as the streaming tail does: the sync can wait up to 10 s on the usage
+    // endpoint, and the helper already swallows its own errors.
+    void maybeSyncClaudeExtraUsageState({
       provider,
       connectionId: successConnectionId,
       providerSpecificData: credentials?.providerSpecificData,
