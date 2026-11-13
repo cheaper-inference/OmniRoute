@@ -2504,6 +2504,7 @@
     "keyCreated": "Emepụtala Igodo API",
     "keyCreatedSuccess": "Emepụtara igodo nke ọma!",
     "keyCreatedNote": "Detuo ma chekwaa igodo a ugbu a — agaghị egosi ya ọzọ.",
+    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "Emechaala",
     "savePermissions": "Chekwaa Ikikere",
     "endpointRestrictions": "Endpoint Ndị E Kwere Ka E Jiri",

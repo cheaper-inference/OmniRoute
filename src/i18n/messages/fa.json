@@ -2504,6 +2504,7 @@
     "keyCreated": "کلید API ایجاد شد",
     "keyCreatedSuccess": "کلید با موفقیت ایجاد شد!",
     "keyCreatedNote": "همین حالا این کلید را کپی و ذخیره کنید — دوباره نمایش داده نخواهد شد.",
+    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "انجام شد",
     "savePermissions": "ذخیره مجوزها",
     "endpointRestrictions": "نقاط پایانی مجاز",

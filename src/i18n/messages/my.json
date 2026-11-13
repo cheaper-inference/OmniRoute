@@ -2504,6 +2504,7 @@
     "keyCreated": "API ကီး ဖန်တီးပြီးပါပြီ",
     "keyCreatedSuccess": "ကီးကို အောင်မြင်စွာ ဖန်တီးပြီးပါပြီ။",
     "keyCreatedNote": "ဤကီးကို ယခုကူးယူပြီး သိမ်းဆည်းပါ — နောက်တစ်ကြိမ် ထပ်မံပြသမည်မဟုတ်ပါ။",
+    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "ပြီးပြီ",
     "savePermissions": "ခွင့်ပြုချက်များကို သိမ်းဆည်းပါ",
     "endpointRestrictions": "ခွင့်ပြုထားသော အဆုံးမှတ်များ",

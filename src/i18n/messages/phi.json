@@ -2504,6 +2504,7 @@
     "keyCreated": "Nagawa ang API Key",
     "keyCreatedSuccess": "Matagumpay na nagawa ang susi!",
     "keyCreatedNote": "Kopyahin at iimbak ang key na ito ngayon — hindi na ito muling ipapakita.",
+    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "Tapos na",
     "savePermissions": "I-save ang Mga Pahintulot",
     "endpointRestrictions": "Mga Pinapayagang Endpoint",

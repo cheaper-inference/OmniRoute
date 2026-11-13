@@ -2504,6 +2504,7 @@
     "keyCreated": "API કી બનાવવામાં આવી",
     "keyCreatedSuccess": "કી સફળતાપૂર્વક બનાવવામાં આવી!",
     "keyCreatedNote": "આ કીને હમણાં જ કૉપિ કરીને સંગ્રહિત કરો — તે ફરીથી બતાવવામાં આવશે નહીં.",
+    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "પૂર્ણ",
     "savePermissions": "પરવાનગીઓ સાચવો",
     "endpointRestrictions": "મંજૂર એન્ડપોઇન્ટ્સ",

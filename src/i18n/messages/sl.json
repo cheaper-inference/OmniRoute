@@ -2504,6 +2504,7 @@
     "keyCreated": "Ključ API je ustvarjen",
     "keyCreatedSuccess": "Ključ je bil uspešno ustvarjen!",
     "keyCreatedNote": "Kopirajte in shranite ta ključ zdaj — ne bo več prikazan.",
+    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "Končano",
     "savePermissions": "Shrani dovoljenja",
     "endpointRestrictions": "Dovoljene končne točke",

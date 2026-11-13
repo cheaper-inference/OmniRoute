@@ -2504,6 +2504,7 @@
     "keyCreated": "API 키가 생성되었습니다.",
     "keyCreatedSuccess": "키가 생성되었습니다!",
     "keyCreatedNote": "지금 이 키를 복사하여 저장하세요. 다시 표시되지 않습니다.",
+    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "완료",
     "savePermissions": "권한 저장",
     "endpointRestrictions": "허용된 엔드포인트",

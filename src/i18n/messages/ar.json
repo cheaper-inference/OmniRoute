@@ -2504,6 +2504,7 @@
     "keyCreated": "تم إنشاء مفتاح API",
     "keyCreatedSuccess": "تم إنشاء المفتاح بنجاح!",
     "keyCreatedNote": "انسخ هذا المفتاح وقم بتخزينه الآن - لن يتم عرضه مرة أخرى.",
+    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "تم",
     "savePermissions": "حفظ الأذونات",
     "endpointRestrictions": "نقاط النهاية المسموح بها",

@@ -303,7 +303,10 @@ export function listUnrenderableComboAccessRules(
   allCombos: ReadonlyArray<{ name: string }>
 ): string[] {
   const renderable = new Set(allCombos.map((combo) => combo.name));
-  return selectedCombos.filter(
-    (name) => name !== ALL_COMBOS_ACCESS_RULE && !renderable.has(name)
-  );
+  return selectedCombos.filter((name) => name !== ALL_COMBOS_ACCESS_RULE && !renderable.has(name));
+}
+
+/** i18n key of the note in the created-key modal: a key that can be revealed later is not one-time. */
+export function keyCreatedNoteKey(allowKeyReveal: boolean): string {
+  return allowKeyReveal ? "keyCreatedNoteRevealable" : "keyCreatedNote";
 }

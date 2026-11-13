@@ -2504,6 +2504,7 @@
     "keyCreated": "API ಕೀ ರಚಿಸಲಾಗಿದೆ",
     "keyCreatedSuccess": "ಕೀ ಯಶಸ್ವಿಯಾಗಿ ರಚಿಸಲಾಗಿದೆ!",
     "keyCreatedNote": "ಈ ಕೀಯನ್ನು ಈಗ ನಕಲಿಸಿ ಮತ್ತು ಸಂಗ್ರಹಿಸಿ — ಇದನ್ನು ಮತ್ತೆ ತೋರಿಸಲಾಗುವುದಿಲ್ಲ.",
+    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "ಮುಗಿಯಿತು",
     "savePermissions": "ಅನುಮತಿಗಳನ್ನು ಉಳಿಸಿ",
     "endpointRestrictions": "ಅನುಮತಿಸಲಾದ ಎಂಡ್ಪಾಯಿಂಟ್ಗಳು",

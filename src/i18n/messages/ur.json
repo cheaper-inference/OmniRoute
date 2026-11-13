@@ -2504,6 +2504,7 @@
     "keyCreated": "API کلید بن گئی",
     "keyCreatedSuccess": "کلید کامیابی سے بن گئی!",
     "keyCreatedNote": "اس کلید کو ابھی کاپی اور محفوظ کریں — یہ دوبارہ نہیں دکھائی جائے گی۔",
+    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "مکمل",
     "savePermissions": "اجازتیں محفوظ کریں",
     "endpointRestrictions": "اجازت یافتہ اینڈ پوائنٹس",

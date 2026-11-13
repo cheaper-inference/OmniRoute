@@ -2504,6 +2504,7 @@
     "keyCreated": "Το κλειδί API δημιουργήθηκε",
     "keyCreatedSuccess": "Το κλειδί δημιουργήθηκε επιτυχώς!",
     "keyCreatedNote": "Αντιγράψτε και αποθηκεύστε αυτό το κλειδί τώρα — δεν θα εμφανιστεί ξανά.",
+    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "Τέλος",
     "savePermissions": "Αποθήκευση δικαιωμάτων",
     "endpointRestrictions": "Επιτρεπόμενα endpoints",

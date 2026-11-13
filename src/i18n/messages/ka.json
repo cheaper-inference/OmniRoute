@@ -2504,6 +2504,7 @@
     "keyCreated": "API გასაღები შეიქმნა",
     "keyCreatedSuccess": "გასაღები წარმატებით შეიქმნა!",
     "keyCreatedNote": "დააკოპირეთ და შეინახეთ ეს გასაღები ახლავე — ის ხელახლა აღარ გამოჩნდება.",
+    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "დასრულება",
     "savePermissions": "ნებართვების შენახვა",
     "endpointRestrictions": "ნებადართული საბოლოო წერტილები",

@@ -2504,6 +2504,7 @@
     "keyCreated": "Ufunguo wa API Umeundwa",
     "keyCreatedSuccess": "Ufunguo umeundwa kwa mafanikio!",
     "keyCreatedNote": "Nakili na uhifadhi ufunguo huu sasa — hautaonyeshwa tena.",
+    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "Imekamilika",
     "savePermissions": "Hifadhi Ruhusa",
     "endpointRestrictions": "Endpoint Zinazoruhusiwa",

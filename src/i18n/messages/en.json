@@ -2504,6 +2504,7 @@
     "keyCreated": "API Key Created",
     "keyCreatedSuccess": "Key created successfully!",
     "keyCreatedNote": "Copy and store this key now — it won't be shown again.",
+    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "Done",
     "savePermissions": "Save Permissions",
     "endpointRestrictions": "Allowed Endpoints",

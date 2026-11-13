@@ -2504,6 +2504,7 @@
     "keyCreated": "Cheia API creată",
     "keyCreatedSuccess": "Cheie creată cu succes!",
     "keyCreatedNote": "Copiați și stocați această cheie acum - nu va fi afișată din nou.",
+    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "Gata",
     "savePermissions": "Salvare permisiuni",
     "endpointRestrictions": "Endpointuri permise",

@@ -2504,6 +2504,7 @@
     "keyCreated": "Kľúč API bol vytvorený",
     "keyCreatedSuccess": "Kľúč bol úspešne vytvorený!",
     "keyCreatedNote": "Skopírujte a uložte tento kľúč teraz – už sa nebude zobrazovať.",
+    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "Hotovo",
     "savePermissions": "Uložiť povolenia",
     "endpointRestrictions": "Povolené koncové body",

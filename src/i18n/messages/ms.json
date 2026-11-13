@@ -2504,6 +2504,7 @@
     "keyCreated": "Kunci API Dicipta",
     "keyCreatedSuccess": "Kunci berjaya dibuat!",
     "keyCreatedNote": "Salin dan simpan kunci ini sekarang — ia tidak akan ditunjukkan lagi.",
+    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "Selesai",
     "savePermissions": "Simpan Kebenaran",
     "endpointRestrictions": "Titik Akhir yang Dibenarkan",

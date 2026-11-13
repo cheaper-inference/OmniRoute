@@ -2504,6 +2504,7 @@
     "keyCreated": "បានបង្កើតសោ API",
     "keyCreatedSuccess": "បានបង្កើតសោដោយជោគជ័យ!",
     "keyCreatedNote": "ចម្លង និងរក្សាទុកសោនេះឥឡូវនេះ — វានឹងមិនត្រូវបានបង្ហាញម្តងទៀតទេ។",
+    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "រួចរាល់",
     "savePermissions": "រក្សាទុកសិទ្ធិ",
     "endpointRestrictions": "ចំណុចបញ្ចប់ដែលបានអនុញ្ញាត",

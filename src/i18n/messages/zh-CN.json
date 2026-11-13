@@ -2504,6 +2504,7 @@
     "keyCreated": "API 密钥已创建",
     "keyCreatedSuccess": "密钥创建成功！",
     "keyCreatedNote": "请立即复制并保存此密钥，它不会再次显示。",
+    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "完成",
     "savePermissions": "保存权限",
     "endpointRestrictions": "允许的端点",

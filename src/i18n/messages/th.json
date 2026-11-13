@@ -2504,6 +2504,7 @@
     "keyCreated": "สร้างคีย์ API แล้ว",
     "keyCreatedSuccess": "สร้างคีย์สำเร็จแล้ว!",
     "keyCreatedNote": "คัดลอกและจัดเก็บคีย์นี้ทันที ซึ่งจะไม่แสดงอีก",
+    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "เสร็จแล้ว",
     "savePermissions": "บันทึกสิทธิ์",
     "endpointRestrictions": "เอ็นด์พอยต์ที่อนุญาต",

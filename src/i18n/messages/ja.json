@@ -2504,6 +2504,7 @@
     "keyCreated": "APIキーが作成されました",
     "keyCreatedSuccess": "キーが正常に作成されました。",
     "keyCreatedNote": "このキーをコピーして保存してください。再度表示されなくなります。",
+    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "完了",
     "savePermissions": "権限の保存",
     "endpointRestrictions": "許可されたエンドポイント",

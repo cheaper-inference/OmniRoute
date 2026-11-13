@@ -2504,6 +2504,7 @@
     "keyCreated": "API-võti on loodud",
     "keyCreatedSuccess": "Võti on edukalt loodud!",
     "keyCreatedNote": "Kopeerige ja salvestage see võti kohe — seda ei näidata enam.",
+    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "Valmis",
     "savePermissions": "Salvesta õigused",
     "endpointRestrictions": "Lubatud lõpp-punktid",

@@ -2504,6 +2504,7 @@
     "keyCreated": "API raktas sukurtas",
     "keyCreatedSuccess": "Raktas sėkmingai sukurtas!",
     "keyCreatedNote": "Nukopijuokite ir išsaugokite šį raktą dabar — daugiau jis nebus rodomas.",
+    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "Atlikta",
     "savePermissions": "Išsaugoti leidimus",
     "endpointRestrictions": "Leidžiami galiniai taškai",
