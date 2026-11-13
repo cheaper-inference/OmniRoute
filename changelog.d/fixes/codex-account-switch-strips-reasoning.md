@@ -1,0 +1,1 @@
+- **fix(codex):** When a Codex request rotates to another account after a 429, the reasoning `encrypted_content` (and its server id) is now dropped from the body before the first send on the new account, so that send no longer fails with a guaranteed 400 `invalid_encrypted_content` and a wasted round trip. Without a switch the body is unchanged.
