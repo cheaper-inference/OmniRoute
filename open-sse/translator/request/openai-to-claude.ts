@@ -232,6 +232,14 @@ export function openaiToClaudeRequest(
     }
   }
 
+  // Forced tools and extended thinking cannot be combined on Claude-compatible APIs.
+  const requestedToolChoice = extractAllowedTools(body.tool_choice);
+  const thinkingToolChoice = requestedToolChoice
+    ? convertAllowedToolsChoice(requestedToolChoice)
+    : convertOpenAIToolChoice(body.tool_choice);
+  const forcedType = thinkingToolChoice?.type;
+  if (!isKimiCoding && forcedType && !["auto", "none"].includes(forcedType)) delete result.thinking;
+
   // Fit thinking budget within the model's output cap and ensure
   // max_tokens > budget_tokens for all thinking configurations (#627).
   // Replaces the previous unconditional `budget + 8192` inflation, which
