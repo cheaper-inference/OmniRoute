@@ -221,6 +221,13 @@ function buildOptions(
     // LLM proxy: no built-in CLI tools; client tools arrive via MCP below.
     tools: [],
     permissionMode: "dontAsk",
+    // Cache + fidelity: isolation mode keeps the conversation prefix
+    // deterministic (no server-side CLAUDE.md/settings/hooks injected into
+    // every request) and verbatim prompts skip the CLI's per-turn attachment
+    // pass, so identical history prefixes hit the upstream prompt cache
+    // (verbatim needs CLI >= 2.1.248; the vendored CLI is newer).
+    settingSources: [],
+    verbatimPrompts: true,
     includePartialMessages: true,
     abortController,
   };
