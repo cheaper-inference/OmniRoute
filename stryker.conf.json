@@ -806,6 +806,7 @@
       "tests/unit/issue-18600-muse-followup-isolation.test.ts",
       "tests/unit/universal-handoff-api-key-scope.test.ts",
       "tests/unit/combo-avoid-stalled-account.test.ts",
+      "tests/unit/pii-masker-off-skips-scan.test.ts",
       "tests/unit/muse-policy-account-marking.test.ts",
       "tests/unit/muse-refresh-review-regressions.test.ts",
       "tests/unit/stream-lifecycle-timer-cleanup-18669.test.ts",
