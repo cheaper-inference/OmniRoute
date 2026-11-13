@@ -1,7 +1,7 @@
 /**
  * Shared combo (model combo) handling with fallback support
  * Supports: priority, weighted, round-robin, random, least-used, cost-optimized,
- * reset-aware, reset-window, strict-random, auto, fill-first, p2c, lkgp,
+ * reset-aware, reset-window, expiry-first, strict-random, auto, fill-first, p2c, lkgp,
  * context-optimized, context-relay, and fusion strategies
  */
 
@@ -249,6 +249,36 @@ const DEFAULT_MODEL_P95_MS: Record<string, number> = {
   "deepseek-chat": 2000,
 };
 const MIN_HISTORY_SAMPLES = 10;
+const AUTO_LATENCY_STATS_CACHE_MS = 10_000;
+let autoLatencyStatsCache: {
+  stats: Record<string, HistoricalLatencyStatsEntry>;
+  expiresAt: number;
+} | null = null;
+let autoLatencyStatsInFlight: Promise<Record<string, HistoricalLatencyStatsEntry>> | null = null;
+
+/** Test-only: forget the cached 24-hour latency stats read. */
+export function resetAutoLatencyStatsCache(): void {
+  autoLatencyStatsCache = null;
+}
+
+async function loadAutoLatencyStats(): Promise<Record<string, HistoricalLatencyStatsEntry>> {
+  if (autoLatencyStatsCache && autoLatencyStatsCache.expiresAt > Date.now()) {
+    return autoLatencyStatsCache.stats;
+  }
+  if (!autoLatencyStatsInFlight) {
+    autoLatencyStatsInFlight = (async () => {
+      const { getModelLatencyStats } = await import("../../src/lib/usageDb");
+      return getModelLatencyStats({ windowHours: 24, minSamples: 3, maxRows: 10000 });
+    })();
+  }
+  try {
+    const stats = await autoLatencyStatsInFlight;
+    autoLatencyStatsCache = { stats, expiresAt: Date.now() + AUTO_LATENCY_STATS_CACHE_MS };
+    return stats;
+  } finally {
+    autoLatencyStatsInFlight = null;
+  }
+}
 
 function calculateTargetContextAffinity(
   target: ResolvedComboTarget,
@@ -366,12 +396,7 @@ export async function buildAutoCandidates(
   const quotaPromises = new Map<string, Promise<unknown>>();
   let historicalLatencyStats: Record<string, HistoricalLatencyStatsEntry> = {};
   try {
-    const { getModelLatencyStats } = await import("../../src/lib/usageDb");
-    historicalLatencyStats = await getModelLatencyStats({
-      windowHours: 24,
-      minSamples: 3,
-      maxRows: 10000,
-    });
+    historicalLatencyStats = await loadAutoLatencyStats();
   } catch {
     // keep empty stats — auto-combo will use runtime + bootstrap signals
   }

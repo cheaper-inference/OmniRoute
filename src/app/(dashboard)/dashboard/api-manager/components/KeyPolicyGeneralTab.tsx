@@ -30,7 +30,7 @@ export default function KeyPolicyGeneralTab() {
 
       <div className="flex items-start justify-between gap-3 p-3.5 rounded-lg border border-error/20 bg-error/5">
         <div className="flex flex-col gap-1">
-          <p className="text-sm font-bold text-error">{t("bannedStatus")}</p>
+          <p className="text-sm font-semibold text-error">{t("bannedStatus")}</p>
           <p className="text-xs text-error">{t("templateBannedStatusDesc")}</p>
         </div>
         <Toggle

@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "Afbalancerer resterende kvote mod 5 timer og ugentlige nulstillinger, og runder derefter lignende resultater",
     "quotaWeighted": "Kvotevægtet",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Udløb først",
+    "expiryFirstDesc": "Bruger først den konto, hvis kvote ellers ville udløbe ubrugt: den største rest med den nærmeste nulstilling går først.",
     "strictRandom": "Strikt tilfældig",
     "strictRandomDesc": "Blandet kortbunke — bruger hver model én gang, før der blandes igen",
     "fusion": "Fusion",
@@ -4033,6 +4035,11 @@
         "when": "Du ruter på tværs af flere konti med kvotetelemetri og forskellige nulstillingsvinduer.",
         "avoid": "Kvotetelemetri er ikke tilgængelig for de fleste konti.",
         "example": "Foretrækker en 60 % ugentlig kontonulstilling i morgen frem for en 80 % kontonulstilling senere."
+      },
+      "expiry-first": {
+        "when": "Du ruter på tværs af konti, hvis kvoter nulstilles efter forskellige tidsplaner, og vil bruge kvote, der ellers ville udløbe ubrugt.",
+        "avoid": "Kvotetelemetri mangler for de fleste konti, eller du har brug for en stabil rækkefølge, der ignorerer nulstillingstidspunktet.",
+        "example": "Foretræk en konto med 80 % tilbage, der nulstilles om 39 minutter, frem for en konto med 48 % tilbage, der nulstilles om 9 timer — kvoten tæt på udløb bruges, før den går tabt."
       },
       "strict-random": {
         "when": "Brug denne, når du ønsker en helt jævn fordeling — hver model bruges én gang, før nogen gentages.",
@@ -4249,6 +4256,13 @@
         "tip1": "Brug eksplicitte kontotrin eller konto-tag-routing for udbydere med kvotetelemetri.",
         "tip2": "Juster session versus ugentlige vægte, når kortvarig udmattelse er mere risikabelt.",
         "tip3": "Hold bindebåndet lille, så tilsvarende konti stadig roterer nogenlunde."
+      },
+      "expiry-first": {
+        "title": "Udløbende kvote først",
+        "description": "Rangerer konti efter udnyttelsespres: høj resterende kvote tæt på nulstillingsfristen går først.",
+        "tip1": "Kræver kvotetelemetri fra udbyderen; konti uden den beholder deres angivne prioritetsrækkefølge.",
+        "tip2": "Næsten lige scorer roterer inden for lighedsbåndet, så søsterkonti stadig deler belastningen.",
+        "tip3": "Afgræns rangeringen til den kvotepulje, som hver model faktisk faktureres mod."
       },
       "strict-random": {
         "title": "Fordeling som et blandet kortspil",
@@ -4481,7 +4495,7 @@
     "spend7d": "Spend7D",
     "avgCostPerRequest": "Avg Cost Per Request",
     "noCostDataDescription": "No Cost Data Description",
-    "spendToday": "Forbrug i dag",
+    "spendToday": "Forbrug 1 dag",
     "overviewLoadFailed": "Overview Load Failed",
     "overviewDescription": "Overview Description",
     "providerShare": "Udbyderandel",
@@ -5679,6 +5693,7 @@
     "usageTracking": "Brugssporing",
     "securityDesc": "Indstil en adgangskode for at beskytte dit dashboard, eller spring over indtil videre.",
     "securityDescSkipWarning": "⚠️ Uden en adgangskode kan du ikke tilføje udbydere under opsætningen. Du kan tilføje dem senere fra kontrolpanelet, når du har angivet en adgangskode.",
+    "passwordAlreadySet": "Der er allerede angivet en adgangskode til dashboardet. Du kan ændre den senere under Indstillinger.",
     "providerDesc": "Tilslut din første AI-udbyder. Du kan tilføje flere senere.",
     "providerRequiresPassword": "Du skal først angive en adgangskode for at tilføje udbydere. Gå tilbage til sikkerhedstrinnet, og angiv en adgangskode, eller tilføj udbydere senere fra kontrolpanelet.",
     "apiKeyRequired": "API-nøgle (påkrævet)",
@@ -6051,6 +6066,8 @@
     "importFromModels": "Importer fra /models",
     "modelsImported": "{count} modeller importeret",
     "allModelsAlreadyImported": "Alle modeller er allerede importeret",
+    "providerPublishesNoModelList": "Denne udbyder offentliggør ingen modelliste — det indbyggede katalog er opdateret",
+    "modelsNoLongerListed": "{count, plural, one {# model er ikke længere opført af udbyderen} other {# modeller er ikke længere opført af udbyderen}}",
     "noNewModelsToImport": "Ingen nye modeller at importere — alle modeller findes allerede i registreret eller brugerdefineret liste",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Modelopdagelse mislykkedes {time}",
@@ -6736,6 +6753,7 @@
     "antigravityProjectIdPlaceholder": "mit-gcp-projekt-id",
     "grokWebCookiePlaceholder": "Pladsholder for Grok-webcookie",
     "herokuBaseUrlHint": "Tip til Heroku-basis-URL",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Skjul e-mail",
     "imageProviders": "Billedudbydere",
     "videoProviders": "Videogenerering",
@@ -7234,7 +7252,8 @@
       "kiro": "Gratis niveau: 50 kreditter/måned (~25K–100K tokens). ⚠️ Kiro ToS forbyder brug af tredjeparts proxy/harness.",
       "codex": "Forbind OpenAI Codex med det eksisterende OAuth-flow.",
       "qwen": "Forbind Qwen Code med det eksisterende OAuth-flow.",
-      "github-models": "Opret et GitHub PAT med 'models: read'-scope på github.com/settings/tokens"
+      "github-models": "Opret et GitHub PAT med 'models: read'-scope på github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} accepterer udbyder-native model-id'er. Importer fra /models eller tilføj brugerdefinerede id'er til routing.",
     "bedrockModelsDescription": "Amazon Bedrock-modeller er omfattet af AWS-regionen. Importer fra /models eller tilføj Bedrock-model-id'er aktiveret i det valgte område.",
@@ -8092,6 +8111,8 @@
     "resetAwareDesc": "Foretrækker konti med sund resterende kvote og nærmere nulstillinger",
     "quotaWeighted": "Kvotevægtet",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Udløb først",
+    "expiryFirstDesc": "Bruger først den konto, hvis kvote ellers ville udløbe ubrugt: den største rest med den nærmeste nulstilling går først.",
     "strictRandom": "Strengt tilfældig",
     "strictRandomDesc": "Blandet kortbunke — bruger hver konto én gang, før der blandes igen",
     "stickyLimit": "Grænse for fastholdelse",
@@ -8804,6 +8825,8 @@
     "retentionUsageHistory": "Brugshistorik (dage)",
     "retentionMemoryEntries": "Hukommelsesindgange (dage)",
     "retentionXpAuditLog": "XP-revisionslog (dage)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Gem indstillinger for opbevaring",
     "storageAutoVacuumMode": "Automatisk vakuumtilstand",
     "storageScheduledVacuum": "Planlagt vakuum",
@@ -10254,7 +10277,11 @@
     "mappingInvalidJson": "Ugyldig JSON.",
     "mappingMustBeObject": "Mappingen skal være et JSON-objekt, ikke et array eller en primitiv værdi.",
     "mappingValueMustBeString": "Værdien for nøglen “{key}” skal være en streng.",
-    "save": "Gem"
+    "save": "Gem",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -11981,6 +12008,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "Opdater",
     "clearAll": "Clear All",
+    "clearAllConfirm": "Alle poster i denne cache bliver slettet. Dette kan ikke fortrydes.",
     "memoryEntries": "Hukommelsesposter",
     "memoryEntriesSub": "LRU i hukommelsen",
     "dbEntries": "Databaseposter",
@@ -12865,6 +12893,8 @@
     },
     "attempts": "forsøg",
     "detail": {
+      "tabOverview": "Oversigt",
+      "tabPayloads": "Nyttelaster",
       "omittedHttpAttempts": "{count} HTTP-afsendelser blev ikke gemt",
       "noHttpResponse": "Intet HTTP-svar blev observeret",
       "transportError": "Transportfejl",
