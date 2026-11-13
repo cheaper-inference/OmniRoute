@@ -25,7 +25,9 @@ export function releaseChatAdmissionWhenDone(
   options: ReleaseChatAdmissionOptions = {}
 ): Response {
   if (!lease) return response;
-  const isStreaming = response.headers.get("content-type")?.includes("text/event-stream");
+  // Ollama-compatible routes stream NDJSON for minutes; hold the lease for those as well.
+  const contentType = response.headers.get("content-type") ?? "";
+  const isStreaming = /text\/event-stream|application\/x-ndjson/i.test(contentType);
   if (!isStreaming || !response.body) {
     lease.release();
     return response;

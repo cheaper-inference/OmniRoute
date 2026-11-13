@@ -38,6 +38,7 @@
   "tap": {
     "testFiles": [
       "tests/unit/admission-wakeups-keepalive-decoder.test.ts",
+      "tests/unit/admission-completions-ndjson.test.ts",
       "tests/unit/chatgpt-account-routing.test.ts",
       "tests/unit/chatgpt-siwc-lifecycle-contract-15201.test.ts",
       "tests/unit/chatgpt-siwc.test.ts",
