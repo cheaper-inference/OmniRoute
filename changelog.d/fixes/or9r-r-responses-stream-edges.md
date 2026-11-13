@@ -1,0 +1,1 @@
+- **fix(responses):** Responses to Chat streams now send the buffered arguments of a tool call that never got `output_item.done`, report `length` when such a call was cut by `max_output_tokens`, and Chat to Responses keeps object-valued tool arguments.

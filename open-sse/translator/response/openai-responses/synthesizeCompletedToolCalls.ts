@@ -19,6 +19,7 @@ interface CompletionState {
   toolCallIndex?: number;
   currentToolCallId?: unknown;
   incompleteReason?: unknown;
+  toolCallCut?: boolean;
   roleEmitted?: boolean;
   finishReasonSent?: boolean;
   finishReason?: FinishReason;
@@ -45,7 +46,9 @@ interface AssistantRoleChunk {
  * state coupling at all.
  */
 export function computeFinishReason(state: CompletionState): FinishReason {
-  if ((state.toolCallIndex || 0) > 0 || state.currentToolCallId) return "tool_calls";
+  // A call still open at max_output_tokens / content_filter has partial arguments: report the cut.
+  const callCut = state.toolCallCut === true;
+  if (!callCut && ((state.toolCallIndex || 0) > 0 || state.currentToolCallId)) return "tool_calls";
   // #15489: a `response.incomplete` terminal is a truncated turn, not a clean stop.
   if (state.incompleteReason === "max_output_tokens") return "length";
   if (state.incompleteReason === "content_filter") return "content_filter";
@@ -178,6 +181,57 @@ function buildToolCallChunks(
   state.currentToolCallArgsBuffer = "";
   state.currentToolCallId = null;
 
+  return chunks;
+}
+
+interface OpenCallEntry {
+  index: number | null;
+  name?: string;
+  argsBuffer?: string;
+  needsNormalization?: boolean;
+}
+
+interface OpenCallState extends CompletionState {
+  toolCallByCallId?: unknown;
+  toolSchemas?: ReadonlyMap<string, unknown>;
+}
+
+/**
+ * Arguments chunks for every call still open (no `output_item.done`), taken from its argument
+ * buffer or, when nothing was buffered, from the matching item of a terminal snapshot.
+ * Used at end of stream and on `response.completed` / `response.incomplete`, so a call that
+ * never got its `.done` does not reach the client with empty arguments.
+ */
+export function drainOpenToolCallArgs(
+  state: OpenCallState,
+  snapshotOutput: unknown[] = []
+): Record<string, unknown>[] {
+  if (!(state.toolCallByCallId instanceof Map)) return [];
+  const chunks: Record<string, unknown>[] = [];
+  for (const [callId, entry] of state.toolCallByCallId as Map<string, OpenCallEntry>) {
+    if (entry.index == null) continue;
+    const snapshot = snapshotOutput.find(
+      (item) => (item as { call_id?: unknown } | null)?.call_id === callId
+    ) as { arguments?: unknown } | undefined;
+    const raw =
+      entry.argsBuffer || (typeof snapshot?.arguments === "string" ? snapshot.arguments : "");
+    if (!raw) continue;
+    const toolName = entry.name ?? "";
+    const stripped = stripEmptyOptionalToolArgs(raw, toolName, state.toolSchemas?.get(toolName));
+    const argsStr = typeof stripped === "string" ? stripped : JSON.stringify(stripped ?? {});
+    chunks.push({
+      ...baseChunk(state),
+      choices: [
+        {
+          index: 0,
+          delta: { tool_calls: [{ index: entry.index, function: { arguments: argsStr } }] },
+          finish_reason: null,
+        },
+      ],
+    });
+    entry.argsBuffer = "";
+    entry.needsNormalization = false;
+  }
   return chunks;
 }
 
