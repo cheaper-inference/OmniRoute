@@ -244,7 +244,8 @@ function toClovaToolModeMessage(message: unknown): JsonRecord {
   if (record.role === "assistant" && toolCalls.length > 0) {
     return {
       role: "assistant",
-      content: "",
+      // Keep the text the assistant wrote before the call; "" only when there is none.
+      content: contentToString(record.content),
       toolCalls: toolCalls.map(toClovaToolCall),
     };
   }
