@@ -324,11 +324,20 @@ export function createResponsesApiTransformStream(
 
   // Helper to start reasoning
   const startReasoning = (controller, requestedIdx) => {
-    if (!state.reasoningId) {
+    // A done item takes no new deltas: reasoning that returns after content opens a new item at a
+    // free output_index (the old one already went out, and a delta on it would be lost).
+    const reopen = !!state.reasoningId && state.reasoningDone;
+    if (!state.reasoningId || reopen) {
       // Reasoning that follows a tool call must not reuse the tool call's output_index.
-      const idx = isToolOutputIndex(requestedIdx)
-        ? nextFreeMessageIndex(requestedIdx)
-        : requestedIdx;
+      const idx =
+        reopen || isToolOutputIndex(requestedIdx)
+          ? nextFreeMessageIndex(requestedIdx)
+          : requestedIdx;
+      if (reopen) {
+        state.reasoningBuf = "";
+        state.reasoningDone = false;
+        state.reasoningPartAdded = false;
+      }
       state.reasoningId = `rs_${state.responseId}_${idx}`;
       state.reasoningIndex = idx;
 
