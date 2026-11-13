@@ -55,7 +55,7 @@ export const CURATED_SKILLS: CuratedSkillEntry[] = [
     id: "omni-providers",
     name: "Providers",
     description:
-      "Manage provider connections, API keys, OAuth flows, and connection tests via the REST API. List, add, update, remove, and test AI provider integrations across OmniRoute's 393-provider catalog.",
+      "Manage provider connections, API keys, OAuth flows, and connection tests via the REST API. List, add, update, remove, and test AI provider integrations across OmniRoute's provider catalog.",
     category: "api",
     area: "providers",
     icon: "key",
@@ -73,7 +73,7 @@ export const CURATED_SKILLS: CuratedSkillEntry[] = [
     id: "omni-combos-routing",
     name: "Combos & Routing",
     description:
-      "Create and manage routing combos with 21 strategies (priority, weighted, round-robin, Auto-combo, and more). Configure fallback chains, test routing outcomes, and retrieve combo metrics.",
+      "Create and manage routing combos with every routing strategy (priority, weighted, round-robin, Auto-combo, and more). Configure fallback chains, test routing outcomes, and retrieve combo metrics.",
     category: "api",
     area: "combos-routing",
     icon: "route",
@@ -212,7 +212,7 @@ export const CURATED_SKILLS: CuratedSkillEntry[] = [
     id: "omni-mcp",
     name: "MCP Server",
     description:
-      "Connect to the OmniRoute MCP server (110 tools, 3 transports: SSE/stdio/HTTP). Covers routing, cache, compression, memory, skills, providers, and audit tools across 33 permission scopes.",
+      "Connect to the OmniRoute MCP server (3 transports: SSE/stdio/HTTP). Covers routing, cache, compression, memory, skills, providers, and audit tools across its permission scopes.",
     category: "api",
     area: "mcp",
     icon: "electrical_services",

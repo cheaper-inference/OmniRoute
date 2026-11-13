@@ -33,7 +33,7 @@ Pokretanje testova: pogledajte [Testiranje](#testing) u nastavku (prvo pokrenite
 
 ## Projekat ukratko
 
-**OmniRoute** — objedinjeni AI proxy/ruter. Jedna krajnja tačka, 381 LLM dobavljač, automatski fallback.
+**OmniRoute** — objedinjeni AI proxy/ruter. Jedna krajnja tačka, stotine LLM dobavljača, automatski fallback.
 
 - API rute — `src/app/api/v1/` (ulazne tačke Next.js App Routera)
 - Rukovaoci — `open-sse/handlers/` (obrada zahtjeva: chat, embeddings itd.)
@@ -41,13 +41,15 @@ Pokretanje testova: pogledajte [Testiranje](#testing) u nastavku (prvo pokrenite
 - Prevoditelji — `open-sse/translator/` (konverzija formata OpenAI↔Claude↔Gemini)
 - Transformator — `open-sse/transformer/` (Responses API ↔ Chat Completions)
 - Servisi — `open-sse/services/` (kombinovano rutiranje, ograničenja brzine, keširanje itd.)
-- Baza podataka — `src/lib/db/` (SQLite domenski moduli, 228 migracija)
+- Baza podataka — `src/lib/db/` (SQLite domenski moduli, verzionirane migracije u `src/lib/db/migrations/`)
 - Domena/pravila — `src/domain/` (mehanizam pravila, pravila troškova, logika rezervnog prebacivanja)
-- MCP server — `open-sse/mcp-server/` (110 alata: 45 kanonskih + moduli za memoriju/vještine/GitHub/pool/gamifikaciju/plugin/Notion/Obsidian/lokalni korpus/RTK; 3 transporta: stdio / SSE / Streamable HTTP; 33 opsega)
+- MCP server — `open-sse/mcp-server/` (kanonski alati + moduli za memoriju/vještine/GitHub/pool/gamifikaciju/plugin/Notion/Obsidian/lokalni korpus/RTK; 3 transporta: stdio / SSE / Streamable HTTP; pristup po opsezima)
 - A2A server — `src/lib/a2a/` (protokol agenata JSON-RPC 2.0)
 - Vještine — `src/lib/skills/` (proširivi okvir vještina); Memorija — `src/lib/memory/` (trajna konverzacijska memorija)
 
 Monorepo: `src/` (Next.js 16 aplikacija), `open-sse/` (radni prostor mehanizma za streaming), `electron/` (desktop aplikacija), `tests/`, `bin/` (ulazna tačka CLI-ja).
+
+Brojevi (dobavljači, migracije, MCP alati i opsezi, strategije usmjeravanja, faktori bodovanja, mode packovi) su izvedene vrijednosti: čitajte ih naredbom `npm run facts` (jedna vrijednost: `npm run facts -- --key=providers`), nikada iz proze. PR-ovi s funkcionalnostima ih ne pišu; `npm run release:refresh-derived` prepisuje dokumentaciju pri izdanju.
 
 ---
 
@@ -67,7 +69,7 @@ Klijent → /v1/chat/completions (Next.js ruta)
 
 API rute slijede dosljedan obrazac: `Route → CORS preflight → Zod body validation → Optional auth (extractApiKey/isValidApiKey) → API key policy enforcement → Handler delegation (open-sse)`. Nema globalnog Next.js posredničkog softvera — presretanje je specifično za rutu.
 
-**Kombinirano usmjeravanje** (`open-sse/services/combo.ts`): 21 javna strategija (priority, weighted, fill-first, round-robin, p2c, random, least-used, cost-optimized, reset-aware, reset-window, expiry-first, headroom, quota-weighted, strict-random, auto, lkgp, context-optimized, cache-optimized, context-relay, fusion, pipeline). Svaki cilj poziva `handleSingleModel()` (obavija `handleChatCore()` rukovanjem greškama za svaki cilj + provjerama prekidača strujnog kola); strategija `fusion` umjesto toga paralelno šalje zahtjeve panelu modela, a model-sudija sintetizira jedan konačni odgovor (`open-sse/services/fusion.ts`). Bodovanje automatske kombinacije prema 16 faktora + puna tabela strategija: `docs/routing/AUTO-COMBO.md`; 3 sloja otpornosti: `docs/architecture/RESILIENCE_GUIDE.md`.
+**Kombinirano usmjeravanje** (`open-sse/services/combo.ts`): javne strategije su `ROUTING_STRATEGY_VALUES` u `src/shared/constants/routingStrategies.ts` (`quota-share` je interna). Svaki cilj poziva `handleSingleModel()` (obavija `handleChatCore()` rukovanjem greškama za svaki cilj + provjerama prekidača strujnog kola); strategija `fusion` umjesto toga paralelno šalje zahtjeve panelu modela, a model-sudija sintetizira jedan konačni odgovor (`open-sse/services/fusion.ts`). Bodovanje automatske kombinacije (`DEFAULT_WEIGHTS` u `open-sse/services/autoCombo/scoring.ts`) + puna tabela strategija: `docs/routing/AUTO-COMBO.md`; 3 sloja otpornosti: `docs/architecture/RESILIENCE_GUIDE.md`.
 
 ---
 
@@ -204,7 +206,7 @@ Potpuni detaljni postupci: [`docs/architecture/MODIFICATION_SCENARIOS.md`](docs/
 Za svaku netrivijalnu izmjenu prvo pročitajte odgovarajući detaljni vodič:
 
 - Navigacija repozitorijem — `docs/architecture/REPOSITORY_MAP.md` · Arhitektura — `docs/architecture/ARCHITECTURE.md` · Inženjerska referenca — `docs/architecture/CODEBASE_DOCUMENTATION.md`
-- Auto-Combo (bodovanje prema 16 faktora, 20 strategija) — `docs/routing/AUTO-COMBO.md` · Ponovno izvođenje zaključivanja — `docs/routing/REASONING_REPLAY.md`
+- Auto-Combo (faktori bodovanja, tabela strategija) — `docs/routing/AUTO-COMBO.md` · Ponovno izvođenje zaključivanja — `docs/routing/REASONING_REPLAY.md`
 - Otpornost (3 mehanizma + otklanjanje grešaka) — `docs/architecture/RESILIENCE_GUIDE.md`
 - Postupci izmjena — `docs/architecture/MODIFICATION_SCENARIOS.md`
 - Okvir vještina — `docs/frameworks/SKILLS.md` · Radar (sloj kataloga besplatnih modela) — `docs/frameworks/RADAR.md` · Sistem memorije (FTS5 + Qdrant) — `docs/frameworks/MEMORY.md`
