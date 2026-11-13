@@ -42,6 +42,33 @@ export function countSkips(src) {
 }
 
 /**
+ * Skips condicionais por modo de gate (plano 2026-11-13, artefatos derivados):
+ * `{ skip: releaseOnlyUnlessTouched("<artefato>") }` roda o teste em modo release e, num PR,
+ * só quando o PR edita o artefato gerado (scripts/check/lib/derivedArtifactScope.mjs). Não é
+ * `.skip(` nem `{ skip: true }`, então countSkips() não o vê; este contador existe para o gate
+ * relatar o efeito numa linha própria em vez de responder só "OK".
+ */
+export function countModeConditionalSkips(src) {
+  return (src.match(/\breleaseOnlyUnlessTouched\s*\(/g) || []).length;
+}
+
+/**
+ * Linhas de relatório (REPORT-ONLY) para aumento líquido de skips condicionais por modo.
+ * Cada entrada: { file, baseModeSkips?, headModeSkips? } (default 0).
+ */
+export function evaluateModeConditionalSkips(perFile) {
+  const lines = [];
+  for (const f of perFile) {
+    const delta = (f.headModeSkips ?? 0) - (f.baseModeSkips ?? 0);
+    if (delta > 0)
+      lines.push(
+        `${f.file}: ${delta} novo(s) skip(s) condicional(is) por modo de gate (releaseOnlyUnlessTouched — roda em modo release; num PR só quando o PR edita o artefato)`
+      );
+  }
+  return lines;
+}
+
+/**
  * (6A.10 subcheck 3) Conta tautologias que mantêm os asserts no texto mas nunca
  * verificam nada real:
  *   - expect(true).toBe(true)
@@ -569,6 +596,8 @@ function main() {
       headSkips: countSkips(headSrc),
       baseExtTaut: countExtendedTautologies(baseSrc),
       headExtTaut: countExtendedTautologies(headSrc),
+      baseModeSkips: countModeConditionalSkips(baseSrc),
+      headModeSkips: countModeConditionalSkips(headSrc),
     });
   }
 
@@ -620,6 +649,8 @@ function main() {
       headSkips: countSkips(headSrc),
       baseExtTaut: countExtendedTautologies(baseSrc),
       headExtTaut: countExtendedTautologies(headSrc),
+      baseModeSkips: countModeConditionalSkips(baseSrc),
+      headModeSkips: countModeConditionalSkips(headSrc),
     });
   }
 
@@ -677,6 +708,18 @@ function main() {
         reimplementedFlags.map((f) => "  ⚠ " + f).join("\n") +
         `\n  → importe o símbolo/função dono e asserte através dele (evita contrato duplicado ` +
         `que diverge silenciosamente). Report-only por enquanto — não falha o gate.`
+    );
+  }
+
+  // Report-only: skips condicionais por modo de gate não reprovam (a decisão de bloqueá-los é
+  // do dono), mas nunca ficam escondidos atrás de um "OK" simples.
+  const modeSkipLines = evaluateModeConditionalSkips(perFile);
+  if (modeSkipLines.length) {
+    console.warn(
+      `[test-masking] (report-only) ${modeSkipLines.length} teste(s) ganharam skip condicional por modo de gate:\n` +
+        modeSkipLines.map((f) => "  ⚠ " + f).join("\n") +
+        `\n  → em PR a comparação do artefato editado roda em \`npm run check:generated-artifacts\` ` +
+        `(histórico completo). Report-only — não falha o gate.`
     );
   }
 
