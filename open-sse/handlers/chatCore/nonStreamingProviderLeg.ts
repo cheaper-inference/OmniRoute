@@ -184,6 +184,25 @@ function summarizeUsage(raw: unknown): ProviderLegUsage | null {
   };
 }
 
+// Errors chatCore maps itself (lease fence 409, semaphore 429). Every send must surface them as is.
+function rethrowIfOwnedByCaller(error: unknown): void {
+  const code = (error as { code?: unknown } | null)?.code;
+  if (
+    code === "SEMAPHORE_TIMEOUT" ||
+    code === "SEMAPHORE_QUEUE_FULL" ||
+    code === "MUSE_OWNERSHIP_REJECTED"
+  ) {
+    throw error;
+  }
+}
+
+// A re-send also surfaces a client abort: the first send turns it into a 499 result, but a
+// swallowed abort in a re-send would otherwise come back as a provider 502.
+function rethrowIfResendMustStop(error: unknown): void {
+  rethrowIfOwnedByCaller(error);
+  if (isLocalStreamLifecycleError(error)) throw error;
+}
+
 function legError(
   status: number,
   message: string,
@@ -531,15 +550,7 @@ export async function runNonStreamingProviderLeg(
       );
     }
   } catch (error) {
-    if (
-      !!error &&
-      typeof error === "object" &&
-      ((error as { code?: unknown }).code === "SEMAPHORE_TIMEOUT" ||
-        (error as { code?: unknown }).code === "SEMAPHORE_QUEUE_FULL" ||
-        (error as { code?: unknown }).code === "MUSE_OWNERSHIP_REJECTED")
-    ) {
-      throw error;
-    }
+    rethrowIfOwnedByCaller(error);
     // `abort(reason)` can reject with a raw string that has no `name`/`status`, so
     // `error.name === "AbortError"` is too narrow — that shape fell through to the 502
     // provider-failure default (#7907). chatCore classified this through
@@ -750,7 +761,8 @@ export async function runNonStreamingProviderLeg(
               });
             }
           }
-        } catch {
+        } catch (resendError) {
+          rethrowIfResendMustStop(resendError);
           // fallback also failed - fall through to standard error
         }
       }
@@ -825,7 +837,8 @@ export async function runNonStreamingProviderLeg(
               });
             }
           }
-        } catch {
+        } catch (resendError) {
+          rethrowIfResendMustStop(resendError);
           // fallback also failed - fall through to standard error
         }
       }
@@ -960,7 +973,11 @@ export async function runNonStreamingProviderLeg(
   // -- ClinePass envelope unwrap + retry --------------------------------------
   if (provider === "clinepass") {
     let { body: unwrapped, error: envError } = unwrapClinepassEnvelope(responseBody, provider);
-    if (envError && /empty/i.test(envError.message || "")) {
+    if (
+      envError &&
+      (envError.status == null || envError.status >= 500) &&
+      /^empty (content|response)\b/i.test(envError.message || "")
+    ) {
       log?.warn?.("RETRY", "clinepass returned empty content, retrying once after 2s");
       const sleepFn = input.sleep ?? DEFAULT_CLINEPASS_sleep;
       await sleepFn(2000);
@@ -1033,13 +1050,15 @@ export async function runNonStreamingProviderLeg(
             }
           }
         }
-      } catch {
+      } catch (resendError) {
+        rethrowIfResendMustStop(resendError);
         // retry failed, fall through
       }
     }
     if (envError) {
+      const envStatus = envError.status ?? 502;
       const receipt = buildReceipt(input, {
-        httpStatus: 502,
+        httpStatus: envStatus,
         errorType: "clinepass_envelope_error",
         usage: null,
         termination: "provider_error",
@@ -1050,7 +1069,7 @@ export async function runNonStreamingProviderLeg(
         model: currentModel,
       });
       const errorResult = legError(
-        502,
+        envStatus,
         envError.message,
         envError,
         null,
@@ -1204,7 +1223,8 @@ export async function runNonStreamingProviderLeg(
               usage: null,
             };
           }
-        } catch {
+        } catch (resendError) {
+          rethrowIfResendMustStop(resendError);
           const receipt = buildReceipt(input, {
             httpStatus: 502,
             errorType: "empty_content",
