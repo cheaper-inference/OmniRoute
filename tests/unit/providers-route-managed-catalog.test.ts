@@ -3,16 +3,33 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "undici";
 import { makeManagementSessionRequest } from "../helpers/managementSession.ts";
+import { settleConnectionFollowUpsAfterEachTest } from "../helpers/connectionFollowUps.ts";
+
+settleConnectionFollowUpsAfterEachTest();
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-providers-managed-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.JWT_SECRET = "test-jwt-secret-for-managed-providers";
 process.env.INITIAL_PASSWORD = "admin-secret";
 
+// Each connection this file creates is auto-tested in the background. None of those probes may
+// reach the network, or a service that happens to listen on a fixture's localhost port.
+const previousDispatcher = getGlobalDispatcher();
+const network = new MockAgent();
+network.disableNetConnect();
+setGlobalDispatcher(network);
+
 const core = await import("../../src/lib/db/core.ts");
 const providersRoute = await import("../../src/app/api/providers/route.ts");
 const modelsDb = await import("../../src/lib/db/models.ts");
+
+// After the imports: loading the route loads proxyFetch, which replaces globalThis.fetch with its
+// own fetch on explicit dispatchers (the MockAgent above never sees those). Without this stub the
+// auto-tests reach the real providers, and the settle hook above depends on their response time.
+const previousFetch = globalThis.fetch;
+globalThis.fetch = async () => Response.json({ data: [], models: [] });
 
 function resetDb() {
   core.resetDbInstance();
@@ -24,7 +41,10 @@ test.beforeEach(() => {
   resetDb();
 });
 
-test.after(() => {
+test.after(async () => {
+  globalThis.fetch = previousFetch;
+  setGlobalDispatcher(previousDispatcher);
+  await network.close();
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });

@@ -587,6 +587,7 @@ export default function ProxyConfigModal({
           {/* Proxy Type Selector */}
           <Field label={t("source")}>
             <SegmentedControl
+              semantics="radio"
               aria-label={t("source")}
               value={mode}
               onChange={(next) => setMode(next as typeof mode)}
@@ -616,6 +617,7 @@ export default function ProxyConfigModal({
             <>
               <Field label={t("proxyType")}>
                 <SegmentedControl
+                  semantics="radio"
                   aria-label={t("proxyType")}
                   className="w-full"
                   value={proxyType}

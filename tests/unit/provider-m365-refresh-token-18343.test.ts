@@ -6,6 +6,9 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { makeManagementSessionRequest } from "../helpers/managementSession.ts";
+import { settleConnectionFollowUpsAfterEachTest } from "../helpers/connectionFollowUps.ts";
+
+settleConnectionFollowUpsAfterEachTest();
 
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-m365-refresh-18343-"));
 process.env.DATA_DIR = dataDir;
