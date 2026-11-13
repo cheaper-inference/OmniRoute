@@ -75,6 +75,13 @@ import { collectDeclaredToolNames } from "../translator/response/openai-response
 import { findDeclaredToolName } from "../services/declaredToolCasing.ts";
 import { appendToolCallNameDelta } from "./toolCallName.ts";
 import {
+  advancePendingLineBytes,
+  mergeNativeToolCalls,
+  summaryTextTailMarker,
+  trackClaudeNativeToolCall,
+  type StreamToolCall as ToolCall,
+} from "./streamSummaryHelpers.ts";
+import {
   generateSessionId,
   markToolFinish,
   consumeToolFinishTime,
@@ -279,13 +286,6 @@ type TranslateState = ReturnType<typeof initState> & {
   } | null;
 };
 
-type ToolCall = {
-  id: string | null;
-  index: number;
-  type: string;
-  function: { name: string; arguments: string };
-};
-
 type UsageTokenRecord = Record<string, number>;
 
 function asRecord(value: unknown): JsonRecord {
@@ -429,9 +429,14 @@ function addNamespaceChildNames(names: Set<string>, children: unknown[]): void {
   }
 }
 
+// An EMPTY set means the request body declared no tools at all: quoted
+// `[Tool call: ...]` text can never be a real call. `null` means unknown (no body,
+// or tools whose names could not be read), which keeps the permissive behaviour.
 function extractAllowedToolNames(body: unknown): Set<string> | null {
+  if (!asPlainRecord(body)) return null;
   const record = asRecord(body);
   const tools = record.tools;
+  if (tools == null || (Array.isArray(tools) && tools.length === 0)) return new Set();
   if (!Array.isArray(tools)) return null;
   const names = new Set<string>();
   for (const tool of tools) {
@@ -454,7 +459,7 @@ function collectPassthroughTextualToolCall(
 ): ToolCall | null {
   const parsed = parseTextualToolCallFromContent(text);
   if (!parsed) return null;
-  if (allowedToolNames?.size && !allowedToolNames.has(parsed.name)) return null;
+  if (allowedToolNames && !allowedToolNames.has(parsed.name)) return null;
   const key = `textual:${toolCalls.size}`;
   const toolCall: ToolCall = {
     id: `call_${Date.now()}_${toolCalls.size}`,
@@ -920,6 +925,8 @@ export function createSSEStream(options: StreamOptions = {}) {
     !clientExpectsResponsesStream && !clientExpectsClaudeStream && !clientExpectsAntigravityStream;
 
   let buffer = "";
+  /** UTF-8 bytes of the unfinished line held in `buffer`, counted per chunk. */
+  let pendingLineBytes = 0;
   let usage: UsageLike | null = null;
   const mergePassthroughCacheCreationUsage = (value: unknown) => {
     if (!value) return;
@@ -963,7 +970,10 @@ export function createSSEStream(options: StreamOptions = {}) {
   /** Passthrough: accumulate tool_calls deltas for call log responseBody */
   const passthroughToolCalls = new Map<string, ToolCall>();
   let passthroughToolCallSeq = 0;
+  /** Passthrough: native Claude tool_use blocks, kept apart so the wire never sees them as textual calls */
+  const passthroughNativeToolCalls = new Map<string, ToolCall>();
   const allowedToolNames = extractAllowedToolNames(body);
+  const noToolsDeclared = allowedToolNames?.size === 0;
   let skipPassthroughEvent = false;
   const thinkState = initThinkState(mode === STREAM_MODE.PASSTHROUGH, provider, model);
 
@@ -1191,8 +1201,9 @@ export function createSSEStream(options: StreamOptions = {}) {
       const incomingContent = delta.content;
       const bufferedCandidate = passthroughBufferedTextualToolCallContent + incomingContent;
       if (
-        passthroughBufferedTextualToolCallContent ||
-        containsTextualToolCallCandidate(incomingContent)
+        !noToolsDeclared &&
+        (passthroughBufferedTextualToolCallContent ||
+          containsTextualToolCallCandidate(incomingContent))
       ) {
         const parsedCandidate = parseTextualToolCallCandidate(bufferedCandidate);
         if (parsedCandidate?.kind === "complete") {
@@ -1579,6 +1590,15 @@ export function createSSEStream(options: StreamOptions = {}) {
     });
   };
 
+  const abortOversizePendingLine = (controller: TransformStreamDefaultController<Uint8Array>) => {
+    buffer = "";
+    abortWithPublicStreamError(
+      controller,
+      "Upstream SSE line exceeded the size limit",
+      "invalid_sse_payload"
+    );
+  };
+
   const emitTranslatedFailureAndAbort = (
     controller: TransformStreamDefaultController<Uint8Array>,
     payload: unknown
@@ -1648,10 +1668,15 @@ export function createSSEStream(options: StreamOptions = {}) {
         const now = Date.now();
         timing.markByte();
         lastChunkTime = now;
+        const nextPendingLineBytes = advancePendingLineBytes(pendingLineBytes, chunk);
+        if (nextPendingLineBytes === null) return abortOversizePendingLine(controller);
+        pendingLineBytes = nextPendingLineBytes;
         const text = decoder.decode(chunk, { stream: true });
         buffer += text;
         reqLogger?.appendProviderChunk?.(text);
-        const nlIdx = buffer.lastIndexOf("\n");
+        // Scan only the new text: a line without a newline must not be re-walked per chunk.
+        const textNlIdx = text.lastIndexOf("\n");
+        const nlIdx = textNlIdx >= 0 ? buffer.length - text.length + textNlIdx : -1;
         const lines = nlIdx >= 0 ? buffer.slice(0, nlIdx).split("\n") : [];
         if (nlIdx >= 0) buffer = buffer.slice(nlIdx + 1);
 
@@ -1871,8 +1896,9 @@ export function createSSEStream(options: StreamOptions = {}) {
                     const bufferedCandidate =
                       passthroughBufferedTextualToolCallContent + incomingDelta;
                     if (
-                      passthroughBufferedTextualToolCallContent ||
-                      containsTextualToolCallCandidate(incomingDelta)
+                      !noToolsDeclared &&
+                      (passthroughBufferedTextualToolCallContent ||
+                        containsTextualToolCallCandidate(incomingDelta))
                     ) {
                       const parsedCandidate = parseTextualToolCallCandidate(bufferedCandidate);
                       if (parsedCandidate?.kind === "complete") {
@@ -2146,12 +2172,13 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // before it can seed an empty `response.completed.response.output`,
                   // in case a future code path pushes a commentary item into it
                   // without going through the response.completed branch above.
-                  const backfillCandidates = shouldDropResponsesCommentary
-                    ? filterResponsesCommentaryFromItems(
-                        passthroughResponsesOutputItems,
-                        isResponsesCommentaryMessageItem
-                      ).items
-                    : passthroughResponsesOutputItems;
+                  const backfillCandidates =
+                    shouldDropResponsesCommentary && parsed.type === "response.completed"
+                      ? filterResponsesCommentaryFromItems(
+                          passthroughResponsesOutputItems,
+                          isResponsesCommentaryMessageItem
+                        ).items
+                      : passthroughResponsesOutputItems;
                   const backfilled = backfillResponsesCompletedOutput(parsed, backfillCandidates);
                   const usageNormalized = normalizeUsage(parsed);
                   if (
@@ -2215,6 +2242,8 @@ export function createSSEStream(options: StreamOptions = {}) {
                     toolNameMap,
                     clientTools ?? (body as JsonRecord | null)?.tools
                   );
+                  // Native tool_use blocks only feed the completion summary; the wire is unchanged.
+                  trackClaudeNativeToolCall(passthroughNativeToolCalls, parsed);
                   // Track content length and accumulate from Claude format
                   if (parsed.delta?.text) {
                     totalContentLength += parsed.delta.text.length;
@@ -2315,6 +2344,9 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // sanitizeStreamingChunk, so the raw line must not be forwarded.
                   const hadArrayContent = Array.isArray(rawDelta?.content);
                   const nativeFailure = nativeFinishFailure(parsed); // before sanitize drops it
+                  const rawToolCallCount = Array.isArray(rawDelta?.tool_calls)
+                    ? rawDelta.tool_calls.length
+                    : 0;
 
                   // Client sanitization may remove diagnostic status fields.
                   // Capture provider evidence first without changing token totals.
@@ -2389,6 +2421,8 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // upstream delta did not already carry.
                   const needsReserialization =
                     hadArrayContent ||
+                    // sanitize dropped empty tool_call placeholders from this chunk
+                    rawToolCallCount > (delta?.tool_calls?.length ?? 0) ||
                     splitMixedReasoningContent ||
                     thinkParsed ||
                     hadReasoningAlias ||
@@ -3293,18 +3327,25 @@ export function createSSEStream(options: StreamOptions = {}) {
                 if (reasoning) {
                   message.reasoning_content = reasoning;
                 }
-                if (passthroughToolCalls.size > 0) {
-                  message.tool_calls = [...passthroughToolCalls.values()].sort(
-                    (a, b) => a.index - b.index
-                  );
+                // Native Claude / Responses calls already went to the client as wire events;
+                // list them here too so logs and the cache keep them (the wire is unchanged).
+                const summaryToolCalls = mergeNativeToolCalls(
+                  [...passthroughToolCalls.values()],
+                  [...passthroughNativeToolCalls.values()],
+                  passthroughResponsesOutputItems,
+                  passthroughResponsesPendingFunctionCalls.values()
+                );
+                const summaryHasToolCalls = passthroughHasToolCalls || summaryToolCalls.length > 0;
+                if (summaryToolCalls.length > 0) {
+                  message.tool_calls = summaryToolCalls;
                 }
                 // Hardening: log empty assistant response after tool completion
                 // for observability — helps diagnose Copilot "Sorry, no response was returned"
-                if (passthroughHasToolCalls && !content.trim() && !reasoning.trim()) {
+                if (summaryHasToolCalls && !content.trim() && !reasoning.trim()) {
                   console.warn(
                     `[STREAM] Empty assistant response after tool_calls completion (${provider || "provider"}:${model || "unknown"}) — sessionId=${sessionId}`
                   );
-                } else if (passthroughHasToolCalls && !content.trim() && reasoning.trim()) {
+                } else if (summaryHasToolCalls && !content.trim() && reasoning.trim()) {
                   message.content = "";
                 }
 
@@ -3312,7 +3353,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                   choices: [
                     {
                       message,
-                      finish_reason: passthroughHasToolCalls ? "tool_calls" : "stop",
+                      finish_reason: summaryHasToolCalls ? "tool_calls" : "stop",
                     },
                   ],
                   usage: {
@@ -3321,6 +3362,10 @@ export function createSSEStream(options: StreamOptions = {}) {
                     total_tokens: prompt + completion,
                   },
                   _streamed: true,
+                  ...summaryTextTailMarker(
+                    passthroughAccumulatedContent,
+                    passthroughAccumulatedReasoning
+                  ),
                 };
                 outcomeRecorded = true;
                 onComplete({
@@ -3731,6 +3776,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                   total_tokens: prompt + completion,
                 },
                 _streamed: true,
+                ...summaryTextTailMarker(state?.accumulatedContent, state?.accumulatedReasoning),
               };
               outcomeRecorded = true;
               onComplete({
