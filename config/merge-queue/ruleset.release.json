@@ -1,0 +1,31 @@
+{
+  "_comment": "omni-queue ruleset template for ONE release branch (docs/ops/OMNI_QUEUE.md). Applied by scripts/merge-queue/apply-ruleset.mjs, which replaces {{base}}, suffixes the name with the branch and sets the App bypass actor_id from --app-id. Keys starting with '_' are stripped before the REST call. No required-checks rule on purpose: the queue validates the candidate, not the PR.",
+  "name": "omni-queue release protection",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": {
+    "ref_name": {
+      "include": ["refs/heads/{{base}}"],
+      "exclude": []
+    }
+  },
+  "rules": [
+    { "type": "deletion" },
+    { "type": "non_fast_forward" },
+    {
+      "type": "pull_request",
+      "parameters": {
+        "required_approving_review_count": 0,
+        "dismiss_stale_reviews_on_push": false,
+        "require_code_owner_review": false,
+        "require_last_push_approval": false,
+        "required_review_thread_resolution": false,
+        "allowed_merge_methods": ["merge", "squash", "rebase"]
+      }
+    }
+  ],
+  "bypass_actors": [
+    { "actor_id": null, "actor_type": "Integration", "bypass_mode": "always" },
+    { "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always" }
+  ]
+}
