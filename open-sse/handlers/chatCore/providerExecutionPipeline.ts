@@ -169,6 +169,7 @@ export interface ProviderExecutionPipelineInput {
   ) => string | null | Promise<string | null>;
 }
 
+const MAX_RETRY_AFTER_MS = 24 * 60 * 60 * 1000;
 const LEASE_MISMATCH_STATUS = 409;
 const LEASE_MISMATCH_CODE = "LEASE_CONNECTION_MISMATCH";
 
@@ -183,9 +184,12 @@ function retryAfterMsFrom(attempt: ChatCoreExecutorResult): number | null {
   // is looked up as "retry-after"; it does not drop the field.
   const raw = normalizeHeaders(attempt.response?.headers)["retry-after"];
   if (raw == null || raw === "") return null;
-  const parsed = Number.parseFloat(String(raw));
-  if (!Number.isFinite(parsed) || parsed < 0) return null;
-  return parsed * 1000;
+  // RFC 9110: delta-seconds or an HTTP-date. Cap at 24 h so the cooldown date stays valid.
+  const text = String(raw).trim();
+  const seconds = Number.parseFloat(text);
+  const ms = /^\d+(\.\d+)?$/.test(text) ? seconds * 1000 : Date.parse(text) - Date.now();
+  if (!Number.isFinite(ms)) return null;
+  return Math.min(Math.max(ms, 0), MAX_RETRY_AFTER_MS);
 }
 
 /**
@@ -386,6 +390,9 @@ export async function runProviderExecutionPipeline(
   const allowedConnections = connection.allowedConnections ?? null;
   const excludedIds: string[] = [];
   let attempts = 0;
+  // Only the very first wire send may join an in-flight identical request: its dedup hash was
+  // built for the original model and credentials, so a resend (refresh, fallback) must not.
+  let firstSend = true;
   let lastAttempt: ChatCoreExecutorResult | null = null;
   let antigravityByopRotationPending = false;
   let authRefreshPending = false;
@@ -447,7 +454,8 @@ export async function runProviderExecutionPipeline(
     const before = assertLease(policy, connection, wire.currentModel);
     if (before) return before;
 
-    const attempt = await sendProviderAttempt(wire.currentModel, attempts === 0);
+    const attempt = await sendProviderAttempt(wire.currentModel, firstSend);
+    firstSend = false;
     lastAttempt = attempt;
     const state = bindCodexResponseCallbacks(attempt.response, baseState);
     if (!isCodexResponseCurrent(attempt.response)) {
@@ -508,7 +516,7 @@ export async function runProviderExecutionPipeline(
           await state.onCodexScopeRateLimited?.({
             failedConnectionId: failedId,
             model: wire.currentModel || target.requestedModel || null,
-            rateLimitedUntil: new Date(Date.now() + (retryAfterMs || 60_000)).toISOString(),
+            rateLimitedUntil: new Date(Date.now() + (retryAfterMs ?? 60_000)).toISOString(),
             credentials: connection.getCredentials(),
           });
         }

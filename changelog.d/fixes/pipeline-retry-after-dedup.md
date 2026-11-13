@@ -1,0 +1,1 @@
+- **fix(sse):** the Codex account rotation reads a `Retry-After` given as an HTTP date, treats `Retry-After: 0` as no wait, and caps the cooldown at 24 hours instead of throwing `Invalid time value` on a huge value. A resend after an auth refresh or a model fallback no longer joins an in-flight identical request.
