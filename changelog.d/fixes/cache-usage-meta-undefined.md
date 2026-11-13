@@ -1,0 +1,1 @@
+- **fix(sse):** the cache-usage log meta no longer records `cacheReadTokens: 0, cacheCreationTokens: 0` for a response whose usage object has cache keys set to `undefined`, and Gemini cache evidence reads `unreported` instead of `invalid` in that case.

@@ -821,7 +821,8 @@
       "tests/unit/auth-selection-skips-full-account.test.ts",
       "tests/unit/claude-request-not-allowed-no-credential-refresh.test.ts",
       "tests/unit/chatcore-plugin-onrequest.test.ts",
-      "tests/unit/tool-cap-keeps-forced-and-called-tools.test.ts"
+      "tests/unit/tool-cap-keeps-forced-and-called-tools.test.ts",
+      "tests/unit/cache-usage-meta-undefined-keys.test.ts"
     ],
     "nodeArgs": [
       "--import",
