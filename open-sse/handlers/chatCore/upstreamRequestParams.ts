@@ -4,7 +4,8 @@
  * Extracted byte-identically from handleChatCore, after the tool-calling capability check:
  * reconcile `max_tokens` / `max_completion_tokens` with what the model accepts (#1961, #6912),
  * strip `store` where the target rejects it, drop `stream_options` for OpenAI Responses
- * upstreams, and clamp the output-token fields to the provider's API cap (#711). Every step
+ * upstreams, and clamp the output-token fields to the provider's API cap (#711) or, for openai and
+ * anthropic, to the model's own output cap. Every step
  * mutates the translated body in place, exactly as the inline block did. The handler evaluates
  * supportsMaxTokens() (src/lib/modelCapabilities) at the same point and passes the answer in, so
  * this engine leaf takes no new open-sse → src import edge.
@@ -23,6 +24,7 @@ export function normalizeUpstreamRequestParams({
   model,
   targetFormat,
   providerSpecificData,
+  modelOutputCap,
   log,
 }: {
   translatedBody: Record<string, unknown>;
@@ -31,6 +33,8 @@ export function normalizeUpstreamRequestParams({
   model: string;
   targetFormat: string;
   providerSpecificData: Record<string, unknown> | null | undefined;
+  /** The model's own output-token cap (override, synced catalog, registry), when known. */
+  modelOutputCap?: number | null;
   log?: LoggerLike;
 }): void {
   // Rename max_tokens to max_completion_tokens if not supported (#1961)
@@ -69,7 +73,14 @@ export function normalizeUpstreamRequestParams({
   // Provider-specific max_tokens caps (#711)
   // Some providers reject requests when max_tokens exceeds their API limit.
   // Cap before sending to avoid upstream HTTP 400 errors.
-  const providerCap = PROVIDER_MAX_TOKENS[provider];
+  // For these providers the table value is a family-wide guess, not an API limit: the real
+  // limit is per model (gpt-5.5 and claude-opus-4-6 allow 128000), so the model's own cap
+  // decides when it is known. The other table entries are real provider limits.
+  const perModelProvider = provider === "openai" || provider === "anthropic";
+  const providerCap =
+    perModelProvider && modelOutputCap && modelOutputCap > 0
+      ? modelOutputCap
+      : PROVIDER_MAX_TOKENS[provider];
   if (providerCap) {
     for (const field of ["max_tokens", "max_completion_tokens"] as const) {
       if (typeof translatedBody[field] === "number" && translatedBody[field] > providerCap) {

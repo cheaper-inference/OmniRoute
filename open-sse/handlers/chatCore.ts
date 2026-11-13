@@ -2599,6 +2599,7 @@ async function handleChatCoreInner({
       | Record<string, unknown>
       | null
       | undefined,
+    modelOutputCap,
     log,
   });
 

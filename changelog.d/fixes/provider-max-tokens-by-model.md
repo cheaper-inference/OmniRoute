@@ -1,0 +1,1 @@
+- **fix(sse):** The OpenAI and Anthropic output-token clamp now uses the model's own output cap (for example 128000 for `gpt-5.5` and `claude-opus-4-6`) instead of the fixed 16384 and 65536 provider values, so a large `max_tokens` or `max_completion_tokens` is no longer cut. A model with no known cap keeps the old provider value.
