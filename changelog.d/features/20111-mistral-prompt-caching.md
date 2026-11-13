@@ -1,0 +1,1 @@
+- **feat(sse):** Mistral now counts as an automatic-prefix-caching provider (cache-aware compression guard, cache stats) and gets a stable `prompt_cache_key` on both Chat Completions and Responses bodies ([#20111](https://github.com/cheaper-inference/OmniRoute/pull/20111)) — thanks @RayJW
