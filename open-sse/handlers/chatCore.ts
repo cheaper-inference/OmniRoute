@@ -1784,7 +1784,7 @@ async function handleChatCoreInner({
           principalId: compressionPrincipalId,
           // F3.3: stream per-engine progress live (best-effort) before compression.completed.
           // Event emission extracted to chatCore/compressionLiveEvents.ts (chatCore slice 2).
-          onEngineStep: (s) => emitCompressionStepEvent(emit, traceId, mode, s),
+          onEngineStep: (s) => emitCompressionStepEvent(emit, traceId, mode, s, log),
         };
         const runCompression = (input: Record<string, unknown>) =>
           applyCompressionAsync(input, mode, compressionOptions);

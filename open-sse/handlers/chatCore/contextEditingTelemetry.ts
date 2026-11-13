@@ -33,8 +33,13 @@ export function recordContextEditingTelemetryHook(args: {
           `cleared ${tele.clearedInputTokens} input tokens / ${tele.clearedToolUses} tool uses (${tele.editCount} edits)`
         );
       }
-    } catch {
-      // Telemetry is best-effort and must never affect the response.
+    } catch (error) {
+      // Telemetry is best-effort and must never affect the response, but a broken analytics path
+      // should leave a trace.
+      log?.debug?.(
+        "CONTEXT_EDITING",
+        `telemetry skipped: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   })();
 }
