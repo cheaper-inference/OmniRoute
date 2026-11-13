@@ -69,7 +69,13 @@ if (PR_ADVISORY) {
   );
 }
 const failures = [];
+// Each entry is the measurement only; the instruction is appended when printed, because it
+// differs by mode: release asks this run to bank the improvement, a feature PR (pr mode) never
+// edits the baseline — the release refresh / nightly banks it.
 const tightenFailures = [];
+const TIGHTEN_HINT_RELEASE =
+  " — rode 'npm run quality:ratchet -- --update' e commite o baseline apertado neste PR";
+const TIGHTEN_HINT_PR = " — banked by the release refresh / nightly, not by this PR";
 const improvements = [];
 const rows = [];
 
@@ -104,7 +110,7 @@ for (const [key, spec] of Object.entries(baseline.metrics)) {
       status = "↑ melhorou";
       if (REQUIRE_TIGHTEN && base - current > tightenSlack) {
         tightenFailures.push(
-          `${key}: melhorou de ${base} para ${current} (delta ${(base - current).toFixed(4)} > slack ${tightenSlack}) — rode 'npm run quality:ratchet -- --update' e commite o baseline apertado neste PR`
+          `${key}: melhorou de ${base} para ${current} (delta ${(base - current).toFixed(4)} > slack ${tightenSlack})`
         );
       }
     }
@@ -117,7 +123,7 @@ for (const [key, spec] of Object.entries(baseline.metrics)) {
       status = "↑ melhorou";
       if (REQUIRE_TIGHTEN && current - base > tightenSlack) {
         tightenFailures.push(
-          `${key}: melhorou de ${base} para ${current} (delta ${(current - base).toFixed(4)} > slack ${tightenSlack}) — rode 'npm run quality:ratchet -- --update' e commite o baseline apertado neste PR`
+          `${key}: melhorou de ${base} para ${current} (delta ${(current - base).toFixed(4)} > slack ${tightenSlack})`
         );
       }
     }
@@ -171,7 +177,7 @@ if (failures.length) {
 if (TIGHTEN_ENFORCED && !UPDATE && tightenFailures.length > 0) {
   console.error(
     "[quality-ratchet] FALHOU (--require-tighten): métrica(s) melhoraram mas o baseline não foi apertado:\n" +
-      tightenFailures.map((f) => "  ✗ " + f).join("\n")
+      tightenFailures.map((f) => "  ✗ " + f + TIGHTEN_HINT_RELEASE).join("\n")
   );
   process.exit(1);
 }
@@ -179,7 +185,7 @@ if (TIGHTEN_ENFORCED && !UPDATE && tightenFailures.length > 0) {
 if (PR_ADVISORY && !UPDATE && tightenFailures.length > 0) {
   console.log(
     "[quality-ratchet] melhoria(s) não bancada(s) — informativo em modo pr (o aperto é da release/noturno; este PR não edita o baseline):\n" +
-      tightenFailures.map((f) => "  · " + f).join("\n")
+      tightenFailures.map((f) => "  · " + f + TIGHTEN_HINT_PR).join("\n")
   );
 }
 

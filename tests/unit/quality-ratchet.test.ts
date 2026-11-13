@@ -228,6 +228,24 @@ test("pr mode: --require-tighten reports an un-banked improvement without failin
   assert.match(r.out, /eslintWarnings: melhorou de 1000 para 0/);
 });
 
+test("pr mode: the advisory never tells the feature PR to commit the tightened baseline", () => {
+  const b = { metrics: { eslintWarnings: { value: 1000, direction: "down", tightenSlack: 10 } } };
+  const r = run(b, { eslintWarnings: 0 }, ["--require-tighten"], "pr");
+  assert.equal(r.code, 0, r.out);
+  assert.doesNotMatch(r.out, /commite o baseline apertado neste PR/);
+  assert.match(r.out, /eslintWarnings: melhorou de 1000 para 0 .*banked by the release refresh/);
+});
+
+test("release mode: the tighten failure keeps its 'commit the tightened baseline' instruction", () => {
+  const b = { metrics: { eslintWarnings: { value: 1000, direction: "down", tightenSlack: 10 } } };
+  const r = run(b, { eslintWarnings: 0 }, ["--require-tighten"], "release");
+  assert.equal(r.code, 1, r.out);
+  assert.match(
+    r.out,
+    /eslintWarnings: melhorou de 1000 para 0 \(delta 1000\.0000 > slack 10\) — rode 'npm run quality:ratchet -- --update' e commite o baseline apertado neste PR/
+  );
+});
+
 test("pr mode: a regression still fails, with or without --require-tighten", () => {
   const b = { metrics: { eslintWarnings: { value: 100, direction: "down" } } };
   for (const args of [[], ["--require-tighten"]]) {
