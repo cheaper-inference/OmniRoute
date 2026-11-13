@@ -5,6 +5,7 @@ import test from "node:test";
 import { loadConfig } from "../../../scripts/merge-queue/config.mjs";
 import {
   APPROVAL_CONTEXTS,
+  APPROVAL_STATUS_SKEW_SECONDS,
   INELIGIBLE_REASONS,
   initialState,
 } from "../../../scripts/merge-queue/contracts.mjs";
@@ -26,6 +27,11 @@ const APPROVER = config.approvers[0];
 const BOT = `${config.appSlug}[bot]`;
 const NOW = "2026-11-13T12:00:00.000Z";
 
+// Ages relative to the approval window (contracts.APPROVAL_STATUS_SKEW_SECONDS): a label older than
+// SKEW_MIN without its status means the head changed after the label.
+const SKEW_MIN = APPROVAL_STATUS_SKEW_SECONDS / 60;
+const OLD = SKEW_MIN + 30;
+
 const iso = (minutesBeforeNow) =>
   new Date(Date.parse(NOW) - minutesBeforeNow * 60000).toISOString();
 
@@ -45,7 +51,7 @@ function approvalStatus(kind, minutesAgo, overrides = {}) {
   };
 }
 
-/** An eligible PR: labeled by the approver 30 min ago, approval status recorded on its head. */
+/** An eligible PR: labeled by the approver OLD min ago, approval status recorded on its head. */
 function makePr(overrides = {}) {
   return {
     number: 101,
@@ -60,8 +66,8 @@ function makePr(overrides = {}) {
     mergeable: true,
     mergeableState: "clean",
     files: ["open-sse/handlers/chatCore.ts"],
-    timeline: [labeledEvent(config.label, APPROVER, 30)],
-    headStatuses: [approvalStatus("queue", 30)],
+    timeline: [labeledEvent(config.label, APPROVER, OLD)],
+    headStatuses: [approvalStatus("queue", OLD)],
     prGreenCheck: "success",
     ...overrides,
   };
@@ -88,7 +94,7 @@ test("a labeled, approved, clean PR is eligible with no actions", () => {
   assert.deepEqual(result.approval, {
     valid: true,
     actor: APPROVER,
-    labeledAt: iso(30),
+    labeledAt: iso(OLD),
     reason: null,
   });
 });
@@ -189,9 +195,9 @@ test("label applied by a non-approver: ineligible, comment once, label kept", ()
 test("the LATEST labeled event decides: approver re-labeling after a non-approver counts", () => {
   const pr = makePr({
     timeline: [
-      labeledEvent(config.label, "random-user", 50),
-      { event: "unlabeled", actor: APPROVER, label: config.label, createdAt: iso(45) },
-      labeledEvent(config.label, APPROVER, 30),
+      labeledEvent(config.label, "random-user", OLD + 20),
+      { event: "unlabeled", actor: APPROVER, label: config.label, createdAt: iso(OLD + 15) },
+      labeledEvent(config.label, APPROVER, OLD),
     ],
   });
   assert.equal(evaluateEligibility(pr, makeCtx()).eligible, true);
@@ -205,7 +211,7 @@ test("the LATEST labeled event decides: approver re-labeling after a non-approve
 });
 
 test("approver logins compare case-insensitively", () => {
-  const pr = makePr({ timeline: [labeledEvent(config.label, APPROVER.toUpperCase(), 30)] });
+  const pr = makePr({ timeline: [labeledEvent(config.label, APPROVER.toUpperCase(), OLD)] });
   assert.equal(approvalFor(pr, makeCtx(), "queue").valid, true);
 });
 
@@ -280,10 +286,13 @@ test("fresh label without its status yet → approval-missing, silent (approve j
 });
 
 test("label older than the skew without any status → head-changed-after-label", () => {
-  const pr = makePr({ timeline: [labeledEvent(config.label, APPROVER, 11)], headStatuses: [] });
+  const pr = makePr({
+    timeline: [labeledEvent(config.label, APPROVER, SKEW_MIN + 1)],
+    headStatuses: [],
+  });
   assert.equal(approvalFor(pr, makeCtx(), "queue").reason, "head-changed-after-label");
   const justInside = makePr({
-    timeline: [labeledEvent(config.label, APPROVER, 9)],
+    timeline: [labeledEvent(config.label, APPROVER, SKEW_MIN - 1)],
     headStatuses: [],
   });
   assert.equal(approvalFor(justInside, makeCtx(), "queue").reason, "approval-missing");
@@ -501,13 +510,13 @@ test("protected-approved label without its status, or by a non-approver, does no
   const base = {
     files: ["llm.txt"],
     labels: [config.label, config.protectedApprovalLabel],
-    headStatuses: [approvalStatus("queue", 30)],
+    headStatuses: [approvalStatus("queue", OLD)],
   };
   const noStatus = makePr({
     ...base,
     timeline: [
-      labeledEvent(config.label, APPROVER, 30),
-      labeledEvent(config.protectedApprovalLabel, APPROVER, 25),
+      labeledEvent(config.label, APPROVER, OLD),
+      labeledEvent(config.protectedApprovalLabel, APPROVER, OLD - 5),
     ],
   });
   const r1 = evaluateEligibility(noStatus, makeCtx());
@@ -516,17 +525,17 @@ test("protected-approved label without its status, or by a non-approver, does no
   const byOther = makePr({
     ...base,
     timeline: [
-      labeledEvent(config.label, APPROVER, 30),
-      labeledEvent(config.protectedApprovalLabel, "random-user", 25),
+      labeledEvent(config.label, APPROVER, OLD),
+      labeledEvent(config.protectedApprovalLabel, "random-user", OLD - 5),
     ],
-    headStatuses: [approvalStatus("queue", 30), approvalStatus("protected", 25)],
+    headStatuses: [approvalStatus("queue", OLD), approvalStatus("protected", OLD - 5)],
   });
   assert.deepEqual(codes(evaluateEligibility(byOther, makeCtx())), ["protected-approval-missing"]);
   // freshly applied protected label: still missing, but no comment while approve.mjs runs
   const fresh = makePr({
     ...base,
     timeline: [
-      labeledEvent(config.label, APPROVER, 30),
+      labeledEvent(config.label, APPROVER, OLD),
       labeledEvent(config.protectedApprovalLabel, APPROVER, 1),
     ],
   });

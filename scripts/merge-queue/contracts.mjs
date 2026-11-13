@@ -43,8 +43,13 @@ export const APPROVAL_CONTEXTS = Object.freeze({
   protected: "omni-queue/protected-approval",
 });
 
-/** Max seconds between the label event and the approval status written in response to it. */
-export const APPROVAL_STATUS_SKEW_SECONDS = 600;
+/**
+ * How long a queue label may wait for its approval status before the queue concludes that the
+ * head changed after the label (comment + label removal). Until then the PR is simply ineligible
+ * ("approval-missing", no action), so a large window costs only a later comment, while a short
+ * one would strip legitimate labels whenever the Actions queue is backed up for hours.
+ */
+export const APPROVAL_STATUS_SKEW_SECONDS = 6 * 60 * 60;
 
 /** Kinds of work a candidate ref can carry. */
 export const CANDIDATE_KINDS = Object.freeze(["batch", "base-check"]);
@@ -201,6 +206,8 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {string} [sha]
  * @property {string} [detail]
  * @property {string} [url]     run / issue / PR link
+ * @property {Object<string, string>} [labeledAt]  "batch-started" only: PR number → ISO time of
+ *                              its approving label (label→merge metrics on the dashboard)
  */
 
 /**
@@ -421,12 +428,23 @@ export function botIdentity(appSlug, appUserId) {
 
 // ───────────────────────────── merge commit message ─────────────────────────────
 
-/** One-line, trailer-safe PR title: no control chars/newlines, collapsed spaces, ≤ 200 chars. */
+/**
+ * GitHub skips push workflows whose head commit message carries one of these markers. A PR title
+ * lands in the subject of the candidate's top merge commit, so a contributor could otherwise stop
+ * the candidate CI from ever running and stall the queue.
+ */
+const SKIP_MARKER_RE = /\[\s*(skip\s*ci|ci\s*skip|no\s*ci|skip\s*actions|actions\s*skip)\s*\]/gi;
+
+/**
+ * One-line, trailer-safe PR title: no control chars/newlines, collapsed spaces, GitHub skip
+ * markers disarmed ("[skip ci]" → "(skip ci)"), ≤ 200 chars.
+ */
 export function sanitizeTitle(title) {
   const flat = String(title ?? "")
     // eslint-disable-next-line no-control-regex
     .replace(/[\u0000-\u001f\u007f]+/g, " ")
     .replace(/\s+/g, " ")
+    .replace(SKIP_MARKER_RE, (_, marker) => `(${marker})`)
     .trim();
   return flat.length > 200 ? `${flat.slice(0, 197)}...` : flat;
 }
@@ -506,7 +524,9 @@ export function globToRegExp(glob) {
     else if (ch === "?") re += "[^/]";
     else re += ch.replace(/[.+^${}()|[\]\\]/g, "\\$&");
   }
-  return new RegExp(`^${re}$`);
+  // "s": `.` must also cross newlines — git allows them in file names, and a protected file
+  // whose path contains one must still match (fail closed).
+  return new RegExp(`^${re}$`, "s");
 }
 
 export function matchesGlob(path, glob) {

@@ -205,3 +205,38 @@ test("gitexec keeps the token out of argv and redacts it from errors", () => {
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("titles cannot carry GitHub skip markers into the candidate's head commit", () => {
+  for (const title of [
+    "fix: thing [skip ci]",
+    "fix: thing [CI SKIP]",
+    "fix: thing [ no ci ]",
+    "fix: thing [skip actions]",
+    "fix: thing [actions skip]",
+    "fix: thing [skipci]",
+  ]) {
+    const flat = sanitizeTitle(title);
+    assert.doesNotMatch(
+      flat,
+      /\[\s*(skip\s*ci|ci\s*skip|no\s*ci|skip\s*actions|actions\s*skip)\s*\]/i
+    );
+    const message = buildMergeMessage({
+      pr: { n: 9, head: SHA_A, title, author: "u", labeledAt: NOW },
+      base: "release/v3.8.54",
+      baseSha: SHA_B,
+      batchId: "b1",
+    });
+    assert.doesNotMatch(message, /\[\s*(skip|ci|no|actions)[^\]]*\]/i, title);
+    assert.doesNotMatch(message, /^skip-checks\s*:/im, title);
+  }
+  assert.equal(sanitizeTitle("feat: [skip ci] x"), "feat: (skip ci) x");
+  assert.equal(sanitizeTitle("docs: [skipping] tests"), "docs: [skipping] tests");
+});
+
+test("protected globs also match paths that contain a newline (fail closed)", () => {
+  const { protectedPaths } = loadConfig();
+  assert.equal(isProtectedPath("x\ny/AGENTS.md", protectedPaths), true);
+  assert.equal(isProtectedPath(".claude/a\nb", protectedPaths), true);
+  assert.equal(matchesGlob("src/a\nb.ts", "src/*.ts"), true);
+  assert.equal(matchesGlob("src/a/b.ts", "src/*.ts"), false);
+});
