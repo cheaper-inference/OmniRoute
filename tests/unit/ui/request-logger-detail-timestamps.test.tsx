@@ -22,7 +22,8 @@ vi.mock("@/lib/db/responsesContinuationStore", () => ({
   resolveCallLogIdByResponseId: () => null,
 }));
 
-const RequestLoggerDetail = (await import("@/shared/components/RequestLoggerDetail")).default;
+const RequestLoggerDetail = (await import("@/shared/components/RequestLoggerDetail"))
+  .RequestLoggerDetailPanel;
 const { GET } = await import("@/app/api/logs/[id]/route");
 
 const START = Date.parse("2026-10-22T12:00:00Z");

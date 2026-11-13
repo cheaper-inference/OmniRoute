@@ -203,8 +203,6 @@ test("the landing colour scan catches each literal form and ignores anchors and 
 test("no hand-rolled role=dialog outside the Modal adapter", () => {
   const hits = countBy(DASHBOARD, /role=["{']*dialog/g);
   delete hits["src/shared/components/Modal.tsx"]; // doc comment on the kit DialogContent
-  // In-container dialog kept on purpose: pinned tests use window Escape/backdrop (lote 6 #1).
-  delete hits["src/shared/components/RequestLoggerDetail.tsx"];
   assert.deepEqual(hits, {});
 });
 
