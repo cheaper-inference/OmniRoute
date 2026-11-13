@@ -729,6 +729,12 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   // turn (call log 1787566395384-bab9ab: reasoning dropped → model emitted
   // DSML tool-call markers as plain text → incomplete `stop` finish).
   const requestedThinking = hasActiveClaudeThinking((body ?? {}) as Record<string, unknown>);
+  // The executor adds stream_options.include_usage upstream. A Chat client that did not ask for it
+  // must not see the extra trailing usage-only chunk (strict parsers read choices[0]).
+  const dropUnrequestedUsageChunk =
+    clientResponseFormat === FORMATS.OPENAI &&
+    (body as { stream_options?: { include_usage?: unknown } } | null | undefined)?.stream_options
+      ?.include_usage !== true;
 
   streamTimingOriginOffsetMs = Date.now() - startTime;
   if (needsResponsesTranslation) {
@@ -809,7 +815,8 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       clientResponseFormat,
       requestToolIdentityMap,
       (body as Record<string, unknown> | null | undefined)?.tools ?? null,
-      pendingRequestOwner ?? pendingRequestId
+      pendingRequestOwner ?? pendingRequestId,
+      dropUnrequestedUsageChunk
     );
   }
 

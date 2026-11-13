@@ -248,6 +248,12 @@ type StreamOptions = {
    */
   requestToolIdentityMap?: Map<string, { namespace: string; name: string }> | null;
   pendingRequestId?: StreamPendingRequestIdentity | null;
+  /**
+   * Passthrough only. The router adds `stream_options.include_usage` upstream to bill the call. When
+   * the Chat client did not ask for it, keep the usage for accounting but send the client no trailing
+   * usage-only chunk.
+   */
+  dropUnrequestedUsageChunk?: boolean;
 };
 
 type TranslateState = ReturnType<typeof initState> & {
@@ -853,6 +859,7 @@ export function createSSEStream(options: StreamOptions = {}) {
     requestToolIdentityMap = null,
     streamBufferBytes = DEFAULT_STREAM_BUFFER_BYTES,
     pendingRequestId = null,
+    dropUnrequestedUsageChunk = false,
   } = options;
   // Request-body-size metric (for monitoring payload size distribution & correlation with TTFT).
   // The size is JSON-serialised byte count; stored as a performance mark detail so monitoring
@@ -2307,6 +2314,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                       );
                       passthroughForwardedUsage = true;
                       passthroughForwardedUsageSummary = true;
+                      if (dropUnrequestedUsageChunk) continue;
                       output = `data: ${JSON.stringify(parsed)}\n\n`;
                       injectedUsage = true;
                       clientPayload = parsed;
@@ -3284,7 +3292,12 @@ export function createSSEStream(options: StreamOptions = {}) {
               // [DONE], so metered clients still see token counts. When the
               // upstream DID send usage (trailing or in-band), it was forwarded
               // already and passthroughForwardedUsage guards this off.
-              if (shouldEmitDoneTerminator && !passthroughForwardedUsage && hasValidUsage(usage)) {
+              if (
+                shouldEmitDoneTerminator &&
+                !passthroughForwardedUsage &&
+                !dropUnrequestedUsageChunk &&
+                hasValidUsage(usage)
+              ) {
                 const usageOnlyChunk = buildUsageOnlyChunk(
                   passthroughLastChatId ?? passthroughResponsesId,
                   model,
@@ -3959,7 +3972,8 @@ export function createPassthroughStreamWithLogger(
   clientResponseFormat: string | null = null,
   requestToolIdentityMap: Map<string, { namespace: string; name: string }> | null = null,
   clientTools: unknown = null,
-  pendingRequestId: StreamPendingRequestIdentity | null = null
+  pendingRequestId: StreamPendingRequestIdentity | null = null,
+  dropUnrequestedUsageChunk = false
 ) {
   return createSSEStream({
     mode: STREAM_MODE.PASSTHROUGH,
@@ -3976,6 +3990,7 @@ export function createPassthroughStreamWithLogger(
     requestToolIdentityMap,
     clientTools,
     pendingRequestId,
+    dropUnrequestedUsageChunk,
   });
 }
 
