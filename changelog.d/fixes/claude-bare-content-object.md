@@ -1,0 +1,1 @@
+- **fix(translator):** A message whose `content` is one bare block object (not an array) no longer loses its text when OpenAI-format requests are sent to Claude.

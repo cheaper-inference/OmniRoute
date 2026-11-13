@@ -133,6 +133,11 @@ export function stripEmptyTextBlocks(content: unknown[] | undefined): unknown[] 
     });
 }
 
+/** A message `content` that is one bare block object becomes a one-item block array. */
+function wrapBareContentBlock(content: unknown): unknown {
+  return content && typeof content === "object" && !Array.isArray(content) ? [content] : content;
+}
+
 /**
  * T15: Normalize content to string form.
  * Handles both string and array-of-blocks forms (Cursor, Codex 2.x, etc.).
@@ -141,8 +146,9 @@ export function stripEmptyTextBlocks(content: unknown[] | undefined): unknown[] 
 export function normalizeContentToString(content: string | unknown[] | null | undefined): string {
   if (!content) return "";
   if (typeof content === "string") return content;
-  if (Array.isArray(content)) {
-    return (content as Array<Record<string, unknown>>)
+  const blocks = wrapBareContentBlock(content);
+  if (Array.isArray(blocks)) {
+    return (blocks as Array<Record<string, unknown>>)
       .filter((b) => b.type === "text")
       .map((b) => String(b.text ?? ""))
       .join("\n");
@@ -659,12 +665,13 @@ function getContentBlocksFromMessage(
       ...(toolResultCacheControl !== undefined && { cache_control: toolResultCacheControl }),
     });
   } else if (msg.role === "user") {
-    if (typeof msg.content === "string") {
-      if (msg.content) {
-        blocks.push({ type: "text", text: msg.content });
+    const userContent = wrapBareContentBlock(msg.content);
+    if (typeof userContent === "string") {
+      if (userContent) {
+        blocks.push({ type: "text", text: userContent });
       }
-    } else if (Array.isArray(msg.content)) {
-      for (const part of msg.content) {
+    } else if (Array.isArray(userContent)) {
+      for (const part of userContent) {
         if (part.type === "text" && part.text) {
           blocks.push({ type: "text", text: part.text });
         } else if (part.type === "tool_result") {
