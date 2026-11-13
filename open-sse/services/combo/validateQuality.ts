@@ -19,6 +19,7 @@ import { evaluateResponseValidation, type ResponseValidationConfig } from "./res
 import { getReasoningTokens } from "../../../src/lib/usage/tokenAccounting.ts";
 import { REASONING_BUFFER_MIN_TRIGGER } from "../reasoningTokenBuffer.ts";
 import { isDeliberateEmptyResponsesTerminal } from "../../translator/helpers/responsesTerminalStatus.ts";
+import { emptyTurnFailure } from "./emptyTurnFailover.ts";
 import type { ComboRetryAfter } from "./types.ts";
 import {
   classifyPreContentReadFailure,
@@ -998,6 +999,9 @@ export async function validateResponseQuality(
       };
     }
   }
+
+  const emptyFailure = emptyTurnFailure(json, permitsEmptyTurn());
+  if (emptyFailure) return { valid: false, reason: emptyFailure };
 
   const choices = json?.choices;
   if (json?.object === "response") {
