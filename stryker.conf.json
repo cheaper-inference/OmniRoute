@@ -304,6 +304,8 @@
       "tests/unit/chatcore-semantic-cache-store.test.ts",
       "tests/unit/chatcore-semantic-cache.test.ts",
       "tests/unit/semantic-cache-no-truncated-writes.test.ts",
+      "tests/unit/semantic-cache-length-stop.test.ts",
+      "tests/unit/semantic-cache-hit-wire-format.test.ts",
       "tests/unit/chatcore-strip-stale-headers.test.ts",
       "tests/unit/chatcore-telemetry-helpers.test.ts",
       "tests/unit/chatcore-translation-paths.test.ts",
