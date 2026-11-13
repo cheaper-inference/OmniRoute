@@ -152,6 +152,19 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {string} startedAt      ISO
  * @property {number} attempts       infra retries already spent on this candidate
  * @property {BisectState|null} bisect
+ * @property {PendingRed|null} [pendingRed]  kind "base-check" only: the red batch waiting for the
+ *                                   verdict of the bare-base run (absent/null otherwise)
+ */
+
+/**
+ * @typedef {object} PendingRed  A red batch parked while its base is checked (classify →
+ *   "needs-base-check"). After the base-check: green → the batch is PR-red (bisect / culprit);
+ *   red with matching signatures → base-red pause; red otherwise → PR-red.
+ * @property {string} batchId
+ * @property {string} candidateSha
+ * @property {PrRef[]} prs
+ * @property {FailureSignature[]} signatures
+ * @property {BisectState|null} bisect   bisection the red candidate belonged to, if any
  */
 
 /**
