@@ -1,0 +1,1 @@
+- **fix(translator):** Claude to OpenAI requests keep every thinking block of an assistant turn (the earlier reasoning is no longer overwritten), and a turn with only an unsupported image or document source now leaves an omitted-block notice instead of vanishing.
