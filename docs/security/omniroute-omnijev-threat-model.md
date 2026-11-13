@@ -55,8 +55,9 @@ the OmniJev path.
   into the prompt.
 - OmniJev -> TypeSafe: only in explicit `jev-api` mode; the latest user text is sent
   over HTTPS to the fixed `https://api.typesafe.ai/v1/systemone` endpoint with the
-  server-only `TYPESAFE_API_KEY` bearer credential. The response is bounded and parsed
-  with strict Zod schemas.
+  server-only `TYPESAFE_API_KEY` bearer credential. The call leaves through
+  `safeOutboundFetch` with the provider outbound guard (global proxy/TLS stack, no retry,
+  no followed redirect). The response is bounded and parsed with strict Zod schemas.
 - OmniJev -> combo executor: a methodology packet controls prompt templates and
   same-family ordering only; it cannot authorize tools, alter credentials, or execute
   actions. Existing circuit-breaker, quota, and authorization gates remain in charge.

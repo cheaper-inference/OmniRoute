@@ -15,7 +15,28 @@ export interface OmniJevPacket {
   reason?: "missing-key" | "unavailable" | "invalid-decision" | "cancelled";
 }
 type Body = Record<string, unknown>;
-type Dependencies = { apiKey?: string; fetch?: typeof fetch; signal?: AbortSignal };
+type OutboundFetch = (url: string, init: RequestInit) => Promise<Response>;
+type Dependencies = { apiKey?: string; fetch?: OutboundFetch; signal?: AbortSignal };
+
+/**
+ * jev-api sends the user's text to a third party, so it leaves through the project's outbound
+ * policy (provider egress guard + global proxy/TLS stack), like the Nadir strategy. Lazy so this
+ * module stays free of that stack until the first opt-in call.
+ */
+const defaultTransport: OutboundFetch = async (url, init) => {
+  const [{ safeOutboundFetch }, { getProviderOutboundGuard }] = await Promise.all([
+    import("@/shared/network/safeOutboundFetch"),
+    import("@/shared/network/outboundUrlGuardPolicy"),
+  ]);
+  return safeOutboundFetch(url, {
+    method: init.method,
+    headers: init.headers,
+    body: init.body,
+    signal: init.signal,
+    retry: false,
+    guard: getProviderOutboundGuard(),
+  });
+};
 
 const probability = z.number().finite().min(0).max(1);
 const choiceSchema = z
@@ -221,13 +242,16 @@ export async function prepareOmniJev(
   });
   try {
     const operation = (async () => {
-      const response = await (deps.fetch ?? fetch)("https://api.typesafe.ai/v1/systemone", {
-        method: "POST",
-        redirect: "error",
-        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ model: "jev-latest", state: text, questions: QUESTIONS }),
-        signal: controller.signal,
-      });
+      const response = await (deps.fetch ?? defaultTransport)(
+        "https://api.typesafe.ai/v1/systemone",
+        {
+          method: "POST",
+          redirect: "error",
+          headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ model: "jev-latest", state: text, questions: QUESTIONS }),
+          signal: controller.signal,
+        }
+      );
       return readBoundedJson(response);
     })();
     const raw = await Promise.race([operation, stopped]);
