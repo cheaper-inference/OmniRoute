@@ -96,6 +96,26 @@ test("POST accepts toolId spelling, custom ttlSec and sessionTag", async () => {
   assert.equal(json.sessionTag, "my:tag-1");
 });
 
+test("schema.ts mirrors of the helper id/tag schemas accept and reject the same inputs", async () => {
+  const helpers = await import("../../../src/app/api/launch/launchRouteHelpers.ts");
+  const schema = await import("../../../src/app/api/launch/sessions/schema.ts");
+  for (const v of ["codex", "Bad", "", "a".repeat(65), "ok-1.2_x", "-lead"]) {
+    assert.equal(
+      schema.launchMintToolIdSchema.safeParse(v).success,
+      helpers.launchToolIdSchema.safeParse(v).success,
+      `tool ${v}`
+    );
+  }
+  for (const v of ["my:tag-1", "bad tag", "", "a".repeat(129), "a/b=c.d_e", "x!"]) {
+    assert.equal(
+      schema.launchMintSessionTagSchema.safeParse(v).success,
+      helpers.launchSessionTagSchema.safeParse(v).success,
+      `tag ${v}`
+    );
+  }
+  assert.equal(schema.LAUNCH_MINT_SPEC_VERSION, helpers.LAUNCH_SPEC_VERSION);
+});
+
 test("POST stores a view and reports {hash,count}", async () => {
   const { key } = await newKey("view");
   const { res, json } = await mint(key, { tool: "codex", view: view() });

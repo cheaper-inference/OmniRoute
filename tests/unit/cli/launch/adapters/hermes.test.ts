@@ -128,6 +128,9 @@ test("default launch: temp HERMES_HOME, config.yaml, env scrub, gateway teardown
     "CUSTOM_BASE_URL",
   ]);
   assert.deepStrictEqual(plan.secretSites, [{ kind: "env", key: "OMNIROUTE_API_KEY" }]);
+  // The lock dir is declared for core to create (contract 1.2), never created by the adapter.
+  assert.deepStrictEqual(plan.tempDirs, [{ path: "locks", mode: 0o700 }]);
+  assert.deepStrictEqual(adapter.contract, { major: 1, minor: 2 });
   assert.deepStrictEqual(plan.teardown, [
     { argv: ["${TOOL}", "gateway", "stop"], env: "plan", timeoutMs: 5000, onError: "warn" },
   ]);
@@ -263,4 +266,19 @@ test("empty view is ModelNotFound", () => {
 test("other gateway root keeps exactly one /v1", () => {
   const { plan } = run("remote-root", { rootUrl: "https://gw.example.test/v1/", origin: "remote" });
   assert.match(configText(plan), /\n {2}base_url: "https:\/\/gw\.example\.test\/v1"\n/);
+});
+
+test("the key site always carries ${TOKEN}, also with the gateway auth off", () => {
+  // Core substitutes the minted olx_ session token for ${TOKEN} on every launch, the anonymous
+  // posture included, so the plan never has an empty-key or missing-key branch.
+  for (const source of ["session", "none"]) {
+    const base = fixtureCtx({ tool: adapter.id, viewSpec: view });
+    const ctx = { ...base, auth: { ...base.auth, source } } as typeof base;
+    const plan = adapter.plan(ctx);
+    assert.equal(plan.env.set.OMNIROUTE_API_KEY, "${TOKEN}", `auth.source=${source}`);
+    assert.ok(!plan.env.unset.includes("OMNIROUTE_API_KEY"), `auth.source=${source}`);
+    assert.deepStrictEqual(plan.secretSites, [{ kind: "env", key: "OMNIROUTE_API_KEY" }]);
+    assert.match(configText(plan), /\n {2}key_env: OMNIROUTE_API_KEY\n/);
+    assert.match(configText(plan), /\n {4}key_env: OMNIROUTE_API_KEY\n/);
+  }
 });

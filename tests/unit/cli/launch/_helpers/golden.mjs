@@ -97,6 +97,11 @@ function mentionsPlaceholder(plan, placeholder) {
  *   strategy must match `plan.modelList.strategy`
  * @param {string[] | ((plan: object) => string[])} [options.injectedIds] the ids the plan tells
  *   the tool about (extracted by the adapter test); must equal ctx.view ids cut by injectLimit
+ * @param {boolean} [options.serverView] server-view adapters: asserts injected === 0 and that
+ *   `injectedIds` (when given) is empty; skips the full-view comparison
+ * @param {string} [options.singleModel] single-model tools: the chosen model id. Asserts
+ *   injected === 1, ctx.model.id equals it and `injectedIds` (when given) deep-equals [id]; skips
+ *   the full-view comparison
  * @param {number} [options.injectLimit] defaults to adapter.capabilities.modelList.injectLimit
  * @param {string | false} [options.assetsDir] where referenced assets must exist (default
  *   ASSETS_DIR); false skips the existence check but still validates paths
@@ -182,9 +187,24 @@ export function checkPlanInvariants(plan, ctx, options = {}) {
   if (plan.modelList.strategy === "server-view") {
     assert.equal(plan.modelList.injected, 0, "server-view plans inject nothing");
   }
-  if (options.injectedIds !== undefined) {
-    const injected =
-      typeof options.injectedIds === "function" ? options.injectedIds(plan) : options.injectedIds;
+  const resolveIds = () =>
+    typeof options.injectedIds === "function" ? options.injectedIds(plan) : options.injectedIds;
+  if (options.serverView && options.singleModel !== undefined) {
+    assert.fail("checkPlanInvariants: serverView and singleModel are mutually exclusive");
+  }
+  if (options.serverView) {
+    assert.equal(plan.modelList.injected, 0, "serverView: modelList.injected is 0");
+    if (options.injectedIds !== undefined) {
+      assert.deepStrictEqual(resolveIds(), [], "serverView: injected ids are empty");
+    }
+  } else if (options.singleModel !== undefined) {
+    assert.equal(plan.modelList.injected, 1, "singleModel: modelList.injected is 1");
+    assert.equal(ctx.model?.id, options.singleModel, "singleModel: ctx.model is the chosen id");
+    if (options.injectedIds !== undefined) {
+      assert.deepStrictEqual(resolveIds(), [options.singleModel], "singleModel: injected ids");
+    }
+  } else if (options.injectedIds !== undefined) {
+    const injected = resolveIds();
     const limit = options.injectLimit ?? options.adapter?.capabilities?.modelList?.injectLimit;
     const viewIds = ctx.view.rows.map((row) => row.id);
     const expected = typeof limit === "number" ? viewIds.slice(0, limit) : viewIds;

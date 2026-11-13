@@ -53,6 +53,12 @@
       "timeoutMs": 5000
     }
   ],
+  "tempDirs": [
+    {
+      "mode": 448,
+      "path": "locks"
+    }
+  ],
   "tempFiles": [
     {
       "contents": "model:\n  provider: custom\n  default: anthropic/claude-sonnet-4-6\n  base_url: \"http://127.0.0.1:20128/v1\"\n  key_env: OMNIROUTE_API_KEY\n  context_length: 200000\nproviders:\n  omniroute:\n    name: OmniRoute\n    api: \"http://127.0.0.1:20128/v1\"\n    key_env: OMNIROUTE_API_KEY\n    transport: chat_completions\n    default_model: anthropic/claude-sonnet-4-6\n    models:\n      anthropic/claude-sonnet-4-6:\n        context_length: 200000\n      openai/gpt-5.2:\n        context_length: 400000\n      fastest:\n        context_length: 128000\nupdates:\n  check: false\nplugins:\n  auto_update_check_hours: 0\ntelemetry:\n  shared_metrics:\n    enabled: false\n    send: false\n    offer_version: 2\ngateway:\n  unmanaged_idle_exit_seconds: 30\ntoolsets:\n  - hermes-cli\n  - web\n",

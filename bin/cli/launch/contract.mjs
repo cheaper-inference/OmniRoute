@@ -24,6 +24,7 @@ export {
 /** @typedef {import("./contract.d.ts").LaunchPlan} LaunchPlan */
 /** @typedef {import("./contract.d.ts").LaunchModelView} LaunchModelView */
 /** @typedef {import("./contract.d.ts").TempFileSpec} TempFileSpec */
+/** @typedef {import("./contract.d.ts").TempDirSpec} TempDirSpec */
 /** @typedef {import("./contract.d.ts").PreflightCheck} PreflightCheck */
 /** @typedef {import("./contract.d.ts").TeardownStep} TeardownStep */
 /** @typedef {import("./contract.d.ts").PostExitCheck} PostExitCheck */
@@ -34,7 +35,8 @@ export {
 
 /** Adapter contract version. Minor bumps are additive only. */
 // 1.1 (additive): launcher assets (TempFileSpec.asset, ${ASSET:...} tokens, assetRef).
-export const ADAPTER_CONTRACT = Object.freeze({ major: 1, minor: 1 });
+// 1.2 (additive): LaunchPlan.tempDirs (directories core creates under ${TMP} / ${STATE}).
+export const ADAPTER_CONTRACT = Object.freeze({ major: 1, minor: 2 });
 /** Alias of ADAPTER_CONTRACT (contract.d.ts `contractVersion`). */
 export const contractVersion = ADAPTER_CONTRACT;
 /** `LaunchPlan.planVersion`, also the top-level marker of `--dry-run --json`. */
@@ -54,6 +56,8 @@ export const PLAN_VERSION = 1;
 export const PLACEHOLDERS = Object.freeze({
   TMP: "${TMP}",
   STATE: "${STATE}",
+  /** Never empty at execute time: core substitutes the minted olx_ session token, also when the
+   *  gateway runs without auth. */
   TOKEN: "${TOKEN}",
   /** Resolved tool command; valid in TeardownStep.argv only. */
   TOOL: "${TOOL}",
@@ -532,6 +536,7 @@ export function injectRows(ctx, injectLimit) {
 
 /**
  * A complete LaunchPlan with every required field defaulted. Adapters spread their parts over it.
+ * The optional `tempDirs` (1.2) is kept only when given, so plans without it are unchanged.
  * @param {string} tool
  * @param {Partial<LaunchPlan>} [parts]
  * @returns {LaunchPlan}
@@ -555,9 +560,11 @@ export function createPlan(tool, parts = {}) {
     ...parts,
   };
   plan.env = { set: { ...(parts.env?.set || {}) }, unset: [...(parts.env?.unset || [])] };
+  if (Array.isArray(parts.tempDirs)) plan.tempDirs = parts.tempDirs.map((dir) => ({ ...dir }));
   if (!("needsTempDir" in parts)) {
     plan.needsTempDir =
       plan.tempFiles.some((file) => (file.root ?? "tmp") === "tmp") ||
+      (plan.tempDirs ?? []).some((dir) => (dir.root ?? "tmp") === "tmp") ||
       JSON.stringify([plan.argv, plan.env]).includes(PLACEHOLDERS.TMP);
   }
   return plan;

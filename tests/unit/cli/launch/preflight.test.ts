@@ -47,6 +47,8 @@ test("compareVersions table", () => {
   }
 });
 
+const OPENCLAW_RANGE = ">=24.16.0 <25 || >=26.1.0";
+
 test("satisfiesRange table", () => {
   const rows: Array<[string, string, boolean]> = [
     ["24.16.0", ">=24.16", true],
@@ -63,6 +65,16 @@ test("satisfiesRange table", () => {
     ["garbage", ">=1", false],
     ["1.0.0", "", false],
     ["1.0.0", "~1", false],
+    ["24.15.9", OPENCLAW_RANGE, false],
+    ["24.16.0", OPENCLAW_RANGE, true],
+    ["24.99.0", OPENCLAW_RANGE, true],
+    ["25.0.0", OPENCLAW_RANGE, false],
+    ["26.0.5", OPENCLAW_RANGE, false],
+    ["26.1.0", OPENCLAW_RANGE, true],
+    ["27.0.0", OPENCLAW_RANGE, true],
+    ["1.0.0", ">=1 ||", false],
+    ["1.0.0", "|| >=1", false],
+    ["1.0.0", ">=2 || ~1", false],
   ];
   for (const [version, range, expected] of rows) {
     assert.equal(satisfiesRange(version, range), expected, `${version} in ${range}`);
@@ -93,6 +105,15 @@ test("node-version uses nodeVersion or the binary output", async () => {
   assert.match(results[1].message, /needs node 99/);
   assert.match(results[1].message, /24\.1\.0/);
   assert.match(results[2].message, /20\.1\.2/);
+});
+
+test("node-version supports || ranges", async () => {
+  const check = { kind: "node-version", range: OPENCLAW_RANGE, why: "openclaw node" };
+  const [ok] = await evaluatePreflight([check], { nodeVersion: "26.1.0" });
+  const [bad] = await evaluatePreflight([check], { nodeVersion: "25.2.0" });
+  assert.equal(ok.status, "pass");
+  assert.equal(bad.status, "fail");
+  assert.match(bad.message, /25\.2\.0/);
 });
 
 test("node-version with a real binary", async () => {

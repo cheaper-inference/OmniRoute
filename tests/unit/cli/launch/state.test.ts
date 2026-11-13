@@ -10,6 +10,7 @@ import { CORE, makeTempDir, removeDir, sleep } from "./_fixtures/gateway/harness
 
 const state = await import(pathToFileURL(join(CORE, "gateway", "state.mjs")).href);
 const lease = await import(pathToFileURL(join(CORE, "lease.mjs")).href);
+const coreState = await import(pathToFileURL(join(CORE, "state.mjs")).href);
 
 const dirs: string[] = [];
 function tmp(): string {
@@ -126,6 +127,20 @@ test(
     );
   }
 );
+
+test("gateway state reuses core/state.mjs for paths and atomic JSON", () => {
+  assert.equal(state.writeJsonFile, coreState.writeJsonAtomic);
+  assert.equal(state.defaultStateDir(), coreState.launchRoot());
+  const dir = tmp();
+  const file = join(dir, "nested", "x.json");
+  state.writeJsonFile(file, { a: 1 });
+  assert.deepEqual(state.readJsonFile(file), { a: 1 });
+  assert.deepEqual(coreState.readJson(file), { a: 1 });
+  if (process.platform !== "win32") assert.equal(statSync(file).mode & 0o777, 0o600);
+  writeFileSync(file, "{not json");
+  assert.equal(state.readJsonFile(file), null);
+  assert.equal(state.readJsonFile(join(dir, "missing.json")), null);
+});
 
 test("gateway record: read, write, and the generation guard on remove", () => {
   const dir = tmp();

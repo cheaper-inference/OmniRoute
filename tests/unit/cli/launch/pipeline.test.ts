@@ -11,6 +11,7 @@ import {
   runLaunch,
   composeModel,
   rejectReserved,
+  gateWarnings,
 } from "../../../../bin/cli/launch/core/pipeline.mjs";
 import { startStubGateway } from "../../../helpers/launch/stubGateway.mjs";
 import { FAKE_TOOL_PATH, readFakeToolDump } from "../../../helpers/launch/fakeTool.mjs";
@@ -185,6 +186,7 @@ test("end to end: mint, catalog via session token, view PATCH, substituted token
     assert.ok(mint, `mint called: ${paths.join(", ")}`);
     assert.equal(mint.auth, "sk-parent");
     assert.equal(mint.body.tool, "fake");
+    assert.equal(mint.body.sessionTag, undefined, "default tag is derived by the gateway");
 
     const [session] = [...stub.sessions.values()];
     const models = stub.requests.find((r: { path: string }) => r.path === "/v1/models");
@@ -397,4 +399,95 @@ test("reserved flags, unknown tool, owned passthrough", async () => {
   const owned = await runLaunch("fake", { args: ["--provider", "x"] }, deps);
   assert.equal(owned.exitCode, 2);
   assert.equal(owned.error?.code, "ConfigConflict");
+});
+
+test("version gate below recommended: a real adapter (qwen) yields exactly one warning", async () => {
+  const qwen = (await import("../../../../bin/cli/launch/adapters/qwen.mjs")).default;
+  const { applyVersionGate } = await import("../../../../bin/cli/launch/core/resolve-bin.mjs");
+  const version = "0.1.0";
+  assert.ok(qwen.capabilities.versionGate.recommended, "qwen has a recommended version");
+  // A dry run keeps plan warnings in its document; a launch prints them.
+  const gateWarnings = (outcome: { warnings: string[]; dryRun?: { warnings: string[] } }) =>
+    [...outcome.warnings, ...(outcome.dryRun?.warnings ?? [])].filter((w) =>
+      w.includes(qwen.capabilities.versionGate.recommended)
+    );
+  const stub = await startStubGateway();
+  try {
+    const common = {
+      registry: { get: (id: string) => (id === "qwen" ? qwen : undefined), list: () => [qwen] },
+      probeTool: async (adapter: object) => ({
+        version,
+        ...applyVersionGate(adapter, version, process.platform),
+      }),
+      execute: async () => ({ exitCode: 0, warnings: [] }),
+    };
+    for (const flags of [{}, { dryRun: true, json: true, port: new URL(stub.url).port }]) {
+      const root = tempRoot("gate");
+      const stderr = capture();
+      const outcome = await runLaunch(
+        "qwen",
+        { yes: true, model: "anthropic/claude-sonnet-4-6", ...flags },
+        {
+          ...common,
+          env: { PATH: process.env.PATH ?? "", HOME: root },
+          homeDir: root,
+          cwd: root,
+          dataDir: join(root, "data"),
+          stdout: capture(),
+          stderr,
+          isTTY: false,
+          acquireGateway: async () => ({
+            baseUrl: `${stub.url}/v1`,
+            owned: true,
+            release: async () => undefined,
+          }),
+          resolveBinary: async () => ({ command: process.execPath, shell: false }),
+          loadPreferences: () => ({ favorites: [], recent: [] }),
+          recordPreference: () => undefined,
+        }
+      );
+      assert.equal(outcome.exitCode, 0, stderr.text);
+      assert.equal(gateWarnings(outcome).length, 1, JSON.stringify(outcome.warnings));
+      assert.equal(
+        stderr.text
+          .split("\n")
+          .filter(
+            (l) => l.includes("warning:") && l.includes(qwen.capabilities.versionGate.recommended)
+          ).length,
+        "dryRun" in flags ? 0 : 1,
+        stderr.text
+      );
+    }
+  } finally {
+    await stub.close();
+  }
+});
+
+test("gateWarnings drops core's generic gate warning only when the plan words its own", () => {
+  const adapter = { capabilities: { versionGate: { recommended: "2.0.0" } } };
+  const core = "x 1.0.0 works, but 2.0.0 or newer is recommended";
+  assert.deepEqual(gateWarnings(adapter, [core, "other"], ["x 1.0.0 is older than 2.0.0"]), [
+    "other",
+  ]);
+  assert.deepEqual(gateWarnings(adapter, [core], ["unrelated"]), [core]);
+  assert.deepEqual(gateWarnings(adapter, [core], [core]), []);
+});
+
+test("--tag is sent to the gateway as sessionTag", async () => {
+  const stub = await startStubGateway();
+  try {
+    const run = await launchAgainst(stub, fakeAdapter({ outPath: join(tempRoot("t"), "d.json") }), {
+      tag: "ticket:OLX-42",
+    });
+    assert.equal(run.outcome.exitCode, 0, run.stderr.text);
+    const mint = stub.requests.find(
+      (r: { method: string; path: string }) =>
+        r.method === "POST" && r.path === "/api/launch/sessions"
+    );
+    assert.equal(mint.body.sessionTag, "ticket:OLX-42");
+    const [session] = [...stub.sessions.values()];
+    assert.equal(session.sessionTag, "ticket:OLX-42");
+  } finally {
+    await stub.close();
+  }
 });
