@@ -69,6 +69,22 @@ function getModelCatalogSourceSearchText(source?: string | null): string {
   }
 }
 
+/** `/pattern/` or `/pattern/flags` (case-insensitive by default); null when the text is not a valid one. */
+function parseRegexQuery(query: string): RegExp | null {
+  const m = /^\/(.+)\/([a-z]*)$/i.exec(query.trim());
+  if (!m) return null;
+  try {
+    return new RegExp(m[1], m[2] || "i");
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Substring match on the id, name, alias and source label. Two operators on top:
+ * `/regex/` matches a regular expression, and a `!term` token excludes models that contain `term`
+ * (`claude !haiku`). Any other query, including `-pro`, stays a plain substring.
+ */
 export function matchesModelCatalogQuery(query: string, target: ModelCatalogTarget): boolean {
   const normalizedQuery = normalizeText(query);
   if (!normalizedQuery) return true;
@@ -80,5 +96,16 @@ export function matchesModelCatalogQuery(query: string, target: ModelCatalogTarg
     getModelCatalogSourceSearchText(target.source),
   ].filter(Boolean);
 
-  return haystacks.some((value) => value.includes(normalizedQuery));
+  const regex = parseRegexQuery(query);
+  if (regex) return haystacks.some((value) => regex.test(value));
+
+  const tokens = normalizedQuery.split(/\s+/);
+  const excluded = tokens.filter((t) => t.length > 1 && t.startsWith("!")).map((t) => t.slice(1));
+  if (excluded.some((term) => haystacks.some((value) => value.includes(term)))) return false;
+
+  const included = tokens.filter((t) => !(t.length > 1 && t.startsWith("!")));
+  if (included.length === 0) return true;
+  // Space-separated tokens stay one phrase, as before; only the `!` tokens are split off.
+  const positive = included.join(" ");
+  return haystacks.some((value) => value.includes(positive));
 }
