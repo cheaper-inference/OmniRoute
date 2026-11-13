@@ -1,7 +1,7 @@
 ---
 title: "Shared CLI launch and configuration contracts"
-version: 3.8.51
-lastUpdated: 2026-09-21
+version: 3.8.54
+lastUpdated: 2026-11-13
 ---
 
 # Shared CLI launch and configuration contracts
@@ -29,6 +29,34 @@ Interrupt and termination signals are forwarded to the child. The launcher
 waits for the child's close event before removing temporary configuration.
 `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` controls the grace period before forced
 termination (default 5000 milliseconds).
+
+`omnirouter launch <tool>` (see [LAUNCH.md](./LAUNCH.md)) follows the same
+environment rules and signal forwarding, and adds:
+
+- **Gateway auto-start.** For a local target, when no gateway answers on the
+  port, the launcher starts `omniroute serve --headless --no-open` bound to
+  `127.0.0.1` under a detached reaper process. Each running launch holds a
+  lease in `DATA_DIR/launch/leases/` (heartbeat every 15 s, stale after 45 s or
+  when its process is gone). The reaper stops the gateway it started once no
+  lease has been live for the idle grace (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`,
+  default 10000 milliseconds). A gateway the user started is used but never
+  stopped. `--keep-gateway` or `omnirouter gateway keep` turns a launcher
+  gateway into a normal one; `--no-start` restores the old fail-if-down
+  behaviour. Remote targets are probed only.
+- **Launch sessions.** Every launch mints a short-lived `olx_` session token
+  from the parent credential (`POST /api/launch/sessions`), heartbeats it while
+  the tool runs, reads the usage summary and revokes it after the tool exits.
+  The token is a strict subset of its parent: same permissions, the same or a
+  narrower catalog, a shorter life, and it is not a dashboard credential. The
+  tool receives the session token, never the parent credential, and requests
+  are tagged `launch:<tool>:<sessionId>` unless `--tag` is given. A gateway
+  without the session API fails with `GatewayTooOld` instead of falling back to
+  an unscoped launch.
+- **Per-launch config.** Tool config files are written to a private temp
+  directory (mode 0700, prefix `omnirouter-`) and removed after the child
+  exits. A `SIGKILL` of the launcher leaves the directory behind;
+  `omnirouter launch --cleanup` removes such directories once they are older
+  than a day.
 
 ## Gemini persistent setup
 
