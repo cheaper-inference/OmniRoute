@@ -340,6 +340,7 @@
       "tests/unit/cliproxyapi-model-mapping-dispatch.test.ts",
       "tests/unit/codex-banked-reset-cache.test.ts",
       "tests/unit/codex-failover.test.ts",
+      "tests/unit/codex-failover-quota-preflight-18425.test.ts",
       "tests/unit/codex-quota-selection-hydration.test.ts",
       "tests/unit/codex-responses-to-chat-9161.test.ts",
       "tests/unit/codex-same-account-transport-retry-9708.test.ts",

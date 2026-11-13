@@ -33,7 +33,12 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // emptyTurnRetryLoop.ts — still dispatched through executeProviderRequest(), still
     // fenced centrally (class A).
     "open-sse/handlers/chatCore/emptyTurnRetryLoop.ts": 1,
-    "open-sse/handlers/chatCore/providerExecutionPipeline.ts": 2,
+    // #18425: the codex 429 rotation now prefers the injected quota-preflight selector
+    // (`connection.getProviderCredentialsWithQuotaPreflight`) and falls back to the plain
+    // `connection.getProviderCredentials` when the leg does not wire it — two call
+    // expressions for the same rotation site, 2->3. Same gate as before
+    // (`policy.allowAccountRotation`, derived from !managedLease), so still class B.
+    "open-sse/handlers/chatCore/providerExecutionPipeline.ts": 3,
     "open-sse/services/imageCombo.ts": 1,
     // GHSA-3w2r: keyless providers (local zero-config defaults, keyless
     // remotes) look up an in-scope connection for a connection-scoped API key

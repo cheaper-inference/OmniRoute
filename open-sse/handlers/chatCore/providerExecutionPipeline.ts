@@ -523,14 +523,26 @@ export async function runProviderExecutionPipeline(
         }
         await state.onClearSessionAffinity?.({ failedConnectionId: failedId });
       }
-      const selectCodexFailover =
-        connection.getProviderCredentialsWithQuotaPreflight ?? connection.getProviderCredentials;
-      const nextCreds = await selectCodexFailover(
-        "codex",
-        null,
-        allowedConnections,
-        wire.currentModel,
-        { excludeConnectionIds: [...excludedIds] }
+      // Both arms stay direct `connection.*` calls so the hard-lease credential
+      // inventory (tests/unit/hard-session-lease-bypass-inventory.test.ts) keeps
+      // seeing this rotation site; an aliased selector would hide it.
+      const codexFailoverOptions = { excludeConnectionIds: [...excludedIds] };
+      const nextCreds = await (
+        connection.getProviderCredentialsWithQuotaPreflight
+          ? connection.getProviderCredentialsWithQuotaPreflight(
+              "codex",
+              null,
+              allowedConnections,
+              wire.currentModel,
+              codexFailoverOptions
+            )
+          : connection.getProviderCredentials(
+              "codex",
+              null,
+              allowedConnections,
+              wire.currentModel,
+              codexFailoverOptions
+            )
       ).catch(() => null);
       if (nextCreds && !nextCreds.allRateLimited && nextCreds.connectionId) {
         await state.onAuditAccountRotation?.({
