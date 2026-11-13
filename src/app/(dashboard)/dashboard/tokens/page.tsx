@@ -16,6 +16,7 @@ import { PageHeader } from "@omniroute/ui-kit/page-header";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
+import Icon from "@/shared/components/Icon";
 import EmptyState from "@/shared/components/EmptyState";
 import Input from "@/shared/components/Input";
 
@@ -309,11 +310,9 @@ export default function TokensPage() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-text-muted">{t("tokensTokenBalance")}</p>
-            <p className="text-4xl font-bold mt-1">{balance.toLocaleString(locale)}</p>
+            <p className="text-4xl font-semibold mt-1">{balance.toLocaleString(locale)}</p>
           </div>
-          <div className="text-6xl opacity-20" aria-hidden="true">
-            🪙
-          </div>
+          <Icon name="toll" size={60} className="shrink-0 opacity-20" />
         </div>
       </Card>
 
@@ -437,7 +436,7 @@ export default function TokensPage() {
               onDismiss={() => setNewInviteCode(null)}
             >
               {t("tokensInviteCreated")}:{" "}
-              <span className="font-mono font-bold">{newInviteCode}</span>
+              <span className="font-mono font-semibold">{newInviteCode}</span>
             </Alert>
           )}
 
@@ -475,7 +474,7 @@ export default function TokensPage() {
                     className="flex items-center justify-between p-3 rounded-lg bg-surface-2 border border-border"
                   >
                     <div>
-                      <span className="font-mono font-bold">{inv.code}</span>
+                      <span className="font-mono font-semibold">{inv.code}</span>
                       <span className="text-xs text-text-muted ml-3">
                         {t("tokensInviteUses", { used: inv.useCount, max: inv.maxUses })}
                       </span>
