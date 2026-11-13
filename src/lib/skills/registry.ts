@@ -112,31 +112,48 @@ class SkillRegistry {
     } = skillData;
     const parsed = SkillCreateInputSchema.parse(parseableData);
     const db = getDbInstance();
-    const id = randomUUID();
     const now = new Date();
+    const mode = skillData.mode || (parsed.enabled ? "on" : "off");
+    const installCount =
+      typeof skillData.installCount === "number" ? Math.max(0, skillData.installCount) : 0;
 
-    db.prepare(
-      `INSERT INTO skills (id, api_key_id, name, version, description, schema, handler, enabled, mode, source_provider, tags, install_count, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).run(
-      id,
-      skillData.apiKeyId,
-      parsed.name,
-      parsed.version,
-      parsed.description || null,
-      JSON.stringify(parsed.schema),
-      parsed.handler,
-      parsed.enabled ? 1 : 0,
-      skillData.mode || (parsed.enabled ? "on" : "off"),
-      skillData.sourceProvider || null,
-      JSON.stringify(skillData.tags || []),
-      typeof skillData.installCount === "number" ? Math.max(0, skillData.installCount) : 0,
-      now.toISOString(),
-      now.toISOString()
-    );
+    // One row per (api_key_id, name, version): a repeat call updates it and keeps its id,
+    // so run history (skill_executions.skill_id) stays attached.
+    const saved = db
+      .prepare(
+        `INSERT INTO skills (id, api_key_id, name, version, description, schema, handler, enabled, mode, source_provider, tags, install_count, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON CONFLICT(api_key_id, name, version) DO UPDATE SET
+           description = excluded.description,
+           schema = excluded.schema,
+           handler = excluded.handler,
+           enabled = excluded.enabled,
+           mode = excluded.mode,
+           source_provider = excluded.source_provider,
+           tags = excluded.tags,
+           install_count = excluded.install_count,
+           updated_at = excluded.updated_at
+         RETURNING id, created_at`
+      )
+      .get(
+        randomUUID(),
+        skillData.apiKeyId,
+        parsed.name,
+        parsed.version,
+        parsed.description || null,
+        JSON.stringify(parsed.schema),
+        parsed.handler,
+        parsed.enabled ? 1 : 0,
+        mode,
+        skillData.sourceProvider || null,
+        JSON.stringify(skillData.tags || []),
+        installCount,
+        now.toISOString(),
+        now.toISOString()
+      ) as { id: string; created_at: string };
 
     const skill: Skill = {
-      id,
+      id: saved.id,
       apiKeyId: skillData.apiKeyId,
       name: parsed.name,
       version: parsed.version,
@@ -144,12 +161,11 @@ class SkillRegistry {
       schema: parsed.schema,
       handler: parsed.handler,
       enabled: parsed.enabled,
-      mode: skillData.mode || (parsed.enabled ? "on" : "off"),
+      mode,
       sourceProvider: skillData.sourceProvider,
       tags: skillData.tags || [],
-      installCount:
-        typeof skillData.installCount === "number" ? Math.max(0, skillData.installCount) : 0,
-      createdAt: now,
+      installCount,
+      createdAt: new Date(saved.created_at),
       updatedAt: now,
     };
 

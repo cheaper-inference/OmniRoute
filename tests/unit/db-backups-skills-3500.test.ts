@@ -44,7 +44,7 @@ function seedSkill(overrides: Partial<Record<string, unknown>> = {}) {
   ).run(
     overrides.id ?? id,
     overrides.api_key_id ?? "key-1",
-    overrides.name ?? "test-skill",
+    overrides.name ?? id,
     overrides.version ?? "1.0.0",
     overrides.description ?? "desc",
     overrides.schema ?? "{}",
