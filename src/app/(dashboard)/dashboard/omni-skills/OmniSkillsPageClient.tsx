@@ -222,19 +222,19 @@ export function OmniSkillsPageClient(): JSX.Element {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card padding="sm">
           <p className="text-xs text-text-muted uppercase tracking-wide">{t("totalSkills")}</p>
-          <p className="text-2xl font-bold text-text-main mt-1">{skillsTotal}</p>
+          <p className="text-2xl font-semibold text-text-main mt-1">{skillsTotal}</p>
         </Card>
         <Card padding="sm">
           <p className="text-xs text-text-muted uppercase tracking-wide">{t("enabledSkills")}</p>
-          <p className="text-2xl font-bold text-success mt-1">{enabledCount}</p>
+          <p className="text-2xl font-semibold text-success mt-1">{enabledCount}</p>
         </Card>
         <Card padding="sm">
           <p className="text-xs text-text-muted uppercase tracking-wide">{t("totalExecutions")}</p>
-          <p className="text-2xl font-bold text-primary mt-1">{execTotal}</p>
+          <p className="text-2xl font-semibold text-primary mt-1">{execTotal}</p>
         </Card>
         <Card padding="sm">
           <p className="text-xs text-text-muted uppercase tracking-wide">{t("successRate")}</p>
-          <p className="text-2xl font-bold text-warning mt-1">{successRate}%</p>
+          <p className="text-2xl font-semibold text-warning mt-1">{successRate}%</p>
         </Card>
       </div>
 

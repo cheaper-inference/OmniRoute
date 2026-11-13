@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "Kiegyenlíti a fennmaradó kvótát az 5 órával és a heti visszaállításokkal szemben, majd hasonló pontszámokat hajt végre",
     "quotaWeighted": "Kvótával súlyozott",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Lejárat elsőként",
+    "expiryFirstDesc": "Először azt a fiókot használja, amelynek kvótája különben kihasználatlanul lejárna: a legnagyobb maradék a legközelebbi visszaállítással kerül előre.",
     "strictRandom": "Szigorúan véletlenszerű",
     "strictRandomDesc": "Paklikeverés — minden modellt egyszer használ, mielőtt újrakeverné őket",
     "fusion": "Fúzió",
@@ -4033,6 +4035,11 @@
         "when": "Kvótatelemetriával és különböző visszaállítási ablakokkal több fiókon keresztül irányíthat.",
         "avoid": "A kvóta telemetria a legtöbb fióknál nem érhető el.",
         "example": "Részesítse előnyben a heti 60%-os fiók-visszaállítást holnap, mint a későbbi 80%-os fiók-visszaállítást."
+      },
+      "expiry-first": {
+        "when": "Olyan fiókok között irányít, amelyek kvótái eltérő ütemezés szerint állnak vissza, és fel szeretné használni azt a kvótát, amely különben kihasználatlanul lejárna.",
+        "avoid": "A legtöbb fióknál hiányzik a kvótatelemetria, vagy olyan stabil sorrendre van szüksége, amely figyelmen kívül hagyja a visszaállítás időzítését.",
+        "example": "Részesítse előnyben a 80%-os maradékkal rendelkező, 39 perc múlva visszaálló fiókot a 48%-os maradékkal rendelkező, 9 óra múlva visszaálló fiókkal szemben — a hamarosan lejáró kvóta elfogy, mielőtt kárba veszne."
       },
       "strict-random": {
         "when": "Akkor használja, ha tökéletesen egyenletes elosztást szeretne — minden modellt egyszer használ, mielőtt bármelyiket megismételné.",
@@ -4249,6 +4256,13 @@
         "tip1": "Használjon kifejezett fióklépéseket vagy fiókcímke-útválasztást a kvótatelemetriával rendelkező szolgáltatók számára.",
         "tip2": "Hangolás a heti súlyokkal szemben, amikor a rövid távú kimerültség kockázatosabb.",
         "tip3": "A kötözőszalag legyen kicsi, hogy az egyenértékű fiókok továbbra is tisztességesen forogjanak."
+      },
+      "expiry-first": {
+        "title": "Lejáró kvóta elsőként",
+        "description": "A fiókokat a kihasználási nyomás szerint rangsorolja: a visszaállítási határidőhöz közeli magas maradék kvóta kerül előre.",
+        "tip1": "Szolgáltatói kvótatelemetriát igényel; az ennek hiányában lévő fiókok megtartják a listában szereplő prioritási sorrendjüket.",
+        "tip2": "A közel azonos pontszámok a döntetlensávon belül váltakoznak, így a testvérfiókok továbbra is megosztják a terhelést.",
+        "tip3": "Szűkítse a rangsorolást arra a kvótakeretre, amely alapján az egyes modellek ténylegesen számláznak."
       },
       "strict-random": {
         "title": "Paklikeveréses elosztás",
@@ -4481,7 +4495,7 @@
     "spend7d": "Spend7D",
     "avgCostPerRequest": "Avg Cost Per Request",
     "noCostDataDescription": "No Cost Data Description",
-    "spendToday": "Mai költés",
+    "spendToday": "1 napos költés",
     "overviewLoadFailed": "Overview Load Failed",
     "overviewDescription": "Overview Description",
     "providerShare": "Szolgáltatói részesedés",
@@ -5679,6 +5693,7 @@
     "usageTracking": "Használat követése",
     "securityDesc": "Állítson be jelszót az irányítópult védelméhez, vagy most hagyja ki.",
     "securityDescSkipWarning": "⚠️ Jelszó nélkül a beállítás során nem tud szolgáltatókat hozzáadni. Később, a jelszó beállítása után az irányítópulton adhatja hozzá őket.",
+    "passwordAlreadySet": "Az irányítópult jelszava már be van állítva. Később a Beállításokban módosíthatja.",
     "providerDesc": "Csatlakoztassa első AI-szolgáltatóját. Később továbbiakat is hozzáadhat.",
     "providerRequiresPassword": "Szolgáltatók hozzáadásához először be kell állítania egy jelszót. Lépjen vissza a biztonsági lépéshez, és állítson be egy jelszót, vagy később adjon hozzá szolgáltatókat az irányítópulton.",
     "apiKeyRequired": "API-kulcs (kötelező)",
@@ -6051,6 +6066,8 @@
     "importFromModels": "Importálás a /models-ből",
     "modelsImported": "{count} modell importálva",
     "allModelsAlreadyImported": "Minden modell már importálva van",
+    "providerPublishesNoModelList": "Ez a szolgáltató nem tesz közzé modelllistát — a beépített katalógusa naprakész",
+    "modelsNoLongerListed": "{count, plural, one {# modell már nem szerepel a szolgáltató listáján} other {# modell már nem szerepel a szolgáltató listáján}}",
     "noNewModelsToImport": "Nincs új modell az importáláshoz — minden modell már a nyilvántartásban vagy az egyéni modellek listájában van",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Modell felfedezése sikertelen {time}",
@@ -6736,6 +6753,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Grok webes süti helyőrzője",
     "herokuBaseUrlHint": "Tipp a Heroku alap-URL-jéhez",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "E-mail-cím elrejtése",
     "imageProviders": "Képszolgáltatók",
     "videoProviders": "Videó generálása",
@@ -7234,7 +7252,8 @@
       "kiro": "Ingyenes csomag: havi 50 kredit (~25K–100K token). ⚠️ A Kiro felhasználási feltételei tiltják a külső proxykkal és futtatókeretekkel való használatot.",
       "codex": "Csatlakoztasd az OpenAI Codex szolgáltatást a meglévő OAuth-folyamattal.",
       "qwen": "Csatlakoztasd a Qwen Code szolgáltatást a meglévő OAuth-folyamattal.",
-      "github-models": "Hozzon létre egy GitHub PAT-ot 'models: read' hatókörrel a github.com/settings/tokens oldalon"
+      "github-models": "Hozzon létre egy GitHub PAT-ot 'models: read' hatókörrel a github.com/settings/tokens oldalon",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "Az {provider} elfogadja a szolgáltató natív modellazonosítóit. Importáljon a /models-ból, vagy adjon hozzá egyéni azonosítókat az útválasztáshoz.",
     "bedrockModelsDescription": "Az Amazon Bedrock modellek hatóköre az AWS régió szerint történik. Importáljon a /models mappából, vagy adja hozzá a kiválasztott régióban engedélyezett Bedrock modellazonosítókat.",
@@ -8122,6 +8141,8 @@
     "resetAwareDesc": "Előnyben részesítse az egészséges fennmaradó kvótával és közelebbi visszaállításokkal rendelkező fiókokat",
     "quotaWeighted": "Kvótaalapú súlyozás",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Lejárat elsőként",
+    "expiryFirstDesc": "Először azt a fiókot használja, amelynek kvótája különben kihasználatlanul lejárna: a legnagyobb maradék a legközelebbi visszaállítással kerül előre.",
     "strictRandom": "Szigorúan véletlenszerű",
     "strictRandomDesc": "Keveréses pakli — minden fiókot egyszer használ, mielőtt újrakeverné",
     "stickyLimit": "Ragadós határ",
@@ -8834,6 +8855,8 @@
     "retentionUsageHistory": "Használati előzmények (nap)",
     "retentionMemoryEntries": "Memóriabejegyzések (nap)",
     "retentionXpAuditLog": "XP auditnapló (nap)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Megőrzési beállítások mentése",
     "storageAutoVacuumMode": "Automatikus vákuum üzemmód",
     "storageScheduledVacuum": "Ütemezett vákuum",
@@ -10284,7 +10307,11 @@
     "mappingInvalidJson": "Érvénytelen JSON.",
     "mappingMustBeObject": "A hozzárendelésnek JSON-objektumnak kell lennie, nem tömbnek vagy primitív értéknek.",
     "mappingValueMustBeString": "A(z) “{key}” kulcs értékének karakterláncnak kell lennie.",
-    "save": "Mentés"
+    "save": "Mentés",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -12011,6 +12038,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "Frissítés",
     "clearAll": "Clear All",
+    "clearAllConfirm": "A gyorsítótár összes bejegyzése törlődik. Ez a művelet nem vonható vissza.",
     "memoryEntries": "Memóriában tárolt bejegyzések",
     "memoryEntriesSub": "Memóriában tárolt LRU",
     "dbEntries": "Adatbázis-bejegyzések",
@@ -12895,6 +12923,8 @@
     },
     "attempts": "kísérletek",
     "detail": {
+      "tabOverview": "Áttekintés",
+      "tabPayloads": "Adatcsomagok",
       "omittedHttpAttempts": "{count} HTTP-küldés nincs megőrizve",
       "noHttpResponse": "Nem észlelt HTTP-választ",
       "transportError": "Átviteli hiba",

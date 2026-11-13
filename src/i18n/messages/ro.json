@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "Echilibrează cota rămasă față de 5 ore și resetări săptămânale, apoi scoruri similare la round-robin",
     "quotaWeighted": "Ponderat după cotă",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Expirare întâi",
+    "expiryFirstDesc": "Consumă mai întâi contul a cărui cotă altfel ar expira nefolosită: primul este cel mai mare rest cu cea mai apropiată resetare.",
     "strictRandom": "Aleatoriu strict",
     "strictRandomDesc": "Pachet amestecat — folosește fiecare model o dată înainte de a amesteca din nou",
     "fusion": "Fuziune",
@@ -4033,6 +4035,11 @@
         "when": "Rutați prin mai multe conturi cu telemetrie de cotă și ferestre diferite de resetare.",
         "avoid": "Telemetria cotelor nu este disponibilă pentru majoritatea conturilor.",
         "example": "Preferați o resetare a contului săptămânală de 60% mâine, față de o resetare a contului de 80% mai târziu."
+      },
+      "expiry-first": {
+        "when": "Rutați prin conturi ale căror cote se resetează după programe diferite și doriți să consumați cota care altfel ar expira nefolosită.",
+        "avoid": "Telemetria cotelor lipsește pentru majoritatea conturilor sau aveți nevoie de o ordine stabilă care ignoră momentul resetării.",
+        "example": "Preferați un cont cu 80% rămas care se resetează în 39 de minute în locul unui cont cu 48% rămas care se resetează în 9 ore — cota aproape expirată este consumată înainte de a se pierde."
       },
       "strict-random": {
         "when": "Utilizați când doriți o distribuție perfect uniformă — fiecare model este folosit o dată înainte de repetare.",
@@ -4249,6 +4256,13 @@
         "tip1": "Utilizați pași expliciți pentru cont sau rutarea etichetei de cont pentru furnizorii cu telemetrie de cotă.",
         "tip2": "Reglați sesiunea față de greutăți săptămânale atunci când epuizarea pe termen scurt este mai riscantă.",
         "tip3": "Păstrați banda de legătură mică, astfel încât conturile echivalente să se rotească în continuare echitabil."
+      },
+      "expiry-first": {
+        "title": "Întâi cota care expiră",
+        "description": "Clasifică conturile după presiunea de valorificare: o cotă rămasă mare, aproape de termenul de resetare, este prima.",
+        "tip1": "Necesită telemetria cotelor de la furnizor; conturile fără ea își păstrează ordinea de prioritate listată.",
+        "tip2": "Scorurile aproape egale se rotesc în banda de egalitate, astfel încât conturile similare continuă să împartă sarcina.",
+        "tip3": "Limitați clasamentul la grupul de cotă pe baza căruia este facturat efectiv fiecare model."
       },
       "strict-random": {
         "title": "Distribuție prin amestecarea pachetului",
@@ -4481,7 +4495,7 @@
     "spend7d": "Spend7D",
     "avgCostPerRequest": "Avg Cost Per Request",
     "noCostDataDescription": "No Cost Data Description",
-    "spendToday": "Cheltuieli astăzi",
+    "spendToday": "Cheltuieli pentru 1 zi",
     "overviewLoadFailed": "Overview Load Failed",
     "overviewDescription": "Overview Description",
     "providerShare": "Ponderea furnizorilor",
@@ -5679,6 +5693,7 @@
     "usageTracking": "Urmărirea utilizării",
     "securityDesc": "Setați o parolă pentru a vă proteja tabloul de bord sau omiteți pentru moment.",
     "securityDescSkipWarning": "⚠️ Fără o parolă, nu veți putea adăuga furnizori în timpul configurării. Îi puteți adăuga ulterior din panoul de control, după setarea unei parole.",
+    "passwordAlreadySet": "O parolă pentru panou este deja setată. O puteți schimba mai târziu din Setări.",
     "providerDesc": "Conectați-vă primul furnizor de AI. Puteți adăuga mai multe mai târziu.",
     "providerRequiresPassword": "Pentru a adăuga furnizori, trebuie mai întâi să setați o parolă. Reveniți la pasul de securitate și setați o parolă sau adăugați furnizorii ulterior din panoul de control.",
     "apiKeyRequired": "Cheie API (obligatorie)",
@@ -6051,6 +6066,8 @@
     "importFromModels": "Import din /modele",
     "modelsImported": "{count} modele importate",
     "allModelsAlreadyImported": "Toate modelele sunt deja importate",
+    "providerPublishesNoModelList": "Acest furnizor nu publică o listă de modele — catalogul său integrat este actualizat",
+    "modelsNoLongerListed": "{count, plural, one {# model nu mai este listat} few {# modele nu mai sunt listate} other {# de modele nu mai sunt listate}} de furnizor",
     "noNewModelsToImport": "Niciun model nou de importat — toate modelele sunt deja în registru sau în lista de modele personalizate",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Descoperirea modelului a eșuat {time}",
@@ -6736,6 +6753,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Substituent pentru cookie-ul web Grok",
     "herokuBaseUrlHint": "Sugestie pentru URL-ul de bază Heroku",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Ascunde adresa de e-mail",
     "imageProviders": "Furnizori de imagini",
     "videoProviders": "Generare video",
@@ -7234,7 +7252,8 @@
       "kiro": "Nivel gratuit: 50 de credite/lună (~25K–100K tokenuri). ⚠️ Kiro ToS interzice utilizarea de proxy/harness terțe.",
       "codex": "Conectați OpenAI Codex cu fluxul OAuth existent.",
       "qwen": "Conectați Qwen Code cu fluxul OAuth existent.",
-      "github-models": "Creați un GitHub PAT cu scope-ul 'models: read' la github.com/settings/tokens"
+      "github-models": "Creați un GitHub PAT cu scope-ul 'models: read' la github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} acceptă ID-uri de model native ale furnizorului. Importați din /modele sau adăugați ID-uri personalizate pentru rutare.",
     "bedrockModelsDescription": "Modelele Amazon Bedrock sunt acoperite de regiunea AWS. Importați din /modele sau adăugați ID-uri de model Bedrock activate în regiunea selectată.",
@@ -8122,6 +8141,8 @@
     "resetAwareDesc": "Preferați conturile cu cotă rămasă sănătoasă și resetări mai apropiate",
     "quotaWeighted": "Ponderat în funcție de cotă",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Expirare întâi",
+    "expiryFirstDesc": "Consumă mai întâi contul a cărui cotă altfel ar expira nefolosită: primul este cel mai mare rest cu cea mai apropiată resetare.",
     "strictRandom": "Aleatoriu strict",
     "strictRandomDesc": "Amestecă pachetul — utilizează fiecare cont o dată înainte de a amesteca din nou",
     "stickyLimit": "Limită lipicioasă",
@@ -8834,6 +8855,8 @@
     "retentionUsageHistory": "Istoricul utilizării (zile)",
     "retentionMemoryEntries": "Intrări de memorie (zile)",
     "retentionXpAuditLog": "Jurnal de audit XP (zile)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Salvează setările de retenție",
     "storageAutoVacuumMode": "Modul de aspirare automată",
     "storageScheduledVacuum": "Vacuum programat",
@@ -10284,7 +10307,11 @@
     "mappingInvalidJson": "JSON nevalid.",
     "mappingMustBeObject": "Maparea trebuie să fie un obiect JSON, nu un tablou sau o valoare primitivă.",
     "mappingValueMustBeString": "Valoarea pentru cheia „{key}” trebuie să fie un șir de caractere.",
-    "save": "Salvați"
+    "save": "Salvați",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Motorul Caveman",
@@ -12011,6 +12038,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "Reîmprospătare",
     "clearAll": "Clear All",
+    "clearAllConfirm": "Toate intrările din acest cache vor fi șterse. Această acțiune nu poate fi anulată.",
     "memoryEntries": "Intrări în memorie",
     "memoryEntriesSub": "LRU în memorie",
     "dbEntries": "Intrări în baza de date",
@@ -12895,6 +12923,8 @@
     },
     "attempts": "încercări",
     "detail": {
+      "tabOverview": "Prezentare generală",
+      "tabPayloads": "Payloaduri",
       "omittedHttpAttempts": "{count} trimiteri HTTP nu au fost păstrate",
       "noHttpResponse": "Nu a fost observat niciun răspuns HTTP",
       "transportError": "Eroare de transport",

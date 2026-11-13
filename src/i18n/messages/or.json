@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "ଅବଶିଷ୍ଟ କୋଟାକୁ 5h ଏବଂ ସାପ୍ତାହିକ ରିସେଟ୍ ସହ ସନ୍ତୁଳିତ କରେ, ତା’ପରେ ସମାନ ସ୍କୋରଗୁଡ଼ିକୁ ରାଉଣ୍ଡ-ରବିନ୍ କରେ",
     "quotaWeighted": "କୋଟା-ଭାରିତ",
     "quotaWeightedDesc": "କୋଟା ଶେଷ ହୋଇଯାଇଥିବା ଆକାଉଣ୍ଟଗୁଡ଼ିକୁ ଏଡ଼ାଇ, ତା’ପରେ ପ୍ରକ୍ରିୟାଧୀନ ଲୋଡ୍ରେ ଭାଗ କରାଯାଇଥିବା ଅବଶିଷ୍ଟ କୋଟାର ଅନୁପାତରେ ବାକିଗୁଡ଼ିକ ମଧ୍ୟରୁ ବାଛେ। ବିଦ୍ୟମାନ ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ ପିନ୍ ହୋଇ ରହେ।",
+    "expiryFirst": "ମିଆଦ-ସମାପ୍ତି-ପ୍ରଥମ",
+    "expiryFirstDesc": "ଅନ୍ୟଥା ବ୍ୟବହାର ନହୋଇ ମିଆଦ ସରିଯାଉଥିବା କୋଟା ଥିବା ଆକାଉଣ୍ଟକୁ ପ୍ରଥମେ ବ୍ୟବହାର କରେ: ସର୍ବାଧିକ ଅବଶିଷ୍ଟ ଏବଂ ନିକଟତମ ରିସେଟ୍ ଥିବା ଆକାଉଣ୍ଟ ପ୍ରଥମେ ଯାଏ।",
     "strictRandom": "କଠୋର ଯାଦୃଚ୍ଛିକ",
     "strictRandomDesc": "ଶଫଲ୍ ଡେକ୍ — ପୁନଃ ଶଫଲ୍ କରିବା ପୂର୍ବରୁ ପ୍ରତ୍ୟେକ ମଡେଲ୍କୁ ଥରେ ବ୍ୟବହାର କରେ",
     "fusion": "ସମ୍ମିଶ୍ରଣ",
@@ -4033,6 +4035,11 @@
         "when": "ଆପଣ କୋଟା ଟେଲିମେଟ୍ରି ଏବଂ ଭିନ୍ନ ରିସେଟ୍ ସମୟ-ଖଣ୍ଡ ଥିବା ଏକାଧିକ ଆକାଉଣ୍ଟ ମଧ୍ୟରେ ରାଉଟ୍ କରନ୍ତି।",
         "avoid": "ଅଧିକାଂଶ ଆକାଉଣ୍ଟ ପାଇଁ କୋଟା ଟେଲିମେଟ୍ରି ଉପଲବ୍ଧ ନାହିଁ।",
         "example": "ପରେ ରିସେଟ୍ ହେବାକୁ ଥିବା 80% ଆକାଉଣ୍ଟ ବଦଳରେ ଆସନ୍ତାକାଲି ରିସେଟ୍ ହେବାକୁ ଥିବା 60% ସାପ୍ତାହିକ ଆକାଉଣ୍ଟକୁ ପ୍ରାଧାନ୍ୟ ଦିଅନ୍ତୁ।"
+      },
+      "expiry-first": {
+        "when": "ଆପଣ ଭିନ୍ନ ଭିନ୍ନ ସମୟସୂଚୀରେ କୋଟା ରିସେଟ୍ ହେଉଥିବା ଆକାଉଣ୍ଟଗୁଡ଼ିକ ମଧ୍ୟରେ ରାଉଟ୍ କରନ୍ତି ଏବଂ ଅନ୍ୟଥା ବ୍ୟବହାର ନହୋଇ ମିଆଦ ସରିଯାଉଥିବା କୋଟା ବ୍ୟବହାର କରିବାକୁ ଚାହାଁନ୍ତି।",
+        "avoid": "ଅଧିକାଂଶ ଆକାଉଣ୍ଟ ପାଇଁ କୋଟା ଟେଲିମେଟ୍ରି ଉପଲବ୍ଧ ନାହିଁ, କିମ୍ବା ଆପଣଙ୍କୁ ରିସେଟ୍ ସମୟକୁ ଅଣଦେଖା କରୁଥିବା ଏକ ସ୍ଥିର କ୍ରମ ଆବଶ୍ୟକ।",
+        "example": "9 ଘଣ୍ଟାରେ ରିସେଟ୍ ହେବାକୁ ଥିବା 48% ଅବଶିଷ୍ଟ ଆକାଉଣ୍ଟ ବଦଳରେ 39 ମିନିଟରେ ରିସେଟ୍ ହେବାକୁ ଥିବା 80% ଅବଶିଷ୍ଟ ଆକାଉଣ୍ଟକୁ ପ୍ରାଧାନ୍ୟ ଦିଅନ୍ତୁ — ମିଆଦ ସରିବାକୁ ଥିବା କୋଟା ନଷ୍ଟ ହେବା ପୂର୍ବରୁ ବ୍ୟବହୃତ ହୁଏ।"
       },
       "strict-random": {
         "when": "ଆପଣ ସମ୍ପୂର୍ଣ୍ଣ ସମାନ ବଣ୍ଟନ ଚାହୁଁଥିଲେ ବ୍ୟବହାର କରନ୍ତୁ—ପୁନରାବୃତ୍ତି ପୂର୍ବରୁ ପ୍ରତ୍ୟେକ ମଡେଲ୍ ଥରେ ବ୍ୟବହୃତ ହେବ।",
@@ -4249,6 +4256,13 @@
         "tip1": "କୋଟା ଟେଲିମେଟ୍ରି ଥିବା ପ୍ରଦାନକାରୀଙ୍କ ପାଇଁ ସ୍ପଷ୍ଟ ଆକାଉଣ୍ଟ ଷ୍ଟେପ୍ କିମ୍ବା ଆକାଉଣ୍ଟ-ଟ୍ୟାଗ୍ ରୁଟିଂ ବ୍ୟବହାର କରନ୍ତୁ।",
         "tip2": "ସ୍ୱଳ୍ପକାଳୀନ କୋଟା ଶେଷ ହେବାର ବିପଦ ଅଧିକ ଥିଲେ ସେସନ୍ ବନାମ ସାପ୍ତାହିକ ଭାରକୁ ସମନ୍ୱୟ କରନ୍ତୁ।",
         "tip3": "ସମତୁଲ୍ୟ ଆକାଉଣ୍ଟଗୁଡ଼ିକ ଯେପରି ନ୍ୟାୟସଙ୍ଗତ ଭାବେ ରୋଟେଟ୍ ହୋଇପାରିବ, ସେଥିପାଇଁ ଟାଇ ବ୍ୟାଣ୍ଡକୁ ଛୋଟ ରଖନ୍ତୁ।"
+      },
+      "expiry-first": {
+        "title": "ମିଆଦ ସରୁଥିବା କୋଟା ପ୍ରଥମେ",
+        "description": "ବ୍ୟବହାର ଚାପ ଅନୁଯାୟୀ ଆକାଉଣ୍ଟଗୁଡ଼ିକୁ ର୍ୟାଙ୍କ କରେ: ରିସେଟ୍ ସମୟସୀମା ନିକଟରେ ଥିବା ଅଧିକ ଅବଶିଷ୍ଟ କୋଟା ପ୍ରଥମେ ଯାଏ।",
+        "tip1": "ପ୍ରଦାନକାରୀ କୋଟା ଟେଲିମେଟ୍ରି ଆବଶ୍ୟକ; ଏହା ନଥିବା ଆକାଉଣ୍ଟଗୁଡ଼ିକ ସେମାନଙ୍କ ତାଲିକାଭୁକ୍ତ ପ୍ରାଥମିକତା କ୍ରମ ବଜାୟ ରଖନ୍ତି।",
+        "tip2": "ପ୍ରାୟ ସମାନ ସ୍କୋରଗୁଡ଼ିକ ଟାଇ ବ୍ୟାଣ୍ଡ ମଧ୍ୟରେ ରୋଟେଟ୍ ହୁଏ, ଯାହାଦ୍ୱାରା ସମାନ ଆକାଉଣ୍ଟଗୁଡ଼ିକ ଏବେ ବି ଲୋଡ୍ ବାଣ୍ଟନ୍ତି।",
+        "tip3": "ପ୍ରତ୍ୟେକ ମଡେଲ ପ୍ରକୃତରେ ଯେଉଁ କୋଟା ବକେଟରେ ବିଲ୍ ହୁଏ, ର୍ୟାଙ୍କିଂକୁ ସେଥିରେ ସୀମିତ ରଖନ୍ତୁ।"
       },
       "strict-random": {
         "title": "ଶଫଲ୍ ଡେକ୍ ବଣ୍ଟନ",
@@ -4481,7 +4495,7 @@
     "spend7d": "୭ ଦିନର ଖର୍ଚ୍ଚ",
     "avgCostPerRequest": "ପ୍ରତି ଅନୁରୋଧର ହାରାହାରି ଖର୍ଚ୍ଚ",
     "noCostDataDescription": "ଏଠାରେ ଖର୍ଚ୍ଚ ତଥ୍ୟ ଦେଖିବାକୁ ଅନୁରୋଧ କରିବା ଆରମ୍ଭ କରନ୍ତୁ। ସମସ୍ତ ପ୍ରଦାନକାରୀଙ୍କ ପାଇଁ ଖର୍ଚ୍ଚ ସ୍ୱୟଂଚାଳିତ ଭାବେ ଟ୍ରାକ୍ କରାଯାଏ।",
-    "spendToday": "ଆଜିର ଖର୍ଚ୍ଚ",
+    "spendToday": "1 ଦିନର ଖର୍ଚ୍ଚ",
     "overviewLoadFailed": "ଖର୍ଚ୍ଚର ସାରାଂଶ ଲୋଡ୍ କରିବାରେ ବିଫଳ",
     "overviewDescription": "ସମସ୍ତ ସଂଯୁକ୍ତ ପ୍ରଦାନକାରୀ ଏବଂ ମଡେଲ୍ଗୁଡ଼ିକରେ ରିଅଲ୍-ଟାଇମ୍ ଖର୍ଚ୍ଚର ବିବରଣୀ",
     "providerShare": "ପ୍ରଦାନକାରୀଙ୍କ ଅଂଶ",
@@ -5679,6 +5693,7 @@
     "usageTracking": "ବ୍ୟବହାର ଟ୍ରାକିଂ",
     "securityDesc": "ଆପଣଙ୍କ ଡ୍ୟାଶବୋର୍ଡକୁ ସୁରକ୍ଷିତ ରଖିବା ପାଇଁ ଏକ ପାସୱାର୍ଡ ସେଟ୍ କରନ୍ତୁ କିମ୍ବା ବର୍ତ୍ତମାନ ପାଇଁ ଏହି ପଦକ୍ଷେପଟି ଛାଡ଼ିଦିଅନ୍ତୁ।",
     "securityDescSkipWarning": "⚠️ ପାସୱାର୍ଡ ବିନା, ସେଟ୍ଅପ୍ ସମୟରେ ଆପଣ ପ୍ରଦାନକାରୀଙ୍କୁ ଯୋଡ଼ିପାରିବେ ନାହିଁ। ପାସୱାର୍ଡ ସେଟ୍ କରିବା ପରେ ଆପଣ ସେମାନଙ୍କୁ ଡ୍ୟାଶବୋର୍ଡରୁ ଯୋଡ଼ିପାରିବେ।",
+    "passwordAlreadySet": "ଡ୍ୟାସବୋର୍ଡ ପାସୱାର୍ଡ ପୂର୍ବରୁ ସେଟ୍ ହୋଇସାରିଛି। ଆପଣ ଏହାକୁ ପରେ ସେଟିଂସରେ ବଦଳାଇପାରିବେ।",
     "providerDesc": "ଆପଣଙ୍କ ପ୍ରଥମ AI ପ୍ରଦାନକାରୀଙ୍କୁ ସଂଯୋଗ କରନ୍ତୁ। ଆପଣ ପରେ ଆହୁରି ଯୋଡ଼ିପାରିବେ।",
     "providerRequiresPassword": "ପ୍ରଦାନକାରୀଙ୍କୁ ଯୋଡ଼ିବା ପାଇଁ ଆପଣଙ୍କୁ ପ୍ରଥମେ ଏକ ପାସୱାର୍ଡ ସେଟ୍ କରିବାକୁ ପଡ଼ିବ। ଦୟାକରି ସୁରକ୍ଷା ପଦକ୍ଷେପକୁ ଫେରି ଏକ ପାସୱାର୍ଡ ସେଟ୍ କରନ୍ତୁ, କିମ୍ବା ପରେ ଡ୍ୟାଶବୋର୍ଡରୁ ପ୍ରଦାନକାରୀଙ୍କୁ ଯୋଡ଼ନ୍ତୁ।",
     "apiKeyRequired": "API କୀ (ଆବଶ୍ୟକ)",
@@ -6051,6 +6066,8 @@
     "importFromModels": "/models ରୁ ଇମ୍ପୋର୍ଟ କରନ୍ତୁ",
     "modelsImported": "{count}ଟି ମଡେଲ୍ ଇମ୍ପୋର୍ଟ କରାଗଲା",
     "allModelsAlreadyImported": "ସମସ୍ତ ମଡେଲ୍ ପୂର୍ବରୁ ଇମ୍ପୋର୍ଟ ହୋଇସାରିଛି",
+    "providerPublishesNoModelList": "ଏହି ପ୍ରଦାନକାରୀ କୌଣସି ମଡେଲ୍ ତାଲିକା ପ୍ରକାଶ କରେ ନାହିଁ — ଏହାର ଅନ୍ତର୍ନିହିତ କ୍ୟାଟାଲଗ୍ ଅଦ୍ୟତନ ଅଛି",
+    "modelsNoLongerListed": "{count, plural, one {#ଟି ମଡେଲ୍} other {#ଟି ମଡେଲ୍}} ବର୍ତ୍ତମାନ ପ୍ରଦାନକାରୀଙ்କ ତାଲିକାରେ ନାହିଁ",
     "noNewModelsToImport": "ଇମ୍ପୋର୍ଟ କରିବାକୁ କୌଣସି ନୂଆ ମଡେଲ୍ ନାହିଁ — ସମସ୍ତ ମଡେଲ୍ ପୂର୍ବରୁ ରେଜିଷ୍ଟ୍ରି କିମ୍ବା କଷ୍ଟମ୍ ମଡେଲ୍ ତାଲିକାରେ ଅଛି",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "ମଡେଲ୍ ଡିସ୍କଭରୀ ବିଫଲ୍ {time}",
@@ -6727,6 +6744,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Grok ୱେବ୍ କୁକି ପ୍ଲେସହୋଲ୍ଡର୍",
     "herokuBaseUrlHint": "Heroku ବେସ୍ URL ସଙ୍କେତ",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "ଇମେଲ୍ ଲୁଚାନ୍ତୁ",
     "imageProviders": "ଛବି ପ୍ରଦାନକାରୀମାନେ",
     "videoProviders": "ଭିଡିଓ ସୃଷ୍ଟି",
@@ -7225,7 +7243,8 @@
       "kiro": "ମାଗଣା ସ୍ତର: 50 କ୍ରେଡିଟ୍/ମାସ (~25K–100K ଟୋକନ୍)। ⚠️ Kiro ToS ତୃତୀୟ-ପକ୍ଷ proxy/harness ବ୍ୟବହାରକୁ ନିଷେଧ କରେ।",
       "codex": "ବର୍ତ୍ତମାନର OAuth ପ୍ରବାହ ସହିତ OpenAI Codexକୁ ସଂଯୋଗ କରନ୍ତୁ।",
       "qwen": "ବର୍ତ୍ତମାନର OAuth ପ୍ରବାହ ସହିତ Qwen Codeକୁ ସଂଯୋଗ କରନ୍ତୁ।",
-      "github-models": "github.com/settings/tokensରେ 'models: read' ସ୍କୋପ୍ ସହିତ ଏକ GitHub PAT ସୃଷ୍ଟି କରନ୍ତୁ"
+      "github-models": "github.com/settings/tokensରେ 'models: read' ସ୍କୋପ୍ ସହିତ ଏକ GitHub PAT ସୃଷ୍ଟି କରନ୍ତୁ",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} ପ୍ରଦାନକାରୀ-ନେଟିଭ୍ ମଡେଲ୍ IDଗୁଡ଼ିକ ଗ୍ରହଣ କରେ। /modelsରୁ ଆମଦାନି କରନ୍ତୁ କିମ୍ବା ରାଉଟିଂ ପାଇଁ କଷ୍ଟମ୍ ID ଯୋଡ଼ନ୍ତୁ।",
     "bedrockModelsDescription": "Amazon Bedrock ମଡେଲ୍ଗୁଡ଼ିକ AWS ଅଞ୍ଚଳ ଅନୁସାରେ ସୀମିତ। /modelsରୁ ଆମଦାନି କରନ୍ତୁ କିମ୍ବା ଚୟନିତ ଅଞ୍ଚଳରେ ସକ୍ଷମ ଥିବା Bedrock ମଡେଲ୍ IDଗୁଡ଼ିକ ଯୋଡ଼ନ୍ତୁ।",
@@ -8122,6 +8141,8 @@
     "resetAwareDesc": "ପର୍ଯ୍ୟାପ୍ତ ଅବଶିଷ୍ଟ କୋଟା ଏବଂ ଶୀଘ୍ରତର ରିସେଟ୍ ଥିବା ଆକାଉଣ୍ଟଗୁଡ଼ିକୁ ପ୍ରାଥମିକତା ଦିଅନ୍ତୁ",
     "quotaWeighted": "କୋଟା-ଆଧାରିତ ଭାରିତ",
     "quotaWeightedDesc": "କୋଟା ଶେଷ ହୋଇଥିବା ଆକାଉଣ୍ଟଗୁଡ଼ିକୁ ଏଡ଼ାଇ ଦିଅନ୍ତୁ, ତା'ପରେ ଅବଶିଷ୍ଟ କୋଟାକୁ ଚାଲୁଥିବା ଲୋଡ୍ରେ ଭାଗ କରି ମିଳୁଥିବା ଅନୁପାତ ଅନୁଯାୟୀ ବାକିଗୁଡ଼ିକ ମଧ୍ୟରୁ ବାଛନ୍ତୁ। ବର୍ତ୍ତମାନର କଥୋପକଥନଗୁଡ଼ିକ ସେହି ଆକାଉଣ୍ଟରେ ପିନ୍ ହୋଇ ରହିବ।",
+    "expiryFirst": "ମିଆଦ-ସମାପ୍ତି-ପ୍ରଥମ",
+    "expiryFirstDesc": "ଅନ୍ୟଥା ବ୍ୟବହାର ନହୋଇ ମିଆଦ ସରିଯାଉଥିବା କୋଟା ଥିବା ଆକାଉଣ୍ଟକୁ ପ୍ରଥମେ ବ୍ୟବହାର କରେ: ସର୍ବାଧିକ ଅବଶିଷ୍ଟ ଏବଂ ନିକଟତମ ରିସେଟ୍ ଥିବା ଆକାଉଣ୍ଟ ପ୍ରଥମେ ଯାଏ।",
     "strictRandom": "କଠୋର ଯାଦୃଚ୍ଛିକ",
     "strictRandomDesc": "ଡେକ୍କୁ ଶଫଲ୍ କରନ୍ତୁ — ପୁଣି ଶଫଲ୍ କରିବା ପୂର୍ବରୁ ପ୍ରତ୍ୟେକ ଆକାଉଣ୍ଟକୁ ଥରେ ବ୍ୟବହାର କରେ",
     "stickyLimit": "ଷ୍ଟିକି ସୀମା",
@@ -8834,6 +8855,8 @@
     "retentionUsageHistory": "ବ୍ୟବହାର ଇତିହାସ (ଦିନ)",
     "retentionMemoryEntries": "ମେମୋରି ଏଣ୍ଟ୍ରି (ଦିନ)",
     "retentionXpAuditLog": "XP ଅଡିଟ୍ ଲଗ୍ (ଦିନ)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "ସଂରକ୍ଷଣ ସେଟିଂସ୍ ସଞ୍ଚୟ କରନ୍ତୁ",
     "storageAutoVacuumMode": "ସ୍ୱୟଂଚାଳିତ ଭାକ୍ୟୁମ୍ ମୋଡ୍",
     "storageScheduledVacuum": "ନିର୍ଦ୍ଧାରିତ ଭାକ୍ୟୁମ୍",
@@ -10284,7 +10307,11 @@
     "mappingInvalidJson": "ଅବୈଧ JSON।",
     "mappingMustBeObject": "ମ୍ୟାପିଂଟି ଏକ JSON ଅବଜେକ୍ଟ ହେବା ଆବଶ୍ୟକ, ଆରେ କିମ୍ବା ପ୍ରିମିଟିଭ୍ ମୂଲ୍ୟ ନୁହେଁ।",
     "mappingValueMustBeString": "“{key}” କୀ ପାଇଁ ମୂଲ୍ୟଟି ଏକ ଷ୍ଟ୍ରିଙ୍ଗ୍ ହେବା ଆବଶ୍ୟକ।",
-    "save": "ସଞ୍ଚୟ କରନ୍ତୁ"
+    "save": "ସଞ୍ଚୟ କରନ୍ତୁ",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -12011,6 +12038,7 @@
     "description": "ପ୍ରଦାତାଙ୍କ ପ୍ରମ୍ପ୍ଟ କ୍ୟାଶ୍ର ଦକ୍ଷତା ଏବଂ ସ୍ଥାନୀୟ ସିମାଣ୍ଟିକ୍ ପ୍ରତିକ୍ରିୟାର ପୁନଃବ୍ୟବହାର ନିରୀକ୍ଷଣ କରନ୍ତୁ।",
     "refresh": "ରିଫ୍ରେଶ୍ କରନ୍ତୁ",
     "clearAll": "ସିମାଣ୍ଟିକ୍ କ୍ୟାଶ୍ ସଫା କରନ୍ତୁ",
+    "clearAllConfirm": "ଏହି କ୍ୟାଶ୍‌ର ସମସ୍ତ ଏଣ୍ଟ୍ରି ବିଲୋପ ହେବ। ଏହାକୁ ପୂର୍ବବତ୍ କରାଯାଇପାରିବ ନାହିଁ।",
     "memoryEntries": "ମେମୋରି ଏଣ୍ଟ୍ରିଗୁଡ଼ିକ",
     "memoryEntriesSub": "ଇନ୍-ମେମୋରି LRU",
     "dbEntries": "DB ଏଣ୍ଟ୍ରିଗୁଡ଼ିକ",
@@ -12895,6 +12923,8 @@
     },
     "attempts": "ପ୍ରୟାସଗୁଡ଼ିକ",
     "detail": {
+      "tabOverview": "ସାରାଂଶ",
+      "tabPayloads": "ପେଲୋଡ୍ଗୁଡ଼ିକ",
       "omittedHttpAttempts": "{count} HTTP ପ୍ରେରଣ ସଂରକ୍ଷିତ ହୋଇନାହିଁ",
       "noHttpResponse": "କୌଣସି HTTP ପ୍ରତିକ୍ରିୟା ଦେଖାଯାଇନାହିଁ",
       "transportError": "ପରିବହନ ତ୍ରୁଟି",

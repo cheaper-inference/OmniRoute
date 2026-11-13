@@ -458,6 +458,7 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
             <p className="mt-1 text-sm text-text-muted">{t("overviewDescription")}</p>
           </div>
           <SegmentedControl
+            semantics="radio"
             size="sm"
             aria-label={t("timeRange")}
             value={range}

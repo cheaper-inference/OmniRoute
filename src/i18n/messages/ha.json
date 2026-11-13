@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "Yana daidaita ragowar quota da lokutan sake saiti na 5h da na mako-mako, sannan yana yin round-robin ga maki masu kama",
     "quotaWeighted": "Mai Nauyi Bisa Quota",
     "quotaWeightedDesc": "A tsallake asusun da quota ɗinsu ya ƙare, sannan a zaɓa daga sauran gwargwadon abin da ya rage, bayan an raba da nauyin buƙatun da ke gudana. Tattaunawar da ake yi za su ci gaba da kasancewa a asusun da aka ɗaure su.",
+    "expiryFirst": "Mai Ƙarewa Da Farko",
+    "expiryFirstDesc": "Yana fara amfani da asusun da quota ɗinsa za ta ƙare ba tare da amfani ba: wanda ya fi yawan saura kuma sake saitinsa ya fi kusa yana fara tafiya.",
     "strictRandom": "Bazuwar Tsantsa",
     "strictRandomDesc": "Cakuɗa katunan — yana amfani da kowane model sau ɗaya kafin sake cakuɗawa",
     "fusion": "Haɗewa",
@@ -4033,6 +4035,11 @@
         "when": "Kana karkatar da buƙatu tsakanin asusu da yawa masu bayanan telemetry na quota da lokutan sake saiti daban-daban.",
         "avoid": "Ba a samun bayanan quota ga yawancin asusu.",
         "example": "Fi son asusun mako-mako mai 60% wanda zai sake saitawa gobe maimakon asusun 80% wanda zai sake saitawa daga baya."
+      },
+      "expiry-first": {
+        "when": "Kana karkatar da buƙatu tsakanin asusu waɗanda ake sake saita quota ɗinsu bisa jadawali daban-daban kuma kana son amfani da quota da in ba haka ba za ta ƙare ba tare da amfani ba.",
+        "avoid": "Ba a samun bayanan telemetry na quota ga yawancin asusu, ko kana buƙatar tsayayyen tsari wanda ba ya la'akari da lokacin sake saiti.",
+        "example": "Fi son asusun da ya rage masa 80% wanda zai sake saitawa cikin minti 39 maimakon asusun da ya rage masa 48% wanda zai sake saitawa cikin awa 9 — ana amfani da quota da ke kusa da ƙarewa kafin ta tafi a banza."
       },
       "strict-random": {
         "when": "Yi amfani da wannan idan kana son rarrabawa daidai ƙwarai — ana amfani da kowane samfuri sau ɗaya kafin a maimaita.",
@@ -4249,6 +4256,13 @@
         "tip1": "Yi amfani da matakan asusu a bayyane ko tura buƙatu ta alamar asusu ga masu bayarwa masu bayanan sa ido kan kaso.",
         "tip2": "Daidaita nauyin zama da na mako-mako idan ƙarewa cikin gajeren lokaci ya fi haɗari.",
         "tip3": "Riƙe tazarar daidaito ƙanƙanta domin asusun da suke daidai su ci gaba da juyawa cikin adalci."
+      },
+      "expiry-first": {
+        "title": "Quota mai ƙarewa da farko",
+        "description": "Yana jera asusu bisa matsin ceto: babbar ragowar quota da ke kusa da wa'adin sake saitinta tana fara tafiya.",
+        "tip1": "Yana buƙatar telemetry na quota daga mai bayarwa; asusun da ba su da shi suna riƙe tsarin fifikonsu da aka jera.",
+        "tip2": "Makin da suka kusan daidaita suna juyawa a cikin tazarar daidaito domin asusu masu kama da juna su ci gaba da raba nauyi.",
+        "tip3": "Iyakance jeri ga rukunin quota da kowane samfuri ke biyan kuɗi a kansa a zahiri."
       },
       "strict-random": {
         "title": "Rarrabawa ta Hanyar Gauraya Tarin Kati",
@@ -4481,7 +4495,7 @@
     "spend7d": "Kashe-kashen Kwanaki 7",
     "avgCostPerRequest": "Matsakaicin Kuɗi / Buƙata",
     "noCostDataDescription": "Fara yin buƙatu don ganin bayanan kuɗi sun bayyana a nan. Ana bin diddigin kuɗi ta atomatik ga duk masu ba da sabis.",
-    "spendToday": "Kashe-kashen Yau",
+    "spendToday": "Kashewa ta kwana 1",
     "overviewLoadFailed": "An kasa loda bayanin kuɗi",
     "overviewDescription": "Rarrabuwar kashe-kashe kai tsaye a duk masu ba da sabis da samfuran da aka haɗa",
     "providerShare": "Rabon Mai Ba da Sabis",
@@ -5679,6 +5693,7 @@
     "usageTracking": "Bin Diddigin Amfani",
     "securityDesc": "Saita kalmar sirri don kare dashboard ɗinka, ko ka tsallake a yanzu.",
     "securityDescSkipWarning": "⚠️ Ba tare da kalmar sirri ba, ba za ka iya ƙara masu samarwa yayin saitawa ba. Za ka iya ƙara su daga baya daga dashboard bayan ka saita kalmar sirri.",
+    "passwordAlreadySet": "An riga an saita kalmar sirri ta dashboard. Kuna iya canza ta daga baya a Saituna.",
     "providerDesc": "Haɗa mai samar da AI naka na farko. Za ka iya ƙara wasu daga baya.",
     "providerRequiresPassword": "Kana buƙatar fara saita kalmar sirri kafin ka ƙara masu samarwa. Da fatan za ka koma matakin tsaro ka saita kalmar sirri, ko ka ƙara masu samarwa daga baya daga dashboard.",
     "apiKeyRequired": "Maɓallin API (dole)",
@@ -6051,6 +6066,8 @@
     "importFromModels": "Shigo daga /models",
     "modelsImported": "An shigo da samfura {count}",
     "allModelsAlreadyImported": "An riga an shigo da duk samfuran",
+    "providerPublishesNoModelList": "Wannan mai ba da sabis ba ya wallafa jerin samfura — kundin da ke ciki yana sabuntacce",
+    "modelsNoLongerListed": "{count, plural, one {Ba a sake jera # samfur daga mai ba da sabis ba} other {Ba a sake jera # samfura daga mai ba da sabis ba}}",
     "noNewModelsToImport": "Babu sababbin samfuran da za a shigo da su — duk samfuran suna cikin kundin rajista ko jerin samfuran al'ada",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Gano model ya kasa {time}",
@@ -6727,6 +6744,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Wurin Riƙe Kuki na Grok Web",
     "herokuBaseUrlHint": "Bayani kan URL na Asali na Heroku",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Ɓoye Imel",
     "imageProviders": "Masu Samar da Hotuna",
     "videoProviders": "Ƙirƙirar Bidiyo",
@@ -7225,7 +7243,8 @@
       "kiro": "Matakin kyauta: credits 50/wata (~25K–100K tokens). ⚠️ Kiro ToS ya hana amfani da proxy/harness na ɓangare na uku.",
       "codex": "Haɗa OpenAI Codex ta amfani da tsarin OAuth na yanzu.",
       "qwen": "Haɗa Qwen Code ta amfani da tsarin OAuth na yanzu.",
-      "github-models": "Ƙirƙiri GitHub PAT mai scope na 'models: read' a github.com/settings/tokens"
+      "github-models": "Ƙirƙiri GitHub PAT mai scope na 'models: read' a github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} yana karɓar ID na samfuri na asali daga provider. Shigo da su daga /models ko ƙara ID na musamman don routing.",
     "bedrockModelsDescription": "Ana iyakance samfuran Amazon Bedrock bisa yankin AWS. Shigo da su daga /models ko ƙara ID na samfuran Bedrock da aka kunna a yankin da aka zaɓa.",
@@ -8122,6 +8141,8 @@
     "resetAwareDesc": "Fi son asusun da ke da lafiyayyen ragowar ƙayyadadden kaso kuma lokutan sake saitinsu suka fi kusa",
     "quotaWeighted": "Mai Nauyi Bisa Ƙayyadadden Kaso",
     "quotaWeightedDesc": "Tsallake asusun da ƙayyadadden kasonsu ya ƙare, sannan zaɓi daga sauran gwargwadon adadin da ya rage, bayan an raba shi da nauyin buƙatun da ake sarrafawa. Tattaunawar da ke akwai za su ci gaba da kasancewa a kan asusun da aka ɗora su.",
+    "expiryFirst": "Mai Ƙarewa Da Farko",
+    "expiryFirstDesc": "Yana fara amfani da asusun da quota ɗinsa za ta ƙare ba tare da amfani ba: wanda ya fi yawan saura kuma sake saitinsa ya fi kusa yana fara tafiya.",
     "strictRandom": "Bazuwar Tsantsa",
     "strictRandomDesc": "Cakuɗa jerin — yana amfani da kowane asusu sau ɗaya kafin sake cakuɗawa",
     "stickyLimit": "Iyakar Mannewa",
@@ -8834,6 +8855,8 @@
     "retentionUsageHistory": "Tarihin Amfani (kwanaki)",
     "retentionMemoryEntries": "Bayanan Ƙwaƙwalwa (kwanaki)",
     "retentionXpAuditLog": "Rajistan Binciken XP (kwanaki)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Ajiye saitunan riƙewa",
     "storageAutoVacuumMode": "Yanayin Vacuum na Atomatik",
     "storageScheduledVacuum": "Vacuum da aka tsara",
@@ -10284,7 +10307,11 @@
     "mappingInvalidJson": "JSON mara inganci.",
     "mappingMustBeObject": "Dole ne daidaitawar ta kasance abin JSON, ba jeri ko ƙima ta asali ba.",
     "mappingValueMustBeString": "Dole ne ƙimar maɓallin “{key}” ta kasance rubutu.",
-    "save": "Adana"
+    "save": "Adana",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Injin Caveman",
@@ -12011,6 +12038,7 @@
     "description": "Kula da ingancin ma'ajiyar wucin gadi ta umarnin mai samarwa da sake amfani da amsoshi bisa ma'ana na cikin gida.",
     "refresh": "Sabunta",
     "clearAll": "Share Ma'ajiyar Wucin Gadi ta Ma'ana",
+    "clearAllConfirm": "Za a goge duk shigarwar da ke cikin wannan ma'ajiyar cache. Ba za a iya sokewa ba.",
     "memoryEntries": "Shigarwar Ƙwaƙwalwa",
     "memoryEntriesSub": "LRU na cikin ƙwaƙwalwa",
     "dbEntries": "Abubuwan da ke cikin DB",
@@ -12895,6 +12923,8 @@
     },
     "attempts": "yunƙurai",
     "detail": {
+      "tabOverview": "Bayyani",
+      "tabPayloads": "Bayanan da aka aika",
       "omittedHttpAttempts": "Ba a adana aikawar HTTP guda {count} ba",
       "noHttpResponse": "Ba a lura da martanin HTTP ba",
       "transportError": "Kuskuren jigila",

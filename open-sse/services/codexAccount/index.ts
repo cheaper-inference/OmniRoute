@@ -169,6 +169,25 @@ export function isCodexChildUnavailable(
   return inspectResolvedCodexChild(connection, model, now)?.unavailable ?? false;
 }
 
+/**
+ * Distinguish a text-only quota preflight from actual upstream 429, quota reset
+ * and legacy/unknown cooldown origins. Only image selection may ignore this.
+ */
+export function isCodexTextQuotaPreflightCooldown(
+  connection: CodexAccountConnection,
+  model: string | null | undefined
+): boolean {
+  if (typeof model !== "string" || !model.trim()) return false;
+  const scope = getCodexModelScope(model);
+  const sources = connection.providerSpecificData.codexScopeRateLimitSource;
+  return (
+    !!sources &&
+    typeof sources === "object" &&
+    !Array.isArray(sources) &&
+    (sources as Record<string, unknown>)[scope] === "quota_preflight"
+  );
+}
+
 /** Return the active cooldown for the requested model's virtual child. */
 export function getCodexChildCooldown(
   connection: CodexAccountConnection,

@@ -34,6 +34,7 @@ export async function markQuotaPreflightAccountUnavailable(
       connectionId,
       model: requestedModel,
       rateLimitedUntil: unavailableUntil,
+      source: "quota_preflight",
     });
     return unavailableUntil;
   }
