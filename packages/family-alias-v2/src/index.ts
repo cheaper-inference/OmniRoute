@@ -20,3 +20,4 @@ export { runCli } from "./cli.ts";
 export { createSavedPlan, makeRunReport, verifySavedPlan } from "./run.ts";
 export { reportHash } from "./report.ts";
 export { runProbePass, runReconciliation } from "./runner.ts";
+export { nextFallback, stripRunPrefix } from "./askgate.ts";
