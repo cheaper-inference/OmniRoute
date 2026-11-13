@@ -39,6 +39,10 @@
  * @property {() => string} now               ISO clock (injected for tests)
  * @property {(msg: string) => void} log
  * @property {string|null} runUrl
+ * @property {string} repository              owner/repo (dashboard and comment links)
+ * @property {object} [modules]               optional overrides of the imported modules
+ *   ({eligibility, checks, classify, compose, land, bisect, dashboard}) — tests inject fakes;
+ *   main() uses the real ones
  */
 
 /**

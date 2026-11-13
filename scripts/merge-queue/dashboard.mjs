@@ -41,7 +41,8 @@ export function computeMetrics(state, now) {
  * Markdown body. Deterministic for a given input (no clock reads besides `now`). Escapes PR
  * titles (attacker-controlled) so they cannot inject markdown links, mentions or HTML.
  * @param {{base: string, state: QueueState, queue: QueueEntry[], config: QueueConfig,
- *          now: string, runUrl: string|null}} input
+ *          now: string, runUrl: string|null, repository?: string}} input
+ *   repository = "owner/repo", used to build PR / commit-checks links (plain text when absent)
  * @returns {string}
  */
 export function renderDashboard(input) {

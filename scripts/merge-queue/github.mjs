@@ -57,6 +57,9 @@ export class GitHubError extends Error {
  * @property {(n: number) => Promise<{id: number, body: string, author: string,
  *            createdAt: string}[]>} listIssueComments
  * @property {(n: number, body: string) => Promise<{id: number}>} createIssueComment
+ * @property {(n: number, key: string, body: string) => Promise<{posted: boolean}>} commentOnce
+ *            posts `body + "\n\n" + contracts.commentMarker(key)` unless a comment on issue/PR n
+ *            already contains that marker (then {posted:false}). The ONLY way queue code comments.
  * @property {(opts: {labels?: string[], state?: "open"|"closed"|"all"}) => Promise<{number: number,
  *            title: string, body: string, labels: string[], state: string,
  *            updatedAt: string}[]>} listIssues   issues only (PRs filtered out)
