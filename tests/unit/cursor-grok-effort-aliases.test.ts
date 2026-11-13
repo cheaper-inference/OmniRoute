@@ -46,7 +46,17 @@ test("wire membership excludes synthetic aliases so a selected alias becomes a M
   assert.equal(wireIds.has("grok-4.7-low"), false);
   assert.deepEqual(resolveRequestedModel("grok-4.7-low", { liveCatalogIds: wireIds }), {
     modelId: "grok-4.7",
-    parameters: [{ id: "effort", value: "low" }],
+    parameters: [
+      { id: "effort", value: "low" },
+      { id: "fast", value: "false" },
+    ],
+  });
+  assert.deepEqual(resolveRequestedModel("grok-4.7-medium", { liveCatalogIds: wireIds }), {
+    modelId: "grok-4.7",
+    parameters: [
+      { id: "effort", value: "medium" },
+      { id: "fast", value: "false" },
+    ],
   });
 });
 
