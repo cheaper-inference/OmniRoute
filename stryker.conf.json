@@ -821,7 +821,8 @@
       "tests/unit/auth-selection-skips-full-account.test.ts",
       "tests/unit/droid-user-agent-android.test.ts",
       "tests/unit/empty-turn-retry-credentials-replace.test.ts",
-      "tests/unit/fallback-wrapper-cancels-native-body.test.ts"
+      "tests/unit/fallback-wrapper-cancels-native-body.test.ts",
+      "tests/unit/silent-catch-cooldown-logs.test.ts"
     ],
     "nodeArgs": [
       "--import",
