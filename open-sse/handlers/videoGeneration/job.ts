@@ -701,7 +701,7 @@ async function storeAuthGatedResult({
   if (download.ok === false) {
     return { success: false, status: download.status, error: download.error };
   }
-  if (!download.base64) {
+  if (!download.buffer) {
     return {
       success: false,
       status: 502,
@@ -709,7 +709,7 @@ async function storeAuthGatedResult({
     };
   }
   const format = preset.resultFormat ?? "mp4";
-  const servedUrl = mediaSink.store(Buffer.from(download.base64, "base64"), format);
+  const servedUrl = mediaSink.store(download.buffer, format);
   if (!servedUrl) {
     return {
       success: false,
@@ -739,7 +739,7 @@ async function fetchJson(
     headers: Record<string, string>;
     body?: string;
     log?: LogLike;
-    /** Return the response body base64-encoded instead of parsing JSON. */
+    /** Return the response body as a Buffer instead of parsing JSON. */
     raw?: boolean;
     signal?: AbortSignal | null;
   }
@@ -760,7 +760,7 @@ async function fetchJson(
 }
 
 type FetchJsonResult =
-  | { ok: true; data?: unknown; base64?: string }
+  | { ok: true; data?: unknown; buffer?: Buffer }
   | { ok: false; status: number; error: string; retryAfterMs?: number };
 
 async function readFetchJsonResponse(
@@ -784,7 +784,7 @@ async function readFetchJsonResponse(
     if (buffer.length === 0) {
       return { ok: false, status: 502, error: `Empty media body from ${url}` };
     }
-    return { ok: true, base64: buffer.toString("base64") };
+    return { ok: true, buffer };
   }
   const data = await response.json();
   return { ok: true, data };
