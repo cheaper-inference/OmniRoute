@@ -701,19 +701,27 @@ function getContentBlocksFromMessage(
           // native video input, so non-pdf/non-image files are skipped here.
           const fileData = part.file.file_data || part.file.data;
           const fmatch =
-            typeof fileData === "string" ? fileData.match(/^data:([^;]+);base64,(.+)$/) : null;
+            typeof fileData === "string" ? fileData.match(/^data:([^;]+);base64,([\s\S]+)$/) : null;
           if (fmatch) {
             const mediaType = fmatch[1];
             if (mediaType === "application/pdf") {
               blocks.push({
                 type: "document",
-                source: { type: "base64", media_type: mediaType, data: fmatch[2] },
+                source: {
+                  type: "base64",
+                  media_type: mediaType,
+                  data: fmatch[2].replace(/\s+/g, ""),
+                },
                 ...(part.file.filename ? { title: part.file.filename } : {}),
               });
             } else if (mediaType.startsWith("image/")) {
               blocks.push({
                 type: "image",
-                source: { type: "base64", media_type: mediaType, data: fmatch[2] },
+                source: {
+                  type: "base64",
+                  media_type: mediaType,
+                  data: fmatch[2].replace(/\s+/g, ""),
+                },
               });
             }
           } else if (typeof fileData === "string" && /^https?:\/\//i.test(fileData)) {
