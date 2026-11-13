@@ -152,13 +152,9 @@ async function applyMessageFieldRecovery(
   return fetchFn(url, { ...fetchOptions, body: retryBody });
 }
 
-// A strict schema can report its violations in stages, so allow a few follow-up retries.
-const MAX_TOP_LEVEL_FIELD_RETRIES = 3;
-
 /**
  * pydantic/FastAPI validation errors (Mistral's 422) name rejected top-level fields in
- * `detail[].loc = ["body", field]`. Drop them and retry, up to MAX_TOP_LEVEL_FIELD_RETRIES
- * times while the upstream keeps naming new ones; null when nothing applies on the first pass.
+ * `detail[].loc = ["body", field]`. Drop them and retry once; null when nothing applies.
  */
 async function applyTopLevelFieldRecovery(
   params: FieldDowngradeParams,
@@ -166,38 +162,46 @@ async function applyTopLevelFieldRecovery(
   errText: string
 ): Promise<Response | null> {
   const { url, body, fetchOptions, fetchFn, serializeBody, strippedFields, log } = params;
-  let response: Response | null = null;
-  let text = errText;
-  for (let attempt = 0; attempt < MAX_TOP_LEVEL_FIELD_RETRIES; attempt++) {
-    const fields = detectRejectedTopLevelFields(text).filter(
-      (field) =>
-        !params.protectedFields?.includes(field) &&
-        !strippedFields.has(field) &&
-        record[field] !== undefined
-    );
-    if (fields.length === 0) break;
-    for (const field of fields) {
-      strippedFields.add(field);
-      delete record[field];
-    }
-    const retryBody = await serializeBody(body);
-    log?.debug?.(
-      "FIELD_400",
-      `Upstream validation error rejected ${fields.join(", ")} on ${url} — retrying without it`
-    );
-    response = await fetchFn(url, { ...fetchOptions, body: retryBody });
-    if (!isFieldRejectionStatus(response.status)) break;
-    text = await readResponseTextWithinCap(response.clone()).catch(() => "");
+  const fields = detectRejectedTopLevelFields(errText).filter(
+    (field) =>
+      !params.protectedFields?.includes(field) &&
+      !strippedFields.has(field) &&
+      record[field] !== undefined
+  );
+  if (fields.length === 0) return null;
+  for (const field of fields) {
+    strippedFields.add(field);
+    delete record[field];
   }
-  return response;
+  const retryBody = await serializeBody(body);
+  log?.debug?.(
+    "FIELD_400",
+    `Upstream validation error rejected ${fields.join(", ")} on ${url} — retrying without it`
+  );
+  return fetchFn(url, { ...fetchOptions, body: retryBody });
 }
 
 function isFieldRejectionStatus(status: number): boolean {
   return status === HTTP_STATUS.BAD_REQUEST || status === HTTP_STATUS.UNPROCESSABLE_ENTITY;
 }
 
+// A strict upstream reports its violations in stages (one rejected field per response), so a
+// retry's own 400/422 may name the next field. Every field is stripped at most once, which
+// bounds the chain; this cap bounds the added round trips.
+const MAX_FIELD_RECOVERY_ROUNDS = 4;
+
 /** Returns the response to use going forward (the retry's when one was issued). */
 export async function applyFieldDowngradeRecovery(params: FieldDowngradeParams): Promise<Response> {
+  let current = params;
+  for (let round = 0; round < MAX_FIELD_RECOVERY_ROUNDS; round++) {
+    const next = await applyFieldDowngradeRecoveryOnce(current);
+    if (next === current.response || !isFieldRejectionStatus(next.status)) return next;
+    current = { ...current, response: next };
+  }
+  return current.response;
+}
+
+async function applyFieldDowngradeRecoveryOnce(params: FieldDowngradeParams): Promise<Response> {
   const { url, fetchOptions, fetchFn, serializeBody, strippedFields, log } = params;
   const { response } = params;
   const body = params.body;

@@ -423,6 +423,76 @@ const extraForbidden = (field: string) => ({
   input: 1,
 });
 
+// Real Mistral wrapper: the pydantic detail sits under `message`, with the status echoed.
+const mistralWrapped = (detail: unknown[]) => ({
+  object: "error",
+  message: { detail },
+  type: "invalid_request_error",
+  param: null,
+  code: null,
+  raw_status_code: 422,
+});
+
+test("detectRejectedTopLevelFields reads Mistral's message.detail wrapper", () => {
+  assert.deepEqual(
+    detectRejectedTopLevelFields(
+      JSON.stringify(mistralWrapped([...MISTRAL_SERVICE_TIER_422.detail, extraForbidden("seed")]))
+    ),
+    ["service_tier", "seed"]
+  );
+  // A plain-string `message` is not a validation error.
+  assert.deepEqual(
+    detectRejectedTopLevelFields(JSON.stringify({ object: "error", message: "nope" })),
+    []
+  );
+});
+
+test("BaseExecutor.execute follows Mistral's wrapped 422 and its top_k 400", async () => {
+  const executor = new SimpleExecutor();
+  const originalFetch = globalThis.fetch;
+  const capturedBodies: Record<string, unknown>[] = [];
+
+  globalThis.fetch = async (_url: string | URL | Request, init: RequestInit = {}) => {
+    const sent = JSON.parse(String(init.body)) as Record<string, unknown>;
+    capturedBodies.push(sent);
+    if ("service_tier" in sent) {
+      return jsonResponse(mistralWrapped(MISTRAL_SERVICE_TIER_422.detail), 422);
+    }
+    if ("top_k" in sent) {
+      return jsonResponse(
+        {
+          object: "error",
+          message: "top_k sampling is not enabled for this model",
+          type: "invalid_request_invalid_args",
+          code: "3051",
+          raw_status_code: 400,
+        },
+        400
+      );
+    }
+    return jsonResponse({ ok: true }, 200);
+  };
+
+  try {
+    const result = await executor.execute({
+      model: "mistral-small-latest",
+      body: {
+        messages: [{ role: "user", content: "hi" }],
+        max_tokens: 5,
+        service_tier: "flex",
+        top_k: 5,
+      },
+      stream: false,
+      credentials: {},
+    });
+    assert.equal(capturedBodies.length, 3);
+    assert.deepEqual(Object.keys(capturedBodies[2]).sort(), ["max_tokens", "messages"]);
+    assert.equal(result.response.status, 200);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("detectRejectedTopLevelFields reads extra_forbidden and service_tier enum errors only", () => {
   assert.deepEqual(detectRejectedTopLevelFields(JSON.stringify(MISTRAL_SERVICE_TIER_422)), [
     "service_tier",

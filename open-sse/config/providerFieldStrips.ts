@@ -27,6 +27,9 @@ export const KNOWN_OFFENDING_FIELDS: readonly string[] = [
   // does not contain "claude" and 400 with "diagnostics: Extra inputs are not
   // permitted".
   "diagnostics",
+  // Sampling hint some models disable. Mistral: 400 "top_k sampling is not enabled for this
+  // model" (live-verified). Dropping it only changes sampling, never the request's meaning.
+  "top_k",
 ];
 
 /** Return the first known-offending field literally named in a 400 body, or null. */
@@ -89,7 +92,10 @@ const MESSAGE_FIELD_NAME_RE = /^[a-z_][a-z0-9_]{0,63}$/;
 // Removing these changes what a message says, not how it is encoded.
 const NON_STRIPPABLE_MESSAGE_FIELDS = new Set(["content", "role", "tool_calls", "tool_call_id"]);
 
-/** The `detail` array of a pydantic/FastAPI validation error body (top level or under `error`). */
+/**
+ * The `detail` array of a pydantic/FastAPI validation error body: top level, under `error`,
+ * or under `message` (Mistral wraps it as `{"object":"error","message":{"detail":[...]}}`).
+ */
 function pydanticDetail(bodyText: string): Array<{ type?: unknown; loc?: unknown }> {
   let parsed: unknown;
   try {
@@ -98,8 +104,13 @@ function pydanticDetail(bodyText: string): Array<{ type?: unknown; loc?: unknown
     return [];
   }
   if (!parsed || typeof parsed !== "object") return [];
-  const record = parsed as { detail?: unknown; error?: { detail?: unknown } | null };
-  const detail = Array.isArray(record.detail) ? record.detail : record.error?.detail;
+  const record = parsed as {
+    detail?: unknown;
+    error?: { detail?: unknown } | null;
+    message?: { detail?: unknown } | string | null;
+  };
+  const wrapped = typeof record.message === "object" ? record.message?.detail : undefined;
+  const detail = [record.detail, record.error?.detail, wrapped].find(Array.isArray);
   return Array.isArray(detail) ? (detail as Array<{ type?: unknown; loc?: unknown }>) : [];
 }
 
