@@ -12,7 +12,14 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { describeGateMode, resolveGateModeInfo } from "./lib/gateMode.mjs";
+import { categoryOf, loadFamilies, matchesAny } from "./check-pr-derived-paths.mjs";
+import {
+  describeGateMode,
+  listChangedFiles,
+  resolveGateModeInfo,
+  resolveHeadBranch,
+  resolvePrDiffBase,
+} from "./lib/gateMode.mjs";
 
 const cwd = process.cwd();
 const packageJsonPath = path.resolve(cwd, "package.json");
@@ -94,6 +101,41 @@ try {
 console.log(`[docs-sync] ${describeGateMode(gateMode)}`);
 const STRICT_ELSEWHERE =
   "the strict check runs in release mode (release PR, Release-Green, nightly)";
+
+const LLM_MIRROR = /^docs\/i18n\/[^/]+\/llm\.txt$/;
+const CHANGELOG_MIRROR = /^docs\/i18n\/[^/]+\/CHANGELOG\.md$/;
+
+/**
+ * PR mode only. A change that writes translation mirrors is judged on them: a head branch that is a
+ * declared writer of the docs/i18n family (config/quality/derived-paths/*.json — the translation
+ * wave) runs both mirror checks strictly; any other change runs a mirror check strictly when its
+ * own diff touches those mirrors (diff base unresolvable, e.g. a depth-1 CI checkout → skipped).
+ * @returns {{ llm: string | null, changelog: string | null }} reason to run strictly, or null
+ */
+function prMirrorScope() {
+  const branch = resolveHeadBranch({ env: process.env, cwd });
+  const writer = loadFamilies(cwd).find(
+    (family) =>
+      branch &&
+      matchesAny(branch, family.writers) &&
+      categoryOf("docs/i18n/xx/llm.txt", family) !== null
+  );
+  if (writer) {
+    const reason = `head ${branch} writes translation mirrors (${writer.source})`;
+    return { llm: reason, changelog: reason };
+  }
+  const base = resolvePrDiffBase({ env: process.env, cwd });
+  if (!base) return { llm: null, changelog: null };
+  const files = listChangedFiles(base.sha, { cwd, includeWorktree: !process.env.GITHUB_ACTIONS });
+  return {
+    llm: files.some((file) => LLM_MIRROR.test(file))
+      ? "the change edits docs/i18n/<locale>/llm.txt"
+      : null,
+    changelog: files.some((file) => CHANGELOG_MIRROR.test(file))
+      ? "the change edits docs/i18n/<locale>/CHANGELOG.md"
+      : null,
+  };
+}
 
 function fail(message) {
   hasFailure = true;
@@ -266,12 +308,25 @@ try {
   }
 
   if (gateMode.mode === "pr") {
-    console.log(
-      `[docs-sync] SKIP reason=pr-mode — docs/i18n/<locale>/llm.txt mirrors are refreshed by the translation wave (scripts/i18n/sync-llm-mirrors.mjs), not by feature PRs; ${STRICT_ELSEWHERE}`
-    );
-    console.log(
-      `[docs-sync] SKIP reason=pr-mode — translated CHANGELOG.md mirrors are refreshed by the release (npm run release:sync-changelog-i18n) and the translation wave, not by feature PRs; ${STRICT_ELSEWHERE}`
-    );
+    const scope = prMirrorScope();
+    if (scope.llm) {
+      console.log(`[docs-sync] pr mode: ${scope.llm} — checking the llm.txt mirrors strictly`);
+      checkI18nMirrorFile("llm.txt", llmPath);
+    } else {
+      console.log(
+        `[docs-sync] SKIP reason=pr-mode — docs/i18n/<locale>/llm.txt mirrors are refreshed by the translation wave (scripts/i18n/sync-llm-mirrors.mjs), not by feature PRs; ${STRICT_ELSEWHERE}`
+      );
+    }
+    if (scope.changelog) {
+      console.log(
+        `[docs-sync] pr mode: ${scope.changelog} — checking the translated CHANGELOG.md mirrors strictly`
+      );
+      checkI18nChangelogFile(changelogPath);
+    } else {
+      console.log(
+        `[docs-sync] SKIP reason=pr-mode — translated CHANGELOG.md mirrors are refreshed by the release (npm run release:sync-changelog-i18n) and the translation wave, not by feature PRs; ${STRICT_ELSEWHERE}`
+      );
+    }
   } else {
     // llm.txt mirrors must be exact copies (no translation)
     checkI18nMirrorFile("llm.txt", llmPath);

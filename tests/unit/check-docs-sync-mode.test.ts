@@ -5,7 +5,7 @@
 // (docs/i18n/<locale>/llm.txt copies and translated CHANGELOG sections): those mirrors are
 // rewritten by the translation wave / release refresh, never by a feature PR.
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -72,7 +72,8 @@ function staleMirrors(root: string) {
 function run(root: string, args: string[], env: Record<string, string> = {}) {
   const clean = Object.fromEntries(
     Object.entries(process.env).filter(
-      ([key]) => !key.startsWith("GITHUB_") && key !== "OMNIROUTE_GATE_MODE"
+      ([key]) =>
+        !key.startsWith("GITHUB_") && !["OMNIROUTE_GATE_MODE", "BASE_SHA", "BASE_REF"].includes(key)
     )
   );
   const result = spawnSync(process.execPath, [SCRIPT, ...args], {
@@ -196,4 +197,61 @@ test("an invalid --mode value fails closed", () => {
   const { status, out } = run(fixture(), ["--mode=lenient"]);
   assert.equal(status, 1);
   assert.match(out, /invalid gate mode "lenient"/);
+});
+
+const TRANSLATION_FAMILY = {
+  family: "translation",
+  writers: ["docs/i18n-*", "chore/i18n-*"],
+  categories: [{ id: "docs-i18n-mirrors", paths: ["docs/i18n/**", ".i18n-state.json"] }],
+};
+
+test("PR mode runs the mirror checks strictly on a branch that writes translation mirrors", () => {
+  const root = fixture();
+  staleMirrors(root);
+  write(root, "config/quality/derived-paths/translation.json", JSON.stringify(TRANSLATION_FAMILY));
+  const wave = run(root, [], {
+    GITHUB_EVENT_NAME: "pull_request",
+    GITHUB_HEAD_REF: "docs/i18n-wave-1113",
+  });
+  assert.equal(wave.status, 1, wave.out);
+  assert.match(wave.out, /mode=pr \(auto: pull_request\)/);
+  assert.match(wave.out, /head docs\/i18n-wave-1113 writes translation mirrors/);
+  assert.match(wave.out, /FAIL - docs\/i18n\/fr\/llm\.txt differs from root llm\.txt/);
+  assert.match(wave.out, /FAIL - docs\/i18n\/fr\/CHANGELOG\.md is missing version sections/);
+
+  const feature = run(root, [], { GITHUB_EVENT_NAME: "pull_request", GITHUB_HEAD_REF: "feat/x" });
+  assert.equal(feature.status, 0, feature.out);
+  assert.match(feature.out, /SKIP reason=pr-mode/);
+});
+
+function git(root: string, ...args: string[]) {
+  return execFileSync("git", args, {
+    cwd: root,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      GIT_AUTHOR_NAME: "t",
+      GIT_AUTHOR_EMAIL: "t@example.invalid",
+      GIT_COMMITTER_NAME: "t",
+      GIT_COMMITTER_EMAIL: "t@example.invalid",
+    },
+  }).trim();
+}
+
+test("PR mode judges the mirror a change itself edits, whatever the branch name", () => {
+  const root = fixture();
+  git(root, "init", "-q", "-b", "main");
+  git(root, "add", "-A");
+  git(root, "commit", "-q", "-m", "base");
+  const base = git(root, "rev-parse", "HEAD");
+  git(root, "switch", "-q", "-c", "feat/edits-a-mirror");
+  write(root, "docs/i18n/fr/llm.txt", "# OmniRoute (Français)\n\n🌐 bar\n\n---\n\nhand edit\n");
+  git(root, "commit", "-q", "-am", "edit a mirror by hand");
+
+  const edited = run(root, ["--mode=pr"], { BASE_SHA: base });
+  assert.equal(edited.status, 1, edited.out);
+  assert.match(edited.out, /the change edits docs\/i18n\/<locale>\/llm\.txt/);
+  assert.match(edited.out, /FAIL - docs\/i18n\/fr\/llm\.txt differs from root llm\.txt/);
+  // The CHANGELOG mirrors were not touched: that check stays skipped.
+  assert.match(edited.out, /SKIP reason=pr-mode — translated CHANGELOG\.md mirrors/);
 });
