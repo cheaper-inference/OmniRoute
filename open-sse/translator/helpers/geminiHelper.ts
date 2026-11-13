@@ -569,7 +569,9 @@ function normalizeMalformedSchemaObjects(obj: unknown, parentKey?: string): void
     expandShorthandProperties(record);
   }
 
-  promoteBooleanRequired(record);
+  // Inside a name map (`properties`, `$defs`, …) every key is a property name: a parameter named
+  // `required` is not the schema keyword, and promoteBooleanRequired would delete it.
+  if (parentKey === undefined || !SCHEMA_MAP_KEYS.has(parentKey)) promoteBooleanRequired(record);
 
   for (const [key, value] of Object.entries(record)) {
     if (value && typeof value === "object") {
