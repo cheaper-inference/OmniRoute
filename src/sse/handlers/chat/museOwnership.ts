@@ -9,8 +9,11 @@
  */
 
 import { getProviderConnections } from "@/lib/db/providers";
+import { museScopeHasRecordedItems, readMuseOwnershipValue } from "@/lib/db/museSessionOwnership";
+import { isMusePolicyRefusal } from "@omniroute/open-sse/services/musePolicyRefusal.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import * as log from "../../utils/logger";
+import { markProviderBoundResponse } from "./providerBoundResponse.ts";
 import {
   MuseOwnershipError,
   MUSE_EMPTY_RESPONSE_RETRY_DELAYS_MS,
@@ -18,6 +21,7 @@ import {
   claimMuseSession,
   museClaimCandidates,
   museEmptyResponseRetryDelayMs,
+  bodyCarriesBoundContinuation,
   museSessionScopeFor,
   recordMuseOutput,
   usesMuseOAuthOwnership,
@@ -33,6 +37,9 @@ type Cred = {
   providerSpecificData?: { accountId?: string } | null;
 };
 type Creds = Cred | { allRateLimited?: boolean; allExpired?: boolean } | null | undefined;
+
+/** Re-exported so the chat handler imports one Muse module and both use the same predicate. */
+export { bodyCarriesBoundContinuation };
 
 export type MuseOwner = {
   scope: string;
@@ -94,25 +101,53 @@ export async function claimMuseOwner(args: ClaimArgs): Promise<MuseOwner | Respo
     const owner = claimMuseSession(scope, args.body, candidates, args.forcedConnectionId);
     return { scope, ...owner, emptyRetries: 0, emptyOriginal: null };
   } catch (error) {
-    if (error instanceof MuseOwnershipError) return errorResponse(error.status, error.message);
+    if (error instanceof MuseOwnershipError)
+      return markProviderBoundResponse(errorResponse(error.status, error.message));
     throw error;
   }
 }
 
-/** 503 when the credentials selected for this attempt are not the session owner's. */
+/**
+ * True when this request already belongs to a Muse session: an owner record or replayable
+ * history exists for its scope. Such a request must not be replayed on another provider,
+ * so provider failover is pinned. A Muse API-key install has no OAuth ownership at all and
+ * keeps the unpinned behavior.
+ */
+export async function museSessionIsOwned(args: {
+  body: Record<string, unknown>;
+  headers: unknown;
+  apiKeyId: string | null;
+}): Promise<boolean> {
+  const connections = toMuseConnectionRows(
+    await getProviderConnections({ provider: "muse-code", isActive: true })
+  );
+  const oauthAccounts = connections.filter((item) => item.authType === "oauth").length;
+  if (oauthAccounts === 0) return false;
+  const scope = museSessionScopeFor(args.body, args.headers, args.apiKeyId, oauthAccounts);
+  if (!scope) return false;
+  return Boolean(readMuseOwnershipValue(`session:${scope}`)) || museScopeHasRecordedItems(scope);
+}
+
+/**
+ * 503 when this attempt selected another account than the session owner. Selection is
+ * restricted to the owner, so "no usable credentials" (the owner is rate limited or expired)
+ * is not a cross-account attempt: it returns null and the caller answers it as usual (429 with
+ * the reset, or the expired-credentials error).
+ */
 export function museOwnerUnavailable(owner: MuseOwner, credentials: Creds): Response | null {
-  const usable =
+  const selectedAnother =
     !!credentials &&
-    !("allRateLimited" in credentials) &&
-    !("allExpired" in credentials) &&
     "connectionId" in credentials &&
-    credentials.connectionId === owner.connectionId;
-  return usable
-    ? null
-    : errorResponse(
-        503,
-        "Muse session owner is unavailable; cross-account continuation is forbidden."
-      );
+    typeof credentials.connectionId === "string" &&
+    credentials.connectionId !== owner.connectionId;
+  return selectedAnother
+    ? markProviderBoundResponse(
+        errorResponse(
+          503,
+          "Muse session owner is unavailable; cross-account continuation is forbidden."
+        )
+      )
+    : null;
 }
 
 const accountOf = (credentials: Cred) =>
@@ -145,7 +180,8 @@ export function bindMuseOwner(
     return null;
   } catch (error) {
     onFailure();
-    if (error instanceof MuseOwnershipError) return errorResponse(error.status, error.message);
+    if (error instanceof MuseOwnershipError)
+      return markProviderBoundResponse(errorResponse(error.status, error.message));
     throw error;
   }
 }
@@ -188,7 +224,11 @@ export function museRetryDelay(
 export const museFailureMarksAccount = (result: {
   errorCode?: unknown;
   errorType?: unknown;
+  status?: number;
+  rawMessage?: unknown;
+  error?: unknown;
 }): boolean =>
+  !isMusePolicyRefusal(result.status, String(result.rawMessage ?? result.error ?? "")) &&
   result.errorCode !== "MUSE_OWNERSHIP_REJECTED" &&
   result.errorType !== "stream_timeout" &&
   result.errorType !== "stream_early_eof" &&

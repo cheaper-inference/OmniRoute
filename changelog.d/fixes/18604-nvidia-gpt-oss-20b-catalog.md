@@ -1,0 +1,1 @@
+- **fix(nvidia):** expose `openai/gpt-oss-20b` in the NVIDIA NIM model catalog (static registry, hosted-model snapshot and free-model catalog with its evidence record) and bump the free-tier counts quoted in the README and diagrams (#18604)

@@ -108,9 +108,7 @@ function NewModelsGroupCard({
       <div className="flex items-center justify-between gap-2 px-3 py-2 bg-bg-subtle border-b border-border">
         <div className="flex items-center gap-2 min-w-0">
           <span className="text-sm font-medium text-text-main truncate">{group.providerName}</span>
-          <span className="text-[10px] text-text-muted rounded-full px-1.5 py-0.5 border border-border">
-            {group.models.length}
-          </span>
+          <Badge size="sm">{group.models.length}</Badge>
         </div>
         <Button size="sm" variant="ghost" onClick={() => onMarkRead(group)}>
           {t("newModelsMarkProviderRead")}
@@ -127,7 +125,7 @@ function NewModelsGroupCard({
             <code className="text-xs font-mono text-text-muted truncate flex-1">
               {model.modelId}
             </code>
-            <span className="text-[10px] text-text-muted shrink-0">
+            <span className="text-xs text-text-muted shrink-0">
               {t("newModelsFirstSeen", { date: formatDate(model.firstSeenAt) })}
             </span>
           </div>
@@ -223,13 +221,15 @@ export default function NewModelsButton() {
           {t("newModelsButton")}
         </Button>
         {unseenCount > 0 && (
-          <span
-            className="pointer-events-none absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-error text-white text-[10px] font-bold px-1"
+          <Badge
+            variant="error"
+            size="sm"
+            className="pointer-events-none absolute -top-1.5 -right-1.5"
             aria-hidden="true"
             data-testid="new-models-badge"
           >
             {unseenCount > 99 ? "99+" : unseenCount}
-          </span>
+          </Badge>
         )}
       </span>
 

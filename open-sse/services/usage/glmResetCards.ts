@@ -19,6 +19,7 @@ const GLM_RESET_CARD_BUCKETS: ReadonlyArray<{ key: string; resetType: GlmResetWi
 export interface GlmResetCard {
   id: string;
   resetType: GlmResetWindow;
+  grantType?: string;
   expiresAt?: string | null;
   title?: string;
 }
@@ -111,6 +112,8 @@ function parseResetCard(value: unknown, fallbackType: GlmResetWindow): GlmResetC
   return {
     id,
     resetType: parseResetWindow(record.resetType ?? record.type, fallbackType),
+    // Preserve the provider's grant namespace for redemption; do not default it.
+    ...(typeof record.grantType === "string" ? { grantType: record.grantType } : {}),
     ...(expiresAt ? { expiresAt } : {}),
     ...(title ? { title } : {}),
   };
@@ -216,7 +219,7 @@ export function fetchGlmResetCardList(
 export function redeemGlmResetCard(
   apiKey: string,
   providerSpecificData: unknown,
-  card: { id: string; resetType: GlmResetWindow },
+  card: Pick<GlmResetCard, "id" | "resetType" | "grantType">,
   requestId: string
 ): Promise<{ response: Response; payload: unknown }> {
   const numericId = Number(card.id);
@@ -225,6 +228,7 @@ export function redeemGlmResetCard(
     resetType: card.resetType,
     recordId: Number.isFinite(numericId) ? numericId : card.id,
     requestId,
+    ...(typeof card.grantType === "string" ? { grantType: card.grantType } : {}),
   });
 }
 

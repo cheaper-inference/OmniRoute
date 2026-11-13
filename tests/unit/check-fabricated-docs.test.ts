@@ -224,6 +224,56 @@ test("env-var: a var present only in .env.example is NOT flagged", () => {
   );
 });
 
+test("env-var: a feature flag defined in a split catalog module is NOT flagged", () => {
+  // FEATURE_FLAG_DEFINITIONS spreads per-area modules such as
+  // searchFeatureFlagDefinitions.ts (#17933); their keys are env-overridable too.
+  const found = findingsFor({
+    files: {
+      "src/shared/constants/featureFlagDefinitions.ts":
+        'export const FEATURE_FLAG_DEFINITIONS = [\n  {\n    key: "MAIN_CATALOG_FLAG",\n  },\n];\n',
+      "src/shared/constants/searchFeatureFlagDefinitions.ts":
+        'export const SEARCH_FEATURE_FLAG_DEFINITIONS = [\n  {\n    key: "SPLIT_CATALOG_FLAG",\n  },\n];\n',
+    },
+    docs: { "flags.md": "Toggle `MAIN_CATALOG_FLAG` or `SPLIT_CATALOG_FLAG`.\n" },
+  });
+  assert.ok(!found.has("env-var::MAIN_CATALOG_FLAG"), "main catalog keys are indexed");
+  assert.ok(
+    !found.has("env-var::SPLIT_CATALOG_FLAG"),
+    "keys from a spread *FeatureFlagDefinitions.ts module must be indexed, not flagged"
+  );
+});
+
+test("env-var: a feature flag defined only in a suffix-split featureFlagDefinitionsX.ts is NOT flagged", () => {
+  // Suffix-named splits keep featureFlagDefinitions.ts under the file-size cap
+  // (featureFlagDefinitionsCodeAssist.ts, #18060); their keys are env-overridable too.
+  const found = findingsFor({
+    files: {
+      "src/shared/constants/featureFlagDefinitions.ts":
+        'export const FEATURE_FLAG_DEFINITIONS = [\n  {\n    key: "MAIN_CATALOG_FLAG",\n  },\n];\n',
+      "src/shared/constants/featureFlagDefinitionsCodeAssist.ts":
+        'export const CODE_ASSIST_FLAG = {\n  key: "SUFFIX_SPLIT_CATALOG_FLAG",\n};\n',
+      "src/shared/constants/featureFlagTypes.ts":
+        'export const NOT_A_CATALOG = {\n  key: "TYPES_MODULE_NOT_A_CATALOG_FLAG",\n};\n',
+    },
+    docs: {
+      "flags.md":
+        "Toggle `SUFFIX_SPLIT_CATALOG_FLAG`; `UNKNOWN_SPLIT_CATALOG_FLAG_XYZ` and `TYPES_MODULE_NOT_A_CATALOG_FLAG` are not real.\n",
+    },
+  });
+  assert.ok(
+    !found.has("env-var::SUFFIX_SPLIT_CATALOG_FLAG"),
+    "keys from a suffix-split featureFlagDefinitionsX.ts module must be indexed, not flagged"
+  );
+  assert.ok(
+    found.has("env-var::UNKNOWN_SPLIT_CATALOG_FLAG_XYZ"),
+    "a key defined in no catalog module must remain flagged"
+  );
+  assert.ok(
+    found.has("env-var::TYPES_MODULE_NOT_A_CATALOG_FLAG"),
+    "only *FeatureFlagDefinitions*.ts files are catalog modules"
+  );
+});
+
 test("api-path: a documented prefix with sub-routes (/api/cloud/) is NOT flagged", () => {
   const found = findingsFor({
     files: {

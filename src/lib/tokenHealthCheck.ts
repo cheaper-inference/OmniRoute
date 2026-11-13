@@ -20,6 +20,7 @@ import { getSettings } from "@/lib/db/settings";
 import { resolveGuardedProxyConfig } from "@/lib/tokenHealthCheckProxyGuard";
 import * as tokenRefresh from "@omniroute/open-sse/services/tokenRefresh.ts";
 import { ROTATION_LOCK_GROUP } from "@omniroute/open-sse/services/refreshSerializer.ts";
+import { isTransientRefreshError } from "@omniroute/open-sse/services/tokenRefresh/transientError.ts";
 import { readStoredVerificationUrl } from "@omniroute/open-sse/services/antigravityVerification.ts";
 import { pickMaskedDisplayValue } from "@/shared/utils/maskEmail";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
@@ -950,7 +951,8 @@ export async function checkConnection(conn: any) {
   // cadence while the access token is still valid for days.
   const tokenExpiresAt = getEffectiveTokenExpiryMs(conn);
   const hasKnownExpiry = tokenExpiresAt > 0;
-  const isAboutToExpire = hasKnownExpiry && tokenExpiresAt - Date.now() < TOKEN_EXPIRY_BUFFER;
+  const refreshLeadMs = conn.provider === "chatgpt" ? 60_000 : TOKEN_EXPIRY_BUFFER;
+  const isAboutToExpire = hasKnownExpiry && tokenExpiresAt - Date.now() < refreshLeadMs;
 
   // ROTATING_REFRESH_PROVIDERS — providers whose refresh_tokens are SINGLE-USE
   // (each refresh consumes the old one and returns a new one). For these, refreshing
@@ -1012,7 +1014,7 @@ export async function checkConnection(conn: any) {
   type RefreshResultShape = {
     accessToken?: string;
     refreshToken?: string;
-    expiresAt?: string;
+    expiresAt?: string | null;
     expiresIn?: number;
     providerSpecificData?: Record<string, unknown>;
     error?: string;
@@ -1047,6 +1049,9 @@ export async function checkConnection(conn: any) {
           const expiresAt = new Date(Date.now() + refreshResult.expiresIn * 1000).toISOString();
           updateData.expiresAt = expiresAt;
           updateData.tokenExpiresAt = expiresAt;
+        } else if (refreshResult.accessToken && refreshResult.expiresAt === null) {
+          updateData.expiresAt = null;
+          updateData.tokenExpiresAt = null;
         }
         // Merge new providerSpecificData and ALWAYS clear the refresh circuit
         // breaker streak on a successful refresh.
@@ -1086,25 +1091,7 @@ export async function checkConnection(conn: any) {
     }
     // Classify: only network/timeout errors are transient. Programming errors
     // and DB failures fall through to the exponential backoff path.
-    const errObj = typeof err === "object" && err !== null ? err : {};
-    const errName = err instanceof Error ? err.name : String(errObj.name ?? "");
-    const errMsg = err instanceof Error ? err.message : String(err);
-    const errCode = String(errObj.code ?? "");
-    // Also check err.cause for wrapped fetch errors.
-    const errCause = errObj.cause instanceof Error ? errObj.cause.message : "";
-    const errCauseCode = String(errObj.cause?.code ?? "");
-    const combinedMsg = `${errMsg} ${errCause}`;
-    const combinedCode = `${errCode} ${errCauseCode}`;
-    const isTransientNetworkError =
-      errName === "AbortError" ||
-      errName === "TimeoutError" ||
-      /ETIMEDOUT|ECONNREFUSED|ECONNRESET|ECONNABORTED|EPIPE|EHOSTUNREACH|ENETUNREACH|ENOTCONN|ENOTFOUND|EAI_AGAIN|ERR_NETWORK|ERR_SOCKET|ERR_CONNECTION|socket hang up|fetch failed/i.test(
-        combinedMsg
-      ) ||
-      /ETIMEDOUT|ECONNREFUSED|ECONNRESET|ECONNABORTED|EPIPE|EHOSTUNREACH|ENETUNREACH|ENOTCONN|ENOTFOUND|EAI_AGAIN|ERR_NETWORK|ERR_SOCKET|ERR_CONNECTION/i.test(
-        combinedCode
-      );
-    if (isTransientNetworkError) {
+    if (isTransientRefreshError(err)) {
       const transientNow = new Date().toISOString();
       const updateData = buildTransientRefreshRetryUpdate(conn, transientNow);
       try {
@@ -1249,6 +1236,9 @@ export async function checkConnection(conn: any) {
         const expiresAt = new Date(Date.now() + result.expiresIn * 1000).toISOString();
         updateData.expiresAt = expiresAt;
         updateData.tokenExpiresAt = expiresAt;
+      } else if (result.expiresAt === null) {
+        updateData.expiresAt = null;
+        updateData.tokenExpiresAt = null;
       }
 
       if (result.providerSpecificData) {

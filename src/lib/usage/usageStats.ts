@@ -96,16 +96,16 @@ function toStringOrEmpty(value: unknown): string {
 
 /**
  * Priceable tokens and stored cost of a raw usage_history row. A row carrying a
- * provider-reported exact cost (`provider_cost_usd`) is billed by that cost; its
- * tokens stay for display only and are never re-priced.
+ * provider-reported cost or catalogue snapshot uses that amount; its tokens
+ * stay for display only and are never re-priced.
  */
 const RAW_COST_COLUMNS = `
-        CASE WHEN provider_cost_usd IS NULL THEN COALESCE(tokens_input, 0) ELSE 0 END as cost_tokens_input,
-        CASE WHEN provider_cost_usd IS NULL THEN COALESCE(tokens_output, 0) ELSE 0 END as cost_tokens_output,
-        CASE WHEN provider_cost_usd IS NULL THEN COALESCE(tokens_cache_read, 0) ELSE 0 END as cost_tokens_cache_read,
-        CASE WHEN provider_cost_usd IS NULL THEN COALESCE(tokens_cache_creation, 0) ELSE 0 END as cost_tokens_cache_creation,
-        CASE WHEN provider_cost_usd IS NULL THEN COALESCE(tokens_reasoning, 0) ELSE 0 END as cost_tokens_reasoning,
-        COALESCE(provider_cost_usd, 0.0) as stored_cost`;
+        CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN COALESCE(tokens_input, 0) ELSE 0 END as cost_tokens_input,
+        CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN COALESCE(tokens_output, 0) ELSE 0 END as cost_tokens_output,
+        CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN COALESCE(tokens_cache_read, 0) ELSE 0 END as cost_tokens_cache_read,
+        CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN COALESCE(tokens_cache_creation, 0) ELSE 0 END as cost_tokens_cache_creation,
+        CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN COALESCE(tokens_reasoning, 0) ELSE 0 END as cost_tokens_reasoning,
+        COALESCE(provider_cost_usd, calculated_cost_usd, 0.0) as stored_cost`;
 
 function buildUsageSourceSql(aggregationEnabled: boolean) {
   if (!aggregationEnabled) {
@@ -292,12 +292,12 @@ export async function getConnectionSpendUsdSinceAdded(
   const rows = db
     .prepare(
       `SELECT model,
-          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_input ELSE 0 END), 0) AS input,
-          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_output ELSE 0 END), 0) AS output,
-          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_read ELSE 0 END), 0) AS cacheRead,
-          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_creation ELSE 0 END), 0) AS cacheCreation,
-          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_reasoning ELSE 0 END), 0) AS reasoning,
-          COALESCE(SUM(provider_cost_usd), 0) AS storedCost,
+          COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_input ELSE 0 END), 0) AS input,
+          COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_output ELSE 0 END), 0) AS output,
+          COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_read ELSE 0 END), 0) AS cacheRead,
+          COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_creation ELSE 0 END), 0) AS cacheCreation,
+          COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_reasoning ELSE 0 END), 0) AS reasoning,
+          COALESCE(SUM(COALESCE(provider_cost_usd, calculated_cost_usd)), 0) AS storedCost,
           COUNT(*) AS requests
        FROM usage_history
        WHERE connection_id = ? AND provider = ? AND success = 1
@@ -665,12 +665,12 @@ export async function getUsageStats() {
           COALESCE(SUM(tokens_cache_read), 0) as tokens_cache_read,
           COALESCE(SUM(tokens_cache_creation), 0) as tokens_cache_creation,
           COALESCE(SUM(tokens_reasoning), 0) as tokens_reasoning,
-          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_input ELSE 0 END), 0) as cost_tokens_input,
-          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_output ELSE 0 END), 0) as cost_tokens_output,
-          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_read ELSE 0 END), 0) as cost_tokens_cache_read,
-          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_creation ELSE 0 END), 0) as cost_tokens_cache_creation,
-          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_reasoning ELSE 0 END), 0) as cost_tokens_reasoning,
-          COALESCE(SUM(provider_cost_usd), 0.0) as stored_cost
+          COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_input ELSE 0 END), 0) as cost_tokens_input,
+          COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_output ELSE 0 END), 0) as cost_tokens_output,
+          COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_read ELSE 0 END), 0) as cost_tokens_cache_read,
+          COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_creation ELSE 0 END), 0) as cost_tokens_cache_creation,
+          COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_reasoning ELSE 0 END), 0) as cost_tokens_reasoning,
+          COALESCE(SUM(COALESCE(provider_cost_usd, calculated_cost_usd)), 0.0) as stored_cost
         FROM usage_history
         WHERE timestamp >= ? AND timestamp <= ?
         GROUP BY minute, provider, model, service_tier

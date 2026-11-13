@@ -1,4 +1,4 @@
--- Migration 227: seen_models — persistent "New models" inbox state.
+-- Migration 240: seen_models — persistent "New models" inbox state.
 --
 -- One row per (provider, model_id) ever observed by a successful model sync.
 -- acknowledged_at NULL = the model is still unread in the dashboard inbox.

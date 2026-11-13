@@ -1,0 +1,1 @@
+- **fix(db):** Per-key minute quota counters (`api_key_quota_counters`) no longer grow without limit; each new write removes that key's buckets older than the previous minute, which no quota check reads. ([#19445](https://github.com/cheaper-inference/OmniRoute/pull/19445))
