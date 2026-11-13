@@ -383,3 +383,39 @@ test("fill-first lease path plans the new pin on the top-priority account", asyn
     reason: "CONNECTION_INELIGIBLE",
   });
 });
+
+test("cost-optimized: a new pin across alias providers takes the lowest priority, as an unpinned request does", async () => {
+  await settingsDb.updateSettings({
+    fallbackStrategy: "cost-optimized",
+    sessionAffinityTtlMs: TTL,
+  });
+  const seedApiKey = async (provider: string, name: string) => {
+    const created = await providersDb.createProviderConnection({
+      provider,
+      authType: "apikey",
+      name: `new-pin-alias-${name}`,
+      apiKey: `synthetic-new-pin-alias-${name}`,
+      isActive: true,
+      testStatus: "active",
+    });
+    assert.ok(created?.id);
+    return created.id as string;
+  };
+  // nvidia searches [nvidia, nvidia_nim] (#922), so the pool lists priority 2 before priority 1.
+  const second = await seedApiKey("nvidia", "second");
+  // createProviderConnection renumbers per provider; an explicit update keeps 2.
+  await providersDb.updateProviderConnection(second, { priority: 2 });
+  const first = await seedApiKey("nvidia_nim", "first");
+
+  const unpinned = await auth.getProviderCredentials("nvidia");
+  const pinned = await auth.getProviderCredentials("nvidia", null, null, null, {
+    sessionKey: "session-alias",
+  });
+
+  assert.equal(unpinned?.connectionId, first);
+  assert.equal(pinned?.connectionId, first, "the pin goes where cost-optimized routes");
+  assert.equal(
+    affinityDb.getSessionAccountAffinity("session-alias", "nvidia", TTL)?.connectionId,
+    first
+  );
+});

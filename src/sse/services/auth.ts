@@ -998,6 +998,11 @@ function skipFullAccounts<T extends { id: string; maxConcurrent?: number | null 
   return open.length > 0 ? open : connections;
 }
 
+/** cost-optimized pick: the lowest priority value (lower = cheaper/preferred), on a copy. */
+function pickLowestPriority<T extends { priority?: number | null }>(connections: T[]) {
+  return [...connections].sort((a, b) => (a.priority || 999) - (b.priority || 999))[0];
+}
+
 /**
  * Get provider credentials from localDb
  * Filters out unavailable accounts and returns the selected account based on strategy
@@ -1956,7 +1961,10 @@ export async function getProviderCredentials(
     // (fill-first: the first eligible account by priority); spreading strategies keep LRU.
     const pickNewSessionPin = startsNewSessionsOnLru(strategy)
       ? undefined
-      : (pool: ProviderConnectionView[]) => skipFullAccounts(provider, pool)[0];
+      : (pool: ProviderConnectionView[]) => {
+          const open = skipFullAccounts(provider, pool);
+          return strategy === "cost-optimized" ? pickLowestPriority(open) : open[0];
+        };
     // Redis lease planning can use a pin evicted after prefetch (accepted synchronous window).
     // After claim, rejected CAS keeps the claimed account; it never overwrites the shared winner.
     const affinityPlan =
@@ -2153,10 +2161,7 @@ export async function getProviderCredentials(
     } else if (strategy === "cost-optimized") {
       // Cost Optimized: sort by priority ascending (lower = cheaper/preferred)
       // Future: can be enhanced with actual cost data per provider
-      const sorted = [...orderedConnections].sort(
-        (a, b) => (a.priority || 999) - (b.priority || 999)
-      );
-      connection = sorted[0];
+      connection = pickLowestPriority(orderedConnections);
     } else if (strategy === "strict-random") {
       // Strict Random: shuffle deck — uses each account once before reshuffling
       const ids = orderedConnections.map((c) => c.id);
