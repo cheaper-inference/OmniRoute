@@ -171,6 +171,20 @@ export type ExecuteProviderRequestDeps = {
   userAgent: string | undefined;
 };
 
+// Resolve early (the loop's own signal checks then end the request) when the client leaves.
+function sleepUnlessAborted(ms: number, signal: AbortSignal): Promise<void> {
+  return new Promise((resolve) => {
+    if (signal.aborted) return resolve();
+    const done = () => {
+      clearTimeout(timer);
+      signal.removeEventListener("abort", done);
+      resolve();
+    };
+    const timer = setTimeout(done, ms);
+    signal.addEventListener("abort", done, { once: true });
+  });
+}
+
 export async function executeProviderRequest(
   deps: ExecuteProviderRequestDeps,
   modelToCall: string = deps.effectiveModel,
@@ -524,7 +538,7 @@ export async function executeProviderRequest(
                   `429 ${decision.kind}; retrying in ${delay}ms (model remaining: ${decision.snapshot.modelRemaining ?? "unknown"})`
                 );
                 releaseAccountSemaphore();
-                await new Promise((r) => setTimeout(r, delay));
+                await sleepUnlessAborted(delay, streamController.signal);
                 attempts++;
                 continue;
               }
@@ -756,7 +770,8 @@ export async function executeProviderRequest(
       // failures stay in routing telemetry; authoritative success only recovers this key.
       if (
         rawResult._executionCredentials?.connectionId &&
-        (rawResult._executionCredentials.apiKey || rawResult._executionCredentials.accessToken)
+        (rawResult._executionCredentials.apiKey || rawResult._executionCredentials.accessToken) &&
+        !(await shouldIsolateProbeFailures())
       ) {
         recordResponseKeyHealth(
           rawResult.response,
