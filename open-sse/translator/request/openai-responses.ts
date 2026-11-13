@@ -70,6 +70,9 @@ function toolOutputContentToString(output: unknown): string {
       if (text) parts.push(text);
     } else if (type === "input_image") {
       parts.push("[Image omitted: not supported on Chat Completions tool results]");
+    } else if (type === "input_file") {
+      // A file part carries base64 or a URL; inlining it as JSON bloats the context.
+      parts.push(`[File omitted: ${typeof rec.filename === "string" ? rec.filename : "file"}]`);
     } else {
       // Unknown part type — stringify as fallback
       try {
@@ -984,7 +987,8 @@ export function openaiResponsesToOpenAIRequest(
         const allowed = toRecord(allowedValue);
         const allowedType = toString(allowed.type);
         const allowedName = toString(allowed.name).trim();
-        if (allowedType !== "function" || !allowedName) {
+        // Custom tools are declared as Chat functions above, so they can be allowed by name.
+        if ((allowedType !== "function" && allowedType !== "custom") || !allowedName) {
           throw unsupportedFeature(
             `Unsupported Responses API feature: allowed_tools descriptor type '${allowedType || "missing"}' cannot be represented in Chat Completions`
           );
@@ -1096,6 +1100,9 @@ export function openaiResponsesToOpenAIRequest(
   delete result.conversation;
   delete result.prompt_cache_options;
   delete result.prompt_cache_retention;
+  // Codex compaction config and stored prompt templates: Responses-only, no Chat guard.
+  delete result.context_management;
+  delete result.prompt;
 
   mergeHistoricalToolIdentities(namespaceToolIdentityMap, rawInputItems, tools);
   if (namespaceToolIdentityMap.size > 0) {
