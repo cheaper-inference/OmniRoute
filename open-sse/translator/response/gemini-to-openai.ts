@@ -456,7 +456,12 @@ export function geminiToOpenAIResponse(chunk, state) {
         // following functionCall is cached and can be re-attached on later
         // turns; otherwise OpenAI-format clients lose the signature and the
         // next Gemini request has to stringify historical tool calls.
-        if (hasThoughtSig && !hasTextContent && !hasFunctionCall) {
+        if (
+          hasThoughtSig &&
+          !hasTextContent &&
+          !hasFunctionCall &&
+          !(part.inlineData || part.inline_data)
+        ) {
           continue;
         }
 
@@ -494,7 +499,7 @@ export function geminiToOpenAIResponse(chunk, state) {
           }
           emitFunctionCallPart(part, state, results);
         }
-        continue;
+        if (!(hasThoughtSig && (part.inlineData || part.inline_data))) continue;
       }
 
       // Text content (non-thinking). Some Gemini/Antigravity turns can imitate
