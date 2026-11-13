@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "Equilibra a cota restante com redefinições de 5h e semanais e, em seguida, faz um round-robin de pontuações semelhantes",
     "quotaWeighted": "Ponderado por cota",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Expiração primeiro",
+    "expiryFirstDesc": "Consome primeiro a conta cuja quota, de outro modo, expiraria sem ser usada: o maior saldo com a redefinição mais próxima vai primeiro.",
     "strictRandom": "Aleatório Estrito",
     "strictRandomDesc": "Baralho embaralhado — usa cada modelo uma vez antes de reembaralhar",
     "fusion": "Fusão",
@@ -4033,6 +4035,11 @@
         "when": "Encaminha várias contas com telemetria de cota e diferentes janelas de redefinição.",
         "avoid": "A telemetria de cota não está disponível para a maioria das contas.",
         "example": "Prefira uma redefinição semanal de 60% da conta amanhã a uma redefinição de 80% da conta mais tarde."
+      },
+      "expiry-first": {
+        "when": "Encaminha entre contas cujas quotas são redefinidas em horários diferentes e pretende consumir a quota que, de outro modo, expiraria sem ser usada.",
+        "avoid": "A telemetria de quota não está disponível para a maioria das contas, ou precisa de uma ordem estável que ignore o momento da redefinição.",
+        "example": "Prefira uma conta com 80% restantes que é redefinida dentro de 39 minutos a uma conta com 48% restantes que é redefinida dentro de 9 horas — a quota prestes a expirar é consumida antes de ser desperdiçada."
       },
       "strict-random": {
         "when": "Usa quando queres distribuição perfeitamente uniforme — cada modelo usado uma vez antes de repetir.",
@@ -4249,6 +4256,13 @@
         "tip1": "Use etapas de conta explícitas ou encaminhamento de tags de conta para fornecedores com telemetria de cota.",
         "tip2": "Ajuste a sessão versus pesos semanais quando a exaustão de curto prazo for mais arriscada.",
         "tip3": "Mantenha a faixa de amarração pequena para que contas equivalentes ainda girem de forma justa."
+      },
+      "expiry-first": {
+        "title": "Quota a expirar primeiro",
+        "description": "Classifica as contas pela pressão de aproveitamento: uma quota restante elevada próxima do prazo de redefinição vai primeiro.",
+        "tip1": "Requer telemetria de quota do fornecedor; as contas sem ela mantêm a ordem de prioridade indicada.",
+        "tip2": "Pontuações quase empatadas alternam dentro da faixa de empate para que contas semelhantes continuem a partilhar a carga.",
+        "tip3": "Limite a classificação ao bucket de quota no qual cada modelo é efetivamente faturado."
       },
       "strict-random": {
         "title": "Distribuição por baralhamento",
@@ -5679,6 +5693,7 @@
     "usageTracking": "Rastreamento de uso",
     "securityDesc": "Defina uma palavra-passe para proteger seu painel ou pule por enquanto.",
     "securityDescSkipWarning": "⚠️ Sem uma palavra-passe, não poderá adicionar fornecedores durante a configuração. Pode adicioná-los mais tarde a partir do painel depois de definir uma palavra-passe.",
+    "passwordAlreadySet": "Já está definida uma palavra-passe para o painel. Pode alterá-la mais tarde nas Definições.",
     "providerDesc": "Ligue o seu primeiro fornecedor de IA. Pode adicionar mais tarde.",
     "providerRequiresPassword": "Tem de definir uma palavra-passe primeiro para adicionar fornecedores. Volte para a etapa de segurança e defina uma palavra-passe ou adicione fornecedores mais tarde no painel.",
     "apiKeyRequired": "Chave API (obrigatória)",
@@ -6738,6 +6753,7 @@
     "antigravityProjectIdPlaceholder": "meu-gcp-project-id",
     "grokWebCookiePlaceholder": "Espaço reservado de Cookie Web do Grok",
     "herokuBaseUrlHint": "Dica de URL Base do Heroku",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Ocultar Email",
     "imageProviders": "Fornecedores de Imagem",
     "videoProviders": "Geração de Vídeo",
@@ -7236,7 +7252,8 @@
       "kiro": "Nível gratuito: 50 créditos/mês (~25K–100K tokens). ⚠️ Os ToS do Kiro proíbem a utilização de proxy/harness de terceiros.",
       "codex": "Ligar o OpenAI Codex com o fluxo OAuth existente.",
       "qwen": "Ligar o Qwen Code com o fluxo OAuth existente.",
-      "github-models": "Crie um PAT do GitHub com o âmbito 'models: read' em github.com/settings/tokens"
+      "github-models": "Crie um PAT do GitHub com o âmbito 'models: read' em github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} aceita IDs de modelo nativos do fornecedor. Importe de /models ou adicione IDs personalizados para encaminhamento.",
     "bedrockModelsDescription": "Os modelos Amazon Bedrock têm escopo definido por região da AWS. Importe de /models ou adicione IDs de modelo Bedrock habilitados na região selecionada.",
@@ -8094,6 +8111,8 @@
     "resetAwareDesc": "Prefira contas com cota restante saudável e redefinições mais próximas",
     "quotaWeighted": "Ponderado por quota",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Expiração primeiro",
+    "expiryFirstDesc": "Consome primeiro a conta cuja quota, de outro modo, expiraria sem ser usada: o maior saldo com a redefinição mais próxima vai primeiro.",
     "strictRandom": "Aleatório Estrito",
     "strictRandomDesc": "Baralhar — usa cada conta uma vez antes de baralhar novamente",
     "stickyLimit": "Limite pegajoso",
@@ -10258,7 +10277,11 @@
     "mappingInvalidJson": "JSON inválido.",
     "mappingMustBeObject": "O mapeamento deve ser um objeto JSON, não um array ou valor primitivo.",
     "mappingValueMustBeString": "O valor para a chave “{key}” deve ser uma string.",
-    "save": "Guardar"
+    "save": "Guardar",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Motor Caveman",
@@ -12870,6 +12893,8 @@
     },
     "attempts": "tentativas",
     "detail": {
+      "tabOverview": "Visão geral",
+      "tabPayloads": "Cargas úteis",
       "omittedHttpAttempts": "{count} envios HTTP não foram retidos",
       "noHttpResponse": "Não foi observada qualquer resposta HTTP",
       "transportError": "Erro de transporte",
