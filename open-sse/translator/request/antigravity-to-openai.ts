@@ -348,7 +348,8 @@ function convertContent(content, toolCallIds) {
   // nothing is dropped (previously only the tool messages survived).
   if (toolResults.length > 0) {
     if (toolCalls.length > 0 || textParts.length > 0 || reasoningContent) {
-      const assistantMsg: JsonRecord = { role: "assistant" };
+      // A user turn can carry a tool result plus a follow-up: keep that follow-up a user message.
+      const assistantMsg: JsonRecord = { role: role === "user" ? "user" : "assistant" };
       if (textParts.length > 0) {
         assistantMsg.content =
           textParts.length === 1 && textParts[0].type === "text" ? textParts[0].text : textParts;
@@ -356,7 +357,7 @@ function convertContent(content, toolCallIds) {
       if (reasoningContent) {
         assistantMsg.reasoning_content = reasoningContent;
       }
-      if (toolCalls.length > 0) {
+      if (toolCalls.length > 0 && assistantMsg.role === "assistant") {
         assistantMsg.tool_calls = toolCalls;
       }
       return [...toolResults, assistantMsg];
