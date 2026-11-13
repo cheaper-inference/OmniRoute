@@ -357,6 +357,14 @@ class SkillRegistry {
         }
 
         for (const row of rows as any[]) {
+          let schema: Skill["schema"];
+          try {
+            schema = JSON.parse(row.schema);
+          } catch {
+            // One corrupt row must not abort the load for every other skill of the scope.
+            log.warn("skills.registry.skip_corrupt_row", { id: row.id });
+            continue;
+          }
           const tags = (() => {
             try {
               if (typeof row.tags !== "string") return [];
@@ -373,7 +381,7 @@ class SkillRegistry {
             name: row.name,
             version: row.version,
             description: row.description || "",
-            schema: JSON.parse(row.schema),
+            schema,
             handler: row.handler,
             enabled: row.enabled === 1,
             mode: row.mode === "off" || row.mode === "auto" ? row.mode : "on",

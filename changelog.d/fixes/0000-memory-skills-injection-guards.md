@@ -1,0 +1,1 @@
+- **fix(memory):** memory injection no longer puts the per-query memory text at the head of an OpenAI, Codex or Azure prompt (it broke automatic prefix caching on every turn), and one corrupt skill row no longer makes every non-streaming request of an API key fail.

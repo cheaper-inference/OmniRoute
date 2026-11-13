@@ -194,7 +194,11 @@ export async function injectMemoryAndSkills({
         // #3890: when the client uses prompt caching (cache_control breakpoints), inject
         // memory cache-safely (before the last user message) so the per-query memory text
         // does not poison the cacheable prefix and force a cache miss on every turn.
-        const cacheSafe = detectCachingContext(body, { provider, targetFormat }).hasCacheControl;
+        // Automatic prefix caching (OpenAI, Codex, Azure) needs a byte-identical prefix from token 0,
+        // like explicit cache_control markers do, so it also keeps memory off the head of the prompt.
+        const cachingContext = detectCachingContext(body, { provider, targetFormat });
+        const cacheSafe =
+          cachingContext.hasCacheControl || cachingContext.usesAutomaticPrefixCaching;
         const injected = injectMemory(
           body as Parameters<typeof injectMemory>[0],
           memories,
@@ -269,7 +273,15 @@ export async function injectMemoryAndSkills({
     // Memory builtins and registered Skills are only executed by the
     // non-streaming server-owned tool loop; stream clients execute tools
     // client-side, so we skip injection for stream requests.
-    await skillRegistry.loadFromDatabase(memoryOwnerId);
+    try {
+      await skillRegistry.loadFromDatabase(memoryOwnerId);
+    } catch (skillsErr) {
+      // Skills are optional extras: a failed load (one corrupt row) must not fail the request.
+      log?.debug?.(
+        "SKILLS",
+        `Skills load skipped: ${skillsErr instanceof Error ? skillsErr.message : String(skillsErr)}`
+      );
+    }
     const existingTools = Array.isArray(body.tools) ? body.tools : [];
     const { tools: mergedTools, injectedNames } = injectSkillsWithMetadata({
       provider: getSkillsProviderForFormat(sourceFormat),
