@@ -228,6 +228,23 @@ type GeminiBaseOptions = {
   keepMixedGoogleSearchCallable?: boolean;
 };
 
+const BILLING_LINE_RE = /^x-anthropic-billing-header:[^\n]*(?:\r?\n)?/i;
+
+/**
+ * Drop Claude Code's `x-anthropic-billing-header:` line from a system message. It rotates every
+ * turn, so it breaks the prompt prefix cache, and it means nothing to Gemini. Strip each text part
+ * on its own: extractTextContent joins parts without a separator.
+ */
+function stripBillingLine(content: unknown): unknown {
+  if (typeof content === "string") return content.replace(BILLING_LINE_RE, "");
+  if (!Array.isArray(content)) return content;
+  return content.map((part) =>
+    part && typeof part === "object" && typeof (part as { text?: unknown }).text === "string"
+      ? { ...part, text: (part as { text: string }).text.replace(BILLING_LINE_RE, "") }
+      : part
+  );
+}
+
 // Core: Convert OpenAI request to Gemini format (base for all variants)
 function openaiToGeminiBase(
   model: string,
@@ -476,7 +493,7 @@ function openaiToGeminiBase(
       const content = msg.content;
 
       if (role === "system" && messages.length > 1) {
-        const systemText = typeof content === "string" ? content : extractTextContent(content);
+        const systemText = extractTextContent(stripBillingLine(content));
         if (systemText) {
           if (!result.systemInstruction) {
             result.systemInstruction = {
