@@ -9,6 +9,7 @@
  */
 import { getDbInstance } from "../core";
 import { cleanupEmptyCallLogDirs, deleteCallArtifact } from "@/lib/usage/callLogArtifacts";
+import { recordUsagePurgedBefore } from "@/lib/usage/usagePurgedBefore";
 
 export type DeleteByPeriodTarget = {
   table: string;
@@ -107,6 +108,10 @@ export async function deleteFromTableBeforeInBatches(
  * rows still present. A cleanup interrupted inside a day would leave part of
  * it, and the next rollup would replace that day's totals with the remainder.
  * With whole days, an interrupted run leaves only complete days behind.
+ *
+ * A usage_history purge records the day it reached, after each statement, so a
+ * row that arrives late for a purged day is added to that day's summary instead
+ * of replacing it (see usagePurgedBefore.ts).
  */
 export async function deleteWholeDaysBefore(
   table: string,
@@ -118,11 +123,15 @@ export async function deleteWholeDaysBefore(
   const db = getDbInstance();
   const oldest = db.prepare(`SELECT MIN(${column}) AS t FROM ${table} WHERE ${column} < ?`);
   const remove = db.prepare(`DELETE FROM ${table} WHERE ${column} < ?`);
+  const record = table === "usage_history" ? recordUsagePurgedBefore : () => {};
   let deleted = 0;
 
   while (true) {
     const row = oldest.get(cutoffDate) as { t?: unknown } | undefined;
-    if (row?.t === null || row?.t === undefined) return deleted;
+    if (row?.t === null || row?.t === undefined) {
+      record(cutoffDate);
+      return deleted;
+    }
     const day = typeof row.t === "string" ? row.t.slice(0, 10) : "";
     const dayStart = /^\d{4}-\d{2}-\d{2}$/.test(day) ? Date.parse(`${day}T00:00:00Z`) : NaN;
     // A value that does not start with a date cannot be split by day; delete
@@ -130,7 +139,13 @@ export async function deleteWholeDaysBefore(
     const nextDay = Number.isFinite(dayStart)
       ? new Date(dayStart + 86_400_000).toISOString().slice(0, 10)
       : cutoffDate;
-    const batch = remove.run(nextDay < cutoffDate ? nextDay : cutoffDate).changes;
+    const reached = nextDay < cutoffDate ? nextDay : cutoffDate;
+    // The delete and the recorded day commit together: a stop between them would let a late row replace the day.
+    const batch = db.transaction(() => {
+      const changes = remove.run(reached).changes;
+      record(reached);
+      return changes;
+    })();
     deleted += batch;
     if (progress) progress.deleted += batch;
     await yieldToEventLoop();

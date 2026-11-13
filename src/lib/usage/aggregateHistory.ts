@@ -8,6 +8,7 @@
 import { getDbInstance } from "../db/core";
 import { getUserDatabaseSettings } from "../db/databaseSettings";
 import { calculateCost } from "./costCalculator";
+import { advanceUsageCountedThrough, getUsagePurgeMark } from "./usagePurgedBefore";
 
 interface AggregationResult {
   processed: number;
@@ -139,7 +140,9 @@ export async function rollupHourlyQuota(
  *
  * Each complete provider/model/day row replaces any prior summary. usage_history
  * is authoritative, so retries after a crash between rollup and delete remain
- * idempotent instead of double-counting the same raw rows.
+ * idempotent instead of double-counting the same raw rows. A day the purge already
+ * deleted has no complete raw rows left: a late row for it is added to the summary,
+ * once (see usagePurgedBefore.ts).
  *
  * @param beforeDate - ISO timestamp/date boundary. Rows strictly before this value are rolled up.
  * @returns Aggregation result with counts
@@ -257,6 +260,13 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
           )
         ) END
     `;
+    // Rows of a purged day (below mark.day) that arrived after the mark (id above it) are late:
+    // they are counted whatever `beforeDate` is. Read in the same synchronous turn as the SELECT
+    // below, so a row that arrives while the pricing awaits has a higher id and waits.
+    const mark = getUsagePurgeMark();
+    const { maxId } = db
+      .prepare("SELECT COALESCE(MAX(id), 0) AS maxId FROM usage_history")
+      .get() as { maxId: number };
     const rows = db
       .prepare(
         `SELECT
@@ -278,14 +288,14 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
           (COALESCE(provider_cost_usd, calculated_cost_usd) IS NOT NULL) as hasStoredCost,
           COALESCE(SUM(COALESCE(provider_cost_usd, calculated_cost_usd)), 0) as storedCost
         FROM usage_history
-        WHERE timestamp < ?
+        WHERE ((timestamp < ? AND DATE(timestamp) >= ?) OR (DATE(timestamp) < ? AND id > ?))
           AND provider IS NOT NULL AND provider != ''
           AND model IS NOT NULL AND model != ''
         GROUP BY LOWER(provider), LOWER(model), DATE(timestamp), serviceTier,
           requestInputTokens, requestOutputTokens, requestCacheReadTokens,
           requestCacheCreationTokens, requestReasoningTokens, hasStoredCost`
       )
-      .all(beforeDate) as Array<{
+      .all(beforeDate, mark.day, mark.day, mark.id) as Array<{
       provider: string;
       model: string;
       date: string;
@@ -381,11 +391,27 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
         total_cache_read_tokens = excluded.total_cache_read_tokens,
         total_cost = excluded.total_cost`
     );
+    // A late row is added to the purged day's summary. An unknown (NULL) cache-read total stays
+    // unknown: adding to it would publish a partial count.
+    const addLate = db.prepare(
+      `INSERT INTO daily_usage_summary
+        (provider, model, date, total_requests, total_input_tokens, total_output_tokens, total_cache_read_tokens, total_cost)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(provider, model, date) DO UPDATE SET
+        total_requests = daily_usage_summary.total_requests + excluded.total_requests,
+        total_input_tokens = daily_usage_summary.total_input_tokens + excluded.total_input_tokens,
+        total_output_tokens = daily_usage_summary.total_output_tokens + excluded.total_output_tokens,
+        total_cache_read_tokens = daily_usage_summary.total_cache_read_tokens + excluded.total_cache_read_tokens,
+        total_cost = daily_usage_summary.total_cost + excluded.total_cost`
+    );
     const insertRows = db.transaction((items: typeof archivedRows) => {
-      const changes = items.reduce(
-        (total, row) =>
+      let addedLate = false;
+      const changes = items.reduce((total, row) => {
+        const late = row.date < mark.day;
+        addedLate ||= late;
+        return (
           total +
-          upsert.run(
+          (late ? addLate : upsert).run(
             row.provider,
             row.model,
             row.date,
@@ -394,9 +420,10 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
             row.outputTokens,
             row.cacheReadTokens,
             row.totalCost
-          ).changes,
-        0
-      );
+          ).changes
+        );
+      }, 0);
+      if (addedLate) advanceUsageCountedThrough(mark, maxId);
       // The Team upsert and raw-row processed marker are one transaction. If
       // either fails, neither becomes visible and a retry cannot double count.
       db.prepare(teamAggregateQuery).run(beforeDate, beforeDate);

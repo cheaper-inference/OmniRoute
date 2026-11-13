@@ -1,0 +1,1 @@
+- **fix(usage):** A usage row that arrives late for a day the retention job already rolled up and deleted is now added to that day's summary. Before, the next rollup replaced the day's totals with the late row alone and the earlier requests vanished from the analytics. The job records the day it purged to and the highest row id it counted, in one settings row (no migration).
