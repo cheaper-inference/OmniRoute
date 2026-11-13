@@ -3,7 +3,11 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { parse } from "@formatjs/icu-messageformat-parser";
 
-import { localeParityIsReleaseOnly, localeParityOptions } from "../_helpers/localeParityMode.ts";
+import {
+  localeParityIsReleaseOnly,
+  localeParityOptions,
+  placeholderParityDeferred,
+} from "../_helpers/localeParityMode.ts";
 import en from "../../src/i18n/messages/en.json" with { type: "json" };
 import vi from "../../src/i18n/messages/vi.json" with { type: "json" };
 
@@ -60,6 +64,8 @@ test("Vietnamese locale preserves every ICU placeholder name", () => {
     if (translated === undefined) {
       return localeParityIsReleaseOnly ? [] : [{ key, reason: "missing" }];
     }
+    // English rewritten by the PR (pr mode only): the release refresh retranslates vi.
+    if (placeholderParityDeferred(key)) return [];
     const sourceNames = placeholderNames(value);
     const targetNames = placeholderNames(translated);
     return JSON.stringify(sourceNames) === JSON.stringify(targetNames)
