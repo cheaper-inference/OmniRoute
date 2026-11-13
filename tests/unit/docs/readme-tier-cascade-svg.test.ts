@@ -6,6 +6,7 @@ import {
   TIER_CASCADE_COPY,
 } from "../../../scripts/docs/gen-readme-tier-cascade.mjs";
 import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
+import { releaseOnlyUnlessTouched } from "../../../scripts/check/lib/derivedArtifactScope.mjs";
 
 // The committed tier cascade must be exactly what the generator produces, draw the kit type as outlines, keep every string as text, keep the counts gate's numbers readable as text
 // and declare both palettes. Same staleness contract as tests/unit/docs/readme-hero-svg.test.ts.
@@ -13,7 +14,12 @@ import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
 const FILE = "docs/diagrams/tier-cascade.svg";
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-test("the committed tier cascade is exactly what the generator produces", async () => {
+// Release mode (and a change that edits this file) compares it byte for byte; a feature PR
+// leaves the drift to the release refresh (scripts/check/lib/derivedArtifactScope.mjs).
+const stalenessSkip = releaseOnlyUnlessTouched("docs/diagrams/tier-cascade.svg");
+
+test("the committed tier cascade is exactly what the generator produces", async (t) => {
+  if (stalenessSkip) return t.skip(stalenessSkip);
   const generated = await renderTierCascade();
   const committed = readFileSync(FILE, "utf8");
   assert.equal(

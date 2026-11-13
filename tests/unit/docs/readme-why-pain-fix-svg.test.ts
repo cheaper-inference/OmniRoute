@@ -5,13 +5,19 @@ import {
   renderReadmeWhyPainFix,
   WHY_PAIN_FIX_COPY,
 } from "../../../scripts/docs/gen-readme-why-pain-fix.mjs";
+import { releaseOnlyUnlessTouched } from "../../../scripts/check/lib/derivedArtifactScope.mjs";
 
 // The committed pain-versus-fix ledger must be exactly what the generator produces, draw the kit type as outlines, keep every string as text and declare both palettes with no literal color
 // escaping the theme. Same staleness contract as tests/unit/docs/readme-hero-svg.test.ts.
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-test("the committed why-pain-fix diagram is exactly what the generator produces", async () => {
+// Release mode (and a change that edits this file) compares it byte for byte; a feature PR
+// leaves the drift to the release refresh (scripts/check/lib/derivedArtifactScope.mjs).
+const stalenessSkip = releaseOnlyUnlessTouched("docs/diagrams/why-pain-fix.svg");
+
+test("the committed why-pain-fix diagram is exactly what the generator produces", async (t) => {
+  if (stalenessSkip) return t.skip(stalenessSkip);
   const generated = await renderReadmeWhyPainFix();
   const committed = readFileSync("docs/diagrams/why-pain-fix.svg", "utf8");
   assert.equal(

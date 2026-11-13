@@ -6,6 +6,7 @@ import {
   STRATEGIES_GRID_COPY,
 } from "../../../scripts/docs/gen-readme-strategies-grid.mjs";
 import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
+import { releaseOnlyUnlessTouched } from "../../../scripts/check/lib/derivedArtifactScope.mjs";
 
 // The committed strategies grid must be exactly what the generator produces, draw the kit type as outlines, keep every string as text, keep the counts gate's "16-factor" claim readable
 // as text and declare both palettes. Same staleness contract as
@@ -14,7 +15,12 @@ import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
 const FILE = "docs/diagrams/strategies-grid.svg";
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-test("the committed strategies grid is exactly what the generator produces", async () => {
+// Release mode (and a change that edits this file) compares it byte for byte; a feature PR
+// leaves the drift to the release refresh (scripts/check/lib/derivedArtifactScope.mjs).
+const stalenessSkip = releaseOnlyUnlessTouched("docs/diagrams/strategies-grid.svg");
+
+test("the committed strategies grid is exactly what the generator produces", async (t) => {
+  if (stalenessSkip) return t.skip(stalenessSkip);
   const generated = await renderStrategiesGrid();
   const committed = readFileSync(FILE, "utf8");
   assert.equal(

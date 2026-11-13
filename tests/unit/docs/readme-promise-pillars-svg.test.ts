@@ -6,6 +6,7 @@ import {
   PROMISE_PILLARS_COPY,
 } from "../../../scripts/docs/gen-readme-promise-pillars.mjs";
 import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
+import { releaseOnlyUnlessTouched } from "../../../scripts/check/lib/derivedArtifactScope.mjs";
 
 // The committed six-pillar promise card must be exactly what the generator produces, draw the kit type as outlines, keep every string as text, keep the counts gate's numbers readable as
 // text and declare both palettes with no literal color escaping the theme. Same staleness
@@ -13,7 +14,12 @@ import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-test("the committed promise-pillars diagram is exactly what the generator produces", async () => {
+// Release mode (and a change that edits this file) compares it byte for byte; a feature PR
+// leaves the drift to the release refresh (scripts/check/lib/derivedArtifactScope.mjs).
+const stalenessSkip = releaseOnlyUnlessTouched("docs/diagrams/promise-pillars.svg");
+
+test("the committed promise-pillars diagram is exactly what the generator produces", async (t) => {
+  if (stalenessSkip) return t.skip(stalenessSkip);
   const generated = await renderReadmePromisePillars();
   const committed = readFileSync("docs/diagrams/promise-pillars.svg", "utf8");
   assert.equal(

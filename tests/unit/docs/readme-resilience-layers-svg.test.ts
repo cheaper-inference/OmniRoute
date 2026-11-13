@@ -5,6 +5,7 @@ import {
   renderResilienceLayers,
   RESILIENCE_LAYERS_COPY,
 } from "../../../scripts/docs/gen-readme-resilience-layers.mjs";
+import { releaseOnlyUnlessTouched } from "../../../scripts/check/lib/derivedArtifactScope.mjs";
 
 // The committed resilience diagram must be exactly what the generator produces, draw the kit type as outlines, keep every string as text and declare both palettes. No counts-gate
 // entry reads this file, so there is no live-code check here (4 tests). Same staleness
@@ -13,7 +14,12 @@ import {
 const FILE = "docs/diagrams/resilience-layers.svg";
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-test("the committed resilience diagram is exactly what the generator produces", async () => {
+// Release mode (and a change that edits this file) compares it byte for byte; a feature PR
+// leaves the drift to the release refresh (scripts/check/lib/derivedArtifactScope.mjs).
+const stalenessSkip = releaseOnlyUnlessTouched("docs/diagrams/resilience-layers.svg");
+
+test("the committed resilience diagram is exactly what the generator produces", async (t) => {
+  if (stalenessSkip) return t.skip(stalenessSkip);
   const generated = await renderResilienceLayers();
   const committed = readFileSync(FILE, "utf8");
   assert.equal(

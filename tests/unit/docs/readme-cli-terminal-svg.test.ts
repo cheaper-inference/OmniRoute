@@ -6,6 +6,7 @@ import {
   CLI_TERMINAL_COPY,
 } from "../../../scripts/docs/gen-readme-cli-terminal.mjs";
 import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
+import { releaseOnlyUnlessTouched } from "../../../scripts/check/lib/derivedArtifactScope.mjs";
 
 // The committed terminal demo must be exactly what the generator produces, carry the kit mono
 // face inline, keep every string as text, keep the counts gate's numbers readable as text
@@ -14,7 +15,12 @@ import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-test("the committed cli-terminal diagram is exactly what the generator produces", async () => {
+// Release mode (and a change that edits this file) compares it byte for byte; a feature PR
+// leaves the drift to the release refresh (scripts/check/lib/derivedArtifactScope.mjs).
+const stalenessSkip = releaseOnlyUnlessTouched("docs/diagrams/cli-terminal.svg");
+
+test("the committed cli-terminal diagram is exactly what the generator produces", async (t) => {
+  if (stalenessSkip) return t.skip(stalenessSkip);
   const generated = await renderCliTerminal();
   const committed = readFileSync("docs/diagrams/cli-terminal.svg", "utf8");
   assert.equal(
