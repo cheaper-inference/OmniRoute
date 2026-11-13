@@ -43,6 +43,15 @@ const IDEMPOTENCY_SEMANTIC_FIELDS = [
   "service_tier",
   "prediction",
   "web_search_options",
+  // Native Claude and Gemini bodies keep their prompt and controls under these names.
+  "system",
+  "thinking",
+  "reasoning_effort",
+  "output_config",
+  "top_k",
+  "stop_sequences",
+  "contents",
+  "systemInstruction",
 ] as const;
 
 function stableSerialize(value: unknown): string {
