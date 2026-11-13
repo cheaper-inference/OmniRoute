@@ -1,0 +1,1 @@
+- **fix(gemini):** a Gemini stream converted to Claude no longer sends events after `message_stop` when a later chunk repeats `finishReason`.
