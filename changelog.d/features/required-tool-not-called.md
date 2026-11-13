@@ -1,0 +1,1 @@
+- **feat(chat):** opt-in guard `OMNIROUTE_REQUIRED_TOOL_GUARD=true` (off by default). A non-streaming reply to a request that forced a tool call, but made none, now returns one explicit 502 `required_tool_not_called` error instead of a successful text answer. Truncated or refused replies, provider-side tools and turns where OmniRoute ran the tools are not touched.

@@ -247,6 +247,7 @@ const SAFE_PUBLIC_ERROR_IDENTIFIERS = new Set([
   "read_failed",
   "relay_timeout",
   "request_failed",
+  "required_tool_not_called",
   "resource_exhausted",
   "resource_pressure",
   "risk_session_stale",

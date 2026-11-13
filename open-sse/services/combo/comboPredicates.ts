@@ -339,6 +339,8 @@ const REQUEST_SCOPED_UPSTREAM_ERROR_CODES: Record<string, true> = {
   context_window_exceeded: true,
   upstream_empty_response: true,
   upstream_response_failed: true,
+  // The model skipped a forced tool call: a property of this request, not of the account.
+  required_tool_not_called: true,
   // The upstream cancelled THIS attempt (the request itself was fine, the
   // provider is healthy — other requests to the same provider succeed in
   // parallel). The ZCode app-server reports it as `model_request_cancelled`

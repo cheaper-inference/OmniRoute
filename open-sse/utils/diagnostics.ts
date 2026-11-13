@@ -63,6 +63,7 @@ const REASON_MESSAGES: Record<string, string> = {
   empty_choices: "response had no usable choices/output",
   empty_stream: "upstream stream carried no content",
   content_is_upstream_error: "upstream reported a failure disguised as a successful response",
+  required_tool_not_called: "the request required a tool call and the reply made none",
 };
 
 function describeReason(reason?: MalformedReason): string {
@@ -464,6 +465,13 @@ export function describeMalformedNonStream(
         ? `upstream reported a failed response: ${rawMessage}`
         : "upstream reported a failed response without usable output",
       code: "upstream_response_failed",
+      type: UPSTREAM_RESPONDED_ERROR_TYPE,
+    };
+  }
+  if (reason === "required_tool_not_called") {
+    return {
+      message: REASON_MESSAGES.required_tool_not_called,
+      code: "required_tool_not_called",
       type: UPSTREAM_RESPONDED_ERROR_TYPE,
     };
   }
