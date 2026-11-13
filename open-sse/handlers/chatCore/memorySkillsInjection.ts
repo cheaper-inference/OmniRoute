@@ -105,7 +105,16 @@ export async function injectMemoryAndSkills({
   log: MemorySkillsLogger;
 }): Promise<MemorySkillsInjectionResult> {
   const memorySettings = memoryOwnerId
-    ? await getMemorySettings().catch(() => DEFAULT_MEMORY_SETTINGS)
+    ? await getMemorySettings().catch((error) => {
+        // Defaults mean "memory off" for this request; leave a trace so that is not silent.
+        log?.debug?.(
+          "MEMORY",
+          `settings read failed, memory off for this request: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        return DEFAULT_MEMORY_SETTINGS;
+      })
     : null;
 
   // Tools the client sent keep their order: a later cap (upstreamBody) keeps the head of
