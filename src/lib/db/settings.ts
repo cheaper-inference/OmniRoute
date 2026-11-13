@@ -166,6 +166,42 @@ function applySessionAffinityLegacyFallback(settings: Record<string, unknown>): 
   }
 }
 
+/**
+ * Applies one `key_value` row to the settings object.
+ *
+ * `__proto__` is a real settings key, not one of the internal `_` rows, so the
+ * underscore filter below would drop it. Defining it as an own property is also
+ * what keeps it away from the `__proto__` setter that a plain assignment would
+ * run, turning the row into the object's prototype instead of a property that
+ * Object.entries (and so an export) can see.
+ */
+function applySettingsRow(
+  settings: Record<string, unknown>,
+  key: string | null,
+  rawValue: string | null
+): void {
+  if (!key || rawValue === null) return;
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(rawValue);
+  } catch {
+    parsed = rawValue;
+  }
+
+  if (key === "__proto__") {
+    Object.defineProperty(settings, key, {
+      value: parsed,
+      enumerable: true,
+      writable: true,
+      configurable: true,
+    });
+    return;
+  }
+  if (key.startsWith("_")) return;
+  settings[key] = parsed;
+}
+
 export async function getSettings() {
   const db = getDbInstance();
   const rows = db.prepare("SELECT key, value FROM key_value WHERE namespace = 'settings'").all();
@@ -353,12 +389,7 @@ export async function getSettings() {
     const record = toRecord(row);
     const key = typeof record.key === "string" ? record.key : null;
     const rawValue = typeof record.value === "string" ? record.value : null;
-    if (!key || rawValue === null || key.startsWith("_")) continue;
-    try {
-      settings[key] = JSON.parse(rawValue);
-    } catch {
-      settings[key] = rawValue;
-    }
+    applySettingsRow(settings, key, rawValue);
   }
 
   for (const encryptedKey of ENCRYPTED_SETTING_KEYS) {
