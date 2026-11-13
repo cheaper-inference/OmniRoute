@@ -528,7 +528,8 @@ export const EMBEDDING_PROVIDERS: Record<string, EmbeddingProvider> = {
     id: "ollama-local",
     baseUrl: "http://localhost:11434/v1/embeddings",
     authType: "none",
-    authHeader: "none",
+    // Key optional (reverse proxy in front of Ollama): sent as bearer only when configured.
+    authHeader: "bearer",
     models: [
       { id: "embeddinggemma", name: "EmbeddingGemma" },
       { id: "nomic-embed-text", name: "Nomic Embed Text" },
