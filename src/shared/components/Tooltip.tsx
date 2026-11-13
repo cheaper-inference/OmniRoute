@@ -36,11 +36,9 @@ interface TooltipProps {
 
 function isInactiveControl(props: unknown): boolean {
   if (!props || typeof props !== "object") return false;
-  const p = props as { disabled?: unknown; loading?: unknown; "aria-disabled"?: unknown };
+  const p = props as { disabled?: unknown; "aria-disabled"?: unknown };
   const ariaDisabled = p["aria-disabled"];
-  return (
-    Boolean(p.disabled) || p.loading === true || ariaDisabled === true || ariaDisabled === "true"
-  );
+  return Boolean(p.disabled) || ariaDisabled === true || ariaDisabled === "true";
 }
 
 export default function Tooltip({
@@ -57,8 +55,9 @@ export default function Tooltip({
   // So does an inactive control: browsers deliver no pointer/focus events to a disabled one,
   // and the kit gives disabled/aria-disabled buttons `pointer-events: none`, so the tooltip
   // explaining why would never open. Radix's documented pattern: the span is the trigger
-  // and the control inside it takes no pointer events. The adapter Button also disables
-  // itself while `loading` (#19620).
+  // and the control inside it takes no pointer events. A Button's transient `loading` is
+  // deliberately not treated as inactive: flipping it would swap the trigger structure and
+  // remount a focused button mid-action (issue 19620 review).
   const isDisabledElement = isValidElement(children) && isInactiveControl(children.props);
   const trigger =
     isValidElement(children) && !isDisabledElement ? (

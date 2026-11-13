@@ -72,7 +72,7 @@ interface DataTableProps {
   emptyMessage?: string;
   /**
    * Draw the table's own frame (the kit `DataTableShell`). Pass `false` when a `Card`
-   * already frames the table, so the two borders do not stack (#19620): the card is the
+   * already frames the table, so the two borders do not stack (issue 19620): the card is the
    * frame, and the adapter keeps the kit loading region and a borderless table.
    */
   framed?: boolean;

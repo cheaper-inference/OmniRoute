@@ -101,25 +101,32 @@ describe("Tooltip adapters → kit Tooltip (Radix)", () => {
     expect(wrapper.className).toContain("[&>*]:pointer-events-none");
   });
 
-  // #19620: the adapter Button disables itself while `loading`, and the kit gives
-  // `aria-disabled` buttons `pointer-events: none`. Neither carries a `disabled` prop, so
-  // the trigger used to be the inert control itself and the tooltip never opened.
-  it("wraps a loading adapter Button so its tooltip still opens", async () => {
+  // #19620 review: a transient `loading` must not swap the trigger structure, or a focused
+  // button would be unmounted and lose keyboard focus when it starts and stops loading.
+  it("keeps the same Button node and focus while loading toggles", async () => {
     const { default: Button } = await import("@/shared/components/Button");
-    render(
-      <Tooltip content="Saving" delayMs={0}>
+    const { rerender } = render(
+      <Tooltip content="Save changes">
+        <Button>Save</Button>
+      </Tooltip>
+    );
+    const before = screen.getByRole("button", { name: /Save/ });
+    before.focus();
+    expect(document.activeElement).toBe(before);
+    rerender(
+      <Tooltip content="Save changes">
         <Button loading>Save</Button>
       </Tooltip>
     );
-    const button = screen.getByRole("button", { name: /Save/ });
-    expect(button.hasAttribute("disabled")).toBe(true);
-    const wrapper = button.parentElement!;
-    expect(wrapper.tagName).toBe("SPAN");
-    expect(wrapper.getAttribute("tabindex")).toBe("0");
-    expect(wrapper.getAttribute("data-slot")).toBe("tooltip-trigger");
-    fireEvent.focus(wrapper);
-    await act(async () => {});
-    expect((await screen.findByRole("tooltip")).textContent).toContain("Saving");
+    expect(screen.getByRole("button", { name: /Save/ })).toBe(before);
+    rerender(
+      <Tooltip content="Save changes">
+        <Button>Save</Button>
+      </Tooltip>
+    );
+    const after = screen.getByRole("button", { name: /Save/ });
+    expect(after).toBe(before);
+    expect(document.activeElement).toBe(before);
   });
 
   it("wraps an aria-disabled trigger so its tooltip still opens", async () => {
