@@ -190,18 +190,20 @@ describe("LogsPage detail modal — first-close reopen regression", () => {
     // Navigation commits after the render: URL now carries ?id=log-1.
     commitPendingUrl();
     expect(window.location.search).toContain("id=log-1");
-    expect(container.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(document.querySelector('[role="dialog"]')).not.toBeNull();
 
     // First close: closeDetail() re-renders the page while window.location
     // still has ?id=log-1 (the close navigation has not committed yet).
-    const dialog = container.querySelector('[role="dialog"]') as HTMLElement;
     await act(async () => {
-      dialog.click(); // backdrop click → onClose
+      // A real click on the overlay: Radix waits for the click that follows the press.
+      const overlay = document.querySelector<HTMLElement>('[data-slot="sheet-overlay"]')!;
+      overlay.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
+      overlay.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await settle();
 
     // The modal must stay closed — the stale ?id in location must not reopen it.
-    expect(container.querySelector('[role="dialog"]')).toBeNull();
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
   });
 
   it("deep link ?id= still opens the modal on mount", async () => {
@@ -212,6 +214,6 @@ describe("LogsPage detail modal — first-close reopen regression", () => {
     });
     await settle();
 
-    expect(container.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(document.querySelector('[role="dialog"]')).not.toBeNull();
   });
 });

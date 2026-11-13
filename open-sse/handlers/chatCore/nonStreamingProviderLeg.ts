@@ -24,15 +24,13 @@ import type {
 import { bufferedResponsesFailure } from "./bufferedResponsesFailure.ts";
 import { translateNonStreamingClientResponse } from "./nonStreamingClientTranslate.ts";
 import { parseNonStreamingResponseBody, isJsonRecord } from "./nonStreamingResponseParse.ts";
-import {
-  NonStreamingResponseTooLargeError,
-  readResponseTextWithinCap,
-} from "./nonStreamingResponseBody.ts";
+import { NonStreamingResponseTooLargeError } from "./nonStreamingResponseBody.ts";
 import { restoreNonStreamingToolNames } from "./passthroughToolNames.ts";
+import { inheritCodexResponseFence } from "../../services/codexAccount/fences.ts";
 import { extractUsageFromResponse } from "../usageExtractor.ts";
 import { cacheCreationFields } from "../../utils/cacheWriteUsage.ts";
 import { sanitizeUsagePayloadForRequest } from "../../utils/usageTracking.ts";
-import { createErrorResult, formatProviderError } from "../../utils/error.ts";
+import { createErrorResult, formatProviderError, readErrorBodyText } from "../../utils/error.ts";
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
 import {
   ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE,
@@ -484,20 +482,26 @@ export async function runNonStreamingProviderLeg(
           connectionId: outcome.connectionId || connectionId,
           model: outcome.model || currentModel,
         });
+        const sanitized = legError(
+          outcome.result.status,
+          formatted,
+          undefined,
+          // Keep the upstream retry hint on the sanitized response.
+          outcome.result.response ? parseRetryAfterMs(outcome.result.response) : null,
+          outcome.result.errorCode,
+          outcome.result.errorType,
+          { passthrough: input.sourceFormat === "claude" }
+        );
+        // The sanitized response still answers for the attempt's Codex owner: failure writes
+        // keyed on it must use that attempt's fence, not the invocation's original one.
+        if (outcome.result.response && sanitized.response) {
+          inheritCodexResponseFence(outcome.result.response, sanitized.response);
+        }
         return {
           kind: "error",
           upstreamHttpSelection,
           result: {
-            ...legError(
-              outcome.result.status,
-              formatted,
-              undefined,
-              // Keep the upstream retry hint on the sanitized response.
-              outcome.result.response ? parseRetryAfterMs(outcome.result.response) : null,
-              outcome.result.errorCode,
-              outcome.result.errorType,
-              { passthrough: input.sourceFormat === "claude" }
-            ),
+            ...sanitized,
             // Never relay the raw upstream Response (body, Set-Cookie, other headers) to the
             // client: legError() above built the sanitized one. Upstream headers stay on
             // `upstreamHeaders` for server-side classification only.
@@ -653,7 +657,7 @@ export async function runNonStreamingProviderLeg(
     let parsedErrorBody: Record<string, unknown> = {};
 
     try {
-      const errorBodyText = await readResponseTextWithinCap(providerResponse);
+      const errorBodyText = await readErrorBodyText(providerResponse);
       try {
         parsedErrorBody = JSON.parse(errorBodyText) as Record<string, unknown>;
       } catch {
@@ -891,8 +895,9 @@ export async function runNonStreamingProviderLeg(
   });
 
   if (parsed.kind === "invalid_sse") {
+    const sseStatus = parsed.status ?? 502;
     const receipt = buildReceipt(input, {
-      httpStatus: 502,
+      httpStatus: sseStatus,
       errorType: "invalid_sse_payload",
       usage: null,
       termination: "provider_error",
@@ -903,7 +908,7 @@ export async function runNonStreamingProviderLeg(
       model: currentModel,
     });
     const errorResult = legError(
-      502,
+      sseStatus,
       parsed.message,
       new Error(parsed.message),
       null,
@@ -1150,8 +1155,10 @@ export async function runNonStreamingProviderLeg(
                 ? "invalid_sse_payload"
                 : "invalid_json_payload";
             const parseMessage = fallbackParsed.message;
+            const parseStatus =
+              (fallbackParsed.kind === "invalid_sse" && fallbackParsed.status) || 502;
             const receipt = buildReceipt(input, {
-              httpStatus: 502,
+              httpStatus: parseStatus,
               errorType: parseCode,
               usage: null,
               termination: "provider_error",
@@ -1162,7 +1169,7 @@ export async function runNonStreamingProviderLeg(
               model: nextModel,
             });
             const errorResult = legError(
-              502,
+              parseStatus,
               parseMessage,
               new Error(parseMessage),
               null,

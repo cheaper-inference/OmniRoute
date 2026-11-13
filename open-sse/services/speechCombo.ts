@@ -28,9 +28,8 @@ import {
   type ComboKeyScope,
 } from "@omniroute/open-sse/services/comboKeyScope.ts";
 import { handleAudioSpeech } from "@omniroute/open-sse/handlers/audioSpeech.ts";
-import { attachOmniRouteMetaToResponse } from "@/domain/omnirouteResponseMeta";
+import { accountSpeechResponse } from "@/lib/usage/speechRequestAccounting";
 import { generateRequestId } from "@/shared/utils/requestId";
-import { calculateModalCost } from "@/lib/usage/costCalculator";
 import { toJsonErrorPayload } from "@/shared/utils/upstreamError";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
@@ -53,7 +52,8 @@ export async function executeSpeechCombo(
   comboName: string,
   body: Record<string, unknown>,
   startTime: number,
-  keyScope: ComboKeyScope = {}
+  keyScope: ComboKeyScope = {},
+  apiKeyInfo?: { id?: string | null; name?: string | null } | null
 ): Promise<Response> {
   const combo = await getComboByName(comboName);
   if (!combo) {
@@ -202,20 +202,17 @@ export async function executeSpeechCombo(
 
     if (response?.ok) {
       await clearRecoveredProviderState(credentials);
-      const characters = typeof body.input === "string" ? body.input.length : 0;
-      const costUsd = await calculateModalCost(
-        "audio",
-        targetProvider,
-        resolvedModel || target.modelStr,
-        { characters }
-      );
-      return attachOmniRouteMetaToResponse(response, {
+      return accountSpeechResponse(response, {
         provider: targetProvider,
         model: resolvedModel || target.modelStr,
-        costUsd,
-        latencyMs: Date.now() - startTime,
+        connectionId: (credentials as { connectionId?: string } | null)?.connectionId,
+        apiKeyId: apiKeyInfo?.id,
+        apiKeyName: apiKeyInfo?.name,
+        startTime,
+        endpoint: "/v1/audio/speech",
+        characters: typeof body.input === "string" ? [...body.input].length : 0,
         requestId: generateRequestId(),
-        strategy: projected.combo.strategy || "priority",
+        comboStrategy: projected.combo.strategy || "priority",
         fallbackAttempts: fallbackCount,
       });
     }

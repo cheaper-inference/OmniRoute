@@ -27,6 +27,7 @@ import {
 import { getComboByName } from "@/lib/db/combos";
 import { runModelEndpointCombo } from "@/lib/combos/modelEndpointCombo";
 import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
+import { recordOcrRequest } from "@/lib/usage/specialtyRequestAccounting";
 
 export { resolveVertexOcrAccessToken };
 
@@ -74,7 +75,8 @@ export async function OPTIONS() {
 /** Dispatch one resolved combo target through the matching OCR provider. */
 async function dispatchOcrModel(
   body: Record<string, unknown> & { model: string },
-  allowedConnections: string[] | null
+  allowedConnections: string[] | null,
+  accounting: { apiKeyInfo?: { id?: string; name?: string } | null; startTime: number }
 ): Promise<Response> {
   const { provider } = parseOcrModel(body.model);
   const resolvedProvider = provider || "mistral";
@@ -98,7 +100,22 @@ async function dispatchOcrModel(
 
   const tokenReadyCredentials = await resolveVertexOcrAccessToken(resolvedProvider, credentials);
   const ocrCredentials = resolveOcrCredentials(tokenReadyCredentials, resolvedProvider);
-  const response = await handleOcr({ body, credentials: ocrCredentials });
+  const response = await handleOcr({
+    body,
+    credentials: ocrCredentials,
+    onSuccess: (result) =>
+      recordOcrRequest({
+        ...result,
+        apiKeyId: accounting.apiKeyInfo?.id,
+        apiKeyName: accounting.apiKeyInfo?.name,
+        connectionId:
+          "connectionId" in credentials && typeof credentials.connectionId === "string"
+            ? credentials.connectionId
+            : null,
+        startTime: accounting.startTime,
+        annotated: Boolean(body.bbox_annotation_format || body.document_annotation_format),
+      }),
+  });
   if (response?.ok) await clearRecoveredProviderState(credentials);
   return response;
 }
@@ -109,6 +126,7 @@ async function dispatchOcrModel(
  */
 /** Validate and execute an OCR request, including named combo routing. */
 async function postHandler(request, _context) {
+  const startTime = Date.now();
   let rawBody;
   try {
     rawBody = await request.json();
@@ -148,12 +166,16 @@ async function postHandler(request, _context) {
         dispatch: (targetBody, allowedConnections) =>
           dispatchOcrModel(
             targetBody as Record<string, unknown> & { model: string },
-            allowedConnections
+            allowedConnections,
+            { apiKeyInfo: policy.apiKeyInfo, startTime }
           ),
       });
     }
   }
-  return dispatchOcrModel(routedBody, scope.allowedConnections);
+  return dispatchOcrModel(routedBody, scope.allowedConnections, {
+    apiKeyInfo: policy.apiKeyInfo,
+    startTime,
+  });
 }
 
 export const POST = withInjectionGuard(postHandler);

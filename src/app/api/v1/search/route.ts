@@ -52,6 +52,7 @@ import type { ApiKeyPolicyResult } from "@/shared/utils/apiKeyPolicy";
 import { runWebEndpointCombo } from "@/lib/combos/webEndpointCombo";
 import { isModelLocked } from "@omniroute/open-sse/services/accountFallback.ts";
 import { orderAutoSearchFallbacks } from "@/lib/search/codexSearchAutoFallback";
+import { searchKeyLockModel } from "@omniroute/open-sse/handlers/search/borrowedKeyLock.ts";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -116,9 +117,12 @@ async function resolveSearchCredentials(
 
   for (const fallbackId of getSearchCredentialFallbacks(providerId)) {
     const fallbackCredentials = withoutKeyScopeBlocked(
-      await getProviderCredentialsWithQuotaPreflight(fallbackId, null, allowedConnections).catch(
-        () => null
-      )
+      await getProviderCredentialsWithQuotaPreflight(
+        fallbackId,
+        null,
+        allowedConnections,
+        searchKeyLockModel(providerId)
+      ).catch(() => null)
     );
     if (fallbackCredentials && !isAllRateLimitedCredentials(fallbackCredentials)) {
       if (

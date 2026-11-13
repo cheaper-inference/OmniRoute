@@ -108,10 +108,10 @@ function MetricBlock({
     <div className="rounded-lg border border-border bg-surface-2 p-4">
       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-text-muted">
         <Icon name={icon} size={16} />
-        {label}
+        <span className="min-w-0 break-words">{label}</span>
       </div>
       <div className="mt-2 text-2xl font-semibold text-text-main">{value}</div>
-      {subValue ? <div className="mt-1 text-xs text-text-muted">{subValue}</div> : null}
+      {subValue ? <div className="mt-1 break-words text-xs text-text-muted">{subValue}</div> : null}
     </div>
   );
 }
@@ -267,8 +267,12 @@ function ComboAutopilotPanel({ report }: { report: ComboAutopilotReport }) {
 
   return (
     <Card className="overflow-hidden p-0">
-      <div className="flex flex-col gap-4 border-b border-border px-6 py-5 lg:flex-row lg:items-start lg:justify-between">
-        <div>
+      {/* #19552: the tile layout follows the header's own width (container query), not the
+          viewport: the sidebar and translated labels both change how much room 4 tiles need.
+          The title block gives up spare width first (grow-999) and the tiles drop below it
+          when both do not fit on one line. */}
+      <div className="@container flex flex-wrap items-start justify-between gap-4 border-b border-border px-6 py-5">
+        <div className="min-w-0 grow-999 basis-72">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-base font-semibold text-text-main">
               {t("comboHealthAutopilotTitle")}
@@ -288,7 +292,7 @@ function ComboAutopilotPanel({ report }: { report: ComboAutopilotReport }) {
           </div>
           <p className="mt-1 text-sm text-text-muted">{t("comboHealthAutopilotDescription")}</p>
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:min-w-90">
+        <div className="grid grow grid-cols-2 gap-2 @3xl:grid-cols-4">
           <MetricBlock
             icon="monitor_heart"
             label={t("comboHealthIssues")}
@@ -882,6 +886,7 @@ export default function ComboHealthTab() {
         <div className="flex flex-col gap-3 sm:items-end">
           <TimeRangeSelector value={range} onChange={setRange} />
           <SegmentedControl
+            semantics="radio"
             size="sm"
             aria-label={t("comboHealthForecastHorizon", { value: horizon })}
             value={horizon}

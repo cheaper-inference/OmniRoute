@@ -1,4 +1,5 @@
 import { CORS_HEADERS } from "../utils/cors.ts";
+import { trackOpenRouterSpeech } from "../utils/speechUsage.ts";
 import { stripTrailingSlashes } from "../utils/urlSanitize.ts";
 /**
  * Audio Speech Handler (TTS)
@@ -1104,7 +1105,7 @@ export async function handleAudioSpeech({
       return upstreamErrorResponse(res, await res.text());
     }
 
-    return audioStreamResponse(res);
+    return trackOpenRouterSpeech(res, audioStreamResponse(res), providerConfig.baseUrl, token);
   } catch (err) {
     return audioErrorResponse(500, `Speech request failed: ${err.message}`);
   }
