@@ -208,6 +208,8 @@ export default function ModelAliasesUnified() {
 
       <div className="mb-5 rounded-lg border border-border/30 bg-surface/20 p-4">
         <SegmentedControl
+          semantics="radio"
+          aria-label={translateOrFallback(t, "modelAliasesTitle", "Model Aliases")}
           className="mb-3"
           size="sm"
           value={aliasMode}

@@ -39,7 +39,6 @@ export {
   normalizeSource,
   type CanonicalNode,
   type NormalizeFail,
-  type NormalizeOk,
   type NormalizeResult,
 } from "./normalize";
 

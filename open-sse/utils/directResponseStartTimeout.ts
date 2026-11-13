@@ -6,6 +6,8 @@ type DirectFetch = (input: RequestInfo | URL, options: DirectFetchOptions) => Pr
 const DEFAULT_DIRECT_HEADERS_TIMEOUT_MS = 30_000;
 /** Local/self-hosted backends (Ollama, LM Studio, host.docker.internal) often need >30s TTFB. */
 const DEFAULT_LOCAL_DIRECT_HEADERS_TIMEOUT_MS = 300_000;
+/** Image generation/edits backends legitimately sit silent >30s while synthesizing images (#19479). */
+const DEFAULT_IMAGE_DIRECT_HEADERS_TIMEOUT_MS = 300_000;
 const DIRECT_RESPONSE_START_TIMEOUT_CODE = "DIRECT_RESPONSE_START_TIMEOUT";
 
 // #13703 — the fresh-socket RETRY (2nd direct attempt) reused the pooled
@@ -50,6 +52,42 @@ function resolveLocalDirectHeadersFloorMs(
   if (raw == null || raw.trim() === "") return DEFAULT_LOCAL_DIRECT_HEADERS_TIMEOUT_MS;
   const parsed = Number(raw);
   return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 0;
+}
+
+function resolveImageDirectHeadersFloorMs(
+  env: Record<string, string | undefined> = process.env
+): number {
+  const raw = env.OMNIROUTE_DIRECT_IMAGE_HEADERS_TIMEOUT_MS;
+  if (raw == null || raw.trim() === "") return DEFAULT_IMAGE_DIRECT_HEADERS_TIMEOUT_MS;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 0;
+}
+
+const IMAGE_DIRECT_PATH_PATTERN =
+  /\/(?:(?:[a-z0-9_-]+-)?images?)\/(?:generations|edits|variations|generate|edit|upscale)/i;
+const CODEX_IMAGES_DIRECT_PATH_PATTERN = /\/backend-api\/codex\/images\//i;
+const IMAGE_TOOL_CALL_PATTERN = /"type"\s*:\s*"image_generation"/i;
+
+function isImageDirectRequest(targetUrl?: string | null, body?: string | null): boolean {
+  if (targetUrl) {
+    try {
+      const pathname = new URL(targetUrl).pathname;
+      if (
+        IMAGE_DIRECT_PATH_PATTERN.test(pathname) ||
+        CODEX_IMAGES_DIRECT_PATH_PATTERN.test(pathname)
+      ) {
+        return true;
+      }
+    } catch {
+      // ignore invalid URLs
+    }
+  }
+  if (body && typeof body === "string") {
+    if (IMAGE_TOOL_CALL_PATTERN.test(body)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 // Volume-aware probe-window tier. Prefill scales with input size: a large
@@ -104,10 +142,13 @@ function resolveFlatDirectHeadersFloorMs(
       : Number.isFinite(Number(raw)) && Number(raw) > 0
         ? Math.floor(Number(raw))
         : 0;
-  // Operator override is a FLOOR: reasoning/local awareness only raises the budget,
+  // Operator override is a FLOOR: reasoning/image/local awareness only raises the budget,
   // never lowers it. An override above the ceiling (e.g. 240s) is preserved.
   if (hasHighReasoningEffort(body)) {
     base = Math.max(base, REASONING_READINESS_CEILING_MS);
+  }
+  if (isImageDirectRequest(targetUrl, body)) {
+    base = Math.max(base, resolveImageDirectHeadersFloorMs(env));
   }
   if (isLocalDirectTarget(targetUrl)) {
     base = Math.max(base, resolveLocalDirectHeadersFloorMs(env));
@@ -185,9 +226,9 @@ export function resolveDirectRetryTimeoutMs(
 }
 
 function createDirectResponseStartTimeout(timeoutMs: number): Error & { code: string } {
-  const err = new Error(
-    `Direct response did not start within ${timeoutMs}ms — retrying on a fresh socket`
-  ) as Error & { code: string };
+  const err = new Error(`Direct response did not start within ${timeoutMs}ms`) as Error & {
+    code: string;
+  };
   err.name = "TimeoutError";
   err.code = DIRECT_RESPONSE_START_TIMEOUT_CODE;
   return err;

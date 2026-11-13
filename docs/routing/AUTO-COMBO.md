@@ -129,6 +129,41 @@ Auto-scoring selects best provider/model per request
 | `src/sse/handlers/chat.ts`                                | Integration: auto prefix short-circuit    |
 | `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto` system entry      |
 
+## Account preferences for saved Auto combos
+
+The Intelligent Auto editor offers an optional **Account preferences** section.
+Each connection can be Preferred, Normal (the default), Reserve, or Excluded.
+Multiple connections can share a tier. Auto selects within the first eligible
+tier, retaining its scoring/router behavior there; failed attempts fall through
+to the remaining concrete accounts, preferred before normal before reserve.
+Excluded connections are never used by this combo.
+
+The setting is stored as `config.accountPreferences`, keyed by connection ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+An omitted or empty map retains existing routing. Preferences do not enable
+disabled connections, grant API-key access, restore quota-blocked candidates, or
+bypass budget checks. Each attempt is restricted to its concrete connection, so
+account fallback cannot jump tiers behind the combo router. Existing session
+affinity may retain an eligible account; excluding the account bound to a native
+turn stops that turn instead of silently changing accounts.
+
+Configured preferences use the account-aware Auto path: unbound context-cache,
+smart-pipeline, chaos and shadow shortcuts are not dispatched. Speculative hedging
+is disabled for these requests so reserve accounts cannot race preferred ones. Other combo
+strategies do not interpret this setting. Changing a combo away from Auto keeps
+the saved preferences for a later switch back.
+
 ## Combo Names That Match a Real Model Id
 
 A combo whose `name` is identical to a bare model id (e.g. a combo named
@@ -291,7 +326,7 @@ resolved values feed the engine's existing `config.modePack` / `config.budgetCap
 
 ## All Routing Strategies
 
-OmniRoute's combo engine supports **20 routing strategies** (declared in `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). The Auto Combo engine itself is exposed under the `auto` strategy; the others are available for persisted combos.
+OmniRoute's combo engine supports **21 routing strategies** (declared in `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). The Auto Combo engine itself is exposed under the `auto` strategy; the others are available for persisted combos.
 
 | Strategy            | Description                                                                                                                                                                               |
 | :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -306,6 +341,7 @@ OmniRoute's combo engine supports **20 routing strategies** (declared in `src/sh
 | `cost-optimized`    | Minimize $ per request given catalog pricing                                                                                                                                              |
 | `reset-aware` ⭐    | Prioritize by quota reset time — short reset windows ranked higher                                                                                                                        |
 | `reset-window`      | Prefer targets whose quota window resets soonest                                                                                                                                          |
+| `expiry-first`      | Spend the account whose quota would otherwise expire unused first — the highest leftover with the nearest reset deadline goes first                                                       |
 | `headroom`          | Pick the target with the most remaining quota headroom                                                                                                                                    |
 | `quota-weighted`    | Skip exhausted accounts, then pick among the rest in proportion to leftover quota divided by in-flight load; existing conversations stay pinned                                           |
 | `strict-random`     | Random without deduplication of repeats                                                                                                                                                   |
@@ -346,6 +382,38 @@ the second target emits client-native tool calls. OmniRoute detects tool-result
 continuations from the request protocol, asks the planner whether another tool round is
 needed, and dynamically makes either the executor or planner the client-facing final
 step.
+
+Optional `config.agenticOrchestration.contextCompaction` applies a separate payload
+budget before each planner or executor dispatch. Enable it explicitly:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+These are serialized JSON character budgets selected by the operator, not token
+context windows or guaranteed upstream limits. Exact model IDs override the default.
+Above the threshold, compaction removes identical tool definitions, trims oversized
+tool evidence with a digest, and removes old complete history groups toward the target
+ratio. It retains system/developer instructions, the latest user request, the last
+tool round including parallel calls/results, and Gemini's leading routing instruction.
+Top-level instructions and tool settings are preserved. An omission marker records
+removed history; this is deterministic trimming, not a semantic summary. If the pinned
+context still exceeds the budget, the request returns 413 before contacting the model.
+With compaction disabled or below the threshold the request passes through unchanged.
+
+On tool-result continuations, OmniRoute also stops execution when two consecutive
+completed rounds repeat the same tool calls with unchanged results, or when every
+explicitly marked result in two consecutive rounds failed. Changed results permit
+repeated calls (for example, polling). The guard resets on a fresh user request,
+groups parallel calls into one round, and supports Anthropic, Chat Completions,
+Responses and Gemini histories. The planner receives the reason and owns the final
+answer even if it requests another tool round.
 
 Additional models after the second target are ordered executor backups. A failed
 HTTP response or transport exception advances to the next executor, carrying the
@@ -861,11 +929,11 @@ See [`docs/guides/TIERS.md`](../guides/TIERS.md) for tier definitions and provid
 
 ### Deterministic routing-decision matrix (`npm run test:combo:matrix`)
 
-`tests/integration/combo-matrix/*.test.ts` proves the routing **decision** of all 19
+`tests/integration/combo-matrix/*.test.ts` proves the routing **decision** of all 21
 public strategies end-to-end through the real combo pipeline with a mocked upstream.
 Coverage includes:
 
-- All 19 `ROUTING_STRATEGY_VALUES` strategies (ordered, weighted, cost, context, fusion, …).
+- All 21 `ROUTING_STRATEGY_VALUES` strategies (ordered, weighted, cost, context, fusion, …).
 - `quota-share` (internal) end-to-end: DRR fairness + saturation deprioritization via the
   real `selectQuotaShareTarget` seam (`registerQuotaFetcher` / `setLKGP` /
   `__setHeadroomSaturationFetcherForTests`).
@@ -899,5 +967,5 @@ intentionally excluded from CI because they require live credentials and VPS acc
 | `open-sse/services/autoCombo/autoPrefix.ts`               | `auto/` prefix parser + 6 variants                                                                        |
 | `open-sse/services/autoCombo/virtualFactory.ts`           | Builds in-memory `AutoComboConfig` from live connections                                                  |
 | `open-sse/services/autoCombo/providerRegistryAccessor.ts` | Test hook for mocking provider registry                                                                   |
-| `src/shared/constants/routingStrategies.ts`               | `ROUTING_STRATEGY_VALUES` (20 strategies)                                                                 |
+| `src/shared/constants/routingStrategies.ts`               | `ROUTING_STRATEGY_VALUES` (21 strategies)                                                                 |
 | `src/sse/handlers/chat.ts`                                | Integration: auto-prefix short-circuit                                                                    |

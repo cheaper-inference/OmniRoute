@@ -431,7 +431,21 @@ export async function runRestoreCommand(backupId, opts = {}) {
   }
 
   const infoPath = join(backupPath, "backup-info.json");
-  const ts = existsSync(infoPath) ? JSON.parse(readFileSync(infoPath, "utf8")).timestamp : backupId;
+  const info = existsSync(infoPath) ? JSON.parse(readFileSync(infoPath, "utf8")) : null;
+  const ts = info ? info.timestamp : backupId;
+
+  // restore has no passphrase option, so it cannot read `.enc` payloads. Refuse before
+  // asking to overwrite anything. shortcut: no decryption here; add a --key-file option
+  // that decrypts every file to a temp dir first if restoring encrypted backups is needed.
+  if (
+    info?.encrypted === true ||
+    FILES_TO_BACKUP.some((f) => existsSync(join(backupPath, `${f.name}.enc`)))
+  ) {
+    console.error(
+      `Backup ${backupId} is encrypted. restore cannot decrypt it; nothing was changed.`
+    );
+    return 1;
+  }
 
   if (!opts.yes) {
     const readline = await import("node:readline");
@@ -450,12 +464,18 @@ export async function runRestoreCommand(backupId, opts = {}) {
 
   const dataDir = resolveDataDir();
   try {
+    let restored = 0;
     for (const file of FILES_TO_BACKUP) {
       const sourcePath = join(backupPath, file.name);
       if (existsSync(sourcePath)) {
         copyFileSync(sourcePath, join(dataDir, file.name));
+        restored++;
         console.log(`\x1b[2m  Restored: ${file.name}\x1b[0m`);
       }
+    }
+    if (restored === 0) {
+      console.error(`Backup ${backupId} holds no restorable files; nothing was changed.`);
+      return 1;
     }
     console.log(t("backup.restored"));
     return 0;

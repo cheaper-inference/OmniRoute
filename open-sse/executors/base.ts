@@ -40,6 +40,7 @@ import {
   isFreeVariantModel,
 } from "../services/openrouterFreeWindow.ts";
 import { gateOutboundRequest } from "../services/wafRateLimit.ts";
+import { readErrorBodyText } from "../utils/error.ts";
 import { ClaudeUsageLimitGuard } from "./claudeUsageLimit.ts";
 import {
   INTRA_RETRY_MAX_HINT_MS,
@@ -52,7 +53,11 @@ import { SessionPool } from "../services/sessionPool/sessionPool.ts";
 import { PoolRegistry } from "../services/sessionPool/poolRegistry.ts";
 import { resolveKeyForRequest } from "../services/apiKeyRotator.ts";
 import type { KeyHealth } from "../services/apiKeyRotator.ts";
-import { getOpenAICompatibleType, isClaudeCodeCompatible } from "../services/provider.ts";
+import {
+  getOpenAICompatibleType,
+  getTargetFormat,
+  isClaudeCodeCompatible,
+} from "../services/provider.ts";
 import { usesCcWireImage } from "../services/ccWireImageBuiltins.ts";
 import { getForcedReasoningEffort } from "../utils/reasoningRuleContext.ts";
 import {
@@ -87,8 +92,10 @@ import {
   fixToolAdjacency,
   stripTrailingAssistantOrphanToolUse,
   stripTrailingAssistantForProvider,
+  stripTrailingAssistantInputForProvider,
 } from "../services/contextManager.ts";
 import {
+  normalizeClaudeFinalAssistantWhitespace,
   requiresUserLastMessage,
   stripTrailingAssistantTurns,
 } from "../services/assistantPrefill.ts";
@@ -122,6 +129,7 @@ import { applyPeerTraceHeader } from "@/shared/resilience/peerRouting";
 import { applyClineProtocolHeaders } from "@/shared/utils/clineAuth";
 import { isProbeContext } from "@/shared/utils/probeOrigin";
 import { assertDispatchUrlAllowed, dispatchGuarded } from "./dispatchPin.ts";
+import { dispatchWithGzipBody } from "./base/gzipRequestBody.ts";
 // Header helpers extracted to a pure leaf; re-exported for external importers
 // (executors + tests) that import them from "./base.ts".
 export {
@@ -890,7 +898,7 @@ export class BaseExecutor {
     let reasoningEffortClamped = false; // reasoning_effort 4xx clamp-and-retry below.
     let maxTokensCeilingRecovered = false; // max_tokens ceiling 400 clamp-and-retry below.
     let advisorResultsReplaced = false;
-    const applyCopilotIdentityFallback = createCopilotIdentityFallback(this.provider, log);
+    const copilotIdentity = createCopilotIdentityFallback(this.provider, log);
 
     for (let urlIndex = 0; urlIndex < fallbackCount; urlIndex++) {
       const requestCredentials = withForcedResponsesUpstream(
@@ -976,6 +984,21 @@ export class BaseExecutor {
       if (advisorResultsReplaced) {
         transformedBody = replaceRedactedAdvisorResults(transformedBody).body;
       }
+      // Fields an upstream already rejected with a 400 in this execute() stay stripped
+      // on a re-run or fallback URL; strippedFields blocks a second strip-and-retry.
+      if (strippedFields.size > 0 && transformedBody && typeof transformedBody === "object") {
+        const record = transformedBody as Record<string, unknown>;
+        const msgFields = [...strippedFields].filter((f) => f.startsWith("messages.*."));
+        for (const f of strippedFields) if (!f.startsWith("messages.*.")) delete record[f];
+        if (msgFields.length > 0 && Array.isArray(record.messages)) {
+          record.messages = record.messages.map((m) => {
+            if (!m || typeof m !== "object") return m;
+            const copy = { ...(m as Record<string, unknown>) };
+            for (const f of msgFields) delete copy[f.slice("messages.*.".length)];
+            return copy;
+          });
+        }
+      }
 
       // Re-synchronize skills beta with the finalized transformed body (#14200):
       syncSkillsBeta(headers, this.provider, transformedBody, usesClaudeCodeProtocol);
@@ -1037,17 +1060,20 @@ export class BaseExecutor {
               model,
               requestCredentials,
               (url, init) =>
-                observeProviderHttpSend(
-                  {
-                    provider: this.provider,
-                    model:
-                      typeof (serializedBody as Record<string, unknown> | null)?.model === "string"
-                        ? String((serializedBody as Record<string, unknown>).model)
-                        : model,
-                    connectionId: requestCredentials?.connectionId ?? null,
-                    endpoint: "unknown",
-                  },
-                  () => this.dispatchRequest(url, init, requestCredentials)
+                dispatchWithGzipBody(this.provider, url, init, (gzipUrl, gzipInit) =>
+                  observeProviderHttpSend(
+                    {
+                      provider: this.provider,
+                      model:
+                        typeof (serializedBody as Record<string, unknown> | null)?.model ===
+                        "string"
+                          ? String((serializedBody as Record<string, unknown>).model)
+                          : model,
+                      connectionId: requestCredentials?.connectionId ?? null,
+                      endpoint: "unknown",
+                    },
+                    () => this.dispatchRequest(gzipUrl, gzipInit, requestCredentials)
+                  )
                 )
             )(requestUrl, optionsWithSignal);
           } finally {
@@ -1360,8 +1386,13 @@ export class BaseExecutor {
             mergeCcHeaders(headers, ccHeaders);
             if (usesCcWireImage(this.provider) && usesClaudeCodeProtocol) {
               delete headers["Authorization"];
+              // Keep the rotated key buildHeaders set (selectedKeyId names it); a second
+              // resolveEffectiveKey() call would advance the rotator.
               headers["x-api-key"] =
-                activeCredentials?.apiKey || activeCredentials?.accessToken || "";
+                headers["x-api-key"] ||
+                activeCredentials?.apiKey ||
+                activeCredentials?.accessToken ||
+                "";
             }
             delete headers["X-Stainless-Helper-Method"];
             applyStainlessHeaders(headers, { arch: stainlessArch(), os: stainlessOS() });
@@ -1414,13 +1445,17 @@ export class BaseExecutor {
         // user message. Both are idempotent on clean histories.
         {
           const tb = transformedBody as Record<string, unknown>;
+          if (Array.isArray(tb?.input)) {
+            tb.input = stripTrailingAssistantInputForProvider(tb.input, this.provider);
+          }
           if (Array.isArray(tb?.messages)) {
             const fixed = fixToolPairs(tb.messages as Record<string, unknown>[]);
             // fixToolAdjacency enforces Claude's strict adjacency rule
             // (tool_result must be in immediately next message).
             // Only apply for Claude/Claude-compatible — OpenAI allows results
             // spread across multiple subsequent messages.
-            const isClaude = this.provider === "claude" || usesClaudeCodeProtocol;
+            const isClaude =
+              this.provider === "claude" || this.provider === "anthropic" || usesClaudeCodeProtocol;
             // For Claude, fixToolAdjacency may strip tool_use blocks whose
             // tool_result isn't in the next message; re-run fixToolPairs to
             // drop any tool_result orphaned by that strip (discussion #2410).
@@ -1430,6 +1465,14 @@ export class BaseExecutor {
             // trailing text-only assistant turn with 400. Strip here so combo
             // failover does not burn the next account on the same body.
             tb.messages = stripTrailingAssistantForProvider(stripped, this.provider);
+            // Anthropic reads an assistant-last turn as a prefill and 400s on trailing whitespace.
+            // Select by the outbound format: generic anthropic-compatible-* relays send it too.
+            if (
+              isClaude ||
+              getTargetFormat(this.provider, requestCredentials?.providerSpecificData) === "claude"
+            ) {
+              tb.messages = normalizeClaudeFinalAssistantWhitespace(tb.messages as JsonRecord[]);
+            }
             // Per-connection opt-in for relays that ban assistant prefill.
             if (requiresUserLastMessage(requestCredentials?.providerSpecificData)) {
               const userLast = stripTrailingAssistantTurns(tb.messages as JsonRecord[]);
@@ -1453,7 +1496,7 @@ export class BaseExecutor {
         // at this final dispatch point — the single chokepoint every Claude
         // routing mode (grouped/raw/combo) and the native passthrough share,
         // before fingerprinting and CCH signing serialize the body.
-        if (this.provider === "claude" || usesClaudeCodeProtocol) {
+        if (this.provider === "claude" || this.provider === "anthropic" || usesClaudeCodeProtocol) {
           finalizeClaudeBodyConstraints(transformedBody as Record<string, unknown>);
         }
 
@@ -1553,6 +1596,7 @@ export class BaseExecutor {
             });
           }
         }
+        copilotIdentity.pin(finalHeaders);
         const fetchOptions: RequestInit = {
           method: "POST",
           headers: finalHeaders,
@@ -1583,13 +1627,14 @@ export class BaseExecutor {
           correctFromRateLimitHeaders(openrouterFreeWindowAccountKey, response.headers);
         }
 
-        ({ response, finalHeaders } = await applyCopilotIdentityFallback({
+        ({ response, finalHeaders } = await copilotIdentity.apply({
           response,
           url,
           fetchOptions,
           clientHeaders,
           fetchWithStartTimeout,
         }));
+        fetchOptions.headers = finalHeaders; // later recoveries reuse fetchOptions
 
         // Context Editing 400-fallback for Claude-compatible relays.
         if (
@@ -1600,10 +1645,7 @@ export class BaseExecutor {
           typeof transformedBody === "object" &&
           (transformedBody as Record<string, unknown>).context_management !== undefined
         ) {
-          const errText = await response
-            .clone()
-            .text()
-            .catch(() => "");
+          const errText = await readErrorBodyText(response.clone()).catch(() => "");
           if (/context[_-]management|context editing/i.test(errText)) {
             contextEditingDisabled = true;
             delete (transformedBody as Record<string, unknown>).context_management;
@@ -1633,10 +1675,7 @@ export class BaseExecutor {
           transformedBody &&
           typeof transformedBody === "object"
         ) {
-          const errText = await response
-            .clone()
-            .text()
-            .catch(() => "");
+          const errText = await readErrorBodyText(response.clone()).catch(() => "");
           const upstreamMax = parseThinkingBudgetMax(errText);
           if (upstreamMax !== null) {
             const currentBudget = readNestedThinkingBudget(transformedBody);
@@ -1782,10 +1821,7 @@ export class BaseExecutor {
           response.status === HTTP_STATUS.BAD_REQUEST &&
           (retryAttemptsByUrl[urlIndex] ?? 0) < BaseExecutor.WAF_RETRY_CONFIG.maxAttempts
         ) {
-          const wafErrText = await response
-            .clone()
-            .text()
-            .catch(() => "");
+          const wafErrText = await readErrorBodyText(response.clone()).catch(() => "");
           if (/content[_-]blocked/i.test(wafErrText)) {
             retryAttemptsByUrl[urlIndex] = (retryAttemptsByUrl[urlIndex] ?? 0) + 1;
             const wafAttempt = retryAttemptsByUrl[urlIndex];

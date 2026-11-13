@@ -24,6 +24,9 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { makeManagementSessionRequest } from "../helpers/managementSession.ts";
+import { settleConnectionFollowUpsAfterEachTest } from "../helpers/connectionFollowUps.ts";
+
+settleConnectionFollowUpsAfterEachTest();
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-connection-activation-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -37,8 +40,11 @@ process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
 // /api/providers) gets a harmless 404 instead of touching the network.
 const VALIDATION_BASE_URL = "https://proxy.activation-11446.example.com/v1";
 let nextModelsProbeStatus: number | null = 200;
+// Initialize the global wrapper before stubbing probes; the first route import
+// must not replace this stub and send synthetic credentials to a real proxy.
+await import("../../open-sse/utils/proxyFetch.ts");
 const originalFetch = globalThis.fetch;
-globalThis.fetch = (async (input: string | URL | Request) => {
+const probeFetch = (async (input: string | URL | Request) => {
   const url =
     typeof input === "string" ? input : input instanceof Request ? input.url : input.toString();
   if (url === `${VALIDATION_BASE_URL}/models`) {
@@ -101,6 +107,10 @@ async function createConnection(
   assert.ok(connection.id, "connection must expose an id");
   return { id: connection.id as string, isActive: connection.isActive };
 }
+
+// Importing the routes installs the patched fetch. Put the probe in its place afterwards, so a
+// test reaches it directly and does not depend on the real lookup of a fake host failing first.
+globalThis.fetch = probeFetch;
 
 test.after(() => {
   globalThis.fetch = originalFetch;

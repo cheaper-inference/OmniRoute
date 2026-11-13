@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | ملف                           | غاية                                          |
 | ----------------------------- | --------------------------------------------- |
-| `providerRegistry.ts`         | سجل نموذج الدردشة عبر كتالوج موفر 380         |
+| `providerRegistry.ts`         | تسجيل نموذج الدردشة عبر كتالوج الموفر 381     |
 | `providerModels.ts`           | الأسماء المستعارة للنموذج، ورسم الخرائط الشكل |
 | `constants.ts`                | المهلات والحدود ورموز الحالة                  |
 | `defaultThinkingSignature.ts` | توقيع التفكير Claude الافتراضي                |

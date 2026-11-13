@@ -302,6 +302,95 @@ Combinațiile de compresie sunt profiluri de compresie denumite care pot fi atri
 
 Locație în panoul de control: `Dashboard -> Context & Cache -> Compression Combos`.
 
+## Cerințe preliminare / ghid operator (CCR și session-dedup)
+
+CCR (`ccr`) și `session-dedup` înlocuiesc sau elid textul și lasă a** marker** din spatele. Această secțiune este referința operatorului pentru conectarea unui client, citirea celor doi markeri și preluarea sau diagnosticarea conținutului elidizat. Mecanica fiecărui motor este tratată mai sus; acesta este stratul „cum îl rulez”.
+
+### Transporturi și puncte finale
+
+Serverul MCP care expune instrumentele CCR poate fi accesat în trei moduri. Baza implicită URL este `http://localhost:20128` (`OMNIROUTE_BASE_URL`):
+
+| Transport                                                | URL / comanda                           | Note                                                                                                                                                                     |
+| -------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| HTTP care poate fi transmis în flux (client, recomandat) | `http://localhost:20128/api/mcp/stream` | Punctul final cu care vorbesc clienții actuali MCP.                                                                                                                      |
+| Legacy SSE singleton                                     | `http://localhost:20128/api/mcp/sse`    | Transport singleton mai vechi. Ea** se inchide** sesiuni care pot fi transmise în flux; utilizați clienții `streamable-http` împotriva `/api/mcp/stream`, nu a acestuia. |
+| stdio                                                    | `omniroute --mcp`                       | Pentru IDE MCP config care generează procesul. Nu există niciun steag `--dev` ; `omniroute --mcp` este punctul de intrare stdio.                                         |
+
+### Niveluri de stocare (ceea ce supraviețuiește unei reporniri)
+
+CCR este a** pe două niveluri** magazin, nu numai în memorie:
+
+- **Nivel fierbinte în memorie** — per-block cap 2 MiB, per-principal 16 MiB, global 64 MiB. Intrările sunt implicite la 24 h TTL (maximum 7 zile). Preluarea completă MCP din memorie este limitată la 256 KiB; orice mai mare este încă accesibil prin modurile ranged / grep.
+- **Nivel SQLite durabil** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, activat în mod implicit) — susține nivelul în memorie, astfel încât un bloc să supraviețuiască evacuarii LRU, unei reporniri sau unei aterizări de recuperare pe o altă instanță. Rândul păstrează TTL ul blocului, astfel încât un bloc dincolo de TTL său dispare de la ambele niveluri.
+
+Trei apărătoare păstrează nivelul durabil delimitat — un bloc rămâne doar pentru memorie atunci când:
+
+1. blocul s-a terminat** 512 KB** (`MAX_DURABLE_BLOCK_BYTES`);
+2. timpul de rulare este un timp de rulare în cloud (fără disc local);
+3. `COMPRESSION_CCR_DURABLE_STORE=false`.
+
+Deci „blocul a dispărut” nu este o poveste de repornire generală: un bloc sub-512 KB pe un timp de execuție local, non-cloud supraviețuiește unei reporniri prin nivelul durabil până când TTL său se epuizează. Consultați [Referința mediului](../reference/ENVIRONMENT.md) pentru variabilă.
+
+### Cele două marcaje
+
+| Marker                                | Sens                                                                                                                                                             | Ce ar trebui să facă modelul                                                                                                                                                                                 |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `[CCR retrieve hash=<24hex> chars=N]` | Un bloc mare a fost stocat la adresa de conținut.                                                                                                                | Sună `omniroute_ccr_retrieve` cu** 24-hex hash copiat text** pentru a recupera textul original.                                                                                                              |
+| `[dedup:ref sha=…]`                   | Textul `session-dedup` elid deja trimis într-o tură anterioară a aceleiași sesiuni. Acesta este un** privire înapoi intenționată** , nu o pierdere sau o eroare. | Do** nu** apelați orice unealtă și faceți** nu** încercați să o „reconstituiți”. Prima apariție a textului este copia canonică; tura curentă nu este niciodată rescrisă, este dedusă într-o tură ulterioară. |
+
+Analiza `[dedup:ref]` în urmă este o decizie deliberată a protocolului — nu există nicio reconstrucție pre-trimitere. Tratați-l ca „acest text exact a fost deja pe fir mai devreme în această sesiune”.
+
+### Cerințe preliminare ale clientului
+
+- **Cheie (stdio):** un apelant stdio nu poartă nicio identitate pe cerere, așa că se autentifică cu `OMNIROUTE_API_KEY` (setat în `env` al serverului MCP ). Fără el, apelantul este anonim, iar instrumentele care necesită un principal se pot degrada.
+- **`tools[]` este condiția prealabilă a injecției.** Instrucțiunea CCR retrieve-protocol (#8033) este injectată** numai** când `tools[]` anunțat al cererii demonstrează că clientul poate ajunge efectiv `omniroute_ccr_retrieve`. Potrivirea este o potrivire de segment final delimitată de un separator (`__`, `.`, `/`, `:`) — niciodată un subșir simplu — așa că un nume cu spațiu de nume, cum ar fi `mcp__gateway__omniroute_ccr_retrieve` contează în continuare. Un `tools[]` absent sau care nu se potrivește înseamnă că instrucțiunea este _nu_ injectată, prin proiectare.
+- **`codemode:false` (clienți OpenCode ).** OpenCode este implicit la Modul Cod, care face publicitate doar instrumentelor sale native pentru model și** nu** puneți instrumentele MCP pe lista nativă `tools[]`. Setați `codemode: false` pe intrarea serverului MCP, astfel încât instrumentele `omniroute_ccr_*` să fie promovate. Acesta este un** client** setare, nu una OmniRoute. Încă nu primește instrucțiunea CCR injectată: OpenCode denumește un instrument `<server>_<tool>`, astfel încât un server numit `omniroute` expune `omniroute_omniroute_ccr_retrieve`, iar `_` nu este unul dintre separatorii potriviți.
+- **Directori.** Stocarea și preluarea sunt izolate pe principal autentificat (pe cheie API ). O cheie își vede numai propriile blocuri.
+
+### Scopuri per instrument
+
+Aplicarea domeniului de aplicare este întotdeauna activată pentru apelanții HTTP/SSE cu domeniu îngust. Instrumentele `omniroute_` CCR necesită:
+
+| Instrument               | Domeniul de aplicare |
+| ------------------------ | -------------------- |
+| `omniroute_ccr_store`    | `write:compression`  |
+| `omniroute_ccr_delete`   | `write:compression`  |
+| `omniroute_ccr_retrieve` | `read:compression`   |
+| `omniroute_ccr_inspect`  | `read:compression`   |
+| `omniroute_ccr_list`     | `read:compression`   |
+| `omniroute_ccr_stats`    | `read:compression`   |
+
+Un domeniu lipsă returnează un** rezultatul erorii instrumentului MCP** (`isError: true`, nu un HTTP 403 — `403 LOCAL_ONLY` este autentificarea separată de gardă a rutei de loopback): `Error: Insufficient MCP scopes for <tool>. Missing: <scope>.` O cheie minimă de la distanță poate deține `mcp:connect` (autorizează `/api/mcp/` -out doar local) plus domeniul de aplicare read/write specific de care are nevoie.
+
+### Matricea clientului
+
+| Client               | Transport                                      | Configurație de utilizat                                                                                                                                                                                                                                           | `tools[]` reclamă? (instrucțiunea → CCR injectată)                                                                                                                                                                                |
+| -------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codul Claude         | streamable-http                                | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                                  | Da — compatibil MCP; injectat.                                                                                                                                                                                                    |
+| Cursor / Cline       | `stdio`** sau** `streamable-http`              | stdio: `omniroute --mcp` cu `OMNIROUTE_API_KEY` în `env`; sau o intrare MCP de la distanță care indică `http://localhost:20128/api/mcp/stream` (consultați [Ghidul de configurare → MCP Client Configuration](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Da — publicitate instrumentelor `omniroute_ccr_*`.                                                                                                                                                                                |
+| OpenCode             | streamable-http                                | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, plus `codemode: false`                                                                                                                                                                   | Instrumente promovate numai cu `codemode: false`; instrucțiunea nu este încă injectată, deoarece `omniroute_omniroute_ccr_retrieve` nu se potrivește (consultați [Cerințele preliminare ale clientului](#client-prerequisites) ). |
+| Compatibil cu OpenAI | HTTP compatibil cu OpenAI (finalizări de chat) | client standard de finalizare a chat-ului față de punctul final compatibil OpenAI                                                                                                                                                                                  | **Nu** — unui apelant simplu compatibil cu OpenAI nu i se spune niciodată să sune instrumentul, iar instrucțiunea nu este injectată.                                                                                              |
+
+### Limite de recuperare și paginare
+
+Rezultatele textului instrumentului MCP sunt tăiate în jurul `mcpAccessibility.maxTextChars` ( `50000` implicit). O recuperare `full` a unui bloc este limitată la 256 KiB —** nu există o recuperare completă nelimitată** . Când `chars=N` unui bloc este mare, paginați-l în loc să trageți totul:
+
+- Regula generală:**`chars > 40000` → folosește un `mode`** , niciodată un plin gol.
+- `mode:"grep"` — regex `pattern` potriviți linie cu linie, până la 1.000 de linii de potrivire (`unique: true` drops repetă), cel mai ieftin pentru „găsiți singura linie de care am nevoie”.
+- `mode:"lines"` — un interval de 1 linii indexate; are nevoie atât `start` cât și `end`.
+- `mode:"head"` / `mode:"tail"` — first/last `n` linii.
+- `mode:"stats"` — numărul de linii, caractere și octeți fără corp.
+
+Utilizați `mode:"lines"` cu `start`/`end` pentru a parcurge un bloc lung în pagini, mai degrabă decât să solicitați întregul odată.
+
+### Denumirea instrumentului
+
+Instrumentul de recuperare se numește în prezent `omniroute_ccr_retrieve` (prefixul `omniroute_` este o soluție datată pentru coliziunile de nume între servere). Un nume de instrument cu sufix delimitat mai curat și o remediere pentru rezultatele MCP JSON trunchiate la mijlocul șirului sunt urmărite ca urmăriri în amonte; această pagină documentează numai comportamentul curent, expediat.
+
+### Ciclul de viață al sesiunii
+
+Sesiunile HTTP care pot fi transmise în flux sunt inactiv și serverul le recunoaște; fereastra inactivă este setată de `OMNIROUTE_MCP_SESSION_IDLE_MS` (implicit 5 minute; referit după nume, nu o valoare codificată, astfel încât această pagină nu se deplasează atunci când se schimbă). Simptomul unei sesiuni inactiv este un HTTP 404 cu `Unknown Mcp-Session-Id` — remediul este reconectarea sau repornirea sesiunii,** nu** pentru a roti o cheie, a schimba un domeniu sau a redenumi un instrument.
+
 ## Suprafața API
 
 | Rută                                   | Scop                                                                  |
@@ -385,7 +474,7 @@ sensibile la cache etc.).
 
 ## Validare
 
-Testele cheie pentru această zonă sunt:
+Porțile focalizate pentru această zonă sunt:
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-*.test.ts tests/unit/compression/pipeline-integration.test.ts tests/unit/compression/context-compression-api.test.ts

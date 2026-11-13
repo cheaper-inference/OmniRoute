@@ -38,17 +38,17 @@ export interface UnifiedSourceResult {
 
 /**
  * Stored cost and priceable tokens of a raw usage_history row. A row carrying a
- * provider-reported exact cost (`provider_cost_usd` — credit-metered providers,
- * xAI) is billed by that cost; its tokens stay for display and are never priced
- * again. Rows without one are priced from their tokens as before.
+ * provider-reported cost or catalogue-priced snapshot uses that cost; tokens
+ * remain available for display, but are never priced again. Rows without a
+ * stored cost are priced from their tokens as before.
  */
 const RAW_COST_COLUMNS = `
-          COALESCE(provider_cost_usd, 0.0) as stored_cost,
-          CASE WHEN provider_cost_usd IS NULL THEN tokens_input ELSE 0 END as cost_tokens_input,
-          CASE WHEN provider_cost_usd IS NULL THEN tokens_output ELSE 0 END as cost_tokens_output,
-          CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_read ELSE 0 END as cost_tokens_cache_read,
-          CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_creation ELSE 0 END as cost_tokens_cache_creation,
-          CASE WHEN provider_cost_usd IS NULL THEN tokens_reasoning ELSE 0 END as cost_tokens_reasoning`;
+          COALESCE(provider_cost_usd, calculated_cost_usd, 0.0) as stored_cost,
+          CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_input ELSE 0 END as cost_tokens_input,
+          CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_output ELSE 0 END as cost_tokens_output,
+          CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_read ELSE 0 END as cost_tokens_cache_read,
+          CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_creation ELSE 0 END as cost_tokens_cache_creation,
+          CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_reasoning ELSE 0 END as cost_tokens_reasoning`;
 
 /**
  * The same columns for a daily_usage_summary row. Its `total_cost` is already
@@ -124,6 +124,7 @@ export function buildUnifiedSource(opts: BuildUnifiedSourceOptions): UnifiedSour
           tokens_input,
           tokens_output,
           tokens_cache_read,
+          COALESCE(tokens_cache_read, 0) as cached_input_tokens,
           tokens_cache_creation,
           tokens_reasoning,
           service_tier,
@@ -146,6 +147,7 @@ export function buildUnifiedSource(opts: BuildUnifiedSourceOptions): UnifiedSour
           total_input_tokens as tokens_input,
           total_output_tokens as tokens_output,
           0 as tokens_cache_read,
+          total_cache_read_tokens as cached_input_tokens,
           0 as tokens_cache_creation,
           0 as tokens_reasoning,
           'standard' as service_tier,
@@ -165,6 +167,7 @@ export function buildUnifiedSource(opts: BuildUnifiedSourceOptions): UnifiedSour
           timestamp, provider, model,
           tokens_input, tokens_output,
           tokens_cache_read, tokens_cache_creation, tokens_reasoning,
+          COALESCE(tokens_cache_read, 0) as cached_input_tokens,
           service_tier, success, latency_ms,
           connection_id, account_key, api_key_id, api_key_name,
           ${RAW_COST_COLUMNS},
@@ -182,7 +185,7 @@ export function buildUnifiedSource(opts: BuildUnifiedSourceOptions): UnifiedSour
  * than the main analytics query — no connection_id / api_key columns needed).
  */
 export function buildPresetUnifiedSource(opts: BuildUnifiedSourceOptions): UnifiedSourceResult {
-  const { sinceIso, untilIso, rawCutoffDate, apiKeyWhere, apiKeyParams } = opts;
+  const { sinceIso, rawCutoffDate, apiKeyWhere, apiKeyParams } = opts;
   const sinceDate = sinceIso?.split("T")[0] ?? null;
 
   const needsAggregated = (!sinceDate || sinceDate < rawCutoffDate) && !apiKeyWhere;

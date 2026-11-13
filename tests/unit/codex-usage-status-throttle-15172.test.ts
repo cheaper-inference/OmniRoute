@@ -10,8 +10,10 @@ import assert from "node:assert/strict";
 
 import { getUsageForProvider } from "../../open-sse/services/usage.ts";
 import { setCodexUsageFetchForTests } from "../../open-sse/services/usage/codex.ts";
+import { connectionProxyTestOverride } from "../../open-sse/services/connectionProxyFetch.ts";
 import {
   MinIntervalThrottle,
+  type MinIntervalThrottleOptions,
   resetQuotaFetchThrottle,
   setQuotaFetchThrottleForTests,
   type ThrottleClock,
@@ -23,28 +25,33 @@ import {
 
 const INTERVAL_MS = 250;
 
+// Virtual time, so the spacing assertions do not depend on how fast the runner
+// schedules timers (#18829). `sleep` yields one macrotask before advancing:
+// concurrent callers share this clock, and the caller that already passed the
+// gate must record its start before the next caller's wait moves time forward.
 class FakeClock implements ThrottleClock {
   t = 1_000;
   now = () => this.t;
   sleep = async (ms: number) => {
+    await new Promise((resolve) => setImmediate(resolve));
     this.t += ms;
   };
 }
 
-function installSharedThrottle(clock: FakeClock | null) {
+function installSharedThrottle(clock: FakeClock) {
   const shared = new MinIntervalThrottle({
     minIntervalMs: INTERVAL_MS,
     jitterMs: 0,
-    ...(clock ? { clock } : {}),
+    clock,
   });
   setQuotaFetchThrottleForTests(shared);
   return () => resetQuotaFetchThrottle();
 }
 
-function installUsageFetch(clock: FakeClock | null) {
+function installUsageFetch(clock: FakeClock) {
   const starts: number[] = [];
   setCodexUsageFetchForTests(async () => {
-    starts.push(clock ? clock.now() : Date.now());
+    starts.push(clock.now());
     return new Response(
       JSON.stringify({
         plan_type: "plus",
@@ -67,18 +74,67 @@ function installUsageFetch(clock: FakeClock | null) {
 // timing the fetch itself measures the lookup (193-218 ms gaps on an idle box), not the throttle.
 class RecordingThrottle extends MinIntervalThrottle {
   readonly grants: number[] = [];
+  private readonly grantClock: FakeClock;
+
+  constructor(options: MinIntervalThrottleOptions & { clock: FakeClock }) {
+    super(options);
+    this.grantClock = options.clock;
+  }
 
   override async acquire(): Promise<void> {
     await super.acquire();
-    this.grants.push(Date.now());
+    this.grants.push(this.grantClock.now());
   }
 }
 
+/** A clock whose sleeps can wake late, the way a busy runner's timers do. */
+class WakingLateClock implements ThrottleClock {
+  t = 1_000;
+  private index = 0;
+
+  constructor(private readonly overshootsMs: number[]) {}
+
+  now = () => this.t;
+  sleep = async (ms: number) => {
+    const overshoot = this.overshootsMs[this.index] ?? 0;
+    this.index += 1;
+    this.t += ms + overshoot;
+  };
+}
+
+test("#15172 a late timer does not shorten the next gap", async () => {
+  // The first sleep wakes 40ms late, the next one on time. Measuring the next
+  // wait from the scheduled instant instead of the real one turns that into a
+  // 210ms gap even though the interval is 250ms.
+  const clock = new WakingLateClock([40, 0]);
+  const throttle = new MinIntervalThrottle({ minIntervalMs: INTERVAL_MS, jitterMs: 0, clock });
+
+  const grantedAt: number[] = [];
+  const acquire = async () => {
+    await throttle.acquire();
+    grantedAt.push(clock.now());
+  };
+  await acquire();
+  await acquire();
+  await acquire();
+
+  for (let i = 1; i < grantedAt.length; i++) {
+    const gap = grantedAt[i] - grantedAt[i - 1];
+    assert.ok(gap >= INTERVAL_MS, `gap ${gap}ms between grant ${i - 1} and ${i}`);
+  }
+});
+
 test("#15172 concurrent Codex usage fetches start at least one interval apart", async () => {
-  const throttle = new RecordingThrottle({ minIntervalMs: INTERVAL_MS, jitterMs: 0 });
+  const clock = new FakeClock();
+  const throttle = new RecordingThrottle({ minIntervalMs: INTERVAL_MS, jitterMs: 0, clock });
   setQuotaFetchThrottleForTests(throttle);
   const restoreThrottle = () => resetQuotaFetchThrottle();
-  const { starts, restore } = installUsageFetch(null);
+  const { starts, restore } = installUsageFetch(clock);
+  // These connection ids go through fetchWithConnectionProxy. Keep proxy
+  // resolution off the settings DB and proxy auto-select, so no real I/O runs
+  // between the gate and the fetch stub while the virtual clock is shared.
+  const previousProxyResolver = connectionProxyTestOverride.resolveProxyForConnection;
+  connectionProxyTestOverride.resolveProxyForConnection = async () => ({ proxy: null });
 
   try {
     const connections = ["a", "b", "c", "d"].map((id) => ({
@@ -94,11 +150,12 @@ test("#15172 concurrent Codex usage fetches start at least one interval apart", 
     for (let i = 1; i < throttle.grants.length; i++) {
       const gap = throttle.grants[i] - throttle.grants[i - 1];
       assert.ok(
-        gap >= INTERVAL_MS - 30,
+        gap >= INTERVAL_MS,
         `gap ${gap}ms between fetch ${i - 1} and ${i} is below one interval`
       );
     }
   } finally {
+    connectionProxyTestOverride.resolveProxyForConnection = previousProxyResolver;
     restore();
     restoreThrottle();
   }

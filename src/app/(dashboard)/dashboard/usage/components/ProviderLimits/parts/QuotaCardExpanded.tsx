@@ -33,6 +33,7 @@ import KiloPassMeter from "./KiloPassMeter";
 import QuotaCardSpeed from "./QuotaCardSpeed";
 import { hasCodexPaidCredits, type CodexPaidCredits } from "@/lib/providers/codexPaidCredits";
 import AntigravityQuotaGroups, { resolveAntigravityQuotaGroups } from "../AntigravityQuotaGroups";
+import CursorModelUsageTable from "../CursorModelUsageTable";
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
   USD: "$",
@@ -166,6 +167,8 @@ interface Props {
   onShowQuota?: (quota: any) => void;
   /** Read-time decode-speed stats from the usage API (`speed` payload). */
   speed?: unknown;
+  /** Cursor only: per-model tokens + billed cost rows (`raw.modelUsage`); absent → no table. */
+  cursorModelUsage?: unknown;
 }
 
 function QuotaDetailRow({
@@ -222,7 +225,7 @@ function QuotaDetailRow({
             onOpenResetCredits?.();
           }}
           aria-label={translateUsageOrFallback(t, "viewResetCredits", "View reset credits")}
-          className="h-6 min-h-6 shrink-0 gap-1 px-1.5 text-[12px] font-bold leading-none tabular-nums"
+          className="h-6 min-h-6 shrink-0 gap-1 px-1.5 text-[12px] font-semibold leading-none tabular-nums"
           style={{ color: colors.text }}
         >
           {loadingResetCredits && <Spinner decorative size="xs" />}
@@ -253,7 +256,7 @@ function QuotaDetailRow({
           </span>
         </span>
         <span
-          className="inline-flex h-6 shrink-0 items-center text-[12px] font-bold leading-none tabular-nums"
+          className="inline-flex h-6 shrink-0 items-center text-[12px] font-semibold leading-none tabular-nums"
           style={{ color: colors.text }}
         >
           {sym}
@@ -277,7 +280,7 @@ function QuotaDetailRow({
       <div className="flex items-center justify-between gap-2">
         <span className="text-[12px] font-medium text-text-main truncate">{label}</span>
         <span
-          className="text-[12px] font-bold tabular-nums shrink-0"
+          className="text-[12px] font-semibold tabular-nums shrink-0"
           style={{ color: colors.text }}
         >
           {q.unlimited ? "∞" : translateUsageOrFallback(t, "percentLeft", `${pct}% left`, { pct })}
@@ -350,6 +353,7 @@ export default function QuotaCardExpanded({
   onHideQuota,
   onShowQuota,
   speed,
+  cursorModelUsage,
 }: Props) {
   const t = useTranslations("usage");
   const tr = (key: string, fallback: string, values?: UsageTranslationValues) =>
@@ -439,6 +443,8 @@ export default function QuotaCardExpanded({
           </span>
         </div>
       )}
+
+      {providerId === "cursor" && !error && <CursorModelUsageTable rows={cursorModelUsage} />}
 
       {!error && <QuotaCardSpeed speed={speed} />}
 

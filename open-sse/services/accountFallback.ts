@@ -23,8 +23,10 @@ import {
   resolveRuleMatchBody,
   honorsRuleLockScope,
   setProviderErrorRuleFlagReader,
+  type ProviderErrorRuleMatch,
 } from "../config/providerErrorRules.ts";
 import * as rot from "./rotationConfig.ts";
+import { getM365FailureScope } from "./m365ErrorPolicy.ts";
 import { isContentPolicyRefusal } from "../utils/contentPolicyError.ts";
 import { isRequestScopedMisalignmentRefusal } from "../utils/providerSafety.ts";
 import { isRegistryPassthroughProvider } from "./passthroughRegistry.ts";
@@ -89,12 +91,23 @@ const RESETS_IN_RE = /resets? in (\d+h)?(\d+m)?(\d+s)?/i;
 const RETRY_IN_SEC_RE = /please retry in (\d+(?:\.\d+)?)\s*s/i;
 const COOLDOWN_NUMERIC_RE = /^\d+(\.\d+)?$/;
 
-export type RetryHintProvenance = "header" | "google_rpc_retry_info" | "body";
+export type RetryHintProvenance = "header" | "google_rpc_retry_info" | "body" | "body_structured";
 
 export function retryHintBypassesMaxCooldownMs(
   provenance: RetryHintProvenance | undefined
 ): boolean {
   return provenance === "header" || provenance === "google_rpc_retry_info";
+}
+
+/** Structured provenances reflect the provider's own reset clock and may shorten an existing model lock (#CO-402). */
+export function isAuthoritativeRetryHintSource(
+  provenance: RetryHintProvenance | undefined
+): boolean {
+  return (
+    provenance === "header" ||
+    provenance === "google_rpc_retry_info" ||
+    provenance === "body_structured"
+  );
 }
 import {
   isSubscriptionQuotaText,
@@ -337,11 +350,24 @@ export function isTokenRateLimitWording(errorText: string | null | undefined): b
   );
 }
 
-/** Shared context-overflow text match with TPM/RPM exclusion. */
+// Phrases that only a real context overflow uses; they outrank the validation exclusion below.
+const STRONG_CONTEXT_OVERFLOW_RE =
+  /\b(?:maximum context|context (?:length|window))\b|context_length_exceeded|\b(?:prompt is |input (?:is )?)too long\b/i;
+
+/** Shared context-overflow text match with TPM/RPM and parameter-validation exclusions. */
 export function isContextOverflowText(errorText: string | null | undefined): boolean {
   const text = String(errorText || "");
   if (!text) return false;
   if (isTokenRateLimitWording(text)) return false;
+  if (!STRONG_CONTEXT_OVERFLOW_RE.test(text)) {
+    if (/\b(?:invalid_value|invalid_type)\b/i.test(text)) return false;
+    if (
+      /\b(?:max_tokens|max_completion_tokens|max_output_tokens)\b/i.test(text) &&
+      /\b(?:invalid|illegal|param(?:eter)?|expected|must be|range)\b/i.test(text)
+    ) {
+      return false;
+    }
+  }
   return CONTEXT_OVERFLOW_PATTERNS.some((p) => p.test(text));
 }
 
@@ -471,10 +497,23 @@ export const PARAM_VALIDATION_PATTERNS = [
 ];
 
 /**
+ * Google Cloud Code's `TOS_VIOLATION` ErrorInfo, recognized by its reason plus its
+ * `cloudcode-pa` domain. The reason alone is not enough: isAccountDeactivated() has no
+ * provider or status input, so another provider's per-request refusal (or a prompt
+ * echoed into an error) could otherwise park a healthy connection for a year.
+ */
+function isGoogleCloudCodeTosViolation(lowerText: string): boolean {
+  return lowerText.includes("tos_violation") && lowerText.includes("cloudcode-pa");
+}
+
+/**
  * T06: Returns true if response body indicates the account is permanently deactivated.
  */
 export function isAccountDeactivated(errorText: string): boolean {
   const lower = String(errorText || "").toLowerCase();
+  if (isGoogleCloudCodeTosViolation(lower)) {
+    return true;
+  }
   return getMergedBannedSignals().some((sig) => lower.includes(sig));
 }
 
@@ -777,18 +816,27 @@ export function lockModel(
   model: string | null | undefined,
   reason: string,
   cooldownMs: number,
-  metadata: Partial<ModelLockoutEntry> = {}
+  metadata: Partial<ModelLockoutEntry> = {},
+  options: { authoritativeReset?: boolean } = {}
 ): void {
   if (!model) return; // No model → skip model-level locking
   ensureCleanupTimer();
   const key = getModelLockKey(provider, connectionId, model, reason);
   cleanupModelLockKey(key);
   const newUntil = Date.now() + cooldownMs;
-  // Preserve the longer cooldown if an existing lock has more time remaining.
   // Safe without a mutex: no await between get/set, so this runs atomically
   // within Node.js's single-threaded event loop.
   const existing = modelLockouts.get(key);
   if (existing && existing.until > newUntil) {
+    // An authoritative upstream reset (structured body field or header) shortens
+    // a longer guessed lock — the provider's own clock wins (#CO-402).
+    if (options.authoritativeReset === true) {
+      modelLockouts.set(
+        key,
+        exactModelLock.buildAuthoritativeShortenedLockEntry(existing, reason, newUntil, metadata)
+      );
+      return;
+    }
     if (metadata.failureCount && metadata.failureCount > existing.failureCount) {
       existing.failureCount = metadata.failureCount;
       existing.lastFailureAt = metadata.lastFailureAt ?? existing.lastFailureAt;
@@ -855,6 +903,14 @@ export function recordModelLockoutFailure(
      * until-midnight default below, plain exponential backoff).
      */
     exactCooldownIsUpstreamReset?: boolean;
+    /**
+     * A structured body hint (reset_at / retry_after seconds parsed from JSON) is
+     * the provider's own reset clock: a NEW such hint may SHORTEN an existing
+     * model lock instead of only extending it. Header/RetryInfo hints already
+     * carry this via exactCooldownIsUpstreamReset; body hints got it separately
+     * so routerai-style 402s unstick after the provider's reset passes (#CO-402).
+     */
+    authoritativeBodyReset?: boolean;
   } = {}
 ) {
   ensureCleanupTimer();
@@ -913,11 +969,19 @@ export function recordModelLockoutFailure(
   });
 
   const lockFn = scope === "exact" ? lockExactModel : lockModel;
-  lockFn(provider, connectionId, model, reason, cooldownMs, {
-    failureCount,
-    lastFailureAt: now,
-    resetAfterMs,
-  });
+  lockFn(
+    provider,
+    connectionId,
+    model,
+    reason,
+    cooldownMs,
+    {
+      failureCount,
+      lastFailureAt: now,
+      resetAfterMs,
+    },
+    { authoritativeReset: options.authoritativeBodyReset === true }
+  );
 
   return {
     cooldownMs,
@@ -1471,8 +1535,9 @@ export function parseRetryAfterFromBody(responseBody: unknown): {
   for (const detail of Array.isArray(details) ? details : []) {
     const detailRecord = toJsonRecord(detail);
     if (detailRecord.retryDelay) {
+      const delayMs = parseDelayString(detailRecord.retryDelay);
       return {
-        retryAfterMs: parseDelayString(detailRecord.retryDelay),
+        retryAfterMs: delayMs === null ? null : Math.min(delayMs, MAX_PROVIDER_COOLDOWN_MS),
         reason: RateLimitReason.RATE_LIMIT_EXCEEDED,
       };
     }
@@ -1644,7 +1709,9 @@ export function classifyError(
       context.headers ?? null,
       context.body
     );
-    if (match) return match.reason;
+    // A catch-all default without an explicit reason only knows the status; the text
+    // classification below is more specific (e.g. a quota 429 stays quota_exhausted).
+    if (match && !match.reasonFromStatus) return match.reason;
   }
 
   // Text classification takes priority (more specific)
@@ -1889,14 +1956,20 @@ export function checkFallbackError(
     const resetTime = parseResetFromHeaders(headers);
     if (resetTime) {
       const waitMs = Math.max(resetTime - Date.now(), 0);
-      if (waitMs > 0) return { retryAfterMs: waitMs, provenance: "header" };
+      // Header hints bypass maxCooldownMs downstream, so clamp them here: an
+      // epoch-like Retry-After must not lock the connection for decades.
+      if (waitMs > 0)
+        return { retryAfterMs: Math.min(waitMs, MAX_PROVIDER_COOLDOWN_MS), provenance: "header" };
     }
 
     const detailedJsonHint = parseDetailedRetryHintFromJsonBody(errorStr, MAX_PROVIDER_COOLDOWN_MS);
     if (detailedJsonHint) {
       return {
         retryAfterMs: detailedJsonHint.retryAfterMs,
-        provenance: detailedJsonHint.provenance,
+        provenance:
+          detailedJsonHint.provenance === "body"
+            ? ("body_structured" as const)
+            : detailedJsonHint.provenance,
       };
     }
 
@@ -1912,14 +1985,26 @@ export function checkFallbackError(
     return profile?.useUpstreamRetryHints ? detectRetryHint() : null;
   }
 
-  function ruleScopedResult(match: NonNullable<ReturnType<typeof getProviderErrorRuleMatch>>) {
+  // Owner decision (2026-10-27): an operator catch-all default yields to a LONGER
+  // upstream retry hint (the same hint buildRetryableFallback would honor), so it can
+  // lengthen a short Retry-After but never cut a real provider reset short. Explicit
+  // operator/catalog rules keep their exact cooldown.
+  function ruleCooldownMs(match: ProviderErrorRuleMatch | null): number | undefined {
+    const configured = match?.cooldownMs;
+    if (configured === undefined || !match?.fromOperatorDefault) return configured;
+    const hintMs = getUpstreamRetryHint()?.retryAfterMs ?? 0;
+    return hintMs > configured ? hintMs : configured;
+  }
+
+  function ruleScopedResult(match: ProviderErrorRuleMatch) {
     const scaled = getScaledBaseCooldown(match.reason as RateLimitReasonValue, backoffLevel);
+    const cooldownMs = ruleCooldownMs(match);
     return {
       shouldFallback: true,
-      cooldownMs: match.cooldownMs ?? scaled.cooldownMs,
-      baseCooldownMs: match.cooldownMs ?? scaled.baseCooldownMs,
-      configuredCooldownMs: match.cooldownMs,
-      newBackoffLevel: match.cooldownMs !== undefined ? 0 : scaled.newBackoffLevel,
+      cooldownMs: cooldownMs ?? scaled.cooldownMs,
+      baseCooldownMs: cooldownMs ?? scaled.baseCooldownMs,
+      configuredCooldownMs: cooldownMs,
+      newBackoffLevel: cooldownMs !== undefined ? 0 : scaled.newBackoffLevel,
       reason: match.reason,
       ruleScope: match.scope,
     };
@@ -1969,6 +2054,27 @@ export function checkFallbackError(
     };
   }
 
+  const m365Scope = getM365FailureScope(provider, status, errorText, structuredError);
+  if (m365Scope) {
+    const reason = status === 403 ? "forbidden" : RateLimitReason.RATE_LIMIT_EXCEEDED;
+    // Native throttles announce their reset even when generic retry hints are disabled.
+    const hint = detectRetryHint();
+    const fallback = buildRetryableFallback(reason);
+    return {
+      ...fallback,
+      ...(hint
+        ? {
+            cooldownMs: hint.retryAfterMs,
+            baseCooldownMs: hint.retryAfterMs,
+            usedUpstreamRetryHint: true,
+            retryHintSource: hint.provenance,
+            newBackoffLevel: 0,
+          }
+        : {}),
+      ruleScope: m365Scope,
+      skipProviderBreaker: true,
+    };
+  }
   const isRateLimitStatus = status === HTTP_STATUS.RATE_LIMITED;
   const preserveQuota429 = shouldPreserveQuotaSignals(provider, errorText);
   const shouldUseQuotaSignal = !isRateLimitStatus || preserveQuota429;
@@ -2125,7 +2231,8 @@ export function checkFallbackError(
         } else {
           return {
             shouldFallback: true,
-            cooldownMs: tpdMs,
+            // A Retry-After header wins over the node clock; clamp it like detectRetryHint does.
+            cooldownMs: Math.min(tpdMs, MAX_PROVIDER_COOLDOWN_MS),
             reason: RateLimitReason.QUOTA_EXHAUSTED,
             dailyQuotaExhausted: true,
           };
@@ -2159,7 +2266,7 @@ export function checkFallbackError(
     if (shouldUseQuotaSignal && !isCreditsExhausted(errorStr) && !isDailyQuotaExhausted(errorStr)) {
       const subResult = buildSubscriptionQuotaFallback(
         errorStr,
-        () => getUpstreamRetryHint()?.retryAfterMs ?? null,
+        getUpstreamRetryHint,
         parseRetryFromErrorText,
         provider
       );
@@ -2280,10 +2387,9 @@ export function checkFallbackError(
       // this, the rule's reason is used but its cooldownMs is silently
       // dropped — which is exactly the user-visible bug where a 13-day
       // upstream quota reset was being treated as ~60s.
+      const matchCooldownMs = ruleCooldownMs(providerMatch);
       const providerCooldownMs =
-        providerMatch?.cooldownMs !== undefined && providerMatch.cooldownMs > 0
-          ? providerMatch.cooldownMs
-          : undefined;
+        matchCooldownMs !== undefined && matchCooldownMs > 0 ? matchCooldownMs : undefined;
       const ruleScope =
         providerMatch && honorsRuleLockScope(provider) ? providerMatch.scope : undefined;
       const fallback = buildRetryableFallback(reason);
@@ -2321,7 +2427,7 @@ export function checkFallbackError(
     ) {
       return { ...buildRetryableFallback(RateLimitReason.UNKNOWN), ambiguousAuth: true };
     }
-    const cooldownMs = providerMatch?.cooldownMs ?? configuredRule.cooldownMs ?? 0;
+    const cooldownMs = ruleCooldownMs(providerMatch) ?? configuredRule.cooldownMs ?? 0;
     const ruleScope =
       providerMatch && honorsRuleLockScope(provider) ? providerMatch.scope : undefined;
     return {
@@ -2346,7 +2452,7 @@ export function checkFallbackError(
   if (status === HTTP_STATUS.PLAN_LIMIT_EXCEEDED) {
     const subResult = buildSubscriptionQuotaFallback(
       errorStr,
-      () => getUpstreamRetryHint()?.retryAfterMs ?? null,
+      getUpstreamRetryHint,
       parseRetryFromErrorText,
       provider
     );

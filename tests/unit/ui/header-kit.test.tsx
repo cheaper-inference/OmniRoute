@@ -56,6 +56,21 @@ describe("Header on the kit shell", () => {
     }
   );
 
+  it("keeps the action group at full width so a long page subtitle truncates instead", () => {
+    render(
+      <SidebarProvider>
+        <Header onOpenCommandPalette={() => {}} />
+      </SidebarProvider>
+    );
+    // At 1280 px the Cache page subtitle squeezed this group and wrapped "Keak OmniRoute" and
+    // "Quick nav" onto two lines; the title column (min-w-0 + truncate) must give way instead.
+    const actions = screen.getByRole("button", { name: "Logout" }).parentElement!;
+    expect(actions.className).toContain("shrink-0");
+    const title = screen.getByRole("heading", { level: 1 });
+    expect(title.className).toContain("truncate");
+    expect(title.closest("div.min-w-0")).not.toBeNull();
+  });
+
   it("shows the quick navigation shortcut as kit keys, hidden below lg", () => {
     render(
       <SidebarProvider>

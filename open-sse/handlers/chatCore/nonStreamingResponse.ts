@@ -62,6 +62,10 @@ import { finalizeToolLoopError } from "../chatCore/nonStreamingFinalization.ts";
 import { markCodexScopeRateLimited } from "../chatCore/codexFailover.ts";
 import { deleteSessionAccountAffinityBestEffort } from "@/lib/db/sessionAccountAffinity";
 import { writeTerminalStatus } from "@/shared/utils/terminalStatus";
+import {
+  runWithCodexResponseFence,
+  inheritCodexResponseFence,
+} from "../../services/codexAccount/fences.ts";
 import { MEMORY_BUILTIN_TOOL_NAMES } from "@/lib/skills/memoryBuiltins";
 
 import { storeSemanticCacheResponse } from "../chatCore/semanticCacheStore.ts";
@@ -108,6 +112,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     effectiveModel,
     effectiveServiceTier: _effectiveServiceTier,
     emitRequestGamificationEvent,
+    agentContext,
     endpointPath,
     executeProviderRequest,
     executeRefreshCredentials,
@@ -393,14 +398,16 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       const errHeaders = err?.upstreamHeaders || err?.response?.headers;
       const errUpstreamBody = err?.upstreamErrorBody;
       if (err) {
-        await applyProviderFailureClassification({
-          statusCode: err.status,
-          message: errMessage,
-          headers: errHeaders,
-          upstreamErrorBody: errUpstreamBody,
-          retryAfterMs: err.retryAfterMs ?? null,
-          targetModel: currentModel,
-        });
+        await runWithCodexResponseFence(err.response, () =>
+          applyProviderFailureClassification({
+            statusCode: err.status,
+            message: errMessage,
+            headers: errHeaders,
+            upstreamErrorBody: errUpstreamBody,
+            retryAfterMs: err.retryAfterMs ?? null,
+            targetModel: currentModel,
+          })
+        );
       }
 
       const captured = providerRequestCapture.latest?.() ?? null;
@@ -687,7 +694,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     );
     effectiveServiceTier = resolveReportedServiceTier(responseBody) ?? effectiveServiceTier;
     if (onRequestSuccess) {
-      await onRequestSuccess();
+      await runWithCodexResponseFence(providerResponse, () => onRequestSuccess(), true);
     }
     const successConnectionId = getCurrentConnectionId();
     await maybeSyncClaudeExtraUsageState({
@@ -696,7 +703,16 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       providerSpecificData: credentials?.providerSpecificData,
       log,
     });
-    const usage = toolLoopUsage ?? extractUsageFromResponse(responseBody, provider);
+    // Bill the provider leg's own usage: it was extracted from the body BEFORE
+    // translateNonStreamingClientResponse mutated it (applyClientUsageBuffer adds
+    // the #8331 client context buffer and can replace usage with an estimate).
+    // Re-extracting here would bill the buffer/estimate as real provider usage.
+    // `billingUsage` (not the token-only `usage` summary) keeps the provider-reported
+    // cost/credit fields. After a server-owned tool loop the initial leg's value is
+    // stale, so only the loop's cumulative usage or a re-extraction applies there.
+    const legBillingUsage = toolLoopRan ? null : okLeg.billingUsage;
+    const usage =
+      toolLoopUsage ?? legBillingUsage ?? extractUsageFromResponse(responseBody, provider);
     recordFinalInputCalibration(
       body,
       provider,
@@ -750,6 +766,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       comboStrategy,
       endpoint: endpointPath,
       cpaAuthIndex: readCpaAuthIndex(providerResponse),
+      agentContext,
     });
 
     // #12150 P1b surface 3 (fix round 1): a video-bridge-observed request's
@@ -1144,13 +1161,16 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     return {
       response: {
         success: true,
-        response: inheritEmptyTurnPolicy(
+        response: inheritCodexResponseFence(
           providerResponse,
-          maybeWrapForcedNonStreamingResponsesJson({
-            clientRequestedResponsesStream,
-            body: translatedResponse,
-            headers: responseHeaders,
-          })
+          inheritEmptyTurnPolicy(
+            providerResponse,
+            maybeWrapForcedNonStreamingResponsesJson({
+              clientRequestedResponsesStream,
+              body: translatedResponse,
+              headers: responseHeaders,
+            })
+          )
         ),
       },
       carry: {

@@ -198,7 +198,7 @@ function ModelOverridesHeader({ count }: { count: number }) {
   return (
     <div className="flex items-start justify-between gap-3 mb-3">
       <div>
-        <h3 className="text-sm font-bold flex items-center gap-2">
+        <h3 className="text-sm font-semibold flex items-center gap-2">
           <Icon name="tune" size={18} className="text-primary" />
           {t("modelOverridesTitle")}
         </h3>

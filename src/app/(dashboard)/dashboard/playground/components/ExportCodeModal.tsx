@@ -97,7 +97,7 @@ export default function ExportCodeModal({ state, onClose }: ExportCodeModalProps
       )}
 
       {/* Placeholder hint */}
-      <p className="text-[11px] text-text-muted">
+      <p className="text-xs text-text-muted">
         {t("placeholderHintPrefix")}{" "}
         <code className="font-mono text-primary">{API_KEY_PLACEHOLDER}</code>{" "}
         {t("placeholderHintSuffix")}
