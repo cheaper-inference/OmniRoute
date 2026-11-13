@@ -9,7 +9,8 @@
  *            `role: "system"` message (2.1.28x, mid-conversation-system beta), "Working
  *            directory:" in the top-level `system` field (older builds), or Codex's `<cwd>` inside
  *            `<environment_context>`.
- *   session  x-omniroute-session-id, then the client's own session id exactly as call logs
+ *   session  x-omniroute-session-id, then the `omnirouter launch` session id (olx_ bearer, see
+ *            withLaunchSession), then the client's own session id exactly as call logs
  *            record it (resolveClientSessionId in services/conversationTracker.ts:
  *            x-claude-code-session-id, x-opencode-session, Codex `session_id`, the Claude Code
  *            `metadata.user_id` JSON `session_id`), so agent_sessions.client_session_id joins
@@ -219,6 +220,59 @@ export function withoutPromptDerivedFields(context: AgentContext): AgentContext 
   };
 }
 
+/** The launch session behind an `olx_` bearer, as resolved key metadata carries it. */
+export interface LaunchSessionIdentityInput {
+  id?: unknown;
+  toolId?: unknown;
+  sessionTag?: unknown;
+}
+
+type UsageKeyInfo = { noLog?: boolean; launchSession?: LaunchSessionIdentityInput | null };
+
+function hasExplicitSessionHeader(headers: HeaderSource): boolean {
+  return readHeader(headers, "x-omniroute-session-id", MAX_SESSION_ID_CHARS) !== null;
+}
+
+/**
+ * `omnirouter launch` (architecture 3.3 step 7): the launch session id is the client session id
+ * with the same precedence as `x-omniroute-session-id` (an explicit header still wins), and the
+ * launched tool's id is the client, so one launch aggregates into one agent_sessions row.
+ */
+export function withLaunchSession(
+  context: AgentContext,
+  headers: HeaderSource,
+  launchSession: LaunchSessionIdentityInput | null | undefined
+): AgentContext {
+  const launchId = cleanValue(launchSession?.id, MAX_SESSION_ID_CHARS);
+  if (!launchId) return context;
+  return {
+    ...context,
+    client: cleanValue(launchSession?.toolId, 40) || context.client,
+    clientSessionId: hasExplicitSessionHeader(headers) ? context.clientSessionId : launchId,
+  };
+}
+
+/**
+ * Session tag of an `olx_` request: the launch session's tag unless the client sent an explicit
+ * `x-omniroute-session-id` header (which keeps its existing meaning). null without a session.
+ */
+export function resolveLaunchSessionTag(
+  headers: HeaderSource,
+  apiKeyInfo: UsageKeyInfo | null | undefined
+): string | null {
+  if (hasExplicitSessionHeader(headers)) return null;
+  return cleanValue(apiKeyInfo?.launchSession?.sessionTag, MAX_SESSION_ID_CHARS + 64);
+}
+
+/** call_logs.session_tag precedence: launch tag, then the resolved conversation, then header. */
+export function resolveCallLogSessionTag(
+  launchSessionTag: string | null | undefined,
+  conversationId: string | null | undefined,
+  explicitSessionIdHeader: string | null | undefined
+): string | null {
+  return launchSessionTag || conversationId || explicitSessionIdHeader || null;
+}
+
 /**
  * Agent context for usage attribution. Keys with `noLog` never persist prompt-derived fields
  * (working directory, branch); explicit header identifiers are still kept.
@@ -226,9 +280,13 @@ export function withoutPromptDerivedFields(context: AgentContext): AgentContext 
 export function resolveUsageAgentContext(
   body: unknown,
   headers: HeaderSource,
-  apiKeyInfo: { noLog?: boolean } | null | undefined
+  apiKeyInfo: UsageKeyInfo | null | undefined
 ): AgentContext {
-  const context = extractAgentContext(body, headers);
+  const context = withLaunchSession(
+    extractAgentContext(body, headers),
+    headers,
+    apiKeyInfo?.launchSession
+  );
   return apiKeyInfo?.noLog === true ? withoutPromptDerivedFields(context) : context;
 }
 

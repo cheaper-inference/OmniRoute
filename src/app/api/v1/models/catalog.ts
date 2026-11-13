@@ -93,6 +93,8 @@ import {
   finalizeCatalogResponse,
   syntheticVariantListingIds,
 } from "./catalogResponse";
+import { launchAnonymousRemoteRejection, launchViewFromKeyMetadata } from "./catalogLaunchView";
+import { catalogMetadataLookup } from "./catalogResponse";
 import {
   isNoAuthProviderBlocked,
   isNoAuthProviderKey,
@@ -258,6 +260,11 @@ export async function getUnifiedModelsResponse(
       ...diagnosticHeaders,
     });
     if (authRejection) return authRejection;
+    const launchRejection = launchAnonymousRemoteRejection(request, {
+      ...corsHeaders,
+      ...diagnosticHeaders,
+    });
+    if (launchRejection) return launchRejection;
   } catch {
     // Fall through to full builder on auth-check failure; core handles errors.
   }
@@ -377,6 +384,11 @@ async function buildUnifiedModelsResponseCore(
       ...diagnosticHeaders,
     });
     if (authRejection) return authRejection;
+    const launchRejection = launchAnonymousRemoteRejection(request, {
+      ...corsHeaders,
+      ...diagnosticHeaders,
+    });
+    if (launchRejection) return launchRejection;
 
     // #9147: yield after auth check before DB initialization prologue
     await yieldCatalogBuildTurn();
@@ -949,6 +961,8 @@ async function buildUnifiedModelsResponseCore(
       isSyntheticVariantHidden,
       hideNoThinkVariants: settings.hideNoThinkVariants === true,
       allowCcDiscoveryAliases: earlyKeyMeta?.allowCcDiscoveryAliases !== false,
+      // Launch-session server view (`olx_` bearer); null for every other caller.
+      launchView: launchViewFromKeyMetadata(earlyKeyMeta),
       blockedProviders: settings.blockedProviders,
       // Per-entry `pricing`: a combo is priced as its first visible target.
       pricing: {
@@ -2312,7 +2326,9 @@ async function buildUnifiedModelsResponseCore(
       if (registryFallback) return registryFallback;
 
       const modelId =
-        model.root || (typeof model.id === "string" ? model.id.split("/").pop() : undefined);
+        catalogMetadataLookup(model)?.model ||
+        model.root ||
+        (typeof model.id === "string" ? model.id.split("/").pop() : undefined);
       return modelId
         ? getTokenLimit(canonicalId, modelId, capabilityResolutionSnapshot)
         : getTokenLimit(canonicalId, null, capabilityResolutionSnapshot);
