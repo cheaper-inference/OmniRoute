@@ -14,6 +14,8 @@ const SAFETY_FINISH_REASONS = new Set([
   "content_filtered",
   "policy_violation",
   "malformed_response",
+  "spii",
+  "image_safety",
 ]);
 
 // Claude/Anthropic `stop_reason` values that have an exact OpenAI equivalent.

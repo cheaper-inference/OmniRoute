@@ -105,7 +105,7 @@ function MiniStat({ label, value }: { label: string; value: number }) {
   return (
     <Card>
       <div className="p-4">
-        <p className="text-lg font-bold text-text-main">{value}</p>
+        <p className="text-lg font-semibold text-text-main">{value}</p>
         <p className="text-[10px] uppercase tracking-wider text-text-muted">{label}</p>
       </div>
     </Card>

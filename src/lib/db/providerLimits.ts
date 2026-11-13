@@ -4,6 +4,12 @@ import {
 } from "@/shared/utils/providerBilling";
 import { getDbInstance, isBuildPhase, isCloud } from "./core";
 import { parseCodexPaidCredits, type CodexPaidCredits } from "@/lib/providers/codexPaidCredits";
+import {
+  withCodexConnectionWrite,
+  StaleCodexOperationError,
+  isCodexConnectionFenceCurrent,
+  type CodexConnectionFence,
+} from "./codexConnectionFences";
 import { projectCodexQuotaDisplay } from "@/lib/providers/codexQuotaDisplay";
 
 type JsonRecord = Record<string, unknown>;
@@ -38,6 +44,8 @@ export interface ProviderLimitsCacheEntry {
   limitReached?: boolean;
   sparkLimitReached?: boolean;
   rateLimitReachedType?: string;
+  /** Cursor only: per-model tokens + Cursor-billed cost for the current cycle (display-only). */
+  modelUsage?: Array<Record<string, unknown>>;
 }
 
 const PROVIDER_LIMITS_CACHE_NAMESPACE = "providerLimitsCache";
@@ -92,6 +100,9 @@ function normalizeOptionalCacheFields(record: JsonRecord): Partial<ProviderLimit
     ...(billing ? { billing } : {}),
     ...(Array.isArray(record.quotaGroups)
       ? { quotaGroups: record.quotaGroups as Array<Record<string, unknown>> }
+      : {}),
+    ...(Array.isArray(record.modelUsage)
+      ? { modelUsage: record.modelUsage as Array<Record<string, unknown>> }
       : {}),
   };
 }
@@ -160,33 +171,39 @@ export function setProviderLimitsCache(
   const sanitized = sanitizeCacheEntryForStorage(entry);
   if (isBuildPhase || isCloud) return sanitized;
   const db = getDbInstance() as unknown as DbLike;
-  db.prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)").run(
-    PROVIDER_LIMITS_CACHE_NAMESPACE,
-    connectionId,
-    JSON.stringify(sanitized)
+  const applied = withCodexConnectionWrite(connectionId, () =>
+    db
+      .prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)")
+      .run(PROVIDER_LIMITS_CACHE_NAMESPACE, connectionId, JSON.stringify(sanitized))
   );
+  if (!applied) throw new StaleCodexOperationError();
   return sanitized;
 }
 
 export function setProviderLimitsCacheBatch(
-  entries: Array<{ connectionId: string; entry: ProviderLimitsCacheEntry }>
+  entries: Array<{
+    connectionId: string;
+    entry: ProviderLimitsCacheEntry;
+    codexFence?: CodexConnectionFence | null;
+  }>
 ): number {
   if (isBuildPhase || isCloud || entries.length === 0) return 0;
   const db = getDbInstance() as unknown as DbLike;
   const insert = db.prepare(
     "INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)"
   );
-  const tx = db.transaction(
-    (items: Array<{ connectionId: string; entry: ProviderLimitsCacheEntry }>) => {
-      for (const item of items) {
-        insert.run(
-          PROVIDER_LIMITS_CACHE_NAMESPACE,
-          item.connectionId,
-          JSON.stringify(sanitizeCacheEntryForStorage(item.entry))
-        );
-      }
+  const tx = db.transaction((items: typeof entries) => {
+    for (const item of items) {
+      // A newer cooldown must not discard valid quota observations. Owner and
+      // credential revisions still fence out a replaced connection.
+      if (item.codexFence && !isCodexConnectionFenceCurrent(item.codexFence)) continue;
+      insert.run(
+        PROVIDER_LIMITS_CACHE_NAMESPACE,
+        item.connectionId,
+        JSON.stringify(sanitizeCacheEntryForStorage(item.entry))
+      );
     }
-  );
+  });
   tx(entries);
   return entries.length;
 }

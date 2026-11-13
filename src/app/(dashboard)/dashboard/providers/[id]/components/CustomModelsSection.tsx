@@ -895,7 +895,13 @@ export default function CustomModelsSection({
                     providerId={providerId}
                     modelId={model.id!}
                     effectiveModelNormalize={(p) =>
-                      effectiveNormalizeForProtocol(model.id!, p, customMap, overrideMap)
+                      effectiveNormalizeForProtocol(
+                        model.id!,
+                        p,
+                        customMap,
+                        overrideMap,
+                        providerId
+                      )
                     }
                     effectiveModelPreserveDeveloper={(p) =>
                       effectivePreserveForProtocol(model.id!, p, customMap, overrideMap)

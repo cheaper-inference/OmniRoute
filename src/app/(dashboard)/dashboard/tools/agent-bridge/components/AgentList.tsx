@@ -95,6 +95,7 @@ export function AgentList({
 
         {/* Filter */}
         <SegmentedControl
+          semantics="radio"
           size="sm"
           aria-label={t("agentListTitle") || "IDE Agents"}
           value={filter}
