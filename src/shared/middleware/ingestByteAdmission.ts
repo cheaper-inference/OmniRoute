@@ -98,7 +98,11 @@ export class IngestByteAdmissionController {
     for (;;) {
       if (signal?.aborted) return { status: "unavailable" };
       const lease = this.tryAcquire(bytes);
-      if (lease) return { status: "acquired", lease };
+      if (lease) {
+        // This waiter took only what it needs: a release may have freed room for others too.
+        this.#dispatchFair();
+        return { status: "acquired", lease };
+      }
       const remaining = deadline - Date.now();
       if (remaining <= 0) return this.#timeout(sessionKey);
 
