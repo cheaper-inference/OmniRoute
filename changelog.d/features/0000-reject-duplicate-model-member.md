@@ -1,0 +1,1 @@
+- **feat(chat):** opt-in `OMNIROUTE_REJECT_DUPLICATE_MODEL_MEMBER=1` rejects a chat or responses JSON body that names `model` more than once at the top level with 400 `duplicate_model_field`, so the routed model no longer depends on which JSON parser reads the body. Off by default; nested `model` keys and keys inside strings are not counted

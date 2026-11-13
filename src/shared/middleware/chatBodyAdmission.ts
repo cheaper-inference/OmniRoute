@@ -32,10 +32,15 @@ import {
   bodyExceedsBudgetResponse,
   chatAdmissionRejectionResponse,
   contentEncodingRejectionResponse,
+  duplicateModelFieldResponse,
   resourcePressureRejectionResponse,
   structuralRejectionResponse,
 } from "./chatAdmissionResponses";
 import { estimateStructureTokens } from "./chatAdmissionStructureEstimate";
+import {
+  hasDuplicateModelMember,
+  isRejectDuplicateModelMemberEnabled,
+} from "./duplicateModelMember";
 import {
   composeAdmissionLease,
   IngestByteAdmissionController,
@@ -1246,6 +1251,10 @@ export async function admitChatRequest(
   if ("response" in decoded) {
     lease?.release();
     return { admit: false, response: decoded.response };
+  }
+  if (isRejectDuplicateModelMemberEnabled() && hasDuplicateModelMember(decoded.body)) {
+    lease?.release();
+    return { admit: false, response: duplicateModelFieldResponse() };
   }
   // Wire bytes were charged above. A body that only crosses the large-body line once
   // expanded takes the same budget check and heavyweight lease as an uncompressed one.

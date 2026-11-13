@@ -85,6 +85,7 @@ const SAFE_PUBLIC_ERROR_IDENTIFIERS = new Set([
   "devin_desktop_error",
   "devin_internal_tool_execution",
   "direct_response_start_timeout",
+  "duplicate_model_field",
   "duplicate_tool_use_id",
   "eai_again",
   "econnrefused",
