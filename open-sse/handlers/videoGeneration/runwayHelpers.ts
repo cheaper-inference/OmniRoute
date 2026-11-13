@@ -2,7 +2,7 @@ import {
   UPSTREAM_MEDIA_LIMITS,
   downloadUpstreamMedia,
   upstreamMediaErrorText,
-} from "@/shared/network/remoteImageFetch";
+} from "../../utils/remoteMediaFetch.ts";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 
 // Generated videos are fetched from URLs the provider returns, so they go through the
