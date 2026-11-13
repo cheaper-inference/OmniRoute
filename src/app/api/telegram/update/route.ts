@@ -122,7 +122,9 @@ async function handleMiniAppRequest(initData: string, body: Record<string, unkno
     return NextResponse.json({ ok: false, error: "message is required" }, { status: 400 });
   }
 
-  const antiReplay = process.env.TELEGRAM_INITDATA_ANTI_REPLAY !== "false";
+  // Opt-in (#19833): the Mini App reuses one initData for the whole session, so keying the replay
+  // cache on (hash, message) would 401 a user who sends the same short message twice.
+  const antiReplay = process.env.TELEGRAM_INITDATA_ANTI_REPLAY === "true";
   const parsed = parseInitData(initData);
   const replayKey = `${parsed.hash ?? ""}:${message}`;
   if (!verifyInitData(initData, botToken, undefined, { antiReplay, replayKey })) {

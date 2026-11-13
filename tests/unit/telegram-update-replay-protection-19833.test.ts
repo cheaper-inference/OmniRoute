@@ -97,3 +97,46 @@ test("initData with future auth_date (e.g. 2099) is rejected with 401 (issue #19
   assert.equal(res.status, 401);
   assert.deepEqual(await res.json(), { ok: false, error: "Invalid initData signature" });
 });
+
+test("anti-replay is opt-in: unset TELEGRAM_INITDATA_ANTI_REPLAY lets a session repeat a message", async () => {
+  clearInitDataReplayCache();
+  const previous = process.env.TELEGRAM_INITDATA_ANTI_REPLAY;
+  delete process.env.TELEGRAM_INITDATA_ANTI_REPLAY;
+  try {
+    const initData = signedInitData(9999);
+    const send = () =>
+      POST(
+        new Request("https://example.test/api/telegram/update", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ initData, message: "ok" }),
+        })
+      );
+    // Same Mini App session, same short message twice (e.g. "ok", "continue"): both pass the
+    // signature check and reach the allowlist (403 for a non-allowlisted user), never a 401.
+    assert.equal((await send()).status, 403);
+    assert.equal((await send()).status, 403);
+  } finally {
+    if (previous === undefined) delete process.env.TELEGRAM_INITDATA_ANTI_REPLAY;
+    else process.env.TELEGRAM_INITDATA_ANTI_REPLAY = previous;
+  }
+});
+
+test("the auth_date future bound is enforced even with anti-replay off", async () => {
+  clearInitDataReplayCache();
+  const previous = process.env.TELEGRAM_INITDATA_ANTI_REPLAY;
+  delete process.env.TELEGRAM_INITDATA_ANTI_REPLAY;
+  try {
+    const res = await POST(
+      new Request("https://example.test/api/telegram/update", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ initData: signedInitData(9999, 4102444800), message: "hello" }),
+      })
+    );
+    assert.equal(res.status, 401);
+  } finally {
+    if (previous === undefined) delete process.env.TELEGRAM_INITDATA_ANTI_REPLAY;
+    else process.env.TELEGRAM_INITDATA_ANTI_REPLAY = previous;
+  }
+});
