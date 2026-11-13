@@ -9,6 +9,14 @@ import { calculateLevel, XP_REWARDS } from "./xp";
 
 const log = logger("GAMIFICATION");
 
+/** Leaderboard scopes every XP award credits. token_share also credits tokens_shared. */
+const REWARD_SCOPES = ["global", "weekly", "monthly"] as const;
+const TOKEN_SHARE_SCOPES = [...REWARD_SCOPES, "tokens_shared"] as const;
+
+function scopesForAction(action: string): readonly string[] {
+  return action === "token_share" ? TOKEN_SHARE_SCOPES : REWARD_SCOPES;
+}
+
 /**
  * Emit a gamification event. All gamification updates happen here.
  * Called from chatCore.ts after successful requests.
@@ -55,8 +63,14 @@ export async function emitGamificationEvent(params: {
         return;
       }
 
-      const { addXp } = await import("../db/gamification");
-      addXp(apiKeyId, action, xpAmount, metadata ? JSON.stringify(metadata) : undefined);
+      const { awardXp } = await import("../db/gamification");
+      awardXp(
+        apiKeyId,
+        action,
+        xpAmount,
+        metadata ? JSON.stringify(metadata) : undefined,
+        scopesForAction(action)
+      );
 
       await syncLevel(apiKeyId);
     }
@@ -84,10 +98,7 @@ export async function emitGamificationEvent(params: {
       }
     }
 
-    // 3. Update leaderboard
-    await updateRewardScores(apiKeyId, action, xpAmount);
-
-    // 4. Check action count badges
+    // 3. Check action count badges (the leaderboard was credited with the award in step 1)
     await checkActionCountBadges(apiKeyId, action);
   } catch (err) {
     // Never throw — gamification must not break the request pipeline
@@ -96,26 +107,6 @@ export async function emitGamificationEvent(params: {
       action,
       error: err instanceof Error ? err.message : String(err),
     });
-  }
-}
-
-async function updateRewardScores(
-  apiKeyId: string,
-  action: string,
-  xpAmount: number
-): Promise<void> {
-  if (xpAmount > 0) {
-    const { updateScore } = await import("./leaderboard");
-    await updateScore(apiKeyId, "global", xpAmount);
-
-    // Update weekly/monthly
-    await updateScore(apiKeyId, "weekly", xpAmount);
-    await updateScore(apiKeyId, "monthly", xpAmount);
-
-    // Update specific scopes
-    if (action === "token_share") {
-      await updateScore(apiKeyId, "tokens_shared", xpAmount);
-    }
   }
 }
 
@@ -145,14 +136,9 @@ async function awardBonusXp(
   amount: number,
   metadata: Record<string, unknown>
 ): Promise<void> {
-  const { addXp } = await import("../db/gamification");
-  addXp(apiKeyId, action, amount, JSON.stringify(metadata));
+  const { awardXp } = await import("../db/gamification");
+  awardXp(apiKeyId, action, amount, JSON.stringify(metadata), REWARD_SCOPES);
   await syncLevel(apiKeyId);
-
-  const { updateScore } = await import("./leaderboard");
-  await updateScore(apiKeyId, "global", amount);
-  await updateScore(apiKeyId, "weekly", amount);
-  await updateScore(apiKeyId, "monthly", amount);
   log.info("events.bonus_awarded", { apiKeyId, action, amount, ...metadata });
 }
 
