@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { LlmChatCard } from "@/app/(dashboard)/dashboard/media-providers/components/LlmChatCard";
 import { ServiceKindTabs } from "@/app/(dashboard)/dashboard/media-providers/components/ServiceKindTabs";
+import { SegmentedPanel, SegmentedTabs } from "@/shared/components/SegmentedControl";
 import { EmbeddingExampleCard } from "@/app/(dashboard)/dashboard/media-providers/components/EmbeddingExampleCard";
 import { ImageExampleCard } from "@/app/(dashboard)/dashboard/media-providers/components/ImageExampleCard";
 import { TtsExampleCard } from "@/app/(dashboard)/dashboard/media-providers/components/TtsExampleCard";
@@ -97,12 +98,20 @@ export default function ProviderPlaygroundPanel({ providerId }: { providerId: st
   return (
     <div className="flex flex-col gap-3">
       <h2 className="text-lg font-semibold">{providerText(t, "playgroundTitle", "Playground")}</h2>
-      <ServiceKindTabs
-        kinds={playgroundableKinds}
-        activeKind={activeKind}
-        onSelect={setActiveKind}
-      />
-      {renderKindPanel(activeKind, providerId)}
+      {playgroundableKinds.length > 1 ? (
+        <SegmentedTabs
+          value={activeKind}
+          onChange={(next) => setActiveKind(next as ServiceKind)}
+          className="gap-3"
+        >
+          <ServiceKindTabs kinds={playgroundableKinds} />
+          <SegmentedPanel value={activeKind}>
+            {renderKindPanel(activeKind, providerId)}
+          </SegmentedPanel>
+        </SegmentedTabs>
+      ) : (
+        renderKindPanel(activeKind, providerId)
+      )}
     </div>
   );
 }

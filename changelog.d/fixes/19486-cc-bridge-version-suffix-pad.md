@@ -1,0 +1,1 @@
+- **fix(cc-bridge):** the ex-machina `cc_version` suffix now pads a short first user message with `0`, as Claude Code does, so custom pipelines without a build revision send the same suffix. ([#19486](https://github.com/cheaper-inference/OmniRoute/pull/19486))

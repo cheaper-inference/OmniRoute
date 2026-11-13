@@ -30,6 +30,15 @@ const COMMON_PROVIDERS = [
   { id: "mistral", name: "Mistral", color: "#FF7000" },
 ];
 
+/**
+ * First-run setup wizard (welcome, tiers, security, provider, test, done).
+ *
+ * The Security step offers to set the management password only while none exists; when one is
+ * already configured (an earlier, unfinished run of the wizard, or this run), it confirms that and
+ * continues without writing login settings (#19211).
+ *
+ * @returns the wizard page
+ */
 export default function OnboardingWizard() {
   const router = useRouter();
   const t = useTranslations("onboarding");
@@ -43,6 +52,9 @@ export default function OnboardingWizard() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [skipSecurity, setSkipSecurity] = useState(false);
+  // #19211: a password set on an earlier, unfinished run of the wizard. The step then only
+  // confirms it; replacing it needs the current password, which Settings asks for.
+  const [passwordAlreadySet, setPasswordAlreadySet] = useState(false);
 
   // #14296: fresh Docker/NAT-forwarded installs (peer isn't 127.0.0.1) hit a
   // 401 on the bootstrap writes below until the operator supplies the
@@ -62,6 +74,11 @@ export default function OnboardingWizard() {
 
   // Check if setup is already complete
   useEffect(() => {
+    /**
+     * Redirect to the dashboard when setup is already complete; otherwise learn whether a
+     * management password already exists (fail-safe or failed reads keep the password form).
+     * @returns resolves once loading can end
+     */
     const checkSetup = async () => {
       try {
         const res = await fetch("/api/settings");
@@ -74,6 +91,19 @@ export default function OnboardingWizard() {
         }
       } catch {
         // Continue with setup
+      }
+      try {
+        const res = await fetch("/api/settings/require-login");
+        if (res.ok) {
+          const loginSettings = await res.json();
+          // One-way: a password set earlier in this run must not be "unset" by a later read.
+          // A failed server read answers hasPassword:true as a fail-safe; that is not a password.
+          if (loginSettings?.hasPassword === true && loginSettings?.settingsUnavailable !== true) {
+            setPasswordAlreadySet(true);
+          }
+        }
+      } catch {
+        // Unknown: keep the password form, as before
       }
       setLoading(false);
     };
@@ -116,6 +146,11 @@ export default function OnboardingWizard() {
     return false;
   };
 
+  /**
+   * Security step submit: set the first management password and sign in, or, when skipping,
+   * turn the login requirement off. Marks the password as set once the write succeeds.
+   * @returns resolves after the step advanced or an error message was shown
+   */
   const handleSetPassword = async () => {
     setErrorMessage("");
     if (skipSecurity) {
@@ -150,6 +185,8 @@ export default function OnboardingWizard() {
         setErrorMessage(data.error || t("failedSetPassword"));
         return;
       }
+      // The password exists from here on: going Back must not offer to set it again (#19211).
+      setPasswordAlreadySet(true);
       const loginRes = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -329,7 +366,7 @@ export default function OnboardingWizard() {
               )}
             />
             {/* The step title is the page heading (the wizard has no PageHeader). */}
-            <h1 className="text-2xl font-bold text-text-main">{currentStep.title}</h1>
+            <h1 className="text-2xl font-semibold text-text-main">{currentStep.title}</h1>
             {currentStep.id === "tiers" && (
               <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-text-muted text-balance">
                 {t("tier.subtitle")}
@@ -400,7 +437,18 @@ export default function OnboardingWizard() {
             {currentStep.id === "tiers" && <TierTour />}
 
             {/* Security */}
-            {currentStep.id === "security" && (
+            {currentStep.id === "security" && passwordAlreadySet && (
+              <div className="space-y-4">
+                <p className="text-sm text-text-muted text-center">{t("securityDesc")}</p>
+                <p
+                  role="status"
+                  className="rounded-lg border border-success/30 bg-success-bg p-3 text-center text-sm text-success"
+                >
+                  {t("passwordAlreadySet")}
+                </p>
+              </div>
+            )}
+            {currentStep.id === "security" && !passwordAlreadySet && (
               <div className="space-y-4">
                 <p className="text-sm text-text-muted text-center">{t("securityDesc")}</p>
                 <Checkbox
@@ -583,7 +631,12 @@ export default function OnboardingWizard() {
                   {t("continue")}
                 </Button>
               )}
-              {currentStep.id === "security" && (
+              {currentStep.id === "security" && passwordAlreadySet && (
+                <Button variant="primary" onClick={handleNext}>
+                  {t("continue")}
+                </Button>
+              )}
+              {currentStep.id === "security" && !passwordAlreadySet && (
                 <Button
                   variant="primary"
                   onClick={handleSetPassword}

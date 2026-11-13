@@ -1,9 +1,10 @@
 /**
  * Connection-aware expansion -- shared pipeline stage for all combo strategies.
  *
- * Group-A strategies (reset-aware / reset-window / headroom / quota-share) and
- * `auto` already expand targets to concrete per-connection candidates inside
- * their own ordering (applyStrategyOrdering / buildAutoCandidates). The other
+ * Group-A strategies (reset-aware / reset-window / expiry-first / headroom /
+ * quota-share) and `auto` already expand targets to concrete per-connection
+ * candidates inside their own ordering (applyStrategyOrdering /
+ * buildAutoCandidates). The other
  * 15 strategies ("group B": priority, weighted, round-robin, random, p2c,
  * least-used, cost-optimized, lkgp, fill-first, strict-random,
  * context-optimized, cache-optimized, context-relay, fusion, pipeline) kept a
@@ -27,9 +28,9 @@ import { expandTargetsByQuotaAwareConnections } from "./quotaStrategies.ts";
 
 /**
  * The 15 group-B strategies that gain per-connection awareness through this
- * stage. A-group strategies (reset-aware, reset-window, headroom, quota-share)
- * and `auto` are deliberately absent -- they expand inside their own ordering
- * and a second pass here would only burn another connection-list read
+ * stage. A-group strategies (reset-aware, reset-window, expiry-first, headroom,
+ * quota-share) and `auto` are deliberately absent -- they expand inside their
+ * own ordering and a second pass here would only burn another connection-list read
  * (idempotent but wasteful).
  */
 export const CONNECTION_AWARE_EXPANSION_GROUP_B: readonly string[] = [
