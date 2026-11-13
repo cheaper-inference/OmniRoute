@@ -65,7 +65,16 @@ test("getTokenHarborUsage maps free allowance, Pass window and USD balance", asy
   try {
     const r = (await T.getTokenHarborUsage("k")) as {
       plan?: string;
-      quotas?: Record<string, { remainingPercentage?: number; resetAt: string | null; remaining?: number; currency?: string; displayName?: string }>;
+      quotas?: Record<
+        string,
+        {
+          remainingPercentage?: number;
+          resetAt: string | null;
+          remaining?: number;
+          currency?: string;
+          displayName?: string;
+        }
+      >;
     };
     assert.equal(r.plan, "Agent Pass");
     assert.equal(r.quotas?.free?.remainingPercentage, 0);
@@ -86,7 +95,10 @@ test("getTokenHarborUsage keeps free/Pass quotas when the balance call fails, an
     "/api/cli/balance": () => json({}, 500),
   });
   try {
-    const r = (await T.getTokenHarborUsage("k")) as { plan?: string; quotas?: Record<string, { remainingPercentage?: number }> };
+    const r = (await T.getTokenHarborUsage("k")) as {
+      plan?: string;
+      quotas?: Record<string, { remainingPercentage?: number }>;
+    };
     assert.equal(r.plan, "Free");
     assert.equal(r.quotas?.free?.remainingPercentage, 70);
     assert.equal(r.quotas?.pass, undefined);

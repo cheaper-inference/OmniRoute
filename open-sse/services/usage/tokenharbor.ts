@@ -112,7 +112,10 @@ export async function getTokenHarborUsage(apiKey: string) {
     }
 
     if (Object.keys(quotas).length === 0) {
-      return { plan, message: "TokenHarbor connected, but no usage data was returned for this key." };
+      return {
+        plan,
+        message: "TokenHarbor connected, but no usage data was returned for this key.",
+      };
     }
 
     return { plan, quotas };
