@@ -14,7 +14,10 @@
  * Priority (lowest → highest):
  *   1. Auto-generated defaults
  *   2. {DATA_DIR}/server.env  (persisted on first boot)
- *   3. Preferred config .env  (DATA_DIR/.env -> ~/.omniroute/.env -> ./.env)
+ *   3. Preferred config .env  (DATA_DIR/.env, then the default data dir .env, merged: the
+ *                              earlier file wins a key; ./.env only when neither exists).
+ *                              Same order as bin/omniroute.mjs; a key that only a later
+ *                              file supplies is named on stderr.
  *   4. process.env            (shell / Docker -e flags, highest priority)
  */
 
@@ -65,17 +68,25 @@ export function resolveDataDir(overridePath, env = process.env) {
   return legacyDir;
 }
 
-function getPreferredEnvFilePath(env = process.env) {
-  const candidates = [];
+// bin/omniroute.mjs loads DATA_DIR/.env, then the default data dir .env (unless
+// OMNIROUTE_CLI_SKIP_DEFAULT_DATA_ENV=1), and a later file fills the keys an earlier one lacks.
+// Do the same here. ./.env stays a fallback for when neither exists: the CLI treats it as untrusted.
+function getPreferredEnvFilePaths(env = process.env) {
+  const dataDirEnvs = [];
 
   if (env.DATA_DIR?.trim()) {
-    candidates.push(join(resolve(env.DATA_DIR.trim()), ".env"));
+    dataDirEnvs.push(join(resolve(env.DATA_DIR.trim()), ".env"));
   }
 
-  candidates.push(join(resolveDataDir(null, env), ".env"));
-  candidates.push(join(process.cwd(), ".env"));
+  dataDirEnvs.push(join(resolveDataDir(null, env), ".env"));
+  if (env.OMNIROUTE_CLI_SKIP_DEFAULT_DATA_ENV !== "1") {
+    dataDirEnvs.push(join(resolveDataDir(null, { ...env, DATA_DIR: "" }), ".env"));
+  }
 
-  return candidates.find((filePath) => existsSync(filePath)) ?? null;
+  const found = [...new Set(dataDirEnvs)].filter((filePath) => existsSync(filePath));
+  if (found.length > 0) return found;
+  const cwdEnv = join(process.cwd(), ".env");
+  return existsSync(cwdEnv) ? [cwdEnv] : [];
 }
 
 function isNativeSqliteLoadError(error) {
@@ -252,8 +263,19 @@ function tightenServerEnv(dataDir, serverEnvPath) {
 export function bootstrapEnv({ dataDirOverride, quiet = false } = {}) {
   const log = quiet ? () => {} : (msg) => process.stderr.write(`[bootstrap] ${msg}\n`);
 
-  const preferredEnvPath = getPreferredEnvFilePath(process.env);
-  const preferredEnv = preferredEnvPath ? parseEnvFile(preferredEnvPath) : {};
+  const preferredEnvPaths = getPreferredEnvFilePaths(process.env);
+  const preferredEnvPath = preferredEnvPaths[0] ?? null;
+  // An empty value is a placeholder, never a winner: it must not hide a later file's real value.
+  const preferredEnv = {};
+  const preferredOrigin = {};
+  for (const filePath of preferredEnvPaths) {
+    for (const [key, value] of Object.entries(parseEnvFile(filePath))) {
+      if (value.length > 0 && !(key in preferredEnv)) {
+        preferredEnv[key] = value;
+        preferredOrigin[key] = filePath;
+      }
+    }
+  }
   const dataDir = resolveDataDir(dataDirOverride, { ...preferredEnv, ...process.env });
   const serverEnvPath = join(dataDir, "server.env");
 
@@ -268,9 +290,7 @@ export function bootstrapEnv({ dataDirOverride, quiet = false } = {}) {
   // (e.g. `STORAGE_ENCRYPTION_KEY=` in the project .env template) does not
   // override the real value persisted in server.env. Only the .env entries
   // that the operator actually set should win.
-  const preferredEnvFiltered = Object.fromEntries(
-    Object.entries(preferredEnv).filter(([, v]) => typeof v === "string" && v.length > 0)
-  );
+  const preferredEnvFiltered = preferredEnv;
   // Filter empty strings from process.env so that Docker `-e KEY=` (which sets an
   // empty string) does not override real values persisted in server.env or set
   // in .env. Only shell/Docker vars that the operator actually set should win.
@@ -279,6 +299,20 @@ export function bootstrapEnv({ dataDirOverride, quiet = false } = {}) {
     Object.entries(process.env).filter(([, v]) => typeof v === "string" && v.length > 0)
   );
   const merged = { ...persisted, ...preferredEnvFiltered, ...processEnvFiltered };
+
+  // A key that only a later .env supplies now takes effect, as in the CLI. Name it (never the
+  // value) when that changes what the server would have used before: unset, or another server.env value.
+  const fromLaterFile = Object.entries(preferredOrigin).filter(
+    ([key, filePath]) =>
+      filePath !== preferredEnvPath &&
+      !(key in processEnvFiltered) &&
+      persisted[key] !== preferredEnv[key]
+  );
+  for (const [key, filePath] of fromLaterFile) {
+    log(
+      `⚠️  ${key} now comes from ${filePath.replace(/[\u0000-\u001f\u007f]/g, "?")}, a later .env that bin/omniroute.mjs also reads`
+    );
+  }
 
   // ── Auto-generate required secrets ────────────────────────────────────────
   let needsPersist = false;
