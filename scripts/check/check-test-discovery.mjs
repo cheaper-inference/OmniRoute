@@ -150,12 +150,6 @@ export const COLLECTORS = [
     sources: ["vitest.config.ts"],
     anchors: { "vitest.config.ts": "src/lib/skills/__tests__/**/*.test.ts" },
   },
-  // vitest.config.ts include — single-file entry for the .test.ts encryption file.
-  {
-    glob: "tests/unit/encryption.test.ts",
-    sources: ["vitest.config.ts"],
-    anchors: { "vitest.config.ts": "tests/unit/encryption.test.ts" },
-  },
   // Playwright — test:e2e: o script chama o runner sem glob (assim `npm run test:e2e -- <spec>`
   // filtra de verdade) e a coleta vem do playwright.config.ts (testDir ./tests/e2e +
   // testMatch **/*.spec.ts).

@@ -52,7 +52,6 @@ test("the distributable pins wreq-js 3.2.0 and carries all nine native lock entr
     "Dockerfile",
     "Dockerfile.bun",
     ".trivyignore",
-    "pnpm.json",
     "pnpm-workspace.yaml",
     "config/quality/dependency-allowlist.json",
     "config/quality/.license-allowlist.json",

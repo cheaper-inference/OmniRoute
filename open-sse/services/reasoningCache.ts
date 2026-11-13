@@ -600,8 +600,6 @@ export function cleanupReasoningCache(): number {
 // Fix: start the periodic cleanup directly from this module so it runs
 // regardless of how the server boots.  On first import we run one
 // immediate sweep, then schedule a 30-minute interval.
-//
-// See: src/lib/jobs/reasoningCacheCleanupJob.ts (the original job module).
 
 const DEFAULT_CLEANUP_INTERVAL_MS = 30 * 60 * 1000; // 30 min
 
