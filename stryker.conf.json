@@ -47,6 +47,7 @@
       "tests/unit/combo/codex-paid-credits-routing.test.ts",
       "tests/unit/direct-path-stream-terminated-no-cooldown.test.ts",
       "tests/unit/provider-exhausted-webhook.test.ts",
+      "tests/unit/migration-044-backfill-once-per-connection.test.ts",
       "tests/unit/model-lockout-one-step-per-episode.test.ts",
       "tests/unit/qoder-model-scoped-throttle-real-path.test.ts",
       "tests/unit/qoder-model-scoped-throttle.test.ts",
