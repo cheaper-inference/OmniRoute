@@ -319,7 +319,9 @@ function applyMistralChatNormalization(body: Record<string, unknown>): void {
   }
   if (body.service_tier !== undefined) {
     const tier = typeof body.service_tier === "string" ? body.service_tier.toLowerCase() : "";
-    const mapped = MISTRAL_SERVICE_TIER_MAP[tier];
+    const mapped = Object.hasOwn(MISTRAL_SERVICE_TIER_MAP, tier)
+      ? MISTRAL_SERVICE_TIER_MAP[tier]
+      : undefined;
     if (mapped) body.service_tier = mapped;
     else delete body.service_tier;
   }

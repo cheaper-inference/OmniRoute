@@ -126,11 +126,12 @@ async function applyMessageFieldRecovery(
   errText: string
 ): Promise<Response | null> {
   const { url, body, fetchOptions, fetchFn, serializeBody, strippedFields, log } = params;
+  const structuredOnly = params.response.status === HTTP_STATUS.UNPROCESSABLE_ENTITY;
   const messages = record.messages;
   if (!Array.isArray(messages)) return null;
   const hasField = (field: string) =>
     messages.some((m) => m && typeof m === "object" && Object.hasOwn(m, field));
-  const fields = detectRejectedMessageFields(errText).filter(
+  const fields = detectRejectedMessageFields(errText, { structuredOnly }).filter(
     (field) =>
       !params.protectedFields?.includes(field) &&
       !strippedFields.has(`messages.*.${field}`) &&

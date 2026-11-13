@@ -162,11 +162,19 @@ export function detectRejectedTopLevelFields(bodyText: string): string[] {
 /**
  * Field names an upstream 400 rejects on individual `messages[*]` entries. Only
  * snake_case names up to 64 chars are returned, never semantic message fields.
+ * `structuredOnly` limits detection to pydantic `extra_forbidden` `loc` paths.
  */
-export function detectRejectedMessageFields(bodyText: string): string[] {
+export function detectRejectedMessageFields(
+  bodyText: string,
+  options: { structuredOnly?: boolean } = {}
+): string[] {
   if (typeof bodyText !== "string" || !bodyText) return [];
+  // structuredOnly (HTTP 422): trust only pydantic `loc` entries, never prose that may be
+  // user content echoed back in `detail[].input`.
   const candidates = [
-    ...Array.from(bodyText.matchAll(MESSAGE_PROPERTY_REJECTED_RE), (match) => match[1]),
+    ...(options.structuredOnly
+      ? []
+      : Array.from(bodyText.matchAll(MESSAGE_PROPERTY_REJECTED_RE), (match) => match[1])),
     ...extraForbiddenMessageFields(bodyText),
   ];
   const fields = new Set<string>();

@@ -84,6 +84,8 @@ test("mistral chat: service_tier maps onto auto|standard_only, unknown values ar
     ["FLEX", "standard_only"],
     ["standard_only", "standard_only"],
     ["bogus", undefined],
+    ["__proto__", undefined],
+    ["constructor", undefined],
     [null, undefined],
     [5, undefined],
   ];
