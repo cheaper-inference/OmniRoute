@@ -151,11 +151,55 @@ test("status shows in-flight state and labeled PRs per discovered base", async (
 test("status --base on a base without state, and with nothing labeled", async (t) => {
   const { run, lines } = await setup(t);
   assert.equal(await run(["status"]), 0);
-  assert.match(lines.out.join("\n"), /no managed base has PRs with the queue label/);
+  assert.match(lines.out.join("\n"), /no managed base has queue state or PRs with the queue label/);
   lines.out.length = 0;
   assert.equal(await run(["status", "--base", "release/v3.8.55"]), 0);
   assert.match(lines.out.join("\n"), /state: none yet/);
   assert.match(lines.out.join("\n"), /labeled PRs \(0\):/);
+});
+
+test("without --base, a paused base with no labeled PR still shows in status and history", async (t) => {
+  const { run, lines, fake } = await setup(t);
+  const paused = {
+    ...initialState("release/v3.8.55", "2026-11-13T09:00:00Z"),
+    paused: {
+      reason: "base-red",
+      since: "2026-11-13T09:30:00Z",
+      baseSha: sha("tip"),
+      detail: "Unit tests red on the base",
+      issue: 77,
+    },
+    history: [{ at: "2026-11-13T09:30:00Z", type: "base-red-paused", detail: "red" }],
+  };
+  writeState(fake, paused);
+  writeState(fake, sampleState()); // release/v3.8.54: in flight, nothing labeled either
+  // Files that must not create a base: unmanaged base, stray name, junk, a sub-directory.
+  writeState(fake, initialState("main", "2026-11-13T09:00:00Z"));
+  fake.commitFiles({
+    branch: STATE_BRANCH,
+    files: {
+      "state/impostor.json": JSON.stringify(initialState("release/v3.8.99")),
+      "state/broken.json": "{not json",
+      "state/archive/release-v3.8.1.json": JSON.stringify(initialState("release/v3.8.1")),
+    },
+  });
+  assert.equal(await run(["status"]), 0);
+  const text = lines.out.join("\n");
+  assert.match(text, /== release\/v3\.8\.54/);
+  assert.match(text, /== release\/v3\.8\.55\npaused: base-red since 2026-11-13 09:30Z/);
+  assert.ok(text.indexOf("== release/v3.8.54") < text.indexOf("== release/v3.8.55"), "sorted");
+  assert.ok(!/== (main|release\/v3\.8\.99|release\/v3\.8\.1)\b/.test(text), text);
+  assert.ok(!text.includes("no managed base"));
+  assert.deepEqual(lines.err, [
+    "warning: state/broken.json on omni-queue-state is not valid JSON; skipped",
+  ]);
+
+  lines.out.length = 0;
+  lines.err.length = 0;
+  assert.equal(await run(["history"]), 0);
+  assert.ok(lines.out.includes("== release/v3.8.55"));
+  assert.ok(lines.out.includes("2026-11-13 09:30Z  base-red-paused  red"));
+  assert.ok(lines.out.includes("== release/v3.8.54"));
 });
 
 test("status reports a corrupt state document as an error (exit 1)", async (t) => {

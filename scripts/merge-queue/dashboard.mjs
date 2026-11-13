@@ -7,6 +7,10 @@
 // Every attacker-influenced string (PR titles, event details, eligibility details) goes through
 // escapeMarkdown: no markdown links, no HTML, no table breaks, no @mentions, no autolinks.
 // Authors are printed without "@" so a dashboard refresh never notifies anyone.
+//
+// Clock-dependent text lives on ONE footer line (VOLATILE_LINE_RE) that upsertDashboard ignores
+// when comparing, so an unchanged queue costs no PATCH (and no edit-history entry) per tick.
+// The body is capped at MAX_BODY_CHARS (GitHub rejects issue bodies over 65 536 characters).
 
 import { DASHBOARD_LABEL, dashboardTitle, isSha } from "./contracts.mjs";
 
@@ -27,6 +31,9 @@ import { DASHBOARD_LABEL, dashboardTitle, isSha } from "./contracts.mjs";
  */
 
 export const RECENT_EVENTS = 20;
+export const MAX_BODY_CHARS = 60_000;
+/** The only line of the body that changes with the clock / run; ignored by upsertDashboard. */
+export const VOLATILE_LINE_RE = /^<sub>Last change: [^\n]*<\/sub>$/gm;
 const SERVER_URL = "https://github.com";
 const REPOSITORY_RE = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 const SAFE_URL_RE = /^https:\/\/[^\s()<>[\]"'`|\\]+$/;
@@ -125,20 +132,29 @@ function knownApprovals(state) {
  *
  * Join rule: a history event may carry `labeledAt: {"<pr>": ISO}` (written on "batch-started");
  * the latest value seen BEFORE a "landed" event wins. PRs of the current in-flight candidate
- * fill the gaps. In shadow mode (no "landed" event in the window) "would-land" events are used.
+ * fill the gaps, then the labeled queue entries (in shadow mode nothing lands, so the PRs keep
+ * their label and their approval time is known there). In shadow mode (no "landed" event in
+ * the window) "would-land" events are used and `labelToMergeBasis` says so.
  * @param {QueueState} state
  * @param {string} now ISO
+ * @param {{queue?: {number: number, labeledAt: string|null}[]}} [extra]
  * @returns {{landedPrs: number, ciRunsPerMergedPr: number|null, redBatches: number,
  *            bisections: number, medianLabelToMergeMinutes: number|null,
- *            p90LabelToMergeMinutes: number|null}}
+ *            p90LabelToMergeMinutes: number|null, labelToMergeBasis: "landed"|"would-land"}}
  */
-export function computeMetrics(state, now) {
+export function computeMetrics(state, now, extra = {}) {
   void now; // the window is the persisted history; no clock-dependent metric
   const counters = state?.counters ?? {};
   const landedPrs = counters.landedPrs ?? 0;
   const history = Array.isArray(state?.history) ? state.history : [];
-  const landType = history.some((e) => e.type === "landed") ? "landed" : "would-land";
+  const shadowOnly =
+    !history.some((e) => e.type === "landed") && history.some((e) => e.type === "would-land");
+  const landType = shadowOnly ? "would-land" : "landed";
   const fallback = knownApprovals(state);
+  for (const entry of extra.queue ?? []) {
+    if (entry?.labeledAt && !fallback.has(entry.number))
+      fallback.set(entry.number, entry.labeledAt);
+  }
   const seen = new Map();
   const durations = [];
   for (const event of history) {
@@ -161,6 +177,7 @@ export function computeMetrics(state, now) {
     bisections: counters.bisections ?? 0,
     medianLabelToMergeMinutes: durations.length ? round1(median(durations)) : null,
     p90LabelToMergeMinutes: durations.length ? round1(percentile(durations, 90)) : null,
+    labelToMergeBasis: landType,
   };
 }
 
@@ -202,12 +219,12 @@ function renderPause(paused) {
   return parts.join("\n");
 }
 
-function renderInFlight(f, link, now) {
+function renderInFlight(f, link) {
   if (!f) return ["_Nothing in flight._"];
-  const age = formatDuration(minutesBetween(f.startedAt, now));
+  // Absolute start time only: a relative age would change the body on every tick.
   const lines = [
     `- **${f.kind === "base-check" ? "Base check" : "Batch"}** ${code(f.batchId)} — stage ` +
-      `${code(f.stage)}, started ${formatTime(f.startedAt)} (${age} ago), ` +
+      `${code(f.stage)}, started ${formatTime(f.startedAt)}, ` +
       `infra retries ${Number(f.attempts) || 0}`,
     `- Candidate ${link.commit(f.candidateSha)}${link.checks(f.candidateSha)} on ref ` +
       `${code(f.candidateRef)}`,
@@ -255,11 +272,16 @@ export function orderQueue(queue) {
   });
 }
 
-function renderQueue(queue, link) {
-  const ordered = orderQueue(queue);
-  if (!ordered.length) return ["_No PR carries the queue label._"];
-  const lines = ["| # | PR | Author | Approved | Status |", "| --- | --- | --- | --- | --- |"];
-  ordered.forEach((e, i) => {
+const QUEUE_HEADER = ["| # | PR | Author | Approved | Status |", "| --- | --- | --- | --- | --- |"];
+const EVENTS_HEADER = [
+  "| Time (UTC) | Event | Batch | PRs | Detail |",
+  "| --- | --- | --- | --- | --- |",
+];
+
+/** Table rows of the ordered queue (no header). */
+function renderQueueRows(queue, link) {
+  const lines = [];
+  orderQueue(queue).forEach((e, i) => {
     const status = e.eligible
       ? "✅ eligible"
       : `⛔ ${(e.reasons ?? [])
@@ -273,13 +295,10 @@ function renderQueue(queue, link) {
   return lines;
 }
 
-function renderEvents(history, link) {
+/** Table rows of the last RECENT_EVENTS events, newest first (no header). */
+function renderEventRows(history, link) {
   const recent = (history ?? []).slice(-RECENT_EVENTS).reverse();
-  if (!recent.length) return ["_No events yet._"];
-  const lines = [
-    "| Time (UTC) | Event | Batch | PRs | Detail |",
-    "| --- | --- | --- | --- | --- |",
-  ];
+  const lines = [];
   for (const e of recent) {
     const url = safeUrl(e.url);
     const sha = isSha(e.sha) ? ` ${code(short(e.sha))}` : "";
@@ -292,18 +311,33 @@ function renderEvents(history, link) {
   return lines;
 }
 
-function renderMetrics(m) {
+function renderMetrics(m, shadow) {
   const value = (v) => (v === null || v === undefined ? "—" : String(v));
+  // Nothing merges in shadow mode, so "per merged PR" has no denominator yet.
+  const ciRuns =
+    m.ciRunsPerMergedPr === null && shadow ? "n/a (shadow)" : value(m.ciRunsPerMergedPr);
+  const target = m.labelToMergeBasis === "would-land" ? "would-land" : "merge";
   return [
     "| Metric | Value |",
     "| --- | --- |",
     `| PRs landed | ${m.landedPrs} |`,
-    `| CI runs per merged PR | ${value(m.ciRunsPerMergedPr)} |`,
+    `| CI runs per merged PR | ${ciRuns} |`,
     `| Red batches | ${m.redBatches} |`,
     `| Bisections | ${m.bisections} |`,
-    `| Approval → merge, median | ${formatDuration(m.medianLabelToMergeMinutes)} |`,
-    `| Approval → merge, p90 | ${formatDuration(m.p90LabelToMergeMinutes)} |`,
+    `| Approval → ${target}, median | ${formatDuration(m.medianLabelToMergeMinutes)} |`,
+    `| Approval → ${target}, p90 | ${formatDuration(m.p90LabelToMergeMinutes)} |`,
   ];
+}
+
+/** Drop rows from the end until `excess` characters are saved; returns the kept count. */
+function keepRows(rows, keep, excess) {
+  let saved = 0;
+  let n = keep;
+  while (n > 0 && saved < excess) {
+    n -= 1;
+    saved += rows[n].length + 1;
+  }
+  return n;
 }
 
 /**
@@ -319,42 +353,84 @@ export function renderDashboard(input) {
   const runUrl = safeUrl(input.runUrl);
   const link = links(repository);
   const shadow = config?.mode !== "live";
-  const out = [
-    `## 🚦 omni-queue — ${code(base)}`,
-    "",
-    shadow
-      ? "**Mode: shadow** — candidates are composed and tested, nothing lands (would-land only)."
-      : "**Mode: live** — green candidates land on the base.",
-    "",
-    `Landing ${code(config?.landing?.mode ?? "?")} · batch ≤ ${config?.batch?.maxSize ?? "?"} · ` +
-      `label ${code(config?.label ?? "?")} · updated ${formatTime(now)}` +
-      (runUrl ? ` · [last run](${runUrl})` : ""),
-    "",
-  ];
-  if (state?.paused) out.push(renderPause(state.paused), "");
-  out.push("### In flight", "", ...renderInFlight(state?.inFlight, link, now), "");
   const entries = queue ?? [];
   const eligible = entries.filter((e) => e.eligible).length;
-  out.push(
-    `### Queue (${entries.length} labeled, ${eligible} eligible)`,
-    "",
-    ...renderQueue(entries, link),
-    ""
-  );
-  out.push(
-    `### Recent events (last ${RECENT_EVENTS})`,
-    "",
-    ...renderEvents(state?.history, link),
-    ""
-  );
-  out.push("### Metrics", "", ...renderMetrics(computeMetrics(state, now)), "");
-  out.push("<sub>Generated by omni-queue on every tick. Manual edits are overwritten.</sub>", "");
-  return out.join("\n");
+  const queueRows = renderQueueRows(entries, link);
+  const eventRows = renderEventRows(state?.history, link);
+  const metrics = renderMetrics(computeMetrics(state, now, { queue: entries }), shadow);
+
+  const table = (header, rows, shown, empty, noun) => {
+    if (!rows.length) return [empty];
+    const out = [...header, ...rows.slice(0, shown)];
+    if (shown < rows.length) out.push("", `_… ${rows.length - shown} more ${noun} not shown._`);
+    return out;
+  };
+  const build = (nQueue, nEvents) => {
+    const out = [
+      `## 🚦 omni-queue — ${code(base)}`,
+      "",
+      shadow
+        ? "**Mode: shadow** — candidates are composed and tested, nothing lands (would-land only)."
+        : "**Mode: live** — green candidates land on the base.",
+      "",
+      `Landing ${code(config?.landing?.mode ?? "?")} · batch ≤ ${config?.batch?.maxSize ?? "?"} · ` +
+        `label ${code(config?.label ?? "?")}`,
+      "",
+    ];
+    if (state?.paused) out.push(renderPause(state.paused), "");
+    out.push("### In flight", "", ...renderInFlight(state?.inFlight, link), "");
+    out.push(
+      `### Queue (${entries.length} labeled, ${eligible} eligible)`,
+      "",
+      ...table(QUEUE_HEADER, queueRows, nQueue, "_No PR carries the queue label._", "PR(s)"),
+      ""
+    );
+    out.push(
+      `### Recent events (last ${RECENT_EVENTS})`,
+      "",
+      ...table(EVENTS_HEADER, eventRows, nEvents, "_No events yet._", "event(s)"),
+      ""
+    );
+    out.push("### Metrics", "", ...metrics, "");
+    out.push(
+      "<sub>Generated by omni-queue. The body is rewritten only when its content changes; " +
+        "manual edits are overwritten.</sub>",
+      `<sub>Last change: ${formatTime(now)}${runUrl ? ` · [run](${runUrl})` : ""}</sub>`,
+      ""
+    );
+    return out.join("\n");
+  };
+
+  // Fit under MAX_BODY_CHARS: trim the queue tail first (lowest priority), then the events.
+  const NOTE_RESERVE = 200;
+  let nQueue = queueRows.length;
+  let nEvents = eventRows.length;
+  let body = build(nQueue, nEvents);
+  if (body.length > MAX_BODY_CHARS) {
+    nQueue = keepRows(queueRows, nQueue, body.length - MAX_BODY_CHARS + NOTE_RESERVE);
+    body = build(nQueue, nEvents);
+  }
+  if (body.length > MAX_BODY_CHARS) {
+    nEvents = keepRows(eventRows, nEvents, body.length - MAX_BODY_CHARS + NOTE_RESERVE);
+    body = build(nQueue, nEvents);
+  }
+  if (body.length > MAX_BODY_CHARS) {
+    body = `${body.slice(0, MAX_BODY_CHARS - 40)}\n\n_… dashboard truncated._\n`;
+  }
+  return body;
+}
+
+/** The body without its volatile footer line (what upsertDashboard compares). */
+export function stableBody(body) {
+  return String(body ?? "")
+    .replace(/\r\n/g, "\n")
+    .replace(VOLATILE_LINE_RE, "");
 }
 
 /**
  * Find the open dashboard issue (exact title + label) or create it; update the body only when
- * it changed. Returns the issue number. With several matches the oldest (lowest number) wins.
+ * it changed, ignoring the volatile "Last change" footer line (stableBody). Returns the issue
+ * number. With several matches the oldest (lowest number) wins.
  * @param {{gh: object, base: string, body: string}} input
  * @returns {Promise<number>}
  */
@@ -369,8 +445,7 @@ export async function upsertDashboard(input) {
     const created = await gh.createIssue({ title, body, labels: [DASHBOARD_LABEL] });
     return created.number;
   }
-  const normalize = (s) => String(s ?? "").replace(/\r\n/g, "\n");
-  if (normalize(match.body) !== normalize(body)) {
+  if (stableBody(match.body) !== stableBody(body)) {
     await gh.updateIssue(match.number, { body });
   }
   return match.number;

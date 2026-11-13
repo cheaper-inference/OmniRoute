@@ -11,7 +11,9 @@
 //   global: --repo <owner/repo>  (default: `gh repo view`)
 //
 // Token: `gh auth token` (execFile, never a shell). Reads state from contracts.STATE_BRANCH via
-// the Contents API; never writes state (the workflow is the single writer).
+// the Contents API; never writes state (the workflow is the single writer). Without --base,
+// status/history cover every managed base with labeled PRs OR a state document (a paused base
+// with nothing labeled is exactly when the owner needs to see it).
 //
 // Exit codes: 0 success · 1 runtime/API error (or a partial failure of add/remove) · 2 usage.
 
@@ -128,10 +130,20 @@ async function buildClient(flags, deps) {
   return createGitHubClient({ token, repository, apiUrl: deps.apiUrl });
 }
 
-async function loadState(gh, base) {
-  const file = await gh.getFileContent(stateFilePath(base), STATE_BRANCH);
-  if (!file) return null;
-  const state = JSON.parse(file.content);
+/** Directory of the per-base state files on STATE_BRANCH ("state"). */
+const STATE_DIR = stateFilePath("probe").replace(/\/[^/]+$/, "");
+
+/**
+ * @param {Map<string, string>} [cache]  base → raw state JSON already read by discoverBases
+ */
+async function loadState(gh, base, cache) {
+  let content = cache?.get(base);
+  if (content === undefined) {
+    const file = await gh.getFileContent(stateFilePath(base), STATE_BRANCH);
+    if (!file) return null;
+    content = file.content;
+  }
+  const state = JSON.parse(content);
   const errors = validateState(state);
   if (errors.length) throw new Error(`state of ${base} is invalid: ${errors.join(", ")}`);
   return state;
@@ -150,6 +162,44 @@ async function labeledPullsByBase(gh, config) {
   return byBase;
 }
 
+/**
+ * Managed bases that have a state document on STATE_BRANCH — a paused queue or a candidate in
+ * flight shows up even when no open PR carries the label any more. Returns base → raw JSON.
+ * Unreadable files are reported on `err` and skipped (status --base still shows the error).
+ */
+async function basesWithState(gh, config, err) {
+  const found = new Map();
+  for (const entry of await gh.listDirectory(STATE_DIR, STATE_BRANCH)) {
+    if (entry.type !== "file" || !entry.name.endsWith(".json")) continue;
+    const file = await gh.getFileContent(entry.path, STATE_BRANCH);
+    if (!file) continue;
+    let base;
+    try {
+      base = JSON.parse(file.content)?.base;
+    } catch {
+      err(`warning: ${entry.path} on ${STATE_BRANCH} is not valid JSON; skipped`);
+      continue;
+    }
+    // The file must be the one this base maps to: a stray file cannot impersonate another base.
+    if (typeof base !== "string" || !isManagedBase(config, base)) continue;
+    if (stateFilePath(base) !== entry.path) continue;
+    found.set(base, file.content);
+  }
+  return found;
+}
+
+/** Bases to show without --base: those with labeled PRs ∪ those with a state document. */
+async function discoverBases(ctx) {
+  const { gh, config, err } = ctx;
+  const byBase = await labeledPullsByBase(gh, config);
+  const cache = await basesWithState(gh, config, err);
+  const bases = [...new Set([...byBase.keys(), ...cache.keys()])].sort();
+  return { byBase, cache, bases };
+}
+
+const NO_BASE =
+  "no managed base has queue state or PRs with the queue label (use --base <branch> to inspect one)";
+
 function requireManagedBase(config, base) {
   if (!base) throw new UsageError("expected a base branch");
   if (!isManagedBase(config, base)) {
@@ -162,15 +212,22 @@ function requireManagedBase(config, base) {
 
 async function cmdStatus(ctx) {
   const { gh, config, flags, out } = ctx;
-  const byBase = await labeledPullsByBase(gh, config);
-  const bases = flags.base ? [requireManagedBase(config, flags.base)] : [...byBase.keys()].sort();
+  let byBase;
+  let cache;
+  let bases;
+  if (flags.base) {
+    bases = [requireManagedBase(config, flags.base)];
+    byBase = await labeledPullsByBase(gh, config);
+  } else {
+    ({ byBase, cache, bases } = await discoverBases(ctx));
+  }
   out(`repository ${gh.owner}/${gh.repo} · mode ${config.mode} · label ${config.label}`);
   if (!bases.length) {
-    out("no managed base has PRs with the queue label (use --base <branch> to inspect one)");
+    out(NO_BASE);
     return 0;
   }
   for (const base of bases) {
-    const state = await loadState(gh, base);
+    const state = await loadState(gh, base, cache);
     out("");
     out(`== ${base}`);
     if (!state) out("state: none yet (the queue has not run on this base)");
@@ -221,15 +278,16 @@ async function cmdHistory(ctx) {
     if (!/^[1-9][0-9]{0,3}$/.test(flags.limit)) throw new UsageError("--limit must be 1..9999");
     limit = Number(flags.limit);
   }
-  const bases = flags.base
-    ? [requireManagedBase(config, flags.base)]
-    : [...(await labeledPullsByBase(gh, config)).keys()].sort();
+  let cache;
+  let bases;
+  if (flags.base) bases = [requireManagedBase(config, flags.base)];
+  else ({ cache, bases } = await discoverBases(ctx));
   if (!bases.length) {
-    out("no managed base has PRs with the queue label (use --base <branch>)");
+    out(NO_BASE);
     return 0;
   }
   for (const base of bases) {
-    const state = await loadState(gh, base);
+    const state = await loadState(gh, base, cache);
     out(`== ${base}`);
     const events = (state?.history ?? []).slice(-limit).reverse();
     if (!events.length) out("no events");
