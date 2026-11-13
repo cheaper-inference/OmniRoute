@@ -103,7 +103,7 @@ if (modeInfo.mode === "pr") {
     prModeSkipLine(
       "[cli-i18n]",
       modeInfo,
-      "pt-BR top-level sections and zh-CN/zh-TW key parity compare locale catalogs a feature PR no longer edits; the release refresh completes them (syncUiKeys catalog cli)"
+      "pt-BR top-level sections and zh-CN/zh-TW key parity compare locale catalogs a feature PR no longer edits; the release refresh completes them (syncUiKeys catalog cli), and a CLI catalog the PR itself changes is judged against the merge base by check-key-completeness --catalog=cli"
     )
   );
   if (errors > 0) {

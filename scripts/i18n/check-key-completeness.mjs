@@ -17,17 +17,24 @@
  *
  * This gate is absolute, not diff-based: it compares the tree as it is.
  *
- * Release mode only (plan "derived numbers and texts resolved only at release", 2026-11-13): a
- * feature PR adds keys to en.json and touches no other locale; the release refresh completes the
- * catalogs (`syncUiKeys` in sync-ui-keys.mjs, called by `release:refresh-derived`). In `pr` mode
- * (scripts/check/lib/gateMode.mjs) the gate prints `SKIP reason=pr-mode` and exits 0; in
- * `release` mode — the release PR, pushes to main, local runs — it is exactly the gate above.
+ * Two modes (plan "derived numbers and texts resolved only at release", 2026-11-13; mode from
+ * scripts/check/lib/gateMode.mjs):
+ *   - `release` — the release PR, pushes to main, local runs: exactly the absolute gate above.
+ *   - `pr` — a feature PR adds keys to en.json and touches no other locale; the release refresh
+ *     completes the catalogs (`syncUiKeys` in sync-ui-keys.mjs, called by
+ *     `release:refresh-derived`). With no locale catalog changed the gate prints
+ *     `SKIP reason=pr-mode` and exits 0. A PR that DOES change locale catalogs (a translation
+ *     wave, the release refresh, a translation-only PR) has each changed catalog judged against
+ *     itself at the merge base (lib/touched-catalogs.mjs): no key or translation it had may be
+ *     lost, no key en.json lacks may appear, no placeholder of an unchanged English value may
+ *     break. A catalog new in the PR must carry exactly the key set of en.json.
  *
  * Usage:
  *   node scripts/i18n/check-key-completeness.mjs               # blocking (dashboard catalogs)
  *   node scripts/i18n/check-key-completeness.mjs --warn        # report only, exit 0
  *   node scripts/i18n/check-key-completeness.mjs --catalog=cli # same gate over bin/cli/locales
- *   node scripts/i18n/check-key-completeness.mjs --mode=pr     # what a feature PR sees (SKIP)
+ *   node scripts/i18n/check-key-completeness.mjs --mode=pr     # what a PR sees (SKIP, or the
+ *                                                               # changed catalogs vs merge base)
  *   npm run i18n:check-keys
  *   npm run i18n:check-keys:cli
  */
@@ -37,7 +44,14 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-import { skipInPrMode } from "./lib/release-mode.mjs";
+import { describeGateMode, resolveGateModeInfo } from "../check/lib/gateMode.mjs";
+import { prModeSkipLine } from "./lib/release-mode.mjs";
+import {
+  findCatalogRegressions,
+  findTouchedCatalogs,
+  formatRegressions,
+  isClean,
+} from "./lib/touched-catalogs.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, "..", "..");
@@ -46,6 +60,9 @@ const CATALOG_DIRS = {
   cli: path.join(ROOT, "bin", "cli", "locales"),
 };
 const SOURCE_LOCALE = "en";
+const UNTRANSLATABLE_PATH = path.join(SCRIPT_DIR, "untranslatable-keys.json");
+const PR_MODE_MOTIVE =
+  "a feature PR adds keys to en.json only; the other locales are completed by the release refresh (syncUiKeys in scripts/i18n/sync-ui-keys.mjs)";
 
 /** Absolute directory of a flat-JSON catalog family: the dashboard (`ui`) or the CLI (`cli`). */
 export function catalogDir(name = "ui") {
@@ -120,18 +137,74 @@ function formatReport(gaps, sample = 5) {
   return lines.join("\n");
 }
 
+async function loadUntranslatable(catalog) {
+  if (catalog !== "ui") return new Set();
+  try {
+    return new Set(JSON.parse(await fs.readFile(UNTRANSLATABLE_PATH, "utf8")).keys ?? []);
+  } catch {
+    return new Set();
+  }
+}
+
+/**
+ * `pr` mode: SKIP when the PR changed no locale catalog of this family (a feature PR); otherwise
+ * judge each changed catalog against itself at the merge base (lib/touched-catalogs.mjs).
+ */
+async function judgeChangedCatalogs({ dir, catalog, tag, warnOnly, modeInfo }) {
+  const catalogRel = path.relative(ROOT, dir).split(path.sep).join("/");
+  const { base, baseEn, touched } = findTouchedCatalogs({ root: ROOT, catalogRel });
+  if (!touched.length) {
+    const why = base
+      ? PR_MODE_MOTIVE
+      : `${PR_MODE_MOTIVE}; the merge base is unresolved (no base ref), so no changed locale catalog could be judged`;
+    console.log(prModeSkipLine(tag, modeInfo, why));
+    return;
+  }
+  const headEn = JSON.parse(await fs.readFile(path.join(dir, `${SOURCE_LOCALE}.json`), "utf8"));
+  const untranslatable = await loadUntranslatable(catalog);
+  const codes = touched.map((t) => t.locale).join(", ");
+  console.log(
+    `${tag} ${describeGateMode(modeInfo)} — judging the ${touched.length} locale catalog(s) this PR changed against the merge base ${base.ref} (${base.sha.slice(0, 8)}): ${codes}`
+  );
+  const regressed = [];
+  for (const { locale, rel, baseLocale } of touched) {
+    const headLocale = JSON.parse(await fs.readFile(path.join(ROOT, rel), "utf8"));
+    const report = findCatalogRegressions({
+      baseEn: baseEn ?? headEn,
+      headEn,
+      baseLocale,
+      headLocale,
+      untranslatable,
+    });
+    if (!isClean(report)) regressed.push({ locale, report });
+  }
+  if (!regressed.length) {
+    console.log(
+      `${tag} OK — the ${touched.length} changed locale catalog(s) kept every key and translation they had at the merge base; completeness against en.json is judged in release mode.`
+    );
+    return;
+  }
+  console.error(
+    `${tag} ${warnOnly ? "WARN" : "FAIL"} — ${regressed.length}/${touched.length} changed locale catalog(s) regressed against the merge base:`
+  );
+  console.error(formatRegressions(regressed));
+  console.error(
+    `${tag} Fix: restore what the PR dropped (git show ${base.sha.slice(0, 8)}:${catalogRel}/<locale>.json); a key en.json lacks is added to en.json first; a placeholder must keep the English names. Completing the catalogs against en.json is the release refresh's job (syncUiKeys), not this PR's.`
+  );
+  if (!warnOnly) process.exitCode = 1;
+}
+
 async function main() {
   const warnOnly = process.argv.includes("--warn");
   const catalogArg = process.argv.find((a) => a.startsWith("--catalog="));
   const catalog = catalogArg ? catalogArg.slice(10) : "ui";
   const dir = catalogDir(catalog);
   const tag = `[i18n-keys:${catalog}]`;
-  const skipped = skipInPrMode({
-    tag,
-    motive:
-      "a feature PR adds keys to en.json only; the other locales are completed by the release refresh (syncUiKeys in scripts/i18n/sync-ui-keys.mjs)",
-  });
-  if (skipped) return;
+  const modeInfo = resolveGateModeInfo({ argv: process.argv, env: process.env });
+  if (modeInfo.mode === "pr") {
+    await judgeChangedCatalogs({ dir, catalog, tag, warnOnly, modeInfo });
+    return;
+  }
   const { en, locales } = await readCatalogs(dir);
   const gaps = findIncompleteLocales({ en, locales });
   const total = leafPaths(en).size;

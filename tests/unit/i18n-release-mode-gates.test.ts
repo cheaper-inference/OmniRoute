@@ -23,7 +23,12 @@ import { fileURLToPath } from "node:url";
 import { syncUiKeys } from "../../scripts/i18n/sync-ui-keys.mjs";
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
-const SUPPORT = ["scripts/check/lib/gateMode.mjs", "scripts/i18n/lib/release-mode.mjs"];
+const SUPPORT = [
+  "scripts/check/lib/gateMode.mjs",
+  "scripts/i18n/lib/release-mode.mjs",
+  "scripts/i18n/lib/touched-catalogs.mjs",
+  "scripts/i18n/lib/icu-names.mjs",
+];
 
 function git(dir: string, ...args: string[]) {
   return execFileSync("git", args, {

@@ -107,7 +107,7 @@ async function main() {
     const skipped = skipInPrMode({
       tag: "[i18n-ratio]",
       motive:
-        "keys a feature PR adds to en.json stay missing in the other locales until the release refresh translates them (syncUiKeys in scripts/i18n/sync-ui-keys.mjs)",
+        "keys a feature PR adds to en.json stay missing in the other locales until the release refresh translates them (syncUiKeys in scripts/i18n/sync-ui-keys.mjs); a locale catalog the PR itself changes is judged against the merge base by check-key-completeness",
     });
     if (skipped) return;
   }

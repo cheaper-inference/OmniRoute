@@ -10,9 +10,15 @@
 //   check-key-completeness  check-new-key-coverage  check-ui-value-drift
 //   check-translation-ratio check-cli-i18n (locale parity part only)
 //
-// Each of them asks `skipInPrMode()` first. In `pr` mode it prints one SKIP line and the gate
-// exits 0; in `release` mode it returns null and the gate runs exactly as it always did — same
-// output, same exit code. The mode comes from scripts/check/lib/gateMode.mjs (`--mode=pr|release`,
+// The PRs that still edit locale catalogs in `pr` mode (translation waves, the release refresh, a
+// translation-only PR) are not skipped wholesale: check-key-completeness judges every catalog the
+// PR changed against itself at the merge base (lib/touched-catalogs.mjs) — lost keys, new
+// `__MISSING__` markers, translations replaced by English, broken placeholders — which covers what
+// the ratio and CLI-parity gates would have caught in a catalog the PR made worse.
+//
+// Each of the other gates asks `skipInPrMode()` first. In `pr` mode it prints one SKIP line and
+// the gate exits 0; in `release` mode it returns null and the gate runs exactly as it always did —
+// same output, same exit code. The mode comes from scripts/check/lib/gateMode.mjs (`--mode=pr|release`,
 // then OMNIROUTE_GATE_MODE, then the GitHub Actions event; a local run is `release`).
 
 import { describeGateMode, resolveGateModeInfo } from "../../check/lib/gateMode.mjs";
