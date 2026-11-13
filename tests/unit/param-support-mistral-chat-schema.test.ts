@@ -77,7 +77,7 @@ test("mistral chat: OpenAI-only fields are dropped, schema fields survive", () =
 test("mistral chat: service_tier maps onto auto|standard_only, unknown values are dropped", () => {
   const cases: Array<[unknown, unknown]> = [
     ["auto", "auto"],
-    ["priority", "auto"],
+    ["priority", undefined],
     ["default", "standard_only"],
     ["flex", "standard_only"],
     ["scale", "standard_only"],
@@ -92,6 +92,15 @@ test("mistral chat: service_tier maps onto auto|standard_only, unknown values ar
     stripUnsupportedParams("mistral", "mistral-small-latest", body);
     assert.equal(body.service_tier, expected, String(input));
   }
+});
+
+test("mistral chat: temperature above Mistral's 1.5 ceiling is clamped, lower values kept", () => {
+  const high = chatBody({ temperature: 2 });
+  stripUnsupportedParams("mistral", "mistral-small-latest", high);
+  assert.equal(high.temperature, 1.5);
+  const ok = chatBody({ temperature: 0.7 });
+  stripUnsupportedParams("mistral", "mistral-small-latest", ok);
+  assert.equal(ok.temperature, 0.7);
 });
 
 test("mistral Responses bodies (no messages) and other providers are left alone", () => {
