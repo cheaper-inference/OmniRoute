@@ -1664,8 +1664,10 @@ async function handleSingleModelChat(
             // A probe stays a probe through the redirect, so each target is gated as one.
             automatedProbe: runtimeOptions.automatedProbe === true,
             authorizationContextModel: runtimeOptions.authorizationContextModel ?? modelStr,
-            forcedConnectionId: runtimeOptions?.forcedConnectionId ?? null,
-            allowedConnectionIds: null,
+            // The redirected combo's own target pin and allow-list win over the caller's pin.
+            forcedConnectionId:
+              resolvedTarget?.connectionId ?? runtimeOptions?.forcedConnectionId ?? null,
+            allowedConnectionIds: resolvedTarget?.allowedConnectionIds ?? null,
             comboStepId: null,
             comboExecutionKey: null,
             skipUpstreamRetry: resolvedTarget?.failoverBeforeRetry === true,
@@ -2174,16 +2176,23 @@ async function handleSingleModelChat(
         requestBody = { ...body, model: modelStr };
       }
       if (!runtimeOptions.reasoningDecision && runtimeOptions.reasoningIntent) {
-        const connectionRouting = await applyConnectionReasoningRule({
-          requestBody,
-          provider,
-          effectiveModel,
-          credentials,
-          apiKeyInfo,
-          reasoningIntent: runtimeOptions.reasoningIntent,
-          reasoningDecision: runtimeOptions.reasoningDecision,
-          requestRoutingTags: runtimeOptions.reasoningRequestTags,
-        }).catch(agyLease.releasingRethrow(leaseId));
+        let connectionRouting;
+        try {
+          connectionRouting = await applyConnectionReasoningRule({
+            requestBody,
+            provider,
+            effectiveModel,
+            credentials,
+            apiKeyInfo,
+            reasoningIntent: runtimeOptions.reasoningIntent,
+            reasoningDecision: runtimeOptions.reasoningDecision,
+            requestRoutingTags: runtimeOptions.reasoningRequestTags,
+          }).catch(agyLease.releasingRethrow(leaseId));
+        } catch (error) {
+          // The slot was taken above; a rule-store error must not keep the account occupied.
+          releaseOAuthSession();
+          throw error;
+        }
         if (connectionRouting.response) {
           releaseOAuthSession();
           agyLease.release(leaseId);

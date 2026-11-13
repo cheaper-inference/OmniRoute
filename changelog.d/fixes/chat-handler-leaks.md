@@ -1,0 +1,1 @@
+Keep the combo target pin on safety-net redirects and release the OAuth slot when a connection reasoning rule fails.
