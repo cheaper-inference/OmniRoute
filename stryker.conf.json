@@ -823,7 +823,8 @@
       "tests/unit/claude-messages-not-mutated-across-combo-legs.test.ts",
       "tests/unit/claude-hoist-leading-system-keeps-markers.test.ts",
       "tests/unit/key-health-attribution-persist.test.ts",
-      "tests/unit/request-keys-native-fields.test.ts"
+      "tests/unit/request-keys-native-fields.test.ts",
+      "tests/unit/stream-refresh-once-after-pipeline.test.ts"
     ],
     "nodeArgs": [
       "--import",

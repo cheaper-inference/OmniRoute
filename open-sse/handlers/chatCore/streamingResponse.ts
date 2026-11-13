@@ -234,6 +234,9 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
   // #3229: diagnostic of the response `providerResponse` holds; replacing it must replace this.
   let upstreamHttpSelection: HttpAttemptSelection | null = null;
   let upstreamDiagnostic: Record<string, unknown> | undefined;
+  // The pipeline already refreshed the token and re-sent once; a second refresh + resend below
+  // would send the same new token again (3 upstream sends for one request).
+  let pipelineRefreshedAuth = false;
   const rejection: HttpAttemptRejectionSlot = { selection: null };
   try {
     const pipelineOutcome = await runProviderExecutionPipeline({
@@ -264,7 +267,10 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
         replaceCredentials: (next) => {
           Object.assign(credentials, next);
         },
-        onCredentialsRefreshed: handleCredentialsRefreshed,
+        onCredentialsRefreshed: async (refreshed) => {
+          pipelineRefreshedAuth = true;
+          return handleCredentialsRefreshed(refreshed);
+        },
         refreshCredentials: executeRefreshCredentials,
         assertManagedLeaseFence: (id) => assertManagedLeaseFence(id),
         getProviderCredentials,
@@ -687,6 +693,7 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
     !hadStreamOptions && // Skip refresh if failure may be from stream_options removal, not auth
     // Codex recovery already ran through the owner-checked pipeline. Never bypass it here.
     !(pipelineRecovered && provider === "codex") &&
+    !pipelineRefreshedAuth &&
     !(await shouldIsolateProbeFailures()) &&
     !(await shouldSkipCredentialRefresh(provider, providerResponse))
   ) {
