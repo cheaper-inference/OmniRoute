@@ -274,6 +274,51 @@ export function evaluatePromptInjection(
   return { blocked: false, result };
 }
 
+/** Highest local severity as a fraction of high: none 0, low 0.33, medium 0.67, high 1. */
+function localRiskScore(detections: Detection[]): number {
+  const top = Math.max(0, ...detections.map((d) => SEVERITY_SCORES[d.severity] ?? 0));
+  return top / SEVERITY_SCORES.high;
+}
+
+/**
+ * evaluatePromptInjection plus the optional semantic classifier (OMNIROUTE_INJECTION_CLASSIFIER_URL,
+ * default off: then this returns exactly the regex decision). See ./injectionClassifier.ts.
+ */
+export async function evaluatePromptInjectionWithClassifier(
+  body: unknown,
+  options: PromptInjectionGuardrailOptions = {},
+  context: GuardrailContext = {}
+): Promise<PromptInjectionGuardrailDecision> {
+  const decision = evaluatePromptInjection(body, options, context);
+  if (!process.env.OMNIROUTE_INJECTION_CLASSIFIER_URL?.trim()) return decision;
+  if (decision.blocked || !isEnabled(options) || !body || typeof body !== "object") return decision;
+
+  const { classifyGrayZone } = await import("./injectionClassifier");
+  const localScore = localRiskScore(decision.result.detections);
+  const text = buildInjectionScanText(extractMessageContents(body).join("\n"));
+  const { added } = await classifyGrayZone(text, localScore);
+  if (added <= 0) return decision;
+
+  const severity = localScore > 0 ? "high" : "medium";
+  const detections = [
+    ...decision.result.detections,
+    { pattern: "semantic_classifier", severity, match: "" } as Detection,
+  ];
+  const result = { ...decision.result, detections, flagged: true };
+  const blocked = getMode(options) === "block" && shouldBlock(detections, getThreshold(options));
+  if (blocked) {
+    emitGuardrailLog(
+      getLogger(options, context),
+      "warn",
+      "Request blocked by prompt injection guard",
+      {
+        detections: detections.map((d) => ({ pattern: d.pattern, severity: d.severity })),
+      }
+    );
+  }
+  return { blocked, result };
+}
+
 export class PromptInjectionGuardrail extends BaseGuardrail {
   private readonly options: PromptInjectionGuardrailOptions;
 
@@ -286,7 +331,7 @@ export class PromptInjectionGuardrail extends BaseGuardrail {
   }
 
   async preCall(payload: unknown, context: GuardrailContext): Promise<GuardrailResult<unknown>> {
-    const decision = evaluatePromptInjection(payload, this.options, context);
+    const decision = await evaluatePromptInjectionWithClassifier(payload, this.options, context);
     if (decision.blocked) {
       return {
         block: true,

@@ -73,6 +73,7 @@ test("guardrails barrel (src/lib/guardrails/index.ts) exports exactly this surfa
     "PromptInjectionGuardrail",
     "detectWithPatterns",
     "evaluatePromptInjection",
+    "evaluatePromptInjectionWithClassifier",
     "guardrailRegistry",
     "normalizePatternEntry",
     "redactCredentials",
