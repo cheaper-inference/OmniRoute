@@ -261,13 +261,14 @@ function openaiToGeminiBase(
   }
 
   // Generation config
-  if (body.temperature !== undefined) {
+  const allowSampling = !/(?:^|\/)gemini-4(?:$|[-.])/i.test(model);
+  if (allowSampling && body.temperature !== undefined) {
     result.generationConfig.temperature = body.temperature;
   }
-  if (body.top_p !== undefined) {
+  if (allowSampling && body.top_p !== undefined) {
     result.generationConfig.topP = body.top_p;
   }
-  if (body.top_k !== undefined) {
+  if (allowSampling && body.top_k !== undefined) {
     result.generationConfig.topK = body.top_k;
   }
   // `stop: null` is how many OpenAI-compatible clients serialize "no stop"; wrapping it
@@ -665,11 +666,19 @@ function openaiToGeminiBase(
               }
               name = sanitizeToolName(name);
 
-              toolParts.push({
+              const converted = Array.isArray(resp) ? convertOpenAIContentToParts(resp) : [];
+              const media = converted.filter((part) => part.inlineData || part.fileData);
+              const resultData = media.length
+                ? converted
+                    .filter((part) => typeof part.text === "string")
+                    .map((part) => part.text)
+                    .join("\n")
+                : resp;
+              toolParts.push(...media, {
                 functionResponse: {
                   ...(toolNameOptions.stripFunctionCallId ? {} : { id: fid }),
                   name: name,
-                  response: { result: sanitizeFunctionResponseData(resp) },
+                  response: { result: sanitizeFunctionResponseData(resultData) },
                 },
               });
             }

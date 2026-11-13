@@ -822,7 +822,8 @@
       "tests/unit/auth-selection-skips-full-account.test.ts",
       "tests/unit/openai-to-claude-request-shape.test.ts",
       "tests/unit/image-data-url-newline.test.ts",
-      "tests/unit/claude-bare-content-object.test.ts"
+      "tests/unit/claude-bare-content-object.test.ts",
+      "tests/unit/gemini-sampling-tool-result-media.test.ts"
     ],
     "nodeArgs": [
       "--import",
