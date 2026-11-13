@@ -1,0 +1,1 @@
+- Strip ISO release-date snapshot stamps (`YYYY-MM-DD`) in `modelDisplayName()` to prevent folding snapshot dates into model version numbers (e.g. `gpt-5-2025-08-07` as `GPT-5` rather than `GPT-5.2025 08.07`) (#20070).
