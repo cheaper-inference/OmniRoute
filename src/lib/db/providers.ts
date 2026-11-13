@@ -3,6 +3,13 @@
  */
 
 import { v4 as uuidv4 } from "uuid";
+import * as codexFences from "./codexConnectionFences";
+import {
+  mayWriteCodexConnection,
+  isCodexConnectionFenceCurrent,
+  readCodexConnectionFence,
+  type CodexConnectionFence,
+} from "./codexConnectionFences";
 
 import { isCommonChatGptWebRetiredProviderId } from "@/shared/constants/chatgptWebRetirement";
 import { getDbInstance, rowToCamel, cleanNulls } from "./core";
@@ -995,7 +1002,91 @@ function _updateConnectionRow(db: DbLike, id: string, data: JsonRecord) {
 export type ProviderConnectionUpdateOpts = UpdateOpts & {
   /** #16190: this isActive:false write is the permanent-ban auto-disable (never retested). */
   permanentBan?: boolean;
+  expectedCodexFence?: CodexConnectionFence;
+  /** Internal token rotation: the exact version committed by this write, never a later reread. */
+  onCodexFenceCommitted?: (fence: CodexConnectionFence) => void;
 };
+
+function preserveCodexFailureState(merged: JsonRecord, existing: JsonRecord): void {
+  for (const key of [
+    "testStatus",
+    "isActive",
+    "lastError",
+    "lastErrorAt",
+    "lastErrorType",
+    "lastErrorSource",
+    "errorCode",
+    "rateLimitedUntil",
+    "backoffLevel",
+  ]) {
+    merged[key] = existing[key] ?? null;
+  }
+  const latestData = toRecord(existing.providerSpecificData);
+  const nextData = { ...toRecord(merged.providerSpecificData) };
+  for (const key of [
+    "codexScopeRateLimitedUntil",
+    "codexScopeRateLimitSource",
+    "codexQuotaState",
+    "codexQuotaStateByScope",
+    "codexExhaustedWindow",
+    "codexExhaustedWindowByScope",
+  ]) {
+    if (Object.hasOwn(latestData, key)) nextData[key] = latestData[key];
+    else delete nextData[key];
+  }
+  merged.providerSpecificData = nextData;
+}
+
+function canApplyCodexConnectionUpdate(
+  id: string,
+  merged: JsonRecord,
+  existing: JsonRecord,
+  fence?: CodexConnectionFence
+): boolean {
+  if (!fence) return mayWriteCodexConnection(id);
+  // Token rotation survives newer failures, never owner/token replacement.
+  if (!isCodexConnectionFenceCurrent(fence)) return false;
+  if (!isCodexConnectionFenceCurrent(fence, true)) preserveCodexFailureState(merged, existing);
+  return true;
+}
+
+function buildMergedConnectionUpdate(
+  data: JsonRecord,
+  existingCamel: JsonRecord,
+  opts?: ProviderConnectionUpdateOpts
+): JsonRecord {
+  const merged: JsonRecord = {
+    ...existingCamel,
+    ...data,
+    updatedAt: new Date().toISOString(),
+  };
+  merged.providerSpecificData = applyCodexChildCooldownClearOnUpdate(
+    data,
+    normalizeConnectionProviderSpecificData(
+      toStringOrNull(merged.provider),
+      merged.providerSpecificData,
+      merged,
+      existingCamel.providerSpecificData
+    )
+  );
+  sanitizeMergedConnectionOverrides(merged);
+  // #16190: with CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED on, an automated switch-off is
+  // marked so the health sweep can retest it; a permanent-ban switch-off is always marked
+  // so that sweep never retests it, whenever the flag is turned on.
+  if (typeof data.isActive === "boolean") {
+    merged.providerSpecificData = applyAutomaticDisableMarker(
+      merged.providerSpecificData,
+      existingCamel.isActive,
+      data.isActive,
+      undefined,
+      {
+        stampAutomatic: data.isActive === false && isRetestAutoDisabledEnabled(),
+        permanentBan: opts?.permanentBan === true,
+      }
+    );
+  }
+  return merged;
+}
 
 export async function updateProviderConnection(
   id: string,
@@ -1009,53 +1100,34 @@ export async function updateProviderConnection(
   // to prevent -- and re-checking the merged value would spend a bcrypt round
   // on every unrelated field edit.
   await assertApiKeyIsNotManagementPassword(data.apiKey);
-
   // Read only after asynchronous validation, inside the write transaction.
   // Otherwise a metadata update can snapshot old credentials, yield to a rotation,
   // and then write the consumed refresh token back over its replacement.
-  const persisted = db.transaction(() => {
+  // Version checks, read/merge and write share one lock. A newer failure may
+  // arrive during validation; it must survive even when a valid token rotates.
+  const applied = db.transaction(() => {
     const existing = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
     if (!existing) return null;
+
     const existingCamel = toRecord(rowToCamel(existing));
-    const merged: JsonRecord = {
-      ...existingCamel,
-      ...data,
-      updatedAt: new Date().toISOString(),
-    };
-    merged.providerSpecificData = applyCodexChildCooldownClearOnUpdate(
-      data,
-      normalizeConnectionProviderSpecificData(
-        toStringOrNull(merged.provider),
-        merged.providerSpecificData,
-        merged,
-        existingCamel.providerSpecificData
-      )
-    );
-    sanitizeMergedConnectionOverrides(merged);
-    if (typeof data.isActive === "boolean") {
-      merged.providerSpecificData = applyAutomaticDisableMarker(
-        merged.providerSpecificData,
-        existingCamel.isActive,
-        data.isActive,
-        undefined,
-        {
-          stampAutomatic: data.isActive === false && isRetestAutoDisabledEnabled(),
-          permanentBan: opts?.permanentBan === true,
-        }
-      );
-    }
+    const merged = buildMergedConnectionUpdate(data, existingCamel, opts);
     const existingRecord = toRecord(existing);
 
+    if (!canApplyCodexConnectionUpdate(id, merged, existingCamel, opts?.expectedCodexFence)) {
+      return null;
+    }
     reconcileCodexUsageHistory(db, {
       connectionId: id,
       existing: existingRecord,
       merged,
     });
     _updateConnectionRow(db, id, encryptConnectionFields({ ...merged }));
-    return { existing, merged };
+    const committedFence = opts?.onCodexFenceCommitted ? readCodexConnectionFence(id) : null;
+    return { existing, merged, committedFence };
   })();
-  if (!persisted) return null;
-  const { existing, merged } = persisted;
+  if (!applied) return null;
+  const { existing, merged, committedFence } = applied;
+  if (committedFence) opts?.onCodexFenceCommitted?.(committedFence);
   backupDbFile("pre-write");
   invalidateConnectionUpdate(id, data, opts);
   bumpProxyConfigGeneration();
@@ -1071,6 +1143,10 @@ export async function updateProviderConnection(
     reorderConnections(db, providerId);
     return getProviderConnectionById(id);
   }
+
+  // Owner-change triggers strip the previous owner's scoped evidence atomically.
+  // Return the committed metadata, not the pre-trigger merged snapshot.
+  if (merged.provider === "codex") return getProviderConnectionById(id);
 
   // The write path keeps existing ciphertext in merged.providerSpecificData
   // to avoid re-encrypting unchanged values. Return a decrypted copy instead:
@@ -1104,6 +1180,7 @@ export { mergeConnectionProviderSpecificData } from "./providers/providerSpecifi
 registerConnectionStore({
   getProviderConnectionById,
   mergeConnectionProviderSpecificData,
+  codexFences,
 });
 
 export {
@@ -1151,7 +1228,7 @@ export async function touchConnectionLastUsed(
  * silently pinned routing to that point-in-time snapshot with no staleness
  * check. Lightweight targeted UPDATE, mirrors touchConnectionLastUsed.
  */
-export async function touchConnectionSyncedModelsAt(id: string): Promise<void> {
+export function touchConnectionSyncedModelsAt(id: string): void {
   if (!id) return;
   const db = getDbInstance() as unknown as DbLike;
   const now = new Date().toISOString();

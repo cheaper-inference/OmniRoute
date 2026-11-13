@@ -54,6 +54,7 @@ import {
 } from "./request/openai-responses/helpers.ts";
 import { applyReasoningInputPolicy } from "../services/reasoningInputPolicy.ts";
 import { normalizeReasoningRequest } from "@/shared/reasoning/effortStandardization";
+import { hoistSystemDirectiveEffort } from "./request/claude-to-openai.ts";
 
 bootstrapTranslatorRegistry();
 export { register } from "./registry.ts";
@@ -345,6 +346,12 @@ const OPENAI_INCOMPATIBLE_ECHO_FIELDS = [
   "cache_control",
 ];
 
+/** A top-level `thread` object marks a Claude message-threads delta body. */
+function carriesMessageThread(body: unknown): boolean {
+  const thread = (body as { thread?: unknown } | null)?.thread;
+  return thread !== null && typeof thread === "object" && !Array.isArray(thread);
+}
+
 /**
  * Translate a request between protocols, applying target-specific compatibility rules and
  * enforcing attachment preservation for CI dispatch.
@@ -378,6 +385,20 @@ export function translateRequest(
     copilotClient?: boolean;
   }
 ) {
+  // Only Anthropic holds message-thread state. A `thread` delta (the message-threads beta) omits
+  // the earlier turns, so a translated route would answer with no history. Refuse it with the
+  // code that makes Claude Code resend the full conversation. Same gate as the tool additions.
+  if (
+    sourceFormat === FORMATS.CLAUDE &&
+    !(targetFormat === FORMATS.CLAUDE && acceptsInlineToolAdditions(provider)) &&
+    carriesMessageThread(body)
+  ) {
+    throw Object.assign(new Error("message threads are not supported on translated routes"), {
+      statusCode: 400,
+      errorType: "invalid_request_error",
+      details: { error_code: "thread_unsupported_request" },
+    });
+  }
   // Claude Code inline-tools `tool_addition` blocks only reach Anthropic-native targets;
   const originalCIMedia =
     provider === "cheaperinference" || provider === "cinf" ? requestMediaRefs(body) : null;
@@ -407,6 +428,20 @@ export function translateRequest(
   const isGlmFamilyUpstream =
     ["opencode-go", "opencode-zen"].includes(normalizedProvider) ||
     /glm|zhipu|z-ai/i.test(normalizedModel);
+
+  // Claude → OpenAI shaped targets take the turn's effort from the last system directive.
+  // The steps below read only the top-level effort, so move it there first. A `default` rule
+  // was matched without seeing the directive and would overwrite it: the directive stays in
+  // the messages and the translator reads it from there.
+  if (
+    sourceFormat === FORMATS.CLAUDE &&
+    targetFormat !== FORMATS.CLAUDE &&
+    (targetFormat === FORMATS.OPENAI || !getRequestTranslator(sourceFormat, targetFormat)) &&
+    (result as { _omnirouteReasoningRule?: { effortMode?: string } })._omnirouteReasoningRule
+      ?.effortMode !== "default"
+  ) {
+    result = hoistSystemDirectiveEffort(result);
+  }
 
   // Phase 2: Apply thinking budget control before normalization. Gemini targets receive
   // the model so a native thinkingLevel reaches the translator instead of a lossy budget.

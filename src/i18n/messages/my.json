@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "၅ နာရီနှင့် အပတ်စဉ် ပြန်လည်သတ်မှတ်ချိန်များအပေါ် အခြေခံ၍ ကျန်ကိုတာကို ချိန်ညှိပြီးနောက် အမှတ်တူညီသည့်အရာများကို အလှည့်ကျ ပို့သည်",
     "quotaWeighted": "ကိုတာအလိုက် အလေးချိန်ပေးမှု",
     "quotaWeightedDesc": "quota ကုန်သွားသော account များကို ကျော်ပြီး ကျန်ရှိသည့် account များထဲမှ ကျန် quota ကို လက်ရှိလုပ်ဆောင်ဆဲ load ဖြင့် စားထားသည့် အချိုးအစားအလိုက် ရွေးချယ်သည်။ ရှိပြီးသား စကားဝိုင်းများကို မူလ account တွင်ပင် ပုံသေထားသည်။",
+    "expiryFirst": "သက်တမ်းကုန်မည့်အရာ ဦးစားပေး",
+    "expiryFirstDesc": "မသုံးဘဲထားပါက သက်တမ်းကုန်သွားမည့် ခွဲတမ်းရှိသော အကောင့်ကို ဦးစွာသုံးသည်- အများဆုံးကျန်ရှိပြီး ပြန်လည်သတ်မှတ်ချိန် အနီးဆုံးဖြစ်သော အကောင့်ကို ဦးစားပေးသည်။",
     "strictRandom": "တင်းကျပ်သော ကျပန်းရွေးချယ်မှု",
     "strictRandomDesc": "ကတ်အုပ်ကို မွှေသကဲ့သို့ — ပြန်မမွှေမီ မော်ဒယ်တစ်ခုစီကို တစ်ကြိမ်စီ အသုံးပြုသည်",
     "fusion": "ပေါင်းစပ်မှု",
@@ -4033,6 +4035,11 @@
         "when": "ခွဲတမ်းတိုင်းတာမှုဒေတာနှင့် မတူညီသော ပြန်လည်သတ်မှတ်ချိန်ကာလများရှိသည့် အကောင့်များစွာအကြား လမ်းကြောင်းခွဲပေးသည်။",
         "avoid": "အကောင့်အများစုအတွက် ခွဲတမ်းတိုင်းတာမှုဒေတာကို မရရှိနိုင်ပါ။",
         "example": "နောက်ပိုင်းမှ ပြန်လည်သတ်မှတ်မည့် 80% အကောင့်ထက် မနက်ဖြန် ပြန်လည်သတ်မှတ်မည့် 60% အပတ်စဉ်အကောင့်ကို ဦးစားပေးပါ။"
+      },
+      "expiry-first": {
+        "when": "ခွဲတမ်းများ မတူညီသော အချိန်ဇယားများဖြင့် ပြန်လည်သတ်မှတ်သည့် အကောင့်များအကြား လမ်းကြောင်းခွဲပေးပြီး မသုံးဘဲထားပါက သက်တမ်းကုန်သွားမည့် ခွဲတမ်းကို အသုံးပြုလိုသည်။",
+        "avoid": "အကောင့်အများစုအတွက် ခွဲတမ်းတိုင်းတာမှုဒေတာ မရှိပါ၊ သို့မဟုတ် ပြန်လည်သတ်မှတ်ချိန်ကို လျစ်လျူရှုသည့် တည်ငြိမ်သော အစီအစဉ်တစ်ခု လိုအပ်သည်။",
+        "example": "9 နာရီအတွင်း ပြန်လည်သတ်မှတ်မည့် 48% ကျန်သော အကောင့်ထက် 39 မိနစ်အတွင်း ပြန်လည်သတ်မှတ်မည့် 80% ကျန်သော အကောင့်ကို ဦးစားပေးပါ — သက်တမ်းကုန်ခါနီး ခွဲတမ်းကို အလဟဿ မဖြစ်မီ အသုံးပြုသည်။"
       },
       "strict-random": {
         "when": "မော်ဒယ်တစ်ခုစီကို တစ်ကြိမ်စီ အသုံးပြုပြီးမှ ပြန်လည်အသုံးပြုသည့် လုံးဝညီမျှသော ခွဲဝေမှုကို လိုချင်သည့်အခါ အသုံးပြုပါ။",
@@ -4249,6 +4256,13 @@
         "tip1": "Quota telemetry ပေးသည့် provider များအတွက် ရှင်းလင်းစွာ သတ်မှတ်ထားသော အကောင့်အဆင့်များ သို့မဟုတ် account-tag လမ်းကြောင်းပို့မှုကို အသုံးပြုပါ။",
         "tip2": "ရေတို ကုန်ခမ်းမှုက ပိုမိုအန္တရာယ်ရှိသည့်အခါ session နှင့် weekly အလေးချိန်များကို ချိန်ညှိပါ။",
         "tip3": "တူညီသော အကောင့်များလည်း မျှတစွာ အလှည့်ကျနိုင်ရန် တူညီမှုအကွာအဝေးကို သေးငယ်စွာ ထားပါ။"
+      },
+      "expiry-first": {
+        "title": "သက်တမ်းကုန်ခါနီး ခွဲတမ်း ဦးစားပေး",
+        "description": "အသုံးချရန် အရေးတကြီးဖြစ်မှုအလိုက် အကောင့်များကို အဆင့်သတ်မှတ်သည်- ပြန်လည်သတ်မှတ်ရမည့်ရက်နှင့် နီးကပ်ပြီး ကျန်ရှိခွဲတမ်းများသော အကောင့်ကို ဦးစားပေးသည်။",
+        "tip1": "ပံ့ပိုးသူ၏ ခွဲတမ်းတိုင်းတာမှုဒေတာ လိုအပ်သည်။ ၎င်းမရှိသော အကောင့်များသည် စာရင်းပါ ဦးစားပေးအစီအစဉ်ကို ဆက်ထိန်းထားသည်။",
+        "tip2": "နီးပါးတူညီသော အမှတ်များသည် တူညီမှုအကွာအဝေးအတွင်း အလှည့်ကျပြောင်းသဖြင့် ဆင်တူသော အကောင့်များသည် ဝန်ကို ဆက်လက်မျှဝေသည်။",
+        "tip3": "မော်ဒယ်တစ်ခုစီ အမှန်တကယ် ငွေတောင်းခံသည့် ခွဲတမ်းအုပ်စုအတွင်းသာ အဆင့်သတ်မှတ်မှုကို ကန့်သတ်ပါ။"
       },
       "strict-random": {
         "title": "ဖဲချပ်တစ်ထုပ်မွှေသကဲ့သို့ ဖြန့်ဝေခြင်း",
@@ -4481,7 +4495,7 @@
     "spend7d": "ရက် ၇ ရက်အတွင်း သုံးစွဲငွေ",
     "avgCostPerRequest": "တောင်းဆိုမှုတစ်ခုလျှင် ပျမ်းမျှကုန်ကျစရိတ်",
     "noCostDataDescription": "ကုန်ကျစရိတ်ဒေတာကို ဤနေရာတွင် မြင်ရရန် တောင်းဆိုမှုများ စတင်ပြုလုပ်ပါ။ ဝန်ဆောင်မှုပေးသူအားလုံးအတွက် ကုန်ကျစရိတ်များကို အလိုအလျောက် ခြေရာခံပါသည်။",
-    "spendToday": "ယနေ့ သုံးစွဲငွေ",
+    "spendToday": "၁ ရက် အသုံးစရိတ်",
     "overviewLoadFailed": "ကုန်ကျစရိတ် ခြုံငုံသုံးသပ်ချက်ကို ရယူ၍မရပါ",
     "overviewDescription": "ချိတ်ဆက်ထားသော ဝန်ဆောင်မှုပေးသူများနှင့် မော်ဒယ်များအားလုံးတစ်လျှောက် အချိန်နှင့်တစ်ပြေးညီ သုံးစွဲငွေ အသေးစိတ်ခွဲခြမ်းချက်",
     "providerShare": "ဝန်ဆောင်မှုပေးသူအလိုက် ဝေစု",
@@ -5679,6 +5693,7 @@
     "usageTracking": "အသုံးပြုမှု ခြေရာခံခြင်း",
     "securityDesc": "သင့် Dashboard ကို ကာကွယ်ရန် စကားဝှက်တစ်ခု သတ်မှတ်ပါ၊ သို့မဟုတ် လောလောဆယ် ကျော်ထားပါ။",
     "securityDescSkipWarning": "⚠️ စကားဝှက်မရှိပါက စနစ်ထည့်သွင်းနေစဉ် provider များကို ထည့်နိုင်မည်မဟုတ်ပါ။ စကားဝှက်သတ်မှတ်ပြီးနောက် Dashboard မှ နောက်ပိုင်းတွင် ၎င်းတို့ကို ထည့်နိုင်ပါသည်။",
+    "passwordAlreadySet": "ဒက်ရှ်ဘုတ် စကားဝှက်ကို သတ်မှတ်ပြီးဖြစ်သည်။ နောက်ပိုင်းတွင် ဆက်တင်များတွင် ပြောင်းနိုင်သည်။",
     "providerDesc": "သင်၏ ပထမဆုံး AI provider ကို ချိတ်ဆက်ပါ။ နောက်ပိုင်းတွင် ထပ်မံထည့်နိုင်ပါသည်။",
     "providerRequiresPassword": "Provider များထည့်ရန် စကားဝှက်ကို ဦးစွာသတ်မှတ်ရန် လိုအပ်ပါသည်။ လုံခြုံရေးအဆင့်သို့ ပြန်သွားပြီး စကားဝှက်တစ်ခု သတ်မှတ်ပါ၊ သို့မဟုတ် နောက်ပိုင်းတွင် Dashboard မှ provider များကို ထည့်ပါ။",
     "apiKeyRequired": "API Key (လိုအပ်သည်)",
@@ -6051,6 +6066,8 @@
     "importFromModels": "/models မှ ထည့်သွင်းမည်",
     "modelsImported": "မော်ဒယ် {count} ခု ထည့်သွင်းပြီးပါပြီ",
     "allModelsAlreadyImported": "မော်ဒယ်အားလုံးကို ထည့်သွင်းပြီးဖြစ်သည်",
+    "providerPublishesNoModelList": "ဤပံ့ပိုးသူသည် မော်ဒယ်စာရင်းကို မထုတ်ပြန်ပါ — ၎င်း၏ ထည့်သွင်းပြီးသား ကတ်တလောက်သည် လက်ရှိအခြေအနေအတိုင်း ဖြစ်သည်",
+    "modelsNoLongerListed": "{count, plural, one {မော်ဒယ် # ခုကို ပံ့ပိုးသူက စာရင်းတွင် မဖော်ပြတော့ပါ} other {မော်ဒယ် # ခုကို ပံ့ပိုးသူက စာရင်းတွင် မဖော်ပြတော့ပါ}}",
     "noNewModelsToImport": "ထည့်သွင်းရန် မော်ဒယ်အသစ်မရှိပါ — မော်ဒယ်အားလုံးသည် မှတ်ပုံတင်စာရင်း သို့မဟုတ် စိတ်ကြိုက်မော်ဒယ်စာရင်းတွင် ရှိပြီးဖြစ်သည်",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "မော်ဒယ်ရှာဖွေတွေ့ရှိမှု မအောင်မြင် {time}",
@@ -6727,6 +6744,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Grok ဝဘ် Cookie နေရာယူစာသား",
     "herokuBaseUrlHint": "Heroku အခြေခံ URL အရိပ်အမြွက်",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "အီးမေးလ်ကို ဖျောက်ရန်",
     "imageProviders": "ပုံဝန်ဆောင်မှုပေးသူများ",
     "videoProviders": "ဗီဒီယို ဖန်တီးခြင်း",
@@ -7225,7 +7243,8 @@
       "kiro": "အခမဲ့အဆင့်- တစ်လလျှင် credit 50 (~25K–100K tokens)။ ⚠️ Kiro ToS သည် ပြင်ပ proxy/harness အသုံးပြုမှုကို တားမြစ်ထားသည်။",
       "codex": "လက်ရှိ OAuth လုပ်ငန်းစဉ်ဖြင့် OpenAI Codex ကို ချိတ်ဆက်ပါ။",
       "qwen": "လက်ရှိ OAuth လုပ်ငန်းစဉ်ဖြင့် Qwen Code ကို ချိတ်ဆက်ပါ။",
-      "github-models": "github.com/settings/tokens တွင် 'models: read' scope ပါဝင်သည့် GitHub PAT တစ်ခု ဖန်တီးပါ"
+      "github-models": "github.com/settings/tokens တွင် 'models: read' scope ပါဝင်သည့် GitHub PAT တစ်ခု ဖန်တီးပါ",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} သည် provider-native model IDs များကို လက်ခံသည်။ /models မှ ထည့်သွင်းပါ သို့မဟုတ် routing အတွက် စိတ်ကြိုက် IDs များ ထည့်ပါ။",
     "bedrockModelsDescription": "Amazon Bedrock မော်ဒယ်များကို AWS region အလိုက် ကန့်သတ်ထားသည်။ /models မှ ထည့်သွင်းပါ သို့မဟုတ် ရွေးချယ်ထားသည့် region တွင် ဖွင့်ထားသော Bedrock model IDs များ ထည့်ပါ။",
@@ -8092,6 +8111,8 @@
     "resetAwareDesc": "ကျန် quota ကောင်းမွန်ပြီး ပြန်လည်သတ်မှတ်ချိန် ပိုနီးသော အကောင့်များကို ဦးစားပေးရန်",
     "quotaWeighted": "Quota အချိုးကျ",
     "quotaWeightedDesc": "ကုန်ဆုံးသွားသော အကောင့်များကို ကျော်ပြီး၊ ကျန်အကောင့်များထဲမှ လက်ကျန်ပမာဏကို လုပ်ဆောင်ဆဲဝန်ဖြင့် စားထားသည့် အချိုးအစားအတိုင်း ရွေးချယ်ပါ။ လက်ရှိစကားဝိုင်းများကို မူလအကောင့်တွင် ဆက်လက်ချိတ်ထားမည်။",
+    "expiryFirst": "သက်တမ်းကုန်မည့်အရာ ဦးစားပေး",
+    "expiryFirstDesc": "မသုံးဘဲထားပါက သက်တမ်းကုန်သွားမည့် ခွဲတမ်းရှိသော အကောင့်ကို ဦးစွာသုံးသည်- အများဆုံးကျန်ရှိပြီး ပြန်လည်သတ်မှတ်ချိန် အနီးဆုံးဖြစ်သော အကောင့်ကို ဦးစားပေးသည်။",
     "strictRandom": "တင်းကျပ်သော ကျပန်းရွေးချယ်မှု",
     "strictRandomDesc": "ကတ်အစုကို မွှေထားပြီး — ပြန်လည်မမွှေမီ အကောင့်တစ်ခုစီကို တစ်ကြိမ်စီ အသုံးပြုသည်",
     "stickyLimit": "တည်မြဲအသုံးပြုမှု ကန့်သတ်ချက်",
@@ -8804,6 +8825,8 @@
     "retentionUsageHistory": "အသုံးပြုမှုမှတ်တမ်း (ရက်)",
     "retentionMemoryEntries": "မှတ်ဉာဏ်ထည့်သွင်းချက်များ (ရက်)",
     "retentionXpAuditLog": "XP စစ်ဆေးမှတ်တမ်း (ရက်)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "ထိန်းသိမ်းကာလ ဆက်တင်များကို သိမ်းပါ",
     "storageAutoVacuumMode": "အလိုအလျောက် VACUUM မုဒ်",
     "storageScheduledVacuum": "အချိန်ဇယားအလိုက် VACUUM",
@@ -10254,7 +10277,11 @@
     "mappingInvalidJson": "JSON မမှန်ကန်ပါ။",
     "mappingMustBeObject": "ချိတ်ဆက်သတ်မှတ်မှုသည် array သို့မဟုတ် primitive value မဟုတ်ဘဲ JSON object ဖြစ်ရမည်။",
     "mappingValueMustBeString": "“{key}” key အတွက် value သည် string ဖြစ်ရမည်။",
-    "save": "သိမ်းဆည်းရန်"
+    "save": "သိမ်းဆည်းရန်",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -12866,6 +12893,8 @@
     },
     "attempts": "ကြိုးပမ်းမှုများ",
     "detail": {
+      "tabOverview": "ခြုံငုံသုံးသပ်ချက်",
+      "tabPayloads": "Payload များ",
       "omittedHttpAttempts": "HTTP ပို့မှု {count} ခုကို မသိမ်းဆည်းထားပါ",
       "noHttpResponse": "HTTP တုံ့ပြန်မှုကို မတွေ့ရှိရပါ",
       "transportError": "ပို့ဆောင်မှု အမှား",
