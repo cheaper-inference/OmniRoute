@@ -376,11 +376,20 @@ function buildWeightedStepKeyMapper(
 ): (target: ResolvedComboTarget) => string | null {
   return (target: ResolvedComboTarget): string | null => {
     if (!weightedResolution?.orderedSteps) return null;
-    const step = weightedResolution.orderedSteps.find(
-      (entry) =>
-        target.executionKey === entry.executionKey ||
-        target.executionKey.startsWith(entry.executionKey + ">")
+    // Prefer an exact step match before checking nested and account-expanded
+    // execution keys. Prompt-cache expansion may append "@connectionId".
+    const exact = weightedResolution.orderedSteps.find(
+      (entry) => target.executionKey === entry.executionKey
     );
+    const step =
+      exact ??
+      weightedResolution.orderedSteps
+        .filter(
+          (entry) =>
+            target.executionKey.startsWith(entry.executionKey + ">") ||
+            target.executionKey.startsWith(entry.executionKey + "@")
+        )
+        .sort((left, right) => right.executionKey.length - left.executionKey.length)[0];
     return step?.executionKey || null;
   };
 }
@@ -835,7 +844,7 @@ async function applyPromptCacheStage(
   );
   const promptCacheAffinityTargets =
     promptCacheAffinityEnabled && resolvePromptCacheAffinityKey(body)
-      ? await expandPromptCacheAffinityTargets(orderedTargets)
+      ? await expandPromptCacheAffinityTargets(orderedTargets, deps.apiKeyAllowedConnections)
       : orderedTargets;
 
   // Determine affinity scope: restrict to model-level for deterministic strategies
@@ -853,7 +862,10 @@ async function applyPromptCacheStage(
     getStrategyTraits(strategy).promptCacheAffinityScope,
     deps.relayOptions?.sessionId
   );
-  if (!promptCacheAffinity.applied) return orderedTargets;
+  // Account expansion is meaningful even when affinity did not reorder targets
+  // (e.g. one eligible account). Returning the unbound originals here lets the
+  // later credential selector discard that resolved account identity.
+  if (!promptCacheAffinity.applied) return promptCacheAffinityTargets;
   const protectedOriginal =
     shouldProtectOriginalFirst(stickyStuck, autoUsedExplicitRouter, strategy) && orderedTargets[0];
   const nextTargets = protectFirstTarget(promptCacheAffinity.targets, protectedOriginal);

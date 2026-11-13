@@ -30,8 +30,11 @@ import {
   claudeResetCreditHeaders,
   fetchJsonWithTimeout,
   forgetClaudeResetCreditCount,
+  respectClaudeUsageCooldown,
 } from "./claudeResetCreditCount.ts";
 import { setBoundedEntry } from "./claudeLowPriority.ts";
+import { isClaudeOauthUsageCoolingDown } from "./claudeUsageCooldown.ts";
+import { expireClaudeUsageCache } from "./usage/claude.ts";
 
 type JsonRecord = Record<string, unknown>;
 type FetchLike = typeof fetch;
@@ -239,11 +242,15 @@ export function parseAllClaudeResetCredits(usageBody: unknown): ClaudeResetCredi
   return { credits, availableCount };
 }
 
-/** GET the at-wall usage snapshot and extract the reset offer. Null on any failure. */
+/**
+ * GET the at-wall usage snapshot and extract the reset offer. Null on any failure, and
+ * without a request while the credential is in its OAuth-usage 429 cooldown.
+ */
 export async function fetchClaudeLimitResetStatus(
   accessToken: string,
   fetchImpl: FetchLike = fetch
 ): Promise<ClaudeLimitResetStatus | null> {
+  if (isClaudeOauthUsageCoolingDown(accessToken)) return null;
   try {
     const res = await fetchJsonWithTimeout(
       fetchImpl,
@@ -251,6 +258,7 @@ export async function fetchClaudeLimitResetStatus(
       { method: "GET", headers: oauthHeaders(accessToken) },
       CLAUDE_LIMIT_RESET_STATUS_TIMEOUT_MS
     );
+    respectClaudeUsageCooldown(accessToken, res);
     return res.ok ? parseClaudeLimitResetStatus(res.body) : null;
   } catch {
     return null;
@@ -528,7 +536,10 @@ async function runLimitResetClaim(
     now,
     spent ? CLAUDE_LIMIT_RESET_WEEK_MS : CLAUDE_LIMIT_RESET_RETRY_BACKOFF_MS
   );
-  if (granted) memoise(recentResetUntil, opts.key, now + CLAUDE_LIMIT_RESET_RECENT_WINDOW_MS);
+  if (granted) {
+    memoise(recentResetUntil, opts.key, now + CLAUDE_LIMIT_RESET_RECENT_WINDOW_MS);
+    expireClaudeUsageCache(opts.accessToken);
+  }
   opts.log?.info?.(
     "CLAUDE_LIMIT_RESET",
     granted

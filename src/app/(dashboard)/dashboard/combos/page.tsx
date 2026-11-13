@@ -1061,7 +1061,12 @@ function CombosPageContent() {
         notify.success(t("comboCreated"));
       } else {
         const err = await res.json();
-        notify.error(err.error?.message || err.error || t("failedCreate"));
+        notify.error(
+          resolveServerErrorMessage(
+            err,
+            typeof err?.error === "string" ? err.error : t("failedCreate")
+          )
+        );
       }
     } catch {
       notify.error(t("errorCreating"));
@@ -1082,7 +1087,12 @@ function CombosPageContent() {
         return true;
       } else {
         const err = await res.json();
-        notify.error(err.error?.message || err.error || t("failedUpdate"));
+        notify.error(
+          resolveServerErrorMessage(
+            err,
+            typeof err?.error === "string" ? err.error : t("failedUpdate")
+          )
+        );
       }
     } catch {
       notify.error(t("errorUpdating"));
@@ -1694,7 +1704,7 @@ function ComboUsageGuide({ onHide, onHideForever, onCreateCombo }) {
               className="relative rounded-lg border border-border bg-bg-subtle p-2.5"
             >
               <div className="flex items-center gap-1.5 mb-1.5">
-                <span className="inline-flex size-5 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
+                <span className="inline-flex size-5 items-center justify-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
                   {step.step}
                 </span>
                 <Icon name={step.icon} size={14} className="text-primary" />

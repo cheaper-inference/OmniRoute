@@ -59,7 +59,7 @@ export function OAuthDeviceCodePanel({
         <div className="bg-primary/10 p-4 rounded-lg">
           <p className="text-xs text-text-muted mb-1">{t("deviceCodeYourCode")}</p>
           <div className="flex items-center justify-center gap-2">
-            <p className="text-2xl font-mono font-bold text-primary">{deviceData.user_code}</p>
+            <p className="text-2xl font-mono font-semibold text-primary">{deviceData.user_code}</p>
             <Button
               size="sm"
               variant="ghost"

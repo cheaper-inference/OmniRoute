@@ -546,7 +546,9 @@ returning the 429 — this covers Gemini-class TPM/RPM windows (~60s retry-after
 on multi-model combos, e.g. both targets of a 2-model combo hitting a per-model
 rate limit. Bounded by `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`,
 `budgetMs`) in **Settings → Resilience**. It never waits on `quota_exhausted`
-(locked until midnight) or auth/not-found reasons.
+(locked until midnight) or auth/not-found reasons. With `comboTimeoutMs` set, a
+wait that cannot finish before that deadline does not start (#18998): the combo
+answers at once with its terminal response instead of a `COMBO_TIMEOUT` 504.
 
 A combo can opt out with `config.comboCooldownWaitEnabled: false`. Only literal
 `false` disables these shared combo waits (post-dispatch cooldown and pre-dispatch
@@ -1016,7 +1018,7 @@ rate limit is the same signal as an exhausted quota. Honest limits:
 
 ## Other Resilience Features
 
-- **21 routing strategies** (priority, weighted, round-robin, context-relay, fill-first, p2c, random, least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted, strict-random, auto, lkgp, context-optimized, cache-optimized, fusion, pipeline, jev) — see [AUTO-COMBO.md](../routing/AUTO-COMBO.md).
+- **22 routing strategies** (priority, weighted, round-robin, context-relay, fill-first, p2c, random, least-used, cost-optimized, reset-aware, reset-window, expiry-first, headroom, quota-weighted, strict-random, auto, lkgp, context-optimized, cache-optimized, fusion, pipeline, jev) — see [AUTO-COMBO.md](../routing/AUTO-COMBO.md).
 - **Reset-aware routing** (v3.8.0) — prioritizes connections by quota reset time.
 - **Background mode degradation** — Responses API `background: true` degraded to sync with warning.
 - **Dynamic tool limit detection** — backs off providers when tool count limits hit.

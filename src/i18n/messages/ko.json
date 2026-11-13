@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "5시간 및 주간 재설정을 기준으로 남은 할당량의 균형을 맞추고 비슷한 점수를 라운드 로빈 방식으로 진행합니다.",
     "quotaWeighted": "할당량 가중",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "만료 우선",
+    "expiryFirstDesc": "그대로 두면 사용되지 않고 만료될 할당량을 가진 계정을 먼저 사용합니다. 남은 양이 가장 많고 재설정이 가장 가까운 계정이 먼저 선택됩니다.",
     "strictRandom": "엄격한 무작위",
     "strictRandomDesc": "셔플 덱 — 다시 섞기 전에 각 모델을 한 번씩 사용합니다",
     "fusion": "퓨전",
@@ -4033,6 +4035,11 @@
         "when": "할당량 원격 측정 및 다양한 재설정 기간을 사용하여 여러 계정에 걸쳐 라우팅합니다.",
         "avoid": "대부분의 계정에서는 할당량 원격 분석을 사용할 수 없습니다.",
         "example": "나중에 80% 계정을 재설정하는 것보다 내일 60% 주간 계정 재설정을 선호합니다."
+      },
+      "expiry-first": {
+        "when": "할당량 재설정 주기가 서로 다른 여러 계정에 걸쳐 라우팅하며, 그대로 두면 사용되지 않고 만료될 할당량을 소진하려는 경우.",
+        "avoid": "대부분의 계정에서 할당량 원격 분석을 사용할 수 없거나, 재설정 시점을 무시하는 안정적인 순서가 필요한 경우.",
+        "example": "9시간 후 재설정되는 잔여 48% 계정보다 39분 후 재설정되는 잔여 80% 계정을 우선합니다 — 만료가 임박한 할당량을 버려지기 전에 사용합니다."
       },
       "strict-random": {
         "when": "완벽하게 균등한 분배가 필요할 때 사용합니다. 반복하기 전에 각 모델을 한 번씩 사용합니다.",
@@ -4249,6 +4256,13 @@
         "tip1": "할당량 원격 분석을 사용하는 공급자에 대해 명시적인 계정 단계 또는 계정 태그 라우팅을 사용합니다.",
         "tip2": "단기 할당량 소진이 더 위험한 경우 세션 가중치와 주간 가중치를 조정하세요.",
         "tip3": "동등한 계정이 계속 공평하게 순환되도록 동점 허용 범위(tie band)를 작게 유지하세요."
+      },
+      "expiry-first": {
+        "title": "만료 임박 할당량 우선",
+        "description": "소진 압력에 따라 계정 순위를 매깁니다. 재설정 기한에 가까우면서 남은 할당량이 많은 계정이 먼저 선택됩니다.",
+        "tip1": "공급자 할당량 원격 분석이 필요합니다. 원격 분석이 없는 계정은 목록에 지정된 우선순위를 유지합니다.",
+        "tip2": "거의 동점인 점수는 동점 허용 범위(tie band) 안에서 순환하므로 유사한 계정끼리 계속 부하를 분산합니다.",
+        "tip3": "순위 범위를 각 모델이 실제로 과금되는 할당량 버킷으로 한정하세요."
       },
       "strict-random": {
         "title": "셔플 덱 방식 분배",
@@ -4491,7 +4505,7 @@
     "spend7d": "Spend7D",
     "avgCostPerRequest": "Avg Cost Per Request",
     "noCostDataDescription": "요청을 시작하면 여기에 비용 데이터가 표시됩니다. 모든 공급자의 비용이 자동으로 추적됩니다.",
-    "spendToday": "오늘의 지출",
+    "spendToday": "1일 지출",
     "overviewLoadFailed": "비용 개요를 로드하지 못했습니다",
     "overviewDescription": "연결된 모든 공급자 및 모델에 대한 실시간 지출 분석",
     "providerShare": "제공업체 점유율",
@@ -5689,6 +5703,7 @@
     "usageTracking": "사용량 추적",
     "securityDesc": "대시보드를 보호하기 위해 비밀번호를 설정하거나 지금은 건너뛰세요.",
     "securityDescSkipWarning": "⚠️ 비밀번호가 없으면 설정 중에 제공자를 추가할 수 없습니다. 비밀번호를 설정한 후 대시보드에서 나중에 추가할 수 있습니다.",
+    "passwordAlreadySet": "대시보드 비밀번호가 이미 설정되어 있습니다. 나중에 설정에서 변경할 수 있습니다.",
     "providerDesc": "첫 번째 AI 공급자를 연결하세요. 나중에 더 추가할 수 있습니다.",
     "providerRequiresPassword": "제공자를 추가하려면 먼저 비밀번호를 설정해야 합니다. 보안 단계로 돌아가 비밀번호를 설정하거나 나중에 대시보드에서 제공자를 추가하세요.",
     "apiKeyRequired": "API 키(필수)",
@@ -6061,6 +6076,8 @@
     "importFromModels": "/models에서 가져오기",
     "modelsImported": "모델 {count}개를 가져왔습니다",
     "allModelsAlreadyImported": "모든 모델이 이미 가져왔습니다",
+    "providerPublishesNoModelList": "이 공급자는 모델 목록을 게시하지 않습니다 — 내장 카탈로그가 최신 상태입니다",
+    "modelsNoLongerListed": "{count, plural, one {# model이} other {# models가}} 더 이상 공급자 목록에 없습니다",
     "noNewModelsToImport": "가져올 새 모델 없음 — 모든 모델이 이미 레지스트리 또는 사용자 정의 모델 목록에 있습니다",
     "localCatalogFallbackStatus": "공급자의 모델 목록을 가져오지 못했습니다 — 내장 카탈로그를 표시합니다",
     "discoveryDegradedStatus": "모델 검색 실패 {time}",
@@ -6737,6 +6754,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Grok 웹 쿠키 자리표시자",
     "herokuBaseUrlHint": "Heroku 기본 URL 도움말",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "이메일 숨기기",
     "imageProviders": "이미지 제공업체",
     "videoProviders": "비디오 생성",
@@ -7235,7 +7253,8 @@
       "kiro": "무료 티어: 월 50 크레딧(~25K–100K 토큰). ⚠️ Kiro ToS는 서드파티 프록시/하네스 사용을 금지합니다.",
       "codex": "기존 OAuth 흐름으로 OpenAI Codex를 연결합니다.",
       "qwen": "기존 OAuth 흐름으로 Qwen Code를 연결합니다.",
-      "github-models": "github.com/settings/tokens 에서 'models: read' 범위(scope)를 가진 GitHub PAT를 생성하세요."
+      "github-models": "github.com/settings/tokens 에서 'models: read' 범위(scope)를 가진 GitHub PAT를 생성하세요.",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider}은 공급자 기본 모델 ID를 허용합니다. /models에서 가져오거나 라우팅을 위한 사용자 정의 ID를 추가하세요.",
     "bedrockModelsDescription": "Amazon Bedrock 모델은 AWS 지역별로 범위가 지정됩니다. /models에서 가져오거나 선택한 지역에서 활성화된 Bedrock 모델 ID를 추가하세요.",
@@ -8102,6 +8121,8 @@
     "resetAwareDesc": "남은 할당량이 양호하고 재설정이 가까운 계정을 선호합니다.",
     "quotaWeighted": "할당량 가중치 적용",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "만료 우선",
+    "expiryFirstDesc": "그대로 두면 사용되지 않고 만료될 할당량을 가진 계정을 먼저 사용합니다. 남은 양이 가장 많고 재설정이 가장 가까운 계정이 먼저 선택됩니다.",
     "strictRandom": "완전 무작위",
     "strictRandomDesc": "셔플 덱 — 다시 섞기 전에 각 계정을 한 번씩 사용합니다",
     "stickyLimit": "고정 한도",
@@ -8814,6 +8835,8 @@
     "retentionUsageHistory": "이용내역(일)",
     "retentionMemoryEntries": "메모리 항목(일)",
     "retentionXpAuditLog": "XP 감사 로그 보존 기간(일)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "보존 설정 저장",
     "storageAutoVacuumMode": "자동 VACUUM 모드",
     "storageScheduledVacuum": "예약된 VACUUM",
@@ -10265,7 +10288,11 @@
     "mappingInvalidJson": "유효하지 않은 JSON입니다.",
     "mappingMustBeObject": "매핑은 배열이나 원시 값이 아닌 JSON 객체여야 합니다.",
     "mappingValueMustBeString": "“{key}” 키의 값은 문자열이어야 합니다.",
-    "save": "저장"
+    "save": "저장",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -11992,6 +12019,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "새로 고침",
     "clearAll": "Clear All",
+    "clearAllConfirm": "이 캐시의 모든 항목이 삭제됩니다. 이 작업은 되돌릴 수 없습니다.",
     "memoryEntries": "메모리 항목",
     "memoryEntriesSub": "인메모리 LRU",
     "dbEntries": "DB 항목",
@@ -12876,6 +12904,8 @@
     },
     "attempts": "시도 횟수",
     "detail": {
+      "tabOverview": "개요",
+      "tabPayloads": "페이로드",
       "omittedHttpAttempts": "HTTP 전송 {count}개가 보관되지 않았습니다",
       "noHttpResponse": "HTTP 응답이 관찰되지 않았습니다",
       "transportError": "전송 오류",

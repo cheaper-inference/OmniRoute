@@ -46,7 +46,7 @@ A boolean flag is considered **enabled** when its effective value is `"true"`,
 
 ## Flag Catalog
 
-124 flags across 6 categories. **Default** is the definition default — the value
+125 flags across 6 categories. **Default** is the definition default — the value
 used when neither a DB override nor an environment variable is present.
 
 ### Security (11)
@@ -123,7 +123,7 @@ Invalid enum values and unreadable feature-flag storage fail closed. Neither opt
 priced spend or a failed pricing lookup. Enforcement and the administrator report resolve the
 same effective policy.
 
-### Runtime (61)
+### Runtime (62)
 
 | Key                                            | Type    | Default | Restart | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------------------------------------------- | ------- | ------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -190,6 +190,7 @@ same effective policy.
 | `SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED`       | boolean | `false` |         | Let `POST /v1/systemone` serve `ollama-local/<model>` decisions models on the local Ollama configured in the existing `ollama-local` connection (its base URL, never a request field) (#14667). Ollama's own limits apply before any upstream call: 2-26 candidates per choice/score question, at most 64 questions, no chat sampling fields, raw base64 images only. Off by default: those model ids are refused with a 400 and no upstream call.                                                                                                                                                                                              |
 | `COMBO_JEV_STRATEGY_ENABLED`                   | boolean | `false` |         | Let combos that use the `jev` strategy ask TypeSafe System One (Jev) which of their models should answer each request (#15279). Every routed request then sends a bounded excerpt of the conversation to api.typesafe.ai and draws paid TypeSafe usage on the configured `typesafe` connection; a stored TypeSafe key alone never turns it on. Off by default: jev combos make no TypeSafe call and keep the operator's preference order.                                                                                                                                                                                                       |
 | `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false` |         | Let an automatic web search (no explicit `provider`) use a connected Codex (ChatGPT) account through `codex-search`: as the last resort ahead of the keyless providers when no credentialed search provider is usable, and as the failover alternate (#17933). Each such search spends ChatGPT subscription quota and takes about 10–40 s. Off by default: `codex-search` runs only when a request names it explicitly.                                                                                                                                                                                                                         |
+| `CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER`   | boolean | `false` |         | For Antigravity / Code Assist onboarding, an account whose `loadCodeAssist` answer lists `ineligibleTiers` and marks no allowed tier as default onboards with `legacy-tier` instead of its `currentTier` (#18060), matching the Antigravity-Manager `fetch_project_id` order. Not yet confirmed on a real restricted account. Off by default: such an account keeps onboarding with its `currentTier`.                                                                                                                                                                                                                                          |
 
 ### CLI (5)
 
@@ -287,10 +288,10 @@ Returns every flag with its effective value, source, and a summary.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 124 flags
+    // ... all 125 flags
   ],
   "summary": {
-    "total": 124,
+    "total": 125,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

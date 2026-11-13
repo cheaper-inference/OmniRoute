@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "Uravnoteži preostalo kvoto glede na ponastavitve na 5 ur in tedenske ponastavitve, nato pa med podobno ocenjenimi krožno razporeja zahteve",
     "quotaWeighted": "Uteženo glede na kvoto",
     "quotaWeightedDesc": "Preskoči račune z izčrpano kvoto, nato pa med preostalimi izbira sorazmerno s preostalo kvoto, deljeno z obremenitvijo zaradi zahtev v teku. Obstoječi pogovori ostanejo pripeti.",
+    "expiryFirst": "Najprej potekajoče",
+    "expiryFirstDesc": "Najprej porabi račun, katerega kvota bi sicer potekla neporabljena: prvi je račun z največjim ostankom in najbližjo ponastavitvijo.",
     "strictRandom": "Strogo naključno",
     "strictRandomDesc": "Premešani komplet — vsak model se uporabi enkrat pred ponovnim mešanjem",
     "fusion": "Združevanje",
@@ -4033,6 +4035,11 @@
         "when": "Zahteve usmerjate prek več računov s telemetrijo kvot in različnimi obdobji ponastavitve.",
         "avoid": "Telemetrija kvot za večino računov ni na voljo.",
         "example": "Dajte prednost računu s tedensko kvoto, ki je 60 % porabljena in se ponastavi jutri, pred računom, katerega kvota je 80 % porabljena in se ponastavi pozneje."
+      },
+      "expiry-first": {
+        "when": "Zahteve usmerjate prek računov, katerih kvote se ponastavljajo po različnih urnikih, in želite porabiti kvoto, ki bi sicer potekla neporabljena.",
+        "avoid": "Za večino računov telemetrija kvot ni na voljo ali pa potrebujete stabilen vrstni red, ki ne upošteva časa ponastavitve.",
+        "example": "Dajte prednost računu z 80 % preostale kvote, ki se ponastavi čez 39 minut, pred računom z 48 % preostale kvote, ki se ponastavi čez 9 ur — kvota tik pred potekom se porabi, preden propade."
       },
       "strict-random": {
         "when": "Uporabite, ko želite popolnoma enakomerno porazdelitev — vsak model se uporabi enkrat, preden se kateri koli ponovno uporabi.",
@@ -4249,6 +4256,13 @@
         "tip1": "Za ponudnike s telemetrijo kvot uporabite izrecne korake računov ali usmerjanje na podlagi oznak računov.",
         "tip2": "Prilagodite uteži za sejo in teden, kadar je kratkoročno izčrpanje bolj tvegano.",
         "tip3": "Pas izenačenosti naj bo ozek, da se enakovredni računi še vedno pravično izmenjujejo."
+      },
+      "expiry-first": {
+        "title": "Najprej kvota, ki poteka",
+        "description": "Razvrsti račune glede na pritisk porabe: velika preostala kvota blizu roka ponastavitve je prva.",
+        "tip1": "Zahteva telemetrijo kvot ponudnika; računi brez nje ohranijo naveden prednostni vrstni red.",
+        "tip2": "Skoraj enake ocene se izmenjujejo znotraj pasu izenačenosti, tako da si podobni računi še vedno delijo obremenitev.",
+        "tip3": "Razvrščanje omejite na skupino kvote, po kateri se posamezni model dejansko obračuna."
       },
       "strict-random": {
         "title": "Porazdelitev s premešanim kompletom kart",
@@ -4491,7 +4505,7 @@
     "spend7d": "Poraba v 7 dneh",
     "avgCostPerRequest": "Povprečni strošek na zahtevo",
     "noCostDataDescription": "Začnite pošiljati zahteve, da se tukaj prikažejo podatki o stroških. Stroški se samodejno spremljajo za vse ponudnike.",
-    "spendToday": "Današnja poraba",
+    "spendToday": "Poraba za 1 dan",
     "overviewLoadFailed": "Pregleda stroškov ni bilo mogoče naložiti",
     "overviewDescription": "Razčlenitev porabe v realnem času za vse povezane ponudnike in modele",
     "providerShare": "Delež po ponudnikih",
@@ -5689,6 +5703,7 @@
     "usageTracking": "Spremljanje porabe",
     "securityDesc": "Nastavite geslo, da zaščitite nadzorno ploščo, ali pa ta korak za zdaj preskočite.",
     "securityDescSkipWarning": "⚠️ Brez gesla med nastavitvijo ne boste mogli dodati ponudnikov. Dodate jih lahko pozneje na nadzorni plošči, ko nastavite geslo.",
+    "passwordAlreadySet": "Geslo za nadzorno ploščo je že nastavljeno. Pozneje ga lahko spremenite v Nastavitvah.",
     "providerDesc": "Povežite svojega prvega ponudnika umetne inteligence. Več jih lahko dodate pozneje.",
     "providerRequiresPassword": "Če želite dodati ponudnike, morate najprej nastaviti geslo. Vrnite se na korak za varnost in nastavite geslo ali pa ponudnike dodajte pozneje na nadzorni plošči.",
     "apiKeyRequired": "Ključ API-ja (obvezno)",
@@ -6061,6 +6076,8 @@
     "importFromModels": "Uvozi iz /models",
     "modelsImported": "Uvoženih modelov: {count}",
     "allModelsAlreadyImported": "Vsi modeli so že uvoženi",
+    "providerPublishesNoModelList": "Ta ponudnik ne objavlja seznama modelov — njegov vgrajeni katalog je posodobljen",
+    "modelsNoLongerListed": "{count, plural, one {# model ni več naveden pri ponudniku} two {# modela nista več navedena pri ponudniku} few {# modeli niso več navedeni pri ponudniku} other {# modelov ni več navedenih pri ponudniku}}",
     "noNewModelsToImport": "Ni novih modelov za uvoz — vsi modeli so že v registru ali na seznamu modelov po meri",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Odkrivanje modela ni uspelo {time}",
@@ -6746,6 +6763,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Označba mesta za spletni piškotek Grok",
     "herokuBaseUrlHint": "Namig za osnovni URL storitve Heroku",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Skrij e-poštni naslov",
     "imageProviders": "Ponudniki slik",
     "videoProviders": "Ustvarjanje videoposnetkov",
@@ -7244,7 +7262,8 @@
       "kiro": "Brezplačna raven: 50 dobroimetij/mesec (~25.000–100.000 žetonov). ⚠️ Pogoji uporabe storitve Kiro prepovedujejo uporabo posrednikov ali ogrodij tretjih oseb.",
       "codex": "Povežite OpenAI Codex z obstoječim postopkom OAuth.",
       "qwen": "Povežite Qwen Code z obstoječim postopkom OAuth.",
-      "github-models": "Ustvarite GitHub PAT z obsegom »models: read« na github.com/settings/tokens"
+      "github-models": "Ustvarite GitHub PAT z obsegom »models: read« na github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} sprejema izvorne ID-je modelov ponudnika. Uvozite jih iz /models ali dodajte ID-je po meri za usmerjanje.",
     "bedrockModelsDescription": "Modeli Amazon Bedrock so omejeni na regijo AWS. Uvozite jih iz /models ali dodajte ID-je modelov Bedrock, omogočene v izbrani regiji.",
@@ -8102,6 +8121,8 @@
     "resetAwareDesc": "Daj prednost računom z zadostno preostalo kvoto in bližnjimi ponastavitvami",
     "quotaWeighted": "Uteženo glede na kvoto",
     "quotaWeightedDesc": "Preskoči račune z izčrpano kvoto, nato pa med preostalimi izbira sorazmerno s preostalo kvoto, deljeno s trenutno obremenitvijo. Obstoječi pogovori ostanejo pripeti.",
+    "expiryFirst": "Najprej potekajoče",
+    "expiryFirstDesc": "Najprej porabi račun, katerega kvota bi sicer potekla neporabljena: prvi je račun z največjim ostankom in najbližjo ponastavitvijo.",
     "strictRandom": "Strogo naključno",
     "strictRandomDesc": "Premešaj komplet — vsak račun uporabi enkrat pred ponovnim mešanjem",
     "stickyLimit": "Omejitev vezave",
@@ -8814,6 +8835,8 @@
     "retentionUsageHistory": "Zgodovina uporabe (dni)",
     "retentionMemoryEntries": "Vnosi v pomnilnik (dni)",
     "retentionXpAuditLog": "Revizijski dnevnik XP (dni)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Shrani nastavitve hrambe",
     "storageAutoVacuumMode": "Način samodejnega izvajanja VACUUM",
     "storageScheduledVacuum": "Načrtovani VACUUM",
@@ -10265,7 +10288,11 @@
     "mappingInvalidJson": "Neveljaven JSON.",
     "mappingMustBeObject": "Preslikava mora biti objekt JSON, ne polje ali primitivna vrednost.",
     "mappingValueMustBeString": "Vrednost ključa »{key}« mora biti niz.",
-    "save": "Shrani"
+    "save": "Shrani",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -11992,6 +12019,7 @@
     "description": "Spremljajte učinkovitost predpomnilnika pozivov ponudnika in lokalno ponovno uporabo semantičnih odgovorov.",
     "refresh": "Osveži",
     "clearAll": "Počisti semantični predpomnilnik",
+    "clearAllConfirm": "Vsi vnosi v tem predpomnilniku bodo izbrisani. Tega dejanja ni mogoče razveljaviti.",
     "memoryEntries": "Zapisi v pomnilniku",
     "memoryEntriesSub": "LRU v pomnilniku",
     "dbEntries": "Zapisi v podatkovni zbirki",
@@ -12876,6 +12904,8 @@
     },
     "attempts": "poskusi",
     "detail": {
+      "tabOverview": "Pregled",
+      "tabPayloads": "Koristne vsebine",
       "omittedHttpAttempts": "{count} pošiljanj HTTP ni bilo shranjenih",
       "noHttpResponse": "Odgovor HTTP ni bil zaznan",
       "transportError": "Napaka prenosa",

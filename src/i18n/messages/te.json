@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "5గం మరియు వారపు రీసెట్‌లకు వ్యతిరేకంగా మిగిలిన కోటాను బ్యాలెన్స్ చేస్తుంది, ఆపై రౌండ్-రాబిన్‌లు సారూప్య స్కోర్‌లు",
     "quotaWeighted": "కోటా-వెయిటెడ్",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "గడువు-ముందు",
+    "expiryFirstDesc": "లేకపోతే ఉపయోగించకుండానే గడువు ముగిసే కోటా ఉన్న ఖాతాను ముందుగా వినియోగిస్తుంది: అత్యధిక మిగులు మరియు అత్యంత సమీప రీసెట్ ఉన్న ఖాతా ముందు వెళ్తుంది.",
     "strictRandom": "స్ట్రిక్ట్ రాండమ్",
     "strictRandomDesc": "షఫుల్ డెక్ — మళ్లీ షఫుల్ చేయడానికి ముందు ప్రతి మోడల్ను ఒక్కసారి ఉపయోగిస్తుంది",
     "fusion": "ఫ్యూజన్",
@@ -4033,6 +4035,11 @@
         "when": "మీరు కోటా టెలిమెట్రీ మరియు విభిన్న రీసెట్ విండోలతో బహుళ ఖాతాలకు వెళ్లవచ్చు.",
         "avoid": "చాలా ఖాతాలకు కోటా టెలిమెట్రీ అందుబాటులో లేదు.",
         "example": "తర్వాత 80% ఖాతా రీసెట్ చేయడం కంటే రేపు 60% వీక్లీ ఖాతా రీసెట్‌ని ఇష్టపడండి."
+      },
+      "expiry-first": {
+        "when": "మీరు వేర్వేరు షెడ్యూల్‌లలో కోటాలు రీసెట్ అయ్యే ఖాతాల మధ్య రూట్ చేస్తారు మరియు లేకపోతే ఉపయోగించకుండానే గడువు ముగిసే కోటాను వినియోగించాలనుకుంటారు.",
+        "avoid": "చాలా ఖాతాలకు కోటా టెలిమెట్రీ లేదు, లేదా రీసెట్ సమయాన్ని పట్టించుకోని స్థిరమైన క్రమం మీకు అవసరం.",
+        "example": "9 గంటల్లో రీసెట్ అయ్యే 48% మిగిలిన ఖాతా కంటే 39 నిమిషాల్లో రీసెట్ అయ్యే 80% మిగిలిన ఖాతాకు ప్రాధాన్యం ఇవ్వండి — గడువు దగ్గరపడిన కోటా వృథా కాకముందే వినియోగించబడుతుంది."
       },
       "strict-random": {
         "when": "ప్రతి మోడల్ను మళ్లీ ఉపయోగించే ముందు ఒక్కోసారి ఉపయోగిస్తూ, పూర్తిగా సమానమైన పంపిణీ కావాలనుకున్నప్పుడు ఉపయోగించండి.",
@@ -4249,6 +4256,13 @@
         "tip1": "కోటా టెలిమెట్రీ ఉన్న ప్రొవైడర్ల కోసం స్పష్టమైన ఖాతా దశలు లేదా ఖాతా-ట్యాగ్ రూటింగ్‌ని ఉపయోగించండి.",
         "tip2": "స్వల్పకాలిక అలసట మరింత ప్రమాదకరం అయినప్పుడు సెషన్ vs వారపు బరువులు ట్యూన్ చేయండి.",
         "tip3": "టై బ్యాండ్‌ను చిన్నగా ఉంచండి, తద్వారా సమానమైన ఖాతాలు ఇప్పటికీ చాలా చక్కగా తిరుగుతాయి."
+      },
+      "expiry-first": {
+        "title": "గడువు ముగుస్తున్న కోటా ముందు",
+        "description": "వినియోగ ఒత్తిడి ప్రకారం ఖాతాలకు ర్యాంక్ ఇస్తుంది: రీసెట్ గడువుకు దగ్గరగా ఉన్న అధిక మిగులు కోటా ముందు వెళ్తుంది.",
+        "tip1": "ప్రొవైడర్ కోటా టెలిమెట్రీ అవసరం; అది లేని ఖాతాలు జాబితాలోని ప్రాధాన్యత క్రమాన్ని కొనసాగిస్తాయి.",
+        "tip2": "దాదాపు సమానమైన స్కోర్‌లు టై బ్యాండ్‌లో తిరుగుతాయి, కాబట్టి సారూప్య ఖాతాలు ఇప్పటికీ లోడ్‌ను పంచుకుంటాయి.",
+        "tip3": "ప్రతి మోడల్ వాస్తవంగా బిల్ అయ్యే కోటా బకెట్‌కే ర్యాంకింగ్‌ను పరిమితం చేయండి."
       },
       "strict-random": {
         "title": "షఫుల్ డెక్ పంపిణీ",
@@ -4491,7 +4505,7 @@
     "spend7d": "7 రోజుల ఖర్చు",
     "avgCostPerRequest": "అభ్యర్థనకు సగటు ఖర్చు",
     "noCostDataDescription": "ఖర్చు డేటా ఇక్కడ కనిపించడానికి అభ్యర్థనలు చేయడం ప్రారంభించండి. అన్ని ప్రొవైడర్ల ఖర్చులు స్వయంచాలకంగా ట్రాక్ చేయబడతాయి.",
-    "spendToday": "ఈరోజు ఖర్చు",
+    "spendToday": "1 రోజు ఖర్చు",
     "overviewLoadFailed": "ఖర్చు అవలోకనాన్ని లోడ్ చేయడం విఫలమైంది",
     "overviewDescription": "కనెక్ట్ చేసిన అన్ని ప్రొవైడర్లు మరియు మోడల్లలో నిజ-సమయ ఖర్చు విభజన",
     "providerShare": "ప్రొవైడర్ వాటా",
@@ -5689,6 +5703,7 @@
     "usageTracking": "వినియోగ ట్రాకింగ్",
     "securityDesc": "మీ డ్యాష్బోర్డ్ను రక్షించడానికి పాస్వర్డ్ను సెట్ చేయండి లేదా ప్రస్తుతానికి దాటవేయండి.",
     "securityDescSkipWarning": "⚠️ పాస్వర్డ్ లేకుండా, సెటప్ సమయంలో మీరు ప్రొవైడర్లను జోడించలేరు. పాస్వర్డ్ను సెట్ చేసిన తర్వాత డ్యాష్బోర్డ్ నుండి వాటిని జోడించవచ్చు.",
+    "passwordAlreadySet": "డాష్‌బోర్డ్ పాస్‌వర్డ్ ఇప్పటికే సెట్ చేయబడింది. మీరు దానిని తర్వాత సెట్టింగ్‌లలో మార్చవచ్చు.",
     "providerDesc": "మీ మొదటి AI ప్రొవైడర్ను కనెక్ట్ చేయండి. తర్వాత మరిన్ని జోడించవచ్చు.",
     "providerRequiresPassword": "ప్రొవైడర్లను జోడించడానికి మీరు ముందుగా పాస్వర్డ్ను సెట్ చేయాలి. దయచేసి భద్రతా దశకు తిరిగి వెళ్లి పాస్వర్డ్ను సెట్ చేయండి లేదా తర్వాత డ్యాష్బోర్డ్ నుండి ప్రొవైడర్లను జోడించండి.",
     "apiKeyRequired": "API కీ (తప్పనిసరి)",
@@ -6061,6 +6076,8 @@
     "importFromModels": "/models నుండి దిగుమతి చేయండి",
     "modelsImported": "{count} మోడళ్లు దిగుమతి చేయబడ్డాయి",
     "allModelsAlreadyImported": "అన్ని మోడళ్లు ఇప్పటికే దిగుమతి చేయబడ్డాయి",
+    "providerPublishesNoModelList": "ఈ ప్రొవైడర్ ఏ మోడల్ జాబితాను ప్రచురించదు — దీని అంతర్నిర్మిత కాటలాగ్ తాజాగా ఉంది",
+    "modelsNoLongerListed": "{count, plural, one {# మోడల్ ఇకపై ప్రొవైడర్ ద్వారా జాబితా చేయబడలేదు} other {# మోడళ్లు ఇకపై ప్రొవైడర్ ద్వారా జాబితా చేయబడలేదు}}",
     "noNewModelsToImport": "దిగుమతి చేయడానికి కొత్త మోడళ్లు లేవు — అన్ని మోడళ్లు ఇప్పటికే రిజిస్ట్రీ లేదా అనుకూల మోడళ్ల జాబితాలో ఉన్నాయి",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "మోడల్ డిస్కవరీ విఫలమైంది {time}",
@@ -6737,6 +6754,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Grok వెబ్ కుకీ ప్లేస్హోల్డర్",
     "herokuBaseUrlHint": "Heroku బేస్ URL సూచన",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "ఇమెయిల్ను దాచు",
     "imageProviders": "చిత్ర ప్రొవైడర్లు",
     "videoProviders": "వీడియో జనరేషన్",
@@ -7235,7 +7253,8 @@
       "kiro": "ఉచిత శ్రేణి: 50 క్రెడిట్‌లు/నెల (~25K–100K టోకెన్‌లు). ⚠️ Kiro ToS థర్డ్-పార్టీ ప్రాక్సీ/హార్నెస్ వినియోగాన్ని నిషేధిస్తుంది.",
       "codex": "ప్రస్తుత OAuth flowతో OpenAI Codexని కనెక్ట్ చేయండి.",
       "qwen": "ప్రస్తుత OAuth flowతో Qwen Codeని కనెక్ట్ చేయండి.",
-      "github-models": "github.com/settings/tokens వద్ద 'models: read' స్కోప్‌తో GitHub PATని సృష్టించండి"
+      "github-models": "github.com/settings/tokens వద్ద 'models: read' స్కోప్‌తో GitHub PATని సృష్టించండి",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} ప్రొవైడర్-స్థానిక మోడల్ IDలను అంగీకరిస్తుంది. /మోడల్స్ నుండి దిగుమతి చేయండి లేదా రూటింగ్ కోసం అనుకూల IDలను జోడించండి.",
     "bedrockModelsDescription": "అమెజాన్ బెడ్‌రాక్ మోడల్‌లు AWS ప్రాంతం ద్వారా స్కోప్ చేయబడ్డాయి. /మోడల్స్ నుండి దిగుమతి చేయండి లేదా ఎంచుకున్న ప్రాంతంలో ప్రారంభించబడిన బెడ్‌రాక్ మోడల్ IDలను జోడించండి.",
@@ -8102,6 +8121,8 @@
     "resetAwareDesc": "ఆరోగ్యకరమైన మిగిలిన కోటా మరియు సమీప రీసెట్‌లతో ఖాతాలకు ప్రాధాన్యత ఇవ్వండి",
     "quotaWeighted": "కోటా-ఆధారితం",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "గడువు-ముందు",
+    "expiryFirstDesc": "లేకపోతే ఉపయోగించకుండానే గడువు ముగిసే కోటా ఉన్న ఖాతాను ముందుగా వినియోగిస్తుంది: అత్యధిక మిగులు మరియు అత్యంత సమీప రీసెట్ ఉన్న ఖాతా ముందు వెళ్తుంది.",
     "strictRandom": "ఖచ్చితమైన యాదృచ్ఛిక ఎంపిక",
     "strictRandomDesc": "డెక్ను షఫుల్ చేస్తుంది — మళ్లీ షఫుల్ చేయడానికి ముందు ప్రతి ఖాతాను ఒక్కసారి ఉపయోగిస్తుంది",
     "stickyLimit": "స్టికీ పరిమితి",
@@ -8814,6 +8835,8 @@
     "retentionUsageHistory": "వినియోగ చరిత్ర (రోజులు)",
     "retentionMemoryEntries": "మెమరీ ఎంట్రీలు (రోజులు)",
     "retentionXpAuditLog": "XP ఆడిట్ లాగ్ (రోజులు)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "రిటెన్షన్ సెట్టింగ్‌లను సేవ్ చేయండి",
     "storageAutoVacuumMode": "ఆటో వాక్యూమ్ మోడ్",
     "storageScheduledVacuum": "షెడ్యూల్ చేయబడిన వాక్యూమ్",
@@ -10265,7 +10288,11 @@
     "mappingInvalidJson": "చెల్లని JSON.",
     "mappingMustBeObject": "మ్యాపింగ్ తప్పనిసరిగా JSON ఆబ్జెక్ట్ అయి ఉండాలి, అర్రే లేదా ప్రిమిటివ్ విలువ కాకూడదు.",
     "mappingValueMustBeString": "“{key}” కీ కోసం విలువ తప్పనిసరిగా స్ట్రింగ్ అయి ఉండాలి.",
-    "save": "సేవ్ చేయండి"
+    "save": "సేవ్ చేయండి",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman ఇంజిన్",
@@ -11992,6 +12019,7 @@
     "description": "ప్రొవైడర్ ప్రాంప్ట్ క్యాష్ సామర్థ్యాన్ని మరియు స్థానిక సెమాంటిక్ ప్రతిస్పందన పునర్వినియోగాన్ని పర్యవేక్షించండి.",
     "refresh": "రిఫ్రెష్ చేయండి",
     "clearAll": "సెమాంటిక్ క్యాష్ను క్లియర్ చేయండి",
+    "clearAllConfirm": "ఈ కాష్‌లోని అన్ని ఎంట్రీలు తొలగించబడతాయి. దీన్ని రద్దు చేయలేరు.",
     "memoryEntries": "మెమరీ ఎంట్రీలు",
     "memoryEntriesSub": "ఇన్-మెమరీ LRU",
     "dbEntries": "DB ఎంట్రీలు",
@@ -12876,6 +12904,8 @@
     },
     "attempts": "ప్రయత్నాలు",
     "detail": {
+      "tabOverview": "అవలోకనం",
+      "tabPayloads": "పేలోడ్లు",
       "omittedHttpAttempts": "{count} HTTP పంపకాలు నిల్వ చేయబడలేదు",
       "noHttpResponse": "HTTP ప్రతిస్పందన గమనించబడలేదు",
       "transportError": "రవాణా లోపం",

@@ -17,7 +17,7 @@ It provides a single OpenAI-compatible endpoint (`/v1/*`) and routes traffic acr
 
 Core capabilities:
 
-- OpenAI-compatible API surface for CLI/tools (388 providers, 159 executor modules)
+- OpenAI-compatible API surface for CLI/tools (393 providers, 159 executor modules)
 - Request/response translation across provider formats
 - Model combo fallback (multi-model sequence)
 - Structured combo steps (`provider + model + connection`) with runtime ordering by `compositeTiers`
@@ -374,10 +374,10 @@ relying on a static combo definition. It powers the `auto/*` model prefix family
 
 Key capabilities:
 
-- **20 routing strategies** (priority, weighted, fill-first, round-robin, P2C, random,
-  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
+- **22 routing strategies** (priority, weighted, fill-first, round-robin, P2C, random,
+  least-used, cost-optimized, reset-aware, reset-window, expiry-first, headroom, quota-weighted,
   strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
-  pipeline) —
+  pipeline, jev) —
   auto is the headline addition in v3.8.0; `fusion` (panel fan-out + judge synthesis,
   `open-sse/services/fusion.ts`) is new in v3.8.36.
 - **16-factor scoring**: quota, health, inverse cost, inverse latency, task fit and
@@ -951,6 +951,22 @@ Each provider has a specialized executor extending `BaseExecutor` (in `open-sse/
 | `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                               | Imported API key + Connect-protobuf chat streaming                   |
 
 All other providers (including custom compatible nodes) use the `DefaultExecutor`.
+
+### Automated probes and web-session accounts
+
+Model tests, Test All, combo tests and assessments send real chat requests. A web-session
+provider acts as the signed-in user, so each of those requests would be saved as a
+conversation on that account; automated probes that left such conversations got an account
+suspended (#14780). The chat pipeline therefore refuses every target an automated probe
+reaches whose provider takes a web-session credential, once the target's provider is
+resolved and before a credential is chosen (`src/lib/providers/chatProbePolicy.ts`). The
+refusal is `422` with `error.code` `chat_probe_not_isolated`, and the probe runners report
+it as a skip, not a failure.
+
+An executor that runs every chat in the provider's own no-history mode declares it with
+`ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`); probes to that
+provider are then allowed. ChatGPT Web declares `temporary-chat`. Pin a declaration to its
+mechanism with a test, so the claim cannot outlive the code that makes it true.
 
 ## Provider Compatibility Matrix
 
