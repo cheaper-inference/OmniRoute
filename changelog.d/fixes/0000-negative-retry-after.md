@@ -1,0 +1,1 @@
+- **fix(resilience):** Ignore negative numeric `Retry-After` headers instead of interpreting them as dates far in the future.

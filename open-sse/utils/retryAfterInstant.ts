@@ -51,7 +51,8 @@ export function parseRetryAfterHeader(headers: Headers | null | undefined): stri
   const raw = headers?.get?.("retry-after");
   if (!raw) return null;
   const seconds = Number(raw.trim());
-  if (Number.isFinite(seconds) && seconds > 0) {
+  if (Number.isFinite(seconds)) {
+    if (seconds <= 0) return null;
     const resetAt = new Date(Date.now() + Math.ceil(seconds) * 1000);
     return Number.isFinite(resetAt.getTime()) ? resetAt.toISOString() : null;
   }
