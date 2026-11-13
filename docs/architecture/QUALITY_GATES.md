@@ -222,8 +222,8 @@ Runs on every PR to `main`. Blocks merge on failure.
 The twelve README SVGs under `docs/diagrams/` are generated (`scripts/docs/gen-readme-<name>.mjs`;
 `npm run docs:readme-diagrams` regenerates all of them). Each has a byte-compare unit test
 (`tests/unit/docs/readme-*-svg.test.ts`, job `test-unit`) that fails when the committed file is
-stale — in release mode, or in a PR that edits that SVG; a feature PR leaves the drift to the release
-refresh (see [Generated files and derived baselines](#generated-files-and-derived-baselines-written-at-release)) — and `check:docs-counts` reads canonical numbers from their `<text>` nodes — which is why the
+stale in release mode; in a PR, `check:generated-artifacts` judges an SVG the PR edits and the base's
+drift is left to the release refresh (see [Generated files and derived baselines](#generated-files-and-derived-baselines-written-at-release)) — and `check:docs-counts` reads canonical numbers from their `<text>` nodes — which is why the
 outlining step keeps every outlined string in the file as invisible `<text>`. The SVG canonical-numbers check reads the files listed in
 `SVG_DIAGRAM_FILES` (`scripts/check/check-docs-counts-sync.mjs`): `docs/diagrams/readme-hero.svg`,
 `free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`, `cli-terminal.svg`,
@@ -527,14 +527,22 @@ editable next to a feature.
 **The checks, per gate mode** (`scripts/check/lib/gateMode.mjs`; helper
 `scripts/check/lib/derivedArtifactScope.mjs`):
 
-| Check                                                                  | `release` (push, schedule, release PR, local)  | `pr` (feature PR, queue batch)                                                                                                 |
-| ---------------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `check:agent-skills-sync`                                              | every skill must equal the generator output    | only the skills whose generated text (outside the custom block) or `references/` the PR edits; otherwise `SKIP reason=pr-mode` |
-| README SVG byte-compare tests (`tests/unit/docs/readme-*-svg.test.ts`) | every SVG                                      | only an SVG the PR edits; otherwise skipped with `SKIP reason=pr-mode`                                                         |
-| e2e timings completeness (`tests/unit/balance-e2e-shards.test.ts`)     | every spec has an entry                        | only when the PR edits `e2e-timings.json` (a new spec runs with the median weight)                                             |
-| `check-quality-ratchet.mjs --require-tighten`                          | un-banked improvement fails (unless `_policy`) | improvement reported, never a failure; a regression still fails                                                                |
+| Check                                                                       | `release` (push, schedule, release PR, local)                  | `pr` (feature PR, queue batch)                                                                                                                                                                                  |
+| --------------------------------------------------------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `check:agent-skills-sync`                                                   | every skill must equal the generator output                    | only the skills whose generated text (outside the custom block) or `references/` the PR edits; otherwise `SKIP reason=pr-mode`                                                                                  |
+| `check:generated-artifacts` (README SVGs + e2e timings; needs full history) | every SVG equals its generator; every spec has a timings entry | only the artifacts the PR edits; the rest `SKIP reason=pr-mode`; no diff base → every artifact judged (fail-closed)                                                                                             |
+| README SVG byte-compare tests (`tests/unit/docs/readme-*-svg.test.ts`)      | every SVG                                                      | only an SVG the PR edits, when the base resolves; `test-unit`'s shallow PR checkout has no base, so there the test skips with `SKIP reason=base-unresolved` and `check:generated-artifacts` owns the comparison |
+| e2e timings completeness (`tests/unit/balance-e2e-shards.test.ts`)          | every spec has an entry                                        | same rule as the SVG tests (a new spec runs with the median weight)                                                                                                                                             |
+| `check-quality-ratchet.mjs --require-tighten`                               | un-banked improvement fails (unless `_policy`)                 | improvement reported, never a failure; a regression still fails                                                                                                                                                 |
 
-Release mode is byte-for-byte the behaviour these checks had before the split. The provider-total
+Release mode keeps the verdicts, exit codes and messages these checks had before the split; at most
+one line is added, naming the resolved mode (`[agent-skills-sync] mode=release (auto: local run)`).
+The tests skip through node:test's `{ skip: releaseOnlyUnlessTouched(...) }` option, which
+`check:test-masking` lists in a report-only block (it is neither `.skip(` nor `{ skip: true }`, so it
+does not count as a hard skip). `check:generated-artifacts` must run where the base is resolvable (a
+job with `fetch-depth: 0`, such as `lint`, beside `check:agent-skills-sync`). It is not wired into
+`ci.yml` yet; until it is, CI does not judge an SVG a PR edits, so run
+`npm run check:generated-artifacts -- --mode=pr` locally. The provider-total
 cross-check of `check:docs-counts` ("Provider reference total (doc vs live modules)") is part of the
 counts gate and follows that gate's own modes.
 

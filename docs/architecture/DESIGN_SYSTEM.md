@@ -235,6 +235,8 @@ generator's output (job `test-unit`).
   `free-tier-budget` needs `node --import tsx/esm` because its figures come from the live catalog loader in
   `open-sse/config/freeModelCatalog.ts`; the CI consequence of a catalog change is in
   `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Commit the generator and the SVG together.
+  A stale SVG fails in release mode; in a feature PR, `npm run check:generated-artifacts` judges only an
+  SVG the PR edits (`docs/architecture/QUALITY_GATES.md` → "Generated files and derived baselines").
 - **Proof.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renders a file the way GitHub serves
   it (an `<img>` tag, camo's `Content-Security-Policy`, `image/svg+xml`), captures a light and a dark frame
   and reports the external font requests the page made (must be 0).
