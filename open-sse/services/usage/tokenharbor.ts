@@ -88,22 +88,26 @@ export async function getTokenHarborUsage(apiKey: string) {
     const plan = onPlan && planName ? planName : "Free";
     const quotas: Record<string, UsageQuota> = {};
 
-    if (data.activated !== false && data.used_pct !== undefined) {
+    // An account that never called a :free model reports activated: false, used_pct 0 and
+    // reset_at null — the weekly window has not started, but the allowance is fully available.
+    if (data.used_pct !== undefined) {
       quotas["free"] = percentQuota(data.used_pct, data.reset_at, "Free models (weekly)");
     }
     if (onPlan && data.plan_used_pct !== undefined) {
       quotas["pass"] = percentQuota(data.plan_used_pct, data.period_ends_at, planName || "Pass");
     }
     if (balanceUsd !== null) {
-      // credits_* entries render as "Balance (USD) $x" — same shape as usage/deepseek.ts.
-      quotas["credits_usd"] = {
+      // Same `quotas.balance` USD credits-row shape as usage/agentrouter.ts, so the
+      // dashboard renders "$x.xx" (see parseProviderQuotas in quotaParsing.ts).
+      quotas["balance"] = {
         used: 0,
         total: 0,
         remaining: balanceUsd,
-        remainingPercentage: 100,
+        remainingPercentage: balanceUsd > 0 ? 100 : 0,
         resetAt: null,
         unlimited: true,
         currency: "USD",
+        displayName: "Balance (USD)",
       };
     }
 

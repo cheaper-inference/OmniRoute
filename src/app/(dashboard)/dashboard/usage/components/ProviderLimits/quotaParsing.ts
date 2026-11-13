@@ -549,8 +549,10 @@ function parseProviderQuotas(providerId: string, data: any) {
   if (providerId === "claude") return parseClaude(data);
   if (providerId === "deepseek") return parseDeepseek(data);
   if (providerId === "kilocode") return parseKilocode(data);
-  // TokenRouter shares the `quotas.balance` USD credits-row shape (usage/tokenrouter.ts).
-  if (providerId === "agentrouter" || providerId === "tokenrouter") return parseAgentrouter(data);
+  // TokenRouter and TokenHarbor share the `quotas.balance` USD credits-row shape
+  // (usage/tokenrouter.ts, usage/tokenharbor.ts).
+  if (providerId === "agentrouter" || providerId === "tokenrouter" || providerId === "tokenharbor")
+    return parseAgentrouter(data);
   if (providerId === "ollama-cloud") return parseOllamaCloud(data);
   if (providerId === "openrouter") return parseOpenrouter(data);
   return parseGeneric(data);
