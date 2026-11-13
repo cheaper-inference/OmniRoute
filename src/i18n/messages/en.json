@@ -2032,7 +2032,14 @@
     "systemMetricsHost": "VPS / Host",
     "systemMetricsCpuCount": "{count} vCPUs • {platform}",
     "systemMetricsProcessCpu": "OmniRoute (process)",
-    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)",
+    "usageWidgetsTitle": "Usage",
+    "usageWidgetsRange": "Time range",
+    "usageWidgetsError": "Could not load usage data",
+    "usageErrors": "Errors",
+    "usageErrorsDetail": "{success}% success · {fallbacks} fallbacks ({fallbackRate}%)",
+    "usageByCombo": "By combo (requests · tokens)",
+    "usageNoData": "No data in this range"
   },
   "analytics": {
     "title": "Analytics",

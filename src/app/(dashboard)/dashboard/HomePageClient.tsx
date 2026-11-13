@@ -1143,7 +1143,7 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
       )}
 
       {showProviderTopologyOnHome && (
-        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-3">
+        <div className="grid grid-cols-1 items-stretch lg:grid-cols-[2fr_1fr] gap-3">
           <HomeProviderTopologySection
             providers={topologyProviders}
             lastProvider={lastProvider}

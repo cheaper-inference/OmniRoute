@@ -154,7 +154,10 @@ export default function HomeRecentRequests({ enabled = true }: { enabled?: boole
   }, [enabled, load]);
 
   return (
-    <Card padding="sm" className="flex min-w-0 flex-col overflow-hidden h-[300px] sm:h-[420px]">
+    <Card
+      padding="sm"
+      className="flex min-w-0 flex-col overflow-hidden h-[300px] lg:h-0 lg:min-h-full"
+    >
       <div className="pb-2 mb-1 border-b border-border shrink-0">
         <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">
           {t("recentRequests")}
