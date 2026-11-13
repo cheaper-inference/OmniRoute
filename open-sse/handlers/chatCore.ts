@@ -37,6 +37,7 @@ import {
   createTurnInProgressResult,
 } from "./chatCore/turnExecutionGuard.ts";
 import { checkSemanticCache, isSemanticCacheEnabled } from "./chatCore/semanticCache.ts";
+import { snapshotBodyForCacheWrite } from "./chatCore/semanticCacheStore.ts";
 import { checkLifecycle, resolveLifecycle } from "./chatCore/modelLifecyclePolicy.ts";
 import {
   shouldDefaultAllowClassifier,
@@ -1232,7 +1233,8 @@ async function handleChatCoreInner({
   // one, producing 0% hit rate. (#cache-signature-asymmetry)
   // sanitizeChatRequestBody edits its argument in place (renames token fields, replaces
   // messages/tools), so a plain alias would drift away from what the cache read just hashed.
-  const bodyForCacheWrite = body && typeof body === "object" ? { ...body } : body;
+  // A deep snapshot, taken only when the cache is on, also covers nested edits.
+  const bodyForCacheWrite = semanticCacheEnabled ? snapshotBodyForCacheWrite(body) : body;
 
   // ── Phase 9.1: Semantic cache check (temp=0, any streaming mode) ──
   const cacheHit = await checkSemanticCache({

@@ -199,7 +199,9 @@ export async function checkSemanticCache({
         managerResult.entry?.signature ||
         (hitType === "exact" ? requestSignature : managerResult.entry?.hash);
 
-      if (targetSignature) {
+      // getCachedResponse already counted a legacy hit (hits, tokens, hit_count); counting it
+      // again here doubled both. Only a hit served by the manager still needs the record.
+      if (targetSignature && managerResult.entry) {
         recordSemanticCacheHit(targetSignature, tokensSaved);
       }
 

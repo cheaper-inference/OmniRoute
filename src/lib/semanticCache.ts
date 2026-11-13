@@ -451,10 +451,13 @@ export function setCachedResponse(signature, model, response, tokensSaved = 0, t
   }
 
   // 1. Memory cache. An oversized answer drops any older entry for the key so it cannot go stale.
+  // The tier keeps its own copy: the caller still edits the answer in place after storing it
+  // (model echo for one client), and that edit must not reach the next caller.
   if (payloadJson !== undefined && exceedsEntryCap(payloadJson)) {
     getMemoryCache().delete(signature);
   } else {
-    getMemoryCache().set(signature, { response, tokensSaved }, ttl);
+    const own = payloadJson !== undefined ? JSON.parse(payloadJson) : response;
+    getMemoryCache().set(signature, { response: own, tokensSaved }, ttl);
   }
 
   // 2. SQLite

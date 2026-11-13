@@ -47,6 +47,20 @@ const DEFAULT_DEPS: SemanticCacheStoreDeps = {
   setCachedResponse: defaultSetCachedResponse,
 };
 
+/**
+ * Copy of the request body that the cache write keys on. handleChatCore edits `body` in place
+ * afterwards (sanitizing renames token fields, fills empty tool schemas, strips empty names),
+ * so an alias made the write key differ from the read key and the entry was never found again.
+ * Only the signature fields are copied; a body that cannot be copied is used as is.
+ */
+export function snapshotBodyForCacheWrite<T>(body: T): T {
+  try {
+    return structuredClone(body);
+  } catch {
+    return body;
+  }
+}
+
 export function storeSemanticCacheResponse(
   args: {
     enabled: boolean;

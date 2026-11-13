@@ -1,0 +1,1 @@
+- **fix(cache):** a legacy semantic-cache hit counts once (it counted 2 hits and twice the tokens saved); a request whose body is rewritten before the response is stored is found by the next identical request; and a model-alias echo for one caller no longer changes the cached answer served to the next.
