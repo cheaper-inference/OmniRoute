@@ -90,10 +90,12 @@ test("gaps at the boundaries are not counted (only interior gaps)", () => {
   assert.deepEqual(r.gaps, []);
 });
 
-test("ignores non-.sql files entirely", () => {
+test("flags every non-.sql entry (the runner would silently skip it)", () => {
+  // Was "ignores non-.sql files entirely": a `.SQL`, `.sql.bak` or `x.sql ` file passed the
+  // gate and was never applied by the runner (R3-5). Every entry must be a valid `.sql` now.
   const files = ["001_a.sql", "002_b.sql", "README.md", ".keep"];
   const r = findMigrationAnomalies(files, EMPTY, EMPTY) as Anomalies;
-  assert.deepEqual(r.badNames, []);
+  assert.deepEqual(r.badNames.sort(), [".keep", "README.md"]);
   assert.deepEqual(r.gaps, []);
   assert.deepEqual(r.duplicates, []);
 });
@@ -209,8 +211,15 @@ test("stale-enforcement: live repo KNOWN_DUPLICATE_VERSIONS are all still real (
 // future" rule is deterministic.
 
 const NOW = new Date("2026-11-20T12:00:00Z");
-const MIGRATIONS_DIR = path.resolve(import.meta.dirname, "../../src/lib/db/migrations");
+// The guard in tests/unit/db/migration-version-ordering.test.ts re-runs this file against a copy
+// of the real directory that already holds a timestamped migration, so nothing below may assume
+// the real tree has none.
+const MIGRATIONS_DIR = path.resolve(
+  process.env.OMNIROUTE_TEST_MIGRATIONS_SOURCE_DIR ||
+    path.resolve(import.meta.dirname, "../../src/lib/db/migrations")
+);
 const realFilenames = () => fs.readdirSync(MIGRATIONS_DIR).filter((f) => f.endsWith(".sql"));
+const realTimestampedCount = () => realFilenames().filter((f) => /^\d{14}_/.test(f)).length;
 
 test("LEGACY_MIGRATION_MAX is frozen at 239 and equals the highest old number on disk", () => {
   assert.equal(LEGACY_MIGRATION_MAX, 239);
@@ -362,8 +371,9 @@ test("removing the last three old migrations reports each missing number", () =>
   const files = ["001_a.sql", "002_b.sql"];
   const r = find(files, EMPTY, EMPTY, { now: NOW, legacyMax: 5 });
   assert.deepEqual(r.missingLegacyTop, ["003", "004", "005"]);
+  // A truncated top can never be released by KNOWN_GAPS (R3-8): the allowlist is ignored.
   const allowed = find(files, EMPTY, new Set(["004"]), { now: NOW, legacyMax: 5 });
-  assert.deepEqual(allowed.missingLegacyTop, ["003", "005"]);
+  assert.deepEqual(allowed.missingLegacyTop, ["003", "004", "005"]);
 });
 
 test("removing the first old migration (001) is detected", () => {
@@ -413,12 +423,26 @@ test("the gate script exits 0 on the real tree and prints both counts", async ()
   const run = spawnSync(process.execPath, ["scripts/check/check-migration-numbering.mjs"], {
     cwd: root,
     encoding: "utf-8",
+    env: gateEnv(),
   });
   assert.equal(run.status, 0, run.stderr);
   assert.match(run.stdout, /antiga\(s\) 001–239, \d+ por data/);
 });
 
 // --- End-to-end: the gate's main() against a scratch copy of the migrations dir ---------
+
+/**
+ * The gate's base comparison reads GITHUB_EVENT_NAME / GITHUB_BASE_REF / CI. When this suite
+ * runs inside a PR job, those leak from the runner: strip them so the gate under test only
+ * sees what each case sets.
+ */
+function gateEnv(extra: Record<string, string> = {}): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = { ...process.env };
+  for (const key of Object.keys(env)) {
+    if (key.startsWith("GITHUB_") || key === "CI" || key.startsWith("MIGRATION_")) delete env[key];
+  }
+  return { ...env, ...extra };
+}
 
 test("gate main() end-to-end: accepts a new timestamp file, rejects bad names and a removed top", async () => {
   const { spawnSync } = await import("node:child_process");
@@ -432,13 +456,18 @@ test("gate main() end-to-end: accepts a new timestamp file, rejects bad names an
     const dir = path.join(tmp, "src/lib/db/migrations");
     fs.mkdirSync(dir, { recursive: true });
     for (const f of realFilenames()) fs.writeFileSync(path.join(dir, f), "-- copy\n");
-    const gate = () => spawnSync(process.execPath, [script], { cwd: tmp, encoding: "utf-8" });
+    const gate = () =>
+      spawnSync(process.execPath, [script], { cwd: tmp, encoding: "utf-8", env: gateEnv() });
 
-    const fresh = `${formatMigrationTimestamp(new Date(Date.now() - 60_000))}_add_x.sql`;
+    // A past stamp no real file uses, so the copy gains exactly one timestamped migration.
+    const taken = new Set(realFilenames().map((f) => f.slice(0, 14)));
+    let freshMs = Date.now() - 120_000;
+    while (taken.has(formatMigrationTimestamp(new Date(freshMs)))) freshMs -= 1_000;
+    const fresh = `${formatMigrationTimestamp(new Date(freshMs))}_add_x.sql`;
     fs.writeFileSync(path.join(dir, fresh), "-- new\n");
     let r = gate();
     assert.equal(r.status, 0, r.stderr);
-    assert.match(r.stdout, /1 por data/);
+    assert.match(r.stdout, new RegExp(`, ${realTimestampedCount() + 1} por data;`));
 
     fs.writeFileSync(path.join(dir, "240_too_late.sql"), "-- bad\n");
     r = gate();
@@ -452,6 +481,144 @@ test("gate main() end-to-end: accepts a new timestamp file, rejects bad names an
     r = gate();
     assert.equal(r.status, 1);
     assert.match(r.stderr, /faixa antiga truncada: faltando 239/);
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+// --- Every directory entry is checked (R3-4, R3-5) ----------------------------------------
+
+test("the real migrations dir holds only regular files with valid .sql names", () => {
+  const entries = fs.readdirSync(MIGRATIONS_DIR, { withFileTypes: true });
+  for (const entry of entries) {
+    assert.ok(entry.isFile() && !entry.isSymbolicLink(), `${entry.name} is not a regular file`);
+    assert.notEqual(classifyMigrationFilename(entry.name).kind, "invalid", entry.name);
+  }
+  assert.equal(entries.length, realFilenames().length);
+});
+
+const BAD_ENTRY_NAMES: Array<[string, RegExp]> = [
+  ["20261113000100_x.SQL", /maiúscula/],
+  ["20261113000100_x.sql ", /espaço/],
+  ["20261113000100_x.sql.bak", /depois de \.sql/],
+  [".hidden.sql", /oculto/],
+  ["README.md", /só aceita arquivos \.sql/],
+];
+
+for (const [name, reason] of BAD_ENTRY_NAMES) {
+  test(`classifyMigrationFilename explains why ${JSON.stringify(name)} is refused`, () => {
+    const verdict = classifyMigrationFilename(name, { now: NOW });
+    assert.equal(verdict.kind, "invalid");
+    assert.match((verdict as { reason: string }).reason, reason);
+  });
+}
+
+test("gate main() rejects directories, symlinks and non-.sql entries in the migrations dir", async () => {
+  const { spawnSync } = await import("node:child_process");
+  const os = await import("node:os");
+  const script = path.resolve(
+    import.meta.dirname,
+    "../../scripts/check/check-migration-numbering.mjs"
+  );
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-migration-entries-"));
+  try {
+    const dir = path.join(tmp, "src/lib/db/migrations");
+    fs.mkdirSync(dir, { recursive: true });
+    for (const f of realFilenames()) fs.writeFileSync(path.join(dir, f), "-- copy\n");
+    const gate = () =>
+      spawnSync(process.execPath, [script], { cwd: tmp, encoding: "utf-8", env: gateEnv() });
+    assert.equal(gate().status, 0);
+
+    const cases: Array<[string, () => void, RegExp]> = [
+      [
+        "20261113000100_dir.sql",
+        () => {
+          fs.mkdirSync(path.join(dir, "20261113000100_dir.sql"));
+          fs.writeFileSync(path.join(dir, "20261113000100_dir.sql", "inner.sql"), "-- x\n");
+        },
+        /20261113000100_dir\.sql — é um diretório/,
+      ],
+      [
+        "20261113000100_link.sql",
+        () =>
+          fs.symlinkSync(
+            path.join(dir, "001_initial_schema.sql"),
+            path.join(dir, "20261113000100_link.sql")
+          ),
+        /20261113000100_link\.sql — é um link simbólico/,
+      ],
+      [
+        "20261113000100_up.SQL",
+        () => fs.writeFileSync(path.join(dir, "20261113000100_up.SQL"), "-- x\n"),
+        /20261113000100_up\.SQL — .*maiúscula/,
+      ],
+      [
+        "20261113000100_sp.sql ",
+        () => fs.writeFileSync(path.join(dir, "20261113000100_sp.sql "), "-- x\n"),
+        /espaço/,
+      ],
+      [
+        "20261113000100_bak.sql.bak",
+        () => fs.writeFileSync(path.join(dir, "20261113000100_bak.sql.bak"), "-- x\n"),
+        /depois de \.sql/,
+      ],
+      [".hidden", () => fs.writeFileSync(path.join(dir, ".hidden"), "x\n"), /oculto/],
+    ];
+    for (const [name, make, expected] of cases) {
+      make();
+      const r = gate();
+      assert.equal(r.status, 1, `${name}: ${r.stdout}`);
+      assert.match(r.stderr, expected, name);
+      fs.rmSync(path.join(dir, name), { recursive: true, force: true });
+    }
+    assert.equal(gate().status, 0);
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+// --- Hints per anomaly class (R3-7, R3-8) -------------------------------------------------
+
+test("KNOWN_GAPS may never contain the first or the last old number", async () => {
+  const mod = (await import("../../scripts/check/check-migration-numbering.mjs")) as {
+    findForbiddenKnownGaps?: (gaps: Set<string>) => string[];
+  };
+  assert.equal(typeof mod.findForbiddenKnownGaps, "function");
+  assert.deepEqual(mod.findForbiddenKnownGaps!(new Set(["026", "001", "239"])), ["001", "239"]);
+  assert.deepEqual(mod.findForbiddenKnownGaps!(KNOWN_GAPS as Set<string>), []);
+});
+
+test("gate hints: truncated range says restore (never allowlist); future stamp says check the clock", async () => {
+  const { spawnSync } = await import("node:child_process");
+  const os = await import("node:os");
+  const script = path.resolve(
+    import.meta.dirname,
+    "../../scripts/check/check-migration-numbering.mjs"
+  );
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-migration-hints-"));
+  try {
+    const dir = path.join(tmp, "src/lib/db/migrations");
+    fs.mkdirSync(dir, { recursive: true });
+    for (const f of realFilenames()) fs.writeFileSync(path.join(dir, f), "-- copy\n");
+    const gate = () =>
+      spawnSync(process.execPath, [script], { cwd: tmp, encoding: "utf-8", env: gateEnv() });
+
+    const top = realFilenames().find((f) => f.startsWith("239_"))!;
+    fs.rmSync(path.join(dir, top));
+    let r = gate();
+    assert.equal(r.status, 1);
+    assert.match(r.stderr, /git checkout <base> -- src\/lib\/db\/migrations\/239_\*/);
+    assert.match(r.stderr, /nunca libere na allowlist/);
+    assert.doesNotMatch(r.stderr, /adicione o número às allowlists/);
+    fs.writeFileSync(path.join(dir, top), "-- copy\n");
+
+    const future = `${formatMigrationTimestamp(new Date(Date.now() + 60 * 60 * 1000))}_later.sql`;
+    fs.writeFileSync(path.join(dir, future), "-- x\n");
+    r = gate();
+    assert.equal(r.status, 1);
+    assert.match(r.stderr, /no futuro/);
+    assert.match(r.stderr, /confira o relógio \(NTP\/timedatectl\)/);
+    assert.doesNotMatch(r.stderr, /renomeie o arquivo colidente/);
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }

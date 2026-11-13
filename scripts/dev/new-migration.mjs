@@ -8,13 +8,17 @@
 // The timestamp is the current UTC time (creation order, not merge order). Parallel PRs
 // therefore never fight over the same number. If a file with the same timestamp already
 // exists, the timestamp moves forward one second until it is unique; an existing file is
-// never overwritten. The resulting name is validated with the same rules the
-// `check:migration-numbering` gate applies (scripts/check/lib/migrationNaming.mjs).
+// never overwritten. Generators running at the same time in one directory are safe too:
+// after the exclusive ("wx") write the directory is read again, and if another file took
+// the same timestamp this one is removed and retried one second later. The resulting name
+// is validated with the same rules the `check:migration-numbering` gate applies
+// (scripts/check/lib/migrationNaming.mjs), against the REAL clock even when --now is given.
 //
 // Options (mostly for tests):
 //   --dir <path>      target directory (default: src/lib/db/migrations of this repo,
 //                     resolved from the script location, not from the cwd)
-//   --now <ISO-8601>  clock override, e.g. 2026-11-13T12:00:00Z
+//   --now <ISO-8601>  clock override, e.g. 2026-11-13T12:00:00Z (never ahead of the real
+//                     clock by more than the gate's tolerance)
 //   --dry-run         print the path that would be created without writing it
 //   --help            usage
 import fs from "node:fs";
@@ -24,6 +28,7 @@ import {
   classifyMigrationFilename,
   formatMigrationTimestamp,
   LEGACY_MIGRATION_MAX,
+  MIGRATION_TIMESTAMP_FUTURE_TOLERANCE_MS,
   normalizeMigrationDescription,
 } from "../check/lib/migrationNaming.mjs";
 
@@ -32,6 +37,13 @@ const DEFAULT_DIR = path.join(REPO_ROOT, "src", "lib", "db", "migrations");
 
 /** Upper bound for the "one second forward" collision loop. */
 const MAX_COLLISION_STEPS = 600;
+
+/** Upper bound for a random pause before retrying after a lost race (milliseconds). */
+const RACE_RETRY_JITTER_MS = 25;
+
+function sleepSync(ms) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
 
 const pad3 = (n) => String(n).padStart(3, "0");
 
@@ -97,7 +109,10 @@ export function renderMigrationTemplate(description, version) {
     `--     DROP ... IF EXISTS, INSERT OR IGNORE. The runner wraps the file in a transaction.`,
     `--   * Do not depend on a migration with a NEWER timestamp: files apply in timestamp`,
     `--     order (old 001-${pad3(LEGACY_MIGRATION_MAX)} first, then date-named ones, then ee- ones), so a`,
-    `--     dependency on a newer file breaks fresh databases. Regenerate this file instead.`,
+    `--     dependency on a newer file breaks fresh databases.`,
+    `--   * Regenerate the name only while the migration is not merged. Once merged,`,
+    `--     never rename or delete it (databases that applied it would run it again):`,
+    `--     create a new migration instead.`,
     `--   * Before opening the PR run: npm run test:migrations:fresh`,
     `--     and npm run check:migration-numbering`,
     ``,
@@ -108,7 +123,7 @@ export function renderMigrationTemplate(description, version) {
  * Pick a unique `<timestamp>_<description>.sql` name inside `dir`.
  *
  * @param {{ dir: string, description: string, now: Date }} input
- * @returns {{ filename: string, version: string, steps: number }}
+ * @returns {{ filename: string, version: string, steps: number, date: Date }}
  */
 export function pickMigrationFilename({ dir, description, now }) {
   const taken = new Set();
@@ -122,7 +137,7 @@ export function pickMigrationFilename({ dir, description, now }) {
   for (let steps = 0; steps <= MAX_COLLISION_STEPS; steps++) {
     const version = formatMigrationTimestamp(current);
     if (!taken.has(version)) {
-      return { filename: `${version}_${description}.sql`, version, steps };
+      return { filename: `${version}_${description}.sql`, version, steps, date: current };
     }
     current = new Date(current.getTime() + 1000);
   }
@@ -156,40 +171,79 @@ export function main(argv = process.argv.slice(2)) {
     return 1;
   }
 
-  let picked;
-  try {
-    picked = pickMigrationFilename({ dir: args.dir, description, now: args.now });
-  } catch (err) {
-    console.error(`[db:new-migration] ${err.message}`);
-    return 1;
-  }
-  const { filename, version } = picked;
-
-  // Same rules as the gate: refuse anything check:migration-numbering would reject
-  // (e.g. a --now before the 2026-11-13 cut-over).
-  const verdict = classifyMigrationFilename(filename, { now: args.now });
-  if (verdict.kind !== "timestamp") {
-    const reason = verdict.kind === "invalid" ? verdict.reason : "nome antigo inesperado";
-    console.error(`[db:new-migration] recusado ${filename}: ${reason}`);
+  // --now is a test/override knob, not a way around the gate: the gate checks "not in the
+  // future" against the real clock, so the generator does too (R3-7 / R4-03).
+  const realNow = Date.now();
+  if (args.now.getTime() > realNow + MIGRATION_TIMESTAMP_FUTURE_TOLERANCE_MS) {
+    console.error(
+      `[db:new-migration] --now ${args.now.toISOString()} está no futuro (relógio real ` +
+        `${new Date(realNow).toISOString()}, tolerância ` +
+        `${MIGRATION_TIMESTAMP_FUTURE_TOLERANCE_MS / 60000} min): o gate recusaria o carimbo`
+    );
     return 1;
   }
 
-  const target = path.join(args.dir, filename);
-  if (args.dryRun) {
-    console.log(target);
-    return 0;
-  }
+  let start = args.now;
+  for (let attempt = 0; attempt <= MAX_COLLISION_STEPS; attempt++) {
+    let picked;
+    try {
+      picked = pickMigrationFilename({ dir: args.dir, description, now: start });
+    } catch (err) {
+      console.error(`[db:new-migration] ${err.message}`);
+      return 1;
+    }
+    const { filename, version } = picked;
 
-  fs.mkdirSync(args.dir, { recursive: true });
-  try {
-    // "wx" fails instead of overwriting if the file appeared in the meantime.
-    fs.writeFileSync(target, renderMigrationTemplate(description, version), { flag: "wx" });
-  } catch (err) {
-    console.error(`[db:new-migration] não foi possível criar ${target}: ${err.message}`);
-    return 1;
+    // Same rules as the gate, with the real clock: refuse anything check:migration-numbering
+    // would reject (e.g. a --now before the 2026-11-13 cut-over, or a stamp pushed into the
+    // future by many collisions).
+    const verdict = classifyMigrationFilename(filename);
+    if (verdict.kind !== "timestamp") {
+      const reason = verdict.kind === "invalid" ? verdict.reason : "nome antigo inesperado";
+      console.error(`[db:new-migration] recusado ${filename}: ${reason}`);
+      return 1;
+    }
+
+    const target = path.join(args.dir, filename);
+    if (args.dryRun) {
+      console.log(target);
+      return 0;
+    }
+
+    const nextSecond = new Date(picked.date.getTime() + 1000);
+    fs.mkdirSync(args.dir, { recursive: true });
+    try {
+      // "wx" fails instead of overwriting if the file appeared in the meantime.
+      fs.writeFileSync(target, renderMigrationTemplate(description, version), { flag: "wx" });
+    } catch (err) {
+      if (err && err.code === "EEXIST") {
+        start = nextSecond;
+        continue;
+      }
+      console.error(`[db:new-migration] não foi possível criar ${target}: ${err.message}`);
+      return 1;
+    }
+
+    // "wx" only protects an identical name. Another generator may have written a different
+    // description with the same timestamp between our readdir and our write: re-read and,
+    // if so, give the timestamp up and retry one second later. Whoever re-reads after both
+    // writes sees the other file, so two files never keep the same timestamp.
+    const rivals = fs
+      .readdirSync(args.dir)
+      .filter((entry) => entry !== filename && entry.startsWith(`${version}_`));
+    if (rivals.length === 0) {
+      console.log(target);
+      return 0;
+    }
+    fs.rmSync(target, { force: true });
+    sleepSync(Math.floor(Math.random() * RACE_RETRY_JITTER_MS));
+    start = nextSecond;
   }
-  console.log(target);
-  return 0;
+  console.error(
+    `[db:new-migration] nenhum carimbo livre em ${MAX_COLLISION_STEPS} tentativas a partir de ` +
+      `${args.now.toISOString()}`
+  );
+  return 1;
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {

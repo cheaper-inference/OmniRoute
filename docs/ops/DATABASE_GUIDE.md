@@ -204,11 +204,51 @@ Rules for the timestamp format (enforced by `npm run check:migration-numbering`,
 - The timestamp is a real UTC date and time, not earlier than `20261113000000` and not more than 10 minutes in the future.
 - The description is lowercase `snake_case` starting with a letter (`a-z`, `0-9`, single `_` between words), at most 80 characters.
 - Two files with the same timestamp are a duplicate.
-- The no-gap rule applies only to the old series: every number from `001` to `239` must exist, except the known gaps `026`, `055` and `121`. Deleting `239` (or any old file) fails the gate. Timestamped files never create a gap.
+- The no-gap rule applies only to the old series: every number from `001` to `239` must exist, except the known gaps `026`, `055` and `121`. Deleting `239` (or any old file) fails the gate. `001` and `239` can never be added to the `KNOWN_GAPS` allowlist. Timestamped files never create a gap.
+- Every entry in `src/lib/db/migrations/` must be a regular file with a valid lowercase `.sql` name. A directory, a symlink, a `.SQL` or `.sql.bak` file, a hidden file or a name with a space fails the gate, because the runner would skip it silently or crash at boot.
 
 **Apply order.** The runner sorts by the numeric value of the prefix, not by text: the old `001`–`239` files first, then the timestamped files in timestamp order, then any namespaced directories registered with `OMNIROUTE_EXTRA_MIGRATIONS_DIRS` (versions such as `ee-001`). A pending migration is any file whose version is not in `_omniroute_migrations`, so a migration from an older branch that merges after a newer one still applies on existing databases.
 
-**The timestamp is creation order, not merge order.** If your migration depends on a table or column created by a migration with a **newer** timestamp (for example, one from another PR that merged first), a fresh database would run yours first and fail. Regenerate your file with `npm run db:new-migration` so it gets a newer timestamp, or make it independent. `npm run test:migrations:fresh` applies every migration to an empty database and catches this.
+**The timestamp is creation order, not merge order.** If your migration depends on a table or column created by a migration with a **newer** timestamp (for example, one from another PR that merged first), a fresh database would run yours first and fail. While your PR is still open, regenerate the file name with `npm run db:new-migration` so it gets a newer timestamp, or make it independent. `npm run test:migrations:fresh` applies every migration to an empty database and catches this.
+
+### A Merged Migration Is Never Deleted or Renamed
+
+Once a migration file is on a release branch or `main`, it has already run on homolog and developer databases, on VPS installs and in the Enterprise sync. From then on:
+
+- **Never delete it.** Fresh installs would lose its schema while upgraded databases keep it.
+- **Never rename it.** The version in `_omniroute_migrations` would no longer match a file, so every database that already applied it would run it again. Non-idempotent SQL then duplicates data or stops the boot.
+- **Need a different schema?** Create a new migration with `npm run db:new-migration`.
+
+Renaming is safe only for a file that is not merged yet, which is the case the gate's hints refer to.
+
+### What the Gate Checks Against the Base
+
+On pull request and merge-queue runs, `npm run check:migration-numbering` compares `src/lib/db/migrations/` on disk with the same directory on the base branch. The base is, in this order: `--base <ref>`, the `MIGRATION_BASE_REF` variable, or, when `GITHUB_EVENT_NAME` is `pull_request`, `pull_request_target` or `merge_group`, the first parent of the merge commit, the `merge_group.base_sha` of the event payload, or `git merge-base HEAD origin/$GITHUB_BASE_REF`. In a pull request or merge-queue run with no resolvable base the gate fails. Outside CI without `--base` it prints `comparação com a base: pulada (sem --base)` and skips these rules.
+
+| Change on the pull request                                                    | Result                                                                                                                                                                   |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A file that exists on the base is deleted or renamed                          | **Fails**, whatever the format. Restore it with `git checkout <base> -- src/lib/db/migrations/<file>` and create a new migration instead.                                |
+| A file that exists on the base has different content                          | **Warning** only (a `::warning` annotation in GitHub Actions). Databases that already applied the file do not run the new content, so keep such edits harmless for them. |
+| A timestamped file is added with a timestamp not newer than the base's newest | Runs the commutation check, described below.                                                                                                                             |
+
+The commutation check (`scripts/check/migration-commutation.ts`) builds two temporary databases with the real install path: an **upgraded** one (boot with the base migrations, then boot again on the same file with the pull request's migrations) and a **fresh** one (one boot with the pull request's migrations). It compares the resulting schemas: tables and columns (ignoring column order), UNIQUE / PRIMARY KEY and FOREIGN KEY constraints, indexes, triggers and views. CHECK constraints and row data are not compared. If they match, the gate prints that the file is out of order but commutes, and passes. If they differ, the gate fails with the difference and asks you to regenerate the name with `npm run db:new-migration`, which is safe because the file is not merged yet. If the check itself cannot run, the gate fails in CI and only warns locally.
+
+To run the same comparison locally, pass the base explicitly, for example `npm run check:migration-numbering -- --base origin/<base-branch>`.
+
+### Converting an Open PR's `NNN` Migration
+
+A pull request opened before the switch may still carry a sequential file such as `240_add_widgets.sql`. Old numbers above `239` are rejected, so convert it before merging:
+
+1. **Rename the file with the generator, keeping the description.** Run `npm run db:new-migration -- <same description>` to get the new name, move the SQL into it, and delete the old `NNN_` file. The description must stay identical: the compatibility entry below matches on it.
+2. **Add a compatibility entry if a persistent database ran the old number.** If any database that is kept (homolog, a VPS, a contributor's own install) ran a build of the PR with the `NNN_` file, add `{ fromVersion: "<NNN>", fromName: "<description>", toVersion: "<YYYYMMDDHHMMSS>", toName: "<description>" }` to `RENAMED_MIGRATION_COMPATIBILITY` in `src/lib/db/migrationRunner/constants.ts`. This is **required for `237`, `238` and `239`**: those slots now hold the canonical `237_usage_history_calculated_cost.sql`, `238_codex_connection_fences.sql` and `239_call_logs_pending_detail_index.sql`, and without the entry such a database skips the canonical migration forever and runs the converted one again. It also works for a slot that stays empty, such as `240`, when the destination is a timestamp. When in doubt, add the entry.
+3. **Keep the SQL idempotent** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `INSERT OR IGNORE`), because the converted migration may meet a database where its schema already exists.
+4. **Move version-keyed special cases.** If the PR added a case for its old number in `isSchemaAlreadyApplied()` (`src/lib/db/migrationRunner.ts`) or in `OPTIONAL_FTS5_MIGRATION_VERSIONS` (`src/lib/db/migrationRunner/constants.ts`), change the key to the new timestamp.
+
+`tests/unit/db/codex-fence-migration-rename.test.ts` is a working example of a test for a renamed migration.
+
+### Backports to Branches Before the Switch
+
+Never cherry-pick or backport a `YYYYMMDDHHMMSS_` file to a branch that predates the switch (for example an older `release/v*` branch). The runner there sorts file names as text, so a timestamped file would run between `201_` and `202_` on a fresh database, and the old gate there does not understand 14-digit prefixes. On such a branch, write the change as that branch's own next `NNN_` file, idempotent, so it is a no-op when the timestamped version arrives later.
 
 ### How Migrations Run
 

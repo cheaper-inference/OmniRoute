@@ -62,6 +62,30 @@ export const MIGRATION_TIMESTAMP_FUTURE_TOLERANCE_MS = 10 * 60 * 1000;
 /** Dica impressa junto de todo nome recusado. */
 export const NEW_MIGRATION_HINT = "npm run db:new-migration -- <descricao>";
 
+/**
+ * Motivo para um nome que não termina em `.sql` minúsculo. O runner só lê arquivos que
+ * terminam exatamente em `.sql`: qualquer outra coisa no diretório seria ignorada em
+ * silêncio (a migration nunca roda e o CI fica verde), então o gate recusa com o motivo.
+ *
+ * @param {string} filename
+ * @returns {string}
+ */
+function describeNonSqlName(filename) {
+  if (filename.startsWith(".")) {
+    return "arquivo oculto: o diretório de migrations só aceita arquivos .sql visíveis";
+  }
+  if (/\s/.test(filename)) {
+    return "nome com espaço: o runner só lê nomes que terminam exatamente em .sql";
+  }
+  if (/\.sql$/i.test(filename)) {
+    return "extensão em maiúsculas (.SQL): o runner só lê arquivos terminados em .sql minúsculo";
+  }
+  if (/\.sql\./i.test(filename)) {
+    return "extensão extra depois de .sql (ex.: .sql.bak): o runner ignora o arquivo";
+  }
+  return "não termina em .sql: o diretório de migrations só aceita arquivos .sql";
+}
+
 function pad(n, width) {
   return String(n).padStart(width, "0");
 }
@@ -146,9 +170,13 @@ export function normalizeMigrationDescription(text) {
  *
  * @param {string} filename  basename terminado em `.sql`
  * @param {{ now?: Date | number, legacyMax?: number }} [options]
+ * Todo resultado `invalid` traz um `code` estável (o gate escolhe a dica pela classe):
+ * `not-sql`, `legacy-zero`, `legacy-after-cut`, `no-prefix`, `prefix-length`, `separator`,
+ * `description`, `description-length`, `bad-date`, `before-cut`, `future`, `format`.
+ *
  * @returns {{ kind: "legacy", version: string, value: number, description: string }
  *   | { kind: "timestamp", version: string, value: number, description: string, date: Date }
- *   | { kind: "invalid", reason: string }}
+ *   | { kind: "invalid", code: string, reason: string }}
  */
 export function classifyMigrationFilename(filename, options = {}) {
   const legacyMax = options.legacyMax ?? LEGACY_MIGRATION_MAX;
@@ -159,19 +187,27 @@ export function classifyMigrationFilename(filename, options = {}) {
         ? options.now.getTime()
         : Number(options.now);
 
-  if (typeof filename !== "string" || !filename.endsWith(".sql")) {
-    return { kind: "invalid", reason: "não termina em .sql" };
+  if (typeof filename !== "string") {
+    return { kind: "invalid", code: "not-sql", reason: "nome ausente" };
+  }
+  if (!filename.endsWith(".sql") || filename.startsWith(".") || /\s/.test(filename)) {
+    return { kind: "invalid", code: "not-sql", reason: describeNonSqlName(filename) };
   }
 
   const legacy = filename.match(LEGACY_MIGRATION_RE);
   if (legacy) {
     const value = Number.parseInt(legacy[1], 10);
     if (value < 1) {
-      return { kind: "invalid", reason: "número antigo 000 não existe (a série começa em 001)" };
+      return {
+        kind: "invalid",
+        code: "legacy-zero",
+        reason: "número antigo 000 não existe (a série começa em 001)",
+      };
     }
     if (value > legacyMax) {
       return {
         kind: "invalid",
+        code: "legacy-after-cut",
         reason:
           `número antigo ${legacy[1]} depois do corte (LEGACY_MIGRATION_MAX=${legacyMax}): ` +
           `migrations novas usam YYYYMMDDHHMMSS_descricao.sql`,
@@ -184,6 +220,7 @@ export function classifyMigrationFilename(filename, options = {}) {
   if (!prefix) {
     return {
       kind: "invalid",
+      code: "no-prefix",
       reason: "sem prefixo numérico (esperado YYYYMMDDHHMMSS_descricao.sql)",
     };
   }
@@ -192,6 +229,7 @@ export function classifyMigrationFilename(filename, options = {}) {
   if (digits.length !== 14) {
     return {
       kind: "invalid",
+      code: "prefix-length",
       reason:
         `prefixo com ${digits.length} dígito(s): use 14 (YYYYMMDDHHMMSS, UTC) para ` +
         `migrations novas — o formato de 3 dígitos é só das antigas 001–${pad(legacyMax, 3)}`,
@@ -200,6 +238,7 @@ export function classifyMigrationFilename(filename, options = {}) {
   if (!rest.startsWith("_")) {
     return {
       kind: "invalid",
+      code: "separator",
       reason: "separador inválido depois do carimbo (esperado `_`, ex.: 20261113120000_add_x.sql)",
     };
   }
@@ -207,6 +246,7 @@ export function classifyMigrationFilename(filename, options = {}) {
   if (!MIGRATION_DESCRIPTION_RE.test(description)) {
     return {
       kind: "invalid",
+      code: "description",
       reason:
         `descrição "${description}" fora do padrão: snake_case minúsculo começando ` +
         `com letra (a-z, 0-9 e _ entre palavras)`,
@@ -215,6 +255,7 @@ export function classifyMigrationFilename(filename, options = {}) {
   if (description.length > MIGRATION_DESCRIPTION_MAX_LENGTH) {
     return {
       kind: "invalid",
+      code: "description-length",
       reason: `descrição com ${description.length} caracteres (máximo ${MIGRATION_DESCRIPTION_MAX_LENGTH})`,
     };
   }
@@ -222,18 +263,21 @@ export function classifyMigrationFilename(filename, options = {}) {
   if (!date) {
     return {
       kind: "invalid",
+      code: "bad-date",
       reason: `carimbo ${digits} não é uma data/hora UTC válida (YYYYMMDDHHMMSS)`,
     };
   }
   if (digits < MIGRATION_TIMESTAMP_MIN) {
     return {
       kind: "invalid",
+      code: "before-cut",
       reason: `carimbo ${digits} anterior ao corte do formato (${MIGRATION_TIMESTAMP_MIN})`,
     };
   }
   if (date.getTime() > nowMs + MIGRATION_TIMESTAMP_FUTURE_TOLERANCE_MS) {
     return {
       kind: "invalid",
+      code: "future",
       reason:
         `carimbo ${digits} no futuro (agora ${formatMigrationTimestamp(new Date(nowMs))} UTC, ` +
         `tolerância ${MIGRATION_TIMESTAMP_FUTURE_TOLERANCE_MS / 60000} min)`,
@@ -241,7 +285,11 @@ export function classifyMigrationFilename(filename, options = {}) {
   }
   if (!TIMESTAMP_MIGRATION_RE.test(filename)) {
     // Defesa em profundidade: as checagens acima devem ser equivalentes ao regex.
-    return { kind: "invalid", reason: "nome fora do formato YYYYMMDDHHMMSS_descricao.sql" };
+    return {
+      kind: "invalid",
+      code: "format",
+      reason: "nome fora do formato YYYYMMDDHHMMSS_descricao.sql",
+    };
   }
   return { kind: "timestamp", version: digits, value: Number(digits), description, date };
 }

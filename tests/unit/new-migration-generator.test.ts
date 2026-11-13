@@ -194,3 +194,54 @@ test("the current clock produces a name the gate accepts right now", () => {
   )(["239_x.sql", generated], new Set(), new Set());
   assert.deepEqual(result.badNames, []);
 });
+
+// --- Clock and race hardening (R3-3, R3-7, R4-03) -----------------------------------------
+
+test("--now beyond the real clock plus tolerance is refused (the gate would reject it)", () => {
+  const dir = freshDir();
+  const future = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+  const r = run(["x", "--dir", dir, "--now", future]);
+  assert.equal(r.status, 1, r.stdout);
+  assert.match(r.stderr, /futuro/);
+  assert.deepEqual(fs.readdirSync(dir), []);
+  // Inside the tolerance it is still accepted.
+  const nearly = new Date(Date.now() + 60 * 1000).toISOString();
+  assert.equal(run(["x", "--dir", dir, "--now", nearly, "--dry-run"]).status, 0);
+});
+
+test("the template says to regenerate the name only while the migration is not merged", () => {
+  const dir = freshDir();
+  const r = run(["x", "--dir", dir, "--now", NOW]);
+  assert.equal(r.status, 0, r.stderr);
+  const content = fs.readFileSync(r.stdout.trim(), "utf-8");
+  assert.match(content, /regenerate the name only while the migration is not merged/i);
+  assert.match(content, /never rename or delete/i);
+  assert.doesNotMatch(content, /Regenerate this file instead/);
+});
+
+test("parallel generators in one directory with the same --now never share a timestamp", async () => {
+  const { spawn } = await import("node:child_process");
+  const runAsync = (args: string[]) =>
+    new Promise<{ status: number | null; stdout: string; stderr: string }>((resolve) => {
+      const child = spawn(process.execPath, [SCRIPT, ...args], { cwd: tmpRoot });
+      let stdout = "";
+      let stderr = "";
+      child.stdout.on("data", (d) => (stdout += d));
+      child.stderr.on("data", (d) => (stderr += d));
+      child.on("close", (status) => resolve({ status, stdout, stderr }));
+    });
+  // Several rounds: the readdir → "wx" window is narrow, one round alone rarely hits it.
+  for (let round = 0; round < 4; round++) {
+    const dir = freshDir();
+    const results = await Promise.all(
+      Array.from({ length: 8 }, (_, i) => runAsync([`race ${i}`, "--dir", dir, "--now", NOW]))
+    );
+    for (const r of results) assert.equal(r.status, 0, r.stderr);
+    const files = fs.readdirSync(dir).sort();
+    assert.equal(files.length, 8, `round ${round}: ${files.join(", ")}`);
+    const stamps = files.map((f) => f.slice(0, 14));
+    assert.equal(new Set(stamps).size, 8, `round ${round}: duplicate stamp in ${files.join(", ")}`);
+    const printed = results.map((r) => path.basename(r.stdout.trim())).sort();
+    assert.deepEqual(printed, files);
+  }
+});
