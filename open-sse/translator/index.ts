@@ -114,6 +114,12 @@ function promoteStrayReasoningEffort(body, model) {
   return body;
 }
 
+// The Responses shape is flat ({type, name, schema, strict}); the Chat shape nests json_schema.
+function promoteResponseFormatToText(normalized) {
+  mapChatResponseFormatToResponsesText(normalized, normalized);
+  if (normalized.text == null) normalized.text = { format: normalized.response_format };
+}
+
 function normalizeOpenAIResponsesRequest(body, model) {
   if (!body || typeof body !== "object") return body;
 
@@ -138,9 +144,7 @@ function normalizeOpenAIResponsesRequest(body, model) {
     delete normalized.max_completion_tokens;
   }
   if (normalized.response_format != null && normalized.text == null) {
-    // The Responses shape is flat ({type, name, schema, strict}); the Chat shape nests json_schema.
-    mapChatResponseFormatToResponsesText(normalized, normalized);
-    if (normalized.text == null) normalized.text = { format: normalized.response_format };
+    promoteResponseFormatToText(normalized);
     delete normalized.response_format;
   } else if (normalized.response_format != null) {
     delete normalized.response_format;
