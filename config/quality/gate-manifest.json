@@ -604,6 +604,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "test:migrations:fresh",
+      "command": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --max-old-space-size=8192 --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit tests/unit/db/migrations-fresh-database.test.ts",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "test:mutation",
       "command": "stryker run",
       "disposition": "separately-invoked"

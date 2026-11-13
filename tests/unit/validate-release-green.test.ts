@@ -265,6 +265,30 @@ test("pre-flight reports pricing freshness as drift, not as a hard failure", asy
   );
 });
 
+test("migrations-fresh is a HARD gate that applies every migration to an empty database", async () => {
+  const fs = await import("node:fs");
+  const src = fs.readFileSync(
+    new URL("../../scripts/quality/validate-release-green.mjs", import.meta.url),
+    "utf8"
+  );
+  // Timestamped migrations can depend on a later-dated one; only a fresh-install run of the
+  // whole set catches it, and it has to block the release (it runs in --quick as well).
+  assert.match(
+    src,
+    /hardCmd\(\s*"migrations-fresh"[\s\S]*?"run",\s*"test:migrations:fresh"/,
+    "migrations-fresh must run test:migrations:fresh as a HARD gate"
+  );
+  assert.doesNotMatch(src, /driftCmd\(\s*"migrations-fresh"/);
+  const pkg = JSON.parse(
+    fs.readFileSync(new URL("../../package.json", import.meta.url), "utf8")
+  ) as { scripts: Record<string, string> };
+  assert.match(
+    pkg.scripts["test:migrations:fresh"] ?? "",
+    /tests\/unit\/db\/migrations-fresh-database\.test\.ts/,
+    "test:migrations:fresh must run the fresh-database migration test"
+  );
+});
+
 test("pre-flight --hermetic scrubs the live-test trigger vars (2026-07-05 false-positive fix)", async () => {
   const fs = await import("node:fs");
   const src = fs.readFileSync(

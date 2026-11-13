@@ -893,6 +893,15 @@ async function main() {
 
   await hardCmd("db-rules", "DB rules", npmCmd, ["run", "check:db-rules"]);
   await hardCmd("public-creds", "Public creds", npmCmd, ["run", "check:public-creds"]);
+  // Timestamped migrations (YYYYMMDDHHMMSS_…) no longer race for a number, so the real risk
+  // is an earlier-dated migration that depends on a later one: green alone in each PR, red
+  // on a fresh install once both land. Apply the whole set to an empty database, in order.
+  await hardCmd(
+    "migrations-fresh",
+    "Migrations: apply every migration to an empty database",
+    npmCmd,
+    ["run", "test:migrations:fresh"]
+  );
 
   // Complexity + cognitive (one ESLint walk; both still recorded as drift)
   {
