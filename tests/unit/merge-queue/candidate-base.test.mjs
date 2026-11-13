@@ -87,6 +87,49 @@ test("a batch ref without the trailer fails closed", () => {
   );
 });
 
+test("a batch ref must name the pushed commit and the commit's batch", () => {
+  const message = mergeMessage(SHA_B); // Omni-Queue-Batch: b1
+  // The right commit in another batch's ref (b2 is a different sequence, not a retry of b1).
+  assert.throws(
+    () => resolveCandidateBase({ message, headSha: HEAD, ref: candidateRef(BASE, "b2", HEAD) }),
+    /names b2, the commit b1/
+  );
+  assert.throws(
+    () => resolveCandidateBase({ message, headSha: HEAD, ref: candidateRef(BASE, "b12", HEAD) }),
+    /names b12, the commit b1/
+  );
+  // A ref whose sha12 suffix names another commit.
+  assert.throws(
+    () => resolveCandidateBase({ message, headSha: HEAD, ref: candidateRef(BASE, "b1", SHA_A) }),
+    /does not name head/
+  );
+  // No <batchId>-<sha12> shape at all.
+  for (const id of ["b1", "b1-0123456789", "b1-0123456789AB", "-0123456789ab"]) {
+    assert.throws(
+      () =>
+        resolveCandidateBase({ message, headSha: HEAD, ref: `omni-queue/release-v3.8.54/${id}` }),
+      /malformed batch candidate ref|does not name head/,
+      id
+    );
+  }
+  // An infra retry pushes the same commit (trailer b1) under b1-r<n>: accepted.
+  for (const id of ["b1-r1", "b1-r12"]) {
+    assert.equal(
+      resolveCandidateBase({ message, headSha: HEAD, ref: candidateRef(BASE, id, HEAD) }).baseSha,
+      SHA_B,
+      id
+    );
+  }
+  // A commit without the batch trailer is judged by the suffix (and the base trailer) alone.
+  const noBatch = message.replace(/^Omni-Queue-Batch: .*\n?/m, "");
+  assert.doesNotMatch(noBatch, /Omni-Queue-Batch/);
+  assert.equal(
+    resolveCandidateBase({ message: noBatch, headSha: HEAD, ref: candidateRef(BASE, "b7", HEAD) })
+      .baseSha,
+    SHA_B
+  );
+});
+
 test("a trailer outside the last paragraph is not a trailer", () => {
   const message = `Merge PR #1: x\n\nOmni-Queue-Base: ${SHA_B}\n\nbody text after it\n`;
   assert.equal(resolveCandidateBase({ message, headSha: HEAD }).source, "self");
@@ -216,7 +259,8 @@ test("CLI refuses a trailer whose base is not an ancestor of the candidate", (t)
   writeFileSync(forged, mergeMessage(repo.base).replace(SHA_A, repo.head));
   repo.git("commit", "-q", "-F", forged);
   const stray = repo.git("rev-parse", "HEAD");
-  const res = runMain(["--ref", candidateRef(BASE, "b9", stray)], { cwd: repo.dir });
+  // Same batch id as the forged trailer (b1): only the ancestry check can refuse it.
+  const res = runMain(["--ref", candidateRef(BASE, "b1", stray)], { cwd: repo.dir });
   assert.equal(res.code, 1);
   assert.equal(res.out, "");
   assert.match(res.err, /is not an ancestor of/);

@@ -48,6 +48,7 @@ export function resolveCandidateBase(input) {
   }
 
   const trailers = parseQueueTrailers(input?.message);
+  if (parsed?.kind === "batch") assertBatchRefNamesHead(parsed.id, headSha, trailers.batch, ref);
   if (!trailers.base) {
     if (parsed?.kind === "batch") {
       throw new Error(`batch candidate ${ref} has no Omni-Queue-Base trailer on ${headSha}`);
@@ -60,6 +61,27 @@ export function resolveCandidateBase(input) {
     throw new Error(`candidate ref ${ref} does not belong to base ${target}`);
   }
   return { baseSha: trailers.base, target, source: "trailer" };
+}
+
+// "b42-r1" → "b42": an infra retry pushes the SAME commit (its trailer keeps the original id)
+// under a fresh ref named with batchIdFor(seq, retry).
+const batchRoot = (id) => String(id).replace(/-r[1-9][0-9]*$/, "");
+
+/**
+ * A batch ref is "<batchId>-<sha12>" (contracts.candidateRef): the suffix must name the pushed
+ * commit, and the commit's Omni-Queue-Batch trailer (when present) the same batch sequence.
+ * Anything else is a push of the right SHA into the wrong ref (or the reverse).
+ */
+function assertBatchRefNamesHead(id, headSha, trailerBatch, ref) {
+  const m = /^(.+)-([0-9a-f]{12})$/.exec(id);
+  if (!m) throw new Error(`malformed batch candidate ref ${ref} (expected <batchId>-<sha12>)`);
+  const [, batchId, sha12] = m;
+  if (!headSha.startsWith(sha12)) {
+    throw new Error(`batch candidate ref ${ref} does not name head ${headSha}`);
+  }
+  if (trailerBatch !== undefined && batchRoot(trailerBatch) !== batchRoot(batchId)) {
+    throw new Error(`batch candidate ref ${ref} names ${batchId}, the commit ${trailerBatch}`);
+  }
 }
 
 function parseArgs(argv) {
