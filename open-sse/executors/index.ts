@@ -98,6 +98,7 @@ const lazyExecutors: Record<string, () => Promise<BaseExecutor>> = {
   "grok-web": () => import("./grok-web.ts").then((m) => new m.GrokWebExecutor()),
   "claude-web": () => import("./claude-web.ts").then((m) => new m.ClaudeWebExecutor()),
   "cw-web": () => import("./claude-web.ts").then((m) => new m.ClaudeWebExecutor()), // Alias
+  "claude-agent": () => import("./claude-agent.ts").then((m) => new m.ClaudeAgentExecutor()),
   "gemini-web": () => import("./gemini-web.ts").then((m) => new m.GeminiWebExecutor()),
   gweb: () => import("./gemini-web.ts").then((m) => new m.GeminiWebExecutor()), // Alias
   "blackbox-web": () => import("./blackbox-web.ts").then((m) => new m.BlackboxWebExecutor()),

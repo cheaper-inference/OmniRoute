@@ -134,6 +134,25 @@ export const NOAUTH_PROVIDERS = {
       text: "MiniMax Code talks to the managed MiniMax subscription gateway. The credential lives in your local MiniMax Code profile: OmniRoute reads it to authenticate a run, writes a rotated credential back to it, and the dashboard sign-in writes the account credential into it too. The dashboard connection is the account entry \u2014 the credential a run uses is the one in your local profile.",
     },
   },
+  "claude-agent": {
+    id: "claude-agent",
+    alias: "ca",
+    name: "Claude Agent (Claude Code CLI)",
+    icon: "terminal",
+    color: "#D97757",
+    textIcon: "CA",
+    website: "https://code.claude.com/docs/en/sdk",
+    noAuth: true,
+    hasFree: false,
+    serviceKinds: ["llm"],
+    isLocalCli: true,
+    toolCalling: "emulated",
+    authHint:
+      "Authentication is owned by the user's existing Claude Code login on this host. OmniRoute never stores an Anthropic credential.",
+    notice: {
+      text: "Requests are served by the bundled Claude Code CLI (via @anthropic-ai/claude-agent-sdk) using the host's existing Claude Code authentication. No Anthropic API key or OAuth token is stored by OmniRoute.",
+    },
+  },
   "codex-app-server": {
     id: "codex-app-server",
     alias: "cxa",

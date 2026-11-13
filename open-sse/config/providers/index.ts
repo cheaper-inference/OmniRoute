@@ -190,6 +190,7 @@ import { bailian_coding_planProvider } from "./registry/bailian-coding-plan/inde
 import { gigachatProvider } from "./registry/gigachat/index.ts";
 import { devin_cliProvider } from "./registry/devin-cli/index.ts";
 import { devin_cli_agenticProvider } from "./registry/devin-cli-agentic/index.ts";
+import { claude_agentProvider } from "./registry/claude-agent/index.ts";
 import { auggieProvider } from "./registry/auggie/index.ts";
 import { chutesProvider } from "./registry/chutes/index.ts";
 import { chenzkProvider } from "./registry/chenzk/index.ts";
@@ -494,6 +495,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   gigachat: gigachatProvider,
   "devin-cli": devin_cliProvider,
   "devin-cli-agentic": devin_cli_agenticProvider,
+  "claude-agent": claude_agentProvider,
   auggie: auggieProvider,
   chutes: chutesProvider,
   chenzk: chenzkProvider,
