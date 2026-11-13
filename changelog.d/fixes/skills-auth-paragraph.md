@@ -1,0 +1,1 @@
+- **docs(skills):** the Authentication paragraph in the 22 generated API skills no longer says `POST /api/auth/login` returns a token. It now says login returns a session cookie, management routes take that cookie or a `manage`-scoped Bearer key, and `/v1/*` needs a key only when `REQUIRE_API_KEY=true`.

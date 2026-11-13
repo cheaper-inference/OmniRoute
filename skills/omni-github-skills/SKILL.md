@@ -11,7 +11,7 @@ Search, score, scan, and import agent skills from GitHub repositories that conta
 
 ## Authentication
 
-All requests require a valid Bearer token or session cookie. Obtain a token via `POST /api/auth/login` or configure `REQUIRE_API_KEY=false` for local development.
+`POST /api/auth/login` returns an `auth_token` session cookie. Management routes (`/api/*`) accept that cookie or `Authorization: Bearer <key>` with an API key that has the `manage` scope. The client API (`/v1/*`) needs a Bearer API key only when `REQUIRE_API_KEY=true`.
 
 ## Endpoints
 
