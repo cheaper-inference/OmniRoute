@@ -947,8 +947,12 @@ function wrapInCloudCodeEnvelope(model, cloudCodeRequest, credentials = null) {
   if (clientParts.length > 0) {
     // Prepend client system parts to the first user message so they still guide
     // the model's behavior early in the conversation.
-    if (envelope.request.contents && envelope.request.contents.length > 0) {
-      envelope.request.contents[0].parts.unshift(...clientParts);
+    const first = envelope.request.contents?.[0];
+    if (first && first.role === "user") {
+      first.parts.unshift(...clientParts);
+    } else if (first) {
+      // History opens with a model turn: a system text there would read as a model utterance.
+      envelope.request.contents.unshift({ role: "user", parts: [...clientParts] });
     } else {
       envelope.request.contents = [{ role: "user", parts: [...clientParts] }];
     }

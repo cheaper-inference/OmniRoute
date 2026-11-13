@@ -1,0 +1,1 @@
+- **fix(antigravity):** client system text is no longer placed into a `model` turn when the conversation history starts with an assistant message; it goes into its own leading `user` turn.
