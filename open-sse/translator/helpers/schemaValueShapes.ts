@@ -180,6 +180,12 @@ function coerceEntry(key: string, value: unknown, options: ShapeOptions): unknow
 }
 
 function coerceSchemaNode(node: JsonRecord, options: ShapeOptions): JsonRecord {
+  // `prefixItems` (2020-12 tuples) is positional like a tuple `items`; no target expresses it,
+  // so a node without `items` takes the most informative element schema as `items` and keeps
+  // its element type. The keyword itself is stripped later by each target.
+  if (node.items === undefined && Array.isArray(node.prefixItems) && node.prefixItems.length > 0) {
+    node = { ...node, items: node.prefixItems };
+  }
   let next: JsonRecord | null = null;
   for (const [key, value] of Object.entries(node)) {
     const coerced = coerceEntry(key, value, options);

@@ -762,8 +762,10 @@ function convertEnumValuesToStrings(obj: unknown): void {
 
   const record = obj as JsonRecord;
   if (record.enum && Array.isArray(record.enum)) {
-    // Gemini only supports enum for string types, not integer
-    if (record.type === "integer" || record.type === "number") {
+    // Gemini only supports enum for string types, not integer. A type array such as
+    // ["integer", "null"] is flattened later, so look through it here.
+    const typeNames = Array.isArray(record.type) ? record.type : [record.type];
+    if (typeNames.includes("integer") || typeNames.includes("number")) {
       // Keep the enum's range as the tightest constraint Gemini accepts on numbers.
       const numbers = record.enum.filter((v): v is number => typeof v === "number");
       if (numbers.length > 0 && record.minimum === undefined && record.maximum === undefined) {
@@ -775,7 +777,11 @@ function convertEnumValuesToStrings(obj: unknown): void {
       // Gemini rejects an empty string inside `enum` ("enum[N]: cannot be empty"). Some MCP servers
       // declare optional choices as ["a", "b", ""]; drop the empty value, and the whole enum when
       // that was its only value, instead of failing every request that carries the tool.
-      const values = record.enum.map((v: unknown) => String(v)).filter((v) => v !== "");
+      // A JSON null in the enum marks a nullable value, not the string "null".
+      const values = record.enum
+        .filter((v: unknown) => v !== null)
+        .map((v: unknown) => String(v))
+        .filter((v) => v !== "");
       if (values.length > 0) {
         record.enum = values;
       } else {
