@@ -284,6 +284,42 @@ function applyOutputConfigFieldDrops(rule: StripRule, body: Record<string, unkno
   else delete body.output_config;
 }
 
+// Mistral's Chat Completions schema is `additionalProperties: false` (spec
+// ChatCompletionRequest), so OpenAI-only fields 422 with extra_forbidden. Its Responses
+// schema allows extras and has its own `store`, so this only applies to Chat bodies.
+const MISTRAL_CHAT_DROP_FIELDS = ["user", "logit_bias", "store", "verbosity"] as const;
+
+// Mistral `service_tier` accepts only auto|standard_only (live 422 on "flex"). OpenAI
+// requests for the standard lane map to standard_only; priority/auto keep the capacity
+// choice with Mistral. Unknown values are dropped rather than guessed.
+const MISTRAL_SERVICE_TIER_MAP: Record<string, string> = {
+  auto: "auto",
+  priority: "auto",
+  default: "standard_only",
+  flex: "standard_only",
+  scale: "standard_only",
+  standard_only: "standard_only",
+};
+
+function renameIfAbsent(body: Record<string, unknown>, from: string, to: string): void {
+  if (body[from] === undefined) return;
+  if (body[to] === undefined && body[from] !== null) body[to] = body[from];
+  delete body[from];
+}
+
+function applyMistralChatNormalization(body: Record<string, unknown>): void {
+  if (!Array.isArray(body.messages)) return;
+  renameIfAbsent(body, "seed", "random_seed");
+  renameIfAbsent(body, "max_completion_tokens", "max_tokens");
+  for (const key of MISTRAL_CHAT_DROP_FIELDS) delete body[key];
+  if (body.service_tier !== undefined) {
+    const tier = typeof body.service_tier === "string" ? body.service_tier.toLowerCase() : "";
+    const mapped = MISTRAL_SERVICE_TIER_MAP[tier];
+    if (mapped) body.service_tier = mapped;
+    else delete body.service_tier;
+  }
+}
+
 /**
  * Remove unsupported params from `body` in place. Returns the same reference
  * (or `body` unchanged when it is not a plain object / model is empty).
@@ -313,6 +349,8 @@ export function stripUnsupportedParams<T>(
     applyThinkingTypeMap(rule, rec);
     applyOutputConfigFieldDrops(rule, rec);
   }
+
+  if (provider === "mistral") applyMistralChatNormalization(rec);
 
   // Phase 2: Config-driven rules from DB
   applyConfigFilters(provider, model, rec, snapshot);

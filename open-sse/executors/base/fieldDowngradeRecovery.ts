@@ -1,4 +1,4 @@
-// Reactive 400 field-downgrade (and auto-learn) retry, extracted verbatim in
+// Reactive 400/422 field-downgrade (and auto-learn) retry, extracted verbatim in
 // behavior from BaseExecutor.execute() (base.ts) to keep that file under its
 // frozen size cap. On an upstream 400 that names an offending request field,
 // the field is deleted from the live body and the SAME url is retried once per
@@ -16,6 +16,7 @@ import { isK31RejectionFinal } from "../../utils/kimiK31.ts";
 import {
   findOffendingField,
   detectRejectedMessageFields,
+  detectRejectedTopLevelFields,
   detectUnsupportedParam,
   isUnsupportedThinkingError,
   REASONING_REQUEST_FIELDS,
@@ -151,18 +152,71 @@ async function applyMessageFieldRecovery(
   return fetchFn(url, { ...fetchOptions, body: retryBody });
 }
 
+// A strict schema can report its violations in stages, so allow a few follow-up retries.
+const MAX_TOP_LEVEL_FIELD_RETRIES = 3;
+
+/**
+ * pydantic/FastAPI validation errors (Mistral's 422) name rejected top-level fields in
+ * `detail[].loc = ["body", field]`. Drop them and retry, up to MAX_TOP_LEVEL_FIELD_RETRIES
+ * times while the upstream keeps naming new ones; null when nothing applies on the first pass.
+ */
+async function applyTopLevelFieldRecovery(
+  params: FieldDowngradeParams,
+  record: Record<string, unknown>,
+  errText: string
+): Promise<Response | null> {
+  const { url, body, fetchOptions, fetchFn, serializeBody, strippedFields, log } = params;
+  let response: Response | null = null;
+  let text = errText;
+  for (let attempt = 0; attempt < MAX_TOP_LEVEL_FIELD_RETRIES; attempt++) {
+    const fields = detectRejectedTopLevelFields(text).filter(
+      (field) =>
+        !params.protectedFields?.includes(field) &&
+        !strippedFields.has(field) &&
+        record[field] !== undefined
+    );
+    if (fields.length === 0) break;
+    for (const field of fields) {
+      strippedFields.add(field);
+      delete record[field];
+    }
+    const retryBody = await serializeBody(body);
+    log?.debug?.(
+      "FIELD_400",
+      `Upstream validation error rejected ${fields.join(", ")} on ${url} — retrying without it`
+    );
+    response = await fetchFn(url, { ...fetchOptions, body: retryBody });
+    if (!isFieldRejectionStatus(response.status)) break;
+    text = await readResponseTextWithinCap(response.clone()).catch(() => "");
+  }
+  return response;
+}
+
+function isFieldRejectionStatus(status: number): boolean {
+  return status === HTTP_STATUS.BAD_REQUEST || status === HTTP_STATUS.UNPROCESSABLE_ENTITY;
+}
+
 /** Returns the response to use going forward (the retry's when one was issued). */
 export async function applyFieldDowngradeRecovery(params: FieldDowngradeParams): Promise<Response> {
   const { url, fetchOptions, fetchFn, serializeBody, strippedFields, log } = params;
   const { response } = params;
   const body = params.body;
-  if (response.status !== HTTP_STATUS.BAD_REQUEST || !body || typeof body !== "object") {
+  if (!isFieldRejectionStatus(response.status) || !body || typeof body !== "object") {
     return response;
   }
   const record = body as Record<string, unknown>;
   if (isK31RejectionFinal(params.model, record)) return response;
 
   const errText = await readResponseTextWithinCap(response.clone()).catch(() => "");
+  // A 422 is a structured schema validation error: only act on the fields its `loc` paths
+  // name. The substring/prose heuristics below can match user content echoed in `input`.
+  if (response.status === HTTP_STATUS.UNPROCESSABLE_ENTITY) {
+    return (
+      (await applyMessageFieldRecovery(params, record, errText)) ??
+      (await applyTopLevelFieldRecovery(params, record, errText)) ??
+      response
+    );
+  }
   const offending = findOffendingField(errText);
   if (
     offending &&
@@ -178,6 +232,8 @@ export async function applyFieldDowngradeRecovery(params: FieldDowngradeParams):
   }
   const messageFieldRetry = await applyMessageFieldRecovery(params, record, errText);
   if (messageFieldRetry) return messageFieldRetry;
+  const topLevelRetry = await applyTopLevelFieldRecovery(params, record, errText);
+  if (topLevelRetry) return topLevelRetry;
   const thinkingRetry = await applyThinkingUnsupportedRecovery(params, record, errText);
   if (thinkingRetry) return thinkingRetry;
   return (await applyAutoLearnRecovery(params, record, errText)) ?? response;
