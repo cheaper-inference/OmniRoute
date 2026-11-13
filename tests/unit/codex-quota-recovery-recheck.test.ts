@@ -126,3 +126,34 @@ test("bounded wait leaves shared flight alive until the underlying refresh settl
   pending.resolve();
   await join;
 });
+test("hung flight settles and clears after maximum flight lifetime without blocking later refreshes", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  let calls = 0;
+  const hung = runCodexQuotaRefresh("hung", () => {
+    calls++;
+    return new Promise<void>(() => {});
+  });
+  const rejection = assert.rejects(hung, /timed out/i);
+  t.mock.timers.tick(30_000);
+  await rejection;
+  await runCodexQuotaRefresh("hung", async () => {
+    calls++;
+  });
+  assert.equal(calls, 2);
+});
+test("deadline expiring during eligibility check returns false with zero refreshes", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout", "Date"] });
+  let calls = 0;
+  const attempted = await recheckCodexQuotaRecovery([blocker("deadline-before-dispatch")], {
+    ownerEpoch: () => "owner-a",
+    eligible: async () => {
+      t.mock.timers.tick(5_000);
+      return true;
+    },
+    refresh: async () => {
+      calls++;
+    },
+  });
+  assert.equal(attempted, false);
+  assert.equal(calls, 0);
+});

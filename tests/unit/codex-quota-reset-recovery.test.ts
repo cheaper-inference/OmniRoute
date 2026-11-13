@@ -66,6 +66,7 @@ function leaseOptions(id: string): auth.CredentialSelectionOptions {
     provider: "codex",
     connectionId: id,
   });
+  assert.equal(acquired.kind, "ACQUIRED");
   return {
     lease: {
       apiKeyId: "test-key",
@@ -74,7 +75,7 @@ function leaseOptions(id: string): auth.CredentialSelectionOptions {
         leaseOwnerId: owner,
         leaseOwnerHash: leases.hashLeaseOwnerId(owner),
         ownerDiagnostic: "test",
-        generation: acquired.kind === "ACQUIRED" ? acquired.lease.generation : 1,
+        generation: acquired.lease.generation,
       },
     },
   };
@@ -83,6 +84,14 @@ function select(allowed: string[], options: auth.CredentialSelectionOptions = {}
   return auth.getProviderCredentialsWithQuotaPreflight("codex", null, allowed, "gpt-5.5", options);
 }
 test.beforeEach(async () => {
+  const activeLease = leases.getActiveExclusiveConnectionLease(owner);
+  if (activeLease) {
+    leases.releaseExclusiveConnectionLease({
+      leaseOwnerId: owner,
+      generation: activeLease.generation,
+      apiKeyId: "test-key",
+    });
+  }
   for (const id of ids.splice(0)) await providers.deleteProviderConnection(id);
   cache.__clearForTests();
   calls = 0;
@@ -287,4 +296,22 @@ test("slow pre-reset poll cannot replace newer accepted post-reset routing evide
   });
   await usage.fetchAndPersistProviderLimits(connection.id, "manual");
   assert.equal(cache.getQuotaCache(connection.id)!.quotas.weekly.remainingPercentage, 95);
+});
+test("fresh blocking window suppressing recovery still invalidates held lease", async () => {
+  const connection = await seed();
+  cache.getQuotaCache(connection.id)!.quotas.weekly.observedAt = Date.now();
+  const options = leaseOptions(connection.id);
+  assert.equal((await select([connection.id], options))?.allRateLimited, true);
+  assert.equal(calls, 0);
+  assert.equal(leases.getActiveExclusiveConnectionLease(owner), null);
+});
+test("active recovery cooldown suppressing recovery still invalidates held lease", async () => {
+  const connection = await seed(94);
+  liveUsed = 94;
+  assert.equal((await select([connection.id]))?.allRateLimited, true);
+  assert.equal(calls, 1);
+  const options = leaseOptions(connection.id);
+  assert.equal((await select([connection.id], options))?.allRateLimited, true);
+  assert.equal(calls, 1);
+  assert.equal(leases.getActiveExclusiveConnectionLease(owner), null);
 });

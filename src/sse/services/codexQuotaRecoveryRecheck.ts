@@ -1,6 +1,7 @@
 // Shared across standalone chunks in one Node process (#8065); no auth/usage imports.
 export const CODEX_QUOTA_RECOVERY_COOLDOWN_MS = 15_000;
 export const CODEX_QUOTA_RECOVERY_DEADLINE_MS = 5_000;
+export const CODEX_QUOTA_FLIGHT_MAX_MS = 30_000;
 export interface CodexQuotaRecoveryBlocker {
   connectionId: string;
   windowNames: string[];
@@ -49,11 +50,23 @@ export function runCodexQuotaRefresh<T>(
   const prior = shared.flights.get(connectionId);
   if (prior) return prior.promise as Promise<T>;
   const startSeq = ++shared.seq;
-  const promise = Promise.resolve()
-    .then(refresh)
-    .finally(() => {
-      if (shared.flights.get(connectionId) === flight) shared.flights.delete(connectionId);
-    });
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const cleanup = () => {
+    clearTimeout(timer);
+    if (shared.flights.get(connectionId) === flight) shared.flights.delete(connectionId);
+  };
+  const work = Promise.resolve().then(refresh);
+  void work.catch(() => {});
+  const promise = Promise.race([
+    work,
+    new Promise<never>((_, reject) => {
+      timer = setTimeout(() => {
+        cleanup();
+        reject(new Error("Codex quota refresh timed out"));
+      }, CODEX_QUOTA_FLIGHT_MAX_MS);
+      timer.unref?.();
+    }),
+  ]).finally(cleanup);
   const flight: Flight = { startSeq, promise };
   shared.flights.set(connectionId, flight);
   return promise;

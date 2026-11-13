@@ -2422,7 +2422,7 @@ export async function getProviderCredentialsWithQuotaPreflight(
       ];
       if (provider === "codex" && meta && !recoveryAttempted) {
         recoveryAttempted = true;
-        const refreshed = await recheckCodexQuotaRecovery(
+        const attempted = await recheckCodexQuotaRecovery(
           meta.blockers.filter((blocker) => !excludedConnectionIds.has(blocker.connectionId)),
           {
             ownerEpoch: (id) => readCodexQuotaOwner(id)?.epoch ?? null,
@@ -2441,7 +2441,7 @@ export async function getProviderCredentialsWithQuotaPreflight(
             refresh: refreshCodexQuotaForRecovery,
           }
         );
-        if (refreshed) continue;
+        if (attempted) continue;
       }
       if (meta) finalQuotaRejection();
       if (

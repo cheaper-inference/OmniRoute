@@ -69,6 +69,7 @@ export async function getCodexUsage(
       headers["chatgpt-account-id"] = accountId;
     }
 
+    const signal = AbortSignal.timeout(20_000);
     const response = connectionId
       ? await fetchWithConnectionProxy(
           connectionId,
@@ -76,12 +77,14 @@ export async function getCodexUsage(
           {
             method: "GET",
             headers,
+            signal,
           },
           { fetchFn: codexUsageFetch }
         )
       : await codexUsageFetch(CODEX_CONFIG.usageUrl, {
           method: "GET",
           headers,
+          signal,
         });
     if (!response) {
       throw new Error("Codex API error: proxied request failed");
