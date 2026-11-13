@@ -1,0 +1,1 @@
+- **fix(images):** Image credential fallback now enforces the caller API key's connection scope on every attempt, including selector-supplied, refreshed and keyless (`noauth`) credentials, failing closed with 403 before dispatch — defense in depth behind the route-level key-scope checks ([#19165](https://github.com/cheaper-inference/OmniRoute/pull/19165) — thanks @Bl0ck154)

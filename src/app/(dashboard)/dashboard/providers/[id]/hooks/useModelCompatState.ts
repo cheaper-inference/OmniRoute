@@ -47,10 +47,12 @@ export interface ModelCompatState {
  *
  * @param customModels         The `modelMeta.customModels` array from page state.
  * @param modelCompatOverrides The `modelMeta.modelCompatOverrides` array from page state.
+ * @param providerId           Provider id, for provider-level runtime defaults (e.g. mistral).
  */
 export function useModelCompatState(
   customModels: CompatModelRow[],
-  modelCompatOverrides: Array<CompatModelRow & { id: string }>
+  modelCompatOverrides: Array<CompatModelRow & { id: string }>,
+  providerId?: string
 ): ModelCompatState {
   const customMap = useMemo(() => buildCompatMap(customModels), [customModels]);
   const overrideMap = useMemo(() => buildCompatMap(modelCompatOverrides), [modelCompatOverrides]);
@@ -62,8 +64,8 @@ export function useModelCompatState(
 
   const effectiveModelNormalize = useCallback(
     (modelId: string, protocol = MODEL_COMPAT_PROTOCOL_KEYS[0]) =>
-      effectiveNormalizeForProtocol(modelId, protocol, customMap, overrideMap),
-    [customMap, overrideMap]
+      effectiveNormalizeForProtocol(modelId, protocol, customMap, overrideMap, providerId),
+    [customMap, overrideMap, providerId]
   );
 
   const effectiveModelPreserveDeveloper = useCallback(

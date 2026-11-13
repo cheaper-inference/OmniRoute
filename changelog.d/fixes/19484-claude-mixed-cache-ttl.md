@@ -1,0 +1,1 @@
+- **fix(claude):** raise earlier 5-minute cache breakpoints to 1 hour when a later breakpoint uses 1 hour, avoiding Anthropic TTL-order errors. ([#19484](https://github.com/cheaper-inference/OmniRoute/pull/19484))
