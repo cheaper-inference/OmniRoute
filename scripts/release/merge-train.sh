@@ -107,7 +107,10 @@ STATIC_GATES=(
 FULL_ONLY_GATES=(
   "npm run check:agent-skills-sync"       # ~76s  — generated SKILL.md out of date
   "npm run check:route-guard-membership"  # ~46s  — new local-only route left unclassified
-  "npm run check:docs-counts"             # ~164s — README/AGENTS/llm.txt counts vs code
+  # Derived numbers are refreshed at release (plan 2026-11-13), so the train judges only what
+  # its PRs wrote (pr mode, diff against the train base): editing a managed count or dropping
+  # a required claim. The strict counts-vs-code verdict is `release:refresh-derived --check`.
+  "env OMNIROUTE_GATE_MODE=pr BASE_REF=${CHANGELOG_BASE_REF_Q} npm run check:docs-counts" # ~10s
   "npm run check:dashboard-typecheck"     # minutes — TS errors under the dashboard tsconfig
 )
 # Full mode: the box-speed runner (same coverage as the two CI shards combined —

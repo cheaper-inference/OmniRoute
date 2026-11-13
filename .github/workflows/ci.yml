@@ -508,6 +508,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          # Depth 2: on a pull_request the checkout is GitHub's merge commit, and its first
+          # parent is the base the PR was merged onto. check:docs-counts (inside check:docs-all)
+          # runs in `pr` mode on feature PRs and diffs the managed numbers against that base.
+          fetch-depth: 2
           persist-credentials: false
       - uses: actions/setup-node@v7
         with:
@@ -517,7 +521,14 @@ jobs:
         with:
           # PR acceleration is not release-candidate provenance.
           cache: ${{ github.event_name == 'pull_request' }}
+      # Plan 2026-11-13 (derived numbers are written at release): on a feature PR the counts gate
+      # judges only the managed numbers the PR itself edited (diff against BASE_SHA, or the merge
+      # commit's first parent when the base moved), never a base that is behind the live code by
+      # design. The release PR (release/v* → main) and pushes keep the strict comparison.
+      # Empty on push/dispatch: no PR, so release mode.
       - run: npm run check:docs-all
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
       # Previously-orphaned contract gates (existed as files, never wired anywhere).
       # All exit 0 today: cli-i18n is a hard gate, openapi-coverage is a ratchet
       # (floor ~36), openapi-security-tiers is advisory (Hard Rules #15/#17).

@@ -93,6 +93,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          # Depth 2: on a pull_request the checkout is GitHub's merge commit, and its first
+          # parent is the base the PR was merged onto. check:docs-counts (inside check:docs-all)
+          # runs in `pr` mode on feature PRs and diffs the managed numbers against that base.
+          fetch-depth: 2
           persist-credentials: false
       - uses: actions/setup-node@v7
         with:
@@ -104,7 +108,13 @@ jobs:
           cache: ${{ github.event_name == 'pull_request' }}
       # One walk of src/app/api for openapi-routes + docs-symbols (both still fail independently).
       - run: npm run check:api-docs-refs
+      # Plan 2026-11-13 (derived numbers are written at release): on a feature PR the counts gate
+      # judges only the managed numbers the PR itself edited (diff against BASE_SHA, or the merge
+      # commit's first parent when the base moved), never a base that is behind the live code by
+      # design. Empty on push/dispatch: no PR, so the strict release comparison.
       - name: Docs accuracy (fabricated-docs + i18n mirrors, strict)
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
         run: npm run check:docs-all
 
   fast-gates:
