@@ -30,7 +30,7 @@ export const HERO_COPY = {
     "FREE TOKENS / MO",
     "15–95%",
     "TOKEN SAVINGS",
-    "20",
+    "21",
     "ROUTING STRATEGIES",
     "$0",
     "TO START",
@@ -61,7 +61,7 @@ export async function renderReadmeHero() {
       viewBox: "0 0 1200 548",
       title:
         "OmniRoute — Never stop coding. Every AI tool to 393 providers, 150+ free, through one endpoint.",
-      desc: "Hero card in the Cheaper Inference UI Kit style: Switzer drawn as outlines, IBM Plex Mono for the install command. Claims: 393 AI providers, 150+ free tiers, ~1.62B free tokens per month, 15–95% token savings, 20 routing strategies, $0 to start. Light and dark follow the viewer's color scheme.",
+      desc: "Hero card in the Cheaper Inference UI Kit style: Switzer drawn as outlines, IBM Plex Mono for the install command. Claims: 393 AI providers, 150+ free tiers, ~1.62B free tokens per month, 15–95% token savings, 21 routing strategies, $0 to start. Light and dark follow the viewer's color scheme.",
     }) +
       gridDefs("heroGrid") +
       `  <rect class="bg" x="0" y="0" width="1200" height="548"/>\n` +
