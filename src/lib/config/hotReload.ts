@@ -4,6 +4,7 @@ import { SQLITE_FILE } from "@/lib/db/core";
 import { getSettings } from "@/lib/db/settings";
 import { isBackgroundServicesDisabled } from "@/lib/env/backgroundServices";
 import { applyRuntimeSettings, type RuntimeReloadChange } from "./runtimeSettings";
+import { noteHotReload } from "@/lib/readinessChecks";
 
 const DEFAULT_POLL_INTERVAL_MS = 5_000;
 const MIN_POLL_INTERVAL_MS = 1_000;
@@ -41,6 +42,7 @@ async function runHotReloadCheck(source: string) {
   const settings = await getSettings();
   const changes = await applyRuntimeSettings(settings, { source });
   logChanges(source, changes);
+  noteHotReload(true);
 }
 
 function queueHotReloadCheck(source: string) {
@@ -51,6 +53,7 @@ function queueHotReloadCheck(source: string) {
 
   activeCheck = runHotReloadCheck(source)
     .catch((error) => {
+      noteHotReload(false);
       console.warn(
         `[HOT_RELOAD] Runtime config reload failed for ${source}:`,
         error instanceof Error ? error.message : error
