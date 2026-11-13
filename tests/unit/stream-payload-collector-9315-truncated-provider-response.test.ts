@@ -20,7 +20,7 @@ const collector = await import("../../open-sse/utils/streamPayloadCollector.ts")
 
 test("buildStreamSummaryFromEvents loses tool_calls and finish_reason when collector caps are exceeded (#9315)", () => {
   const maxEvents = 50;
-  const c = collector.createStructuredSSECollector({ maxEvents });
+  const c = collector.createStructuredSSECollector({ maxEvents, retainEvents: true });
   // Fill the collector with 48 content delta chunks (leaving 2 event slots)
   for (let i = 0; i < 48; i++) {
     c.push({
@@ -53,12 +53,22 @@ test("buildStreamSummaryFromEvents loses tool_calls and finish_reason when colle
     object: "chat.completion.chunk",
     created: 1,
     model: "test-model",
-    choices: [{
-      index: 0, delta: {
-        role: "assistant",
-        tool_calls: [{ index: 0, id: "call_1", type: "function", function: { name: "Bash", arguments: "{}" } }],
+    choices: [
+      {
+        index: 0,
+        delta: {
+          role: "assistant",
+          tool_calls: [
+            {
+              index: 0,
+              id: "call_1",
+              type: "function",
+              function: { name: "Bash", arguments: "{}" },
+            },
+          ],
+        },
       },
-    }],
+    ],
   });
   c.push({
     id: "chatcmpl-test",
@@ -108,7 +118,14 @@ test("buildStreamSummaryFromEvents loses tool_calls and finish_reason when colle
           role: "assistant",
           content: "chunk-0 chunk-1 chunk-2 [...snip...] chunk-47 final piece ",
           reasoning_content: "deep reasoning ",
-          tool_calls: [{ index: 0, id: "call_1", type: "function", function: { name: "Bash", arguments: "{}" } }],
+          tool_calls: [
+            {
+              index: 0,
+              id: "call_1",
+              type: "function",
+              function: { name: "Bash", arguments: "{}" },
+            },
+          ],
         },
         finish_reason: "tool_calls",
       },
@@ -117,7 +134,10 @@ test("buildStreamSummaryFromEvents loses tool_calls and finish_reason when colle
     _streamed: true,
   };
   const buildFromResponse = c.build(responseBody, { includeEvents: false });
-  const summary = (buildFromResponse as Record<string, unknown>).summary as Record<string, unknown> | null;
+  const summary = (buildFromResponse as Record<string, unknown>).summary as Record<
+    string,
+    unknown
+  > | null;
 
   // Verify ALL data is present with responseBody approach
   assert.ok(summary !== null, "summary should not be null");
@@ -126,7 +146,7 @@ test("buildStreamSummaryFromEvents loses tool_calls and finish_reason when colle
 test("providerPayload built from responseBody retains all data regardless of collector truncation", () => {
   // Simulate a small collector cap that causes heavy truncation
   const maxEvents = 3;
-  const c = collector.createStructuredSSECollector({ maxEvents });
+  const c = collector.createStructuredSSECollector({ maxEvents, retainEvents: true });
 
   c.push({
     id: "chatcmpl-test",
@@ -172,9 +192,11 @@ test("providerPayload built from responseBody retains all data regardless of col
     "openai",
     "test-model"
   ) as Record<string, unknown> | null;
-  const choicesFromEvents = summaryFromEvents?.choices as Array<Record<string, unknown>> | undefined;
+  const choicesFromEvents = summaryFromEvents?.choices as
+    Array<Record<string, unknown>> | undefined;
   const messageFromEvents = choicesFromEvents?.[0]?.message as Record<string, unknown> | undefined;
-  const contentFromEvents = typeof messageFromEvents?.content === "string" ? messageFromEvents.content : "";
+  const contentFromEvents =
+    typeof messageFromEvents?.content === "string" ? messageFromEvents.content : "";
   // finish_reason was dropped so it defaults to "stop" anyway — checking content
   assert.ok(
     !contentFromEvents.includes("you?"),
@@ -196,9 +218,15 @@ test("providerPayload built from responseBody retains all data regardless of col
     _streamed: true,
   };
   const buildFromResponse = c.build(responseBody, { includeEvents: false });
-  const summary = (buildFromResponse as Record<string, unknown>).summary as Record<string, unknown> | null;
+  const summary = (buildFromResponse as Record<string, unknown>).summary as Record<
+    string,
+    unknown
+  > | null;
   assert.ok(summary !== null);
   const s = summary as Record<string, unknown>;
-  assert.equal((s.choices as Array<Record<string, unknown>>)[0].message.content, "hello world how are you?");
+  assert.equal(
+    (s.choices as Array<Record<string, unknown>>)[0].message.content,
+    "hello world how are you?"
+  );
   assert.equal((s.choices as Array<Record<string, unknown>>)[0].finish_reason, "stop");
 });
