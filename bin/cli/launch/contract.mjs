@@ -33,7 +33,8 @@ export {
 // ---------- versions (13.1) ----------
 
 /** Adapter contract version. Minor bumps are additive only. */
-export const ADAPTER_CONTRACT = Object.freeze({ major: 1, minor: 0 });
+// 1.1 (additive): launcher assets (TempFileSpec.asset, ${ASSET:...} tokens, assetRef).
+export const ADAPTER_CONTRACT = Object.freeze({ major: 1, minor: 1 });
 /** Alias of ADAPTER_CONTRACT (contract.d.ts `contractVersion`). */
 export const contractVersion = ADAPTER_CONTRACT;
 /** `LaunchPlan.planVersion`, also the top-level marker of `--dry-run --json`. */
@@ -45,6 +46,10 @@ export const PLAN_VERSION = 1;
  * The ONLY placeholders execute substitutes. Matching is exact (`${TMP}` and nothing else), so
  * tool-literal syntax such as `${OMNIROUTE_API_KEY:-omniroute-local}` (openclaw), `$VAR` (crush)
  * or `${{ secrets.X }}` (continue) passes through to the tool untouched.
+ *
+ * A fifth, non-secret token family references launcher assets (contract 1.1), valid ONLY inside
+ * `TempFileSpec.contents`: `${ASSET:<relpath>}` (raw text) and `${ASSET:<relpath>:json}` (text as
+ * a JSON string literal, quotes included). Build them with `assetRef`; see ASSET_ROOT.
  */
 export const PLACEHOLDERS = Object.freeze({
   TMP: "${TMP}",
@@ -53,6 +58,74 @@ export const PLACEHOLDERS = Object.freeze({
   /** Resolved tool command; valid in TeardownStep.argv only. */
   TOOL: "${TOOL}",
 });
+
+// ---------- launcher assets (contract 1.1) ----------
+
+/**
+ * Repo-relative directory holding static assets adapters may reference (codex base
+ * instructions, pi/omp extension templates). Core resolves every asset path against it; adapters
+ * never read files themselves (boundary rule).
+ *
+ * Two ways to use an asset, both on a TempFileSpec:
+ * - `asset: "<relpath>"` (no `contents`): core copies the asset verbatim to `path`.
+ * - `contents` containing `assetRef(relpath)` / `assetRef(relpath, { json: true })` tokens:
+ *   core replaces each token with the asset text (raw, or `JSON.stringify(text)`). Asset
+ *   expansion runs AFTER ${TMP}/${STATE}/${TOKEN} substitution, so asset text is never
+ *   placeholder-expanded. `expandAssetRefs` is the shared pure implementation.
+ */
+export const ASSET_ROOT = "bin/cli/launch/assets";
+
+const ASSET_PATH = /^[A-Za-z0-9_][A-Za-z0-9._-]*(?:\/[A-Za-z0-9_][A-Za-z0-9._-]*)*$/;
+const ASSET_TOKEN = /\$\{ASSET:([A-Za-z0-9._/-]+?)(:json)?\}/g;
+
+/**
+ * Validate an asset path: relative to ASSET_ROOT, forward slashes only, no empty, "." or ".."
+ * segment, no absolute or drive path, characters [A-Za-z0-9._-] per segment, no leading dot.
+ * Returns the path; throws LaunchError("Internal") otherwise.
+ * @param {string} relpath e.g. "codex/base-instructions.md"
+ */
+export function validateAssetPath(relpath) {
+  const s = typeof relpath === "string" ? relpath : "";
+  const segments = s.split("/");
+  if (!ASSET_PATH.test(s) || segments.some((segment) => segment === "." || segment === "..")) {
+    throw new LaunchError("Internal", `Invalid asset path: ${JSON.stringify(relpath)}`);
+  }
+  return s;
+}
+
+/**
+ * Token for an asset inside TempFileSpec.contents.
+ * @param {string} relpath validated with validateAssetPath
+ * @param {{ json?: boolean }} [options] json: insert as a JSON string literal (quotes included)
+ */
+export function assetRef(relpath, options = {}) {
+  return `\${ASSET:${validateAssetPath(relpath)}${options.json ? ":json" : ""}}`;
+}
+
+/**
+ * Every asset token in `contents`, in order: `{ token, path, json }`.
+ * @param {string | undefined} contents
+ */
+export function findAssetRefs(contents) {
+  const refs = [];
+  for (const match of String(contents ?? "").matchAll(ASSET_TOKEN)) {
+    refs.push({ token: match[0], path: match[1], json: match[2] === ":json" });
+  }
+  return refs;
+}
+
+/**
+ * Replace every asset token in `contents` using `readAsset(relpath) -> string` (core supplies the
+ * I/O). Pure given a pure reader. Invalid paths throw before readAsset is called.
+ * @param {string} contents
+ * @param {(relpath: string) => string} readAsset
+ */
+export function expandAssetRefs(contents, readAsset) {
+  return String(contents).replace(ASSET_TOKEN, (_token, path, json) => {
+    const text = String(readAsset(validateAssetPath(path)));
+    return json === ":json" ? JSON.stringify(text) : text;
+  });
+}
 
 /** Non-secret key for tools that hide a provider with an empty key (pi, codex env_key, qwen). */
 export const NO_AUTH_SENTINEL = "omniroute-no-auth";
@@ -506,7 +579,7 @@ export function findTokenSites(plan) {
     if (String(arg).includes(PLACEHOLDERS.TOKEN)) sites.push({ kind: "arg", key: String(index) });
   });
   for (const file of plan.tempFiles || []) {
-    if (String(file.contents).includes(PLACEHOLDERS.TOKEN)) {
+    if (String(file.contents ?? "").includes(PLACEHOLDERS.TOKEN)) {
       sites.push({ kind: "file", key: file.path });
     }
   }

@@ -1,5 +1,6 @@
 // bin/cli/launch/contract.d.ts: launcher contract types (architecture section 2), contract 1.0.
 // Frozen for every stream. Additive changes only (optional fields, optional methods): 13.1.
+// 1.1: launcher assets (TempFileSpec.asset, ${ASSET:...} tokens in contents, assetRef helpers).
 
 import type {
   ViewSelectSpec,
@@ -29,8 +30,8 @@ export interface ContractVersion {
 }
 
 /** Version of this contract; adapters declare `contract: { major: 1, minor: <= this.minor }`. */
-export declare const ADAPTER_CONTRACT: Readonly<{ major: 1; minor: 0 }>;
-export declare const contractVersion: Readonly<{ major: 1; minor: 0 }>;
+export declare const ADAPTER_CONTRACT: Readonly<{ major: 1; minor: 1 }>;
+export declare const contractVersion: Readonly<{ major: 1; minor: 1 }>;
 export declare const PLAN_VERSION: 1;
 
 // ---------- capability flags (static, declared by the adapter) ----------
@@ -211,8 +212,16 @@ export interface TempFileSpec {
   /** Relative to ${TMP} (default) or ${STATE}; may contain subdirs. */
   path: string;
   root?: "tmp" | "state";
-  /** May contain ${TMP}, ${STATE}, ${TOKEN}; other `${...}` text is tool-literal and kept. */
-  contents: string;
+  /** May contain ${TMP}, ${STATE}, ${TOKEN}; other `${...}` text is tool-literal and kept.
+   *  May also contain asset tokens (1.1): `${ASSET:<relpath>}` is replaced by the asset's raw
+   *  text, `${ASSET:<relpath>:json}` by `JSON.stringify(text)`; build them with `assetRef`.
+   *  Asset expansion runs after placeholder substitution, so asset text is kept literally.
+   *  Exactly one of `contents` / `asset` is set. */
+  contents?: string;
+  /** (1.1) Copy this launcher asset verbatim to `path`. Relative to ASSET_ROOT
+   *  (`bin/cli/launch/assets/`), validated by `validateAssetPath`. Exactly one of `contents` /
+   *  `asset` is set; `mergeBase` requires `contents`. */
+  asset?: string;
   mode?: 0o600 | 0o700;
   /** Display/validation hint for dry-run (additive). */
   format?: "json" | "yaml" | "toml" | "ts" | "js" | "env" | "text";
@@ -316,6 +325,19 @@ export declare const PLACEHOLDERS: Readonly<{
   TOOL: "${TOOL}";
 }>;
 export declare const NO_AUTH_SENTINEL: "omniroute-no-auth";
+export declare const ASSET_ROOT: "bin/cli/launch/assets";
+export interface AssetRef {
+  token: string;
+  path: string;
+  json: boolean;
+}
+export declare function validateAssetPath(relpath: string): string;
+export declare function assetRef(relpath: string, options?: { json?: boolean }): string;
+export declare function findAssetRefs(contents: string | undefined): AssetRef[];
+export declare function expandAssetRefs(
+  contents: string,
+  readAsset: (relpath: string) => string
+): string;
 export declare const PLATFORMS: ReadonlyArray<Platform>;
 export declare const EXIT_CODES: Readonly<Record<LaunchErrorCode, number | null>>;
 export declare const ERROR_CODES: Readonly<{ [K in LaunchErrorCode]: K }>;

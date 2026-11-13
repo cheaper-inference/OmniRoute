@@ -3,7 +3,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { load as loadYaml } from "js-yaml";
@@ -19,7 +19,7 @@ import {
   viewSelectSpecSchema,
 } from "../../../../src/shared/validation/launchView.ts";
 import { FIXTURE_ROWS, fixtureCtx } from "./_helpers/fixtureCtx.mjs";
-import { assertGolden, checkPlanInvariants, goldenPath } from "./_helpers/golden.mjs";
+import { ASSETS_DIR, assertGolden, checkPlanInvariants, goldenPath } from "./_helpers/golden.mjs";
 
 const {
   ADAPTER_CONTRACT,
@@ -53,6 +53,7 @@ const {
   viewHash,
   yaml,
 } = contract;
+const { ASSET_ROOT, assetRef, expandAssetRefs, findAssetRefs, validateAssetPath } = contract;
 
 type Plan = ReturnType<typeof createPlan>;
 type LaunchAdapter = import("../../../../bin/cli/launch/contract.d.ts").LaunchAdapter;
@@ -105,7 +106,7 @@ function sampleAdapter(overrides: Record<string, unknown> = {}): LaunchAdapter {
 // ---------- versions and constants ----------
 
 test("contract version and plan version are frozen at 1.0 / 1", () => {
-  assert.deepEqual({ ...ADAPTER_CONTRACT }, { major: 1, minor: 0 });
+  assert.deepEqual({ ...ADAPTER_CONTRACT }, { major: 1, minor: 1 });
   assert.equal(contractVersion, ADAPTER_CONTRACT);
   assert.ok(Object.isFrozen(ADAPTER_CONTRACT));
   assert.equal(PLAN_VERSION, 1);
@@ -564,7 +565,7 @@ test("checkPlanInvariants accepts a good adapter plan", () => {
   const plan = adapter.plan(ctx);
   checkPlanInvariants(plan, ctx, {
     adapter,
-    injectedIds: (p: Plan) => JSON.parse(p.tempFiles[0].contents).models,
+    injectedIds: (p: Plan) => JSON.parse(p.tempFiles[0].contents ?? "{}").models,
   });
 });
 
@@ -716,4 +717,161 @@ test("launchSessionPatchSchema checks ids, uniqueness and the hash", () => {
   );
   assert.ok(!launchSessionPatchSchema.safeParse({ view: { ...view, extra: 1 } }).success);
   assert.ok(!launchSessionPatchSchema.safeParse({ view, other: 1 }).success);
+});
+
+// ---------- launcher assets (contract 1.1) ----------
+
+test("validateAssetPath accepts relative forward-slash paths and rejects escapes", () => {
+  assert.equal(ASSET_ROOT, "bin/cli/launch/assets");
+  for (const good of ["codex/base-instructions.md", "pi/omniroute.ts", "a.txt", "a/b/c_d-e.1"]) {
+    assert.equal(validateAssetPath(good), good);
+  }
+  const bad = [
+    "",
+    "/abs/x.md",
+    "C:/x.md",
+    "C:\\x.md",
+    "codex\\base.md",
+    "../x.md",
+    "a/../b.md",
+    "./a.md",
+    "a/./b.md",
+    "a//b.md",
+    "a/",
+    ".hidden",
+    "a/.hidden",
+    "a b.md",
+    "a:b.md",
+    "a}b.md",
+    undefined,
+    42,
+  ];
+  for (const path of bad) {
+    assert.throws(
+      () => validateAssetPath(path as string),
+      (e: unknown) => isLaunchError(e),
+      String(path)
+    );
+  }
+});
+
+test("assetRef builds tokens that findAssetRefs parses back", () => {
+  assert.equal(assetRef("codex/base-instructions.md"), "${ASSET:codex/base-instructions.md}");
+  assert.equal(
+    assetRef("codex/base-instructions.md", { json: true }),
+    "${ASSET:codex/base-instructions.md:json}"
+  );
+  assert.throws(
+    () => assetRef("../x"),
+    (e: unknown) => isLaunchError(e)
+  );
+  const contents = `{"a":${assetRef("x/a.md", { json: true })},"b":"${assetRef("y.txt")}"}`;
+  assert.deepEqual(findAssetRefs(contents), [
+    { token: "${ASSET:x/a.md:json}", path: "x/a.md", json: true },
+    { token: "${ASSET:y.txt}", path: "y.txt", json: false },
+  ]);
+  assert.deepEqual(findAssetRefs(undefined), []);
+  assert.deepEqual(findAssetRefs("${TMP}/x ${TOKEN} ${OMNIROUTE_API_KEY:-x}"), []);
+});
+
+test("expandAssetRefs inserts raw or JSON-quoted text and keeps asset text literal", () => {
+  const text = 'Line "one"\n\tsecond ${TOKEN} \\ end';
+  const read = (relpath: string) => {
+    assert.equal(relpath, "codex/base-instructions.md");
+    return text;
+  };
+  const entry = `{"slug":"m","base_instructions":${assetRef("codex/base-instructions.md", { json: true })}}`;
+  const expanded = expandAssetRefs(entry, read);
+  assert.deepEqual(JSON.parse(expanded), { slug: "m", base_instructions: text });
+  assert.equal(expandAssetRefs(`<${assetRef("codex/base-instructions.md")}>`, read), `<${text}>`);
+  assert.equal(expandAssetRefs("no tokens ${TMP}", read), "no tokens ${TMP}");
+  let called = false;
+  assert.throws(
+    () =>
+      expandAssetRefs("${ASSET:a/../b}", () => {
+        called = true;
+        return "";
+      }),
+    (e: unknown) => isLaunchError(e)
+  );
+  assert.equal(called, false, "invalid path rejected before reading");
+});
+
+test("createPlan and findTokenSites accept asset-backed files", () => {
+  const plan = createPlan("x", {
+    tempFiles: [{ path: "ext/omniroute.ts", asset: "pi/omniroute.ts" }],
+  });
+  assert.equal(plan.needsTempDir, true);
+  assert.deepEqual(findTokenSites(plan), []);
+});
+
+test("checkPlanInvariants accepts asset files and asset tokens, rejects misuse", () => {
+  const assetsDir = mkdtempSync(join(tmpdir(), "olx-assets-"));
+  try {
+    mkdirSync(join(assetsDir, "codex"));
+    writeFileSync(join(assetsDir, "codex", "base-instructions.md"), "You are Codex.");
+    writeFileSync(join(assetsDir, "codex", "ext.ts"), "export default 1;");
+    const ctx = fixtureCtx();
+    const base = (): Plan =>
+      createPlan("x", {
+        tempFiles: [
+          {
+            path: "model.json",
+            root: "state",
+            contents: `{"models":[{"base_instructions":${assetRef("codex/base-instructions.md", { json: true })}}]}`,
+            format: "json",
+          },
+          { path: "ext.ts", asset: "codex/ext.ts", format: "ts" },
+        ],
+        modelList: { strategy: "inject", viewHash: ctx.view.hash, injected: 0 },
+      });
+    checkPlanInvariants(base(), ctx, { assetsDir });
+    // Existence check can be skipped, path validation cannot.
+    checkPlanInvariants(base(), ctx, { assetsDir: false });
+
+    const cases: Array<[string, (plan: Plan) => void, RegExp]> = [
+      ["missing asset file", (p) => (p.tempFiles[1].asset = "codex/nope.ts"), /exists/],
+      [
+        "missing token asset",
+        (p) => (p.tempFiles[0].contents = assetRef("codex/none.md")),
+        /exists/,
+      ],
+      ["both", (p) => (p.tempFiles[1].contents = "x"), /exactly one of contents \/ asset/],
+      ["neither", (p) => delete p.tempFiles[1].asset, /exactly one of contents \/ asset/],
+      ["bad asset path", (p) => (p.tempFiles[1].asset = "../etc/passwd"), /is valid/],
+      ["bad token path", (p) => (p.tempFiles[0].contents = "${ASSET:a/../b}"), /is valid/],
+      ["malformed token", (p) => (p.tempFiles[0].contents = "${ASSET:a b}"), /well formed/],
+      [
+        "mergeBase with asset",
+        (p) => (p.tempFiles[1].mergeBase = { path: "/x.json", format: "json" }),
+        /mergeBase requires contents/,
+      ],
+      [
+        "token in env",
+        (p) => (p.env.set.X = assetRef("codex/ext.ts")),
+        /only valid inside tempFiles contents/,
+      ],
+      [
+        "token in argv",
+        (p) => p.argv.push(assetRef("codex/ext.ts")),
+        /only valid inside tempFiles contents/,
+      ],
+    ];
+    for (const [name, mutate, message] of cases) {
+      const plan = base();
+      mutate(plan);
+      assert.throws(() => checkPlanInvariants(plan, ctx, { assetsDir }), message, name);
+    }
+  } finally {
+    rmSync(assetsDir, { recursive: true, force: true });
+  }
+  assert.ok(ASSETS_DIR.endsWith(join("bin", "cli", "launch", "assets")));
+});
+
+test("defineAdapter accepts contract minor 1 and refuses minor 2", () => {
+  assert.ok(defineAdapter(sampleAdapter({ contract: { major: 1, minor: 1 } })));
+  assert.throws(
+    () => defineAdapter(sampleAdapter({ contract: { major: 1, minor: 2 } })),
+    /contract\.minor/
+  );
 });

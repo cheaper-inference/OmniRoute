@@ -2,18 +2,40 @@
 
 import assert from "node:assert/strict";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
+  ASSET_ROOT,
   PLACEHOLDERS,
+  findAssetRefs,
   PLAN_VERSION,
   findTokenSites,
   isValidEnvKey,
   json,
+  validateAssetPath,
 } from "../../../../../bin/cli/launch/contract.mjs";
 
 export const GOLDEN_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "golden");
+/** Absolute path of bin/cli/launch/assets (contract ASSET_ROOT). */
+export const ASSETS_DIR = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  "../../../../..",
+  ASSET_ROOT
+);
+
+function assertAsset(relpath, where, assetsDir) {
+  assert.doesNotThrow(
+    () => validateAssetPath(relpath),
+    `asset path ${relpath} in ${where} is valid`
+  );
+  if (assetsDir !== false) {
+    assert.ok(
+      existsSync(join(assetsDir, relpath)),
+      `asset ${relpath} (${where}) exists in ${assetsDir}`
+    );
+  }
+}
 
 const NAME_PART = /^[a-z0-9][a-z0-9._-]*$/;
 
@@ -76,6 +98,8 @@ function mentionsPlaceholder(plan, placeholder) {
  * @param {string[] | ((plan: object) => string[])} [options.injectedIds] the ids the plan tells
  *   the tool about (extracted by the adapter test); must equal ctx.view ids cut by injectLimit
  * @param {number} [options.injectLimit] defaults to adapter.capabilities.modelList.injectLimit
+ * @param {string | false} [options.assetsDir] where referenced assets must exist (default
+ *   ASSETS_DIR); false skips the existence check but still validates paths
  */
 export function checkPlanInvariants(plan, ctx, options = {}) {
   assert.equal(plan.planVersion, PLAN_VERSION, "planVersion");
@@ -110,12 +134,35 @@ export function checkPlanInvariants(plan, ctx, options = {}) {
     );
   }
 
+  // Asset tokens only inside TempFileSpec.contents.
+  const assetsDir = options.assetsDir ?? ASSETS_DIR;
+  assert.ok(
+    !JSON.stringify([plan.argv, plan.env, plan.teardown, plan.preflight]).includes("${ASSET:"),
+    "asset tokens are only valid inside tempFiles contents"
+  );
+
   // Files only under ${TMP} / ${STATE}.
   const seenPaths = new Set();
   for (const file of plan.tempFiles) {
     assert.ok(isRelativeSafe(file.path), `temp file path ${file.path} stays under its root`);
     assert.ok([undefined, "tmp", "state"].includes(file.root), `temp file root ${file.root}`);
-    assert.equal(typeof file.contents, "string", `contents of ${file.path} is a string`);
+    const hasContents = file.contents !== undefined;
+    const hasAsset = file.asset !== undefined;
+    assert.ok(hasContents !== hasAsset, `${file.path}: exactly one of contents / asset`);
+    if (hasContents) {
+      assert.equal(typeof file.contents, "string", `contents of ${file.path} is a string`);
+      const refs = findAssetRefs(file.contents);
+      assert.equal(
+        file.contents.split("${ASSET:").length - 1,
+        refs.length,
+        `${file.path}: every \${ASSET:...} token is well formed`
+      );
+      for (const ref of refs) assertAsset(ref.path, file.path, assetsDir);
+    } else {
+      assert.equal(typeof file.asset, "string", `asset of ${file.path} is a string`);
+      assert.equal(file.mergeBase, undefined, `${file.path}: mergeBase requires contents`);
+      assertAsset(file.asset, file.path, assetsDir);
+    }
     const key = `${file.root ?? "tmp"}:${file.path}`;
     assert.ok(!seenPaths.has(key), `temp file ${key} written twice`);
     seenPaths.add(key);

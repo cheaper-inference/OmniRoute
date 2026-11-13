@@ -20,4 +20,7 @@ assertGolden(adapter.id, "win32", plan); // tests/unit/cli/launch/golden/<id>.wi
 - Cases to cover (section 16.2): no model, model with/without context, below `recommended`,
   win32, profile, user passthrough, empty view (`rows: []`, expect a `LaunchError`).
 - Create or refresh goldens with `UPDATE_GOLDEN=1`, then review the JSON diff before committing.
+- Static assets (contract 1.1) live in `bin/cli/launch/assets/`: use `{ path, asset: "<relpath>" }`
+  for a verbatim copy, or `assetRef(relpath, { json: true })` inside `contents`; the invariants
+  check that each referenced asset exists (`assetsDir` option, `false` skips the check).
 - `boundary.test.ts` also imports every `adapters/*.mjs` default export and runs the invariants.
