@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "ModelUnsuitable",
+    "hint": "Pick a model with a larger context window (omnirouter launch claude --model <id>).",
+    "message": "tiny/ctx-16k has a 16000 token context; Claude Code needs at least 32000"
+  }
+}
