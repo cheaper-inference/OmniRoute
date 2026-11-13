@@ -19,6 +19,11 @@
 
 // Providers that support usage/quota API
 export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
+  "zcode-start",
+  "zcode-individual",
+  "zcode",
+  "zcode-cn-start",
+  "zcode-cn-individual",
   "antigravity",
   "agy",
   "kiro",

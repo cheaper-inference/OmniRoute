@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { ZCODE_PROVIDERS } from "@/shared/constants/zcodeProviders";
 import { useLocale, useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
@@ -367,6 +368,17 @@ export default function QuotaCardExpanded({
         : [],
     [providerId, quotaGroups, quotas]
   );
+  const zcodeGroups = useMemo(
+    () =>
+      ZCODE_PROVIDERS.has(providerId || "")
+        ? quotaGroups.filter(
+            (group, index, groups) =>
+              (group.plan === "start" || group.plan === "individual") &&
+              groups.findIndex((candidate) => candidate.plan === group.plan) === index
+          )
+        : [],
+    [providerId, quotaGroups]
+  );
   const sortedQuotas = useMemo(
     () => resolveQuotaDisplayOrder(providerId, quotas),
     [quotas, providerId]
@@ -392,7 +404,7 @@ export default function QuotaCardExpanded({
 
   return (
     <div className="border-t border-border bg-bg-subtle/30 px-3 py-2.5 flex flex-col gap-1.5">
-      {shouldShowLoadingPlaceholder(loading, sortedQuotas.length, message) ? (
+      {shouldShowLoadingPlaceholder(loading, sortedQuotas.length + zcodeGroups.length, message) ? (
         <div role="status" className="text-[11px] text-text-muted flex items-center gap-1.5">
           <Spinner decorative size="xs" />
           {t("loadingQuotas")}
@@ -401,6 +413,47 @@ export default function QuotaCardExpanded({
         <div className="text-[11px] text-error flex items-start gap-1.5">
           <Icon name="error" size={13} />
           <span>{error}</span>
+        </div>
+      ) : zcodeGroups.length > 0 ? (
+        <div className="flex flex-col gap-2">
+          {zcodeGroups.map((group) => {
+            const plan = group.plan === "start" ? "Start" : "Individual";
+            const quotaMap =
+              group.quotas && typeof group.quotas === "object" && !Array.isArray(group.quotas)
+                ? (group.quotas as Record<string, unknown>)
+                : {};
+            const rows =
+              group.status === "available"
+                ? Object.entries(quotaMap).filter(
+                    ([, value]) => value && typeof value === "object" && !Array.isArray(value)
+                  )
+                : [];
+            const observedAt = typeof group.observedAt === "string" ? group.observedAt : null;
+            return (
+              <section key={plan} aria-label={plan} className="flex flex-col gap-1">
+                <div className="flex justify-between gap-2 text-[11px] font-semibold text-text-main">
+                  <span>{plan}</span>
+                  {observedAt && (
+                    <time dateTime={observedAt} title={observedAt}>
+                      {new Date(observedAt).toLocaleString()}
+                    </time>
+                  )}
+                </div>
+                {rows.length ? (
+                  rows.map(([name, value]) => (
+                    <QuotaDetailRow
+                      key={name}
+                      q={{ ...(value as Record<string, unknown>), name }}
+                    />
+                  ))
+                ) : (
+                  <div className="text-[11px] text-text-muted italic">
+                    {tr("noQuotaData", "No quota data")}
+                  </div>
+                )}
+              </section>
+            );
+          })}
         </div>
       ) : (providerId === "antigravity" || providerId === "agy") &&
         resolvedAntigravityGroups.length > 0 ? (

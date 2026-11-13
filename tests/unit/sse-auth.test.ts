@@ -819,6 +819,78 @@ test("getProviderCredentials honors forcedConnectionId even when another account
   assert.equal(selected.apiKey, "sk-forced");
 });
 
+test("a pinned Z-code OAuth connection does not select the synthetic local account", async () => {
+  const connection = await providersDb.createProviderConnection({
+    provider: "zcode",
+    authType: "oauth",
+    name: "BigModel test",
+    accessToken: "oauth-test-token",
+    idToken: "zcode-start-token",
+    providerSpecificData: { family: "bigmodel", userId: "user-1" },
+  });
+  const selected = await auth.getProviderCredentials("zcode", null, null, null, {
+    forcedConnectionId: connection.id,
+  });
+  assert.equal(selected?.connectionId, connection.id);
+  assert.equal(selected?.accessToken, "oauth-test-token");
+  assert.equal(selected?.idToken, "zcode-start-token");
+  assert.equal(selected?.providerSpecificData?.family, "bigmodel");
+});
+
+test("an unpinned Z-code request selects an added OAuth account", async () => {
+  const connection = await providersDb.createProviderConnection({
+    provider: "zcode",
+    authType: "oauth",
+    name: "Z.ai test",
+    accessToken: "oauth-test-token",
+    idToken: "zcode-start-token",
+    providerSpecificData: { family: "zai", userId: "user-1" },
+  });
+  const legacy = await auth.getProviderCredentials("zcode");
+  assert.equal(legacy?.connectionId, "noauth");
+  const selected = await auth.getProviderCredentials("zcode-start");
+  assert.equal(selected?.connectionId, connection.id);
+  assert.equal(selected?.idToken, "zcode-start-token");
+});
+
+test("an expired pinned Z-code account never falls back to the local account", async () => {
+  const connection = await providersDb.createProviderConnection({
+    provider: "zcode",
+    authType: "oauth",
+    name: "expired Z.ai",
+    accessToken: "oauth-test-token",
+    idToken: "zcode-start-token",
+    testStatus: "expired",
+  });
+  const selected = await auth.getProviderCredentials("zcode", null, null, null, {
+    forcedConnectionId: connection.id,
+  });
+  assert.notEqual(selected?.connectionId, "noauth");
+});
+
+test("a pinned Z-code account on cooldown is not replaced with a different account", async () => {
+  const a = await providersDb.createProviderConnection({
+    provider: "zcode",
+    authType: "oauth",
+    name: "cooling Z.ai",
+    accessToken: "access-a",
+    idToken: "jwt-a",
+    rateLimitedUntil: futureIso(),
+  });
+  const b = await providersDb.createProviderConnection({
+    provider: "zcode",
+    authType: "oauth",
+    name: "healthy BigModel",
+    accessToken: "access-b",
+    idToken: "jwt-b",
+  });
+  const selected = await auth.getProviderCredentials("zcode", null, null, null, {
+    forcedConnectionId: a.id,
+  });
+  assert.notEqual(selected?.connectionId, b.id);
+  assert.notEqual(selected?.connectionId, "noauth");
+});
+
 test("getProviderCredentials refuses a forced pin outside allowedConnections instead of falling back (#12080)", async () => {
   const allowedConn = await seedConnection("openai", {
     name: "forced-allowed",

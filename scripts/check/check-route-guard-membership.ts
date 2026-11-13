@@ -236,6 +236,8 @@ export const KNOWN_UNCLASSIFIED_SOURCE_SPAWN: Record<string, string> = {
  * Stale-enforced: an entry that no longer loads a process API must be removed.
  */
 export const TRANSITIVE_SPAWN_INFRA_MODULES: Record<string, string> = {
+  "open-sse/executors/zcode/nativeHostManager.ts":
+    "Official ZCode inference host: server-owned runtime/node + server-core.js, fixed ['1'] argv, no shell or caller execArgv; account state is hash-scoped and credentials must identify an authorized saved account. Request text/tools travel over RPC, not launch arguments. Covered by tests/unit/zcode-native-host-manager.test.ts.",
   "src/lib/db/adapters/driverFactory.ts":
     "spawnSync(process.execPath, ['-e', require('better-sqlite3')]) native-driver probe when the DB opens; fixed argv.",
   "src/lib/db/healthCheckRunner.ts":

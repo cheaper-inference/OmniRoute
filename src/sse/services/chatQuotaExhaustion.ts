@@ -1,3 +1,4 @@
+import { getProviderConnectionById } from "@/lib/db/providers";
 import { shouldMarkAccountExhaustedFrom429 } from "@omniroute/open-sse/services/accountFallback.ts";
 import {
   getCachedClaudeQuotaScopeDecision,
@@ -18,6 +19,25 @@ export async function maybeMarkChatAccountExhaustedFrom429(input: {
   // Mark account as quota-exhausted only for explicit long-window quota signals.
   // A plain 429/high-traffic response should trigger fallback/cooldown, not poison
   // quotaCache as exhausted for 5 minutes while usage quota may still be available.
+  // Z-code tariff isolation (handoff 05-astra-plan.md, step 3): the quota
+  // cache is shared across tariffs over the same OAuth connection — a 429 on
+  // one tariff must not mark the connection exhausted for the other. Start
+  // quota state is read from the provider's own billing/balance instead.
+  if (
+    [
+      "zcode",
+      "zc",
+      "zc-start",
+      "zc-individual",
+      "zcode-start",
+      "zcode-individual",
+      "zcode-cn-start",
+      "zcode-cn-individual",
+    ].includes(input.provider) &&
+    (await getProviderConnectionById(input.connectionId))?.authType === "oauth"
+  ) {
+    return;
+  }
   if (
     input.status !== 429 ||
     !shouldMarkAccountExhaustedFrom429(

@@ -49,6 +49,7 @@ import { isClaudeExtraUsageAllowed } from "@/lib/providers/claudeExtraUsage";
 import { filterCodexQuotaWindows } from "@omniroute/open-sse/services/codexQuotaWindowPolicy.ts";
 import { isCodexQuotaFilteringDisabled } from "@/lib/providers/codexQuotaFiltering";
 import { resolveProviderId } from "@/shared/constants/providers";
+import { createQuotaScopeCheck, resolveSnapshotQuotaProvider } from "./zcodeQuotaScope";
 import {
   claudeQuotaMatchesModel,
   isExplicitClaudeQuota429Text,
@@ -749,6 +750,11 @@ export function getClaudeQuotaPreflightResetAt(
   return decisionForLatestClaudeReset(windows, "connection", now)?.resetAt ?? null;
 }
 
+/** Whether a cached ZCode OAuth observation is attributable to this tariff. */
+export const isQuotaScopeApplicable = createQuotaScopeCheck(
+  (id) => getQuotaCache(id) || hydrateQuotaCacheFromSnapshots(id)
+);
+
 /** Request-time overrides that make cached quota windows irrelevant for this request. */
 function isQuotaFilterBypassed(
   connectionId: string,
@@ -769,8 +775,10 @@ export function isQuotaExhaustedForRequest(
   connectionId: string,
   provider: string,
   requestedModel: string | null = null,
-  providerSpecificData?: unknown
+  providerSpecificData?: unknown,
+  authType?: string | null
 ): boolean {
+  if (!isQuotaScopeApplicable(connectionId, provider, authType)) return false;
   if (isQuotaFilterBypassed(connectionId, provider, requestedModel, providerSpecificData))
     return false;
   const entry = getQuotaCache(connectionId) || hydrateQuotaCacheFromSnapshots(connectionId);
@@ -1083,7 +1091,7 @@ function hydrateQuotaCacheFromSnapshots(connectionId: string): QuotaCacheEntry |
 
   const entry: QuotaCacheEntry = {
     connectionId,
-    provider,
+    provider: resolveSnapshotQuotaProvider(provider, snapshots),
     quotas,
     modelQuotas: {},
     fetchedAt: fetchedAt || Date.now(),

@@ -108,6 +108,34 @@ const lazyExecutors: Record<string, () => Promise<BaseExecutor>> = {
   "zed-hosted": () => import("./zed-hosted.ts").then((m) => new m.ZedHostedExecutor()),
   "devin-cli": () => import("./devin-cli.ts").then((m) => new m.DevinCliExecutor()),
   zcode: () => import("./zcode.ts").then((m) => new m.ZcodeExecutor()),
+  "zcode-start": () =>
+    import("./zcode.ts").then(
+      (m) => new m.ZcodeExecutor({ provider: "zcode-start", providerId: "account:zai-start-plan" })
+    ),
+  "zcode-individual": () =>
+    import("./zcode.ts").then(
+      (m) =>
+        new m.ZcodeExecutor({
+          provider: "zcode-individual",
+          providerId: "account:zai-individual-coding-plan",
+        })
+    ),
+  "zcode-cn-start": () =>
+    import("./zcode.ts").then(
+      (m) =>
+        new m.ZcodeExecutor({
+          provider: "zcode-cn-start",
+          providerId: "account:bigmodel-start-plan",
+        })
+    ),
+  "zcode-cn-individual": () =>
+    import("./zcode.ts").then(
+      (m) =>
+        new m.ZcodeExecutor({
+          provider: "zcode-cn-individual",
+          providerId: "account:bigmodel-individual-coding-plan",
+        })
+    ),
   "minimax-code": () => import("./minimax-code.ts").then((m) => new m.MinimaxCodeExecutor()),
   mmcode: () => import("./minimax-code.ts").then((m) => new m.MinimaxCodeExecutor()), // Alias
   zc: () => import("./zcode.ts").then((m) => new m.ZcodeExecutor()), // Alias

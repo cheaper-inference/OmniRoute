@@ -20,9 +20,16 @@ export interface ZcodeAppServerClientOptions {
   requestTimeoutMs?: number;
 }
 
+export type ZcodeCallOptions = { timeoutMs?: number; signal?: AbortSignal };
+
 export interface ZcodeClientLike {
-  start(): Promise<void>;
-  call(channel: string, method: string, args: unknown[]): Promise<unknown>;
+  start(options?: ZcodeCallOptions): Promise<void>;
+  call(
+    channel: string,
+    method: string,
+    args: unknown[],
+    options?: ZcodeCallOptions
+  ): Promise<unknown>;
   close(): Promise<void>;
 }
 

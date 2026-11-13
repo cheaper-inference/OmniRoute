@@ -203,6 +203,8 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // (existing-registration check on start, and again on completion) behind management
     // auth — state reads, never connection selection or dispatch (class C).
     "src/app/api/oauth/chatgpt/session/route.ts": 2,
+    // Management-authenticated reauthorization validates the named account; no model dispatch.
+    "src/app/api/oauth/zcode/login/start/route.ts": 1,
     "src/app/api/oauth/codex/import/route.ts": 1,
     "src/app/api/oauth/kiro/api-key/route.ts": 1,
     "src/app/api/oauth/kiro/auto-import/route.ts": 2,
@@ -303,6 +305,8 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/lib/monitoring/providerHealthMatrix.ts": 1,
     "src/lib/oauth/connectionPersistence.ts": 1,
     "src/lib/oauth/services/persistCursorConnection.ts": 1,
+    // Login persistence finds an existing account to update; no inference dispatch.
+    "src/lib/oauth/services/zcodePersistence.ts": 1,
     "src/lib/oauth/utils/agyAuthImport.ts": 1,
     "src/lib/oauth/utils/claudeAuthImport.ts": 1,
     "src/lib/oauth/utils/codexAuthImport.ts": 1,
@@ -380,7 +384,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // `museSessionIsOwned` deciding whether provider failover may change provider.
     "src/sse/handlers/chat/museOwnership.ts": 2,
     "src/sse/handlers/chatHelpers.ts": 1,
-    "src/sse/services/auth.ts": 4,
+    // Reads the selected row after a 429 for tariff-aware cooldown, without dispatch.
+    "src/sse/services/chatQuotaExhaustion.ts": 1,
+    // Includes the selected tariff account read for cooldown state.
+    "src/sse/services/auth.ts": 5,
   },
 };
 

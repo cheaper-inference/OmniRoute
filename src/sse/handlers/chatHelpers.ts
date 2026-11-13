@@ -44,6 +44,7 @@ import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts
 import { getCachedProviderNodes } from "@/lib/db/readCache";
 import {
   runWithProxyContext,
+  runWithDirectFetchContext,
   runWithAppliedProxyCapture,
   runWithTlsTracking,
   isTlsFingerprintActive,
@@ -436,6 +437,27 @@ export function checkResourcePressureBeforeProviderWork(): ResourcePressureGuard
 
 // Resolved failures are accounted by callers; acquired probes settle inside execute()'s fence.
 const chatPathOwnsBreakerAccounting = () => "ignore" as const;
+
+/**
+ * The ZCode app-server is a local native process and owns inference egress itself.
+ * Do not apply OmniRoute's ambient proxy (or its reachability fast-fail) to that
+ * transport. The explicit HTTP gateway still follows the configured proxy route.
+ */
+export async function runWithProviderProxyContext<T>(
+  provider: string,
+  proxy: unknown,
+  fn: () => T | Promise<T>,
+  zcodeTransport = process.env.ZCODE_TRANSPORT
+): Promise<T> {
+  const providerId = provider.trim().toLowerCase();
+  const transport = zcodeTransport?.trim().toLowerCase();
+  const nativeZcodeHost =
+    /^zcode(?:-|$)/.test(providerId) &&
+    (!transport || transport === "app-server" || transport === "native-host");
+  if (nativeZcodeHost) return await runWithDirectFetchContext(fn);
+  return await runWithProxyContext(proxy || null, fn);
+}
+
 export async function executeChatWithBreaker({
   bypassCircuitBreaker,
   breaker,
@@ -517,7 +539,7 @@ export async function executeChatWithBreaker({
   try {
     const chatFn = () =>
       capture(() =>
-        runWithProxyContext(proxyInfo?.proxy || null, () =>
+        runWithProviderProxyContext(provider, proxyInfo?.proxy || null, () =>
           (handleChatCore as any)({
             body: { ...body, model: `${provider}/${model}` },
             // Preserve the resolved catalog metadata and per-model wire format

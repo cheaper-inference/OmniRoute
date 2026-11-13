@@ -1,16 +1,16 @@
 ---
 title: "Provider Reference"
 version: 3.8.54
-lastUpdated: 2026-11-12
+lastUpdated: 2026-11-13
 ---
 
 # Provider Reference
 
 > **Auto-generated** from `src/shared/constants/providers.ts` — do not edit by hand.
 > Regenerate with: `npm run gen:provider-reference`
-> **Last generated:** 2026-11-12
+> **Last generated:** 2026-11-13
 
-Total providers: **393**. See category breakdown below.
+Total providers: **397**. See category breakdown below.
 
 ## Categories
 
@@ -34,7 +34,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 
 ---
 
-## No-auth Providers (no key required) (10)
+## No-auth Providers (no key required) (14)
 
 | ID | Alias | Name | Tags | Website | Notes | Tool calling |
 |----|-------|------|------|---------|-------|--------------|
@@ -47,7 +47,11 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `minimax-code` | `mmcode` | MiniMax Code | No-auth | [link](https://www.minimax.io) | No API key stored by OmniRoute. The provider reads the local MiniMax Code profile to authenticate a run. You can also sign in to your MiniMax account from this page (device code) — the credential is written into that same local profile. | native |
 | `uncloseai` | `unc` | UncloseAI | No-auth | [link](https://uncloseai.com) | No auth required. API accepts any non-empty string as key for identification. If older built-in models return 404, use Available Models → Import from /models or Auto-Sync; verified live model: turboderp/Qwen3.8-27B-exl3. | emulated |
 | `veoaifree-web` | `veo-free` | Veo AI Free | No-auth, video | [link](https://veoaifree.com) | No auth required. Rate limited to 6 requests/hour per IP. | — |
-| `zcode` | `zc` | ZCode (GLM Coding Plan) | No-auth | [link](https://zcode.z.ai) | No API key stored by OmniRoute. The local ZCode app-server uses the existing builtin:zai-coding-plan login. | — |
+| `zcode` | `zc` | ZCode (GLM Coding Plan) | No-auth | [link](https://zcode.z.ai) | Add a Z.ai or BigModel account through ZCode sign-in. Each account supports separate Start and Individual routes. | — |
+| `zcode-cn-individual` | `zc-cn-individual` | ZCode China Individual (GLM Coding Plan) | No-auth | [link](https://zcode.z.ai) | Select an account added under ZCode. This route uses its Individual Coding Plan quota. | — |
+| `zcode-cn-start` | `zc-cn-start` | ZCode China Start (GLM Coding Plan) | No-auth | [link](https://zcode.z.ai) | Select an account added under ZCode. This route uses its Start Plan quota. | — |
+| `zcode-individual` | `zc-individual` | ZCode Individual (GLM Coding Plan) | No-auth | [link](https://zcode.z.ai) | Select an account added under ZCode. This route uses its Individual Coding Plan quota. | — |
+| `zcode-start` | `zc-start` | ZCode Start (GLM Coding Plan) | No-auth | [link](https://zcode.z.ai) | Select an account added under ZCode. This route uses its Start Plan quota. | — |
 
 ## OAuth Providers (31)
 

@@ -2230,7 +2230,14 @@ async function handleSingleModelChat(
       }
       let refreshedCredentials;
       try {
-        refreshedCredentials = await checkAndRefreshToken(provider, credentials).catch(
+        const oauthProvider =
+          provider === "zcode-individual" &&
+          credentials?.connectionId &&
+          credentials.connectionId !== "noauth" &&
+          credentials.accessToken
+            ? "zcode"
+            : provider;
+        refreshedCredentials = await checkAndRefreshToken(oauthProvider, credentials).catch(
           agyLease.releasingRethrow(leaseId)
         );
       } catch (error) {
