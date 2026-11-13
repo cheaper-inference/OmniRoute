@@ -75,6 +75,18 @@ function isSameClaudeAccount(
   existingProviderData: Record<string, any> | null | undefined,
   incomingProviderData: Record<string, any> | null | undefined
 ): boolean {
+  // Two different accountUUIDs are two different accounts, whatever the email or connectionId says
+  // (a swapped key must not attach to the old account's row). A side without one is unproven: the
+  // lookup that fills it is best-effort, so it does not block a re-login.
+  const incomingAccount = incomingProviderData?.accountUUID;
+  const existingAccount = existingProviderData?.accountUUID;
+  if (
+    typeof incomingAccount === "string" &&
+    typeof existingAccount === "string" &&
+    incomingAccount.toLowerCase() !== existingAccount.toLowerCase()
+  ) {
+    return false;
+  }
   const incomingOrganization = incomingProviderData?.organizationUUID;
   const existingOrganization = existingProviderData?.organizationUUID;
   if (incomingOrganization && existingOrganization) {
@@ -111,7 +123,12 @@ export function findExistingOAuthConnectionMatch(
     return existing.find((row) => row.authType === "oauth" && sameM365Account(row, tokenData));
   }
   return existing.find((c) => {
-    if (c.id && safeEqual(connectionId, c.id)) return true;
+    if (c.id && safeEqual(connectionId, c.id)) {
+      return (
+        provider !== "claude" ||
+        isSameClaudeAccount(c.providerSpecificData, tokenData.providerSpecificData)
+      );
+    }
     // Email dedup only when the payload actually carries an email. Without this
     // guard `safeEqual(undefined, undefined)` is true, so an email-less payload
     // would false-match the first email-less connection of the provider.
