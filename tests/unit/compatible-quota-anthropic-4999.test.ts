@@ -41,6 +41,11 @@ const {
   compatibleQuotaAuthFor,
 } = await import("../../src/shared/utils/compatibleQuotaCheck.ts");
 const { z } = await import("zod");
+const { settleConnectionFollowUpsAfterEachTest } =
+  await import("../helpers/connectionFollowUps.ts");
+
+// POST /api/providers starts tracked follow-ups (auto-test, model sync); settle them per test.
+settleConnectionFollowUpsAfterEachTest();
 
 test.after(async () => {
   await new Promise<void>((resolve) => setTimeout(resolve, 20));
