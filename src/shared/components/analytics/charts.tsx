@@ -296,6 +296,7 @@ export function ApiKeyTable({
         containerClassName="rounded-none border-0"
         className="text-sm"
         scrollbarLabel={t("chartApiKeyBreakdown")}
+        scrollLabel={t("chartApiKeyBreakdown")}
       >
         <TableHeader>
           <TableRow>
@@ -764,6 +765,7 @@ export function ProviderTable({
         containerClassName="rounded-none border-0"
         className="text-sm"
         scrollbarLabel={t("chartProviderBreakdown")}
+        scrollLabel={t("chartProviderBreakdown")}
       >
         <TableHeader>
           <TableRow>
