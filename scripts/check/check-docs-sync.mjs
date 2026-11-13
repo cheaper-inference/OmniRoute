@@ -1,7 +1,18 @@
 #!/usr/bin/env node
+// Documentation version sync. Two gate modes (scripts/check/lib/gateMode.mjs; plan "derived
+// numbers and texts resolved only at release", 2026-11-13):
+//
+//   release — every check below, strict (push, schedule, the release PR, any local run).
+//   pr      — the checks a feature PR can break in its own sources: package.json vs
+//             docs/openapi.yaml version, the root CHANGELOG headings, superseded docs. The two
+//             translation-mirror checks (docs/i18n/<locale>/llm.txt copies and the translated
+//             CHANGELOG.md sections) are skipped with a reason: feature PRs never write
+//             docs/i18n/**; the translation wave (scripts/i18n/sync-llm-mirrors.mjs) and the
+//             release (npm run release:sync-changelog-i18n) do.
 
 import fs from "node:fs";
 import path from "node:path";
+import { describeGateMode, resolveGateModeInfo } from "./lib/gateMode.mjs";
 
 const cwd = process.cwd();
 const packageJsonPath = path.resolve(cwd, "package.json");
@@ -72,6 +83,17 @@ function isSemver(value) {
 }
 
 let hasFailure = false;
+
+let gateMode;
+try {
+  gateMode = resolveGateModeInfo({ argv: process.argv, env: process.env });
+} catch (error) {
+  console.error(`[docs-sync] FAIL - ${error instanceof Error ? error.message : String(error)}`);
+  process.exit(1);
+}
+console.log(`[docs-sync] ${describeGateMode(gateMode)}`);
+const STRICT_ELSEWHERE =
+  "the strict check runs in release mode (release PR, Release-Green, nightly)";
 
 function fail(message) {
   hasFailure = true;
@@ -243,10 +265,19 @@ try {
     }
   }
 
-  // llm.txt mirrors must be exact copies (no translation)
-  checkI18nMirrorFile("llm.txt", llmPath);
-  // CHANGELOG.md mirrors are translations — check version sections and size, not exact content
-  checkI18nChangelogFile(changelogPath);
+  if (gateMode.mode === "pr") {
+    console.log(
+      `[docs-sync] SKIP reason=pr-mode — docs/i18n/<locale>/llm.txt mirrors are refreshed by the translation wave (scripts/i18n/sync-llm-mirrors.mjs), not by feature PRs; ${STRICT_ELSEWHERE}`
+    );
+    console.log(
+      `[docs-sync] SKIP reason=pr-mode — translated CHANGELOG.md mirrors are refreshed by the release (npm run release:sync-changelog-i18n) and the translation wave, not by feature PRs; ${STRICT_ELSEWHERE}`
+    );
+  } else {
+    // llm.txt mirrors must be exact copies (no translation)
+    checkI18nMirrorFile("llm.txt", llmPath);
+    // CHANGELOG.md mirrors are translations — check version sections and size, not exact content
+    checkI18nChangelogFile(changelogPath);
+  }
 
   // Anti-regression: legacy duplicate docs that have been superseded must not return.
   // Use docs/reference/* as the source of truth.
