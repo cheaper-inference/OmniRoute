@@ -3,6 +3,7 @@ import {
   buildClaudeEnv,
   resolveClaudeSpawn,
   resolveLaunchTarget,
+  executeLegacyLaunch,
 } from "./launch.mjs";
 import {
   buildCodexEnv,
@@ -14,10 +15,10 @@ import {
 import { t } from "../i18n.mjs";
 import os from "node:os";
 import { join } from "node:path";
-import { spawn, execFileSync } from "node:child_process";
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { contextCredentialFor, resolveActiveContext } from "../contexts.mjs";
 import { buildSafeCliLaunchEnv } from "../launch-env.mjs";
+import { probeWindowsBinary } from "../launch/core/resolve-bin.mjs";
 import { quoteShellArgsForSpawn } from "../utils/winShellArgs.mjs";
 import {
   listManifestTargets,
@@ -190,24 +191,11 @@ const NO_AUTH_SENTINEL = "omniroute-no-auth";
 function resolveGenericSpawn(command) {
   if (process.platform !== "win32") return { command, shell: undefined };
 
-  try {
-    const output = execFileSync("where.exe", [command], {
-      stdio: ["ignore", "pipe", "ignore"],
-      encoding: "utf8",
-      timeout: 3000,
-      windowsHide: true,
-    });
-    const matches = output
-      .split(/\r?\n/)
-      .map((value) => value.trim())
-      .filter(Boolean);
-    const preferred = matches.find((value) => /\.exe$/i.test(value));
-    if (preferred) return { command: preferred, shell: undefined };
-    const shim = matches.find((value) => /\.(?:cmd|bat)$/i.test(value));
-    if (shim) return { command: shim, shell: true };
-  } catch {
-    // Fall through to the conventional npm shim.
-  }
+  const matches = probeWindowsBinary(command);
+  const preferred = matches.find((value) => /\.exe$/i.test(value));
+  if (preferred) return { command: preferred, shell: undefined };
+  const shim = matches.find((value) => /\.(?:cmd|bat)$/i.test(value));
+  if (shim) return { command: shim, shell: true };
 
   return { command: `${command}.cmd`, shell: true };
 }
@@ -430,84 +418,26 @@ async function runGenericTarget(target, rawOpts, args) {
     childEnv.GEMINI_CLI_HOME = overlayHome;
   }
 
-  const child = spawn(
-    commandSpec.command,
-    quoteShellArgsForSpawn(
-      [...providerArgs, ...modelArgs, ...args],
-      process.platform,
-      commandSpec.shell
-    ),
-    {
-      env: childEnv,
-      stdio: "inherit",
+  try {
+    return await executeLegacyLaunch({
+      command: commandSpec.command,
       shell: commandSpec.shell,
-      ...(process.platform === "win32" ? { windowsHide: true } : {}),
-    }
-  );
-
-  const cleanup = () => {
-    if (!overlayHome) return;
-    try {
-      rmSync(overlayHome, { recursive: true, force: true });
-    } catch {
-      // Best-effort cleanup; the directory contains no persistent credentials.
-    }
-  };
-
-  return await new Promise((resolve) => {
-    let settled = false;
-    let requestedSignalCode;
-    let escalationTimer;
-    const signalExitCode = { SIGINT: 130, SIGTERM: 143, SIGHUP: 129 };
-    const finish = (code) => {
-      if (settled) return;
-      settled = true;
-      if (escalationTimer) clearTimeout(escalationTimer);
-      for (const signal of Object.keys(signalExitCode)) {
-        process.removeListener(signal, signalHandlers[signal]);
-      }
-      cleanup();
-      resolve(code);
-    };
-    const signalHandlers = {};
-    for (const signal of Object.keys(signalExitCode)) {
-      signalHandlers[signal] = () => {
-        if (requestedSignalCode !== undefined) return;
-        requestedSignalCode = signalExitCode[signal];
-        try {
-          child.kill(signal);
-        } catch {
-          // The child may have already exited; its close event will settle.
-        }
-        const configuredTimeout = Number(
-          rawOpts.signalTimeoutMs ?? process.env.OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS
-        );
-        const timeoutMs =
-          Number.isFinite(configuredTimeout) && configuredTimeout > 0 ? configuredTimeout : 5000;
-        escalationTimer = setTimeout(() => {
-          try {
-            child.kill("SIGKILL");
-          } catch {
-            // A close event may have raced with the escalation timeout.
-          }
-        }, timeoutMs);
-        escalationTimer.unref?.();
-      };
-      process.once(signal, signalHandlers[signal]);
-    }
-    child.on("error", (error) => {
-      if (error?.code === "ENOENT") {
-        console.error(`The '${target}' CLI was not found in PATH.`);
-        finish(127);
-      } else {
-        console.error(String(error?.message || error));
-        finish(1);
-      }
+      // The core executor applies quoteShellArgsForSpawn itself, so pass raw argv.
+      args: [...providerArgs, ...modelArgs, ...args],
+      env: childEnv,
+      notFoundMessage: `The '${target}' CLI was not found in PATH.`,
+      signalTimeoutMs: rawOpts.signalTimeoutMs,
     });
-    child.on("close", (code, signal) => {
-      finish(requestedSignalCode ?? code ?? signalExitCode[signal] ?? 0);
-    });
-  });
+  } finally {
+    // executeLegacyLaunch resolves only after the child closed, so the overlay is safe to drop.
+    if (overlayHome) {
+      try {
+        rmSync(overlayHome, { recursive: true, force: true });
+      } catch {
+        // Best-effort cleanup; the directory contains no persistent credentials.
+      }
+    }
+  }
 }
 
 /** Build a launch plan and redact any resolved secret values. */
