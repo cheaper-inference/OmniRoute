@@ -1,0 +1,181 @@
+name: omni-queue
+
+# OmniRoute's own merge queue (docs/ops/OMNI_QUEUE.md). One idempotent tick composes the next
+# batch of approved PRs on top of a release branch, pushes it as a fresh omni-queue/** candidate
+# (ci.yml + quality.yml run their full profile there), reads the candidate's checks and lands it
+# (or, in shadow mode, records what it would land). State lives on the omni-queue-state branch.
+#
+# Security posture (also the .zizmor.yml justification for pull_request_target/workflow_run):
+#   • No job ever checks out or runs PR code. Both jobs check out the DEFAULT branch (sparse:
+#     scripts/merge-queue + config/merge-queue only) and run zero-dependency Node scripts —
+#     no npm ci, no third-party install scripts next to the App token. The queue touches PR
+#     content only as git objects (merge-tree/commit-tree in a scratch bare repository).
+#   • The workflow file and the orchestrator must exist on the default branch: schedule,
+#     workflow_run and pull_request_target always run the default branch's copy.
+#   • Writes use a GitHub App installation token minted per job with the minimum permissions
+#     (the GITHUB_TOKEN cannot be used: refs it pushes do not trigger the candidate's CI).
+#   • Kill switch: every job is inert unless the repository variable OMNI_QUEUE_ENABLED is
+#     'true'. Forks never inherit repository variables.
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+    inputs:
+      base:
+        description: "Release branch to act on (default: every managed base with queue work)"
+        required: false
+        type: string
+      action:
+        description: "tick = one normal tick; pause/resume = toggle a base; dry-run = decide and print, write nothing"
+        required: false
+        default: tick
+        type: choice
+        options:
+          - tick
+          - pause
+          - resume
+          - dry-run
+      reason:
+        description: "Free-text reason recorded with pause/resume"
+        required: false
+        type: string
+  # A candidate's CI finished: tick right away instead of waiting for the next cron slot.
+  workflow_run:
+    workflows: ["CI", "Quality Gates"]
+    types: [completed]
+    branches: ["omni-queue/**"]
+  # Label changes bind/withdraw approvals (job `approval`); every listed action wakes the tick.
+  pull_request_target:
+    types: [labeled, unlabeled, synchronize, closed]
+
+permissions: {}
+
+jobs:
+  # Binds a label approval to the exact head SHA (commit status omni-queue/approval or
+  # omni-queue/protected-approval). Deliberately outside the tick's concurrency group: GitHub
+  # replaces a pending run of a group, and an approval must never be dropped that way.
+  approval:
+    name: Approval
+    if: >-
+      vars.OMNI_QUEUE_ENABLED == 'true'
+      && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
+      && github.event_name == 'pull_request_target'
+      && (github.event.action == 'labeled' || github.event.action == 'unlabeled')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Mint the omni-queue App token
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          app-id: ${{ secrets.OMNI_QUEUE_APP_ID }}
+          private-key: ${{ secrets.OMNI_QUEUE_APP_PRIVATE_KEY }}
+          permission-contents: read
+          permission-pull-requests: read
+          permission-issues: write
+          permission-statuses: write
+      # The default branch's orchestrator, never the PR's code.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+          sparse-checkout: |
+            scripts/merge-queue
+            config/merge-queue
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          package-manager-cache: false
+          node-version: "24"
+      - name: Bind the label to the head SHA
+        env:
+          OMNI_QUEUE_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: node scripts/merge-queue/approve.mjs
+
+  tick:
+    name: Tick
+    needs: approval
+    # always(): the approval job is skipped on every event but a label change.
+    if: >-
+      always()
+      && vars.OMNI_QUEUE_ENABLED == 'true'
+      && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
+      && (needs.approval.result == 'success' || needs.approval.result == 'skipped')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # ONE writer of queue state at a time, across every base and every trigger. Never cancel a
+    # running tick (it may be between a push and the state save that records it); GitHub keeps
+    # at most one pending tick, which is all a level-triggered tick needs.
+    concurrency:
+      group: omni-queue-tick
+      cancel-in-progress: false
+    permissions:
+      contents: read
+    steps:
+      - name: Mint the omni-queue App token
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          app-id: ${{ secrets.OMNI_QUEUE_APP_ID }}
+          private-key: ${{ secrets.OMNI_QUEUE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+          permission-issues: write
+          permission-statuses: read
+          permission-checks: read
+          permission-actions: read
+      # The default branch's orchestrator, never the PR's code.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+          sparse-checkout: |
+            scripts/merge-queue
+            config/merge-queue
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          package-manager-cache: false
+          node-version: "24"
+      # Queue merge commits are authored by the App's bot user (<id>+<slug>[bot] noreply).
+      - name: Resolve the bot identity
+        id: identity
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$APP_SLUG" =~ ^[a-z0-9][a-z0-9-]*$ ]]; then
+            echo "::error::unexpected App slug"; exit 1
+          fi
+          login="${APP_SLUG}[bot]"
+          id="$(gh api "/users/${login}" --jq .id)"
+          if [[ ! "$id" =~ ^[0-9]+$ ]]; then
+            echo "::error::could not resolve the user id of ${login}"; exit 1
+          fi
+          {
+            echo "name=${login}"
+            echo "email=${id}+${login}@users.noreply.github.com"
+          } >> "$GITHUB_OUTPUT"
+      # Inputs travel through env and are assembled into an argv array: no expression is ever
+      # expanded inside the script body. Scheduled, workflow_run and pull_request_target ticks
+      # pass no base (the tick discovers the bases with work).
+      - name: Run one queue tick
+        env:
+          OMNI_QUEUE_TOKEN: ${{ steps.app-token.outputs.token }}
+          OMNI_QUEUE_GIT_NAME: ${{ steps.identity.outputs.name }}
+          OMNI_QUEUE_GIT_EMAIL: ${{ steps.identity.outputs.email }}
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_BASE: ${{ inputs.base }}
+          INPUT_ACTION: ${{ inputs.action }}
+          INPUT_REASON: ${{ inputs.reason }}
+        run: |
+          set -euo pipefail
+          args=()
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            if [ -n "${INPUT_BASE:-}" ]; then args+=(--base "$INPUT_BASE"); fi
+            args+=(--action "${INPUT_ACTION:-tick}")
+            if [ -n "${INPUT_REASON:-}" ]; then args+=(--reason "$INPUT_REASON"); fi
+          fi
+          node scripts/merge-queue/tick.mjs "${args[@]}"

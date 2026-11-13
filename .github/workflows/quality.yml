@@ -5,7 +5,9 @@ on:
     # release/** pushes are covered by the PR run of each change plus Release-Green on the
     # merged combination (see ci.yml for the 2026-10-18 measurement); the per-push run here
     # only ever queued hosted slots and was cancelled by the next merge.
-    branches: [main]
+    # omni-queue/** (2026-11-13): omni-queue merge-queue candidates run the full profile, like
+    # merge_group (see ci.yml).
+    branches: [main, "omni-queue/**"]
   pull_request:
     branches: [main, "release/**"]
     types: [opened, synchronize, reopened, ready_for_review, converted_to_draft, edited]
@@ -46,6 +48,9 @@ jobs:
       testsOnly: ${{ steps.classify.outputs.testsOnly }}
       # Exposure only (one-CI-policy step 1, RFC #8084): no job depends on it yet.
       domains: ${{ steps.classify.outputs.domains }}
+      # omni-queue candidate base (the merge_group.base_sha of a push to omni-queue/**);
+      # empty on every other event.
+      candidateBase: ${{ steps.candidate.outputs.BASE_SHA }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -57,9 +62,14 @@ jobs:
           node-version: ${{ env.CI_NODE_VERSION }}
       - name: Validate gate inventory
         run: npm run check:gate-manifest
+      # Same as ci.yml: a new omni-queue/** branch has no usable github.event.before.
+      - name: Resolve the omni-queue candidate base
+        id: candidate
+        if: startsWith(github.ref, 'refs/heads/omni-queue/')
+        run: node scripts/merge-queue/candidate-base.mjs >> "$GITHUB_OUTPUT"
       - name: Validate recurring free catalog evidence
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+          BASE_SHA: ${{ steps.candidate.outputs.BASE_SHA || github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
         run: npm run check:free-catalog-evidence
       - id: classify
         env:
@@ -204,7 +214,7 @@ jobs:
         run: bash scripts/ci/install-workflow-scanners.sh
       - name: Forgotten sibling tests (advisory)
         env:
-          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha || needs.changes.outputs.candidateBase }}
         run: |
           node scripts/quality/build-test-impact-map.mjs
           node scripts/check/check-forgotten-sibling-tests.mjs \
@@ -344,6 +354,8 @@ jobs:
       - name: Impacted unit tests (TIA subset; blocking)
         env:
           GITHUB_BASE_REF: ${{ github.base_ref }}
+          # omni-queue/** candidates: select against the batch base, not HEAD~1.
+          GITHUB_BASE_SHA: ${{ needs.changes.outputs.candidateBase }}
         run: |
           git fetch --no-tags origin "$GITHUB_BASE_REF" || true
           # The advisory sibling-test step generates the same map earlier in this job.
@@ -416,7 +428,8 @@ jobs:
     name: No new ESLint warnings
     needs: changes
     if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || startsWith(github.head_ref, 'mergify/merge-queue/')) && needs.changes.outputs.code == 'true') }}
-    runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && github.event_name != 'merge_group' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","omni-light"]')) || 'ubuntu-latest' }}
+    # omni-queue/** candidates contain fork code: never on the self-hosted pool.
+    runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && github.event_name != 'merge_group' && !startsWith(github.ref, 'refs/heads/omni-queue/') && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","omni-light"]')) || 'ubuntu-latest' }}
     # 2026-08-30: a cold full lint with the eslint-plugin-react-hooks 7 compiler rules is
     # killed on the 7 GB hosted runner without a message (status null → exit 1, the
     # JSON never written); the box lints it in ~12 min with the heap below.
@@ -511,7 +524,15 @@ jobs:
         with:
           # PR acceleration is not release-candidate provenance.
           cache: ${{ github.event_name == 'pull_request' }}
+      # omni-queue/** candidates compare against their batch base (no `needs: changes` here:
+      # this job must keep running on a queue-draft edit run).
+      - name: Resolve the omni-queue candidate base
+        id: candidate
+        if: startsWith(github.ref, 'refs/heads/omni-queue/')
+        run: node scripts/merge-queue/candidate-base.mjs >> "$GITHUB_OUTPUT"
       - name: CHANGELOG integrity (nenhum bullet da base pode sumir no merge-result)
+        env:
+          CHANGELOG_BASE_REF: ${{ steps.candidate.outputs.BASE_SHA }}
         run: npm run check:changelog-integrity
       - name: Agent-skills generator sync (SKILL.md gerado ≡ catálogo)
         run: npm run check:agent-skills-sync
