@@ -102,8 +102,9 @@ export function resolveChatCoreRequestFormat(opts: {
     sourceFormat,
     endpointPath,
   });
+  // `\bdroid\b`: a bare substring test also matched "Android" (Dalvik, mobile browsers).
   const isDroidCLI =
-    userAgent?.toLowerCase().includes("droid") || userAgent?.toLowerCase().includes("codex-cli");
+    /\bdroid\b/i.test(userAgent ?? "") || userAgent?.toLowerCase().includes("codex-cli");
   const copilotCompatibleReasoning = isCopilotClient(clientRawRequest?.headers, userAgent);
   const isOpencodeClientRequest = isOpencodeClient(clientRawRequest?.headers, userAgent);
   const clientResponseFormat =
