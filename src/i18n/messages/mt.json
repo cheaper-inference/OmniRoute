@@ -5679,6 +5679,7 @@
     "usageTracking": "Traċċar tal-Użu",
     "securityDesc": "Issettja password biex tipproteġi d-dashboard tiegħek, jew aqbeż għalissa.",
     "securityDescSkipWarning": "⚠️ Mingħajr password, ma tkunx tista' żżid fornituri waqt l-issettjar. Tista' żżidhom aktar tard mid-dashboard wara li tissettja password.",
+    "passwordAlreadySet": "Il-password tad-dashboard diġà ġiet issettjata. Tista' tbiddilha aktar tard fis-Settings.",
     "providerDesc": "Qabbad l-ewwel fornitur tal-AI tiegħek. Tista' żżid aktar aktar tard.",
     "providerRequiresPassword": "L-ewwel trid tissettja password biex iżżid il-fornituri. Jekk jogħġbok mur lura għall-pass tas-sigurtà u ssettja password, jew żid il-fornituri aktar tard mid-dashboard.",
     "apiKeyRequired": "Ċavetta tal-API (meħtieġa)",
@@ -6738,6 +6739,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Test indikattiv għall-cookie tal-web ta’ Grok",
     "herokuBaseUrlHint": "Ħjiel għall-URL Bażi ta’ Heroku",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Aħbi l-Email",
     "imageProviders": "Fornituri tal-Immaġnijiet",
     "videoProviders": "Ġenerazzjoni tal-Vidjow",
@@ -7236,7 +7238,8 @@
       "kiro": "Livell bla ħlas: 50 kreditu/xahar (~25K–100K token). ⚠️ It-Termini tas-Servizz ta’ Kiro jipprojbixxu l-użu ta’ proxy/harness ta’ parti terza.",
       "codex": "Qabbad OpenAI Codex mal-fluss OAuth eżistenti.",
       "qwen": "Qabbad Qwen Code mal-fluss OAuth eżistenti.",
-      "github-models": "Oħloq GitHub PAT bl-ambitu 'models: read' fuq github.com/settings/tokens"
+      "github-models": "Oħloq GitHub PAT bl-ambitu 'models: read' fuq github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} jaċċetta IDs tal-mudelli nattivi għall-fornitur. Importa minn /models jew żid IDs personalizzati għar-routing.",
     "bedrockModelsDescription": "Il-mudelli ta’ Amazon Bedrock huma limitati skont ir-reġjun AWS. Importa minn /models jew żid IDs tal-mudelli Bedrock attivati fir-reġjun magħżul.",
@@ -10258,7 +10261,11 @@
     "mappingInvalidJson": "JSON invalidu.",
     "mappingMustBeObject": "L-immappjar irid ikun oġġett JSON, mhux array jew valur primittiv.",
     "mappingValueMustBeString": "Il-valur għaċ-ċavetta “{key}” irid ikun string.",
-    "save": "Issejvja"
+    "save": "Issejvja",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",

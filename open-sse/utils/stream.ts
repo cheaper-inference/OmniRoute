@@ -40,7 +40,12 @@ import { calculateCost } from "@/lib/usage/costCalculator";
 import { buildOmniRouteSseMetadataComment } from "@/domain/omnirouteResponseMeta";
 import { sseCommentsEnabled } from "./sseHeartbeat.ts";
 import { createStructuredSSECollector } from "./streamPayloadCollector.ts";
-import { STREAM_IDLE_TIMEOUT_MS, FETCH_BODY_TIMEOUT_MS, HTTP_STATUS } from "../config/constants.ts";
+import {
+  STREAM_IDLE_TIMEOUT_MS,
+  FETCH_BODY_TIMEOUT_MS,
+  HTTP_STATUS,
+  RESPONSES_DEFERRED_COMPLETION_GRACE_MS,
+} from "../config/constants.ts";
 import {
   OMIT_STREAMING_CHUNK_MARKER,
   isResponsesCommentaryMessageItem,
@@ -69,6 +74,13 @@ import { extractToolSchemaMap } from "../translator/response/openai-responses/to
 import { collectDeclaredToolNames } from "../translator/response/openai-responses/declaredToolName.ts";
 import { findDeclaredToolName } from "../services/declaredToolCasing.ts";
 import { appendToolCallNameDelta } from "./toolCallName.ts";
+import {
+  advancePendingLineBytes,
+  mergeNativeToolCalls,
+  summaryTextTailMarker,
+  trackClaudeNativeToolCall,
+  type StreamToolCall as ToolCall,
+} from "./streamSummaryHelpers.ts";
 import {
   generateSessionId,
   markToolFinish,
@@ -245,6 +257,9 @@ type TranslateState = ReturnType<typeof initState> & {
   usage?: unknown;
   cacheEvidence?: "hit" | "miss" | "unreported" | "invalid";
   finishReason?: unknown;
+  /** Responses translator: finish_reason seen, response.completed waits for a usage chunk. */
+  awaitingTrailingUsage?: boolean;
+  completedSent?: boolean;
   copilotCompatibleReasoning?: boolean;
   /** Suppress the `</think>` close marker for clients that render it verbatim (#5245). */
   suppressThinkClose?: boolean;
@@ -269,13 +284,6 @@ type TranslateState = ReturnType<typeof initState> & {
     message: string;
     streamSnapshot?: import("./streamErrorFormat.ts").StreamFailureSnapshot;
   } | null;
-};
-
-type ToolCall = {
-  id: string | null;
-  index: number;
-  type: string;
-  function: { name: string; arguments: string };
 };
 
 type UsageTokenRecord = Record<string, number>;
@@ -421,9 +429,14 @@ function addNamespaceChildNames(names: Set<string>, children: unknown[]): void {
   }
 }
 
+// An EMPTY set means the request body declared no tools at all: quoted
+// `[Tool call: ...]` text can never be a real call. `null` means unknown (no body,
+// or tools whose names could not be read), which keeps the permissive behaviour.
 function extractAllowedToolNames(body: unknown): Set<string> | null {
+  if (!asPlainRecord(body)) return null;
   const record = asRecord(body);
   const tools = record.tools;
+  if (tools == null || (Array.isArray(tools) && tools.length === 0)) return new Set();
   if (!Array.isArray(tools)) return null;
   const names = new Set<string>();
   for (const tool of tools) {
@@ -446,7 +459,7 @@ function collectPassthroughTextualToolCall(
 ): ToolCall | null {
   const parsed = parseTextualToolCallFromContent(text);
   if (!parsed) return null;
-  if (allowedToolNames?.size && !allowedToolNames.has(parsed.name)) return null;
+  if (allowedToolNames && !allowedToolNames.has(parsed.name)) return null;
   const key = `textual:${toolCalls.size}`;
   const toolCall: ToolCall = {
     id: `call_${Date.now()}_${toolCalls.size}`,
@@ -912,6 +925,8 @@ export function createSSEStream(options: StreamOptions = {}) {
     !clientExpectsResponsesStream && !clientExpectsClaudeStream && !clientExpectsAntigravityStream;
 
   let buffer = "";
+  /** UTF-8 bytes of the unfinished line held in `buffer`, counted per chunk. */
+  let pendingLineBytes = 0;
   let usage: UsageLike | null = null;
   const mergePassthroughCacheCreationUsage = (value: unknown) => {
     if (!value) return;
@@ -955,7 +970,10 @@ export function createSSEStream(options: StreamOptions = {}) {
   /** Passthrough: accumulate tool_calls deltas for call log responseBody */
   const passthroughToolCalls = new Map<string, ToolCall>();
   let passthroughToolCallSeq = 0;
+  /** Passthrough: native Claude tool_use blocks, kept apart so the wire never sees them as textual calls */
+  const passthroughNativeToolCalls = new Map<string, ToolCall>();
   const allowedToolNames = extractAllowedToolNames(body);
+  const noToolsDeclared = allowedToolNames?.size === 0;
   let skipPassthroughEvent = false;
   const thinkState = initThinkState(mode === STREAM_MODE.PASSTHROUGH, provider, model);
 
@@ -1135,6 +1153,12 @@ export function createSSEStream(options: StreamOptions = {}) {
   // Idle timeout state — closes stream if provider stops sending data
   let lastChunkTime = Date.now();
   let idleTimer: ReturnType<typeof setInterval> | null = null;
+  // Responses client: finish_reason arrived but no usage trailer or [DONE] yet.
+  let deferredCompletionTimer: ReturnType<typeof setTimeout> | null = null;
+  const clearDeferredCompletionTimer = () => {
+    if (deferredCompletionTimer) clearTimeout(deferredCompletionTimer);
+    deferredCompletionTimer = null;
+  };
   let streamTimedOut = false;
   const claudeEmptyResponseLifecycle = createClaudeEmptyResponseLifecycle();
   // #12398: `timing.firstByteAt` doubles as "any upstream chunk ever arrived".
@@ -1153,6 +1177,9 @@ export function createSSEStream(options: StreamOptions = {}) {
   const multilineSseDataLineNormalizer = createSSEDataLineNormalizer();
 
   const clearIdleTimer = () => {
+    // Every end-of-stream path (flush, cancel, idle timeout, failure abort) calls this, so the
+    // deferred completion must not fire after any of them.
+    clearDeferredCompletionTimer();
     if (idleTimer) {
       clearInterval(idleTimer);
       idleTimer = null;
@@ -1174,8 +1201,9 @@ export function createSSEStream(options: StreamOptions = {}) {
       const incomingContent = delta.content;
       const bufferedCandidate = passthroughBufferedTextualToolCallContent + incomingContent;
       if (
-        passthroughBufferedTextualToolCallContent ||
-        containsTextualToolCallCandidate(incomingContent)
+        !noToolsDeclared &&
+        (passthroughBufferedTextualToolCallContent ||
+          containsTextualToolCallCandidate(incomingContent))
       ) {
         const parsedCandidate = parseTextualToolCallCandidate(bufferedCandidate);
         if (parsedCandidate?.kind === "complete") {
@@ -1562,6 +1590,15 @@ export function createSSEStream(options: StreamOptions = {}) {
     });
   };
 
+  const abortOversizePendingLine = (controller: TransformStreamDefaultController<Uint8Array>) => {
+    buffer = "";
+    abortWithPublicStreamError(
+      controller,
+      "Upstream SSE line exceeded the size limit",
+      "invalid_sse_payload"
+    );
+  };
+
   const emitTranslatedFailureAndAbort = (
     controller: TransformStreamDefaultController<Uint8Array>,
     payload: unknown
@@ -1631,10 +1668,15 @@ export function createSSEStream(options: StreamOptions = {}) {
         const now = Date.now();
         timing.markByte();
         lastChunkTime = now;
+        const nextPendingLineBytes = advancePendingLineBytes(pendingLineBytes, chunk);
+        if (nextPendingLineBytes === null) return abortOversizePendingLine(controller);
+        pendingLineBytes = nextPendingLineBytes;
         const text = decoder.decode(chunk, { stream: true });
         buffer += text;
         reqLogger?.appendProviderChunk?.(text);
-        const nlIdx = buffer.lastIndexOf("\n");
+        // Scan only the new text: a line without a newline must not be re-walked per chunk.
+        const textNlIdx = text.lastIndexOf("\n");
+        const nlIdx = textNlIdx >= 0 ? buffer.length - text.length + textNlIdx : -1;
         const lines = nlIdx >= 0 ? buffer.slice(0, nlIdx).split("\n") : [];
         if (nlIdx >= 0) buffer = buffer.slice(nlIdx + 1);
 
@@ -1854,8 +1896,9 @@ export function createSSEStream(options: StreamOptions = {}) {
                     const bufferedCandidate =
                       passthroughBufferedTextualToolCallContent + incomingDelta;
                     if (
-                      passthroughBufferedTextualToolCallContent ||
-                      containsTextualToolCallCandidate(incomingDelta)
+                      !noToolsDeclared &&
+                      (passthroughBufferedTextualToolCallContent ||
+                        containsTextualToolCallCandidate(incomingDelta))
                     ) {
                       const parsedCandidate = parseTextualToolCallCandidate(bufferedCandidate);
                       if (parsedCandidate?.kind === "complete") {
@@ -2071,23 +2114,15 @@ export function createSSEStream(options: StreamOptions = {}) {
                     }
                   }
                   // #7936/#18600 — restore provider tool-name aliases (and the
-                  // #7936 `{namespace, name}` identities) on passthrough Responses
-                  // call items through the shared shape-safe helper. The done and
-                  // completed branches above already restored their own copies;
-                  // this covers `response.output_item.added` plus the
-                  // `response.incomplete`/`response.failed`/`response.done` and
-                  // cancellation terminal snapshots so a truncated/alternate stream
-                  // is restored too. The restoration mutates
-                  // `parsed`, so a real change must be re-serialized; otherwise
-                  // the client still receives the alias.
-                  if (
-                    parsed.type === "response.output_item.added" ||
-                    parsed.type === "response.incomplete" ||
-                    parsed.type === "response.failed" ||
-                    parsed.type === "response.done" ||
-                    parsed.type === "response.cancelled" ||
-                    parsed.type === "response.canceled"
-                  ) {
+                  // #7936 `{namespace, name}` identities) on every passthrough
+                  // Responses event through the shared shape-safe helper: call items,
+                  // argument events, and the tools/tool_choice any response object
+                  // echoes (created, in_progress, terminal snapshots). The done and
+                  // completed branches above already restored their own copies and the
+                  // helper is idempotent. The restoration mutates `parsed`, so a real
+                  // change must be re-serialized; otherwise the client still receives
+                  // the alias.
+                  if (typeof parsed.type === "string") {
                     if (
                       restoreResponsesToolNames(
                         parsed as JsonRecord,
@@ -2137,12 +2172,13 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // before it can seed an empty `response.completed.response.output`,
                   // in case a future code path pushes a commentary item into it
                   // without going through the response.completed branch above.
-                  const backfillCandidates = shouldDropResponsesCommentary
-                    ? filterResponsesCommentaryFromItems(
-                        passthroughResponsesOutputItems,
-                        isResponsesCommentaryMessageItem
-                      ).items
-                    : passthroughResponsesOutputItems;
+                  const backfillCandidates =
+                    shouldDropResponsesCommentary && parsed.type === "response.completed"
+                      ? filterResponsesCommentaryFromItems(
+                          passthroughResponsesOutputItems,
+                          isResponsesCommentaryMessageItem
+                        ).items
+                      : passthroughResponsesOutputItems;
                   const backfilled = backfillResponsesCompletedOutput(parsed, backfillCandidates);
                   const usageNormalized = normalizeUsage(parsed);
                   if (
@@ -2206,6 +2242,8 @@ export function createSSEStream(options: StreamOptions = {}) {
                     toolNameMap,
                     clientTools ?? (body as JsonRecord | null)?.tools
                   );
+                  // Native tool_use blocks only feed the completion summary; the wire is unchanged.
+                  trackClaudeNativeToolCall(passthroughNativeToolCalls, parsed);
                   // Track content length and accumulate from Claude format
                   if (parsed.delta?.text) {
                     totalContentLength += parsed.delta.text.length;
@@ -2306,6 +2344,9 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // sanitizeStreamingChunk, so the raw line must not be forwarded.
                   const hadArrayContent = Array.isArray(rawDelta?.content);
                   const nativeFailure = nativeFinishFailure(parsed); // before sanitize drops it
+                  const rawToolCallCount = Array.isArray(rawDelta?.tool_calls)
+                    ? rawDelta.tool_calls.length
+                    : 0;
 
                   // Client sanitization may remove diagnostic status fields.
                   // Capture provider evidence first without changing token totals.
@@ -2380,6 +2421,8 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // upstream delta did not already carry.
                   const needsReserialization =
                     hadArrayContent ||
+                    // sanitize dropped empty tool_call placeholders from this chunk
+                    rawToolCallCount > (delta?.tool_calls?.length ?? 0) ||
                     splitMixedReasoningContent ||
                     thinkParsed ||
                     hadReasoningAlias ||
@@ -2861,11 +2904,35 @@ export function createSSEStream(options: StreamOptions = {}) {
               emitTranslatedClientItem(controller, item);
             }
           }
+
+          // The Responses translator defers response.completed for a trailing usage
+          // chunk. If neither usage nor [DONE] follows, flush it after a short grace.
+          if (state?.awaitingTrailingUsage && !state.completedSent && !deferredCompletionTimer) {
+            deferredCompletionTimer = setTimeout(() => {
+              deferredCompletionTimer = null;
+              try {
+                for (const item of translateResponse(targetFormat, sourceFormat, null, state) ||
+                  []) {
+                  emitTranslatedClientItem(controller, item);
+                }
+              } catch (error) {
+                // Every end-of-stream path clears this timer, so the stream is still live:
+                // report the failure and give the client a terminal error (as the transformer does).
+                console.warn(
+                  `[STREAM] deferred completion flush failed (${model || "unknown"}):`,
+                  error
+                );
+                controller.error(error);
+              }
+            }, RESPONSES_DEFERRED_COMPLETION_GRACE_MS);
+            deferredCompletionTimer.unref?.();
+          }
         }
       },
 
       async flush(controller) {
         flushing = true;
+        clearDeferredCompletionTimer();
         // Clean up idle watchdog timer
         if (idleTimer) {
           clearIdleTimer();
@@ -3260,18 +3327,25 @@ export function createSSEStream(options: StreamOptions = {}) {
                 if (reasoning) {
                   message.reasoning_content = reasoning;
                 }
-                if (passthroughToolCalls.size > 0) {
-                  message.tool_calls = [...passthroughToolCalls.values()].sort(
-                    (a, b) => a.index - b.index
-                  );
+                // Native Claude / Responses calls already went to the client as wire events;
+                // list them here too so logs and the cache keep them (the wire is unchanged).
+                const summaryToolCalls = mergeNativeToolCalls(
+                  [...passthroughToolCalls.values()],
+                  [...passthroughNativeToolCalls.values()],
+                  passthroughResponsesOutputItems,
+                  passthroughResponsesPendingFunctionCalls.values()
+                );
+                const summaryHasToolCalls = passthroughHasToolCalls || summaryToolCalls.length > 0;
+                if (summaryToolCalls.length > 0) {
+                  message.tool_calls = summaryToolCalls;
                 }
                 // Hardening: log empty assistant response after tool completion
                 // for observability — helps diagnose Copilot "Sorry, no response was returned"
-                if (passthroughHasToolCalls && !content.trim() && !reasoning.trim()) {
+                if (summaryHasToolCalls && !content.trim() && !reasoning.trim()) {
                   console.warn(
                     `[STREAM] Empty assistant response after tool_calls completion (${provider || "provider"}:${model || "unknown"}) — sessionId=${sessionId}`
                   );
-                } else if (passthroughHasToolCalls && !content.trim() && reasoning.trim()) {
+                } else if (summaryHasToolCalls && !content.trim() && reasoning.trim()) {
                   message.content = "";
                 }
 
@@ -3279,7 +3353,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                   choices: [
                     {
                       message,
-                      finish_reason: passthroughHasToolCalls ? "tool_calls" : "stop",
+                      finish_reason: summaryHasToolCalls ? "tool_calls" : "stop",
                     },
                   ],
                   usage: {
@@ -3288,6 +3362,10 @@ export function createSSEStream(options: StreamOptions = {}) {
                     total_tokens: prompt + completion,
                   },
                   _streamed: true,
+                  ...summaryTextTailMarker(
+                    passthroughAccumulatedContent,
+                    passthroughAccumulatedReasoning
+                  ),
                 };
                 outcomeRecorded = true;
                 onComplete({
@@ -3698,6 +3776,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                   total_tokens: prompt + completion,
                 },
                 _streamed: true,
+                ...summaryTextTailMarker(state?.accumulatedContent, state?.accumulatedReasoning),
               };
               outcomeRecorded = true;
               onComplete({

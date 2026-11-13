@@ -5679,6 +5679,7 @@
     "usageTracking": "အသုံးပြုမှု ခြေရာခံခြင်း",
     "securityDesc": "သင့် Dashboard ကို ကာကွယ်ရန် စကားဝှက်တစ်ခု သတ်မှတ်ပါ၊ သို့မဟုတ် လောလောဆယ် ကျော်ထားပါ။",
     "securityDescSkipWarning": "⚠️ စကားဝှက်မရှိပါက စနစ်ထည့်သွင်းနေစဉ် provider များကို ထည့်နိုင်မည်မဟုတ်ပါ။ စကားဝှက်သတ်မှတ်ပြီးနောက် Dashboard မှ နောက်ပိုင်းတွင် ၎င်းတို့ကို ထည့်နိုင်ပါသည်။",
+    "passwordAlreadySet": "ဒက်ရှ်ဘုတ် စကားဝှက်ကို သတ်မှတ်ပြီးဖြစ်သည်။ နောက်ပိုင်းတွင် ဆက်တင်များတွင် ပြောင်းနိုင်သည်။",
     "providerDesc": "သင်၏ ပထမဆုံး AI provider ကို ချိတ်ဆက်ပါ။ နောက်ပိုင်းတွင် ထပ်မံထည့်နိုင်ပါသည်။",
     "providerRequiresPassword": "Provider များထည့်ရန် စကားဝှက်ကို ဦးစွာသတ်မှတ်ရန် လိုအပ်ပါသည်။ လုံခြုံရေးအဆင့်သို့ ပြန်သွားပြီး စကားဝှက်တစ်ခု သတ်မှတ်ပါ၊ သို့မဟုတ် နောက်ပိုင်းတွင် Dashboard မှ provider များကို ထည့်ပါ။",
     "apiKeyRequired": "API Key (လိုအပ်သည်)",
@@ -6729,6 +6730,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Grok ဝဘ် Cookie နေရာယူစာသား",
     "herokuBaseUrlHint": "Heroku အခြေခံ URL အရိပ်အမြွက်",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "အီးမေးလ်ကို ဖျောက်ရန်",
     "imageProviders": "ပုံဝန်ဆောင်မှုပေးသူများ",
     "videoProviders": "ဗီဒီယို ဖန်တီးခြင်း",
@@ -7227,7 +7229,8 @@
       "kiro": "အခမဲ့အဆင့်- တစ်လလျှင် credit 50 (~25K–100K tokens)။ ⚠️ Kiro ToS သည် ပြင်ပ proxy/harness အသုံးပြုမှုကို တားမြစ်ထားသည်။",
       "codex": "လက်ရှိ OAuth လုပ်ငန်းစဉ်ဖြင့် OpenAI Codex ကို ချိတ်ဆက်ပါ။",
       "qwen": "လက်ရှိ OAuth လုပ်ငန်းစဉ်ဖြင့် Qwen Code ကို ချိတ်ဆက်ပါ။",
-      "github-models": "github.com/settings/tokens တွင် 'models: read' scope ပါဝင်သည့် GitHub PAT တစ်ခု ဖန်တီးပါ"
+      "github-models": "github.com/settings/tokens တွင် 'models: read' scope ပါဝင်သည့် GitHub PAT တစ်ခု ဖန်တီးပါ",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} သည် provider-native model IDs များကို လက်ခံသည်။ /models မှ ထည့်သွင်းပါ သို့မဟုတ် routing အတွက် စိတ်ကြိုက် IDs များ ထည့်ပါ။",
     "bedrockModelsDescription": "Amazon Bedrock မော်ဒယ်များကို AWS region အလိုက် ကန့်သတ်ထားသည်။ /models မှ ထည့်သွင်းပါ သို့မဟုတ် ရွေးချယ်ထားသည့် region တွင် ဖွင့်ထားသော Bedrock model IDs များ ထည့်ပါ။",
@@ -10258,7 +10261,11 @@
     "mappingInvalidJson": "JSON မမှန်ကန်ပါ။",
     "mappingMustBeObject": "ချိတ်ဆက်သတ်မှတ်မှုသည် array သို့မဟုတ် primitive value မဟုတ်ဘဲ JSON object ဖြစ်ရမည်။",
     "mappingValueMustBeString": "“{key}” key အတွက် value သည် string ဖြစ်ရမည်။",
-    "save": "သိမ်းဆည်းရန်"
+    "save": "သိမ်းဆည်းရန်",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",

@@ -5679,6 +5679,7 @@
     "usageTracking": "ବ୍ୟବହାର ଟ୍ରାକିଂ",
     "securityDesc": "ଆପଣଙ୍କ ଡ୍ୟାଶବୋର୍ଡକୁ ସୁରକ୍ଷିତ ରଖିବା ପାଇଁ ଏକ ପାସୱାର୍ଡ ସେଟ୍ କରନ୍ତୁ କିମ୍ବା ବର୍ତ୍ତମାନ ପାଇଁ ଏହି ପଦକ୍ଷେପଟି ଛାଡ଼ିଦିଅନ୍ତୁ।",
     "securityDescSkipWarning": "⚠️ ପାସୱାର୍ଡ ବିନା, ସେଟ୍ଅପ୍ ସମୟରେ ଆପଣ ପ୍ରଦାନକାରୀଙ୍କୁ ଯୋଡ଼ିପାରିବେ ନାହିଁ। ପାସୱାର୍ଡ ସେଟ୍ କରିବା ପରେ ଆପଣ ସେମାନଙ୍କୁ ଡ୍ୟାଶବୋର୍ଡରୁ ଯୋଡ଼ିପାରିବେ।",
+    "passwordAlreadySet": "ଡ୍ୟାସବୋର୍ଡ ପାସୱାର୍ଡ ପୂର୍ବରୁ ସେଟ୍ ହୋଇସାରିଛି। ଆପଣ ଏହାକୁ ପରେ ସେଟିଂସରେ ବଦଳାଇପାରିବେ।",
     "providerDesc": "ଆପଣଙ୍କ ପ୍ରଥମ AI ପ୍ରଦାନକାରୀଙ୍କୁ ସଂଯୋଗ କରନ୍ତୁ। ଆପଣ ପରେ ଆହୁରି ଯୋଡ଼ିପାରିବେ।",
     "providerRequiresPassword": "ପ୍ରଦାନକାରୀଙ୍କୁ ଯୋଡ଼ିବା ପାଇଁ ଆପଣଙ୍କୁ ପ୍ରଥମେ ଏକ ପାସୱାର୍ଡ ସେଟ୍ କରିବାକୁ ପଡ଼ିବ। ଦୟାକରି ସୁରକ୍ଷା ପଦକ୍ଷେପକୁ ଫେରି ଏକ ପାସୱାର୍ଡ ସେଟ୍ କରନ୍ତୁ, କିମ୍ବା ପରେ ଡ୍ୟାଶବୋର୍ଡରୁ ପ୍ରଦାନକାରୀଙ୍କୁ ଯୋଡ଼ନ୍ତୁ।",
     "apiKeyRequired": "API କୀ (ଆବଶ୍ୟକ)",
@@ -6729,6 +6730,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Grok ୱେବ୍ କୁକି ପ୍ଲେସହୋଲ୍ଡର୍",
     "herokuBaseUrlHint": "Heroku ବେସ୍ URL ସଙ୍କେତ",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "ଇମେଲ୍ ଲୁଚାନ୍ତୁ",
     "imageProviders": "ଛବି ପ୍ରଦାନକାରୀମାନେ",
     "videoProviders": "ଭିଡିଓ ସୃଷ୍ଟି",
@@ -7227,7 +7229,8 @@
       "kiro": "ମାଗଣା ସ୍ତର: 50 କ୍ରେଡିଟ୍/ମାସ (~25K–100K ଟୋକନ୍)। ⚠️ Kiro ToS ତୃତୀୟ-ପକ୍ଷ proxy/harness ବ୍ୟବହାରକୁ ନିଷେଧ କରେ।",
       "codex": "ବର୍ତ୍ତମାନର OAuth ପ୍ରବାହ ସହିତ OpenAI Codexକୁ ସଂଯୋଗ କରନ୍ତୁ।",
       "qwen": "ବର୍ତ୍ତମାନର OAuth ପ୍ରବାହ ସହିତ Qwen Codeକୁ ସଂଯୋଗ କରନ୍ତୁ।",
-      "github-models": "github.com/settings/tokensରେ 'models: read' ସ୍କୋପ୍ ସହିତ ଏକ GitHub PAT ସୃଷ୍ଟି କରନ୍ତୁ"
+      "github-models": "github.com/settings/tokensରେ 'models: read' ସ୍କୋପ୍ ସହିତ ଏକ GitHub PAT ସୃଷ୍ଟି କରନ୍ତୁ",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} ପ୍ରଦାନକାରୀ-ନେଟିଭ୍ ମଡେଲ୍ IDଗୁଡ଼ିକ ଗ୍ରହଣ କରେ। /modelsରୁ ଆମଦାନି କରନ୍ତୁ କିମ୍ବା ରାଉଟିଂ ପାଇଁ କଷ୍ଟମ୍ ID ଯୋଡ଼ନ୍ତୁ।",
     "bedrockModelsDescription": "Amazon Bedrock ମଡେଲ୍ଗୁଡ଼ିକ AWS ଅଞ୍ଚଳ ଅନୁସାରେ ସୀମିତ। /modelsରୁ ଆମଦାନି କରନ୍ତୁ କିମ୍ବା ଚୟନିତ ଅଞ୍ଚଳରେ ସକ୍ଷମ ଥିବା Bedrock ମଡେଲ୍ IDଗୁଡ଼ିକ ଯୋଡ଼ନ୍ତୁ।",
@@ -10258,7 +10261,11 @@
     "mappingInvalidJson": "ଅବୈଧ JSON।",
     "mappingMustBeObject": "ମ୍ୟାପିଂଟି ଏକ JSON ଅବଜେକ୍ଟ ହେବା ଆବଶ୍ୟକ, ଆରେ କିମ୍ବା ପ୍ରିମିଟିଭ୍ ମୂଲ୍ୟ ନୁହେଁ।",
     "mappingValueMustBeString": "“{key}” କୀ ପାଇଁ ମୂଲ୍ୟଟି ଏକ ଷ୍ଟ୍ରିଙ୍ଗ୍ ହେବା ଆବଶ୍ୟକ।",
-    "save": "ସଞ୍ଚୟ କରନ୍ତୁ"
+    "save": "ସଞ୍ଚୟ କରନ୍ତୁ",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",

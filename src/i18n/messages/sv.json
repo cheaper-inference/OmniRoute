@@ -5679,6 +5679,7 @@
     "usageTracking": "Användningsspårning",
     "securityDesc": "Ställ in ett lösenord för att skydda din instrumentpanel, eller hoppa över nu.",
     "securityDescSkipWarning": "⚠️ Utan ett lösenord kan du inte lägga till leverantörer under konfigurationen. Du kan lägga till dem senare från kontrollpanelen efter att du har angett ett lösenord.",
+    "passwordAlreadySet": "Ett lösenord för instrumentpanelen är redan angivet. Du kan ändra det senare under Inställningar.",
     "providerDesc": "Anslut din första AI-leverantör. Du kan lägga till mer senare.",
     "providerRequiresPassword": "Du måste först ange ett lösenord för att kunna lägga till leverantörer. Gå tillbaka till säkerhetssteget och ange ett lösenord, eller lägg till leverantörer senare från kontrollpanelen.",
     "apiKeyRequired": "API-nyckel (krävs)",
@@ -6738,6 +6739,7 @@
     "antigravityProjectIdPlaceholder": "mitt-gcp-projekt-id",
     "grokWebCookiePlaceholder": "Platshållare för Grok-webbcookie",
     "herokuBaseUrlHint": "Tips för Heroku-bas-URL",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Dölj e-postadress",
     "imageProviders": "Bildleverantörer",
     "videoProviders": "Videogenerering",
@@ -7236,7 +7238,8 @@
       "kiro": "Gratisnivå: 50 krediter/månad (~25K–100K tokens). ⚠️ Kiros användarvillkor förbjuder användning av tredjepartsproxy/harness.",
       "codex": "Anslut OpenAI Codex med det befintliga OAuth-flödet.",
       "qwen": "Anslut Qwen Code med det befintliga OAuth-flödet.",
-      "github-models": "Skapa en GitHub PAT med omfånget 'models: read' på github.com/settings/tokens"
+      "github-models": "Skapa en GitHub PAT med omfånget 'models: read' på github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} accepterar leverantörsbaserade modell-ID:n. Importera från /models eller lägg till anpassade ID:n för routing.",
     "bedrockModelsDescription": "Amazon Bedrock-modeller omfattas av AWS-regionen. Importera från /models eller lägg till Bedrock-modell-ID:n aktiverade i den valda regionen.",
@@ -10258,7 +10261,11 @@
     "mappingInvalidJson": "Ogiltig JSON.",
     "mappingMustBeObject": "Mappningen måste vara ett JSON-objekt, inte en array eller ett primitivt värde.",
     "mappingValueMustBeString": "Värdet för nyckeln “{key}” måste vara en sträng.",
-    "save": "Spara"
+    "save": "Spara",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",

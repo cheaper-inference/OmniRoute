@@ -1,5 +1,6 @@
 import { clearHealthCheckLogCache } from "@/lib/tokenHealthCheck";
 import { setCustomBannedSignals } from "@omniroute/open-sse/services/accountFallback.ts";
+import { setOpencodeServerSettings } from "@omniroute/open-sse/services/opencodeServerSettings.ts";
 import {
   setOperatorProviderErrorDefaults,
   setOperatorProviderErrorRules,
@@ -7,12 +8,12 @@ import {
   type OperatorProviderErrorRule,
 } from "@omniroute/open-sse/config/providerErrorRules.ts";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
+import { isSpawnCapableBypassPrefix } from "@/shared/constants/spawnCapablePrefixes";
 import {
   normalizeCliVersionOverrides,
   setCliVersionOverrides,
   type CliVersionOverrides,
 } from "@omniroute/open-sse/config/cliVersions.ts";
-import { isSpawnCapableBypassPrefix } from "@/shared/constants/spawnCapablePrefixes";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -32,6 +33,7 @@ export type RuntimeReloadSection =
   | "systemPrompt"
   | "authzBypass"
   | "bannedSignals"
+  | "opencodeServer"
   | "cliVersionOverrides";
 
 export interface RuntimeReloadChange {
@@ -62,6 +64,7 @@ interface RuntimeSettingsSnapshot {
   authzBypass: AuthzBypassSnapshot;
   customBannedSignals: string[];
   providerErrorRules: Record<string, OperatorProviderErrorRule[]> | null;
+  opencodeServerUrl: string;
   providerErrorDefaults: Record<string, OperatorProviderErrorDefault> | null;
   cliVersionOverrides: CliVersionOverrides;
 }
@@ -92,6 +95,7 @@ const DEFAULT_RUNTIME_SETTINGS_SNAPSHOT: RuntimeSettingsSnapshot = {
   authzBypass: DEFAULT_AUTHZ_BYPASS_SNAPSHOT,
   customBannedSignals: [],
   providerErrorRules: null,
+  opencodeServerUrl: "",
   providerErrorDefaults: null,
   cliVersionOverrides: {},
 };
@@ -338,6 +342,8 @@ export function buildRuntimeSettingsSnapshot(
     authzBypass: normalizeAuthzBypass(settings),
     customBannedSignals: normalizeStringArray(settings.customBannedSignals),
     providerErrorRules: normalizeOperatorProviderErrorRules(settings.providerErrorRules),
+    opencodeServerUrl:
+      typeof settings.opencode_server_url === "string" ? settings.opencode_server_url.trim() : "",
     providerErrorDefaults: normalizeOperatorProviderErrorDefaults(settings.providerErrorDefaults),
     cliVersionOverrides: normalizeCliVersionOverrides(settings.cliVersionOverrides),
   };
@@ -661,6 +667,11 @@ export async function applyRuntimeSettings(
     hasChanged(currentSnapshot.providerErrorRules, previousSnapshot.providerErrorRules)
   ) {
     setOperatorProviderErrorRules(currentSnapshot.providerErrorRules ?? undefined);
+  }
+
+  if (force || hasChanged(currentSnapshot.opencodeServerUrl, previousSnapshot.opencodeServerUrl)) {
+    setOpencodeServerSettings({ url: currentSnapshot.opencodeServerUrl });
+    markChanged("opencodeServer");
   }
 
   if (

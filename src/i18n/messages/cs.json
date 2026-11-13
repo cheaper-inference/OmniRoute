@@ -5679,6 +5679,7 @@
     "usageTracking": "Sledování využití",
     "securityDesc": "Nastavte heslo pro ochranu nástěnky nebo to teď přeskočte.",
     "securityDescSkipWarning": "⚠️ Bez hesla nebudete moci během nastavení přidat poskytovatele. Můžete je přidat později z řídicího panelu po nastavení hesla.",
+    "passwordAlreadySet": "Heslo k řídicímu panelu je již nastaveno. Později ho můžete změnit v Nastavení.",
     "providerDesc": "Připojte svého prvního AI poskytovatele. Další můžete přidat později.",
     "providerRequiresPassword": "Chcete-li přidat poskytovatele, musíte nejprve nastavit heslo. Vraťte se prosím ke kroku zabezpečení a nastavte heslo, nebo přidejte poskytovatele později z řídicího panelu.",
     "apiKeyRequired": "API klíč (povinný)",
@@ -6738,6 +6739,7 @@
     "antigravityProjectIdPlaceholder": "moje-gcp-projekt-id",
     "grokWebCookiePlaceholder": "Zástupný text webového souboru cookie Grok",
     "herokuBaseUrlHint": "Nápověda k základní URL Heroku",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Skrýt e-mail",
     "imageProviders": "Poskytovatelé obrázků",
     "videoProviders": "Generování videa",
@@ -7236,7 +7238,8 @@
       "kiro": "Bezplatná úroveň: 50 kreditů/měsíc (~25–100 tis. tokenů). ⚠️ Podmínky používání Kiro zakazují používání proxy serverů či testovacích rozhraní třetích stran.",
       "codex": "Připojit OpenAI Codex pomocí stávajícího toku OAuth.",
       "qwen": "Připojit Qwen Code pomocí stávajícího toku OAuth.",
-      "github-models": "Vytvořte GitHub PAT s rozsahem 'models: read' na github.com/settings/tokens"
+      "github-models": "Vytvořte GitHub PAT s rozsahem 'models: read' na github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} přijímá ID modelu nativního poskytovatele. Importujte z /models nebo přidejte vlastní ID pro směrování.",
     "bedrockModelsDescription": "Modely Amazon Bedrock jsou vymezeny podle regionu AWS. Importujte z /models nebo přidejte ID modelu Bedrock povolené ve vybrané oblasti.",
@@ -10258,7 +10261,11 @@
     "mappingInvalidJson": "Neplatný JSON.",
     "mappingMustBeObject": "Mapování musí být objekt JSON, nikoli pole nebo primitivní hodnota.",
     "mappingValueMustBeString": "Hodnota pro klíč “{key}” musí být řetězec.",
-    "save": "Uložit"
+    "save": "Uložit",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",

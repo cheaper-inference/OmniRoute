@@ -5679,6 +5679,7 @@
     "usageTracking": "ഉപയോഗ നിരീക്ഷണം",
     "securityDesc": "നിങ്ങളുടെ ഡാഷ്ബോർഡ് പരിരക്ഷിക്കാൻ ഒരു പാസ്വേഡ് സജ്ജമാക്കുക, അല്ലെങ്കിൽ ഇപ്പോൾ ഒഴിവാക്കുക.",
     "securityDescSkipWarning": "⚠️ പാസ്വേഡ് ഇല്ലെങ്കിൽ, സജ്ജീകരണത്തിനിടെ പ്രൊവൈഡർമാരെ ചേർക്കാൻ നിങ്ങൾക്ക് കഴിയില്ല. പാസ്വേഡ് സജ്ജമാക്കിയ ശേഷം ഡാഷ്ബോർഡിൽ നിന്ന് അവ ചേർക്കാം.",
+    "passwordAlreadySet": "ഡാഷ്‌ബോർഡ് പാസ്‌വേഡ് ഇതിനകം സജ്ജമാക്കിയിട്ടുണ്ട്. പിന്നീട് ക്രമീകരണങ്ങളിൽ ഇത് മാറ്റാം.",
     "providerDesc": "നിങ്ങളുടെ ആദ്യ AI പ്രൊവൈഡറെ ബന്ധിപ്പിക്കുക. പിന്നീട് കൂടുതൽ പ്രൊവൈഡർമാരെ ചേർക്കാം.",
     "providerRequiresPassword": "പ്രൊവൈഡർമാരെ ചേർക്കാൻ ആദ്യം ഒരു പാസ്വേഡ് സജ്ജമാക്കേണ്ടതുണ്ട്. ദയവായി സുരക്ഷാ ഘട്ടത്തിലേക്ക് തിരികെ പോയി ഒരു പാസ്വേഡ് സജ്ജമാക്കുക, അല്ലെങ്കിൽ പിന്നീട് ഡാഷ്ബോർഡിൽ നിന്ന് പ്രൊവൈഡർമാരെ ചേർക്കുക.",
     "apiKeyRequired": "API കീ (നിർബന്ധം)",
@@ -6729,6 +6730,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Grok വെബ് കുക്കി പ്ലേസ്ഹോൾഡർ",
     "herokuBaseUrlHint": "Heroku അടിസ്ഥാന URL സൂചന",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "ഇമെയിൽ മറയ്ക്കുക",
     "imageProviders": "ഇമേജ് ദാതാക്കൾ",
     "videoProviders": "വീഡിയോ സൃഷ്ടിക്കൽ",
@@ -7227,7 +7229,8 @@
       "kiro": "സൗജന്യ ടിയർ: പ്രതിമാസം 50 ക്രെഡിറ്റുകൾ (~25K–100K tokens). ⚠️ Kiro ToS മൂന്നാം കക്ഷി proxy/harness ഉപയോഗം നിരോധിക്കുന്നു.",
       "codex": "നിലവിലുള്ള OAuth പ്രവാഹം ഉപയോഗിച്ച് OpenAI Codex കണക്റ്റ് ചെയ്യുക.",
       "qwen": "നിലവിലുള്ള OAuth പ്രവാഹം ഉപയോഗിച്ച് Qwen Code കണക്റ്റ് ചെയ്യുക.",
-      "github-models": "github.com/settings/tokens-ൽ 'models: read' സ്കോപ്പുള്ള ഒരു GitHub PAT സൃഷ്ടിക്കുക"
+      "github-models": "github.com/settings/tokens-ൽ 'models: read' സ്കോപ്പുള്ള ഒരു GitHub PAT സൃഷ്ടിക്കുക",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} പ്രൊവൈഡർ-നേറ്റീവ് മോഡൽ ID-കൾ സ്വീകരിക്കുന്നു. /models-ൽ നിന്ന് ഇമ്പോർട്ട് ചെയ്യുക അല്ലെങ്കിൽ റൂട്ടിംഗിനായി ഇഷ്ടാനുസൃത ID-കൾ ചേർക്കുക.",
     "bedrockModelsDescription": "Amazon Bedrock മോഡലുകൾ AWS മേഖല അനുസരിച്ചാണ് പരിധിനിർണ്ണയിച്ചിരിക്കുന്നത്. /models-ൽ നിന്ന് ഇമ്പോർട്ട് ചെയ്യുക അല്ലെങ്കിൽ തിരഞ്ഞെടുത്ത മേഖലയിൽ പ്രവർത്തനക്ഷമമാക്കിയ Bedrock മോഡൽ ID-കൾ ചേർക്കുക.",
@@ -10258,7 +10261,11 @@
     "mappingInvalidJson": "അസാധുവായ JSON.",
     "mappingMustBeObject": "മാപ്പിംഗ് ഒരു JSON ഒബ്ജക്റ്റായിരിക്കണം; അറേയോ പ്രിമിറ്റീവ് മൂല്യമോ ആയിരിക്കരുത്.",
     "mappingValueMustBeString": "“{key}” എന്ന കീയുടെ മൂല്യം ഒരു സ്ട്രിംഗ് ആയിരിക്കണം.",
-    "save": "സംരക്ഷിക്കുക"
+    "save": "സംരക്ഷിക്കുക",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman എഞ്ചിൻ",

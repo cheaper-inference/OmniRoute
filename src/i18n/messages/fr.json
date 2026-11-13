@@ -5679,6 +5679,7 @@
     "usageTracking": "Suivi de l'utilisation",
     "securityDesc": "Définissez un mot de passe pour protéger votre tableau de bord ou ignorez-le pour l'instant.",
     "securityDescSkipWarning": "⚠️ Sans mot de passe, vous ne pourrez pas ajouter de fournisseurs pendant la configuration. Vous pourrez les ajouter ultérieurement depuis le tableau de bord après avoir défini un mot de passe.",
+    "passwordAlreadySet": "Un mot de passe du tableau de bord est déjà défini. Vous pourrez le modifier plus tard dans les Paramètres.",
     "providerDesc": "Connectez votre premier fournisseur d'IA. Vous pourrez en ajouter d’autres plus tard.",
     "providerRequiresPassword": "Vous devez d’abord définir un mot de passe pour ajouter des fournisseurs. Revenez à l’étape de sécurité et définissez un mot de passe, ou ajoutez les fournisseurs ultérieurement depuis le tableau de bord.",
     "apiKeyRequired": "Clé API (obligatoire)",
@@ -6738,6 +6739,7 @@
     "antigravityProjectIdPlaceholder": "mon-id-projet-gcp",
     "grokWebCookiePlaceholder": "Espace réservé du cookie Web de Grok",
     "herokuBaseUrlHint": "Indication sur l’URL de base de Heroku",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Masquer l’adresse e-mail",
     "imageProviders": "Fournisseurs d’images",
     "videoProviders": "Génération vidéo",
@@ -7236,7 +7238,8 @@
       "kiro": "Offre gratuite : 50 crédits/mois (~25K–100K tokens). ⚠️ Les conditions d'utilisation de Kiro interdisent l'utilisation de proxys/harness tiers.",
       "codex": "Connecter OpenAI Codex avec le flux OAuth existant.",
       "qwen": "Connecter Qwen Code avec le flux OAuth existant.",
-      "github-models": "Créez un PAT GitHub avec la portée 'models: read' sur github.com/settings/tokens"
+      "github-models": "Créez un PAT GitHub avec la portée 'models: read' sur github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} accepte les ID de modèle natifs du fournisseur. Importez depuis /models ou ajoutez des ID personnalisés pour le routage.",
     "bedrockModelsDescription": "Les modèles Amazon Bedrock sont définis par région AWS. Importez depuis /models ou ajoutez les ID de modèle Bedrock activés dans la région sélectionnée.",
@@ -10258,7 +10261,11 @@
     "mappingInvalidJson": "JSON non valide.",
     "mappingMustBeObject": "Le mappage doit être un objet JSON, pas un tableau ou une valeur primitive.",
     "mappingValueMustBeString": "La valeur de la clé “{key}” doit être une chaîne de caractères.",
-    "save": "Enregistrer"
+    "save": "Enregistrer",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Moteur Caveman",
