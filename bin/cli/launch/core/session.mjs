@@ -2,7 +2,7 @@
 // 12.9). Every /api/launch/* call lives here, so a G1 API change is a one-file change.
 //
 //   GET    /api/launch/capabilities           parent credential   404 -> GatewayTooOld
-//   POST   /api/launch/sessions               parent credential   {tool, view?, ttlSec?}
+//   POST   /api/launch/sessions               parent credential   {tool, view?, ttlSec?, sessionTag?}
 //   PATCH  /api/launch/sessions/:id           session token       {view?:{hash,ids,serve?}, heartbeat?}
 //   DELETE /api/launch/sessions/:id           session token
 //   GET    /api/launch/sessions/:id/usage     session token
@@ -78,8 +78,14 @@ export function createSessionClient(options) {
       return { version: data?.version ?? data?.apiVersion, features, raw: data };
     },
     /** Mint the olx_ session token. */
-    async mint({ tool, view, ttlSec = DEFAULT_SESSION_TTL_SEC }) {
-      const body = { tool, ttlSec, ...(view ? { view } : {}) };
+    async mint({ tool, view, tag, ttlSec = DEFAULT_SESSION_TTL_SEC }) {
+      // `sessionTag` only when the user asked (--tag); the gateway derives the default.
+      const body = {
+        tool,
+        ttlSec,
+        ...(view ? { view } : {}),
+        ...(tag ? { sessionTag: tag } : {}),
+      };
       const data = await call("POST", "/api/launch/sessions", {
         token: credential,
         body,

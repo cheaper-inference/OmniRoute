@@ -186,6 +186,7 @@ test("end to end: mint, catalog via session token, view PATCH, substituted token
     assert.ok(mint, `mint called: ${paths.join(", ")}`);
     assert.equal(mint.auth, "sk-parent");
     assert.equal(mint.body.tool, "fake");
+    assert.equal(mint.body.sessionTag, undefined, "default tag is derived by the gateway");
 
     const [session] = [...stub.sessions.values()];
     const models = stub.requests.find((r: { path: string }) => r.path === "/v1/models");
@@ -470,4 +471,23 @@ test("gateWarnings drops core's generic gate warning only when the plan words it
   ]);
   assert.deepEqual(gateWarnings(adapter, [core], ["unrelated"]), [core]);
   assert.deepEqual(gateWarnings(adapter, [core], [core]), []);
+});
+
+test("--tag is sent to the gateway as sessionTag", async () => {
+  const stub = await startStubGateway();
+  try {
+    const run = await launchAgainst(stub, fakeAdapter({ outPath: join(tempRoot("t"), "d.json") }), {
+      tag: "ticket:OLX-42",
+    });
+    assert.equal(run.outcome.exitCode, 0, run.stderr.text);
+    const mint = stub.requests.find(
+      (r: { method: string; path: string }) =>
+        r.method === "POST" && r.path === "/api/launch/sessions"
+    );
+    assert.equal(mint.body.sessionTag, "ticket:OLX-42");
+    const [session] = [...stub.sessions.values()];
+    assert.equal(session.sessionTag, "ticket:OLX-42");
+  } finally {
+    await stub.close();
+  }
 });

@@ -278,7 +278,12 @@ export async function runLaunch(toolId, flags = {}, deps = {}) {
       fetch: doFetch,
     });
     const capabilities = await client.capabilities();
-    session = await client.mint({ tool, ttlSec: deps.sessionTtlSec ?? DEFAULT_SESSION_TTL_SEC });
+    // --tag goes to the gateway as sessionTag; without it the gateway derives launch:<tool>:<id>.
+    session = await client.mint({
+      tool,
+      tag: settings.tag,
+      ttlSec: deps.sessionTtlSec ?? DEFAULT_SESSION_TTL_SEC,
+    });
     await bus.emit({ type: "session.minted", sessionId: session.sessionId });
 
     const rows = await fetchCatalog({ rootUrl, token: session.token, fetch: doFetch });
