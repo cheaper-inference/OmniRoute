@@ -252,6 +252,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       return runProviderExecutionPipeline({
         upstreamHttpRejection,
         getNextFamilyFallback: familyFallback.getNext,
+        getContextOverflowFallback: familyFallback.getForContextOverflow,
         policy,
         target: {
           provider,

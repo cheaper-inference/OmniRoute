@@ -22,6 +22,7 @@ import {
 } from "./passthroughHelpers.ts";
 import {
   isModelUnavailableError,
+  isContextOverflowError,
   getNextEligibleFamilyFallback,
   isFamilyFallbackEligible,
 } from "../../services/modelFamilyFallback.ts";
@@ -166,6 +167,11 @@ export interface ProviderExecutionPipelineInput {
     currentModel: string,
     triedModels: Set<string>,
     providerHint?: string | null
+  ) => string | null | Promise<string | null>;
+  /** Larger-context family model to resend on after a context-overflow 400, or null. */
+  getContextOverflowFallback?: (
+    currentModel: string,
+    triedModels: Set<string>
   ) => string | null | Promise<string | null>;
 }
 
@@ -698,6 +704,22 @@ export async function runProviderExecutionPipeline(
           wire.currentModel,
           wire.triedModels,
           target.provider
+        );
+        if (nextModel) {
+          wire.body = { ...wire.body, model: nextModel };
+          wire.currentModel = nextModel;
+          wire.triedModels.add(nextModel);
+          wire.setBodyAndModel(wire.body, nextModel);
+          modelFallbackPending = true;
+          continue;
+        }
+      }
+      // A 400 context overflow is recoverable on a larger-context sibling. The streaming path and
+      // the leg's own branch already do this; the pipeline outcome skipped the leg branch.
+      if (isContextOverflowError(status, fallbackMessage) && input.getContextOverflowFallback) {
+        const nextModel = await input.getContextOverflowFallback(
+          wire.currentModel,
+          wire.triedModels
         );
         if (nextModel) {
           wire.body = { ...wire.body, model: nextModel };
