@@ -49,6 +49,22 @@ import {
 import { normalizeRootUrl, publicTarget, resolveTarget } from "./target.mjs";
 import { computeView, needsServerView, serverViewBody } from "./view.mjs";
 
+/**
+ * Core's version-gate warnings (probeTool) minus those the plan already carries: adapters that
+ * check their own gate word the below-recommended warning themselves, so core drops its generic
+ * one when any plan warning names the recommended version (one warning per gate).
+ * @returns {string[]}
+ */
+export function gateWarnings(adapter, probedWarnings = [], planWarnings = []) {
+  const recommended = adapter?.capabilities?.versionGate?.recommended;
+  const ownGateWarning =
+    typeof recommended === "string" && planWarnings.some((w) => String(w).includes(recommended));
+  return probedWarnings.filter((message) => {
+    if (planWarnings.includes(message)) return false;
+    return !(ownGateWarning && message.includes(`${recommended} or newer is recommended`));
+  });
+}
+
 /** v1.x flags: parsed, rejected with "not yet supported" (section 9). */
 export const RESERVED_FLAGS = Object.freeze({
   budget: "--budget",
@@ -134,6 +150,7 @@ export async function runLaunch(toolId, flags = {}, deps = {}) {
   const jsonMode = Boolean(flags.json);
   const warnings = [];
   const warn = (message) => {
+    if (warnings.includes(message)) return; // one line per distinct warning
     warnings.push(message);
     stderr.write(`omnirouter: warning: ${message}\n`);
   };
@@ -288,7 +305,6 @@ export async function runLaunch(toolId, flags = {}, deps = {}) {
     // ---- binary, context, plan ----
     const bin = await (deps.resolveBinary ?? resolveBinary)(adapter, { platform, env });
     const probed = await (deps.probeTool ?? probeTool)(adapter, bin, { platform, env: baseEnv });
-    for (const message of probed.warnings) warn(message);
     const ctx0 = buildContext({
       platform,
       homeDir,
@@ -313,7 +329,15 @@ export async function runLaunch(toolId, flags = {}, deps = {}) {
       passthroughJson: passthrough.json,
       settings: { ...settings, ...(picked.model ? { model: picked.model.id } : {}) },
     });
-    const { plan, ctx } = planLaunch(adapter, ctx0, { middleware: deps.middleware });
+    let planned;
+    try {
+      planned = planLaunch(adapter, ctx0, { middleware: deps.middleware });
+    } catch (error) {
+      for (const message of probed.warnings) warn(message);
+      throw error;
+    }
+    const { plan, ctx } = planned;
+    for (const message of gateWarnings(adapter, probed.warnings, plan.warnings)) warn(message);
     for (const message of plan.warnings) warn(message);
     for (const note of plan.notes) stderr.write(`omnirouter: ${note}\n`);
     revokeOnExit = plan.cleanup?.revokeSession !== false;
@@ -485,7 +509,7 @@ async function previewLaunch(s) {
         platform: s.platform,
         env: s.baseEnv,
       });
-      for (const message of probed.warnings) warn(message);
+      if (flags.doctor) for (const message of probed.warnings) warn(message);
     } catch (error) {
       versionError = toLaunchError(error);
       if (!flags.doctor) throw error;
@@ -529,7 +553,15 @@ async function previewLaunch(s) {
     });
   }
 
-  const { plan, appliedMiddleware } = planLaunch(adapter, ctx0, { middleware: deps.middleware });
+  let planned;
+  try {
+    planned = planLaunch(adapter, ctx0, { middleware: deps.middleware });
+  } catch (error) {
+    for (const message of probed.warnings) warn(message);
+    throw error;
+  }
+  const { plan, appliedMiddleware } = planned;
+  for (const message of gateWarnings(adapter, probed.warnings, plan.warnings)) warn(message);
   const doc = dryRunDocument(redactPlan(plan, [target.credential.value]), {
     gateway: { rootUrl, origin, status },
     auth: { source: target.credential.source },
