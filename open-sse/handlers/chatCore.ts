@@ -698,6 +698,8 @@ async function handleChatCoreInner({
   const releaseTurnExecution = turnExecution.release;
   let turnExecutionHandedOffToStream = false;
   let drainUnpersistedHttpAttempts = () => {};
+  // Set once the pending row is registered; a throw before a stream takes the row over calls it.
+  let releasePendingRowOnThrow: (() => void) | null = null;
 
   // Preserve chatCore's canonical formatting while the guarded body remains byte-stable.
   // prettier-ignore
@@ -873,6 +875,15 @@ async function handleChatCoreInner({
   const pendingRequestOwner = pendingConnId
     ? capturePendingRequestOwner(pendingRequestId)
     : undefined;
+  releasePendingRowOnThrow = () =>
+    trackPendingRequest(
+      model,
+      provider,
+      pendingConnId,
+      false,
+      undefined,
+      pendingRequestOwner ?? pendingRequestId
+    );
 
   // Initialize rate limit settings from persisted DB (once, lazy)
   await initializeRateLimits();
@@ -3656,6 +3667,15 @@ async function handleChatCoreInner({
   onClientDisconnectFinalize = streamingTailOutcome.carry.onClientDisconnectFinalize;
   turnExecutionHandedOffToStream = streamingTailOutcome.carry.turnExecutionHandedOffToStream;
   return streamingTailOutcome.result;
+  } catch (error) {
+    // A throw after the pending row was registered would leave the row and the dashboard counter
+    // until the age sweep. A stream that was handed off owns the row; release it only otherwise.
+    if (!turnExecutionHandedOffToStream) {
+      try {
+        releasePendingRowOnThrow?.();
+      } catch {}
+    }
+    throw error;
   } finally {
     if (!turnExecutionHandedOffToStream) {
       try {
