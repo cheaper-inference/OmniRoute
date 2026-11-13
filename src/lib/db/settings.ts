@@ -38,6 +38,8 @@ import { DEFAULT_NEW_CONNECTION_PROXY_ENABLED } from "@/shared/constants/newConn
 const ENCRYPTED_SETTING_KEYS: ReadonlySet<string> = new Set([
   "oidcClientSecret",
   "entraGraphClientSecret",
+  // Operator exact-value denylist for the credential masker: secrets, so encrypted at rest.
+  "credentialExactValues",
 ]);
 
 type ProxyValue = JsonRecord | string | null;

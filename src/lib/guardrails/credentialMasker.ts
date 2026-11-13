@@ -1,5 +1,6 @@
 import { CREDENTIAL_PATTERNS } from "@omniroute/open-sse/utils/credentialPatterns.ts";
 import { getSettings } from "@/lib/db/settings";
+import { redactExactValues, setCredentialExactValues } from "@/shared/utils/credentialExactValues";
 import { BaseGuardrail, type GuardrailContext, type GuardrailResult } from "./base";
 
 export { CREDENTIAL_PATTERNS };
@@ -23,8 +24,11 @@ export interface CredentialRedactionResult {
 
 export function redactCredentials(text: string): CredentialRedactionResult {
   if (typeof text !== "string" || !text) return { text, detections: [], modified: false };
-  let result = text;
+  // Operator exact values first: they have no shape the catalog could recognise.
+  const exact = redactExactValues(text);
+  let result = exact.text;
   const detections: Array<{ type: string; count: number }> = [];
+  if (exact.count > 0) detections.push({ type: "exact_value", count: exact.count });
   for (const p of CREDENTIAL_PATTERNS) {
     p.regex.lastIndex = 0;
     const matches = result.match(p.regex);
@@ -146,6 +150,7 @@ export class CredentialMaskerGuardrail extends BaseGuardrail {
       _s.credentialRedactionEnabled === true || process.env.CREDENTIAL_REDACTION_ENABLED === "true"
     ))
       return { block: false };
+    setCredentialExactValues(_s.credentialExactValues);
     const detections: Array<{ type: string; count: number }> = [];
     const { modified, payload: next } = redactPayload(payload, detections);
     if (!modified) return { block: false };
@@ -165,6 +170,7 @@ export class CredentialMaskerGuardrail extends BaseGuardrail {
       _s.credentialRedactionEnabled === true || process.env.CREDENTIAL_REDACTION_ENABLED === "true"
     ))
       return { block: false };
+    setCredentialExactValues(_s.credentialExactValues);
     const detections: Array<{ type: string; count: number }> = [];
     const { modified, response: next } = redactResponse(response, detections);
     if (!modified) return { block: false };
