@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "label": "omni-queue",
+  "protectedApprovalLabel": "protected-approved",
+  "approvers": ["diegosouzapw"],
+  "appSlug": "omni-queue",
+  "bases": "^release/v\\d+\\.\\d+\\.\\d+$",
+  "blockLabels": ["hold", "hold-vps", "do-not-merge", "wip"],
+  "batch": { "maxSize": 6, "minSize": 1, "maxWaitMinutes": 10 },
+  "landing": { "mode": "merge-ff" },
+  "requiredChecks": [
+    "Gate / CI",
+    "Gate / Quality",
+    "Merge integrity (changelog + generated skills)"
+  ],
+  "advisoryChecks": ["Build (advisory)"],
+  "checksTimeoutMinutes": 240,
+  "infraRetries": 1,
+  "preferGreenPrChecks": true,
+  "prGreenCheck": "Gate / Quality",
+  "protectedPaths": [
+    "**/AGENTS.md",
+    "**/CLAUDE.md",
+    "**/GEMINI.md",
+    ".agents/**",
+    ".claude/**",
+    "skills/**/SKILL.md",
+    "config/quality/skill-templates/**",
+    "**/llm.txt",
+    ".github/copilot-instructions.md",
+    ".github/instructions/**",
+    ".github/prompts/**",
+    ".cursorrules",
+    ".cursor/**",
+    ".windsurfrules"
+  ],
+  "mode": "shadow"
+}

@@ -132,6 +132,7 @@
     "start:fast": "cross-env OMNIROUTE_SKIP_STANDALONE=1 node scripts/dev/run-next.mjs start",
     "homolog": "node scripts/homolog/run.mjs",
     "lint": "eslint . --cache --cache-location .eslintcache --suppressions-location config/quality/eslint-suppressions.json",
+    "queue": "node scripts/merge-queue/cli.mjs",
     "lint:json": "node scripts/quality/run-eslint-json.mjs",
     "lint:md": "npx --yes markdownlint-cli2 \"docs/**/*.md\" \"*.md\" \"!docs/i18n\" \"!docs/research\"",
     "lint:prose": "vale docs",
