@@ -511,3 +511,74 @@ test("reconcile: folds fragments under the version section, credits by fragment 
     "12457's own commit is covered by the pre-existing multi-line bullet; only 11434 is generated"
   );
 });
+
+test("reconcile: omni-queue merge-ff rows collapse into ONE bullet per PR, titled and credited from the merge", () => {
+  // merge-ff keeps every contributor commit; readCommits tags them with `queue` (history-map).
+  const changelog = `# Changelog
+
+## [Unreleased]
+
+## [3.8.55] — TBD
+
+### ✨ New Features
+
+### 🐛 Bug Fixes
+
+### 📝 Maintenance
+
+---
+
+## [3.8.54] — 2026-11-10
+
+---
+`;
+  const q = {
+    pr: 19001,
+    author: "alice",
+    title: "feat(queue): new thing",
+    mergeSha: "m".repeat(40),
+  };
+  const row = (hash: string, date: string, subject: string, extra = {}) => ({
+    hash,
+    date,
+    authorName: "Alice C",
+    authorEmail: "a@x",
+    subject,
+    refs: [],
+    pr: null as number | null,
+    prAuthor: null,
+    coauthors: [],
+    ...extra,
+  });
+  const rows = [
+    row("aaaaaaaaa1", "2026-11-02", "fix typo", { pr: 19001, queue: q }),
+    row("bbbbbbbbb2", "2026-11-01", "wip: start", { pr: 19001, queue: q }),
+    row("ccccccccc3", "2026-11-03", "fix(x): squashed (#19002)", { pr: 19002, refs: [19002] }),
+  ];
+  const prs = [
+    { number: 19002, title: "x", author: { login: "bob" }, body: "", closingIssuesReferences: [] },
+  ];
+  const { changelog: next, report } = reconcile({
+    changelog,
+    version: "3.8.55",
+    repo: REPO,
+    rows,
+    prs,
+    fragments: [],
+    today: "2026-11-13",
+    baseTip: "0000000",
+    headTip: "1111111",
+  });
+  const section = next.slice(next.indexOf("## [3.8.55]"), next.indexOf("## [3.8.54]"));
+  assert.ok(
+    section.includes(`- **feat(queue):** new thing (${link(19001)}) — thanks @alice`),
+    section
+  );
+  assert.equal((section.match(/pull\/19001\)/g) || []).length, 1, "two commits, one bullet");
+  assert.doesNotMatch(section, /fix typo|wip: start/);
+  assert.ok(section.includes(`- **fix(x):** squashed (${link(19002)}) — thanks @bob`));
+  assert.equal(report.generated.features, 1);
+  assert.equal(report.generated.fixes, 1);
+  assert.equal(rows[0].prAuthor, "alice", "gh data lacks the PR → trailer author");
+  assert.equal(rows[2].prAuthor, "bob");
+});

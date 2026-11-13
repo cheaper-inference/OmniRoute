@@ -128,3 +128,37 @@ test("computeUncovered: a fragment-only ref counts as covered (end-to-end #6857)
   assert.equal(withFragments.covered, 1, "fragment ref makes the commit covered");
   assert.equal(withFragments.uncovered.length, 0);
 });
+
+test("computeUncovered: an omni-queue merge-ff commit is covered through its PR; no map = legacy", () => {
+  const commits = [
+    { hash: "q1", subject: "wip: start feature" }, // landed by omni-queue in PR #300
+    { hash: "q2", subject: "fix typo" }, // landed by omni-queue in PR #301 (not cited)
+    { hash: "s1", subject: "feat(x): squash (#100)" },
+    { hash: "d1", subject: "chore: direct push" },
+  ];
+  const prByCommit = new Map([
+    ["q1", { pr: 300 }],
+    ["q2", { pr: 301 }],
+  ]);
+  const refs = new Set([100, 300]);
+
+  const mapped = computeUncovered(commits, refs, prByCommit);
+  assert.equal(mapped.covered, 2, "squash #100 + q1 through PR #300");
+  assert.deepEqual(
+    mapped.uncovered.map((c) => [c.hash, c.queuePr ?? null, c.rollup]),
+    [
+      ["q2", 301, false],
+      ["d1", null, true],
+    ]
+  );
+  assert.equal("queuePr" in mapped.uncovered[1], false, "unmapped rows carry no hint field");
+
+  // squash-only reading is untouched: same result with no map and with an empty map
+  const legacy = computeUncovered(commits, refs);
+  assert.deepEqual(computeUncovered(commits, refs, new Map()), legacy);
+  assert.equal(legacy.covered, 1);
+  assert.deepEqual(
+    legacy.uncovered.map((c) => Object.keys(c).join(",")),
+    Array(3).fill("hash,subject,refs,type,rollup")
+  );
+});
