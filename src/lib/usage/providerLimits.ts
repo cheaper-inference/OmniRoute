@@ -39,7 +39,8 @@ import {
 } from "@omniroute/open-sse/services/usage/claudeQuota.ts";
 import { getMachineId } from "@/shared/utils/machine";
 import { supportsProviderQuota } from "@/shared/utils/providerQuotaVisibility";
-import { mergeProviderLimitsCacheEntry, toProviderLimitsCacheEntry } from "./providerLimitsCache";
+import { toProviderLimitsCacheEntry } from "./providerLimitsCache";
+import { mergeZcodeUsageCache } from "./zcodeUsageCache";
 import { getCredentialRefreshExecutor } from "@omniroute/open-sse/executors/credential.ts";
 import { getUsageForProvider } from "@omniroute/open-sse/services/usage.ts";
 import {
@@ -247,20 +248,6 @@ export function isSupportedUsageConnection(connection: ProviderConnectionLike | 
   if (connection.authType !== "apikey" && connection.authType !== "api_key") return false;
   if (PROVIDER_LIMITS_APIKEY_PROVIDERS.has(connection.provider)) return true;
   return supportsProviderQuota(connection.provider, connection);
-}
-
-function mergeZcodeUsageCache(
-  provider: string,
-  next: ProviderLimitsCacheEntry,
-  previous: ProviderLimitsCacheEntry | null | undefined
-): ProviderLimitsCacheEntry {
-  // Never retain stale account/plan results after an unavailable readback.
-  if (
-    ZCODE_PROVIDERS.has(provider) &&
-    (Array.isArray(next.quotaGroups) || (next.message && !next.quotas))
-  )
-    return next;
-  return mergeProviderLimitsCacheEntry(provider, next, previous);
 }
 
 function withStatus(error: Error, status: number): Error & { status: number } {

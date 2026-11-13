@@ -49,8 +49,7 @@ import { isClaudeExtraUsageAllowed } from "@/lib/providers/claudeExtraUsage";
 import { filterCodexQuotaWindows } from "@omniroute/open-sse/services/codexQuotaWindowPolicy.ts";
 import { isCodexQuotaFilteringDisabled } from "@/lib/providers/codexQuotaFiltering";
 import { resolveProviderId } from "@/shared/constants/providers";
-import { ZCODE_PROVIDERS } from "@/shared/constants/zcodeProviders";
-import { isZcodeQuotaScopeApplicable, resolveSnapshotQuotaProvider } from "./zcodeQuotaScope";
+import { createQuotaScopeCheck, resolveSnapshotQuotaProvider } from "./zcodeQuotaScope";
 import {
   claudeQuotaMatchesModel,
   isExplicitClaudeQuota429Text,
@@ -752,15 +751,9 @@ export function getClaudeQuotaPreflightResetAt(
 }
 
 /** Whether a cached ZCode OAuth observation is attributable to this tariff. */
-export function isQuotaScopeApplicable(
-  connectionId: string,
-  provider: string,
-  authType?: string | null
-): boolean {
-  if (authType !== "oauth" || !ZCODE_PROVIDERS.has(resolveProviderId(provider))) return true;
-  const entry = getQuotaCache(connectionId) || hydrateQuotaCacheFromSnapshots(connectionId);
-  return isZcodeQuotaScopeApplicable(provider, authType, entry?.provider);
-}
+export const isQuotaScopeApplicable = createQuotaScopeCheck(
+  (id) => getQuotaCache(id) || hydrateQuotaCacheFromSnapshots(id)
+);
 
 /** Request-time overrides that make cached quota windows irrelevant for this request. */
 function isQuotaFilterBypassed(
@@ -1045,7 +1038,6 @@ function hydrateQuotaCacheFromSnapshots(connectionId: string): QuotaCacheEntry |
 
   const quotas: Record<string, QuotaInfo> = {};
   let provider = "";
-  const snapshotScopes = new Set<string>();
   let fetchedAt = 0;
   let windowDurationMs: number | null = null;
 
@@ -1062,8 +1054,6 @@ function hydrateQuotaCacheFromSnapshots(connectionId: string): QuotaCacheEntry |
     const windowKey = camelSnapshot.windowKey ?? snapshot.window_key;
     if (!windowKey) continue;
     provider = provider || snapshot.provider || "";
-    const snapshotProvider = resolveProviderId(snapshot.provider || "");
-    snapshotScopes.add(snapshotProvider);
     let fractionReported: false | undefined;
     const rawData = camelSnapshot.rawData ?? snapshot.raw_data;
     try {
@@ -1099,10 +1089,9 @@ function hydrateQuotaCacheFromSnapshots(connectionId: string): QuotaCacheEntry |
   if (Object.keys(quotas).length === 0) return null;
   const exhausted = isExhausted(quotas);
 
-  provider = resolveSnapshotQuotaProvider(provider, snapshotScopes);
   const entry: QuotaCacheEntry = {
     connectionId,
-    provider,
+    provider: resolveSnapshotQuotaProvider(provider, snapshots),
     quotas,
     modelQuotas: {},
     fetchedAt: fetchedAt || Date.now(),
