@@ -72,6 +72,8 @@ import { isManagedBase } from "./config.mjs";
  * @property {string|null} actor       approver who applied the label
  * @property {string|null} labeledAt   ISO of that label event (FIFO key)
  * @property {string|null} reason      INELIGIBLE_REASONS code when invalid
+ * @property {string} [detail]         extra context for `reason` (e.g. the label is present but
+ *                                     its "labeled" event is missing from the timeline)
  */
 
 /**
@@ -93,6 +95,21 @@ const toMs = (iso) => {
 };
 const head12 = (sha) => String(sha ?? "").slice(0, 12);
 const escapeRegExp = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+/** Git ref names may contain "<", ">", "@" and backticks: keep comment-safe characters only. */
+const safeRef = (ref) =>
+  String(ref ?? "")
+    .replace(/[^A-Za-z0-9._/-]/g, "?")
+    .slice(0, 120);
+
+/**
+ * Protected-path match that also holds for paths with control characters: Git allows "\n" in
+ * file names, and the contracts glob does not match across it ("x\ny/AGENTS.md" would escape
+ * "**\/AGENTS.md"). Control characters are replaced before matching (fail closed).
+ */
+function isProtectedFile(path, globs) {
+  const clean = String(path ?? "").replace(/[\u0000-\u001f\u007f]/g, "_");
+  return isProtectedPath(clean, globs);
+}
 
 function hasLabel(labels, name) {
   const want = lower(name);
@@ -168,7 +185,17 @@ export function approvalFor(pr, ctx, kind) {
   const label = kind === "queue" ? config.label : config.protectedApprovalLabel;
 
   const event = lastLabeledEvent(pr.timeline, label);
-  if (!event) return { valid: false, actor: null, labeledAt: null, reason: "approval-missing" };
+  if (!event) {
+    // The label is (normally) present but no "labeled" event was found: a truncated timeline or
+    // an event the normalizer dropped. Never approve; say why so the tick/dashboard can show it.
+    return {
+      valid: false,
+      actor: null,
+      labeledAt: null,
+      reason: "approval-missing",
+      detail: `label ${label} event not found in timeline`,
+    };
+  }
   const actor = event.actor ?? null;
   const labeledAt = event.createdAt;
   if (!isApprover(config, actor)) {
@@ -193,23 +220,55 @@ export function approvalFor(pr, ctx, kind) {
   return { valid: false, actor, labeledAt, reason };
 }
 
+const BRANCH_TOKEN_RE = /(?<![A-Za-z0-9._-])release\/v[A-Za-z0-9._-]*/g;
+const TITLE_VERSION_RE = /(?<![A-Za-z0-9._/-])v(\d+\.\d+\.\d+)(?![A-Za-z0-9_-]|\.[A-Za-z0-9])/g;
+const MERGE_INTO_RE = /\bmerge\b[^.\n]*?\binto\s+[`'"]?(release\/v[A-Za-z0-9._-]*)/i;
+
+/** "release/v3.8.54." (sentence punctuation) → "release/v3.8.54". */
+const trimToken = (t) => String(t).replace(/\.+$/, "");
+
 /**
- * True when an OPEN release-freeze issue names `base` exactly (word-boundary match in title or
- * body; "release/v3.8.5" must not match "release/v3.8.54"). A preceding "/" is allowed so
- * "origin/release/v3.8.54" and "refs/heads/release/v3.8.54" still freeze (fail closed); a
- * trailing "." only counts as a boundary when it ends the name (sentence punctuation).
+ * Branches an open release-freeze issue freezes. The /generate-release template is
+ * title "🔒 release-freeze: vX.Y.Z in progress" and body "do NOT merge campaign PRs into
+ * release/vX.Y.Z (...). Development continues on release/vX.Y.Z+1 ...", so the body also names
+ * the branch that stays OPEN. Order of trust:
+ *  1. the title: every "release/v…" branch it names, else every "vX.Y.Z" version in it
+ *     (→ "release/vX.Y.Z");
+ *  2. only when the title names nothing: the branch of the body's "merge … into <branch>"
+ *     sentence, else the FIRST branch the body mentions (never every mention).
+ * An empty list means the issue names no branch at all (see isBaseFrozen: fail closed).
+ * @param {{title: string, body: string}} issue
+ * @returns {string[]}
+ */
+export function frozenBranches(issue) {
+  const title = String(issue?.title ?? "");
+  const body = String(issue?.body ?? "");
+  const fromTitle = [...title.matchAll(BRANCH_TOKEN_RE)].map((m) => trimToken(m[0]));
+  if (fromTitle.length) return [...new Set(fromTitle)];
+  const versions = [...title.matchAll(TITLE_VERSION_RE)].map((m) => `release/v${m[1]}`);
+  if (versions.length) return [...new Set(versions)];
+  const into = MERGE_INTO_RE.exec(body);
+  if (into) return [trimToken(into[1])];
+  const first = body.match(BRANCH_TOKEN_RE);
+  return first ? [trimToken(first[0])] : [];
+}
+
+/**
+ * True when an OPEN release-freeze issue freezes `base` (exact name; "release/v3.8.5" never
+ * matches "release/v3.8.54", nor "release/v3.8.54x"). The frozen branch comes from the title
+ * first and only falls back to the body when the title names none (frozenBranches), so a body
+ * that says where development CONTINUES never freezes that branch. Fail closed: an open freeze
+ * issue that names no branch or version at all freezes every base.
  * @param {string} base
  * @param {{title: string, body: string}[]} freezeIssues
  */
 export function isBaseFrozen(base, freezeIssues) {
   const name = String(base ?? "");
   if (!name) return false;
-  const re = new RegExp(
-    `(?<![A-Za-z0-9._-])${escapeRegExp(name)}(?![A-Za-z0-9_/-]|\\.[A-Za-z0-9_-])`
-  );
-  return (freezeIssues ?? []).some(
-    (issue) => re.test(String(issue?.title ?? "")) || re.test(String(issue?.body ?? ""))
-  );
+  return (freezeIssues ?? []).some((issue) => {
+    const branches = frozenBranches(issue);
+    return branches.length === 0 || branches.includes(name);
+  });
 }
 
 function prInFlight(state, n) {
@@ -243,7 +302,7 @@ export function evaluateEligibility(pr, ctx) {
   /** @type {Action[]} */
   const actions = [];
   const reason = (code, detail) => reasons.push({ code, detail });
-  const protectedSurface = (pr.files ?? []).some((f) => isProtectedPath(f, config.protectedPaths));
+  const protectedSurface = (pr.files ?? []).some((f) => isProtectedFile(f, config.protectedPaths));
   /** @type {Approval} */
   let approval = { valid: false, actor: null, labeledAt: null, reason: "no-label" };
 
@@ -265,11 +324,11 @@ export function evaluateEligibility(pr, ctx) {
 
   const managed = isManagedBase(config, pr.baseRef);
   if (!managed) {
-    reason("base-mismatch", `base ${pr.baseRef} does not match ${config.bases}`);
+    reason("base-mismatch", `base ${safeRef(pr.baseRef)} does not match ${config.bases}`);
     comment(
       "base-mismatch",
       `omni-queue only manages bases matching \`${config.bases}\`; this PR targets ` +
-        `\`${pr.baseRef}\`. Retarget it to the active release branch to queue it.`
+        `\`${safeRef(pr.baseRef)}\`. Retarget it to the active release branch to queue it.`
     );
   }
 
@@ -282,7 +341,7 @@ export function evaluateEligibility(pr, ctx) {
     const issues = (ctx.freezeIssues ?? [])
       .filter((i) => isBaseFrozen(pr.baseRef, [i]))
       .map((i) => `#${i.number}`);
-    reason("base-frozen", `release-freeze open for ${pr.baseRef} (${issues.join(", ")})`);
+    reason("base-frozen", `release-freeze open for ${safeRef(pr.baseRef)} (${issues.join(", ")})`);
     let key = null;
     try {
       key = `frozen:${sanitizeBase(pr.baseRef)}`;
@@ -292,7 +351,7 @@ export function evaluateEligibility(pr, ctx) {
     if (key) {
       comment(
         key,
-        `\`${pr.baseRef}\` is frozen for release (${issues.join(", ")}). omni-queue will not ` +
+        `\`${safeRef(pr.baseRef)}\` is frozen for release (${issues.join(", ")}). omni-queue will not ` +
           `merge into it; retarget this PR to the next release branch to keep it queued.`
       );
     }
@@ -322,25 +381,34 @@ export function evaluateEligibility(pr, ctx) {
       );
       removeQueueLabel();
     } else if (approval.reason === "approval-missing") {
-      reason("approval-missing", `approval status for head ${h12} not recorded yet`);
+      reason(
+        "approval-missing",
+        approval.detail ?? `approval status for head ${h12} not recorded yet`
+      );
     }
   }
 
   if (protectedSurface && labeled) {
-    const files = (pr.files ?? []).filter((f) => isProtectedPath(f, config.protectedPaths));
+    // File paths are chosen by the PR author (markdown/mention/marker injection): report only
+    // the count and the matching globs, which come from the trusted config.
+    const count = (pr.files ?? []).filter((f) => isProtectedFile(f, config.protectedPaths)).length;
+    const globs = config.protectedPaths.filter((g) =>
+      (pr.files ?? []).some((f) => isProtectedFile(f, [g]))
+    );
+    const surface = `${count} file(s) matching ${globs.map((g) => `\`${g}\``).join(", ")}`;
     const hasProtected = hasLabel(pr.labels, config.protectedApprovalLabel);
     const prot = hasProtected ? approvalFor(pr, ctx, "protected") : null;
     if (!prot?.valid) {
-      const why = hasProtected ? prot.reason : "label absent";
+      const why = hasProtected ? (prot.detail ?? prot.reason) : "label absent";
       reason(
         "protected-approval-missing",
-        `protected surface (${files.slice(0, 5).join(", ")}): ${config.protectedApprovalLabel} ${why}`
+        `protected surface (${surface}): ${config.protectedApprovalLabel} ${why}`
       );
       // While approve.mjs may still be recording a fresh protected label, stay silent.
       if (prot?.reason !== "approval-missing") {
         comment(
           `protected:${h12}`,
-          `This PR changes agent-instruction surfaces (${files.slice(0, 5).join(", ")}). ` +
+          `This PR changes agent-instruction surfaces (${surface}). ` +
             `A maintainer must also apply \`${config.protectedApprovalLabel}\` to the current ` +
             `head (${h12}) before omni-queue can merge it.`
         );

@@ -11,6 +11,7 @@ import {
 import {
   approvalFor,
   evaluateEligibility,
+  frozenBranches,
   isBaseFrozen,
   selectBatch,
 } from "../../../scripts/merge-queue/eligibility.mjs";
@@ -222,6 +223,54 @@ test("label before the last push: status only on the old head → head-changed +
   );
 });
 
+test("protected comment never echoes author-chosen file paths (markdown/marker injection)", () => {
+  const evil = [
+    ".claude/<!-- omni-queue:conflict:abc -->",
+    ".claude/@org/team [x](http://evil.example)",
+    ".claude/`code`\nline",
+  ];
+  const pr = makePr({ files: ["src/ok.ts", ...evil] });
+  const result = evaluateEligibility(pr, makeCtx());
+  assert.deepEqual(codes(result), ["protected-approval-missing"]);
+  const comment = result.actions.find((a) => a.type === "comment");
+  assert.ok(comment, "protected comment emitted");
+  for (const text of [comment.body, result.reasons[0].detail]) {
+    assert.doesNotMatch(text, /<!--|@org|evil\.example|\n/);
+    assert.match(text, /3 file\(s\) matching `\.claude\/\*\*`/);
+  }
+});
+
+test("a protected file whose path contains a newline is still protected", () => {
+  const pr = makePr({ files: ["x\ny/AGENTS.md"] });
+  const result = evaluateEligibility(pr, makeCtx());
+  assert.equal(result.protectedSurface, true);
+  assert.deepEqual(codes(result), ["protected-approval-missing"]);
+  assert.match(result.reasons[0].detail, /1 file\(s\) matching `\*\*\/AGENTS\.md`/);
+});
+
+test("comments never echo unsafe characters of the base branch name", () => {
+  const pr = makePr({ baseRef: "feat/<!--x-->@team`" });
+  const result = evaluateEligibility(pr, makeCtx());
+  const comment = result.actions.find((a) => a.key === "base-mismatch");
+  assert.ok(comment);
+  assert.doesNotMatch(comment.body, /<!--|@team/);
+  assert.match(comment.body, /`feat\/\?\?--x--\?\?team\?`/);
+});
+
+test("label present but its labeled event missing from the timeline → visible reason", () => {
+  const pr = makePr({ timeline: [] });
+  const approval = approvalFor(pr, makeCtx(), "queue");
+  assert.equal(approval.valid, false);
+  assert.equal(approval.reason, "approval-missing");
+  assert.match(approval.detail, /event not found in timeline/);
+  const result = evaluateEligibility(pr, makeCtx());
+  assert.deepEqual(codes(result), ["approval-missing"]);
+  assert.match(result.reasons[0].detail, /event not found in timeline/);
+  // a normal fresh label has the default detail instead
+  const fresh = makePr({ timeline: [labeledEvent(config.label, APPROVER, 2)], headStatuses: [] });
+  assert.doesNotMatch(evaluateEligibility(fresh, makeCtx()).reasons[0].detail, /event not found/);
+});
+
 test("fresh label without its status yet → approval-missing, silent (approve job running)", () => {
   const pr = makePr({ timeline: [labeledEvent(config.label, APPROVER, 2)], headStatuses: [] });
   const result = evaluateEligibility(pr, makeCtx());
@@ -322,11 +371,86 @@ test("isBaseFrozen matches the exact branch name only", () => {
   assert.equal(isBaseFrozen(BASE, [issue("Release freeze: release/v3.8.54x")]), false);
   assert.equal(isBaseFrozen(BASE, [issue("Release freeze: release/v3.8.54.1")]), false);
   assert.equal(isBaseFrozen(BASE, [issue("Release freeze: release/v3.8.540")]), false);
-  assert.equal(isBaseFrozen(BASE, [issue("Release freeze: prerelease/v3.8.54")]), false);
+  // the body names a "prerelease/…" branch, which is not a release branch, then the real one
+  assert.equal(
+    isBaseFrozen(BASE, [
+      issue("freeze", "do NOT merge into prerelease/v3.8.54 or release/v3.8.53"),
+    ]),
+    false
+  );
   assert.equal(isBaseFrozen(BASE, [issue("Release freeze: release/v3.8.55", null)]), false);
   // "." in the base is literal, not a regex wildcard
   assert.equal(isBaseFrozen(BASE, [issue("Release freeze: release/v3x8x54")]), false);
   assert.equal(isBaseFrozen(BASE, []), false);
+});
+
+// Literal texts of the real freeze issues (#17170, #19190, #11439) opened by /generate-release.
+const ISSUE_17170 = {
+  number: 17170,
+  title: "🔒 release-freeze: v3.8.52 in progress",
+  body:
+    "While this issue is open, do NOT merge campaign PRs into release/v3.8.52 (Hard Rule #21). " +
+    "/generate-release closes it after the squash-merge to main. Development continues on " +
+    "release/v3.8.53 as soon as 0a.0b cuts it (announced in a comment below).",
+};
+const ISSUE_19190 = {
+  number: 19190,
+  title: "🔒 release-freeze: v3.8.53 in progress",
+  body:
+    "While this issue is open, do NOT merge campaign PRs into release/v3.8.53 (Hard Rule #21). " +
+    "/generate-release closes it after the squash-merge to main.",
+};
+const ISSUE_11439 = {
+  number: 11439,
+  title: "🔒 release-freeze: v3.8.50 in progress",
+  body:
+    "While this issue is open, do NOT merge campaign PRs into `release/v3.8.50` (Hard Rule #21)." +
+    "\n\nDevelopment continues on the next cycle branch (`release/v3.8.51`), already cut and " +
+    "live — retarget PRs there.",
+};
+
+test("real freeze issues freeze the named version only, never the branch development moves to", () => {
+  assert.deepEqual(frozenBranches(ISSUE_17170), ["release/v3.8.52"]);
+  assert.equal(isBaseFrozen("release/v3.8.52", [ISSUE_17170]), true);
+  assert.equal(isBaseFrozen("release/v3.8.53", [ISSUE_17170]), false);
+  assert.equal(isBaseFrozen("release/v3.8.53", [ISSUE_19190]), true);
+  assert.equal(isBaseFrozen("release/v3.8.54", [ISSUE_19190]), false);
+  assert.equal(isBaseFrozen("release/v3.8.51", [ISSUE_11439]), false);
+  assert.equal(isBaseFrozen("release/v3.8.50", [ISSUE_11439]), true);
+  // the active branch during a freeze stays eligible
+  const pr = makePr({ baseRef: "release/v3.8.53" });
+  const result = evaluateEligibility(pr, makeCtx({ freezeIssues: [ISSUE_17170] }));
+  assert.equal(result.eligible, true, JSON.stringify(result.reasons));
+  assert.deepEqual(result.actions, []);
+});
+
+test("the body is read only when the title names no branch or version", () => {
+  // title without a version: the "merge … into <branch>" sentence decides, not other mentions
+  const untitled = { ...ISSUE_17170, title: "🔒 release-freeze in progress" };
+  assert.deepEqual(frozenBranches(untitled), ["release/v3.8.52"]);
+  assert.equal(isBaseFrozen("release/v3.8.53", [untitled]), false);
+  // no "into" sentence: the FIRST branch mentioned, never every mention
+  const first = {
+    number: 1,
+    title: "freeze",
+    body: "release/v3.8.52 now; next is release/v3.8.53",
+  };
+  assert.deepEqual(frozenBranches(first), ["release/v3.8.52"]);
+  assert.equal(isBaseFrozen("release/v3.8.53", [first]), false);
+  // the title wins over the body
+  const titled = { number: 2, title: "freeze release/v3.8.54", body: "into release/v3.8.53" };
+  assert.deepEqual(frozenBranches(titled), ["release/v3.8.54"]);
+  // a version in the title that is longer than X.Y.Z is not that branch
+  assert.equal(isBaseFrozen(BASE, [{ number: 3, title: "freeze v3.8.540", body: "" }]), false);
+  assert.equal(isBaseFrozen(BASE, [{ number: 3, title: "freeze v3.8.54.", body: "" }]), true);
+});
+
+test("an open freeze issue that names no branch or version freezes every base (fail closed)", () => {
+  const vague = { number: 5, title: "🔒 release-freeze", body: "Release in progress." };
+  assert.deepEqual(frozenBranches(vague), []);
+  assert.equal(isBaseFrozen("release/v3.8.53", [vague]), true);
+  assert.equal(isBaseFrozen(BASE, [vague]), true);
+  assert.equal(isBaseFrozen("", [vague]), false);
 });
 
 test("frozen base: ineligible with a comment keyed by the sanitized base", () => {
@@ -351,7 +475,7 @@ test("protected surface without protected-approved: ineligible + comment once pe
   const result = evaluateEligibility(pr, makeCtx());
   assert.equal(result.protectedSurface, true);
   assert.deepEqual(codes(result), ["protected-approval-missing"]);
-  assert.match(result.reasons[0].detail, /docs\/AGENTS\.md/);
+  assert.match(result.reasons[0].detail, /1 file\(s\) matching `\*\*\/AGENTS\.md`/);
   assert.deepEqual(
     result.actions.map((a) => [a.type, a.key]),
     [["comment", `protected:${HEAD.slice(0, 12)}`]]
