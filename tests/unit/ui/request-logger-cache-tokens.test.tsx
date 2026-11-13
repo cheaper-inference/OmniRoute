@@ -49,7 +49,8 @@ vi.mock("@/store/emailPrivacyStore", () => ({
 }));
 
 const RequestLoggerV2 = (await import("@/shared/components/RequestLoggerV2")).default;
-const RequestLoggerDetail = (await import("@/shared/components/RequestLoggerDetail")).default;
+const RequestLoggerDetail = (await import("@/shared/components/RequestLoggerDetail"))
+  .RequestLoggerDetailPanel;
 
 let container: HTMLElement;
 let root: Root;

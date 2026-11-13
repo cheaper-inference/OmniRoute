@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "शिल्लक कोटा 5h आणि साप्ताहिक रीसेट करा, नंतर समान स्कोअर राउंड-रॉबिन",
     "quotaWeighted": "कोटा-भारित",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "मुदत-समाप्ती-प्रथम",
+    "expiryFirstDesc": "ज्या खात्याचा कोटा अन्यथा न वापरता संपला असता ते खाते आधी वापरते: सर्वाधिक शिल्लक आणि सर्वात जवळचा रीसेट असलेले खाते आधी जाते.",
     "strictRandom": "काटेकोर यादृच्छिक",
     "strictRandomDesc": "शफल डेक — पुन्हा शफल करण्यापूर्वी प्रत्येक मॉडेल एकदा वापरतो",
     "fusion": "फ्युजन",
@@ -4033,6 +4035,11 @@
         "when": "तुम्ही कोटा टेलीमेट्री आणि भिन्न रीसेट विंडोसह एकाधिक खात्यांमधून मार्ग काढता.",
         "avoid": "बहुतेक खात्यांसाठी कोटा टेलीमेट्री अनुपलब्ध आहे.",
         "example": "नंतर 80% खाते रीसेट करण्यापेक्षा उद्या 60% साप्ताहिक खाते रीसेट करण्यास प्राधान्य द्या."
+      },
+      "expiry-first": {
+        "when": "ज्या खात्यांचे कोटा वेगवेगळ्या वेळापत्रकांनुसार रीसेट होतात अशा खात्यांमधून तुम्ही रूट करता आणि अन्यथा न वापरता संपणारा कोटा वापरू इच्छिता.",
+        "avoid": "बहुतेक खात्यांसाठी कोटा टेलीमेट्री उपलब्ध नाही, किंवा तुम्हाला रीसेटच्या वेळेकडे दुर्लक्ष करणारा स्थिर क्रम हवा आहे.",
+        "example": "9 तासांत रीसेट होणाऱ्या 48% शिल्लक खात्याऐवजी 39 मिनिटांत रीसेट होणाऱ्या 80% शिल्लक खात्याला प्राधान्य द्या — मुदत संपत आलेला कोटा वाया जाण्यापूर्वी वापरला जातो."
       },
       "strict-random": {
         "when": "पूर्णपणे समान वितरण हवे असल्यास वापरा — पुनरावृत्ती होण्यापूर्वी प्रत्येक मॉडेल एकदा वापरले जाते.",
@@ -4249,6 +4256,13 @@
         "tip1": "कोटा टेलीमेट्री असलेल्या प्रदात्यांसाठी स्पष्ट खाते चरण किंवा खाते-टॅग रूटिंग वापरा.",
         "tip2": "ट्यून सत्र वि साप्ताहिक वजन जेव्हा अल्पकालीन थकवा अधिक धोकादायक असतो.",
         "tip3": "टाय बँड लहान ठेवा जेणेकरून समतुल्य खाती अजूनही योग्यरित्या फिरतील."
+      },
+      "expiry-first": {
+        "title": "संपत असलेला कोटा प्रथम",
+        "description": "वापराच्या निकडीनुसार खात्यांना क्रम देते: रीसेटच्या मुदतीजवळ असलेला जास्त शिल्लक कोटा आधी जातो.",
+        "tip1": "प्रदाता कोटा टेलीमेट्री आवश्यक आहे; ती नसलेली खाती त्यांचा सूचीबद्ध प्राधान्यक्रम कायम ठेवतात.",
+        "tip2": "जवळपास समान स्कोअर टाय बँडमध्ये फिरतात, त्यामुळे समान खाती अजूनही लोड वाटून घेतात.",
+        "tip3": "प्रत्येक मॉडेल प्रत्यक्षात ज्या कोटा बकेटवर बिल होते तिथपर्यंतच क्रमवारी मर्यादित ठेवा."
       },
       "strict-random": {
         "title": "शफल डेक वितरण",
@@ -4481,7 +4495,7 @@
     "spend7d": "७ दिवसांचा खर्च",
     "avgCostPerRequest": "प्रति विनंती सरासरी खर्च",
     "noCostDataDescription": "खर्चाचा डेटा येथे दिसण्यासाठी विनंत्या करायला सुरुवात करा. सर्व प्रदात्यांसाठी खर्चाचा मागोवा स्वयंचलितपणे घेतला जातो.",
-    "spendToday": "आजचा खर्च",
+    "spendToday": "१ दिवसाचा खर्च",
     "overviewLoadFailed": "खर्चाचा आढावा लोड करण्यात अयशस्वी",
     "overviewDescription": "सर्व कनेक्ट केलेल्या प्रदात्यांवरील आणि मॉडेल्सवरील खर्चाचे रिअल-टाइम विश्लेषण",
     "providerShare": "प्रदात्याचा वाटा",
@@ -5679,6 +5693,7 @@
     "usageTracking": "वापराचा मागोवा",
     "securityDesc": "तुमचा डॅशबोर्ड सुरक्षित ठेवण्यासाठी पासवर्ड सेट करा किंवा आत्तासाठी वगळा.",
     "securityDescSkipWarning": "⚠️ पासवर्डशिवाय, सेटअपदरम्यान तुम्हाला प्रदाते जोडता येणार नाहीत. पासवर्ड सेट केल्यानंतर तुम्ही त्यांना नंतर डॅशबोर्डवरून जोडू शकता.",
+    "passwordAlreadySet": "डॅशबोर्ड पासवर्ड आधीच सेट केलेला आहे. तुम्ही तो नंतर सेटिंग्जमध्ये बदलू शकता.",
     "providerDesc": "तुमचा पहिला AI प्रदाता कनेक्ट करा. तुम्ही नंतर आणखी प्रदाते जोडू शकता.",
     "providerRequiresPassword": "प्रदाते जोडण्यासाठी तुम्हाला आधी पासवर्ड सेट करणे आवश्यक आहे. कृपया सुरक्षा चरणावर परत जाऊन पासवर्ड सेट करा किंवा नंतर डॅशबोर्डवरून प्रदाते जोडा.",
     "apiKeyRequired": "API की (आवश्यक)",
@@ -6051,6 +6066,8 @@
     "importFromModels": "/models मधून आयात करा",
     "modelsImported": "{count} मॉडेल आयात केली",
     "allModelsAlreadyImported": "सर्व मॉडेल आधीच आयात केली आहेत",
+    "providerPublishesNoModelList": "हा प्रदाता कोणतीही मॉडेल सूची प्रकाशित करत नाही — त्याची अंगभूत सूची अद्ययावत आहे",
+    "modelsNoLongerListed": "{count, plural, one {# मॉडेल आता प्रदात्याने सूचीबद्ध केलेले नाही} other {# मॉडेल आता प्रदात्याने सूचीबद्ध केलेली नाहीत}}",
     "noNewModelsToImport": "आयात करण्यासाठी कोणतीही नवीन मॉडेल नाहीत — सर्व मॉडेल आधीच रजिस्ट्रीमध्ये किंवा सानुकूल मॉडेलच्या यादीत आहेत",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "मॉडेल शोध अयशस्वी {time}",
@@ -7226,7 +7243,8 @@
       "kiro": "मोफत स्तर: 50 क्रेडिट्स/महिना (~25K–100K टोकन्स). ⚠️ Kiro ToS तृतीय-पक्ष प्रॉक्सी/हार्नेसच्या वापरावर बंदी घालते.",
       "codex": "सध्याच्या OAuth फ्लोसह OpenAI Codex कनेक्ट करा.",
       "qwen": "सध्याच्या OAuth फ्लोसह Qwen Code कनेक्ट करा.",
-      "github-models": "github.com/settings/tokens वर 'models: read' स्कोपसह GitHub PAT तयार करा"
+      "github-models": "github.com/settings/tokens वर 'models: read' स्कोपसह GitHub PAT तयार करा",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} प्रदाता-नेटिव्ह मॉडेल आयडी स्वीकारते. /मॉडेलमधून आयात करा किंवा राउटिंगसाठी सानुकूल आयडी जोडा.",
     "bedrockModelsDescription": "Amazon बेडरॉक मॉडेल्स AWS क्षेत्राद्वारे व्यापलेले आहेत. /मॉडेल्समधून आयात करा किंवा निवडलेल्या प्रदेशात सक्षम केलेले बेडरॉक मॉडेल आयडी जोडा.",
@@ -8093,6 +8111,8 @@
     "resetAwareDesc": "निरोगी उर्वरित कोटा आणि जवळच्या रीसेटसह खात्यांना प्राधान्य द्या",
     "quotaWeighted": "कोटा-भारित",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "मुदत-समाप्ती-प्रथम",
+    "expiryFirstDesc": "ज्या खात्याचा कोटा अन्यथा न वापरता संपला असता ते खाते आधी वापरते: सर्वाधिक शिल्लक आणि सर्वात जवळचा रीसेट असलेले खाते आधी जाते.",
     "strictRandom": "कठोर यादृच्छिक",
     "strictRandomDesc": "डेक शफल करा — पुन्हा शफल करण्यापूर्वी प्रत्येक खाते एकदा वापरले जाते",
     "stickyLimit": "स्टिकी मर्यादा",
@@ -8805,6 +8825,8 @@
     "retentionUsageHistory": "वापर इतिहास (दिवस)",
     "retentionMemoryEntries": "मेमरी एंट्री (दिवस)",
     "retentionXpAuditLog": "XP ऑडिट लॉग (दिवस)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "रिटेंशन सेटिंग्ज जतन करा",
     "storageAutoVacuumMode": "ऑटो व्हॅक्यूम मोड",
     "storageScheduledVacuum": "अनुसूचित व्हॅक्यूम",
@@ -10255,7 +10277,11 @@
     "mappingInvalidJson": "अवैध JSON.",
     "mappingMustBeObject": "मॅपिंग हे JSON ऑब्जेक्ट असणे आवश्यक आहे, ॲरे किंवा प्रिमिटिव्ह व्हॅल्यू नाही.",
     "mappingValueMustBeString": "“{key}” या की चे मूल्य स्ट्रिंग असणे आवश्यक आहे.",
-    "save": "सेव्ह करा"
+    "save": "सेव्ह करा",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -11982,6 +12008,7 @@
     "description": "प्रदात्याच्या प्रॉम्प्ट कॅशेची कार्यक्षमता आणि स्थानिक सिमॅंटिक प्रतिसादांचा पुनर्वापर यांचे निरीक्षण करा.",
     "refresh": "रीफ्रेश करा",
     "clearAll": "सिमॅंटिक कॅशे साफ करा",
+    "clearAllConfirm": "या कॅशेमधील सर्व नोंदी हटवल्या जातील. हे पूर्ववत करता येणार नाही.",
     "memoryEntries": "मेमरी नोंदी",
     "memoryEntriesSub": "इन-मेमरी LRU",
     "dbEntries": "DB नोंदी",
@@ -12866,6 +12893,8 @@
     },
     "attempts": "प्रयत्न",
     "detail": {
+      "tabOverview": "आढावा",
+      "tabPayloads": "पेलोड्स",
       "omittedHttpAttempts": "{count} HTTP प्रेषणे जतन केलेली नाहीत",
       "noHttpResponse": "कोणताही HTTP प्रतिसाद दिसून आलेला नाही",
       "transportError": "वाहतूक त्रुटी",

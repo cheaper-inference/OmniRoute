@@ -38,17 +38,17 @@ export interface UnifiedSourceResult {
 
 /**
  * Stored cost and priceable tokens of a raw usage_history row. A row carrying a
- * provider-reported exact cost (`provider_cost_usd` — credit-metered providers,
- * xAI) is billed by that cost; its tokens stay for display and are never priced
- * again. Rows without one are priced from their tokens as before.
+ * provider-reported cost or catalogue-priced snapshot uses that cost; tokens
+ * remain available for display, but are never priced again. Rows without a
+ * stored cost are priced from their tokens as before.
  */
 const RAW_COST_COLUMNS = `
-          COALESCE(provider_cost_usd, 0.0) as stored_cost,
-          CASE WHEN provider_cost_usd IS NULL THEN tokens_input ELSE 0 END as cost_tokens_input,
-          CASE WHEN provider_cost_usd IS NULL THEN tokens_output ELSE 0 END as cost_tokens_output,
-          CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_read ELSE 0 END as cost_tokens_cache_read,
-          CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_creation ELSE 0 END as cost_tokens_cache_creation,
-          CASE WHEN provider_cost_usd IS NULL THEN tokens_reasoning ELSE 0 END as cost_tokens_reasoning`;
+          COALESCE(provider_cost_usd, calculated_cost_usd, 0.0) as stored_cost,
+          CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_input ELSE 0 END as cost_tokens_input,
+          CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_output ELSE 0 END as cost_tokens_output,
+          CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_read ELSE 0 END as cost_tokens_cache_read,
+          CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_creation ELSE 0 END as cost_tokens_cache_creation,
+          CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_reasoning ELSE 0 END as cost_tokens_reasoning`;
 
 /**
  * The same columns for a daily_usage_summary row. Its `total_cost` is already

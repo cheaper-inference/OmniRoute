@@ -830,7 +830,7 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
             <div role="status" className="flex items-center gap-3 mb-5">
               <Spinner decorative size="md" className="text-primary" />
               <div>
-                <h3 className="text-lg font-bold">
+                <h3 className="text-lg font-semibold">
                   {updatePhase === "done"
                     ? t("updateCompleteTitle")
                     : updatePhase === "failed"

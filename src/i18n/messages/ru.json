@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "Балансирует оставшуюся квоту с 5-часовым и еженедельным сбросом, затем выполняет циклический анализ одинаковых результатов.",
     "quotaWeighted": "С учётом квоты",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Сначала истекающие",
+    "expiryFirstDesc": "Сначала расходует аккаунт, чья квота иначе сгорела бы неиспользованной: первым идёт аккаунт с наибольшим остатком и ближайшим сбросом.",
     "strictRandom": "Строгий случайный",
     "strictRandomDesc": "Перемешивание колоды - каждая модель используется по одному разу перед новым перемешиванием",
     "fusion": "Слияние",
@@ -4033,6 +4035,11 @@
         "when": "Вы осуществляете маршрутизацию между несколькими учетными записями с помощью телеметрии квот и различных окон сброса.",
         "avoid": "Телеметрия квот недоступна для большинства учетных записей.",
         "example": "Предпочитайте 60%-ный еженедельный сброс учетной записи завтра, чем 80%-ный сброс учетной записи позже."
+      },
+      "expiry-first": {
+        "when": "Вы маршрутизируете запросы между аккаунтами, квоты которых сбрасываются по разным графикам, и хотите израсходовать квоту, которая иначе сгорела бы неиспользованной.",
+        "avoid": "Для большинства аккаунтов нет телеметрии квот, или вам нужен стабильный порядок, не зависящий от времени сброса.",
+        "example": "Предпочтите аккаунт с остатком 80% и сбросом через 39 минут аккаунту с остатком 48% и сбросом через 9 часов — квота, срок которой скоро истекает, расходуется до того, как пропадёт."
       },
       "strict-random": {
         "when": "Используйте, когда нужен идеально ровный spread - каждая модель используется один раз перед повтором.",
@@ -4249,6 +4256,13 @@
         "tip1": "Используйте явные шаги учетной записи или маршрутизацию тегов учетной записи для поставщиков с телеметрией квот.",
         "tip2": "Сеанс настройки по сравнению с еженедельными весами, когда кратковременное утомление более рискованно.",
         "tip3": "Держите галстук небольшим, чтобы эквивалентные счета по-прежнему равномерно менялись."
+      },
+      "expiry-first": {
+        "title": "Сначала истекающая квота",
+        "description": "Ранжирует аккаунты по срочности использования: большая оставшаяся квота, близкая к сроку сброса, идёт первой.",
+        "tip1": "Требуется телеметрия квот поставщика; аккаунты без неё сохраняют указанный порядок приоритета.",
+        "tip2": "Почти равные оценки чередуются в пределах диапазона равенства, поэтому аналогичные аккаунты по-прежнему делят нагрузку.",
+        "tip3": "Ограничьте ранжирование тем пулом квоты, по которому фактически тарифицируется каждая модель."
       },
       "strict-random": {
         "title": "Распределение по перемешиванию",
@@ -4481,7 +4495,7 @@
     "spend7d": "Spend7D",
     "avgCostPerRequest": "Avg Cost Per Request",
     "noCostDataDescription": "No Cost Data Description",
-    "spendToday": "Расходы сегодня",
+    "spendToday": "Расходы за 1 день",
     "overviewLoadFailed": "Overview Load Failed",
     "overviewDescription": "Overview Description",
     "providerShare": "Доля провайдера",
@@ -5679,6 +5693,7 @@
     "usageTracking": "Отслеживание использования",
     "securityDesc": "Установите пароль для защиты вашей панели управления или пропустите этот шаг.",
     "securityDescSkipWarning": "⚠️ Без пароля вы не сможете добавлять провайдеров во время настройки. Их можно добавить позже на панели управления после установки пароля.",
+    "passwordAlreadySet": "Пароль панели управления уже задан. Его можно изменить позже в настройках.",
     "providerDesc": "Подключите своего первого поставщика искусственного интеллекта. Вы можете добавить больше позже.",
     "providerRequiresPassword": "Чтобы добавлять провайдеров, сначала необходимо установить пароль. Вернитесь к этапу настройки безопасности и установите пароль либо добавьте провайдеров позже на панели управления.",
     "apiKeyRequired": "Ключ API (обязательно)",
@@ -6051,6 +6066,8 @@
     "importFromModels": "Импорт из /модели",
     "modelsImported": "{count} моделей импортировано",
     "allModelsAlreadyImported": "Все модели уже импортированы",
+    "providerPublishesNoModelList": "Этот поставщик не публикует список моделей — его встроенный каталог актуален",
+    "modelsNoLongerListed": "{count, plural, one {# модель больше не указана} few {# модели больше не указаны} many {# моделей больше не указаны} other {# модели больше не указаны}} поставщиком",
     "noNewModelsToImport": "Нет новых моделей для импорта — все модели уже есть в реестре или списке пользовательских моделей",
     "localCatalogFallbackStatus": "Не удалось получить список моделей провайдера — показан встроенный каталог",
     "discoveryDegradedStatus": "Не удалось обнаружить модель {time}",
@@ -7226,7 +7243,8 @@
       "kiro": "Бесплатный тариф: 50 кредитов/месяц (~25K–100K токенов). ⚠️ Условия использования Kiro запрещают использование сторонних прокси/оболочек.",
       "codex": "Подключите OpenAI Codex с помощью существующего процесса OAuth.",
       "qwen": "Подключите Qwen Code с помощью существующего процесса OAuth.",
-      "github-models": "Создайте GitHub PAT с областью доступа 'models: read' на github.com/settings/tokens"
+      "github-models": "Создайте GitHub PAT с областью доступа 'models: read' на github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} принимает собственные идентификаторы моделей поставщика. Импортируйте из /models или добавляйте собственные идентификаторы для маршрутизации.",
     "bedrockModelsDescription": "Модели Amazon Bedrock охватываются регионом AWS. Импортируйте из /models или добавьте идентификаторы моделей Bedrock, включенные в выбранном регионе.",
@@ -8093,6 +8111,8 @@
     "resetAwareDesc": "Предпочитайте учетные записи со здоровой оставшейся квотой и более близким к сбросу.",
     "quotaWeighted": "С учётом квоты",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Сначала истекающие",
+    "expiryFirstDesc": "Сначала расходует аккаунт, чья квота иначе сгорела бы неиспользованной: первым идёт аккаунт с наибольшим остатком и ближайшим сбросом.",
     "strictRandom": "Строгий случайный",
     "strictRandomDesc": "Перемешивание колоды — каждый аккаунт используется один раз перед повторным перемешиванием",
     "stickyLimit": "Липкий лимит",
@@ -8805,6 +8825,8 @@
     "retentionUsageHistory": "История использования (дни)",
     "retentionMemoryEntries": "Записи в памяти (дни)",
     "retentionXpAuditLog": "Журнал аудита XP (дни)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Сохранить настройки хранения",
     "storageAutoVacuumMode": "Автоматический режим вакуума",
     "storageScheduledVacuum": "Запланированный вакуум",
@@ -10255,7 +10277,11 @@
     "mappingInvalidJson": "Некорректный JSON.",
     "mappingMustBeObject": "Сопоставление должно быть JSON-объектом, а не массивом или примитивным значением.",
     "mappingValueMustBeString": "Значение для ключа “{key}” должно быть строкой.",
-    "save": "Сохранить"
+    "save": "Сохранить",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -11982,6 +12008,7 @@
     "description": "Отслеживайте и управляйте семантическим кэшем ответов, скоростью попаданий и экономией токенов.",
     "refresh": "Обновить",
     "clearAll": "Очистить всё",
+    "clearAllConfirm": "Все записи в этом кэше будут удалены. Это действие нельзя отменить.",
     "memoryEntries": "Записи в памяти",
     "memoryEntriesSub": "LRU в памяти",
     "dbEntries": "Записи БД",
@@ -12866,6 +12893,8 @@
     },
     "attempts": "попытки",
     "detail": {
+      "tabOverview": "Обзор",
+      "tabPayloads": "Данные запросов",
       "omittedHttpAttempts": "{count} отправок HTTP не сохранено",
       "noHttpResponse": "Ответ HTTP не наблюдался",
       "transportError": "Ошибка транспорта",

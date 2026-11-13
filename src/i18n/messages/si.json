@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "5h සහ සතිපතා යළි සැකසීම්වලට සාපේක්ෂව ඉතිරි කෝටාව සමතුලිත කර, ඉන්පසු සමාන ලකුණු අතර වටමාරු ක්රමයට තෝරයි",
     "quotaWeighted": "කෝටා-බරිත",
     "quotaWeightedDesc": "කෝටාව අවසන් වූ ගිණුම් මඟ හැර, ඉතිරි ගිණුම් අතරින් ඉතිරි කෝටාව ක්රියාත්මක ඉල්ලීම් භාරයෙන් බෙදූ අනුපාතයට අනුව එකක් තෝරන්න. පවතින සංවාද අදාළ ගිණුමටම බැඳී පවතී.",
+    "expiryFirst": "කල් ඉකුත්වන දේ පළමුව",
+    "expiryFirstDesc": "නැතහොත් භාවිත නොකර කල් ඉකුත් වන කෝටාවක් ඇති ගිණුම පළමුව වැය කරයි: වැඩිම ඉතිරිය සහ ආසන්නතම යළි සැකසීම ඇති ගිණුම පළමුව යයි.",
     "strictRandom": "දැඩි අහඹු තේරීම",
     "strictRandomDesc": "කාඩ් කුට්ටම කලවම් කිරීම — නැවත කලවම් කිරීමට පෙර සෑම ආකෘතියක්ම එක් වරක් භාවිත කරයි",
     "fusion": "සංකලනය",
@@ -4033,6 +4035,11 @@
         "when": "කෝටා දුරමාන දත්ත සහ විවිධ යළි පිහිටුවීමේ කාල කවුළු සහිත ගිණුම් කිහිපයක් හරහා ඔබ මාර්ගගත කරයි.",
         "avoid": "බොහෝ ගිණුම් සඳහා කෝටා දුරමාන දත්ත නොමැත.",
         "example": "පසුව යළි පිහිටුවන 80%ක ගිණුමකට වඩා හෙට යළි පිහිටුවන 60%ක සතිපතා ගිණුමට ප්රමුඛත්වය දෙන්න."
+      },
+      "expiry-first": {
+        "when": "විවිධ කාලසටහන් අනුව කෝටා යළි සැකසෙන ගිණුම් හරහා ඔබ මාර්ගගත කරන අතර, නැතහොත් භාවිත නොකර කල් ඉකුත් වන කෝටාව වැය කිරීමට අවශ්‍යය.",
+        "avoid": "බොහෝ ගිණුම් සඳහා කෝටා දුරමාන දත්ත නොමැත, නැතහොත් යළි සැකසීමේ වේලාව නොසලකා හරින ස්ථාවර අනුපිළිවෙළක් ඔබට අවශ්‍යය.",
+        "example": "පැය 9කින් යළි සැකසෙන 48%ක් ඉතිරි ගිණුමකට වඩා මිනිත්තු 39කින් යළි සැකසෙන 80%ක් ඉතිරි ගිණුමට ප්‍රමුඛත්වය දෙන්න — කල් ඉකුත් වීමට ආසන්න කෝටාව නාස්ති වීමට පෙර වැය වේ."
       },
       "strict-random": {
         "when": "පරිපූර්ණ ලෙස ඒකාකාර බෙදාහැරීමක් අවශ්ය විට භාවිත කරන්න — නැවත භාවිත කිරීමට පෙර සෑම මාදිලියක්ම එක් වරක් භාවිත වේ.",
@@ -4249,6 +4256,13 @@
         "tip1": "කෝටා ටෙලිමෙට්රි දත්ත සහිත සැපයුම්කරුවන් සඳහා පැහැදිලි ගිණුම් පියවර හෝ ගිණුම්-ටැග් මාර්ගගත කිරීම භාවිත කරන්න.",
         "tip2": "කෙටි කාලීන ක්ෂය වීම වඩාත් අවදානම් නම් සැසි බර සහ සතිපතා බර සුසර කරන්න.",
         "tip3": "සමාන ගිණුම් තවමත් සාධාරණව මාරු වන පරිදි සමානතා පරාසය කුඩාව තබන්න."
+      },
+      "expiry-first": {
+        "title": "කල් ඉකුත්වන කෝටාව පළමුව",
+        "description": "භාවිත පීඩනය අනුව ගිණුම් ශ්‍රේණිගත කරයි: යළි සැකසීමේ නියමිත කාලයට ආසන්න ඉහළ ඉතිරි කෝටාව පළමුව යයි.",
+        "tip1": "සැපයුම්කරුගේ කෝටා දුරමාන දත්ත අවශ්‍යය; ඒවා නොමැති ගිණුම් ලැයිස්තුගත ප්‍රමුඛතා අනුපිළිවෙළ රඳවා ගනී.",
+        "tip2": "බොහෝ දුරට සමාන ලකුණු සමානතා පරාසය තුළ මාරු වන බැවින් සමාන ගිණුම් තවමත් බර බෙදා ගනී.",
+        "tip3": "එක් එක් මාදිලිය සැබවින්ම බිල්පත් කරන කෝටා බාල්දියට ශ්‍රේණිගත කිරීම සීමා කරන්න."
       },
       "strict-random": {
         "title": "කාඩ් කට්ටලය කලවම් කර බෙදාහැරීම",
@@ -4481,7 +4495,7 @@
     "spend7d": "දින 7ක වියදම",
     "avgCostPerRequest": "ඉල්ලීමකට සාමාන්ය පිරිවැය",
     "noCostDataDescription": "පිරිවැය දත්ත මෙහි පෙන්වීමට ඉල්ලීම් සිදු කිරීම අරඹන්න. සියලුම සපයන්නන් සඳහා පිරිවැය ස්වයංක්රීයව නිරීක්ෂණය කෙරේ.",
-    "spendToday": "අද වියදම",
+    "spendToday": "දින 1ක වියදම",
     "overviewLoadFailed": "පිරිවැය දළ විශ්ලේෂණය පූරණය කිරීමට අසමත් විය",
     "overviewDescription": "සම්බන්ධිත සියලුම සපයන්නන් සහ මාදිලි හරහා තත්ය කාලීන වියදම් විශ්ලේෂණය",
     "providerShare": "සපයන්නාගේ කොටස",
@@ -5679,6 +5693,7 @@
     "usageTracking": "භාවිත නිරීක්ෂණය",
     "securityDesc": "ඔබේ උපකරණ පුවරුව ආරක්ෂා කිරීමට මුරපදයක් සකසන්න, නැතහොත් දැනට මෙය මඟ හරින්න.",
     "securityDescSkipWarning": "⚠️ මුරපදයක් නොමැතිව, සැකසුම අතරතුර සැපයුම්කරුවන් එක් කිරීමට ඔබට නොහැකි වනු ඇත. මුරපදයක් සැකසීමෙන් පසු ඒවා උපකරණ පුවරුවෙන් එක් කළ හැකිය.",
+    "passwordAlreadySet": "උපකරණ පුවරුවේ මුරපදය දැනටමත් සකසා ඇත. ඔබට එය පසුව සැකසීම් තුළ වෙනස් කළ හැක.",
     "providerDesc": "ඔබේ පළමු AI සැපයුම්කරු සම්බන්ධ කරන්න. ඔබට පසුව තවත් සැපයුම්කරුවන් එක් කළ හැකිය.",
     "providerRequiresPassword": "සැපයුම්කරුවන් එක් කිරීමට පළමුව මුරපදයක් සැකසිය යුතුය. කරුණාකර ආරක්ෂක පියවර වෙත ආපසු ගොස් මුරපදයක් සකසන්න, නැතහොත් පසුව උපකරණ පුවරුවෙන් සැපයුම්කරුවන් එක් කරන්න.",
     "apiKeyRequired": "API යතුර (අවශ්යයි)",
@@ -6051,6 +6066,8 @@
     "importFromModels": "/models වෙතින් ආයාත කරන්න",
     "modelsImported": "මාදිලි {count}ක් ආයාත කරන ලදී",
     "allModelsAlreadyImported": "සියලුම මාදිලි දැනටමත් ආයාත කර ඇත",
+    "providerPublishesNoModelList": "මෙම සපයන්නා මාදිලි ලැයිස්තුවක් ප්‍රකාශයට පත් නොකරයි — එහි අන්තර්ගත නාමාවලිය යාවත්කාලීනයි",
+    "modelsNoLongerListed": "{count, plural, one {මාදිලිය # සපයන්නා විසින් තවදුරටත් ලැයිස්තුගත කර නොමැත} other {මාදිලි # සපයන්නා විසින් තවදුරටත් ලැයිස්තුගත කර නොමැත}}",
     "noNewModelsToImport": "ආයාත කිරීමට නව මාදිලි නොමැත — සියලුම මාදිලි දැනටමත් රෙජිස්ට්රියේ හෝ අභිරුචි මාදිලි ලැයිස්තුවේ ඇත",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "මොඩල් සොයා ගැනීම අසාර්ථක {time}",
@@ -7226,7 +7243,8 @@
       "kiro": "නොමිලේ ස්තරය: මසකට credits 50ක් (~25K–100K tokens). ⚠️ Kiro ToS මඟින් තෙවන පාර්ශ්ව proxy/harness භාවිතය තහනම් කරයි.",
       "codex": "පවතින OAuth ප්රවාහය සමඟ OpenAI Codex සම්බන්ධ කරන්න.",
       "qwen": "පවතින OAuth ප්රවාහය සමඟ Qwen Code සම්බන්ධ කරන්න.",
-      "github-models": "github.com/settings/tokens හි 'models: read' scope එක සහිත GitHub PAT එකක් සාදන්න"
+      "github-models": "github.com/settings/tokens හි 'models: read' scope එක සහිත GitHub PAT එකක් සාදන්න",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} සපයන්නා provider-native model IDs පිළිගනී. /models වෙතින් ආයාත කරන්න හෝ මාර්ගගත කිරීම සඳහා අභිරුචි IDs එක් කරන්න.",
     "bedrockModelsDescription": "Amazon Bedrock models AWS කලාපය අනුව සීමා වේ. /models වෙතින් ආයාත කරන්න හෝ තෝරාගත් කලාපයේ සක්රීය කර ඇති Bedrock model IDs එක් කරන්න.",
@@ -8093,6 +8111,8 @@
     "resetAwareDesc": "ප්රමාණවත් ඉතිරි කෝටාවක් සහ වඩා ආසන්න යළි සැකසීම් ඇති ගිණුම්වලට ප්රමුඛතාව දෙන්න",
     "quotaWeighted": "කෝටා-බරිත",
     "quotaWeightedDesc": "කෝටාව අවසන් වූ ගිණුම් මඟහැර, ඉතිරි ගිණුම් අතරින් ක්රියාත්මක වෙමින් පවතින ඉල්ලීම් භාරයෙන් බෙදූ ඉතිරි ප්රමාණයට සමානුපාතිකව තෝරන්න. පවතින සංවාද ඒවාට පවරා ඇති ගිණුම්වලටම බැඳී පවතී.",
+    "expiryFirst": "කල් ඉකුත්වන දේ පළමුව",
+    "expiryFirstDesc": "නැතහොත් භාවිත නොකර කල් ඉකුත් වන කෝටාවක් ඇති ගිණුම පළමුව වැය කරයි: වැඩිම ඉතිරිය සහ ආසන්නතම යළි සැකසීම ඇති ගිණුම පළමුව යයි.",
     "strictRandom": "දැඩි අහඹු",
     "strictRandomDesc": "කාඩ් කට්ටලයක් මෙන් කලවම් කරයි — නැවත කලවම් කිරීමට පෙර සෑම ගිණුමක්ම එක් වරක් භාවිත කරයි",
     "stickyLimit": "ස්ථාවර සීමාව",
@@ -8805,6 +8825,8 @@
     "retentionUsageHistory": "භාවිත ඉතිහාසය (දින)",
     "retentionMemoryEntries": "මතක ඇතුළත් කිරීම් (දින)",
     "retentionXpAuditLog": "XP විගණන ලොගය (දින)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "රඳවාගැනීමේ සැකසුම් සුරකින්න",
     "storageAutoVacuumMode": "ස්වයංක්රීය Vacuum ප්රකාරය",
     "storageScheduledVacuum": "කාලසටහන්ගත Vacuum",
@@ -10255,7 +10277,11 @@
     "mappingInvalidJson": "වලංගු නොවන JSON.",
     "mappingMustBeObject": "සිතියම්ගත කිරීම අරාවක් හෝ ප්රාථමික අගයක් නොව, JSON වස්තුවක් විය යුතුය.",
     "mappingValueMustBeString": "“{key}” යතුර සඳහා වන අගය පෙළක් විය යුතුය.",
-    "save": "සුරකින්න"
+    "save": "සුරකින්න",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman එන්ජිම",
@@ -11982,6 +12008,7 @@
     "description": "සැපයුම්කරුගේ ප්රේරක හැඹිලි කාර්යක්ෂමතාව සහ ස්ථානීය අර්ථානුකූල ප්රතිචාර නැවත භාවිතය නිරීක්ෂණය කරන්න.",
     "refresh": "යළි පූරණය කරන්න",
     "clearAll": "අර්ථානුකූල හැඹිලිය හිස් කරන්න",
+    "clearAllConfirm": "මෙම හැඹිලියේ සියලුම ඇතුළත් කිරීම් මකා දැමෙනු ඇත. මෙය අහෝසි කළ නොහැක.",
     "memoryEntries": "මතක ඇතුළත් කිරීම්",
     "memoryEntriesSub": "මතකය තුළ ඇති LRU",
     "dbEntries": "DB ඇතුළත් කිරීම්",
@@ -12866,6 +12893,8 @@
     },
     "attempts": "උත්සාහ",
     "detail": {
+      "tabOverview": "දළ විශ්ලේෂණය",
+      "tabPayloads": "දත්තභාර",
       "omittedHttpAttempts": "HTTP යැවීම් {count}ක් රඳවාගෙන නැත",
       "noHttpResponse": "HTTP ප්‍රතිචාරයක් නිරීක්ෂණය වී නැත",
       "transportError": "ප්‍රවාහන දෝෂය",

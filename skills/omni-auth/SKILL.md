@@ -176,7 +176,7 @@ See the full OpenAPI specification at `GET /api/openapi/spec` or `docs/openapi.y
 
 # OmniRoute
 
-Local/remote AI gateway exposing OpenAI-compatible REST. One key, 392 providers,
+Local/remote AI gateway exposing OpenAI-compatible REST. One key, 393 providers,
 auto-fallback, RTK token saver, MCP server, A2A agents.
 
 ## Setup
@@ -239,7 +239,7 @@ Use `data[].id` as `model` field in requests. Combos appear with `owned_by:"comb
 
 ## Differentiators vs OpenAI direct
 
-- **Auto-fallback** combos (19 strategies): never stop coding even if a provider rate-limits
+- **Auto-fallback** combos (21 strategies): never stop coding even if a provider rate-limits
 - **RTK token saver**: tool_result compressed via 47 specialized filters (git-diff, test-jest, terraform-plan, docker-logs…) — 20-40% token reduction
 - **Caveman mode**: optional terse system prompt injection (LITE/FULL/ULTRA) — 15-25% completion reduction
 - **MCP + A2A** servers built-in (this is the only AI router that exposes both protocols)

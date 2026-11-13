@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "Cân bằng hạn ngạch còn lại với các mốc đặt lại sau 5 giờ và hằng tuần, sau đó xoay vòng các mô hình có điểm số tương tự",
     "quotaWeighted": "Theo trọng số hạn ngạch",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Hết hạn trước",
+    "expiryFirstDesc": "Ưu tiên dùng tài khoản có hạn ngạch sẽ hết hạn mà không được sử dụng: tài khoản còn nhiều nhất và có thời điểm đặt lại gần nhất được dùng trước.",
     "strictRandom": "Ngẫu nhiên nghiêm ngặt",
     "strictRandomDesc": "Trộn bài — sử dụng mỗi mô hình một lần trước khi trộn lại",
     "fusion": "Hợp nhất",
@@ -4033,6 +4035,11 @@
         "when": "Bạn định tuyến giữa nhiều tài khoản bằng dữ liệu đo từ xa về hạn ngạch và các chu kỳ đặt lại khác nhau.",
         "avoid": "Dữ liệu đo từ xa về hạn ngạch không khả dụng cho hầu hết các tài khoản.",
         "example": "Ưu tiên tài khoản có hạn ngạch theo tuần đang ở mức 60% và sẽ được đặt lại vào ngày mai hơn tài khoản ở mức 80% sẽ được đặt lại muộn hơn."
+      },
+      "expiry-first": {
+        "when": "Bạn định tuyến giữa các tài khoản có hạn ngạch đặt lại theo lịch khác nhau và muốn dùng hết hạn ngạch mà nếu không sẽ hết hạn mà không được sử dụng.",
+        "avoid": "Hầu hết tài khoản không có dữ liệu đo từ xa về hạn ngạch, hoặc bạn cần một thứ tự ổn định không phụ thuộc vào thời điểm đặt lại.",
+        "example": "Ưu tiên tài khoản còn 80% sẽ đặt lại sau 39 phút hơn tài khoản còn 48% sẽ đặt lại sau 9 giờ — hạn ngạch sắp hết hạn được dùng trước khi bị lãng phí."
       },
       "strict-random": {
         "when": "Sử dụng khi bạn muốn phân bổ hoàn toàn đồng đều — mỗi mô hình được sử dụng một lần trước khi lặp lại.",
@@ -4249,6 +4256,13 @@
         "tip1": "Sử dụng các bước tài khoản rõ ràng hoặc định tuyến theo thẻ tài khoản cho các nhà cung cấp có dữ liệu theo dõi hạn ngạch.",
         "tip2": "Điều chỉnh trọng số theo phiên và theo tuần khi rủi ro cạn kiệt trong ngắn hạn cao hơn.",
         "tip3": "Giữ khoảng chênh lệch nhỏ để các tài khoản tương đương vẫn được xoay vòng công bằng."
+      },
+      "expiry-first": {
+        "title": "Hạn ngạch sắp hết hạn trước",
+        "description": "Xếp hạng tài khoản theo mức độ cần tận dụng: hạn ngạch còn lại nhiều và gần hạn đặt lại được dùng trước.",
+        "tip1": "Cần dữ liệu đo từ xa về hạn ngạch từ nhà cung cấp; tài khoản không có dữ liệu này giữ nguyên thứ tự ưu tiên đã liệt kê.",
+        "tip2": "Các điểm số gần bằng nhau được xoay vòng trong khoảng chênh lệch để các tài khoản tương tự vẫn chia sẻ tải.",
+        "tip3": "Giới hạn việc xếp hạng trong nhóm hạn ngạch mà mỗi mô hình thực sự được tính phí."
       },
       "strict-random": {
         "title": "Phân phối theo bộ bài xáo trộn",
@@ -4481,7 +4495,7 @@
     "spend7d": "Chi tiêu 7 ngày",
     "avgCostPerRequest": "Chi phí trung bình / yêu cầu",
     "noCostDataDescription": "Bắt đầu thực hiện các yêu cầu để xem dữ liệu chi phí xuất hiện tại đây. Chi phí được theo dõi tự động cho tất cả các nhà cung cấp.",
-    "spendToday": "Chi tiêu hôm nay",
+    "spendToday": "Chi tiêu trong 1 ngày",
     "overviewLoadFailed": "Không thể tải tổng quan chi phí",
     "overviewDescription": "Phân tích chi tiêu theo thời gian thực trên tất cả các nhà cung cấp và mô hình đã kết nối",
     "providerShare": "Tỷ trọng theo nhà cung cấp",
@@ -5679,6 +5693,7 @@
     "usageTracking": "Theo dõi mức sử dụng",
     "securityDesc": "Đặt mật khẩu để bảo vệ bảng điều khiển của bạn, hoặc bỏ qua lúc này.",
     "securityDescSkipWarning": "⚠️ Không có mật khẩu, bạn sẽ không thể thêm nhà cung cấp trong quá trình thiết lập. Bạn có thể thêm sau từ bảng điều khiển sau khi đặt mật khẩu.",
+    "passwordAlreadySet": "Mật khẩu bảng điều khiển đã được đặt. Bạn có thể đổi mật khẩu sau trong Cài đặt.",
     "providerDesc": "Kết nối nhà cung cấp AI đầu tiên của bạn. Bạn có thể thêm nhiều nhà cung cấp khác sau.",
     "providerRequiresPassword": "Bạn cần đặt mật khẩu trước khi thêm nhà cung cấp. Hãy quay lại bước bảo mật và đặt mật khẩu, hoặc thêm nhà cung cấp sau từ bảng điều khiển.",
     "apiKeyRequired": "Khóa API (bắt buộc)",
@@ -6051,6 +6066,8 @@
     "importFromModels": "Nhập từ /models",
     "modelsImported": "Đã nhập {count} mô hình",
     "allModelsAlreadyImported": "Tất cả mô hình đã được nhập",
+    "providerPublishesNoModelList": "Nhà cung cấp này không công bố danh sách mô hình — danh mục tích hợp của họ đã được cập nhật",
+    "modelsNoLongerListed": "{count, plural, one {# mô hình không còn được nhà cung cấp liệt kê} other {# mô hình không còn được nhà cung cấp liệt kê}}",
     "noNewModelsToImport": "Không có mô hình mới để nhập — tất cả mô hình đã có trong sổ đăng ký hoặc danh sách mô hình tùy chỉnh",
     "localCatalogFallbackStatus": "Không thể lấy danh sách mô hình của nhà cung cấp — đang hiển thị danh mục tích hợp sẵn",
     "discoveryDegradedStatus": "Khám phá mô hình thất bại {time}",
@@ -7226,7 +7243,8 @@
       "kiro": "Gói miễn phí: 50 tín dụng/tháng (khoảng 25–100 nghìn token). ⚠️ Điều khoản Kiro cấm sử dụng proxy/harness của bên thứ ba.",
       "codex": "Kết nối OpenAI Codex bằng luồng OAuth hiện có.",
       "qwen": "Kết nối Qwen Code bằng luồng OAuth hiện có.",
-      "github-models": "Tạo GitHub PAT với phạm vi 'models: read' tại github.com/settings/tokens"
+      "github-models": "Tạo GitHub PAT với phạm vi 'models: read' tại github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} chấp nhận ID mô hình gốc của nhà cung cấp. Nhập từ /models hoặc thêm ID tùy chỉnh để định tuyến.",
     "bedrockModelsDescription": "Các mô hình Amazon Bedrock được giới hạn theo vùng AWS. Nhập từ /models hoặc thêm ID mô hình Bedrock được bật trong vùng đã chọn.",
@@ -8093,6 +8111,8 @@
     "resetAwareDesc": "Ưu tiên các tài khoản có hạn ngạch còn lại ở mức tốt và thời điểm đặt lại sớm hơn",
     "quotaWeighted": "Theo trọng số hạn ngạch",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Hết hạn trước",
+    "expiryFirstDesc": "Ưu tiên dùng tài khoản có hạn ngạch sẽ hết hạn mà không được sử dụng: tài khoản còn nhiều nhất và có thời điểm đặt lại gần nhất được dùng trước.",
     "strictRandom": "Ngẫu nhiên nghiêm ngặt",
     "strictRandomDesc": "Trộn bộ bài — sử dụng mỗi tài khoản một lần trước khi trộn lại",
     "stickyLimit": "Giới hạn cố định",
@@ -8805,6 +8825,8 @@
     "retentionUsageHistory": "Lịch sử sử dụng (ngày)",
     "retentionMemoryEntries": "Mục nhập bộ nhớ (ngày)",
     "retentionXpAuditLog": "Nhật ký kiểm toán XP (ngày)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Lưu cài đặt thời hạn lưu giữ",
     "storageAutoVacuumMode": "Chế độ dọn dẹp tự động",
     "storageScheduledVacuum": "Dọn dẹp theo lịch",
@@ -10255,7 +10277,11 @@
     "mappingInvalidJson": "JSON không hợp lệ.",
     "mappingMustBeObject": "Ánh xạ phải là một đối tượng JSON, không được là mảng hoặc giá trị nguyên thủy.",
     "mappingValueMustBeString": "Giá trị của khóa “{key}” phải là chuỗi.",
-    "save": "Lưu"
+    "save": "Lưu",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Công cụ Caveman",
@@ -11982,6 +12008,7 @@
     "description": "Giám sát hiệu quả cache prompt của nhà cung cấp và việc tái sử dụng phản hồi ngữ nghĩa cục bộ.",
     "refresh": "Làm mới",
     "clearAll": "Xóa Cache ngữ nghĩa",
+    "clearAllConfirm": "Tất cả mục trong bộ nhớ đệm này sẽ bị xóa. Không thể hoàn tác thao tác này.",
     "memoryEntries": "Bản ghi bộ nhớ",
     "memoryEntriesSub": "LRU trong bộ nhớ",
     "dbEntries": "Bản ghi cơ sở dữ liệu",
@@ -12866,6 +12893,8 @@
     },
     "attempts": "lần thử",
     "detail": {
+      "tabOverview": "Tổng quan",
+      "tabPayloads": "Payload",
       "omittedHttpAttempts": "{count} lần gửi HTTP không được lưu giữ",
       "noHttpResponse": "Chưa quan sát thấy phản hồi HTTP",
       "transportError": "Lỗi truyền tải",
