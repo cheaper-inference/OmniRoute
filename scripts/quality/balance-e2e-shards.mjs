@@ -15,6 +15,13 @@
  *
  * Weights are RELATIVE (unitless). The seed uses LOC as a proxy; regenerate from real
  * durations by editing config/quality/e2e-timings.json (see its _meta note).
+ *
+ * `--sync [--dry-run]` (or `syncE2eTimings()`) refreshes the file's spec list: a spec without
+ * an entry gets its LOC (the seed's proxy), an entry whose spec is gone is dropped, every other
+ * value and the key order stay as they are. The timings file is a derived baseline written by
+ * the release refresh, not by feature PRs (plan 2026-11-13,
+ * config/quality/derived-paths/baselines.json); a spec without an entry already gets the median
+ * weight at run time.
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -31,9 +38,7 @@ const TIMINGS_PATH = path.join("config", "quality", "e2e-timings.json");
  */
 export function lptAssign(items, shardCount) {
   const shards = Array.from({ length: shardCount }, () => ({ files: [], total: 0 }));
-  const sorted = [...items].sort(
-    (a, b) => b.weight - a.weight || a.file.localeCompare(b.file)
-  );
+  const sorted = [...items].sort((a, b) => b.weight - a.weight || a.file.localeCompare(b.file));
   for (const item of sorted) {
     let target = shards[0];
     for (const s of shards) if (s.total < target.total) target = s;
@@ -62,7 +67,49 @@ export function weightItems(files, timings) {
   }));
 }
 
+function specLoc(file, e2eDir) {
+  return fs.readFileSync(path.join(e2eDir, file), "utf8").split("\n").length;
+}
+
+/**
+ * Brings config/quality/e2e-timings.json in line with the spec files on disk.
+ * @param {{ root?: string, dryRun?: boolean }} [opts]
+ * @returns {{ changed: boolean, added: string[], pruned: string[], file: string }}
+ */
+export function syncE2eTimings({ root = process.cwd(), dryRun = false } = {}) {
+  const file = path.join(root, TIMINGS_PATH);
+  const e2eDir = path.join(root, E2E_DIR);
+  const timings = JSON.parse(fs.readFileSync(file, "utf8"));
+  const specs = fs
+    .readdirSync(e2eDir)
+    .filter((f) => f.endsWith(".spec.ts"))
+    .sort();
+  const onDisk = new Set(specs);
+  const pruned = Object.keys(timings).filter((k) => !k.startsWith("_") && !onDisk.has(k));
+  const added = specs.filter((f) => !(f in timings));
+  const next = {};
+  for (const [key, value] of Object.entries(timings)) {
+    if (key.startsWith("_") || onDisk.has(key)) next[key] = value;
+  }
+  for (const spec of added) next[spec] = specLoc(spec, e2eDir);
+  const changed = added.length > 0 || pruned.length > 0;
+  if (changed && !dryRun) fs.writeFileSync(file, `${JSON.stringify(next, null, 2)}\n`);
+  return { changed, added, pruned, file: TIMINGS_PATH };
+}
+
+function runSync() {
+  const dryRun = process.argv.includes("--dry-run");
+  const { changed, added, pruned, file } = syncE2eTimings({ dryRun });
+  const verb = dryRun ? "would update" : "updated";
+  if (!changed) console.log(`[e2e-balance] ${file} already lists every spec`);
+  else
+    console.log(
+      `[e2e-balance] ${verb} ${file}: +${added.length} (${added.join(", ") || "—"}), -${pruned.length} (${pruned.join(", ") || "—"})`
+    );
+}
+
 function main() {
+  if (process.argv.includes("--sync")) return runSync();
   const shard = Number(process.argv[2]);
   const total = Number(process.argv[3]);
   if (!Number.isInteger(shard) || !Number.isInteger(total) || shard < 1 || shard > total) {
@@ -88,9 +135,7 @@ function main() {
     console.error("[e2e-balance] INTERNAL: shard union != discovered specs — falling back");
     process.exit(3);
   }
-  process.stdout.write(
-    shards[shard - 1].files.map((f) => path.join(E2E_DIR, f)).join("\n") + "\n"
-  );
+  process.stdout.write(shards[shard - 1].files.map((f) => path.join(E2E_DIR, f)).join("\n") + "\n");
 }
 
 const isDirectRun =
