@@ -1,7 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
-import { useId, useState } from "react";
+import { useState } from "react";
 import { Button, Input, Select, Textarea } from "@/shared/components";
 import type { ProviderMessageTranslator } from "../../providerPageHelpers";
 import {
@@ -104,21 +104,15 @@ type TemplateJsonEditorProps = {
 
 /** "Full JSON" template mode: the whole request template as JSON text. */
 function TemplateJsonEditor({ value, onChange, t }: TemplateJsonEditorProps) {
-  const templateTextId = useId();
   return (
-    <div className="flex flex-col gap-1">
-      <label htmlFor={templateTextId} className="text-sm font-medium">
-        {t("customJsonTemplateModeJson")}
-      </label>
-      <Textarea
-        id={templateTextId}
-        rows={8}
-        spellCheck={false}
-        className="font-mono text-xs"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      />
-    </div>
+    <Textarea
+      label={t("customJsonTemplateModeJson")}
+      rows={8}
+      spellCheck={false}
+      className="font-mono text-xs"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
   );
 }
 

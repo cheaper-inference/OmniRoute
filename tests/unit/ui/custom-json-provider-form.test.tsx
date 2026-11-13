@@ -291,7 +291,13 @@ describe("AddCompatibleProviderModal — Custom JSON API type", { timeout: 30_00
     const modal = openAddAsCustomJson(onCreated);
     setValue(inputByLabel(modal, "baseUrlLabel"), "https://api.example.com/v1/answer");
     chooseKitSelectValue(kitSelectByLabel("customJsonTemplateLabel", modal), "json");
-    setValue(templateTextarea(modal), '{"question":"{{prompt}}","tenant":"demo"}');
+    // The JSON editor is labelled through the kit Field of the Textarea adapter.
+    const area = templateTextarea(modal);
+    expect(area.id).not.toBe("");
+    expect(modal.querySelector(`label[for="${area.id}"]`)?.textContent).toContain(
+      "customJsonTemplateModeJson"
+    );
+    setValue(area, '{"question":"{{prompt}}","tenant":"demo"}');
     click(button(modal, "add"));
     await waitFor(() => onCreated.mock.calls.length > 0);
     expect(bodyOf(0).customJson.requestTemplate).toEqual({
