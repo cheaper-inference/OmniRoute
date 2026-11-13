@@ -824,24 +824,24 @@ export function createResponsesApiTransformStream(
               }
 
               // Regular text content
+              // Use a distinct output_index for the message when reasoning was
+              // emitted, so the message item does not collide with the
+              // reasoning item's output_index.
+              let msgIdx = state.reasoningId ? state.reasoningIndex + 1 : idx;
+              // #13693: a done item must never receive new deltas — re-home
+              // the text on a fresh message item instead.
+              if (state.msgItemDone[msgIdx]) {
+                msgIdx = nextFreeMessageIndex(msgIdx);
+              }
+
+              // Fix for #1211: Strip leading double-newlines / blank spaces from the very first
+              // text chunk. Trim before the guard below, and do not `continue` on a blank chunk:
+              // that would skip this chunk's tool_calls and finish_reason.
+              if (!state.msgTextBuf[msgIdx]) {
+                content = content.trimStart();
+              }
+
               if (content) {
-                // Use a distinct output_index for the message when reasoning was
-                // emitted, so the message item does not collide with the
-                // reasoning item's output_index.
-                let msgIdx = state.reasoningId ? state.reasoningIndex + 1 : idx;
-                // #13693: a done item must never receive new deltas — re-home
-                // the text on a fresh message item instead.
-                if (state.msgItemDone[msgIdx]) {
-                  msgIdx = nextFreeMessageIndex(msgIdx);
-                }
-
-                // Fix for #1211: Strip leading double-newlines / blank spaces from the very first text chunk
-                if (!state.msgTextBuf[msgIdx]) {
-                  content = content.trimStart();
-                }
-
-                if (!content) continue;
-
                 if (!state.msgItemAdded[msgIdx]) {
                   state.msgItemAdded[msgIdx] = true;
                   const msgId = `msg_${state.responseId}_${msgIdx}`;

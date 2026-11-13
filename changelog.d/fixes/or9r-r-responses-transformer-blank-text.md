@@ -1,0 +1,1 @@
+- **fix(responses):** the Chat to Responses stream converter no longer drops a tool call or a finish reason that arrives in the same chunk as a whitespace-only first text.
