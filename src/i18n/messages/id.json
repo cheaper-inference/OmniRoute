@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "Menyeimbangkan sisa kuota dengan reset 5 jam dan mingguan, lalu menghitung skor serupa secara round-robin",
     "quotaWeighted": "Berbobot Kuota",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Kedaluwarsa Dulu",
+    "expiryFirstDesc": "Menghabiskan akun yang kuotanya akan kedaluwarsa tanpa terpakai: sisa terbesar dengan reset terdekat didahulukan.",
     "strictRandom": "Acak Ketat",
     "strictRandomDesc": "Kocok dek — menggunakan setiap model satu kali sebelum mengocok ulang",
     "fusion": "Fusi",
@@ -4033,6 +4035,11 @@
         "when": "Anda merutekan beberapa akun dengan telemetri kuota dan jendela pengaturan ulang yang berbeda.",
         "avoid": "Telemetri kuota tidak tersedia untuk sebagian besar akun.",
         "example": "Lebih suka pengaturan ulang akun mingguan 60% besok daripada pengaturan ulang akun 80% nanti."
+      },
+      "expiry-first": {
+        "when": "Anda merutekan beberapa akun yang kuotanya direset pada jadwal berbeda dan ingin memakai kuota yang jika tidak akan kedaluwarsa tanpa terpakai.",
+        "avoid": "Telemetri kuota tidak tersedia untuk sebagian besar akun, atau Anda memerlukan urutan stabil yang mengabaikan waktu reset.",
+        "example": "Utamakan akun dengan sisa 80% yang direset dalam 39 menit dibanding akun dengan sisa 48% yang direset dalam 9 jam — kuota yang hampir kedaluwarsa terpakai sebelum terbuang."
       },
       "strict-random": {
         "when": "Gunakan saat Anda menginginkan distribusi yang sepenuhnya merata — setiap model digunakan satu kali sebelum diulang.",
@@ -4255,6 +4262,13 @@
         "tip1": "Gunakan langkah akun eksplisit atau perutean tag akun untuk penyedia dengan telemetri kuota.",
         "tip2": "Sesi penyesuaian vs beban mingguan ketika kelelahan jangka pendek lebih berisiko.",
         "tip3": "Jaga agar tali pengikatnya tetap kecil sehingga akun-akun yang setara masih dapat berputar dengan adil."
+      },
+      "expiry-first": {
+        "title": "Kuota kedaluwarsa dulu",
+        "description": "Mengurutkan akun berdasarkan tekanan pemanfaatan: sisa kuota tinggi yang mendekati tenggat reset didahulukan.",
+        "tip1": "Memerlukan telemetri kuota penyedia; akun tanpa telemetri tetap memakai urutan prioritas yang tercantum.",
+        "tip2": "Skor yang hampir seri bergiliran dalam rentang seri sehingga akun sejenis tetap berbagi beban.",
+        "tip3": "Batasi peringkat pada bucket kuota yang benar-benar menjadi dasar penagihan setiap model."
       },
       "strict-random": {
         "title": "Distribusi dengan pengacakan dek",
@@ -5685,6 +5699,7 @@
     "usageTracking": "Pelacakan Penggunaan",
     "securityDesc": "Tetapkan kata sandi untuk melindungi dasbor Anda, atau lewati saja sekarang.",
     "securityDescSkipWarning": "⚠️ Tanpa kata sandi, Anda tidak akan dapat menambahkan penyedia selama penyiapan. Anda dapat menambahkannya nanti dari dasbor setelah menetapkan kata sandi.",
+    "passwordAlreadySet": "Kata sandi dasbor sudah diatur. Anda dapat mengubahnya nanti di Pengaturan.",
     "providerDesc": "Hubungkan penyedia AI pertama Anda. Anda dapat menambahkan lebih banyak lagi nanti.",
     "providerRequiresPassword": "Anda harus menetapkan kata sandi terlebih dahulu untuk menambahkan penyedia. Silakan kembali ke langkah keamanan dan tetapkan kata sandi, atau tambahkan penyedia nanti dari dasbor.",
     "apiKeyRequired": "Kunci API (wajib)",
@@ -6744,6 +6759,7 @@
     "antigravityProjectIdPlaceholder": "id-proyek-gcp-saya",
     "grokWebCookiePlaceholder": "Placeholder Cookie Web Grok",
     "herokuBaseUrlHint": "Petunjuk URL Dasar Heroku",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Sembunyikan Email",
     "imageProviders": "Penyedia Gambar",
     "videoProviders": "Pembuatan Video",
@@ -7242,7 +7258,8 @@
       "kiro": "Tingkat gratis: 50 kredit/bulan (~25K–100K token). ⚠️ ToS Kiro melarang penggunaan proksi/harness pihak ketiga.",
       "codex": "Hubungkan OpenAI Codex dengan alur OAuth yang ada.",
       "qwen": "Hubungkan Qwen Code dengan alur OAuth yang ada.",
-      "github-models": "Buat GitHub PAT dengan cakupan 'models: read' di github.com/settings/tokens"
+      "github-models": "Buat GitHub PAT dengan cakupan 'models: read' di github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} menerima ID model asli penyedia. Impor dari /models atau tambahkan ID khusus untuk perutean.",
     "bedrockModelsDescription": "Model Amazon Bedrock dicakup berdasarkan wilayah AWS. Impor dari /models atau tambahkan ID model Batuan Dasar yang diaktifkan di wilayah yang dipilih.",
@@ -8100,6 +8117,8 @@
     "resetAwareDesc": "Lebih suka akun dengan sisa kuota yang sehat dan hampir disetel ulang",
     "quotaWeighted": "Berbobot Kuota",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Kedaluwarsa Dulu",
+    "expiryFirstDesc": "Menghabiskan akun yang kuotanya akan kedaluwarsa tanpa terpakai: sisa terbesar dengan reset terdekat didahulukan.",
     "strictRandom": "Acak Ketat",
     "strictRandomDesc": "Kocok tumpukan — menggunakan setiap akun satu kali sebelum mengocok ulang",
     "stickyLimit": "Batas Lengket",
@@ -10264,7 +10283,11 @@
     "mappingInvalidJson": "JSON tidak valid.",
     "mappingMustBeObject": "Pemetaan harus berupa objek JSON, bukan array atau nilai primitif.",
     "mappingValueMustBeString": "Nilai untuk kunci “{key}” harus berupa string.",
-    "save": "Simpan"
+    "save": "Simpan",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Mesin Caveman",

@@ -10,6 +10,7 @@ export const ROUTING_STRATEGY_VALUES = [
   "cost-optimized",
   "reset-aware",
   "reset-window",
+  "expiry-first",
   "headroom",
   "quota-weighted",
   "strict-random",
@@ -168,6 +169,13 @@ export const ROUTING_STRATEGIES: RoutingStrategyOption[] = [
     combosDescKey: "resetWindowDesc",
     settingsDescKey: "resetWindowDesc",
     icon: "schedule",
+  },
+  {
+    value: "expiry-first",
+    labelKey: "expiryFirst",
+    combosDescKey: "expiryFirstDesc",
+    settingsDescKey: "expiryFirstDesc",
+    icon: "hourglass_bottom",
   },
   {
     value: "headroom",

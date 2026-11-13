@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "Kalan kotayı 5 saatlik ve haftalık sıfırlamalara karşı dengeler, ardından benzer puanları bir kez eşleştirme",
     "quotaWeighted": "Kota Ağırlıklı",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Önce Süresi Dolan",
+    "expiryFirstDesc": "Kotası aksi takdirde kullanılmadan sona erecek hesabı önce harcar: en yüksek kalan miktara ve en yakın sıfırlamaya sahip hesap önce gelir.",
     "strictRandom": "Kesin Rastgele",
     "strictRandomDesc": "Karıştırma destesi: yeniden karıştırmadan önce her modeli bir kez kullanır.",
     "fusion": "Füzyon",
@@ -4033,6 +4035,11 @@
         "when": "Kota telemetrisi ve farklı sıfırlama pencereleri ile birden fazla hesaba yönlendirme yaparsınız.",
         "avoid": "Kota telemetrisi çoğu hesapta kullanılamaz.",
         "example": "Daha sonra yapılacak %80'lik hesap sıfırlama yerine, haftalık %60'lık hesabın yarın sıfırlanmasını tercih edin."
+      },
+      "expiry-first": {
+        "when": "Kotaları farklı zamanlamalarla sıfırlanan hesaplar arasında yönlendirme yaparsınız ve aksi takdirde kullanılmadan sona erecek kotayı harcamak istersiniz.",
+        "avoid": "Çoğu hesapta kota telemetrisi yoktur veya sıfırlama zamanlamasını yok sayan sabit bir sıraya ihtiyacınız vardır.",
+        "example": "9 saat içinde sıfırlanan, %48'i kalmış bir hesap yerine 39 dakika içinde sıfırlanan, %80'i kalmış bir hesabı tercih edin — süresi dolmak üzere olan kota boşa gitmeden harcanır."
       },
       "strict-random": {
         "when": "Tamamen eşit dağılım istediğinizde kullanın — tekrara geçmeden önce her model bir kez kullanılır.",
@@ -4255,6 +4262,13 @@
         "tip1": "Kota telemetrisi olan sağlayıcılar için açık hesap adımlarını veya hesap etiketi yönlendirmesini kullanın.",
         "tip2": "Kısa süreli tükenmenin daha riskli olduğu durumlarda seansı haftalık ağırlıklara göre ayarlayın.",
         "tip3": "Eşdeğer hesapların adil bir şekilde dönmeye devam etmesi için kravat bandını küçük tutun."
+      },
+      "expiry-first": {
+        "title": "Önce süresi dolan kota",
+        "description": "Hesapları kullanım aciliyetine göre sıralar: sıfırlama süresine yakın, kalan kotası yüksek hesap önce gelir.",
+        "tip1": "Sağlayıcı kota telemetrisi gerektirir; telemetrisi olmayan hesaplar listelenen öncelik sırasını korur.",
+        "tip2": "Neredeyse eşit puanlar eşitlik bandı içinde dönüşümlü kullanılır, böylece benzer hesaplar yükü paylaşmaya devam eder.",
+        "tip3": "Sıralamayı her modelin fiilen faturalandırıldığı kota kovasıyla sınırlayın."
       },
       "strict-random": {
         "title": "Deste karıştırmalı dağıtım",
@@ -5685,6 +5699,7 @@
     "usageTracking": "Kullanım Takibi",
     "securityDesc": "Kontrol panelini korumak için bir şifre belirle veya şimdilik atla.",
     "securityDescSkipWarning": "⚠️ Parola olmadan kurulum sırasında sağlayıcı ekleyemezsiniz. Parola belirledikten sonra sağlayıcıları kontrol panelinden ekleyebilirsiniz.",
+    "passwordAlreadySet": "Kontrol paneli parolası zaten ayarlanmış. Daha sonra Ayarlar'dan değiştirebilirsiniz.",
     "providerDesc": "İlk AI sağlayıcını bağla. Daha sonra daha fazlasını ekleyebilirsin.",
     "providerRequiresPassword": "Sağlayıcı eklemek için önce bir parola belirlemeniz gerekir. Lütfen güvenlik adımına geri dönüp bir parola belirleyin veya sağlayıcıları daha sonra kontrol panelinden ekleyin.",
     "apiKeyRequired": "API Anahtarı (gerekli)",
@@ -6744,6 +6759,7 @@
     "antigravityProjectIdPlaceholder": "benim-gcp-proje-kimliğim",
     "grokWebCookiePlaceholder": "Grok Web Çerezi Yer Tutucusu",
     "herokuBaseUrlHint": "Heroku Temel URL'siyle İlgili İpucu",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "E-postayı Gizle",
     "imageProviders": "Görsel Sağlayıcıları",
     "videoProviders": "Video Oluşturma",
@@ -7242,7 +7258,8 @@
       "kiro": "Ücretsiz katman: ayda 50 kredi (~25 bin–100 bin jeton). ⚠️ Kiro Kullanım Koşulları, üçüncü taraf proxy/çalıştırma düzeneği kullanımını yasaklar.",
       "codex": "Mevcut OAuth akışı ile OpenAI Codex'i bağlayın.",
       "qwen": "Mevcut OAuth akışı ile Qwen Code'u bağlayın.",
-      "github-models": "github.com/settings/tokens adresinde 'models: read' kapsamına sahip bir GitHub PAT oluşturun"
+      "github-models": "github.com/settings/tokens adresinde 'models: read' kapsamına sahip bir GitHub PAT oluşturun",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} sağlayıcıya özgü model kimliklerini kabul eder. /models'den içe aktarın veya yönlendirme için özel kimlikler ekleyin.",
     "bedrockModelsDescription": "Amazon Bedrock modelleri AWS bölgesi kapsamındadır. /models'den içe aktarın veya seçilen bölgede etkin olan Bedrock model kimliklerini ekleyin.",
@@ -8100,6 +8117,8 @@
     "resetAwareDesc": "Kalan kotası sağlıklı olan ve sıfırlamaya daha yakın olan hesapları tercih edin",
     "quotaWeighted": "Kota Ağırlıklı",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Önce Süresi Dolan",
+    "expiryFirstDesc": "Kotası aksi takdirde kullanılmadan sona erecek hesabı önce harcar: en yüksek kalan miktara ve en yakın sıfırlamaya sahip hesap önce gelir.",
     "strictRandom": "Katı Rastgele",
     "strictRandomDesc": "Karıştırma destesi — yeniden karıştırmadan önce her hesabı bir kez kullanır",
     "stickyLimit": "Yapışkan Sınır",
@@ -10264,7 +10283,11 @@
     "mappingInvalidJson": "Geçersiz JSON.",
     "mappingMustBeObject": "Eşleme bir dizi veya ilkel değer değil, bir JSON nesnesi olmalıdır.",
     "mappingValueMustBeString": "“{key}” anahtarının değeri bir dize olmalıdır.",
-    "save": "Kaydet"
+    "save": "Kaydet",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Motoru",
