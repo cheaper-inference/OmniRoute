@@ -71,6 +71,7 @@ import { resolveAlibabaProviderBaseUrl } from "@/shared/constants/alibabaProvide
 import { xiaomiAlternateUrl, xiaomiMimoChatUrl } from "./default/xiaomiTokenPlan.ts";
 import { usesCcWireImage } from "../services/ccWireImageBuiltins.ts";
 import { applyRegistryBodyRepairs } from "../utils/strictChatHistory.ts";
+import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
 import { withWorkbuddyHeaders, sanitizeWorkbuddyBody } from "../utils/workbuddyGateway.ts";
 import {
   attachMuseCodeToolNameMap,
@@ -1195,7 +1196,8 @@ export class DefaultExecutor extends BaseExecutor {
       result = await super.execute(input);
     } catch (err) {
       if (session) {
-        pool.reportCooldown(session);
+        // A client abort says nothing about the session: do not cool a healthy one down.
+        if (!isLocalStreamLifecycleError(err)) pool.reportCooldown(session);
         session.release();
       }
       throw err;
