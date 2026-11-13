@@ -9991,6 +9991,7 @@ paths:
     post:
       tags: [Agent Skills]
       summary: Trigger SKILL.md generator
+      x-always-protected: true
       description: |
         Runs the Agent Skills generator which writes `skills/{id}/SKILL.md` for
         all 42 catalog entries (or a subset via `onlyIds`). Preserves
@@ -14933,6 +14934,7 @@ paths:
       tags:
         - Skills
       summary: "POST skills › marketplace › install"
+      x-always-protected: true
       responses:
         "200":
           description: OK
@@ -14949,6 +14951,7 @@ paths:
       tags:
         - Skills
       summary: "POST skills › skillssh › install"
+      x-always-protected: true
       responses:
         "200":
           description: OK
