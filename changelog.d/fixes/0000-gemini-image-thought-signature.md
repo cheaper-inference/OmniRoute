@@ -1,0 +1,1 @@
+- **fix(sse):** keep Gemini image parts that carry a thought signature.
