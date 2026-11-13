@@ -272,11 +272,24 @@ function preserveRequired(obj: unknown): void {
   }
 }
 
+// The Gemini `role` field is optional (single-turn requests omit it). Same rule as
+// gemini-to-openai: model-only parts (functionCall, thought) mean assistant, anything else user.
+// shortcut: no fallback to the previous turn's role for role-less text; add it if clients send
+// role-less multi-turn text.
+function inferRolelessTurn(content): "user" | "assistant" {
+  const parts = Array.isArray(content.parts) ? content.parts : [];
+  return parts.some((p) => p && (p.functionCall || p.thought === true)) ? "assistant" : "user";
+}
+
 // Convert Antigravity content to OpenAI message
 // Handles: text, thought, thoughtSignature, functionCall, functionResponse, inlineData
 function convertContent(content, toolCallIds) {
   const role =
-    content.role === "model" ? "assistant" : content.role === "user" ? "user" : content.role;
+    content.role === "model"
+      ? "assistant"
+      : content.role === "user"
+        ? "user"
+        : content.role || inferRolelessTurn(content);
 
   if (!content.parts || !Array.isArray(content.parts)) {
     return null;

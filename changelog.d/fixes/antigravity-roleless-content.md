@@ -1,0 +1,1 @@
+- **fix(translator):** An Antigravity request whose `contents` entry has no `role` (the field is optional in single-turn requests) becomes a user message, or an assistant message when it only holds a function call or a thought, instead of a message with no role.
