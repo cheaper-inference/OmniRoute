@@ -413,6 +413,19 @@ export function RequestLoggerDetailPanel({
   const [unblocking, setUnblocking] = useState(false);
   const [cleared, setCleared] = useState(false);
   const [copiedAll, setCopiedAll] = useState(false);
+  const copyAllLifetime = useRef({
+    active: false,
+    timer: null as ReturnType<typeof setTimeout> | null,
+  });
+
+  useEffect(() => {
+    const lifetime = { active: true, timer: null as ReturnType<typeof setTimeout> | null };
+    copyAllLifetime.current = lifetime;
+    return () => {
+      lifetime.active = false;
+      if (lifetime.timer !== null) clearTimeout(lifetime.timer);
+    };
+  }, []);
 
   // #7920 gave this component formatErrorForDisplay for structured error objects, but the
   // #8213 combo/cooldown checks below went straight to the raw field and call
@@ -533,10 +546,15 @@ export function RequestLoggerDetailPanel({
       legacyRequestTitle: t("requestPayloadLegacy"),
     });
     if (!text) return;
+    const lifetime = copyAllLifetime.current;
     const success = await onCopy(text);
-    if (success !== false) {
+    if (success !== false && lifetime.active) {
       setCopiedAll(true);
-      setTimeout(() => setCopiedAll(false), 2000);
+      if (lifetime.timer !== null) clearTimeout(lifetime.timer);
+      lifetime.timer = setTimeout(() => {
+        lifetime.timer = null;
+        setCopiedAll(false);
+      }, 2000);
     }
   };
   const detailIssue =
