@@ -125,58 +125,55 @@ export type BufferedPlanningResult =
   | { kind: "plain"; visibleText: string }
   | { kind: "leak"; visibleText: string };
 
-export function consumePlanningLeak(text: string, isFinal = false): BufferedPlanningResult {
-  if (!isPlanningLeakPrefix(text)) {
-    return { kind: "plain", visibleText: text };
-  }
+/** Leading object never closed: at the final chunk a "thought" fragment is a leak, otherwise wait. */
+function classifyUnclosedObject(text: string, isFinal: boolean): BufferedPlanningResult {
+  if (!isFinal) return { kind: "incomplete" };
+  return text.trim().includes('"thought"')
+    ? { kind: "leak", visibleText: "" }
+    : { kind: "plain", visibleText: text };
+}
 
-  // If a top-level comma is already present, the root object has multiple
-  // properties (e.g. {"thought":"...","summary":"..."}), which is structured
-  // application output, not a leaked solitary planning artifact.
-  if (hasTopLevelComma(text)) {
+/** A root object whose only key is a string `thought` (a leaked planning artifact). */
+function isSolitaryThought(parsed: unknown): boolean {
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return false;
+  const record = parsed as Record<string, unknown>;
+  return typeof record.thought === "string" && Object.keys(record).length === 1;
+}
+
+/** Strip a solitary thought object only when visible text follows it. */
+function classifySolitaryThought(
+  text: string,
+  rest: string,
+  isFinal: boolean
+): BufferedPlanningResult {
+  if (rest.length > 0) return { kind: "leak", visibleText: rest };
+  if (!isFinal) return { kind: "incomplete" };
+  // At final chunk, if no visible text follows a solitary thought object,
+  // stripping it would yield empty content (0 chars) and cause empty-stream
+  // failure loops (#19805). Preserve it as plain text.
+  return { kind: "plain", visibleText: text };
+}
+
+export function consumePlanningLeak(text: string, isFinal = false): BufferedPlanningResult {
+  // A top-level comma means the root object has multiple properties
+  // (e.g. {"thought":"...","summary":"..."}), which is structured application
+  // output, not a leaked solitary planning artifact.
+  if (!isPlanningLeakPrefix(text) || hasTopLevelComma(text)) {
     return { kind: "plain", visibleText: text };
   }
 
   const leading = splitLeadingJsonObject(text);
+  if (!leading) return classifyUnclosedObject(text, isFinal);
 
-  if (!leading) {
-    if (isFinal) {
-      const trimmed = text.trim();
-      if (trimmed.includes('"thought"') && !hasTopLevelComma(text)) {
-        return { kind: "leak", visibleText: "" };
-      }
-      return { kind: "plain", visibleText: text };
-    }
-    return { kind: "incomplete" };
-  }
-
+  let parsed: unknown;
   try {
-    const parsed = JSON.parse(leading.jsonText);
-    if (
-      parsed &&
-      typeof parsed === "object" &&
-      !Array.isArray(parsed) &&
-      typeof (parsed as Record<string, unknown>).thought === "string"
-    ) {
-      const keys = Object.keys(parsed as Record<string, unknown>);
-      if (keys.length === 1) {
-        if (leading.rest.length > 0) {
-          return { kind: "leak", visibleText: leading.rest };
-        }
-        if (!isFinal) {
-          return { kind: "incomplete" };
-        }
-        // At final chunk, if no visible text follows a solitary thought object,
-        // stripping it would yield empty content (0 chars) and cause empty-stream
-        // failure loops (#19805). Preserve it as plain text.
-        return { kind: "plain", visibleText: text };
-      }
-    }
+    parsed = JSON.parse(leading.jsonText);
   } catch {
     return { kind: "plain", visibleText: text };
   }
-
-  return { kind: "plain", visibleText: text };
+  return isSolitaryThought(parsed)
+    ? classifySolitaryThought(text, leading.rest, isFinal)
+    : { kind: "plain", visibleText: text };
 }
 
 export class GeminiPlanningLeakFilter {
