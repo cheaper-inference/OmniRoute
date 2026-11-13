@@ -290,11 +290,10 @@ function applyOutputConfigFieldDrops(rule: StripRule, body: Record<string, unkno
 const MISTRAL_CHAT_DROP_FIELDS = ["user", "logit_bias", "store", "verbosity"] as const;
 
 // Mistral `service_tier` accepts only auto|standard_only (live 422 on "flex"). OpenAI
-// requests for the standard lane map to standard_only; priority/auto keep the capacity
-// choice with Mistral. Unknown values are dropped rather than guessed.
+// requests for the standard lane map to standard_only. `priority` has no Mistral equivalent
+// we can verify, so it is dropped (standard lane) rather than guessed; so are unknown values.
 const MISTRAL_SERVICE_TIER_MAP: Record<string, string> = {
   auto: "auto",
-  priority: "auto",
   default: "standard_only",
   flex: "standard_only",
   scale: "standard_only",
@@ -307,11 +306,17 @@ function renameIfAbsent(body: Record<string, unknown>, from: string, to: string)
   delete body[from];
 }
 
+// Spec ChatCompletionRequest: temperature is 0–1.5 (OpenAI allows up to 2).
+const MISTRAL_MAX_TEMPERATURE = 1.5;
+
 function applyMistralChatNormalization(body: Record<string, unknown>): void {
   if (!Array.isArray(body.messages)) return;
   renameIfAbsent(body, "seed", "random_seed");
   renameIfAbsent(body, "max_completion_tokens", "max_tokens");
   for (const key of MISTRAL_CHAT_DROP_FIELDS) delete body[key];
+  if (typeof body.temperature === "number" && body.temperature > MISTRAL_MAX_TEMPERATURE) {
+    body.temperature = MISTRAL_MAX_TEMPERATURE;
+  }
   if (body.service_tier !== undefined) {
     const tier = typeof body.service_tier === "string" ? body.service_tier.toLowerCase() : "";
     const mapped = MISTRAL_SERVICE_TIER_MAP[tier];
