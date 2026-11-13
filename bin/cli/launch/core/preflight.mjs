@@ -66,29 +66,35 @@ const COMPARATOR = /^(>=|<=|>|<|=)?\s*v?(\d+(?:\.\d+)*)$/;
 export function satisfiesRange(version, range) {
   if (typeof version !== "string" || version.trim() === "") return false;
   if (!/^v?\d+(?:\.\d+)*(?:[-+].*)?$/.test(version.trim())) return false;
-  const parts = String(range ?? "")
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean);
-  if (parts.length === 0) return false;
-  for (const part of parts) {
-    const match = COMPARATOR.exec(part);
-    if (!match) return false;
-    const op = match[1] ?? "=";
-    const cmp = compareVersions(version, match[2]);
-    const ok =
-      op === ">="
-        ? cmp >= 0
-        : op === ">"
-          ? cmp > 0
-          : op === "<="
-            ? cmp <= 0
-            : op === "<"
-              ? cmp < 0
-              : cmp === 0;
-    if (!ok) return false;
+  const text = String(range ?? "").trim();
+  if (text === "") return false;
+  // npm-style: alternatives separated by "||" (OR); each is a space-separated AND-set.
+  // An empty alternative (e.g. ">=1 ||") makes the whole range invalid.
+  for (const alternative of text.split("||")) {
+    const parts = alternative.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return false;
   }
-  return true;
+  return text.split("||").some((alternative) => {
+    const parts = alternative.trim().split(/\s+/).filter(Boolean);
+    for (const part of parts) {
+      const match = COMPARATOR.exec(part);
+      if (!match) return false;
+      const op = match[1] ?? "=";
+      const cmp = compareVersions(version, match[2]);
+      const ok =
+        op === ">="
+          ? cmp >= 0
+          : op === ">"
+            ? cmp > 0
+            : op === "<="
+              ? cmp <= 0
+              : op === "<"
+                ? cmp < 0
+                : cmp === 0;
+      if (!ok) return false;
+    }
+    return true;
+  });
 }
 
 function defaultExecFile(cmd, args) {
