@@ -718,6 +718,7 @@
       "tests/unit/model-not-found-must-not-poison-credential.test.ts",
       "tests/unit/cache-debug-wiring.test.ts",
       "tests/unit/cache-debug.test.ts",
+      "tests/unit/codex-zstd-request-body.test.ts",
       "tests/unit/codex-reasoning-replay-rejection.test.ts",
       "tests/unit/opencode-free-tier-combo-scoped-failure-14313.test.ts",
       "tests/unit/client-abort-propagates-upstream.test.ts",
