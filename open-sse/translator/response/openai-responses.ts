@@ -409,7 +409,7 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
     state.finishReason = choice.finish_reason; // read by sendCompleted() → finalizeResponsesTerminalStatus
     for (const i in state.msgItemAdded) closeMessage(state, emit, i);
     closeReasoning(state, emit);
-    for (const i in state.funcCallIds) closeToolCall(state, emit, i);
+    for (const i in state.funcNames) closeToolCall(state, emit, i);
     // #6906: usage already captured (same chunk or earlier) completes now; otherwise
     // defer for a trailing usage-only chunk, handled above and in flushEvents().
     if (state.responsesUsage) {
@@ -760,20 +760,17 @@ function repairDoubleEscapedTabs(state, tcIdx, rawArgs: string): string {
 function emitToolCall(state, emit, tc) {
   const tcIdx = tc.index ?? 0;
   const lifecycle = translatorToolCallLifecycle(state);
-  const outputIndex = allocateToolOutputIndex(state, tcIdx);
-  // Record every allocated tool-call output_index so a post-close text
-  // relocation (nextFreeMessageIndex) can never collide with it.
-  if (!state.funcAllocatedOutputIndexes) state.funcAllocatedOutputIndexes = {};
-  state.funcAllocatedOutputIndexes[outputIndex] = true;
   const newCallId = tc.id;
   const funcName = tc.function?.name;
 
   // T37: If we already have a tool call at this index but the ID changed,
   // we must close the current one and start a new one to prevent merging.
   if (state.funcCallIds[tcIdx] && newCallId && state.funcCallIds[tcIdx] !== newCallId) {
-    // Superseded call: close and emit output_item.done but do NOT record as final output
-    // since this call was replaced by a new one at the same index.
-    closeToolCall(state, emit, tcIdx, false);
+    // A new id at a reused upstream index is a second call, not an edit of the first:
+    // keep the first in the final output and give the new call its own output_index.
+    closeToolCall(state, emit, tcIdx);
+    delete state.funcOutputIndex?.[tcIdx];
+    delete state.toolCallLocalIndex?.[tcIdx];
     delete state.funcCallIds[tcIdx];
     delete state.funcNames[tcIdx];
     delete state.funcArgsBuf[tcIdx];
@@ -784,6 +781,12 @@ function emitToolCall(state, emit, tc) {
     delete state.funcArgsTabState?.[tcIdx];
     lifecycle.reset(tcIdx);
   }
+
+  const outputIndex = allocateToolOutputIndex(state, tcIdx);
+  // Record every allocated tool-call output_index so a post-close text
+  // relocation (nextFreeMessageIndex) can never collide with it.
+  if (!state.funcAllocatedOutputIndexes) state.funcAllocatedOutputIndexes = {};
+  state.funcAllocatedOutputIndexes[outputIndex] = true;
 
   // Empty or missing name deltas must not wipe a name already accumulated.
   // appendName keeps the previous spelling when the incoming delta is blank,
@@ -829,6 +832,9 @@ function finalToolCallArgs(state, idx): string {
 }
 
 function closeToolCall(state, emit, idx, recordAsCompleted = true) {
+  // Wait until close to generate a missing id: an upstream may send its real id late.
+  if (!state.funcCallIds[idx] && state.funcNames[idx])
+    state.funcCallIds[idx] = fallbackToolCallId(Number(idx));
   const callId = state.funcCallIds[idx];
   if (callId && !state.funcItemDone[idx]) {
     const normalizedIndex = announcedToolOutputIndex(state, idx);
@@ -913,7 +919,7 @@ function closeToolCall(state, emit, idx, recordAsCompleted = true) {
       // translators) so stream.ts's completion-log summary reports finish_reason
       // "tool_calls" and message.tool_calls instead of "stop" with no tool calls.
       if (state.toolCalls instanceof Map) {
-        state.toolCalls.set(idx, {
+        state.toolCalls.set(normalizedIndex, {
           id: callId,
           index: normalizedIndex,
           type: isCustomTool ? "custom_tool_call" : "function",
@@ -988,7 +994,7 @@ function flushEvents(state) {
 
   for (const i in state.msgItemAdded) closeMessage(state, emit, i);
   closeReasoning(state, emit);
-  for (const i in state.funcCallIds) closeToolCall(state, emit, i);
+  for (const i in state.funcNames) closeToolCall(state, emit, i);
   sendCompleted(state, emit);
 
   return events;
