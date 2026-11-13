@@ -3,6 +3,7 @@ import { RESPONSES_DEFERRED_COMPLETION_GRACE_MS } from "../config/constants.ts";
 import { appendToolCallArgumentDelta } from "../utils/toolCallArguments.ts";
 import { mergeCacheCreationFields } from "../utils/cacheWriteUsage.ts";
 import { ToolCallLifecycle } from "../translator/response/openai-responses/toolCallLifecycle.ts";
+import { stripEmptyOptionalToolArgs } from "../translator/response/openai-responses/pureHelpers.ts";
 import { shouldParseTextualReasoningTags } from "../handlers/responseSanitizer.ts";
 import { getReadableReasoningValue } from "../utils/reasoningFields.ts";
 import {
@@ -510,26 +511,18 @@ export function createResponsesApiTransformStream(
       const selection = lifecycle.get(idx)!;
       const isCustomTool = selection.custom;
 
-      // Fix #1674 & #1852: Final cleanup of empty string and empty array placeholders.
+      // Fix #1674 & #1852: drop empty placeholders only where the declared tool schema allows it.
+      // The helper keeps a required empty string or array, and removes nothing without a schema.
       // Custom-tool input is intentionally allowed to be an empty string.
       if (!isCustomTool) {
-        try {
-          const parsed = JSON.parse(args);
-          if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-            let modified = false;
-            for (const [k, v] of Object.entries(parsed)) {
-              if (v === "" || (Array.isArray(v) && v.length === 0)) {
-                delete parsed[k];
-                modified = true;
-              }
-            }
-            if (modified) {
-              args = JSON.stringify(parsed);
-              state.funcArgsBuf[idx] = args;
-            }
-          }
-        } catch (e) {
-          // Ignore malformed JSON
+        const cleaned = stripEmptyOptionalToolArgs(
+          args,
+          selection.name,
+          options.toolSchemas?.get(selection.name)
+        );
+        if (typeof cleaned === "string" && cleaned !== args) {
+          args = cleaned;
+          state.funcArgsBuf[idx] = args;
         }
       }
 
@@ -934,20 +927,7 @@ export function createResponsesApiTransformStream(
 
               if (tc.function?.arguments) {
                 const refCallId = state.funcCallIds[tcIdx] || newCallId;
-                let deltaStr = tc.function.arguments;
-
-                // Fix #1674 & #1852: Strip empty strings and empty arrays from streaming deltas
-                if (
-                  deltaStr.includes('""') ||
-                  deltaStr.includes("[]") ||
-                  deltaStr.includes("[ ]")
-                ) {
-                  deltaStr = deltaStr
-                    .replace(/,"[a-zA-Z0-9_]+":""/g, "")
-                    .replace(/"[a-zA-Z0-9_]+":"",/g, "")
-                    .replace(/,"[a-zA-Z0-9_]+":\s*\[\s*\]/g, "")
-                    .replace(/"[a-zA-Z0-9_]+":\s*\[\s*\],?/g, "");
-                }
+                const deltaStr = tc.function.arguments;
 
                 const existingArgs = state.funcArgsBuf[tcIdx] || "";
                 const nextArgs = appendToolCallArgumentDelta(existingArgs, deltaStr);
