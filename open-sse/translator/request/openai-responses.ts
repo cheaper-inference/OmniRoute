@@ -293,6 +293,14 @@ export function openaiResponsesToOpenAIRequest(
 
   const result: JsonRecord = { ...root };
 
+  // Chat Completions has no max_output_tokens. The main path converts it in
+  // sanitizeChatRequestBody, but the direct translateRequest callers (translator route, GLM
+  // executor, tool-loop follow-up) do not, and the next hop (for example Claude) read max_tokens.
+  if (result.max_output_tokens !== undefined) {
+    if (result.max_tokens === undefined) result.max_tokens = result.max_output_tokens;
+    delete result.max_output_tokens;
+  }
+
   // Request-scoped response-side identity for Responses namespace child tools.
   // The Chat wire `tool.function.name` is the namespace-qualified name (#8295:
   // folding the namespace in makes cross-namespace leaf collisions structurally
