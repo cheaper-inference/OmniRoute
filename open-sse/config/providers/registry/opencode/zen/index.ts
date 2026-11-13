@@ -106,6 +106,7 @@ export const opencode_zenProvider: RegistryEntry = {
       targetFormat: "openai-responses",
       contextLength: 1048576,
       maxOutputTokens: 131072,
+      supportsVision: true,
     },
     // Explicit wire-format overlay of the base opencode provider's muse-spark entry
     // (targetFormat: openai-responses). Keep in sync with base on catalog syncs.
@@ -116,6 +117,7 @@ export const opencode_zenProvider: RegistryEntry = {
       targetFormat: "openai-responses",
       contextLength: 1048576,
       maxOutputTokens: 131072,
+      supportsVision: true,
     },
     // Muse Spark 1.3 is served only on the Responses API, same as 1.2 above.
     // Its window matches the published OpenCode catalog instead of the
@@ -127,6 +129,7 @@ export const opencode_zenProvider: RegistryEntry = {
       targetFormat: "openai-responses",
       contextLength: 1048576,
       maxOutputTokens: 131072,
+      supportsVision: true,
     },
     {
       id: "muse-spark-1.3-contributor-free",
@@ -135,6 +138,7 @@ export const opencode_zenProvider: RegistryEntry = {
       targetFormat: "openai-responses",
       contextLength: 1048576,
       maxOutputTokens: 131072,
+      supportsVision: true,
     },
 
     // ── DeepSeek ────────────────────────────────────────────────
