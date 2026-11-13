@@ -23,6 +23,11 @@ import type { ExecutorExecuteResult, ExecuteInput } from "./base.ts";
 import { BaseExecutor } from "./base.ts";
 import { buildErrorBody, sanitizeErrorMessage } from "../utils/error.ts";
 import { resolveClaudeAgentSdk, resolveClaudeCodeExecutable } from "../utils/claudeAgentSdk.ts";
+import {
+  CLEAR_TOOL_USES_STRATEGY,
+  CONTEXT_EDITING_DEFAULT_KEEP_TOOL_USES,
+  CONTEXT_EDITING_DEFAULT_TRIGGER_TOKENS,
+} from "../config/contextEditing.ts";
 import { z } from "zod/v4";
 import type {
   McpServerConfig,
@@ -47,6 +52,7 @@ type AnthropicRequestBody = {
   tools?: unknown;
   thinking?: { budget_tokens?: unknown } | null;
   output_config?: { effort?: unknown } | null;
+  context_management?: unknown;
 };
 
 const EFFORT_LEVELS = ["low", "medium", "high", "xhigh", "max"] as const;
@@ -241,6 +247,83 @@ export function unmangleContent(
     return { ...record, name: rename(record.name) };
   });
 }
+/**
+ * Turn-history cleaning (clear_tool_uses, applied locally): the CLI child
+ * cannot accept Anthropic's server-side context_management, so the same
+ * strategy runs here — once the estimated history passes the trigger, older
+ * tool_use/tool_result blocks become placeholders and the newest `keep`
+ * tool_uses stay intact. Trigger/keep honor a client-provided
+ * context_management.edits[] entry, else the Anthropic defaults.
+ */
+const CLEARED_TOOL_PLACEHOLDER = "[cleared old tool call]";
+
+function clearToolUsesEdit(body: AnthropicRequestBody): Record<string, unknown> | null {
+  const edits = asRecord(body.context_management)?.edits;
+  if (!Array.isArray(edits)) return null;
+  return (
+    edits.find((edit) => asRecord(edit)?.type === CLEAR_TOOL_USES_STRATEGY) as
+      | Record<string, unknown>
+      | undefined
+  ) ?? null;
+}
+
+export function hasClearToolUsesEdit(body: AnthropicRequestBody): boolean {
+  return clearToolUsesEdit(body) !== null;
+}
+
+// ~4 chars per token: trigger heuristic only, never a billing number.
+function estimateTokens(value: unknown): number {
+  return Math.ceil(JSON.stringify(value).length / 4);
+}
+
+export function clearOldToolUses(body: AnthropicRequestBody): AnthropicRequestBody {
+  const messages = Array.isArray(body.messages) ? (body.messages as unknown[]) : [];
+  const edit = clearToolUsesEdit(body);
+  const keep = Math.max(
+    0,
+    typeof edit?.keep?.value === "number"
+      ? edit.keep.value
+      : CONTEXT_EDITING_DEFAULT_KEEP_TOOL_USES
+  );
+  const trigger =
+    typeof edit?.trigger?.value === "number"
+      ? edit.trigger.value
+      : CONTEXT_EDITING_DEFAULT_TRIGGER_TOKENS;
+  const toolUseIds: string[] = [];
+  let totalTokens = 0;
+  for (const message of messages) {
+    totalTokens += estimateTokens(message);
+    const record = asRecord(message);
+    if (record?.role !== "assistant" || !Array.isArray(record.content)) continue;
+    for (const block of record.content) {
+      const blockRecord = asRecord(block);
+      if (blockRecord?.type === "tool_use" && typeof blockRecord.id === "string") {
+        toolUseIds.push(blockRecord.id);
+      }
+    }
+  }
+  if (toolUseIds.length <= keep || totalTokens <= trigger) return body;
+  const cleared = new Set(toolUseIds.slice(0, toolUseIds.length - keep));
+  const cleaned = messages.map((message) => {
+    const record = asRecord(message);
+    if (!record || !Array.isArray(record.content)) return message;
+    const kind = record.role === "assistant" ? "tool_use" : record.role === "user" ? "tool_result" : null;
+    if (!kind) return message;
+    const idField = kind === "tool_use" ? "id" : "tool_use_id";
+    return {
+      ...record,
+      content: (record.content as unknown[]).map((block) => {
+        const blockRecord = asRecord(block);
+        return blockRecord?.type === kind &&
+          typeof blockRecord[idField] === "string" &&
+          cleared.has(blockRecord[idField] as string)
+          ? { type: "text", text: CLEARED_TOOL_PLACEHOLDER }
+          : block;
+      }),
+    };
+  });
+  return { ...body, messages: cleaned };
+}
 
 export class ClaudeAgentExecutor extends BaseExecutor {
   constructor() {
@@ -272,7 +355,11 @@ export class ClaudeAgentExecutor extends BaseExecutor {
       typeof body.model === "string" && body.model ? body.model : input.model;
 
     try {
-      const query = sdk.query({ prompt: historyPrompt(body), options });
+      const cleanBody =
+        input.contextEditing?.enabled || hasClearToolUsesEdit(body)
+          ? clearOldToolUses(body)
+          : body;
+      const query = sdk.query({ prompt: historyPrompt(cleanBody), options });
       if (requestedStream) {
         return this.streamResponse(query, rename?.rename ?? ((name) => name), onAbort, input.signal ?? null, abortController, input.log ?? null);
       }
