@@ -158,7 +158,13 @@ test("handleWebFetch passes depth and wait_for_selector to firecrawl", async () 
     );
 
     assert.equal(captured.body.maxDepth, 2, "should forward depth");
-    assert.equal(captured.body.waitFor, "main", "should forward wait_for_selector");
+    // Firecrawl v2 (#19636): `waitFor` is milliseconds only; a CSS selector becomes a wait action.
+    assert.deepEqual(
+      captured.body.actions,
+      [{ type: "wait", selector: "main" }],
+      "should forward wait_for_selector as a v2 wait action"
+    );
+    assert.equal(captured.body.waitFor, undefined, "a selector must not be sent as waitFor");
   } finally {
     globalThis.fetch = originalFetch;
   }
