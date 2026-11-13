@@ -1,0 +1,61 @@
+{
+  "argv": [
+    "tui",
+    "--local"
+  ],
+  "cleanup": {
+    "removeTempDir": true,
+    "revokeSession": true
+  },
+  "env": {
+    "set": {
+      "DO_NOT_TRACK": "1",
+      "OMNIROUTE_API_KEY": "${TOKEN}",
+      "OPENCLAW_CONFIG_PATH": "${TMP}/openclaw.json",
+      "OPENCLAW_NO_AUTO_UPDATE": "1",
+      "OPENCLAW_STATE_DIR": "${TMP}/state",
+      "XDG_CACHE_HOME": "${TMP}/cache"
+    },
+    "unset": [
+      "OPENCLAW_AGENT_DIR",
+      "OPENCLAW_HOME",
+      "OPENCLAW_PROFILE",
+      "OPENCLAW_WORKSPACE_DIR"
+    ]
+  },
+  "modelList": {
+    "injected": 4,
+    "strategy": "inject",
+    "viewHash": "99ac62b3453bcaf223236b5c6c2f2cc2ecb9839d8068edd5a5c1e4d1198814d6"
+  },
+  "needsTempDir": true,
+  "notes": [
+    "All 4 view models are declared; switch in session with /model omniroute/<id>."
+  ],
+  "planVersion": 1,
+  "postExitChecks": [],
+  "preflight": [
+    {
+      "kind": "node-version",
+      "range": ">=24.16.0 <25 || >=26.1.0",
+      "why": "openclaw refuses other Node versions (node:sqlite NUL truncation) and may install a private Node under ~/.openclaw when run on an older one"
+    }
+  ],
+  "secretSites": [
+    {
+      "key": "OMNIROUTE_API_KEY",
+      "kind": "env"
+    }
+  ],
+  "teardown": [],
+  "tempFiles": [
+    {
+      "contents": "{\n  \"agents\": {\n    \"defaults\": {\n      \"model\": {\n        \"primary\": \"omniroute/anthropic/claude-sonnet-4-6\"\n      },\n      \"skipBootstrap\": true,\n      \"workspace\": \"/home/fixture/project\"\n    }\n  },\n  \"discovery\": {\n    \"mdns\": {\n      \"mode\": \"off\"\n    }\n  },\n  \"models\": {\n    \"catalogRefresh\": {\n      \"enabled\": false\n    },\n    \"mode\": \"merge\",\n    \"providers\": {\n      \"omniroute\": {\n        \"api\": \"openai-completions\",\n        \"apiKey\": \"${OMNIROUTE_API_KEY:-omniroute-local}\",\n        \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n        \"models\": [\n          {\n            \"contextWindow\": 200000,\n            \"id\": \"anthropic/claude-sonnet-4-6\",\n            \"input\": [\n              \"text\",\n              \"image\"\n            ],\n            \"maxTokens\": 64000,\n            \"name\": \"anthropic/claude-sonnet-4-6 (OmniRoute)\",\n            \"reasoning\": true\n          },\n          {\n            \"contextWindow\": 400000,\n            \"id\": \"openai/gpt-5.2\",\n            \"input\": [\n              \"text\"\n            ],\n            \"maxTokens\": 128000,\n            \"name\": \"openai/gpt-5.2 (OmniRoute)\",\n            \"reasoning\": true\n          },\n          {\n            \"contextWindow\": 32768,\n            \"id\": \"small/ctx-32k\",\n            \"input\": [\n              \"text\"\n            ],\n            \"maxTokens\": 8192,\n            \"name\": \"small/ctx-32k (OmniRoute)\"\n          },\n          {\n            \"contextWindow\": 128000,\n            \"id\": \"fastest\",\n            \"input\": [\n              \"text\"\n            ],\n            \"maxTokens\": 32768,\n            \"name\": \"fastest (OmniRoute)\"\n          }\n        ]\n      }\n    }\n  },\n  \"update\": {\n    \"checkOnStart\": false\n  }\n}\n",
+      "format": "json",
+      "mode": 384,
+      "path": "openclaw.json"
+    }
+  ],
+  "tool": "openclaw",
+  "warnings": []
+}

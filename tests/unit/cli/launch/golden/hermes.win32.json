@@ -1,0 +1,68 @@
+{
+  "argv": [],
+  "cleanup": {
+    "removeTempDir": true,
+    "revokeSession": true
+  },
+  "env": {
+    "set": {
+      "HERMES_GATEWAY_LOCK_DIR": "${TMP}/locks",
+      "HERMES_HOME": "${TMP}",
+      "OMNIROUTE_API_KEY": "${TOKEN}"
+    },
+    "unset": [
+      "HERMES_TUI",
+      "HERMES_IGNORE_USER_CONFIG",
+      "HERMES_SAFE_MODE",
+      "HERMES_INFERENCE_PROVIDER",
+      "HERMES_MODEL",
+      "OPENAI_BASE_URL",
+      "OPENAI_API_KEY",
+      "CUSTOM_BASE_URL"
+    ]
+  },
+  "modelList": {
+    "injected": 3,
+    "strategy": "inject",
+    "viewHash": "4f2072bb6ece0d13f968fc0640d57cc5dcf044eed42e8589c5f3b10959a26932"
+  },
+  "needsTempDir": true,
+  "notes": [
+    "Model Claude Sonnet 4.6 pinned at 200000 tokens of context",
+    "Temporary HERMES_HOME: sessions, memory and skills are discarded on exit",
+    "hermes gateway stop runs on exit so the background gateway does not outlive the launch"
+  ],
+  "planVersion": 1,
+  "postExitChecks": [],
+  "preflight": [],
+  "secretSites": [
+    {
+      "key": "OMNIROUTE_API_KEY",
+      "kind": "env"
+    }
+  ],
+  "teardown": [
+    {
+      "argv": [
+        "${TOOL}",
+        "gateway",
+        "stop"
+      ],
+      "env": "plan",
+      "onError": "warn",
+      "timeoutMs": 5000
+    }
+  ],
+  "tempFiles": [
+    {
+      "contents": "model:\n  provider: custom\n  default: anthropic/claude-sonnet-4-6\n  base_url: \"http://127.0.0.1:20128/v1\"\n  key_env: OMNIROUTE_API_KEY\n  context_length: 200000\nproviders:\n  omniroute:\n    name: OmniRoute\n    api: \"http://127.0.0.1:20128/v1\"\n    key_env: OMNIROUTE_API_KEY\n    transport: chat_completions\n    default_model: anthropic/claude-sonnet-4-6\n    models:\n      anthropic/claude-sonnet-4-6:\n        context_length: 200000\n      openai/gpt-5.2:\n        context_length: 400000\n      fastest:\n        context_length: 128000\nupdates:\n  check: false\nplugins:\n  auto_update_check_hours: 0\ntelemetry:\n  shared_metrics:\n    enabled: false\n    send: false\n    offer_version: 2\ngateway:\n  unmanaged_idle_exit_seconds: 30\ntoolsets:\n  - hermes-cli\n  - web\n",
+      "format": "yaml",
+      "mode": 384,
+      "path": "config.yaml"
+    }
+  ],
+  "tool": "hermes",
+  "warnings": [
+    "The temp-home recipe and gateway teardown are not yet verified on Windows"
+  ]
+}
