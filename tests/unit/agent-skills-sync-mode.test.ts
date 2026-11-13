@@ -75,6 +75,24 @@ test("classify: generated text or a references/ file edited → strict; custom b
   assert.deepEqual(result, { strict: ["b", "c", "d"], customOnly: ["a"] });
 });
 
+test("classify: a hand-written file beside SKILL.md (not references/) is not generated text", () => {
+  // The generator writes only SKILL.md (outside the custom block) and references/**. A PR that
+  // adds an example script to a skill directory must not be judged against the generator.
+  const same = withCustom("same");
+  const result = classifyTouchedSkills({
+    changedFiles: [
+      "skills/omni-mcp/examples/run.sh",
+      "skills/omni-auth/notes.md",
+      "skills/omni-auth/SKILL.md",
+      "skills/omni-cache/references/endpoints.md",
+      "skills/omni-cache/examples/run.sh",
+    ],
+    readBase: () => same,
+    readHead: () => same,
+  });
+  assert.deepEqual(result, { strict: ["omni-cache"], customOnly: ["omni-auth"] });
+});
+
 function runScript(args: string[], env: Record<string, string>) {
   const res = spawnSync(process.execPath, ["--import", "tsx/esm", SCRIPT, ...args], {
     cwd: root,

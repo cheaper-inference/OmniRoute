@@ -121,10 +121,46 @@ test("syncE2eTimings adds new specs at their LOC, drops deleted ones, keeps the 
       "a.spec.ts",
       "new.spec.ts",
     ]);
-    assert.equal(JSON.parse(written)["new.spec.ts"], 4, "LOC = split on newlines, like the seed");
+    // The seed is `wc -l` (newline count): "1\n2\n3\n" is 3 lines, not 4.
+    assert.equal(JSON.parse(written)["new.spec.ts"], 3, "LOC = newline count, like the seed");
     assert.equal(JSON.parse(written)["b.spec.ts"], 50, "existing weights are never rewritten");
     assert.ok(written.endsWith("}\n"));
     assert.equal(syncE2eTimings({ root: dir }).changed, false, "idempotent");
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("syncE2eTimings keeps the untouched entries byte for byte (the _meta \\u escapes included)", () => {
+  // The committed file escapes non-ASCII as \uXXXX (the _meta note's em dash): a sync that only
+  // adds one spec must not rewrite any other line.
+  const raw = '{\n  "_meta": "Unitless \\u2014 only ratios matter.",\n  "a.spec.ts": 59\n}\n';
+  const { dir, file } = syncFixture({}, { "a.spec.ts": "x\n", "n.spec.ts": "1\n2\n" });
+  fs.writeFileSync(file, raw);
+  try {
+    assert.equal(syncE2eTimings({ root: dir }).changed, true);
+    assert.equal(
+      fs.readFileSync(file, "utf8"),
+      '{\n  "_meta": "Unitless \\u2014 only ratios matter.",\n  "a.spec.ts": 59,\n  "n.spec.ts": 2\n}\n'
+    );
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("syncE2eTimings: the committed seed is already in its own output format", () => {
+  // Running the sync on a copy of the real file that lists every spec rewrites nothing.
+  const committed = fs.readFileSync(
+    path.join(ROOT, "config", "quality", "e2e-timings.json"),
+    "utf8"
+  );
+  const keys = Object.keys(JSON.parse(committed)).filter((k) => !k.startsWith("_"));
+  const { dir, file } = syncFixture({}, Object.fromEntries(keys.map((k) => [k, "x\n"])));
+  fs.writeFileSync(file, committed);
+  try {
+    const res = syncE2eTimings({ root: dir });
+    assert.equal(res.changed, false);
+    assert.equal(fs.readFileSync(file, "utf8"), committed);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
