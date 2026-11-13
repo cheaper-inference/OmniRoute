@@ -45,7 +45,7 @@ export const CURATED_SKILLS: CuratedSkillEntry[] = [
     id: "omni-auth",
     name: "Authentication",
     description:
-      "Manage API key authentication and session tokens. Start here to authenticate requests via Bearer token, obtain session cookies, and configure login requirements for the OmniRoute API.",
+      "Manage API key authentication and session tokens. Start here to authenticate requests via Bearer token, obtain session cookies, and configure login requirements for the OmniRoute API. Use when you need to log in, send an authenticated request, or find out which credential an OmniRoute endpoint accepts.",
     category: "api",
     area: "auth",
     icon: "lock",
@@ -55,7 +55,7 @@ export const CURATED_SKILLS: CuratedSkillEntry[] = [
     id: "omni-providers",
     name: "Providers",
     description:
-      "Manage provider connections, API keys, OAuth flows, and connection tests via the REST API. List, add, update, remove, and test AI provider integrations across OmniRoute's 393-provider catalog.",
+      "Manage provider connections, API keys, OAuth flows, and connection tests via the REST API. List, add, update, remove, and test AI provider integrations across OmniRoute's 393-provider catalog. Use when you need to add, test or remove a provider connection, or check why a provider call fails.",
     category: "api",
     area: "providers",
     icon: "key",
@@ -64,7 +64,7 @@ export const CURATED_SKILLS: CuratedSkillEntry[] = [
     id: "omni-models",
     name: "Models",
     description:
-      "Query available AI models across all configured providers. List models, resolve model aliases, and browse the full model catalog including provider-specific variants.",
+      "Query available AI models across all configured providers. List models, resolve model aliases, and browse the full model catalog including provider-specific variants. Use when you need to find out which models and aliases exist, or which provider serves a model id.",
     category: "api",
     area: "models",
     icon: "neurology",
@@ -73,7 +73,7 @@ export const CURATED_SKILLS: CuratedSkillEntry[] = [
     id: "omni-combos-routing",
     name: "Combos & Routing",
     description:
-      "Create and manage routing combos with 21 strategies (priority, weighted, round-robin, Auto-combo, and more). Configure fallback chains, test routing outcomes, and retrieve combo metrics.",
+      "Create and manage routing combos with 21 strategies (priority, weighted, round-robin, Auto-combo, and more). Configure fallback chains, test routing outcomes, and retrieve combo metrics. Use when you need to create or tune a routing combo, a fallback chain or a routing strategy.",
     category: "api",
     area: "combos-routing",
     icon: "route",
@@ -239,7 +239,7 @@ export const CURATED_SKILLS: CuratedSkillEntry[] = [
     id: "omni-inference",
     name: "Inference (OpenAI-compatible)",
     description:
-      "The core OpenAI-compatible inference endpoints: chat completions, embeddings, images, audio (TTS/STT), moderations, rerank, and the Responses API. The primary integration surface for AI agents.",
+      "The core OpenAI-compatible inference endpoints: chat completions, embeddings, images, audio (TTS/STT), moderations, rerank, and the Responses API. The primary integration surface for AI agents. Use when you need to call a model: chat, embeddings, images, speech, rerank, moderation, web search or web fetch.",
     category: "api",
     area: "inference",
     icon: "hub",
