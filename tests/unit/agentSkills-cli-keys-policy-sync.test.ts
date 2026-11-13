@@ -13,7 +13,7 @@ test("published cli-keys skill matches the authenticated key-policy command regi
     new URL("../../skills/cli-keys/SKILL.md", import.meta.url),
     "utf8"
   );
-  const policy = published.split("### `keys set <id>`\n")[1]?.split("\n### ")[0];
+  const policy = published.split("### `keys policy set <id>`\n")[1]?.split("\n### ")[0];
   assert.ok(policy, "the key-policy command must remain documented");
   assert.match(policy, /- `--allowed-models <list>`/);
   assert.match(policy, /- `--model-access-mode <mode>`/);

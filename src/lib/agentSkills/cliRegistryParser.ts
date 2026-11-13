@@ -127,6 +127,38 @@ function qualifyCommand(rawName: string, parent: string, isFirst: boolean, exten
 }
 
 /**
+ * Full name of the `.command()` call at `index`. `groups` maps a variable to its group path, per file
+ * (`const engine = cmp.command("engine")` -> engine: "compression engine"). A group made on a function
+ * parameter (`parent.command("task")` in cloud.mjs) has no known path and is not tracked.
+ */
+function nestedCommandName(
+  content: string,
+  index: number,
+  rawName: string,
+  groups: Map<string, string>,
+  root: { topLevelName: string; isFirst: boolean; extendsParent: boolean }
+): string {
+  const m = /(?:(?:const|let|var)\s+([\w$]+)\s*=\s*)?([\w$]+)\s*$/.exec(
+    content.slice(Math.max(0, index - 120), index)
+  );
+  const group = groups.get(m?.[2] ?? "");
+  const isProgram = m?.[2] === "program" && !root.extendsParent;
+  const base = group
+    ? `${group} ${rawName}`
+    : qualifyCommand(rawName, root.topLevelName, root.isFirst || isProgram, root.extendsParent);
+  if (m?.[1] && (group || base === root.topLevelName)) {
+    groups.set(
+      m[1],
+      base
+        .split(" ")
+        .filter((w) => !/^[<[]/.test(w))
+        .join(" ")
+    );
+  }
+  return base;
+}
+
+/**
  * Extracts all commands (and their immediately following description + options)
  * from a single .mjs file content.
  *
@@ -140,6 +172,9 @@ function extractCommandsFromContent(
   extendsParent = false
 ): RawCommand[] {
   const commands: RawCommand[] = [];
+  // variable -> full group path, per file. A variable named like the file's root is that root
+  // (helpers take the root as a parameter before it is created, e.g. `registerSkillsMarketplace(skills)`).
+  const groups = new Map<string, string>([[topLevelName, topLevelName]]);
 
   // Find all .command() call positions
   COMMAND_RE.lastIndex = 0;
@@ -187,10 +222,12 @@ function extractCommandsFromContent(
       args.push(argMatch[1]);
     }
 
-    // Compose full command name:
-    // - If rawName equals the top-level name (or is the isDefault pattern), use as-is
-    // - Otherwise, qualify as "topLevel subname"
-    const base = qualifyCommand(rawName, topLevelName, i === 0, extendsParent);
+    // Compose full command name: a leaf of a nested group keeps the whole group path.
+    const base = nestedCommandName(content, cmdIndex, rawName, groups, {
+      topLevelName,
+      isFirst: i === 0,
+      extendsParent,
+    });
     const fullName = args.length > 0 ? `${base} ${args.join(" ")}` : base;
 
     commands.push({ name: fullName.trim(), description, flags });

@@ -34,23 +34,23 @@ omniroute eval
 omniroute eval suites
 ```
 
-### `eval list`
+### `eval suites list`
 
 **Example:**
 
 ```bash
-omniroute eval list
+omniroute eval suites list
 ```
 
-### `eval get <suiteId>`
+### `eval suites get <suiteId>`
 
 **Example:**
 
 ```bash
-omniroute eval get <suiteId>
+omniroute eval suites get <suiteId>
 ```
 
-### `eval create`
+### `eval suites create`
 
 **Flags:**
 
@@ -59,7 +59,7 @@ omniroute eval get <suiteId>
 **Example:**
 
 ```bash
-omniroute eval create
+omniroute eval suites create
 ```
 
 ### `eval run <suiteId>`

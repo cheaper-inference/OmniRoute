@@ -1,0 +1,1 @@
+- **docs(skills):** the generated CLI skills now name a nested command with its full group path (`compression engine set`, `a2a tasks list`, `backup auto enable`, `keys policy set`) instead of dropping the middle group, so two commands no longer share one heading and each command can be copied and run as written.

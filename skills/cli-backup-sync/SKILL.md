@@ -51,7 +51,7 @@ omniroute backup create
 omniroute backup auto
 ```
 
-### `backup enable`
+### `backup auto enable`
 
 **Flags:**
 
@@ -63,23 +63,23 @@ omniroute backup auto
 **Example:**
 
 ```bash
-omniroute backup enable
+omniroute backup auto enable
 ```
 
-### `backup disable`
+### `backup auto disable`
 
 **Example:**
 
 ```bash
-omniroute backup disable
+omniroute backup auto disable
 ```
 
-### `backup status`
+### `backup auto status`
 
 **Example:**
 
 ```bash
-omniroute backup status
+omniroute backup auto status
 ```
 
 ### `backup restore [backupId]`
@@ -185,12 +185,12 @@ omniroute cloud message <taskId> <message>
 omniroute cloud sources <taskId>
 ```
 
-### `cloud cloud`
+### `cloud`
 
 **Example:**
 
 ```bash
-omniroute cloud cloud
+omniroute cloud
 ```
 
 ### `cloud agents`
@@ -278,15 +278,15 @@ omniroute sync initialize
 omniroute sync tokens
 ```
 
-### `sync list`
+### `sync tokens list`
 
 **Example:**
 
 ```bash
-omniroute sync list
+omniroute sync tokens list
 ```
 
-### `sync create`
+### `sync tokens create`
 
 **Flags:**
 
@@ -297,10 +297,10 @@ omniroute sync list
 **Example:**
 
 ```bash
-omniroute sync create
+omniroute sync tokens create
 ```
 
-### `sync revoke <id>`
+### `sync tokens revoke <id>`
 
 **Flags:**
 
@@ -309,7 +309,7 @@ omniroute sync create
 **Example:**
 
 ```bash
-omniroute sync revoke <id>
+omniroute sync tokens revoke <id>
 ```
 
 ### `sync status`

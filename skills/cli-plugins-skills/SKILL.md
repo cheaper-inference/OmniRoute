@@ -122,12 +122,12 @@ omniroute memory health
 omniroute PLUGIN_NAME
 ```
 
-### `plugin plugin`
+### `plugin`
 
 **Example:**
 
 ```bash
-omniroute plugin plugin
+omniroute plugin
 ```
 
 ### `plugin list`
@@ -194,15 +194,15 @@ omniroute plugin update [name]
 omniroute plugin scaffold <name>
 ```
 
-### `marketplace`
+### `skills marketplace`
 
 **Example:**
 
 ```bash
-omniroute marketplace
+omniroute skills marketplace
 ```
 
-### `skills search [query]`
+### `skills marketplace search [query]`
 
 **Flags:**
 
@@ -214,18 +214,18 @@ omniroute marketplace
 **Example:**
 
 ```bash
-omniroute skills search [query]
+omniroute skills marketplace search [query]
 ```
 
-### `skills info <packageId>`
+### `skills marketplace info <packageId>`
 
 **Example:**
 
 ```bash
-omniroute skills info <packageId>
+omniroute skills marketplace info <packageId>
 ```
 
-### `skills install <packageId>`
+### `skills marketplace install <packageId>`
 
 **Flags:**
 
@@ -236,31 +236,31 @@ omniroute skills info <packageId>
 **Example:**
 
 ```bash
-omniroute skills install <packageId>
+omniroute skills marketplace install <packageId>
 ```
 
-### `skills categories`
+### `skills marketplace categories`
 
 **Example:**
 
 ```bash
-omniroute skills categories
+omniroute skills marketplace categories
 ```
 
-### `skills featured`
+### `skills marketplace featured`
 
 **Example:**
 
 ```bash
-omniroute skills featured
+omniroute skills marketplace featured
 ```
 
-### `skills skills`
+### `skills`
 
 **Example:**
 
 ```bash
-omniroute skills skills
+omniroute skills
 ```
 
 ### `skills list`
@@ -369,18 +369,18 @@ omniroute skills executions
 omniroute skills skillssh
 ```
 
-### `skills list`
+### `skills skillssh list`
 
 **Example:**
 
 ```bash
-omniroute skills list
+omniroute skills skillssh list
 ```
 
-### `skills install <url>`
+### `skills skillssh install <url>`
 
 **Example:**
 
 ```bash
-omniroute skills install <url>
+omniroute skills skillssh install <url>
 ```

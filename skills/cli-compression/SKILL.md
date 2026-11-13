@@ -57,20 +57,20 @@ omniroute compression configure
 omniroute compression engine
 ```
 
-### `compression set <name>`
+### `compression engine set <name>`
 
 **Example:**
 
 ```bash
-omniroute compression set <name>
+omniroute compression engine set <name>
 ```
 
-### `compression get`
+### `compression engine get`
 
 **Example:**
 
 ```bash
-omniroute compression get
+omniroute compression engine get
 ```
 
 ### `compression combos`
@@ -81,15 +81,15 @@ omniroute compression get
 omniroute compression combos
 ```
 
-### `compression list`
+### `compression combos list`
 
 **Example:**
 
 ```bash
-omniroute compression list
+omniroute compression combos list
 ```
 
-### `compression stats`
+### `compression combos stats`
 
 **Flags:**
 
@@ -98,7 +98,7 @@ omniroute compression list
 **Example:**
 
 ```bash
-omniroute compression stats
+omniroute compression combos stats
 ```
 
 ### `compression rules`
@@ -109,15 +109,15 @@ omniroute compression stats
 omniroute compression rules
 ```
 
-### `compression list`
+### `compression rules list`
 
 **Example:**
 
 ```bash
-omniroute compression list
+omniroute compression rules list
 ```
 
-### `compression add`
+### `compression rules add`
 
 **Flags:**
 
@@ -128,10 +128,10 @@ omniroute compression list
 **Example:**
 
 ```bash
-omniroute compression add
+omniroute compression rules add
 ```
 
-### `compression remove <id>`
+### `compression rules remove <id>`
 
 **Flags:**
 
@@ -140,7 +140,7 @@ omniroute compression add
 **Example:**
 
 ```bash
-omniroute compression remove <id>
+omniroute compression rules remove <id>
 ```
 
 ### `compression language-packs`
