@@ -625,7 +625,8 @@ function redactSensitiveUrlCredentials(value: string): string {
 function redactKnownCredentialPatterns(value: string): string {
   let redacted = value;
   for (const pattern of CREDENTIAL_PATTERNS) {
-    if (pattern.name === "auth_header") continue;
+    // Both keep their label: the labelled-assignment scanner masks them with its own rules.
+    if (pattern.name === "auth_header" || pattern.name === "labelled_secret") continue;
     pattern.regex.lastIndex = 0;
     redacted = redacted.replace(pattern.regex, "[REDACTED]");
   }
