@@ -595,6 +595,8 @@ export default function CostOverviewTab() {
               </div>
             )}
             <SegmentedControl
+              semantics="radio"
+              aria-label={tc("timeRange")}
               options={RANGE_OPTIONS.map((option) => ({
                 value: option.value,
                 label: t(option.labelKey),
@@ -808,7 +810,7 @@ export default function CostOverviewTab() {
               </h3>
             </div>
             <div className="flex items-end gap-3">
-              <p className="text-3xl font-bold text-info">
+              <p className="text-3xl font-semibold text-info">
                 {currencyFormatter.format(projectedMonthEnd)}
               </p>
               <p className="text-xs text-text-muted pb-1">
@@ -835,7 +837,7 @@ export default function CostOverviewTab() {
             </div>
             <div className="flex items-end gap-3">
               <p
-                className={`text-3xl font-bold ${
+                className={`text-3xl font-semibold ${
                   costChangePct > 0
                     ? "text-error"
                     : costChangePct < 0
@@ -1076,24 +1078,28 @@ function CostExplorerCard({
         <div>
           <div className="flex items-center gap-2">
             <Icon name="travel_explore" size={20} className="text-success" />
-            <h3 className="text-lg font-bold text-text-main">{t("costExplorerTitle")}</h3>
+            <h3 className="text-lg font-semibold text-text-main">{t("costExplorerTitle")}</h3>
           </div>
           <p className="text-sm text-text-muted mt-1">{t("costExplorerDescription")}</p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <SegmentedControl
+            semantics="radio"
+            aria-label={t("costExplorerTitle")}
             options={groupOptions}
             value={groupBy}
             onChange={(value) => onGroupByChange(value as CostExplorerGroupBy)}
           />
-          <Input
-            icon="search"
-            value={searchQuery}
-            onChange={(event) => onSearchChange(event.target.value)}
-            placeholder={t("filterRows")}
-            aria-label={t("filterCostExplorerRows")}
-            className="min-w-55"
-          />
+          <div>
+            <Input
+              icon="search"
+              value={searchQuery}
+              onChange={(event) => onSearchChange(event.target.value)}
+              placeholder={t("filterRows")}
+              aria-label={t("filterCostExplorerRows")}
+              className="min-w-55"
+            />
+          </div>
         </div>
       </div>
 
