@@ -54,6 +54,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolveCycleBase } from "./list-uncovered-commits.mjs";
+import { queuePrByCommit } from "../merge-queue/history-map.mjs";
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const MAINTAINER = "diegosouzapw";
@@ -409,8 +410,22 @@ export function repoSlug(cwd = ROOT) {
   return m ? m[1] : "cheaper-inference/OmniRoute";
 }
 
-/** Non-merge commits in `base..head` with mailmap identities, PR number and co-author trailers. */
-export function readCommits(base, head, cwd = ROOT) {
+/**
+ * Non-merge commits in `base..head` with mailmap identities, PR number and co-author trailers.
+ *
+ * PR number: the `(#N)` suffix of a squash subject, or — for the original commits an omni-queue
+ * merge-ff landing brought in (no `(#N)`) — the PR of the queue merge commit that carries them
+ * (`prByCommit`, scripts/merge-queue/history-map.mjs). Such rows also get `queue` = {pr, author,
+ * title, mergeSha, subjectPr}; a squash-only history maps nothing and reads exactly as before.
+ * `subjectPr` keeps a `(#N)` suffix of a mapped commit: reconcile() restores it as the row's PR
+ * when N is a real merged PR (a foreign squash the contributor merged into their branch).
+ */
+export function readCommits(
+  base,
+  head,
+  cwd = ROOT,
+  prByCommit = queuePrByCommit({ range: `${base}..${head}`, cwd })
+) {
   const raw = git(
     [
       "log",
@@ -430,6 +445,10 @@ export function readCommits(base, head, cwd = ROOT) {
       const [hash, date, authorName, authorEmail, subject, coa] = r.split("\x1f");
       const refs = refsIn(subject);
       const prMatch = subject.match(/\(#(\d+)\)\s*$/);
+      // the queue merge knows which PR brought the commit in (a contributor `(#N)` may be an
+      // issue); the suffix is kept as `queue.subjectPr` for reconcile()'s foreign-squash check
+      const q = prByCommit?.get(hash) ?? null;
+      const subjectPr = prMatch ? Number(prMatch[1]) : null;
       return {
         hash,
         date,
@@ -437,8 +456,19 @@ export function readCommits(base, head, cwd = ROOT) {
         authorEmail,
         subject,
         refs,
-        pr: prMatch ? Number(prMatch[1]) : null,
+        pr: q ? q.pr : subjectPr,
         prAuthor: null,
+        ...(q
+          ? {
+              queue: {
+                pr: q.pr,
+                author: q.author,
+                title: q.title,
+                mergeSha: q.mergeSha,
+                subjectPr,
+              },
+            }
+          : {}),
         coauthors: (coa || "")
           .split("\x1e")
           .map((s) => s.trim())
@@ -533,7 +563,7 @@ export function fragmentOrigins(cwd = ROOT, dirs = Object.keys(SECTION_HEADINGS)
  * definitive origin of the credit, from git history). The inventory is deliberately read from disk,
  * not from a ref: a fragment the previous pass unlinked (deletion not yet committed) is consumed.
  */
-export function readFragments(cwd = ROOT) {
+export function readFragments(cwd = ROOT, prByCommit = null) {
   const out = [];
   const origins = fragmentOrigins(cwd);
   for (const dir of Object.keys(SECTION_HEADINGS)) {
@@ -547,14 +577,18 @@ export function readFragments(cwd = ROOT) {
     for (const f of paths) {
       const origin = origins.get(f) || { hash: "", subject: "" };
       const om = origin.subject.match(/\(#(\d+)\)\s*$/);
+      // merge-ff landing: the adding commit has no `(#N)`; its queue merge names the PR
+      const qPr = origin.hash ? (prByCommit?.get(origin.hash)?.pr ?? null) : null;
       const pm = f.match(/\/(\d{4,6})-/);
       out.push({
         path: f,
         section: dir,
         text: fs.readFileSync(path.join(cwd, f), "utf8").trim(),
         originHash: origin.hash ? origin.hash.slice(0, 9) : null,
-        originPr: om ? Number(om[1]) : null,
+        originPr: qPr ?? (om ? Number(om[1]) : null),
         prefixPr: pm ? Number(pm[1]) : null,
+        // the adding commit's own `(#N)`, for reconcile()'s foreign-squash check (merge-ff only)
+        ...(qPr !== null ? { originSubjectPr: om ? Number(om[1]) : null } : {}),
       });
     }
   }
@@ -585,7 +619,19 @@ export function reconcile({
   const prBy = new Map(prs.map((p) => [p.number, p]));
   for (const [n, p] of extraPrs) if (!prBy.has(n)) prBy.set(n, p);
   const prAuthor = (n) => prBy.get(n)?.author?.login || null;
-  for (const r of rows) r.prAuthor = r.pr ? prAuthor(r.pr) : null;
+  // merge-ff rows: a `(#N)` subject naming a REAL merged PR other than the queue PR is a foreign
+  // squash the contributor merged into their branch; it keeps its own PR (row, credit, bullet).
+  // An N that is not a merged PR (an issue number) leaves the queue PR in place.
+  const foreignPr = (subjectPr, queuePr) =>
+    subjectPr && subjectPr !== queuePr && prBy.has(subjectPr) ? subjectPr : null;
+  for (const r of rows) {
+    const own = r.queue ? foreignPr(r.queue.subjectPr, r.queue.pr) : null;
+    if (own) {
+      r.pr = own;
+      delete r.queue;
+    }
+  }
+  for (const r of rows) r.prAuthor = r.pr ? prAuthor(r.pr) || r.queue?.author || null : null;
   const issueToPrs = new Map();
   for (const p of prs)
     for (const ci of p.closingIssuesReferences || []) {
@@ -639,7 +685,7 @@ export function reconcile({
       if (frag) {
         const refs0 = refsIn(normalizeLinks(b));
         const override = fragmentPr[frag.path];
-        const oPr = frag.originPr;
+        const oPr = foreignPr(frag.originSubjectPr, frag.originPr) || frag.originPr;
         const fPr = frag.prefixPr;
         let defPrs = override
           ? [override]
@@ -685,18 +731,25 @@ export function reconcile({
 
   const gen = { features: [], fixes: [], maintenance: [] };
   const deps = [];
+  // merge-ff landings keep every contributor commit: one generated bullet per queue PR, titled
+  // after the PR (the merge commit), not one per "wip"/"fix typo" commit
+  const queueBulleted = new Set();
   for (const r of [...uncovered].sort(
     (a, b) => (a.pr || 0) - (b.pr || 0) || a.date.localeCompare(b.date)
   )) {
+    if (r.queue) {
+      if (queueBulleted.has(r.pr)) continue;
+      queueBulleted.add(r.pr);
+    }
     if (BOT_RE.test(r.authorName)) {
       deps.push(r);
       continue;
     }
-    const c = bulletFromSubject(r.subject, special);
+    const c = bulletFromSubject(r.queue?.title || r.subject, special);
     let bullet = `- ${c.text}`;
     bullet += r.pr ? ` (${prLink(repo, r.pr)})` : ` (direct commit \`${r.hash.slice(0, 10)}\`)`;
     bullet = addCredit(bullet, [
-      r.pr ? prAuthor(r.pr) : null,
+      r.pr ? prAuthor(r.pr) || r.queue?.author || null : null,
       ...(r.pr ? credits[r.pr] || [] : []),
     ]);
     gen[sectionForType(c.type)].push(bullet);
@@ -706,7 +759,7 @@ export function reconcile({
       `- **deps:** ${deps.length} Dependabot bumps — ${deps
         .map(
           (r) =>
-            `${r.subject.replace(/^deps(\([^)]*\))?:\s*/, "").replace(/\s*\(#\d+\)\s*$/, "")} (${prLink(repo, r.pr)})`
+            `${(r.queue?.title || r.subject).replace(/^deps(\([^)]*\))?:\s*/, "").replace(/\s*\(#\d+\)\s*$/, "")} (${prLink(repo, r.pr)})`
         )
         .join("; ")}`
     );
@@ -803,7 +856,8 @@ export function main(argv = process.argv.slice(2)) {
     console.log(`[reconcile-changelog] base = parent of the ${source} commit ${open.slice(0, 10)}`);
   }
   const repo = repoSlug();
-  const rows = readCommits(base, head);
+  const queueMap = queuePrByCommit({ range: `${base}..${head}`, cwd: ROOT });
+  const rows = readCommits(base, head, ROOT, queueMap);
   const prs = o.prs
     ? JSON.parse(fs.readFileSync(o.prs, "utf8"))
     : fetchMergedPrs(repo, releaseBranch);
@@ -813,7 +867,7 @@ export function main(argv = process.argv.slice(2)) {
     const p = fetchPr(repo, n);
     if (p) extraPrs.set(n, p);
   }
-  const fragments = readFragments();
+  const fragments = readFragments(ROOT, queueMap);
   const changelog = fs.readFileSync(path.join(ROOT, "CHANGELOG.md"), "utf8");
   const baseTip = git(["rev-parse", "--short=10", base]);
   const headTip = git(["rev-parse", "--short=10", head]);
