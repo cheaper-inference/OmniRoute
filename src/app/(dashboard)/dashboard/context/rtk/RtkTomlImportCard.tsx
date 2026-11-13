@@ -130,14 +130,14 @@ function RtkTomlResult({ result }: { result: ImportResult }) {
             ? t("tomlValidationPassed")
             : t("tomlValidationFailed")}
       </p>
-      <p className="mt-1 text-[11px] text-text-muted">
+      <p className="mt-1 text-xs text-text-muted">
         {t("tomlValidationSummary", {
           filters: result.filters.length,
           tests: result.outcomes.length,
         })}
       </p>
       {result.backupCreated && (
-        <p className="mt-1 text-[11px] text-text-muted">{t("tomlBackupCreated")}</p>
+        <p className="mt-1 text-xs text-text-muted">{t("tomlBackupCreated")}</p>
       )}
       {result.filters.length > 0 && (
         <ul className="mt-2 space-y-1 text-[11px] text-text-main">

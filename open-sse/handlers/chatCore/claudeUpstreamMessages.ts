@@ -82,6 +82,10 @@ export function extractSystemMessagesToBody(payload: Record<string, unknown>) {
   payload.messages = messages.filter((m) => !isSystemRole(m.role));
 }
 
+function isFirstPartyAnthropic(provider: string | null | undefined): boolean {
+  return provider === "claude" || provider === "anthropic";
+}
+
 function isNonEmptyTextOrOther(block: ClaudeContentBlock): boolean {
   return block.type !== "text" || (typeof block.text === "string" && block.text.length > 0);
 }
@@ -164,6 +168,12 @@ export function normalizeClaudeUpstreamMessages(
         return [];
       }
 
+      // Anthropic's own API speaks the full Messages format: unknown block types
+      // (search_result, container_upload, future additions) are the upstream's call,
+      // not ours to delete — the model would answer without the documents and
+      // nothing would report the loss. Other Claude-format backends (for example
+      // DeepSeek's Anthropic-compatible route) reject them, so they keep the drop.
+      if (preserveToolResultBlocks && isFirstPartyAnthropic(options?.provider)) return [block];
       log?.debug?.("CONTENT", `Dropped unsupported content part type="${block.type}"`);
       return [];
     });

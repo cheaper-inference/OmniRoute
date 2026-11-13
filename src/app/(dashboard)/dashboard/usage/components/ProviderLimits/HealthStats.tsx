@@ -43,7 +43,7 @@ export default function HealthStats({
             <span className="text-[11px] font-semibold text-text-muted">
               {kind === "all" ? t("statTotal") : all(DISPLAY_LABELS[kind])}
             </span>
-            <div className="text-2xl font-bold tabular-nums" style={{ color }}>
+            <div className="text-2xl font-semibold tabular-nums" style={{ color }}>
               {format.number(counts[kind])}
             </div>
             {kind === "ok" && (

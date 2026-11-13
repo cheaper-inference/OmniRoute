@@ -477,6 +477,7 @@ export default function ReasoningRoutingRules({
         </div>
         <div className="mt-5 max-w-xl">
           <Select
+            native
             label={t("apiKey")}
             value={apiKeyId || "all"}
             disabled={loading || saving}
@@ -525,6 +526,7 @@ export default function ReasoningRoutingRules({
             onChange={(event) => setSearch(event.target.value)}
           />
           <Select
+            native
             label={t("filterStatus")}
             value={statusFilter}
             onChange={(event) => setStatusFilter(event.target.value)}
@@ -536,6 +538,7 @@ export default function ReasoningRoutingRules({
           />
           {!apiKeyId && (
             <Select
+              native
               label={t("filterScope")}
               value={scopeFilter}
               onChange={(event) => setScopeFilter(event.target.value)}

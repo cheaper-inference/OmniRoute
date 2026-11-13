@@ -5,6 +5,7 @@ import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import ConnectionTestButton from "@/shared/components/ConnectionTestButton";
 import Badge from "@/shared/components/Badge";
+import { ChatGptPlanBadge } from "@/shared/components/ChatGptPlanUi";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { pickDisplayValue } from "@/shared/utils/maskEmail";
 import { readCookieExpiresAt } from "@/shared/utils/webCookieExpiry";
@@ -95,25 +96,36 @@ export default function QuotaCardHeader({
           <ProviderIcon providerId={connection.provider} size={24} type="color" />
         </div>
         <div className="flex min-w-0 flex-1 flex-col justify-center">
-          <div className="flex h-4 min-w-0 items-center gap-1.5">
+          <div
+            className={`flex min-w-0 items-center gap-1.5 ${connection.provider === "chatgpt" ? "min-h-4 flex-wrap" : "h-4"}`}
+          >
             <span
               className="truncate text-[12px] font-semibold leading-4 text-text-main"
               title={providerLabel}
             >
               {providerLabel}
             </span>
-            <span
-              className="inline-flex h-4 shrink-0 items-center"
-              title={
-                resolvedPlan
-                  ? t("rawPlanWithValue", { plan: resolvedPlan })
-                  : t("noPlanFromProvider")
-              }
-            >
-              <Badge variant={tierMeta.variant} size="sm" dot className="h-4 px-1.5 py-0 leading-4">
-                {tierMeta.label}
-              </Badge>
-            </span>
+            {connection.provider === "chatgpt" ? (
+              <ChatGptPlanBadge scopes={connection.providerSpecificData?.scopes} />
+            ) : (
+              <span
+                className="inline-flex h-4 shrink-0 items-center"
+                title={
+                  resolvedPlan
+                    ? t("rawPlanWithValue", { plan: resolvedPlan })
+                    : t("noPlanFromProvider")
+                }
+              >
+                <Badge
+                  variant={tierMeta.variant}
+                  size="sm"
+                  dot
+                  className="h-4 px-1.5 py-0 leading-4"
+                >
+                  {tierMeta.label}
+                </Badge>
+              </span>
+            )}
             {hasStaleData && (
               <span className="shrink-0 leading-4 text-warning" title={t("staleQuotaTooltip")}>
                 <Icon name="schedule" size={12} ariaLabel={t("staleQuotaTooltip")} />
