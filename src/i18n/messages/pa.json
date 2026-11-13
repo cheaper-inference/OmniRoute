@@ -5679,6 +5679,7 @@
     "usageTracking": "ਵਰਤੋਂ ਟ੍ਰੈਕਿੰਗ",
     "securityDesc": "ਆਪਣੇ ਡੈਸ਼ਬੋਰਡ ਨੂੰ ਸੁਰੱਖਿਅਤ ਕਰਨ ਲਈ ਪਾਸਵਰਡ ਸੈੱਟ ਕਰੋ, ਜਾਂ ਫਿਲਹਾਲ ਇਸਨੂੰ ਛੱਡ ਦਿਓ।",
     "securityDescSkipWarning": "⚠️ ਪਾਸਵਰਡ ਤੋਂ ਬਿਨਾਂ, ਤੁਸੀਂ ਸੈਟਅੱਪ ਦੌਰਾਨ ਪ੍ਰਦਾਤਾ ਸ਼ਾਮਲ ਨਹੀਂ ਕਰ ਸਕੋਗੇ। ਪਾਸਵਰਡ ਸੈੱਟ ਕਰਨ ਤੋਂ ਬਾਅਦ ਤੁਸੀਂ ਉਨ੍ਹਾਂ ਨੂੰ ਡੈਸ਼ਬੋਰਡ ਤੋਂ ਸ਼ਾਮਲ ਕਰ ਸਕਦੇ ਹੋ।",
+    "passwordAlreadySet": "ਡੈਸ਼ਬੋਰਡ ਪਾਸਵਰਡ ਪਹਿਲਾਂ ਹੀ ਸੈੱਟ ਹੈ। ਤੁਸੀਂ ਇਸਨੂੰ ਬਾਅਦ ਵਿੱਚ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਬਦਲ ਸਕਦੇ ਹੋ।",
     "providerDesc": "ਆਪਣੇ ਪਹਿਲੇ AI ਪ੍ਰਦਾਤਾ ਨੂੰ ਕਨੈਕਟ ਕਰੋ। ਤੁਸੀਂ ਬਾਅਦ ਵਿੱਚ ਹੋਰ ਵੀ ਸ਼ਾਮਲ ਕਰ ਸਕਦੇ ਹੋ।",
     "providerRequiresPassword": "ਪ੍ਰਦਾਤਾ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਤੁਹਾਨੂੰ ਪਹਿਲਾਂ ਪਾਸਵਰਡ ਸੈੱਟ ਕਰਨ ਦੀ ਲੋੜ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਸੁਰੱਖਿਆ ਪੜਾਅ 'ਤੇ ਵਾਪਸ ਜਾਓ ਅਤੇ ਪਾਸਵਰਡ ਸੈੱਟ ਕਰੋ, ਜਾਂ ਬਾਅਦ ਵਿੱਚ ਡੈਸ਼ਬੋਰਡ ਤੋਂ ਪ੍ਰਦਾਤਾ ਸ਼ਾਮਲ ਕਰੋ।",
     "apiKeyRequired": "API ਕੁੰਜੀ (ਲੋੜੀਂਦੀ)",
@@ -6729,6 +6730,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Grok ਵੈੱਬ ਕੂਕੀ ਪਲੇਸਹੋਲਡਰ",
     "herokuBaseUrlHint": "Heroku ਬੇਸ URL ਸੰਕੇਤ",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "ਈਮੇਲ ਲੁਕਾਓ",
     "imageProviders": "ਚਿੱਤਰ ਪ੍ਰਦਾਤਾ",
     "videoProviders": "ਵੀਡੀਓ ਤਿਆਰ ਕਰਨਾ",
@@ -7227,7 +7229,8 @@
       "kiro": "ਮੁਫ਼ਤ ਟੀਅਰ: 50 ਕ੍ਰੈਡਿਟ/ਮਹੀਨਾ (~25K–100K ਟੋਕਨ)। ⚠️ Kiro ToS ਵਿੱਚ ਤੀਜੀ-ਧਿਰ ਪ੍ਰਾਕਸੀ/ਹਾਰਨੈੱਸ ਦੀ ਵਰਤੋਂ ਦੀ ਮਨਾਹੀ ਹੈ।",
       "codex": "ਮੌਜੂਦਾ OAuth ਫ਼ਲੋ ਨਾਲ OpenAI Codex ਨੂੰ ਕਨੈਕਟ ਕਰੋ।",
       "qwen": "ਮੌਜੂਦਾ OAuth ਫ਼ਲੋ ਨਾਲ Qwen Code ਨੂੰ ਕਨੈਕਟ ਕਰੋ।",
-      "github-models": "github.com/settings/tokens ਉੱਤੇ 'models: read' ਸਕੋਪ ਵਾਲਾ GitHub PAT ਬਣਾਓ"
+      "github-models": "github.com/settings/tokens ਉੱਤੇ 'models: read' ਸਕੋਪ ਵਾਲਾ GitHub PAT ਬਣਾਓ",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} ਪ੍ਰਦਾਤਾ-ਮੂਲ ਮਾਡਲ IDs ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ। /models ਤੋਂ ਇੰਪੋਰਟ ਕਰੋ ਜਾਂ ਰੂਟਿੰਗ ਲਈ ਕਸਟਮ IDs ਸ਼ਾਮਲ ਕਰੋ।",
     "bedrockModelsDescription": "Amazon Bedrock ਮਾਡਲਾਂ ਦਾ ਦਾਇਰਾ AWS ਖੇਤਰ ਅਨੁਸਾਰ ਹੁੰਦਾ ਹੈ। /models ਤੋਂ ਇੰਪੋਰਟ ਕਰੋ ਜਾਂ ਚੁਣੇ ਹੋਏ ਖੇਤਰ ਵਿੱਚ ਸਮਰੱਥ ਕੀਤੀਆਂ Bedrock ਮਾਡਲ IDs ਸ਼ਾਮਲ ਕਰੋ।",
@@ -10258,7 +10261,11 @@
     "mappingInvalidJson": "ਅਵੈਧ JSON।",
     "mappingMustBeObject": "ਮੈਪਿੰਗ ਇੱਕ JSON ਆਬਜੈਕਟ ਹੋਣੀ ਚਾਹੀਦੀ ਹੈ, ਐਰੇ ਜਾਂ ਪ੍ਰਿਮਿਟਿਵ ਮੁੱਲ ਨਹੀਂ।",
     "mappingValueMustBeString": "ਕੁੰਜੀ “{key}” ਲਈ ਮੁੱਲ ਇੱਕ ਸਤਰ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ।",
-    "save": "ਸੁਰੱਖਿਅਤ ਕਰੋ"
+    "save": "ਸੁਰੱਖਿਅਤ ਕਰੋ",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -12870,6 +12877,8 @@
     },
     "attempts": "ਕੋਸ਼ਿਸ਼ਾਂ",
     "detail": {
+      "tabOverview": "ਸੰਖੇਪ ਜਾਣਕਾਰੀ",
+      "tabPayloads": "ਪੇਲੋਡ",
       "omittedHttpAttempts": "{count} HTTP ਭੇਜਣ ਸੰਭਾਲੇ ਨਹੀਂ ਗਏ",
       "noHttpResponse": "ਕੋਈ HTTP ਜਵਾਬ ਦੇਖਿਆ ਨਹੀਂ ਗਿਆ",
       "transportError": "ਆਵਾਜਾਈ ਗਲਤੀ",

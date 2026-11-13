@@ -5679,6 +5679,7 @@
     "usageTracking": "사용량 추적",
     "securityDesc": "대시보드를 보호하기 위해 비밀번호를 설정하거나 지금은 건너뛰세요.",
     "securityDescSkipWarning": "⚠️ 비밀번호가 없으면 설정 중에 제공자를 추가할 수 없습니다. 비밀번호를 설정한 후 대시보드에서 나중에 추가할 수 있습니다.",
+    "passwordAlreadySet": "대시보드 비밀번호가 이미 설정되어 있습니다. 나중에 설정에서 변경할 수 있습니다.",
     "providerDesc": "첫 번째 AI 공급자를 연결하세요. 나중에 더 추가할 수 있습니다.",
     "providerRequiresPassword": "제공자를 추가하려면 먼저 비밀번호를 설정해야 합니다. 보안 단계로 돌아가 비밀번호를 설정하거나 나중에 대시보드에서 제공자를 추가하세요.",
     "apiKeyRequired": "API 키(필수)",
@@ -6729,6 +6730,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Grok 웹 쿠키 자리표시자",
     "herokuBaseUrlHint": "Heroku 기본 URL 도움말",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "이메일 숨기기",
     "imageProviders": "이미지 제공업체",
     "videoProviders": "비디오 생성",
@@ -7227,7 +7229,8 @@
       "kiro": "무료 티어: 월 50 크레딧(~25K–100K 토큰). ⚠️ Kiro ToS는 서드파티 프록시/하네스 사용을 금지합니다.",
       "codex": "기존 OAuth 흐름으로 OpenAI Codex를 연결합니다.",
       "qwen": "기존 OAuth 흐름으로 Qwen Code를 연결합니다.",
-      "github-models": "github.com/settings/tokens 에서 'models: read' 범위(scope)를 가진 GitHub PAT를 생성하세요."
+      "github-models": "github.com/settings/tokens 에서 'models: read' 범위(scope)를 가진 GitHub PAT를 생성하세요.",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider}은 공급자 기본 모델 ID를 허용합니다. /models에서 가져오거나 라우팅을 위한 사용자 정의 ID를 추가하세요.",
     "bedrockModelsDescription": "Amazon Bedrock 모델은 AWS 지역별로 범위가 지정됩니다. /models에서 가져오거나 선택한 지역에서 활성화된 Bedrock 모델 ID를 추가하세요.",
@@ -10258,7 +10261,11 @@
     "mappingInvalidJson": "유효하지 않은 JSON입니다.",
     "mappingMustBeObject": "매핑은 배열이나 원시 값이 아닌 JSON 객체여야 합니다.",
     "mappingValueMustBeString": "“{key}” 키의 값은 문자열이어야 합니다.",
-    "save": "저장"
+    "save": "저장",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -12870,6 +12877,8 @@
     },
     "attempts": "시도 횟수",
     "detail": {
+      "tabOverview": "개요",
+      "tabPayloads": "페이로드",
       "omittedHttpAttempts": "HTTP 전송 {count}개가 보관되지 않았습니다",
       "noHttpResponse": "HTTP 응답이 관찰되지 않았습니다",
       "transportError": "전송 오류",

@@ -1,5 +1,6 @@
 import { fisherYatesShuffle, getNextFromDeck } from "../../../src/shared/utils/shuffleDeck";
 import { generateRoutingHints } from "../manifestAdapter";
+import { isAccountSemaphoreFull } from "../accountSemaphore.ts";
 import { resolveMaxConcurrentByConnection } from "./concurrencyCaps.ts";
 import { sortTargetsByContextSize } from "./comboStructure.ts";
 import { selectQuotaShareTarget } from "./quotaShareStrategy.ts";
@@ -283,8 +284,20 @@ const STRATEGY_ORDERERS: Record<
     );
     return orderedOnly(orderedTargets);
   },
-  p2c: (orderedTargets, { combo, log }) => {
-    const nextTargets = orderTargetsByPowerOfTwoChoices(orderedTargets, combo.name);
+  p2c: async (orderedTargets, { combo, log }) => {
+    // An account at its max_concurrent cap would queue the request while a sibling sits
+    // idle. Draw only among accounts with room; full ones stay behind as last fallbacks.
+    const caps = await resolveMaxConcurrentByConnection(orderedTargets);
+    const isFull = (t: ResolvedComboTarget): boolean => {
+      const cap = t.connectionId ? caps.get(t.connectionId) : null;
+      return Boolean(cap && isAccountSemaphoreFull(t.provider, t.connectionId as string, cap));
+    };
+    const full = orderedTargets.filter(isFull);
+    const open = orderedTargets.filter((t) => !full.includes(t));
+    const nextTargets =
+      full.length === 0 || open.length === 0
+        ? orderTargetsByPowerOfTwoChoices(orderedTargets, combo.name)
+        : [...orderTargetsByPowerOfTwoChoices(open, combo.name), ...full];
     log.info("COMBO", `Power-of-two-choices ordering: selected ${nextTargets[0]?.modelStr}`);
     return orderedOnly(nextTargets);
   },

@@ -610,7 +610,7 @@ test("getProviderCredentials keeps separate codex affinity per session", async (
 
 test("concurrent OAuth selections reserve different available accounts atomically", async () => {
   await settingsDb.updateSettings({
-    fallbackStrategy: "fill-first",
+    fallbackStrategy: "round-robin",
     codexSessionAffinityTtlMs: 0,
   });
   const first = await seedConnection("codex", {

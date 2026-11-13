@@ -5679,6 +5679,7 @@
     "usageTracking": "Izmantošanas uzskaite",
     "securityDesc": "Iestatiet paroli, lai aizsargātu savu informācijas paneli, vai izlaidiet šo soli.",
     "securityDescSkipWarning": "⚠️ Ja parole nav iestatīta, iestatīšanas laikā nevarēsiet pievienot pakalpojumu sniedzējus. Varat tos pievienot vēlāk informācijas panelī pēc paroles iestatīšanas.",
+    "passwordAlreadySet": "Paneļa parole jau ir iestatīta. Vēlāk to varat mainīt iestatījumos.",
     "providerDesc": "Pievienojiet savu pirmo AI pakalpojumu sniedzēju. Vēlāk varēsiet pievienot vairāk.",
     "providerRequiresPassword": "Lai pievienotu pakalpojumu sniedzējus, vispirms jāiestata parole. Lūdzu, atgriezieties drošības solī un iestatiet paroli vai pievienojiet pakalpojumu sniedzējus vēlāk informācijas panelī.",
     "apiKeyRequired": "API atslēga (obligāta)",
@@ -6738,6 +6739,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Grok Web sīkdatnes vietturis",
     "herokuBaseUrlHint": "Norāde par Heroku bāzes URL",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Slēpt e-pastu",
     "imageProviders": "Attēlu nodrošinātāji",
     "videoProviders": "Video generēšana",
@@ -7236,7 +7238,8 @@
       "kiro": "Bezmaksas plāns: 50 kredīti mēnesī (~25K–100K tokenu). ⚠️ Kiro pakalpojuma sniegšanas noteikumi aizliedz trešo pušu proxy/harness izmantošanu.",
       "codex": "Savienojiet OpenAI Codex, izmantojot esošo OAuth plūsmu.",
       "qwen": "Savienojiet Qwen Code, izmantojot esošo OAuth plūsmu.",
-      "github-models": "Izveidojiet GitHub PAT ar 'models: read' tvērumu vietnē github.com/settings/tokens"
+      "github-models": "Izveidojiet GitHub PAT ar 'models: read' tvērumu vietnē github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} pieņem sniedzēja formāta modeļu ID. Importējiet tos no /models vai pievienojiet pielāgotus ID maršrutēšanai.",
     "bedrockModelsDescription": "Amazon Bedrock modeļi ir piesaistīti AWS reģionam. Importējiet tos no /models vai pievienojiet izvēlētajā reģionā iespējoto Bedrock modeļu ID.",
@@ -10258,7 +10261,11 @@
     "mappingInvalidJson": "Nederīgs JSON.",
     "mappingMustBeObject": "Kartēšanai jābūt JSON objektam, nevis masīvam vai primitīvai vērtībai.",
     "mappingValueMustBeString": "Atslēgas “{key}” vērtībai jābūt virknei (string).",
-    "save": "Saglabāt"
+    "save": "Saglabāt",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman dzinējs",
@@ -12870,6 +12877,8 @@
     },
     "attempts": "mēģinājumi",
     "detail": {
+      "tabOverview": "Pārskats",
+      "tabPayloads": "Dati",
       "omittedHttpAttempts": "{count} HTTP sūtījumi nav saglabāti",
       "noHttpResponse": "HTTP atbilde nav novērota",
       "transportError": "Pārsūtīšanas kļūda",

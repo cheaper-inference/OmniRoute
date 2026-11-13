@@ -49,6 +49,11 @@ const QUOTA_PATTERNS: ReadonlyArray<RegExp> = [
   /out of credits/i,
   /hard.?limit/i,
   /plan.*limit/i,
+  // LiteLLM spent key: "Budget has been exceeded! Key=..., Max budget: ...". A bare
+  // "Rate limit exceeded" has no "budget" and stays a rate limit. OmniRoute's own refusal
+  // ("Daily budget exceeded: $x / $y", "Budget limit exceeded") must not match: it is a local
+  // 429, not an upstream quota signal.
+  /budget has been (?:exceeded|exhausted)|budget (?:is )?exhausted/i,
 
   // Antigravity / Cloud Code quota exhaustion ("Individual quota reached.
   // Contact your administrator to enable overages. Resets in 164h27m24s.").
@@ -269,6 +274,28 @@ const TERMINAL_QUOTA_PATTERNS: ReadonlyArray<RegExp> = [
   /insufficient balance/i,
 ];
 
+const INSUFFICIENT_QUOTA_CODE = /insufficient.*quota/i;
+const MINUTE_WORDS = /\bper[\s-]?min(?:ute)?s?\b|\/\s*min(?:ute)?\b|\b[RT]PM\b/i;
+// A longer window, or words for a spent balance, mean real exhaustion. "credit" and
+// "balance" carry no \b so INSUFFICIENT_G1_CREDITS_BALANCE still counts.
+const LONGER_WINDOW_WORDS =
+  /\b(?:hour(?:ly)?|(?:to)?day|daily|week(?:ly)?|month(?:ly)?|[RT]P[DH])s?\b/i;
+const SPENT_BALANCE_WORDS = /balance|credit|billing|recharge|top[\s-]?up|\bfunds?\b|payment/i;
+
+/**
+ * A 429 that reuses the `insufficient_quota` code but names a per-minute limit
+ * (and no longer window, no spent balance) is a throttle, not out-of-credit.
+ * OpenAI's real out-of-credit text names no rate, so it stays quota.
+ */
+function isMinuteThrottleOnQuotaCode(text: string): boolean {
+  return (
+    INSUFFICIENT_QUOTA_CODE.test(text) &&
+    MINUTE_WORDS.test(text) &&
+    !LONGER_WINDOW_WORDS.test(text) &&
+    !SPENT_BALANCE_WORDS.test(text)
+  );
+}
+
 // Mirror of retryAfterJson's COMPOUND_DURATION_RE ("151h58m18.015s", "2h7m",
 // "45m3s") — anchored and bounded (ReDoS rule); see parseDelaySeconds below.
 const COMPOUND_DURATION_RE =
@@ -364,6 +391,8 @@ function upstreamRetryDelaySeconds(body: unknown): number | null {
  * Decision order:
  * 1. status !== 429 → `"transient"` (don't pretend to know more than
  *    the caller does about non-429 failures).
+ * 1b. a 429 that reuses `insufficient_quota` but names a per-minute limit,
+ *    with no longer window and no spent-balance words → `"rate_limit"`.
  * 2. body carries a terminal credits/billing signal → `"quota_exhausted"`
  *    regardless of any retry hint: those do not clear on a timer.
  * 3. body declares a sub-hour retry window → `"rate_limit"` even when
@@ -385,6 +414,7 @@ export function classify429(response: {
 }): FailureKind {
   if (response.status < 400) return "transient";
   const text = bodyToText(response.body);
+  if (response.status === 429 && isMinuteThrottleOnQuotaCode(text)) return "rate_limit";
   if (text && TERMINAL_QUOTA_PATTERNS.some((pat) => pat.test(text))) {
     return "quota_exhausted";
   }

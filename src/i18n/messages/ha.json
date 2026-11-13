@@ -5679,6 +5679,7 @@
     "usageTracking": "Bin Diddigin Amfani",
     "securityDesc": "Saita kalmar sirri don kare dashboard ɗinka, ko ka tsallake a yanzu.",
     "securityDescSkipWarning": "⚠️ Ba tare da kalmar sirri ba, ba za ka iya ƙara masu samarwa yayin saitawa ba. Za ka iya ƙara su daga baya daga dashboard bayan ka saita kalmar sirri.",
+    "passwordAlreadySet": "An riga an saita kalmar sirri ta dashboard. Kuna iya canza ta daga baya a Saituna.",
     "providerDesc": "Haɗa mai samar da AI naka na farko. Za ka iya ƙara wasu daga baya.",
     "providerRequiresPassword": "Kana buƙatar fara saita kalmar sirri kafin ka ƙara masu samarwa. Da fatan za ka koma matakin tsaro ka saita kalmar sirri, ko ka ƙara masu samarwa daga baya daga dashboard.",
     "apiKeyRequired": "Maɓallin API (dole)",
@@ -6729,6 +6730,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Wurin Riƙe Kuki na Grok Web",
     "herokuBaseUrlHint": "Bayani kan URL na Asali na Heroku",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Ɓoye Imel",
     "imageProviders": "Masu Samar da Hotuna",
     "videoProviders": "Ƙirƙirar Bidiyo",
@@ -7227,7 +7229,8 @@
       "kiro": "Matakin kyauta: credits 50/wata (~25K–100K tokens). ⚠️ Kiro ToS ya hana amfani da proxy/harness na ɓangare na uku.",
       "codex": "Haɗa OpenAI Codex ta amfani da tsarin OAuth na yanzu.",
       "qwen": "Haɗa Qwen Code ta amfani da tsarin OAuth na yanzu.",
-      "github-models": "Ƙirƙiri GitHub PAT mai scope na 'models: read' a github.com/settings/tokens"
+      "github-models": "Ƙirƙiri GitHub PAT mai scope na 'models: read' a github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} yana karɓar ID na samfuri na asali daga provider. Shigo da su daga /models ko ƙara ID na musamman don routing.",
     "bedrockModelsDescription": "Ana iyakance samfuran Amazon Bedrock bisa yankin AWS. Shigo da su daga /models ko ƙara ID na samfuran Bedrock da aka kunna a yankin da aka zaɓa.",
@@ -10258,7 +10261,11 @@
     "mappingInvalidJson": "JSON mara inganci.",
     "mappingMustBeObject": "Dole ne daidaitawar ta kasance abin JSON, ba jeri ko ƙima ta asali ba.",
     "mappingValueMustBeString": "Dole ne ƙimar maɓallin “{key}” ta kasance rubutu.",
-    "save": "Adana"
+    "save": "Adana",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Injin Caveman",
@@ -12870,6 +12877,8 @@
     },
     "attempts": "yunƙurai",
     "detail": {
+      "tabOverview": "Bayyani",
+      "tabPayloads": "Bayanan da aka aika",
       "omittedHttpAttempts": "Ba a adana aikawar HTTP guda {count} ba",
       "noHttpResponse": "Ba a lura da martanin HTTP ba",
       "transportError": "Kuskuren jigila",
