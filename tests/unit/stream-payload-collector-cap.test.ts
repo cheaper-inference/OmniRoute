@@ -16,7 +16,7 @@ const { createStructuredSSECollector } =
 // nothing real to reconstruct a later continuation turn from. Measured
 // live: ~22% of a sample of recent successful responses hit this.
 test("createStructuredSSECollector retains a realistic reasoning-heavy event burst without dropping (regression for the 2026-09-02 truncated-continuation incident)", () => {
-  const collector = createStructuredSSECollector({ stage: "client_response" });
+  const collector = createStructuredSSECollector({ stage: "client_response", retainEvents: true });
 
   // Anonymized, real-incident shape: ~1600 small reasoning deltas (the
   // observed volume for a genuinely reasoning-heavy turn) followed by the

@@ -25,6 +25,7 @@ import {
 import { isDiscoverableAgyModelId } from "@omniroute/open-sse/config/agyModels.ts";
 import {
   declaresOnlyNonChatEndpoints,
+  isProviderExcludedModel,
   filterChatSelectableModels,
 } from "@omniroute/open-sse/services/modelEndpointPolicy.ts";
 import { filterSelectableModels } from "@omniroute/open-sse/services/modelLifecycle.ts";
@@ -114,6 +115,25 @@ function normalizeImportedModels(
   discoveredModels: readonly SyncedAvailableModel[]
 ): ManagedImportedModel[] {
   return discoveredModels.map((model) => normalizeImportedModel(model as JsonRecord));
+}
+
+/**
+ * The row an explicit import stores for a model that serves no chat endpoint
+ * (speech, transcription, image, embeddings, …). The chat sync drops such a
+ * model from the synced list, so this row is how it reaches the catalog; later
+ * syncs keep it because it declares only non-chat endpoints.
+ */
+function normalizeImportedNonChatModel(model: SyncedAvailableModel): JsonRecord {
+  const row: JsonRecord = { ...normalizeImportedModel({ ...model }) };
+  if (model.endpointCapabilitySource) row.endpointCapabilitySource = model.endpointCapabilitySource;
+  if (model.modelType) row.modelType = model.modelType;
+  if (typeof model.dimensions === "number" && model.dimensions > 0) {
+    row.dimensions = model.dimensions;
+  }
+  if (Array.isArray(model.supportedInputTypes) && model.supportedInputTypes.length > 0) {
+    row.supportedInputTypes = model.supportedInputTypes;
+  }
+  return row;
 }
 
 function isImportedSource(source: unknown): boolean {
@@ -288,6 +308,23 @@ export async function importManagedModels({
     : filterChatSelectableModels(providerId, selectableModels);
   const candidateImportedModels = normalizeImportedModels(discoveredModels);
   const importedIds = new Set(candidateImportedModels.map((model) => model.id));
+  // An explicit import ("merge") also stores what the chat filter dropped, when
+  // the model declares only non-chat endpoints. Self-hosted providers already
+  // keep those models in the synced list.
+  const chatModelIds = new Set(discoveredModels.map((model) => model.id));
+  const nonChatImports =
+    mode === "merge" && !isSelfHostedChatProvider(providerId)
+      ? selectableModels
+          .filter(
+            (model) =>
+              !chatModelIds.has(model.id) &&
+              declaresOnlyNonChatEndpoints(model.supportedEndpoints) &&
+              // A model the provider policy excludes outright (OpenRouter `:batch`)
+              // is not a media model, whatever endpoints it declares.
+              !isProviderExcludedModel(providerId, model)
+          )
+          .map(normalizeImportedNonChatModel)
+      : [];
 
   const nextModelsMap = new Map<string, JsonRecord>();
   const removedCustomModels: JsonRecord[] = [];
@@ -311,6 +348,14 @@ export async function importManagedModels({
       removedCustomModels.push(model);
       continue;
     }
+    nextModelsMap.set(modelId, model);
+  }
+  for (const model of nonChatImports) {
+    const modelId = getModelId(model);
+    if (!modelId) continue;
+    const existing = nextModelsMap.get(modelId);
+    // An operator's own row for the same id stays; a previous import is refreshed.
+    if (existing && !isImportedSource(existing.source)) continue;
     nextModelsMap.set(modelId, model);
   }
 

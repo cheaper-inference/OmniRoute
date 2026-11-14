@@ -15,7 +15,7 @@
 
 **Radījis [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nekad nepārtrauciet programmēt. Katrs MI rīks → 388 nodrošinātājs — 150+ bezmaksas — izmantojot vienu galapunktu. Claude Code, Codex, Cursor, Cline, Copilot un Antigravity uz BEZMAKSAS Claude / GPT / Gemini ar automātisku atkāpšanos. RTK + Caveman kombinētā saspiešana ietaupa 15–95% marķieru (~89% vidēji) — nekad nesasniedziet limitus. 388 MI nodrošinātājs · 150+ bezmaksas līmeņi · ~1,62 miljardi bezmaksas marķieru mēnesī · 20 maršrutēšanas stratēģijas · Sāciet par $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nekad nepārtrauciet programmēt. Katrs MI rīks → 389 nodrošinātājs — 150+ bezmaksas — izmantojot vienu galapunktu. Claude Code, Codex, Cursor, Cline, Copilot un Antigravity uz BEZMAKSAS Claude / GPT / Gemini ar automātisku atkāpšanos. RTK + Caveman kombinētā saspiešana ietaupa 15–95% marķieru (~89% vidēji) — nekad nesasniedziet limitus. 389 MI nodrošinātājs · 150+ bezmaksas līmeņi · ~1,62 miljardi bezmaksas marķieru mēnesī · 20 maršrutēšanas stratēģijas · Sāciet par $0."/>
 
 </div>
 
@@ -73,7 +73,7 @@
 
 |                                 |         v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------------- | :----------------------: | :---------: | :-------------------: |
-| 🌐 Nodrošinātāji                |           352            |   **358**   |          388          |
+| 🌐 Nodrošinātāji                |           352            |   **358**   |          389          |
 | 🧠 Unikāli tērzēšanas modeļu ID |           1320           |  **1374**   |         1491          |
 | 🖼️ Modalitāšu tilts             | 🆕 redze + audio + video |      ✓      |           ✓           |
 | 📡 Radar bezmaksas katalogs     |      🆕 pēc izvēles      |      ✓      |           ✓           |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ Funkcijas</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Kombinācijas</a></td>
-    <td align="center"><a href="#-388-ai-providers--153-catalog-marked-free">🌐 Nodrošinātāji</a></td>
+    <td align="center"><a href="#-389-ai-providers--153-catalog-marked-free">🌐 Nodrošinātāji</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI un MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Solījums — viens galapunkts un 388 pakalpojumu sniedzējs. Automātiskā atkāpšanās nodrošina maršrutēšanas turpināšanu, kamēr ir pieejams cits darbspējīgs mērķis. Seši pīlāri: noturīga atkāpšanās starp 388 pakalpojumu sniedzēju · līdz 95% žetonu ietaupījums piemērotām darba slodzēm · $0, lai sāktu, ar vairāk nekā 150 bezmaksas līmeņiem un 52 atkārtoti pieejamiem vai bezatslēgas bezmaksas pakalpojumu sniedzējiem uz visiem laikiem · 39 CLI/aģentu integrācijas, izmantojot vienu konfigurāciju · OpenAI, Claude, Gemini un Responses API saderība ar /v1 · ražošanas vadīklas, tostarp ķēdes pārtraucēji, TLS slepenais režīms, MCP 110 rīki, A2A, atmiņa, aizsargmehānismi, novērtējumi un vairāk nekā 56 000 statisku testu deklarāciju vairāk nekā 7800 izsekotos testu failos."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Solījums — viens galapunkts un 389 pakalpojumu sniedzējs. Automātiskā atkāpšanās nodrošina maršrutēšanas turpināšanu, kamēr ir pieejams cits darbspējīgs mērķis. Seši pīlāri: noturīga atkāpšanās starp 389 pakalpojumu sniedzēju · līdz 95% žetonu ietaupījums piemērotām darba slodzēm · $0, lai sāktu, ar vairāk nekā 150 bezmaksas līmeņiem un 52 atkārtoti pieejamiem vai bezatslēgas bezmaksas pakalpojumu sniedzējiem uz visiem laikiem · 39 CLI/aģentu integrācijas, izmantojot vienu konfigurāciju · OpenAI, Claude, Gemini un Responses API saderība ar /v1 · ražošanas vadīklas, tostarp ķēdes pārtraucēji, TLS slepenais režīms, MCP 110 rīki, A2A, atmiņa, aizsargmehānismi, novērtējumi un vairāk nekā 56 000 statisku testu deklarāciju vairāk nekā 7800 izsekotos testu failos."/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ Visas **20** stratēģijas — kombinējiet tās katrā kombinācijas solī:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ar ko OmniRoute atšķiras — aktuāls funkciju salīdzinājums ar 9router, OpenRouter, CLIProxyAPI un LiteLLM 13 iespēju kategorijās. OmniRoute: 388 nodrošinātājs, vairāk nekā 150 iebūvēti bezmaksas līmeņi, 20 maršrutēšanas stratēģijas, marķieru saspiešana ar 12 dzinējiem, iebūvēts MCP serveris ar 110 rīkiem, A2A aģentu protokols, pastāvīgā atmiņa, drošības ierobežojumi, mākoņa aģenti, TLS pirkstu nospiedumu slēpšana, Desktop/Termux/PWA un 67 i18n saskarnes lokalizācijas. OmniRoute ir licencēts saskaņā ar MIT licenci, un to var mitināt patstāvīgi. Konkurentu iespējas un skaits var mainīties; skatiet saiti uz metodoloģiju."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ar ko OmniRoute atšķiras — aktuāls funkciju salīdzinājums ar 9router, OpenRouter, CLIProxyAPI un LiteLLM 13 iespēju kategorijās. OmniRoute: 389 nodrošinātājs, vairāk nekā 150 iebūvēti bezmaksas līmeņi, 20 maršrutēšanas stratēģijas, marķieru saspiešana ar 12 dzinējiem, iebūvēts MCP serveris ar 110 rīkiem, A2A aģentu protokols, pastāvīgā atmiņa, drošības ierobežojumi, mākoņa aģenti, TLS pirkstu nospiedumu slēpšana, Desktop/Termux/PWA un 67 i18n saskarnes lokalizācijas. OmniRoute ir licencēts saskaņā ar MIT licenci, un to var mitināt patstāvīgi. Konkurentu iespējas un skaits var mainīties; skatiet saiti uz metodoloģiju."/>
 
 <sub>📊 Pilna metodoloģija un detalizēts salīdzinājums par katru funkciju ar 9router, OpenRouter, CLIProxyAPI un LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -605,7 +605,7 @@ Radar ir jāiespējo brīvprātīgi, un tas izmanto tikai GET pieprasījumus. Om
 - **🖼️ Jauni galapunkti** — `/v1/ocr` (Mistral OCR) un `/v1/audio/translations` (Whisper stila) papildina multivides iespēju klāstu. → [API atsauce](docs/reference/API_REFERENCE.md)
 - **🎨 Attēlu / video / audio ģenerēšana** — viena API multividei: xAI Grok Imagine un Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind un runas pakalpojumu sniedzēji, piemēram, ElevenLabs. → [API atsauce](docs/reference/API_REFERENCE.md)
 - **🌍 Izvietošana un darbība** — reversā starpniekservera `basePath`, automātiska pārlūkprogrammas valodas noteikšana, ierīču uzskaite katrai atslēgai, MITM uzticamība bez root tiesībām, zh-TW lokalizācija. → [Vide](docs/reference/ENVIRONMENT.md)
-- **🤝 Vairāk pakalpojumu sniedzēju un aģentu** — mākoņa aģenti (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) ar pārlūkprogrammas un OAuth pieteikšanos, pirmās klases Ollama karte, Claude Opus 5 un Sonnet 5, oficiāla Kimi partnerība (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… un atjaunināts **388 pakalpojumu sniedzēja katalogs**. → [Pakalpojumu sniedzēji](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Vairāk pakalpojumu sniedzēju un aģentu** — mākoņa aģenti (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) ar pārlūkprogrammas un OAuth pieteikšanos, pirmās klases Ollama karte, Claude Opus 5 un Sonnet 5, oficiāla Kimi partnerība (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… un atjaunināts **389 pakalpojumu sniedzēja katalogs**. → [Pakalpojumu sniedzēji](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Maršrutēšanas pārredzamība** — katra atbilde ietver `X-OmniRoute-Decision` galveni, kas norāda to apkalpojušo stratēģiju/pakalpojumu sniedzēju/aizturi; jaunā `cache-optimized` kombinētā stratēģija un Auto-Combo `cacheAffinity` faktora maršruts atkārtotus pieprasījumus novirza atpakaļ uz savienojumu, kurā atrodas kešotais prefikss; tikai lasāms `/v1/auto-combo/{channel}/candidates` galapunkts atklāj `auto/*` kanāla aktuālo kandidātu kopu. → [Automātiskās kombinācijas](docs/routing/AUTO-COMBO.md)
 - **⚡ Vietējā veiktspēja un infrastruktūra** — lokālais Redis ar vienu klikšķi, Cloudflare Workers / Deno Deploy releju izvietotāji, Bifrost un Mux kā uzraudzīti iegulti pakalpojumi. → [Iegultie pakalpojumi](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Arī komplektā** — spraudņu ietvars un tirgus, Omni/Agent/GitHub prasmju ietvari, Obsidian glabātuves integrācija (22 MCP rīki), ar OpenAI saderīgas Batch un Files API, semantiskā atbilžu kešatmiņa, spēļošana ar līderu tabulām, ACP aģentu atklāšana (15 iebūvēti aģenti), plānota žurnālu eksportēšana uz BigQuery, `auto/chaos` paralēla vairāku modeļu izkliedēšana, Telegram robota tilts, lietotnē iebūvēts versiju pārvaldnieks un LMArena-ELO bezmaksas pakalpojumu sniedzēju reitingi. → [Dokumentācija](docs/README.md)
@@ -688,11 +688,11 @@ parāda precīzu vidi/argumentus pirms izpildes, un `--api-key-env NAME` pasarg�
 
 <div align="center">
 
-## 🌐 388 AI nodrošinātāji — 153 katalogā atzīmēti kā bezmaksas
+## 🌐 389 AI nodrošinātāji — 153 katalogā atzīmēti kā bezmaksas
 
 </div>
 
-> **388 reģistrēts nodrošinātājs** kanoniskajās tērzēšanas, multivides, meklēšanas, lokālajās, mākoņa aģentu un sistēmu kolekcijās, tostarp **153 ar `hasFree: true` atklāšanas metadatiem**. Tērzēšanas modeļu reģistrs aptver **239 nodrošinātājus / 3 059 atšķirīgus nodrošinātāja–modeļa pārus / 1 475 neapstrādātus modeļu ID**; atsevišķajā bezmaksas budžeta katalogā ir **471 rinda katram modelim**, **34 periodiski resursu pūli** un **52 periodiski / bez atslēgas pieejami nodrošinātāji, kas vienmēr ir bezmaksas**. Šie saucēji pēc būtības atšķiras; definīcijas un aprēķini, kuros pūli tiek uzskaitīti tikai vienreiz, ir pieejami sadaļās [Nodrošinātāju atsauce](docs/reference/PROVIDER_REFERENCE.md) un [Bezmaksas līmeņi](docs/reference/FREE_TIERS.md).
+> **389 reģistrēts nodrošinātājs** kanoniskajās tērzēšanas, multivides, meklēšanas, lokālajās, mākoņa aģentu un sistēmu kolekcijās, tostarp **153 ar `hasFree: true` atklāšanas metadatiem**. Tērzēšanas modeļu reģistrs aptver **239 nodrošinātājus / 3 059 atšķirīgus nodrošinātāja–modeļa pārus / 1 475 neapstrādātus modeļu ID**; atsevišķajā bezmaksas budžeta katalogā ir **471 rinda katram modelim**, **34 periodiski resursu pūli** un **52 periodiski / bez atslēgas pieejami nodrošinātāji, kas vienmēr ir bezmaksas**. Šie saucēji pēc būtības atšķiras; definīcijas un aprēķini, kuros pūli tiek uzskaitīti tikai vienreiz, ir pieejami sadaļās [Nodrošinātāju atsauce](docs/reference/PROVIDER_REFERENCE.md) un [Bezmaksas līmeņi](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1294,7 +1294,7 @@ Kanoniskie rādītāji 2026-10-18: **1.976 unikāli videoklipi** · **20.220.289
   <tr><td nowrap><b>Izpildlaiks</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Valoda</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> visā <code>src/</code> un <code>open-sse/</code> (kopš v2.0 kodolā nav neviena <code>any</code>)</td></tr>
   <tr><td nowrap><b>ietvars</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Datu bāze</b></td><td>better-sqlite3 (SQLite, WAL žurnalēšana) + LowDB (mantotais JSON) — 147 domēna moduļi, 233 migrācijas</td></tr>
+  <tr><td nowrap><b>Datu bāze</b></td><td>better-sqlite3 (SQLite, WAL žurnalēšana) + LowDB (mantotais JSON) — 147 domēna moduļi, 236 migrācijas</td></tr>
   <tr><td nowrap><b>Atmiņa</b></td><td>SQLite FTS5 pilnteksta meklēšana + int8 kvantizēti vektoru iegulumi, tipizēta novecošana</td></tr>
   <tr><td nowrap><b>Shēmas</b></td><td>Zod 4 — MCP rīku I/O validācija + API līgumi</td></tr>
   <tr><td nowrap><b>Protokoli</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

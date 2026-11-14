@@ -396,8 +396,8 @@
       "_seeded_2026_11_09": "#19066 block 7. Measured by scripts/check/check-type-scale-ratchet.mjs (text-[8px]..text-[11px], fractions included, in src/): 971 on release/v3.8.54 565dda8d, 914 after the same PR moved 57 non-dense hints and empty states from text-[11px] to text-xs. Ceiling = the live count, without the velocity 20% headroom, on the owner's instruction: it may only go down. Enforced by the pre-commit hook and tests/unit/check-type-scale-ratchet.test.ts."
     },
     "typeScaleFontBold": {
-      "_headroom_2026_11_10": "Tip measured 255 on 2026-11-10; +5 headroom until the font-semibold pass lowers it.",
-      "value": 260,
+      "_tightened_2026_11_11": "#19765 replaced every font-bold with the kit bold weight (font-semibold); the tip measures 0, so font-bold cannot come back.",
+      "value": 0,
       "direction": "down",
       "eps": 0,
       "dedicatedGate": true,
