@@ -484,7 +484,7 @@ function AccessTabBar({ context }: { context: AccessFormContext }) {
             {errorCount > 0 && " "}
             {errorCount > 0 && (
               <span
-                className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-error text-bg"
+                className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-semibold bg-error text-bg"
                 title={t("errorBadgeLabel", { count: errorCount })}
               >
                 <span aria-hidden="true">{errorCount}</span>
@@ -843,7 +843,7 @@ export default function ApiKeyAccessEditorClient({ apiKeyId }: ApiKeyAccessEdito
           <Icon name="key_off" size={24} />
         </div>
         <div className="flex flex-col gap-1">
-          <h2 className="text-xl font-bold text-text-main">{t("keyNotFound")}</h2>
+          <h2 className="text-xl font-semibold text-text-main">{t("keyNotFound")}</h2>
           <p className="text-sm text-text-muted">{t("keyNotFoundDesc")}</p>
         </div>
         <Link href="/dashboard/api-manager" className={buttonVariants({ variant: "outline" })}>
@@ -862,7 +862,9 @@ export default function ApiKeyAccessEditorClient({ apiKeyId }: ApiKeyAccessEdito
           <Icon name="error" size={24} />
         </div>
         <div className="flex flex-col gap-1">
-          <h2 className="text-xl font-bold text-text-main">{fetchError || t("failedLoadKey")}</h2>
+          <h2 className="text-xl font-semibold text-text-main">
+            {fetchError || t("failedLoadKey")}
+          </h2>
         </div>
         <Link href="/dashboard/api-manager" className={buttonVariants({ variant: "outline" })}>
           <Icon name="arrow_back" size={16} />

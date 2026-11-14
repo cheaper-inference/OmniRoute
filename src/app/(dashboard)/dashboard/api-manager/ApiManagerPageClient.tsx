@@ -944,7 +944,7 @@ export default function ApiManagerPageClient() {
                         </span>
                       )}
                       {key.isBanned && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-error/10 text-error text-[11px] font-bold animate-pulse">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-error/10 text-error text-[11px] font-semibold animate-pulse">
                           <Icon name="gavel" size={12} />
                           BANNED
                         </span>
@@ -1017,10 +1017,10 @@ export default function ApiManagerPageClient() {
                         <Icon name="tune" size={18} />
                       </Link>
                       <Button
-                        variant="ghost"
+                        variant="destructive-ghost"
                         size="icon"
                         onClick={() => handleDeleteKey(key.id)}
-                        className="text-error opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
+                        className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
                         title={t("deleteKey")}
                         aria-label={t("deleteKey")}
                         icon="delete"
@@ -1147,6 +1147,7 @@ export default function ApiManagerPageClient() {
           {/* Template Picker */}
           <div className="flex flex-col gap-2 p-3 rounded-lg border border-border bg-surface/40">
             <Select
+              native
               label={t("templatePickerLabel")}
               value={selectedTemplateId}
               onChange={(e) => void handleSelectTemplateInCreateModal(e.target.value)}

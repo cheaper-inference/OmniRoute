@@ -3907,6 +3907,8 @@
     "resetAwareDesc": "Līdzsvaro atlikušo kvotu, ņemot vērā 5h un nedēļas atiestatīšanu, un pēc tam cikliski izvēlas modeļus ar līdzīgu vērtējumu",
     "quotaWeighted": "Kvotu svēršana",
     "quotaWeightedDesc": "Izlaist kontus ar izsmeltu kvotu, pēc tam izvēlēties no pārējiem proporcionāli atlikumam, dalot ar pašlaik apstrādāto pieprasījumu slodzi. Esošās sarunas paliek piesaistītas.",
+    "expiryFirst": "Vispirms beidzošās",
+    "expiryFirstDesc": "Vispirms izmanto kontu, kura kvota citādi beigtos neizmantota: pirmais ir lielākais atlikums ar tuvāko atiestatīšanu.",
     "strictRandom": "Pilnīgi nejauša izvēle",
     "strictRandomDesc": "Sajauc modeļu secību — izmanto katru modeli vienreiz, pirms secību sajauc no jauna",
     "fusion": "Apvienošana",
@@ -4037,6 +4039,11 @@
         "when": "Jūs maršrutējat pieprasījumus starp vairākiem kontiem, izmantojot kvotu telemetriju un atšķirīgus atiestatīšanas periodus.",
         "avoid": "Lielākajai daļai kontu kvotu telemetrija nav pieejama.",
         "example": "Dodiet priekšroku kontam ar 60% nedēļas kvotas atlikumu, kas tiks atiestatīts rīt, nevis kontam ar 80% atlikumu, kas tiks atiestatīts vēlāk."
+      },
+      "expiry-first": {
+        "when": "Jūs maršrutējat pieprasījumus starp kontiem, kuru kvotas tiek atiestatītas pēc atšķirīgiem grafikiem, un vēlaties izlietot kvotu, kas citādi beigtos neizmantota.",
+        "avoid": "Lielākajai daļai kontu nav kvotu telemetrijas, vai arī jums ir nepieciešama stabila secība, kas neņem vērā atiestatīšanas laiku.",
+        "example": "Dodiet priekšroku kontam ar 80% atlikumu, kas tiks atiestatīts pēc 39 minūtēm, nevis kontam ar 48% atlikumu, kas tiks atiestatīts pēc 9 stundām — drīz beidzošā kvota tiek izlietota, pirms tā zūd."
       },
       "strict-random": {
         "when": "Izmantojiet, ja vēlaties pilnīgi vienmērīgu sadalījumu — katrs modelis tiek izmantots vienu reizi, pirms kāds tiek izmantots atkārtoti.",
@@ -4253,6 +4260,13 @@
         "tip1": "Pakalpojumu sniedzējiem ar kvotu telemetriju izmantojiet skaidri norādītas kontu darbības vai maršrutēšanu pēc kontu tagiem.",
         "tip2": "Pielāgojiet sesijas un nedēļas svarus, ja īstermiņa kvotas izsmelšana rada lielāku risku.",
         "tip3": "Uzturiet vienādu rezultātu diapazonu nelielu, lai līdzvērtīgi konti joprojām tiktu rotēti vienmērīgi."
+      },
+      "expiry-first": {
+        "title": "Vispirms beidzošā kvota",
+        "description": "Sarindo kontus pēc izmantošanas spiediena: liels atlikušās kvotas apjoms tuvu atiestatīšanas termiņam ir pirmais.",
+        "tip1": "Nepieciešama pakalpojumu sniedzēja kvotu telemetrija; konti bez tās saglabā norādīto prioritātes secību.",
+        "tip2": "Gandrīz vienādi rezultāti rotē vienādu rezultātu diapazonā, lai līdzīgi konti joprojām dalītu slodzi.",
+        "tip3": "Ierobežojiet sarindošanu ar to kvotas grupu, pēc kuras katrs modelis faktiski tiek norēķināts."
       },
       "strict-random": {
         "title": "Sajaukta kāršu klāja sadale",
@@ -4485,7 +4499,7 @@
     "spend7d": "Izdevumi 7D",
     "avgCostPerRequest": "Vidējās izmaksas uz pieprasījumu",
     "noCostDataDescription": "Sāciet veikt pieprasījumus, lai šeit parādītos izmaksu dati. Izmaksas tiek automātiski uzskaitītas visiem nodrošinātājiem.",
-    "spendToday": "Izdevumi šodien",
+    "spendToday": "Izdevumi 1 dienā",
     "overviewLoadFailed": "Neizdevās ielādēt izmaksu pārskatu",
     "overviewDescription": "Reāllaika izdevumu sadalījums visiem pieslēgtajiem nodrošinātājiem un modeļiem",
     "providerShare": "Nodrošinātāju īpatsvars",
@@ -5683,6 +5697,7 @@
     "usageTracking": "Izmantošanas uzskaite",
     "securityDesc": "Iestatiet paroli, lai aizsargātu savu informācijas paneli, vai izlaidiet šo soli.",
     "securityDescSkipWarning": "⚠️ Ja parole nav iestatīta, iestatīšanas laikā nevarēsiet pievienot pakalpojumu sniedzējus. Varat tos pievienot vēlāk informācijas panelī pēc paroles iestatīšanas.",
+    "passwordAlreadySet": "Paneļa parole jau ir iestatīta. Vēlāk to varat mainīt iestatījumos.",
     "providerDesc": "Pievienojiet savu pirmo AI pakalpojumu sniedzēju. Vēlāk varēsiet pievienot vairāk.",
     "providerRequiresPassword": "Lai pievienotu pakalpojumu sniedzējus, vispirms jāiestata parole. Lūdzu, atgriezieties drošības solī un iestatiet paroli vai pievienojiet pakalpojumu sniedzējus vēlāk informācijas panelī.",
     "apiKeyRequired": "API atslēga (obligāta)",
@@ -6055,6 +6070,8 @@
     "importFromModels": "Importēt no /models",
     "modelsImported": "Importēti modeļi: {count}",
     "allModelsAlreadyImported": "Visi modeļi jau importēti",
+    "providerPublishesNoModelList": "Šis nodrošinātājs nepublicē modeļu sarakstu — tā iebūvētais katalogs ir aktuāls",
+    "modelsNoLongerListed": "{count, plural, one {# modelis vairs nav} other {# modeļi vairs nav}} norādīti nodrošinātāja sarakstā",
     "noNewModelsToImport": "Nav jaunu modeļu importēšanai — visi modeļi jau ir reģistrā vai pielāgoto modeļu sarakstā",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Modeļa atklāšana neizdevās {time}",
@@ -6740,6 +6757,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Grok Web sīkdatnes vietturis",
     "herokuBaseUrlHint": "Norāde par Heroku bāzes URL",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Slēpt e-pastu",
     "imageProviders": "Attēlu nodrošinātāji",
     "videoProviders": "Video generēšana",
@@ -7238,7 +7256,8 @@
       "kiro": "Bezmaksas plāns: 50 kredīti mēnesī (~25K–100K tokenu). ⚠️ Kiro pakalpojuma sniegšanas noteikumi aizliedz trešo pušu proxy/harness izmantošanu.",
       "codex": "Savienojiet OpenAI Codex, izmantojot esošo OAuth plūsmu.",
       "qwen": "Savienojiet Qwen Code, izmantojot esošo OAuth plūsmu.",
-      "github-models": "Izveidojiet GitHub PAT ar 'models: read' tvērumu vietnē github.com/settings/tokens"
+      "github-models": "Izveidojiet GitHub PAT ar 'models: read' tvērumu vietnē github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} pieņem sniedzēja formāta modeļu ID. Importējiet tos no /models vai pievienojiet pielāgotus ID maršrutēšanai.",
     "bedrockModelsDescription": "Amazon Bedrock modeļi ir piesaistīti AWS reģionam. Importējiet tos no /models vai pievienojiet izvēlētajā reģionā iespējoto Bedrock modeļu ID.",
@@ -8096,6 +8115,8 @@
     "resetAwareDesc": "Priekšroka kontiem ar pietiekamu atlikušo kvotu un tuvāku atiestatīšanas laiku",
     "quotaWeighted": "Svērtā atlase pēc kvotas",
     "quotaWeightedDesc": "Izlaist kontus ar izsmeltu kvotu, pēc tam izvēlēties no pārējiem proporcionāli atlikumam, dalot ar pašlaik apstrādāto pieprasījumu slodzi. Esošās sarunas paliek piesaistītas.",
+    "expiryFirst": "Vispirms beidzošās",
+    "expiryFirstDesc": "Vispirms izmanto kontu, kura kvota citādi beigtos neizmantota: pirmais ir lielākais atlikums ar tuvāko atiestatīšanu.",
     "strictRandom": "Stingri nejauši",
     "strictRandomDesc": "Sajaukt komplektu — izmanto katru kontu vienu reizi, pirms sajauc no jauna",
     "stickyLimit": "Piesaistes ierobežojums",
@@ -8808,6 +8829,8 @@
     "retentionUsageHistory": "Lietojuma vēsture (dienas)",
     "retentionMemoryEntries": "Atmiņas ieraksti (dienas)",
     "retentionXpAuditLog": "XP audita žurnāls (dienas)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Saglabāt glabāšanas iestatījumus",
     "storageAutoVacuumMode": "Automātiskais VACUUM režīms",
     "storageScheduledVacuum": "Plānotā VACUUM darbība",
@@ -10258,7 +10281,11 @@
     "mappingInvalidJson": "Nederīgs JSON.",
     "mappingMustBeObject": "Kartēšanai jābūt JSON objektam, nevis masīvam vai primitīvai vērtībai.",
     "mappingValueMustBeString": "Atslēgas “{key}” vērtībai jābūt virknei (string).",
-    "save": "Saglabāt"
+    "save": "Saglabāt",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman dzinējs",
@@ -10643,6 +10670,7 @@
     "grokAutoTopUpMonth": "mēnesī",
     "grokAdditionalCredits": "Papildu kredīti",
     "kiloAccountBalance": "Konta bilance",
+    "kiloPassBandUsage": "{used} no {total}",
     "kiloPassBonus": "Pieejamais bonuss",
     "kiloPassMeterLabel": "Kilo Pass lietojuma indikators",
     "kiloPassPaid": "Apmaksāts",
@@ -11985,6 +12013,7 @@
     "description": "Uzraugiet nodrošinātāja uzvednes kešatmiņas efektivitāti un lokālo semantisko atbilžu atkārtotu izmantošanu.",
     "refresh": "Atsvaidzināt",
     "clearAll": "Notīrīt semantisko kešatmiņu",
+    "clearAllConfirm": "Visi šīs kešatmiņas ieraksti tiks dzēsti. Šo darbību nevar atsaukt.",
     "memoryEntries": "Ieraksti atmiņā",
     "memoryEntriesSub": "Atmiņā glabāts LRU",
     "dbEntries": "DB ieraksti",
@@ -12869,6 +12898,8 @@
     },
     "attempts": "mēģinājumi",
     "detail": {
+      "tabOverview": "Pārskats",
+      "tabPayloads": "Dati",
       "omittedHttpAttempts": "{count} HTTP sūtījumi nav saglabāti",
       "noHttpResponse": "HTTP atbilde nav novērota",
       "transportError": "Pārsūtīšanas kļūda",

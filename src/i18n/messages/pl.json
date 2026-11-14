@@ -3907,6 +3907,8 @@
     "resetAwareDesc": "Bilansuje pozostały quota z resetami 5-godzinnymi i tygodniowymi, a następnie stosuje round-robin dla podobnych wyników",
     "quotaWeighted": "Ważone według limitu",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Najpierw wygasające",
+    "expiryFirstDesc": "Najpierw zużywa konto, którego limit w przeciwnym razie wygasłby niewykorzystany: pierwsze idzie konto z największą resztą i najbliższym resetem.",
     "strictRandom": "Ściśle losowo",
     "strictRandomDesc": "Tasowanie talii — używa każdego model raz przed ponownym przetasowaniem",
     "fusion": "Fuzja",
@@ -4037,6 +4039,11 @@
         "when": "Gdy kierujesz ruch przez wiele kont z telemetryczną obsługą quota i różnymi oknami resetowania.",
         "avoid": "Gdy telemetria quota jest niedostępna dla większości kont.",
         "example": "Preferowanie tygodniowego konta wykorzystanego w 60%, które resetuje się jutro, nad kontem wykorzystanym w 80%, które resetuje się później."
+      },
+      "expiry-first": {
+        "when": "Gdy kierujesz ruch przez konta, których limity resetują się według różnych harmonogramów, i chcesz zużyć limit, który w przeciwnym razie wygasłby niewykorzystany.",
+        "avoid": "Gdy dla większości kont brakuje telemetrii limitów lub potrzebujesz stabilnej kolejności, która ignoruje moment resetu.",
+        "example": "Preferuj konto z 80% pozostałego limitu, które resetuje się za 39 minut, zamiast konta z 48% pozostałego limitu, które resetuje się za 9 godzin — limit bliski wygaśnięcia zostaje zużyty, zanim przepadnie."
       },
       "strict-random": {
         "when": "Używaj, gdy chcesz uzyskać idealnie równomierne rozłożenie — każdy model jest używany raz przed powtórzeniem.",
@@ -4253,6 +4260,13 @@
         "tip1": "Użyj jawnych kroków konta lub routingu opartego na tagach kont dla providers z telemetryczną obsługą quota.",
         "tip2": "Dostosuj wagi sesyjne w stosunku do tygodniowych, gdy krótkoterminowe wyczerpanie jest bardziej ryzykowne.",
         "tip3": "Utrzymuj wąskie pasmo remisowe, aby równorzędne konta nadal rotowały sprawiedliwie."
+      },
+      "expiry-first": {
+        "title": "Najpierw wygasający limit",
+        "description": "Szereguje konta według presji wykorzystania: wysoki pozostały limit blisko terminu resetu idzie pierwszy.",
+        "tip1": "Wymaga telemetrii limitów od dostawcy; konta bez niej zachowują swoją wymienioną kolejność priorytetów.",
+        "tip2": "Niemal równe wyniki rotują w paśmie remisowym, dzięki czemu podobne konta nadal dzielą obciążenie.",
+        "tip3": "Ogranicz ranking do puli limitu, według której każdy model jest faktycznie rozliczany."
       },
       "strict-random": {
         "title": "Rozkład losowy bez powtórzeń (Shuffle)",
@@ -4485,7 +4499,7 @@
     "spend7d": "Wydatki 7D",
     "avgCostPerRequest": "Śr. koszt / zapytanie",
     "noCostDataDescription": "Wyślij zapytania, aby zobaczyć dane o kosztach. Koszty są automatycznie śledzone dla wszystkich providers.",
-    "spendToday": "Dzisiejsze wydatki",
+    "spendToday": "Wydatki za 1 dzień",
     "overviewLoadFailed": "Nie udało się załadować przeglądu kosztów",
     "overviewDescription": "Podział wydatków w czasie rzeczywistym dla wszystkich połączonych providers i models",
     "providerShare": "Udział providers",
@@ -5683,6 +5697,7 @@
     "usageTracking": "Śledzenie użycia",
     "securityDesc": "Ustaw hasło, aby zabezpieczyć dashboard, lub pomiń na razie.",
     "securityDescSkipWarning": "⚠️ Bez hasła nie będzie można dodać dostawców podczas konfiguracji. Można ich dodać później z poziomu panelu po ustawieniu hasła.",
+    "passwordAlreadySet": "Hasło do panelu jest już ustawione. Możesz je później zmienić w Ustawieniach.",
     "providerDesc": "Połącz pierwszego AI provider. Więcej można dodać później.",
     "providerRequiresPassword": "Aby dodać dostawców, należy najpierw ustawić hasło. Wróć do kroku zabezpieczeń i ustaw hasło albo dodaj dostawców później z poziomu panelu.",
     "apiKeyRequired": "Klucz API (wymagany)",
@@ -6055,6 +6070,8 @@
     "importFromModels": "Importuj z /models",
     "modelsImported": "Zaimportowano {count} models",
     "allModelsAlreadyImported": "Wszystkie models zostały już zaimportowane",
+    "providerPublishesNoModelList": "Ten dostawca nie publikuje listy modeli — jego wbudowany katalog jest aktualny",
+    "modelsNoLongerListed": "{count, plural, one {# model nie jest już} few {# modele nie są już} many {# modeli nie jest już} other {# modelu nie ma już}} wymienione przez dostawcę",
     "noNewModelsToImport": "Brak nowych models do zaimportowania — wszystkie models znajdują się już w rejestrze lub na liście niestandardowych models",
     "localCatalogFallbackStatus": "Nie udało się pobrać listy modeli dostawcy — wyświetlany jest wbudowany katalog",
     "discoveryDegradedStatus": "Wykrywanie modelu nie powiodło się {time}",
@@ -6740,6 +6757,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Wpisz ciasteczko sieciowe Grok",
     "herokuBaseUrlHint": "Wskazówka dotycząca bazowego URL Heroku",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Ukryj adres e-mail",
     "imageProviders": "Dostawcy obrazów",
     "videoProviders": "Generowanie wideo",
@@ -7238,7 +7256,8 @@
       "kiro": "Darmowy plan: 50 kredytów/miesiąc (~25K–100K tokenów). ⚠️ ToS Kiro zabrania korzystania z zewnętrznych proxy/harness.",
       "codex": "Połącz OpenAI Codex za pomocą istniejącego przepływu OAuth.",
       "qwen": "Połącz Qwen Code za pomocą istniejącego przepływu OAuth.",
-      "github-models": "Utwórz token GitHub PAT z zakresem 'models: read' na github.com/settings/tokens"
+      "github-models": "Utwórz token GitHub PAT z zakresem 'models: read' na github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} akceptuje natywne ID models dla provider. Zaimportuj z /models lub dodaj własne ID do routing.",
     "bedrockModelsDescription": "Models Amazon Bedrock są ograniczone do regionu AWS. Zaimportuj z /models lub dodaj Bedrock ID models włączone w wybranym regionie.",
@@ -8096,6 +8115,8 @@
     "resetAwareDesc": "Preferuj konta ze zdrową pozostałą quota i bliskim czasem resetu",
     "quotaWeighted": "Ważone limitem",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Najpierw wygasające",
+    "expiryFirstDesc": "Najpierw zużywa konto, którego limit w przeciwnym razie wygasłby niewykorzystany: pierwsze idzie konto z największą resztą i najbliższym resetem.",
     "strictRandom": "Ściśle losowo",
     "strictRandomDesc": "Tasowanie talii — używa każdego konta raz przed ponownym przetasowaniem",
     "stickyLimit": "Limit trwałego przypisania",
@@ -8808,6 +8829,8 @@
     "retentionUsageHistory": "Historia użycia (dni)",
     "retentionMemoryEntries": "Wpisy pamięci (dni)",
     "retentionXpAuditLog": "Log audytu XP (dni)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Zapisz ustawienia retencji",
     "storageAutoVacuumMode": "Tryb Auto Vacuum",
     "storageScheduledVacuum": "Zaplanowane vacuum",
@@ -10258,7 +10281,11 @@
     "mappingInvalidJson": "Nieprawidłowy format JSON.",
     "mappingMustBeObject": "Mapowanie musi być obiektem JSON, a nie tablicą ani wartością pierwotną.",
     "mappingValueMustBeString": "Wartość klucza „{key}” musi być ciągiem znaków.",
-    "save": "Zapisz"
+    "save": "Zapisz",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Silnik Caveman",
@@ -10643,6 +10670,7 @@
     "grokAutoTopUpMonth": "miesiąc",
     "grokAdditionalCredits": "Dodatkowe Kredyty",
     "kiloAccountBalance": "Saldo konta",
+    "kiloPassBandUsage": "{used} z {total}",
     "kiloPassBonus": "Dostępny bonus",
     "kiloPassMeterLabel": "Miernik zużycia Kilo Pass",
     "kiloPassPaid": "Opłacone",
@@ -11985,6 +12013,7 @@
     "description": "Monitorowanie wydajności prompt cache u provider oraz lokalnego ponownego użycia semantycznego.",
     "refresh": "Odśwież",
     "clearAll": "Wyczyść cache semantyczny",
+    "clearAllConfirm": "Wszystkie wpisy w tej pamięci podręcznej zostaną usunięte. Tej operacji nie można cofnąć.",
     "memoryEntries": "Wpisy w pamięci",
     "memoryEntriesSub": "LRU w pamięci",
     "dbEntries": "Wpisy w bazie danych",
@@ -12869,6 +12898,8 @@
     },
     "attempts": "próby",
     "detail": {
+      "tabOverview": "Przegląd",
+      "tabPayloads": "Dane",
       "omittedHttpAttempts": "Nie zachowano {count} wysłań HTTP",
       "noHttpResponse": "Nie zaobserwowano odpowiedzi HTTP",
       "transportError": "Błąd transportu",

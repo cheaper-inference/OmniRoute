@@ -3907,6 +3907,8 @@
     "resetAwareDesc": "Binabalanse ang natitirang quota laban sa 5h at lingguhang pag-reset, pagkatapos ay round-robins ang mga katulad na marka",
     "quotaWeighted": "Tinimbang ayon sa Quota",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Mag-e-expire Muna",
+    "expiryFirstDesc": "Inuuna ang account na ang quota ay mag-e-expire nang hindi nagagamit: nauuna ang may pinakamalaking natitira at pinakamalapit na pag-reset.",
     "strictRandom": "Ganap na Random",
     "strictRandomDesc": "Naka-shuffle na deck — ginagamit nang isang beses ang bawat modelo bago muling i-shuffle",
     "fusion": "Pagsasanib",
@@ -4037,6 +4039,11 @@
         "when": "Nagruruta ka sa maraming account na may quota telemetry at iba't ibang mga reset window.",
         "avoid": "Hindi available ang quota telemetry para sa karamihan ng mga account.",
         "example": "Mas gusto ang isang 60% lingguhang pag-reset ng account bukas kaysa sa isang 80% na pag-reset ng account sa ibang pagkakataon."
+      },
+      "expiry-first": {
+        "when": "Nagruruta ka sa mga account na ang mga quota ay nire-reset sa magkakaibang iskedyul at gusto mong gamitin ang quota na kung hindi ay mag-e-expire nang hindi nagagamit.",
+        "avoid": "Walang quota telemetry ang karamihan ng mga account, o kailangan mo ng matatag na pagkakasunod-sunod na hindi isinasaalang-alang ang oras ng pag-reset.",
+        "example": "Mas piliin ang account na may natitirang 80% na magre-reset sa loob ng 39 minuto kaysa sa account na may natitirang 48% na magre-reset sa loob ng 9 na oras — nagagamit ang malapit nang mag-expire na quota bago ito masayang."
       },
       "strict-random": {
         "when": "Gamitin kapag gusto mo ng ganap na pantay na pamamahagi — gagamitin muna nang tig-iisang beses ang bawat modelo bago umulit.",
@@ -4253,6 +4260,13 @@
         "tip1": "Gumamit ng mga tahasang hakbang sa account o pagruruta ng tag ng account para sa mga provider na may quota telemetry.",
         "tip2": "Tune session vs lingguhang timbang kapag ang panandaliang pagkahapo ay mas mapanganib.",
         "tip3": "Panatilihing maliit ang tie band para patas pa rin ang pag-ikot ng mga katumbas na account."
+      },
+      "expiry-first": {
+        "title": "Inuuna ang mag-e-expire na quota",
+        "description": "Niraranggo ang mga account ayon sa presyon ng paggamit: nauuna ang malaking natitirang quota na malapit na sa deadline ng pag-reset nito.",
+        "tip1": "Nangangailangan ng quota telemetry ng provider; pinapanatili ng mga account na wala nito ang nakalistang priority order.",
+        "tip2": "Umiikot sa loob ng tie band ang halos magkakapantay na score para patuloy na maghati sa load ang magkakatulad na account.",
+        "tip3": "Limitahan ang ranggo sa quota bucket na talagang pinagbabatayan ng singil ng bawat model."
       },
       "strict-random": {
         "title": "Pamamahagi gamit ang shuffle deck",
@@ -4485,7 +4499,7 @@
     "spend7d": "Spend7D",
     "avgCostPerRequest": "Avg Cost Per Request",
     "noCostDataDescription": "No Cost Data Description",
-    "spendToday": "Gastos Ngayon",
+    "spendToday": "Gastos sa loob ng 1 araw",
     "overviewLoadFailed": "Overview Load Failed",
     "overviewDescription": "Overview Description",
     "providerShare": "Bahagi ng Provider",
@@ -5683,6 +5697,7 @@
     "usageTracking": "Pagsubaybay sa Paggamit",
     "securityDesc": "Magtakda ng password para protektahan ang iyong dashboard, o laktawan muna.",
     "securityDescSkipWarning": "⚠️ Kung walang password, hindi ka makakapagdagdag ng mga provider habang nagsasagawa ng paunang pag-setup. Maaari mong idagdag ang mga ito sa ibang pagkakataon mula sa dashboard pagkatapos magtakda ng password.",
+    "passwordAlreadySet": "May nakatakda nang password para sa dashboard. Maaari mo itong palitan mamaya sa Settings.",
     "providerDesc": "Ikonekta ang iyong unang AI provider. Maaari kang magdagdag ng higit pa sa ibang pagkakataon.",
     "providerRequiresPassword": "Kailangan mo munang magtakda ng password para makapagdagdag ng mga provider. Bumalik sa hakbang sa seguridad at magtakda ng password, o magdagdag ng mga provider sa ibang pagkakataon mula sa dashboard.",
     "apiKeyRequired": "API Key (kinakailangan)",
@@ -6055,6 +6070,8 @@
     "importFromModels": "Mag-import mula sa /models",
     "modelsImported": "{count} modelo ang na-import",
     "allModelsAlreadyImported": "Lahat ng mga modelo ay nai-import na",
+    "providerPublishesNoModelList": "Walang inilalathalang listahan ng modelo ang provider na ito — napapanahon ang built-in nitong katalogo",
+    "modelsNoLongerListed": "{count, plural, one {# modelo ang hindi na nakalista} other {# modelo ang hindi na nakalista}} ng provider",
     "noNewModelsToImport": "Walang bagong modelo na i-import — lahat ng mga modelo ay nasa registry o custom na listahan na",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Nabigo ang pagtuklas ng modelo {time}",
@@ -6740,6 +6757,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Placeholder ng Grok Web Cookie",
     "herokuBaseUrlHint": "Pahiwatig sa Base URL ng Heroku",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Itago ang Email",
     "imageProviders": "Mga Provider ng Larawan",
     "videoProviders": "Pagbuo ng Video",
@@ -7238,7 +7256,8 @@
       "kiro": "Libreng tier: 50 credits/buwan (~25K–100K tokens). ⚠️ Ipinagbabawal ng Kiro ToS ang paggamit ng third-party proxy/harness.",
       "codex": "Ikonekta ang OpenAI Codex gamit ang umiiral na OAuth flow.",
       "qwen": "Ikonekta ang Qwen Code gamit ang umiiral na OAuth flow.",
-      "github-models": "Gumawa ng GitHub PAT na may 'models: read' na scope sa github.com/settings/tokens"
+      "github-models": "Gumawa ng GitHub PAT na may 'models: read' na scope sa github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "Tumatanggap ang {provider} ng mga provider-native na model ID. Mag-import mula sa /models o magdagdag ng mga custom na ID para sa pagruruta.",
     "bedrockModelsDescription": "Ang mga modelo ng Amazon Bedrock ay saklaw ng rehiyon ng AWS. Mag-import mula sa /models o magdagdag ng mga Bedrock model ID na pinagana sa napiling rehiyon.",
@@ -8096,6 +8115,8 @@
     "resetAwareDesc": "Mas gusto ang mga account na may malusog na natitirang quota at mas malapit na pag-reset",
     "quotaWeighted": "Tinimbang ayon sa Quota",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Mag-e-expire Muna",
+    "expiryFirstDesc": "Inuuna ang account na ang quota ay mag-e-expire nang hindi nagagamit: nauuna ang may pinakamalaking natitira at pinakamalapit na pag-reset.",
     "strictRandom": "Mahigpit na Sapalaran",
     "strictRandomDesc": "Barahang hinalo — ginagamit nang isang beses ang bawat account bago muling haluin",
     "stickyLimit": "Malagkit na Limitasyon",
@@ -8808,6 +8829,8 @@
     "retentionUsageHistory": "Kasaysayan ng Paggamit (mga araw)",
     "retentionMemoryEntries": "Mga Entry ng Memorya (mga araw)",
     "retentionXpAuditLog": "XP Audit Log (mga araw)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "I-save ang mga setting ng pagpapanatili",
     "storageAutoVacuumMode": "Mode ng Awtomatikong Vacuum",
     "storageScheduledVacuum": "Naka-iskedyul na Vacuum",
@@ -10258,7 +10281,11 @@
     "mappingInvalidJson": "Hindi wastong JSON.",
     "mappingMustBeObject": "Ang mapping ay dapat na isang JSON object, hindi isang array o primitive value.",
     "mappingValueMustBeString": "Ang value para sa key na “{key}” ay dapat na isang string.",
-    "save": "I-save"
+    "save": "I-save",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -10643,6 +10670,7 @@
     "grokAutoTopUpMonth": "buwan",
     "grokAdditionalCredits": "Karagdagang Kredito",
     "kiloAccountBalance": "Balanse ng Account",
+    "kiloPassBandUsage": "{used} sa {total}",
     "kiloPassBonus": "Magagamit na bonus",
     "kiloPassMeterLabel": "Meter ng paggamit ng Kilo Pass",
     "kiloPassPaid": "Bayad na",
@@ -11985,6 +12013,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "I-refresh",
     "clearAll": "Clear All",
+    "clearAllConfirm": "Mabubura ang lahat ng entry sa cache na ito. Hindi na ito maibabalik.",
     "memoryEntries": "Mga Entry sa Memorya",
     "memoryEntriesSub": "In-memory na LRU",
     "dbEntries": "Mga Entry sa DB",
@@ -12869,6 +12898,8 @@
     },
     "attempts": "mga pagtatangkang",
     "detail": {
+      "tabOverview": "Pangkalahatang-ideya",
+      "tabPayloads": "Mga Payload",
       "omittedHttpAttempts": "Hindi napanatili ang {count} pagpapadala ng HTTP",
       "noHttpResponse": "Walang naobserbahang tugon sa HTTP",
       "transportError": "Error sa transportasyon",

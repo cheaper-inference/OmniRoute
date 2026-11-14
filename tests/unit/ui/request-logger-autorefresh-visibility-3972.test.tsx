@@ -177,14 +177,14 @@ describe("RequestLoggerV2 detail modal lifecycle", () => {
     await act(async () => {
       row?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
-    expect(container.querySelector('[aria-label="ariaLabel"]')).not.toBeNull();
+    expect(document.querySelector('[aria-label="ariaLabel"]')).not.toBeNull();
 
     await act(async () => {
-      container
+      document
         .querySelector<HTMLButtonElement>('[aria-label="close"]')
         ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
-    expect(container.querySelector('[aria-label="ariaLabel"]')).toBeNull();
+    expect(document.querySelector('[aria-label="ariaLabel"]')).toBeNull();
 
     await act(async () => {
       detail.resolve(
@@ -203,7 +203,7 @@ describe("RequestLoggerV2 detail modal lifecycle", () => {
       await detail.promise;
     });
 
-    expect(container.querySelector('[aria-label="ariaLabel"]')).toBeNull();
+    expect(document.querySelector('[aria-label="ariaLabel"]')).toBeNull();
   });
 });
 

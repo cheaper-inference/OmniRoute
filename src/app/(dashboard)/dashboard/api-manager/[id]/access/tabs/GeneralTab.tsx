@@ -118,7 +118,7 @@ function BanToggle({ formState, setIsBanned }: GeneralSectionProps<"setIsBanned"
     <div className="flex items-start justify-between gap-3 p-4 rounded-lg border border-error/20 bg-error/5">
       {/* Ban Toggle (SECURITY) */}
       <div className="flex flex-col gap-1">
-        <p className="text-sm font-bold text-error">{t("bannedStatus")}</p>
+        <p className="text-sm font-semibold text-error">{t("bannedStatus")}</p>
         <p className="text-xs text-error">
           Immediately revoke all access. Used for suspected abuse or compromised keys.
         </p>

@@ -3907,6 +3907,8 @@
     "resetAwareDesc": "Gewichtet Restquote gegen 5h- und Wochen-Resets und rotiert ähnliche Scores per Round Robin",
     "quotaWeighted": "Kontingentgewichtet",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Ablauf zuerst",
+    "expiryFirstDesc": "Verbraucht zuerst das Konto, dessen Quote sonst ungenutzt verfallen würde: der größte Rest mit dem nächsten Reset kommt zuerst.",
     "strictRandom": "Strikte Zufallsauswahl",
     "strictRandomDesc": "Mischverfahren – verwendet jedes Modell einmal, bevor neu gemischt wird",
     "fusion": "Fusion",
@@ -4037,6 +4039,11 @@
         "when": "Du routest über mehrere Konten mit Quota-Telemetrie und unterschiedlichen Reset-Fenstern.",
         "avoid": "Für die meisten Konten fehlen Quota-Telemetriedaten.",
         "example": "Bevorzuge ein Konto mit 60 % Wochen-Restquote und Reset morgen vor 80 % mit späterem Reset."
+      },
+      "expiry-first": {
+        "when": "Du routest über Konten, deren Quoten nach unterschiedlichen Zeitplänen zurückgesetzt werden, und willst Quote verbrauchen, die sonst ungenutzt verfallen würde.",
+        "avoid": "Für die meisten Konten fehlt Quota-Telemetrie, oder du brauchst eine stabile Reihenfolge, die den Reset-Zeitpunkt ignoriert.",
+        "example": "Bevorzuge ein Konto mit 80 % Rest und Reset in 39 Minuten vor einem mit 48 % Rest und Reset in 9 Stunden — die bald verfallende Quote wird verbraucht, bevor sie verloren geht."
       },
       "strict-random": {
         "when": "Verwenden Sie diese Option, wenn Sie eine vollkommen gleichmäßige Verteilung wünschen – jedes Modell wird einmal verwendet, bevor es erneut ausgewählt wird.",
@@ -4253,6 +4260,13 @@
         "tip1": "Nutze explizite Kontoschritte oder Tag-Routing für Provider mit Quota-Telemetrie.",
         "tip2": "Passe 5h- und Wochengewichtung an, wenn kurzfristige Erschöpfung riskant ist.",
         "tip3": "Halte das Tie-Band klein, damit gleichwertige Konten fair rotieren."
+      },
+      "expiry-first": {
+        "title": "Verfallende Quote zuerst",
+        "description": "Ordnet Konten nach Verfallsdruck: hohe Restquote kurz vor ihrem Reset-Termin kommt zuerst.",
+        "tip1": "Erfordert Quota-Telemetrie des Providers; Konten ohne sie behalten ihre gelistete Prioritätsreihenfolge.",
+        "tip2": "Nahezu gleiche Scores rotieren innerhalb des Tie-Bands, sodass gleichwertige Konten die Last weiterhin teilen.",
+        "tip3": "Beschränke das Ranking auf den Quota-Bucket, gegen den jedes Modell tatsächlich abrechnet."
       },
       "strict-random": {
         "title": "Shuffle-Deck-Verteilung",
@@ -4485,7 +4499,7 @@
     "spend7d": "Spend7D",
     "avgCostPerRequest": "Avg Cost Per Request",
     "noCostDataDescription": "No Cost Data Description",
-    "spendToday": "Heutige Ausgaben",
+    "spendToday": "Ausgaben für 1 Tag",
     "overviewLoadFailed": "Overview Load Failed",
     "overviewDescription": "Overview Description",
     "providerShare": "Anbieteranteil",
@@ -5683,6 +5697,7 @@
     "usageTracking": "Nutzungsverfolgung",
     "securityDesc": "Legen Sie ein Passwort fest, um Ihr Dashboard zu schützen, oder überspringen Sie es zunächst.",
     "securityDescSkipWarning": "⚠️ Ohne Passwort können Sie während der Einrichtung keine Anbieter hinzufügen. Sie können sie später über das Dashboard hinzufügen, nachdem Sie ein Passwort festgelegt haben.",
+    "passwordAlreadySet": "Ein Dashboard-Passwort ist bereits festgelegt. Sie können es später in den Einstellungen ändern.",
     "providerDesc": "Verbinden Sie Ihren ersten KI-Anbieter. Sie können später weitere hinzufügen.",
     "providerRequiresPassword": "Sie müssen zuerst ein Passwort festlegen, um Anbieter hinzuzufügen. Kehren Sie zum Sicherheitsschritt zurück und legen Sie ein Passwort fest, oder fügen Sie Anbieter später über das Dashboard hinzu.",
     "apiKeyRequired": "API-Schlüssel (erforderlich)",
@@ -6055,6 +6070,8 @@
     "importFromModels": "Import aus /models",
     "modelsImported": "{count} Modelle importiert",
     "allModelsAlreadyImported": "Alle Modelle sind bereits importiert",
+    "providerPublishesNoModelList": "Dieser Anbieter veröffentlicht keine Modellliste — sein integrierter Katalog ist aktuell",
+    "modelsNoLongerListed": "{count, plural, one {# Modell wird vom Anbieter nicht mehr aufgeführt} other {# Modelle werden vom Anbieter nicht mehr aufgeführt}}",
     "noNewModelsToImport": "Keine neuen Modelle zum Importieren — alle Modelle sind bereits in der Registry oder der Liste benutzerdefinierter Modelle",
     "localCatalogFallbackStatus": "Die Modellliste des Anbieters ist nicht erreichbar – der integrierte Katalog wird angezeigt",
     "discoveryDegradedStatus": "Modellentdeckung fehlgeschlagen {time}",
@@ -6740,6 +6757,7 @@
     "antigravityProjectIdPlaceholder": "meine-gcp-projekt-id",
     "grokWebCookiePlaceholder": "Platzhalter für das Grok-Web-Cookie",
     "herokuBaseUrlHint": "Hinweis zur Heroku-Basis-URL",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "E-Mail-Adresse ausblenden",
     "imageProviders": "Bildanbieter",
     "videoProviders": "Videogenerierung",
@@ -7238,7 +7256,8 @@
       "kiro": "Kostenlose Stufe: 50 Credits/Monat (~25K–100K Token). ⚠️ Die Nutzungsbedingungen von Kiro verbieten die Nutzung von Drittanbieter-Proxys/Harnesses.",
       "codex": "OpenAI Codex mit dem bestehenden OAuth-Flow verbinden.",
       "qwen": "Qwen Code mit dem bestehenden OAuth-Flow verbinden.",
-      "github-models": "Erstellen Sie einen GitHub-PAT mit dem Scope 'models: read' unter github.com/settings/tokens"
+      "github-models": "Erstellen Sie einen GitHub-PAT mit dem Scope 'models: read' unter github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} akzeptiert provider-native Modell-IDs. Importiere sie über /models oder füge eigene IDs fürs Routing hinzu.",
     "bedrockModelsDescription": "Amazon-Bedrock-Modelle hängen von der AWS-Region ab. Importiere sie über /models oder füge Bedrock-Modell-IDs hinzu, die in der gewählten Region aktiviert sind.",
@@ -8096,6 +8115,8 @@
     "resetAwareDesc": "Bevorzugt Konten mit gesunder Restquote und näherem Reset",
     "quotaWeighted": "Kontingentgewichtet",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Ablauf zuerst",
+    "expiryFirstDesc": "Verbraucht zuerst das Konto, dessen Quote sonst ungenutzt verfallen würde: der größte Rest mit dem nächsten Reset kommt zuerst.",
     "strictRandom": "Strikte Zufallsauswahl",
     "strictRandomDesc": "Kartenstapelprinzip – jedes Konto wird einmal verwendet, bevor neu gemischt wird",
     "stickyLimit": "Sticky-Limit",
@@ -8808,6 +8829,8 @@
     "retentionUsageHistory": "Nutzungsverlauf (Tage)",
     "retentionMemoryEntries": "Speichereinträge (Tage)",
     "retentionXpAuditLog": "XP-Audit-Log (Tage)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Aufbewahrungseinstellungen speichern",
     "storageAutoVacuumMode": "Automatischer Vakuummodus",
     "storageScheduledVacuum": "Geplantes Vakuum",
@@ -10258,7 +10281,11 @@
     "mappingInvalidJson": "Ungültiges JSON.",
     "mappingMustBeObject": "Das Mapping muss ein JSON-Objekt sein, kein Array oder primitiver Wert.",
     "mappingValueMustBeString": "Der Wert für den Schlüssel “{key}” muss ein String sein.",
-    "save": "Speichern"
+    "save": "Speichern",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman-Engine",
@@ -10643,6 +10670,7 @@
     "grokAutoTopUpMonth": "Monat",
     "grokAdditionalCredits": "Zusätzliche Credits",
     "kiloAccountBalance": "Kontoguthaben",
+    "kiloPassBandUsage": "{used} von {total}",
     "kiloPassBonus": "Verfügbarer Bonus",
     "kiloPassMeterLabel": "Kilo-Pass-Nutzungsanzeige",
     "kiloPassPaid": "Bezahlt",
@@ -11985,6 +12013,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "Aktualisieren",
     "clearAll": "Clear All",
+    "clearAllConfirm": "Alle Einträge in diesem Cache werden gelöscht. Dies kann nicht rückgängig gemacht werden.",
     "memoryEntries": "Speichereinträge",
     "memoryEntriesSub": "In-Memory-LRU",
     "dbEntries": "Datenbankeinträge",
@@ -12869,6 +12898,8 @@
     },
     "attempts": "versuche",
     "detail": {
+      "tabOverview": "Übersicht",
+      "tabPayloads": "Nutzdaten",
       "omittedHttpAttempts": "{count} HTTP-Sendungen nicht gespeichert",
       "noHttpResponse": "Keine HTTP-Antwort beobachtet",
       "transportError": "Transportfehler",

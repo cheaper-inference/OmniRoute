@@ -3907,6 +3907,8 @@
     "resetAwareDesc": "शेष कोटा को 5 घंटे और साप्ताहिक रीसेट के विरुद्ध संतुलित करता है, फिर समान स्कोर को राउंड-रॉबिन करता है",
     "quotaWeighted": "कोटा-भारित",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "समाप्ति-प्रथम",
+    "expiryFirstDesc": "उस खाते को पहले खर्च करता है जिसका कोटा अन्यथा बिना उपयोग के समाप्त हो जाता: सबसे अधिक शेष और सबसे निकट रीसेट वाला खाता पहले जाता है।",
     "strictRandom": "सख़्त रैंडम",
     "strictRandomDesc": "डेक शफ़ल — दोबारा शफ़ल करने से पहले हर मॉडल का एक बार उपयोग करता है",
     "fusion": "फ़्यूज़न",
@@ -4037,6 +4039,11 @@
         "when": "आप कोटा टेलीमेट्री और विभिन्न रीसेट विंडो के साथ कई खातों को रूट करते हैं।",
         "avoid": "अधिकांश खातों के लिए कोटा टेलीमेट्री उपलब्ध नहीं है।",
         "example": "80% खाते को बाद में रीसेट करने की तुलना में 60% साप्ताहिक खाते को कल रीसेट करने को प्राथमिकता दें।"
+      },
+      "expiry-first": {
+        "when": "आप ऐसे खातों में रूट करते हैं जिनके कोटा अलग-अलग समय-सारणी पर रीसेट होते हैं और उस कोटा को खर्च करना चाहते हैं जो अन्यथा बिना उपयोग के समाप्त हो जाता।",
+        "avoid": "अधिकांश खातों के लिए कोटा टेलीमेट्री उपलब्ध नहीं है, या आपको ऐसा स्थिर क्रम चाहिए जो रीसेट के समय को अनदेखा करे।",
+        "example": "9 घंटे में रीसेट होने वाले 48% शेष खाते की तुलना में 39 मिनट में रीसेट होने वाले 80% शेष खाते को प्राथमिकता दें — समाप्ति के निकट का कोटा व्यर्थ होने से पहले खर्च हो जाता है।"
       },
       "strict-random": {
         "when": "जब आप पूरी तरह समान वितरण चाहते हैं, तब उपयोग करें — दोहराने से पहले प्रत्येक मॉडल का एक बार उपयोग होता है।",
@@ -4253,6 +4260,13 @@
         "tip1": "कोटा टेलीमेट्री वाले प्रदाताओं के लिए स्पष्ट खाता चरणों या खाता-टैग रूटिंग का उपयोग करें।",
         "tip2": "जब अल्पकालिक थकावट अधिक जोखिम भरी हो तो सत्र बनाम साप्ताहिक भार को समायोजित करें।",
         "tip3": "टाई बैंड को छोटा रखें ताकि समतुल्य खाते अभी भी निष्पक्ष रूप से घूमते रहें।"
+      },
+      "expiry-first": {
+        "title": "समाप्त होता कोटा पहले",
+        "description": "उपयोग की तात्कालिकता के अनुसार खातों को रैंक करता है: रीसेट की समय-सीमा के निकट अधिक शेष कोटा पहले जाता है।",
+        "tip1": "प्रदाता कोटा टेलीमेट्री आवश्यक है; इसके बिना वाले खाते अपना सूचीबद्ध प्राथमिकता क्रम बनाए रखते हैं।",
+        "tip2": "लगभग बराबर स्कोर टाई बैंड के भीतर घूमते हैं ताकि समान खाते अब भी लोड साझा करें।",
+        "tip3": "रैंकिंग को उसी कोटा बकेट तक सीमित रखें जिसके विरुद्ध प्रत्येक मॉडल वास्तव में बिल होता है।"
       },
       "strict-random": {
         "title": "शफ़ल डेक वितरण",
@@ -4485,7 +4499,7 @@
     "spend7d": "Spend7D",
     "avgCostPerRequest": "Avg Cost Per Request",
     "noCostDataDescription": "No Cost Data Description",
-    "spendToday": "आज का खर्च",
+    "spendToday": "1 दिन का खर्च",
     "overviewLoadFailed": "Overview Load Failed",
     "overviewDescription": "Overview Description",
     "providerShare": "प्रदाता की हिस्सेदारी",
@@ -5683,6 +5697,7 @@
     "usageTracking": "उपयोग ट्रैकिंग",
     "securityDesc": "अपने डैशबोर्ड की सुरक्षा के लिए एक पासवर्ड सेट करें, या अभी के लिए छोड़ें।",
     "securityDescSkipWarning": "⚠️ पासवर्ड के बिना, आप सेटअप के दौरान प्रदाता नहीं जोड़ पाएँगे। पासवर्ड सेट करने के बाद आप उन्हें डैशबोर्ड से जोड़ सकते हैं।",
+    "passwordAlreadySet": "डैशबोर्ड पासवर्ड पहले से सेट है। आप इसे बाद में सेटिंग्स में बदल सकते हैं।",
     "providerDesc": "अपना पहला AI प्रदाता कनेक्ट करें. आप बाद में और भी जोड़ सकते हैं.",
     "providerRequiresPassword": "प्रदाता जोड़ने के लिए आपको पहले पासवर्ड सेट करना होगा। कृपया सुरक्षा चरण पर वापस जाकर पासवर्ड सेट करें, या बाद में डैशबोर्ड से प्रदाता जोड़ें।",
     "apiKeyRequired": "एपीआई कुंजी (आवश्यक)",
@@ -6055,6 +6070,8 @@
     "importFromModels": "/मॉडल से आयात करें",
     "modelsImported": "{count} मॉडल आयात किए गए",
     "allModelsAlreadyImported": "सभी मॉडल पहले से ही आयातित हैं",
+    "providerPublishesNoModelList": "यह प्रदाता किसी मॉडल सूची को प्रकाशित नहीं करता — इसकी अंतर्निहित कैटलॉग अद्यतित है",
+    "modelsNoLongerListed": "{count, plural, one {# मॉडल अब प्रदाता द्वारा सूचीबद्ध नहीं है} other {# मॉडल अब प्रदाता द्वारा सूचीबद्ध नहीं हैं}}",
     "noNewModelsToImport": "आयात करने के लिए कोई नए मॉडल नहीं — सभी मॉडल पहले से ही रजिस्ट्री या कस्टम मॉडल सूची में हैं",
     "localCatalogFallbackStatus": "प्रदाता की मॉडल सूची तक नहीं पहुँचा जा सका — अंतर्निहित कैटलॉग दिखाया जा रहा है",
     "discoveryDegradedStatus": "मॉडल खोज विफल {time}",
@@ -6731,6 +6748,7 @@
     "antigravityProjectIdPlaceholder": "मेरी-जीसीपी-प्रोजेक्ट-आईडी",
     "grokWebCookiePlaceholder": "Grok वेब कुकी प्लेसहोल्डर",
     "herokuBaseUrlHint": "Heroku बेस URL संकेत",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "ईमेल छिपाएँ",
     "imageProviders": "इमेज प्रदाता",
     "videoProviders": "वीडियो जनरेशन",
@@ -7229,7 +7247,8 @@
       "kiro": "फ्री टियर: 50 क्रेडिट/महीना (~25K–100K टोकन)। ⚠️ Kiro ToS तृतीय-पक्ष प्रॉक्सी/हार्नेस के उपयोग को प्रतिबंधित करता है।",
       "codex": "OpenAI Codex को मौजूदा OAuth फ़्लो से कनेक्ट करें।",
       "qwen": "Qwen Code को मौजूदा OAuth फ़्लो से कनेक्ट करें।",
-      "github-models": "github.com/settings/tokens पर 'models: read' स्कोप के साथ एक GitHub PAT बनाएं"
+      "github-models": "github.com/settings/tokens पर 'models: read' स्कोप के साथ एक GitHub PAT बनाएं",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} प्रदाता-मूल मॉडल आईडी स्वीकार करता है। /मॉडल से आयात करें या रूटिंग के लिए कस्टम आईडी जोड़ें।",
     "bedrockModelsDescription": "अमेज़ॅन बेडरॉक मॉडल का दायरा AWS क्षेत्र द्वारा तय किया गया है। /मॉडल से आयात करें या चयनित क्षेत्र में सक्षम बेडरॉक मॉडल आईडी जोड़ें।",
@@ -8096,6 +8115,8 @@
     "resetAwareDesc": "स्वस्थ शेष कोटा और निकट रीसेट वाले खातों को प्राथमिकता दें",
     "quotaWeighted": "कोटा-भारित",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "समाप्ति-प्रथम",
+    "expiryFirstDesc": "उस खाते को पहले खर्च करता है जिसका कोटा अन्यथा बिना उपयोग के समाप्त हो जाता: सबसे अधिक शेष और सबसे निकट रीसेट वाला खाता पहले जाता है।",
     "strictRandom": "पूर्णतः यादृच्छिक",
     "strictRandomDesc": "शफ़ल डेक — दोबारा शफ़ल करने से पहले प्रत्येक खाते का एक बार उपयोग करता है",
     "stickyLimit": "चिपचिपी सीमा",
@@ -8808,6 +8829,8 @@
     "retentionUsageHistory": "उपयोग इतिहास (दिन)",
     "retentionMemoryEntries": "मेमोरी प्रविष्टियाँ (दिन)",
     "retentionXpAuditLog": "XP ऑडिट लॉग (दिन)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "रिटेंशन सेटिंग्स सहेजें",
     "storageAutoVacuumMode": "ऑटो वैक्यूम मोड",
     "storageScheduledVacuum": "अनुसूचित निर्वात",
@@ -10258,7 +10281,11 @@
     "mappingInvalidJson": "अमान्य JSON।",
     "mappingMustBeObject": "मैपिंग एक JSON ऑब्जेक्ट होना चाहिए, न कि कोई ऐरे या प्रिमिटिव मान।",
     "mappingValueMustBeString": "कुंजी “{key}” का मान एक स्ट्रिंग होना चाहिए।",
-    "save": "सहेजें"
+    "save": "सहेजें",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -10643,6 +10670,7 @@
     "grokAutoTopUpMonth": "महीना",
     "grokAdditionalCredits": "अतिरिक्त श्रेय",
     "kiloAccountBalance": "खाता शेष",
+    "kiloPassBandUsage": "{total} में से {used}",
     "kiloPassBonus": "उपलब्ध बोनस",
     "kiloPassMeterLabel": "Kilo Pass उपयोग मीटर",
     "kiloPassPaid": "भुगतान किया गया",
@@ -11985,6 +12013,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "रीफ़्रेश करें",
     "clearAll": "Clear All",
+    "clearAllConfirm": "इस कैश की सभी प्रविष्टियाँ हटा दी जाएँगी। इसे पूर्ववत नहीं किया जा सकता।",
     "memoryEntries": "मेमोरी प्रविष्टियाँ",
     "memoryEntriesSub": "इन-मेमोरी LRU",
     "dbEntries": "DB प्रविष्टियाँ",
@@ -12869,6 +12898,8 @@
     },
     "attempts": "प्रयास",
     "detail": {
+      "tabOverview": "सिंहावलोकन",
+      "tabPayloads": "पेलोड",
       "omittedHttpAttempts": "{count} HTTP प्रेषण सहेजे नहीं गए",
       "noHttpResponse": "कोई HTTP प्रतिक्रिया देखी नहीं गई",
       "transportError": "परिवहन त्रुटि",
