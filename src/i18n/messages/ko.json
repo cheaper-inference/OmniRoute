@@ -10666,6 +10666,7 @@
     "grokAutoTopUpMonth": "월",
     "grokAdditionalCredits": "추가 크레딧",
     "kiloAccountBalance": "계정 잔액",
+    "kiloPassBandUsage": "{total} 중 {used}",
     "kiloPassBonus": "사용 가능한 보너스",
     "kiloPassMeterLabel": "Kilo Pass 사용량 측정기",
     "kiloPassPaid": "결제됨",

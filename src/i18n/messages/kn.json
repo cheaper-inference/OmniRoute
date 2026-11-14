@@ -10666,6 +10666,7 @@
     "grokAutoTopUpMonth": "ತಿಂಗಳು",
     "grokAdditionalCredits": "ಹೆಚ್ಚುವರಿ ಕ್ರೆಡಿಟ್ಗಳು",
     "kiloAccountBalance": "ಖಾತೆಯ ಉಳಿಕೆ",
+    "kiloPassBandUsage": "{total} ರಲ್ಲಿ {used}",
     "kiloPassBonus": "ಲಭ್ಯವಿರುವ ಬೋನಸ್",
     "kiloPassMeterLabel": "Kilo Pass ಬಳಕೆಯ ಮಾಪಕ",
     "kiloPassPaid": "ಪಾವತಿಸಲಾಗಿದೆ",

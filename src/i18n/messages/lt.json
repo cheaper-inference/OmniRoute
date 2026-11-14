@@ -10666,6 +10666,7 @@
     "grokAutoTopUpMonth": "mėnuo",
     "grokAdditionalCredits": "Papildomi kreditai",
     "kiloAccountBalance": "Sąskaitos likutis",
+    "kiloPassBandUsage": "{used} iš {total}",
     "kiloPassBonus": "Turima premija",
     "kiloPassMeterLabel": "Kilo Pass naudojimo matuoklis",
     "kiloPassPaid": "Apmokėta",
