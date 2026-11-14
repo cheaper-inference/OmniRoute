@@ -44,6 +44,7 @@ export default function ProxyCustomFields(p: Props) {
       {!managed && (
         <Field label={t("proxyType")}>
           <SegmentedControl
+            semantics="radio"
             aria-label={t("proxyType")}
             className="w-full"
             value={p.proxyType}

@@ -584,6 +584,7 @@ export default function ProxyConfigModal({
           {/* Proxy Type Selector */}
           <Field label={t("source")}>
             <SegmentedControl
+              semantics="radio"
               aria-label={t("source")}
               value={mode}
               onChange={(next) => setMode(next as typeof mode)}
@@ -694,11 +695,10 @@ export default function ProxyConfigModal({
               {hasOwnProxy && (
                 <Button
                   size="sm"
-                  variant="ghost"
+                  variant="destructive-ghost"
                   icon="delete"
                   onClick={handleClear}
                   disabled={saving}
-                  className="!text-error hover:!bg-error/10"
                 >
                   {t("clear")}
                 </Button>

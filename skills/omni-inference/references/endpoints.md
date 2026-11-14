@@ -93,6 +93,8 @@
 - [`PUT /api/v1/management/proxies/bulk-assign`](#put-apiv1managementproxiesbulk-assign)
 - [`GET /api/v1/management/proxies/health`](#get-apiv1managementproxieshealth)
 - [`GET /api/v1/me/status`](#get-apiv1mestatus)
+- [`GET /api/v1/me/sessions`](#get-apiv1mesessions)
+- [`GET /api/v1/me/sessions/{id}`](#get-apiv1mesessionsid)
 - [`GET /api/v1/muse-code/models`](#get-apiv1muse-codemodels)
 - [`GET /api/v1/music/generations`](#get-apiv1musicgenerations)
 - [`POST /api/v1/music/generations`](#post-apiv1musicgenerations)
@@ -178,7 +180,7 @@ curl http://localhost:20128/api/v1/search \
 
 Run a unified search
 
-Searches the web, news, or X through a configured provider. Set `provider` to `xquik-search` to use Xquik for X search. The aliases `xquik` and `xquik_search` resolve to the same provider. AnySearch (`anysearch-search`, aliases `anysearch` / `anysearch_search`) provides free fallback-only web search.
+Searches the web, news, or X through a configured provider. Set `provider` to `xquik-search` to use Xquik for X search. The aliases `xquik` and `xquik_search` resolve to the same provider. AnySearch (`anysearch-search`, aliases `anysearch` / `anysearch_search`) provides free fallback-only web search. Alternatively, set `model` to a saved priority/fill-first combo name. Only search-capable targets are attempted, in configured order. `model` and `provider` are mutually exclusive. Codex Web Search (`codex-search`, alias `codex_search`) reuses connected Codex (ChatGPT) accounts. Name it explicitly to use it; automatic selection (a credentialed last resort before keyless search) needs the `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` feature flag, off by default. It spends subscription quota (not a free API), typically takes 10–40 seconds, and uses a 60-second timeout unless the operator sets a lower search timeout. Time range and domain filters are instruction hints, not hard filters.
 
 ```bash
 curl -X POST http://localhost:20128/api/v1/search \
@@ -724,6 +726,9 @@ curl -X DELETE http://localhost:20128/api/v1/{omnirouteCatchAll} \
 
 GET accounts › <id> › limits
 
+Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+
+
 ```bash
 curl http://localhost:20128/api/v1/accounts/{id}/limits \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
@@ -732,6 +737,9 @@ curl http://localhost:20128/api/v1/accounts/{id}/limits \
 ### PUT /api/v1/accounts/{id}/limits
 
 PUT accounts › <id> › limits
+
+Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+
 
 ```bash
 curl -X PUT http://localhost:20128/api/v1/accounts/{id}/limits \
@@ -1029,6 +1037,9 @@ curl http://localhost:20128/api/v1/media/{id} \
 
 POST issues › report
 
+Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+
+
 ```bash
 curl -X POST http://localhost:20128/api/v1/issues/report \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
@@ -1120,8 +1131,32 @@ curl http://localhost:20128/api/v1/management/proxies/health \
 
 GET me › status
 
+Self-service usage status for the calling API key (also served at /v1/me/status). Authenticate with `Authorization: Bearer <key>` or `x-api-key: <key>`. Requires scope `self:usage`. `accountQuotas` / `accountQuota` are included only with scope `self:account-quota` and are filtered by the key's `sharedQuotaProviders` setting. `listPriceUsd` / `unpricedRequests` in `usage.cost`, `usage.daily` and `usage.weekly` are cached per key for 60 s, so they may lag by up to 60 s.
+
 ```bash
 curl http://localhost:20128/api/v1/me/status \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/v1/me/sessions
+
+GET me › sessions
+
+List agent sessions opened by the calling API key (also served at /v1/me/sessions). Authenticate with `Authorization: Bearer <key>`; requires scope `self:usage`. Every filter applies on top of the calling key, so other keys' sessions are never listed. Session `costUsd` is the list-price cost of the session's requests; flat-rate providers are not counted as $0. It has the same meaning as `/v1/me/status` `listPriceUsd`, except that sessions are priced when each request is recorded and status with the current prices, so the two differ if prices changed in between. `unpricedCount` counts the requests that used tokens but had no known price and are therefore missing from `costUsd`, like status `unpricedRequests`.
+
+```bash
+curl http://localhost:20128/api/v1/me/sessions \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/v1/me/sessions/{id}
+
+GET me › sessions › <id>
+
+Get details and recent requests of a session owned by the calling API key.
+
+```bash
+curl http://localhost:20128/api/v1/me/sessions/{id} \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
@@ -1158,6 +1193,9 @@ curl -X POST http://localhost:20128/api/v1/music/generations \
 
 GET providers › <provider> › limits
 
+Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+
+
 ```bash
 curl http://localhost:20128/api/v1/providers/{provider}/limits \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
@@ -1166,6 +1204,9 @@ curl http://localhost:20128/api/v1/providers/{provider}/limits \
 ### PUT /api/v1/providers/{provider}/limits
 
 PUT providers › <provider> › limits
+
+Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+
 
 ```bash
 curl -X PUT http://localhost:20128/api/v1/providers/{provider}/limits \
@@ -1335,7 +1376,7 @@ curl http://localhost:20128/api/v1/systemone \
 
 System One typed decisions
 
-One `state` plus typed `questions` (`noul` / `choice` / `score`); the backend is selected by the model id — `typesafe/jev-*` or a bare `jev-*` alias routes natively to api.typesafe.ai, `openrouter/<vendor>/ <model>` routes to OpenRouter's alpha decisions endpoint. Answers, probabilities and usage (tokens, cost) pass through untouched.
+One `state` plus typed `questions` (`noul` / `choice` / `score`); the backend is selected by the model id — `typesafe/jev-*` or a bare `jev-*` alias routes natively to api.typesafe.ai, `openrouter/<vendor>/ <model>` routes to OpenRouter's alpha decisions endpoint, and `cloudflare-ai/<jev|clef|clef-flash>` (alias `cf/`) runs on Cloudflare Workers AI through the existing `cloudflare-ai` connection (Jev draws AI Gateway credits, Clef draws Workers AI neurons; opt-in through the `SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED` feature flag, default off). Answers, probabilities and usage (tokens, cost) pass through untouched.
 
 ```bash
 curl -X POST http://localhost:20128/api/v1/systemone \
@@ -1633,6 +1674,8 @@ curl http://localhost:20128/api/v1/vscode/raw/{token}/v1/models \
 ### POST /api/v1/web/fetch
 
 POST web › fetch
+
+Fetch a URL with an explicit provider, native automatic selection, or a saved priority/fill-first combo in `model`. Mixed combos skip targets without a fetch executor. `model` and `provider` are mutually exclusive.
 
 ```bash
 curl -X POST http://localhost:20128/api/v1/web/fetch \

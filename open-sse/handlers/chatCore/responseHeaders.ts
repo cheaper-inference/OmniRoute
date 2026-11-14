@@ -1,10 +1,12 @@
 import { inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
+import { inheritCodexResponseFence } from "../../services/codexAccount/fences.ts";
 import {
   attachOmniRouteMetaHeaders,
   buildOmniRouteResponseMetaHeaders,
 } from "@/domain/omnirouteResponseMeta";
 import { OMNIROUTE_RESPONSE_HEADERS } from "@/shared/constants/headers";
 import { defaultLogger } from "@omniroute/open-sse/utils/logger";
+import { isAnthropicAccountHeader } from "./upstreamAccountHeaders.ts";
 
 const STREAMING_RESPONSE_HEADER_DENYLIST = new Set([
   "content-type",
@@ -224,6 +226,14 @@ export type StreamingResponseHeadersMeta = Parameters<
   requestedConnectionId?: string | null;
   /** The connection that ACTUALLY served this response (`credentials.connectionId`). */
   selectedConnectionId?: string | null;
+  /**
+   * When true, upstream `anthropic-ratelimit-*`
+   * and `anthropic-organization-id` headers are dropped instead of forwarded,
+   * per the requesting API key's account-header policy
+   * (see {@link import("./upstreamAccountHeaders.ts").shouldStripAnthropicAccountHeaders}).
+   * Omitted/false preserves today's unconditional-forwarding behavior.
+   */
+  stripAnthropicAccountHeaders?: boolean;
 };
 
 /**
@@ -276,7 +286,10 @@ export function buildStreamingResponseHeaders(
       // #14116: this response was served by a combo/pool sibling account
       // other than the one the caller pinned/requested — its quota headers
       // describe THAT account, not the caller's own, so never forward them.
-      (foreignAccount && isCodexAccountQuotaHeader(normalized))
+      (foreignAccount && isCodexAccountQuotaHeader(normalized)) ||
+      // Per-API-key policy: drop the upstream Anthropic account-identity/quota
+      // headers (see upstreamAccountHeaders.ts).
+      (meta.stripAnthropicAccountHeaders && isAnthropicAccountHeader(normalized))
     ) {
       return;
     }
@@ -371,13 +384,16 @@ export function materializeDeduplicatedExecutionResult<T extends Record<string, 
 
   return {
     ...result,
-    response: inheritEmptyTurnPolicy(
+    response: inheritCodexResponseFence(
       result.response as Response,
-      new Response(snapshot.payload, {
-        status: snapshot.status,
-        statusText: snapshot.statusText,
-        headers: snapshot.headers,
-      })
+      inheritEmptyTurnPolicy(
+        result.response as Response,
+        new Response(snapshot.payload, {
+          status: snapshot.status,
+          statusText: snapshot.statusText,
+          headers: snapshot.headers,
+        })
+      )
     ),
   } as T;
 }

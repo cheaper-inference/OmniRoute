@@ -7,12 +7,14 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { _resetClaudeOauthUsageCooldown } from "../../open-sse/services/claudeUsageCooldown.ts";
 
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-claude-reset-wiring-"));
 process.env.DATA_DIR = dataDir;
 process.env.API_KEY_SECRET = "claude-reset-wiring-test-secret";
 
-const { createProviderConnection } = await import("../../src/lib/db/providers.ts");
+const { createProviderConnection, deleteProviderConnection } =
+  await import("../../src/lib/db/providers.ts");
 const { getProviderLimitsCache } = await import("../../src/lib/db/providerLimits.ts");
 const { acquireExclusiveConnectionLease } =
   await import("../../src/lib/db/exclusiveConnectionLeases.ts");
@@ -64,6 +66,7 @@ const count = (prefix: string) => calls.filter((c) => c.startsWith(prefix)).leng
 
 test.beforeEach(() => {
   resetCreditMemo._resetClaudeResetCreditCountCache();
+  _resetClaudeOauthUsageCooldown();
 });
 
 test.afterEach(() => {
@@ -119,6 +122,9 @@ test("failed reset-credit lists preserve throttling and invalidate refused count
     [503, 502, "claude_usage_failed", 3],
     [403, 502, "claude_usage_failed", null],
   ] as const) {
+    // A 429 starts the shared OAuth-usage cooldown (claude-usage-cooldown-reset-credits.test.ts);
+    // let it expire so the next upstream status is observed.
+    _resetClaudeOauthUsageCooldown();
     mockUpstream();
     await listClaudeResetCredits(id);
     mockUpstream({ listStatus: upstreamStatus });
@@ -206,4 +212,29 @@ test("a redeem whose follow-up refresh is throttled does not bring back the old 
   assert.equal(redeemed.usage._stale, true);
   assert.equal("bankedResetCredits" in redeemed.usage, false, "no pre-redeem count");
   assert.equal(getProviderLimitsCache(id)?.bankedResetCredits, undefined);
+});
+
+test("a redeem whose post-claim usage refresh throws still reports the spent credit", async () => {
+  const connection = await createProviderConnection({
+    provider: "claude",
+    authType: "oauth",
+    name: "Reset wiring refresh throws",
+    accessToken: "wiring-refresh-throws-token",
+    isActive: true,
+    expiresAt: "2099-01-01T00:00:00Z",
+    providerSpecificData: { organizationUUID: "org-uuid-1" },
+  });
+  const id = connection.id as string;
+  mockUpstream();
+  const upstream = globalThis.fetch;
+  // The claim succeeds upstream; the connection is gone by the time the usage refresh
+  // runs, so fetchAndPersistProviderLimits throws ("Connection not found").
+  globalThis.fetch = (async (input: unknown, init?: RequestInit) => {
+    if (String(input) === CLAIM_URL) await deleteProviderConnection(id);
+    return upstream(input as string, init);
+  }) as typeof fetch;
+
+  const redeemed = await consumeClaudeResetCredit(id, "idem-refresh-throws", "grant:grant-a");
+  assert.deepEqual(redeemed, { outcome: "reset", usage: {} });
+  assert.equal(count(`POST ${CLAIM_URL}`), 1);
 });

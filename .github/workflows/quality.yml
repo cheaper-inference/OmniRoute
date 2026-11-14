@@ -39,6 +39,17 @@ jobs:
     if: ${{ !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) }}
     runs-on: ubuntu-latest
     outputs:
+      # Match the official Mergify App and both repository IDs from GitHub's
+      # event. A contributor-controlled branch prefix alone grants no exception.
+      queueCandidate: >-
+        ${{ github.event_name == 'pull_request' && github.event.pull_request.draft == true &&
+            github.event.pull_request.user.id == 37929162 &&
+            github.event.pull_request.user.login == 'mergify[bot]' &&
+            github.event.pull_request.user.type == 'Bot' &&
+            startsWith(github.head_ref, 'mergify/merge-queue/') &&
+            github.event.repository.id > 0 &&
+            github.event.pull_request.head.repo.id == github.event.repository.id &&
+            github.event.pull_request.base.repo.id == github.event.repository.id }}
       code: ${{ steps.classify.outputs.code }}
       docs: ${{ steps.classify.outputs.docs }}
       i18n: ${{ steps.classify.outputs.i18n }}
@@ -47,11 +58,11 @@ jobs:
       # Exposure only (one-CI-policy step 1, RFC #8084): no job depends on it yet.
       domains: ${{ steps.classify.outputs.domains }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -91,10 +102,10 @@ jobs:
     if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || startsWith(github.head_ref, 'mergify/merge-queue/')) && (needs.changes.outputs.docs == 'true' || needs.changes.outputs.code == 'true')) }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -137,11 +148,11 @@ jobs:
       API_KEY_SECRET: ci-lint-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -213,7 +224,7 @@ jobs:
           cat forgotten-sibling-tests.md >> "$GITHUB_STEP_SUMMARY"
       - name: Upload forgotten sibling report
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: forgotten-sibling-tests
           path: |
@@ -233,6 +244,7 @@ jobs:
           # already over frozen cap) must not red an innocent PR. Unset on
           # workflow_dispatch (no PR base) → absolute comparison.
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          # Other checks may use this local ref; OpenAPI reads immutable event commits.
           BASE_REF: ${{ github.base_ref && format('origin/{0}', github.base_ref) || '' }}
         run: |
           set -uo pipefail
@@ -395,7 +407,7 @@ jobs:
       # audited against ci.yml test-unit failures on the same commit (gate moves need this data).
       - name: Upload TIA selection (shadow evidence)
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: tia-selection
           path: tia-selection.txt
@@ -427,10 +439,10 @@ jobs:
       contents: read
       security-events: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -517,13 +529,11 @@ jobs:
         run: npm run check:agent-skills-sync
 
   admission-verdict:
-    # A queue-draft edit run must not leave a check named "Gate / Quality" on the draft: Mergify
-    # read that skipped check as a finished non-success and dequeued the PR (#18961 on
-    # 2026-11-04) before the real run reported. Every other run keeps the exact name.
-    name: ${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && 'Gate / Quality (queue-draft edit)' || 'Gate / Quality' }}
-    # Runs on every candidate; only a Mergify queue-draft description edit skips it (see the
-    # workflow concurrency note): that draft is never what branch protection merges.
-    if: ${{ always() && !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) }}
+    # Only requested candidates receive the required check name. An ordinary draft
+    # deliberately skips its producer jobs and must not create a failed admission.
+    # Classifier failures still reach the gate; queue metadata edits keep their own name.
+    name: ${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && 'Gate / Quality (queue-draft edit)' || (github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success') && 'Gate / Quality' || 'Admission not requested / Quality' }}
+    if: ${{ always() && !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && (github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success') }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs:

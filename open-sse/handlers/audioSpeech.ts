@@ -1,4 +1,5 @@
 import { CORS_HEADERS } from "../utils/cors.ts";
+import { trackOpenRouterSpeech } from "../utils/speechUsage.ts";
 import { stripTrailingSlashes } from "../utils/urlSanitize.ts";
 /**
  * Audio Speech Handler (TTS)
@@ -35,12 +36,13 @@ import {
   upstreamErrorResponse,
 } from "../utils/audioResponse.ts";
 import { handleSyntxSpeech } from "./syntxAudio.ts";
+import { handleRenderhourSpeech } from "./renderhourSpeech.ts";
 import {
   UPSTREAM_MEDIA_LIMITS,
   downloadUpstreamMedia,
   upstreamAudioContentType,
   upstreamMediaErrorText,
-} from "@/shared/network/remoteImageFetch";
+} from "../utils/remoteMediaFetch.ts";
 import {
   getKieCallbackUrl,
   getKieErrorMessage,
@@ -1067,6 +1069,10 @@ export async function handleAudioSpeech({
       return handleTortoiseSpeech(providerConfig, body);
     }
 
+    if (providerConfig.format === "renderhour-tts") {
+      return handleRenderhourSpeech({ providerConfig, body, modelId, credentials });
+    }
+
     if (providerConfig.format === "syntx-audio") {
       return handleSyntxSpeech({
         model: modelId,
@@ -1088,6 +1094,10 @@ export async function handleAudioSpeech({
         voice: body.voice || providerConfig.defaultVoice || "alloy",
         response_format: normalizeSpeechResponseFormat(body.response_format),
         speed: body.speed || 1.0,
+        // OpenAI's voice-steering field (gpt-4o-mini-tts, deAPI VoiceDesign); only sent when given.
+        ...(typeof body.instructions === "string" && body.instructions
+          ? { instructions: body.instructions }
+          : {}),
       }),
     });
 
@@ -1095,7 +1105,7 @@ export async function handleAudioSpeech({
       return upstreamErrorResponse(res, await res.text());
     }
 
-    return audioStreamResponse(res);
+    return trackOpenRouterSpeech(res, audioStreamResponse(res), providerConfig.baseUrl, token);
   } catch (err) {
     return audioErrorResponse(500, `Speech request failed: ${err.message}`);
   }

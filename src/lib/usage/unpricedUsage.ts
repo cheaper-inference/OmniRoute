@@ -67,7 +67,7 @@ export async function getUnpricedUsageReport(
       { provider: group.provider, model: group.model }
     );
     // A lookup that threw is a transient store problem, not a missing price.
-    if (!priced && !failed) models.push(group);
+    if ((!priced && !failed) || group.unpricedUnitRequests > 0) models.push(group);
   }
 
   models.sort(
