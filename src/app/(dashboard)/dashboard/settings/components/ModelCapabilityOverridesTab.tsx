@@ -419,10 +419,9 @@ function ModelOverrideRow({
         </span>
       </div>
       <Button
-        variant="ghost"
+        variant="destructive-ghost"
         size="sm"
         onClick={() => onRemove(override.target, override.key)}
-        className="text-error"
       >
         {t("remove")}
       </Button>

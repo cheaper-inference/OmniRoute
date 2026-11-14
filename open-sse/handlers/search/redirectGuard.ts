@@ -21,7 +21,7 @@
 
 import { canGuardDirectConnection } from "../../executors/dispatchPin.ts";
 import { getGuardedDispatcher } from "../../utils/connectGuardDispatcher.ts";
-import { validateSearchRedirectUrl } from "./baseUrl.ts";
+import { validateSearchRedirectUrl, type SearchUrlGuard } from "./baseUrl.ts";
 
 /** Lower than undici's 20; a search endpoint has no reason for long chains. */
 export const MAX_SEARCH_REDIRECTS = 5;
@@ -74,9 +74,14 @@ export function isRegistryEndpoint(url: string, registryBaseUrl: string): boolea
 }
 
 /** Adds the connect-time metadata guard when the hop goes out directly. */
-function withConnectGuard(providerId: string, url: URL, init: RequestInit): RequestInit {
+function withConnectGuard(
+  providerId: string,
+  url: URL,
+  init: RequestInit,
+  guard: SearchUrlGuard
+): RequestInit {
   if (!canGuardDirectConnection(providerId, url.toString())) return init;
-  return { ...init, dispatcher: getGuardedDispatcher("block-metadata") } as RequestInit;
+  return { ...init, dispatcher: getGuardedDispatcher(guard) } as RequestInit;
 }
 
 /**
@@ -85,17 +90,21 @@ function withConnectGuard(providerId: string, url: URL, init: RequestInit): Requ
  * connection, by resolved address. The first URL's name check is the caller's
  * responsibility (resolveSearchBaseUrl already did it). With `guardFirstHop`
  * false the first hop keeps the ordinary dispatcher; redirect hops are guarded
- * either way.
+ * either way. `guard` is `public-only` for a caller base URL (see
+ * searchBaseUrlGuard()): then every hop, the first included, must stay public.
  */
 export async function fetchWithCheckedRedirects(
   url: string,
   init: RequestInit,
   providerId = "",
-  guardFirstHop = true
+  guardFirstHop = true,
+  { guard = "block-metadata" }: { guard?: SearchUrlGuard } = {}
 ): Promise<Response> {
   let currentUrl = new URL(url);
   const firstHopInit = (hopInit: RequestInit) =>
-    guardFirstHop ? withConnectGuard(providerId, currentUrl, hopInit) : hopInit;
+    guardFirstHop || guard === "public-only"
+      ? withConnectGuard(providerId, currentUrl, hopInit, guard)
+      : hopInit;
   // A caller that already refuses redirects ("error") or wants the raw 3xx
   // ("manual"), such as parallelSearch.ts, keeps that mode; only the default
   // "follow" is replaced by the checked loop below.
@@ -107,7 +116,9 @@ export async function fetchWithCheckedRedirects(
   for (let hop = 0; ; hop++) {
     const response = await fetch(
       currentUrl.toString(),
-      hop === 0 ? firstHopInit(currentInit) : withConnectGuard(providerId, currentUrl, currentInit)
+      hop === 0
+        ? firstHopInit(currentInit)
+        : withConnectGuard(providerId, currentUrl, currentInit, guard)
     );
     const location = REDIRECT_STATUSES.has(response.status)
       ? response.headers.get("location")
@@ -118,7 +129,7 @@ export async function fetchWithCheckedRedirects(
     if (hop >= MAX_SEARCH_REDIRECTS) {
       throw new Error(`Search provider exceeded ${MAX_SEARCH_REDIRECTS} redirects`);
     }
-    const nextUrl = validateSearchRedirectUrl(new URL(location, currentUrl));
+    const nextUrl = validateSearchRedirectUrl(new URL(location, currentUrl), guard);
     currentInit = nextHopInit(currentInit, response.status, currentUrl, nextUrl);
     currentUrl = nextUrl;
   }

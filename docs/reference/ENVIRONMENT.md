@@ -290,6 +290,7 @@ OmniRoute provides a two-layer defense: request-side injection scanning and resp
 | `INPUT_SANITIZER_BLOCK_THRESHOLD` | `high`    | `src/shared/utils/injectionSeverity.ts`  | Minimum severity that `MODE=block` rejects: `high` (default), `medium`, or `low`. Medium patterns are observe-only unless lowered.                                              |
 | `INJECTION_GUARD_BLOCK_THRESHOLD` | _(unset)_ | `src/shared/utils/injectionSeverity.ts`  | Legacy alias for `INPUT_SANITIZER_BLOCK_THRESHOLD` — same behavior.                                                                                                             |
 | `PII_REDACTION_ENABLED`           | `false`   | `src/lib/guardrails/piiMasker.ts`        | When `true`, redact PII in incoming requests (independent of injection mode).                                                                                                   |
+| `PII_REVERSIBLE_VAULT_ENABLED`    | `false`   | `src/lib/pii/requestTokenVaultScope.ts`  | With `PII_REDACTION_ENABLED`, mask request PII as per-request reversible tokens and restore them in 2xx responses. Also a DB feature flag (DB > ENV).                           |
 | `CREDENTIAL_REDACTION_ENABLED`    | `false`   | `src/lib/guardrails/credentialMasker.ts` | Redact well-known API-key / secret-token patterns from request/response payloads. Opt-in; mirrors `PII_REDACTION_ENABLED`.                                                      |
 
 ### Response-Side: PII Sanitizer
@@ -1814,6 +1815,7 @@ value below unset in production deployments.
 | `ELECTRON_SMOKE_KEEP_DATA`             | `0`                              | `scripts/dev/smoke-electron-packaged.mjs` | Set `1` to preserve the smoke data directory after the run.                                                                                                                                                                                |
 | `ELECTRON_SMOKE_STREAM_LOGS`           | `0`                              | `scripts/dev/smoke-electron-packaged.mjs` | Set `1` to stream Electron logs to stdout during the run.                                                                                                                                                                                  |
 | `ELECTRON_SMOKE_COLD_RESTART`          | `0`                              | `scripts/dev/smoke-electron-packaged.mjs` | #7592: relaunch against the same data dir and assert the second launch selects the native SQLite driver.                                                                                                                                   |
+| `OMNI_COVERAGE_ROOT` | _(unset)_ | `scripts/quality/coverage-node-register.mjs` | Repository root used by the coverage capture harness (Node register hook + Vitest provider) to resolve the exact-commit coverage source scope. Set by the quality harness only; leave unset in production. |
 | `CLI_DEVIN_BIN`                        | _(PATH lookup)_                  | `open-sse/executors/devin-cli.ts`         | Override the Devin CLI binary path.                                                                                                                                                                                                        |
 
 ### Docs translation pipeline
@@ -2026,6 +2028,20 @@ Long-lived SSE consumer that mirrors OmniConductor hub tasks into the local A2A 
 | `CONDUCTOR_HUB_TOKEN`          | _(empty)_               | `src/lib/conductor/boot.ts`      | Hub credential for the SSE feed — emit a `spokesperson`-kind peer on the hub (`POST /v1/peers`, admin).            |
 | `CONDUCTOR_ORCHESTRATOR_TOKEN` | _(empty)_               | `src/lib/conductor/hubProxy.ts`  | Credential for inbound A2A→hub task delegation (`POST /v1/tasks`); falls back to `CONDUCTOR_HUB_TOKEN` when unset. |
 | `CONDUCTOR_SPOKESPERSON_URL`   | `http://127.0.0.1:7920` | `src/lib/conductor/faroProxy.ts` | Base URL of the spokesperson (Faro) service behind the dashboard chat proxy (`/api/conductor/ask`).                |
+
+### Video Bridge isolated validation
+
+`scripts/ad-hoc/video-live-isolation.ts --prepare` requires
+`OMNIROUTE_VIDEO_LIVE_SOURCE_DIR` to name an absolute directory containing
+`storage.sqlite`. There is no default. The tool opens that database read-only and
+prepares a private temporary copy with isolated client keys and settings;
+credentials remain on the validation host. This variable is only for the explicit
+preparation command and is not consumed by normal server startup. Preparation
+does not call a model; the separate live smoke command requires `--execute-real`.
+Preparation requires a fresh process: it refuses a database module or connection
+already bound to another directory before changing client keys or settings. The
+loopback STT component accepts only the generated isolated owner key and claims
+one request before reading its body; concurrent requests are rejected.
 
 ### Quota-aware scheduling
 

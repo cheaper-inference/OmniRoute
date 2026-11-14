@@ -1,5 +1,5 @@
 // Guards the launch_sessions migration slot: upstream keeps adding migrations, so a rebase that
-// lands another 240_* (or numbers something above it) must fail loudly here.
+// lands another 242_* (or numbers something above it) must fail loudly here.
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -29,33 +29,33 @@ test.after(() => {
 
 const files = fs.readdirSync(MIGRATIONS_DIR).filter((f) => f.endsWith(".sql"));
 
-test("exactly one migration starts with 240_ and it is launch_sessions", () => {
-  const with240 = files.filter((f) => f.startsWith("240_"));
-  assert.deepEqual(with240, ["240_launch_sessions.sql"]);
+test("exactly one migration starts with 242_ and it is launch_sessions", () => {
+  const with242 = files.filter((f) => f.startsWith("242_"));
+  assert.deepEqual(with242, ["242_launch_sessions.sql"]);
   assert.deepEqual(
     files.filter((f) => /_launch_sessions\.sql$/.test(f)),
-    ["240_launch_sessions.sql"]
+    ["242_launch_sessions.sql"]
   );
 });
 
-test("240 is greater than every other migration number", () => {
+test("242 is greater than every other migration number", () => {
   const others = files
-    .filter((f) => f !== "240_launch_sessions.sql")
+    .filter((f) => f !== "242_launch_sessions.sql")
     .map((f) => Number.parseInt(f.split("_")[0], 10))
     .filter((n) => Number.isFinite(n));
   assert.ok(others.length > 0);
   assert.ok(
-    others.every((n) => n < 240),
-    `a migration numbered >= 240 exists besides launch_sessions: ${Math.max(...others)}`
+    others.every((n) => n < 242),
+    `a migration numbered >= 242 exists besides launch_sessions: ${Math.max(...others)}`
   );
 });
 
-test("migration creates the table, columns and indexes; ledger has 240", () => {
+test("migration creates the table, columns and indexes; ledger has 242", () => {
   const db = core.getDbInstance();
   const ledger = db
-    .prepare("SELECT version, name FROM _omniroute_migrations WHERE version = '240'")
+    .prepare("SELECT version, name FROM _omniroute_migrations WHERE version = '242'")
     .all();
-  assert.deepEqual(ledger, [{ version: "240", name: "launch_sessions" }]);
+  assert.deepEqual(ledger, [{ version: "242", name: "launch_sessions" }]);
 
   const cols = (db.prepare("PRAGMA table_info(launch_sessions)").all() as { name: string }[]).map(
     (c) => c.name
@@ -98,6 +98,6 @@ test("running migrations again is a no-op with a single ledger row", () => {
   const db = core.getDbInstance();
   assert.doesNotThrow(() => runMigrations(db));
   assert.doesNotThrow(() => runMigrations(db));
-  const rows = db.prepare("SELECT version FROM _omniroute_migrations WHERE version = '240'").all();
+  const rows = db.prepare("SELECT version FROM _omniroute_migrations WHERE version = '242'").all();
   assert.equal(rows.length, 1);
 });
