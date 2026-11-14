@@ -6705,6 +6705,10 @@
     "tokenrouterManagementKeyHint": "Kontonøkkel fra TokenRouter-dashbordet (Settings → Management Key). Brukes kun til å lese kvote og saldo, aldri til forespørsler. Den lagrede nøkkelen vises ikke; la feltet stå tomt for å beholde den.",
     "newApiAggregatorToggleLabel": "Aggregator-gateway",
     "newApiAggregatorToggleHint": "Aktiver balanseoppdagelse for New-API / One-API / Sub2API aggregator-noder. Dashbordet vil vise balanse-merket, og kvote-preflight-ruting vil hoppe over utmattede kontoer.",
+    "quotaCheck": "Kvotesjekk",
+    "quotaCheckHint": "Leser gjenværende kreditter for denne nodens API-nøkler fra et standard endepunkt og viser dem i Leverandørgrenser. Et kvoteendepunkt du har konfigurert manuelt på en nøkkel, forblir uendret.",
+    "quotaPath": "Kvotesti",
+    "quotaPathHint": "Sendes som en GET-forespørsel til basis-URL-en pluss denne stien, med nøkkelens API-nøkkel. JSON-svaret må inneholde et numerisk credits-felt; de valgfrie feltene total og used styrer forbruksstolpen.",
     "newApiAggregatorConsoleApiKeyHint": "System Access Token for aggregatorens /api/user/self-endepunkt. Ikke routing API-nøkkelen.",
     "newApiAggregatorUserIdHint": "New-Api-User header-verdi brukt for å hente aggregatbrugerens kvote-balanse.",
     "newApiAggregatorQuotaPerUnitLabel": "Kvote Per Enhet",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Tillat midlertidig lagring av JPEG-filer bare når den autentiserte forespørselen også setter drilldown: true. Råvideoer lagres aldri.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Tillat autentisert detaljvisning av bilderammer",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Tillat API-nøkler å lese og slette bare sine egne ugjennomsiktige referanser. Ingen anonym tilgang eller tilgang på tvers av nøkler.",
-    "modalityBridgeVideoDrilldownUsage": "Lagrede JPEG-filer / byte"
+    "modalityBridgeVideoDrilldownUsage": "Lagrede JPEG-filer / byte",
+    "modalityBridgeVideoPromotionTitle": "Beredskap for avansert policy",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Eksperimentell",
+    "modalityBridgeVideoPromotionEligible": "Kvalifisert",
+    "modalityBridgeVideoPromotionContextRequired": "Promotering krever to uavhengige kvalifiserende kjøringer for nøyaktig samme modellrevisjon, policy, korpus og bygg. En ubekreftet kontekst forblir HOLD. Valg av en eksperimentell policy innebærer ikke godkjenning."
   },
   "contextRtk": {
     "title": "RTK-motor",

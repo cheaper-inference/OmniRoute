@@ -6696,6 +6696,10 @@
     "tokenrouterManagementKeyHint": "TokenRouter डॅशबोर्डमधील खाते की (Settings → Management Key). फक्त कोटा आणि शिल्लक वाचण्यासाठी वापरली जाते, विनंत्यांसाठी कधीही नाही. जतन केलेली की दाखवली जात नाही; ती ठेवण्यासाठी रिकामे ठेवा.",
     "newApiAggregatorToggleLabel": "एग्रीगेटर गेटवे",
     "newApiAggregatorToggleHint": "New-API / One-API / Sub2API समाकलन नोडसाठी संतुलन शोध सक्षम करा. डॅशबोर्ड संतुलन बॅज दर्शवेल आणि कोटा-पूर्व उड्डाण मार्गक्रमण थकलेले खाते वगळेल.",
+    "quotaCheck": "कोटा तपासणी",
+    "quotaCheckHint": "या नोडच्या API कीजचे उरलेले क्रेडिट्स मानक एंडपॉइंटवरून वाचा आणि प्रदात्यांच्या मर्यादा मध्ये दाखवा. एखाद्या कीवर तुम्ही हाताने कॉन्फिगर केलेला कोटा एंडपॉइंट बदलत नाही.",
+    "quotaPath": "कोटा पाथ",
+    "quotaPathHint": "कीच्या API कीसह बेस URL अधिक हा पाथ यावर GET विनंती म्हणून पाठवले जाते. JSON प्रतिसादात संख्यात्मक credits फील्ड असणे आवश्यक आहे; पर्यायी total आणि used फील्ड वापर बार ठरवतात.",
     "newApiAggregatorConsoleApiKeyHint": "संविधानकर्ता /api/user/self अंतिम बिंदूसाठी प्रणाली प्रवेश टोकन. राउटिंग API की नाही.",
     "newApiAggregatorUserIdHint": "नवीन-Api-User हेडर मूल्य संकलक वापरकर्त्याचा कोटा शिल्लक मिळवण्यासाठी वापरले जाते.",
     "newApiAggregatorQuotaPerUnitLabel": "युनिट प्रति कोटा",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "प्रमाणित विनंतीमध्ये drilldown: true देखील सेट केलेले असेल, तेव्हाच तात्पुरत्या JPEG फाइल्स राखून ठेवण्याची अनुमती द्या. मूळ व्हिडिओ कधीही राखून ठेवले जात नाहीत.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "प्रमाणित फ्रेम ड्रिल-डाउनला अनुमती द्या",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "API कींना केवळ त्यांचे स्वतःचे अपारदर्शक हँडल वाचण्याची आणि हटवण्याची अनुमती द्या. अनामिक किंवा इतर कींद्वारे प्रवेश नाही.",
-    "modalityBridgeVideoDrilldownUsage": "राखून ठेवलेले JPEG / बाइट्स"
+    "modalityBridgeVideoDrilldownUsage": "राखून ठेवलेले JPEG / बाइट्स",
+    "modalityBridgeVideoPromotionTitle": "प्रगत धोरण सज्जता",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "प्रायोगिक",
+    "modalityBridgeVideoPromotionEligible": "पात्र",
+    "modalityBridgeVideoPromotionContextRequired": "पदोन्नतीसाठी नेमकी मॉडेल आवृत्ती, धोरण, कॉर्पस आणि बिल्ड यांसाठी दोन स्वतंत्र पात्रता पूर्ण करणाऱ्या रनची आवश्यकता आहे. असत्यापित संदर्भ HOLD स्थितीत राहतो; प्रायोगिक धोरण निवडणे म्हणजे मंजुरी नव्हे."
   },
   "contextRtk": {
     "title": "RTK इंजिन",

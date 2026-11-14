@@ -6696,6 +6696,10 @@
     "tokenrouterManagementKeyHint": "TokenRouter 대시보드의 계정 키(Settings → Management Key)입니다. 할당량과 잔액을 읽는 데만 사용되며 요청에는 절대 사용되지 않습니다. 저장된 키는 표시되지 않으며, 유지하려면 비워 두세요.",
     "newApiAggregatorToggleLabel": "집계 게이트웨이",
     "newApiAggregatorToggleHint": "New-API / One-API / Sub2API 집계 노드에 대한 잔액 감지를 활성화합니다. 대시보드는 잔액 배지를 표시하고 쿼터 사전 비행 라우팅은 소진된 계정을 건너뜁니다.",
+    "quotaCheck": "할당량 확인",
+    "quotaCheckHint": "이 노드의 API 키 잔여 크레딧을 표준 엔드포인트에서 읽어 공급자 한도에 표시합니다. 키에 직접 구성한 할당량 엔드포인트는 변경되지 않습니다.",
+    "quotaPath": "할당량 경로",
+    "quotaPathHint": "키의 API 키로 기본 URL에 이 경로를 붙인 주소로 GET 요청을 보냅니다. JSON 응답에는 숫자 credits 필드가 있어야 하며, 선택적 total 및 used 필드가 사용량 막대를 결정합니다.",
     "newApiAggregatorConsoleApiKeyHint": "집계자의 /api/user/self 엔드포인트에 대한 시스템 액세스 토큰입니다. 라우팅 API 키가 아닙니다.",
     "newApiAggregatorUserIdHint": "New-Api-User 헤더 값은 집계기 사용자의 할당량 잔액을 가져오는 데 사용됩니다.",
     "newApiAggregatorQuotaPerUnitLabel": "단위당 할당량",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "인증된 요청에서 drilldown: true도 설정한 경우에만 임시 JPEG 보관을 허용합니다. 원본 비디오는 절대 보관되지 않습니다.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "인증된 프레임 드릴다운 허용",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "API 키가 자체 불투명 핸들만 읽고 삭제할 수 있도록 허용합니다. 익명 액세스 또는 키 간 액세스는 허용되지 않습니다.",
-    "modalityBridgeVideoDrilldownUsage": "보관된 JPEG / 바이트"
+    "modalityBridgeVideoDrilldownUsage": "보관된 JPEG / 바이트",
+    "modalityBridgeVideoPromotionTitle": "고급 정책 준비 상태",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "실험적",
+    "modalityBridgeVideoPromotionEligible": "적격",
+    "modalityBridgeVideoPromotionContextRequired": "승격하려면 정확히 동일한 모델 리비전, 정책, 코퍼스 및 빌드에 대해 서로 독립적인 적격 실행이 두 번 필요합니다. 검증되지 않은 컨텍스트는 HOLD 상태로 유지되며, 실험적 정책을 선택하는 것은 승인을 의미하지 않습니다."
   },
   "contextRtk": {
     "title": "RTK 엔진",

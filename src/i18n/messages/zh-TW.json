@@ -6696,6 +6696,10 @@
     "tokenrouterManagementKeyHint": "TokenRouter 控制台中的帳戶金鑰（Settings → Management Key）。僅用於讀取配額與餘額，絕不用於請求。已儲存的金鑰不會顯示；留空即可保留。",
     "newApiAggregatorToggleLabel": "聚合閘道",
     "newApiAggregatorToggleHint": "為 New-API / One-API / Sub2API 聚合器節點啟用餘額檢測。儀表板將顯示餘額徽章，配額預檢路由將跳過已耗盡的帳戶。",
+    "quotaCheck": "配額檢查",
+    "quotaCheckHint": "從標準端點讀取此節點 API 金鑰的剩餘額度，並在提供者限制中顯示。你在某個金鑰上手動設定的配額端點會保持不變。",
+    "quotaPath": "配額路徑",
+    "quotaPathHint": "使用該金鑰的 API 金鑰，以 GET 請求傳送到基礎 URL 加上此路徑。JSON 回應必須包含數值型 credits 欄位；選用的 total 和 used 欄位決定用量列。",
     "newApiAggregatorConsoleApiKeyHint": "聚合器的 /api/user/self 端點的系統訪問令牌。不是路由 API 金鑰。",
     "newApiAggregatorUserIdHint": "用於獲取聚合器用戶配額餘額的 New-Api-User 標頭值。",
     "newApiAggregatorQuotaPerUnitLabel": "每單位配額",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "僅當已驗證的請求同時設定 drilldown: true 時，才允許暫時保留 JPEG。原始影片絕不會被保留。",
     "modalityBridgeVideoDrilldownRemoteEnabled": "允許已驗證的影格深入檢視",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "允許 API 金鑰僅讀取及刪除其自身的不透明控制代碼。不允許匿名或跨金鑰存取。",
-    "modalityBridgeVideoDrilldownUsage": "保留的 JPEG／位元組"
+    "modalityBridgeVideoDrilldownUsage": "保留的 JPEG／位元組",
+    "modalityBridgeVideoPromotionTitle": "進階政策就緒狀態",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "實驗性",
+    "modalityBridgeVideoPromotionEligible": "符合資格",
+    "modalityBridgeVideoPromotionContextRequired": "升級需要針對完全相同的模型修訂版本、政策、語料庫與建置，完成兩次彼此獨立且符合資格的執行。未經驗證的情境仍維持「HOLD」狀態；選取實驗性政策並不代表已獲核准。"
   },
   "contextRtk": {
     "title": "RTK 引擎",

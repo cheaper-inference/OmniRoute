@@ -6696,6 +6696,10 @@
     "tokenrouterManagementKeyHint": "Kọ́kọ́rọ́ àkọọ́lẹ̀ láti dashboard TokenRouter (Settings → Management Key). A ń lò ó láti ka kóòtà àti ìwọ̀ntúnwọ̀nsì nìkan, kì í ṣe fún àwọn ìbéèrè rárá. A kì í fi kọ́kọ́rọ́ tí a ti fipamọ́ hàn; fi sílẹ̀ ní òfo láti pa á mọ́.",
     "newApiAggregatorToggleLabel": "Ẹnu-ọ̀nà Olùkójọpọ̀",
     "newApiAggregatorToggleHint": "Mú ìṣàwárí ìwọ̀ntúnwọ̀nsì ṣiṣẹ́ fún àwọn node olùkójọpọ̀ New-API / One-API / Sub2API. Dashboard yóò ṣàfihàn báàjì ìwọ̀ntúnwọ̀nsì, àti pé ìdarí ọ̀nà àyẹ̀wò-kóòtà-kí-á-tó-bẹ̀rẹ̀ yóò fo àwọn àkọọ́lẹ̀ tí kóòtà wọn ti tán.",
+    "quotaCheck": "Àyẹ̀wò ìpín",
+    "quotaCheckHint": "Ka àwọn kírẹ́dítì tó ṣẹ́kù ti àwọn kọ́kọ́rọ́ API node yìí láti endpoint tó péye kí o sì fi wọ́n hàn nínú Àwọn Ààlà Olùpèsè. Endpoint ìpín tí o ṣètò fúnra rẹ lórí kọ́kọ́rọ́ kan kò ní yí padà.",
+    "quotaPath": "Ọ̀nà ìpín",
+    "quotaPathHint": "A fi ránṣẹ́ gẹ́gẹ́ bí ìbéèrè GET sí URL ìpìlẹ̀ pẹ̀lú ọ̀nà yìí, pẹ̀lú kọ́kọ́rọ́ API ti kọ́kọ́rọ́ náà. Ìdáhùn JSON gbọ́dọ̀ ní pápá nọ́mbà credits; àwọn pápá àṣàyàn total àti used ló ń darí ọ̀pá ìlò.",
     "newApiAggregatorConsoleApiKeyHint": "Token Ìwọlé Sístẹ́mù fún endpoint /api/user/self ti olùkójọpọ̀. Kì í ṣe kọ́kọ́rọ́ API ìdarí ọ̀nà.",
     "newApiAggregatorUserIdHint": "Iye àkọlé New-Api-User tí a ń lò láti gba ìwọ̀ntúnwọ̀nsì kóòtà olùmúlò olùkójọpọ̀.",
     "newApiAggregatorQuotaPerUnitLabel": "Kóòtà Fún Ìwọ̀n Kọ̀ọ̀kan",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Fàyè gba pípa JPEG fún ìgbà díẹ̀ mọ́ nígbà tí ìbéèrè tí a ti fìdí rẹ̀ múlẹ̀ bá tún ṣètò drilldown: true nìkan. A kì í pa àwọn fídíò gidi mọ́ láéláé.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Fàyè gba ìṣàwárí férémù jinlẹ̀ tí a ti fìdí rẹ̀ múlẹ̀",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Fàyè gba àwọn kọ́kọ́rọ́ API láti ka àti pa àwọn àmì ìdánimọ̀ àìhàn tiwọn nìkan. Kò sí ààyè fún ìwọlé aláìlórúkọ tàbí ìwọlé láti ọ̀dọ̀ kọ́kọ́rọ́ mìíràn.",
-    "modalityBridgeVideoDrilldownUsage": "Àwọn JPEG / báìtì tí a pa mọ́"
+    "modalityBridgeVideoDrilldownUsage": "Àwọn JPEG / báìtì tí a pa mọ́",
+    "modalityBridgeVideoPromotionTitle": "Ìmúrasílẹ̀ fún ìlànà tó ti ní ìlọsíwájú",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Ti àdánwò",
+    "modalityBridgeVideoPromotionEligible": "Tó yẹ",
+    "modalityBridgeVideoPromotionContextRequired": "Ìgbéga nílò ìṣiṣẹ́ méjì tó kúnjú ìwọ̀n, tí ọ̀kọ̀ọ̀kan kò gbára lé èkejì, fún àtúnṣe módẹ́lì pàtó kan náà, ìlànà, àkójọpọ̀ dátà àti ẹ̀yà ìkọ́lé. Àyíká-ọ̀rọ̀ tí a kò tíì jẹ́rìí sí máa wà ní HOLD; yíyan ìlànà àdánwò kì í ṣe ìfọwọ́sí."
   },
   "contextRtk": {
     "title": "Ẹ́ńjìnnì RTK",
