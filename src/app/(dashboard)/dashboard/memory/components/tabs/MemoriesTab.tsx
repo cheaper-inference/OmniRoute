@@ -458,7 +458,11 @@ export default function MemoriesTab() {
             </div>
           ) : (
             <>
-              <Table aria-label={t("memories")} scrollbarLabel={t("memories")}>
+              <Table
+                aria-label={t("memories")}
+                scrollbarLabel={t("memories")}
+                containerClassName="rounded-none border-0"
+              >
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("type")}</TableHead>

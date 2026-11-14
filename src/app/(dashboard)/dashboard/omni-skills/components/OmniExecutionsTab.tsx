@@ -43,7 +43,11 @@ export function OmniExecutionsTab({
 
   return (
     <Card>
-      <Table aria-label={t("executionsTab")} scrollbarLabel={t("executionsTab")}>
+      <Table
+        aria-label={t("executionsTab")}
+        scrollbarLabel={t("executionsTab")}
+        containerClassName="rounded-none border-0"
+      >
         <TableHeader>
           <TableRow>
             <TableHead>{t("skill")}</TableHead>
