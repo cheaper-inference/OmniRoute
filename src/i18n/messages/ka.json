@@ -6696,6 +6696,10 @@
     "tokenrouterManagementKeyHint": "ანგარიშის გასაღები TokenRouter-ის პანელიდან (Settings → Management Key). გამოიყენება მხოლოდ კვოტისა და ბალანსის წასაკითხად, არასდროს მოთხოვნებისთვის. შენახული გასაღები არ ჩანს; მის შესანარჩუნებლად დატოვეთ ცარიელი.",
     "newApiAggregatorToggleLabel": "აგრეგატორის კარიბჭე",
     "newApiAggregatorToggleHint": "ჩართეთ ბალანსის გამოვლენა New-API / One-API / Sub2API აგრეგატორის კვანძებისთვის. მართვის პანელზე გამოჩნდება ბალანსის ნიშანი, ხოლო კვოტის წინასწარი შემოწმების მქონე მარშრუტიზაცია ამოწურულ ანგარიშებს გამოტოვებს.",
+    "quotaCheck": "კვოტის შემოწმება",
+    "quotaCheckHint": "კითხულობს ამ კვანძის API გასაღებების დარჩენილ კრედიტებს სტანდარტული endpoint-იდან და აჩვენებს მათ პროვაიდერების ლიმიტები-ში. გასაღებზე ხელით კონფიგურირებული კვოტის endpoint უცვლელი რჩება.",
+    "quotaPath": "კვოტის გზა",
+    "quotaPathHint": "იგზავნება GET მოთხოვნად საბაზისო URL-ზე პლუს ეს გზა, გასაღების API გასაღებით. JSON პასუხი უნდა შეიცავდეს რიცხვით credits ველს; არჩევითი total და used ველები განსაზღვრავს გამოყენების ზოლს.",
     "newApiAggregatorConsoleApiKeyHint": "სისტემური წვდომის ტოკენი აგრეგატორის /api/user/self ენდპოინტისთვის. ეს არ არის მარშრუტიზაციის API გასაღები.",
     "newApiAggregatorUserIdHint": "New-Api-User სათაურის მნიშვნელობა, რომელიც აგრეგატორის მომხმარებლის კვოტის ბალანსის მისაღებად გამოიყენება.",
     "newApiAggregatorQuotaPerUnitLabel": "კვოტა ერთეულზე",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "დაუშვით JPEG-ების დროებით შენახვა მხოლოდ მაშინ, როცა ავთენტიფიცირებულ მოთხოვნაში ასევე მითითებულია drilldown: true. დაუმუშავებელი ვიდეოები არასოდეს ინახება.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "ავთენტიფიცირებული წვდომით კადრების დეტალური დათვალიერების დაშვება",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "დაუშვით, რომ API გასაღებებმა წაიკითხონ და წაშალონ მხოლოდ საკუთარი გაუმჭვირვალე იდენტიფიკატორები. ანონიმური ან სხვა გასაღებით წვდომა დაუშვებელია.",
-    "modalityBridgeVideoDrilldownUsage": "შენახული JPEG-ები / ბაიტები"
+    "modalityBridgeVideoDrilldownUsage": "შენახული JPEG-ები / ბაიტები",
+    "modalityBridgeVideoPromotionTitle": "გაფართოებული პოლიტიკის მზადყოფნა",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "ექსპერიმენტული",
+    "modalityBridgeVideoPromotionEligible": "დაშვებული",
+    "modalityBridgeVideoPromotionContextRequired": "დაწინაურებისთვის საჭიროა ორი დამოუკიდებელი საკვალიფიკაციო გაშვება მოდელის ზუსტად იმავე რევიზიის, პოლიტიკის, კორპუსისა და ბილდისთვის. დაუდასტურებელი კონტექსტი რჩება HOLD სტატუსში; ექსპერიმენტული პოლიტიკის არჩევა დამტკიცებას არ ნიშნავს."
   },
   "contextRtk": {
     "title": "RTK ძრავა",

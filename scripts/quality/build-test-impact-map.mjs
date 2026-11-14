@@ -175,15 +175,88 @@ function writeJsonValue(write, value) {
  * "RangeError: Invalid string length" before it could report anything. Writing
  * entry by entry through a small buffer means no string here grows with the map.
  *
- * That removes the limit from the writer only. `select-impacted-tests.mjs` and
- * `check-forgotten-sibling-tests.mjs` still load the file with
- * `readFileSync(path, "utf8")`, which throws ERR_STRING_TOO_LONG once the file
- * passes the same limit (512 MiB). The compact output below only buys headroom
- * until then; the readers have to stream for the ceiling to go away.
- *
- * Top-level entries are separated by newlines; nested values stay compact
- * because the readers parse the whole thing anyway.
+ * The readers have the same ceiling: `readFileSync(path, "utf8")` throws once the
+ * file passes 512 MiB. So every top-level entry AND every entry of a top-level
+ * object (`sources`, `artifacts`) starts its own line, and `readTestImpactMap()`
+ * parses line by line from a Buffer, never decoding the whole file as one
+ * string. Newlines are JSON whitespace, so the file stays valid JSON; values
+ * below that depth stay compact on their line.
  */
+function isPlainObject(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+// V8's maximum string length (0x1fffffe8). Below it a whole-file JSON.parse is safe.
+const MAX_STRING_CHARS = 0x1fffffe8;
+const OPEN_OBJECT_LINE = /^("(?:[^"\\]|\\.)*"):\{$/;
+
+/** Each `\n`-separated line of the buffer, decoded on its own. */
+function* bufferLines(buffer) {
+  let start = 0;
+  while (start < buffer.length) {
+    let end = buffer.indexOf(0x0a, start);
+    if (end === -1) end = buffer.length;
+    yield buffer.toString("utf8", start, end);
+    start = end + 1;
+  }
+}
+
+/** Parse the layout written by writeTestImpactMap, one line at a time. */
+function parseImpactMapLines(buffer) {
+  let root = null;
+  let target = null;
+  let closed = false;
+  for (const raw of bufferLines(buffer)) {
+    const line = raw.trim().replace(/,$/, "");
+    if (!line) continue;
+    if (closed) throw new Error("test-impact-map: content after the closing brace");
+    if (root === null) {
+      if (line !== "{") throw new Error("test-impact-map: not the line-per-entry layout");
+      root = {};
+      continue;
+    }
+    if (line === "}") {
+      if (target) target = null;
+      else closed = true;
+      continue;
+    }
+    const open = target ? null : OPEN_OBJECT_LINE.exec(line);
+    if (open) {
+      target = {};
+      root[JSON.parse(open[1])] = target;
+      continue;
+    }
+    Object.assign(target ?? root, JSON.parse(`{${line}}`));
+  }
+  if (!closed) throw new Error("test-impact-map: truncated (no closing brace)");
+  return root;
+}
+
+/**
+ * Read a test impact map without building one string for the whole file.
+ *
+ * Files written by writeTestImpactMap are parsed line by line from a Buffer, so
+ * their size is no longer capped by V8's string limit. Any other layout (an old
+ * single-line map) falls back to JSON.parse only while it fits in one string.
+ *
+ * @param {string} file
+ * @param {{ wholeStringLimit?: number }} [options] test seam for the string ceiling
+ */
+export function readTestImpactMap(file, { wholeStringLimit = MAX_STRING_CHARS } = {}) {
+  const buffer = fs.readFileSync(file);
+  try {
+    return parseImpactMapLines(buffer);
+  } catch (lineError) {
+    if (buffer.length >= wholeStringLimit) {
+      throw new Error(
+        `test-impact-map: ${file} is ${buffer.length} bytes and not in the line-per-entry ` +
+          `layout (${lineError.message}); rebuild it with build-test-impact-map.mjs`
+      );
+    }
+    return JSON.parse(buffer.toString("utf8"));
+  }
+}
+
 export function writeTestImpactMap(out, map) {
   const fd = fs.openSync(out, "w");
   let pending = "";
@@ -199,7 +272,17 @@ export function writeTestImpactMap(out, map) {
     write("{");
     Object.entries(map).forEach(([key, value], index) => {
       write((index > 0 ? ",\n" : "\n") + JSON.stringify(key) + ":");
-      writeJsonValue(write, value);
+      if (isPlainObject(value) && Object.keys(value).length > 0) {
+        // One line per entry, so the reader never needs the whole object as one string.
+        write("{");
+        Object.entries(value).forEach(([entryKey, entryValue], entryIndex) => {
+          write((entryIndex > 0 ? ",\n" : "\n") + JSON.stringify(entryKey) + ":");
+          writeJsonValue(write, entryValue);
+        });
+        write("\n}");
+      } else {
+        writeJsonValue(write, value);
+      }
     });
     write("\n}\n");
     flush();

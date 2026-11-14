@@ -6705,6 +6705,10 @@
     "tokenrouterManagementKeyHint": "Konta atslēga no TokenRouter informācijas paneļa (Settings → Management Key). Tiek izmantota tikai kvotas un atlikuma nolasīšanai, nekad pieprasījumiem. Saglabātā atslēga netiek rādīta; atstājiet tukšu, lai to paturētu.",
     "newApiAggregatorToggleLabel": "Apkopotāja vārteja",
     "newApiAggregatorToggleHint": "Iespējot atlikuma noteikšanu New-API / One-API / Sub2API apkopotāju mezgliem. Informācijas panelī tiks parādīta atlikuma emblēma, un kvotas priekšpārbaudes maršrutēšana izlaidīs kontus, kuru kvota ir izsmelta.",
+    "quotaCheck": "Kvotas pārbaude",
+    "quotaCheckHint": "Nolasa šī mezgla API atslēgu atlikušos kredītus no standarta galapunkta un parāda tos sadaļā Nodrošinātāju limiti. Kvotas galapunkts, ko manuāli konfigurējāt atslēgai, paliek nemainīgs.",
+    "quotaPath": "Kvotas ceļš",
+    "quotaPathHint": "Tiek nosūtīts kā GET pieprasījums uz bāzes URL ar šo ceļu, izmantojot atslēgas API atslēgu. JSON atbildē jābūt skaitliskam laukam credits; neobligātie lauki total un used nosaka lietojuma joslu.",
     "newApiAggregatorConsoleApiKeyHint": "Sistēmas piekļuves marķieris apkopotāja /api/user/self galapunktam. Tā nav maršrutēšanas API atslēga.",
     "newApiAggregatorUserIdHint": "New-Api-User galvenes vērtība, kas tiek izmantota, lai iegūtu apkopotāja lietotāja kvotas atlikumu.",
     "newApiAggregatorQuotaPerUnitLabel": "Kvota par vienību",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Atļaut īslaicīgu JPEG failu saglabāšanu tikai tad, ja autentificētajā pieprasījumā ir iestatīts arī drilldown: true. Neapstrādātie video nekad netiek saglabāti.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Atļaut autentificētu kadru detalizētu izpēti",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Atļaut API atslēgām lasīt un dzēst tikai savus necaurspīdīgos identifikatorus. Anonīma piekļuve vai piekļuve ar citu atslēgu nav atļauta.",
-    "modalityBridgeVideoDrilldownUsage": "Saglabātie JPEG faili / baiti"
+    "modalityBridgeVideoDrilldownUsage": "Saglabātie JPEG faili / baiti",
+    "modalityBridgeVideoPromotionTitle": "Paplašinātās politikas gatavība",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Eksperimentāla",
+    "modalityBridgeVideoPromotionEligible": "Atbilstoša",
+    "modalityBridgeVideoPromotionContextRequired": "Paaugstināšanai ir nepieciešamas divas neatkarīgas kvalificējošas izpildes tieši tai pašai modeļa versijai, politikai, korpusam un būvējumam. Nepārbaudīts konteksts saglabā statusu HOLD; eksperimentālas politikas atlase nav apstiprinājums."
   },
   "contextRtk": {
     "title": "RTK dzinējs",

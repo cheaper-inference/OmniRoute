@@ -6696,6 +6696,10 @@
     "tokenrouterManagementKeyHint": "Khóa tài khoản từ bảng điều khiển TokenRouter (Settings → Management Key). Chỉ dùng để đọc hạn mức và số dư, không bao giờ dùng cho yêu cầu. Khóa đã lưu không được hiển thị; để trống để giữ nguyên.",
     "newApiAggregatorToggleLabel": "Cổng tổng hợp",
     "newApiAggregatorToggleHint": "Bật tính năng phát hiện số dư cho các node tổng hợp New-API / One-API / Sub2API. Bảng điều khiển sẽ hiển thị huy hiệu số dư và định tuyến kiểm tra hạn mức trước sẽ bỏ qua các tài khoản đã hết hạn mức.",
+    "quotaCheck": "Kiểm tra hạn mức",
+    "quotaCheckHint": "Đọc số tín dụng còn lại của các khóa API thuộc nút này từ một endpoint tiêu chuẩn và hiển thị trong Giới hạn của nhà cung cấp. Endpoint hạn mức mà bạn đã cấu hình thủ công trên một khóa sẽ được giữ nguyên.",
+    "quotaPath": "Đường dẫn hạn mức",
+    "quotaPathHint": "Được gửi dưới dạng yêu cầu GET tới URL cơ sở cộng với đường dẫn này, kèm khóa API của khóa đó. Phản hồi JSON phải có trường số credits; các trường tùy chọn total và used quyết định thanh sử dụng.",
     "newApiAggregatorConsoleApiKeyHint": "Token truy cập hệ thống cho endpoint /api/user/self của bộ tổng hợp. Không phải là khóa API định tuyến.",
     "newApiAggregatorUserIdHint": "Giá trị tiêu đề New-Api-User dùng để lấy số dư hạn mức của người dùng bộ tổng hợp.",
     "newApiAggregatorQuotaPerUnitLabel": "Hạn mức trên mỗi đơn vị",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Chỉ cho phép lưu giữ tạm thời các tệp JPEG khi yêu cầu đã xác thực cũng đặt drilldown: true. Video gốc không bao giờ được lưu giữ.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Cho phép xem chi tiết khung hình sau khi xác thực",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Chỉ cho phép khóa API đọc và xóa các mã định danh không rõ nghĩa thuộc về chính khóa đó. Không cho phép truy cập ẩn danh hoặc truy cập chéo giữa các khóa.",
-    "modalityBridgeVideoDrilldownUsage": "Tệp JPEG được lưu giữ / byte"
+    "modalityBridgeVideoDrilldownUsage": "Tệp JPEG được lưu giữ / byte",
+    "modalityBridgeVideoPromotionTitle": "Mức độ sẵn sàng của chính sách nâng cao",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Thử nghiệm",
+    "modalityBridgeVideoPromotionEligible": "Đủ điều kiện",
+    "modalityBridgeVideoPromotionContextRequired": "Việc thăng hạng yêu cầu hai lượt chạy đủ điều kiện độc lập cho đúng phiên bản mô hình, chính sách, tập ngữ liệu và bản dựng. Ngữ cảnh chưa được xác minh vẫn ở trạng thái HOLD; việc chọn một chính sách thử nghiệm không đồng nghĩa với phê duyệt."
   },
   "contextRtk": {
     "title": "Công cụ RTK",

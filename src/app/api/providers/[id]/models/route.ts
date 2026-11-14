@@ -856,7 +856,7 @@ export async function GET(
           ? getRegistryEntry(provider)
           : null;
       const rawBaseUrl =
-        getProviderBaseUrl(connection.providerSpecificData) ||
+        getProviderBaseUrl(connection.providerSpecificData, provider) ||
         (typeof registryEntry?.baseUrl === "string" ? registryEntry.baseUrl : null);
       const baseUrl = rawBaseUrl;
       if (!baseUrl) {
