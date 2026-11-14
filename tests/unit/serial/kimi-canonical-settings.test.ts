@@ -47,7 +47,7 @@ function raw(key: string) {
 test.beforeEach(async () => {
   await h.resetStorage();
   db = h.core.getDbInstance();
-  db.prepare("DELETE FROM _omniroute_migrations WHERE version='240'").run();
+  db.prepare("DELETE FROM _omniroute_migrations WHERE version='242'").run();
   chaosConfig.invalidateChaosConfigCache();
 });
 test.afterEach(() => {
@@ -331,7 +331,7 @@ test("C12 distinct model pattern order remains first-match and canonical exact d
   migrate();
   tiers.setTierConfig(tierDb.loadTierConfigFromDb());
   assert.equal(tiers.classifyTier("kimi", "moonshot/custom").tier, "cheap");
-  db.prepare("DELETE FROM _omniroute_migrations WHERE version='240'").run();
+  db.prepare("DELETE FROM _omniroute_migrations WHERE version='242'").run();
   tierDb.saveTierConfig({
     ...tierBase(),
     modelOverrides: [
@@ -589,7 +589,7 @@ for (const remainder of [false, true])
       assert.deepEqual(db.prepare("SELECT * FROM provider_connections ORDER BY id").all(), before);
       assert.deepEqual(db.prepare("SELECT * FROM key_value ORDER BY namespace,key").all(), stored);
       assert.equal(
-        db.prepare("SELECT 1 FROM _omniroute_migrations WHERE version='240'").get(),
+        db.prepare("SELECT 1 FROM _omniroute_migrations WHERE version='242'").get(),
         undefined
       );
     }
@@ -728,33 +728,50 @@ test("C14 alias deny takes precedence and empty exposure lists preserve the pool
   assert.deepEqual(autoExposure.filterModelExposureCandidates(pool, rules), [pool[2]]);
 });
 
-for (const canonicalFirst of [false, true]) {
-  test(
-    "R6 Chaos canonical provider override wins differing models in order " + canonicalFirst,
-    async () => {
-      const account = await h.seedConnection("moonshot", { apiKey: "chaos-canonical" });
-      await h.seedConnection("openai", { apiKey: "chaos-foreign" });
-      const legacy = { providerId: "moonshot", modelId: "moonshot/legacy-wire", enabled: true };
-      const canonical = { providerId: "kimi", modelId: "moonshot/canonical-wire", enabled: true };
-      kv("chaosModeConfig", {
-        ...chaosConfig.DEFAULT_CHAOS_CONFIG,
-        enabled: true,
-        providerOverrides: canonicalFirst ? [canonical, legacy] : [legacy, canonical],
-      });
-      migrate();
-      assert.deepEqual(raw("chaosModeConfig").providerOverrides, [canonical]);
-      const calls: string[] = [];
-      mock.method(chaos.chatDispatch, "postChatCompletion", async (request: Request) => {
-        calls.push((await request.json()).model);
-        return Response.json({ choices: [{ message: { content: "fixture" } }] });
-      });
-      const result = await chaos.executeChaosRun({ task: "canonical override" });
-      assert.equal(result.totalProviders, 1);
-      assert.equal(result.models[0].providerId, account.id);
-      assert.deepEqual(calls, ["moonshot/canonical-wire"]);
-    }
-  );
-}
+const nativeChaosPairs = [
+  ["moonshot", "kimi"],
+  ["moonshot", "KIMI"],
+  ["MOONSHOT", "kimi"],
+];
+for (const [legacyId, canonicalId] of nativeChaosPairs)
+  for (const canonicalFirst of [false, true]) {
+    test(
+      "R6 Chaos canonical override wins " +
+        legacyId +
+        "/" +
+        canonicalId +
+        " order " +
+        canonicalFirst,
+      async () => {
+        const account = await h.seedConnection("moonshot", { apiKey: "chaos-canonical" });
+        await h.seedConnection("openai", { apiKey: "chaos-foreign" });
+        const legacy = { providerId: legacyId, modelId: "moonshot/legacy-wire", enabled: true };
+        const canonical = {
+          providerId: canonicalId,
+          modelId: "moonshot/canonical-wire",
+          enabled: true,
+        };
+        kv("chaosModeConfig", {
+          ...chaosConfig.DEFAULT_CHAOS_CONFIG,
+          enabled: true,
+          providerOverrides: canonicalFirst ? [canonical, legacy] : [legacy, canonical],
+        });
+        migrate();
+        assert.deepEqual(raw("chaosModeConfig").providerOverrides, [
+          { ...canonical, providerId: "kimi" },
+        ]);
+        const calls: string[] = [];
+        mock.method(chaos.chatDispatch, "postChatCompletion", async (request: Request) => {
+          calls.push((await request.json()).model);
+          return Response.json({ choices: [{ message: { content: "fixture" } }] });
+        });
+        const result = await chaos.executeChaosRun({ task: "canonical override" });
+        assert.equal(result.totalProviders, 1);
+        assert.equal(result.models[0].providerId, account.id);
+        assert.deepEqual(calls, ["moonshot/canonical-wire"]);
+      }
+    );
+  }
 for (const connectionProvider of ["moonshot", "kimi"])
   for (const unmatchedSurvivor of [false, true]) {
     test(
@@ -765,12 +782,23 @@ for (const connectionProvider of ["moonshot", "kimi"])
       async () => {
         await h.seedConnection(connectionProvider, { apiKey: "chaos-prior" });
         await h.seedConnection("deepseek", { apiKey: "chaos-not-selected" });
+        const overrides = [
+          {
+            providerId: connectionProvider === "moonshot" ? "MOONSHOT" : "moonshot",
+            modelId: "moonshot/legacy-wire",
+            enabled: true,
+          },
+          {
+            providerId: connectionProvider === "moonshot" ? "kimi" : "KIMI",
+            modelId: "moonshot/canonical-wire",
+            enabled: false,
+          },
+        ];
         kv("chaosModeConfig", {
           ...chaosConfig.DEFAULT_CHAOS_CONFIG,
           enabled: true,
           providerOverrides: [
-            { providerId: "moonshot", modelId: "moonshot/legacy-wire", enabled: true },
-            { providerId: "kimi", modelId: "moonshot/canonical-wire", enabled: false },
+            ...(unmatchedSurvivor ? [...overrides].reverse() : overrides),
             ...(unmatchedSurvivor ? [{ providerId: "missing-provider", enabled: true }] : []),
           ],
         });
@@ -786,42 +814,53 @@ for (const connectionProvider of ["moonshot", "kimi"])
           stored
         );
         assert.equal(
-          db.prepare("SELECT 1 FROM _omniroute_migrations WHERE version='240'").get(),
+          db.prepare("SELECT 1 FROM _omniroute_migrations WHERE version='242'").get(),
           undefined
         );
       }
     );
   }
-test("R6 Chaos keeps a matching connection selector while canonical disable wins", async () => {
-  await h.seedConnection("moonshot", { apiKey: "chaos-prior" });
-  const survivor = await h.seedConnection("openai", { apiKey: "chaos-selected" });
-  const canonical = { providerId: "kimi", modelId: "moonshot/canonical-wire", enabled: false };
-  const connection = {
-    providerId: survivor.id,
-    modelId: "moonshot/connection-wire",
-    enabled: true,
-  };
-  kv("chaosModeConfig", {
-    ...chaosConfig.DEFAULT_CHAOS_CONFIG,
-    enabled: true,
-    providerOverrides: [
-      { providerId: "moonshot", modelId: "moonshot/legacy-wire", enabled: true },
-      canonical,
-      connection,
-    ],
-  });
-  migrate();
-  assert.deepEqual(raw("chaosModeConfig").providerOverrides, [canonical, connection]);
-  const calls: string[] = [];
-  mock.method(chaos.chatDispatch, "postChatCompletion", async (request: Request) => {
-    calls.push((await request.json()).model);
-    return Response.json({ choices: [{ message: { content: "fixture" } }] });
-  });
-  const result = await chaos.executeChaosRun({ task: "connection selector" });
-  assert.equal(result.totalProviders, 1);
-  assert.equal(result.models[0].providerId, survivor.id);
-  assert.deepEqual(calls, ["moonshot/connection-wire"]);
-});
+for (const [legacyId, canonicalId] of nativeChaosPairs)
+  test(
+    "R6 Chaos matching connection survives " + legacyId + "/" + canonicalId + " canonical disable",
+    async () => {
+      await h.seedConnection("moonshot", { apiKey: "chaos-prior" });
+      const survivor = await h.seedConnection("openai", { apiKey: "chaos-selected" });
+      const canonical = {
+        providerId: canonicalId,
+        modelId: "moonshot/canonical-wire",
+        enabled: false,
+      };
+      const connection = {
+        providerId: survivor.id,
+        modelId: "moonshot/connection-wire",
+        enabled: true,
+      };
+      kv("chaosModeConfig", {
+        ...chaosConfig.DEFAULT_CHAOS_CONFIG,
+        enabled: true,
+        providerOverrides: [
+          { providerId: legacyId, modelId: "moonshot/legacy-wire", enabled: true },
+          canonical,
+          connection,
+        ],
+      });
+      migrate();
+      assert.deepEqual(raw("chaosModeConfig").providerOverrides, [
+        { ...canonical, providerId: "kimi" },
+        connection,
+      ]);
+      const calls: string[] = [];
+      mock.method(chaos.chatDispatch, "postChatCompletion", async (request: Request) => {
+        calls.push((await request.json()).model);
+        return Response.json({ choices: [{ message: { content: "fixture" } }] });
+      });
+      const result = await chaos.executeChaosRun({ task: "connection selector" });
+      assert.equal(result.totalProviders, 1);
+      assert.equal(result.models[0].providerId, survivor.id);
+      assert.deepEqual(calls, ["moonshot/connection-wire"]);
+    }
+  );
 
 for (const selector of ["kimi", "moonshot"])
   for (const inactive of [false, true])
@@ -915,3 +954,84 @@ for (const matchingSelector of [false, true]) {
     }
   );
 }
+
+test("R8 Chaos mixed-case literal IDs and non-native selectors preserve every field and rerun", () => {
+  db.prepare(
+    "INSERT INTO provider_connections(id,provider,is_active,created_at,updated_at) VALUES('MoOnShOt','openai',0,'old','old'),('KiMi','deepseek',0,'old','old')"
+  ).run();
+  const config = {
+    ...chaosConfig.DEFAULT_CHAOS_CONFIG,
+    providerOverrides: [
+      { providerId: "MOONSHOT", modelId: "MOONSHOT/keep-wire", enabled: false, extra: "keep" },
+      { providerId: "kImI", modelId: "kimi/keep-wire", enabled: true },
+      { providerId: "OpenAI", modelId: "moonshot/foreign-wire" },
+      { providerId: "Account-A", enabled: false },
+    ],
+  };
+  kv("chaosModeConfig", config);
+  const stored = raw("chaosModeConfig");
+  migrate();
+  assert.deepEqual(raw("chaosModeConfig"), stored);
+  const before = db.prepare("SELECT * FROM key_value ORDER BY namespace,key").all();
+  assert.equal(runMigrations(db), 0);
+  assert.deepEqual(db.prepare("SELECT * FROM key_value ORDER BY namespace,key").all(), before);
+});
+
+for (const [legacyId, canonicalId] of [
+  ["moonshot", "KIMI"],
+  ["MOONSHOT", "kimi"],
+])
+  for (const canonicalFirst of [false, true]) {
+    test(
+      "R2 Tier native conflict " +
+        legacyId +
+        "/" +
+        canonicalId +
+        " canonical first=" +
+        canonicalFirst,
+      () => {
+        db.prepare(
+          "INSERT INTO provider_connections(id,provider,is_active,created_at,updated_at) VALUES('KiMi','openai',0,'old','old')"
+        ).run();
+        const legacy = { provider: legacyId, tier: "cheap" as const };
+        const canonical = { provider: canonicalId, tier: "premium" as const };
+        const foreign = { provider: "OpenRouter", tier: "cheap" as const };
+        const legacyModel = { ...legacy, modelPattern: "moonshot/*" };
+        const canonicalModel = { ...canonical, modelPattern: "moonshot/*" };
+        const distinct = { ...legacy, modelPattern: "opaque/*" };
+        const coding = {
+          provider: "KIMI-CODING",
+          modelPattern: "moonshot/*",
+          tier: "cheap" as const,
+        };
+        tierDb.saveTierConfig({
+          ...tierBase(),
+          providerOverrides: [
+            ...(canonicalFirst ? [canonical, legacy] : [legacy, canonical]),
+            foreign,
+          ],
+          modelOverrides: [
+            ...(canonicalFirst ? [canonicalModel, legacyModel] : [legacyModel, canonicalModel]),
+            distinct,
+            coding,
+          ],
+        });
+        migrate();
+        const loaded = tierDb.loadTierConfigFromDb()!;
+        assert.deepEqual(loaded.providerOverrides, [{ ...canonical, provider: "kimi" }, foreign]);
+        assert.deepEqual(loaded.modelOverrides, [
+          { ...canonicalModel, provider: "kimi" },
+          { ...distinct, provider: "kimi" },
+          coding,
+        ]);
+        tiers.setTierConfig(loaded);
+        assert.equal(tiers.classifyTier("kimi", "moonshot/request").tier, "premium");
+        tiers.setTierConfig({ ...loaded, providerOverrides: [] });
+        assert.equal(tiers.classifyTier("moonshot", "moonshot/request").tier, "premium");
+        assert.equal(tiers.classifyTier("kimi", "opaque/request").tier, "cheap");
+        const before = db.prepare("SELECT * FROM tier_config").all();
+        assert.equal(runMigrations(db), 0);
+        assert.deepEqual(db.prepare("SELECT * FROM tier_config").all(), before);
+      }
+    );
+  }

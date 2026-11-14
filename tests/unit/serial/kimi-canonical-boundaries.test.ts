@@ -19,7 +19,7 @@ test.after(async () => {
 });
 function migrate() {
   const db = h.core.getDbInstance();
-  db.prepare("DELETE FROM _omniroute_migrations WHERE version='240'").run();
+  db.prepare("DELETE FROM _omniroute_migrations WHERE version='242'").run();
   runMigrations(db);
 }
 function responseSse(model: string) {

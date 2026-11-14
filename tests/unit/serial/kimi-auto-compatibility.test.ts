@@ -6,18 +6,29 @@ import test from "node:test";
 
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "kimi-auto-compat-"));
 process.env.DATA_DIR = dataDir;
+process.env.API_KEY_SECRET ||= "kimi-auto-compat-fixture";
 const core = await import("../../../src/lib/db/core.ts");
 const providers = await import("../../../src/lib/db/providers.ts");
 const factory = await import("../../../open-sse/services/autoCombo/virtualFactory.ts");
 const strategy = await import("../../../open-sse/services/combo/autoStrategy.ts");
+const models = await import("../../../src/lib/db/models.ts");
+const apiKeys = await import("../../../src/lib/db/apiKeys.ts");
+const { findPublishedModel } = await import("../../../src/lib/db/apiKeys/publishedModelLookup.ts");
+const { getModelsByProviderId } = await import("../../../open-sse/config/providerModels.ts");
+const { getComboBuilderOptions } = await import("../../../src/lib/combos/builderOptions.ts");
+
 type Target = Parameters<typeof strategy.expandAutoComboCandidatePool>[0][number];
 
 test.beforeEach(() => {
   core.resetDbInstance();
+  apiKeys.resetApiKeyState();
   fs.rmSync(dataDir, { recursive: true, force: true });
   fs.mkdirSync(dataDir, { recursive: true });
 });
-test.afterEach(() => core.resetDbInstance());
+test.afterEach(() => {
+  core.resetDbInstance();
+  apiKeys.resetApiKeyState();
+});
 test.after(() => fs.rmSync(dataDir, { recursive: true, force: true }));
 
 async function connection(provider: string, extra: Record<string, unknown> = {}) {
@@ -205,4 +216,117 @@ test("explicit paid synced evidence vetoes sibling custom/default free hints in 
     assert.deepEqual(rows.find((row) => row.modelStr === "kimi/wire-paid")?.ids, [paid.id]);
   }
   assert.deepEqual(native(await expand([free.id])), []);
+});
+
+async function publicKey() {
+  const created = await apiKeys.createApiKey("Kimi publication", "kimi-publication-fixture");
+  await apiKeys.updateApiKeyPermissions(created.id, { disableNonPublicModels: true });
+  apiKeys.clearApiKeyCaches();
+  return created;
+}
+
+test("R2 late native sync Auto targets remain published with exact wire IDs and restrictions", async () => {
+  const legacy = await connection("moonshot");
+  assert.equal(legacy.provider, "moonshot");
+  assert.ok(
+    core.getDbInstance().prepare("SELECT 1 FROM _omniroute_migrations WHERE version='242'").get()
+  );
+  await models.replaceSyncedAvailableModelsForConnection("moonshot", legacy.id, [
+    { id: "legacy-only" },
+    { id: "moonshot/native-wire" },
+  ]);
+  assert.ok(
+    core
+      .getDbInstance()
+      .prepare("SELECT 1 FROM key_value WHERE namespace='syncedAvailableModels' AND key=?")
+      .get("moonshot:" + legacy.id)
+  );
+  const foreign = await connection("openai");
+  await models.replaceSyncedAvailableModelsForConnection("openai", foreign.id, [
+    { id: "moonshot/foreign-wire" },
+  ]);
+  const key = await publicKey();
+  for (const rows of [await pool(), native(await expand())]) {
+    assert.deepEqual(rows.map((row) => row.modelStr).sort(), [
+      "kimi/legacy-only",
+      "kimi/moonshot/native-wire",
+    ]);
+    for (const row of rows)
+      assert.equal(await apiKeys.isModelAllowedForKey(key.key, row.modelStr), true, row.modelStr);
+  }
+  assert.deepEqual(await findPublishedModel("kimi", "legacy-only"), {
+    providerId: "moonshot",
+    publishedModelId: "legacy-only",
+  });
+  for (const prefix of ["kimi", "moonshot"])
+    assert.equal(await apiKeys.isModelAllowedForKey(key.key, prefix + "/legacy-only"), true);
+  assert.equal(await apiKeys.isModelAllowedForKey(key.key, "openai/moonshot/foreign-wire"), true);
+  assert.equal(await apiKeys.isModelAllowedForKey(key.key, "kimi/moonshot/foreign-wire"), false);
+  assert.equal(await apiKeys.isModelAllowedForKey(key.key, "kimi/native-wire"), false);
+  await apiKeys.updateApiKeyPermissions(key.id, { blockedModels: ["kimi/moonshot/native-wire"] });
+  apiKeys.clearApiKeyCaches();
+  for (const prefix of ["kimi", "moonshot"])
+    assert.equal(
+      await apiKeys.isModelAllowedForKey(key.key, prefix + "/moonshot/native-wire"),
+      false
+    );
+  models.mergeModelCompatOverride("moonshot", "legacy-only", { isHidden: true });
+  apiKeys.clearApiKeyCaches();
+  for (const prefix of ["kimi", "moonshot"])
+    assert.equal(await apiKeys.isModelAllowedForKey(key.key, prefix + "/legacy-only"), false);
+});
+
+test("R2 inactive legacy sync retains publication but stays outside both Auto paths", async () => {
+  const legacy = await connection("moonshot", { isActive: false });
+  await models.replaceSyncedAvailableModelsForConnection("moonshot", legacy.id, [
+    { id: "inactive-only" },
+  ]);
+  assert.deepEqual(await pool(), []);
+  assert.deepEqual(native(await expand()), []);
+  const key = await publicKey();
+  for (const prefix of ["moonshot", "kimi"])
+    assert.equal(await apiKeys.isModelAllowedForKey(key.key, prefix + "/inactive-only"), true);
+});
+
+test("R2 late native account retains the static builder catalog without synced inventory", async () => {
+  const legacy = await connection("moonshot");
+  assert.equal(legacy.provider, "moonshot");
+  assert.equal(getModelsByProviderId("moonshot"), getModelsByProviderId("kimi"));
+  assert.deepEqual(getModelsByProviderId("moonshot-extra"), []);
+  const options = await getComboBuilderOptions();
+  const provider = options.providers.find((row) => row.providerId === "moonshot");
+  assert.ok(provider);
+  assert.ok(provider.connections.some((row) => row.id === legacy.id));
+  assert.ok(provider.models.some((row) => row.id === "kimi-k3.1-pro"));
+});
+
+test("R2 cross-namespace native admission preserves the shipped paid-only policy", async () => {
+  const canonical = await connection("kimi", {
+    providerSpecificData: { importFreeModelsOnly: true },
+  });
+  // Native Kimi has no shipped free tier; a payload label alone grants no entitlement.
+  await models.replaceSyncedAvailableModelsForConnection("moonshot", canonical.id, [
+    { id: "paid-only", isFree: false },
+    { id: "labeled-free", isFree: true },
+  ]);
+  const key = await publicKey();
+  for (const prefix of ["moonshot", "kimi"])
+    for (const model of ["paid-only", "labeled-free"])
+      assert.equal(await apiKeys.isModelAllowedForKey(key.key, prefix + "/" + model), false);
+  assert.deepEqual(await pool(), []);
+  assert.deepEqual(native(await expand()), []);
+  await providers.updateProviderConnection(canonical.id, {
+    providerSpecificData: { importFreeModelsOnly: false },
+  });
+  apiKeys.clearApiKeyCaches();
+  for (const prefix of ["moonshot", "kimi"])
+    for (const model of ["paid-only", "labeled-free"])
+      assert.equal(await apiKeys.isModelAllowedForKey(key.key, prefix + "/" + model), true);
+  for (const rows of [await pool(), native(await expand())]) {
+    assert.deepEqual(rows.map((row) => row.modelStr).sort(), [
+      "kimi/labeled-free",
+      "kimi/paid-only",
+    ]);
+    for (const row of rows) assert.deepEqual(row.allowedConnectionIds, [canonical.id]);
+  }
 });

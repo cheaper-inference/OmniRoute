@@ -24,7 +24,7 @@ test.beforeEach(() => {
   fs.mkdirSync(dataDir, { recursive: true });
   counter.clearTokenLimitCache();
   db = core.getDbInstance();
-  db.prepare("DELETE FROM _omniroute_migrations WHERE version='240'").run();
+  db.prepare("DELETE FROM _omniroute_migrations WHERE version='242'").run();
 });
 test.afterEach(() => {
   core.resetDbInstance();

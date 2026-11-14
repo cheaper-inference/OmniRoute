@@ -19,7 +19,7 @@ test("migrated connection runs both prefixes through the chat route, forced SSE 
     providerSpecificData: { baseUrl: "https://api.moonshot.cn/v1" },
   });
   const db = h.core.getDbInstance();
-  db.prepare("DELETE FROM _omniroute_migrations WHERE version='240'").run();
+  db.prepare("DELETE FROM _omniroute_migrations WHERE version='242'").run();
   runMigrations(db);
   assert.equal(
     db
@@ -187,7 +187,7 @@ test("C5 later imported Moonshot connection dispatches both prefixes after migra
     providerSpecificData: { baseUrl: "https://api.moonshot.cn/v1" },
   });
   const db = h.core.getDbInstance();
-  assert.ok(db.prepare("SELECT 1 FROM _omniroute_migrations WHERE version='240'").get());
+  assert.ok(db.prepare("SELECT 1 FROM _omniroute_migrations WHERE version='242'").get());
   const before = db.prepare("SELECT * FROM provider_connections WHERE id=?").get(conn.id);
   for (const prefix of ["moonshot", "kimi"]) {
     let calls = 0;
@@ -228,7 +228,7 @@ test("C9 default wire model and explicit outer routing prefix preserve vendor mo
   db.prepare("UPDATE provider_connections SET default_model='moonshot/custom' WHERE id=?").run(
     conn.id
   );
-  db.prepare("DELETE FROM _omniroute_migrations WHERE version='240'").run();
+  db.prepare("DELETE FROM _omniroute_migrations WHERE version='242'").run();
   runMigrations(db);
   assert.equal(
     db.prepare("SELECT default_model FROM provider_connections WHERE id=?").get(conn.id)

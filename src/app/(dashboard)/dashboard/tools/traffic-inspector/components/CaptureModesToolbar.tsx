@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
+import GuardedAction from "@/shared/components/GuardedAction";
 import Icon from "@/shared/components/Icon";
 import { cn } from "@/shared/utils/cn";
 import { CustomHostsManager } from "./CustomHostsManager";
@@ -151,13 +152,13 @@ export function CaptureModesToolbar({ customHostCount }: CaptureModesToolbarProp
           );
         })}
 
-        <Button
+        <GuardedAction
           size="sm"
           variant={tproxy.running ? "warning" : "outline"}
           onClick={toggleTproxy}
-          disabled={!tproxy.available || tproxyBusy}
+          disabled={tproxyBusy}
+          reason={!tproxy.available ? t("tproxyModeUnavailable") : undefined}
           aria-pressed={tproxy.running}
-          title={!tproxy.available ? t("tproxyModeUnavailable") : undefined}
         >
           <ModeDot active={tproxy.running} warn />
           {t("tproxyMode")}
@@ -165,7 +166,7 @@ export function CaptureModesToolbar({ customHostCount }: CaptureModesToolbarProp
             <span>· {tproxy.interceptCount}</span>
           )}
           <Icon name="warning" size={14} className="text-warning" />
-        </Button>
+        </GuardedAction>
 
         <div className="ml-auto flex items-center gap-2">
           <Button variant="ghost" size="sm" icon="settings" onClick={() => setShowHosts(true)}>

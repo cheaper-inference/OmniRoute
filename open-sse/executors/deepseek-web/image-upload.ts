@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { setTimeout as delay } from "node:timers/promises";
 import { z } from "zod";
-import { fetchRemoteMedia } from "@/shared/network/remoteImageFetch";
+import { fetchRemoteMedia } from "../../utils/remoteMediaFetch.ts";
 import { sniffCursorImageFormat } from "../../utils/cursorImages.ts";
 import { detectMediaParts } from "../../utils/mediaParts.ts";
 

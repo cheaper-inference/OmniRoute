@@ -117,7 +117,7 @@ test("supported late family state equals canonical public readers after migratio
     ["kimi/custom"]
   );
 
-  db.prepare("DELETE FROM _omniroute_migrations WHERE version='240'").run();
+  db.prepare("DELETE FROM _omniroute_migrations WHERE version='242'").run();
   runMigrations(db);
   assert.deepEqual(await models.getCustomModels("kimi"), before.customModels);
   assert.deepEqual(models.getModelCompatOverrides("kimi"), before.compatOverrides);
@@ -138,7 +138,7 @@ test("supported late family state equals canonical public readers after migratio
     ].sort((a, b) => a.id.localeCompare(b.id))
   );
   const once = rows();
-  db.prepare("DELETE FROM _omniroute_migrations WHERE version='240'").run();
+  db.prepare("DELETE FROM _omniroute_migrations WHERE version='242'").run();
   runMigrations(db);
   assert.deepEqual(rows(), once);
 });
@@ -389,7 +389,7 @@ test("migration preserves native non-authoritative inactive aggregate metadata",
     ],
   });
   const db = core.getDbInstance();
-  db.prepare("DELETE FROM _omniroute_migrations WHERE version='240'").run();
+  db.prepare("DELETE FROM _omniroute_migrations WHERE version='242'").run();
   runMigrations(db);
   assert.deepEqual(await getActiveSyncedCatalog("kimi"), before);
 });

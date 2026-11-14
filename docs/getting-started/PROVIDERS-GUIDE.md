@@ -34,7 +34,7 @@ The Moonshot Open Platform API uses the provider ID and model prefix `kimi`,
 for example `kimi/k3`. Existing `moonshot/...` requests still work.
 Kimi Code, Kimi Code API-key and Kimi Web remain separate integrations.
 
-On upgrade, migration 240 preserves connection IDs, credentials and custom base
+On upgrade, migration 242 preserves connection IDs, credentials and custom base
 URLs while merging saved API provider settings, routing targets, access rules and
 provider budgets. Historical usage and call logs keep their recorded names.
 Explicit Kimi settings win ordinary conflicts; manual model overrides retain

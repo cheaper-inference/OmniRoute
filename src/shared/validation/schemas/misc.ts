@@ -32,7 +32,13 @@ export const CODEX_REASONING_EFFORT_VALUES = new Set([
   "max",
 ]);
 
-export const REQUEST_DEFAULT_SERVICE_TIER_VALUES = new Set(["default", "priority", "fast", "flex"]);
+export const REQUEST_DEFAULT_SERVICE_TIER_VALUES = new Set([
+  "default",
+  "priority",
+  "fast",
+  "flex",
+  "ultrafast",
+]);
 
 // ──── Auth Schemas ────
 

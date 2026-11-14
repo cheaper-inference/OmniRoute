@@ -19,7 +19,7 @@ test.beforeEach(() => {
   fs.rmSync(dataDir, { recursive: true, force: true });
   fs.mkdirSync(dataDir, { recursive: true });
   db = core.getDbInstance();
-  db.prepare("DELETE FROM _omniroute_migrations WHERE version='240'").run();
+  db.prepare("DELETE FROM _omniroute_migrations WHERE version='242'").run();
 });
 test.afterEach(() => core.resetDbInstance());
 test.after(() => fs.rmSync(dataDir, { recursive: true, force: true }));
@@ -76,7 +76,7 @@ for (const provider of ["moonshot", "openrouter"]) {
         assert.equal(step.label, "wire pattern");
       }
       const once = db.prepare("SELECT data FROM combos WHERE name='wire-wildcard'").get()?.data;
-      db.prepare("DELETE FROM _omniroute_migrations WHERE version='240'").run();
+      db.prepare("DELETE FROM _omniroute_migrations WHERE version='242'").run();
       runMigrations(db);
       assert.equal(
         db.prepare("SELECT data FROM combos WHERE name='wire-wildcard'").get()?.data,

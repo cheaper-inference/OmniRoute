@@ -9,11 +9,17 @@
  */
 
 export const RENAMED_MIGRATION_COMPATIBILITY = [
+  // Move completed Kimi markers directly, leaving upstream slots available.
   {
-    // Earlier PR heads used 239 before the pending-detail index claimed it.
     fromVersion: "239",
     fromName: "canonical_kimi_provider",
-    toVersion: "240",
+    toVersion: "242",
+    toName: "canonical_kimi_provider",
+  },
+  {
+    fromVersion: "240",
+    fromName: "canonical_kimi_provider",
+    toVersion: "242",
     toName: "canonical_kimi_provider",
   },
   {

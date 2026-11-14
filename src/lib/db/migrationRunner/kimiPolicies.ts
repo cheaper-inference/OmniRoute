@@ -184,9 +184,32 @@ function validTier(value: unknown): value is Row {
   );
 }
 
+function tierRows(value: unknown, modelField?: string): unknown {
+  if (!Array.isArray(value)) return value;
+  const rows = (value as Row[]).map((row) => {
+    const provider = String(row.provider).toLowerCase();
+    return provider === "kimi" || provider === "moonshot" ? { ...row, provider } : row;
+  });
+  return providerRows(rows, "provider", modelField);
+}
+
+function normalizeChaosSelectors(rows: Row[], ids: Set<string>): Row[] {
+  return rows.map((row) => {
+    const selector = String(row.providerId).toLowerCase();
+    return (selector === "kimi" || selector === "moonshot") && !ids.has(selector)
+      ? { ...row, providerId: selector }
+      : row;
+  });
+}
+
 function chaos(value: unknown, ids: Set<string>): unknown {
   if (!validChaos(value)) return value;
-  const rows = providerRows(value.providerOverrides, "providerId", undefined, ids);
+  const rows = providerRows(
+    normalizeChaosSelectors(value.providerOverrides, ids),
+    "providerId",
+    undefined,
+    ids
+  );
   return { ...value, providerOverrides: rows };
 }
 
@@ -206,7 +229,7 @@ export function preflightKimiPolicies(db: SqliteAdapter): void {
   }
   if (!validChaos(value)) return;
   const ids = connectionIds(db);
-  const original = value.providerOverrides as Row[];
+  const original = normalizeChaosSelectors(value.providerOverrides, ids);
   for (const selector of ["kimi", "moonshot"])
     if (
       ids.has(selector) &&
@@ -320,10 +343,8 @@ export function migrateKimiPolicies(db: SqliteAdapter): void {
     const value = jsonTransform(row.value, (v) => {
       if (!validTier(v)) return v;
       const result = { ...v };
-      if ("providerOverrides" in v)
-        result.providerOverrides = providerRows(v.providerOverrides, "provider");
-      if ("modelOverrides" in v)
-        result.modelOverrides = providerRows(v.modelOverrides, "provider", "modelPattern");
+      if ("providerOverrides" in v) result.providerOverrides = tierRows(v.providerOverrides);
+      if ("modelOverrides" in v) result.modelOverrides = tierRows(v.modelOverrides, "modelPattern");
       if (Array.isArray(v.freeProviders) && v.freeProviders.every((id) => typeof id === "string"))
         result.freeProviders = [...new Set(v.freeProviders.map(canonicalKimiProvider))];
       return result;

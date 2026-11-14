@@ -398,6 +398,7 @@ export function getModelStripTypes(aliasOrId: string, modelId: string): string[]
 }
 
 export function getModelsByProviderId(providerId: string): RegistryModel[] {
+  if (providerId === "moonshot") providerId = "kimi";
   const alias = PROVIDER_ID_TO_ALIAS[providerId] || providerId;
   return PROVIDER_MODELS[alias] || [];
 }

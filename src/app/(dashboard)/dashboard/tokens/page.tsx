@@ -490,9 +490,8 @@ export default function TokensPage() {
                     </div>
                     {!inv.revokedAt && (
                       <Button
-                        variant="ghost"
+                        variant="destructive-ghost"
                         size="sm"
-                        className="text-error"
                         onClick={() => handleRevokeInvite(inv.id)}
                       >
                         {t("tokensRevoke")}
@@ -588,9 +587,9 @@ export default function TokensPage() {
                     )}
                   </div>
                   <Button
-                    variant="ghost"
+                    variant="destructive-ghost"
                     size="sm"
-                    className="text-error ml-4"
+                    className="ml-4"
                     onClick={() => handleDisconnectServer(server.id)}
                   >
                     {t("tokensDisconnect")}
