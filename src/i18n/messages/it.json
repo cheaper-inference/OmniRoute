@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Sperimentale",
     "modalityBridgeVideoPromotionEligible": "Idoneo",
-    "modalityBridgeVideoPromotionContextRequired": "La promozione richiede due esecuzioni di qualificazione indipendenti per la stessa identica revisione del modello, policy, corpus e build. Un contesto non verificato rimane in stato HOLD; la selezione di una policy sperimentale non costituisce un'approvazione."
+    "modalityBridgeVideoPromotionContextRequired": "La promozione richiede due esecuzioni di qualificazione indipendenti per la stessa identica revisione del modello, policy, corpus e build. Un contesto non verificato rimane in stato HOLD; la selezione di una policy sperimentale non costituisce un'approvazione.",
+    "proxyManagedCoresTab": "Nuclei gestiti"
   },
   "contextRtk": {
     "title": "Motore RTK",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Vista cache"
   },
   "proxyConfigModal": {
+    "managedCore": "Nucleo del proxy",
+    "managedSelectCore": "Seleziona un nucleo",
+    "managedSaveHint": "Il salvataggio scarica e verifica il nucleo ufficiale, se necessario, controlla la configurazione e poi attiva questo proxy. La digitazione non installa nulla.",
+    "errorSelectManagedCore": "Seleziona sing-box o Xray prima di salvare questo tunnel",
     "levelGlobal": "Globale",
     "levelProvider": "Fornitore",
     "levelCombo": "Combinato",
@@ -16645,5 +16650,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Nuclei proxy gestiti",
+    "description": "Incolla un link del tunnel nel campo host del proxy personalizzato per salvarlo e assegnarlo. Qui puoi anche salvare una definizione di connessione in uscita nel formato JSON nativo senza modificare alcuna assegnazione.",
+    "saveHint": "Il salvataggio verifica il nucleo ufficiale, se necessario, e controlla la configurazione nativa prima dell’attivazione. Le fonti richiedono la crittografia. Nessuna installazione durante l’anteprima, nessun avvio automatico e nessuna modifica al proxy trasparente.",
+    "saveActivate": "Salva e attiva",
+    "core": "Nucleo",
+    "selectCore": "Seleziona un nucleo",
+    "name": "Nome",
+    "source": "Link di origine o connessione in uscita nel formato JSON nativo",
+    "start": "Avvia",
+    "stop": "Arresta",
+    "loadError": "Impossibile caricare i nuclei gestiti",
+    "operationError": "Operazione sul nucleo gestito non riuscita",
+    "state": "{state, select, not_installed {Non installato} stopped {Arrestato} starting {Avvio in corso} running {In esecuzione} stopping {Arresto in corso} error {Errore} other {Sconosciuto}}"
   }
 }

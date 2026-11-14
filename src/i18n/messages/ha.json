@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Na gwaji",
     "modalityBridgeVideoPromotionEligible": "Ya cancanta",
-    "modalityBridgeVideoPromotionContextRequired": "Ɗaukakawa na buƙatar gudanawa biyu masu zaman kansu da suka cika sharuɗɗa don ainihin bita ta samfurin, manufa, kundin bayanai da gini. Mahallin da ba a tabbatar da shi ba zai ci gaba da kasancewa HOLD; zaɓin manufar gwaji ba amincewa ba ne."
+    "modalityBridgeVideoPromotionContextRequired": "Ɗaukakawa na buƙatar gudanawa biyu masu zaman kansu da suka cika sharuɗɗa don ainihin bita ta samfurin, manufa, kundin bayanai da gini. Mahallin da ba a tabbatar da shi ba zai ci gaba da kasancewa HOLD; zaɓin manufar gwaji ba amincewa ba ne.",
+    "proxyManagedCoresTab": "Jigogin da ake sarrafawa"
   },
   "contextRtk": {
     "title": "Injin RTK",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Duban ma'ajiyar wucin gadi"
   },
   "proxyConfigModal": {
+    "managedCore": "Jigon proksi",
+    "managedSelectCore": "Zaɓi jigo",
+    "managedSaveHint": "Adanawa tana sauke jigon hukuma tare da tabbatar da shi idan ana buƙata, tana duba tsarin, sannan tana kunna wannan proksi. Rubutu kaɗai ba ya girka komai.",
+    "errorSelectManagedCore": "Zaɓi sing-box ko Xray kafin adana wannan rami",
     "levelGlobal": "Na Gabaɗaya",
     "levelProvider": "Mai samarwa",
     "levelCombo": "Haɗin",
@@ -16645,5 +16650,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Jigogin proksi da ake sarrafawa",
+    "description": "Manna mahaɗin rami a filin mai masaukin proksi na musamman domin adanawa da sanya shi. A nan kuma za ka iya adana ma’anar JSON ta asali ta haɗin fita ba tare da canza wani rabon aiki ba.",
+    "saveHint": "Adanawa tana tabbatar da jigon hukuma idan ana buƙata, sannan tana duba tsarin asali kafin kunnawa. Dole a ɓoye bayanan tushe. Ba a girka komai yayin samfoti, ba a farawa ta atomatik, kuma ba a canza proksi mai wucewa kai tsaye.",
+    "saveActivate": "Adana kuma kunna",
+    "core": "Jigo",
+    "selectCore": "Zaɓi jigo",
+    "name": "Suna",
+    "source": "Mahaɗin tushe ko JSON na asali na haɗin fita",
+    "start": "Fara",
+    "stop": "Dakatar",
+    "loadError": "An kasa loda jigogin da ake sarrafawa",
+    "operationError": "Aikin jigon da ake sarrafawa ya gaza",
+    "state": "{state, select, not_installed {Ba a girka ba} stopped {An dakatar} starting {Ana farawa} running {Yana aiki} stopping {Ana dakatarwa} error {Kuskure} other {Ba a sani ba}}"
   }
 }

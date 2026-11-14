@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "পরীক্ষামূলক",
     "modalityBridgeVideoPromotionEligible": "যোগ্য",
-    "modalityBridgeVideoPromotionContextRequired": "উন্নীতকরণের জন্য ঠিক একই মডেল রিভিশন, নীতি, কর্পাস ও বিল্ডে দুটি স্বতন্ত্র যোগ্যতাসম্পন্ন রান প্রয়োজন। যাচাই না করা কোনো কনটেক্সট HOLD অবস্থাতেই থাকে; পরীক্ষামূলক নীতি নির্বাচন করা অনুমোদন নয়।"
+    "modalityBridgeVideoPromotionContextRequired": "উন্নীতকরণের জন্য ঠিক একই মডেল রিভিশন, নীতি, কর্পাস ও বিল্ডে দুটি স্বতন্ত্র যোগ্যতাসম্পন্ন রান প্রয়োজন। যাচাই না করা কোনো কনটেক্সট HOLD অবস্থাতেই থাকে; পরীক্ষামূলক নীতি নির্বাচন করা অনুমোদন নয়।",
+    "proxyManagedCoresTab": "পরিচালিত কোর"
   },
   "contextRtk": {
     "title": "RTK ইঞ্জিন",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "ক্যাশ ভিউ"
   },
   "proxyConfigModal": {
+    "managedCore": "প্রক্সি কোর",
+    "managedSelectCore": "একটি কোর নির্বাচন করুন",
+    "managedSaveHint": "সংরক্ষণের সময় প্রয়োজনে আনুষ্ঠানিক কোর ডাউনলোড ও যাচাই করা হয়, কনফিগারেশন পরীক্ষা করা হয়, তারপর এই প্রক্সি সক্রিয় করা হয়। টাইপ করলে কিছুই ইনস্টল হয় না।",
+    "errorSelectManagedCore": "এই টানেল সংরক্ষণের আগে sing-box বা Xray নির্বাচন করুন",
     "levelGlobal": "গ্লোবাল",
     "levelProvider": "প্রোভাইডার",
     "levelCombo": "কম্বো",
@@ -16645,5 +16650,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "পরিচালিত প্রক্সি কোর",
+    "description": "টানেল লিংক সংরক্ষণ ও বরাদ্দ করতে কাস্টম প্রক্সির হোস্ট ক্ষেত্রে সেটি পেস্ট করুন। এখানে কোনো বরাদ্দ পরিবর্তন না করেও নেটিভ আউটবাউন্ড JSON সংজ্ঞা সংরক্ষণ করতে পারেন।",
+    "saveHint": "সংরক্ষণের সময় প্রয়োজনে আনুষ্ঠানিক কোর যাচাই করা হয় এবং সক্রিয় করার আগে নেটিভ কনফিগারেশন পরীক্ষা করা হয়। উৎসগুলোর জন্য এনক্রিপশন আবশ্যক। পূর্বরূপ দেখার সময় ইনস্টলেশন, স্বয়ংক্রিয় চালু বা স্বচ্ছ প্রক্সির পরিবর্তন করা হয় না।",
+    "saveActivate": "সংরক্ষণ ও সক্রিয় করুন",
+    "core": "কোর",
+    "selectCore": "একটি কোর নির্বাচন করুন",
+    "name": "নাম",
+    "source": "উৎস লিংক বা নেটিভ আউটবাউন্ড JSON",
+    "start": "চালু করুন",
+    "stop": "বন্ধ করুন",
+    "loadError": "পরিচালিত কোরগুলো লোড করা যায়নি",
+    "operationError": "পরিচালিত কোরের কার্যক্রম ব্যর্থ হয়েছে",
+    "state": "{state, select, not_installed {ইনস্টল করা নেই} stopped {বন্ধ} starting {চালু হচ্ছে} running {চলছে} stopping {বন্ধ হচ্ছে} error {ত্রুটি} other {অজানা}}"
   }
 }

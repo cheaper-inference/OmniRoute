@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Eksperimentinė",
     "modalityBridgeVideoPromotionEligible": "Atitinka reikalavimus",
-    "modalityBridgeVideoPromotionContextRequired": "Perkėlimui į aukštesnį lygį reikalingi du nepriklausomi kvalifikacinius reikalavimus atitinkantys vykdymai su ta pačia modelio versija, politika, tekstynu ir komponavimo versija. Nepatvirtintam kontekstui išlaikoma būsena HOLD; eksperimentinės politikos pasirinkimas nėra patvirtinimas."
+    "modalityBridgeVideoPromotionContextRequired": "Perkėlimui į aukštesnį lygį reikalingi du nepriklausomi kvalifikacinius reikalavimus atitinkantys vykdymai su ta pačia modelio versija, politika, tekstynu ir komponavimo versija. Nepatvirtintam kontekstui išlaikoma būsena HOLD; eksperimentinės politikos pasirinkimas nėra patvirtinimas.",
+    "proxyManagedCoresTab": "Valdomi branduoliai"
   },
   "contextRtk": {
     "title": "RTK variklis",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Podėlio rodinys"
   },
   "proxyConfigModal": {
+    "managedCore": "Tarpinio serverio branduolys",
+    "managedSelectCore": "Pasirinkite branduolį",
+    "managedSaveHint": "Išsaugant prireikus atsisiunčiamas ir patikrinamas oficialus branduolys, patikrinama konfigūracija, o tada aktyvinamas šis tarpinis serveris. Teksto įvedimas nieko neįdiegia.",
+    "errorSelectManagedCore": "Prieš išsaugodami šį tunelį pasirinkite sing-box arba Xray",
     "levelGlobal": "Visuotinis",
     "levelProvider": "Teikėjo",
     "levelCombo": "Derinio",
@@ -16645,5 +16650,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Valdomi tarpinio serverio branduoliai",
+    "description": "Įklijuokite tunelio nuorodą į pasirinktinio tarpinio serverio pagrindinio kompiuterio lauką, kad ją išsaugotumėte ir priskirtumėte. Čia taip pat galite išsaugoti išeinančio ryšio aprašą branduolio savuoju JSON formatu nekeisdami jokio priskyrimo.",
+    "saveHint": "Išsaugant prireikus patikrinamas oficialaus branduolio autentiškumas, o prieš aktyvinimą patikrinama konfigūracija branduolio savuoju formatu. Šaltiniai turi būti užšifruoti. Peržiūros metu niekas nediegiama, automatinis paleidimas neatliekamas, o skaidriojo tarpinio serverio nustatymai nekeičiami.",
+    "saveActivate": "Išsaugoti ir aktyvinti",
+    "core": "Branduolys",
+    "selectCore": "Pasirinkite branduolį",
+    "name": "Pavadinimas",
+    "source": "Šaltinio nuoroda arba išeinantis ryšys branduolio savuoju JSON formatu",
+    "start": "Paleisti",
+    "stop": "Sustabdyti",
+    "loadError": "Nepavyko įkelti valdomų branduolių",
+    "operationError": "Valdomo branduolio operacija nepavyko",
+    "state": "{state, select, not_installed {Neįdiegtas} stopped {Sustabdytas} starting {Paleidžiamas} running {Veikia} stopping {Stabdomas} error {Klaida} other {Nežinoma}}"
   }
 }

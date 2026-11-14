@@ -45,7 +45,25 @@ Los ocho siguen el mismo modelo de supervisión:
 - OmniRoute los instala bajo `DATA_DIR/services/{name}/` (aislado del propio `package.json` de OmniRoute)
 - OmniRoute los genera y monitorea como procesos secundarios
 - OmniRoute inyecta una clave API efímera en el entorno del niño y la rota sin tiempo de inactividad (cuando corresponda)
-- Todas las rutas de gestión (`/api/services/*`) son**LOCAL_ONLY** Se puede acceder — solo desde loopback (regla estricta n.° 17)
+- Todas las rutas de gestión (`/api/services/*`) son**LOCAL_ONLY** — accesible solo desde loopback (regla estricta #17)
+
+### Núcleos de proxy administrados
+
+El campo Host de proxy personalizado también acepta un enlace de origen V2Ray. Seleccionar** caja de canto** o** Radiografía** explícitamente y luego haga clic en Guardar. Al escribir nunca se descarga ni se inicia un núcleo. Save verifica el archivo de lanzamiento oficial, valida la configuración nativa, inicia un escucha localhost SOCKS distinto y solo entonces escribe la asignación del registro de proxy. La activación fallida restaura la configuración y el proceso administrados anteriores. se requiere `STORAGE_ENCRYPTION_KEY` ; Los enlaces de origen están cifrados.
+
+Los archivos administrados se encuentran en `DATA_DIR/services/managed-proxy/`, separados de TPROXY. Hay un proceso de propiedad por núcleo seleccionado, hasta 100 oyentes. No se cambia ningún valor predeterminado de inicio automático o enrutamiento global. El guardado exitoso recuerda la activación solo para este núcleo administrado; El inicio de la aplicación restaura los núcleos guardados habilitados utilizando el binario ya verificado, nunca una descarga en el momento del arranque. La parada explícita borra ese indicador de activación. Un binario faltante o dañado requiere volver a guardar una fuente. La eliminación del registro elimina la fuente y el oyente localmente; Las ediciones de puntos finales normales se rechazan para las filas administradas, por lo que la fuente guardada no puede desviarse silenciosamente de su escucha enrutada.
+
+| Formato fuente                         | caja de canto                                                                         | Radiografía                                                                           |
+| -------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| VLESS, VMess, troyano, Shadowsocks URI | Conversión admitida                                                                   | Conversión admitida                                                                   |
+| Hysteria2/hy2, TUIC, AnyTLS URI        | Conversión admitida                                                                   | Rechazado; utilizar un núcleo compatible                                              |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade  | Compatible con VLESS/VMess/Trojan                                                     | Compatible con VLESS/VMess/Trojan                                                     |
+| transporte XHTTP URI                   | Rechazado                                                                             | Conversión admitida                                                                   |
+| JSON saliente nativo                   | Proxy protocols/options permitido del núcleo seleccionado, verificado de forma nativa | Proxy protocols/options permitido del núcleo seleccionado, verificado de forma nativa |
+
+Las opciones de conexión desconocidas, los indicadores TLS inseguros, los complementos externos, las opciones de rutas de archivos locales y las combinaciones no admitidas se rechazan en lugar de descartarse silenciosamente. Los objetos nativos son definiciones salientes, no configuraciones de núcleo completo; No se aceptan salidas control/direct/bypass. WireGuard en sing-box 1.14 usa puntos finales, por lo que no se acepta como salida nativa. Este no es un conversor de todos los formatos; SSR, los enlaces heredados whole-base64 Shadowsocks, los objetos Clash arbitrarios y las variantes de transporte ausentes en la tabla necesitan un formato fuente compatible por separado.
+
+`/api/services/managed-proxy` está autenticado y solo es de bucle invertido: GET enumera los metadatos redactados, POST guarda `{core,name,sourceLink,id?,assignment?}`, PATCH acepta `{core,action:"start"|"stop"}`. La canalización de sello de pares confiable del host debe estar presente. Los diagnósticos centrales nativos se suprimen porque pueden contener credenciales; Los eventos del ciclo de vida utilizan el registrador de archivos de aplicación estructurado existente sin enlaces de origen ni cargas útiles ascendentes. Adjunte únicamente registros de aplicaciones desinfectados para obtener asistencia. Las versiones oficiales están fijadas en sing-box 1.14.3 y Xray 26.3.27 con manifiestos SHA-256 de activos de lanzamiento; Las actualizaciones futuras requieren cambiar la versión y todos los resúmenes verificados juntos.
 
 ### Decisiones clave (del plan de diseño)
 

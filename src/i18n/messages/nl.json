@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Experimenteel",
     "modalityBridgeVideoPromotionEligible": "In aanmerking komend",
-    "modalityBridgeVideoPromotionContextRequired": "Promotie vereist twee onafhankelijke kwalificerende uitvoeringen voor exact dezelfde modelrevisie, hetzelfde beleid, corpus en dezelfde build. Een niet-geverifieerde context blijft op HOLD staan; het selecteren van een experimenteel beleid geldt niet als goedkeuring."
+    "modalityBridgeVideoPromotionContextRequired": "Promotie vereist twee onafhankelijke kwalificerende uitvoeringen voor exact dezelfde modelrevisie, hetzelfde beleid, corpus en dezelfde build. Een niet-geverifieerde context blijft op HOLD staan; het selecteren van een experimenteel beleid geldt niet als goedkeuring.",
+    "proxyManagedCoresTab": "Beheerde kernen"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Cacheweergave"
   },
   "proxyConfigModal": {
+    "managedCore": "Proxykern",
+    "managedSelectCore": "Selecteer een kern",
+    "managedSaveHint": "Bij het opslaan wordt zo nodig de officiële kern gedownload en geverifieerd, wordt de configuratie gecontroleerd en wordt daarna deze proxy geactiveerd. Typen installeert niets.",
+    "errorSelectManagedCore": "Selecteer sing-box of Xray voordat u deze tunnel opslaat",
     "levelGlobal": "Globaal",
     "levelProvider": "Aanbieder",
     "levelCombo": "Combinatie",
@@ -16645,5 +16650,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Beheerde proxykernen",
+    "description": "Plak een tunnellink in het hostveld van de aangepaste proxy om deze op te slaan en toe te wijzen. Hier kunt u ook een definitie van een uitgaande verbinding in de eigen JSON-indeling van de kern opslaan zonder een toewijzing te wijzigen.",
+    "saveHint": "Bij het opslaan wordt zo nodig de officiële kern geverifieerd en wordt de configuratie in de eigen indeling van de kern vóór activering gecontroleerd. Bronnen vereisen versleuteling. Geen installatie tijdens het voorbeeld, geen automatische start en geen wijzigingen aan de transparante proxy.",
+    "saveActivate": "Opslaan en activeren",
+    "core": "Kern",
+    "selectCore": "Selecteer een kern",
+    "name": "Naam",
+    "source": "Bronlink of uitgaande verbinding in de eigen JSON-indeling van de kern",
+    "start": "Starten",
+    "stop": "Stoppen",
+    "loadError": "Beheerde kernen konden niet worden geladen",
+    "operationError": "Bewerking op de beheerde kern mislukt",
+    "state": "{state, select, not_installed {Niet geïnstalleerd} stopped {Gestopt} starting {Bezig met starten} running {Actief} stopping {Bezig met stoppen} error {Fout} other {Onbekend}}"
   }
 }

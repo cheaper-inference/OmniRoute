@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Expérimental",
     "modalityBridgeVideoPromotionEligible": "Éligible",
-    "modalityBridgeVideoPromotionContextRequired": "La promotion nécessite deux exécutions de qualification indépendantes pour la révision exacte du modèle, la politique, le corpus et le build. Un contexte non vérifié reste en statut HOLD ; la sélection d’une politique expérimentale ne constitue pas une approbation."
+    "modalityBridgeVideoPromotionContextRequired": "La promotion nécessite deux exécutions de qualification indépendantes pour la révision exacte du modèle, la politique, le corpus et le build. Un contexte non vérifié reste en statut HOLD ; la sélection d’une politique expérimentale ne constitue pas une approbation.",
+    "proxyManagedCoresTab": "Noyaux gérés"
   },
   "contextRtk": {
     "title": "Moteur RTK",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Vue du cache"
   },
   "proxyConfigModal": {
+    "managedCore": "Noyau du proxy",
+    "managedSelectCore": "Sélectionnez un noyau",
+    "managedSaveHint": "Lors de l’enregistrement, le noyau officiel est téléchargé et vérifié si nécessaire, la configuration est contrôlée, puis ce proxy est activé. La saisie de texte n’installe rien.",
+    "errorSelectManagedCore": "Sélectionnez sing-box ou Xray avant d’enregistrer ce tunnel",
     "levelGlobal": "Mondial",
     "levelProvider": "Fournisseur",
     "levelCombo": "Combinaison",
@@ -16645,5 +16650,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Noyaux de proxy gérés",
+    "description": "Collez un lien de tunnel dans le champ hôte du proxy personnalisé pour l’enregistrer et l’affecter. Vous pouvez également enregistrer ici une définition de connexion sortante au format JSON natif sans modifier aucune affectation.",
+    "saveHint": "Lors de l’enregistrement, le noyau officiel est vérifié si nécessaire et la configuration native est contrôlée avant l’activation. Les sources doivent être chiffrées. Aucune installation pendant l’aperçu, aucun démarrage automatique ni aucune modification du proxy transparent.",
+    "saveActivate": "Enregistrer et activer",
+    "core": "Noyau",
+    "selectCore": "Sélectionnez un noyau",
+    "name": "Nom",
+    "source": "Lien source ou connexion sortante au format JSON natif",
+    "start": "Démarrer",
+    "stop": "Arrêter",
+    "loadError": "Impossible de charger les noyaux gérés",
+    "operationError": "Échec de l’opération sur le noyau géré",
+    "state": "{state, select, not_installed {Non installé} stopped {Arrêté} starting {Démarrage en cours} running {En cours d’exécution} stopping {Arrêt en cours} error {Erreur} other {Inconnu}}"
   }
 }

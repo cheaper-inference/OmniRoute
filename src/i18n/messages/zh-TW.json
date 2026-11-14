@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "實驗性",
     "modalityBridgeVideoPromotionEligible": "符合資格",
-    "modalityBridgeVideoPromotionContextRequired": "升級需要針對完全相同的模型修訂版本、政策、語料庫與建置，完成兩次彼此獨立且符合資格的執行。未經驗證的情境仍維持「HOLD」狀態；選取實驗性政策並不代表已獲核准。"
+    "modalityBridgeVideoPromotionContextRequired": "升級需要針對完全相同的模型修訂版本、政策、語料庫與建置，完成兩次彼此獨立且符合資格的執行。未經驗證的情境仍維持「HOLD」狀態；選取實驗性政策並不代表已獲核准。",
+    "proxyManagedCoresTab": "受管理的核心"
   },
   "contextRtk": {
     "title": "RTK 引擎",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "快取檢視"
   },
   "proxyConfigModal": {
+    "managedCore": "代理核心",
+    "managedSelectCore": "選擇核心",
+    "managedSaveHint": "儲存時會視需要下載並驗證官方核心，檢查設定，然後啟用此代理。僅輸入內容不會安裝任何元件。",
+    "errorSelectManagedCore": "儲存此通道前，請選擇 sing-box 或 Xray",
     "levelGlobal": "全域性",
     "levelProvider": "提供者",
     "levelCombo": "組合",
@@ -16645,5 +16650,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "受管理的代理核心",
+    "description": "將通道連結貼到自訂代理的主機欄位中，即可儲存並指派使用。您也可以在此儲存原生輸出連線的 JSON 定義，而不變更任何指派。",
+    "saveHint": "儲存時會視需要驗證官方核心，並在啟用前檢查原生設定。來源必須使用加密。預覽時不會安裝，也不會自動啟動或變更透明代理設定。",
+    "saveActivate": "儲存並啟用",
+    "core": "核心",
+    "selectCore": "選擇核心",
+    "name": "名稱",
+    "source": "來源連結或原生輸出連線 JSON",
+    "start": "啟動",
+    "stop": "停止",
+    "loadError": "無法載入受管理的核心",
+    "operationError": "受管理的核心操作失敗",
+    "state": "{state, select, not_installed {尚未安裝} stopped {已停止} starting {正在啟動} running {執行中} stopping {正在停止} error {錯誤} other {未知}}"
   }
 }

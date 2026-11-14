@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Eksperymentalna",
     "modalityBridgeVideoPromotionEligible": "Spełnia wymagania",
-    "modalityBridgeVideoPromotionContextRequired": "Promocja wymaga dwóch niezależnych przebiegów spełniających kryteria dla dokładnie tej samej wersji modelu, polityki, korpusu i kompilacji. Niezweryfikowany kontekst pozostaje w stanie HOLD; wybranie eksperymentalnej polityki nie stanowi zatwierdzenia."
+    "modalityBridgeVideoPromotionContextRequired": "Promocja wymaga dwóch niezależnych przebiegów spełniających kryteria dla dokładnie tej samej wersji modelu, polityki, korpusu i kompilacji. Niezweryfikowany kontekst pozostaje w stanie HOLD; wybranie eksperymentalnej polityki nie stanowi zatwierdzenia.",
+    "proxyManagedCoresTab": "Zarządzane rdzenie"
   },
   "contextRtk": {
     "title": "Silnik RTK",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Widok pamięci podręcznej"
   },
   "proxyConfigModal": {
+    "managedCore": "Rdzeń proxy",
+    "managedSelectCore": "Wybierz rdzeń",
+    "managedSaveHint": "Podczas zapisywania w razie potrzeby pobierany i weryfikowany jest oficjalny rdzeń, sprawdzana jest konfiguracja, a następnie aktywowane jest to proxy. Samo wpisywanie niczego nie instaluje.",
+    "errorSelectManagedCore": "Wybierz sing-box lub Xray przed zapisaniem tego tunelu",
     "levelGlobal": "Globalny",
     "levelProvider": "Dostawca",
     "levelCombo": "Kombinacja",
@@ -16645,5 +16650,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Zarządzane rdzenie proxy",
+    "description": "Wklej łącze tunelu w polu hosta niestandardowego proxy, aby je zapisać i przypisać. Tutaj możesz również zapisać definicję połączenia wychodzącego w natywnym formacie JSON bez zmiany żadnego przypisania.",
+    "saveHint": "Podczas zapisywania w razie potrzeby weryfikowany jest oficjalny rdzeń, a przed aktywacją sprawdzana jest natywna konfiguracja. Źródła wymagają szyfrowania. Brak instalacji podczas podglądu, automatycznego uruchamiania i zmian w przezroczystym proxy.",
+    "saveActivate": "Zapisz i aktywuj",
+    "core": "Rdzeń",
+    "selectCore": "Wybierz rdzeń",
+    "name": "Nazwa",
+    "source": "Łącze źródłowe lub połączenie wychodzące w natywnym formacie JSON",
+    "start": "Uruchom",
+    "stop": "Zatrzymaj",
+    "loadError": "Nie udało się wczytać zarządzanych rdzeni",
+    "operationError": "Operacja na zarządzanym rdzeniu nie powiodła się",
+    "state": "{state, select, not_installed {Niezainstalowany} stopped {Zatrzymany} starting {Uruchamianie} running {Uruchomiony} stopping {Zatrzymywanie} error {Błąd} other {Nieznany}}"
   }
 }

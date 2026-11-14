@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Eksperimental",
     "modalityBridgeVideoPromotionEligible": "Kwalipikado",
-    "modalityBridgeVideoPromotionContextRequired": "Ang pag-promote ay nangangailangan ng dalawang magkahiwalay na kwalipikadong pagpapatakbo para sa eksaktong rebisyon ng modelo, patakaran, corpus, at build. Mananatiling HOLD ang isang hindi beripikadong konteksto; ang pagpili ng eksperimental na patakaran ay hindi nangangahulugang pag-apruba."
+    "modalityBridgeVideoPromotionContextRequired": "Ang pag-promote ay nangangailangan ng dalawang magkahiwalay na kwalipikadong pagpapatakbo para sa eksaktong rebisyon ng modelo, patakaran, corpus, at build. Mananatiling HOLD ang isang hindi beripikadong konteksto; ang pagpili ng eksperimental na patakaran ay hindi nangangahulugang pag-apruba.",
+    "proxyManagedCoresTab": "Mga pinamamahalaang core"
   },
   "contextRtk": {
     "title": "Engine ng RTK",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "View ng cache"
   },
   "proxyConfigModal": {
+    "managedCore": "Core ng proxy",
+    "managedSelectCore": "Pumili ng core",
+    "managedSaveHint": "Kapag nag-save, dina-download at bineberipika ang opisyal na core kung kinakailangan, sinusuri ang configuration, at saka ina-activate ang proxy na ito. Walang nai-install sa pagta-type lamang.",
+    "errorSelectManagedCore": "Piliin ang sing-box o Xray bago i-save ang tunnel na ito",
     "levelGlobal": "Pangkalahatan",
     "levelProvider": "Tagapagbigay",
     "levelCombo": "Kombinasyon",
@@ -16645,5 +16650,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Mga pinamamahalaang proxy core",
+    "description": "Mag-paste ng tunnel link sa field ng host ng pasadyang proxy upang i-save at italaga ito. Dito, maaari ka ring mag-save ng depinisyon ng outbound sa native na JSON format nang hindi binabago ang anumang pagtatalaga.",
+    "saveHint": "Kapag nag-save, bineberipika ang opisyal na core kung kinakailangan at sinusuri ang native na configuration bago i-activate. Kailangang naka-encrypt ang mga source. Walang pag-install habang nagpe-preview, awtomatikong pagsisimula, o pagbabago sa transparent proxy.",
+    "saveActivate": "I-save at i-activate",
+    "core": "Core",
+    "selectCore": "Pumili ng core",
+    "name": "Pangalan",
+    "source": "Link ng pinagmulan o outbound JSON sa native na format",
+    "start": "Simulan",
+    "stop": "Ihinto",
+    "loadError": "Hindi ma-load ang mga pinamamahalaang core",
+    "operationError": "Nabigo ang operasyon ng pinamamahalaang core",
+    "state": "{state, select, not_installed {Hindi naka-install} stopped {Nakahinto} starting {Nagsisimula} running {Gumagana} stopping {Humihinto} error {Error} other {Hindi alam}}"
   }
 }

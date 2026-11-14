@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Sperimentali",
     "modalityBridgeVideoPromotionEligible": "Eliġibbli",
-    "modalityBridgeVideoPromotionContextRequired": "Il-promozzjoni teħtieġ żewġ eżekuzzjonijiet indipendenti li jikkwalifikaw għall-istess reviżjoni eżatta tal-mudell, politika, korpus u build. Kuntest mhux ivverifikat jibqa’ HOLD; l-għażla ta’ politika sperimentali ma tikkostitwixxix approvazzjoni."
+    "modalityBridgeVideoPromotionContextRequired": "Il-promozzjoni teħtieġ żewġ eżekuzzjonijiet indipendenti li jikkwalifikaw għall-istess reviżjoni eżatta tal-mudell, politika, korpus u build. Kuntest mhux ivverifikat jibqa’ HOLD; l-għażla ta’ politika sperimentali ma tikkostitwixxix approvazzjoni.",
+    "proxyManagedCoresTab": "Qlub ġestiti"
   },
   "contextRtk": {
     "title": "Magna RTK",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Dehra tal-cache"
   },
   "proxyConfigModal": {
+    "managedCore": "Qalba tal-proxy",
+    "managedSelectCore": "Agħżel qalba",
+    "managedSaveHint": "Meta tissejvja, il-qalba uffiċjali titniżżel u tiġi vverifikata jekk ikun meħtieġ, il-konfigurazzjoni tiġi ċċekkjata, u mbagħad dan il-proxy jiġi attivat. Ma jiġi installat xejn waqt li tittajpja.",
+    "errorSelectManagedCore": "Agħżel sing-box jew Xray qabel ma tissejvja din il-mina",
     "levelGlobal": "Globali",
     "levelProvider": "Fornitur",
     "levelCombo": "Kombinazzjoni",
@@ -16645,5 +16650,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Qlub tal-proxy ġestiti",
+    "description": "Waħħal rabta tal-mina fil-qasam tal-host tal-proxy personalizzat biex tissejvjaha u tassenjaha. Hawn tista’ wkoll tissejvja definizzjoni ta’ konnessjoni ħierġa fil-format JSON nattiv mingħajr ma tibdel xi assenjazzjoni.",
+    "saveHint": "Meta tissejvja, il-qalba uffiċjali tiġi vverifikata jekk ikun meħtieġ u l-konfigurazzjoni nattiva tiġi ċċekkjata qabel l-attivazzjoni. Is-sorsi jeħtieġu kriptaġġ. Ma ssirx installazzjoni waqt il-previżjoni, bidu awtomatiku jew bidliet fil-proxy trasparenti.",
+    "saveActivate": "Ssejvja u attiva",
+    "core": "Qalba",
+    "selectCore": "Agħżel qalba",
+    "name": "Isem",
+    "source": "Rabta tas-sors jew konnessjoni ħierġa fil-format JSON nattiv",
+    "start": "Ibda",
+    "stop": "Waqqaf",
+    "loadError": "Ma setgħux jitgħabbew il-qlub ġestiti",
+    "operationError": "L-operazzjoni fuq il-qalba ġestita falliet",
+    "state": "{state, select, not_installed {Mhix installata} stopped {Imwaqqfa} starting {Qed tibda} running {Qed taħdem} stopping {Qed tieqaf} error {Żball} other {Mhux magħruf}}"
   }
 }

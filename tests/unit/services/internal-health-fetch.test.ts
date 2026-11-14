@@ -52,6 +52,57 @@ test("pre-spawn free-port probe bypasses patched global fetch without warnings",
   }
 });
 
+test(
+  "native health probe takes precedence over the HTTP health URL",
+  { timeout: 2000 },
+  async () => {
+    const { HealthChecker } = await import("../../../src/lib/services/healthCheck.ts");
+    let urlCalls = 0;
+    let probeCalls = 0;
+    let probeSignal: AbortSignal | undefined;
+    let reportHealthy: () => void;
+    const healthy = new Promise<void>((resolve) => {
+      reportHealthy = resolve;
+    });
+    const checker = new HealthChecker(
+      () => {
+        urlCalls++;
+        throw new Error("Native probes must not use HTTP");
+      },
+      10,
+      (health) => {
+        if (health === "healthy") reportHealthy();
+      },
+      async (signal) => {
+        probeCalls++;
+        probeSignal = signal;
+        return true;
+      }
+    );
+    let deadline: ReturnType<typeof setTimeout> | undefined;
+    try {
+      checker.start();
+      await Promise.race([
+        healthy,
+        new Promise<never>((_, reject) => {
+          deadline = setTimeout(
+            () => reject(new Error("Native health probe did not complete")),
+            1000
+          );
+        }),
+      ]);
+      assert.equal(checker.getHealth(), "healthy");
+      assert.equal(probeCalls, 1);
+      assert.equal(urlCalls, 0);
+      assert.ok(probeSignal instanceof AbortSignal);
+      assert.equal(probeSignal.aborted, false);
+    } finally {
+      clearTimeout(deadline);
+      checker.stop();
+    }
+  }
+);
+
 test("periodic unhealthy probe bypasses patched global fetch and becomes unhealthy quietly", async () => {
   let patchedFetchCalls = 0;
   globalThis.fetch = (async () => {

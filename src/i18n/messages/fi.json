@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Kokeellinen",
     "modalityBridgeVideoPromotionEligible": "Kelvollinen",
-    "modalityBridgeVideoPromotionContextRequired": "Ylennys edellyttää kahta toisistaan riippumatonta hyväksyttävää suoritusta täsmälleen samalla malliversiolla, käytännöllä, korpuksella ja koontiversiolla. Vahvistamaton konteksti pysyy HOLD-tilassa; kokeellisen käytännön valitseminen ei merkitse hyväksyntää."
+    "modalityBridgeVideoPromotionContextRequired": "Ylennys edellyttää kahta toisistaan riippumatonta hyväksyttävää suoritusta täsmälleen samalla malliversiolla, käytännöllä, korpuksella ja koontiversiolla. Vahvistamaton konteksti pysyy HOLD-tilassa; kokeellisen käytännön valitseminen ei merkitse hyväksyntää.",
+    "proxyManagedCoresTab": "Hallinnoidut ytimet"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Välimuistinäkymä"
   },
   "proxyConfigModal": {
+    "managedCore": "Välityspalvelimen ydin",
+    "managedSelectCore": "Valitse ydin",
+    "managedSaveHint": "Tallennettaessa virallinen ydin ladataan ja varmennetaan tarvittaessa, kokoonpano tarkistetaan ja sitten tämä välityspalvelin aktivoidaan. Tekstin kirjoittaminen ei asenna mitään.",
+    "errorSelectManagedCore": "Valitse sing-box tai Xray ennen tämän tunnelin tallentamista",
     "levelGlobal": "Maailmanlaajuinen",
     "levelProvider": "Palveluntarjoaja",
     "levelCombo": "Yhdistelmä",
@@ -16645,5 +16650,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Hallinnoidut välityspalvelinytimet",
+    "description": "Liitä tunnelilinkki mukautetun välityspalvelimen isäntäkenttään tallentaaksesi ja määrittääksesi sen käyttöön. Täällä voit myös tallentaa lähtevän yhteyden määrityksen ytimen omassa JSON-muodossa muuttamatta yhtään kohdistusta.",
+    "saveHint": "Tallennettaessa virallinen ydin varmennetaan tarvittaessa ja ytimen omassa muodossa oleva kokoonpano tarkistetaan ennen aktivointia. Lähteet edellyttävät salausta. Esikatselun aikana ei asenneta mitään, automaattista käynnistystä ei tehdä eikä läpinäkyvän välityspalvelimen asetuksia muuteta.",
+    "saveActivate": "Tallenna ja aktivoi",
+    "core": "Ydin",
+    "selectCore": "Valitse ydin",
+    "name": "Nimi",
+    "source": "Lähdelinkki tai lähtevä yhteys ytimen omassa JSON-muodossa",
+    "start": "Käynnistä",
+    "stop": "Pysäytä",
+    "loadError": "Hallinnoituja ytimiä ei voitu ladata",
+    "operationError": "Hallinnoidun ytimen toiminto epäonnistui",
+    "state": "{state, select, not_installed {Ei asennettu} stopped {Pysäytetty} starting {Käynnistyy} running {Käynnissä} stopping {Pysähtyy} error {Virhe} other {Tuntematon}}"
   }
 }

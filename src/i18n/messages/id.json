@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Eksperimental",
     "modalityBridgeVideoPromotionEligible": "Memenuhi syarat",
-    "modalityBridgeVideoPromotionContextRequired": "Promosi memerlukan dua proses yang memenuhi syarat secara independen untuk revisi model, kebijakan, korpus, dan build yang sama persis. Konteks yang belum diverifikasi tetap berstatus HOLD; memilih kebijakan eksperimental bukanlah persetujuan."
+    "modalityBridgeVideoPromotionContextRequired": "Promosi memerlukan dua proses yang memenuhi syarat secara independen untuk revisi model, kebijakan, korpus, dan build yang sama persis. Konteks yang belum diverifikasi tetap berstatus HOLD; memilih kebijakan eksperimental bukanlah persetujuan.",
+    "proxyManagedCoresTab": "Inti terkelola"
   },
   "contextRtk": {
     "title": "Mesin RTK",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Tampilan cache"
   },
   "proxyConfigModal": {
+    "managedCore": "Inti proxy",
+    "managedSelectCore": "Pilih inti",
+    "managedSaveHint": "Saat disimpan, inti resmi diunduh dan diverifikasi jika diperlukan, konfigurasi diperiksa, lalu proxy ini diaktifkan. Mengetik tidak menginstal apa pun.",
+    "errorSelectManagedCore": "Pilih sing-box atau Xray sebelum menyimpan terowongan ini",
     "levelGlobal": "Global",
     "levelProvider": "Penyedia",
     "levelCombo": "kombo",
@@ -16645,5 +16650,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Inti proxy terkelola",
+    "description": "Tempel tautan terowongan di kolom host proxy kustom untuk menyimpan dan menetapkannya. Di sini Anda juga dapat menyimpan definisi JSON bawaan untuk koneksi keluar tanpa mengubah penetapan apa pun.",
+    "saveHint": "Saat disimpan, inti resmi diverifikasi jika diperlukan dan konfigurasi bawaan diperiksa sebelum aktivasi. Sumber memerlukan enkripsi. Tidak ada instalasi saat pratinjau, mulai otomatis, atau perubahan proxy transparan.",
+    "saveActivate": "Simpan dan aktifkan",
+    "core": "Inti",
+    "selectCore": "Pilih inti",
+    "name": "Nama",
+    "source": "Tautan sumber atau JSON bawaan untuk koneksi keluar",
+    "start": "Mulai",
+    "stop": "Hentikan",
+    "loadError": "Tidak dapat memuat inti terkelola",
+    "operationError": "Operasi inti terkelola gagal",
+    "state": "{state, select, not_installed {Belum diinstal} stopped {Dihentikan} starting {Memulai} running {Berjalan} stopping {Menghentikan} error {Kesalahan} other {Tidak diketahui}}"
   }
 }

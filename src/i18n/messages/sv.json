@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Experimentell",
     "modalityBridgeVideoPromotionEligible": "Kvalificerad",
-    "modalityBridgeVideoPromotionContextRequired": "Uppflyttning kräver två oberoende kvalificerande körningar för exakt samma modellrevision, policy, korpus och bygge. En overifierad kontext förblir HOLD; att välja en experimentell policy innebär inte ett godkännande."
+    "modalityBridgeVideoPromotionContextRequired": "Uppflyttning kräver två oberoende kvalificerande körningar för exakt samma modellrevision, policy, korpus och bygge. En overifierad kontext förblir HOLD; att välja en experimentell policy innebär inte ett godkännande.",
+    "proxyManagedCoresTab": "Hanterade kärnor"
   },
   "contextRtk": {
     "title": "RTK-motor",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Cachevy"
   },
   "proxyConfigModal": {
+    "managedCore": "Proxykärna",
+    "managedSelectCore": "Välj en kärna",
+    "managedSaveHint": "När du sparar laddas den officiella kärnan ned och verifieras vid behov, konfigurationen kontrolleras och sedan aktiveras denna proxy. Att skriva installerar ingenting.",
+    "errorSelectManagedCore": "Välj sing-box eller Xray innan du sparar denna tunnel",
     "levelGlobal": "Global",
     "levelProvider": "Leverantör",
     "levelCombo": "Kombination",
@@ -16645,5 +16650,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Hanterade proxykärnor",
+    "description": "Klistra in en tunnellänk i värdfältet för anpassad proxy för att spara och tilldela den. Här kan du också spara en inbyggd JSON-definition för utgående anslutning utan att ändra några tilldelningar.",
+    "saveHint": "När du sparar verifieras den officiella kärnan vid behov och den inbyggda konfigurationen kontrolleras före aktivering. Källor kräver kryptering. Ingen installation vid förhandsgranskning, autostart eller ändring av transparent proxy sker.",
+    "saveActivate": "Spara och aktivera",
+    "core": "Kärna",
+    "selectCore": "Välj en kärna",
+    "name": "Namn",
+    "source": "Källänk eller inbyggd JSON för utgående anslutning",
+    "start": "Starta",
+    "stop": "Stoppa",
+    "loadError": "Kunde inte läsa in hanterade kärnor",
+    "operationError": "Åtgärden för den hanterade kärnan misslyckades",
+    "state": "{state, select, not_installed {Inte installerad} stopped {Stoppad} starting {Startar} running {Körs} stopping {Stoppar} error {Fel} other {Okänd}}"
   }
 }

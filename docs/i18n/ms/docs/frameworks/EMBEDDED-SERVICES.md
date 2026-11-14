@@ -47,6 +47,24 @@ Kesemua lapan mengikuti model penyeliaan yang sama:
 - OmniRoute menyuntik kunci API fana ke dalam persekitaran kanak-kanak dan memutarkannya tanpa masa henti (jika berkenaan)
 - Semua laluan pengurusan (`/api/services/*`) adalah**LOCAL_ONLY** — boleh diakses hanya dari loopback (peraturan keras #17)
 
+### Teras proksi terurus
+
+Medan hos proksi tersuai juga menerima pautan sumber V2Ray. Pilih** kotak nyanyian** atau** Xray** secara eksplisit, kemudian klik Simpan. Menaip tidak pernah memuat turun atau memulakan teras. Simpan mengesahkan arkib keluaran rasmi, mengesahkan konfigurasi asli, memulakan pendengar SOCKS localhost yang berbeza, dan hanya kemudian menulis tugasan pendaftaran proksi. Pengaktifan yang gagal memulihkan konfigurasi dan proses terurus sebelumnya. `STORAGE_ENCRYPTION_KEY` diperlukan; pautan sumber disulitkan.
+
+Fail terurus secara langsung di bawah `DATA_DIR/services/managed-proxy/`, berasingan daripada TPROXY. Terdapat satu proses yang dimiliki setiap teras yang dipilih, sehingga 100 pendengar. Tiada autostart atau lalai penghalaan global diubah. Simpan yang Berjaya mengingati pengaktifan untuk teras terurus ini sahaja; permulaan aplikasi memulihkan teras tersimpan yang didayakan menggunakan binari yang telah disahkan, bukan muat turun masa but. Explicit Stop mengosongkan bendera pengaktifan itu. Binari yang hilang atau rosak memerlukan menyimpan semula sumber. Pemadaman pendaftaran mengalih keluar sumber dan pendengar secara setempat; suntingan titik akhir biasa ditolak untuk baris terurus supaya sumber yang disimpan tidak boleh hanyut secara senyap daripada pendengar yang dihalakan.
+
+| Format sumber                         | kotak nyanyian                                                              | Xray                                                                        |
+| ------------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| VLESS, VMess, Trojan, Shadowsocks URI | Penukaran yang disokong                                                     | Penukaran yang disokong                                                     |
+| Hysteria2/hy2, TUIC, AnyTLS URI       | Penukaran yang disokong                                                     | Ditolak; gunakan teras yang serasi                                          |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade | Disokong untuk VLESS/VMess/Trojan                                           | Disokong untuk VLESS/VMess/Trojan                                           |
+| pengangkutan XHTTP URI                | ditolak                                                                     | Penukaran yang disokong                                                     |
+| JSON keluar asli                      | protocols/options proksi dibenarkan teras yang dipilih, disemak secara asli | protocols/options proksi dibenarkan teras yang dipilih, disemak secara asli |
+
+Pilihan wayar yang tidak diketahui, bendera TLS yang tidak selamat, pemalam luaran, pilihan laluan fail setempat dan gabungan yang tidak disokong ditolak dan bukannya dibuang secara senyap. Objek asli ialah definisi keluar, bukan konfigurasi teras keseluruhan; control/direct/bypass keluar tidak diterima. WireGuard pada sing-box 1.14 menggunakan titik akhir, jadi ia tidak diterima sebagai keluar asli. Ini bukan penukar semua format; SSR, pautan whole-base64 Shadowsocks warisan, objek Clash sewenang-wenangnya dan varian pengangkutan yang tidak terdapat dalam jadual memerlukan format sumber yang disokong secara berasingan.
+
+`/api/services/managed-proxy` disahkan dan gelung balik sahaja: GET menyenaraikan metadata yang disunting, POST menyimpan `{core,name,sourceLink,id?,assignment?}`, PATCH menerima `{core,action:"start"|"stop"}`. Saluran paip peer-cop yang dipercayai hos mesti ada. Diagnostik teras asli ditindas kerana ia boleh mengandungi bukti kelayakan; peristiwa kitaran hayat menggunakan logger fail aplikasi berstruktur sedia ada tanpa pautan sumber atau muatan huluan. Lampirkan hanya log aplikasi yang telah dibersihkan untuk sokongan. Versi rasmi disematkan pada kotak nyanyian 1.14.3 dan Xray 26.3.27 dengan manifes SHA-256 aset keluaran; kemas kini masa hadapan memerlukan menukar versi dan semua ringkasan yang disahkan bersama-sama.
+
 ### Keputusan utama (daripada pelan reka bentuk)
 
 | Keputusan                                 | Nilai                                                                           |

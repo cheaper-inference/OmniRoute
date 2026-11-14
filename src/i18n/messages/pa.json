@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "ਪ੍ਰਯੋਗਾਤਮਕ",
     "modalityBridgeVideoPromotionEligible": "ਯੋਗ",
-    "modalityBridgeVideoPromotionContextRequired": "ਤਰੱਕੀ ਲਈ ਬਿਲਕੁਲ ਉਸੇ ਮਾਡਲ ਸੰਸ਼ੋਧਨ, ਨੀਤੀ, ਕੋਰਪਸ ਅਤੇ ਬਿਲਡ ਵਾਸਤੇ ਦੋ ਸੁਤੰਤਰ ਯੋਗਤਾ-ਪੂਰਨ ਰਨ ਲੋੜੀਂਦੇ ਹਨ। ਇੱਕ ਅਪ੍ਰਮਾਣਿਤ ਸੰਦਰਭ HOLD ਹੀ ਰਹਿੰਦਾ ਹੈ; ਕਿਸੇ ਪ੍ਰਯੋਗਾਤਮਕ ਨੀਤੀ ਦੀ ਚੋਣ ਮਨਜ਼ੂਰੀ ਨਹੀਂ ਹੈ।"
+    "modalityBridgeVideoPromotionContextRequired": "ਤਰੱਕੀ ਲਈ ਬਿਲਕੁਲ ਉਸੇ ਮਾਡਲ ਸੰਸ਼ੋਧਨ, ਨੀਤੀ, ਕੋਰਪਸ ਅਤੇ ਬਿਲਡ ਵਾਸਤੇ ਦੋ ਸੁਤੰਤਰ ਯੋਗਤਾ-ਪੂਰਨ ਰਨ ਲੋੜੀਂਦੇ ਹਨ। ਇੱਕ ਅਪ੍ਰਮਾਣਿਤ ਸੰਦਰਭ HOLD ਹੀ ਰਹਿੰਦਾ ਹੈ; ਕਿਸੇ ਪ੍ਰਯੋਗਾਤਮਕ ਨੀਤੀ ਦੀ ਚੋਣ ਮਨਜ਼ੂਰੀ ਨਹੀਂ ਹੈ।",
+    "proxyManagedCoresTab": "ਪ੍ਰਬੰਧਿਤ ਕੋਰ"
   },
   "contextRtk": {
     "title": "RTK ਇੰਜਣ",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "ਕੈਸ਼ ਦ੍ਰਿਸ਼"
   },
   "proxyConfigModal": {
+    "managedCore": "ਪ੍ਰੌਕਸੀ ਕੋਰ",
+    "managedSelectCore": "ਕੋਰ ਚੁਣੋ",
+    "managedSaveHint": "ਸੁਰੱਖਿਅਤ ਕਰਦੇ ਸਮੇਂ ਲੋੜ ਪੈਣ 'ਤੇ ਅਧਿਕਾਰਤ ਕੋਰ ਡਾਊਨਲੋਡ ਕਰਕੇ ਉਸਦੀ ਪੁਸ਼ਟੀ ਕੀਤੀ ਜਾਂਦੀ ਹੈ, ਸੰਰਚਨਾ ਦੀ ਜਾਂਚ ਹੁੰਦੀ ਹੈ ਅਤੇ ਫਿਰ ਇਹ ਪ੍ਰੌਕਸੀ ਸਰਗਰਮ ਹੁੰਦੀ ਹੈ। ਟਾਈਪ ਕਰਨ ਨਾਲ ਕੁਝ ਵੀ ਇੰਸਟਾਲ ਨਹੀਂ ਹੁੰਦਾ।",
+    "errorSelectManagedCore": "ਇਸ ਟਨਲ ਨੂੰ ਸੁਰੱਖਿਅਤ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ sing-box ਜਾਂ Xray ਚੁਣੋ",
     "levelGlobal": "ਗਲੋਬਲ",
     "levelProvider": "ਪ੍ਰਦਾਤਾ",
     "levelCombo": "ਕੌਂਬੋ",
@@ -16645,5 +16650,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "ਪ੍ਰਬੰਧਿਤ ਪ੍ਰੌਕਸੀ ਕੋਰ",
+    "description": "ਟਨਲ ਲਿੰਕ ਨੂੰ ਸੁਰੱਖਿਅਤ ਕਰਨ ਅਤੇ ਨਿਰਧਾਰਤ ਕਰਨ ਲਈ ਇਸਨੂੰ ਕਸਟਮ ਪ੍ਰੌਕਸੀ ਦੇ ਹੋਸਟ ਖੇਤਰ ਵਿੱਚ ਪੇਸਟ ਕਰੋ। ਇੱਥੇ ਤੁਸੀਂ ਕਿਸੇ ਵੀ ਨਿਰਧਾਰਨ ਨੂੰ ਬਦਲੇ ਬਿਨਾਂ ਨੇਟਿਵ ਆਊਟਬਾਊਂਡ JSON ਪਰਿਭਾਸ਼ਾ ਵੀ ਸੁਰੱਖਿਅਤ ਕਰ ਸਕਦੇ ਹੋ।",
+    "saveHint": "ਸੁਰੱਖਿਅਤ ਕਰਦੇ ਸਮੇਂ ਲੋੜ ਪੈਣ 'ਤੇ ਅਧਿਕਾਰਤ ਕੋਰ ਦੀ ਪੁਸ਼ਟੀ ਕੀਤੀ ਜਾਂਦੀ ਹੈ ਅਤੇ ਸਰਗਰਮ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਨੇਟਿਵ ਸੰਰਚਨਾ ਦੀ ਜਾਂਚ ਹੁੰਦੀ ਹੈ। ਸਰੋਤਾਂ ਲਈ ਇਨਕ੍ਰਿਪਸ਼ਨ ਲੋੜੀਂਦੀ ਹੈ। ਪੂਰਵ-ਝਲਕ ਦੌਰਾਨ ਇੰਸਟਾਲੇਸ਼ਨ, ਆਪਣੇ ਆਪ ਸ਼ੁਰੂ ਹੋਣਾ ਜਾਂ ਪਾਰਦਰਸ਼ੀ ਪ੍ਰੌਕਸੀ ਵਿੱਚ ਤਬਦੀਲੀਆਂ ਨਹੀਂ ਹੁੰਦੀਆਂ।",
+    "saveActivate": "ਸੁਰੱਖਿਅਤ ਕਰੋ ਅਤੇ ਸਰਗਰਮ ਕਰੋ",
+    "core": "ਕੋਰ",
+    "selectCore": "ਕੋਰ ਚੁਣੋ",
+    "name": "ਨਾਮ",
+    "source": "ਸਰੋਤ ਲਿੰਕ ਜਾਂ ਨੇਟਿਵ ਆਊਟਬਾਊਂਡ JSON",
+    "start": "ਸ਼ੁਰੂ ਕਰੋ",
+    "stop": "ਰੋਕੋ",
+    "loadError": "ਪ੍ਰਬੰਧਿਤ ਕੋਰ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੇ",
+    "operationError": "ਪ੍ਰਬੰਧਿਤ ਕੋਰ ਦੀ ਕਾਰਵਾਈ ਅਸਫਲ ਹੋਈ",
+    "state": "{state, select, not_installed {ਇੰਸਟਾਲ ਨਹੀਂ ਹੈ} stopped {ਰੁਕਿਆ ਹੋਇਆ} starting {ਸ਼ੁਰੂ ਹੋ ਰਿਹਾ ਹੈ} running {ਚੱਲ ਰਿਹਾ ਹੈ} stopping {ਰੁਕ ਰਿਹਾ ਹੈ} error {ਗਲਤੀ} other {ਅਣਜਾਣ}}"
   }
 }

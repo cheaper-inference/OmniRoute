@@ -4,7 +4,7 @@ import { EventEmitter } from "node:events";
 import { spawn } from "node:child_process";
 import type { ChildProcess } from "node:child_process";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
-import { getServiceRow, updateServiceField, setToolStatus } from "@/lib/db/versionManager";
+import { getServiceRow, setToolStatus } from "@/lib/db/versionManager";
 import { RingBuffer } from "./ringBuffer";
 import { HealthChecker } from "./healthCheck";
 import {
@@ -56,32 +56,45 @@ export class ServiceSupervisor extends EventEmitter {
   private readonly checker: HealthChecker;
   private operationLock: Promise<void> = Promise.resolve();
 
+  /**
+   * Initialize log buffering and health monitoring; repeated probe failures transition the service
+   * to error.
+   */
   constructor(private readonly config: ServiceConfig) {
     super();
     this.buffer = new RingBuffer(config.logsBufferBytes);
-    this.checker = new HealthChecker(config.healthUrl, config.healthIntervalMs, (h) => {
-      this.health = h;
-      this.emit("stateChange", this.getStatus());
-      // A service that fails FAILURE_THRESHOLD consecutive health probes will
-      // not recover by itself. Stop the poller and surface an explicit error
-      // state instead of probing the dead port forever — every failed probe
-      // fires a full ProxyFetch dispatcher+native fetch pair (e.g. against a
-      // CLIProxyAPI binary that cannot execute on this platform).
-      if (h === "unhealthy" && (this.state === "running" || this.state === "starting")) {
-        this.checker.stop();
-        this.lastError = sanitizeErrorMessage(
-          `Health probe failed for ${this.config.tool} (port ${this.config.port})`
-        );
-        this.setState("error");
-        void setToolStatus(this.config.tool, "error", undefined, this.lastError);
-      }
-    });
+    this.checker = new HealthChecker(
+      config.healthUrl,
+      config.healthIntervalMs,
+      (h) => {
+        this.health = h;
+        this.emit("stateChange", this.getStatus());
+        // A service that fails FAILURE_THRESHOLD consecutive health probes will
+        // not recover by itself. Stop the poller and surface an explicit error
+        // state instead of probing the dead port forever — every failed probe
+        // fires a full ProxyFetch dispatcher+native fetch pair (e.g. against a
+        // CLIProxyAPI binary that cannot execute on this platform).
+        if (h === "unhealthy" && (this.state === "running" || this.state === "starting")) {
+          this.checker.stop();
+          this.lastError = sanitizeErrorMessage(
+            `Health probe failed for ${this.config.tool} (port ${this.config.port})`
+          );
+          this.setState("error");
+          void setToolStatus(this.config.tool, "error", undefined, this.lastError);
+        }
+      },
+      config.healthProbe
+    );
   }
 
+  /**
+   * Return the supervisor's log buffer for consumers that inspect or subscribe to service output.
+   */
   getRingBuffer(): RingBuffer {
     return this.buffer;
   }
 
+  /** Return a snapshot of lifecycle, process ownership, health, and the last sanitized error. */
   getStatus(): ServiceStatus {
     return {
       tool: this.config.tool,
@@ -95,6 +108,10 @@ export class ServiceSupervisor extends EventEmitter {
     };
   }
 
+  /**
+   * Serialize startup, optionally adopt an existing service, and enforce configured readiness
+   * requirements.
+   */
   async start(): Promise<ServiceStatus> {
     return this.withLock(async () => {
       if (this.state === "running" || this.state === "starting") {
@@ -109,6 +126,7 @@ export class ServiceSupervisor extends EventEmitter {
       this.setState("starting");
       this.lastError = null;
       this.adopted = false;
+      this.spawnFailed = false;
 
       // Pre-spawn probe (#6205): avoid a raw EADDRINUSE crash when a prior
       // instance is still holding the port. A healthy instance is adopted; a
@@ -179,11 +197,14 @@ export class ServiceSupervisor extends EventEmitter {
         await setToolStatus(this.config.tool, "starting", this.pid);
       }
 
+      /** Buffer and emit nonblank output lines after applying the service log sanitizer. */
       const processLine = (stream: "stdout" | "stderr", raw: Buffer) => {
         const lines = raw.toString("utf8").split("\n");
         for (const line of lines) {
           if (!line.trim()) continue;
-          const logLine: LogLine = { ts: Date.now(), stream, line };
+          const safeLine = this.config.sanitizeLogLine?.(line) ?? line;
+          if (!safeLine) continue;
+          const logLine: LogLine = { ts: Date.now(), stream, line: safeLine };
           this.buffer.push(logLine);
           this.emit("log", logLine);
         }
@@ -212,7 +233,16 @@ export class ServiceSupervisor extends EventEmitter {
       this.startedAt = new Date().toISOString();
       this.checker.start();
 
-      await this.waitForHealthy();
+      try {
+        await this.waitForHealthy();
+      } catch (error) {
+        if (this.config.requireHealthy) {
+          this.checker.stop();
+          await this.killChild();
+          this.setState("error");
+        }
+        throw error;
+      }
 
       // A spawn failure flips state to "error" — surface the explicit error
       // status instead of overriding it with "running".
@@ -227,6 +257,10 @@ export class ServiceSupervisor extends EventEmitter {
     });
   }
 
+  /**
+   * Serialize shutdown of the owned child and clear status; an adopted process has no owned child
+   * to kill.
+   */
   async stop(): Promise<ServiceStatus> {
     return this.withLock(async () => {
       if (this.state === "stopped" || this.state === "stopping") {
@@ -249,11 +283,13 @@ export class ServiceSupervisor extends EventEmitter {
     });
   }
 
+  /** Stop the service before requesting a new start through the lifecycle lock. */
   async restart(): Promise<ServiceStatus> {
     await this.stop();
     return this.start();
   }
 
+  /** Run a lifecycle operation after its predecessor and release the queue even if it rejects. */
   private async withLock<T>(fn: () => Promise<T>): Promise<T> {
     let resolve!: () => void;
     const next = new Promise<void>((r) => (resolve = r));
@@ -268,6 +304,10 @@ export class ServiceSupervisor extends EventEmitter {
     }
   }
 
+  /**
+   * Wait up to three probe intervals; reject health failures or strict-readiness timeouts, not
+   * spawn errors.
+   */
   private async waitForHealthy(): Promise<void> {
     const timeoutMs = this.config.healthIntervalMs * 3;
     const deadline = Date.now() + timeoutMs;
@@ -299,24 +339,33 @@ export class ServiceSupervisor extends EventEmitter {
       timeoutMs,
       lastHealth: this.checker.getHealth(),
     });
+    if (this.config.requireHealthy) throw new Error("Managed core listeners did not become ready");
   }
 
+  /**
+   * Terminate the owned child, escalate to SIGKILL, and reject if forced termination does not
+   * complete.
+   */
   private async killChild(): Promise<void> {
     const child = this.childProcess;
-    if (!child || child.killed) return;
+    if (!child || !child.pid || child.exitCode !== null || child.signalCode !== null) return;
 
-    child.kill("SIGTERM");
-
-    await new Promise<void>((resolve) => {
-      const timeout = setTimeout(() => {
-        if (!child.killed) child.kill("SIGKILL");
-        resolve();
+    await new Promise<void>((resolve, reject) => {
+      let escalated = false;
+      const timeout = setInterval(() => {
+        if (!escalated) {
+          escalated = true;
+          child.kill("SIGKILL");
+        } else {
+          clearInterval(timeout);
+          reject(new Error("Owned service did not exit after forced termination"));
+        }
       }, this.config.stopTimeoutMs);
-
       child.once("exit", () => {
-        clearTimeout(timeout);
+        clearInterval(timeout);
         resolve();
       });
+      child.kill("SIGTERM");
     });
   }
 
@@ -352,6 +401,7 @@ export class ServiceSupervisor extends EventEmitter {
     }
   }
 
+  /** Clear the exited child and persist a sanitized crash error unless shutdown was intentional. */
   private async handleExit(
     code: number | null,
     signal: NodeJS.Signals | null,
@@ -372,6 +422,7 @@ export class ServiceSupervisor extends EventEmitter {
     await setToolStatus(this.config.tool, "error", undefined, this.lastError);
   }
 
+  /** Update the lifecycle state and emit a fresh status snapshot. */
   private setState(state: ServiceState): void {
     this.state = state;
     this.emit("stateChange", this.getStatus());

@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "प्रायोगिक",
     "modalityBridgeVideoPromotionEligible": "पात्र",
-    "modalityBridgeVideoPromotionContextRequired": "प्रोन्नयन के लिए ठीक उसी मॉडल संशोधन, नीति, कॉर्पस और बिल्ड हेतु दो स्वतंत्र अर्हकारी रन आवश्यक हैं। असत्यापित संदर्भ HOLD ही रहता है; किसी प्रायोगिक नीति का चयन अनुमोदन नहीं है।"
+    "modalityBridgeVideoPromotionContextRequired": "प्रोन्नयन के लिए ठीक उसी मॉडल संशोधन, नीति, कॉर्पस और बिल्ड हेतु दो स्वतंत्र अर्हकारी रन आवश्यक हैं। असत्यापित संदर्भ HOLD ही रहता है; किसी प्रायोगिक नीति का चयन अनुमोदन नहीं है।",
+    "proxyManagedCoresTab": "प्रबंधित कोर"
   },
   "contextRtk": {
     "title": "RTK इंजन",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "कैश दृश्य"
   },
   "proxyConfigModal": {
+    "managedCore": "प्रॉक्सी कोर",
+    "managedSelectCore": "कोर चुनें",
+    "managedSaveHint": "सहेजते समय ज़रूरत पड़ने पर आधिकारिक कोर डाउनलोड और सत्यापित किया जाता है, कॉन्फ़िगरेशन जाँचा जाता है, फिर यह प्रॉक्सी सक्रिय होती है। टाइप करने से कुछ भी इंस्टॉल नहीं होता।",
+    "errorSelectManagedCore": "इस टनल को सहेजने से पहले sing-box या Xray चुनें",
     "levelGlobal": "वैश्विक",
     "levelProvider": "प्रदाता",
     "levelCombo": "कॉम्बो",
@@ -16645,5 +16650,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "प्रबंधित प्रॉक्सी कोर",
+    "description": "टनल लिंक सहेजने और असाइन करने के लिए उसे कस्टम प्रॉक्सी के होस्ट फ़ील्ड में पेस्ट करें। यहाँ आप किसी भी असाइनमेंट को बदले बिना नेटिव आउटबाउंड JSON परिभाषा भी सहेज सकते हैं।",
+    "saveHint": "सहेजते समय ज़रूरत पड़ने पर आधिकारिक कोर सत्यापित किया जाता है और सक्रिय करने से पहले नेटिव कॉन्फ़िगरेशन जाँचा जाता है। स्रोतों के लिए एन्क्रिप्शन आवश्यक है। पूर्वावलोकन के दौरान कोई इंस्टॉलेशन, स्वतः प्रारंभ या पारदर्शी प्रॉक्सी में बदलाव नहीं होता।",
+    "saveActivate": "सहेजें और सक्रिय करें",
+    "core": "कोर",
+    "selectCore": "कोर चुनें",
+    "name": "नाम",
+    "source": "स्रोत लिंक या नेटिव आउटबाउंड JSON",
+    "start": "शुरू करें",
+    "stop": "रोकें",
+    "loadError": "प्रबंधित कोर लोड नहीं किए जा सके",
+    "operationError": "प्रबंधित कोर का संचालन विफल हुआ",
+    "state": "{state, select, not_installed {इंस्टॉल नहीं है} stopped {रुका हुआ} starting {शुरू हो रहा है} running {चल रहा है} stopping {रुक रहा है} error {त्रुटि} other {अज्ञात}}"
   }
 }

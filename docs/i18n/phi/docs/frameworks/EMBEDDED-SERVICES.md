@@ -45,7 +45,25 @@ Lahat ng walo ay sumusunod sa parehong supervisory model:
 - ini-install OmniRoute ang mga ito sa ilalim `DATA_DIR/services/{name}/` (nahihiwalay sa sariling `package.json` ng OmniRoute)
 - OmniRoute spawns at sinusubaybayan ang mga ito bilang proseso ng bata
 - OmniRoute ay nag-inject ng ephemeral API key sa kapaligiran ng bata at iniikot ito nang walang downtime (kung saan naaangkop)
-- Ang lahat ng mga ruta ng pamamahala (`/api/services/*`) ay**LOCAL_ONLY** Maa-access lang — mula sa loopback (hard rule #17)
+- Ang lahat ng mga ruta ng pamamahala (`/api/services/*`) ay**LOCAL_ONLY** — maa-access lamang mula sa loopback (hard rule #17)
+
+### Mga pinamamahalaang proxy core
+
+Tumatanggap din ang field ng Custom na proxy host ng link ng pinagmulang V2Ray. Pumili** sing-box** o** Xray** tahasan, pagkatapos ay i-click ang I-save. Ang pag-type ay hindi kailanman magda-download o magsisimula ng isang core. Bine-verify ng Save ang opisyal na archive ng release, pinapatunayan ang native na configuration, nagsisimula ng isang natatanging localhost SOCKS listener, at pagkatapos lamang isusulat ang pagtatalaga ng proxy registry. Ibinabalik ng nabigong pag-activate ang nakaraang pinamamahalaang configuration at proseso. `STORAGE_ENCRYPTION_KEY` ay kinakailangan; naka-encrypt ang mga source link.
+
+Ang mga pinamamahalaang file ay nakatira sa ilalim `DATA_DIR/services/managed-proxy/`, hiwalay sa TPROXY. Mayroong isang pag-aari na proseso sa bawat napiling core, hanggang sa 100 tagapakinig. Walang binago ang autostart o global na default na pagruruta. Naaalala ng matagumpay na Save ang activation para sa pinamamahalaang core na ito lamang; nire-restore ng application startup ang mga naka-enable na naka-save na core gamit ang na-verify na binary, hindi kailanman isang boot-time na pag-download. Tinatanggal ng Explicit Stop ang flag ng activation na iyon. Ang isang nawawala o nasira na binary ay nangangailangan ng muling pag-save ng pinagmulan. Tinatanggal ng pagtanggal ng rehistro ang pinagmulan at tagapakinig nang lokal; ang mga ordinaryong endpoint na pag-edit ay tinatanggihan para sa mga pinamamahalaang row upang ang naka-save na pinagmulan ay hindi maaaring tahimik na maanod mula sa iruruta nitong tagapakinig.
+
+| Format ng pinagmulan                  | sing-box                                                                                | Xray                                                                                    |
+| ------------------------------------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| VLESS, VMess, Trojan, Shadowsocks URI | Sinusuportahang conversion                                                              | Sinusuportahang conversion                                                              |
+| Hysteria2/hy2, TUIC, AnyTLS URI       | Sinusuportahang conversion                                                              | Tinanggihan; gumamit ng katugmang core                                                  |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade | Sinusuportahan para sa VLESS/VMess/Trojan                                               | Sinusuportahan para sa VLESS/VMess/Trojan                                               |
+| XHTTP URI transportasyon              | Tinanggihan                                                                             | Sinusuportahang conversion                                                              |
+| Native outbound JSON                  | Pinapahintulutang proxy protocols/options ng napiling core, native na nilagyan ng check | Pinapahintulutang proxy protocols/options ng napiling core, native na nilagyan ng check |
+
+Ang mga hindi kilalang opsyon sa wire, mga hindi secure TLS flag, mga panlabas na plugin, mga opsyon sa lokal na file-path at hindi sinusuportahang kumbinasyon ay tinatanggihan sa halip na tahimik na itapon. Ang mga native na bagay ay mga papalabas na kahulugan, hindi buong-core na mga pagsasaayos; control/direct/bypass outbounds ay hindi tinatanggap. WireGuard sa sing-box 1.14 ay gumagamit ng mga endpoint, kaya hindi ito tinatanggap bilang katutubong palabas. Ito ay hindi isang all-format converter; SSR, legacy whole-base64 Shadowsocks links, arbitrary Clash objects at transport variant na wala sa talahanayan ay nangangailangan ng hiwalay na sinusuportahang source format.
+
+`/api/services/managed-proxy` ay napatotohanan at loopback-only: GET lists redacted metadata, POST save `{core,name,sourceLink,id?,assignment?}`, PATCH accepts `{core,action:"start"|"stop"}`. Dapat na naroroon ang pinagkakatiwalaang pipeline ng peer-stamp ng host. Ang mga native na pangunahing diagnostic ay pinipigilan dahil maaari silang maglaman ng mga kredensyal; Ginagamit ng mga kaganapan sa lifecycle ang umiiral nang structured application file logger nang walang source link o upstream payload. Maglakip lamang ng mga na-sanitize na log ng application para sa suporta. Ang mga opisyal na bersyon ay naka-pin sa sing-box 1.14.3 at Xray 26.3.27 na may mga release-asset SHA-256 manifest; Nangangailangan ang mga update sa hinaharap na baguhin ang bersyon at lahat ng na-verify na digest nang magkasama.
 
 ### Mga pangunahing desisyon (mula sa plano ng disenyo)
 

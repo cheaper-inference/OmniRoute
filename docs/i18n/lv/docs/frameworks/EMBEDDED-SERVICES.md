@@ -45,13 +45,31 @@ Visas astoņas ievēro vienu un to pašu uzraudzības modeli:
 - OmniRoute instalē tos zem `DATA_DIR/services/{name}/` (izolēts no paša OmniRoute `package.json`)
 - OmniRoute nārsto un uzrauga tos kā bērna procesus
 - OmniRoute ievada īslaicīgu API atslēgu bērna vidē un pagriež to bez dīkstāves (ja piemērojams)
-- Visi pārvaldības maršruti (`/api/services/*`) ir**LOCAL_ONLY** — pieejams tikai no cilpas (cietais noteikums Nr. 17)
+- Visi pārvaldības maršruti (`/api/services/*`) ir**LOCAL_ONLY** — pieejams tikai no cilpas (cietais noteikums #17)
+
+### Pārvaldīti starpniekservera kodoli
+
+Pielāgota starpniekservera resursdatora lauks pieņem arī V2Ray avota saiti. Izvēlieties** dziedāt kaste** vai** Rentgens** skaidri norādīts, pēc tam noklikšķiniet uz Saglabāt. Rakstīšana nekad nelejupielādē un nesāk kodolu. Saglabāt pārbauda oficiālo laidienu arhīvu, apstiprina sākotnējo konfigurāciju, sāk atsevišķu localhost SOCKS klausītāju un tikai pēc tam raksta starpniekservera reģistra piešķiršanu. Neveiksmīga aktivizēšana atjauno iepriekšējo pārvaldīto konfigurāciju un procesu. `STORAGE_ENCRYPTION_KEY` ir nepieciešams; avota saites ir šifrētas.
+
+Pārvaldītie faili atrodas `DATA_DIR/services/managed-proxy/`, atsevišķi no TPROXY. Katram atlasītajam kodolam ir viens īpašums, līdz 100 klausītājiem. Autostartēšana vai globālā maršrutēšanas noklusējuma iestatījumi netiek mainīti. Veiksmīga saglabāšana atceras aktivizēšanu tikai šim pārvaldītajam kodolam; Lietojumprogrammas startēšana atjauno iespējotos saglabātos kodolus, izmantojot jau pārbaudīto bināro failu, nekad neveicot lejupielādi sāknēšanas laikā. Skaidra apturēšana notīra šo aktivizācijas karogu. Trūkstošam vai bojātam bināram ir nepieciešams atkārtoti saglabāt avotu. Reģistra dzēšana noņem avotu un klausītāju lokāli; parastie galapunkta labojumi pārvaldītajām rindām tiek noraidīti, tāpēc saglabātais avots nevar klusi novirzīties no maršrutētā klausītāja.
+
+| Avota formāts                               | dziedāt kaste                                                                       | Rentgens                                                                            |
+| ------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| VLESS, VMess, Trojas zirgs, Shadowsocks URI | Atbalstīta konversija                                                               | Atbalstīta konversija                                                               |
+| Hysteria2/hy2, TUIC, AnyTLS URI             | Atbalstīta konversija                                                               | Noraidīts; izmantojiet saderīgu kodolu                                              |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade       | Atbalstīts VLESS/VMess/Trojan                                                       | Atbalstīts VLESS/VMess/Trojan                                                       |
+| XHTTP URI transports                        | Noraidīts                                                                           | Atbalstīta konversija                                                               |
+| Vietējā izejošā JSON                        | Atlasītā kodola atļautais starpniekserveris protocols/options, pārbaudīts sākotnēji | Atlasītā kodola atļautais starpniekserveris protocols/options, pārbaudīts sākotnēji |
+
+Nezināmas vadu opcijas, nedroši TLS karodziņi, ārējie spraudņi, lokālo failu ceļu opcijas un neatbalstītas kombinācijas tiek noraidītas, nevis klusi izmestas. Vietējie objekti ir izejošās definīcijas, nevis visa kodola konfigurācijas; control/direct/bypass izejošās ziņas netiek pieņemtas. WireGuard uz sing-box 1.14 izmanto beigu punktus, tāpēc tas netiek pieņemts kā vietējais izejošs. Šis nav visu formātu pārveidotājs; SSR, mantotajām whole-base64 Shadowsocks saitēm, patvaļīgiem Clash objektiem un transporta variantiem, kas nav tabulā, ir nepieciešams atsevišķi atbalstīts avota formāts.
+
+`/api/services/managed-proxy` ir autentificēts un ir tikai atpakaļcilpas: GET uzskaita rediģētos metadatus, POST saglabā `{core,name,sourceLink,id?,assignment?}`, PATCH pieņem `{core,action:"start"|"stop"}`. Jābūt resursdatora uzticamam vienādranga zīmoga konveijeram. Vietējā pamata diagnostika tiek apspiesta, jo tajā var būt akreditācijas dati; dzīves cikla notikumi izmanto esošo strukturēto lietojumprogrammu failu reģistrētāju bez avota saitēm vai augšupējās slodzes. Lai saņemtu atbalstu, pievienojiet tikai sanitizētus lietojumprogrammu žurnālus. Oficiālās versijas ir piespraustas sing-box 1.14.3 un Xray 26.3.27 ar release-asset SHA-256 manifestiem; turpmākajiem atjauninājumiem ir jāmaina versija un visi pārbaudītie īssavilkumi kopā.
 
 ### Galvenie lēmumi (no dizaina plāna)
 
 | Lēmums                                           | Vērtība                                                                             |
 | ------------------------------------------------ | ----------------------------------------------------------------------------------- |
-| Informācijas paneļa piekļuve 9Router vietējai UI | Reversais starpniekserveris pie `/dashboard/providers/services/9router/embed/*`     |
+| Informācijas paneļa piekļuve 9Router vietējam UI | Reversais starpniekserveris pie `/dashboard/providers/services/9router/embed/*`     |
 | Uzstādīšanas mehānisms                           | `npm install {package}` izmantojot `execFile` (bez čaulas interpolācijas)           |
 | Patēriņa režīms                                  | Pakalpojumu sniedzējs maršrutēšanas programmā reģistrēts kā `9router/{sub}/{model}` |
 | API atslēgu pārvaldība                           | OmniRoute ģenerē, šifrē miera stāvoklī (AES-256-GCM) un ievada, izmantojot env      |

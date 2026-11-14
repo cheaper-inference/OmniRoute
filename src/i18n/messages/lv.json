@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Eksperimentāla",
     "modalityBridgeVideoPromotionEligible": "Atbilstoša",
-    "modalityBridgeVideoPromotionContextRequired": "Paaugstināšanai ir nepieciešamas divas neatkarīgas kvalificējošas izpildes tieši tai pašai modeļa versijai, politikai, korpusam un būvējumam. Nepārbaudīts konteksts saglabā statusu HOLD; eksperimentālas politikas atlase nav apstiprinājums."
+    "modalityBridgeVideoPromotionContextRequired": "Paaugstināšanai ir nepieciešamas divas neatkarīgas kvalificējošas izpildes tieši tai pašai modeļa versijai, politikai, korpusam un būvējumam. Nepārbaudīts konteksts saglabā statusu HOLD; eksperimentālas politikas atlase nav apstiprinājums.",
+    "proxyManagedCoresTab": "Pārvaldīti kodoli"
   },
   "contextRtk": {
     "title": "RTK dzinējs",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Kešatmiņas skats"
   },
   "proxyConfigModal": {
+    "managedCore": "Starpniekservera kodols",
+    "managedSelectCore": "Atlasiet kodolu",
+    "managedSaveHint": "Saglabājot, ja nepieciešams, tiek lejupielādēts un pārbaudīts oficiālais kodols, tiek pārbaudīta konfigurācija un pēc tam aktivizēts šis starpniekserveris. Teksta ievadīšana neko neinstalē.",
+    "errorSelectManagedCore": "Pirms šī tuneļa saglabāšanas atlasiet sing-box vai Xray",
     "levelGlobal": "Globālais",
     "levelProvider": "Pakalpojumu sniedzējs",
     "levelCombo": "Kombinācija",
@@ -16645,5 +16650,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Pārvaldīti starpniekservera kodoli",
+    "description": "Ielīmējiet tuneļa saiti pielāgotā starpniekservera resursdatora laukā, lai to saglabātu un piešķirtu. Šeit varat arī saglabāt izejošā savienojuma definīciju kodola sākotnējā JSON formātā, nemainot nevienu piešķīrumu.",
+    "saveHint": "Saglabājot, ja nepieciešams, tiek pārbaudīts oficiālais kodols, un pirms aktivizēšanas tiek pārbaudīta konfigurācija kodola sākotnējā formātā. Avotiem jābūt šifrētiem. Priekšskatījuma laikā nekas netiek instalēts, automātiskā palaišana netiek veikta un caurspīdīgā starpniekservera iestatījumi netiek mainīti.",
+    "saveActivate": "Saglabāt un aktivizēt",
+    "core": "Kodols",
+    "selectCore": "Atlasiet kodolu",
+    "name": "Nosaukums",
+    "source": "Avota saite vai izejošais savienojums kodola sākotnējā JSON formātā",
+    "start": "Palaist",
+    "stop": "Apturēt",
+    "loadError": "Neizdevās ielādēt pārvaldītos kodolus",
+    "operationError": "Pārvaldītā kodola darbība neizdevās",
+    "state": "{state, select, not_installed {Nav instalēts} stopped {Apturēts} starting {Tiek palaists} running {Darbojas} stopping {Tiek apturēts} error {Kļūda} other {Nezināms}}"
   }
 }

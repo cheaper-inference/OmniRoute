@@ -27,7 +27,9 @@
     "vite": "",
     "harfbuzzjs": "devDependency used only by scripts/docs/readme-outline.mjs to shape the kit's Switzer text roles and turn them into vector outlines for the README SVGs (the font's licence forbids embedding a subset). MIT; HarfBuzz compiled to WASM, no native build, no network at runtime. Already in the tree through subset-font; pinned exact at 1.6.4.",
     "fontverter": "devDependency used only by scripts/docs/readme-outline.mjs to read the vendored Switzer woff2 into memory as sfnt for HarfBuzz; nothing it converts is ever written or embedded. BSD-3-Clause; maintained by papandreou (assetgraph). Already in the tree through subset-font; pinned exact at 2.0.0.",
-    "subset-font": "devDependency used only by scripts/docs/readme-fonts.mjs to subset the OFL IBM Plex Mono @fontsource woff2 to the code characters each README SVG keeps as real text, embedded as a data: URI that renders inside GitHub's <img> sandbox. BSD-3-Clause; HarfBuzz compiled to WASM (harfbuzzjs, MIT), no native build, no network at runtime. Maintained by papandreou (assetgraph), 2.x line since 2022."
+    "subset-font": "devDependency used only by scripts/docs/readme-fonts.mjs to subset the OFL IBM Plex Mono @fontsource woff2 to the code characters each README SVG keeps as real text, embedded as a data: URI that renders inside GitHub's <img> sandbox. BSD-3-Clause; HarfBuzz compiled to WASM (harfbuzzjs, MIT), no native build, no network at runtime. Maintained by papandreou (assetgraph), 2.x line since 2022.",
+    "adm-zip": "Required managed-proxy ZIP reader for verified Windows core archives (PR #16457). npm registry identity and repository verified on 2026-11-11: adm-zip 0.6.1, cthackers/adm-zip, maintainer cthackers. Already pinned by the lockfile and overrides; this records the existing runtime dependency, with archive traversal, symlink and size-limit regressions retained.",
+    "tar": "Required managed-proxy tar reader for verified Unix core archives (PR #16457). npm registry identity and repository verified on 2026-11-11: tar 7.5.21, isaacs/node-tar, maintainer isaacs. Already pinned by the lockfile and overrides; this records the existing runtime dependency, with archive traversal, symlink and size-limit regressions retained."
   },
   "allowed": [
     "@agentclientprotocol/sdk",
@@ -80,6 +82,7 @@
     "@types/ws",
     "@vitejs/plugin-react",
     "@xyflow/react",
+    "adm-zip",
     "ajv",
     "ajv-formats",
     "axios",
@@ -192,6 +195,7 @@
     "subset-font",
     "tailwind-merge",
     "tailwindcss",
+    "tar",
     "tiktoken",
     "tsup",
     "tsx",

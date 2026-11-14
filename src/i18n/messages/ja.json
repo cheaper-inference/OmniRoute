@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "試験的",
     "modalityBridgeVideoPromotionEligible": "適格",
-    "modalityBridgeVideoPromotionContextRequired": "昇格には、モデルの正確なリビジョン、ポリシー、コーパス、ビルドについて、条件を満たす独立した2回の実行が必要です。未検証のコンテキストはHOLDのままであり、試験的なポリシーを選択しても承認されたことにはなりません。"
+    "modalityBridgeVideoPromotionContextRequired": "昇格には、モデルの正確なリビジョン、ポリシー、コーパス、ビルドについて、条件を満たす独立した2回の実行が必要です。未検証のコンテキストはHOLDのままであり、試験的なポリシーを選択しても承認されたことにはなりません。",
+    "proxyManagedCoresTab": "管理対象のコア"
   },
   "contextRtk": {
     "title": "RTKエンジン",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "キャッシュビュー"
   },
   "proxyConfigModal": {
+    "managedCore": "プロキシコア",
+    "managedSelectCore": "コアを選択",
+    "managedSaveHint": "保存時には、必要に応じて公式コアをダウンロードして検証し、設定を確認してからこのプロキシを有効化します。入力するだけでは何もインストールされません。",
+    "errorSelectManagedCore": "このトンネルを保存する前に sing-box または Xray を選択してください",
     "levelGlobal": "グローバル",
     "levelProvider": "プロバイダー",
     "levelCombo": "コンボ",
@@ -16645,5 +16650,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "管理対象のプロキシコア",
+    "description": "トンネルリンクを保存して割り当てるには、カスタムプロキシのホスト欄に貼り付けてください。ここでは、割り当てを変更せずにネイティブ形式のアウトバウンド JSON 定義を保存することもできます。",
+    "saveHint": "保存時には、必要に応じて公式コアを検証し、有効化する前にネイティブ設定を確認します。ソースには暗号化が必要です。プレビュー時のインストール、自動起動、透過プロキシの変更は行いません。",
+    "saveActivate": "保存して有効化",
+    "core": "コア",
+    "selectCore": "コアを選択",
+    "name": "名前",
+    "source": "ソースリンクまたはネイティブ形式のアウトバウンド JSON",
+    "start": "起動",
+    "stop": "停止",
+    "loadError": "管理対象のコアを読み込めませんでした",
+    "operationError": "管理対象のコアの操作に失敗しました",
+    "state": "{state, select, not_installed {未インストール} stopped {停止中} starting {起動処理中} running {実行中} stopping {停止処理中} error {エラー} other {不明}}"
   }
 }

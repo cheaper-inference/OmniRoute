@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Eksperimentalno",
     "modalityBridgeVideoPromotionEligible": "Ispunjava uvjete",
-    "modalityBridgeVideoPromotionContextRequired": "Promocija zahtijeva dva neovisna kvalificirajuća pokretanja za potpuno istu reviziju modela, pravilo, korpus i međuverziju. Neprovjereni kontekst ostaje na ČEKANJU; odabir eksperimentalnog pravila ne predstavlja odobrenje."
+    "modalityBridgeVideoPromotionContextRequired": "Promocija zahtijeva dva neovisna kvalificirajuća pokretanja za potpuno istu reviziju modela, pravilo, korpus i međuverziju. Neprovjereni kontekst ostaje na ČEKANJU; odabir eksperimentalnog pravila ne predstavlja odobrenje.",
+    "proxyManagedCoresTab": "Upravljane jezgre"
   },
   "contextRtk": {
     "title": "RTK mehanizam",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Prikaz predmemorije"
   },
   "proxyConfigModal": {
+    "managedCore": "Proxy jezgra",
+    "managedSelectCore": "Odaberite jezgru",
+    "managedSaveHint": "Pri spremanju se po potrebi preuzima i provjerava službena jezgra, provjerava se konfiguracija, a zatim se aktivira ovaj proxy. Unos teksta ne instalira ništa.",
+    "errorSelectManagedCore": "Odaberite sing-box ili Xray prije spremanja ovog tunela",
     "levelGlobal": "Globalno",
     "levelProvider": "Pružatelj",
     "levelCombo": "Kombinacija",
@@ -16645,5 +16650,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Upravljane proxy jezgre",
+    "description": "Zalijepite poveznicu tunela u polje poslužitelja prilagođenog proxyja kako biste ga spremili i dodijelili. Ovdje možete spremiti i definiciju odlazne veze u izvornom JSON formatu bez promjene bilo koje dodjele.",
+    "saveHint": "Pri spremanju se po potrebi provjerava službena jezgra, a izvorna konfiguracija provjerava se prije aktivacije. Izvori zahtijevaju šifriranje. Nema instalacije tijekom pretpregleda, automatskog pokretanja ni promjena transparentnog proxyja.",
+    "saveActivate": "Spremi i aktiviraj",
+    "core": "Jezgra",
+    "selectCore": "Odaberite jezgru",
+    "name": "Naziv",
+    "source": "Poveznica izvora ili odlazna veza u izvornom JSON formatu",
+    "start": "Pokreni",
+    "stop": "Zaustavi",
+    "loadError": "Nije moguće učitati upravljane jezgre",
+    "operationError": "Operacija nad upravljanom jezgrom nije uspjela",
+    "state": "{state, select, not_installed {Nije instalirana} stopped {Zaustavljena} starting {Pokretanje} running {Pokrenuta} stopping {Zaustavljanje} error {Pogreška} other {Nepoznato}}"
   }
 }

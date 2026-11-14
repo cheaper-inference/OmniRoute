@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "تجرباتی",
     "modalityBridgeVideoPromotionEligible": "اہل",
-    "modalityBridgeVideoPromotionContextRequired": "ترقی کے لیے ماڈل کی عین اسی ترمیم، پالیسی، کارپس اور بلڈ پر دو آزاد، اہلیت پر پورا اترنے والے رنز درکار ہیں۔ غیر تصدیق شدہ سیاق HOLD ہی رہتا ہے؛ تجرباتی پالیسی کا انتخاب منظوری نہیں ہے۔"
+    "modalityBridgeVideoPromotionContextRequired": "ترقی کے لیے ماڈل کی عین اسی ترمیم، پالیسی، کارپس اور بلڈ پر دو آزاد، اہلیت پر پورا اترنے والے رنز درکار ہیں۔ غیر تصدیق شدہ سیاق HOLD ہی رہتا ہے؛ تجرباتی پالیسی کا انتخاب منظوری نہیں ہے۔",
+    "proxyManagedCoresTab": "زیرِ انتظام کور"
   },
   "contextRtk": {
     "title": "RTK انجن",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "کیش ویو"
   },
   "proxyConfigModal": {
+    "managedCore": "پراکسی کور",
+    "managedSelectCore": "کور منتخب کریں",
+    "managedSaveHint": "محفوظ کرتے وقت ضرورت پڑنے پر سرکاری کور ڈاؤن لوڈ کرکے اس کی تصدیق کی جاتی ہے، ترتیب جانچی جاتی ہے، پھر یہ پراکسی فعال کی جاتی ہے۔ ٹائپ کرنے سے کچھ بھی نصب نہیں ہوتا۔",
+    "errorSelectManagedCore": "یہ ٹنل محفوظ کرنے سے پہلے sing-box یا Xray منتخب کریں",
     "levelGlobal": "عالمی",
     "levelProvider": "فراہم کنندہ",
     "levelCombo": "امتزاج",
@@ -16645,5 +16650,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "زیرِ انتظام پراکسی کور",
+    "description": "ٹنل لنک محفوظ کرنے اور تفویض کرنے کے لیے اسے حسبِ ضرورت پراکسی کے ہوسٹ خانے میں پیسٹ کریں۔ یہاں آپ کسی تفویض کو بدلے بغیر مقامی فارمیٹ میں آؤٹ باؤنڈ JSON تعریف بھی محفوظ کر سکتے ہیں۔",
+    "saveHint": "محفوظ کرتے وقت ضرورت پڑنے پر سرکاری کور کی تصدیق کی جاتی ہے اور فعال کرنے سے پہلے مقامی فارمیٹ کی ترتیب جانچی جاتی ہے۔ ذرائع کے لیے خفیہ کاری ضروری ہے۔ پیش منظر کے دوران تنصیب، خودکار آغاز یا شفاف پراکسی میں تبدیلیاں نہیں کی جاتیں۔",
+    "saveActivate": "محفوظ کریں اور فعال کریں",
+    "core": "کور",
+    "selectCore": "کور منتخب کریں",
+    "name": "نام",
+    "source": "ماخذ کا لنک یا مقامی فارمیٹ میں آؤٹ باؤنڈ JSON",
+    "start": "شروع کریں",
+    "stop": "روکیں",
+    "loadError": "زیرِ انتظام کور لوڈ نہیں ہو سکے",
+    "operationError": "زیرِ انتظام کور کی کارروائی ناکام ہو گئی",
+    "state": "{state, select, not_installed {نصب نہیں ہے} stopped {رکا ہوا} starting {شروع ہو رہا ہے} running {چل رہا ہے} stopping {رک رہا ہے} error {خرابی} other {نامعلوم}}"
   }
 }

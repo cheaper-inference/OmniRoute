@@ -45,7 +45,25 @@ Cała ósemka kieruje się tym samym modelem nadzoru:
 - OmniRoute instaluje je w `DATA_DIR/services/{name}/` (odizolowane od własnego `package.json` OmniRoute)
 - OmniRoute tworzy je i monitoruje jako procesy potomne
 - OmniRoute wprowadza efemeryczny klucz API do środowiska dziecka i obraca go bez przestojów (w stosownych przypadkach)
-- Wszystkie trasy zarządzania (`/api/services/*`) są**LOCAL_ONLY** — dostępne tylko z pętli zwrotnej (twarda zasada nr 17)
+- Wszystkie trasy zarządzania (`/api/services/*`) są**LOCAL_ONLY** — dostępne tylko z pętli zwrotnej (twarda reguła #17)
+
+### Zarządzane rdzenie proxy
+
+Pole Niestandardowy host proxy akceptuje także łącze źródłowe V2Ray. Wybierać** śpiewak** Lub** Xray** jawnie, a następnie kliknij Zapisz. Pisanie nigdy nie powoduje pobrania ani uruchomienia rdzenia. Save weryfikuje oficjalne archiwum wydań, sprawdza natywną konfigurację, uruchamia odrębny odbiornik SOCKS localhost i dopiero wtedy zapisuje przypisanie rejestru proxy. Nieudana aktywacja przywraca poprzednią zarządzaną konfigurację i proces. wymagane jest `STORAGE_ENCRYPTION_KEY` ; linki źródłowe są szyfrowane.
+
+Zarządzane pliki znajdują się w `DATA_DIR/services/managed-proxy/`, oddzielnie od TPROXY. Na wybrany rdzeń przypada jeden proces własny, do 100 słuchaczy. Nie zmienia się żadnych ustawień domyślnych autostartu ani globalnego routingu. Pomyślne zapisanie zapamiętuje aktywację tylko dla tego zarządzanego rdzenia; uruchamianie aplikacji przywraca włączone zapisane rdzenie przy użyciu już zweryfikowanego pliku binarnego, nigdy nie jest pobierane w czasie rozruchu. Jawne zatrzymanie czyści tę flagę aktywacji. Brakujący lub uszkodzony plik binarny wymaga ponownego zapisania źródła. Usunięcie rejestru usuwa lokalnie źródło i słuchacz; zwykłe zmiany w punktach końcowych są odrzucane w przypadku zarządzanych wierszy, więc zapisane źródło nie może po cichu odejść od kierowanego odbiornika.
+
+| Format źródłowy                       | śpiewak                                                                         | Xray                                                                            |
+| ------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| VLESS, VMess, trojan, Shadowsocks URI | Obsługiwana konwersja                                                           | Obsługiwana konwersja                                                           |
+| Hysteria2/hy2, TUIC, AnyTLS URI       | Obsługiwana konwersja                                                           | Odrzucony; użyj kompatybilnego rdzenia                                          |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade | Obsługiwane dla VLESS/VMess/Trojan                                              | Obsługiwane dla VLESS/VMess/Trojan                                              |
+| XHTTP URI transport                   | Odrzucony                                                                       | Obsługiwana konwersja                                                           |
+| Natywny wychodzący JSON               | Dozwolony serwer proxy protocols/options wybranego rdzenia, sprawdzany natywnie | Dozwolony serwer proxy protocols/options wybranego rdzenia, sprawdzany natywnie |
+
+Nieznane opcje połączeń, niezabezpieczone flagi TLS, wtyczki zewnętrzne, opcje lokalnych ścieżek plików i nieobsługiwane kombinacje są raczej odrzucane niż dyskretnie odrzucane. Obiekty natywne to definicje wychodzące, a nie konfiguracje obejmujące cały rdzeń; Wyjścia control/direct/bypass nie są akceptowane. WireGuard w sing-boxie 1.14 używa punktów końcowych, więc nie jest akceptowany jako natywny ruch wychodzący. To nie jest konwerter wszystkich formatów; SSR, starsze linki whole-base64 Shadowsocks, dowolne obiekty Clash i warianty transportu nieobecne w tabeli wymagają oddzielnie obsługiwanego formatu źródłowego.
+
+`/api/services/managed-proxy` jest uwierzytelniana i obsługuje tylko pętlę zwrotną: GET wyświetla zredagowane metadane, POST zapisuje `{core,name,sourceLink,id?,assignment?}`, PATCH akceptuje `{core,action:"start"|"stop"}`. Musi być obecny zaufany potok stempli równorzędnych hosta. Natywne podstawowe narzędzia diagnostyczne są pomijane, ponieważ mogą zawierać poświadczenia; zdarzenia cyklu życia korzystają z istniejącego strukturalnego rejestratora plików aplikacji bez łączy źródłowych i ładunków nadrzędnych. Aby uzyskać pomoc, dołączaj tylko oczyszczone dzienniki aplikacji. Oficjalne wersje są przypięte do sing-box 1.14.3 i Xray 26.3.27 z manifestami SHA-256 zasobów wydania; przyszłe aktualizacje wymagają jednoczesnej zmiany wersji i wszystkich zweryfikowanych podsumowań.
 
 ### Kluczowe decyzje (z planu projektu)
 

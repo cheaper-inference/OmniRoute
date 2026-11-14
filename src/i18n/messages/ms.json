@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Eksperimental",
     "modalityBridgeVideoPromotionEligible": "Layak",
-    "modalityBridgeVideoPromotionContextRequired": "Promosi memerlukan dua pelaksanaan kelayakan bebas untuk semakan model, dasar, korpus dan binaan yang tepat. Konteks yang belum disahkan kekal HOLD; pemilihan dasar eksperimental bukanlah suatu kelulusan."
+    "modalityBridgeVideoPromotionContextRequired": "Promosi memerlukan dua pelaksanaan kelayakan bebas untuk semakan model, dasar, korpus dan binaan yang tepat. Konteks yang belum disahkan kekal HOLD; pemilihan dasar eksperimental bukanlah suatu kelulusan.",
+    "proxyManagedCoresTab": "Teras terurus"
   },
   "contextRtk": {
     "title": "Enjin RTK",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Paparan cache"
   },
   "proxyConfigModal": {
+    "managedCore": "Teras proksi",
+    "managedSelectCore": "Pilih teras",
+    "managedSaveHint": "Semasa menyimpan, teras rasmi dimuat turun dan disahkan jika perlu, konfigurasi diperiksa, kemudian proksi ini diaktifkan. Menaip tidak memasang apa-apa.",
+    "errorSelectManagedCore": "Pilih sing-box atau Xray sebelum menyimpan terowong ini",
     "levelGlobal": "Global",
     "levelProvider": "Pembekal",
     "levelCombo": "Kombo",
@@ -16645,5 +16650,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Teras proksi terurus",
+    "description": "Tampalkan pautan terowong dalam medan hos proksi tersuai untuk menyimpan dan menetapkannya. Di sini anda juga boleh menyimpan takrif JSON asli bagi sambungan keluar tanpa mengubah sebarang penetapan.",
+    "saveHint": "Semasa menyimpan, teras rasmi disahkan jika perlu dan konfigurasi asli diperiksa sebelum pengaktifan. Sumber memerlukan penyulitan. Tiada pemasangan semasa pratonton, mula automatik atau perubahan proksi telus.",
+    "saveActivate": "Simpan dan aktifkan",
+    "core": "Teras",
+    "selectCore": "Pilih teras",
+    "name": "Nama",
+    "source": "Pautan sumber atau JSON asli bagi sambungan keluar",
+    "start": "Mulakan",
+    "stop": "Hentikan",
+    "loadError": "Tidak dapat memuatkan teras terurus",
+    "operationError": "Operasi teras terurus gagal",
+    "state": "{state, select, not_installed {Belum dipasang} stopped {Dihentikan} starting {Sedang bermula} running {Sedang berjalan} stopping {Sedang berhenti} error {Ralat} other {Tidak diketahui}}"
   }
 }

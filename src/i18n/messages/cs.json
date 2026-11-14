@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Experimentální",
     "modalityBridgeVideoPromotionEligible": "Způsobilé",
-    "modalityBridgeVideoPromotionContextRequired": "Povýšení vyžaduje dvě nezávislá kvalifikační spuštění pro přesně stejnou revizi modelu, zásadu, korpus a sestavení. Neověřený kontext zůstává ve stavu HOLD; výběr experimentální zásady nepředstavuje schválení."
+    "modalityBridgeVideoPromotionContextRequired": "Povýšení vyžaduje dvě nezávislá kvalifikační spuštění pro přesně stejnou revizi modelu, zásadu, korpus a sestavení. Neověřený kontext zůstává ve stavu HOLD; výběr experimentální zásady nepředstavuje schválení.",
+    "proxyManagedCoresTab": "Spravovaná jádra"
   },
   "contextRtk": {
     "title": "Modul RTK",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Zobrazení mezipaměti"
   },
   "proxyConfigModal": {
+    "managedCore": "Jádro proxy",
+    "managedSelectCore": "Vyberte jádro",
+    "managedSaveHint": "Při ukládání se v případě potřeby stáhne a ověří oficiální jádro, zkontroluje se konfigurace a poté se toto proxy aktivuje. Samotné zadávání textu nic neinstaluje.",
+    "errorSelectManagedCore": "Před uložením tohoto tunelu vyberte sing-box nebo Xray",
     "levelGlobal": "Globální",
     "levelProvider": "Poskytovatel",
     "levelCombo": "Kombinace",
@@ -16645,5 +16650,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Spravovaná jádra proxy",
+    "description": "Vložte odkaz na tunel do pole hostitele vlastního proxy, abyste jej uložili a přiřadili. Zde můžete také uložit definici odchozího připojení v nativním formátu JSON, aniž byste změnili jakékoli přiřazení.",
+    "saveHint": "Při ukládání se v případě potřeby ověří oficiální jádro a před aktivací se zkontroluje nativní konfigurace. Zdroje vyžadují šifrování. Během náhledu se nic neinstaluje, neprobíhá automatické spouštění ani změny transparentního proxy.",
+    "saveActivate": "Uložit a aktivovat",
+    "core": "Jádro",
+    "selectCore": "Vyberte jádro",
+    "name": "Název",
+    "source": "Odkaz na zdroj nebo definice odchozího připojení v nativním formátu JSON",
+    "start": "Spustit",
+    "stop": "Zastavit",
+    "loadError": "Spravovaná jádra nelze načíst",
+    "operationError": "Operace se spravovaným jádrem selhala",
+    "state": "{state, select, not_installed {Nenainstalováno} stopped {Zastaveno} starting {Spouštění} running {Spuštěno} stopping {Zastavování} error {Chyba} other {Neznámý stav}}"
   }
 }

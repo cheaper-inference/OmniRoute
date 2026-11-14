@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Eksperimental",
     "modalityBridgeVideoPromotionEligible": "Uyğundur",
-    "modalityBridgeVideoPromotionContextRequired": "İrəli çəkilmə üçün dəqiq model reviziyası, siyasət, korpus və yığım üzrə tələblərə cavab verən iki müstəqil icra tələb olunur. Yoxlanılmamış kontekst HOLD statusunda qalır; eksperimental siyasətin seçilməsi təsdiq demək deyil."
+    "modalityBridgeVideoPromotionContextRequired": "İrəli çəkilmə üçün dəqiq model reviziyası, siyasət, korpus və yığım üzrə tələblərə cavab verən iki müstəqil icra tələb olunur. Yoxlanılmamış kontekst HOLD statusunda qalır; eksperimental siyasətin seçilməsi təsdiq demək deyil.",
+    "proxyManagedCoresTab": "İdarə olunan nüvələr"
   },
   "contextRtk": {
     "title": "RTK Mühərriki",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Keş görünüşü"
   },
   "proxyConfigModal": {
+    "managedCore": "Proksi nüvəsi",
+    "managedSelectCore": "Nüvə seçin",
+    "managedSaveHint": "Saxlama zamanı lazım gələrsə rəsmi nüvə endirilir və doğrulanır, konfiqurasiya yoxlanılır, sonra bu proksi aktivləşdirilir. Mətn daxil etmək heç nə quraşdırmır.",
+    "errorSelectManagedCore": "Bu tuneli saxlamazdan əvvəl sing-box və ya Xray seçin",
     "levelGlobal": "Qlobal",
     "levelProvider": "Provayder",
     "levelCombo": "Kombinasiya",
@@ -16645,5 +16650,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "İdarə olunan proksi nüvələri",
+    "description": "Saxlamaq və təyin etmək üçün tunel keçidini fərdi proksinin host sahəsinə yapışdırın. Burada heç bir təyinatı dəyişmədən yerli çıxış JSON tərifini də saxlaya bilərsiniz.",
+    "saveHint": "Saxlama zamanı lazım gələrsə rəsmi nüvə doğrulanır və aktivləşdirmədən əvvəl yerli konfiqurasiya yoxlanılır. Mənbələr şifrələmə tələb edir. Önizləmə zamanı quraşdırma, avtomatik başlatma və ya şəffaf proksi dəyişiklikləri edilmir.",
+    "saveActivate": "Saxla və aktivləşdir",
+    "core": "Nüvə",
+    "selectCore": "Nüvə seçin",
+    "name": "Ad",
+    "source": "Mənbə keçidi və ya yerli çıxış JSON-u",
+    "start": "Başlat",
+    "stop": "Dayandır",
+    "loadError": "İdarə olunan nüvələri yükləmək mümkün olmadı",
+    "operationError": "İdarə olunan nüvə əməliyyatı uğursuz oldu",
+    "state": "{state, select, not_installed {Quraşdırılmayıb} stopped {Dayandırılıb} starting {Başladılır} running {İşləyir} stopping {Dayandırılır} error {Xəta} other {Naməlum}}"
   }
 }

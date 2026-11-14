@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Eksperimentell",
     "modalityBridgeVideoPromotionEligible": "Kvalifisert",
-    "modalityBridgeVideoPromotionContextRequired": "Promotering krever to uavhengige kvalifiserende kjøringer for nøyaktig samme modellrevisjon, policy, korpus og bygg. En ubekreftet kontekst forblir HOLD. Valg av en eksperimentell policy innebærer ikke godkjenning."
+    "modalityBridgeVideoPromotionContextRequired": "Promotering krever to uavhengige kvalifiserende kjøringer for nøyaktig samme modellrevisjon, policy, korpus og bygg. En ubekreftet kontekst forblir HOLD. Valg av en eksperimentell policy innebærer ikke godkjenning.",
+    "proxyManagedCoresTab": "Administrerte kjerner"
   },
   "contextRtk": {
     "title": "RTK-motor",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Hurtigbuffervisning"
   },
   "proxyConfigModal": {
+    "managedCore": "Mellomtjenerkjerne",
+    "managedSelectCore": "Velg en kjerne",
+    "managedSaveHint": "Ved lagring lastes den offisielle kjernen ned og verifiseres ved behov, konfigurasjonen kontrolleres, og deretter aktiveres denne mellomtjeneren. Inntasting installerer ingenting.",
+    "errorSelectManagedCore": "Velg sing-box eller Xray før du lagrer denne tunnelen",
     "levelGlobal": "Globalt",
     "levelProvider": "Leverandør",
     "levelCombo": "Kombinasjon",
@@ -16645,5 +16650,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Administrerte mellomtjenerkjerner",
+    "description": "Lim inn en tunnellenke i vertsfeltet for den egendefinerte mellomtjeneren for å lagre og tilordne den. Her kan du også lagre en definisjon av en utgående tilkobling i kjernens eget JSON-format uten å endre noen tilordning.",
+    "saveHint": "Ved lagring verifiseres den offisielle kjernen ved behov, og konfigurasjonen i kjernens eget format kontrolleres før aktivering. Kilder krever kryptering. Ingen installasjon under forhåndsvisning, automatisk oppstart eller endringer av den transparente mellomtjeneren.",
+    "saveActivate": "Lagre og aktiver",
+    "core": "Kjerne",
+    "selectCore": "Velg en kjerne",
+    "name": "Navn",
+    "source": "Kildelenke eller utgående tilkobling i kjernens eget JSON-format",
+    "start": "Start",
+    "stop": "Stopp",
+    "loadError": "Kunne ikke laste inn administrerte kjerner",
+    "operationError": "Operasjonen på den administrerte kjernen mislyktes",
+    "state": "{state, select, not_installed {Ikke installert} stopped {Stoppet} starting {Starter} running {Kjører} stopping {Stopper} error {Feil} other {Ukjent}}"
   }
 }

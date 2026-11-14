@@ -31,7 +31,7 @@ Sekiz hizmet yerleşiktir:
 
 | Hizmet            | npm paketi                              | Varsayılan bağlantı noktası | Amaç                                                                                                                                                                                                                                                                                                                                                                      |
 | ----------------- | --------------------------------------- | :-------------------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Yönlendirici** | `9router`                               |            20130            | OmniRoute alt sağlayıcı olarak kullanabileceği AI yönlendiricisi. `9router/{sub}/{model}` olarak sunulan modeller                                                                                                                                                                                                                                                         |
+| **9Yönlendirici** | `9router`                               |            20130            | OmniRoute alt sağlayıcı olarak kullanabileceği AI yönlendiricisi. `9router/{sub}/{model}` olarak gösterilen modeller                                                                                                                                                                                                                                                      |
 | **CLIProxyAPI**   | GitHub sürüm ikili dosyası (`cliproxy`) |            8317             | Anthropic CLI kimlik doğrulama akışları için yerel proxy bağdaştırıcısı. OAuth belirteçlerinin süresi dolduğunda geri dönüş yönlendirmesi sağlar                                                                                                                                                                                                                          |
 | **Mux**           | `mux` (başsız `mux server`)             |            8322             | Yerel aracı düzenleme arka plan programı (coder/mux). Yalnızca yaşam döngüsü tarafından yönetilen — bir yönlendirme hedefi değil ( LLM proxy oluşturma yok).                                                                                                                                                                                                              |
 | **Bifrost**       | `@maximhq/bifrost`                      |            8080             | AI ağ geçidi geçiş arka ucuna gidin. Çalışırken, geçiş yolu (`/v1/relay/`) tarafından otomatik olarak seçilir                                                                                                                                                                                                                                                             |
@@ -45,18 +45,36 @@ Sekizinin tümü aynı denetim modelini takip ediyor:
 - OmniRoute bunları `DATA_DIR/services/{name}/` altına kurar ( OmniRoute kendi `package.json` yalıtılmış olarak)
 - OmniRoute bunları alt süreçler olarak oluşturur ve izler
 - OmniRoute çocuğun ortamına geçici bir API anahtarı enjekte eder ve kesinti olmadan onu döndürür (varsa)
-- Tüm yönetim yolları (`/api/services/*`)**LOCAL_ONLY** — yalnızca geridöngüden erişilebilir (katı kural #17)
+- Tüm yönetim yolları (`/api/services/*`)**LOCAL_ONLY** — yalnızca geri döngüden erişilebilir ( #17 katı kuralı)
 
-### Önemli kararlar (tasarım planından)
+### Yönetilen proxy çekirdekleri
 
-| Karar                                      | Değer                                                                                           |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------------- |
-| 9Router yerel UI kontrol panelinden erişim | `/dashboard/providers/services/9router/embed/*` ters proxy                                      |
-| Kurulum mekanizması                        | `execFile` aracılığıyla `npm install {package}` (kabuk enterpolasyonu yok)                      |
-| Tüketim modu                               | Sağlayıcı, yönlendirme motorunda `9router/{sub}/{model}` olarak kayıtlı                         |
-| API anahtar yönetimi                       | OmniRoute, hareketsiz durumdayken (AES-256-GCM) oluşturur, şifreler ve env yoluyla enjekte eder |
-| Kontrol paneli konumu                      | `/dashboard/providers/services` (üç sekme)                                                      |
-| Otomatik başlatma                          | Hizmet başına geçiş, varsayılan OFF                                                             |
+Özel proxy ana bilgisayar alanı aynı zamanda bir V2Ray kaynak bağlantısını da kabul eder. Seçme** şarkı kutusu** veya** Röntgen** açıkça belirtin ve ardından Kaydet'e tıklayın. Yazmak hiçbir zaman bir çekirdeği indirmez veya başlatmaz. Kaydet, resmi sürüm arşivini doğrular, yerel yapılandırmayı doğrular, farklı bir localhost SOCKS dinleyicisini başlatır ve ancak bundan sonra proxy kayıt defteri atamasını yazar. Başarısız etkinleştirme, önceki yönetilen yapılandırmayı ve süreci geri yükler. `STORAGE_ENCRYPTION_KEY` gereklidir; kaynak bağlantıları şifrelenir.
+
+Yönetilen dosyalar TPROXY ayrı olarak `DATA_DIR/services/managed-proxy/` altında bulunur. Seçilen çekirdek başına 100 dinleyiciye kadar sahip olunan bir süreç vardır. Otomatik başlatma veya genel yönlendirme varsayılanı değiştirilmedi. Başarılı Kaydetme yalnızca bu yönetilen çekirdek için etkinleştirmeyi hatırlar; uygulama başlatma, önceden doğrulanmış ikili dosyayı kullanarak etkinleştirilmiş kayıtlı çekirdekleri geri yükler; asla önyükleme sırasında indirme yapılmaz. Açık Durdurma, bu aktivasyon bayrağını temizler. Eksik veya hasarlı bir ikili dosya, kaynağın yeniden kaydedilmesini gerektirir. Kayıt defterinin silinmesi, kaynağı ve dinleyiciyi yerel olarak kaldırır; yönetilen satırlar için sıradan uç nokta düzenlemeleri reddedilir, böylece kaydedilen kaynak yönlendirilen dinleyiciden sessizce ayrılamaz.
+
+| Kaynak formatı                           | şarkı kutusu                                                                         | Röntgen                                                                              |
+| ---------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| VLESS, VMess, Truva atı, Shadowsocks URI | Desteklenen dönüşüm                                                                  | Desteklenen dönüşüm                                                                  |
+| Hysteria2/hy2, TUIC, AnyTLS URI          | Desteklenen dönüşüm                                                                  | Reddedilmiş; uyumlu bir çekirdek kullanın                                            |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade    | VLESS/VMess/Trojan için desteklenir                                                  | VLESS/VMess/Trojan için desteklenir                                                  |
+| XHTTP URI taşıma                         | Reddedilmiş                                                                          | Desteklenen dönüşüm                                                                  |
+| Yerel giden JSON                         | Seçilen çekirdeğin izin verilen proxy protocols/options, yerel olarak kontrol edildi | Seçilen çekirdeğin izin verilen proxy protocols/options, yerel olarak kontrol edildi |
+
+Bilinmeyen bağlantı seçenekleri, güvenli olmayan TLS işaretleri, harici eklentiler, yerel dosya yolu seçenekleri ve desteklenmeyen kombinasyonlar sessizce atılmak yerine reddedilir. Yerel nesneler, tüm çekirdek yapılandırmaları değil, giden tanımlardır; control/direct/bypass gidenleri kabul edilmez. sing-box 1.14'teki WireGuard uç noktaları kullandığından yerel giden olarak kabul edilmez. Bu, tüm formatları kapsayan bir dönüştürücü değildir; SSR, eski whole-base64 Shadowsocks bağlantıları, rastgele Clash nesneleri ve tabloda bulunmayan taşıma çeşitleri, ayrı olarak desteklenen bir kaynak formatına ihtiyaç duyar.
+
+`/api/services/managed-proxy` kimliği doğrulanmıştır ve yalnızca geri döngüye sahiptir: GET düzeltilmiş meta verileri listeler, POST `{core,name,sourceLink,id?,assignment?}` kaydeder, PATCH, `{core,action:"start"|"stop"}` kabul eder. Ana bilgisayarın güvenilir eş damgası hattının mevcut olması gerekir. Yerel çekirdek tanılamaları kimlik bilgileri içerebileceğinden gizlenir; yaşam döngüsü olayları, kaynak bağlantıları veya yukarı akış yükleri olmadan mevcut yapılandırılmış uygulama dosya günlükçüsünü kullanır. Destek için yalnızca sterilize edilmiş uygulama günlüklerini ekleyin. Resmi sürümler, sürüm varlığı SHA-256 bildirimleriyle birlikte sing-box 1.14.3 ve Xray 26.3.27'ye sabitlenmiştir; gelecekteki güncellemeler, sürümün ve tüm doğrulanmış özetlerin birlikte değiştirilmesini gerektirir.
+
+### Anahtar kararlar (tasarım planından)
+
+| Karar                                      | Değer                                                                                                |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| 9Router yerel UI kontrol panelinden erişim | `/dashboard/providers/services/9router/embed/*` ters proxy                                           |
+| Kurulum mekanizması                        | `execFile` aracılığıyla `npm install {package}` (kabuk enterpolasyonu yok)                           |
+| Tüketim modu                               | Sağlayıcı, yönlendirme motorunda `9router/{sub}/{model}` olarak kayıtlı                              |
+| API anahtar yönetimi                       | OmniRoute, hareketsiz durumdayken (AES-256-GCM) oluşturur, şifreler ve env aracılığıyla enjekte eder |
+| Kontrol paneli konumu                      | `/dashboard/providers/services` (üç sekme)                                                           |
+| Otomatik başlatma                          | Hizmet başına geçiş, varsayılan OFF                                                                  |
 
 ---
 

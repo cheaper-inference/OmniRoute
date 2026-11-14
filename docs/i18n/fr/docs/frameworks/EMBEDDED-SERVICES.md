@@ -45,7 +45,25 @@ Tous les huit suivent le même modèle de surveillance :
 - OmniRoute les installe sous `DATA_DIR/services/{name}/` (isolés du propre `package.json` de OmniRoute)
 - OmniRoute les génère et les surveille en tant que processus enfants
 - OmniRoute injecte une clé API éphémère dans l'environnement de l'enfant et la fait tourner sans temps d'arrêt (le cas échéant)
-- Toutes les voies de gestion (`/api/services/*`) sont**LOCAL_ONLY** — accessible uniquement depuis le bouclage (règle stricte n°17)
+- Toutes les voies de gestion (`/api/services/*`) sont**LOCAL_ONLY** — accessible uniquement depuis le bouclage (règle stricte #17)
+
+### Cœurs proxy gérés
+
+Le champ Hôte proxy personnalisé accepte également un lien source V2Ray. Sélectionner** boîte à chanter** ou** Radiographie** explicitement, puis cliquez sur Enregistrer. Taper ne télécharge ni ne démarre jamais un noyau. Save vérifie l'archive de la version officielle, valide la configuration native, démarre un écouteur SOCKS localhost distinct et écrit ensuite seulement l'affectation du registre proxy. L’échec de l’activation restaure la configuration et le processus gérés précédents. `STORAGE_ENCRYPTION_KEY` est requis ; les liens sources sont cryptés.
+
+Les fichiers gérés vivent sous `DATA_DIR/services/managed-proxy/`, distinct de TPROXY. Il existe un processus détenu par noyau sélectionné, jusqu'à 100 auditeurs. Aucune valeur par défaut de démarrage automatique ou de routage global n’est modifiée. L'enregistrement réussi mémorise l'activation de ce noyau géré uniquement ; Le démarrage de l'application restaure les cœurs enregistrés activés à l'aide du binaire déjà vérifié, jamais de téléchargement au démarrage. L'arrêt explicite efface cet indicateur d'activation. Un binaire manquant ou endommagé nécessite de réenregistrer une source. La suppression du registre supprime la source et l'écouteur localement ; les modifications de point de terminaison ordinaires sont rejetées pour les lignes gérées afin que la source enregistrée ne puisse pas dériver silencieusement de son écouteur routé.
+
+| Format source                                  | boîte à chanter                                                           | Radiographie                                                              |
+| ---------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| VLESS, VMess, cheval de Troie, Shadowsocks URI | Conversion prise en charge                                                | Conversion prise en charge                                                |
+| Hysteria2/hy2, TUIC, AnyTLS URI                | Conversion prise en charge                                                | Rejeté; utiliser un noyau compatible                                      |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade          | Pris en charge pour VLESS/VMess/Trojan                                    | Pris en charge pour VLESS/VMess/Trojan                                    |
+| XHTTP URI transport                            | Rejeté                                                                    | Conversion prise en charge                                                |
+| JSON sortant natif                             | Proxy autorisé protocols/options du noyau sélectionné, vérifié nativement | Proxy autorisé protocols/options du noyau sélectionné, vérifié nativement |
+
+Les options filaires inconnues, les indicateurs TLS non sécurisés, les plugins externes, les options de chemin de fichier local et les combinaisons non prises en charge sont rejetés plutôt que silencieusement. Les objets natifs sont des définitions sortantes, et non des configurations globales ; Les sorties control/direct/bypass ne sont pas acceptées. WireGuard sur sing-box 1.14 utilise des points de terminaison, il n'est donc pas accepté comme sortant natif. Ce n'est pas un convertisseur tous formats ; SSR, les anciens liens whole-base64 Shadowsocks, les objets Clash arbitraires et les variantes de transport absentes de la table nécessitent un format source pris en charge séparément.
+
+`/api/services/managed-proxy` est authentifié et en boucle uniquement : GET répertorie les métadonnées expurgées, POST enregistre `{core,name,sourceLink,id?,assignment?}`, PATCH accepte `{core,action:"start"|"stop"}`. Le pipeline d’homologation de confiance de l’hôte doit être présent. Les diagnostics de base natifs sont supprimés car ils peuvent contenir des informations d'identification ; Les événements du cycle de vie utilisent l'enregistreur de fichiers d'application structuré existant sans liens sources ni charges utiles en amont. Joignez uniquement les journaux d’applications nettoyés pour obtenir de l’aide. Les versions officielles sont épinglées sur sing-box 1.14.3 et Xray 26.3.27 avec les manifestes SHA-256 des ressources de version ; les futures mises à jour nécessiteront de modifier la version et tous les résumés vérifiés ensemble.
 
 ### Décisions clés (du plan de conception)
 

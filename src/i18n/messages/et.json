@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Eksperimentaalne",
     "modalityBridgeVideoPromotionEligible": "Nõuetele vastav",
-    "modalityBridgeVideoPromotionContextRequired": "Edutamiseks on vaja kahte sõltumatut kvalifitseeruvat käitust täpselt sama mudelirevisiooni, poliitika, korpuse ja kooste jaoks. Kontrollimata kontekst jääb OOTELE; eksperimentaalse poliitika valimine ei tähenda heakskiitu."
+    "modalityBridgeVideoPromotionContextRequired": "Edutamiseks on vaja kahte sõltumatut kvalifitseeruvat käitust täpselt sama mudelirevisiooni, poliitika, korpuse ja kooste jaoks. Kontrollimata kontekst jääb OOTELE; eksperimentaalse poliitika valimine ei tähenda heakskiitu.",
+    "proxyManagedCoresTab": "Hallatavad tuumad"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Vahemälu vaade"
   },
   "proxyConfigModal": {
+    "managedCore": "Puhverserveri tuum",
+    "managedSelectCore": "Valige tuum",
+    "managedSaveHint": "Salvestamisel laaditakse vajaduse korral ametlik tuum alla ja kontrollitakse selle ehtsust, kontrollitakse konfiguratsiooni ning seejärel aktiveeritakse see puhverserver. Teksti sisestamine ei installi midagi.",
+    "errorSelectManagedCore": "Enne selle tunneli salvestamist valige sing-box või Xray",
     "levelGlobal": "Globaalne",
     "levelProvider": "Teenusepakkuja",
     "levelCombo": "Kombinatsioon",
@@ -16645,5 +16650,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Hallatavad puhverserverituumad",
+    "description": "Kleepige tunnelilink kohandatud puhverserveri hosti väljale, et see salvestada ja määrata. Siin saate salvestada ka väljamineva ühenduse definitsiooni tuuma omas JSON-vormingus ilma ühtegi määrangut muutmata.",
+    "saveHint": "Salvestamisel kontrollitakse vajaduse korral ametliku tuuma ehtsust ning enne aktiveerimist kontrollitakse tuuma omas vormingus konfiguratsiooni. Allikad nõuavad krüptimist. Eelvaate ajal ei installita midagi, automaatset käivitamist ei toimu ja läbipaistva puhverserveri seadeid ei muudeta.",
+    "saveActivate": "Salvesta ja aktiveeri",
+    "core": "Tuum",
+    "selectCore": "Valige tuum",
+    "name": "Nimi",
+    "source": "Allikalink või väljaminev ühendus tuuma omas JSON-vormingus",
+    "start": "Käivita",
+    "stop": "Peata",
+    "loadError": "Hallatavaid tuumi ei saanud laadida",
+    "operationError": "Hallatava tuuma toiming ebaõnnestus",
+    "state": "{state, select, not_installed {Installimata} stopped {Peatatud} starting {Käivitub} running {Töötab} stopping {Peatub} error {Viga} other {Teadmata}}"
   }
 }
