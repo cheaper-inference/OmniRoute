@@ -218,6 +218,7 @@ function startPendingContinuationSweep(): void {
 
 /** Non-payload diagnostic: counts pending continuation bridges, not their contents. */
 export function getPendingContinuationStateCount(): number {
+  prunePendingContinuationStates();
   return pendingContinuationStates.size;
 }
 
