@@ -657,11 +657,18 @@ test("one global tick at a time, never cancelled; approvals outside that group",
     group: "omni-queue-tick",
     "cancel-in-progress": false,
   });
-  // No per-PR group either: GitHub keeps ONE pending run per group and drops the others, and
-  // approve.mjs handles each label event (labeled → success, unlabeled → failure, per context).
-  // Dropping "labeled protected-approved" behind a later "unlabeled omni-queue" would lose an
-  // approval; parallel runs instead converge once approve.mjs re-reads the current labels.
-  assert.equal(queue.jobs.approval.concurrency, undefined);
+  // Approval runs are serialized per PR AND per label: two runs for the same label cannot
+  // interleave their label re-read and status write (a stale `failure` landing after a newer
+  // `success`). Keyed on the label too, because GitHub keeps ONE pending run per group and drops
+  // the others: a PR-only group would let an unrelated label event, or the other approval label,
+  // replace a pending "labeled omni-queue" run and lose the approval. A run replaced in its own
+  // group is superseded by a newer event on the same label, which re-reads the current labels.
+  // github.event.number is the PR number of a pull_request_target payload (the file never names
+  // github.event.pull_request: see "the queue never checks out or runs PR code").
+  assert.deepEqual(queue.jobs.approval.concurrency, {
+    group: "omni-queue-approval-${{ github.event.number }}-${{ github.event.label.name }}",
+    "cancel-in-progress": false,
+  });
 });
 
 test("least privilege: no default token scopes, App token scoped per job", () => {
