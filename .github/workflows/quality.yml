@@ -443,7 +443,7 @@ jobs:
     needs: changes
     if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || startsWith(github.head_ref, 'mergify/merge-queue/')) && needs.changes.outputs.code == 'true') }}
     # omni-queue/** candidates contain fork code: never on the self-hosted pool.
-    runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && github.event_name != 'merge_group' && !startsWith(github.ref, 'refs/heads/omni-queue/') && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","omni-light"]')) || 'ubuntu-latest' }}
+    runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && github.event_name != 'merge_group' && !startsWith(github.ref, 'refs/heads/omni-queue/') && !startsWith(github.head_ref, 'omni-queue/') && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","omni-light"]')) || 'ubuntu-latest' }}
     # 2026-08-30: a cold full lint with the eslint-plugin-react-hooks 7 compiler rules is
     # killed on the 7 GB hosted runner without a message (status null → exit 1, the
     # JSON never written); the box lints it in ~12 min with the heap below.

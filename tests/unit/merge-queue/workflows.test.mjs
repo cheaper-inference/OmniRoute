@@ -261,7 +261,8 @@ function scheduledJobs(wf, ctx) {
     const job = wf.jobs[id];
     assert.ok(job, `unknown job ${id}`);
     const needs = [job.needs ?? []].flat();
-    const depsOk = needs.every(visit);
+    // Visit every dependency first (no short-circuit): each needs.<dep>.result is independent.
+    const depsOk = needs.map(visit).every(Boolean);
     const needsCtx = Object.fromEntries(
       needs.map((dep) => [
         dep,
@@ -344,6 +345,48 @@ function pushContext(ref, { eventName = "push", vars = anyVar("true") } = {}) {
   };
 }
 
+const MERGIFY_USER = { login: "mergify[bot]", id: 37929162, type: "Bot" };
+
+/**
+ * Context of a same-repository pull request whose head branch is `headRef` (refs/pull/… merge
+ * ref, so github.ref never names the head), every repository variable switched ON. The
+ * `changes` job's queueCandidate is ci.yml's own expression unless `queueCandidate` forces it.
+ */
+function prContext(
+  headRef,
+  { draft = false, user = { login: "someone", id: 1, type: "User" }, queueCandidate } = {}
+) {
+  const base = pushContext("refs/pull/1/merge", { eventName: "pull_request" });
+  const repo = base.github.event.repository;
+  const ctx = {
+    ...base,
+    github: {
+      ...base.github,
+      ref_name: "1/merge",
+      head_ref: headRef,
+      base_ref: "release/v3.8.54",
+      action: "synchronize",
+      event: {
+        ...base.github.event,
+        action: "synchronize",
+        pull_request: {
+          number: 1,
+          draft,
+          user,
+          head: { ref: headRef, sha: CANDIDATE_SHA, repo: { ...repo, fork: false } },
+          base: { ref: "release/v3.8.54", sha: BASE_SHA, repo },
+        },
+      },
+    },
+  };
+  const expr = loadWorkflow("ci.yml").jobs.changes.outputs.queueCandidate;
+  const changes = {
+    ...base.__outputs.changes,
+    queueCandidate: queueCandidate ?? String(render(expr, ctx)),
+  };
+  return { ...ctx, __outputs: { changes } };
+}
+
 test("the evaluator follows GitHub semantics on the constructs the guards use", () => {
   const ctx = pushContext(CANDIDATE_REF);
   assert.equal(render("${{ startsWith(github.ref, 'refs/heads/OMNI-queue/') }}", ctx), true);
@@ -364,6 +407,22 @@ test("the evaluator follows GitHub semantics on the constructs the guards use", 
   assert.equal(condition("github.event.action == 'labeled' || 'it''s'", ctx), true);
   assert.throws(() => condition("unknownroot.value", ctx), /unknown context root/);
   assert.throws(() => condition("github.ref ~ 'x'", ctx), /unsupported character/);
+});
+
+test("scheduledJobs reads every dependency's own result, not the first falsy one", () => {
+  // GitHub evaluates each needs.<dep>.result independently: a skipped `a` listed before `b` must
+  // not hide that `b` ran from a status-function job that reads it. `c` comes first so that `b`
+  // is not memoized yet when `c` is evaluated.
+  const wf = {
+    jobs: {
+      c: { needs: ["a", "b"], if: "${{ always() && needs.b.result == 'success' }}" },
+      d: { needs: ["a", "b"] },
+      a: { if: "false" },
+      b: {},
+    },
+  };
+  const scheduled = scheduledJobs(wf, pushContext("refs/heads/main"));
+  assert.deepEqual(scheduled, { c: true, d: false, a: false, b: true });
 });
 
 // ───────────────────────────── branch filters ─────────────────────────────
@@ -938,6 +997,24 @@ test("dispatch inputs reach tick.mjs as argv, never as shell text", (t) => {
 // ───────────────────────────── ci.yml / quality.yml candidate profile ─────────────────────────────
 
 const PROFILES = { ci: "ci.yml", quality: "quality.yml" };
+const hosted = /^(ubuntu|windows|macos)-[a-z0-9.-]+$/;
+
+/** Runner labels a job resolves to under `ctx` (every matrix os, when the label uses one). */
+function labelsOf(job, ctx) {
+  const raw = job["runs-on"];
+  if (String(raw).includes("matrix.")) {
+    const matrix = job.strategy?.matrix ?? {};
+    const values = [...(matrix.os ?? []), ...(matrix.include ?? []).map((e) => e.os)];
+    assert.ok(values.length > 0, "matrix runner without os values");
+    return values.flatMap((os) => [render(raw, { ...ctx, matrix: { os } })].flat());
+  }
+  const value = render(raw, ctx);
+  return isRecord(value) ? [value.labels ?? value.group].flat() : [value].flat();
+}
+
+// Jobs that send same-repository pull requests to the self-hosted pool when switched on.
+const PR_SELF_HOSTED = { ci: ["test-unit", "test-vitest"], quality: ["lint-guard"] };
+const MERGIFY_HEAD = "mergify/merge-queue/release-v3.8.54/abc123";
 
 for (const [profile, file] of Object.entries(PROFILES)) {
   const wf = loadWorkflow(file);
@@ -986,18 +1063,6 @@ for (const [profile, file] of Object.entries(PROFILES)) {
   });
 
   test(`${file}: no job can reach a self-hosted runner for an omni-queue/** ref`, () => {
-    const hosted = /^(ubuntu|windows|macos)-[a-z0-9.-]+$/;
-    const labelsOf = (job, ctx) => {
-      const raw = job["runs-on"];
-      if (String(raw).includes("matrix.")) {
-        const matrix = job.strategy?.matrix ?? {};
-        const values = [...(matrix.os ?? []), ...(matrix.include ?? []).map((e) => e.os)];
-        assert.ok(values.length > 0, "matrix runner without os values");
-        return values.flatMap((os) => [render(raw, { ...ctx, matrix: { os } })].flat());
-      }
-      const value = render(raw, ctx);
-      return isRecord(value) ? [value.labels ?? value.group].flat() : [value].flat();
-    };
     let selfHostedOnMain = 0;
     for (const [id, job] of Object.entries(wf.jobs)) {
       // Worst case: every repository variable on, candidate pushed or dispatched on its ref.
@@ -1023,6 +1088,39 @@ for (const [profile, file] of Object.entries(PROFILES)) {
         assert.ok(String(job["runs-on"]).includes(OMNI_QUEUE_EXCLUSION), `${file}:${id}`);
       }
     }
+  });
+
+  test(`${file}: a pull request opened from an omni-queue/** head stays off the self-hosted pool`, () => {
+    // github.ref is refs/pull/<n>/merge on a pull request, so only github.head_ref names the
+    // candidate branch. A same-repository PR opened by hand from a live candidate ref carries
+    // the same fork code as the candidate push.
+    const fromCandidate = prContext(CANDIDATE_BRANCH);
+    for (const [id, job] of Object.entries(wf.jobs)) {
+      for (const label of labelsOf(job, fromCandidate)) {
+        assert.match(String(label), hosted, `${file}:${id} → ${label} on a candidate-head PR`);
+      }
+    }
+    // Controls: Mergify queue drafts and ordinary same-repository PRs keep the pool, pushes and
+    // merge_group keep their current selection.
+    const mergify = prContext(MERGIFY_HEAD, { draft: true, user: MERGIFY_USER });
+    const mergeGroup = pushContext("refs/heads/gh-readonly-queue/x", { eventName: "merge_group" });
+    for (const id of PR_SELF_HOSTED[profile]) {
+      const job = wf.jobs[id];
+      assert.ok(job, `${file}:${id} exists`);
+      assert.ok(labelsOf(job, mergify).includes("self-hosted"), `${id} on a Mergify draft`);
+      assert.ok(labelsOf(job, prContext("fix/x")).includes("self-hosted"), `${id} on a PR`);
+      assert.deepEqual(labelsOf(job, mergeGroup), ["ubuntu-latest"], `${id} on merge_group`);
+      assert.deepEqual(labelsOf(job, pushContext(CANDIDATE_REF)), ["ubuntu-latest"], id);
+    }
+    const onMainPush = labelsOf(
+      wf.jobs[PR_SELF_HOSTED[profile][0]],
+      pushContext("refs/heads/main")
+    );
+    assert.deepEqual(
+      onMainPush,
+      profile === "quality" ? ["self-hosted", "omni-light"] : ["ubuntu-latest"],
+      "main pushes keep their selection"
+    );
   });
 
   test(`${file}: the candidate base replaces github.event.before in the changes job`, () => {
@@ -1074,8 +1172,7 @@ for (const [profile, file] of Object.entries(PROFILES)) {
       [...JSON.stringify(obj ?? {}).matchAll(/secrets\.([A-Za-z0-9_]+)/g)]
         .map((m) => m[1])
         .filter((s) => s !== "GITHUB_TOKEN");
-    const exposure = (ref) => {
-      const ctx = pushContext(ref);
+    const exposure = (ctx) => {
       const scheduled = scheduledJobs(wf, ctx);
       const hits = [];
       for (const [id, job] of Object.entries(wf.jobs)) {
@@ -1090,10 +1187,35 @@ for (const [profile, file] of Object.entries(PROFILES)) {
       }
       return hits;
     };
-    assert.deepEqual(exposure(CANDIDATE_REF), [], "no service secret next to a candidate");
+    assert.deepEqual(
+      exposure(pushContext(CANDIDATE_REF)),
+      [],
+      "no service secret next to a candidate"
+    );
+    // A same-repository PR opened by hand from a candidate ref: github.ref is the PR merge ref,
+    // only github.head_ref names the candidate.
+    for (const queueCandidate of [undefined, "true"]) {
+      // Worst case included: even classified as a queue draft (every PR job scheduled).
+      assert.deepEqual(
+        exposure(prContext(CANDIDATE_BRANCH, { queueCandidate })),
+        [],
+        `no service secret on a PR whose head is a candidate (queueCandidate ${queueCandidate})`
+      );
+    }
     if (profile === "ci") {
+      // Control: a Mergify queue draft (same-repository head) still uploads to Trunk and Sonar.
+      const mergify = exposure(prContext(MERGIFY_HEAD, { draft: true, user: MERGIFY_USER }));
+      assert.ok(
+        mergify.some((h) => h.startsWith("test-vitest:")),
+        mergify.join(", ")
+      );
+      assert.ok(
+        mergify.some((h) => h.startsWith("test-e2e:")),
+        mergify.join(", ")
+      );
+      assert.ok(mergify.includes("sonarqube:env"), mergify.join(", "));
       // Control: main pushes still upload (Codecov + both Trunk uploads + the Sonar job env).
-      const onMain = exposure("refs/heads/main");
+      const onMain = exposure(pushContext("refs/heads/main"));
       assert.ok(
         onMain.some((h) => h.startsWith("test-coverage:")),
         onMain.join(", ")
