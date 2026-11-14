@@ -380,6 +380,22 @@ test("encodeAgentRunRequest sends standard Grok 4.7 effort through RequestedMode
       ["fast", "true"],
     ],
   });
+  assert.deepEqual(decodeRequestedModel("cursor-grok-4.7-medium-256k"), {
+    modelId: "grok-4.7",
+    parameters: [
+      ["context", "256k"],
+      ["reasoning_effort", "medium"],
+      ["fast", "false"],
+    ],
+  });
+  assert.deepEqual(decodeRequestedModel("cursor-grok-4.7-medium-fast-256k"), {
+    modelId: "grok-4.7",
+    parameters: [
+      ["context", "256k"],
+      ["reasoning_effort", "medium"],
+      ["fast", "true"],
+    ],
+  });
 });
 
 test("encodeAgentRunRequest sends ModelDetails for pinned thinking models (#3714)", () => {
