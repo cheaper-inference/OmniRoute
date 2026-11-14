@@ -4,9 +4,16 @@
 // section 14 (hermes row). Pure: imports only ../contract.mjs, no I/O, no process reads.
 //
 // Shape of the launch (dossier section 3, "Recommended", verified live as test C):
-// - a launcher-owned temp HERMES_HOME (${TMP}) holding one config.yaml with a `custom` provider
-//   pointed at OmniRoute's /v1, the key by env reference (`key_env`), the catalog context window
-//   pinned (`model.context_length`), update checks and telemetry consent pre-answered;
+// - a launcher-owned temp HERMES_HOME (${TMP}) holding one config.yaml whose `model.provider`
+//   names the `providers.omniroute` entry pointed at OmniRoute's /v1, the key by env reference
+//   (`key_env`), the catalog context window pinned (`model.context_length`), update checks and
+//   telemetry consent pre-answered;
+// - why the named entry and not `provider: custom`: Hermes 0.19.0 resolves bare `custom` through
+//   `_resolve_openrouter_runtime` (hermes_cli/runtime_provider.py:1056), which takes the key only
+//   from `model.api_key` / `model.api` (:1065-1070) or host-gated vendor env vars, never from
+//   `model.key_env`, so it fell back to "no-key-required" (:1182-1183). A named entry goes
+//   through `_get_named_custom_provider` (:618), which reads `providers.<name>.key_env` from the
+//   env (:674-676). `model.key_env` stays for releases that honor it on the bare-custom path;
 // - HERMES_GATEWAY_LOCK_DIR inside ${TMP} so nothing lands in ~/.local/state/hermes; core
 //   creates that dir before spawn because the plan declares it in `tempDirs` (contract 1.2);
 // - the key is always ${TOKEN}: core substitutes the minted olx_ session token on every launch,
@@ -29,6 +36,7 @@ import {
 const TOOL_ID = "hermes";
 const MIN_CONTEXT = 64000; // _enforce_minimum_context hard reject (dossier section 4)
 const KEY_ENV = "OMNIROUTE_API_KEY";
+const PROVIDER_NAME = "omniroute"; // providers.<name>; not a Hermes built-in name, so it resolves to it
 const LOCK_DIR = "locks"; // HERMES_GATEWAY_LOCK_DIR, relative to ${TMP}
 const RECOMMENDED_VERSION = "0.16.0"; // "gate softly on >= v0.16.0 or unknown" (dossier 1)
 
@@ -217,14 +225,14 @@ function plan(ctx) {
 
   const config = {
     model: {
-      provider: "custom",
+      provider: PROVIDER_NAME,
       default: model.id,
       base_url: baseUrl,
       key_env: KEY_ENV,
       context_length: model.contextTokens,
     },
     providers: {
-      omniroute: {
+      [PROVIDER_NAME]: {
         name: "OmniRoute",
         api: baseUrl,
         key_env: KEY_ENV,

@@ -4,7 +4,7 @@
 //   soft gate ">= v0.16.0 or unknown" (recommended only, no hard min)       line 19
 //   protocol chat_completions at <root>/v1                                  lines 23-24
 //   no --provider/--base-url/--api-key flags (guard, TUI refusal, argv key)   lines 30-33
-//   temp HERMES_HOME + config.yaml (custom, base_url, key_env, context pin,
+//   temp HERMES_HOME + config.yaml (named provider, base_url, key_env, context pin,
 //     updates.check off, plugin checks off, shared_metrics consent, idle exit 30, toolsets)
 //                                                                            lines 35-52
 //   HERMES_GATEWAY_LOCK_DIR=<tmp>/locks, teardown `hermes gateway stop`      lines 55-60
@@ -143,7 +143,19 @@ test("default launch: temp HERMES_HOME, config.yaml, env scrub, gateway teardown
   assert.equal(file.format, "yaml");
   const text = configText(plan);
   assert.ok(!text.includes("${TOKEN}"), "the key is only referenced by key_env");
-  assert.match(text, /^model:\n {2}provider: custom\n {2}default: anthropic\/claude-sonnet-4-6\n/);
+  // model.provider names the providers.omniroute entry: Hermes 0.19.0 reads key_env only on a
+  // named entry (runtime_provider.py:674-676); bare `custom` ignores model.key_env and sends
+  // "no-key-required" (runtime_provider.py:1065-1070, 1182-1183), so the minted token never left.
+  assert.match(
+    text,
+    /^model:\n {2}provider: omniroute\n {2}default: anthropic\/claude-sonnet-4-6\n/
+  );
+  assert.ok(!/provider: custom\n/.test(text), "bare custom drops key_env on Hermes 0.19.0");
+  assert.match(
+    text,
+    /\nproviders:\n {2}omniroute:\n {4}name: OmniRoute\n {4}api: "http:\/\/127\.0\.0\.1:20128\/v1"\n {4}key_env: OMNIROUTE_API_KEY\n/
+  );
+  assert.equal(plan.env.set.OMNIROUTE_API_KEY, ctx.auth.token, "key_env names the token env var");
   assert.match(text, /\n {2}base_url: "http:\/\/127\.0\.0\.1:20128\/v1"\n/);
   assert.match(text, /\n {2}key_env: OMNIROUTE_API_KEY\n {2}context_length: 200000\n/);
   assert.match(text, /\nupdates:\n {2}check: false\n/);
