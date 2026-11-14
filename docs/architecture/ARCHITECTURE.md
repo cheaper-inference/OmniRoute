@@ -374,10 +374,10 @@ relying on a static combo definition. It powers the `auto/*` model prefix family
 
 Key capabilities:
 
-- **21 routing strategies** (priority, weighted, fill-first, round-robin, P2C, random,
+- **22 routing strategies** (priority, weighted, fill-first, round-robin, P2C, random,
   least-used, cost-optimized, reset-aware, reset-window, expiry-first, headroom, quota-weighted,
   strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
-  pipeline) —
+  pipeline, jev) —
   auto is the headline addition in v3.8.0; `fusion` (panel fan-out + judge synthesis,
   `open-sse/services/fusion.ts`) is new in v3.8.36.
 - **16-factor scoring**: quota, health, inverse cost, inverse latency, task fit and

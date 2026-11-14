@@ -40,11 +40,18 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // (`policy.allowAccountRotation`, derived from !managedLease), so still class B.
     "open-sse/handlers/chatCore/providerExecutionPipeline.ts": 3,
     "open-sse/services/imageCombo.ts": 1,
+    // #15279: the jev combo strategy reads the scoped `typesafe` credential for its
+    // opt-in System One choice call (COMBO_JEV_STRATEGY_ENABLED). The call never
+    // dispatches chat; the chosen targets still go through the normal path (class B).
+    "open-sse/services/combo/jevAsk.ts": 1,
     // GHSA-3w2r: keyless providers (local zero-config defaults, keyless
     // remotes) look up an in-scope connection for a connection-scoped API key
     // before running (chat's #9057 rule) — one extra scoped lookup per site.
     "open-sse/services/speechCombo.ts": 2,
     "open-sse/services/videoCombo.ts": 2,
+    // #15279: the combo test summary only checks whether a TypeSafe key exists so it
+    // can say "Jev is not configured"; no request is made with it (class B).
+    "src/app/api/combos/test/route.ts": 1,
     "src/app/api/compression/compare/verify/route.ts": 1,
     "src/app/api/internal/codex-responses-ws/route.ts": 1,
     // PR #11390: rerank listing endpoint probes configured credentials so the

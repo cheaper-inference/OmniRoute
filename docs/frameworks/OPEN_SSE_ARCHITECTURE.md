@@ -228,7 +228,7 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-Supports **21 routing strategies** (see `src/shared/constants/routingStrategies.ts`):
+Supports **22 routing strategies** (see `src/shared/constants/routingStrategies.ts`):
 
 | Strategy            | Behavior                                                                  |
 | ------------------- | ------------------------------------------------------------------------- |
@@ -253,6 +253,7 @@ Supports **21 routing strategies** (see `src/shared/constants/routingStrategies.
 | `cache-optimized`   | Pin each reusable prompt prefix to the same account (prompt-cache hits)   |
 | `fusion`            | Fan out to a panel in parallel, then synthesize via a judge (`fusion.ts`) |
 | `pipeline`          | Chain steps — each target's output feeds the next one                     |
+| `jev`               | Opt-in: TypeSafe Jev admits which ranked entries run; else your order     |
 
 ### base.ts (1170 LOC)
 

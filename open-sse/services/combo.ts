@@ -1010,8 +1010,8 @@ async function handleComboChatInner({
         hiddenModelsByProvider,
       });
   if (pipelineDispatch) return pipelineDispatch;
-
   const runtimeUnitDispatch = await tryRuntimeUnitDispatch({
+    invocationId: traceInvocationId,
     body,
     combo,
     config,
@@ -1023,6 +1023,7 @@ async function handleComboChatInner({
     isModelAvailable,
     log,
     settings,
+    resilienceSettings,
     relayOptions,
     signal,
     apiKeyAllowedConnections,
@@ -1102,6 +1103,8 @@ async function handleComboChatInner({
     allCombos,
     relayOptions,
     signal,
+    nativeTurnPin: activeNativeTurnPin,
+    deferContextOverflowWhenCompressible,
     apiKeyAllowedConnections,
     log,
     resilienceSettings,
@@ -1109,6 +1112,7 @@ async function handleComboChatInner({
     handleSingleModelWithTimeout,
     buildAutoCandidates,
     hiddenModelsByProvider,
+    traceInvocationId,
   });
   if ("earlyResponse" in targetResolution) return targetResolution.earlyResponse;
   const { stickyWeightedLimit, getWeightedStepKeyForTarget, preScreenMap, compatRejectedTargets } =

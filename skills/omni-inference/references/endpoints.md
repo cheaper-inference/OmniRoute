@@ -1376,7 +1376,7 @@ curl http://localhost:20128/api/v1/systemone \
 
 System One typed decisions
 
-One `state` plus typed `questions` (`noul` / `choice` / `score`); the backend is selected by the model id — `typesafe/jev-*` or a bare `jev-*` alias routes natively to api.typesafe.ai, `openrouter/<vendor>/ <model>` routes to OpenRouter's alpha decisions endpoint. Answers, probabilities and usage (tokens, cost) pass through untouched.
+One `state` plus typed `questions` (`noul` / `choice` / `score`); the backend is selected by the model id — `typesafe/jev-*` or a bare `jev-*` alias routes natively to api.typesafe.ai, `openrouter/<vendor>/ <model>` routes to OpenRouter's alpha decisions endpoint, and `cloudflare-ai/<jev|clef|clef-flash>` (alias `cf/`) runs on Cloudflare Workers AI through the existing `cloudflare-ai` connection (Jev draws AI Gateway credits, Clef draws Workers AI neurons; opt-in through the `SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED` feature flag, default off). Answers, probabilities and usage (tokens, cost) pass through untouched.
 
 ```bash
 curl -X POST http://localhost:20128/api/v1/systemone \
