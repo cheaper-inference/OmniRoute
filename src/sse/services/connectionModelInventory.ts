@@ -1,4 +1,5 @@
 import { splitCodexReasoningSuffix } from "@omniroute/open-sse/executors/codex/reasoningSuffix.ts";
+import { resolveAntigravityModelId } from "@omniroute/open-sse/config/antigravityModelAliases.ts";
 import { isRegisteredImageModel } from "@omniroute/open-sse/config/imageRegistry";
 import { isModelAdvertisedByConnection } from "@/domain/connectionModelRules";
 import { isSelfHostedChatProvider } from "@/shared/constants/providers";
@@ -38,6 +39,13 @@ export function isRequestedModelAdvertised(
   advertised: ReadonlySet<string> | undefined
 ): boolean {
   if (isModelAdvertisedByConnection(requestedModel, advertised)) return true;
+  if (provider === "antigravity" || provider === "agy") {
+    const rawModel = requestedModel.slice(requestedModel.lastIndexOf("/") + 1);
+    const resolved = resolveAntigravityModelId(rawModel);
+    if (resolved !== rawModel && isModelAdvertisedByConnection(resolved, advertised)) {
+      return true;
+    }
+  }
   if (provider !== "codex") return false;
   const rawModel = requestedModel.slice(requestedModel.lastIndexOf("/") + 1);
   const { baseModel } = splitCodexReasoningSuffix(rawModel);
@@ -88,10 +96,19 @@ function recordConnectionInventories(
   byConnection: SyncedAvailableModelsByConnection,
   acc: InventoryAccumulator
 ): void {
+  const isAntigravity = isPerAccountCatalogProvider(providerId);
   for (const [connectionId, models] of Object.entries(byConnection)) {
     if (!Array.isArray(models) || models.length === 0) continue;
-    const ids = new Set(models.map((m) => m.id));
-    if (isPerAccountCatalogProvider(providerId)) recordPerAccountInventory(connectionId, ids, acc);
+    const ids = new Set(
+      models
+        .map((m) => m.id)
+        .filter(
+          (id) =>
+            typeof id === "string" &&
+            (!isAntigravity || (!id.endsWith("-disabled") && !id.includes("-disabled")))
+        )
+    );
+    if (isAntigravity) recordPerAccountInventory(connectionId, ids, acc);
     else acc.advertised.set(connectionId, ids);
   }
 }

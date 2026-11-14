@@ -48,6 +48,10 @@ const ANTIGRAVITY_PRICING = {
   "gemini-4-argon-low": GEMINI_4_ARGON_PROMO_PRICING,
   "gemini-4-argon-medium": GEMINI_4_ARGON_PROMO_PRICING,
   "gemini-4-argon-high": GEMINI_4_ARGON_PROMO_PRICING,
+  "gemini-4-carbon": GEMINI_4_ARGON_PROMO_PRICING,
+  "gemini-4-carbon-low": GEMINI_4_ARGON_PROMO_PRICING,
+  "gemini-4-carbon-medium": GEMINI_4_ARGON_PROMO_PRICING,
+  "gemini-4-carbon-high": GEMINI_4_ARGON_PROMO_PRICING,
   "gemini-3.5-flash-lite": {
     input: 0.3,
     output: 2.5,

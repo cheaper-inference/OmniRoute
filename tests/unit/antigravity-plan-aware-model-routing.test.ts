@@ -227,3 +227,34 @@ test("a combo pin on an antigravity account still sees the agy inventory for an 
   });
   assert.equal(idOf(operatorPinned), proAccount, "an operator pin is still tried as asked");
 });
+
+test("a Gemini 4 Carbon request (bare or tiered) skips accounts whose plan does not list it", async () => {
+  await resetStorage();
+  const CARBON_TIERS = ["gemini-4-carbon-low", "gemini-4-carbon-medium", "gemini-4-carbon-high"];
+  const pro = await account("pro-user", 1, [...OLD, "gemini-4-argon-medium"]);
+  const ultra = await account("ultra-user", 2, [...OLD, ...CARBON_TIERS]);
+
+  // Bare id resolution
+  const bareSelect = await auth.getProviderCredentials(PROVIDER, null, null, "gemini-4-carbon");
+  assert.equal(idOf(bareSelect), ultra, "bare gemini-4-carbon resolves to medium tier and routes to Ultra");
+
+  // Tiered id
+  const highSelect = await auth.getProviderCredentials(PROVIDER, null, null, "gemini-4-carbon-high");
+  assert.equal(idOf(highSelect), ultra, "gemini-4-carbon-high routes to Ultra");
+
+  // Failover must not land on pro
+  const next = await auth.getProviderCredentials(PROVIDER, ultra, null, "gemini-4-carbon");
+  assert.notEqual(idOf(next), pro, "failover must not pick account without Carbon");
+});
+
+test("isDiscoverableAntigravityModelId and isDiscoverableAgyModelId reject -disabled model stubs", async () => {
+  const { isDiscoverableAntigravityModelId } = await import(
+    "../../open-sse/config/antigravityModelAliases.ts"
+  );
+  const { isDiscoverableAgyModelId } = await import("../../open-sse/config/agyModels.ts");
+
+  assert.equal(isDiscoverableAntigravityModelId("gemini-4-carbon-disabled"), false);
+  assert.equal(isDiscoverableAntigravityModelId("gemini-4-carbon-medium"), true);
+  assert.equal(isDiscoverableAgyModelId("gemini-4-carbon-disabled"), false);
+  assert.equal(isDiscoverableAgyModelId("gemini-4-carbon-high"), true);
+});
