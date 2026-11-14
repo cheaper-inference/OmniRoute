@@ -2,7 +2,8 @@
 // The OpenAI -> Gemini translator stored that array as is and wrapped it in
 // functionResponse.response.result, so Gemini received a JSON list of {type, text}
 // objects instead of the tool text. All-text arrays are joined into one string;
-// arrays that carry a non-text part, and plain string results, stay unchanged.
+// arrays that carry a non-text part keep the media as its own part and join the text; plain
+// string results stay unchanged.
 import test from "node:test";
 import assert from "node:assert/strict";
 
@@ -55,13 +56,18 @@ test("a string result is unchanged", () => {
   assert.equal(resultOf(translate("plain text")), "plain text");
 });
 
-test("an array with a non-text part is left unchanged", () => {
+test("an array with a non-text part sends the media as its own part and the text as the result", () => {
   const mixed = [
     { type: "text", text: "see image" },
     { type: "image_url", image_url: { url: "https://example.com/a.png" } },
   ];
+  const parts = translate(mixed);
 
-  assert.deepEqual(resultOf(translate(mixed)), mixed);
+  assert.equal(resultOf(parts), "see image");
+  assert.deepEqual(parts.find((p) => p.fileData)?.fileData, {
+    fileUri: "https://example.com/a.png",
+    mimeType: "image/*",
+  });
 });
 
 test("an empty array is left unchanged", () => {
