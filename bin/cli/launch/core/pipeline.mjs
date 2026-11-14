@@ -37,6 +37,7 @@ import {
   startHeartbeat,
   DEFAULT_SESSION_TTL_SEC,
   HEARTBEAT_INTERVAL_MS,
+  usageFailureReason,
 } from "./session.mjs";
 import {
   launchRoot,
@@ -417,8 +418,13 @@ export async function runLaunch(toolId, flags = {}, deps = {}) {
               await bus.emit({ type: "session.summary", summary });
               if (!jsonMode) stderr.write(summaryText(tool, summary));
             }
-          } catch {
-            // cosmetic: silent downgrade (12.9)
+          } catch (error) {
+            // Cosmetic, but never silently dropped (live smoke item 8): one stderr line.
+            if (!jsonMode) {
+              stderr.write(
+                `omnirouter: usage summary unavailable (${usageFailureReason(error)})\n`
+              );
+            }
           }
         }
         await revoke();

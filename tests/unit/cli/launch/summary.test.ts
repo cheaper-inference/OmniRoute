@@ -1,4 +1,5 @@
-// Exit usage summary (architecture 12.3): fetched after child exit, before revoke, silent on failure.
+// Exit usage summary (architecture 12.3): fetched after child exit, before revoke; a failure prints
+// one "usage summary unavailable" line instead of being silently dropped (live smoke item 8).
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -8,6 +9,7 @@ import { join } from "node:path";
 
 import { createPlan, defineAdapter, findTokenSites } from "../../../../bin/cli/launch/contract.mjs";
 import { runLaunch } from "../../../../bin/cli/launch/core/pipeline.mjs";
+import { createSessionClient } from "../../../../bin/cli/launch/core/session.mjs";
 
 const TOKEN = "olx_secret_session_token_value";
 const SUMMARY = {
@@ -167,7 +169,7 @@ test("summary: OMNIROUTE_LAUNCH_SUMMARY=0 skips the usage call", async () => {
   assert.equal(r.stderr.text.includes("session:"), false);
 });
 
-test("summary: usage throwing keeps the exit code and prints nothing", async () => {
+test("summary: usage throwing keeps the exit code and prints one unavailable line", async () => {
   const r = await run({
     exitCode: 5,
     usage: async () => {
@@ -177,7 +179,86 @@ test("summary: usage throwing keeps the exit code and prints nothing", async () 
   assert.equal(r.outcome.exitCode, 5);
   assert.equal(r.stderr.text.includes("session:"), false);
   assert.equal(r.stderr.text.includes("boom"), false);
+  const lines = r.stderr.text.split("\n").filter((l) => l.includes("usage summary unavailable"));
+  assert.deepEqual(lines, ["omnirouter: usage summary unavailable (error)"]);
   assert.deepEqual(r.calls, ["usage", "revoke", "release"]);
+});
+
+/** A real session client whose usage fetch goes to `usageFetch` (other calls are not used). */
+function realUsage(usageFetch: (url: string, init: RequestInit) => Promise<Response>) {
+  const client = createSessionClient({
+    rootUrl: "http://127.0.0.1:1",
+    fetch: usageFetch as unknown as typeof fetch,
+  });
+  return () => client.usage({ sessionId: "s1", token: TOKEN });
+}
+
+function delayed(ms: number, signal: AbortSignal | null | undefined, make: () => Response) {
+  return new Promise<Response>((resolve, reject) => {
+    const timer = setTimeout(() => resolve(make()), ms);
+    signal?.addEventListener("abort", () => {
+      clearTimeout(timer);
+      reject(signal.reason);
+    });
+  });
+}
+
+test("summary: a usage endpoint that answers after 2.5 s still prints the summary", async () => {
+  let fetches = 0;
+  const r = await run({
+    usage: realUsage((_url, init) => {
+      fetches += 1;
+      return delayed(2500, init.signal, () => Response.json(SUMMARY));
+    }),
+  });
+  assert.equal(r.outcome.exitCode, 0, r.stderr.text);
+  assert.equal(fetches, 1);
+  assert.match(r.stderr.text, /4 requests/);
+  assert.equal(r.stderr.text.includes("unavailable"), false);
+  assert.deepEqual(r.calls, ["usage", "revoke", "release"]);
+});
+
+test("summary: a failing usage endpoint is retried once, then prints exactly one line", async () => {
+  let fetches = 0;
+  const r = await run({
+    exitCode: 3,
+    usage: realUsage(async () => {
+      fetches += 1;
+      return new Response("nope", { status: 500 });
+    }),
+  });
+  assert.equal(r.outcome.exitCode, 3);
+  assert.equal(fetches, 2, "one retry");
+  const lines = r.stderr.text.split("\n").filter((l) => l.includes("usage summary"));
+  assert.deepEqual(lines, ["omnirouter: usage summary unavailable (HTTP 500)"]);
+  assert.deepEqual(r.calls, ["usage", "revoke", "release"], "revoke still after the fetch");
+});
+
+test("summary: a usage timeout says timed out", async () => {
+  const client = createSessionClient({
+    rootUrl: "http://127.0.0.1:1",
+    fetch: ((_url: string, init: RequestInit) =>
+      delayed(1000, init.signal, () => Response.json(SUMMARY))) as unknown as typeof fetch,
+  });
+  const r = await run({
+    usage: () => client.usage({ sessionId: "s1", token: TOKEN }, { timeoutMs: 50 }),
+  });
+  const lines = r.stderr.text.split("\n").filter((l) => l.includes("usage summary"));
+  assert.deepEqual(lines, ["omnirouter: usage summary unavailable (timed out)"]);
+});
+
+test("summary: no unavailable line with --no-summary, OMNIROUTE_LAUNCH_SUMMARY=0 or --json", async () => {
+  const failing = async () => {
+    throw new Error("boom");
+  };
+  for (const opts of [
+    { flags: { summary: false } },
+    { env: { OMNIROUTE_LAUNCH_SUMMARY: "0" } },
+    { flags: { json: true } },
+  ]) {
+    const r = await run({ ...opts, usage: failing });
+    assert.equal(r.stderr.text.includes("usage summary unavailable"), false, JSON.stringify(opts));
+  }
 });
 
 test("summary: usage returning null keeps the exit code and prints nothing", async () => {
