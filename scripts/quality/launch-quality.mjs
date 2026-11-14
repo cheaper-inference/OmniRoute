@@ -12,8 +12,11 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { ESLint } from "eslint";
+import libCoverage from "istanbul-lib-coverage";
+import v8ToIstanbul from "v8-to-istanbul";
 import { listFunctions, computeHalstead } from "./launch-halstead.mjs";
 import { runDeadCode, runDuplicates, runAnyUnknown } from "./launch-scans.mjs";
+import { resolveScope } from "./launch-scope.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const GATES_PATH = path.join(ROOT, "config/quality/launch-gates.json");
@@ -44,10 +47,10 @@ function lineStarts(text) {
 }
 
 /** Per-file function index: names and spans shared by every per-function gate. */
-function indexFunctions(files) {
+function indexFunctions(files, root = ROOT) {
   const index = new Map();
   for (const file of files) {
-    const text = fs.readFileSync(path.join(ROOT, file), "utf8");
+    const text = fs.readFileSync(path.join(root, file), "utf8");
     index.set(file, { text, starts: lineStarts(text), fns: listFunctions(text, file) });
   }
   return index;
@@ -134,49 +137,102 @@ async function allComplexities(files, index) {
   return ccByFn;
 }
 
-function runCoverage(gates) {
+/**
+ * Convert raw NODE_V8_COVERAGE files to one istanbul coverage map, limited to `files`.
+ *
+ * Each process file, and each script inside it, is converted on its own (with that process's
+ * own source map, when the script was transformed) and only then merged, line by line. c8
+ * instead merges the raw V8 byte ranges of every process first and remaps them through a
+ * single source map per file; when one process ran a file through tsx (offsets shifted by the
+ * `import()` interop wrapper) and another ran it natively (a spawned child, or this runner's
+ * load hook), the merged ranges no longer belong to one text and per-function coverage is
+ * wrong.
+ * @param {string} rawDir NODE_V8_COVERAGE directory
+ * @param {string[]} files repo-relative files to keep
+ * @param {string} [root]
+ * @returns {Promise<Record<string, object>>} istanbul JSON keyed by absolute path
+ */
+export async function convertRawCoverage(rawDir, files, root = ROOT) {
+  const wanted = new Map(files.map((f) => [pathToFileURL(path.join(root, f)).href, f]));
+  const map = libCoverage.createCoverageMap({});
+  for (const name of fs.readdirSync(rawDir)) {
+    if (!name.endsWith(".json")) continue;
+    const raw = JSON.parse(fs.readFileSync(path.join(rawDir, name), "utf8"));
+    const smc = raw["source-map-cache"] ?? {};
+    for (const script of raw.result ?? []) {
+      if (!wanted.has(script.url)) continue;
+      const abs = fileURLToPath(script.url);
+      const cached = smc[script.url];
+      const sources = cached?.data
+        ? {
+            sourceMap: { sourcemap: cached.data },
+            source: cached.lineLengths.map((n) => "".padEnd(n, ".")).join("\n") + "\n",
+            originalSource: fs.readFileSync(abs, "utf8"),
+          }
+        : undefined;
+      const converter = v8ToIstanbul(abs, 0, sources);
+      await converter.load();
+      converter.applyCoverage(script.functions);
+      // A source-mapped conversion keys the entry by the map's source (path or file URL).
+      for (const data of Object.values(converter.toIstanbul())) {
+        const key = data.path.startsWith("file:") ? fileURLToPath(data.path) : data.path;
+        if (path.resolve(key) === abs) map.merge({ [abs]: { ...data, path: abs } });
+      }
+      converter.destroy();
+    }
+  }
+  return map.toJSON();
+}
+
+/**
+ * Run `tests` with V8 coverage and return the istanbul JSON keyed by absolute path, limited to
+ * `files` (repo-relative). Those files are loaded untransformed through
+ * launch-coverage-hooks.mjs so V8 offsets match the files on disk (see that file), and the raw
+ * data is converted per process (see convertRawCoverage).
+ * @param {{ tests: string[], files: string[], root?: string }} options
+ */
+export async function runCoverage({ tests, files, root = ROOT }) {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "launch-cov-"));
-  const c8 = path.join(ROOT, "node_modules/.bin/c8");
-  const testArgs = [
-    "--import",
-    "tsx/esm",
-    "--import",
-    "./open-sse/utils/setupPolyfill.ts",
-    "--import",
-    "./tests/_setup/isolateDataDir.ts",
-    "--test",
-    "--test-force-exit",
-    "--test-concurrency=4",
-    ...gates.coverageTests,
-  ];
-  const res = spawnSync(
-    c8,
-    [
-      "--temp-directory",
-      path.join(tmp, "raw"),
-      "--report-dir",
-      path.join(tmp, "report"),
-      "--reporter=json",
-      "--exclude=tests/**",
-      process.execPath,
-      ...testArgs,
-    ],
-    {
-      cwd: ROOT,
+  try {
+    // Not .json: tsx would read a hook URL ending in .json as a JSON module.
+    const scopeList = path.join(tmp, "scope-files.txt");
+    const rawDir = path.join(tmp, "raw");
+    fs.writeFileSync(scopeList, JSON.stringify(files.map((f) => path.join(root, f))));
+    const testArgs = [
+      "--import",
+      "tsx/esm",
+      "--import",
+      `${pathToFileURL(path.join(ROOT, "scripts/quality/launch-coverage-hooks.mjs")).href}?scope=${encodeURIComponent(scopeList)}`,
+      "--import",
+      "./open-sse/utils/setupPolyfill.ts",
+      "--import",
+      "./tests/_setup/isolateDataDir.ts",
+      "--test",
+      "--test-force-exit",
+      "--test-concurrency=4",
+      ...tests,
+    ];
+    // NODE_TEST_CONTEXT is set when this runs inside node:test; it would stop the nested run.
+    const { NODE_TEST_CONTEXT: _nested, ...env } = process.env;
+    const res = spawnSync(process.execPath, testArgs, {
+      cwd: root,
       encoding: "utf8",
       maxBuffer: 256 * 1024 * 1024,
-      env: { ...process.env, DISABLE_SQLITE_AUTO_BACKUP: "true" },
+      env: {
+        ...env,
+        DISABLE_SQLITE_AUTO_BACKUP: "true",
+        NODE_V8_COVERAGE: rawDir,
+      },
+    });
+    if (!fs.existsSync(rawDir)) {
+      throw new Error(`tests produced no V8 coverage (exit ${res.status})\n${res.stderr}`);
     }
-  );
-  const reportFile = path.join(tmp, "report/coverage-final.json");
-  if (!fs.existsSync(reportFile)) {
+    const coverage = await convertRawCoverage(rawDir, files, root);
+    const failed = /^ℹ fail (\d+)/m.exec(res.stdout || "");
+    return { coverage, testsFailed: failed ? Number(failed[1]) : null, exitCode: res.status };
+  } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
-    throw new Error(`c8 produced no coverage report (exit ${res.status})\n${res.stderr}`);
   }
-  const coverage = JSON.parse(fs.readFileSync(reportFile, "utf8"));
-  const failed = /^ℹ fail (\d+)/m.exec(res.stdout || "");
-  fs.rmSync(tmp, { recursive: true, force: true });
-  return { coverage, testsFailed: failed ? Number(failed[1]) : null, exitCode: res.status };
 }
 
 /** Lines owned by a function: its span minus the inner lines of nested functions. */
@@ -202,6 +258,21 @@ function lineOf(entry, offset) {
   return lo + 1;
 }
 
+/**
+ * Statement coverage of every function of one file, keyed by function name (first
+ * occurrence wins for repeated names). Exported for tests.
+ * @param {string} file repo-relative
+ * @param {object | undefined} fileCov istanbul entry of the file
+ * @param {string} [root]
+ */
+export function coverageByFunction(file, fileCov, root = ROOT) {
+  const entry = indexFunctions([file], root).get(file);
+  const out = new Map();
+  for (const fn of entry.fns)
+    if (!out.has(fn.name)) out.set(fn.name, functionCoverage(fn, entry, fileCov));
+  return out;
+}
+
 /** Statement coverage of one function, from an istanbul file entry (undefined = not loaded). */
 function functionCoverage(fn, entry, fileCov) {
   if (!fileCov) return 0;
@@ -218,7 +289,10 @@ function functionCoverage(fn, entry, fileCov) {
 
 async function runCrap(files, index, gates) {
   const ccByFn = await allComplexities(files, index);
-  const { coverage, testsFailed, exitCode } = runCoverage(gates);
+  const { coverage, testsFailed, exitCode } = await runCoverage({
+    tests: gates.coverageTests,
+    files,
+  });
   const measured = [];
   for (const file of files) {
     const entry = index.get(file);
@@ -285,9 +359,9 @@ async function main() {
   const started = Date.now();
   const args = parseArgs(process.argv.slice(2));
   const cfg = JSON.parse(fs.readFileSync(GATES_PATH, "utf8"));
-  const { limits, scope } = cfg;
-  const missing = scope.filter((f) => !fs.existsSync(path.join(ROOT, f)));
-  if (missing.length) throw new Error(`scope files missing: ${missing.join(", ")}`);
+  const { limits } = cfg;
+  const scope = resolveScope(cfg, ROOT);
+  console.log(`launch scope: ${scope.length} files (config/quality/launch-gates.json)\n`);
 
   const index = indexFunctions(scope);
   const [eslintOut, crap, dead, dupes, anyUnknown] = await Promise.all([
@@ -339,6 +413,8 @@ async function main() {
       }).stdout.trim(),
       seconds,
       limits,
+      scopeConfig: cfg.scope,
+      scopeCount: scope.length,
       scope,
       coverageTestsFailed: crap.testsFailed,
       gates: gates.map(({ list, ...g }) => ({ ...g, list })),
