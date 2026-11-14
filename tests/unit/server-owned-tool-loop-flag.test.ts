@@ -79,8 +79,11 @@ describe("feature-flags-settings count update", () => {
     // OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED (#16798, default off) to 87.
     // FAL_NATIVE_ENABLED (#18849) adds the 120th flag; CODEX_SEARCH_AUTO_FALLBACK_ENABLED (#17933) the 121st;
     // CODEBUDDY_TELEMETRY_ENABLED (#18398, opt-in codebuddy-intl turn reports, default off) the 122nd;
-    // CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER (#18060, default off) the 123rd.
-    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 123);
+    // CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER (#18060) the 123rd;
+    // PII_REVERSIBLE_VAULT_ENABLED (#18017 wiring, default off) the 124th;
+    // SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED, SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED and
+    // COMBO_JEV_STRATEGY_ENABLED (System One, default off) to 127.
+    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 127);
     // COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) to 114.
     // CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) to 112.
     // UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) to 113.
@@ -90,6 +93,7 @@ describe("feature-flags-settings count update", () => {
     // PROXY_STRICT_POST_REPLAY_ENABLED + RESPONSES_TRANSPORT_KEEPALIVE_ENABLED (#18312, default off) to 117.
     // OPENCODE_FREE_TIER_EGRESS_PROBE (one-hop egress probe after a FreeTierError, default off) to 118.
     // PROXY_REFUSAL_MODEL_SCOPE (#18686, default off) to 119.
+    // PII_REVERSIBLE_VAULT_ENABLED (#18017 wiring, default off) to 120.
     // OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED (#16571, default off) to 87.
     // COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED (#16256, default off) to 87.
     // OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED (#16797, default off) to 87;
@@ -109,8 +113,9 @@ describe("feature-flags-settings count update", () => {
     // UNPRICED_USAGE_BUDGET_POLICY (#14604, explicit enum policy, default fail_closed) to 114;
     // the release flags listed above (through CODEX_SEARCH_AUTO_FALLBACK_ENABLED, #17933)
     // plus CODEBUDDY_TELEMETRY_ENABLED take it to 122;
-    // CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER (#18060, default off) to 123.
-    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 123);
+    // CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER (#18060, default off) to 123;
+    // PII_REVERSIBLE_VAULT_ENABLED (#18017) to 124 and the System One/COMBO_JEV flags to 127.
+    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 127);
   });
 });
 
