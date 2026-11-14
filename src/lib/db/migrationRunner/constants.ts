@@ -10,6 +10,13 @@
 
 export const RENAMED_MIGRATION_COMPATIBILITY = [
   {
+    // Earlier PR heads used 239 before the pending-detail index claimed it.
+    fromVersion: "239",
+    fromName: "canonical_kimi_provider",
+    toVersion: "240",
+    toName: "canonical_kimi_provider",
+  },
+  {
     fromVersion: "022",
     fromName: "call_logs_summary_storage",
     toVersion: "025",
@@ -40,6 +47,21 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     fromName: "usage_history_calculated_cost",
     toVersion: "237",
     toName: "usage_history_calculated_cost",
+  },
+  {
+    // Earlier #19573 heads used 236 and 237 before 236_key_templates and
+    // 237_usage_history_calculated_cost (and 238_codex_connection_fences, #18347)
+    // claimed those slots. Rehome only the exact pending-detail index row.
+    fromVersion: "236",
+    fromName: "call_logs_pending_detail_index",
+    toVersion: "239",
+    toName: "call_logs_pending_detail_index",
+  },
+  {
+    fromVersion: "237",
+    fromName: "call_logs_pending_detail_index",
+    toVersion: "239",
+    toName: "call_logs_pending_detail_index",
   },
   {
     fromVersion: "028",

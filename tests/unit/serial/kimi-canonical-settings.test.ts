@@ -47,7 +47,7 @@ function raw(key: string) {
 test.beforeEach(async () => {
   await h.resetStorage();
   db = h.core.getDbInstance();
-  db.prepare("DELETE FROM _omniroute_migrations WHERE version='239'").run();
+  db.prepare("DELETE FROM _omniroute_migrations WHERE version='240'").run();
   chaosConfig.invalidateChaosConfigCache();
 });
 test.afterEach(() => {
@@ -331,7 +331,7 @@ test("C12 distinct model pattern order remains first-match and canonical exact d
   migrate();
   tiers.setTierConfig(tierDb.loadTierConfigFromDb());
   assert.equal(tiers.classifyTier("kimi", "moonshot/custom").tier, "cheap");
-  db.prepare("DELETE FROM _omniroute_migrations WHERE version='239'").run();
+  db.prepare("DELETE FROM _omniroute_migrations WHERE version='240'").run();
   tierDb.saveTierConfig({
     ...tierBase(),
     modelOverrides: [
@@ -589,7 +589,7 @@ for (const remainder of [false, true])
       assert.deepEqual(db.prepare("SELECT * FROM provider_connections ORDER BY id").all(), before);
       assert.deepEqual(db.prepare("SELECT * FROM key_value ORDER BY namespace,key").all(), stored);
       assert.equal(
-        db.prepare("SELECT 1 FROM _omniroute_migrations WHERE version='239'").get(),
+        db.prepare("SELECT 1 FROM _omniroute_migrations WHERE version='240'").get(),
         undefined
       );
     }
@@ -786,7 +786,7 @@ for (const connectionProvider of ["moonshot", "kimi"])
           stored
         );
         assert.equal(
-          db.prepare("SELECT 1 FROM _omniroute_migrations WHERE version='239'").get(),
+          db.prepare("SELECT 1 FROM _omniroute_migrations WHERE version='240'").get(),
           undefined
         );
       }
@@ -822,3 +822,75 @@ test("R6 Chaos keeps a matching connection selector while canonical disable wins
   assert.equal(result.models[0].providerId, survivor.id);
   assert.deepEqual(calls, ["moonshot/connection-wire"]);
 });
+
+for (const inactive of [false, true])
+  for (const reverse of [false, true]) {
+    test(
+      "R7 Chaos connection/provider ambiguity rolls back with inactive=" +
+        inactive +
+        " reversed=" +
+        reverse,
+      () => {
+        const connections = [
+          [inactive ? "KiMi" : "kimi", inactive ? "openai" : "moonshot"],
+          ["native-account", inactive ? "KiMi" : "kimi"],
+        ];
+        for (const [id, provider] of reverse ? [...connections].reverse() : connections)
+          db.prepare(
+            "INSERT INTO provider_connections(id,provider,is_active,created_at,updated_at) VALUES(?,?,?,'old','old')"
+          ).run(id, provider, inactive ? 0 : 1);
+        const overrides = [
+          inactive
+            ? { providerId: "kImI", enabled: false }
+            : { providerId: "kimi", modelId: "moonshot/canonical-wire" },
+          { providerId: "moonshot", modelId: "moonshot/legacy-wire", enabled: true },
+        ];
+        kv("chaosModeConfig", {
+          ...chaosConfig.DEFAULT_CHAOS_CONFIG,
+          enabled: false,
+          providerOverrides: reverse ? [...overrides].reverse() : overrides,
+        });
+        kv("providerStrategies", { moonshot: { fallbackStrategy: "random" } });
+        db.prepare(
+          "INSERT INTO combos(id,name,data,created_at,updated_at) VALUES('ambiguity','ambiguity',?,'old','old')"
+        ).run(JSON.stringify({ models: ["moonshot/kimi-k3"] }));
+        const queries = [
+          "SELECT * FROM provider_connections ORDER BY id",
+          "SELECT * FROM key_value ORDER BY namespace,key",
+          "SELECT * FROM combos ORDER BY id",
+          "SELECT * FROM _omniroute_migrations ORDER BY version",
+        ];
+        const before = queries.map((sql) => db.prepare(sql).all());
+        assert.throws(migrate, /Kimi.*connection.*provider.*ambig.*rename.*override/i);
+        assert.deepEqual(
+          queries.map((sql) => db.prepare(sql).all()),
+          before
+        );
+      }
+    );
+  }
+
+for (const matchingSelector of [false, true]) {
+  test(
+    matchingSelector
+      ? "R7 Chaos preserves a literal kimi ID with no raw provider ambiguity"
+      : "R7 Chaos does not reject a selector other than kimi",
+    () => {
+      db.prepare(
+        "INSERT INTO provider_connections(id,provider,created_at,updated_at) VALUES('kimi',?,'old','old'),('other-account',?,'old','old')"
+      ).run(matchingSelector ? "kimi" : "openai", matchingSelector ? "moonshot" : "kimi");
+      const overrides = [{ providerId: matchingSelector ? "kimi" : "moonshot", enabled: true }];
+      kv("chaosModeConfig", {
+        ...chaosConfig.DEFAULT_CHAOS_CONFIG,
+        providerOverrides: overrides,
+      });
+      migrate();
+      assert.deepEqual(raw("chaosModeConfig").providerOverrides, overrides);
+      assert.equal(
+        db.prepare("SELECT provider FROM provider_connections WHERE id='other-account'").get()
+          ?.provider,
+        "kimi"
+      );
+    }
+  );
+}

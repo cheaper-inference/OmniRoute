@@ -16,7 +16,7 @@ const hostOf = (value: unknown) =>
 test.beforeEach(async () => {
   await h.resetStorage();
   db = h.core.getDbInstance();
-  db.prepare("DELETE FROM _omniroute_migrations WHERE version='239'").run();
+  db.prepare("DELETE FROM _omniroute_migrations WHERE version='240'").run();
   settings.bumpProxyConfigGeneration();
 });
 test.after(() => h.cleanup());

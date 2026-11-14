@@ -83,7 +83,7 @@ test.beforeEach(() => {
   fs.mkdirSync(dataDir, { recursive: true });
   counter.clearTokenLimitCache();
   db = core.getDbInstance();
-  db.prepare("DELETE FROM _omniroute_migrations WHERE version = '239'").run();
+  db.prepare("DELETE FROM _omniroute_migrations WHERE version = '240'").run();
 });
 test.afterEach(() => {
   core.resetDbInstance();
@@ -404,7 +404,7 @@ test("incompatible enabled schedules roll back every migration write", () => {
   assert.deepEqual(read("provider_connections"), before);
   assert.equal(read("api_key_token_limits").length, 2);
   assert.equal(
-    db.prepare("SELECT 1 FROM _omniroute_migrations WHERE version='239'").get(),
+    db.prepare("SELECT 1 FROM _omniroute_migrations WHERE version='240'").get(),
     undefined
   );
 });
@@ -808,7 +808,7 @@ test("remaining configuration tables and keyed namespaces merge without losing d
     chain: JSON.stringify([provider + "/fallback", provider + "-wire"]),
   }));
   assert.deepEqual(read("domain_fallback_chains"), unknownFallbacks);
-  db.prepare("DELETE FROM _omniroute_migrations WHERE version='239'").run();
+  db.prepare("DELETE FROM _omniroute_migrations WHERE version='240'").run();
   migrate();
   assert.deepEqual(read("domain_fallback_chains"), unknownFallbacks);
   assert.equal(read("key_value").filter((r) => r.key === "moonshot").length, 0);
@@ -877,7 +877,7 @@ test("unexpected database errors roll back earlier writes and leave migration pe
   assert.throws(migrate, /fixture failure/);
   assert.deepEqual(read("provider_connections"), before);
   assert.equal(
-    db.prepare("SELECT 1 FROM _omniroute_migrations WHERE version='239'").get(),
+    db.prepare("SELECT 1 FROM _omniroute_migrations WHERE version='240'").get(),
     undefined
   );
 });

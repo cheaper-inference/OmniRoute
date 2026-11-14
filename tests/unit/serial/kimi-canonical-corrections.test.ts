@@ -33,7 +33,7 @@ test.beforeEach(() => {
   fs.rmSync(dataDir, { recursive: true, force: true });
   fs.mkdirSync(dataDir, { recursive: true });
   db = core.getDbInstance();
-  db.prepare("DELETE FROM _omniroute_migrations WHERE version='239'").run();
+  db.prepare("DELETE FROM _omniroute_migrations WHERE version='240'").run();
   settings.bumpProxyConfigGeneration();
 });
 test.afterEach(() => core.resetDbInstance());

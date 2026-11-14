@@ -43,7 +43,7 @@ for (const [index, post] of routes.entries())
           maxRequestsPerMinute: 1000,
         });
         const db = core.getDbInstance();
-        db.prepare("DELETE FROM _omniroute_migrations WHERE version='239'").run();
+        db.prepare("DELETE FROM _omniroute_migrations WHERE version='240'").run();
         runMigrations(db);
         let calls = 0;
         globalThis.fetch = (async () => {

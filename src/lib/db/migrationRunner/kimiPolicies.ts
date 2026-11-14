@@ -190,7 +190,7 @@ function chaos(value: unknown, ids: Set<string>): unknown {
   return { ...value, providerOverrides: rows };
 }
 
-/** Refuse only the collision that would replace a matching soft filter with all-provider fallback. */
+/** Refuse Chaos selector collisions that cannot preserve account selection. */
 export function preflightKimiPolicies(db: SqliteAdapter): void {
   const row = db
     .prepare<{ value: string }>(
@@ -207,6 +207,18 @@ export function preflightKimiPolicies(db: SqliteAdapter): void {
   if (!validChaos(value)) return;
   const ids = connectionIds(db);
   const original = value.providerOverrides as Row[];
+  if (
+    ids.has("kimi") &&
+    original.some((v) => String(v.providerId).toLowerCase() === "kimi") &&
+    db
+      .prepare(
+        "SELECT id FROM provider_connections WHERE lower(provider)='kimi' AND lower(id)<>'kimi'"
+      )
+      .get()
+  )
+    throw new Error(
+      "Kimi Chaos connection/provider ambiguity for selector 'kimi': rename the colliding connection ID or resolve its stored override before retrying migration"
+    );
   const next = chaos(value, ids) as Row;
   const after = next.providerOverrides as Row[];
   const active = db

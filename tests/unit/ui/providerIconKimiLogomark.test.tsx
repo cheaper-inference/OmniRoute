@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 /**
  * ProviderIcon — Kimi (Moonshot AI) official-partnership theme-aware logomark
- * (2026-07) for the 3 visible Kimi provider cards (kimi-coding, kimi-web,
- * moonshot). Mirrors the "ProviderIcon — Qwen Cloud local asset" pattern in
- * ProviderIcon-icon-url.test.tsx; the lmarena/lma THEMED_SVGS pair is the
+ * (2026-07) for the canonical API card (kimi), kimi-coding, kimi-web and
+ * the moonshot compatibility alias. Mirrors the Qwen Cloud local asset pattern
+ * in ProviderIcon-icon-url.test.tsx; the lmarena/lma THEMED_SVGS pair is the
  * existing precedent this follows.
  */
 import React from "react";
@@ -68,7 +68,7 @@ afterEach(async () => {
 });
 
 describe("ProviderIcon — Kimi official-partnership logomark", () => {
-  it.each(["kimi-coding", "kimi-web", "moonshot"])(
+  it.each(["kimi", "kimi-coding", "kimi-web", "moonshot"])(
     "uses the light-background logomark for %s in light theme",
     (providerId) => {
       const container = renderIcon(providerId);
@@ -78,7 +78,7 @@ describe("ProviderIcon — Kimi official-partnership logomark", () => {
     }
   );
 
-  it.each(["kimi-coding", "kimi-web", "moonshot"])(
+  it.each(["kimi", "kimi-coding", "kimi-web", "moonshot"])(
     "uses the dark-background logomark for %s in dark theme",
     (providerId) => {
       useThemeStore.getState().setTheme("dark");
@@ -88,16 +88,6 @@ describe("ProviderIcon — Kimi official-partnership logomark", () => {
       expect(img?.getAttribute("src")).toBe("/providers/kimi-logomark-dark.svg");
     }
   );
-
-  it("does not apply the Kimi logomark to the legacy hidden 'kimi' alias id", () => {
-    // "kimi" (legacy, hiddenFromDashboard) intentionally stays on its own
-    // KNOWN_SVGS entry (/providers/kimi.svg) — only the 3 visible cards were
-    // repointed to the official partnership asset.
-    const container = renderIcon("kimi");
-    const img = container.querySelector("img");
-    expect(img).not.toBeNull();
-    expect(img?.getAttribute("src")).toBe("/providers/kimi.svg");
-  });
 
   it("does not apply the Kimi logomark to an unrelated provider", () => {
     const container = renderIcon("openai");

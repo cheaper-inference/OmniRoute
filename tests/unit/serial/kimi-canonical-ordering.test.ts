@@ -17,7 +17,7 @@ test.beforeEach(() => {
   fs.mkdirSync(dataDir, { recursive: true });
   db = core.getDbInstance();
   fallback.resetAllFallbacks();
-  db.prepare("DELETE FROM _omniroute_migrations WHERE version='239'").run();
+  db.prepare("DELETE FROM _omniroute_migrations WHERE version='240'").run();
 });
 test.afterEach(() => {
   fallback.resetAllFallbacks();
@@ -82,7 +82,7 @@ for (const ties of [false, true]) {
         once?.find((entry) => entry.provider === "kimi"),
         { provider: "kimi", priority: 4, enabled: false }
       );
-    db.prepare("DELETE FROM _omniroute_migrations WHERE version='239'").run();
+    db.prepare("DELETE FROM _omniroute_migrations WHERE version='240'").run();
     runMigrations(db);
     assert.deepEqual(domain.loadFallbackChain("kimi/order"), once);
   });
@@ -101,7 +101,7 @@ test("fallback migration leaves unsupported arrays and malformed collisions in t
   const before = rows();
   runMigrations(db);
   assert.deepEqual(rows(), before);
-  db.prepare("DELETE FROM _omniroute_migrations WHERE version='239'").run();
+  db.prepare("DELETE FROM _omniroute_migrations WHERE version='240'").run();
   runMigrations(db);
   assert.deepEqual(rows(), before);
 });
@@ -130,7 +130,7 @@ for (const legacyFirst of [false, true])
         const once = db
           .prepare("SELECT chain FROM domain_fallback_chains WHERE model='ordinary-model'")
           .get()?.chain;
-        db.prepare("DELETE FROM _omniroute_migrations WHERE version='239'").run();
+        db.prepare("DELETE FROM _omniroute_migrations WHERE version='240'").run();
         runMigrations(db);
         assert.equal(
           db.prepare("SELECT chain FROM domain_fallback_chains WHERE model='ordinary-model'").get()
@@ -196,7 +196,7 @@ for (const kind of ["malformed", "mixed"])
       const before = rows();
       runMigrations(db);
       assert.deepEqual(rows(), before);
-      db.prepare("DELETE FROM _omniroute_migrations WHERE version='239'").run();
+      db.prepare("DELETE FROM _omniroute_migrations WHERE version='240'").run();
       runMigrations(db);
       assert.deepEqual(rows(), before);
     });
@@ -225,7 +225,7 @@ test("case-variant fallback model key preserves its actual writer row", () => {
   assert.equal(fallback.getNextFallback("kimi/lowercase"), "openai");
   assert.equal(domain.loadFallbackChain("moonshot/lowercase"), null);
   const once = rows();
-  db.prepare("DELETE FROM _omniroute_migrations WHERE version='239'").run();
+  db.prepare("DELETE FROM _omniroute_migrations WHERE version='240'").run();
   runMigrations(db);
   assert.deepEqual(rows(), once);
 });
