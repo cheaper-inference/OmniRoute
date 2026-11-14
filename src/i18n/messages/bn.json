@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "কম্বো রেফারেন্স যোগ করুন",
     "builderComboRefStep": "কম্বো রেফারেন্স যোগ করুন",
     "builderPinnedAccount": "পিন করা অ্যাকাউন্ট",
+    "builderRestrictAccounts": "নির্দিষ্ট অ্যাকাউন্টে সীমাবদ্ধ রাখুন (ঐচ্ছিক)",
+    "builderRestrictAccountsHint": "সব সক্রিয় অ্যাকাউন্ট ব্যবহার করতে খালি রাখুন। অ্যাকাউন্ট নির্বাচন করলে স্বয়ংক্রিয় রাউটিং শুধু সেই অ্যাকাউন্টগুলোর মধ্যেই সীমাবদ্ধ থাকবে।",
     "builderLegacyEntry": "লিগ্যাসি এন্ট্রি",
     "builderStaleModel": "লাইভ ক্যাটালগে নেই",
     "reviewName": "নাম",

@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "የጥምር ማጣቀሻ ያክሉ",
     "builderComboRefStep": "የጥምር ማጣቀሻ ያክሉ",
     "builderPinnedAccount": "የተሰካ መለያ",
+    "builderRestrictAccounts": "በመለያዎች መገደብ (አማራጭ)",
+    "builderRestrictAccountsHint": "ሁሉንም ንቁ መለያዎች ለመጠቀም ባዶ ይተዉት። መለያዎች ሲመረጡ፣ ራስ-ሰር ማዘዋወር በእነዚህ መለያዎች ብቻ ይገደባል።",
     "builderLegacyEntry": "የቀድሞ ስሪት ግቤት",
     "builderStaleModel": "በቀጥታ ካታሎግ ውስጥ የለም",
     "reviewName": "ስም",

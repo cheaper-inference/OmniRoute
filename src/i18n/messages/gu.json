@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "કોમ્બો સંદર્ભ ઉમેરો",
     "builderComboRefStep": "કોમ્બો સંદર્ભ ઉમેરો",
     "builderPinnedAccount": "પિન કરેલું એકાઉન્ટ",
+    "builderRestrictAccounts": "પસંદ કરેલા એકાઉન્ટ્સ સુધી મર્યાદિત કરો (વૈકલ્પિક)",
+    "builderRestrictAccountsHint": "બધા સક્રિય એકાઉન્ટ્સનો ઉપયોગ કરવા માટે ખાલી રાખો. એકાઉન્ટ્સ પસંદ કરવાથી આપમેળે રૂટિંગ ફક્ત તે એકાઉન્ટ્સ સુધી મર્યાદિત રહેશે.",
     "builderLegacyEntry": "લેગસી એન્ટ્રી",
     "builderStaleModel": "લાઇવ કેટલોગમાં નથી",
     "reviewName": "નામ",

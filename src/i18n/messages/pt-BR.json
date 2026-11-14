@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "Adicionar referência de combo",
     "builderComboRefStep": "Adicionar referência de combo",
     "builderPinnedAccount": "Conta fixada",
+    "builderRestrictAccounts": "Restringir a contas (opcional)",
+    "builderRestrictAccountsHint": "Deixe em branco para usar todas as contas ativas. Se selecionar contas, o roteamento automático usará apenas essas contas.",
     "builderLegacyEntry": "Entrada legada",
     "builderStaleModel": "Fora do catálogo ao vivo",
     "reviewName": "Nome",

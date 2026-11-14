@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "कॉम्बो संदर्भ जोडा",
     "builderComboRefStep": "कॉम्बो संदर्भ जोडा",
     "builderPinnedAccount": "पिन केलेले खाते",
+    "builderRestrictAccounts": "निवडलेल्या खात्यांपुरते मर्यादित करा (ऐच्छिक)",
+    "builderRestrictAccountsHint": "सर्व सक्रिय खाती वापरण्यासाठी रिकामे ठेवा. खाती निवडल्यास स्वयंचलित राउटिंग फक्त त्या खात्यांपुरते मर्यादित राहील.",
     "builderLegacyEntry": "लेगसी नोंद",
     "builderStaleModel": "लाइव्ह कॅटलॉगमध्ये नाही",
     "reviewName": "नाव",

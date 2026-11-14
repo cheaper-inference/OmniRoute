@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "Magdagdag ng combo reference",
     "builderComboRefStep": "Magdagdag ng combo reference",
     "builderPinnedAccount": "Naka-pin na Account",
+    "builderRestrictAccounts": "Limitahan sa mga napiling account (opsyonal)",
+    "builderRestrictAccountsHint": "Iwanang walang laman upang gamitin ang lahat ng aktibong account. Kapag may napiling mga account, ang awtomatikong pagruruta ay gagamit lamang ng mga account na iyon.",
     "builderLegacyEntry": "Legacy na entry",
     "builderStaleModel": "Wala sa live na katalogo",
     "reviewName": "Pangalan",

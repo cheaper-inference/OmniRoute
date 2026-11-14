@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "Añadir referencia de combo",
     "builderComboRefStep": "Añadir referencia de combo",
     "builderPinnedAccount": "Cuenta fijada",
+    "builderRestrictAccounts": "Restringir a cuentas (opcional)",
+    "builderRestrictAccountsHint": "Deje el campo vacío para usar todas las cuentas activas. Si selecciona cuentas, el enrutamiento automático usará únicamente esas cuentas.",
     "builderLegacyEntry": "Entrada heredada",
     "builderStaleModel": "No está en el catálogo en vivo",
     "reviewName": "Nombre",

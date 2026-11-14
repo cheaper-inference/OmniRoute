@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "Żid referenza għall-kombinazzjoni",
     "builderComboRefStep": "Żid referenza għall-kombinazzjoni",
     "builderPinnedAccount": "Kont Ippinnjat",
+    "builderRestrictAccounts": "Illimita għal kontijiet (mhux obbligatorju)",
+    "builderRestrictAccountsHint": "Ħalli vojt biex tuża l-kontijiet attivi kollha. Jekk tagħżel kontijiet, ir-rottaġġ awtomatiku juża biss dawk il-kontijiet.",
     "builderLegacyEntry": "Entrata minn verżjoni preċedenti",
     "builderStaleModel": "Mhux fil-katalgu live",
     "reviewName": "Isem",

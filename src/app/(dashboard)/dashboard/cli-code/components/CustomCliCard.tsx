@@ -5,6 +5,7 @@ import Icon from "@/shared/components/Icon";
 import { Card, Button } from "@/shared/components";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
+import SearchableSelectField from "@/shared/components/SearchableSelectField";
 import { useTranslations } from "next-intl";
 import { Field } from "@omniroute/ui-kit/field";
 import { copyToClipboard } from "@/shared/utils/clipboard";
@@ -195,25 +196,27 @@ export default function CustomCliCard({
                 placeholder={translateOrFallback("customCliNamePlaceholder", "e.g. My Team CLI")}
               />
 
-              <Select
+              <SearchableSelectField
                 label={translateOrFallback("customCliDefaultModelLabel", "Default model")}
                 value={effectiveDefaultModel}
-                onChange={(e) => setDefaultModel(e.target.value)}
+                onValueChange={setDefaultModel}
                 disabled={!hasActiveProviders}
                 hint={translateOrFallback(
                   "customCliDefaultModelHelp",
                   "Use any OmniRoute model ID or combo. Most OpenAI-compatible CLIs only need the /v1 base URL plus a model string."
                 )}
-              >
-                <option value="">
-                  {translateOrFallback("modelPlaceholder", "Select a model")}
-                </option>
-                {(availableModels as ModelOption[]).map((model) => (
-                  <option key={model.value} value={model.value}>
-                    {model.label}
-                  </option>
-                ))}
-              </Select>
+                options={[
+                  {
+                    value: "",
+                    label: translateOrFallback("modelPlaceholder", "Select a model"),
+                    alwaysVisible: true,
+                  },
+                  ...(availableModels as ModelOption[]).map(({ value, label }) => ({
+                    value,
+                    label,
+                  })),
+                ]}
+              />
 
               <Field label={translateOrFallback("apiKey", "API Key")} htmlFor={apiKeySelectId}>
                 {apiKeys && apiKeys.length > 0 ? (
@@ -283,20 +286,23 @@ export default function CustomCliCard({
                           "e.g. review"
                         )}
                       />
-                      <Select
+                      <SearchableSelectField
+                        label={translateOrFallback("customCliTargetModelLabel", "Target model")}
                         value={mapping.model}
-                        onChange={(e) => handleUpdateMapping(mapping.id, "model", e.target.value)}
+                        onValueChange={(value) => handleUpdateMapping(mapping.id, "model", value)}
                         disabled={!hasActiveProviders}
-                      >
-                        <option value="">
-                          {translateOrFallback("customCliTargetModelLabel", "Target model")}
-                        </option>
-                        {(availableModels as ModelOption[]).map((model) => (
-                          <option key={model.value} value={model.value}>
-                            {model.label}
-                          </option>
-                        ))}
-                      </Select>
+                        options={[
+                          {
+                            value: "",
+                            label: translateOrFallback("customCliTargetModelLabel", "Target model"),
+                            alwaysVisible: true,
+                          },
+                          ...(availableModels as ModelOption[]).map(({ value, label }) => ({
+                            value,
+                            label,
+                          })),
+                        ]}
+                      />
                       <Button
                         variant="ghost"
                         size="sm"

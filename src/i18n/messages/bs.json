@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "Dodaj combo referencu",
     "builderComboRefStep": "Dodaj combo referencu",
     "builderPinnedAccount": "Zakačeni račun",
+    "builderRestrictAccounts": "Ograniči na račune (opcionalno)",
+    "builderRestrictAccountsHint": "Ostavite prazno da biste koristili sve aktivne račune. Ako odaberete račune, automatsko usmjeravanje koristit će samo njih.",
     "builderLegacyEntry": "Legacy unos",
     "builderStaleModel": "Nije u aktivnom katalogu",
     "reviewName": "Naziv",

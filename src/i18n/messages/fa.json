@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "افزودن ارجاع ترکیب",
     "builderComboRefStep": "افزودن ارجاع ترکیب",
     "builderPinnedAccount": "حساب سنجاقشده",
+    "builderRestrictAccounts": "محدود کردن به حساب‌ها (اختیاری)",
+    "builderRestrictAccountsHint": "برای استفاده از همهٔ حساب‌های فعال، خالی بگذارید. با انتخاب حساب‌ها، مسیریابی خودکار فقط از همین حساب‌ها استفاده می‌کند.",
     "builderLegacyEntry": "ورودی قدیمی",
     "builderStaleModel": "در کاتالوگ زنده نیست",
     "reviewName": "نام",

@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "Aggiungi riferimento alla combo",
     "builderComboRefStep": "Aggiungi riferimento alla combo",
     "builderPinnedAccount": "Account vincolato",
+    "builderRestrictAccounts": "Limita agli account (facoltativo)",
+    "builderRestrictAccountsHint": "Lascia vuoto per utilizzare tutti gli account attivi. Se selezioni degli account, il routing automatico utilizzerà solo questi account.",
     "builderLegacyEntry": "Voce legacy",
     "builderStaleModel": "Non presente nel catalogo live",
     "reviewName": "Nome",

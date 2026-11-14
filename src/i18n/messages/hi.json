@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "कॉम्बो संदर्भ जोड़ें",
     "builderComboRefStep": "कॉम्बो संदर्भ जोड़ें",
     "builderPinnedAccount": "पिन किया गया खाता",
+    "builderRestrictAccounts": "चुने हुए खातों तक सीमित करें (वैकल्पिक)",
+    "builderRestrictAccountsHint": "सभी सक्रिय खातों का उपयोग करने के लिए खाली छोड़ें। खाते चुनने पर स्वचालित रूटिंग केवल उन्हीं खातों तक सीमित रहेगी।",
     "builderLegacyEntry": "लेगेसी प्रविष्टि",
     "builderStaleModel": "लाइव कैटलॉग में नहीं है",
     "reviewName": "नाम",

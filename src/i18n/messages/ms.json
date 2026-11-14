@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "Tambah rujukan kombo",
     "builderComboRefStep": "Tambah rujukan kombo",
     "builderPinnedAccount": "Akaun Disematkan",
+    "builderRestrictAccounts": "Hadkan kepada akaun tertentu (pilihan)",
+    "builderRestrictAccountsHint": "Biarkan kosong untuk menggunakan semua akaun aktif. Jika akaun dipilih, penghalaan automatik hanya akan menggunakan akaun tersebut.",
     "builderLegacyEntry": "Entri legasi",
     "builderStaleModel": "Tiada dalam katalog langsung",
     "reviewName": "Nama",

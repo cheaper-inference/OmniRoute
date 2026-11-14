@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "Ongeza rejeleo la kombo",
     "builderComboRefStep": "Ongeza rejeleo la kombo",
     "builderPinnedAccount": "Akaunti Iliyobandikwa",
+    "builderRestrictAccounts": "Weka kikomo kwa akaunti (si lazima)",
+    "builderRestrictAccountsHint": "Acha wazi ili kutumia akaunti zote zinazotumika. Ukichagua akaunti, uelekezaji wa kiotomatiki utatumia akaunti hizo pekee.",
     "builderLegacyEntry": "Ingizo la zamani",
     "builderStaleModel": "Haipo kwenye katalogi hai",
     "reviewName": "Jina",

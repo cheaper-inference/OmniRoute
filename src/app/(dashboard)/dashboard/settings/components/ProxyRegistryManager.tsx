@@ -29,6 +29,7 @@ import {
   Textarea,
 } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import SearchableSelectField from "@/shared/components/SearchableSelectField";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useProxyBatchOperations } from "./useProxyBatchOperations";
 import { ProxyStatusBadge } from "./ProxyStatusBadge";
@@ -1016,18 +1017,18 @@ export default function ProxyRegistryManager({
               <option value="account">{t("scopeAccount")}</option>
               <option value="combo">{t("scopeCombo")}</option>
             </Select>
-            <Select
+            <SearchableSelectField
               label={t("labelProxy")}
               value={bulkProxyId}
-              onChange={(e) => setBulkProxyId(e.target.value)}
-            >
-              <option value="">{t("clearAssignment")}</option>
-              {items.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name} ({item.type}://{item.host}:{item.port})
-                </option>
-              ))}
-            </Select>
+              onValueChange={setBulkProxyId}
+              options={[
+                { value: "", label: t("clearAssignment"), alwaysVisible: true },
+                ...items.map((item) => ({
+                  value: item.id,
+                  label: `${item.name} (${item.type}://${item.host}:${item.port})`,
+                })),
+              ]}
+            />
           </div>
 
           {bulkScope !== "global" && (
@@ -1178,26 +1179,26 @@ export default function ProxyRegistryManager({
               </div>
 
               <div className="flex flex-col gap-2 pt-2 border-t border-border sm:flex-row sm:items-end">
-                <Select
+                <SearchableSelectField
                   label={t("poolAddLabel")}
                   className="flex-1"
                   value={poolAddProxyId}
-                  onChange={(e) => setPoolAddProxyId(e.target.value)}
+                  onValueChange={setPoolAddProxyId}
                   data-testid="proxy-registry-pool-add-select"
-                >
-                  <option value="">{t("poolSelectProxy")}</option>
-                  {items
-                    .filter(
-                      (item) =>
-                        !poolMembers.includes(item.id) &&
-                        (item.status ?? "").toLowerCase() !== "dead"
-                    )
-                    .map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {item.name} ({item.type}://{item.host}:{item.port})
-                      </option>
-                    ))}
-                </Select>
+                  options={[
+                    { value: "", label: t("poolSelectProxy"), alwaysVisible: true },
+                    ...items
+                      .filter(
+                        (item) =>
+                          !poolMembers.includes(item.id) &&
+                          (item.status ?? "").toLowerCase() !== "dead"
+                      )
+                      .map((item) => ({
+                        value: item.id,
+                        label: `${item.name} (${item.type}://${item.host}:${item.port})`,
+                      })),
+                  ]}
+                />
                 <Button
                   size="sm"
                   icon="add"

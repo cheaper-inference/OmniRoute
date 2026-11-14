@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "Pridėti kombinacijos nuorodą",
     "builderComboRefStep": "Pridėti kombinacijos nuorodą",
     "builderPinnedAccount": "Prisegta paskyra",
+    "builderRestrictAccounts": "Apriboti paskyromis (neprivaloma)",
+    "builderRestrictAccountsHint": "Palikite tuščią, kad būtų naudojamos visos aktyvios paskyros. Jei pasirinksite paskyras, automatinis maršruto parinkimas naudos tik šias paskyras.",
     "builderLegacyEntry": "Senos versijos įrašas",
     "builderStaleModel": "Nėra tiesioginiame kataloge",
     "reviewName": "Pavadinimas",

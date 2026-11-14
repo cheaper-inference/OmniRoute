@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "Tilføj kombinationsreference",
     "builderComboRefStep": "Tilføj kombinationsreference",
     "builderPinnedAccount": "Fastgjort konto",
+    "builderRestrictAccounts": "Begræns til konti (valgfrit)",
+    "builderRestrictAccountsHint": "Lad feltet være tomt for at bruge alle aktive konti. Hvis du vælger konti, bruger automatisk routing kun disse konti.",
     "builderLegacyEntry": "Ældre post",
     "builderStaleModel": "Ikke i live-kataloget",
     "reviewName": "Navn",

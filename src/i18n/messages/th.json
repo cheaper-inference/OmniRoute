@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "เพิ่มข้อมูลอ้างอิงคอมโบ",
     "builderComboRefStep": "เพิ่มข้อมูลอ้างอิงคอมโบ",
     "builderPinnedAccount": "บัญชีที่ตรึงไว้",
+    "builderRestrictAccounts": "จำกัดให้ใช้เฉพาะบัญชีที่เลือก (ไม่บังคับ)",
+    "builderRestrictAccountsHint": "เว้นว่างไว้เพื่อใช้บัญชีที่ใช้งานอยู่ทั้งหมด เมื่อเลือกบัญชี การกำหนดเส้นทางอัตโนมัติจะใช้เฉพาะบัญชีเหล่านั้นเท่านั้น",
     "builderLegacyEntry": "รายการแบบเดิม",
     "builderStaleModel": "ไม่อยู่ในแคตตาล็อกสด",
     "reviewName": "ชื่อ",

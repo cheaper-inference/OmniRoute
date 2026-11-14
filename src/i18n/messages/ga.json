@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "Cuir tagairt do theaglaim leis",
     "builderComboRefStep": "Cuir tagairt do theaglaim leis",
     "builderPinnedAccount": "Cuntas Pionnáilte",
+    "builderRestrictAccounts": "Teorannaigh do chuntais (roghnach)",
+    "builderRestrictAccountsHint": "Fág folamh é chun gach cuntas gníomhach a úsáid. Má roghnaíonn tú cuntais, ní úsáidfidh an ródú uathoibríoch ach na cuntais sin.",
     "builderLegacyEntry": "Iontráil leagáide",
     "builderStaleModel": "Níl sé sa chatalóg beo",
     "reviewName": "Ainm",

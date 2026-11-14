@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "ಕಾಂಬೊ ಉಲ್ಲೇಖವನ್ನು ಸೇರಿಸಿ",
     "builderComboRefStep": "ಕಾಂಬೊ ಉಲ್ಲೇಖವನ್ನು ಸೇರಿಸಿ",
     "builderPinnedAccount": "ಪಿನ್ ಮಾಡಿದ ಖಾತೆ",
+    "builderRestrictAccounts": "ಆಯ್ದ ಖಾತೆಗಳಿಗೆ ಸೀಮಿತಗೊಳಿಸಿ (ಐಚ್ಛಿಕ)",
+    "builderRestrictAccountsHint": "ಎಲ್ಲಾ ಸಕ್ರಿಯ ಖಾತೆಗಳನ್ನು ಬಳಸಲು ಖಾಲಿ ಬಿಡಿ. ಖಾತೆಗಳನ್ನು ಆಯ್ಕೆ ಮಾಡಿದಾಗ ಸ್ವಯಂಚಾಲಿತ ರೂಟಿಂಗ್ ಆ ಖಾತೆಗಳಿಗೆ ಮಾತ್ರ ಸೀಮಿತವಾಗಿರುತ್ತದೆ.",
     "builderLegacyEntry": "ಹಳೆಯ ನಮೂದು",
     "builderStaleModel": "ಲೈವ್ ಕ್ಯಾಟಲಾಗ್‌ನಲ್ಲಿ ಇಲ್ಲ",
     "reviewName": "ಹೆಸರು",

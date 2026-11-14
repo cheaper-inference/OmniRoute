@@ -1,0 +1,314 @@
+[
+  {
+    "variant": "EN desktop light",
+    "geometry": {
+      "direction": "ltr",
+      "modal": {
+        "bottom": 702.59375,
+        "height": 605.1875,
+        "left": 192,
+        "right": 1088,
+        "top": 97.40625,
+        "width": 896,
+        "x": 192,
+        "y": 97.40625
+      },
+      "mountedRows": 12,
+      "noHorizontalOverflow": true,
+      "popup": {
+        "bottom": 669,
+        "height": 383,
+        "left": 498,
+        "right": 771.328125,
+        "top": 286,
+        "width": 273.328125,
+        "x": 498,
+        "y": 286
+      },
+      "popupInsideViewport": true,
+      "portalOutsideModal": true,
+      "theme": "light",
+      "viewport": {
+        "height": 800,
+        "width": 1280
+      }
+    },
+    "filteredOptions": [
+      "Select model",
+      "Test Model 04999 · OpenAImodel-04999 · Synthetic QA fixture"
+    ]
+  },
+  {
+    "variant": "EN desktop dark",
+    "geometry": {
+      "direction": "ltr",
+      "modal": {
+        "bottom": 702.59375,
+        "height": 605.1875,
+        "left": 192,
+        "right": 1088,
+        "top": 97.40625,
+        "width": 896,
+        "x": 192,
+        "y": 97.40625
+      },
+      "mountedRows": 12,
+      "noHorizontalOverflow": true,
+      "popup": {
+        "bottom": 669,
+        "height": 383,
+        "left": 498,
+        "right": 771.328125,
+        "top": 286,
+        "width": 273.328125,
+        "x": 498,
+        "y": 286
+      },
+      "popupInsideViewport": true,
+      "portalOutsideModal": true,
+      "theme": "dark",
+      "viewport": {
+        "height": 800,
+        "width": 1280
+      }
+    },
+    "filteredOptions": [
+      "Select model",
+      "Test Model 04999 · OpenAImodel-04999 · Synthetic QA fixture"
+    ]
+  },
+  {
+    "variant": "FA desktop light",
+    "geometry": {
+      "direction": "rtl",
+      "modal": {
+        "bottom": 702.59375,
+        "height": 605.1875,
+        "left": 192,
+        "right": 1088,
+        "top": 97.40625,
+        "width": 896,
+        "x": 192,
+        "y": 97.40625
+      },
+      "mountedRows": 12,
+      "noHorizontalOverflow": true,
+      "popup": {
+        "bottom": 669,
+        "height": 383,
+        "left": 508,
+        "right": 781.328125,
+        "top": 286,
+        "width": 273.328125,
+        "x": 508,
+        "y": 286
+      },
+      "popupInsideViewport": true,
+      "portalOutsideModal": true,
+      "theme": "light",
+      "viewport": {
+        "height": 800,
+        "width": 1280
+      }
+    },
+    "filteredOptions": [
+      "انتخاب مدل",
+      "مدل آزمایشی 04999 · OpenAImodel-04999 · Synthetic QA fixture"
+    ]
+  },
+  {
+    "variant": "FA desktop dark",
+    "geometry": {
+      "direction": "rtl",
+      "modal": {
+        "bottom": 702.59375,
+        "height": 605.1875,
+        "left": 192,
+        "right": 1088,
+        "top": 97.40625,
+        "width": 896,
+        "x": 192,
+        "y": 97.40625
+      },
+      "mountedRows": 12,
+      "noHorizontalOverflow": true,
+      "popup": {
+        "bottom": 669,
+        "height": 383,
+        "left": 508,
+        "right": 781.328125,
+        "top": 286,
+        "width": 273.328125,
+        "x": 508,
+        "y": 286
+      },
+      "popupInsideViewport": true,
+      "portalOutsideModal": true,
+      "theme": "dark",
+      "viewport": {
+        "height": 800,
+        "width": 1280
+      }
+    },
+    "filteredOptions": [
+      "انتخاب مدل",
+      "مدل آزمایشی 04999 · OpenAImodel-04999 · Synthetic QA fixture"
+    ]
+  },
+  {
+    "variant": "EN mobile light",
+    "geometry": {
+      "direction": "ltr",
+      "modal": {
+        "bottom": 742.1875,
+        "height": 640.375,
+        "left": 24,
+        "right": 366,
+        "top": 101.8125,
+        "width": 342,
+        "x": 24,
+        "y": 101.8125
+      },
+      "mountedRows": 12,
+      "noHorizontalOverflow": true,
+      "popup": {
+        "bottom": 765,
+        "height": 383,
+        "left": 49,
+        "right": 331,
+        "top": 382,
+        "width": 282,
+        "x": 49,
+        "y": 382
+      },
+      "popupInsideViewport": true,
+      "portalOutsideModal": true,
+      "theme": "light",
+      "viewport": {
+        "height": 844,
+        "width": 390
+      }
+    },
+    "filteredOptions": [
+      "Select model",
+      "Test Model 04999 · OpenAImodel-04999 · Synthetic QA fixture"
+    ]
+  },
+  {
+    "variant": "EN mobile dark",
+    "geometry": {
+      "direction": "ltr",
+      "modal": {
+        "bottom": 742.1875,
+        "height": 640.375,
+        "left": 24,
+        "right": 366,
+        "top": 101.8125,
+        "width": 342,
+        "x": 24,
+        "y": 101.8125
+      },
+      "mountedRows": 12,
+      "noHorizontalOverflow": true,
+      "popup": {
+        "bottom": 765,
+        "height": 383,
+        "left": 49,
+        "right": 331,
+        "top": 382,
+        "width": 282,
+        "x": 49,
+        "y": 382
+      },
+      "popupInsideViewport": true,
+      "portalOutsideModal": true,
+      "theme": "dark",
+      "viewport": {
+        "height": 844,
+        "width": 390
+      }
+    },
+    "filteredOptions": [
+      "Select model",
+      "Test Model 04999 · OpenAImodel-04999 · Synthetic QA fixture"
+    ]
+  },
+  {
+    "variant": "FA mobile light",
+    "geometry": {
+      "direction": "rtl",
+      "modal": {
+        "bottom": 742.1875,
+        "height": 640.375,
+        "left": 24,
+        "right": 366,
+        "top": 101.8125,
+        "width": 342,
+        "x": 24,
+        "y": 101.8125
+      },
+      "mountedRows": 12,
+      "noHorizontalOverflow": true,
+      "popup": {
+        "bottom": 765,
+        "height": 383,
+        "left": 59,
+        "right": 341,
+        "top": 382,
+        "width": 282,
+        "x": 59,
+        "y": 382
+      },
+      "popupInsideViewport": true,
+      "portalOutsideModal": true,
+      "theme": "light",
+      "viewport": {
+        "height": 844,
+        "width": 390
+      }
+    },
+    "filteredOptions": [
+      "انتخاب مدل",
+      "مدل آزمایشی 04999 · OpenAImodel-04999 · Synthetic QA fixture"
+    ]
+  },
+  {
+    "variant": "FA mobile dark",
+    "geometry": {
+      "direction": "rtl",
+      "modal": {
+        "bottom": 742.1875,
+        "height": 640.375,
+        "left": 24,
+        "right": 366,
+        "top": 101.8125,
+        "width": 342,
+        "x": 24,
+        "y": 101.8125
+      },
+      "mountedRows": 12,
+      "noHorizontalOverflow": true,
+      "popup": {
+        "bottom": 765,
+        "height": 383,
+        "left": 59,
+        "right": 341,
+        "top": 382,
+        "width": 282,
+        "x": 59,
+        "y": 382
+      },
+      "popupInsideViewport": true,
+      "portalOutsideModal": true,
+      "theme": "dark",
+      "viewport": {
+        "height": 844,
+        "width": 390
+      }
+    },
+    "filteredOptions": [
+      "انتخاب مدل",
+      "مدل آزمایشی 04999 · OpenAImodel-04999 · Synthetic QA fixture"
+    ]
+  }
+]

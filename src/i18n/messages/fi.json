@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "Lisää yhdistelmäviite",
     "builderComboRefStep": "Lisää yhdistelmäviite",
     "builderPinnedAccount": "Kiinnitetty tili",
+    "builderRestrictAccounts": "Rajoita tileihin (valinnainen)",
+    "builderRestrictAccountsHint": "Jätä tyhjäksi, jos haluat käyttää kaikkia aktiivisia tilejä. Jos valitset tilejä, automaattinen reititys käyttää vain näitä tilejä.",
     "builderLegacyEntry": "Vanha merkintä",
     "builderStaleModel": "Ei live-katalogissa",
     "reviewName": "Nimi",

@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "Ƙara manunin haɗi",
     "builderComboRefStep": "Ƙara manunin haɗi",
     "builderPinnedAccount": "Tsayayyen Asusu",
+    "builderRestrictAccounts": "Iyakance ga asusu (na zaɓi)",
+    "builderRestrictAccountsHint": "A bar shi babu komai don amfani da duk asusun da ke aiki. Idan an zaɓi asusu, zaɓin hanya ta atomatik zai yi amfani da waɗannan asusun kawai.",
     "builderLegacyEntry": "Tsohuwar shigarwa",
     "builderStaleModel": "Ba ya cikin kundin kai tsaye",
     "reviewName": "Suna",
