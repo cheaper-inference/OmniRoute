@@ -67,7 +67,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -129,11 +129,11 @@ jobs:
       API_KEY_SECRET: ci-lint-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -162,7 +162,7 @@ jobs:
         run: npm run lint:json
       - name: Upload ESLint results
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: eslint-results
           path: .artifacts/eslint-results.json
@@ -282,10 +282,10 @@ jobs:
       contents: read
       security-events: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -311,19 +311,20 @@ jobs:
       # SKIPPED (shard flaky). Nesse caso collect-metrics pula coverage.* (ausente sem
       # erro) e o ratchet roda com --allow-missing — as métricas determinísticas
       # (eslint/complexity/cognitive) seguem BLOQUEANTES.
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         continue-on-error: true
         with:
           name: coverage-report
           path: coverage/
       # Prefer lint job's ESLint JSON (one inventory, two consumers).
       - name: Download ESLint results
-        continue-on-error: true
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: eslint-results
           path: .artifacts/
       - run: npm run quality:collect
+        env:
+          ESLINT_RESULTS_JSON: .artifacts/eslint-results.json
       # Catraca: falha se qualquer métrica regredir vs quality-baseline.json (commitado).
       # Hoje: contagem de warnings do ESLint. Fase 4 estende com cobertura (lida do
       # coverage mergeado). Tamanho de arquivo e duplicação têm gates dedicados.
@@ -368,7 +369,7 @@ jobs:
         run: cat .artifacts/quality-ratchet.md >> "$GITHUB_STEP_SUMMARY"
       - name: Upload ratchet report
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: quality-ratchet
           path: .artifacts/quality-ratchet.md
@@ -381,8 +382,9 @@ jobs:
   # steps stay ADVISORY via step-level continue-on-error (scanner install,
   # vuln/osv ratchet, OpenAPI/oasdiff breaking-change, circular-deps/dpdm): they
   # depend on external binaries/state that may legitimately self-skip, so they must
-  # never block. The blocking gates themselves SKIP (exit 0) when their binary/plugin
-  # is absent — only a measured regression on the SAME metric the baseline froze
+  # never block. Most blocking gates SKIP (exit 0) when their binary/plugin is absent;
+  # the osv vuln ratchet instead fails as INCOMPLETE (exit 2) on a missing measurement.
+  # Otherwise only a measured regression on the SAME metric the baseline froze
   # blocks. The CodeQL ratchet was PROMOTED to the quality-gate job (v3.8.26).
   # SonarQube needs SONAR_TOKEN/SONAR_HOST_URL secrets.
   quality-extended:
@@ -397,11 +399,11 @@ jobs:
       # fetch-depth: 0 — the OpenAPI breaking-change gate (oasdiff) reads the base
       # spec via `git show <base_ref>:docs/openapi.yaml`; a shallow clone
       # would lack the base ref and the gate would self-skip (base-unresolved).
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -476,9 +478,11 @@ jobs:
       - name: Secret scan (gitleaks, ratchet, blocking)
         run: npm run check:secrets -- --ratchet
       # BLOCKING ratchet (v3.8.27 cycle-end): vulnCount must not regress vs the
-      # baseline. --ratchet exits 1 on a measured regression (measured > baseline);
-      # it SKIPs (exit 0) when osv-scanner is absent or osv.dev is unreachable (a
-      # missing/failed measurement never blocks). See the CVE-variance note in
+      # baseline. --ratchet exits 1 on a measured regression (measured > baseline)
+      # and exits 2 (INCOMPLETE) when osv-scanner is absent, its run fails or its
+      # report is invalid — a missing measurement is never a pass. An install
+      # failure in the advisory-scanner step above surfaces here as
+      # `vulnCount=INCOMPLETE reason=binary-absent`. See the CVE-variance note in
       # docs/security/SUPPLY_CHAIN.md — a newly-disclosed CVE on an unchanged dep can
       # red this gate; the fix is to bump the dep or re-baseline metrics.vulnCount.
       - name: Vulnerability ratchet (osv-scanner, ratchet, blocking)
@@ -489,16 +493,8 @@ jobs:
       # an absent baseline are INCOMPLETE, never zero findings or acceptance.
       - name: Workflow lint (actionlint+zizmor, ratchet, blocking)
         run: npm run check:workflows -- --ratchet
-      # OpenAPI breaking-change detection (oasdiff). Diffs the PR's public API
-      # contract (docs/openapi.yaml) against the base branch's spec.
-      # BLOCKING ratchet (Fase 9 Onda 0): reads metrics.openapiBreaking.value and
-      # exits 1 ONLY on a measured regression (count > baseline). It SKIPs (exit 0)
-      # when oasdiff is absent or the base spec can't be resolved — a missing
-      # measurement never blocks. BASE_REF is read by the script from the env
-      # (never interpolated into a shell body) — workflow-injection-safe.
+      # Pin comparison to the event's commits; missing tools/base/report fail closed.
       - name: OpenAPI breaking-change (oasdiff, ratchet, blocking)
-        env:
-          BASE_REF: ${{ github.base_ref }}
         run: npm run check:openapi-breaking -- --ratchet
 
   docs-sync-strict:
@@ -510,10 +506,10 @@ jobs:
     # Run when docs OR code change: API/route code can break doc/OpenAPI contract gates.
     if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') && (needs.changes.outputs.docs == 'true' || needs.changes.outputs.code == 'true')) }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -552,7 +548,7 @@ jobs:
       # release cut keep the strict verdict, so stale mirrors still cannot ship in a release.
       - name: Base checkout for the i18n drift baseline (PR only)
         if: ${{ github.event_name == 'pull_request' }}
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ github.event.pull_request.base.sha }}
           path: .i18n-base
@@ -582,10 +578,10 @@ jobs:
     # existing doc corpus is brought up to style. Promote to blocking once it converges.
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -594,7 +590,7 @@ jobs:
       - name: Vale prose lint (Microsoft style, advisory)
         # Non-fatal: a Vale/reviewdog setup error must not turn this advisory job red.
         continue-on-error: true
-        uses: errata-ai/vale-action@reviewdog
+        uses: errata-ai/vale-action@518a9136acc6e6668ce7c00d367051e0941e87ff # reviewdog
         with:
           files: docs
           fail_on_error: false
@@ -613,11 +609,11 @@ jobs:
       # fetch-depth: 0 — the value-drift gate diffs en.json against the merge base to
       # find rewritten English strings. On a shallow clone the base ref is missing and
       # the gate self-skips (base-unresolved), so it would never actually run.
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -678,10 +674,10 @@ jobs:
     needs: changes
     if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') && (needs.changes.outputs.i18n == 'true' || needs.changes.outputs.code == 'true')) }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -707,10 +703,10 @@ jobs:
     if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') && needs.changes.outputs.i18n == 'true') }}
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: "3.12"
       - name: Validate all languages
@@ -734,7 +730,7 @@ jobs:
           exit "$FAIL"
       - name: Upload results
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: i18n-results
           path: i18n-results/
@@ -745,11 +741,11 @@ jobs:
     if: ${{ github.event_name == 'pull_request' && (github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -802,10 +798,10 @@ jobs:
       cancel-in-progress: false
     if: ${{ github.event_name != 'pull_request' || (needs.changes.outputs.code == 'true' && (github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true')) }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -850,7 +846,7 @@ jobs:
             --exclude='.build/next/cache' \
             .build/next
       - name: Upload Next.js build for downstream jobs
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: next-build
           path: ${{ runner.temp }}/e2e-build.tar.gz
@@ -867,10 +863,10 @@ jobs:
     env:
       JWT_SECRET: ci-build-secret-with-sufficient-length-for-validation
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -880,7 +876,7 @@ jobs:
           cache: ${{ github.event_name == 'pull_request' }}
       - run: npm run check:node-runtime
       - name: Download Next.js build artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: next-build
           # Workspace-relative on purpose: the matrix below includes windows-latest, whose
@@ -969,10 +965,10 @@ jobs:
       JWT_SECRET: ci-build-secret-with-sufficient-length-for-validation
       CSC_IDENTITY_AUTO_DISCOVERY: "false"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -982,7 +978,7 @@ jobs:
           cache: ${{ github.event_name == 'pull_request' }}
       - run: npm run check:node-runtime
       - name: Download Next.js build artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: next-build
           # Workspace-relative on purpose: the matrix below includes windows-latest, whose
@@ -1056,10 +1052,10 @@ jobs:
           df -h /
           sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup
           df -h /
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -1100,7 +1096,7 @@ jobs:
             npm run test:unit:ci:shard
       - name: Upload raw shard coverage
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: coverage-shard-${{ matrix.shard }}
           path: coverage-shard/*.json
@@ -1121,10 +1117,10 @@ jobs:
     # gh workflow run ci.yml --ref <branch>.
     if: ${{ github.event_name != 'pull_request' || (needs.changes.outputs.code == 'true' && needs.changes.outputs.queueCandidate == 'true') }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -1166,10 +1162,10 @@ jobs:
       API_KEY_SECRET: ci-test-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -1230,10 +1226,10 @@ jobs:
           df -h /
           sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup
           df -h /
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -1242,7 +1238,7 @@ jobs:
           # PR acceleration is not release-candidate provenance.
           cache: ${{ github.event_name == 'pull_request' }}
       - name: Download all shard coverage
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           pattern: coverage-shard-*
           path: coverage-shards/
@@ -1330,7 +1326,7 @@ jobs:
           fail_ci_if_error: false
       - name: Upload coverage artifacts
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: coverage-report
           path: |
@@ -1351,7 +1347,7 @@ jobs:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
           fetch-depth: 0
@@ -1359,7 +1355,7 @@ jobs:
       # lcov.info directly — download into coverage/ so it lands at coverage/lcov.info,
       # where sonar.javascript.lcov.reportPaths expects it (path: . left the Sonar
       # new-code coverage at 0% every scan).
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: coverage-report
           path: coverage/
@@ -1383,7 +1379,7 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
       - name: SonarQube Scan
         if: ${{ github.event_name == 'pull_request' && env.SONAR_TOKEN != '' && env.SONAR_HOST_URL != '' }}
-        uses: SonarSource/sonarqube-scan-action@v8
+        uses: SonarSource/sonarqube-scan-action@e805d875275f728fac1885b413934be6d7c63f65 # v8
         env:
           SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
@@ -1410,7 +1406,7 @@ jobs:
       - name: Download coverage artifact
         if: ${{ needs.test-coverage.result != 'cancelled' }}
         continue-on-error: true
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: coverage-report
           path: .
@@ -1439,7 +1435,7 @@ jobs:
               echo "This PR changes production code in \`src/\`, \`open-sse/\`, \`electron/\`, or \`bin/\` without accompanying automated tests."
             fi
           } > .artifacts/pr-coverage-comment.md
-      - uses: actions/github-script@v9
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             const fs = require("fs");
@@ -1498,10 +1494,10 @@ jobs:
       DISABLE_SQLITE_AUTO_BACKUP: "true"
       OMNIROUTE_PLAYWRIGHT_SKIP_BUILD: "1"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -1519,7 +1515,7 @@ jobs:
           restore-keys: playwright-chromium-${{ runner.os }}-
       - run: npx playwright install --with-deps chromium
       - name: Download Next.js build artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: next-build
           # Workspace-relative on purpose: the matrix below includes windows-latest, whose
@@ -1580,10 +1576,10 @@ jobs:
       DATA_DIR: /tmp/omniroute-ci-${{ matrix.shard }}
       DISABLE_SQLITE_AUTO_BACKUP: "true"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -1608,10 +1604,10 @@ jobs:
       API_KEY_SECRET: ci-test-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -1642,10 +1638,10 @@ jobs:
       API_KEY_SECRET: ci-test-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -1677,10 +1673,10 @@ jobs:
       API_KEY_SECRET: ci-test-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -1692,13 +1688,11 @@ jobs:
       - run: npm run test:protocols:e2e
 
   admission-verdict:
-    # A queue-draft edit run must not leave a check named "Gate / CI" on the draft: Mergify
-    # read that skipped check as a finished non-success and dequeued the PR (#18961 on
-    # 2026-11-04) before the real run reported. Every other run keeps the exact name.
-    name: ${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && 'Gate / CI (queue-draft edit)' || 'Gate / CI' }}
-    # Runs on every candidate; only a Mergify queue-draft description edit skips it (see the
-    # workflow concurrency note): that draft is never what branch protection merges.
-    if: ${{ always() && !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) }}
+    # Only requested candidates receive the required check name. An ordinary draft
+    # deliberately skips its producer jobs and must not create a failed admission.
+    # Classifier failures still reach the gate; queue metadata edits keep their own name.
+    name: ${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && 'Gate / CI (queue-draft edit)' || (github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success') && 'Gate / CI' || 'Admission not requested / CI' }}
+    if: ${{ always() && !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && (github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success') }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs:
@@ -1775,7 +1769,7 @@ jobs:
     steps:
       - name: Download i18n results
         continue-on-error: true
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           pattern: i18n-*
           path: results
