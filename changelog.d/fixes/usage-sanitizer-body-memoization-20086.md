@@ -1,0 +1,1 @@
+- Memoize `getSerializedBodyBytes()` and `estimateInputTokens()` via `WeakMap` in `open-sse/utils/usageTracking.ts` to prevent repeated request body serialization and tokenization on streamed zero-input usage chunks (#20086).
