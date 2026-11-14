@@ -81,6 +81,16 @@ const shapes = [
 ];
 
 for (const shape of shapes) {
+  test(`trims logged ${shape.name} without changing request bodies or effort levels`, async () => {
+    const clientRequestBody = shape.body(" \tCustom-Level\n ");
+    const upstreamRequestBody = shape.body(" \nhigh\t ");
+    const row = await recordEffort({ clientRequestBody, upstreamRequestBody });
+    assert.equal(row.reasoning_effort_requested, "Custom-Level");
+    assert.equal(row.reasoning_effort_upstream, "high");
+    assert.deepEqual(clientRequestBody, shape.body(" \tCustom-Level\n "));
+    assert.deepEqual(upstreamRequestBody, shape.body(" \nhigh\t "));
+  });
+
   for (const source of sources) {
     test(`records ${shape.name} with ${source.name}`, async () => {
       const row = await recordEffort({
@@ -97,7 +107,10 @@ for (const shape of shapes) {
 
 test("falls back to requestBody only when clientRequestBody is absent", async () => {
   for (const clientRequestBody of [undefined, null]) {
-    const row = await recordEffort({ clientRequestBody, requestBody: { reasoning_effort: "low" } });
+    const row = await recordEffort({
+      clientRequestBody,
+      requestBody: { reasoning_effort: " low " },
+    });
     assert.equal(row.reasoning_effort_requested, "low");
     assert.equal(row.reasoning_effort_upstream, null);
   }
@@ -113,8 +126,8 @@ test("falls back to requestBody only when clientRequestBody is absent", async ()
 test("preserves direct, reasoning, then output_config precedence", async () => {
   const row = await recordEffort({
     clientRequestBody: {
-      reasoning_effort: "low",
-      reasoning: { effort: "medium" },
+      reasoning_effort: " low ",
+      reasoning: { effort: " medium " },
       output_config: { effort: "high" },
     },
     upstreamRequestBody: {
@@ -127,7 +140,7 @@ test("preserves direct, reasoning, then output_config precedence", async () => {
   assert.equal(row.reasoning_effort_upstream, "medium");
 });
 
-test("skips malformed earlier shapes and preserves nonempty effort strings", async () => {
+test("skips malformed earlier shapes and trims nonempty effort strings", async () => {
   const row = await recordEffort({
     clientRequestBody: {
       reasoning_effort: 1,
@@ -141,7 +154,7 @@ test("skips malformed earlier shapes and preserves nonempty effort strings", asy
     },
   });
   assert.equal(row.reasoning_effort_requested, "none");
-  assert.equal(row.reasoning_effort_upstream, " high ");
+  assert.equal(row.reasoning_effort_upstream, "high");
 });
 
 test("keeps both effort columns null for missing or malformed values", async () => {
