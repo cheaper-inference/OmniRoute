@@ -1,0 +1,1 @@
+- **perf(models):** a model-capability lookup is remembered until a capability write, so a request no longer re-queries SQLite for each of its capability checks when models.dev sync is off. ([#19727](https://github.com/cheaper-inference/OmniRoute/pull/19727))

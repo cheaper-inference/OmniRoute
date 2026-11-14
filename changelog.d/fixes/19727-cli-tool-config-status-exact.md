@@ -1,0 +1,1 @@
+- **fix(cli-tools):** the CLI tools overview no longer shows Claude, Droid, OpenClaw, Cline and Kilo as configured when their config only mentions OmniRoute in unrelated text, or points at another host or port. The badge now follows the same fields the tool's own settings page reads. ([#19727](https://github.com/cheaper-inference/OmniRoute/pull/19727))
