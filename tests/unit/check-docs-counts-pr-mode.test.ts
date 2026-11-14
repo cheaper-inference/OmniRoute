@@ -182,16 +182,36 @@ test("every check declares its scope, and every derived check has a locator", ()
     "Auto-Combo scoring factors count": "derived",
     "Routing strategies count": "release-only",
     "Routing strategies count (prose claims)": "derived",
-    "Routing strategies count (services guide)": "derived",
     "OAuth providers count": "release-only",
     "A2A skills count": "release-only",
     "Cloud agents count": "release-only",
   };
+  // One invariant per agent-instruction file (phase 2): listed from the tree, so judged apart.
+  const INSTRUCTION = "No derived counts (agent-instruction file ";
+  const instruction = checks.filter((c) => c.label.startsWith(INSTRUCTION));
   assert.deepEqual(
-    Object.fromEntries(checks.map((c) => [c.label, c.scope])),
+    Object.fromEntries(
+      checks.filter((c) => !c.label.startsWith(INSTRUCTION)).map((c) => [c.label, c.scope])
+    ),
     expected,
     "a new check must be classified (derived / invariant / release-only)"
   );
+  const guarded = instruction.flatMap((c) => c.files);
+  for (const file of [
+    "AGENTS.md",
+    "llm.txt",
+    "docs/i18n/bs/AGENTS.md",
+    "open-sse/services/AGENTS.md",
+    "src/shared/constants/agentSkills.ts",
+    "skills/README.md",
+    "skills/omni-mcp/SKILL.md",
+  ]) {
+    assert.ok(guarded.includes(file), `${file} is not guarded as an agent-instruction file`);
+  }
+  for (const c of instruction) {
+    assert.equal(c.scope, "invariant", c.label);
+    assert.equal(c.strict, true, c.label);
+  }
   for (const c of derived) assert.equal(typeof c.extract, "function", `${c.label} has no locator`);
 });
 
@@ -701,16 +721,11 @@ test("planDerivedRewrites moves every strategy-count claim #15159 pins (real tre
   const after = (file: string) =>
     plan.files.find((f) => f.path === file)?.after ?? (readReal(file) as string);
   const counts = (text: string, re: RegExp) => [...text.matchAll(re)].map((m) => Number(m[1]));
-  // the same regexes tests/unit/routing-strategy-docs-sync-15159.test.ts reads
-  assert.deepEqual(counts(after("AGENTS.md"), /(\d+)\s+public strategies/g), [next]);
-  const row = after("AGENTS.md")
-    .split("\n")
-    .find((l) => /Auto-Combo \(.*strategies\)/.test(l));
-  assert.equal(Number(row?.match(/(\d+)\s+strategies/)?.[1]), next);
-  const services = after("open-sse/services/AGENTS.md")
-    .split("\n")
-    .find((l) => /\*\*Strategies\*\*/.test(l));
-  assert.equal(Number(services?.match(/\((\d+)\)/)?.[1]), next);
+  // Phase 2: the agent-instruction files state no strategy count, so the refresh never edits
+  // them; the docs that do state it (#15159 pins AUTO-COMBO.md) move to the new count.
+  for (const file of ["AGENTS.md", "open-sse/services/AGENTS.md", "llm.txt"]) {
+    assert.ok(!plan.files.some((f) => f.path === file), `${file} must not be rewritten`);
+  }
   const autoCombo = counts(
     after("docs/routing/AUTO-COMBO.md"),
     /(\d+)\s+(?:routing\s+)?strategies/g
@@ -720,7 +735,7 @@ test("planDerivedRewrites moves every strategy-count claim #15159 pins (real tre
     autoCombo.every((n) => n === next),
     String(autoCombo)
   );
-  for (const file of ["llm.txt", "docs/architecture/RESILIENCE_GUIDE.md", "README.md"]) {
+  for (const file of ["docs/architecture/RESILIENCE_GUIDE.md", "README.md"]) {
     assert.ok(
       counts(after(file), /(\d+)\*{0,2}\s+(?:routing\s+)?strategies/g).every((n) => n === next),
       file
