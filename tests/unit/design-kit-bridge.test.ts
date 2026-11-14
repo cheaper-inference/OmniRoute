@@ -347,7 +347,13 @@ test("DashboardLayout content shell is fluid up to ~4K before centering", () => 
 
 test("DataTable is theme-aware via --table-* tokens, no color literal, no dead fallbacks", () => {
   const dt = read("src/shared/components/DataTable.tsx");
-  assert.ok(dt.includes("var(--table-header-bg)"), "header uses the token");
+  // Kit 0.0.116: the capped kit Table pins and paints the header row itself (kit token), so the
+  // adapter no longer patches the header cells with sticky positioning or a background.
+  assert.ok(dt.includes("maxHeight={maxHeight}"), "the kit Table owns the scroll and the header");
+  assert.ok(
+    !dt.includes("sticky top-0") && !dt.includes("--table-header-bg"),
+    "no adapter-side header patch"
+  );
   // KEA-7886: rows, borders, hover and selection come from the kit table (ci-ui.css tokens);
   // the selected row is the kit's data-state="selected" instead of a zebra/selected inline mix.
   assert.ok(dt.includes('from "@omniroute/ui-kit/table"'), "rows render through the kit table");
@@ -444,7 +450,14 @@ test("bg-alt, muted and surface-secondary have @theme entries so their utilities
 
 test("cn() still dedupes via tailwind-merge and DataTable paints an opaque surface", () => {
   assert.match(read("src/shared/utils/cn.ts"), /twMerge\(clsx\(/);
-  assert.ok(read("src/shared/components/DataTable.tsx").includes("var(--color-surface)"));
+  // Kit 0.0.116: the kit Table container is the DataTable scroll viewport, and the kit paints it
+  // with the opaque surface; the adapter must not make it transparent.
+  const dt = read("src/shared/components/DataTable.tsx");
+  assert.ok(dt.includes("maxHeight={maxHeight}") && !dt.includes("bg-transparent"));
+  assert.match(
+    read("packages/ui-kit/src/ci-ui.css"),
+    /\.ci-table-container \{[^}]*background: var\(--ci-color-surface\);/
+  );
 });
 
 test("text-primary resolves to a readable primary ink; lime stays on bg/border/ring (KEA-7886)", () => {

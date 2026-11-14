@@ -339,7 +339,9 @@ export default function GlobalConfigTab() {
         {results && results.length > 0 && (
           <Table
             scrollbarLabel={t("bulkHealthcheck")}
-            containerClassName="max-h-64 overflow-y-auto rounded-none border-0"
+            containerClassName="rounded-none border-0"
+            maxHeight="16rem"
+            scrollLabel={t("bulkHealthcheck")}
             className="text-xs"
           >
             <TableHeader>

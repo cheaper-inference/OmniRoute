@@ -273,10 +273,12 @@ function PromptTrendPanel({
 
       <Table
         className="text-sm"
-        containerClassName="mt-5 max-h-80 overflow-y-auto"
+        containerClassName="mt-5"
+        maxHeight="20rem"
+        scrollLabel={title}
         scrollbarLabel={title}
       >
-        <TableHeader className="sticky top-0 z-10 bg-surface">
+        <TableHeader>
           <TableRow>
             <TableHead className="w-[84px]">{hourLabel}</TableHead>
             <TableHead>{activityLabel}</TableHead>

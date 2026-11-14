@@ -1263,6 +1263,7 @@ export default function EvalsTab() {
         </div>
 
         <DataTable
+          label={t("recentRunsTitle")}
           framed={false}
           columns={HISTORY_COLUMNS.map((column) => ({
             key: column.key,
@@ -1785,6 +1786,7 @@ export default function EvalsTab() {
                       </span>
                     </div>
                     <DataTable
+                      label={t("testCasesCount", { count: (suite.cases || []).length })}
                       framed={false}
                       columns={[
                         { key: "name", label: t("columnCase") },

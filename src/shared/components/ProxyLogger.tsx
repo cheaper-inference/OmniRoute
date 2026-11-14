@@ -516,11 +516,14 @@ export default function ProxyLogger() {
         ) : (
           <Table
             scrollbarLabel={t("tableLabel")}
-            // Opaque bg-surface viewport (#4233); it scrolls both axes under a sticky header.
-            containerClassName="max-h-[calc(100vh-320px)] overflow-auto rounded-none border-0 bg-surface"
+            // Opaque bg-surface viewport (#4233); the kit cap scrolls both axes under a pinned
+            // header and makes the viewport a named tab stop (kit 0.0.116).
+            containerClassName="rounded-none border-0 bg-surface"
+            maxHeight="calc(100vh - 320px)"
+            scrollLabel={t("tableLabel")}
             className="text-left text-xs"
           >
-            <TableHeader className="sticky top-0 z-10">
+            <TableHeader>
               <TableRow>
                 {visibleColumns.status && <TableHead className="px-3">{t("colStatus")}</TableHead>}
                 {visibleColumns.proxy && <TableHead className="px-3">{t("colProxy")}</TableHead>}
