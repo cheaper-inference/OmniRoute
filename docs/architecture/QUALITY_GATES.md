@@ -280,6 +280,14 @@ What `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) fails in e
 | `release` | Every check, strict equality against the facts collected from the tree (the behaviour the gate always had): a stale count, version, coverage floor or SVG number is a STRICT drift                                                                                                                                                                                                                    | Yes                  |
 | `pr`      | Only what the change did, diffed against the PR base with the same claim extractors: (1) a managed value that did not exist in the base for that check and file ("PR edited a managed number — restore the line to the base text"); (2) a required claim the base carried and the head lost. Content invariants that need no facts run as in release mode; release-only checks are listed and skipped | No                   |
 
+The agent-instruction files carry **no** derived count at all: `AGENTS.md`, `llm.txt` (and its
+`docs/i18n/*/llm.txt` copies), the bs `AGENTS.md` fork, `open-sse/services/AGENTS.md`,
+`src/shared/constants/agentSkills.ts`, `skills/README.md` and every `skills/*/SKILL.md` point to the
+source (for example `ROUTING_STRATEGY_VALUES` in `src/shared/constants/routingStrategies.ts`) and to
+`npm run facts` instead. The invariant "No derived counts (agent-instruction file …)" fails a count
+there (providers, migrations, MCP tools and scopes, routing strategies, scoring factors, mode packs)
+in both modes, so the release refresh never has to rewrite an instruction file.
+
 In `pr` mode the writer branches may edit managed values: `chore/derived-*` (the nightly refresh
 PR), `release/v*`, and the translation waves `docs/i18n-*` and `chore/i18n-*`
 (`scripts/check/lib/derivedClaimsDiff.mjs`). Queue batches (`merge_group`, Mergify drafts,

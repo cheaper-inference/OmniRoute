@@ -41,15 +41,28 @@ test("checks all reported documentation and skill surfaces", () => {
     "docs/getting-started/FREE-TIERS-GUIDE.md",
     "docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md",
     "docs/guides/FREE_PROVIDER_RANKINGS.md",
-    "src/shared/constants/agentSkills.ts",
-    "skills/README.md",
-    "skills/omni-auth/SKILL.md",
-    "skills/omni-providers/SKILL.md",
   ]) {
     assert.ok(
       checks.some((entry) => entry.docKey === "providers" && entry.files.includes(file)),
       `provider-count gate must cover ${file}`
     );
+  }
+  // The skill surfaces are agent-instruction files (plan 2026-11-13, phase 2): they carry no
+  // provider count at all, and a STRICT invariant fails one that comes back.
+  for (const file of [
+    "src/shared/constants/agentSkills.ts",
+    "skills/README.md",
+    "skills/omni-auth/SKILL.md",
+    "skills/omni-providers/SKILL.md",
+  ]) {
+    const guard = checks.find(
+      (entry) =>
+        entry.label.startsWith("No derived counts (agent-instruction file ") &&
+        entry.files.includes(file)
+    );
+    assert.ok(guard, `the instruction-surface invariant must cover ${file}`);
+    assert.equal(guard.strict, true);
+    assert.equal(guard.validate(`across 393 providers`).ok, false, `${file}: a count must fail`);
   }
 });
 

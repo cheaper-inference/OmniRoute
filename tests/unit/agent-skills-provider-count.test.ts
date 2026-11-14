@@ -4,125 +4,122 @@ import path from "node:path";
 import test from "node:test";
 
 import { CURATED_SKILLS } from "../../src/shared/constants/agentSkills.ts";
-import { buildChecks, tallyDrift } from "../../scripts/check/check-docs-counts-sync.mjs";
+import {
+  agentInstructionFiles,
+  buildChecks,
+  makeInstructionCountFreeValidator,
+} from "../../scripts/check/check-docs-counts-sync.mjs";
 import { loadFactsSnapshot } from "../../scripts/release/facts.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "../..");
 
-// The provider count in skill descriptions is a DERIVED number: feature PRs no longer write it,
-// `npm run release:refresh-derived` rewrites it from the live provider modules and records the
-// same value in docs/reference/derived-facts.json. Between releases the live modules move ahead
-// of the text by design, so the tree is judged against the snapshot (written in the same refresh
-// as the text), never against the live modules. Whether the refresh itself writes the live value
-// is proven by "the release refresh closes the cycle" in check-docs-counts-sync.test.ts.
-type Facts = { providers: number } & Record<string, unknown>;
+// Skill descriptions and the generated skills are agent-instruction surfaces (plan 2026-11-13,
+// phase 2): they used to state the provider total ("393-provider catalog"), every provider PR
+// rewrote it, and between releases it was stale by design. They now carry no count at all —
+// agents read counts with `npm run facts`. What this test guarded (a skill must never state a
+// WRONG provider count) still holds, more strictly: it states none, and the counts gate's
+// "No derived counts (agent-instruction file …)" invariant fails any PR that adds one back.
+
+type Verdict = { ok: boolean; detail: string };
 type Check = {
   label: string;
-  actual: unknown;
-  docKey: string;
+  scope: string;
   strict: boolean;
   files: string[];
-  validate?: (content: string) => { ok: boolean; detail: string };
+  validate?: (content: string) => Verdict;
 };
 
-const snapshot = loadFactsSnapshot() as Facts | null;
-assert.ok(
-  snapshot,
-  "docs/reference/derived-facts.json is missing — run npm run release:refresh-derived"
-);
-const SNAPSHOT_PROVIDERS = snapshot.providers;
+const countFree = makeInstructionCountFreeValidator as (file: string) => (c: string) => Verdict;
+const instructionFiles = agentInstructionFiles as () => string[];
 
-function providerClaims(text: string): string[] {
-  const claims: string[] = [];
-  for (const match of text.matchAll(/\b(\d+)-(?:provider|providers)\b/gi)) claims.push(match[0]);
-  for (const match of text.matchAll(/\b(\d+)\s+providers\b/gi)) claims.push(match[0]);
-  return claims;
+// Any number in front of "provider(s)" — wider than the gate's 3-4 digit aggregate pattern, so a
+// shortened or approximate count ("390+ providers", "1,000 providers") is caught here too.
+// Lower-case on purpose: "`503 Provider circuit open`" is an HTTP status line, not a count.
+function providerCounts(text: string): string[] {
+  return [...text.matchAll(/\b\d[\d,.]*\+?(?:-|\s+)(?:LLM\s+|AI\s+)?providers?\b/g)]
+    .map((m) => m[0])
+    .filter((claim) => !/^1\s/.test(claim)); // "1 provider" is a unit, not a total
 }
 
-function offendersIn(label: string, text: string, expected: number): string[] {
-  return providerClaims(text)
-    .filter((claim) => Number(claim.match(/\d+/)?.[0]) !== expected)
-    .map((claim) => `${label}: "${claim}"`);
-}
-
-test("the snapshot carries a plausible provider count", () => {
-  // Guards the asserts below: a zero or missing count would make them pass vacuously.
-  assert.ok(
-    Number.isInteger(SNAPSHOT_PROVIDERS) && SNAPSHOT_PROVIDERS >= 300,
-    `snapshot providers must be an integer >= 300, got ${SNAPSHOT_PROVIDERS}`
-  );
+test("the provider-count probe still sees the phrasings a count took", () => {
+  // Guards the probe itself, or the two tests below would pass vacuously.
+  for (const text of [
+    "OmniRoute's 393-provider catalog",
+    "One key, 393 providers,",
+    "across 390+ providers",
+    "1,000 LLM providers",
+  ]) {
+    assert.equal(providerCounts(text).length, 1, text);
+  }
+  assert.deepEqual(providerCounts("- `503 Provider circuit open` → retry"), []);
 });
 
-test("every agent-skill description states the snapshot provider count", () => {
+test("no curated agent-skill description states a provider count", () => {
+  assert.ok(CURATED_SKILLS.length >= 20, "the curated skill list must not be empty");
   const offenders = CURATED_SKILLS.flatMap((skill) =>
-    offendersIn(skill.id, skill.description ?? "", SNAPSHOT_PROVIDERS)
+    providerCounts(skill.description ?? "").map((c) => `${skill.id}: "${c}"`)
   );
-  assert.deepEqual(
-    offenders,
-    [],
-    `description must say ${SNAPSHOT_PROVIDERS} providers (derived-facts.json), found: ${offenders.join(", ")}`
-  );
+  assert.deepEqual(offenders, [], `descriptions must stay count-free: ${offenders.join(", ")}`);
 });
 
-test("the generated skill files state the snapshot provider count", () => {
-  // These are generated from CURATED_SKILLS, but the count also appears in body text
-  // the generator templates out, which the description test above cannot see.
+test("the generated skill files state no provider count", () => {
+  // Generated from CURATED_SKILLS, but the count also appeared in body text and in the curated
+  // custom blocks the description test above cannot see.
   const generated = ["skills/omni-providers/SKILL.md", "skills/omni-auth/SKILL.md"];
   const offenders = generated.flatMap((rel) =>
-    offendersIn(rel, readFileSync(path.join(ROOT, rel), "utf8"), SNAPSHOT_PROVIDERS)
+    providerCounts(readFileSync(path.join(ROOT, rel), "utf8")).map((c) => `${rel}: "${c}"`)
   );
-  assert.deepEqual(
-    offenders,
-    [],
-    `generated skills must say ${SNAPSHOT_PROVIDERS} providers (derived-facts.json), found: ${offenders.join(", ")}`
-  );
+  assert.deepEqual(offenders, [], `generated skills must stay count-free: ${offenders.join(", ")}`);
 });
 
-// Release mode with injected facts: the gate that guards agentSkills.ts and the generated skills
-// (the "secondary docs and skills" provider check) rejects a count that disagrees with the facts
-// and accepts the right one. This is what keeps the strict comparison alive once the live count
-// moves: the release refresh runs this gate against the live facts.
-const SKILL_FILES = [
-  "src/shared/constants/agentSkills.ts",
-  "skills/omni-providers/SKILL.md",
-  "skills/omni-auth/SKILL.md",
-];
-
-function skillsCheck(facts: Facts): Check {
-  const checks = buildChecks({ facts }) as Check[];
-  const check = checks.find(
-    (c) => c.docKey === "providers" && SKILL_FILES.every((f) => c.files.includes(f))
+test("the counts gate guards agentSkills.ts and every skill as an instruction surface", () => {
+  const files = instructionFiles();
+  for (const rel of [
+    "src/shared/constants/agentSkills.ts",
+    "skills/README.md",
+    "skills/omni-providers/SKILL.md",
+    "skills/omni-auth/SKILL.md",
+    "skills/omni-mcp/SKILL.md",
+    "skills/omni-combos-routing/SKILL.md",
+  ]) {
+    assert.ok(files.includes(rel), `${rel} is not guarded as an agent-instruction file`);
+  }
+  const snapshot = loadFactsSnapshot();
+  assert.ok(snapshot, "docs/reference/derived-facts.json is missing");
+  const checks = (buildChecks({ facts: snapshot }) as Check[]).filter((c) =>
+    c.label.startsWith("No derived counts (agent-instruction file ")
   );
-  assert.ok(check, "the counts gate no longer covers agentSkills.ts and the generated skills");
-  assert.equal(check.strict, true, "the skills provider-count check must be STRICT");
-  return check;
-}
-
-function tallyFor(check: Check, file: string, content: string) {
-  return tallyDrift([{ ...check, files: [file] }], (f: string) => (f === file ? content : null));
-}
-
-test("release mode rejects a skill description whose count disagrees with the facts", () => {
-  const live = {
-    ...snapshot,
-    providers: SNAPSHOT_PROVIDERS + 7,
-    providerReferenceTotal: SNAPSHOT_PROVIDERS + 7,
-  };
-  const check = skillsCheck(live);
-  const stale = `description: "Route across ${SNAPSHOT_PROVIDERS} providers"`;
-  const fresh = `description: "Route across ${SNAPSHOT_PROVIDERS + 7} providers"`;
-  assert.equal(
-    tallyFor(check, SKILL_FILES[0], stale).strict,
-    1,
-    "stale count must be STRICT drift"
-  );
-  assert.equal(tallyFor(check, SKILL_FILES[0], fresh).strict, 0, "the facts' count must pass");
+  const guarded = new Set(checks.flatMap((c) => c.files));
+  assert.ok(guarded.has("src/shared/constants/agentSkills.ts"));
+  for (const c of checks) {
+    assert.equal(c.scope, "invariant", `${c.label} must run in both modes`);
+    assert.equal(c.strict, true, `${c.label} must be STRICT`);
+  }
 });
 
-test("the committed skill sources pass the gate under the snapshot facts", () => {
-  const check = skillsCheck(snapshot);
-  for (const rel of SKILL_FILES) {
-    const r = tallyFor(check, rel, readFileSync(path.join(ROOT, rel), "utf8"));
-    assert.equal(r.strict, 0, `${rel} drifts from derived-facts.json:\n${r.lines.join("\n")}`);
+test("the instruction-surface invariant rejects a provider count in a skill description", () => {
+  const validate = countFree("src/shared/constants/agentSkills.ts");
+  const ok = `description: "Manage provider connections across OmniRoute's provider catalog."`;
+  assert.equal(validate(ok).ok, true, validate(ok).detail);
+  for (const stale of [
+    `description: "Manage provider connections across OmniRoute's 393-provider catalog."`,
+    `description: "One key, 394 providers, auto-fallback."`,
+    `description: "Connect to the OmniRoute MCP server (110 tools) across 33 scopes."`,
+    `description: "Create and manage routing combos with 21 strategies."`,
+  ]) {
+    const verdict = validate(stale);
+    assert.equal(verdict.ok, false, `must reject: ${stale}`);
+    assert.match(verdict.detail, /npm run facts/);
+  }
+});
+
+test("the committed skill sources pass the instruction-surface invariant", () => {
+  for (const rel of [
+    "src/shared/constants/agentSkills.ts",
+    "skills/omni-providers/SKILL.md",
+    "skills/omni-auth/SKILL.md",
+  ]) {
+    const verdict = countFree(rel)(readFileSync(path.join(ROOT, rel), "utf8"));
+    assert.equal(verdict.ok, true, `${rel}: ${verdict.detail}`);
   }
 });
