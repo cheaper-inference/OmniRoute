@@ -5,6 +5,7 @@ import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { makeGitAncestryProbe, readBuildSha, resolveBuildProvenance } from "./buildProvenance.ts";
+import { resolveTarballArg, runTarballReport } from "./tarballPackReport.ts";
 
 import {
   MCP_CLOSURE_SPOT_CHECK_PATH,
@@ -137,8 +138,11 @@ function formatBytes(bytes: number): string {
 const POLICY_ONLY = process.argv.includes("--policy-only");
 
 try {
-  if (!POLICY_ONLY) ensureAppStagingReady();
-  const packReport = runPackDryRun();
+  const fromTarball = resolveTarballArg(process.argv);
+  if (!POLICY_ONLY && !fromTarball) ensureAppStagingReady();
+  // Both reports feed the same downstream policy: the tarball mode simply has no
+  // unpacked size to report (the dry-run payload does).
+  const packReport: PackReport = fromTarball ? runTarballReport(fromTarball) : runPackDryRun();
   const artifactPaths: string[] = packReport.files.map((file) => file.path);
   const unexpectedPaths: string[] = findUnexpectedArtifactPaths(artifactPaths, {
     exactPaths: PACK_ARTIFACT_ALLOWED_EXACT_PATHS,
@@ -161,7 +165,13 @@ try {
   console.log(`   File:          ${packReport.filename}`);
   console.log(`   Entry count:   ${packReport.entryCount}`);
   console.log(`   Packed size:   ${formatBytes(packReport.size)}`);
-  console.log(`   Unpacked size: ${formatBytes(packReport.unpackedSize)}`);
+  console.log(
+    `   Unpacked size: ${
+      typeof packReport.unpackedSize === "number"
+        ? formatBytes(packReport.unpackedSize)
+        : "n/a (tarball mode)"
+    }`
+  );
   console.log(`   MCP closure:   ${mcpClosure.length} source files checked`);
 
   if (unexpectedPaths.length > 0) {
