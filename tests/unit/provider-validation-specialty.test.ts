@@ -148,7 +148,7 @@ test("specialty providers surface network failures and non-auth upstream failure
 
   assert.equal(deepgram.error, "deepgram offline");
   assert.equal(eleven.error, "Validation failed: 500");
-  assert.equal(inworld.error, "Invalid API key");
+  assert.match(String(inworld.error), /^Invalid API key \(HTTP 403/);
   assert.equal(longcat.error, "longcat offline");
 });
 
@@ -1277,7 +1277,7 @@ test("specialty validators cover remaining status branches for Deepgram, Assembl
 
   assert.equal(deepgram.error, "Validation failed: 500");
   assert.equal(assembly.valid, true);
-  assert.equal(eleven.error, "Invalid API key");
+  assert.match(String(eleven.error), /^Invalid API key \(HTTP 403/);
   assert.equal(inworld.error, "inworld offline");
   assert.equal(bailian.error, "Validation failed: 500");
   assert.equal(longcatInvalid.error, "Invalid API key");
@@ -1423,7 +1423,7 @@ test("specialty validators surface missing base URLs and invalid auth for Heroku
   assert.equal(missingDatabricksBase.error, "Missing base URL");
   assert.equal(missingSnowflakeBase.error, "Missing base URL");
   assert.equal(herokuInvalid.error, "Invalid API key");
-  assert.equal(databricksInvalid.error, "Invalid API key");
+  assert.match(String(databricksInvalid.error), /^Invalid API key \(HTTP 403/);
   assert.equal(snowflakeInvalid.error, "Invalid API key");
   assert.equal(gigachatInvalid.error, "Invalid API key");
 });
@@ -1502,7 +1502,7 @@ test("specialty validator rejects invalid DataRobot credentials", async () => {
   });
 
   assert.equal(gateway.error, "Invalid API key");
-  assert.equal(deployment.error, "Invalid API key");
+  assert.match(String(deployment.error), /^Invalid API key \(HTTP 403/);
 });
 
 test("specialty validators accept watsonx, OCI and SAP enterprise gateways", async () => {
@@ -1651,7 +1651,7 @@ test("specialty validator rejects invalid native Bedrock credentials", async () 
     providerSpecificData: { region: "eu-west-2" },
   });
 
-  assert.equal(bedrock.error, "Invalid API key");
+  assert.match(String(bedrock.error), /^Invalid API key \(HTTP 403/);
 });
 
 test("specialty validators reject invalid watsonx, OCI and SAP credentials", async () => {
@@ -1696,8 +1696,8 @@ test("specialty validators reject invalid watsonx, OCI and SAP credentials", asy
   });
 
   assert.equal(watsonx.error, "Invalid API key");
-  assert.equal(oci.error, "Invalid API key");
-  assert.equal(sap.error, "Invalid API key");
+  assert.match(String(oci.error), /^Invalid API key \(HTTP 403/);
+  assert.match(String(sap.error), /^Invalid API key \(HTTP 403/);
 });
 
 test("specialty validator accepts Modal OpenAI-compatible deployments", async () => {
@@ -2028,7 +2028,7 @@ test("specialty validator rejects invalid NLP Cloud credentials", async () => {
     apiKey: "nlpc-bad",
   });
 
-  assert.equal(nlpCloud.error, "Invalid API key");
+  assert.match(String(nlpCloud.error), /^Invalid API key \(HTTP 403/);
 });
 
 test("specialty validator accepts Runway credentials on the organization endpoint", async () => {
@@ -2612,7 +2612,7 @@ test("gitlawb validator: rejects invalid API key (403)", async () => {
 
   const result = await validateProviderApiKey({ provider: "gitlawb", apiKey: "glb-bad-key" });
   assert.equal(result.valid, false);
-  assert.equal(result.error, "Invalid API key");
+  assert.match(String(result.error), /^Invalid API key \(HTTP 403/);
 });
 
 test("gitlawb validator: surfaces network failures", async () => {
@@ -2711,7 +2711,7 @@ test("gitlawb-gmi validator: rejects invalid API key (403)", async () => {
     apiKey: "glb-gmi-bad-key",
   });
   assert.equal(result.valid, false);
-  assert.equal(result.error, "Invalid API key");
+  assert.match(String(result.error), /^Invalid API key \(HTTP 403/);
 });
 
 test("gitlawb-gmi validator: surfaces network failures", async () => {
@@ -2821,7 +2821,7 @@ test("huggingface validator treats 401/403 as an invalid token", async () => {
     new Response(JSON.stringify({ error: "Forbidden" }), { status: 403 });
   const forbidden = await validateProviderApiKey({ provider: "huggingface", apiKey: "hf_bad" });
   assert.equal(forbidden.valid, false);
-  assert.equal(forbidden.error, "Invalid API key");
+  assert.match(String(forbidden.error), /^Invalid API key \(HTTP 403/);
 });
 
 test("huggingface validator does NOT mark a fine-grained token invalid on a non-auth status", async () => {
