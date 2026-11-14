@@ -161,6 +161,32 @@ test("shadow mode: unlabeled writes no status at all (nothing red on a PR Mergif
   assert.equal(fake.comments.get(5), undefined);
 });
 
+test("shadow mode: a non-approver's label writes nothing on the PR, not even the comment", async (t) => {
+  const { fake, gh } = await setup(t);
+  const event = labelEvent({ sender: "mallory" });
+  reflectEvent(fake, event);
+  const from = fake.requests.length;
+  const result = await handleLabelEvent({
+    gh,
+    config: shadowConfig,
+    event,
+    eventName: "pull_request_target",
+  });
+  assert.deepEqual(result, {
+    action: "rejected-actor",
+    kind: "queue",
+    sha: HEAD,
+    actor: "mallory",
+  });
+  assert.deepEqual(
+    fake.requests.slice(from).filter((r) => r.method !== "GET"),
+    [],
+    "no write of any kind"
+  );
+  assert.equal(fake.statuses.get(HEAD), undefined);
+  assert.equal(fake.comments.get(5), undefined);
+});
+
 test("shadow mode: an approver's label still records the approval", async (t) => {
   const { fake, gh } = await setup(t);
   const event = labelEvent();
@@ -338,8 +364,13 @@ test("main counts only the App's own marker: a planted marker does not mute the 
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   const eventPath = join(dir, "event.json");
   writeFileSync(eventPath, JSON.stringify(labelEvent({ sender: "mallory" })));
+  // The warning is a live-mode write (shadow writes nothing on a pull request), and main()
+  // reads the committed config, which starts in shadow: hand it the live one.
+  const configPath = join(dir, "config.json");
+  writeFileSync(configPath, JSON.stringify(config));
   const env = {
     OMNI_QUEUE_TOKEN: "ghs_x",
+    OMNI_QUEUE_CONFIG: configPath,
     GITHUB_REPOSITORY: fake.repository,
     GITHUB_EVENT_NAME: "pull_request_target",
     GITHUB_EVENT_PATH: eventPath,

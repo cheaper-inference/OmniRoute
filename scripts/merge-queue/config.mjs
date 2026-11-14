@@ -75,7 +75,7 @@ function positiveInt(value, path, errors, { min = 1, max = Number.MAX_SAFE_INTEG
  * @property {number} infraRetries             re-runs of the same candidate on infra failure
  * @property {boolean} preferGreenPrChecks
  * @property {string} prGreenCheck             PR-level check preferred when selecting a batch
- * @property {string[]} protectedPaths         globs (contracts.matchesGlob) of instruction surfaces
+ * @property {string[]} protectedPaths         globs (contracts.matchesGlob) of protected surfaces
  * @property {"shadow"|"live"} mode
  */
 

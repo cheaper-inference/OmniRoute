@@ -16,7 +16,8 @@
 //   labeled config.label / config.protectedApprovalLabel by an approver → commit status
 //     `success` on pull_request.head.sha, context APPROVAL_CONTEXTS[kind],
 //     description "approved by <login>" (App token, so the creator is `<appSlug>[bot]`);
-//   labeled by a non-approver → comment once (key "not-approver"), no status;
+//   labeled by a non-approver → comment once (key "not-approver"), no status
+//     (in shadow mode no comment either: shadow writes nothing on a pull request);
 //   unlabeled → status `failure` "approval withdrawn by <login>" on the same head/context;
 //     in shadow mode (config.mode) nothing at all is written for a removal.
 //
@@ -126,7 +127,9 @@ export async function handleLabelEvent(input) {
 
   const approvers = new Set(config.approvers.map((a) => a.toLowerCase()));
   if (!approvers.has(actor.toLowerCase())) {
-    await gh.commentOnce(pr.number, "not-approver", notApproverComment(config, labelName, actor));
+    if (config.mode === "live") {
+      await gh.commentOnce(pr.number, "not-approver", notApproverComment(config, labelName, actor));
+    }
     log(`#${pr.number} ${labelName} applied by non-approver ${actor}: no status written`);
     return { action: "rejected-actor", kind, sha, actor };
   }

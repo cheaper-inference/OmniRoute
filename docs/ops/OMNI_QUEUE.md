@@ -319,13 +319,13 @@ prints the plan and writes nothing.
 
 Shadow mode observes. The PRs it reads are the ones Mergify still lands, so it leaves them alone.
 
-| Shadow mode writes                                                                            | Shadow mode never writes                                                                                    |
-| --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| candidate branches `omni-queue/<base>/…` (pushed, then deleted)                               | a label removal, on any path (culprit, conflict, head changed after the label, head already in the base)    |
-| the state file on `omni-queue-state`                                                          | a comment on a pull request from the tick (culprit, conflict, not eligible, protected surface, frozen base) |
-| the dashboard issue, and a comment on the `base-red` issue when it pauses a base              | a `failure` status when a label is removed: the `approval` job writes nothing for `unlabeled`               |
-| the `success` approval status when an approver applies a label (the `approval` job)           | a landing, a merge, or any push to a base                                                                   |
-| one comment from the `approval` job when someone who is not an approver applies a queue label |                                                                                                             |
+| Shadow mode writes                                                                  | Shadow mode never writes                                                                                    |
+| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| candidate branches `omni-queue/<base>/…` (pushed, then deleted)                     | a label removal, on any path (culprit, conflict, head changed after the label, head already in the base)    |
+| the state file on `omni-queue-state`                                                | a comment on a pull request from the tick (culprit, conflict, not eligible, protected surface, frozen base) |
+| the dashboard issue, and a comment on the `base-red` issue when it pauses a base    | a `failure` status when a label is removed: the `approval` job writes nothing for `unlabeled`               |
+| the `success` approval status when an approver applies a label (the `approval` job) | a landing, a merge, or any push to a base                                                                   |
+|                                                                                     | the "not an approver" comment of the `approval` job: a label from a non-approver is only logged             |
 
 What live mode would have done is recorded instead:
 

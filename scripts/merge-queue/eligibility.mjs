@@ -415,9 +415,9 @@ export function evaluateEligibility(pr, ctx) {
       // While approve.mjs may still be recording a fresh protected label, stay silent.
       if (prot?.reason !== "approval-missing") {
         const lead = count
-          ? `This PR changes agent-instruction surfaces (${surface}). `
+          ? `This PR changes protected surfaces (${surface}). `
           : "GitHub did not list every changed file of this PR, so omni-queue cannot rule out " +
-            "agent-instruction surfaces. ";
+            "protected surfaces. ";
         comment(
           `protected:${h12}`,
           lead +

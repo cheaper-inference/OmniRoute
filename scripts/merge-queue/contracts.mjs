@@ -555,7 +555,7 @@ export function matchesGlob(path, glob) {
   return globToRegExp(glob).test(String(path ?? "").replace(/^\.?\//, ""));
 }
 
-/** True when `path` is an agent-instruction surface (config.protectedPaths). */
+/** True when `path` is a protected surface (config.protectedPaths). */
 export function isProtectedPath(path, globs) {
   return globs.some((g) => matchesGlob(path, g));
 }
