@@ -163,6 +163,54 @@ scenario(
 );
 
 scenario(
+  "scenario 2b: a pull request opened on the candidate SHA never decides the candidate's verdict",
+  async (t) => {
+    const w = await createQueueWorld(t, { mode: "live" });
+    const base0 = w.baseTip();
+    await approvedPrs(w, [1]);
+    w.culprits.add(1);
+    await w.tick();
+    const red = w.state().inFlight;
+    w.runCi(red.candidateSha, red.candidateRef); // the candidate's own push run: Gate / CI fails
+    // A fork publishes the (public) candidate commit and opens a PR on it; its CI passes later.
+    w.reportChecks(red.candidateSha, {
+      headBranch: "patch-1",
+      suiteBranch: null,
+      event: "pull_request",
+    });
+    // Same trick from a branch of this repository named like the candidate ref.
+    w.reportChecks(red.candidateSha, { headBranch: red.candidateRef, event: "pull_request" });
+    await w.tick();
+    assert.equal(w.baseTip(), base0, "the red candidate did not land");
+    assert.equal(w.events("checks-red").length, 1);
+    assert.equal(w.events("checks-green").length, 0);
+    assert.deepEqual(
+      w.events("culprit-found").map((e) => e.prs),
+      [[1]]
+    );
+
+    // The other way around: a green candidate, and the PR's runs get cancelled.
+    await approvedPrs(w, [2]);
+    await w.tick();
+    const green = w.state().inFlight;
+    assert.deepEqual(nums(green.prs), [2]);
+    w.runCi(green.candidateSha, green.candidateRef);
+    for (const suiteBranch of [null, green.candidateRef]) {
+      w.reportChecks(green.candidateSha, {
+        headBranch: suiteBranch ?? "patch-1",
+        suiteBranch,
+        event: "pull_request",
+        conclusion: "cancelled",
+      });
+    }
+    await w.tick();
+    assert.equal(w.baseTip(), green.candidateSha, "the candidate's own green verdict landed it");
+    assert.equal(w.events("infra-retry").length, 0);
+    assert.equal(w.state().paused, null);
+  }
+);
+
+scenario(
   "scenario 3 (shadow): would-land, base intact, the next tick does not recompose",
   async (t) => {
     const w = await createQueueWorld(t, { mode: "shadow" });
@@ -188,6 +236,123 @@ scenario(
     assert.equal(w.candidatePushes().length, 1);
     assert.equal(state.inFlight, null);
     assert.equal(w.baseTip(), base0);
+  }
+);
+
+scenario(
+  "scenario 3b (shadow): culprit, conflicts and a withdrawn label write nothing on any PR",
+  async (t) => {
+    const w = await createQueueWorld(t, { mode: "shadow" });
+    // #1 conflicts with the base in git; GitHub already reports #4 as conflicting.
+    w.openPr(1, { "shared.txt": "PR one\nline 2\nline 3\n" });
+    w.sb.advanceBase({ "shared.txt": "BASE\nline 2\nline 3\n" }, "base edits line 1");
+    const base0 = w.baseTip();
+    w.openPr(2, { "two.txt": "2\n" });
+    w.openPr(3, { "three.txt": "3\n" });
+    w.openPr(4, { "four.txt": "4\n" });
+    w.fake.pulls.get(4).mergeable = false;
+    for (const n of [1, 2, 3, 4]) {
+      assert.equal((await w.label(n)).action, "approved");
+      w.clock.advance(1);
+    }
+    w.clock.advance(w.config.batch.maxWaitMinutes);
+    w.culprits.add(2);
+    const from = w.fake.requests.length;
+    await w.tick(); // b1 [2, 3]; #1 base-conflict, #4 conflicting
+    await drain(w); // red → [2] red (culprit) → [3] green (would-land)
+    await w.tick();
+    await w.tick();
+
+    const state = w.state();
+    assert.equal(w.baseTip(), base0, "shadow never lands");
+    assert.equal(state.inFlight, null);
+    assert.deepEqual(
+      w.events("batch-started").map((e) => e.prs),
+      [[2, 3], [2], [3]],
+      "no head is composed twice"
+    );
+    assert.deepEqual(
+      w.events("would-dequeue").map((e) => [e.prs[0], e.detail]),
+      [
+        [4, "conflicting"],
+        [1, "base-conflict"],
+      ]
+    );
+    assert.equal(w.events("pr-dequeued").length, 0);
+    const culprit = w.events("culprit-found");
+    assert.deepEqual(
+      culprit.map((e) => e.prs),
+      [[2]]
+    );
+    assert.match(culprit[0].detail, /shadow mode: label kept, no comment$/);
+    assert.deepEqual(
+      w.events("would-land").map((e) => e.prs),
+      [[3]]
+    );
+    assert.deepEqual(state.shadow.processed, {
+      1: w.headOf(1),
+      2: w.headOf(2),
+      3: w.headOf(3),
+    });
+    for (const n of [1, 2, 3, 4]) {
+      assert.deepEqual(w.labelsOf(n), ["omni-queue"], `#${n} keeps its label`);
+      assert.equal(w.fake.comments.get(n), undefined, `#${n} got no comment`);
+      const statuses = w.fake.statuses.get(w.headOf(n));
+      assert.deepEqual(
+        statuses.map((st) => [st.context, st.state]),
+        [["omni-queue/approval", "success"]],
+        `#${n}: the approval is the only status on its head`
+      );
+    }
+    const onPrs = writesIn(w.fake.requests.slice(from)).filter((r) =>
+      /^\/(issues|pulls)\/[1-4](\/|$)/.test(r.path)
+    );
+    assert.deepEqual(
+      onPrs.map((r) => `${r.method} ${r.path}`),
+      [],
+      "no label removal and no comment on a pull request"
+    );
+    const dashboard = [...w.fake.issues.values()].find((i) => i.title === dashboardTitle(QBASE));
+    assert.match(dashboard.body, /`would-dequeue`/);
+    assert.match(dashboard.body, /`shadow-processed`/);
+
+    // The maintainer withdraws a label: the approval job writes nothing in shadow mode.
+    const withdrawn = await w.unlabel(3);
+    assert.deepEqual(withdrawn, { action: "ignored" });
+    assert.deepEqual(
+      w.fake.statuses.get(w.headOf(3)).map((st) => st.state),
+      ["success"],
+      "no red status on a PR that another queue still lands"
+    );
+    await w.tick();
+    assert.equal(w.candidatePushes().length, 3);
+  }
+);
+
+scenario(
+  "scenario 3c (shadow): a PR Mergify merged during the candidate CI is noted on would-land",
+  async (t) => {
+    const w = await createQueueWorld(t, { mode: "shadow" });
+    const heads = await approvedPrs(w, [1, 2]);
+    await w.tick();
+    const f = w.state().inFlight;
+    assert.deepEqual(nums(f.prs), [1, 2]);
+    w.runCi(f.candidateSha, f.candidateRef);
+    // Another path merges #2 (the tested head) while the candidate CI runs.
+    Object.assign(w.fake.pulls.get(2), {
+      state: "closed",
+      merged: true,
+      merged_at: w.clock.now(),
+    });
+    await w.tick();
+
+    const would = w.events("would-land");
+    assert.equal(would.length, 1, "the green batch was not discarded");
+    assert.deepEqual(would[0].prs, [1, 2]);
+    assert.match(would[0].detail, /merged meanwhile by another path: #2$/);
+    assert.equal(w.events("land-rejected").length, 0);
+    assert.equal(w.candidatePushes().length, 1, "nothing recomposed");
+    assert.deepEqual(w.state().shadow.processed, { 1: heads[1] });
   }
 );
 

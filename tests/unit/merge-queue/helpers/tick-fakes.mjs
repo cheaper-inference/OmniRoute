@@ -64,6 +64,8 @@ export function createFakeGitHub({ readOnly = false } = {}) {
     timelines: new Map(),
     statuses: new Map(),
     checkRuns: new Map(),
+    /** workflow runs (normalized, github.listWorkflowRuns): the check suite of each push / PR run */
+    workflowRuns: [],
     annotations: new Map(),
     issues: [],
     comments: new Map(),
@@ -183,6 +185,17 @@ export function createFakeGitHub({ readOnly = false } = {}) {
     async listCheckRuns(sha) {
       read("listCheckRuns", [sha]);
       return copy(gh.checkRuns.get(sha) ?? []);
+    },
+    async listWorkflowRuns({ branch, headSha, event } = {}) {
+      read("listWorkflowRuns", [{ branch, headSha, event }]);
+      return copy(
+        gh.workflowRuns.filter(
+          (run) =>
+            (!branch || run.headBranch === branch) &&
+            (!headSha || run.headSha === headSha) &&
+            (!event || run.event === event)
+        )
+      );
     },
     async listCheckRunAnnotations(id) {
       read("listCheckRunAnnotations", [id]);
@@ -700,15 +713,46 @@ export function createHarness({ mode = "live", landing = "merge-ff", infraRetrie
       }
       return prs;
     },
+    /** Newest candidate branch of the fake origin that points at `sha` (null when none does). */
+    candidateRefAt(sha) {
+      const refs = [...gh.branches.entries()].filter(
+        ([name, tip]) => name.startsWith(CANDIDATE_PREFIX) && tip === sha
+      );
+      return refs.length ? refs.at(-1)[0] : null;
+    },
+    /**
+     * A workflow run on `sha` as GitHub Actions lists it: `event` "push" on branch `headBranch`
+     * (the candidate's own CI) or "pull_request" (a PR whose head is that commit; `headBranch` is
+     * then the PR's head branch name). Returns the id of its check suite, to put on its check runs
+     * as `checkSuiteId`.
+     */
+    workflowRun(sha, { headBranch, event = "push" } = {}) {
+      const checkSuiteId = 5000 + world.runSeq++;
+      gh.workflowRuns.push({
+        id: world.runSeq++,
+        name: "CI",
+        status: "completed",
+        conclusion: null,
+        htmlUrl: `https://github.com/${REPOSITORY}/actions/runs/${checkSuiteId}`,
+        headSha: sha,
+        headBranch: headBranch ?? null,
+        event,
+        checkSuiteId,
+      });
+      return checkSuiteId;
+    },
     /**
      * Report CI on `sha`: red (a "Gate / CI" failure) when the composition contains a culprit, a
      * full interaction pair (counting the PRs it was stacked on) or sits on a broken base SHA;
      * `infra` reports a startup_failure; `kind` "base-check" tests the bare base SHA. `at` pins
-     * the run time; `headBranch` tags the runs with the ref that triggered them.
+     * the run time. The runs belong to the check suite of a push workflow run on `headBranch`
+     * (default: the newest candidate ref pointing at `sha`, as the push of that ref starts CI).
      */
     runCi(sha, { infra = false, kind = "batch", at: pinned = null, headBranch } = {}) {
       clock.advance(1);
       const at = pinned ?? clock.now();
+      const branch = headBranch ?? h.candidateRefAt(sha);
+      const checkSuiteId = h.workflowRun(sha, { headBranch: branch, event: "push" });
       let red;
       if (kind === "base-check") red = world.brokenBases.has(sha);
       else {
@@ -737,11 +781,45 @@ export function createHarness({ mode = "live", landing = "merge-ff", infraRetrie
           htmlUrl: `https://github.com/${REPOSITORY}/actions/runs/1/job/${id}`,
           appSlug: "github-actions",
           output: { title: null, summary: null, text: null },
+          checkSuiteId,
           ...(headBranch ? { headBranch } : {}),
         };
       });
       gh.checkRuns.set(sha, [...(gh.checkRuns.get(sha) ?? []), ...runs]);
       clock.advance(1);
+    },
+    /**
+     * Check runs that a pull_request workflow run reports on `sha` (somebody opened a PR whose
+     * head is that commit): one run per `names` entry with `conclusion`, in a suite of its own.
+     * `headBranch` null = a fork PR (GitHub reports no head_branch for its suite); a string = a
+     * PR opened from a branch of this repository.
+     */
+    runPrCi(
+      sha,
+      { headBranch = null, conclusion = "success", names = config.requiredChecks } = {}
+    ) {
+      clock.advance(1);
+      const at = clock.now();
+      const checkSuiteId = h.workflowRun(sha, {
+        headBranch: headBranch ?? "fork-branch",
+        event: "pull_request",
+      });
+      const runs = names.map((name) => ({
+        id: world.runSeq++,
+        name,
+        status: "completed",
+        conclusion,
+        startedAt: at,
+        completedAt: at,
+        htmlUrl: null,
+        appSlug: "github-actions",
+        output: { title: null, summary: null, text: null },
+        checkSuiteId,
+        headBranch,
+      }));
+      gh.checkRuns.set(sha, [...(gh.checkRuns.get(sha) ?? []), ...runs]);
+      clock.advance(1);
+      return runs;
     },
     /** Run CI for whatever is in flight, then tick; repeat until the queue is idle. */
     async drain({ maxTicks = 40 } = {}) {

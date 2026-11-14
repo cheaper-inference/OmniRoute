@@ -323,6 +323,68 @@ test("approval status must cite an approver and be success", () => {
   assert.equal(approvalFor(prefix, makeCtx(), "queue").valid, false);
 });
 
+test("a withdrawn label stops the approval from counting without any failure status", () => {
+  // approve.mjs writes no status on `unlabeled` in shadow mode: the old `success` stays the
+  // newest status of the head. It must never count again by itself.
+  const withdrawn = {
+    event: "unlabeled",
+    actor: APPROVER,
+    label: config.label,
+    createdAt: iso(90),
+  };
+  const stale = [approvalStatus("queue", OLD)];
+  // 1. label gone: ineligible whatever the statuses say
+  const unlabeled = makePr({
+    labels: [],
+    timeline: [labeledEvent(config.label, APPROVER, OLD), withdrawn],
+    headStatuses: stale,
+  });
+  assert.deepEqual(codes(evaluateEligibility(unlabeled, makeCtx())), ["no-label"]);
+  // 2. put back by somebody who is not an approver: the latest label decides
+  const byOther = makePr({
+    timeline: [
+      labeledEvent(config.label, APPROVER, OLD),
+      withdrawn,
+      labeledEvent(config.label, "random-user", 60),
+    ],
+    headStatuses: stale,
+  });
+  assert.deepEqual(codes(evaluateEligibility(byOther, makeCtx())), ["label-not-by-approver"]);
+  // 3. put back by an approver: only a status as new as THAT label approves the head
+  const relabeled = (minutesAgo) =>
+    makePr({
+      timeline: [
+        labeledEvent(config.label, APPROVER, OLD),
+        withdrawn,
+        labeledEvent(config.label, APPROVER, minutesAgo),
+      ],
+      headStatuses: stale,
+    });
+  assert.deepEqual(codes(evaluateEligibility(relabeled(60), makeCtx())), ["approval-missing"]);
+  assert.deepEqual(codes(evaluateEligibility(relabeled(SKEW_MIN + 1), makeCtx())), [
+    "head-changed-after-label",
+  ]);
+  // 4. the protected approval follows the same rule
+  const protectedPr = (labels) =>
+    makePr({
+      files: ["AGENTS.md"],
+      labels,
+      timeline: [
+        labeledEvent(config.label, APPROVER, OLD),
+        labeledEvent(config.protectedApprovalLabel, APPROVER, OLD),
+      ],
+      headStatuses: [approvalStatus("queue", OLD), approvalStatus("protected", OLD)],
+    });
+  assert.equal(
+    evaluateEligibility(protectedPr([config.label, config.protectedApprovalLabel]), makeCtx())
+      .eligible,
+    true
+  );
+  assert.deepEqual(codes(evaluateEligibility(protectedPr([config.label]), makeCtx())), [
+    "protected-approval-missing",
+  ]);
+});
+
 test("a newer failure status (approval withdrawn) invalidates an older success", () => {
   const pr = makePr({
     headStatuses: [

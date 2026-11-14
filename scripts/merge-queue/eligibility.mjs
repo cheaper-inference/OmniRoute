@@ -439,7 +439,7 @@ export function evaluateEligibility(pr, ctx) {
   }
 
   if (config.mode === "shadow" && ctx.state?.shadow?.processed?.[String(n)] === pr.headSha) {
-    reason("shadow-processed", `head ${h12} already validated in shadow mode`);
+    reason("shadow-processed", `head ${h12} already processed in shadow mode`);
   }
 
   return { eligible: reasons.length === 0, reasons, actions, approval, protectedSurface };

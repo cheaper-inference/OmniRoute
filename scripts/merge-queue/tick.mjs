@@ -22,7 +22,8 @@
 // candidateSha (checks.evaluateChecks) → pending: nothing; green: land (or would-land in shadow)
 // / advance bisection; red: classify (classify.classifyRed) → infra retry / base-check / bisect /
 // culprit; timeout: infra path → if nothing in flight: snapshot labeled PRs, run eligibility,
-// execute its actions, select a batch, compose, push the candidate → render dashboard → save.
+// execute its actions, select a batch, compose, push the candidate → render dashboard → save
+// (only when the state changed, or as an hourly heartbeat: STATE_HEARTBEAT_MINUTES).
 // Every network side effect happens BEFORE the state save that records it, and every step is
 // safe to repeat when the save loses the CAS race (the next tick re-observes GitHub):
 //   - candidate refs are unique per SHA (never force-pushed) and orphans are deleted by cleanup;
@@ -38,6 +39,12 @@
 //
 // The PR snapshot + eligibility run on EVERY tick (dashboard queue, eligibility comments and
 // label removals); only the batch selection/composition waits for an idle, unpaused queue.
+//
+// SHADOW MODE is inert for pull requests: no label is removed and no comment is posted on a PR,
+// on any path (removeLabel / commentPr are the only two ways the tick writes to one). What live
+// mode would have done is recorded instead: `culprit-found` (with a shadow note) and
+// `would-dequeue` events, and the head is remembered in state.shadow.processed so it is not
+// batched again. Issues the queue owns (dashboard, base-red notice) are still written.
 
 import { mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -101,6 +108,15 @@ export { StateConflictError };
  */
 
 export const TICK_ACTIONS = Object.freeze(["tick", "pause", "resume", "dry-run"]);
+
+/**
+ * How often a tick that changed nothing still saves the state. Most ticks change nothing (idle
+ * queue, candidate checks pending), and a save stamps `updatedAt`, so saving on every tick was
+ * one commit on the state branch per tick: 288 a day per base from the cron alone. An unchanged
+ * state is written only as a heartbeat, at most once per this interval, so the age of
+ * `updatedAt` still tells an idle queue (under the interval plus one tick) from a dead one.
+ */
+export const STATE_HEARTBEAT_MINUTES = 60;
 
 /** GitHub client methods that write; refused (and reported) during a dry-run. */
 export const GH_WRITE_METHODS = Object.freeze([
@@ -240,6 +256,8 @@ class Tick {
     this.reason = reason;
     this.dryRun = action === "dry-run";
     this.config = deps.config;
+    /** Anything but live observes only: nothing lands, nothing is written on a pull request. */
+    this.shadow = this.config.mode !== "live";
     this.violations = [];
     this.gh = this.dryRun ? readOnlyGitHub(deps.gh, this.violations) : deps.gh;
     this.m = { ...DEFAULT_MODULES, ...(deps.modules ?? {}) };
@@ -362,15 +380,35 @@ class Tick {
     return this.s.history.some(predicate);
   }
 
+  /** Comment on an issue the queue owns (base-red notice, divergence): written in every mode. */
   async comment(n, key, body) {
     if (this.dryRun) return this.note(`would comment on #${n} (${key})`);
     await this.gh.commentOnce(n, key, body);
   }
 
+  /** Comment on a PULL REQUEST: never in shadow mode. */
+  async commentPr(n, key, body) {
+    if (this.shadow) return this.note(`shadow: comment ${key} on #${n} not posted`);
+    await this.comment(n, key, body);
+  }
+
+  /** Remove a label from a PULL REQUEST: never in shadow mode. */
   async removeLabel(n, label) {
+    if (this.shadow) return this.note(`shadow: label "${label}" kept on #${n}`);
     this.touched.add(n);
     if (this.dryRun) return this.note(`would remove label "${label}" from #${n}`);
     await this.gh.removeLabel(n, label);
+  }
+
+  /**
+   * Shadow mode: live mode would have removed `pr` from the queue (label + comment). Record it
+   * and remember the head like a validated one, so it is not batched again until it changes.
+   * @param {PrRef} pr
+   */
+  wouldDequeue(pr, detail, batchId) {
+    this.s.shadow.processed[String(pr.n)] = pr.head;
+    this.event("would-dequeue", { batchId, prs: [pr.n], sha: pr.head, detail });
+    this.note(`shadow: #${pr.n} would be dequeued (${detail}); label kept, no comment`);
   }
 
   /**
@@ -429,15 +467,49 @@ class Tick {
     if (this.violations.length) {
       throw new Error(`dry-run attempted GitHub writes: ${this.violations.join(", ")}`);
     }
-    if (!this.dryRun) {
-      const result = await store.save(this.base, this.s, version, `omni-queue: tick ${this.base}`);
-      if (!result.ok) {
-        throw new StateConflictError(`state of ${this.base} changed during the tick`);
-      }
-      if (result.state) this.s = result.state;
-    }
+    if (!this.dryRun) await this.saveState(state, version);
     await this.deleteSuperseded(loadedRefs);
     return { base: this.base, decisions: this.decisions, state: this.s };
+  }
+
+  /** Save the tick's state with compare-and-swap, unless there is nothing to write. */
+  async saveState(loaded, version) {
+    if (!this.saveNeeded(loaded, version)) {
+      this.note(`state unchanged: not saved (heartbeat every ${STATE_HEARTBEAT_MINUTES} min)`);
+      return;
+    }
+    const message = `omni-queue: tick ${this.base}`;
+    const result = await this.deps.store.save(this.base, this.s, version, message);
+    if (!result.ok) {
+      throw new StateConflictError(`state of ${this.base} changed during the tick`);
+    }
+    if (result.state) this.s = result.state;
+  }
+
+  /**
+   * False when the tick left the stored document exactly as it loaded it (`updatedAt` aside)
+   * and the last save is younger than STATE_HEARTBEAT_MINUTES: nothing to write.
+   *
+   * Skipping the save is safe for the compare-and-swap and for the refs:
+   *  - the CAS protects a write from overwriting a concurrent one. A tick with nothing to write
+   *    cannot lose an update, and the version it loaded is discarded with it: the next tick
+   *    loads its own;
+   *  - what an unchanged tick does on GitHub (dashboard, eligibility comments, stray-ref
+   *    cleanup) happens BEFORE the save in every tick and is not recorded in the state, so a
+   *    save never guarded it; a concurrent change is seen by the next tick instead of by a redo;
+   *  - deleteSuperseded removes the loaded in-flight refs the new state no longer names. With
+   *    an identical document those two sets are equal, so it deletes nothing: no ref ever goes
+   *    away on the strength of a save that did not happen.
+   * A missing document (version null) is always written, and so is anything whose age cannot
+   * be read (invalid or future `updatedAt`).
+   * @param {QueueState} loaded   the document store.load returned
+   * @param {string|null} version its CAS version (null = no document yet)
+   */
+  saveNeeded(loaded, version) {
+    if (version === null || version === undefined) return true;
+    if (withoutStamp(loaded) !== withoutStamp(this.s)) return true;
+    const age = Date.parse(this.now()) - Date.parse(loaded.updatedAt);
+    return !(age >= 0 && age < STATE_HEARTBEAT_MINUTES * 60_000);
   }
 
   handleAction() {
@@ -480,16 +552,43 @@ class Tick {
   // ─────────────────────────── in-flight candidate ───────────────────────────
 
   /**
-   * Check runs and statuses of `sha` for ONE candidate ref: runs that name another head branch
-   * (the base's own push on a base-check SHA, the other ref of an infra retry) are not ours.
-   * `since` additionally drops results older than the attempt (statuses carry no branch).
+   * Check runs on `sha` that the push of candidate ref `ref` produced: the runs of the check
+   * suites of the push-event workflow runs GitHub lists for that branch and SHA. Every other
+   * run on the SHA is not ours and never enters the verdict:
+   *  - the base's own push of a base-check SHA, and the other ref of an infra retry;
+   *  - a pull request opened on the candidate commit. The SHA is public, so anybody can publish
+   *    it in a fork (the suite then has no head_branch) or, with a branch in this repository,
+   *    under any name, the candidate ref included; that PR's CI reports on the same SHA, and by
+   *    re-pushing or cancelling its author could turn the candidate red, pending or "infra", or
+   *    supersede the candidate's own result with a later run of the same name. A check suite
+   *    only says which branch, never which event, so the workflow run is what decides.
+   * Fail closed: without a ref, or while no push run is listed, no check run counts (the verdict
+   * stays pending and checks.NO_RUN_TIMEOUT_MINUTES applies).
+   */
+  async pushCheckRuns(sha, ref) {
+    if (!ref) return [];
+    const runs = await this.gh.listCheckRuns(sha);
+    if (!runs.length) return [];
+    const pushes = await this.gh.listWorkflowRuns({ branch: ref, headSha: sha, event: "push" });
+    const suites = new Set();
+    for (const run of pushes) {
+      // The filters are re-checked here: a listing that ignored one must not widen the verdict.
+      const ours = run.event === "push" && run.headBranch === ref && run.headSha === sha;
+      if (ours && run.checkSuiteId !== null && run.checkSuiteId !== undefined) {
+        suites.add(run.checkSuiteId);
+      }
+    }
+    return runs.filter((run) => suites.has(run.checkSuiteId));
+  }
+
+  /**
+   * Check runs and statuses of `sha` for ONE candidate ref (see pushCheckRuns for which runs are
+   * the candidate's). `since` additionally drops results older than the attempt (statuses
+   * carry no branch).
    */
   async readChecks(sha, { since = null, ref = null } = {}) {
-    let runs = await this.gh.listCheckRuns(sha);
+    let runs = await this.pushCheckRuns(sha, ref);
     let statuses = await this.gh.listCommitStatuses(sha);
-    if (ref) {
-      runs = runs.filter((run) => typeof run.headBranch !== "string" || run.headBranch === ref);
-    }
     if (since) {
       // Same SHA tested before (infra retry, or a base-check on the base's own SHA): ignore
       // results that predate this attempt so an old verdict is never re-read as the new one.
@@ -607,8 +706,10 @@ class Tick {
    * protected approval, release-freeze. Reasons caused by the batch itself are tolerated.
    * Read errors propagate (the tick fails and the next one retries; nothing is dropped blindly).
    * @param {PrRef[]} prs
-   * @returns {Promise<{valid: PrRef[], dropped: {pr: PrRef, why: string}[],
-   *   frozen: string|null}>} frozen = the base is under an open release-freeze
+   * @returns {Promise<{valid: PrRef[], frozen: string|null,
+   *   dropped: {pr: PrRef, why: string, mergedAtHead: boolean}[]}>}
+   *   frozen = the base is under an open release-freeze; mergedAtHead = another path merged the
+   *   PR at exactly the head this batch tested
    */
   async revalidate(prs) {
     const valid = [];
@@ -638,7 +739,7 @@ class Tick {
         const blocking = reasons.filter((r) => r.code !== "base-frozen");
         if (blocking.length) why = blocking.map((r) => r.code).join(", ");
       }
-      if (why) dropped.push({ pr, why });
+      if (why) dropped.push({ pr, why, mergedAtHead: snap.merged && snap.headSha === pr.head });
       else valid.push(pr);
     }
     return { valid, dropped, frozen };
@@ -690,7 +791,11 @@ class Tick {
 
     const { valid, dropped, frozen } = await this.revalidate(f.prs);
     if (frozen) return this.holdFrozen(f, frozen);
-    if (dropped.length) {
+    // Shadow lands nothing, and during shadow another path (Mergify) keeps merging the same PRs:
+    // one merged at the tested head while the candidate CI ran does not make the green verdict
+    // worthless, so it is named on the would-land event instead of discarding the batch.
+    const mergedMeanwhile = live ? [] : dropped.filter((d) => d.mergedAtHead).map((d) => d.pr);
+    if (dropped.length > mergedMeanwhile.length) {
       const detail = dropped.map((d) => `#${d.pr.n} ${d.why}`).join("; ");
       this.event("land-rejected", {
         batchId: f.batchId,
@@ -711,7 +816,11 @@ class Tick {
         batchId: f.batchId,
         prs: prNumbers(f.prs),
         sha: f.candidateSha,
-        detail: `shadow mode: would ${this.config.landing.mode} onto ${head12(f.baseSha)}`,
+        detail:
+          `shadow mode: would ${this.config.landing.mode} onto ${head12(f.baseSha)}` +
+          (mergedMeanwhile.length
+            ? `; merged meanwhile by another path: ${formatPrs(mergedMeanwhile)}`
+            : ""),
       });
       this.note(`shadow: ${f.batchId} would land ${formatPrs(f.prs)}`);
       return this.afterSegmentGreen(f);
@@ -777,7 +886,7 @@ class Tick {
     for (const pr of f.prs) {
       await this.removeLabel(pr.n, label);
       await this.removeLabel(pr.n, protectedApprovalLabel);
-      await this.comment(
+      await this.commentPr(
         pr.n,
         `landed:${head12(pr.head)}`,
         [
@@ -1169,6 +1278,19 @@ class Tick {
       this.note(`culprit #${pr.n} (${head12(pr.head)}): head moved, label kept`);
       return;
     }
+    if (this.shadow) {
+      // Observed only: the label stays and nothing is posted; the head is settled for shadow.
+      this.s.shadow.processed[String(pr.n)] = pr.head;
+      this.s.counters.culprits += 1;
+      this.event("culprit-found", {
+        batchId,
+        prs: [pr.n],
+        sha: candidateSha,
+        detail: `${failed}; shadow mode: label kept, no comment`,
+      });
+      this.note(`shadow: culprit #${pr.n} would be dequeued; label kept, no comment`);
+      return;
+    }
     const lines = failures.length
       ? failures.map(
           (run) =>
@@ -1177,7 +1299,7 @@ class Tick {
         )
       : ["  - (no failing check could be read; see the candidate checks)"];
     await this.removeLabel(pr.n, this.config.label);
-    await this.comment(
+    await this.commentPr(
       pr.n,
       `culprit:${head12(pr.head)}`,
       [
@@ -1229,8 +1351,12 @@ class Tick {
       heads,
     });
     for (const pr of result.excludedBaseConflict ?? []) {
+      if (this.shadow) {
+        this.wouldDequeue(pr, "base-conflict", batchId);
+        continue;
+      }
       await this.removeLabel(pr.n, this.config.label);
-      await this.comment(
+      await this.commentPr(
         pr.n,
         `base-conflict:${head12(pr.head)}`,
         [
@@ -1312,9 +1438,10 @@ class Tick {
    * no later tick recomposes it) with one comment per head.
    */
   async dropAlreadyInBase(pr, batchId, baseSha) {
+    if (this.shadow) return this.wouldDequeue(pr, "already-in-base", batchId);
     await this.removeLabel(pr.n, this.config.label);
     await this.removeLabel(pr.n, this.config.protectedApprovalLabel);
-    await this.comment(
+    await this.commentPr(
       pr.n,
       `already-landed:${head12(pr.head)}`,
       [
@@ -1450,13 +1577,16 @@ class Tick {
         continue;
       }
       const verdict = this.m.eligibility.evaluateEligibility(pr, ctx);
+      let wouldDequeue = false;
       for (const action of verdict.actions ?? []) {
-        if (action.type === "comment") await this.comment(action.pr, action.key, action.body);
+        if (action.type === "comment") await this.commentPr(action.pr, action.key, action.body);
         else if (action.type === "removeLabel") {
           await this.removeLabel(action.pr, action.label ?? label);
+          wouldDequeue = this.shadow;
         } else throw new Error(`unknown eligibility action: ${action.type}`);
       }
-      const dequeued = this.touched.has(pr.number);
+      if (wouldDequeue) this.recordWouldDequeue(pr, verdict);
+      const dequeued = this.touched.has(pr.number) || wouldDequeue;
       const eligible = Boolean(verdict.eligible) && !dequeued;
       entries.push({
         number: pr.number,
@@ -1472,6 +1602,23 @@ class Tick {
       (a, b) => (a.labeledAt ?? "￿").localeCompare(b.labeledAt ?? "￿") || a.number - b.number
     );
     return { entries, candidates, ctx };
+  }
+
+  /**
+   * Shadow mode: eligibility asked to remove the queue label of `pr` (head changed after the
+   * label, conflicting). The label stays, so the same verdict comes back on every tick: one
+   * event per head. The head is NOT marked processed: the PR stays ineligible by itself while
+   * the cause lasts, and a new approval of this head must still be able to queue it.
+   * @param {import("./eligibility.mjs").PrSnapshot} pr
+   */
+  recordWouldDequeue(pr, verdict) {
+    const seen = this.hasEvent(
+      (e) => e.type === "would-dequeue" && e.sha === pr.headSha && e.prs?.[0] === pr.number
+    );
+    if (seen) return;
+    const detail = (verdict.reasons ?? []).map((r) => r.code).join(", ") || "eligibility";
+    this.event("would-dequeue", { prs: [pr.number], sha: pr.headSha, detail });
+    this.note(`shadow: #${pr.number} would be dequeued (${detail}); label kept, no comment`);
   }
 
   async startBatch(queue) {
@@ -1547,6 +1694,9 @@ class Tick {
     }
   }
 }
+
+/** A state document without its save stamp, serialized: equal strings = nothing to save. */
+const withoutStamp = (state) => JSON.stringify({ ...state, updatedAt: null });
 
 /** {"<n>": labeledAt} of the PRs of a batch (HistoryEvent.labeledAt, dashboard metrics). */
 function approvalTimes(prs) {
