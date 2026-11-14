@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { renderReadmeHero, HERO_COPY } from "../../../scripts/docs/gen-readme-hero.mjs";
 import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
+import { releaseOnlyUnlessTouched } from "../../../scripts/check/lib/derivedArtifactScope.mjs";
 
 // The committed hero must be exactly what the generator produces, draw the kit type as
 // outlines, keep every string as text, keep the counts gate's numbers readable as text and
@@ -10,15 +11,23 @@ import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-test("the committed hero is exactly what the generator produces (regenerate with npm run docs:readme-hero)", async () => {
-  const generated = await renderReadmeHero();
-  const committed = readFileSync("docs/diagrams/readme-hero.svg", "utf8");
-  assert.equal(
-    committed,
-    generated,
-    "docs/diagrams/readme-hero.svg is stale — regenerate with `npm run docs:readme-hero`"
-  );
-});
+// Release mode (and a change that edits this file) compares it byte for byte; a feature PR
+// leaves the drift to the release refresh (scripts/check/lib/derivedArtifactScope.mjs).
+const stalenessCheck = { skip: releaseOnlyUnlessTouched("docs/diagrams/readme-hero.svg") };
+
+test(
+  "the committed hero is exactly what the generator produces (regenerate with npm run docs:readme-hero)",
+  stalenessCheck,
+  async () => {
+    const generated = await renderReadmeHero();
+    const committed = readFileSync("docs/diagrams/readme-hero.svg", "utf8");
+    assert.equal(
+      committed,
+      generated,
+      "docs/diagrams/readme-hero.svg is stale — regenerate with `npm run docs:readme-hero`"
+    );
+  }
+);
 
 test("the only embedded font is the mono subset for the install command, and nothing is external", async () => {
   const svg = await renderReadmeHero();

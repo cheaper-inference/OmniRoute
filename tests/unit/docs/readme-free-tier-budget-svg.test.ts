@@ -8,6 +8,7 @@ import {
   fmtWords,
 } from "../../../scripts/docs/gen-readme-free-tier-budget.mjs";
 import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
+import { releaseOnlyUnlessTouched } from "../../../scripts/check/lib/derivedArtifactScope.mjs";
 
 // The committed free-tier budget card must be exactly what the generator produces from the live
 // catalog, draw the kit type as outlines, keep every string as text, keep the counts gate's
@@ -16,15 +17,23 @@ import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-test("the committed free-tier-budget diagram is exactly what the generator produces", async () => {
-  const generated = await renderReadmeFreeTierBudget();
-  const committed = readFileSync("docs/diagrams/free-tier-budget.svg", "utf8");
-  assert.equal(
-    committed,
-    generated,
-    "docs/diagrams/free-tier-budget.svg is stale — regenerate with `node --import tsx/esm scripts/docs/gen-readme-free-tier-budget.mjs`"
-  );
-});
+// Release mode (and a change that edits this file) compares it byte for byte; a feature PR
+// leaves the drift to the release refresh (scripts/check/lib/derivedArtifactScope.mjs).
+const stalenessCheck = { skip: releaseOnlyUnlessTouched("docs/diagrams/free-tier-budget.svg") };
+
+test(
+  "the committed free-tier-budget diagram is exactly what the generator produces",
+  stalenessCheck,
+  async () => {
+    const generated = await renderReadmeFreeTierBudget();
+    const committed = readFileSync("docs/diagrams/free-tier-budget.svg", "utf8");
+    assert.equal(
+      committed,
+      generated,
+      "docs/diagrams/free-tier-budget.svg is stale — regenerate with `node --import tsx/esm scripts/docs/gen-readme-free-tier-budget.mjs`"
+    );
+  }
+);
 
 test("no font is embedded (every string is outlined) and nothing is external", async () => {
   const svg = await renderReadmeFreeTierBudget();

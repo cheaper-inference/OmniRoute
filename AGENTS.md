@@ -363,8 +363,12 @@ OmniRoute has **~90 quality-gate scripts** (`scripts/check/` + `scripts/quality/
 - Gates in jobs `lint` + `docs-sync-strict`: pass/fail policy gates —
   fix the violation or add an allowlist entry with a justification comment + tracking issue.
 - Gates in job `quality-gate`: ratchet — metrics (ESLint warnings, code coverage, duplication,
-  complexity) must not regress vs `quality-baseline.json`. Update via
-  `npm run quality:ratchet -- --update` when a metric genuinely improves.
+  complexity) must not regress vs `quality-baseline.json`. A feature PR never banks an
+  improvement (`--update` runs at release); a regression still fails.
+- Generated files and derived baselines (`docs/reference/PROVIDER_REFERENCE.md`, the README SVGs,
+  the generated `skills/*/SKILL.md` + `references/`, `config/quality/e2e-timings.json`) are written
+  by the release refresh, not by feature PRs — `check:pr-derived-paths` flags a PR that carries
+  them. See `docs/architecture/QUALITY_GATES.md` → "Generated files and derived baselines".
 - Job `test-vitest` runs `npm run test:vitest` (MCP tools, autoCombo, cache) — blocking.
   `test:vitest:ui` has been blocking since PR #7127.
 - **Velocity phase (2026-08-30 → v4.0)**: every numeric baseline is loosened by 20% and `--require-tighten` is advisory (`quality-baseline.json` → `_policy`); the nightly `baseline-headroom` job tracks how much of the budget is left in the issue "📈 Baseline headroom". See `docs/architecture/QUALITY_GATES.md` → "Velocity phase".
@@ -387,7 +391,7 @@ is a short form, its complete binding text, rationale and incident history are i
 6. Never silently swallow errors in SSE streams
 7. Always validate inputs with Zod schemas
 8. Always include tests when changing production code
-9. Coverage must not regress below the baseline frozen in `quality-baseline.json` (ratchet); absolute floor is 60% (statements/lines/functions/branches). Update the baseline via `npm run quality:ratchet -- --update` only when coverage genuinely improves. See `docs/architecture/QUALITY_GATES.md`.
+9. Coverage must not regress below the baseline frozen in `quality-baseline.json` (ratchet); absolute floor is 60% (statements/lines/functions/branches). The baseline is tightened with `npm run quality:ratchet -- --update` at release, never inside a feature PR. See `docs/architecture/QUALITY_GATES.md`.
 10. Never bypass Husky hooks (`--no-verify`, `--no-gpg-sign`) without explicit operator approval.
 11. Never embed public upstream OAuth client_id/secret or Firebase Web keys as string literals — always go through `resolvePublicCred()` (`open-sse/utils/publicCreds.ts`). See `docs/security/PUBLIC_CREDS.md`.
 12. Never return raw `err.stack` / `err.message` in HTTP / SSE / executor responses — always route through `buildErrorBody()` or `sanitizeErrorMessage()` (`open-sse/utils/error.ts`). See `docs/security/ERROR_SANITIZATION.md`.

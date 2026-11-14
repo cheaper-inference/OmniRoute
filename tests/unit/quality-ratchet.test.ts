@@ -7,7 +7,14 @@ import path from "node:path";
 
 const SCRIPT = path.resolve("scripts/quality/check-quality-ratchet.mjs");
 
-function run(baseline: unknown, metrics: unknown, extraArgs: string[] = []) {
+// The gate mode (scripts/check/lib/gateMode.mjs) decides whether --require-tighten bites; every
+// test pins it so the verdict does not depend on the runner (a CI pull_request run is `pr`).
+function run(
+  baseline: unknown,
+  metrics: unknown,
+  extraArgs: string[] = [],
+  mode: "pr" | "release" = "release"
+) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ratchet-"));
   const bPath = path.join(dir, "baseline.json");
   const mPath = path.join(dir, "metrics.json");
@@ -15,9 +22,14 @@ function run(baseline: unknown, metrics: unknown, extraArgs: string[] = []) {
   fs.writeFileSync(mPath, JSON.stringify(metrics));
   // spawnSync so we can always capture both stdout and stderr
   // (warnings via console.warn go to stderr; we need them in the `out` field).
-  const result = spawnSync("node", [SCRIPT, "--baseline", bPath, "--metrics", mPath, ...extraArgs], {
-    encoding: "utf8",
-  });
+  const result = spawnSync(
+    "node",
+    [SCRIPT, "--baseline", bPath, "--metrics", mPath, ...extraArgs],
+    {
+      encoding: "utf8",
+      env: { ...process.env, OMNIROUTE_GATE_MODE: mode },
+    }
+  );
   const code = result.status ?? 1;
   const out = (result.stdout || "") + (result.stderr || "");
   return { code, out, dir, bPath };
@@ -203,4 +215,56 @@ test("without _policy the --require-tighten gate still bites", () => {
   const r = run(b, { eslintWarnings: 0 }, ["--require-tighten"]);
   assert.equal(r.code, 1);
   assert.match(r.out, /require-tighten/);
+});
+
+// Plan 2026-11-13: baselines are banked by the release refresh / nightly, not by feature PRs.
+// In `pr` mode an improvement never fails (the PR is not asked to edit quality-baseline.json);
+// a regression still does. Release mode keeps the strict --require-tighten.
+test("pr mode: --require-tighten reports an un-banked improvement without failing", () => {
+  const b = { metrics: { eslintWarnings: { value: 1000, direction: "down", tightenSlack: 10 } } };
+  const r = run(b, { eslintWarnings: 0 }, ["--require-tighten"], "pr");
+  assert.equal(r.code, 0, r.out);
+  assert.match(r.out, /--require-tighten advisory: mode=pr \(env: OMNIROUTE_GATE_MODE=pr\)/);
+  assert.match(r.out, /eslintWarnings: melhorou de 1000 para 0/);
+});
+
+test("pr mode: the advisory never tells the feature PR to commit the tightened baseline", () => {
+  const b = { metrics: { eslintWarnings: { value: 1000, direction: "down", tightenSlack: 10 } } };
+  const r = run(b, { eslintWarnings: 0 }, ["--require-tighten"], "pr");
+  assert.equal(r.code, 0, r.out);
+  assert.doesNotMatch(r.out, /commite o baseline apertado neste PR/);
+  assert.match(r.out, /eslintWarnings: melhorou de 1000 para 0 .*banked by the release refresh/);
+});
+
+test("release mode: the tighten failure keeps its 'commit the tightened baseline' instruction", () => {
+  const b = { metrics: { eslintWarnings: { value: 1000, direction: "down", tightenSlack: 10 } } };
+  const r = run(b, { eslintWarnings: 0 }, ["--require-tighten"], "release");
+  assert.equal(r.code, 1, r.out);
+  assert.match(
+    r.out,
+    /eslintWarnings: melhorou de 1000 para 0 \(delta 1000\.0000 > slack 10\) — rode 'npm run quality:ratchet -- --update' e commite o baseline apertado neste PR/
+  );
+});
+
+test("pr mode: a regression still fails, with or without --require-tighten", () => {
+  const b = { metrics: { eslintWarnings: { value: 100, direction: "down" } } };
+  for (const args of [[], ["--require-tighten"]]) {
+    const r = run(b, { eslintWarnings: 101 }, args, "pr");
+    assert.equal(r.code, 1, `${args.join(" ")}: ${r.out}`);
+    assert.match(r.out, /eslintWarnings: 101 > baseline 100/);
+  }
+});
+
+test("release mode: --require-tighten still bites without _policy (same as before the split)", () => {
+  const b = { metrics: { eslintWarnings: { value: 1000, direction: "down", tightenSlack: 10 } } };
+  const r = run(b, { eslintWarnings: 0 }, ["--require-tighten"], "release");
+  assert.equal(r.code, 1, r.out);
+  assert.match(r.out, /FALHOU \(--require-tighten\)/);
+});
+
+test("--mode=pr on the command line wins over the environment", () => {
+  const b = { metrics: { eslintWarnings: { value: 1000, direction: "down", tightenSlack: 10 } } };
+  const r = run(b, { eslintWarnings: 0 }, ["--require-tighten", "--mode=pr"], "release");
+  assert.equal(r.code, 0, r.out);
+  assert.match(r.out, /mode=pr \(flag: --mode=pr\)/);
 });

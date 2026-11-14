@@ -6,6 +6,7 @@ import {
   CLI_TERMINAL_COPY,
 } from "../../../scripts/docs/gen-readme-cli-terminal.mjs";
 import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
+import { releaseOnlyUnlessTouched } from "../../../scripts/check/lib/derivedArtifactScope.mjs";
 
 // The committed terminal demo must be exactly what the generator produces, carry the kit mono
 // face inline, keep every string as text, keep the counts gate's numbers readable as text
@@ -14,15 +15,23 @@ import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-test("the committed cli-terminal diagram is exactly what the generator produces", async () => {
-  const generated = await renderCliTerminal();
-  const committed = readFileSync("docs/diagrams/cli-terminal.svg", "utf8");
-  assert.equal(
-    committed,
-    generated,
-    "docs/diagrams/cli-terminal.svg is stale — regenerate with `node scripts/docs/gen-readme-cli-terminal.mjs`"
-  );
-});
+// Release mode (and a change that edits this file) compares it byte for byte; a feature PR
+// leaves the drift to the release refresh (scripts/check/lib/derivedArtifactScope.mjs).
+const stalenessCheck = { skip: releaseOnlyUnlessTouched("docs/diagrams/cli-terminal.svg") };
+
+test(
+  "the committed cli-terminal diagram is exactly what the generator produces",
+  stalenessCheck,
+  async () => {
+    const generated = await renderCliTerminal();
+    const committed = readFileSync("docs/diagrams/cli-terminal.svg", "utf8");
+    assert.equal(
+      committed,
+      generated,
+      "docs/diagrams/cli-terminal.svg is stale — regenerate with `node scripts/docs/gen-readme-cli-terminal.mjs`"
+    );
+  }
+);
 
 test("the only embedded font is the mono subset for its terminal text, and nothing is external", async () => {
   const svg = await renderCliTerminal();

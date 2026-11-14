@@ -226,6 +226,11 @@ jobs:
       # means a push to `main` catches the drift at the source instead of the next cycle
       # inheriting it.
       - run: npm run check:agent-skills-sync
+      # Generated artifacts (plan 2026-11-13, owner decision 2026-11-14): release mode compares
+      # every README SVG and e2e-timings.json with its generator; pr mode only the ones the PR
+      # edited, and every one when the diff base does not resolve. Here because this job has
+      # the full history (fetch-depth: 0) the shallow test-unit checkout lacks. ~70 s.
+      - run: npm run check:generated-artifacts
       # WS1.7 (v3.8.49 plan): Dockerfile lint (hadolint, pinned by digest).
       # failure-threshold=error keeps the 5 pre-existing warnings (DL3008/DL3003/
       # DL3016 version pinning / WORKDIR) visible without blocking; any ERROR fails.
