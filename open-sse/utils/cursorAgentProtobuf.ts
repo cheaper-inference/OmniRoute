@@ -441,6 +441,14 @@ export function resolveRequestedModel(
   parameters: Array<{ id: string; value: string }>;
 } {
   const normalized = normalizeCursorModelId(modelId);
+  const deepSeekEffort = /^deepseek-v41-flash-1017-(medium|max)$/.exec(normalized)?.[1];
+  if (deepSeekEffort) {
+    return { modelId: normalized, parameters: [{ id: "reasoning_effort", value: deepSeekEffort }] };
+  }
+  return resolveNormalizedModel(normalized, opts);
+}
+
+function resolveNormalizedModel(normalized: string, opts?: ResolveRequestedModelOptions) {
   if (normalized === "auto") {
     return { modelId: "default", parameters: [] };
   }
@@ -453,10 +461,6 @@ export function resolveRequestedModel(
         parameters: [{ id: CURSOR_ROUTING_LEVEL_PARAMETER_ID, value: level }],
       };
     }
-  }
-  const deepSeekEffort = /^deepseek-v41-flash-1017-(medium|max)$/.exec(normalized)?.[1];
-  if (deepSeekEffort) {
-    return { modelId: normalized, parameters: [{ id: "reasoning_effort", value: deepSeekEffort }] };
   }
   const oneMillionContext = resolveCursorContextModel(normalized);
   if (oneMillionContext) return oneMillionContext;
@@ -566,10 +570,22 @@ export function openAIToolsToMcpDefs(tools: OpenAITool[]): McpToolDefinition[] {
   });
 }
 
-/** Encode an AgentRun request with the model fields Cursor uses to select the speed tier. */
-export function encodeAgentRunRequest(input: AgentRunInput): Buffer {
-  const conversationId = input.conversationId || crypto.randomUUID();
-  const messageId = input.messageId || crypto.randomUUID();
+type RequestedModelParameter = ReturnType<typeof resolveRequestedModel>["parameters"][number];
+
+/** Use client effort for base Haiku when the route has no pinned effort. */
+function getHaikuEffort(
+  modelId: string,
+  parameters: RequestedModelParameter[],
+  effort: AgentRunInput["reasoningEffort"]
+) {
+  if (modelId !== "claude-haiku-5-5") return undefined;
+  const effortIds = ["effort", "reasoning", "reasoning_effort"];
+  if (parameters.some(({ id }) => effortIds.includes(id))) return undefined;
+  return CURSOR_EFFORT_SUFFIXES.some((suffix) => suffix === effort) ? effort : undefined;
+}
+
+/** Select model fields for Cursor routes with explicit effort or speed. */
+function resolveAgentRunModel(input: AgentRunInput) {
   const { modelId, parameters: resolvedParameters } = applyCursorReasoningEffort(
     resolveRequestedModel(input.modelId, { liveCatalogIds: input.liveCatalogIds }),
     input.reasoningEffort
@@ -582,14 +598,7 @@ export function encodeAgentRunRequest(input: AgentRunInput): Buffer {
   const useSonnetMedium =
     modelId === "claude-sonnet-5-5" &&
     resolvedParameters.some(({ id, value }) => id === "effort" && value === "medium");
-  const haikuEffort =
-    modelId === "claude-haiku-5-5" &&
-    !resolvedParameters.some(
-      ({ id }) => id === "effort" || id === "reasoning" || id === "reasoning_effort"
-    ) &&
-    CURSOR_EFFORT_SUFFIXES.some((effort) => effort === input.reasoningEffort)
-      ? input.reasoningEffort
-      : undefined;
+  const haikuEffort = getHaikuEffort(modelId, resolvedParameters, input.reasoningEffort);
   const parameters =
     useStandardGrok || useSonnetMedium
       ? resolvedParameters.map((parameter) =>
@@ -598,6 +607,17 @@ export function encodeAgentRunRequest(input: AgentRunInput): Buffer {
       : [...resolvedParameters];
   if (useComposerStandard) parameters.push({ id: "fast", value: "false" });
   if (haikuEffort) parameters.push({ id: "reasoning_effort", value: haikuEffort });
+  const omitLegacyModel = Boolean(
+    useStandardGrok || useComposerStandard || useSonnetMedium || haikuEffort
+  );
+  return { modelId, parameters, omitLegacyModel };
+}
+
+/** Encode an AgentRun request with the model fields Cursor uses to select the speed tier. */
+export function encodeAgentRunRequest(input: AgentRunInput): Buffer {
+  const conversationId = input.conversationId || crypto.randomUUID();
+  const messageId = input.messageId || crypto.randomUUID();
+  const { modelId, parameters, omitLegacyModel } = resolveAgentRunModel(input);
 
   // UserMessage { text, message_id, selected_context, mode=1 }.
   // selected_context is normally an empty placeholder (required by the server
@@ -678,9 +698,7 @@ export function encodeAgentRunRequest(input: AgentRunInput): Buffer {
   const agentRunRequest = [
     conversationState,
     action,
-    ...(useStandardGrok || useComposerStandard || useSonnetMedium || haikuEffort
-      ? []
-      : [modelDetails]),
+    ...(omitLegacyModel ? [] : [modelDetails]),
     mcpToolsBlock,
     encodeString(ARR_CONVERSATION_ID, conversationId),
     requestedModel,
