@@ -627,6 +627,8 @@ class Tick {
       if (snap.merged) why = "already merged";
       else if (snap.state !== "open") why = "closed";
       else if (snap.headSha !== pr.head) why = `head moved to ${head12(snap.headSha)}`;
+      // Retargeted mid-CI: eligibility (managed base, freeze) would judge the NEW base.
+      else if (snap.baseRef !== this.base) why = `base changed to ${snap.baseRef}`;
       else if (!snap.labels.includes(this.config.label)) why = "queue label removed";
       else {
         const verdict = this.m.eligibility.evaluateEligibility(snap, ctx);
@@ -1419,6 +1421,10 @@ class Tick {
         pr = await this.snapshotPull(summary.number);
       } catch (error) {
         this.note(`#${summary.number}: snapshot failed (${error.message}); skipped this tick`);
+        continue;
+      }
+      if (pr.baseRef !== this.base) {
+        this.note(`#${pr.number}: retargeted to ${pr.baseRef} since the list; skipped`);
         continue;
       }
       const verdict = this.m.eligibility.evaluateEligibility(pr, ctx);

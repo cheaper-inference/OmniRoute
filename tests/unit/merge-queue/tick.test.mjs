@@ -1299,6 +1299,46 @@ test("main: the client counts only the App's own comment markers (botLogin)", as
   assert.equal(fake.comments.get(7).length, 2);
 });
 
+test("a PR retargeted to another managed base during CI never lands on the old (frozen) base", async () => {
+  const h = createHarness({ mode: "live" });
+  const f = await startBatch(h, [1]);
+  h.runCi(f.candidateSha);
+  // /generate-release froze BASE and a campaign retargeted the open PR to the next release:
+  // same head, label kept (retargeting fires `edited`, which the workflow does not listen to).
+  h.gh.pulls.get(1).baseRef = "release/v10.0.0";
+  h.gh.issues.push({
+    number: 901,
+    title: `Release freeze: ${BASE}`,
+    body: "",
+    labels: ["release-freeze"],
+    state: "open",
+  });
+  await h.tick();
+  const state = await h.state();
+  assert.deepEqual(h.world.lands, [], "nothing lands on the base the PR left");
+  assert.equal(h.gh.branches.get(BASE), BASE0);
+  const rejected = state.history.find((e) => e.type === "land-rejected");
+  assert.deepEqual(rejected.prs, [1]);
+  assert.match(rejected.detail, /#1 base changed to release\/v10\.0\.0/);
+  assert.equal(state.inFlight, null, "nothing left to recompose on this base");
+});
+
+test("queue admission re-checks the base of the fresh PR snapshot, not the list summary", async () => {
+  const h = createHarness({ mode: "live" });
+  h.addPr(2);
+  const listOpenPulls = h.gh.listOpenPulls;
+  h.gh.listOpenPulls = async (options) => {
+    const pulls = await listOpenPulls(options);
+    // the list was read just before the PR was retargeted: the summary still says BASE
+    return pulls.length ? pulls : [{ ...(await h.gh.getPull(2)), baseRef: BASE }];
+  };
+  h.gh.pulls.get(2).baseRef = "release/v10.0.0";
+  await h.tick();
+  const state = await h.state();
+  assert.equal(state.inFlight, null, "#2 is not composed on a base it no longer targets");
+  assert.deepEqual(h.world.pushes, []);
+});
+
 test("a base-check infra failure retries under a ref every validator accepts", async () => {
   const h = createHarness({ infraRetries: 1 });
   h.gh.issues.push({

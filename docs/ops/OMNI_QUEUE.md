@@ -127,6 +127,10 @@ reason codes come from `INELIGIBLE_REASONS` in `scripts/merge-queue/contracts.mj
 | GitHub does not report the PR as conflicting with its base                                                              | `conflicting`                                  |
 | not already validated in shadow mode at this exact head, not already in flight                                          | `shadow-processed`, `in-flight`                |
 
+Right before a green batch lands, the tick reads every PR again and re-runs these rules. A PR
+whose head moved, or whose base changed (retargeted to another release branch during CI), is
+dropped from the batch, so a retargeted PR never lands on the branch it left.
+
 **Why commit statuses.** "The label was applied after the last push" cannot be decided from
 commit dates: they are set by the author and trivially forged. Instead, the `approval` job
 writes a commit status on the head SHA that was current when an approver applied the label. A
