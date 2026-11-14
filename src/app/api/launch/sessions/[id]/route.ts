@@ -2,16 +2,15 @@ import { launchSessionPatchSchema } from "@/shared/validation/launchView";
 
 import {
   callerOwnsSession,
-  firstIssueMessage,
-  launchError,
   launchJson,
   notFound,
+  parseLaunchBody,
   publicSessionView,
-  readJsonBody,
   resolveLaunchCaller,
   serveError,
   unauthorized,
 } from "../../launchRouteHelpers";
+import { applySessionPatch } from "./patchSession";
 
 export const dynamic = "force-dynamic";
 
@@ -27,31 +26,19 @@ export async function PATCH(request: Request, context: RouteContext) {
   if (!caller) return unauthorized();
   const { id } = await context.params;
 
-  const { getLaunchSession, heartbeatLaunchSession, isLaunchSessionActive, setLaunchSessionView } =
-    await import("@/lib/db/launchSessions");
+  const { getLaunchSession, isLaunchSessionActive } = await import("@/lib/db/launchSessions");
   const existing = getLaunchSession(id);
   if (!existing || !callerOwnsSession(caller, existing) || !isLaunchSessionActive(existing)) {
     return notFound();
   }
 
-  const read = await readJsonBody(request);
-  if (!read.ok) return launchError(400, "Invalid JSON body", "invalid_request_error");
-  const parsed = launchSessionPatchSchema.safeParse(read.body);
-  if (!parsed.success) {
-    return launchError(400, firstIssueMessage(parsed.error), "invalid_request_error");
-  }
-  const prefixError = serveError(parsed.data.view?.serve);
-  if (prefixError) return launchError(400, prefixError, "invalid_request_error");
+  const parsed = await parseLaunchBody(request, launchSessionPatchSchema, (patch) =>
+    serveError(patch.view?.serve)
+  );
+  if (!parsed.ok) return parsed.response;
 
-  let session = existing;
-  if (parsed.data.view) {
-    session = setLaunchSessionView(id, parsed.data.view) ?? session;
-  }
-  if (parsed.data.heartbeat) {
-    const refreshed = heartbeatLaunchSession(id);
-    if (!refreshed) return notFound();
-    session = refreshed;
-  }
+  const session = await applySessionPatch(id, existing, parsed.data);
+  if (!session) return notFound();
   return launchJson({
     sessionId: session.id,
     expiresAt: session.expiresAt,

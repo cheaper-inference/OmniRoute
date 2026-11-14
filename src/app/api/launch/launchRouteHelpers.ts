@@ -33,7 +33,10 @@ export function launchError(status: number, message: string, code?: string): Res
   });
 }
 
-export function launchJson(body: unknown, status = 200): Response {
+/** A parsed JSON request body. */
+type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+
+export function launchJson<T extends object>(body: T, status = 200): Response {
   return Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
 }
 
@@ -78,9 +81,9 @@ export function callerOwnsSession(caller: LaunchCaller, session: LaunchSessionRe
   return session.parentKeyId === null;
 }
 
-export async function readJsonBody(
+async function readJsonBody(
   request: Request
-): Promise<{ ok: true; body: unknown } | { ok: false }> {
+): Promise<{ ok: true; body: JsonValue } | { ok: false }> {
   try {
     const text = await request.text();
     return { ok: true, body: text.trim() === "" ? {} : JSON.parse(text) };
@@ -89,11 +92,36 @@ export async function readJsonBody(
   }
 }
 
-export function firstIssueMessage(error: z.ZodError): string {
+function firstIssueMessage(error: z.ZodError): string {
   const issue = error.issues[0];
   if (!issue) return "Invalid request body";
   const path = issue.path.length > 0 ? `${issue.path.join(".")}: ` : "";
   return `${path}${issue.message}`;
+}
+
+type ParsedLaunchBody<T> = { ok: true; data: T } | { ok: false; response: Response };
+
+const rejectBody = (message: string): { ok: false; response: Response } => ({
+  ok: false,
+  response: launchError(400, message, "invalid_request_error"),
+});
+
+/**
+ * Read, schema-validate and semantically check a launch request body. Each step answers 400
+ * `invalid_request_error` and the first failing step wins: unparseable JSON, then the first
+ * schema issue, then `extraError` on the parsed data.
+ */
+export async function parseLaunchBody<S extends z.ZodType>(
+  request: Request,
+  schema: S,
+  extraError: (data: z.output<S>) => string | null
+): Promise<ParsedLaunchBody<z.output<S>>> {
+  const read = await readJsonBody(request);
+  if (!read.ok) return rejectBody("Invalid JSON body");
+  const parsed = schema.safeParse(read.body);
+  if (!parsed.success) return rejectBody(firstIssueMessage(parsed.error));
+  const error = extraError(parsed.data);
+  return error ? rejectBody(error) : { ok: true, data: parsed.data };
 }
 
 /**
