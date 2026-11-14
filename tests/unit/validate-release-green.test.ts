@@ -860,7 +860,8 @@ test("every HARD command of the pre-flight goes through withHardGateMode; drift 
     /runAsync\(npmCmd, g\.args, \{ timeout: g\.timeout, env: withHardGateMode\(g\.env\) \}\)/, // lanes
     /env: withHardGateMode\(step\.env\)/, // package artifact
     /"check:pack-boot"\][\s\S]{0,80}env: withHardGateMode\(\)/, // tarball boot
-    /env: hardGate \? withHardGateMode\(g\.env\) : g\.env/, // --full-ci, HARD bucket only
+    /hardGate = fullCiKindFor\(g\.id, results, g\.kind\) === "hard"/, // --full-ci bucket
+    /env: hardGate \? withHardGateMode\(gateEnv\) : gateEnv/, // --full-ci, HARD bucket only
   ]) {
     assert.match(src, wiring);
   }
