@@ -63,5 +63,24 @@ rules:
     # The privileged job neither checks out that run's code nor downloads its
     # artifacts. workflow_dispatch and DEPLOY_ENABLED remain operator controls.
     # Keep this one event-specific exception under release review.
+    #
+    # omni-queue.yml (the omni-queue merge queue) uses `pull_request_target`
+    # (labeled/unlabeled/synchronize/closed) and `workflow_run` (CI / Quality Gates
+    # completed on omni-queue/**) only to bind label approvals and to wake its tick.
+    # Not exploitable:
+    #   • No checkout of PR code, ever: both jobs check out the DEFAULT branch
+    #     (sparse: scripts/merge-queue + config/merge-queue, persist-credentials:
+    #     false) and run zero-dependency Node scripts (no npm ci). PR content is
+    #     handled only as git objects and through the REST API.
+    #   • No expression is expanded inside a `run:` body; event data and dispatch
+    #     inputs reach the scripts through `env:` only.
+    #   • Writes use a GitHub App installation token minted per job with minimum
+    #     permissions (approval: statuses/issues write; tick: contents, workflows,
+    #     pull-requests, issues write + statuses/checks/actions read — workflows
+    #     write only because GitHub refuses an App push of a commit that touches
+    #     .github/workflows/**, which a batched PR's merge commit may carry).
+    #   • Kill switch: every job requires vars.OMNI_QUEUE_ENABLED == 'true'.
+    # Accepted risk, re-review at the next release cycle (added 2026-11-13).
     ignore:
       - deploy-vps.yml
+      - omni-queue.yml

@@ -20,6 +20,7 @@ jobs:
          startsWith(github.event.workflow_run.head_branch, 'release/v') ||
          startsWith(github.event.workflow_run.head_branch, 'v'))))
       && vars.DEPLOY_ENABLED == 'true'
+      && !startsWith(github.event.workflow_run.head_branch, 'omni-queue/') && !startsWith(github.ref, 'refs/heads/omni-queue/')
     name: Deploy OmniRoute to VPS
     runs-on: ubuntu-latest
     # Bound a hung SSH session to an hour instead of GitHub's 6-hour default; the deploy

@@ -158,3 +158,34 @@ test("readFragments: inventory comes from the WORKING TREE, origins from git (v3
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("readFragments: a queue map resolves the origin PR of a merge-ff commit; absent map = legacy", () => {
+  // omni-queue merge-ff keeps the contributor's commit (no `(#N)`), so the origin PR comes from
+  // the queue merge (scripts/merge-queue/history-map.mjs); commits outside the map read as before.
+  const dir = makeRepo();
+  try {
+    commitFile(dir, "changelog.d/fixes/a.md", "- **fix(a):** squash\n", "fix(a): squash (#100)");
+    commitFile(dir, "changelog.d/fixes/b.md", "- **fix(b):** contributor\n", "wip: fragment b");
+    const full = git(dir, "rev-parse", "HEAD");
+    const map = new Map([[full, { pr: 321 }]]);
+
+    assert.deepEqual(
+      readFragments(dir, map).map((f) => [f.path, f.originPr]),
+      [
+        ["changelog.d/fixes/a.md", 100],
+        ["changelog.d/fixes/b.md", 321],
+      ]
+    );
+    assert.deepEqual(
+      readFragments(dir).map((f) => [f.path, f.originPr]),
+      [
+        ["changelog.d/fixes/a.md", 100],
+        ["changelog.d/fixes/b.md", null],
+      ],
+      "without the map nothing changes"
+    );
+    assert.deepEqual(readFragments(dir, new Map()), readFragments(dir), "empty map = legacy");
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
