@@ -20,6 +20,10 @@ import { rankBySpeed } from "./speedRanking.ts";
 import type { SpeedCandidate } from "./speedRanking.ts";
 import { NadirStrategyImpl, type NadirRoutingConfig } from "./nadirStrategy.ts";
 import type { RoutingHint } from "../manifestAdapter.ts";
+import {
+  DecisionModelStrategyImpl,
+  type DecisionModelRoutingConfig,
+} from "./decisionModelStrategy.ts";
 
 export interface SlaRoutingPolicy {
   targetP95Ms?: number;
@@ -39,10 +43,12 @@ export interface RoutingContext {
   weights?: ScoringWeights;
   explorationRate?: number;
   manifestHint?: RoutingHint | null;
-  /** Raw request `messages`, for request-aware strategies (`nadir`). Untouched by the others. */
+  /** Raw request `messages`, for request-aware strategies (`nadir`, `decision-*`). Untouched by the others. */
   messages?: unknown;
   /** The combo's `config.nadir` block; see nadirStrategy.ts. */
   nadir?: NadirRoutingConfig;
+  /** The combo's `config.decisionModel` block; see decisionModelStrategy.ts. */
+  decisionModel?: DecisionModelRoutingConfig;
 }
 
 export interface RoutingDecision {
@@ -404,6 +410,14 @@ strategyRegistry.set("sla-aware", slaStrategy);
 strategyRegistry.set("sla", slaStrategy); // alias
 strategyRegistry.set("lkgp", lkgpStrategy);
 strategyRegistry.set("nadir", new NadirStrategyImpl({ fallback: rulesStrategy }));
+strategyRegistry.set(
+  "decision-openai",
+  new DecisionModelStrategyImpl({ fallback: rulesStrategy }, "openai")
+);
+strategyRegistry.set(
+  "decision-systemone",
+  new DecisionModelStrategyImpl({ fallback: rulesStrategy }, "systemone")
+);
 
 export function getStrategy(name: string): RouterStrategy {
   const strategy = strategyRegistry.get(name);

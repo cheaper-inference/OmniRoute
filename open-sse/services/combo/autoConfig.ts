@@ -5,6 +5,7 @@ import {
 } from "../autoCombo/scoring.ts";
 import { getModePack } from "../autoCombo/modePacks.ts";
 import { resolveNadirRoutingConfig } from "../autoCombo/nadirStrategy.ts";
+import { resolveDecisionModelRoutingConfig } from "../autoCombo/decisionModelStrategy.ts";
 import { isRecord } from "./comboData.ts";
 import { readAccountPreferences } from "./accountPreferences.ts";
 import { resolveAutoResetWindowConfig, resolveSlaRoutingPolicy } from "./quotaScoring.ts";
@@ -66,6 +67,7 @@ export function parseAutoConfig(combo: ComboLike, eligibleTargets: ResolvedCombo
   const resetWindowConfig = resolveAutoResetWindowConfig(autoConfigSource);
   const slaPolicy = resolveSlaRoutingPolicy(autoConfigSource);
   const nadirConfig = resolveNadirRoutingConfig(autoConfigSource.nadir);
+  const decisionModelConfig = resolveDecisionModelRoutingConfig(autoConfigSource.decisionModel);
 
   return {
     routingStrategy,
@@ -78,6 +80,7 @@ export function parseAutoConfig(combo: ComboLike, eligibleTargets: ResolvedCombo
     resetWindowConfig,
     slaPolicy,
     nadirConfig,
+    decisionModelConfig,
     accountPreferences: readAccountPreferences(autoConfigSource.accountPreferences),
   };
 }

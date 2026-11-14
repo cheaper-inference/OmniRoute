@@ -331,6 +331,7 @@ export async function resolveAutoStrategyOrder(
     resetWindowConfig,
     slaPolicy,
     nadirConfig,
+    decisionModelConfig,
     accountPreferences,
   } = parseAutoConfig(combo, eligibleTargets);
 
@@ -524,6 +525,7 @@ export async function resolveAutoStrategyOrder(
             manifestHint: autoManifestHint,
             messages: body.messages,
             nadir: nadirConfig,
+            decisionModel: decisionModelConfig,
           },
           routingStrategy
         );
