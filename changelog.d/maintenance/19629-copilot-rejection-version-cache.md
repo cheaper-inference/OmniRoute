@@ -1,0 +1,1 @@
+- **perf(models):** `/v1/models` no longer rebuilds the full model-lockout list on every request to compute the Copilot rejection version. ([#19629](https://github.com/cheaper-inference/OmniRoute/pull/19629))

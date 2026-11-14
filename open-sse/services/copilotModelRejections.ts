@@ -1,4 +1,4 @@
-import { getAllModelLockouts, lockExactModel } from "./accountFallback.ts";
+import { getAllModelLockouts, getModelLockRevision, lockExactModel } from "./accountFallback.ts";
 
 /** A bounded, connection-specific rejection; never a persisted entitlement rule. */
 export const COPILOT_MODEL_NOT_SUPPORTED_LOCK_MS = 6 * 60 * 60 * 1000;
@@ -71,15 +71,32 @@ export function getCopilotModelRejections() {
   );
 }
 
+// The catalog cache asks for this version on every /v1/models request, cache hits included.
+// Rebuilding it walks and formats every model lock, so keep the last result until the lock set
+// is written to or the earliest Copilot lock expires (the only changes that alter the string).
+let versionCache: { revision: number; nextExpiry: number; value: string } | null = null;
+
 /** Stable between state changes; expiry/clear change it without a database write. */
 export function getCopilotRejectionCatalogVersion(): string {
-  return JSON.stringify(
-    getCopilotModelRejections()
+  const revision = getModelLockRevision();
+  const cached = versionCache;
+  if (cached && cached.revision === revision && Date.now() < cached.nextExpiry) {
+    return cached.value;
+  }
+  const entries = getCopilotModelRejections();
+  const value = JSON.stringify(
+    entries
       .map((entry) =>
         JSON.stringify([entry.provider, entry.connectionId, entry.model, entry.until])
       )
       .sort()
   );
+  versionCache = {
+    revision,
+    nextExpiry: entries.reduce((soonest, entry) => Math.min(soonest, entry.until), Infinity),
+    value,
+  };
+  return value;
 }
 
 export function areCopilotConnectionsRejected(

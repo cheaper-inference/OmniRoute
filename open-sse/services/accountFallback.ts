@@ -616,12 +616,45 @@ export function getProviderProfile(provider: string): ProviderProfile {
   return buildProviderProfile(category);
 }
 
+// getRuntimeProviderProfile runs several times per request. Reuse the profile built for the
+// same settings object (getCachedSettings returns one object per 5 s window, and a settings
+// write evicts it). The test-process flag inside it depends on NODE_ENV, VITEST, argv and
+// execArgv, so those are part of the memo key, compared by identity: no argv scan per call.
+const runtimeProfileMemo = new WeakMap<
+  Record<string, unknown>,
+  {
+    env: string;
+    argv: unknown;
+    execArgv: unknown;
+    oauth?: ProviderProfile;
+    apikey?: ProviderProfile;
+  }
+>();
+
+function memoizedProviderProfile(
+  category: "oauth" | "apikey",
+  settings: Record<string, unknown>
+): ProviderProfile {
+  const env = `${process.env.NODE_ENV}|${process.env.VITEST}`;
+  let entry = runtimeProfileMemo.get(settings);
+  if (
+    !entry ||
+    entry.env !== env ||
+    entry.argv !== process.argv ||
+    entry.execArgv !== process.execArgv
+  ) {
+    entry = { env, argv: process.argv, execArgv: process.execArgv };
+    runtimeProfileMemo.set(settings, entry);
+  }
+  return (entry[category] ??= buildProviderProfile(category, settings));
+}
+
 export async function getRuntimeProviderProfile(provider: string | null | undefined) {
   try {
     const { getCachedSettings } = await import("@/lib/db/readCache");
     const settings = await getCachedSettings();
     const category = getProviderCategory(provider || "");
-    return buildProviderProfile(category, settings);
+    return memoizedProviderProfile(category, settings);
   } catch {
     return getProviderProfile(provider || "");
   }
@@ -631,6 +664,14 @@ export async function getRuntimeProviderProfile(provider: string | null | undefi
 // In-memory map: "provider:connectionId:model" → { reason, until, lockedAt }
 const modelLockouts = new Map<string, ModelLockoutEntry>();
 const modelFailureState = new Map<string, ModelFailureState>();
+
+// Bumps on every deliberate write to modelLockouts (set, replace, clear). Expiry is time-driven
+// and is not counted. Lets a caller cache a value derived from the lock set (see
+// copilotModelRejections.ts) instead of re-walking every lock on each read.
+let modelLockRevision = 0;
+export function getModelLockRevision(): number {
+  return modelLockRevision;
+}
 
 // Aliases (e.g. "cx" → "codex") must share lockout state with their canonical
 // provider, otherwise a model locked via one spelling stays routable via the other.
@@ -821,6 +862,7 @@ export function lockModel(
 ): void {
   if (!model) return; // No model → skip model-level locking
   ensureCleanupTimer();
+  modelLockRevision++;
   const key = getModelLockKey(provider, connectionId, model, reason);
   cleanupModelLockKey(key);
   const newUntil = Date.now() + cooldownMs;
@@ -857,12 +899,16 @@ export function lockModel(
 }
 
 // Lock only this exact provider/account/model tuple, never a quota family — see exactModelLock.ts.
-export const lockExactModel = exactModelLock.createLockExactModel(
+const lockExactModelUncounted = exactModelLock.createLockExactModel(
   modelLockouts,
   ensureCleanupTimer,
   cleanupModelLockKey,
   getCanonicalLockProvider
 );
+export const lockExactModel: typeof lockExactModelUncounted = (...args) => {
+  modelLockRevision++;
+  return lockExactModelUncounted(...args);
+};
 
 /**
  * Pick the `exactCooldownMs` to apply to a model lockout (#1308).
@@ -996,6 +1042,7 @@ export function clearModelLock(
   model: string | null | undefined
 ): boolean {
   if (!model) return false;
+  modelLockRevision++;
   return exactModelLock.clearMultiKeyLock(
     modelLockouts,
     modelFailureState,
@@ -1149,6 +1196,7 @@ export function decayModelFailureCount(
  * Clear all in-memory model lockouts and failure state (for tests / full reset).
  */
 export function clearAllModelLockouts(): void {
+  modelLockRevision++;
   modelLockouts.clear();
   modelFailureState.clear();
 }
@@ -2524,6 +2572,24 @@ export function checkFallbackError(
 
     // Generic 400 is not account-fallback-worthy. Combo routing may still try a
     // different provider/model because combo fallback is target-level orchestration.
+    return { shouldFallback: false, cooldownMs: 0, reason: RateLimitReason.UNKNOWN };
+  }
+
+  // Unmatched 4xx (e.g. 405, 409, 415) is request-shaped, like a generic 400:
+  // not account-fallback-worthy, so a healthy account takes no cooldown for it.
+  // Auth-shaped 401/402/403 and retryable 408/429 are classified before this
+  // point and keep their fallback. 9router 20a43f5a.
+  if (
+    status >= HTTP_STATUS.BAD_REQUEST &&
+    status < HTTP_STATUS.SERVER_ERROR &&
+    ![
+      HTTP_STATUS.UNAUTHORIZED,
+      HTTP_STATUS.PAYMENT_REQUIRED,
+      HTTP_STATUS.FORBIDDEN,
+      HTTP_STATUS.REQUEST_TIMEOUT,
+      HTTP_STATUS.RATE_LIMITED,
+    ].includes(status)
+  ) {
     return { shouldFallback: false, cooldownMs: 0, reason: RateLimitReason.UNKNOWN };
   }
 
