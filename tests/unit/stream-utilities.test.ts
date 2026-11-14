@@ -388,6 +388,114 @@ test("createPassthroughStreamWithLogger backfills completed output from function
   assert.ok(result.includes('"arguments":"{\\"path\\":\\"README.md\\"}"'));
 });
 
+test("createPassthroughStreamWithLogger preserves completed function_call status in backfilled response.completed (#20066)", async () => {
+  for (const trailingNewline of ["\n", ""]) {
+    const transform = createPassthroughStreamWithLogger(
+      "codex",
+      null,
+      null,
+      "gpt-6.1-sol",
+      null,
+      null,
+      null,
+      null,
+      null,
+      "openai-responses"
+    );
+
+    const writer = transform.writable.getWriter();
+    await writer.write(
+      new TextEncoder().encode(
+        [
+          'data: {"type":"response.created","response":{"id":"resp_fc_20066"}}',
+          "event: response.output_item.added",
+          'data: {"type":"response.output_item.added","response_id":"resp_fc_20066","output_index":0,"item":{"id":"fc_20066","type":"function_call","status":"in_progress","call_id":"call_20066","name":"get_weather","arguments":""}}',
+          "event: response.function_call_arguments.done",
+          'data: {"type":"response.function_call_arguments.done","response_id":"resp_fc_20066","output_index":0,"item_id":"fc_20066","arguments":"{\\"city\\":\\"Paris\\"}"}',
+          "event: response.output_item.done",
+          'data: {"type":"response.output_item.done","response_id":"resp_fc_20066","output_index":0,"item":{"id":"fc_20066","type":"function_call","status":"completed","call_id":"call_20066","name":"get_weather","arguments":"{\\"city\\":\\"Paris\\"}"}}',
+          "event: response.completed",
+          `data: {"type":"response.completed","response":{"id":"resp_fc_20066","status":"completed","output":[],"usage":{"input_tokens":10,"output_tokens":5,"total_tokens":15}}}${trailingNewline}`,
+        ].join("\n")
+      )
+    );
+    await writer.close();
+
+    const reader = transform.readable.getReader();
+    const decoder = new TextDecoder();
+    let result = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      result += decoder.decode(value);
+    }
+
+    const completedLine = result
+      .split("\n")
+      .find((line) => line.startsWith("data: ") && line.includes('"type":"response.completed"'));
+    assert.ok(completedLine, "expected response.completed data frame");
+    const completedEvent = JSON.parse(completedLine.slice("data: ".length));
+    assert.equal(completedEvent.response.output.length, 1);
+    assert.equal(completedEvent.response.output[0].id, "fc_20066");
+    assert.equal(completedEvent.response.output[0].call_id, "call_20066");
+    assert.equal(completedEvent.response.output[0].name, "get_weather");
+    assert.equal(completedEvent.response.output[0].arguments, '{"city":"Paris"}');
+    assert.equal(completedEvent.response.output[0].status, "completed");
+  }
+});
+
+test("createPassthroughStreamWithLogger marks pending function_call completed when output_item.done is omitted (#20066)", async () => {
+  const transform = createPassthroughStreamWithLogger(
+    "codex",
+    null,
+    null,
+    "gpt-6.1-sol",
+    null,
+    null,
+    null,
+    null,
+    null,
+    "openai-responses"
+  );
+
+  const writer = transform.writable.getWriter();
+  await writer.write(
+    new TextEncoder().encode(
+      [
+        'data: {"type":"response.created","response":{"id":"resp_fc_pending_20066"}}',
+        "event: response.output_item.added",
+        'data: {"type":"response.output_item.added","response_id":"resp_fc_pending_20066","output_index":0,"item":{"id":"fc_pending_20066","type":"function_call","status":"in_progress","call_id":"call_pending_20066","name":"get_weather","arguments":""}}',
+        "event: response.function_call_arguments.delta",
+        'data: {"type":"response.function_call_arguments.delta","response_id":"resp_fc_pending_20066","output_index":0,"item_id":"fc_pending_20066","delta":"{\\"city\\":\\"Rome\\"}"}',
+        "event: response.completed",
+        'data: {"type":"response.completed","response":{"id":"resp_fc_pending_20066","status":"completed","output":[],"usage":{"input_tokens":8,"output_tokens":4,"total_tokens":12}}}',
+        "",
+      ].join("\n")
+    )
+  );
+  await writer.close();
+
+  const reader = transform.readable.getReader();
+  const decoder = new TextDecoder();
+  let result = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    result += decoder.decode(value);
+  }
+
+  const completedLine = result
+    .split("\n")
+    .find((line) => line.startsWith("data: ") && line.includes('"type":"response.completed"'));
+  assert.ok(completedLine, "expected response.completed data frame");
+  const completedEvent = JSON.parse(completedLine.slice("data: ".length));
+  assert.equal(completedEvent.response.output.length, 1);
+  assert.equal(completedEvent.response.output[0].arguments, '{"city":"Rome"}');
+  assert.equal(completedEvent.response.output[0].status, "completed");
+});
+
 test("createPassthroughStreamWithLogger keeps reasoning deltas out of logged assistant content", async () => {
   let completePayload = null;
   const transform = createPassthroughStreamWithLogger(

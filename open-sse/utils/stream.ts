@@ -89,6 +89,7 @@ import {
 import {
   backfillResponsesCompletedOutput,
   filterResponsesCommentaryFromItems,
+  markPendingResponsesFunctionCallsCompleted,
   normalizeResponsesCompletedUsage as normalizeUsage,
   normalizeResponsesSseIds,
   pushUniqueResponsesOutputItems,
@@ -2038,7 +2039,10 @@ export function createSSEStream(options: StreamOptions = {}) {
                       if (typeof parsed.arguments === "string") {
                         pending.arguments = parsed.arguments;
                       }
-                      pushUniqueResponsesOutputItems(passthroughResponsesOutputItems, [pending]);
+                      pushUniqueResponsesOutputItems(
+                        passthroughResponsesOutputItems,
+                        markPendingResponsesFunctionCallsCompleted([pending])
+                      );
                     }
                   }
                   // Capture each completed output item so the final
@@ -2140,9 +2144,12 @@ export function createSSEStream(options: StreamOptions = {}) {
                     parsed.type === "response.completed" &&
                     passthroughResponsesPendingFunctionCalls.size > 0
                   ) {
-                    pushUniqueResponsesOutputItems(passthroughResponsesOutputItems, [
-                      ...passthroughResponsesPendingFunctionCalls.values(),
-                    ]);
+                    pushUniqueResponsesOutputItems(
+                      passthroughResponsesOutputItems,
+                      markPendingResponsesFunctionCallsCompleted(
+                        passthroughResponsesPendingFunctionCalls.values()
+                      )
+                    );
                     passthroughResponsesPendingFunctionCalls.clear();
                     passthroughResponsesCurrentFunctionCallKey = null;
                   }

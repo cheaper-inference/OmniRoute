@@ -2,6 +2,7 @@ import { extractUsage } from "./usageTracking.ts";
 import { parseSSEDataPayload } from "./streamHelpers.ts";
 import {
   backfillResponsesCompletedOutput,
+  markPendingResponsesFunctionCallsCompleted,
   normalizeResponsesSseIds,
   normalizeResponsesCompletedUsage,
   pushUniqueResponsesOutputItems,
@@ -143,7 +144,10 @@ function handleResponsesTailPayload(
       if (typeof parsed.arguments === "string") {
         pending.arguments = parsed.arguments;
       }
-      pushUniqueResponsesOutputItems(context.passthroughResponsesOutputItems, [pending]);
+      pushUniqueResponsesOutputItems(
+        context.passthroughResponsesOutputItems,
+        markPendingResponsesFunctionCallsCompleted([pending])
+      );
     }
   }
   // #18600 — restore the client's original tool name on the tail `done` item
@@ -185,9 +189,12 @@ function handleResponsesTailPayload(
     parsed.type === "response.completed" &&
     context.passthroughResponsesPendingFunctionCalls.size > 0
   ) {
-    pushUniqueResponsesOutputItems(context.passthroughResponsesOutputItems, [
-      ...context.passthroughResponsesPendingFunctionCalls.values(),
-    ]);
+    pushUniqueResponsesOutputItems(
+      context.passthroughResponsesOutputItems,
+      markPendingResponsesFunctionCallsCompleted(
+        context.passthroughResponsesPendingFunctionCalls.values()
+      )
+    );
     context.passthroughResponsesPendingFunctionCalls.clear();
     context.setPassthroughResponsesCurrentFunctionCallKey(null);
   }

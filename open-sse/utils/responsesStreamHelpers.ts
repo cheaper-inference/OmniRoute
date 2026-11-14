@@ -100,30 +100,61 @@ function buildResponsesOutputItemKey(item: unknown): string | null {
   return `${type}:${id}:${callId}:${outputIndex}:${name}`;
 }
 
-// Module-level Set reused across calls to avoid allocation per event
-const _seenResponsesKeys = new Set<string>();
+// Module-level Map reused across calls to avoid allocation per event
+const _seenResponsesKeyIndex = new Map<string, number>();
+
+function isPlainRecord(value: unknown): value is JsonRecord {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function shouldReplaceResponsesOutputItem(existingItem: unknown, nextItem: unknown): boolean {
+  if (!isPlainRecord(existingItem)) return true;
+  if (!isPlainRecord(nextItem)) return false;
+  return !(existingItem.status === "completed" && nextItem.status === "in_progress");
+}
+
+function upsertResponsesOutputItem(target: unknown[], item: unknown) {
+  const key = buildResponsesOutputItemKey(item);
+  const existingIndex = key ? _seenResponsesKeyIndex.get(key) : undefined;
+  if (existingIndex !== undefined) {
+    if (shouldReplaceResponsesOutputItem(target[existingIndex], item)) {
+      target[existingIndex] = item;
+    }
+    return;
+  }
+
+  const index = target.length;
+  target.push(item);
+  if (key) {
+    _seenResponsesKeyIndex.set(key, index);
+  }
+}
+
+export function markPendingResponsesFunctionCallsCompleted(
+  items: Iterable<JsonRecord>
+): JsonRecord[] {
+  const list = [...items];
+  for (const item of list) {
+    if (item.status === "in_progress") {
+      item.status = "completed";
+    }
+  }
+  return list;
+}
 
 export function pushUniqueResponsesOutputItems(target: unknown[], items: readonly unknown[]) {
-  // Clear the reused Set instead of allocating new one
-  _seenResponsesKeys.clear();
+  // Clear the reused Map instead of allocating a new one
+  _seenResponsesKeyIndex.clear();
 
-  for (const existingItem of target) {
-    const key = buildResponsesOutputItemKey(existingItem);
-    if (key) {
-      _seenResponsesKeys.add(key);
+  for (let i = 0; i < target.length; i++) {
+    const key = buildResponsesOutputItemKey(target[i]);
+    if (key && !_seenResponsesKeyIndex.has(key)) {
+      _seenResponsesKeyIndex.set(key, i);
     }
   }
 
   for (const item of items) {
-    const key = buildResponsesOutputItemKey(item);
-    if (key && _seenResponsesKeys.has(key)) {
-      continue;
-    }
-
-    target.push(item);
-    if (key) {
-      _seenResponsesKeys.add(key);
-    }
+    upsertResponsesOutputItem(target, item);
   }
 }
 
