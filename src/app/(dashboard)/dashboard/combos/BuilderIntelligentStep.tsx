@@ -137,7 +137,7 @@ function NadirSettingsSection({
           {getI18nOrFallback(
             t,
             "nadirRoutingHint",
-            "All fields are optional. Without an API key, calls use Nadir's anonymous tier, which is rate-limited per IP; with a key, each decision is logged to your Nadir dashboard. Empty fields fall back to OMNIROUTE_NADIR_API_KEY / OMNIROUTE_NADIR_BASE_URL. Any failure or timeout routes with Rules."
+            "All fields are optional. Without an API key, calls use Nadir's anonymous tier, which is rate-limited per IP; with a key, each decision is logged to your Nadir dashboard and counts as a Nadir request (50 free a month, then a per-request fee from a prepaid balance; an empty balance answers HTTP 402). Empty fields fall back to OMNIROUTE_NADIR_API_KEY / OMNIROUTE_NADIR_BASE_URL. Any failure or timeout routes with Rules."
           )}{" "}
           <a
             href="https://getnadir.com/docs/gateway-omniroute/"

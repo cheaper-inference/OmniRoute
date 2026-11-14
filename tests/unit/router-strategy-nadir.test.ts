@@ -16,6 +16,7 @@ import {
   type RoutingContext,
 } from "../../open-sse/services/autoCombo/routerStrategy.ts";
 import {
+  NADIR_ACCOUNT_COOLDOWN_MS,
   NADIR_FAILURE_COOLDOWN_MS,
   NADIR_MAX_PROMPT_CHARS,
   NadirStrategyImpl,
@@ -222,6 +223,45 @@ test("nadir — cools down after a failure and retries once the window has passe
   const retried = await strategy.selectAsync(pool, ctx);
   assert.equal(calls.length, 2);
   assert.match(retried.reason, /call failed: boom/);
+});
+
+test("nadir — an empty balance (402) logs Nadir's reason and waits the account cooldown", async (t) => {
+  const warn = t.mock.method(console, "warn", () => {});
+  let now = 1_000_000;
+  const { calls, transport } = recordingTransport(() =>
+    json(
+      {
+        detail: {
+          error: "balance_empty",
+          message:
+            "Each request through Nadir costs $0.002 from your prepaid balance, and the balance is empty. Top up to keep routing: https://getnadir.com/dashboard/billing",
+        },
+      },
+      402
+    )
+  );
+  const strategy = nadir(transport, () => now);
+
+  const first = await strategy.selectAsync(pool, ctx);
+  assert.equal(first.strategy, "rules");
+  assert.match(first.reason, /call failed: HTTP 402 balance_empty: Each request through Nadir/);
+  assert.match(String(warn.mock.calls[0].arguments[0]), /balance_empty.*next 300s/);
+
+  now += NADIR_FAILURE_COOLDOWN_MS + 1;
+  const cooled = await strategy.selectAsync(pool, ctx);
+  assert.equal(calls.length, 1, "a 402 keeps the strategy off the network past the 30 s window");
+  assert.match(cooled.reason, /cooling down/);
+
+  now += NADIR_ACCOUNT_COOLDOWN_MS;
+  await strategy.selectAsync(pool, ctx);
+  assert.equal(calls.length, 2);
+});
+
+test("nadir — a non-JSON error body still reports the bare status", async (t) => {
+  t.mock.method(console, "warn", () => {});
+  const badGateway = async () => new Response("<html>bad gateway</html>", { status: 502 });
+  const decision = await nadir(badGateway).selectAsync(pool, ctx);
+  assert.match(decision.reason, /call failed: HTTP 502\)/);
 });
 
 // ── configuration ────────────────────────────────────────────────────────────
