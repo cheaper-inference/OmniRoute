@@ -13,6 +13,12 @@ import {
   getClientIdentityProfileHeaders,
 } from "@/shared/constants/clientIdentityProfiles";
 import NewApiAggregatorFields from "../[id]/components/modals/NewApiAggregatorFields";
+import CustomJsonFields from "../[id]/components/modals/CustomJsonFields";
+import {
+  CUSTOM_JSON_API_TYPE,
+  createCustomJsonForm,
+  parseCustomJsonForm,
+} from "../[id]/components/modals/customJsonForm";
 import { providerText } from "../[id]/providerPageHelpers";
 
 type CompatibleMode = "openai" | "anthropic" | "cc";
@@ -124,6 +130,7 @@ export default function AddCompatibleProviderModal({
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [iconUrlError, setIconUrlError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [customJson, setCustomJson] = useState(() => createCustomJsonForm());
 
   const apiTypeOptions = useMemo(
     () => [
@@ -133,6 +140,7 @@ export default function AddCompatibleProviderModal({
       { value: "audio-transcriptions", label: t("audioTranscriptions") },
       { value: "audio-speech", label: t("audioSpeech") },
       { value: "images-generations", label: t("imagesGenerations") },
+      { value: CUSTOM_JSON_API_TYPE, label: t("customJsonApi") },
     ],
     [t]
   );
@@ -152,6 +160,7 @@ export default function AddCompatibleProviderModal({
       setShowAdvanced(false);
       setSaveError(null);
       setIconUrlError(null);
+      setCustomJson(createCustomJsonForm());
     }
   } else if (initializedFor !== null) {
     setInitializedFor(null);
@@ -195,10 +204,22 @@ export default function AddCompatibleProviderModal({
     mode === "openai" ? "/v1/chat/completions" : mode === "cc" ? CC_DEFAULT_CHAT_PATH : "/messages";
   const chatPathHint = mode === "cc" ? t("ccCompatibleChatPathHint") : t("chatPathHint");
   const advancedId = `advanced-settings-${mode}`;
+  const isCustomJson = defaults.hasApiType && formData.apiType === CUSTOM_JSON_API_TYPE;
   const hasRequiredFields = Boolean(
     formData.name.trim() && formData.prefix.trim() && formData.baseUrl.trim()
   );
-  const canValidate = Boolean(checkKey.trim() && formData.baseUrl.trim());
+  const canValidate = Boolean(
+    (checkKey.trim() || (isCustomJson && customJson.authType === "none")) && formData.baseUrl.trim()
+  );
+  // Custom JSON API nodes take the complete endpoint URL: never prefill the OpenAI one.
+  const changeApiType = (apiType: string) => {
+    const leaving = formData.apiType === CUSTOM_JSON_API_TYPE;
+    const entering = apiType === CUSTOM_JSON_API_TYPE;
+    let baseUrl = formData.baseUrl;
+    if (entering && baseUrl === defaults.baseUrl) baseUrl = "";
+    if (leaving && !entering && !baseUrl.trim()) baseUrl = defaults.baseUrl;
+    setFormData({ ...formData, apiType, baseUrl });
+  };
 
   const resetAfterCreate = () => {
     setFormData(createInitialForm(mode));
@@ -207,6 +228,7 @@ export default function AddCompatibleProviderModal({
     setShowAdvanced(false);
     setSaveError(null);
     setIconUrlError(null);
+    setCustomJson(createCustomJsonForm());
   };
 
   const handleSubmit = async () => {
@@ -218,6 +240,11 @@ export default function AddCompatibleProviderModal({
     }
     setIconUrlError(null);
     setSaveError(null);
+    const customJsonResult = isCustomJson ? parseCustomJsonForm(customJson) : null;
+    if (customJsonResult?.error) {
+      setSaveError(t(customJsonResult.error.key, customJsonResult.error.values));
+      return;
+    }
     setSubmitting(true);
     try {
       const body: Record<string, unknown> = {
@@ -230,6 +257,7 @@ export default function AddCompatibleProviderModal({
       if (defaults.hasApiType) body.apiType = formData.apiType;
       if (defaults.hasModelsPath) body.modelsPath = formData.modelsPath || "";
       if (defaults.compatMode) body.compatMode = defaults.compatMode;
+      if (customJsonResult?.config) body.customJson = customJsonResult.config;
       const providerIdSuffix = formData.providerIdSuffix.trim();
       if (providerIdSuffix) body.providerIdSuffix = providerIdSuffix;
       body.iconUrl = formData.iconUrl.trim();
@@ -290,6 +318,14 @@ export default function AddCompatibleProviderModal({
   };
 
   const handleValidate = async () => {
+    const customJsonResult = isCustomJson ? parseCustomJsonForm(customJson) : null;
+    if (customJsonResult?.error) {
+      setValidationResult({
+        valid: false,
+        error: t(customJsonResult.error.key, customJsonResult.error.values),
+      });
+      return;
+    }
     setValidating(true);
     try {
       const body: Record<string, unknown> = {
@@ -305,6 +341,7 @@ export default function AddCompatibleProviderModal({
       }
       const trimmedModelId = checkModelId.trim();
       if (trimmedModelId) body.modelId = trimmedModelId;
+      if (customJsonResult?.config) body.customJson = customJsonResult.config;
 
       const res = await fetch("/api/provider-nodes/validate", {
         method: "POST",
@@ -365,16 +402,17 @@ export default function AddCompatibleProviderModal({
             label={t("apiTypeLabel")}
             options={apiTypeOptions}
             value={formData.apiType}
-            onChange={(e) => setFormData({ ...formData, apiType: e.target.value })}
+            onChange={(e) => changeApiType(e.target.value)}
           />
         )}
         <Input
           label={t("baseUrlLabel")}
           value={formData.baseUrl}
           onChange={(e) => setFormData({ ...formData, baseUrl: e.target.value })}
-          placeholder={baseUrlPlaceholder}
-          hint={baseUrlHint}
+          placeholder={isCustomJson ? "https://api.example.com/v1/answer" : baseUrlPlaceholder}
+          hint={isCustomJson ? t("customJsonEndpointHint") : baseUrlHint}
         />
+        {isCustomJson && <CustomJsonFields value={customJson} onChange={setCustomJson} t={t} />}
         <Input
           label={t("iconUrlLabel")}
           value={formData.iconUrl}
@@ -419,14 +457,16 @@ export default function AddCompatibleProviderModal({
         </Button>
         {showAdvanced && (
           <div id={advancedId} className="flex flex-col gap-3 pl-2 border-l-2 border-border">
-            <Input
-              label={t("chatPathLabel")}
-              value={formData.chatPath}
-              onChange={(e) => setFormData({ ...formData, chatPath: e.target.value })}
-              placeholder={chatPathPlaceholder}
-              hint={chatPathHint}
-            />
-            {defaults.hasModelsPath && (
+            {!isCustomJson && (
+              <Input
+                label={t("chatPathLabel")}
+                value={formData.chatPath}
+                onChange={(e) => setFormData({ ...formData, chatPath: e.target.value })}
+                placeholder={chatPathPlaceholder}
+                hint={chatPathHint}
+              />
+            )}
+            {defaults.hasModelsPath && !isCustomJson && (
               <Input
                 label={t("modelsPathLabel")}
                 value={formData.modelsPath}
@@ -459,10 +499,11 @@ export default function AddCompatibleProviderModal({
               disabled={!canValidate || validating}
               variant="secondary"
             >
-              {validating ? t("checking") : t("check")}
+              {validating ? t("checking") : isCustomJson ? t("customJsonSendTest") : t("check")}
             </Button>
           </div>
         </div>
+        {isCustomJson && <p className="text-xs text-text-muted">{t("customJsonSendTestHint")}</p>}
         <Input
           label={t("testModelIdLabel")}
           value={checkModelId}
