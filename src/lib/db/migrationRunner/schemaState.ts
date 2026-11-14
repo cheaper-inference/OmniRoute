@@ -172,83 +172,179 @@ export function detectNameMismatches(
   return mismatches;
 }
 
-export function reconcileRenumberedMigrations(db: SqliteAdapter, files: MigrationFile[]): boolean {
+type CompatibilityEntry = {
+  fromVersion: string;
+  fromName: string;
+  toVersion: string;
+  toName: string;
+};
+type LedgerRow = { version: string; name: string };
+type EntryOutcome =
+  { status: "skipped" } | { status: "repaired" } | { status: "blocked"; targetRow: LedgerRow };
+
+function occupiedSlotError(compatibility: CompatibilityEntry, targetRow: LedgerRow): Error {
+  return new Error(
+    `[Migration] Cannot reconcile ${compatibility.fromVersion}_${compatibility.fromName}: ` +
+      `target version ${compatibility.toVersion} is occupied by unknown migration ` +
+      `"${targetRow.name}" (expected "${compatibility.toName}").`
+  );
+}
+
+/**
+ * One compatibility entry, exactly as the single pass always handled it, except that an
+ * occupied target slot is reported back instead of thrown: the caller decides whether another
+ * entry is about to empty that slot.
+ */
+function reconcileCompatibilityEntry(
+  db: SqliteAdapter,
+  compatibility: CompatibilityEntry
+): EntryOutcome {
+  const legacyRow = db
+    .prepare("SELECT version, name FROM _omniroute_migrations WHERE version = ? AND name = ?")
+    .get(compatibility.fromVersion, compatibility.fromName) as LedgerRow | undefined;
+  if (!legacyRow) {
+    return { status: "skipped" };
+  }
+
+  const targetRow = db
+    .prepare("SELECT version, name FROM _omniroute_migrations WHERE version = ?")
+    .get(compatibility.toVersion) as LedgerRow | undefined;
+
+  const isSameSlotReplacement = compatibility.fromVersion === compatibility.toVersion;
+  if (targetRow && !isSameSlotReplacement && targetRow.name !== compatibility.toName) {
+    return { status: "blocked", targetRow };
+  }
+
+  const applyRepair = db.transaction(() => {
+    if (targetRow) {
+      db.prepare("DELETE FROM _omniroute_migrations WHERE version = ? AND name = ?").run(
+        compatibility.fromVersion,
+        compatibility.fromName
+      );
+    } else {
+      db.prepare(
+        "UPDATE _omniroute_migrations SET version = ?, name = ? WHERE version = ? AND name = ?"
+      ).run(
+        compatibility.toVersion,
+        compatibility.toName,
+        compatibility.fromVersion,
+        compatibility.fromName
+      );
+    }
+  });
+
+  applyRepair();
+  console.warn(
+    `[Migration] Reconciled renamed migration ${compatibility.fromVersion}_${compatibility.fromName} ` +
+      `to ${compatibility.toVersion}_${compatibility.toName} to preserve pending migrations.`
+  );
+
+  // After the compat rewrite, verify the old version slot is now free.
+  // A residual row (from a failed prior run, manual intervention, or edge-case
+  // UPDATE conflict) at the old version would shadow a NEW migration file
+  // placed at that version number — e.g. 028_create_files_and_batches.sql
+  // would be skipped because getAppliedVersions() still sees version "028".
+  const residualRow = db
+    .prepare("SELECT version, name FROM _omniroute_migrations WHERE version = ?")
+    .get(compatibility.fromVersion) as LedgerRow | undefined;
+  if (residualRow) {
+    console.warn(
+      `[Migration] ⚠️  Residual row at version ${compatibility.fromVersion} ` +
+        `(name: "${residualRow.name}") still present after compat rewrite — ` +
+        `removing to unblock new migration at this version slot.`
+    );
+    db.prepare("DELETE FROM _omniroute_migrations WHERE version = ?").run(
+      compatibility.fromVersion
+    );
+  }
+  return { status: "repaired" };
+}
+
+/**
+ * Moves the ledger rows of renamed migrations (RENAMED_MIGRATION_COMPATIBILITY) to their new
+ * slots, so a database that applied a migration under its old version neither runs it again
+ * nor skips the migration that now owns the old slot.
+ *
+ * The order of the entries does not matter. They run in array order; an entry whose target
+ * slot still holds another migration's row would stop the boot, but if another eligible entry
+ * moves that row away, the entry waits and is retried after the rest of the pass, until every
+ * entry is done. When nothing has to wait, the steps and the result are exactly those of a
+ * single pass in array order. When a real conflict remains (a slot held by a row no entry
+ * moves, or entries that swap slots), the boot stops with exactly the error the single pass
+ * gave: the one for the first entry it found blocked. A warning names the entry that is
+ * really stuck when that is a different one.
+ *
+ * Runs inside the caller's transaction (runImmediateTransaction in migrationRunner.ts), which
+ * rolls back the repairs made before an error. Order independence assumes what the runner and
+ * the tests already enforce: one file per version and one entry per (fromVersion, fromName).
+ * `compatibilityEntries` exists for tests; the runner always uses the constant.
+ */
+export function reconcileRenumberedMigrations(
+  db: SqliteAdapter,
+  files: MigrationFile[],
+  compatibilityEntries: ReadonlyArray<CompatibilityEntry> = RENAMED_MIGRATION_COMPATIBILITY
+): boolean {
   let repaired = false;
 
-  for (const compatibility of RENAMED_MIGRATION_COMPATIBILITY) {
-    const hasTargetFile = files.some(
-      (file) => file.version === compatibility.toVersion && file.name === compatibility.toName
-    );
-    const hasSourceFile = isCompatibilitySourceEligible(files, compatibility);
+  // Eligibility depends only on the files on disk, so it is the same in every pass.
+  const eligible = compatibilityEntries.filter(
+    (compatibility) =>
+      files.some(
+        (file) => file.version === compatibility.toVersion && file.name === compatibility.toName
+      ) && isCompatibilitySourceEligible(files, compatibility)
+  );
 
-    if (!hasTargetFile || !hasSourceFile) {
-      continue;
-    }
-
-    const legacyRow = db
-      .prepare("SELECT version, name FROM _omniroute_migrations WHERE version = ? AND name = ?")
-      .get(compatibility.fromVersion, compatibility.fromName) as
-      { version: string; name: string } | undefined;
-    if (!legacyRow) {
-      continue;
-    }
-
-    const targetRow = db
-      .prepare("SELECT version, name FROM _omniroute_migrations WHERE version = ?")
-      .get(compatibility.toVersion) as { version: string; name: string } | undefined;
-
-    const isSameSlotReplacement = compatibility.fromVersion === compatibility.toVersion;
-    if (targetRow && !isSameSlotReplacement && targetRow.name !== compatibility.toName) {
-      throw new Error(
-        `[Migration] Cannot reconcile ${compatibility.fromVersion}_${compatibility.fromName}: ` +
-          `target version ${compatibility.toVersion} is occupied by unknown migration ` +
-          `"${targetRow.name}" (expected "${compatibility.toName}").`
+  // The entry the single pass in array order would have stopped at, with the row it found.
+  let firstBlocked: { compatibility: CompatibilityEntry; targetRow: LedgerRow } | null = null;
+  const stopTheBoot = (compatibility: CompatibilityEntry, targetRow: LedgerRow): never => {
+    const reported = firstBlocked ?? { compatibility, targetRow };
+    if (reported.compatibility !== compatibility) {
+      console.warn(
+        `[Migration] ${compatibility.fromVersion}_${compatibility.fromName} cannot move: ` +
+          `target version ${compatibility.toVersion} holds "${targetRow.name}" ` +
+          `(expected "${compatibility.toName}"), and no compatibility entry moves it.`
       );
     }
+    throw occupiedSlotError(reported.compatibility, reported.targetRow);
+  };
 
-    const applyRepair = db.transaction(() => {
-      if (targetRow) {
-        db.prepare("DELETE FROM _omniroute_migrations WHERE version = ? AND name = ?").run(
-          compatibility.fromVersion,
-          compatibility.fromName
-        );
-      } else {
-        db.prepare(
-          "UPDATE _omniroute_migrations SET version = ?, name = ? WHERE version = ? AND name = ?"
-        ).run(
-          compatibility.toVersion,
-          compatibility.toName,
-          compatibility.fromVersion,
-          compatibility.fromName
+  const deferred = new Set<CompatibilityEntry>();
+  let pending: ReadonlyArray<CompatibilityEntry> = eligible;
+  while (pending.length > 0) {
+    const waiting: Array<{ compatibility: CompatibilityEntry; targetRow: LedgerRow }> = [];
+    for (const compatibility of pending) {
+      const result = reconcileCompatibilityEntry(db, compatibility);
+      if (result.status === "repaired") {
+        repaired = true;
+        continue;
+      }
+      if (result.status === "skipped") continue;
+
+      const { targetRow } = result;
+      firstBlocked ??= { compatibility, targetRow };
+      const movedByAnotherEntry = eligible.some(
+        (other) =>
+          other !== compatibility &&
+          other.fromVersion === targetRow.version &&
+          other.fromName === targetRow.name
+      );
+      if (!movedByAnotherEntry) stopTheBoot(compatibility, targetRow);
+      if (!deferred.has(compatibility)) {
+        deferred.add(compatibility);
+        console.warn(
+          `[Migration] Deferring ${compatibility.fromVersion}_${compatibility.fromName}: ` +
+            `target version ${compatibility.toVersion} still holds "${targetRow.name}", which ` +
+            `another compatibility entry moves first.`
         );
       }
-    });
-
-    applyRepair();
-    repaired = true;
-    console.warn(
-      `[Migration] Reconciled renamed migration ${compatibility.fromVersion}_${compatibility.fromName} ` +
-        `to ${compatibility.toVersion}_${compatibility.toName} to preserve pending migrations.`
-    );
-
-    // After the compat rewrite, verify the old version slot is now free.
-    // A residual row (from a failed prior run, manual intervention, or edge-case
-    // UPDATE conflict) at the old version would shadow a NEW migration file
-    // placed at that version number — e.g. 028_create_files_and_batches.sql
-    // would be skipped because getAppliedVersions() still sees version "028".
-    const residualRow = db
-      .prepare("SELECT version, name FROM _omniroute_migrations WHERE version = ?")
-      .get(compatibility.fromVersion) as { version: string; name: string } | undefined;
-    if (residualRow) {
-      console.warn(
-        `[Migration] ⚠️  Residual row at version ${compatibility.fromVersion} ` +
-          `(name: "${residualRow.name}") still present after compat rewrite — ` +
-          `removing to unblock new migration at this version slot.`
-      );
-      db.prepare("DELETE FROM _omniroute_migrations WHERE version = ?").run(
-        compatibility.fromVersion
-      );
+      waiting.push({ compatibility, targetRow });
     }
+
+    // Every pass either finishes an entry or stops here, so the loop always ends.
+    if (waiting.length === pending.length) {
+      stopTheBoot(waiting[0].compatibility, waiting[0].targetRow);
+    }
+    pending = waiting.map((entry) => entry.compatibility);
   }
 
   return repaired;

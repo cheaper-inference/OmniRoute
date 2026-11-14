@@ -275,6 +275,7 @@ const GUARDED_TEST_FILES = [
   "tests/unit/db/migration-timestamp-runner.test.ts",
   "tests/unit/db/migration-version-ordering.test.ts",
   "tests/unit/db/migrations-fresh-database.test.ts",
+  "tests/unit/db/migration-compat-reconcile-order.test.ts",
 ];
 
 function utcStamp(date: Date): string {
