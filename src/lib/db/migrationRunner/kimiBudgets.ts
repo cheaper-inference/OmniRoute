@@ -12,6 +12,34 @@ function window(row: Row, now: number): number {
   ).periodStartAt;
 }
 
+function seedCounter(
+  db: SqliteAdapter,
+  row: Row,
+  start: number,
+  spelling?: "moonshot" | "kimi"
+): void {
+  const counter = db
+    .prepare<Row>(
+      "SELECT tokens_used FROM api_key_token_counters WHERE limit_id = ? AND window_start = ?"
+    )
+    .get(row.id, String(start));
+  if (Number(counter?.tokens_used) > 0) return;
+  const seed =
+    readKimiBudgetHistory(
+      db,
+      String(row.api_key_id),
+      String(row.scope_type),
+      String(row.scope_value),
+      start,
+      undefined,
+      spelling
+    ) || 0;
+  if (seed > 0)
+    db.prepare(
+      "INSERT INTO api_key_token_counters(limit_id,window_start,tokens_used) VALUES(?,?,?) ON CONFLICT(limit_id,window_start) DO UPDATE SET tokens_used = excluded.tokens_used"
+    ).run(row.id, String(start), seed);
+}
+
 export function migrateKimiTokenBudgets(db: SqliteAdapter, now: number): void {
   const rows = db
     .prepare<Row>("SELECT * FROM api_key_token_limits WHERE scope_type = 'provider'")
@@ -27,20 +55,7 @@ export function migrateKimiTokenBudgets(db: SqliteAdapter, now: number): void {
       .get(old.api_key_id, old.scope_type, canonical, old.reset_interval);
     if (!current) {
       const start = window(old, now);
-      const counter = db
-        .prepare<Row>(
-          "SELECT tokens_used FROM api_key_token_counters WHERE limit_id = ? AND window_start = ?"
-        )
-        .get(old.id, String(start));
-      if (!(Number(counter?.tokens_used) > 0)) {
-        const seed =
-          readKimiBudgetHistory(db, String(old.api_key_id), String(old.scope_type), value, start) ||
-          0;
-        if (seed > 0)
-          db.prepare(
-            "INSERT INTO api_key_token_counters(limit_id,window_start,tokens_used) VALUES(?,?,?) ON CONFLICT(limit_id,window_start) DO UPDATE SET tokens_used = excluded.tokens_used"
-          ).run(old.id, String(start), seed);
-      }
+      seedCounter(db, old, start);
       db.prepare("UPDATE api_key_token_limits SET scope_value = ? WHERE id = ?").run(
         canonical,
         old.id
@@ -53,26 +68,7 @@ export function migrateKimiTokenBudgets(db: SqliteAdapter, now: number): void {
       [old, "moonshot"],
       [current, "kimi"],
     ] as const) {
-      const counter = db
-        .prepare<Row>(
-          "SELECT tokens_used FROM api_key_token_counters WHERE limit_id = ? AND window_start = ?"
-        )
-        .get(component.id, String(start));
-      if (Number(counter?.tokens_used) > 0) continue;
-      const seed =
-        readKimiBudgetHistory(
-          db,
-          String(component.api_key_id),
-          String(component.scope_type),
-          String(component.scope_value),
-          start,
-          undefined,
-          spelling
-        ) || 0;
-      if (seed > 0)
-        db.prepare(
-          "INSERT INTO api_key_token_counters(limit_id,window_start,tokens_used) VALUES(?,?,?) ON CONFLICT(limit_id,window_start) DO UPDATE SET tokens_used = excluded.tokens_used"
-        ).run(component.id, String(start), seed);
+      seedCounter(db, component, start, spelling);
     }
     db.prepare(
       "INSERT INTO api_key_token_counters(limit_id,window_start,tokens_used,updated_at) SELECT ?,window_start,tokens_used,updated_at FROM api_key_token_counters WHERE limit_id = ? AND true ON CONFLICT(limit_id,window_start) DO UPDATE SET tokens_used = tokens_used + excluded.tokens_used"

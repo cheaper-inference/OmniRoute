@@ -101,15 +101,38 @@ function hiddenModels(custom: unknown, compat: unknown): Set<string> {
   return new Set([...visibility].filter(([, hidden]) => hidden).map(([id]) => id));
 }
 
-export async function getKimiAutoComboInputs(permittedIds?: ReadonlySet<string>) {
-  const [legacy, canonical, legacyRefs, canonicalRefs] = await Promise.all([
-    getRawSyncedAvailableModelsByConnection("moonshot"),
-    getRawSyncedAvailableModelsByConnection("kimi"),
-    getActiveConnectionAdmissionRefs("moonshot"),
-    getActiveConnectionAdmissionRefs("kimi"),
-  ]);
-  const customModels = readFamilyCollection("customModels");
-  const compatOverrides = readFamilyCollection("modelCompatOverrides");
+type RawSyncedFamily = Awaited<ReturnType<typeof getRawSyncedAvailableModelsByConnection>>;
+type RawSyncedEntry = RawSyncedFamily[string];
+
+function mergedSyncedValue(
+  old: RawSyncedEntry | undefined,
+  current: RawSyncedEntry | undefined,
+  selected: RawSyncedEntry
+): unknown {
+  return old &&
+    current &&
+    !old.malformed &&
+    supported(old.value, true) &&
+    supported(current.value, true)
+    ? mergeCollection(old.value, current.value, modelIdentity)
+    : selected.value;
+}
+
+function syncedModelMetadata(value: unknown): Map<string, Row> {
+  const metadata = new Map<string, Row>();
+  if (Array.isArray(value))
+    for (const row of value) {
+      const modelId = modelIdentity(row);
+      if (modelId && record(row)) metadata.set(modelId, row);
+    }
+  return metadata;
+}
+
+function mergeSyncedFamily(
+  legacy: RawSyncedFamily,
+  canonical: RawSyncedFamily,
+  permittedIds?: ReadonlySet<string>
+) {
   const syncedByConnection: SyncedAvailableModelsByConnection = {};
   const syncedMetadata = new Map<string, Map<string, Row>>();
   for (const id of new Set([...Object.keys(legacy), ...Object.keys(canonical)])) {
@@ -123,14 +146,7 @@ export async function getKimiAutoComboInputs(permittedIds?: ReadonlySet<string>)
       });
     const selected = current ?? old;
     if (!selected || selected.malformed) continue;
-    const value =
-      old &&
-      current &&
-      !old.malformed &&
-      supported(old.value, true) &&
-      supported(current.value, true)
-        ? mergeCollection(old.value, current.value, modelIdentity)
-        : selected.value;
+    const value = mergedSyncedValue(old, current, selected);
     try {
       syncedByConnection[id] = normalizeSyncedAvailableModels(value, "kimi");
     } catch {
@@ -140,14 +156,21 @@ export async function getKimiAutoComboInputs(permittedIds?: ReadonlySet<string>)
       });
       continue;
     }
-    const metadata = new Map<string, Row>();
-    if (Array.isArray(value))
-      for (const row of value) {
-        const modelId = modelIdentity(row);
-        if (modelId && record(row)) metadata.set(modelId, row);
-      }
-    syncedMetadata.set(id, metadata);
+    syncedMetadata.set(id, syncedModelMetadata(value));
   }
+  return { syncedByConnection, syncedMetadata };
+}
+
+export async function getKimiAutoComboInputs(permittedIds?: ReadonlySet<string>) {
+  const [legacy, canonical, legacyRefs, canonicalRefs] = await Promise.all([
+    getRawSyncedAvailableModelsByConnection("moonshot"),
+    getRawSyncedAvailableModelsByConnection("kimi"),
+    getActiveConnectionAdmissionRefs("moonshot"),
+    getActiveConnectionAdmissionRefs("kimi"),
+  ]);
+  const customModels = readFamilyCollection("customModels");
+  const compatOverrides = readFamilyCollection("modelCompatOverrides");
+  const { syncedByConnection, syncedMetadata } = mergeSyncedFamily(legacy, canonical, permittedIds);
   const refs = new Map<string, ConnectionAdmissionRef>();
   for (const ref of [...legacyRefs, ...canonicalRefs])
     if (!permittedIds || permittedIds.has(ref.id)) refs.set(ref.id, ref);

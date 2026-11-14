@@ -103,6 +103,18 @@ function providerRows(
     return [{ ...row, [field]: next }];
   });
 }
+function validChaosBounds(value: Row): boolean {
+  for (const [key, min, max] of [
+    ["timeoutMs", 5000, 600000],
+    ["maxTokens", 256, 128000],
+  ] as const) {
+    const v = value[key];
+    if (v !== undefined && !(typeof v === "number" && Number.isInteger(v) && v >= min && v <= max))
+      return false;
+  }
+  return true;
+}
+
 function validChaos(value: unknown): value is Row & { providerOverrides: Row[] } {
   if (
     !record(value) ||
@@ -121,14 +133,7 @@ function validChaos(value: unknown): value is Row & { providerOverrides: Row[] }
     (typeof value.systemPrompt !== "string" || value.systemPrompt.length > 10000)
   )
     return false;
-  for (const [key, min, max] of [
-    ["timeoutMs", 5000, 600000],
-    ["maxTokens", 256, 128000],
-  ] as const) {
-    const v = value[key];
-    if (v !== undefined && !(typeof v === "number" && Number.isInteger(v) && v >= min && v <= max))
-      return false;
-  }
+  if (!validChaosBounds(value)) return false;
   return value.providerOverrides.every(
     (v) =>
       record(v) &&
@@ -280,41 +285,41 @@ export function preflightKimiPolicies(db: SqliteAdapter): void {
   if (!matches) throw new Error("Kimi chaos selector conflict would broaden the active selection");
 }
 
+function resilienceSettings(value: Row): Row {
+  const result = { ...value };
+  if (record(value.preferredAccountFailover))
+    result.preferredAccountFailover = {
+      ...value.preferredAccountFailover,
+      ...(Object.hasOwn(value.preferredAccountFailover, "providerTimeoutsMs")
+        ? {
+            providerTimeoutsMs: providerMap(
+              value.preferredAccountFailover.providerTimeoutsMs,
+              (v) => typeof v === "number" && Number.isFinite(v)
+            ),
+          }
+        : {}),
+      ...(Object.hasOwn(value.preferredAccountFailover, "modelTimeoutsMs")
+        ? { modelTimeoutsMs: qualifiedMap(value.preferredAccountFailover.modelTimeoutsMs) }
+        : {}),
+    };
+  if (record(value.quotaPreflight) && Object.hasOwn(value.quotaPreflight, "providerWindowDefaults"))
+    result.quotaPreflight = {
+      ...value.quotaPreflight,
+      providerWindowDefaults: providerMap(value.quotaPreflight.providerWindowDefaults),
+    };
+  if (Object.hasOwn(value, "providerQuotaOverrides"))
+    result.providerQuotaOverrides = providerMap(value.providerQuotaOverrides);
+  return result;
+}
+
 function globalSetting(key: string, value: unknown, ids: Set<string>): unknown {
   if (["providerStrategies", "providerErrorDefaults", "providerOverrides"].includes(key))
     return providerMap(value);
   if (key === "providerErrorRules") return providerMap(value, Array.isArray);
   if (key === "systemTransforms" && record(value))
     return { ...value, providers: providerMap(value.providers) };
-  if (key === "resilienceSettings" && record(value)) {
-    const result = { ...value };
-    if (record(value.preferredAccountFailover))
-      result.preferredAccountFailover = {
-        ...value.preferredAccountFailover,
-        ...(Object.hasOwn(value.preferredAccountFailover, "providerTimeoutsMs")
-          ? {
-              providerTimeoutsMs: providerMap(
-                value.preferredAccountFailover.providerTimeoutsMs,
-                (v) => typeof v === "number" && Number.isFinite(v)
-              ),
-            }
-          : {}),
-        ...(Object.hasOwn(value.preferredAccountFailover, "modelTimeoutsMs")
-          ? { modelTimeoutsMs: qualifiedMap(value.preferredAccountFailover.modelTimeoutsMs) }
-          : {}),
-      };
-    if (
-      record(value.quotaPreflight) &&
-      Object.hasOwn(value.quotaPreflight, "providerWindowDefaults")
-    )
-      result.quotaPreflight = {
-        ...value.quotaPreflight,
-        providerWindowDefaults: providerMap(value.quotaPreflight.providerWindowDefaults),
-      };
-    if (Object.hasOwn(value, "providerQuotaOverrides"))
-      result.providerQuotaOverrides = providerMap(value.providerQuotaOverrides);
-    return result;
-  }
+  if (key === "resilienceSettings" && record(value)) return resilienceSettings(value);
+
   if (key === "quotaVisibility")
     return ids.has("moonshot") || ids.has("kimi") ? value : providerMap(value, record);
   if (key === "quotaProviderOrder") return providerOrder(value, true);

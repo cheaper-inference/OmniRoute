@@ -478,6 +478,74 @@ function sanitizeAutoCustomModels(rawModels: unknown): AutoCustomModel[] {
   return Array.isArray(rawModels) ? rawModels.filter(isValidAutoCustomModel) : [];
 }
 
+async function expandNativeKimiPool(
+  eligibleTargets: ResolvedComboTarget[],
+  seenModelStrs: Set<string>,
+  allConnections: ActiveConnectionRecord[]
+): Promise<void> {
+  try {
+    const connections = (allConnections as ActiveConnectionRecord[]).filter(
+      (connection) =>
+        typeof connection.provider === "string" &&
+        typeof connection.id === "string" &&
+        canonicalKimiProvider(connection.provider) === "kimi"
+    );
+    const inputs = await getKimiAutoComboInputs(new Set(connections.map((c) => c.id)));
+    for (const candidate of await getKimiAutoComboCandidates(
+      inputs,
+      connections,
+      getProviderModels("kimi")
+    )) {
+      const modelStr = "kimi/" + candidate.modelId;
+      if (seenModelStrs.has(modelStr)) continue;
+      seenModelStrs.add(modelStr);
+      eligibleTargets.push({
+        kind: "model",
+        stepId: modelStr,
+        executionKey: modelStr,
+        provider: "kimi",
+        providerId: "kimi",
+        modelStr,
+        weight: 1,
+        connectionId: null,
+        allowedConnectionIds: candidate.allowedConnectionIds,
+        label: null,
+      });
+    }
+  } catch {
+    // Preserve explicit targets and continue other providers when native inventory is unreadable.
+  }
+}
+
+async function providerAutoModelIds(
+  providerId: string,
+  hiddenModels: Set<string> | undefined
+): Promise<string[]> {
+  const [admitted, rawCustomModels] = await Promise.all([
+    loadAdmittedSyncedModels(providerId),
+    getCustomModels(providerId),
+  ]);
+  const syncedModelsRaw = admitted.models;
+  const customModels = sanitizeAutoCustomModels(rawCustomModels);
+  const syncedModels = filterChatSelectableModels(providerId, syncedModelsRaw);
+  // Custom rows include speech / transcription / image models imported from a
+  // media provider's local catalog or added by hand; they are not chat targets.
+  const chatCustomModels = filterChatSelectableModels(providerId, customModels);
+  const userVisibleIds = new Set<string>();
+  for (const m of syncedModels) if (m.id && !hiddenModels?.has(m.id)) userVisibleIds.add(m.id);
+  for (const m of chatCustomModels) if (m.id && !hiddenModels?.has(m.id)) userVisibleIds.add(m.id);
+  // A provider whose custom rows are all non-chat still has user models, so it
+  // must not fall back to its static chat catalog.
+  const hasUserModels =
+    admitted.freeOnlyExhausted ||
+    userVisibleIds.size > 0 ||
+    customModels.some((m: { id?: string }) => m.id && !hiddenModels?.has(m.id));
+  const expandIds = hasUserModels
+    ? Array.from(userVisibleIds)
+    : getProviderModels(providerId).map((m) => m.id);
+  return expandIds;
+}
+
 /**
  * For an auto-combo WITHOUT an explicit `candidatePool`, broaden the eligible
  * targets to every model of every active provider connection so the router has
@@ -544,38 +612,11 @@ export async function expandAutoComboCandidatePool(
     const hiddenModelsMap = getHiddenModelsByProvider();
     for (const providerId of providerIds) {
       if (providerId === "kimi") {
-        try {
-          const connections = (allConnections as ActiveConnectionRecord[]).filter(
-            (connection) =>
-              typeof connection.provider === "string" &&
-              typeof connection.id === "string" &&
-              canonicalKimiProvider(connection.provider) === "kimi"
-          );
-          const inputs = await getKimiAutoComboInputs(new Set(connections.map((c) => c.id)));
-          for (const candidate of await getKimiAutoComboCandidates(
-            inputs,
-            connections,
-            getProviderModels("kimi")
-          )) {
-            const modelStr = "kimi/" + candidate.modelId;
-            if (seenModelStrs.has(modelStr)) continue;
-            seenModelStrs.add(modelStr);
-            eligibleTargets.push({
-              kind: "model",
-              stepId: modelStr,
-              executionKey: modelStr,
-              provider: "kimi",
-              providerId: "kimi",
-              modelStr,
-              weight: 1,
-              connectionId: null,
-              allowedConnectionIds: candidate.allowedConnectionIds,
-              label: null,
-            });
-          }
-        } catch {
-          // Preserve explicit targets and continue other providers when native inventory is unreadable.
-        }
+        await expandNativeKimiPool(
+          eligibleTargets,
+          seenModelStrs,
+          allConnections as ActiveConnectionRecord[]
+        );
         continue;
       }
       // #auto-pool-visible-only: when the operator has synced/custom models for
@@ -587,30 +628,7 @@ export async function expandAutoComboCandidatePool(
       // chat combo pools must keep filtering them out at read time.
       // A free-only connection contributes only its free rows; a provider whose
       // free-only connections list no free model has nothing to expand.
-      const [admitted, rawCustomModels] = await Promise.all([
-        loadAdmittedSyncedModels(providerId),
-        getCustomModels(providerId),
-      ]);
-      const syncedModelsRaw = admitted.models;
-      const customModels = sanitizeAutoCustomModels(rawCustomModels);
-      const syncedModels = filterChatSelectableModels(providerId, syncedModelsRaw);
-      // Custom rows include speech / transcription / image models imported from a
-      // media provider's local catalog or added by hand; they are not chat targets.
-      const chatCustomModels = filterChatSelectableModels(providerId, customModels);
-      const hiddenModels = hiddenModelsMap.get(providerId);
-      const userVisibleIds = new Set<string>();
-      for (const m of syncedModels) if (m.id && !hiddenModels?.has(m.id)) userVisibleIds.add(m.id);
-      for (const m of chatCustomModels)
-        if (m.id && !hiddenModels?.has(m.id)) userVisibleIds.add(m.id);
-      // A provider whose custom rows are all non-chat still has user models, so it
-      // must not fall back to its static chat catalog.
-      const hasUserModels =
-        admitted.freeOnlyExhausted ||
-        userVisibleIds.size > 0 ||
-        customModels.some((m: { id?: string }) => m.id && !hiddenModels?.has(m.id));
-      const expandIds = hasUserModels
-        ? Array.from(userVisibleIds)
-        : getProviderModels(providerId).map((m) => m.id);
+      const expandIds = await providerAutoModelIds(providerId, hiddenModelsMap.get(providerId));
       for (const modelId of expandIds) {
         const modelStr = `${providerId}/${modelId}`;
         if (!seenModelStrs.has(modelStr)) {

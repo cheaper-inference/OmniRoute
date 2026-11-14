@@ -30,6 +30,26 @@ function update(db: SqliteAdapter, table: string, row: Row, keys: string[], orig
   ).run(...fields.map((k) => row[k]), ...keys.map((k) => original[k]));
 }
 
+function mergeProviderCollision(
+  db: SqliteAdapter,
+  table: string,
+  keys: string[],
+  where: string,
+  old: Row,
+  current: Row,
+  merge: (old: Row, current: Row) => Row
+): void {
+  let merged: Row;
+  try {
+    merged = merge(old, current);
+  } catch (error) {
+    if (error instanceof PreserveLegacyKimiJsonError) return;
+    throw error;
+  }
+  update(db, table, merged, keys, current);
+  db.prepare("DELETE FROM " + table + " WHERE " + where).run(...keys.map((k) => old[k]));
+}
+
 function mergeProviderRows(
   db: SqliteAdapter,
   table: string,
@@ -59,15 +79,7 @@ function mergeProviderRows(
       .prepare<Row>("SELECT * FROM " + table + " WHERE " + where)
       .get(...keys.map((k) => next[k]));
     if (current) {
-      let merged: Row;
-      try {
-        merged = merge(old, current);
-      } catch (error) {
-        if (error instanceof PreserveLegacyKimiJsonError) continue;
-        throw error;
-      }
-      update(db, table, merged, keys, current);
-      db.prepare("DELETE FROM " + table + " WHERE " + where).run(...keys.map((k) => old[k]));
+      mergeProviderCollision(db, table, keys, where, old, current, merge);
     } else update(db, table, next, keys, old);
   }
 }
@@ -142,14 +154,7 @@ function migrateKimiProxyScopes(db: SqliteAdapter): void {
   }
 }
 
-/** Called only inside the runner's transaction, before its ledger marker is inserted. */
-export function migrateCanonicalKimi(db: SqliteAdapter, now = Date.now()): void {
-  preflightKimiPolicies(db);
-  migrateKimiTokenBudgets(db, now);
-  db.prepare("UPDATE provider_connections SET provider = 'kimi' WHERE provider = 'moonshot'").run();
-  for (const table of ["registered_keys", "provider_plans"]) {
-    db.prepare("UPDATE " + table + " SET provider = 'kimi' WHERE provider = 'moonshot'").run();
-  }
+function migrateKimiProviderRows(db: SqliteAdapter): void {
   mergeProviderRows(db, "provider_key_limits", "provider", ["provider"], issuance);
   mergeProviderRows(db, "tier_assignments", "provider", ["provider", "model"]);
   mergeProviderRows(db, "model_capabilities", "provider", ["provider", "model_id"]);
@@ -168,6 +173,9 @@ export function migrateCanonicalKimi(db: SqliteAdapter, now = Date.now()): void 
         ? { ...old, provider: "kimi" }
         : current
   );
+}
+
+function migrateKimiRoutingState(db: SqliteAdapter, now: number): void {
   mergeProviderRows(
     db,
     "session_account_affinity",
@@ -222,6 +230,33 @@ export function migrateCanonicalKimi(db: SqliteAdapter, now = Date.now()): void 
       models: mergeJson(old.models, current.models),
     })
   );
+}
+
+function canonicalReferenceValue(field: string, value: string): unknown {
+  if (field === "provider") return value === "moonshot" ? "kimi" : value;
+  if (["allowed_models", "blocked_models"].includes(field))
+    return jsonTransform(value, (v) => (Array.isArray(v) ? v.map(target) : v));
+  if (field === "data") return jsonTransform(value, target);
+  return canonicalKimiModel(value);
+}
+
+function canonicalReferenceRow(row: Row, fields: readonly string[]): Row {
+  const next = { ...row };
+  for (const field of fields) {
+    if (typeof row[field] !== "string") continue;
+    if (
+      field !== "provider" &&
+      typeof row.provider === "string" &&
+      row.provider !== "kimi" &&
+      row.provider !== "moonshot"
+    )
+      continue;
+    next[field] = canonicalReferenceValue(field, row[field]);
+  }
+  return next;
+}
+
+function migrateKimiModelReferences(db: SqliteAdapter): void {
   for (const [table, fields] of [
     ["api_keys", ["allowed_models", "blocked_models", "forced_model"]],
     ["group_model_permissions", ["provider"]],
@@ -233,30 +268,13 @@ export function migrateCanonicalKimi(db: SqliteAdapter, now = Date.now()): void 
     const info = db.prepare<{ name: string; pk: number }>("PRAGMA table_info(" + table + ")").all();
     const keys = info.filter((column) => column.pk).map((column) => column.name);
     for (const row of db.prepare<Row>("SELECT * FROM " + table).all()) {
-      const next = { ...row };
-      for (const field of fields) {
-        if (typeof row[field] !== "string") continue;
-        if (
-          field !== "provider" &&
-          typeof row.provider === "string" &&
-          row.provider !== "kimi" &&
-          row.provider !== "moonshot"
-        )
-          continue;
-        next[field] =
-          field === "provider"
-            ? row[field] === "moonshot"
-              ? "kimi"
-              : row[field]
-            : ["allowed_models", "blocked_models"].includes(field)
-              ? jsonTransform(row[field], (v) => (Array.isArray(v) ? v.map(target) : v))
-              : field === "data"
-                ? jsonTransform(row[field], target)
-                : canonicalKimiModel(String(row[field]));
-      }
+      const next = canonicalReferenceRow(row, fields);
       if (fields.some((field) => next[field] !== row[field])) update(db, table, next, keys, row);
     }
   }
+}
+
+function migrateKimiFallbackChains(db: SqliteAdapter): void {
   const preservedFallbackModels = new Set<unknown>();
   mergeProviderRows(
     db,
@@ -292,6 +310,20 @@ export function migrateCanonicalKimi(db: SqliteAdapter, now = Date.now()): void 
         row.model
       );
   }
+}
+
+/** Called only inside the runner's transaction, before its ledger marker is inserted. */
+export function migrateCanonicalKimi(db: SqliteAdapter, now = Date.now()): void {
+  preflightKimiPolicies(db);
+  migrateKimiTokenBudgets(db, now);
+  db.prepare("UPDATE provider_connections SET provider = 'kimi' WHERE provider = 'moonshot'").run();
+  for (const table of ["registered_keys", "provider_plans"]) {
+    db.prepare("UPDATE " + table + " SET provider = 'kimi' WHERE provider = 'moonshot'").run();
+  }
+  migrateKimiProviderRows(db);
+  migrateKimiRoutingState(db, now);
+  migrateKimiModelReferences(db);
+  migrateKimiFallbackChains(db);
   migrateKimiProxyScopes(db);
   migrateKimiSettings(db);
   migrateKimiPolicies(db);
