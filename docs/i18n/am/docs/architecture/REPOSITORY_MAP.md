@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------- |
 | `components/`                    | ዳሽቦርድ መለዋወጫ API: አስማሚዎች በ `packages/ui-kit` — ላይ `docs/architecture/DESIGN_SYSTEM.md` ይመልከቱ |
 | `constants/iconMap.ts`           | `ICON_MAP`: በስክሪኖቹ ጥቅም ላይ የዋሉ የአዶ ስሞች → የሉሲድ ክፍሎች (`<Icon>`)                                |
-| `constants/providers.ts`         | **381 አቅራቢዎች** በ Zod ማረጋገጫ (የእውነት ምንጭ)                                                      |
+| `constants/providers.ts`         | **394 አቅራቢዎች** በ Zod ማረጋገጫ (የእውነት ምንጭ)                                                      |
 | `constants/cliTools.ts`          | ውጫዊ CLI መሣሪያ መዝገብ                                                                           |
-| `constants/routingStrategies.ts` | **20 የማዞሪያ ስልቶች** ቅድሚያ ከሚሰጣቸው ነገሮች ጋር                                                       |
+| `constants/routingStrategies.ts` | **22 የማዞሪያ ስልቶች** ቅድሚያ ከሚሰጣቸው ነገሮች ጋር                                                       |
 | `constants/publicApiRoutes.ts`   | ተሸካሚ (ከአስተዳደር ጋር) ማረጋገጫ የሚያስፈልጋቸው መስመሮች                                                     |
 | `constants/upstreamHeaders.ts`   | ለላይ ለሚደረጉ ጥያቄዎች የራስጌ ውድቅ ዝርዝር                                                               |
 | `validation/schemas.ts`          | ~ 80 Zod schemas (ለ API ኮንትራቶች አንድ የእውነት ምንጭ)                                               |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — የዥረት ሞተር የሥራ ቦታ
+## `open-sse/` — የዥረት ሞተር የስራ ቦታ
 
-የተለየ npm የሥራ ቦታ (`@omniroute/open-sse`)። የጥያቄ ሂደትን + የአቅራቢ አፈጻጸምን ያስተናግዳል።
+የተለየ npm የስራ ቦታ (`@omniroute/open-sse`)። + አቅራቢ አፈጻጸምን በማካሄድ ላይ ያለውን ጥያቄ ያስተናግዳል።
 
 ```
 open-sse/
-├── handlers/            # 16 ፋይሎች (12 አስተናጋጆች + 4 ረዳቶች): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, ወዘተ።
-├── executors/           # 150 የአስፈጻሚ ሞጁሎች (BaseExecutorን የሚያራዝሙ ክፍሎች + ለየአቅራቢው ረዳቶች)
-├── translator/          # የቅርጸት መቀየሪያዎች (9 ጥያቄ፣ 9 ምላሽ፣ 9 ረዳቶች)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ የአገልግሎት ሞጁሎች (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, ወዘተ።)
-├── mcp-server/          # MCP አገልጋይ (110 መሣሪያዎች፣ 3 ማጓጓዣዎች፣ 33 ወሰኖች)
-├── config/              # የአቅራቢ/ሞዴል መዝገቦች፣ የራስጌ ውቅር፣ የሞዴል ተለዋጭ ስሞች
-├── utils/               # TLS ደንበኛ፣ የፕሮክሲ ሰርስሮ ማምጣት/አሰራጭ፣ የአውታረ መረብ ረዳቶች
-├── index.ts             # የሥራ ቦታ መግቢያ
-├── package.json         # የሥራ ቦታ ማኒፌስት
-├── tsconfig.json        # የሥራ ቦታ TS ውቅር
-└── types.d.ts           # የሥራ ቦታ ዓይነት መግለጫዎች
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| ዱካ                          | ዓላማ                                                                        |
-| --------------------------- | -------------------------------------------------------------------------- |
-| `server.ts`                 | የMCP አገልጋይ የሕይወት ዑደት (stdio + HTTP ማጓጓዣዎች)                                 |
-| `httpTransport.ts`          | HTTP Streamable + SSE ማጓጓዣዎች (`/api/mcp/sse`, `/api/mcp/stream`)           |
-| `audit.ts`                  | የኦዲት ምዝግብ ወደ `mcp_tool_audit` ሰንጠረዥ                                        |
-| `scopeEnforcement.ts`       | ለእያንዳንዱ መሣሪያ የወሰን ማረጋገጫ                                                    |
-| `runtimeHeartbeat.ts`       | የጤና የልብ ምት ወደ `DATA_DIR/runtime/mcp-heartbeat.json`                        |
-| `descriptionCompressor.ts`  | ዐውድን ለመቆጠብ የመሣሪያ መግለጫ ሜታዳታን ይጨመቃል                                          |
-| `schemas/tools.ts`          | 36 መሠረታዊ የመሣሪያ ትርጓሜዎች + ወሰኖች                                               |
-| `tools/advancedTools.ts`    | የላቁ የመሣሪያ ትግበራዎች                                                           |
-| `tools/memoryTools.ts`      | 3 የማህደረ ትውስታ መሣሪያዎች (ፍለጋ/መጨመር/ማጽዳት)                                        |
-| `tools/skillTools.ts`       | 4 የክህሎት መሣሪያዎች (ዝርዝር/ማንቃት/ማስፈጸም/አፈጻጸሞች)                                    |
-| `tools/compressionTools.ts` | 5 የመጭመቂያ መሣሪያዎች                                                            |
-| `README.md`                 | ውስጣዊ የMCP አገልጋይ README (ከ`docs/frameworks/MCP-SERVER.md` ጋር ተሻጋሪ አገናኝ ያለው) |
+| መንገድ                        | ዓላማ                                                              |
+| --------------------------- | ---------------------------------------------------------------- |
+| `server.ts`                 | MCP አገልጋይ የሕይወት ዑደት (stdio + HTTP ማጓጓዣዎች)                        |
+| `httpTransport.ts`          | HTTP ሊተላለፍ የሚችል + SSE ማጓጓዣዎች (`/api/mcp/sse`፣ `/api/mcp/stream`) |
+| `audit.ts`                  | የኦዲት ምዝግብ ማስታወሻ ወደ `mcp_tool_audit` ጠረጴዛ                         |
+| `scopeEnforcement.ts`       | በመሳሪያ ወሰን ማረጋገጥ                                                  |
+| `runtimeHeartbeat.ts`       | የጤና የልብ ምት ወደ `DATA_DIR/runtime/mcp-heartbeat.json`              |
+| `descriptionCompressor.ts`  | አውድ ለማስቀመጥ የመሣሪያ መግለጫ ዲበ ውሂብን ጨመቁ                                |
+| `schemas/tools.ts`          | 36 የመሠረት መሣሪያ ትርጓሜዎች + ወሰኖች                                      |
+| `tools/advancedTools.ts`    | የላቀ የመሳሪያ አተገባበር                                                 |
+| `tools/memoryTools.ts`      | 3 የማህደረ ትውስታ መሳሪያዎች (search/add/clear)                           |
+| `tools/skillTools.ts`       | 4 የክህሎት መሳሪያዎች (list/enable/execute/executions)                  |
+| `tools/compressionTools.ts` | 5 መጭመቂያ መሳሪያዎች                                                   |
+| `README.md`                 | የውስጥ MCP አገልጋይ README (የተሻገረ ከ `docs/frameworks/MCP-SERVER.md`)  |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | ውጫዊ CLI ውህደቶች + ውስጣዊ OmniRoute CLI                                      |
 | `I18N.md`                   | i18n architecture, ቋንቋ መጨመር, 67 አካባቢዎች                                  |
 | `UNINSTALL.md`              | የማራገፍ ደረጃዎችን ያጽዱ                                                        |
-| `PROVIDER_REFERENCE.md`     | **በራስ የመነጨ** የ381 አቅራቢዎች ካታሎግ (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **በራስ የመነጨ** የ394 አቅራቢዎች ካታሎግ (regen: `npm run gen:provider-reference`) |
 
 ### ሥርዓተ-ጥልቅ-ጠልቆዎች
 

@@ -4,44 +4,43 @@
 
 ---
 
-Objektiv funktionsjämförelse mot populära AI-routrar med öppen källkod.
+Objektiv jämförelse av funktioner kontra populära AI routrar med öppen källkod.
 
-> **Metodik**: Publika repos granskade 2026-Q2. Versioner enligt listan.
-> Skicka in rättelser via PR — vi vill att detta ska vara korrekt.
+> **Metodik** : Offentliga repor granskade 2026-Q2. Versioner enligt listan. Skicka in korrigeringar via PR — vi vill att detta ska vara korrekt.
 
-| Funktion                                              |                  OmniRoute 3.8                   |    LiteLLM 1.x    | OpenRouter (SaaS) |  Portkey   |
-| ----------------------------------------------------- | :----------------------------------------------: | :---------------: | :---------------: | :--------: |
-| **Leverantörer**                                      |                     **329**                      |       ~100        |        ~50        |    ~30     |
-| **Katalogposter gratis/utan autentisering**           |                     **155**                      |        n/a        |    passthrough    |    n/a     |
-| **Självhostbar**                                      |                        ✅                        |        ✅         |        ❌         |  ⚠ betald  |
-| **OAuth-katalogposter**                               |                      **23**                      |      delvis       |        ❌         |     ❌     |
-| **Automatiska fallback-kombinationer**                |                **20 strategier**                 | prioritetsbaserad |    nivåbaserad    |   viktad   |
-| **Fusion (parallell panel + domarsyntes)**            |                        ✅                        |        ❌         |        ❌         |     ❌     |
-| **Fallback nivå 1/2/3 (prenumeration→billig→gratis)** |                     ✅ + UI                      |      manuell      |        n/a        |  manuell   |
-| **Tokenkomprimering**                                 | Stack med 12 motorer (RTK + Caveman + LLMLingua) |       ingen       |       ingen       |   ingen    |
-| **Multimodal generering (tal/musik/video)**           |                        ✅                        |        ❌         |    passthrough    |     ❌     |
-| **Inbyggd MCP-server**                                |             ✅ 110 verktyg, 33 scope             |        ❌         |        ❌         |     ❌     |
-| **A2A-protokoll**                                     |                 ✅ 6 färdigheter                 |        ❌         |        ❌         |     ❌     |
-| **Minne (FTS5 + vektor)**                             |                        ✅                        |        ❌         |        ❌         |     ❌     |
-| **Guardrails (PII, injektion, vision)**               |                        ✅                        |      delvis       |        ❌         | ✅ betald  |
-| **Molnagentintegrationer**                            |           Codex, Cursor, Devin, Jules            |        ❌         |        ❌         |     ❌     |
-| **Circuit breaker per leverantör**                    |         ✅ 3-tillstånd, lat återhämtning         |   grundläggande   |        ❌         |     ✅     |
-| **TLS-fingeravtrycksstealth (JA3/JA4)**               |                    ✅ wreq-js                    |        ❌         |        ❌         |     ❌     |
-| **Utvärderingsramverk**                               |                    ✅ inbyggt                    |        ❌         |        ❌         |  ⚠ betald  |
-| **MITM-proxy (fångar upp Cursor/Antigravity)**        |              ✅ plattformsoberoende              |        ❌         |        ❌         |     ❌     |
-| **CLI med systemfält (utan Electron)**                |                        ✅                        |        ❌         |        n/a        |    n/a     |
-| **Automatisk CLI-autentisering via maskin-ID**        |                        ✅                        |        ❌         |        n/a        |    n/a     |
-| **Instrumentpanel**                                   |                    Next.js 16                    |   grundläggande   |    proprietär     | proprietär |
-| **i18n**                                              |              **67 språkversioner**               |        ❌         |        ❌         |     ⚠      |
-| **Offentliga agentfärdigheter (SKILL.md)**            |                      ✅ 45                       |        ❌         |        ❌         |     ❌     |
-| **Tunnelstöd (Cloudflared, Tailscale, Ngrok)**        |                        ✅                        |        ❌         |        n/a        |    n/a     |
-| **Licens**                                            |                       MIT                        |        MIT        |    proprietär     | proprietär |
+| Särdrag                                                   |                OmniRoute 3.8                |     LiteLLM 1.x      | OpenRouter (SaaS) | Portnyckel |
+| --------------------------------------------------------- | :-----------------------------------------: | :------------------: | :---------------: | :--------: |
+| **Leverantörer**                                          |                   **329**                   |         ~100         |        ~50        |    ~30     |
+| **Free/no-auth katalogposter**                            |                   **155**                   |         n/a          |     genomgång     |    n/a     |
+| **Självvärd**                                             |                     ✅                      |          ✅          |        ❌         | ⚠ betalat  |
+| **OAuth katalogposter**                                   |                   **23**                    |       partiell       |        ❌         |     ❌     |
+| **Automatiska reservkombinationer**                       |              **22 strategier**              | prioriteringsbaserad |    nivåbaserad    |   viktad   |
+| **Fusion (parallell panel + domare syntes)**              |                     ✅                      |          ❌          |        ❌         |     ❌     |
+| **Tier 1/2/3 fallback (prenumeration → billig → gratis)** |                   ✅ + UI                   |       manuell        |        n/a        |  manuell   |
+| **Token-komprimering**                                    | 12-motors stack (RTK + Caveman + LLMLingua) |        ingen         |       ingen       |   ingen    |
+| **Multimodal generation (speech/music/video)**            |                     ✅                      |          ❌          |     genomgång     |     ❌     |
+| **Inbyggd MCP server**                                    |       ✅ 110 verktyg, 33 kikarsikten        |          ❌          |        ❌         |     ❌     |
+| **A2A protokoll**                                         |              ✅ 6 färdigheter               |          ❌          |        ❌         |     ❌     |
+| **Minne (FTS5 + vektor)**                                 |                     ✅                      |          ❌          |        ❌         |     ❌     |
+| **Skyddsräcken (PII, injektion, syn)**                    |                     ✅                      |       partiell       |        ❌         | ✅ betalat |
+| **Molnagentintegrationer**                                |         Codex, Cursor, Devin, Jules         |          ❌          |        ❌         |     ❌     |
+| **Strömbrytare per leverantör**                           |      ✅ 3-tillstånd, lat återhämtning       |    grundläggande     |        ❌         |     ✅     |
+| **TLS fingerprint stealth (JA3/JA4)**                     |                 ✅ wreq-js                  |          ❌          |        ❌         |     ❌     |
+| **Eval ramverk**                                          |                 ✅ inbyggd                  |          ❌          |        ❌         | ⚠ betalat  |
+| **MITM proxy (fångar upp Cursor/Antigravity)**            |           ✅ plattformsoberoende            |          ❌          |        ❌         |     ❌     |
+| **CLI med systemfältet (ingen Electron)**                 |                     ✅                      |          ❌          |        n/a        |    n/a     |
+| **CLI maskin-ID automatisk autentisering**                |                     ✅                      |          ❌          |        n/a        |    n/a     |
+| **Instrumentpanel**                                       |                 Next.js 16                  |    grundläggande     |    proprietär     | proprietär |
+| **i18n**                                                  |               **67 platser**                |          ❌          |        ❌         |     ⚠      |
+| **Kunskaper om offentliga agenter (SKILL.md)**            |                    ✅ 45                    |          ❌          |        ❌         |     ❌     |
+| **Tunnelstöd (Cloudflared, Tailscale, Ngrok)**            |                     ✅                      |          ❌          |        n/a        |    n/a     |
+| **Licens**                                                |                     MIT                     |         MIT          |    proprietär     | proprietär |
 
 ## När ska man välja OmniRoute
 
-- Du är självvärd och vill** maximal leverantörstäckning** (381 leverantörer, 155 free/no-auth -katalogposter)
+- Du är självvärd och vill** maximal leverantörstäckning** (394 leverantörer, 155 free/no-auth -katalogposter)
 - Du behöver en** inbyggd MCP server** (LLM verktyg, minne, färdigheter exponerade som verktyg)
-- Du behöver**A2A protokoll** för agent-till-agent-arbetsflöden
+- Du behöver**A2A protokoll** för agent-till-agent arbetsflöden
 - Du vill** fingeravtryck smygande** (JA3/JA4) för att undvika upptäckt av uppströms CAPTCHAs
 - Du behöver** företagsfunktioner** (räcke, evals, revisionsspår) utan en SaaS -sedel
 

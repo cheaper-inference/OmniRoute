@@ -242,58 +242,58 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Komponen papan pemuka API: penyesuai atas `packages/ui-kit` — lihat `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nama ikon yang digunakan oleh skrin komponen Lucide → (`<Icon>`)                             |
-| `constants/providers.ts`         | **381 pembekal** dengan pengesahan Zod (sumber kebenaran)                                                |
+| `constants/providers.ts`         | **394 pembekal** dengan pengesahan Zod (sumber kebenaran)                                                |
 | `constants/cliTools.ts`          | Pendaftaran alat CLI luaran                                                                              |
-| `constants/routingStrategies.ts` | **20 strategi laluan** dengan keutamaan                                                                  |
+| `constants/routingStrategies.ts` | **22 strategi penghalaan** dengan keutamaan                                                              |
 | `constants/publicApiRoutes.ts`   | Laluan yang memerlukan pengesahan Pembawa (vs pengurusan).                                               |
 | `constants/upstreamHeaders.ts`   | Senarai penafian pengepala untuk permintaan huluan                                                       |
-| `validation/schemas.ts`          | skema ~ 80 Zod (sumber tunggal kebenaran untuk kontrak API )                                             |
+| `validation/schemas.ts`          | ~ 80 Zod skema (sumber tunggal kebenaran untuk kontrak API )                                             |
 | `validation/helpers.ts`          | pembantu pengesahan Zod (`validateBody`, dsb.)                                                           |
 | `types/`                         | Jenis TS yang dikongsi                                                                                   |
 | `contracts/`                     | Kontrak API awam (digunakan oleh `files:` dalam `package.json`)                                          |
 | `utils/circuitBreaker.ts`        | Pemutus litar pembekal (lihat `docs/architecture/RESILIENCE_GUIDE.md`)                                   |
 | `utils/apiAuth.ts`               | pengesahan kunci API, semakan skop                                                                       |
 | `utils/fetchTimeout.ts`          | pembalut Timeout/abort untuk pengambilan hulu                                                            |
-| `utils/releaseNotes.ts`          | Penghurai pengumuman v2/legacy tertutup, penyetempatan dan pemecatan ID                                  |
+| `utils/releaseNotes.ts`          | Penghuraian pengumuman v2/legacy tertutup, penyetempatan dan pemecatan ID                                |
 
 ---
 
 ## `open-sse/` — Ruang Kerja Enjin Penstriman
 
-Ruang kerja npm (`@omniroute/open-sse`) yang berasingan. Mengendalikan pemprosesan permintaan + pelaksanaan penyedia.
+Asingkan ruang kerja npm (`@omniroute/open-sse`). Mengendalikan permintaan memproses pelaksanaan pembekal +.
 
 ```
 open-sse/
-├── handlers/            # 16 fail (12 pengendali + 4 pembantu): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, dll.
-├── executors/           # 150 modul pelaksana (kelas yang melanjutkan BaseExecutor + pembantu bagi setiap penyedia)
-├── translator/          # Penukar format (9 permintaan, 9 respons, 9 pembantu)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ modul perkhidmatan (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, dll.)
-├── mcp-server/          # Pelayan MCP (110 alat, 3 pengangkutan, 33 skop)
-├── config/              # Daftar penyedia/model, konfigurasi pengepala, alias model
-├── utils/               # Klien TLS, pengambilan/penghantar proksi, pembantu rangkaian
-├── index.ts             # Titik masuk ruang kerja
-├── package.json         # Manifes ruang kerja
-├── tsconfig.json        # Konfigurasi TS ruang kerja
-└── types.d.ts           # Pengisytiharan jenis ruang kerja
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
 | Laluan                      | Tujuan                                                                              |
 | --------------------------- | ----------------------------------------------------------------------------------- |
-| `server.ts`                 | Kitaran hayat pelayan MCP (pengangkutan stdio + HTTP)                               |
-| `httpTransport.ts`          | Pengangkutan HTTP Streamable + SSE (`/api/mcp/sse`, `/api/mcp/stream`)              |
-| `audit.ts`                  | Pengelogan audit ke jadual `mcp_tool_audit`                                         |
-| `scopeEnforcement.ts`       | Pengesahan skop bagi setiap alat                                                    |
-| `runtimeHeartbeat.ts`       | Denyutan kesihatan ke `DATA_DIR/runtime/mcp-heartbeat.json`                         |
-| `descriptionCompressor.ts`  | Mampatkan metadata perihalan alat untuk menjimatkan konteks                         |
-| `schemas/tools.ts`          | 36 definisi alat asas + skop                                                        |
+| `server.ts`                 | Kitaran hayat pelayan MCP (stdio + HTTP transports)                                 |
+| `httpTransport.ts`          | HTTP Pengangkutan + SSE boleh strim (`/api/mcp/sse`, `/api/mcp/stream`)             |
+| `audit.ts`                  | Log audit ke jadual `mcp_tool_audit`                                                |
+| `scopeEnforcement.ts`       | Pengesahan skop setiap alat                                                         |
+| `runtimeHeartbeat.ts`       | Degupan jantung kesihatan kepada `DATA_DIR/runtime/mcp-heartbeat.json`              |
+| `descriptionCompressor.ts`  | Mampatkan metadata perihalan alat untuk menyimpan konteks                           |
+| `schemas/tools.ts`          | 36 definisi alat asas skop +                                                        |
 | `tools/advancedTools.ts`    | Pelaksanaan alat lanjutan                                                           |
-| `tools/memoryTools.ts`      | 3 alat memori (carian/tambah/kosongkan)                                             |
-| `tools/skillTools.ts`       | 4 alat kemahiran (senarai/dayakan/laksanakan/pelaksanaan)                           |
+| `tools/memoryTools.ts`      | 3 alat ingatan (search/add/clear)                                                   |
+| `tools/skillTools.ts`       | 4 alatan kemahiran (list/enable/execute/executions)                                 |
 | `tools/compressionTools.ts` | 5 alat pemampatan                                                                   |
-| `README.md`                 | README pelayan MCP dalaman (dipaut silang daripada `docs/frameworks/MCP-SERVER.md`) |
+| `README.md`                 | Pelayan MCP dalaman README (pautan silang daripada `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Penyepaduan CLI luaran + OmniRoute CLI                                                     |
 | `I18N.md`                   | seni bina i18n, menambah bahasa, 67 tempat                                                 |
 | `UNINSTALL.md`              | Bersihkan langkah nyahpasang                                                               |
-| `PROVIDER_REFERENCE.md`     | **Dijana secara automatik** katalog 381 pembekal (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Dijana secara automatik** katalog 394 pembekal (regen: `npm run gen:provider-reference`) |
 
 ### Penyelaman dalam subsistem
 

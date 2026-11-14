@@ -843,6 +843,43 @@ Web/search teikėjo abstrakcija (Tavily, Brave, Exa, Serper ir kt.).
 
 **Auth:** Nešiklio API raktas (`extractApiKey` + `isValidApiKey`). Paieškos politika vykdoma naudojant `enforceApiKeyPolicy`.
 
+### Pavadinti search/fetch deriniai
+
+Tiek `POST /v1/search`, tiek `POST /v1/web/fetch` priima `model` kaip išsaugotą kombinuotą pavadinimą. Naudokite `model` arba aiškų `provider`; siunčiant abu grąžinimus `400`. Be kurio nors lauko, esamas automatinis teikėjo pasirinkimas lieka nepakitęs.
+
+Tiek „Combo Builder“, tiek jo „Add Model“ kataloge rodomi prisijungusių paslaugų teikėjų savieji žiniatinklio valdymo įrašai, net jei jie neturi LLM modelių sąrašo. Serper šou** Interneto paieška** ; Tavily rodo** Interneto paieška / puslapio ištraukimas** , ir rodo tik gavimo paslaugų teikėjai** Puslapio ištraukimas** . Kaip įprasta, pasirinkite įrašą ir paskyrą. Vienas „Tavily“ įrašas aptarnauja abu žiniatinklio galinius taškus; šie operacijų įrašai neįtraukiami į tik pokalbių klientų parinkiklius arba pokalbių modelių zondus.
+
+Pavyzdžiui, sukurkite a** prioritetas** kombinacija pavadinimu `shared-free` su šiais užsakytais taikiniais:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+Tada kiekvienam paviršiui naudokite tą patį pavadinimą:
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+Paieškoje atsižvelgiama į Taviliją, tada Serperį; atnešti Taviliją, tada Jiną skaitytoją; pokalbis praleidžia tam skirtus search/fetch teikėjus ir svarsto OpenAI. Suderinamumas kyla iš search/fetch vykdytojų registrų, o ne iš žodžių modelio pavadinime. Filtravimas atliekamas prieš kredencialų pasirinkimą ir išsiuntimą ir niekada neredaguoja išsaugoto derinio.
+
+Ne pokalbių galimybių maršrutai palaiko `priority`, `fill-first`, `round-robin`, `weighted`, `random`, `strict-random`, `least-used` ir `p2c`. Tik pokalbių sintezės strategijos, pvz., `fusion`, `pipeline` ir `context-relay` atmetamos ne pokalbių maršrutuose, o ne tyliai taikomos paieškai ar generuojamai medijai. Esamas kombinuotas variklis tvarko užsakytas atsargines dalis, įskaitant ankstesnių kvotų klaidas, ir išlaiko IDs veiksmą, paskyros kaiščius, kiekvieno žingsnio paskyros leidžiamųjų sąrašus, įdėtas nuorodas, skambinančiojo connection/quota apimtis ir kombinuotos prieigos politiką. Rezultatai išlaiko savąją search/fetch schemą, įskaitant tikrąjį teikėją; `X-OmniRoute-Combo-Trace` nustato maršruto sprendimą. Nežinomos kombinacijos grąžina `404`; neaktyvūs deriniai ir deriniai be suderinamų taikinių grąžina `400`.
+
+Kiekvienas kombinuotas bandymas naudoja vieną aiškų teikėją. Jis negali iškviesti vietinio automatinio teikėjo telkinio už kombinacijos nugaros. Aiškios teikėjo užklausos išlaiko esamą vieno teikėjo elgseną. Tiesioginės pokalbių užklausos, nukreiptos į tam skirtus search/fetch teikėjus, grąžina veiksmingą JSON `400` o ne patenka į OpenAI stiliaus vykdytoją.
+
+### Galimybėms būdingi kombinuoti maršrutai
+
+Išsaugotuose deriniuose gali būti `routes` objektas, kurio raktai yra API galimybės. Kiekvienas maršrutas turi savo tikslų sąrašą, strategiją ir vykdymo laiko konfigūraciją. Aukščiausio lygio `models`, `strategy` ir `config` išlieka su senu suderinamu pokalbių planu; senos kombinacijos be `routes` veikia nepakitusios.
+
+Palaikomi maršruto klavišai yra `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`, `image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`, `audio-translations` ir `audio-generation`. Galinio taško projekcija įvyksta prieš pasirenkant kredencialus, įvertinant balus arba išsiunčiant. Įdėtos kombinuotos nuorodos pasirenka antrinio derinio maršrutą tai pačiai funkcijai.
+
+`POST /v1/music/generations` ir `POST /v1/ocr` priima kombinuotą pavadinimą `model`. Vietinis su „ElevenLabs“ suderinamas `POST /v1/music` taip pat priima kombinuotą pavadinimą `model_id`, tačiau kiekvienas tinkamas taikinys tame savajame galiniame taške turi būti ElevenLabs muzikos modelis, kad būtų išsaugota dvejetainio atsako sutartis. `POST /v1/sound-generation` priima `audio-generation` kombinaciją `model_id` pagal tą patį savąjį dvejetainį apribojimą. Naudokite `/v1/music/generations` heterogeniniams muzikos teikėjams.
+
 **Automatinis pasirinkimas:** be `provider` pigiausias teikėjas su sukonfigūruotu ryšiu paleidžiamas pirmas, o kitas pigiausias yra perjungimas. Nemokami paskutinės galimybės teikėjai (`duckduckgo-free`) naudojami tik tada, kai nieko daugiau nesukonfigūruota. Savarankiškai priglobtas SearXNG laikomas sukonfigūruotu, kai jo ryšyje išsaugomas tikras `baseUrl` (ne numatytasis katalogo `http://localhost:8888/search`): tada jis yra 0 USD vertės tiekėjas, pranašesnis už raktinius tiekėjus, o pigiausias raktas turintis `baseUrl` yra perjungimas, URL kai SearXNG `http(s)` 400, 401, 403 arba 404 taškais. debesies metaduomenų adresas neįskaičiuojamas. SearXNG ryšys, kuriame saugomas atpažinimo ženklas, yra tik per `https://` arba loopback `http://`. Per nuotolinį paprastą `http://` tai niekada nėra perjungimas ir lieka paskutinė išeitis, naudojama tik tada, kai nesukonfigūruotas joks kitas teikėjas arba kai to prašoma pagal pavadinimą, todėl šiais dviem atvejais jis siunčia prieigos raktą aiškiu tekstu.
 
 ### Exa ir Tavily `provider_options`
@@ -872,21 +909,21 @@ Išlaidų apskaita yra vienodo registro `costPerQuery`, išskyrus Exa, kuri vado
 
 ## Web Fetch API
 
-Ištraukia turinį iš URL naudodama sukonfigūruotą žiniatinklio išgavimo teikėją („Firecrawl“, „Jina
-Reader“, „Tavily Extract“, „TinyFish Fetch“, „Nimble Extract“, „Parallel Extract“).
+Išskleiskite turinį iš URL naudodami sukonfigūruotą žiniatinklio gavimo paslaugų teikėją (Firecrawl, Jina Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-„Parallel Extract“ (`parallel-search`, tas pats API raktas kaip ir „Parallel Search“) grąžina tik „Markdown“ — bet koks kitas `format` sukelia `400` klaidą, o turinio apimtis ribojama iki 100 000 simbolių. Kai pačio tikslinio puslapio nepavyksta išgauti, upstream sistema apie tai praneša HTTP 200 atsakyme; „OmniRoute“ tai pateikia kaip `422` su fiksuotu pranešimu.
+Parallel Extract (`parallel-search`, tas pats API klavišas kaip Parallel Search) grąžina tik žymėjimą — bet kuris kitas `format` yra `400` — ir apriboja turinį iki 100 000 simbolių. Kai paties tikslinio puslapio nepavyksta išskleisti, prieš srovę jis praneša HTTP 200; OmniRoute paverčia tai kaip `422` su fiksuotu pranešimu.
 
-| Metodas | Kelias          | Aprašymas                                                              |
-| ------- | --------------- | ---------------------------------------------------------------------- |
-| POST    | `/v1/web/fetch` | Iškviečia / nuskaito URL — užklausos turinį tikrina `v1WebFetchSchema` |
+Keenable Fetch (`keenable-search`) taip pat pateikia tik žymėjimą (bet koks kitas `format` yra `400`) ir apriboja turinį iki 100 000 simbolių. Jis veikia be rakto: aiški `provider: "keenable-search"` užklausa be ryšio naudoja „Keenable“ beraktį galinį tašką (už IP greičio ribas). Sukonfigūruotas raktas tik pakelia šias ribas; automatinis pasirinkimas naudoja Keenable tik tada, kai sukonfigūruotas raktas.
 
-**Autentifikavimas:** „Bearer“ API raktas (`extractApiKey` + `isValidApiKey`). Politika taikoma naudojant `enforceApiKeyPolicy`.
+| Metodas | Kelias          | Aprašymas                                                      |
+| ------- | --------------- | -------------------------------------------------------------- |
+| POST    | `/v1/web/fetch` | Fetch/scrape a URL — korpusas, patvirtintas `v1WebFetchSchema` |
 
-**Kvotą atsižvelgiantis rezervinis mechanizmas (#8297):** kai nenurodytas aiškus `provider`, telkinys
-(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) tikrinamas nustatyta
-prioriteto tvarka (pirmiausia naudojamas pirmasis tinkamas teikėjas) — sukonfigūruotas, tačiau greičio ribojamas teikėjas praleidžiamas, užuot nutraukus užklausą, o pakartotinai bandytina / kvotos upstream klaida (HTTP 429 visada; 402/403 „Firecrawl“ / „Tavily“ / „TinyFish“ kvotos tipo nemokamiems planams — netaikoma „Jina Reader“ ir niekada netaikoma paprastai netinkamai 400 užklausai) užklausos metu perduodama kitam dar neišbandytam teikėjui, turinčiam kredencialus. Kai visi telkinio teikėjai išnaudoti, galinis taškas grąžina vieną `429` (su `Retry-After` antrašte), o ne ankstesnį bendrinį `400`. Kai aiškiai nurodytas `provider`, tylus rezervinis mechanizmas nenaudojamas — greičio ribojamo arba neatsakančio aiškiai nurodyto teikėjo klaida pateikiama tiesiogiai (`429`, jei taikomas greičio ribojimas, kitu atveju upstream būsena).
+**Auth:** Nešiklio API raktas (`extractApiKey` + `isValidApiKey`). Politika vykdoma per `enforceApiKeyPolicy`.
+
+Pavadintuose deriniuose naudojama aukščiau pateikta [`model` maršruto parinkimo sutartis](#named-searchfetch-combinations), išsaugant specifines gavimo parinktis ir atsakymus.
+
+**Atsarginis režimas pagal kvotą (#8297):** kai nenurodytas nei `provider` nei `model`, baseinas (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` → `parallel-search` → `keenable-search`) eina fiksuota prioriteto tvarka (užpildykite pirmiausia) užklausa, o retryable/quota gedimas prieš srovę (HTTP 429 visada; — 402/403 Firecrawl/Tavily/TinyFish stiliaus nemokamoms pakopoms — ne Jina Reader ir niekada nepaprastoms 400 blogoms užklausoms) užklausos metu perduoda kitam neišbandytam kredencialų teikėjui. Kai išnaudojamas kiekvienas telkinio teikėjas, galutinis taškas grąžina vieną `429` (su `Retry-After` antrašte) vietoj ankstesnės bendros `400`. Kai prašoma aiškaus `provider`, yra** ne** tylus atsarginis — apribotas greitis arba neveikiantis aiškus teikėjas pateikia savo klaidą (`429`, jei greitis ribojamas, kitu atveju būsena prieš srovę).
 
 ---
 
@@ -953,33 +990,24 @@ CLI pakeičia `base_url + /responses` į WebSocket, o „OmniRoute“ perduoda j
 
 ## Kvotų ir problemų ataskaitos
 
-| Metodas | Kelias              | Aprašymas                                                                                             |
-| ------- | ------------------- | ----------------------------------------------------------------------------------------------------- |
-| GET     | `/v1/quotas/check`  | Iš anksto patikrinti `provider` + `accountId` kvotą prieš išduodant registruotą raktą                 |
-| POST    | `/v1/issues/report` | Pranešti apie kvotos / rakto išdavimo nesėkmę „GitHub“ (reikia `GITHUB_ISSUES_REPO` + prieigos rakto) |
+| Metodas | Kelias              | Aprašymas                                                                                        |
+| ------- | ------------------- | ------------------------------------------------------------------------------------------------ |
+| GET     | `/v1/quotas/check`  | Prieš išduodant registruotą raktą, iš anksto patvirtinkite `provider` + `accountId` kvotą        |
+| POST    | `/v1/issues/report` | Pranešti apie quota/key išdavimo sutrikimą GitHub (reikia `GITHUB_ISSUES_REPO` + prieigos rakto) |
 
-**Autentifikavimas:** „Bearer“ API raktas (`isAuthenticated`).
+**Auth:** `/v1/quotas/check` paima nešiklio API raktą (`isAuthenticated`). `/v1/issues/report` yra skirtas tik valdymui (`requireManagementAuth`), kaip ir `/api/v1/registered-keys`: prietaisų skydelio seansas, vietinis CLI prieigos raktas arba API raktas su `manage`/`admin` apimtimi; Tik išvadoms skirti API klavišai gauna `403`.
 
-### Kvotos seanso atkūrimas (pasirenkama funkcija)
+### Kvotos seanso atkūrimas (pasirinkimas)
 
-Neužsikraunantis srautu `POST /v1/chat/completions` arba `POST /v1/responses`, kuris baigiasi
-galutine kvotos klaida (`402`/`429`/`503`, kurios atsakyme nurodoma, kad kvota arba kreditai
-išeikvoti), gali būti atidėtas ir vėliau pakartotas, užuot grąžinus klaidą. Skambinantysis
-pasirenka šią funkciją kiekvienai užklausai, nurodydamas tris antraštes:
+Neperduodamą `POST /v1/chat/completions` arba `POST /v1/responses`, kuris sugenda dėl terminalo kvotos klaidos (`402`/`429`/`503`, kurio turinys sako, kad kvota arba kreditai išnaudoti), gali būti paliktas ir paleidžiamas vėliau, užuot grąžinus klaidą. Skambintojas pasirenka pagal užklausą su trimis antraštėmis:
 
-| Antraštė                     | Reikšmė                                       |
-| ---------------------------- | --------------------------------------------- |
-| `x-omniroute-quota-recovery` | `auto`                                        |
-| `x-omniroute-session`        | seanso ID, `[A-Za-z0-9._:-]{1,128}`           |
-| `x-omniroute-recovery-turn`  | seanse unikalus posūkio ID (ta pati taisyklė) |
+| Antraštė                     | Vertė                                              |
+| ---------------------------- | -------------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                             |
+| `x-omniroute-session`        | seanso ID, `[A-Za-z0-9._:-]{1,128}`                |
+| `x-omniroute-recovery-turn`  | paversti unikalų ID seanso metu (ta pati taisyklė) |
 
-Tinkamos naudoti tik užklausos su `stream: false`, be įrankių, įrankių istorijos ar
-`previous_response_id` ir be `x-omniroute-connection` prisegimo; taip pat turi būti nustatytas
-`STORAGE_ENCRYPTION_KEY` (užklausa saugoma užšifruota iki 24 val.). Tada atsakymas yra `202` su
-`recovery.poll`; apklauskite `GET /v1/quota-recoveries/{id}` (`202`, kol laukiama, `200` su
-atkurtu atsakymu, kai užbaigta) arba atšaukite naudodami `DELETE`. Bilietai matomi tik juos
-sukūrusiam API raktui. Jei pakartotinio siuntimo rezultatas neaiškus, atkūrimas baigiamas būsena
-`needs_confirmation`, o užklausa nesiunčiama du kartus. Šaltinis: `src/lib/quota/quotaSessionRecovery.ts`.
+Tinkami tik `stream: false` posūkiai be įrankių, įrankių istorijos ar `previous_response_id` ir be `x-omniroute-connection` kaiščio, o `STORAGE_ENCRYPTION_KEY` turi būti nustatytas (užklausa saugoma šifruota iki 24 val.). Tada atsakymas yra `202` su `recovery.poll`; apklausa `GET /v1/quota-recoveries/{id}` (`202` laukiama, `200` su atkurtu turiniu, kai baigta) arba atšaukti su `DELETE`. Bilietai matomi tik juos sukūrusiam API klavišui. Pakartojimas, kurio rezultatas neaiškus, baigiasi `needs_confirmation` o ne siunčiamas du kartus. Šaltinis: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1731,19 +1759,23 @@ Išeinančios žiniatinklio kabliukų prenumeratos, skirtos „OmniRoute“ įvy
 
 ---
 
-## Užregistruoti raktai (automatinis valdymas)
+## Registruoti raktai (automatinis valdymas)
 
-Naudojama automatiniam raktų valdymo posistemiui, kad išduotų ir pasuktų API raktus pagalbinio teikėjo / paskyros atžvilgiu, taikant dienos / valandos kvotas.
+Naudojamas automatinio raktų valdymo posistemėje, kad išduotų ir pasuktų API raktus prieš pagrindinį provider/account, su daily/hourly kvotomis.
 
-| Method | Path                                  | Description                                                                                                                                                                                                           |
-| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Išvardyti užregistruotus raktus (tik užmaskuotas prefiksas)                                                                                                                                                           |
-| POST   | `/api/v1/registered-keys`             | Išduoti naują užregistruotą raktą — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Neapdorotas raktas grąžinamas **vieną kartą**. Kvotai neleidus, grąžinama `429`. |
-| GET    | `/api/v1/registered-keys/[id]`        | Gauti užregistruoto rakto metaduomenis (be neapdorotos medžiagos)                                                                                                                                                     |
-| DELETE | `/api/v1/registered-keys/[id]`        | Atšaukti užregistruotą raktą                                                                                                                                                                                          |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Aiškus atšaukimo galinis taškas (poveikis toks pats kaip DELETE)                                                                                                                                                      |
+| Metodas | Kelias                                | Aprašymas                                                                                                                                                                                                            |
+| ------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET     | `/api/v1/registered-keys`             | Užregistruotų raktų sąrašas (tik užmaskuotas priešdėlis)                                                                                                                                                             |
+| POST    | `/api/v1/registered-keys`             | Išduokite naują registruotą raktą — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Grąžina neapdorotą raktą** vieną kartą** . Grąžina `429` dėl kvotos atsisakymo. |
+| GET     | `/api/v1/registered-keys/[id]`        | Gauti registruoto rakto metaduomenis (be žaliavos)                                                                                                                                                                   |
+| DELETE  | `/api/v1/registered-keys/[id]`        | Atšaukti registruotą raktą                                                                                                                                                                                           |
+| POST    | `/api/v1/registered-keys/[id]/revoke` | Aiškus atšaukimo galutinis taškas (tas pats efektas kaip DELETE)                                                                                                                                                     |
+| GET     | `/api/v1/providers/[provider]/limits` | Perskaitykite teikėjo išdavimo ribas                                                                                                                                                                                 |
+| PUT     | `/api/v1/providers/[provider]/limits` | Nustatykite teikėjo išdavimo viršutines ribas — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                        |
+| GET     | `/api/v1/accounts/[id]/limits`        | Perskaitykite sąskaitos išdavimo viršutines ribas                                                                                                                                                                    |
+| PUT     | `/api/v1/accounts/[id]/limits`        | Nustatykite paskyros išdavimo viršutines ribas — tokias pačias kaip teikėjo maršrutas                                                                                                                                |
 
-**Autentifikavimas:** valdymo sesija / API raktas (`requireManagementAuth`) — ta pati apsauga kaip `/api/keys`: prietaisų skydelio sesija, vietinis CLI prieigos raktas arba API raktas su `manage` / `admin` apimtimi; tik išvadoms skirti API raktai gauna `403`. Taip pat žr. `/v1/quotas/check` ir `/v1/issues/report`.
+**Auth:** valdymo session/API raktas (`requireManagementAuth`) — ta pati apsauga kaip ir `/api/keys`: prietaisų skydelio seansas, vietinis CLI raktas arba API raktas su `manage`/`admin` apimtimi; Tik išvadoms skirti API klavišai gauna `403`. Taip pat žr. `/v1/quotas/check` ir `/v1/issues/report`.
 
 ---
 

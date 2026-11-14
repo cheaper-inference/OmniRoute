@@ -110,138 +110,136 @@ unit shards, integration, vitest, lint/typecheck, docs-sync, `check:pack-artifac
 Tests-පමණක් ඇති diffs (`tests/` යටතේ ඇති සියලු files, `tests/e2e/` යටතේ කිසිවක් නැත) කිසිදු label එකක් නොමැතිව
 E2E matrix එක ස්වයංක්රීයව මඟහරියි.
 
-## සවිස්තරාත්මක පිරික්සුම් ලැයිස්තුව
+## සවිස්තර පිරික්සුම් ලැයිස්තුව
 
-### නිකුතුවට පෙර
+### පූර්ව නිකුතුව
 
-- [ ] මෙම නිකුතුව ඉලක්ක කරගත් සියලු PR `release/vX.Y.0` වෙත ඒකාබද්ධ කර ඇත
-- [ ] මෙම අනුවාදය සඳහා විවෘතව ඇති සියලු Linear/issue අයිතම වසා ඇත හෝ ඊළඟ සන්ධිස්ථානයට යොමු කර ඇත
-- [ ] `release/vX.Y.0` ශාඛාවේ CI සාර්ථකයි
-- [ ] කේතයේ `TODO(release)` සලකුණු නොමැත: `grep -r "TODO(release)" src/ open-sse/`
+- [ ] මෙම නිකුතුව ඉලක්ක කරගත් සියලුම PRs `release/vX.Y.0` වෙත ඒකාබද්ධ කෙරේ
+- [ ] මෙම අනුවාදය සඳහා සියලු විවෘත Linear/issue අයිතම වසා හෝ ඊළඟ සන්ධිස්ථානයට තල්ලු කර ඇත
+- [ ] `release/vX.Y.0` ශාඛාව මත CI කොළ
+- [ ] කේතයෙහි `TODO(release)` සලකුණු නොමැත: `grep -r "TODO(release)" src/ open-sse/`
 - [ ] Docker මූලික රූපය යාවත්කාලීනයි (දැනට `node:24.15.0-trixie-slim`)
 
-### අනුවාදය සහ වෙනස්කම් සටහන
+### අනුවාදය සහ චේන්ජ්ලොග්
 
-- [ ] `/version-bump-cc <patch|minor|major>` ධාවනය කරන්න (Claude Code කුසලතාව)
-  - `package.json`, `electron/package.json` හි අනුවාද ඉහළ නංවයි
-  - අවසන් ටැගයේ සිට ඇති git commit මත පදනම්ව `CHANGELOG.md` නැවත ජනනය කරයි
+- [ ] `/version-bump-cc <patch|minor|major>` ධාවනය කරන්න (Claude කේත කුසලතාව)
+  - ගැටිති `package.json`, `electron/package.json`
+  - අවසන් ටැගයේ සිට git commits වලින් `CHANGELOG.md` නැවත උත්පාදනය කරයි
   - README.md ලාංඡන යාවත්කාලීන කරයි
-- [ ] CHANGELOG.md අතින් සමාලෝචනය කර, අවශ්ය නම් commit පණිවිඩ පිරිසිදු කරන්න
-- [ ] `CHANGELOG.md` හි නවතම semver කොටස `package.json` අනුවාදයට සමාන බව තහවුරු කරන්න
-- [ ] ඉදිරි වැඩ සඳහා `## [Unreleased]` පළමු වෙනස්කම් සටහන් කොටස ලෙස තබා ගන්න
-- [ ] `docs/openapi.yaml` යාවත්කාලීන කරන්න → `info.version` අගය `package.json` අනුවාදයට සමාන විය යුතුය
+- [ ] CHANGELOG.md අතින් සමාලෝචනය කර අවශ්‍ය නම් කැපවීම් පණිවිඩ පිරිසිදු කරන්න
+- [ ] `CHANGELOG.md` හි නවතම semver කොටස `package.json` අනුවාදයට සමාන බව සහතික කර ගන්න
+- [ ] ඉදිරියට එන වැඩ සඳහා පළමු changelog කොටස ලෙස `## [Unreleased]` තබා ගන්න
+- [ ] `docs/openapi.yaml` → `info.version` යාවත්කාලීන කිරීම `package.json` අනුවාදයට සමාන විය යුතුය
 
-### කේත ගුණාත්මකභාවය
+### කේතයේ ගුණාත්මකභාවය
 
-- [ ] `npm run lint` — දෝෂ 0යි (අනතුරු ඇඟවීම් පෙර සිට පවතී)
-- [ ] `npm run typecheck:core` — දෝෂ රහිතයි
-- [ ] `npm run typecheck:noimplicit:core` — දෝෂ රහිතයි (දැඩි)
-- [ ] `npm run check:cycles:ratchet` — ස්ථිර කළ `metrics.cycles` උපරිම සීමාව තුළ ඇත (සරල `check:cycles` ඕනෑම චක්රයක් සඳහා 1 සමඟ පිටවෙයි, #15281)
-- [ ] `npm run check:any-budget:t11` — අයවැය සීමාව තුළ ඇත
-- [ ] `npm run check:route-validation:t06` — දෝෂ රහිතයි
-- [ ] `npm run check:node-runtime` — සහාය දක්වන අවම runtime අවශ්යතාව සපුරා ඇත (`>=22.22.2 <23`, `>=24.0.0 <27`, `src/shared/utils/nodeRuntimeSupport.ts` හි `SUPPORTED_NODE_RANGE` අනුව; `package.json` හි `engines` සමඟ සමපාතයි)
+- [ ] `npm run lint` — 0 දෝෂ (අනතුරු ඇඟවීම් කලින් පවතී)
+- [ ] `npm run typecheck:core` — පිරිසිදු
+- [ ] `npm run typecheck:noimplicit:core` — පිරිසිදු (දැඩි)
+- [ ] ශීත කළ `metrics.cycles` සිවිලිම තුළ `npm run check:cycles:ratchet` — (ඕනෑම චක්‍රයක් මත හිස් `check:cycles` 1 පිටවීම, #15281)
+- [ ] අයවැය තුළ `npm run check:any-budget:t11` —
+- [ ] `npm run check:route-validation:t06` — පිරිසිදු
+- [ ] `npm run check:node-runtime` — සහය දක්වන ධාවන කාල තට්ටුව හමු විය (`>=22.22.2 <23`, `>=24.0.0 <27`, `src/shared/utils/nodeRuntimeSupport.ts` හි `SUPPORTED_NODE_RANGE` එකකට; `package.json` `engines` සමඟ පෙළගැසී ඇත)
 
-### පරීක්ෂණ
+### පරීක්ෂා කිරීම
 
 - [ ] `npm run test:unit` — සමත්
-- [ ] `npm run test:vitest` — සමත් (MCP සේවාදායකය, autoCombo, cache)
-- [ ] `npm run test:coverage` — 60/60/60/60 සීමාව සපුරා ඇත (ප්රකාශ/පේළි/ශ්රිත/ශාඛා)
-- [ ] `npm run test:integration` — සමත් (වෙනස්කම් DB / handlers වෙත බලපාන්නේ නම්)
-- [ ] `npm run test:combo:matrix` — සමත් (combo ක්රමෝපාය න්යාසය: පොදු routing ක්රමෝපාය 19 හිම තේරීම් තීරණ නියත ලෙස තහවුරු කරයි; combo routing, strategy resolution, හෝ fallback තර්කනය වෙනස් කරන විට ධාවනය කරන්න)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **විකල්ප/අතින්** (gate එකක් සහිත සැබෑ upstream smoke පරීක්ෂණය; VPS `root@192.168.0.15` වෙතින් කියවීමට පමණක් හැකි DB snapshot එකක් ලබා ගනී; සැබෑ providers වෙත ඉල්ලීම් යවයි, credits වැය වේ; CI තුළ කිසිවිටෙක ධාවනය නොවේ; gate එක නොමැති විට නිසි ලෙස මඟහරියි)
-- [ ] `npm run test:combo:live:vps` — **විකල්ප/අතින්** (Phase-3 VPS සජීවී smoke පරීක්ෂණය: සරල Node ESM හරහා සජීවී `.15` සේවාදායකයට එරෙහි HTTP අවස්ථා 7ක්; `ssh root@192.168.0.15` අවශ්යයි; `__live_test__*` combos පමණක් සාදා/මකා දමයි; සැබෑ providers වෙත ඉල්ලීම් යවයි; CI තුළ කිසිවිටෙක ධාවනය නොවේ)
-- [ ] `npm run test:e2e` — සමත් (UI වෙනස්කම්)
-- [ ] `npm run test:protocols:e2e` — සමත් (MCP/A2A වෙනස්කම්)
+- [ ] `npm run test:vitest` — pass (MCP server, autoCombo, cache)
+- [ ] `npm run test:coverage` — ගේට්ටුව 60/60/60/60 තෘප්තිමත් (statements/lines/functions/branches)
+- [ ] `npm run test:integration` — pass (වෙනස්කම් DB / හසුරුවන්න ස්පර්ශ කළහොත්)
+- [ ] `npm run test:combo:matrix` — pass (combo මූලෝපාය අනුකෘතිය: පොදු මාර්ගගත කිරීමේ උපාය මාර්ග 22 තේරීම් තීරණ තීරණාත්මකව ඔප්පු කරයි; Combo routing, උපාය විභේදනය, හෝ පසුබැසීමේ තර්කනය ස්පර්ශ කරන විට ධාවනය කරන්න)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (ගේටඩ් රියල්-උප්ස්ට්‍රීම් දුම; VPS `root@192.168.0.15` වෙතින් කියවීමට-පමණක් DB ස්නැප්ෂොට් එකක් මූලාශ්‍ර කරයි; සැබෑ සපයන්නන්ට පහර දෙයි, බැර කිරීම්; කිසි විටෙකත් CI හි ධාවනය නොවේ; ගේට්ටුව නොමැතිව පිරිසිදුව මඟ හැරේ)
+- [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS සජීවී දුම: සාමාන්‍ය නෝඩ් ESM හරහා සජීවී `.15` සේවාදායකයට එරෙහිව HTTP අවස්ථා 7 ක්; `ssh root@192.168.0.15` අවශ්‍යයි; creates/deletes පමණක් `__live_test__*` සංයෝජන; සැබෑ සපයන්නන්ට පහර දෙයි; කිසි විටෙකත් CI හි ධාවනය නොවේ)
+- [ ] `npm run test:e2e` — pass (UI වෙනස්කම්)
+- [ ] `npm run test:protocols:e2e` — pass (MCP/A2A වෙනස්කම්)
 - [ ] `npm run test:ecosystem` — සමත්
 
-### Hooks (Husky මඟින් වලංගු කරන ලදී)
+### කොකු (හස්කි වලංගු)
 
-Husky hooks `.husky/` තුළ පිහිටා ඇති අතර git මෙහෙයුම්වලදී ස්වයංක්රීයව ධාවනය වේ.
+හස්කි කොකු `.husky/` හි ජීවත් වන අතර git මෙහෙයුම් මත ස්වයංක්‍රීයව ක්‍රියාත්මක වේ.
 
-- **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** වේගවත්, නියත gates — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (2026-06-13 දින සක්රිය කරන ලදී). හිතාමතාම `test:unit` ඇතුළත් නොකරයි (මන්දගාමීයි; CI `test-unit` කාර්යය මඟින් ආවරණය වේ).
-  - නිකුතු ශාඛා push කිරීමට පෙර `npm run test:unit` අතින් ධාවනය කරන්න.
+- **පූර්ව කැපවීම:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
+- **පෙර තල්ලු:** වේගවත් නිර්ණායක ගේට්ටු — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (සක්‍රිය 2026-06-13). හිතාමතාම `test:unit` බැහැර කරයි (මන්දගාමී; CI `test-unit` රැකියාවෙන් ආවරණය වේ).
+  - මුදා හැරීමේ ශාඛා තල්ලු කිරීමට පෙර `npm run test:unit` අතින් ධාවනය කරන්න.
 
-hook එකක් අසමත් වුවහොත්: මූලික ගැටලුව නිවැරදි කරන්න, `--no-verify` භාවිතයෙන් මඟ නොහරින්න.
+කොක්කක් අසමත් වුවහොත්: යටින් පවතින ගැටළුව විසඳන්න, `--no-verify` සමඟ මඟ නොහරින්න.
 
-### සම්මත Commits
+### සාම්ප්‍රදායික බැඳීම්
 
-නිකුතුවට අදාළ සියලු commit `type(scope): subject` ආකෘතිය අනුගමනය කළ යුතුය.
+සියලුම මුදා හැරීමට බැඳී ඇති බැඳීම් `type(scope): subject` ආකෘතිය අනුගමනය කළ යුතුය.
 
 **වලංගු වර්ග:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**වලංගු විෂය පථ:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**වලංගු විෂය පථයන්:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `skills`, `cloud-agent`, `guardrails` `memory` `compression` `translator` `auto-combo`, `resilience`, `providers`, `executors` `authz` `domain`
 
-අනුකූලතාව බිඳ දමන වෙනස්කම්: `BREAKING CHANGE:` පාද සටහන එක් කරන්න හෝ scope එකට පසුව `!` යොදන්න (උදා. `feat(api)!: drop /v0`).
+බිඳෙන වෙනස්කම්: විෂය පථයට පසුව `BREAKING CHANGE:` පාදකය හෝ `!` එක් කරන්න (උදා `feat(api)!: drop /v0`).
 
-### ලේඛනගතකරණය
+### ලේඛනගත කිරීම
 
-- [ ] `npm run check:docs-sync` සමත් වේ (pre-commit මඟින් ස්වයංක්රීයව ධාවනය වේ)
-- [ ] `npm run check:docs-all` සමත් වේ (සමස්ත පරීක්ෂාව: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` 0 සමඟ පිටවෙයි — කේතය ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` අතර env ගිවිසුම නොවෙනස්ව පවතී
-- [ ] `npm run check:doc-links` 0 සමඟ පිටවෙයි — ප්රතිව්යුහගත කිරීමෙන් පසු බිඳුණු අභ්යන්තර markdown යොමු නොමැත
-- [ ] storage/runtime වෙනස්කම් සඳහා `docs/architecture/ARCHITECTURE.md` සමාලෝචනය කර ඇත
-- [ ] env var සහ මෙහෙයුම් වෙනස්කම් සඳහා `docs/guides/TROUBLESHOOTING.md` සමාලෝචනය කර ඇත
-- [ ] `.env.example` වෙනස් වූයේ නම්: `docs/reference/ENVIRONMENT.md` යාවත්කාලීන කර ඇත
-- [ ] නව විශේෂාංගයට UI එකක් තිබේ නම්: `docs/guides/USER_GUIDE.md` එය සඳහන් කරයි
-- [ ] නව විශේෂාංගයට API එකක් තිබේ නම්: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` යාවත්කාලීන කර ඇත
-- [ ] නව විශේෂාංගය module එකක් නම්: ඒ සඳහා වෙන් වූ `docs/<MODULE>.md` පවතී
-- [ ] අනුකූලතාව බිඳ දමන වෙනස්කමක් නම්: `docs/guides/TROUBLESHOOTING.md` හි migration සටහනක් ඇත
+- [ ] `npm run check:docs-sync` සමත් (පූර්ව කැපවීමෙන් ස්වයංක්‍රීයව ධාවනය)
+- [ ] `npm run check:docs-all` passes (කුඩය: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:env-doc-sync` පිටවීම 0 — කේතය ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env කොන්ත්‍රාත්තුව නොවෙනස්ව පවතී
+- [ ] `npm run check:doc-links` ප්‍රතිව්‍යුහගත කිරීමෙන් පසු 0 — වලින් පිටවන අභ්‍යන්තර සලකුණු සටහන් නොමැත
+- [ ] `docs/architecture/ARCHITECTURE.md` storage/runtime ප්ලාවිතය සඳහා සමාලෝචනය කරන ලදී
+- [ ] `docs/guides/TROUBLESHOOTING.md` env var සහ මෙහෙයුම් ප්ලාවිතය සඳහා සමාලෝචනය කරන ලදී
+- [ ] `.env.example` වෙනස් වී ඇත්නම්: `docs/reference/ENVIRONMENT.md` යාවත්කාලීන කර ඇත
+- [ ] නව විශේෂාංගයේ UI තිබේ නම් : `docs/guides/USER_GUIDE.md` එය සඳහන් කරයි
+- [ ] නව විශේෂාංගයේ API තිබේ නම් : `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` යාවත්කාලීන කර ඇත
+- [ ] නව විශේෂාංගය මොඩියුලයක් නම්: කැප වූ `docs/<MODULE>.md` පවතී
+- [ ] වෙනස් කිරීම කඩන්නේ නම්: `docs/guides/TROUBLESHOOTING.md` සංක්‍රමණ සටහනක් ඇත
 
 ### i18n
 
-- [ ] `npm run i18n:check` 0 සමඟ පිටවෙයි — පරිවර්තන තත්ත්වය (`.i18n-state.json`) මූලාශ්ර ලේඛන සමඟ සමමුහුර්තයි (දැඩි ප්රකාරයේ වෙනස් වී ඇති මූලාශ්ර නොමැත; අවසන් මොහොතේ ලේඛන සංශෝධන සඳහා අනතුරු ඇඟවීමේ ප්රකාරයේ උපදේශනය පිළිගත හැකි නමුත්, ටැග් කිරීමට පෙර එය 0 විය යුතුය)
-- [ ] `npm run i18n:check-ui-coverage` 0 සමඟ පිටවෙයි — සෑම UI locale එකක්ම 80% ආවරණ අවම සීමාවේ හෝ ඊට ඉහළින් ඇත
-- [ ] `npm run i18n:sync-ui:dry` ඉලක්ක locale 66 පුරා අස්ථානගත keys 0ක් වාර්තා කරයි (`en` මූලාශ්රය හැර සෑම locale එකක්ම)
-- [ ] මූලාශ්ර ඉංග්රීසි ලේඛන වෙනස් වූයේ නම්, ටැග් කිරීමට පෙර `npm run i18n:run` ධාවනය කරන්න (`.env` තුළ `OMNIROUTE_TRANSLATION_API_KEY` අවශ්යයි)
-- [ ] සුළු පරිවර්තන දායකත්ව ඊළඟ නිකුතුවට කල් දැමිය හැකිය (CHANGELOG තුළ සටහන් කරන්න)
+- [ ] `npm run i18n:check` 0 — පරිවර්තන තත්වයෙන් (`.i18n-state.json`) පිටවෙයි මූලාශ්‍ර ලේඛන සමඟ සමමුහුර්ත කිරීම (දැඩි ආකාරයෙන් ප්ලාවිත මූලාශ්‍ර නොමැත; අනතුරු ඇඟවීමේ මාදිලියේ උපදේශනය අවසාන මොහොතේ ලේඛන ස්පර්ශ කිරීම් සඳහා පිළිගත හැකි නමුත් ටැග් කිරීමට පෙර 0 විය යුතුය)
+- [ ] `npm run i18n:check-ui-coverage` 0 — සෑම UI පෙදෙසකින්ම 80% ආවරණ තට්ටුවෙන් හෝ ඊට ඉහළින් පිටවෙයි
+- [ ] `npm run i18n:sync-ui:dry` ඉලක්කගත ස්ථාන 66 පුරාවටම නැතිවූ යතුරු 0ක් වාර්තා කරයි ( `en` මූලාශ්‍රය හැර සෑම පෙදෙසක්ම)
+- [ ] මූලාශ්‍ර ඉංග්‍රීසි ලේඛන වෙනස් වී ඇත්නම්, ටැග් කිරීමට පෙර `npm run i18n:run` ධාවනය කරන්න ( `.env` හි `OMNIROUTE_TRANSLATION_API_KEY` අවශ්‍යයි)
+- [ ] පරිවර්තන දායකත්වය සුළු නම් ( CHANGELOG හි ධාවන පථය) නම් ඊළඟ නිකුතුවට කල් දැමිය හැක.
 
-### දත්ත සමුදා Migrations
+### දත්ත සමුදා සංක්‍රමණය
 
-- [ ] `src/lib/db/migrations/` තුළ නව ගොනු තිබේ නම්:
-  - [ ] සෑම migration එකක්ම idempotent වේ (`CREATE TABLE IF NOT EXISTS`, ආදිය)
-  - [ ] Migrations transactions තුළ ආවරණය කර ඇත
-  - [ ] නිවැරදිව අංකනය කර ඇත (අනුපිළිවෙළේ හිස්තැන් නොමැත)
-- [ ] නව ස්ථාපනයක පරීක්ෂා කරන්න: `~/.omniroute/omniroute.db` මකා `npm run dev` ධාවනය කරන්න
-- [ ] පවතින ස්ථාපනයක පරීක්ෂා කරන්න: DB උපස්ථ කර, migration ධාවනය කර, schema එක සත්යාපනය කරන්න
-- [ ] migration එක tables නැවත ලියන්නේ නම් WAL ගොනු (`-wal`, `-shm`) නිවැරදිව හසුරුවා ඇත
+- [ ] `src/lib/db/migrations/` හි නව ගොනු තිබේ නම්:
+  - [ ] සෑම සංක්‍රමණයක්ම දුර්වලයි (`CREATE TABLE IF NOT EXISTS`, ආදිය)
+  - [ ] ගණුදෙණු වලින් ඔතා ඇති සංක්‍රමණ
+  - [ ] නිවැරදිව අංකනය කර ඇත (අනුපිළිවෙලෙහි හිඩැස් නොමැත)
+- [ ] නැවුම් ස්ථාපනය පරීක්ෂා කරන්න: `~/.omniroute/omniroute.db` මකා `npm run dev` ධාවනය කරන්න
+- [ ] පවතින ස්ථාපනය මත පරීක්ෂා කරන්න: උපස්ථ DB, සංක්‍රමණය ධාවනය කරන්න, යෝජනා ක්‍රමය සත්‍යාපනය කරන්න
+- [ ] සංක්‍රමණය වගු නැවත ලියන්නේ නම්WAL ගොනු (`-wal`, `-shm`) නිවැරදිව හසුරුවනු ලැබේ
 
-### සැපයුම්කරුවන්ගේ නාමාවලිය (Zod මඟින් වලංගු කරන ලද)
+### සපයන්නාගේ නාමාවලිය (Zod වලංගු)
 
-- [ ] `src/shared/constants/providers.ts` හි Zod schema එක load වන අවස්ථාවේ වලංගු වේ
-  - [ ] සියලු සැපයුම්කරුවන් සතුව අවශ්ය ක්ෂේත්ර (`id`, `label`, `kind`, ආදිය) ඇත
-  - [ ] නව නොමිලේ සැපයුම්කරුවන් සඳහා `freeNote` සපයා ඇත
-  - [ ] OAuth සැපයුම්කරුවන්ගේ `oauthConfig`, `src/lib/oauth/constants/oauth.ts` තුළ ලියාපදිංචි කර ඇත
-- [ ] නව සැපයුම්කරුවෙකු එක් කර ඇත්නම්: ඊට අනුරූප executor එක `open-sse/executors/` තුළ ඇත
-- [ ] OpenAI නොවන ආකෘතියක් නම්: translator එක `open-sse/translator/` තුළ ඇත
-- [ ] Models, `open-sse/config/providerRegistry.ts` තුළ ලියාපදිංචි කර ඇත
-- [ ] `tests/unit/` තුළ ඇති unit tests මඟින් සැපයුම්කරුවන් වර්ගීකරණය සහ routing ආවරණය කරයි
+- [ ] `src/shared/constants/providers.ts` Zod යෝජනා ක්‍රමය පැටවීමේ වේලාවේදී වලංගු වේ
+  - [ ] සියලුම සැපයුම්කරුවන්ට අවශ්‍ය ක්ෂේත්‍ර ඇත (`id`, `label`, `kind`, ආදිය.)
+  - [ ] `freeNote` නව නොමිලේ සපයන්නන් සඳහා ලබා දී ඇත
+  - [ ] OAuth සපයන්නන් `src/lib/oauth/constants/oauth.ts` හි `oauthConfig` ලියාපදිංචි කර ඇත
+- [ ] නව සැපයුම්කරු එකතු කර ඇත්නම්: `open-sse/executors/` හි අනුරූප විධායකය
+- [ ] OpenAI ආකෘතිය නොවන නම්: `open-sse/translator/` හි පරිවර්තකය
+- [ ] `open-sse/config/providerRegistry.ts` හි ලියාපදිංචි වූ ආකෘති
+- [ ] `tests/unit/` ආවරණ සැපයුම්කරු වර්ගීකරණය සහ මාර්ගගත කිරීමේ ඒකක පරීක්ෂණ
 
-### ඩෙස්ක්ටොප් (Electron)
+### වැඩතලය (Electron)
 
 `electron/` වෙනස් වී ඇත්නම්:
 
-- [ ] `npm run electron:smoke:packaged` සාර්ථක වේ
-- [ ] `:win`, `:mac`, `:linux` අතරින් අවම වශයෙන් එකක් සඳහා builds පරීක්ෂා කර ඇත
-- [ ] Code signing සහතික කල් ඉකුත් වී නැත (signing සිදු කරන්නේ නම්)
-- [ ] `electron/package.json` අනුවාදය root `package.json` සමඟ ගැළපේ
-- [ ] `stable` වෙත නිකුත් කරන්නේ නම් auto-update channel pointer එක යාවත්කාලීන කර ඇත
+- [ ] `npm run electron:smoke:packaged` සමත් වේ
+- [ ] අවම වශයෙන් `:win`, `:mac`, `:linux` වලින් එකක් සඳහා පරීක්‍ෂා කර ඇත
+- [ ] කේත අත්සන් කිරීමේ සහතික කල් ඉකුත් වී නැත (අත්සන් කරන්නේ නම්)
+- [ ] `electron/package.json` අනුවාදය root `package.json` සමඟ ගැලපේ
+- [ ] `stable` වෙත නිකුත් කරන්නේ නම් ස්වයංක්‍රීය යාවත්කාලීන නාලිකා දර්ශකය යාවත්කාලීන වේ
 
-### Build සැකැස්ම
+### පිරිසැලසුම සාදන්න
 
-Repository එක එකිනෙකට වෙනස් output directories තුනක් භාවිත කරයි — ඒවා කිසිවිටෙක පටලවා නොගන්න:
+ගබඩාව — වෙනස් නිමැවුම් නාමාවලි තුනක් භාවිතා කරයි, ඒවා කිසි විටෙකත් මිශ්‍ර නොකරයි:
 
-| Directory | අරමුණ                                                              | නිරීක්ෂණය කරනවාද? |
-| --------- | ------------------------------------------------------------------ | ----------------- |
-| `src/`    | යෙදුමේ source එක (TypeScript / TSX)                                | ඔව්               |
-| `.build/` | Build අතරමැදි ගොනු — `next build` output එක (`distDir`)            | නැත (gitignored)  |
-| `dist/`   | බෙදාහැරිය හැකි npm bundle එක — `assembleStandalone` මඟින් සකසන ලදී | නැත (gitignored)  |
+| නාමාවලිය  | අරමුණ                                                              | ලුහුබැඳ ගියාද?       |
+| --------- | ------------------------------------------------------------------ | -------------------- |
+| `src/`    | යෙදුම් මූලාශ්රය (TypeScript / TSX)                                 | ඔව්                  |
+| `.build/` | අතරමැදි — `next build` ප්‍රතිදානය (`distDir`) සාදන්න               | නැත (නොසලකා හරින ලද) |
+| `dist/`   | නැව්ගත කළ හැකි npm බණ්ඩලය — `assembleStandalone` මගින් එකලස් කර ඇත | නැත (නොසලකා හරින ලද) |
 
-> **ක්රියාකරු සටහන:** remote VPS image directory එක තවමත් `/usr/lib/node_modules/omniroute/app/` ලෙස පවතී.
-> වෙනස් වූයේ **repository එක තුළ ඇති** build output එක පමණි (`app/` → `dist/`). Deploy skills මඟින්
-> `dist/` හි අන්තර්ගතය remote `app/` directory එකට rsync කරයි — VPS path වෙනස් කිරීම් අවශ්ය නොවේ.
+> **ක්රියාකරු සටහන:** දුරස්ථ VPS රූප නාමාවලිය `/usr/lib/node_modules/omniroute/app/` ලෙස පවතී. පමණක්** in-repo** ගොඩනැගීමේ ප්‍රතිදානය ගෙන යන ලදී (`app/` → `dist/`). නිපුණතා rsync `dist/` අන්තර්ගතයන් දුරස්ථ `app/` dir — වෙත යෙදවීම VPS මාර්ගය වෙනස් කිරීම අවශ්‍ය නොවේ.
 
-**තනි-build ක්රියාවලිය:**
+**තනි ගොඩනැගීමේ ප්‍රවාහය:**
 
 ```
 npm run build:release
@@ -251,70 +249,68 @@ npm run build:release
   └─ writes dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-Deploy කිරීම සඳහා `npm run build` ධාවනය කර ඉන් පසු වෙනම `npm run build:cli` ධාවනය නොකරන්න — එක් command එකකින්
-පිරිසිදු rebuild එකක් සහ sentinel එකක් නිර්මාණය කරන `npm run build:release` භාවිත කරන්න.
+NOT ධාවනය `npm run build` කරන්න, ඉන්පසු — භාවිතා කිරීම සඳහා වෙනම `npm run build:cli` එකක් යොදන්න `npm run build:release` එය එක් විධානයකින් + සෙන්ටිනල් නැවත ගොඩනැගීම සිදු කරයි.
 
-### Artifact වලංගුකරණය
+### කෞතුක භාණ්ඩ වලංගුකරණය
 
 - [ ] `npm run build:release` සාර්ථක වන අතර `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` පිරිසිදුයි — `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, හෝ වෙනත් local residue නොමැත
-- [ ] Build කිරීමෙන් පසු `dist/server.js` පවතී
-- [ ] විකල්ප local packaged-runtime smoke පරීක්ෂාව: `npm run dev:candidate -- build` ට පසු `npm run dev:candidate -- validate` මඟින් හුදකලා `DATA_DIR` එකක packed tarball එක boot කර `/api/health` + `/v1/models` පරීක්ෂා කරයි ([දායකත්ව Golden Path](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) බලන්න)
+- [ ] `npm run check:pack-artifact` පිරිසිදු — no `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, හෝ වෙනත් දේශීය අපද්‍රව්‍ය
+- [ ] ගොඩනැගීමෙන් පසුව `dist/server.js` පවතී
+- [ ] විකල්ප දේශීය ඇසුරුම් කරන ලද ධාවන කාල දුම: `npm run dev:candidate -- validate` පසු `npm run dev:candidate -- build` හුදකලා `DATA_DIR` මත අසුරන ලද තාරබෝල බූට් කර `/api/health` + `/v1/models` පරීක්ෂා කරයි ( [දායකත්ව රන් මාවත](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) බලන්න)
 
-### Tag කිරීම සහ නිකුත් කිරීම
+### ටැග් කිරීම සහ මුදා හැරීම
 
-- [ ] `/generate-release-cc` ධාවනය කරන්න (Claude Code skill):
-  - `vX.Y.Z` tag එක නිර්මාණය කරයි
-  - Tag එක සහ branch එක push කරයි
-  - Changelog අන්තර්ගතය සහිත GitHub Release එකක් විවෘත කරයි
-  - Electron installers අමුණයි (build කර ඇත්නම්)
-- [ ] නැතහොත් අතින්:
+- [ ] `/generate-release-cc` ධාවනය කරන්න (Claude කේත කුසලතාව):
+  - ටැග් `vX.Y.Z` නිර්මාණය කරයි
+  - ටැගය සහ ශාඛාව තල්ලු කරයි
+  - චේන්ජ්ලොග් බොඩි සමඟ GitHub නිකුතුව විවෘත කරයි
+  - Electron ස්ථාපකයන් අමුණන්න (ඉදි කර ඇත්නම්)
+- [ ] හෝ අතින්:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
   git push origin vX.Y.Z
   gh release create vX.Y.Z --notes-from-tag
   ```
 
-### Deploy කිරීම
+### යොදවන්න
 
-Deploy skills සැහැල්ලු rsync ක්රියාවලිය භාවිත කරයි — `npm pack` නැත, `npm i -g` නැත:
+නිපුණතා යෙදවීම සැහැල්ලු rsync ප්‍රවාහය — no `npm pack`, no `npm i -g` භාවිතා කරන්න:
 
-- [ ] ඉලක්කයට ගැළපෙන deploy skill එක භාවිත කරන්න:
-  - `/deploy-vps-local-cc` — local VPS (192.168.0.15)
+- [ ] ඉලක්කයට ගැලපෙන යෙදවීමේ කුසලතාව භාවිතා කරන්න:
+  - `/deploy-vps-local-cc` — දේශීය VPS (192.168.0.15)
   - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — දෙකම
-- [ ] Deploy කිරීමට පෙර `dist/BUILD_SHA` == `git rev-parse --short HEAD` බව තහවුරු කරන්න
-- [ ] Build එක සැබෑ `node_modules` ඇති ස්ථානයක ධාවනය විය යුතුය (ප්රධාන checkout එක හෝ `npm ci` ක්රියාත්මක කළ worktree එකක් — symlink කළ worktree එකක් නොවේ)
-- [ ] Deploy කළ instance එක smoke test කරන්න:
-  - `/dashboard/health` විවෘත කරන්න → අනුවාද string එක release එක සමඟ ගැළපෙන බව පරීක්ෂා කරන්න
-  - දන්නා සැපයුම්කරුවෙකු වෙත `/v1/chat/completions` request එකක් ධාවනය කරන්න
-  - `/api/monitoring/health` මඟින් `CLOSED` circuit breakers ආපසු ලබාදෙන බව තහවුරු කරන්න
-  - MCP transports ප්රතිචාර දක්වන බව තහවුරු කරන්න (`/mcp` HTTP, `/mcp-sse` SSE)
+- [ ] යෙදවීමට පෙර, `dist/BUILD_SHA` == `git rev-parse --short HEAD` තහවුරු කරන්න
+- [ ] ගොඩනැගීම `node_modules` සත්‍ය වන තැන ධාවනය විය යුතුය (ප්‍රධාන පිටවීම හෝ `npm ci`'d worktree — NOT a symlinked worktree)
+- [ ] දුම් පරීක්ෂාව යොදවා ඇති අවස්ථාව:
+  - විවෘත `/dashboard/health` → පිරික්සුම් අනුවාද තන්තු ගැලපීමේ නිකුතුව
+  - දන්නා සැපයුම්කරුවෙකුට එරෙහිව `/v1/chat/completions` ඉල්ලීමක් ක්‍රියාත්මක කරන්න
+  - `/api/monitoring/health` ආපසු `CLOSED` පරිපථ කඩනයන් සත්‍යාපනය කරන්න
+  - MCP ප්‍රවාහන ප්‍රතිචාර තහවුරු කරන්න (`/mcp` HTTP, `/mcp-sse` SSE)
 
-### නිකුතුවෙන් පසු
+### පසු මුදා හැරීම
 
-- [ ] `/capture-release-evidences-cc` ධාවනය කරන්න (Claude Code skill)
-  - නව විශේෂාංගවල WebP screenshots/recordings ග්රහණය කරයි
-  - ඒවා release notes / blog post එකට අමුණයි
-- [ ] නිකුත් කිරීමේ නිවේදනය සමඟ GitHub Discussions / Discord යාවත්කාලීන කරන්න
-- [ ] ඊළඟ අනුවාදය සඳහා milestone එකක් විවෘත කරන්න
-- [ ] තීරණාත්මක නම්: discussion එක pin කරන්න හෝ යෙදුම තුළ පෙන්වන banner එක සඳහා `news.json` තුළ පළ කරන්න
+- [ ] `/capture-release-evidences-cc` ධාවනය කරන්න (Claude කේත කුසලතාව)
+  - නව විශේෂාංග WebP screenshots/recordings ග්‍රහණය කරයි
+  - සටහන් / බ්ලොග් සටහන නිකුත් කිරීමට අමුණන්න
+- [ ] නිකුතු නිවේදනය සමඟ GitHub සාකච්ඡා / Discord යාවත්කාලීන කරන්න
+- [ ] ඊළඟ අනුවාදය සඳහා සන්ධිස්ථානය විවෘත කරන්න
+- [ ] විවේචනාත්මක නම්: ඇප්-තුළ බැනරය සඳහා සාකච්ජාව හෝ `news.json` හි පළ කරන්න
 
-### Radar පොදු දියත් කිරීමේ gate එක
+### රේඩාර් මහජන දියත් කිරීමේ දොරටුව
 
-Radar නිවේදනය හිතාමතාම `active: false` සමඟ commit කර ඇත. පහත සෑම අයිතමයක් සඳහාම සාක්ෂි සැපයීමෙන් පසු activation එක වෙනම
-වෙනස්කමක් ලෙස සිදු කරයි:
+රේඩාර් නිවේදනය හිතාමතාම `active: false` සමඟ කැපවී ඇත. පහත දැක්වෙන සෑම අයිතමයක්ම සාක්ෂි දැරීමෙන් පසුව සක්‍රිය කිරීම වෙනම වෙනස් කිරීමකි:
 
-- [ ] Stacked Radar PR සියල්ල merge කර ඇති අතර release-tip CI හරිත තත්ත්වයේ ඇත
-- [ ] `RADAR_ENABLED` පෙරනිමියෙන් තවමත් අක්රියව තිබියදී OSS Radar routes deploy කර smoke test කරන්න
-- [ ] නම් කරන ලද Radar host එකේ `GET /planos`, `/termos`, `/privacidade`, සහ `/reembolso` smoke test කරන්න
-- [ ] Private service එක තුළ ක්රියාකරුගේ අනන්යතාව/සම්බන්ධතා තොරතුරු/ලිපිනය සහ හිමිකරු අනුමත කළ නීතිමය සමාලෝචනය වාර්තා කරන්න
-- [ ] Stripe Checkout සහ signed webhook එක test mode එකේ පමණක් අත්හදා බලන්න
-- [ ] අනුමත sender/domain එක භාවිතයෙන් එක් encrypted transactional-email delivery එකක් අත්හදා බලන්න
-- [ ] Backup restore එක සහ අධීක්ෂණය යටතේ budget cap එකකට සීමා කළ එක් research run එකක් සාර්ථක බව ඔප්පු කරන්න
-- [ ] Donation සාක්ෂි පිළිගැනීමට පෙර BRL/PIX සමාලෝචන ප්රතිපත්තිය අනුමත කරන්න
-- [ ] ඉහත gates සම්පූර්ණ කිරීමෙන් පසුව පමණක් public Checkout සක්රිය කර, ඉන් පසු නව `news.json` ID එක සක්රිය කරන්න
-- [ ] Home banner එක localized copy භාවිත කරන බවත්, පැරණි ID එකක් dismiss කළ පසු නව ID එකක් නැවත දිස්වන බවත් තහවුරු කරන්න
+- [ ] ගොඩගැසී ඇති සියලුම රේඩාර් PRs ඒකාබද්ධ කර ඇති අතර මුදා හැරීමේ ඉඟිය CI කොළ පාටයි
+- [ ] පෙරනිමියෙන් `RADAR_ENABLED` තවමත් අක්‍රියව ඇති OSS රේඩාර් මාර්ග යෙදවීම සහ දුම් පානය කිරීම
+- [ ] නම් කරන ලද රේඩාර් ධාරකය මත `GET /planos`, `/termos`, `/privacidade`, සහ `/reembolso` දුම
+- [ ] වාර්තා ක්‍රියාකරු identity/contact/address සහ පුද්ගලික සේවයේ හිමිකරු-අනුමත නීති සමාලෝචනය
+- [ ] Exercise Stripe Checkout සහ අත්සන් කරන ලද webhook පරීක්‍ෂණ ආකාරයෙන් පමණි
+- [ ] අනුමත sender/domain සමඟ එක් සංකේතාත්මක ගනුදෙනු-ඊමේල් බෙදාහැරීමක් අභ්‍යාස කරන්න
+- [ ] උපස්ථ ප්‍රතිසාධනය සහ එක් අධීක්ෂණය කරන ලද, අයවැය ආවරණය කළ පර්යේෂණ ධාවනය ඔප්පු කරන්න
+- [ ] පරිත්‍යාග සාක්ෂි පිළිගැනීමට පෙර BRL/PIX සමාලෝචන ප්‍රතිපත්තිය අනුමත කරන්න
+- [ ] පෙර දොරටු වලින් පසුව පමණක් පොදු පිටවීම සබල කරන්න, පසුව නව `news.json` ID සක්‍රිය කරන්න
+- [ ] මුල් පිටුව බැනරය දේශීයකරණය කළ පිටපතක් භාවිතා කරන බව තහවුරු කර පැරණි ID ඉවත දැමූ පසු නව ID නැවත දිස් වේ
 
 ## Embedded Services ස්මෝක් පරීක්ෂාව (v3.8.4+)
 

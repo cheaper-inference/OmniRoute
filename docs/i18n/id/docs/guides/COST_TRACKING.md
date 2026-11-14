@@ -83,7 +83,7 @@ Nama model dinormalisasi terlebih dahulu (awalan jalur penyedia seperti `openai/
 
 ### Bagaimana pembelanjaan dicatat
 
-- Biaya per permintaan dihitung setelah respons dan dicatat fire-and-forget sehingga tidak menambah latensi pada klien. Konsumsi kuota bersama dijadwalkan pada event-loop tick berikutnya melalui [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Biaya per permintaan dihitung pada saat permintaan selesai. Konsumsi kuota bersama dijadwalkan pada event-loop tick berikutnya melalui [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
 - Pembelanjaan kunci API di-buffer dan dihapus secara batch oleh [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (interval pengosongan default 60 detik, buffer 1.000 entri). Merdu melalui:
 
   | Env var                             | Bawaan  | Tujuan                               |
@@ -91,7 +91,29 @@ Nama model dinormalisasi terlebih dahulu (awalan jalur penyedia seperti `openai/
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Interval pembilasan dalam milidetik. |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Entri buffer maksimum sebelum flush. |
 
-Angka biaya dashboard adalah** bukan** dibaca dari jumlah dolar per baris yang disimpan — jumlah tersebut dihitung ulang dengan cepat dari jumlah token dan tabel harga saat ini setiap kali titik akhir analitik berjalan. Itu berarti mengoreksi harga yang salah (dan menyinkronkan ulang) memperbarui perkiraan biaya historis secara surut.
+Biaya lebih memilih biaya yang dilaporkan penyedia secara tepat (`provider_cost_usd`), kemudian snapshot permintaan dengan harga katalog (`calculated_cost_usd`), lalu penetapan harga token dari katalog saat ini. Biaya yang disimpan tidak dibebankan lagi melalui jumlah tokennya. Baris khusus token lama masih berubah ketika harga katalognya berubah.
+
+### OCR dan penyematan
+
+- Permintaan `/v1/ocr` yang berhasil menggunakan `usage_info.pages_processed` hulu, bukan rentang halaman yang diminta atau jumlah objek halaman yang dikembalikan. Perkiraannya adalah halaman × `ocr_cost_per_page` ( USD/page absolut,** bukan** USD/million).
+- Permintaan dengan dokumen atau anotasi kotak pembatas memerlukan tarif `ocr_cost_per_annotated_page` terpisah. Tanpanya, biayanya masih belum diketahui; tarif OCR biasa tidak diganti secara diam-diam.
+- LiteLLM sync memetakan bidang `annotation_cost_per_page` hulunya ke `ocr_cost_per_annotated_page`, mempertahankan nilai USD/page absolut dan entri hanya anotasi, termasuk nol eksplisit. Bidang kanonik yang disediakan akan diutamakan; nilai alias yang tidak valid diabaikan. Penggantian harga pengguna tetap mempertahankan prioritas normalnya. Lihat [kunci harga OCR LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- penggunaan OCR menyimpan jumlah halaman, harga satuan, biaya USD yang dihitung, kunci API dan koneksi yang dipilih. Halaman tidak pernah direpresentasikan sebagai token. Log panggilan berisi metadata penagihan, bukan dokumen URLs, PDF byte, atau teks yang diekstraksi.
+- Permintaan `/v1/embeddings` yang berhasil mencatat satu baris penggunaan per batch fisik, termasuk batch terpisah yang diselesaikan dalam milidetik yang sama. Biaya yang dilaporkan penyedia lebih diutamakan daripada perkiraan token; pembungkus kombo tidak menambahkan biaya.
+- Riwayat penggunaan, analisis Biaya, jendela provider/account, batas pengeluaran kunci API, buku besar biaya permintaan, dan pembatalan penggunaan harian mencakup biaya-biaya ini. Kunci tanpa log mempertahankan penghitungan numerik tanpa menyimpan teks sumber.
+- Penggunaan atau tarif tidak ada** tidak dikenal** , tidak gratis: header biaya respons dihilangkan, dan kebijakan penggunaan tanpa harga yang ada berlaku untuk kunci API terbatas. Tarif nol yang dikonfigurasi secara eksplisit tetap berlaku untuk penggunaan tanpa biaya.
+
+Ini adalah akuntansi forward-only. Panggilan OCR/embedding lama yang tidak pernah menulis riwayat penggunaan tidak dapat direkonstruksi dari migrasi ini. Perkiraan katalog adalah perkiraan USD, bukan faktur, dan tidak termasuk konversi mata uang, pajak, atau diskon.
+
+### Pidato dan gambar
+
+- Upaya `/v1/audio/transcriptions`, `/v1/audio/speech` dan pembuatan gambar yang berhasil berbagi akuntansi numerik. Panggilan langsung dan kombo membawa tombol API pemanggil dan koneksi yang dipilih; pembungkus kombo tidak pernah menambahkan debit kedua.
+- USD yang dilaporkan penyedia menang atas perkiraan katalog, termasuk biaya nol yang eksplisit. OpenRouterJSON `usage.cost` dinormalisasi menjadi `cost_usd`. Jika tidak, token yang diukur menggunakan harga token, detik transkripsi menggunakan harga per detik, masukan ucapan menggunakan jumlah karakter Unicode, dan gambar harga tetap menggunakan nomor yang sebenarnya dikembalikan, bukan `n` yang diminta.
+- Biner OpenRouter TTS tidak memiliki badan penggunaan JSON. Setelah audio selesai atau penelepon membatalkan, OmniRoute menanyakan generasinya ID di** sama** asal OpenRouter yang dikonfigurasi. Permintaan EU tidak pernah kembali ke asal global. Ini adalah pencarian terbatas dan hanya-baca; sintesis tidak dicoba ulang untuk akuntansi. Catatan penagihan dapat muncul setelah audio selesai: percobaan ulang pencarian dijalankan di latar belakang hingga sekitar 52 detik, termasuk tenggat waktu jaringan.
+- Selama pencarian tersebut, respons audio memiliki `X-OmniRoute-Cost-Status: pending` dan tidak ada header biaya respons. Tagihan akhirnya muncul dalam riwayat penggunaan, analitik, dan buku besar setelah rekonsiliasi. Jika metadata tidak tersedia, snapshot tarif yang dikonfigurasi akan digunakan; jika tidak, biayanya tetap tidak diketahui.
+- Detik, jumlah karakter dan gambar memiliki bidang unit penagihan terpisah, tidak pernah memalsukan jumlah token. Akuntansi hanya mempertahankan penggunaan numerik, bukan teks ucapan, transkrip, atau byte gambar. Pengecualian gambar tanpa harga yang ada tidak berubah: tarif gambar yang benar-benar hilang tidak lagi mengunci kunci terbatas, dan responsnya menghilangkan header biaya daripada menyatakan panggilan itu gratis. Kegagalan penyimpanan harga masih menyimpan bukti penggunaan untuk penegakan yang gagal ditutup.
+
+Tidak ada biaya speech/image historis yang ditemukan atau diisi ulang. Tagihan penyedia tetap menjadi referensi untuk faktur dan panggilan yang biayanya tidak dilaporkan.
 
 ---
 

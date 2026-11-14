@@ -4,10 +4,20 @@
 
 ---
 
-Gli errori vengono classificati prima di decidere se effettuare nuovi tentativi.
+Gli errori vengono classificati prima che venga presa la decisione di riprovare.
 
-Gli errori transitori, come timeout, errori di rete, limiti di frequenza e risposte 5xx del provider, possono attivare il failover. Gli errori di autenticazione, gli errori di autorizzazione, le richieste non valide, i modelli non disponibili e gli errori sconosciuti non vengono ritentati indiscriminatamente.
+Errori temporanei come timeout, errori di rete, limiti di velocità e risposte 5xx del provider potrebbero eseguire il failover. La quota o il credito esauriti (una quota 429 o 402 Pagamento richiesto) non vengono mai ritentati sullo stesso provider ma viene eseguito il failover su un altro, la cui quota è separata. Gli errori di autenticazione, gli errori di autorizzazione, le richieste non valide, i modelli non disponibili e gli errori sconosciuti non vengono ripetuti alla cieca.
 
-La policy predefinita tra provider consente fino a tre tentativi complessivi, riprova in caso di limiti di frequenza e timeout e mantiene la disabilitazione amministrativa separata dallo stato temporaneo del circuito.
+La policy predefinita tra provider consente fino a tre tentativi del provider, limiti di velocità e timeout dei tentativi, failover su quota esaurita e mantiene la disabilitazione amministrativa separata dallo stato temporaneo del circuito.
 
-Gli stati del circuito sono `closed`, `open` e `half_open`. Un periodo di cooldown pianifica un controllo limitato; se il controllo ha esito positivo, il circuito viene chiuso, mentre se ha esito negativo, viene riaperto.
+## Dove si applica
+
+- **Combinazioni** failover tra i loro obiettivi in base alla strategia e alle impostazioni della combo.
+- **Un modello identificativo nudo** (nessun prefisso `provider/` ) servito da diversi provider attivi, senza alcuna combinazione di quel nome esatto, viene prima inviato alle scelte di inferenza del provider. Se il tentativo fallisce in un modo in cui viene eseguito il failover della policy, la stessa richiesta viene inviata al successivo provider attivo che serve l'ID. La risposta riporta `x-omniroute-fallback-attempts` con il numero di fornitori provati prima di quello che ha risposto.
+  - Ogni supplente è autorizzato esattamente come se l'inferenza lo avesse scelto. Un target bloccato o non ammesso dalla chiave API viene ignorato senza una chiamata upstream e il client riceve il vero errore upstream, non un rifiuto della policy per un target a cui non è mai stato assegnato un nome.
+  - Solo una risposta fallita va avanti: non viene eseguito alcun failover dopo il primo byte trasmesso in streaming.
+  - Lo scambio di modello di fallback di emergenza si applica solo dopo che ogni fornitore del modello richiesto ha fallito.
+  - Una richiesta bloccata su una connessione (`x-omniroute-connection`) rimane su di essa.
+  - Un ID con prefisso (`provider/model`) non viene mai reindirizzato a un altro provider.
+
+Gli stati del circuito sono `closed`, `open` e `half_open`. Un tempo di recupero programma un'indagine delimitata; una sonda riuscita chiude il circuito e una sonda guasta lo riapre.

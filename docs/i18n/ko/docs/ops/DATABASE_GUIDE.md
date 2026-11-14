@@ -407,48 +407,49 @@ sqlite3 ~/.omniroute/storage.sqlite ".backup /backups/omniroute-hot.db"
 
 ### WAL 모드
 
-WAL은 기본적으로 활성화되어 있습니다. 쓰기 작업이 많은 워크로드에서는 다음을 고려하세요.
+WAL 는 기본적으로 활성화되어 있습니다. 쓰기 작업량이 많은 경우 다음을 고려하세요.
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- 1000페이지마다 체크포인트 실행
-PRAGMA journal_size_limit = 67108864;  -- WAL 한도를 64MB로 설정
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute `journal_size_limit` 설정하지 않습니다. 체크포인트는 WAL 프레임을 기본 파일로 이동하지만 WAL 파일은 가장 큰 할당 크기를 유지합니다. `OMNIROUTE_WAL_GUARD_MAX_MB` 가드는 `wal_checkpoint(RESTART)` 만 경고하고 실행합니다. 디스크 크기 캡이 아닙니다.
 
 ### 인덱스
 
-성능을 위한 주요 인덱스(마이그레이션에서 자동 생성됨):
+성능에 대한 주요 인덱스(마이그레이션으로 자동 생성됨):
 
-- `idx_models_provider` — 제공자별 모델 조회
-- `idx_combo_targets_combo_id` — 콤보 대상 확장
-- `idx_usage_history_api_key_timestamp` — 사용량 분석
+- 공급자별 `idx_models_provider` — 모델 조회
+- `idx_combo_targets_combo_id` — 콤보 타겟 확장
+- `idx_usage_history_api_key_timestamp` — 사용 분석
 - `idx_quota_snapshots_api_key_window` — 할당량 추적
-- `idx_call_logs_timestamp` — 호출 로그 쿼리
+- `idx_call_logs_timestamp` — 통화 기록 쿼리
 
-새 인덱스를 추가하려면 마이그레이션을 생성하세요.
+새 색인을 추가하려면 마이그레이션을 생성하세요.
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### 메모리 매핑 I/O
+### 메모리 매핑된 I/O
 
-매우 큰 데이터베이스(>10GB)의 경우 SQLite pragma를 통해 메모리 매핑을 조정할 수 있습니다.
+매우 큰 데이터베이스(> 10GB)의 경우 SQLite pragma를 통해 메모리 매핑을 조정할 수 있습니다.
 
 ```sql
--- SQLite pragma를 통해 설정(core.ts 또는 런타임에서 조정)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
 ### 압축
 
-장기간 실행되는 OmniRoute 인스턴스에는 가끔 `VACUUM`을 실행하는 것이 좋습니다.
+장기 실행 OmniRoute 인스턴스는 가끔씩 `VACUUM` 활용하면 이점을 얻을 수 있습니다.
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-트래픽이 적은 시간대에 매월 실행하세요. (WAL 모드는 필요성을 줄여 주지만 완전히 없애지는 않습니다.)
+트래픽이 적은 시간대에 매월 실행합니다. (WAL 모드는 필요성을 줄이지만 제거하지는 않습니다.)
 
 ---
 
@@ -556,7 +557,7 @@ sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 
 ---
 
-## 일반 작업
+## 일반적인 작업
 
 ### 테이블 검사
 
@@ -564,7 +565,7 @@ sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 sqlite3 ~/.omniroute/storage.sqlite "SELECT * FROM api_keys LIMIT 5;"
 ```
 
-### 모든 테이블의 행 수 계산
+### 모든 테이블의 행 개수 계산
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite <<EOF
@@ -572,20 +573,20 @@ SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';
 EOF
 ```
 
-### 모든 데이터 초기화(삭제)
+### 모든 데이터 재설정(삭제)
 
 ```bash
-# 먼저 OmniRoute 중지
+# Stop OmniRoute first
 omniroute stop
 
-# DB 파일 삭제
+# Delete the DB file
 rm ~/.omniroute/storage.sqlite*
 
-# 다시 시작(빈 DB가 다시 생성됨)
+# Restart (will recreate empty DB)
 omniroute
 ```
 
-**선택적** 초기화(제공자는 유지하고 사용량 데이터만 삭제):
+에 대한** 선택적** 재설정(공급자 유지, 사용량 삭제):
 
 ```bash
 DELETE FROM usage_history WHERE timestamp < datetime('now', '-30 day');

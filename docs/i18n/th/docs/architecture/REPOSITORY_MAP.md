@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `components/`                    | ส่วนประกอบแดชบอร์ด API: อะแดปเตอร์บน `packages/ui-kit` — ดู `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ชื่อไอคอนที่ใช้โดยหน้าจอ → ส่วนประกอบ Lucide (`<Icon>`)                              |
-| `constants/providers.ts`         | **ผู้ให้บริการ 381 ราย** ด้วยการตรวจสอบ Zod (แหล่งที่มาของความจริง)                              |
+| `constants/providers.ts`         | **ผู้ให้บริการ 394 ราย** ด้วยการตรวจสอบ Zod (แหล่งที่มาของความจริง)                              |
 | `constants/cliTools.ts`          | รีจิสทรีเครื่องมือ CLI ภายนอก                                                                    |
-| `constants/routingStrategies.ts` | **20 กลยุทธ์การกำหนดเส้นทาง** มีลำดับความสำคัญ                                                   |
+| `constants/routingStrategies.ts` | **22 กลยุทธ์การกำหนดเส้นทาง** มีลำดับความสำคัญ                                                   |
 | `constants/publicApiRoutes.ts`   | เส้นทางที่ต้องมีการตรวจสอบสิทธิ์ผู้ถือ (เทียบกับการจัดการ)                                       |
 | `constants/upstreamHeaders.ts`   | รายการส่วนหัวที่ปฏิเสธสำหรับคำขออัปสตรีม                                                         |
 | `validation/schemas.ts`          | ~ 80 Zod schema (แหล่งความจริงแหล่งเดียวสำหรับสัญญา API )                                        |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — เวิร์กสเปซเอนจินสตรีมมิง
+## `open-sse/` — พื้นที่ทำงานของ Streaming Engine
 
-เวิร์กสเปซ npm แยกต่างหาก (`@omniroute/open-sse`) ทำหน้าที่ประมวลผลคำขอและดำเนินการกับผู้ให้บริการ
+แยกพื้นที่ทำงาน npm (`@omniroute/open-sse`) จัดการคำขอการประมวลผลการดำเนินการของผู้ให้บริการ +
 
 ```
 open-sse/
-├── handlers/            # 16 ไฟล์ (12 แฮนด์เลอร์ + 4 ตัวช่วย): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search ฯลฯ
-├── executors/           # โมดูล executor 150 โมดูล (คลาสที่สืบทอดจาก BaseExecutor + ตัวช่วยเฉพาะผู้ให้บริการ)
-├── translator/          # ตัวแปลงรูปแบบ (คำขอ 9 รายการ การตอบกลับ 9 รายการ ตัวช่วย 9 รายการ)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # โมดูลบริการ ~80+ โมดูล (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM ฯลฯ)
-├── mcp-server/          # เซิร์ฟเวอร์ MCP (110 เครื่องมือ, 3 ทรานสปอร์ต, 33 ขอบเขต)
-├── config/              # รีจิสทรีผู้ให้บริการ/โมเดล, การกำหนดค่าเฮดเดอร์, นามแฝงโมเดล
-├── utils/               # ไคลเอนต์ TLS, proxy fetch/dispatcher, ตัวช่วยด้านเครือข่าย
-├── index.ts             # จุดเข้าใช้งานเวิร์กสเปซ
-├── package.json         # แมนิเฟสต์เวิร์กสเปซ
-├── tsconfig.json        # การกำหนดค่า TS ของเวิร์กสเปซ
-└── types.d.ts           # การประกาศชนิดข้อมูลของเวิร์กสเปซ
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| พาธ                         | วัตถุประสงค์                                                                      |
-| --------------------------- | --------------------------------------------------------------------------------- |
-| `server.ts`                 | วงจรชีวิตของเซิร์ฟเวอร์ MCP (ทรานสปอร์ต stdio + HTTP)                             |
-| `httpTransport.ts`          | ทรานสปอร์ต HTTP Streamable + SSE (`/api/mcp/sse`, `/api/mcp/stream`)              |
-| `audit.ts`                  | บันทึกการตรวจสอบลงในตาราง `mcp_tool_audit`                                        |
-| `scopeEnforcement.ts`       | ตรวจสอบขอบเขตสำหรับแต่ละเครื่องมือ                                                |
-| `runtimeHeartbeat.ts`       | ส่งสัญญาณสถานะความพร้อมใช้งานไปยัง `DATA_DIR/runtime/mcp-heartbeat.json`          |
-| `descriptionCompressor.ts`  | บีบอัดเมทาดาทาคำอธิบายเครื่องมือเพื่อประหยัดบริบท                                 |
-| `schemas/tools.ts`          | นิยามเครื่องมือพื้นฐาน 36 รายการ + ขอบเขต                                         |
-| `tools/advancedTools.ts`    | การนำเครื่องมือขั้นสูงไปใช้จริง                                                   |
-| `tools/memoryTools.ts`      | เครื่องมือหน่วยความจำ 3 รายการ (ค้นหา/เพิ่ม/ล้าง)                                 |
-| `tools/skillTools.ts`       | เครื่องมือทักษะ 4 รายการ (แสดงรายการ/เปิดใช้งาน/ดำเนินการ/การดำเนินการ)           |
-| `tools/compressionTools.ts` | เครื่องมือบีบอัด 5 รายการ                                                         |
-| `README.md`                 | README ภายในของเซิร์ฟเวอร์ MCP (เชื่อมโยงข้ามจาก `docs/frameworks/MCP-SERVER.md`) |
+| เส้นทาง                     | วัตถุประสงค์                                                                    |
+| --------------------------- | ------------------------------------------------------------------------------- |
+| `server.ts`                 | วงจรชีวิตของเซิร์ฟเวอร์MCP (การขนส่ง stdio + HTTP )                             |
+| `httpTransport.ts`          | HTTP Streamable + การขนส่ง SSE (`/api/mcp/sse`, `/api/mcp/stream`)              |
+| `audit.ts`                  | การบันทึกการตรวจสอบไปยังตาราง `mcp_tool_audit`                                  |
+| `scopeEnforcement.ts`       | การตรวจสอบขอบเขตต่อเครื่องมือ                                                   |
+| `runtimeHeartbeat.ts`       | การเต้นของหัวใจถึง `DATA_DIR/runtime/mcp-heartbeat.json`                        |
+| `descriptionCompressor.ts`  | บีบอัดข้อมูลเมตาคำอธิบายเครื่องมือเพื่อบันทึกบริบท                              |
+| `schemas/tools.ts`          | คำจำกัดความของเครื่องมือพื้นฐาน 36 รายการขอบเขต +                               |
+| `tools/advancedTools.ts`    | การใช้งานเครื่องมือขั้นสูง                                                      |
+| `tools/memoryTools.ts`      | 3 เครื่องมือหน่วยความจำ (search/add/clear)                                      |
+| `tools/skillTools.ts`       | เครื่องมือทักษะ 4 อย่าง (list/enable/execute/executions)                        |
+| `tools/compressionTools.ts` | 5 เครื่องมือบีบอัด                                                              |
+| `README.md`                 | เซิร์ฟเวอร์ MCP ภายใน README (เชื่อมโยงข้ามจาก `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | การรวม CLI ภายนอก + ภายใน OmniRoute CLI                                                        |
 | `I18N.md`                   | สถาปัตยกรรม i18n เพิ่มภาษา 67 ภาษา                                                             |
 | `UNINSTALL.md`              | ล้างขั้นตอนการถอนการติดตั้ง                                                                    |
-| `PROVIDER_REFERENCE.md`     | **สร้างอัตโนมัติ** แค็ตตาล็อกของผู้ให้บริการ 381 ราย (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **สร้างอัตโนมัติ** แค็ตตาล็อกของผู้ให้บริการ 394 ราย (regen: `npm run gen:provider-reference`) |
 
 ### เจาะลึกระบบย่อย
 

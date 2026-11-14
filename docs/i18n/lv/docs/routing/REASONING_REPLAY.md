@@ -8,7 +8,7 @@
 
 OmniRoute tver asistentu `reasoning_content`, ko ražo domāšanas režīma modeļi, un pārskatāmi atskaņo to pēc vairāku apgriezienu pieprasījumiem, kad to pieprasa augšējais pakalpojumu sniedzējs. Tādējādi tiek novērstas HTTP 400 kļūdas, ko stingrie pakalpojumu sniedzēji rada, ja klienta sarunu vēsturē trūkst iepriekšējās kārtas argumentācijas.
 
-## Kāpēc Tas pastāv
+## Kāpēc Tas Pastāv
 
 Vairāki domāšanas režīma nodrošinātāji noraida turpmāko darbību, ja vien** iepriekšējā asistenta ziņojumā ir iekļauts oriģinālais `reasoning_content`** . Augšējā plūsma atgriež 400 ar tādiem ziņojumiem kā:
 
@@ -16,7 +16,7 @@ Vairāki domāšanas režīma nodrošinātāji noraida turpmāko darbību, ja vi
 Param Incorrect: The reasoning_content in the thinking mode must be passed back to the API.
 ```
 
-Bet tipiski klienti (Cursor, Cline, Roo Code, OpenAI SDK) izņem `reasoning_content` no vēstures, ko viņi atkārto. OmniRoute atjauno to no servera puses kešatmiņas, lai pieprasījums, ko redz augšup, būtu konsekvents. 1628. izdevums ieviesa hibrīda memory/SQLite noturību, lai kešatmiņa izturētu procesa restartēšanu.
+Bet tipiski klienti (Cursor, Cline, Roo Code, OpenAI SDK) izņem `reasoning_content` no vēstures, ko viņi atkārto. OmniRoute atjauno to no servera puses kešatmiņas, lai pieprasījums, ko redz augšup, būtu konsekvents. Problēma #1628 ieviesa hibrīda memory/SQLite noturību, lai kešatmiņa izturētu procesa restartēšanu.
 
 ## Arhitektūra
 
@@ -24,19 +24,21 @@ Bet tipiski klienti (Cursor, Cline, Roo Code, OpenAI SDK) izņem `reasoning_cont
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Uztveršana notiek `open-sse/handlers/chatCore.ts` (divās vietās, divās `cacheReasoningFromAssistantMessage` zvanu vietās). Atkārtošana notiek `open-sse/translator/index.ts` pēc shēmas piespiešanas, bet pirms nosūtīšanas.
+
+Rīka izsaukuma ieraksti tiek glabāti sadaļā `buildToolCallCacheKey()`— pieprasījuma tvēruma īssavilkums un rīka izsaukuma ID, tāpēc tas pats ID, ko izmanto cita API atslēga vai sesija, neatlasa ierakstu. Tvērums nāk no `buildReasoningCacheScope()`: API atslēgas ID, kā arī sesijas atslēga, ja pieprasījumam tāds ir. Tāpēc kolonnā `tool_call_id` un informācijas panelī tiek rādīts šo ierakstu kopsavilkums.
 
 Vienkāršā (neizsaukšanas) palīga pagriezieni tiek ievadīti atšķirīgi: `buildAssistantMessageCacheKey()` apkopo sesijas tvērumu, kā arī normalizēto OpenAI formāta transkriptu līdz šim gājienam, jo DeepSeek ir nepieciešams argumentēt _katru_ iepriekšējo pagriezienu, tiklīdz ir `tools`. Responses-API mērķiem (piemēram, `opencode-go/deepseek-v4-flash`, kas novirzīts uz `/responses`) augšējais pamatteksts satur `input`, nevis `messages`, tāpēc `translateRequest()` (`open-sse/translator/index.ts`) ziņo par rakursa transkriptu, kas ir sagremots, izmantojot atzvanīšanas opciju, un tveršanas vietas sagremo šo pašu transkriptu. Atbilžu atkārtošanas caurlaide tiek atskaņota OpenAI rakursā katram avota formātam, tāpēc tiek atskaņoti arī Anthropic Messages klienti (Claude → OpenAI → atbildes).
 
@@ -164,13 +166,13 @@ Kešatmiņa parāda divus galapunktus zem `src/app/api/cache/reasoning/route.ts`
 
 Muse (`muse-code`) atgriež zvanītāja necaurredzamu argumentāciju (`encrypted_content`). Atkārtoti atskaņojot to, izmantojot citu kontu vai atgādinot akreditācijas datus, iepriekš neizdodas, tāpēc vietējie OAuth pieprasījumi izmanto sesijas līmeņa īpašumtiesības, nevis katra pieprasījuma rotāciju (`src/sse/services/museSessionOwnership.ts`, ieviests `src/sse/handlers/chat.ts`). Īpaši atlasītie API atslēgas savienojumi un tikai API atslēgas konfigurācijas saglabā esošo maršrutēšanu bez šī īpašumtiesību režīma.
 
-- Nodrošiniet stabilu sesiju ID katrā solī: `x-omniroute-session-id`, `x-omniroute-session`, `x-session-id` vai `x-codex-session-id`; alternatīvi izmantojiet `prompt_cache_key`, `session_id`, `conversation_id` vai `metadata.session_id` pamattekstā (šajā prioritātes secībā). Trūkst vai tukšs IDs atgriež 400, ja ir aktīvi divi vai vairāki vietējie OAuth konti; ar vienu OAuth kontu nav ko pagriezt, tāpēc šāds pieprasījums saglabā atspraustu maršrutēšanu. Darbības joma ietver zvanītāja OmniRoute API taustiņu ID.
+- Nodrošiniet stabilu sesiju ID katrā pagriezienā: `x-omniroute-session-id`, `x-omniroute-session`, `x-session-id` vai `x-codex-session-id`; alternatīvi izmantojiet `prompt_cache_key`, `session_id`, `conversation_id` vai `metadata.session_id` pamattekstā (šajā prioritātes secībā). Trūkst vai tukšs IDs atgriež 400, ja ir aktīvi divi vai vairāki vietējie OAuth konti; ar vienu OAuth kontu nav ko pagriezt, tāpēc šāds pieprasījums saglabā atspraustu maršrutēšanu. Darbības joma ietver zvanītāja OmniRoute API taustiņu ID.
 - Jaunas neatkarīgas sesijas, kas tiek veiktas aktīvos vietējos OAuth kontos, ko atļauj API atslēgas savienojuma politika, sakārtotas pēc savienojuma ID. Apkārtējā sistēma izlaiž kontus savienojuma atdzišanas laikā ar termināļa statusu (`banned`, `expired`, `credits_exhausted`) vai modelim bloķētu pieprasītajam modelim; Muse iepriekšējās kļūmes reģistrē dzesēšanas un pārtraukuma stāvokli tāpat kā citi pakalpojumu sniedzēji. Skaidri piespiedu savienojums apiet jaunu sesiju, bet nevar ignorēt esošo īpašnieku.
 - Kamēr īpašnieks nesniedz veiksmīgu atbildi, sesija, kuras īpašnieks ir kļuvis nepieejams, tiek atkārtoti pieprasīta veselīgā kontā. Pēc pirmās veiksmīgās atbildes sesija paliek piesprausta šim īpašniekam, līdz tā ir dīkstāvē 30 dienas (`MUSE_SESSION_IDLE_TTL_MS`).
 - Katrs turpinājums un rīka rezultāta pagrieziens paliek piesprausts sesijas īpašniekam: savienojums, konta identitāte un secinājumu akreditācijas datu ģenerēšana, kas tiek pārbaudīta vēlreiz pirms augšupējiem mēģinājumiem, tostarp akreditācijas datu atsvaidzināšanas mēģinājumiem. Atbilžu izsaukuma IDs/item atsauces un tērzēšanas pabeigšanas rīka izsaukuma IDs ir jābūt reģistrētām šai sesijai un paaudzei.
 - SQLite `key_value` ieraksti `muse_session_ownership` nosaukumvietā (`src/lib/db/museSessionOwnership.ts`) saglabā īpašumtiesības un rotācijas kursoru pāri restartēšanas reizēm. Katra pretenzija un sniegtā atbilde atsvaidzina sesijas aktivitātes zīmogu; dīkstāves sesija, kas ir ilgāka par `MUSE_SESSION_IDLE_TTL_MS` tiek apgriezta (īpašnieka spraudīte, norādītais karodziņš un ierakstītās opaque/reference jaucējvērtības), ne vairāk kā reizi 10 minūtēs un ierobežotās partijās, tāpēc vēlāka tās vēstures atkārtošana neizdodas aizvērt kā nezināms īpašnieks. Ieraksti satur savienojuma IDs un konta identitātes, akreditācijas datu, necaurredzama satura un turpinājumu atsauces, nevis noslēpumus vai sarunu vēsturi. Klientiem ir jāsaglabā un jānosūta visa sava vēsture un nepārskatāmie argumenti.
-- Nezināms vai svešs necaurredzams pamatojums, pazudis īpašnieks, nepieejams īpašnieka konts vai paaudzes maiņa ar reģistrētu vēsturi, kas ir slēgta ar skaidru 4xx/503 — nekad klusu starpkontu kļūmjpārlēci un nekad nav atmeta argumentācija. (#1628)
-- Atgādināta tā paša konta atslēga tiek pieņemta tikai tad, ja sesijā nav reģistrēta atkārtojama vēsture; ierakstītās sesijas tiek aizvērtas, līdz tiek sāktas no jauna.
+- Nezināms vai svešs necaurredzams pamatojums, pazudis īpašnieks, nepieejams īpašnieka konts vai paaudzes maiņa ar reģistrētu vēsturi, kas ir slēgta ar skaidru 4xx/503 — nekad klusu starpkontu kļūmjpārlēci un nekad nav atmeta argumentācija.
+- Atgādināta tā paša konta atslēga tiek pieņemta tikai tad, ja sesijā nav ierakstīta atkārtojama vēsture; ierakstītās sesijas tiek aizvērtas, līdz tiek sāktas no jauna.
 - Tukša augšupejoša atbilde (`upstream_empty_response` / `empty_response`, zvanītājam nekas netiek nosūtīts) vienam un tam pašam īpašniekam tiek mēģināts atkārtoti ne vairāk kā divas reizes, pēc 0,5 s, pēc tam pēc 1,5 s (`MUSE_EMPTY_RESPONSE_RETRY_DELAYS_MS`). Ja visi mēģinājumi ir tukši, oriģinālais 502 tiek atgriezts bez dzesēšanas vai slēdža marķējuma, tāpēc neskaidra atbilde nekad nebloķē īpašnieku.
 - Visi `muse-code` pieprasījumi apiet semantiskās kešatmiņas lasīšanu un rakstīšanu, tostarp straumēšanas rakstīšanu, tāpēc kešatmiņā saglabātā necaurspīdīgā izvade nevar iegūt citu sesijas īpašnieku.
 

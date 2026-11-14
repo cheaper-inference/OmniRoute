@@ -4,10 +4,20 @@
 
 ---
 
-Storingen worden geclassificeerd voordat beslissingen over nieuwe pogingen worden genomen.
+Mislukkingen worden geclassificeerd voordat er beslissingen over nieuwe pogingen worden genomen.
 
-Bij tijdelijke storingen, zoals time-outs, netwerkfouten, snelheidslimieten en 5xx-responsen van providers, kan worden overgeschakeld naar een andere provider. Authenticatiefouten, machtigingsfouten, ongeldige aanvragen, niet-beschikbare modellen en onbekende storingen worden niet zonder meer opnieuw geprobeerd.
+Tijdelijke fouten zoals time-outs, netwerkfouten, snelheidslimieten en provider 5xx-reacties kunnen een failover veroorzaken. Opgebruikte quota of tegoeden (een quotum 429 of 402 Betaling vereist) worden nooit opnieuw geprobeerd bij dezelfde provider, maar worden wel overgezet naar een andere provider, waarvan het quotum gescheiden is. Authenticatiefouten, toestemmingsfouten, ongeldige verzoeken, niet-beschikbare modellen en onbekende fouten worden niet blindelings opnieuw geprobeerd.
 
-Het standaardbeleid voor meerdere providers staat maximaal drie providerpogingen toe, probeert aanvragen bij snelheidslimieten en time-outs opnieuw en houdt administratieve uitschakeling gescheiden van de tijdelijke circuitstatus.
+Het standaard beleid voor meerdere providers staat maximaal drie providerpogingen toe, probeert de snelheidslimieten en time-outs opnieuw uit te voeren, faalt over op uitgeputte quota en houdt administratieve uitschakeling gescheiden van de tijdelijke circuitstatus.
 
-Circuitstatussen zijn `closed`, `open` en `half_open`. Na een afkoelperiode wordt een begrensde test gepland; bij een geslaagde test wordt het circuit gesloten en bij een mislukte test wordt het opnieuw geopend.
+## Waar het van toepassing is
+
+- **Combo's** failover tussen hun doelen volgens de eigen strategie en instellingen van de combo.
+- **Een kaal model-ID** (geen `provider/` voorvoegsel) dat verschillende actieve providers bedienen, zonder combinatie van die exacte naam, wordt eerst naar de inferentiekeuzes van de provider gestuurd. Als die poging mislukt op een manier waarop het beleid mislukt, wordt hetzelfde verzoek verzonden naar de volgende actieve provider die de ID levert. Het antwoord bevat `x-omniroute-fallback-attempts` met het aantal geprobeerde providers vóór degene die antwoordde.
+  - Elke plaatsvervanger is precies geautoriseerd alsof de gevolgtrekking deze had gekozen. Een doel dat door de API -sleutel wordt geblokkeerd of niet toegeeft, wordt overgeslagen zonder een upstream-oproep, en de client krijgt de echte upstream-fout, geen beleidsafwijzing voor een doel dat het nooit heeft genoemd.
+  - Alleen een mislukt antwoord gaat verder: er mislukt niets na de eerste gestreamde byte.
+  - De nood-fallback-modelwissel is alleen van toepassing nadat elke aanbieder van het aangevraagde model is uitgevallen.
+  - Een verzoek dat is vastgemaakt aan een verbinding (`x-omniroute-connection`) blijft hierop staan.
+  - Een voorvoegsel-ID (`provider/model`) wordt nooit omgeleid naar een andere provider.
+
+Circuitstatussen zijn `closed`, `open` en `half_open`. Een cooldown plant een begrensde sonde; een succesvolle sonde sluit het circuit en een mislukte sonde heropent het.

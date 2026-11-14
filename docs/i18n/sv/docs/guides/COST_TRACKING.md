@@ -74,7 +74,7 @@ Kostnaden beräknas per begäran från token-antal och per miljon token-priser i
 - **Cachelästa tokens** × `cached` hastighet (faller tillbaka till inmatningshastigheten).
 - **Cache-skapande tokens** × `cache_creation` hastighet (faller tillbaka till inmatningshastigheten).
 - **Utdatapolletter** × `output` hastighet.
-- **Resonerande tokens** × `reasoning` hastighet (faller tillbaka till utgångshastigheten).
+- **Resonerande tokens** × `reasoning` rate (faller tillbaka till output rate).
 
 Alla priser tolkas som USD per 1 000 000 tokens. En Codex "snabb"/"prioritet"- eller "flex"-tjänstnivå tillämpar en kostnadsmultiplikator (`getCodexFastCostMultiplier`) — t.ex. flex faktureras med 50 % tokenrabatt, visas som** flex besparingar** i instrumentpanelen.
 
@@ -82,7 +82,7 @@ Modellnamn normaliseras först (leverantörssökvägsprefix som `openai/` eller 
 
 ### Hur utgifterna registreras
 
-- Kostnaden per begäran beräknas efter svaret och registreras brand-and-forget så att det aldrig lägger till latens till klienten. Förbrukning av delad kvot schemaläggs vid nästa evenemangsslinga via [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Kostnaden per förfrågan beräknas när begäran slutförs. Konsumtion av delad kvot schemaläggs vid nästa evenemangsslinga via [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
 - API-nyckelutgifter buffras och rensas i omgångar av [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (standard 60-tals spolningsintervall, 1 000 ingångars buffert). Kan justeras via:
 
   | Env var                             | Standard | Ändamål                             |
@@ -90,7 +90,29 @@ Modellnamn normaliseras först (leverantörssökvägsprefix som `openai/` eller 
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Spolningsintervall i millisekunder. |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Max buffrade poster före spolning.  |
 
-Instrumentpanelens kostnadssiffror är** inte** läs från ett lagrat per rad dollarbelopp — de beräknas om i farten från token-antal och den aktuella pristabellen varje gång analytics endpoint körs. Det innebär att korrigering av ett felaktigt pris (och omsynkronisering) uppdaterar historiska kostnadsuppskattningar retroaktivt.
+Kostnader föredrar en exakt leverantörsrapporterad debitering (`provider_cost_usd`), sedan en ögonblicksbild av begäran om katalogpris (`calculated_cost_usd`), sedan token-reprising från den aktuella katalogen. Lagrade kostnader debiteras inte igen genom deras tokenräkningar. Äldre token-rader ändras fortfarande när deras katalogpris ändras.
+
+### OCR och inbäddningar
+
+- Lyckade `/v1/ocr` -förfrågningar använder uppströms `usage_info.pages_processed`, inte det begärda sidintervallet eller antalet returnerade sidobjekt. Uppskattningen är sidor × `ocr_cost_per_page` (absolut USD/page,** inte** USD/million).
+- Förfrågningar med dokument- eller begränsningsrutakommentarer kräver en separat `ocr_cost_per_annotated_page` taxa. Utan det förblir kostnaden okänd; den vanliga OCR tariffen ersätts inte tyst.
+- LiteLLM sync mappar dess uppströms `annotation_cost_per_page` fält till `ocr_cost_per_annotated_page`, och behåller det absoluta USD/page värdet och endast anteckningsposter, inklusive explicit noll. Ett tillhandahållet kanoniskt fält har företräde; ogiltiga aliasvärden ignoreras. Åsidosättande av användarprissättning behåller sin normala prioritet. Se [LiteLLMOCR -prisnycklar](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- OCR -användning lagrar sidantal, enhetspris, beräknad USD kostnad, API -nyckel och vald anslutning. Sidor representeras aldrig som tokens. Samtalsloggar innehåller faktureringsmetadata, inte dokument URLs, PDF byte eller extraherad text.
+- Lyckade `/v1/embeddings` -förfrågningar registrerar en användningsrad per fysisk batch, inklusive separata batcher som slutförs på samma millisekund. Leverantörsrapporterade avgifter har företräde framför tokenuppskattningar; Kombinerade omslag tillför ingen avgift.
+- Användningshistorik, kostnadsanalysen, provider/account -fönster, utgiftsgränser för API-nyckel, reskontra för förfrågningar och daglig användning inkluderar dessa avgifter. No-log-nycklar behåller numerisk redovisning utan att behålla källtext.
+- Saknade användning eller tariffer är** okänd** , inte gratis: svarskostnadshuvudet utelämnas, och den befintliga policyn för oprissatt användning gäller för begränsade API nycklar. Explicit konfigurerade nollpriser förblir giltig nollkostnadsanvändning.
+
+Detta är enbart forward-redovisning. Gamla OCR/embedding -anrop som aldrig skrev användningshistorik kan inte rekonstrueras från denna migrering. Kataloguppskattningar är USD -uppskattningar, inte en faktura, och inkluderar inte valutaomvandling, skatt eller rabatter.
+
+### Tal och bilder
+
+- Framgångsrika försök med `/v1/audio/transcriptions`, `/v1/audio/speech` och bildgenerering delar numerisk redovisning. Direkt- och kombinationssamtal bär uppringarens API nyckel och den valda anslutningen; ett kombinerat omslag lägger aldrig till en andra debitering.
+- Leverantörsrapporterad USD vinner över en kataloguppskattning, inklusive en explicit nollavgift. OpenRouterJSON `usage.cost` är normaliserad till `cost_usd`. Annars använder uppmätta tokens tokenpriser, transkriptionssekunder använder priser per sekund, talinmatning använder Unicode-teckenantal och schablonprisbilder använder det antal som faktiskt returneras, inte den begärda `n`.
+- Binär OpenRouter TTS har ingen JSON användningskropp. Efter att ljudet är klart eller den som ringer avbryter, frågar OmniRoute dess generation ID på** samma** konfigurerat OpenRouter ursprung. En EU förfrågan faller aldrig tillbaka till det globala ursprunget. Detta är en avgränsad, skrivskyddad uppslagning; syntes inte omförsöks för redovisning. Faktureringsposter kan visas efter att ljudet har avslutats: uppslagsförsök körs i bakgrunden i upp till cirka 52 sekunder, inklusive nätverksdeadlines.
+- Under den uppslagningen har ljudsvaret `X-OmniRoute-Cost-Status: pending` och ingen svarskostnadshuvud. Dess slutliga laddning visas i användningshistorik, analyser och nyckelboken efter avstämning. Om metadata inte är tillgänglig används en konfigurerad tariffögonblicksbild; annars förblir kostnaden okänd.
+- Sekunder, tecken och bildantal har separata faktureringsenhetsfält, aldrig falska tokenräkningar. Redovisning behåller endast numerisk användning, inte taltext, utskrifter eller bildbytes. Befintliga undantag för oprissatta bilder är oförändrade: en tariff för bilder som verkligen saknas låser inte en ny begränsad nyckel, och svaret utelämnar kostnadsrubriken snarare än att samtalet förklaras fritt. Ett misslyckande i prissättningsbutiken behåller fortfarande användningsbevis för felstängd verkställighet.
+
+Ingen historisk speech/image laddning är uppfunnen eller återfylld. Leverantörsdebitering förblir referensen för fakturor och för samtal vars debitering inte har rapporterats.
 
 ---
 

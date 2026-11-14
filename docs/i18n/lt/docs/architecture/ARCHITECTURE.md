@@ -14,7 +14,7 @@ OmniRoute yra vietinis AI maršruto parinkimo šliuzas ir prietaisų skydelis, s
 
 Pagrindinės galimybės:
 
-- Su OpenAI suderinamas API paviršius, skirtas CLI/tools (381 teikėjas, 159 vykdymo moduliai)
+- Su OpenAI suderinamas API paviršius, skirtas CLI/tools (394 teikėjai, 159 vykdymo moduliai)
 - Request/response vertimas tarp tiekėjo formatų
 - Atsarginis modelio derinys (kelių modelių seka)
 - Struktūriniai kombinuoti žingsniai (`provider + model + connection`) su vykdymo laiko tvarka pagal `compositeTiers`
@@ -265,73 +265,72 @@ Administravimo sritys:
 - Konfigūracijos paketas: `src/app/api/sync/bundle` (GET, pagal ETag versijuojama nustatymų, teikėjų, derinių ir raktų momentinė kopija)
 - WebSocket: `src/app/api/v1/ws/route.ts` — Upgrade apdorojimo priemonė su OpenAI suderinamiems WS klientams
 
-## 2) SSE + vertimo branduolys
+## 2) SSE + vertimo šerdis
 
-Pagrindinio srauto moduliai:
+Pagrindiniai srauto moduliai:
 
-- Įėjimo taškas: `src/sse/handlers/chat.ts`
-- Pagrindinis orkestravimas: `open-sse/handlers/chatCore.ts`
-- Teikėjų vykdymo adapteriai: `open-sse/executors/*`
-- Formato aptikimas / teikėjo konfigūracija: `open-sse/services/provider.ts`
-- Modelio analizavimas / nustatymas: `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- Paskyros atsarginio parinkimo logika: `open-sse/services/accountFallback.ts`
+- Įėjimas: `src/sse/handlers/chat.ts`
+- Pagrindinė orkestruotė: `open-sse/handlers/chatCore.ts`
+- Teikėjo vykdymo adapteriai: `open-sse/executors/*`
+- detection/provider konfigūracijos formatas: `open-sse/services/provider.ts`
+- Modelis parse/resolve: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- Atsarginės paskyros logika: `open-sse/services/accountFallback.ts`
 - Vertimų registras: `open-sse/translator/index.ts`
 - Srauto transformacijos: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- Naudojimo duomenų išgavimas / normalizavimas: `open-sse/utils/usageTracking.ts`
-- „Think“ žymų analizatorius: `open-sse/utils/thinkTagParser.ts`
-- Įterpinių apdorojimo programa: `open-sse/handlers/embeddings.ts`
-- Įterpinių teikėjų registras: `open-sse/config/embeddingRegistry.ts`
-- Vaizdų generavimo apdorojimo programa: `open-sse/handlers/imageGeneration.ts`
-- Vaizdų teikėjų registras: `open-sse/config/imageRegistry.ts`
-- Atsakymų išvalymas: `open-sse/handlers/responseSanitizer.ts`
+- Naudojimas extraction/normalization: `open-sse/utils/usageTracking.ts`
+- Pagalvokite apie žymos analizatorių: `open-sse/utils/thinkTagParser.ts`
+- Įterpimo tvarkytuvas: `open-sse/handlers/embeddings.ts`
+- Įterpimo teikėjo registras: `open-sse/config/embeddingRegistry.ts`
+- Vaizdo generavimo tvarkyklė: `open-sse/handlers/imageGeneration.ts`
+- Vaizdo teikėjo registras: `open-sse/config/imageRegistry.ts`
+- Reagavimo dezinfekcija: `open-sse/handlers/responseSanitizer.ts`
 - Vaidmenų normalizavimas: `open-sse/services/roleNormalizer.ts`
 
 Paslaugos (verslo logika):
 
-- Paskyrų parinkimas / vertinimas: `open-sse/services/accountSelector.ts`
+- Sąskaita selection/scoring: `open-sse/services/accountSelector.ts`
 - Konteksto gyvavimo ciklo valdymas: `open-sse/services/contextManager.ts`
-- IP filtro taikymas: `open-sse/services/ipFilter.ts`
-- Seansų stebėjimas: `open-sse/services/sessionManager.ts`
-- Užklausų dubliavimosi šalinimas: `open-sse/services/signatureCache.ts`
-- Sisteminės instrukcijos įterpimas: `open-sse/services/systemPrompt.ts`
-- Mąstymo biudžeto valdymas: `open-sse/services/thinkingBudget.ts`
-- Modelių nukreipimas pagal pakaitos simbolius: `open-sse/services/wildcardRouter.ts`
-- Užklausų dažnio ribojimo valdymas: `open-sse/services/rateLimitManager.ts`
+- IP filtro vykdymas: `open-sse/services/ipFilter.ts`
+- Sesijos stebėjimas: `open-sse/services/sessionManager.ts`
+- Prašymas panaikinti dubliavimą: `open-sse/services/signatureCache.ts`
+- Sisteminis greitas įpurškimas: `open-sse/services/systemPrompt.ts`
+- Mąstantis biudžeto valdymas: `open-sse/services/thinkingBudget.ts`
+- Pakaitos simbolių modelio maršrutas: `open-sse/services/wildcardRouter.ts`
+- Normos limito valdymas: `open-sse/services/rateLimitManager.ts`
 - Grandinės pertraukiklis: `src/shared/utils/circuitBreaker.ts`
-- Konteksto perdavimas: `open-sse/services/contextHandoff.ts` — perdavimo santraukos generavimas ir įterpimas, skirtas konteksto perdavimo strategijai
-- Glaudinimas: `open-sse/services/compression/*` — išankstinis glaudinimas prieš vertimą į teikėjo formatą;
-  apima „Caveman“ taisykles, RTK filtrus, nuosekliąsias konvejerines grandines, glaudinimo derinius, statistiką ir tikrinimą
-- „Codex“ kvotos gavimo priemonė: `open-sse/services/codexQuotaFetcher.ts` — gauna „Codex“ kvotą konteksto perdavimo sprendimams priimti
-- Pakartotiniai bandymai atsižvelgiant į atvėsimo laikotarpį: `src/sse/services/cooldownAwareRetry.ts` — kiekvienam modeliui skirti pakartotiniai bandymai po atvėsimo laikotarpio su konfigūruojamais `requestRetry` / `maxRetryIntervalSec`
-- Saugus išeinantis duomenų gavimas: `src/shared/network/safeOutboundFetch.ts` — apsaugotas teikėjo / modelio duomenų gavimas su SSRF apsauga, privačių URL blokavimu, pakartotiniais bandymais ir skirtuoju laiku
-- Išeinančių URL apsauga: `src/shared/network/outboundUrlGuard.ts` — teikėjų URL pagrindinių kompiuterių patikros; `src/shared/network/outboundUrlGuardPolicy.ts` parenka režimą pagal `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` ir atitinkamus jų valdymo skydelio perjungiklius (žr. `docs/reference/ENVIRONMENT.md`)
-- Numatytosios teikėjo užklausų reikšmės: `open-sse/services/providerRequestDefaults.ts` — teikėjo lygmens numatytosios `maxTokens`, `temperature`, `thinkingBudgetTokens` reikšmės
-- GLM teikėjo konstantos: `open-sse/config/glmProvider.ts` — bendrinami GLM modeliai, kvotų URL, GLMT skirtasis laikas / numatytosios reikšmės
-- „Antigravity“ pirminė tarnyba: `open-sse/config/antigravityUpstream.ts` — bazinio URL ir aptikimo kelio konstantos
-- „Codex“ kliento konstantos: `open-sse/config/codexClient.ts` — versijuotos naudotojo agento ir kliento versijos reikšmės
-- Modelių alternatyviųjų pavadinimų pradiniai duomenys: `src/lib/modelAliasSeed.ts` — paleidimo metu užpildo daugiau kaip 30 skirtingų tarpinių serverių dialektų alternatyviųjų pavadinimų
+- Kontekstinis perdavimas: `open-sse/services/contextHandoff.ts` — perdavimo santraukos generavimas ir įterpimas konteksto perdavimo strategijai
+- Suspaudimas: `open-sse/services/compression/*` — aktyvus glaudinimas prieš teikėjo vertimą; apima „Caveman“ taisykles, RTK filtrus, sudėtinius vamzdynus, glaudinimo derinius, statistiką ir patvirtinimą
+- Codex kvotos gavimo priemonė: `open-sse/services/codexQuotaFetcher.ts` — gauna Codex kvotą kontekstinio perdavimo perdavimo sprendimams
+- Atvėsimo pakartojimas: `src/sse/services/cooldownAwareRetry.ts` — kiekvienam modeliui atvėsimo bandymai su konfigūruojama `requestRetry` / `maxRetryIntervalSec`
+- Saugus išsiunčiamas gavimas: `src/shared/network/safeOutboundFetch.ts` — apsaugotas provider/model gavimas su SSRF apsauga, privataus URL blokavimas, bandymas iš naujo ir skirtasis laikas
+- Siuntimo URL apsauga: `src/shared/network/outboundUrlGuard.ts` — priegloba tikrina teikėją URLs; `src/shared/network/outboundUrlGuardPolicy.ts` pasirenka režimą iš `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, o jų prietaisų skydelis perjungia (žr. `docs/reference/ENVIRONMENT.md`)
+- Teikėjo užklausos numatytieji nustatymai: `open-sse/services/providerRequestDefaults.ts` — teikėjo lygio `maxTokens`, `temperature`, `thinkingBudgetTokens` numatytieji nustatymai
+- GLM teikėjo konstantos: `open-sse/config/glmProvider.ts` — bendrinami GLM modeliai, kvota URLs, GLMT timeout/defaults
+- Antigravity prieš srovę: `open-sse/config/antigravityUpstream.ts` — bazė URL ir atradimo kelio konstantos
+- Codex kliento konstantos: `open-sse/config/codexClient.ts` — versijos vartotojo agento ir kliento versijos vertės
+- Modelio slapyvardžio sėkla: `src/lib/modelAliasSeed.ts` — seeds 30 + tarpinių tarmių slapyvardžių paleidžiant
 
 Domeno sluoksnio moduliai:
 
-- Sąnaudų taisyklės / biudžetai: `src/domain/costRules.ts`
-- Atsarginio parinkimo politika: `src/domain/fallbackPolicy.ts`
-- Derinių sprendimo priemonė: `src/domain/comboResolver.ts`
-- Blokavimo politika: `src/domain/lockoutPolicy.ts`
-- Politikos variklis: `src/domain/policyEngine.ts` — centralizuotas blokavimo → biudžeto → atsarginio parinkimo vertinimas
+- Kaina rules/budgets: `src/domain/costRules.ts`
+- Atsarginė politika: `src/domain/fallbackPolicy.ts`
+- Rezervuota kombinuoto sprendimo sutartis: `src/domain/comboResolver.ts`; tiesioginis maršrutas naudoja `open-sse/services/combo.ts`
+- Lokauto politika: `src/domain/lockoutPolicy.ts`
+- Rezervuota politikos vertinimo sutartis: `src/domain/policyEngine.ts`; užklausos kelias įgyvendina API rakto politiką per `src/shared/utils/apiKeyPolicy.ts` ir išspręstos tikslinės prieigos teisę per `src/sse/handlers/chat/resolvedModelPolicy.ts`
 - Klaidų kodų katalogas: `src/shared/constants/errorCodes.ts`
-- Užklausos ID: `src/shared/utils/requestId.ts`
-- Duomenų gavimo skirtasis laikas: `src/shared/utils/fetchTimeout.ts`
-- Užklausų telemetrija: `src/shared/utils/requestTelemetry.ts`
-- Atitiktis / auditas: `src/lib/compliance/index.ts`
-- Vertinimų vykdymo priemonė: `src/lib/evals/evalRunner.ts`
-- Domeno būsenos išlaikymas: `src/lib/db/domainState.ts` — SQLite CRUD operacijos, skirtos atsarginio parinkimo grandinėms, biudžetams, sąnaudų istorijai, blokavimo būsenai ir grandinės pertraukikliams
+- Užklausa ID: `src/shared/utils/requestId.ts`
+- Gavimo skirtasis laikas: `src/shared/utils/fetchTimeout.ts`
+- Telemetrijos užklausa: `src/shared/utils/requestTelemetry.ts`
+- Compliance/audit: `src/lib/compliance/index.ts`
+- Eval bėgikas: `src/lib/evals/evalRunner.ts`
+- Domeno būsenos išlikimas: `src/lib/db/domainState.ts` — SQLite CRUD atsarginėms grandinėms, biudžetams, išlaidų istorijai, blokavimo būsenai, grandinės pertraukikliams
 
-OAuth teikėjų moduliai (27 atskiri failai kataloge `src/lib/oauth/providers/`):
+OAuth teikėjo moduliai (27 atskiri failai `src/lib/oauth/providers/`):
 
-- Registro rodyklė: `src/lib/oauth/providers/index.ts`
-- Atskiri teikėjai: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- Bendrinamos pagalbinės priemonės: `codebuddyDeviceAuth.ts` („CodeBuddy“ CN / tarptautinis įrenginio srautas), `museCodeDeviceResponse.ts`
-- Plonas apvalkalas: `src/lib/oauth/providers.ts` — pakartotinai eksportuoja iš atskirų modulių
+- Registro indeksas: `src/lib/oauth/providers/index.ts`
+- Individualūs tiekėjai: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts` `workbuddy.ts` `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts` `zed.ts` `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts` `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `xai-oauth.ts`, `zed-hosted.ts`
+- Bendri pagalbininkai: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl įrenginio srautas), `museCodeDeviceResponse.ts`
+- Plonas apvalkalas: `src/lib/oauth/providers.ts` — reeksportuoja iš atskirų modulių
 
 ## 5) Įterptosios paslaugos (v3.8.4)
 
@@ -363,13 +362,13 @@ Išsamiau: `docs/frameworks/EMBEDDED-SERVICES.md`
 „Auto Combo“ dinamiškai įvertina ir parenka maršruto taikinius užklausos metu, o ne pasikliauja statiniu derinio apibrėžimu. Tai suteikia `auto/*` modelio priešdėlių šeimą.
 
 - Variklio įvadas: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Sprendimas: `src/domain/comboResolver.ts` (automatinis `auto/` priešdėlio aptikimas)
+- Tiesioginis kombinuotas įrašas: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), vadinamas `src/sse/handlers/chat.ts`
 - Prietaisų skydelis: `/dashboard/auto-combo`
 - Telemetrija: `auto_combo_decisions` SQLite lentelė
 
 Pagrindinės galimybės:
 
-- **20 maršruto parinkimo strategijų** (prioritetinis, svertinis, užpildomas pirmiausia, apvalus, P2C, atsitiktinis, mažiausiai naudojamas, optimizuotas sąnaudoms, atpažįstamas iš naujo, nustatymo iš naujo langas, aukštis, svertinis pagal kvotą, griežtas atsitiktinis,** auto** , lkgp, optimizuotas kontekstui, optimizuotas talpyklai, konteksto perdavimas,** susiliejimas** , vamzdynas) — auto yra antraštės papildymas 3.8.0 versijoje; `fusion` (panel fan-out + teisėj synthesis, `open-sse/services/fusion.ts`) yra nauja 3.8.36 versijoje.
+- **22 maršruto parinkimo strategijos** (prioritetas, svertinis, užpildomas pirmiausia, apvalus, P2C, atsitiktinis, mažiausiai naudojamas, optimizuotas sąnaudoms, atpažįstamas iš naujo, iš naujo nustatytas langas, galiojimo laikas pirmiausia, laisvos vietos, kvotos svertinis, griežtas atsitiktinis,** auto** , lkgp, optimizuotas kontekstui, optimizuotas talpyklai, konteksto perdavimas,** susiliejimas** , vamzdynas, jev) — auto yra 3.8.0 versijos antraštės papildymas; `fusion` (panel fan-out + teisėj synthesis, `open-sse/services/fusion.ts`) yra nauja 3.8.36 versijoje.
 - **16 faktorių balas** : kvota, sveikata, atvirkštinė kaina, atvirkštinė delsa, užduoties pritaikymas ir dar dešimt. Kanoninė veiksnių lentelė ir numatytieji jų svoriai yra [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — jei ją čia pakartojus, ji būtų antroje vietoje.
 - **Virtuali gamykla** materializuojasi trumpalaikiai deriniai, kai nėra atitinkamo pavadinimo derinio, kandidatai tiekiami iš sveikų aktyvių paslaugų teikėjų ryšių.
 - **Automatiniai priešdėliai** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — kiekvienas paremtas suderintu svorio profiliu.
@@ -403,14 +402,18 @@ Dėl taisyklių rinkinio kūrimo ir slenksčio derinimo žr. [`docs/security/GUA
 
 ### D. Domeno sluoksnis
 
-`src/domain/` vardų erdvė centralizuoja politikos sprendimus, todėl maršruto tvarkytojams nereikės patiems rinkti lockout/budget/fallback logikos.
+`src/domain/` vardų erdvėje yra domeno paslaugos ir rezervuotos vertinimo sutartys. Tai nėra vienas privalomas politikos įvesties taškas kiekvienai užklausai.
 
-- Politikos variklis: `src/domain/policyEngine.ts` — vienas įėjimo taškas, skirtas išankstiniam vykdymui įvertinti (blokavimo → biudžeto → atsarginis užsakymas)
+Tiesioginio pokalbio kelias skambina `enforceApiKeyPolicy()` iš `src/shared/utils/apiKeyPolicy.ts`; authorization of resolved models and combo members is implemented in `src/sse/handlers/chat/resolvedModelPolicy.ts`. Savarankiškai priglobtas `src/app/api/v1/chat/completions/route.ts` įrašas taip pat įgyvendina API rakto politiką prieš išsiuntimą. Kombinuota skiriamoji geba eina per `open-sse/services/combo.ts`.
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` ir `src/lib/container.ts` lieka patikrintos sutartys, o ne to užklausos kelio laidai. Sudėtinis rodinys užregistruoja politikos variklį, bet patikrintas gamybos užklausos kelias jo neišsprendžia. Changing those contracts alone does not change live chat policy or combo routing; juos prijungti ar nuimti reikalingas atskiras projektinis sprendimas.
+
+- Rezervuotas politikos variklis: `src/domain/policyEngine.ts` — blokavimas → biudžeto → atsarginis įvertinimas
 - Išlaidų taisyklės: `src/domain/costRules.ts`
 - Atsarginė politika: `src/domain/fallbackPolicy.ts`
 - Lokauto politika: `src/domain/lockoutPolicy.ts`
 - Žymėmis pagrįstas maršrutas: `src/domain/tagRouter.ts`
-- Kombinuotas sprendimas: `src/domain/comboResolver.ts` — išsprendžia kombinuotųjų pavadinimų, auto/\* priešdėlių ir pakaitos simbolių modelio taikinius pagal konkrečius vykdymo planus
+- Rezervuotas kombinuotas sprendimas: `src/domain/comboResolver.ts` — atskira atrankos sutartis; tiesioginis kombinuotas maršrutas įdiegtas `open-sse/services/combo.ts`
 - Connection/model taisyklių stalius: `src/domain/connectionModelRules.ts`
 - Modelio prieinamumo momentinės nuotraukos: `src/domain/modelAvailability.ts`
 - Teikėjo galiojimo pabaigos stebėjimas: `src/domain/providerExpiration.ts`
@@ -858,41 +861,47 @@ flowchart LR
 - `src/lib/db/*`: konkrečius modulius importuokite tiesiogiai — bendras eksportavimo modulis nenaudojamas (senasis `localDb.ts` pakartotinio eksportavimo sluoksnis buvo pašalintas)
 - `src/lib/usageDb.ts`: naudojimo istorijos / iškvietimų žurnalų sąsaja, veikianti virš SQLite lentelių
 
-## Teikėjų vykdytojų aprėptis (strategijos šablonas)
+## Teikėjo vykdytojo aprėptis (strategijos modelis)
 
-Kiekvienas teikėjas turi specializuotą vykdytoją, išplečiantį `BaseExecutor` (faile `open-sse/executors/base.ts`), kuris suteikia URL kūrimo, antraščių sudarymo, pakartotinių bandymų su eksponentiniu delsos didinimu, prisijungimo duomenų atnaujinimo kablių ir `execute()` orkestravimo metodo funkcijas.
+Kiekvienas teikėjas turi specializuotą vykdytoją, išplečiantį `BaseExecutor` (in `open-sse/executors/base.ts`), kuris suteikia URL kūrimą, antraštės kūrimą, pakartotinį bandymą su eksponentiniu atsitraukimu, kredencialų atnaujinimo kabliukus ir `execute()` orkestravimo metodą.
 
-| Vykdytojas                | Teikėjas (-ai)                                                                                                                                               | Specialus apdorojimas                                                                     |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA ir kt. | Dinaminė kiekvieno teikėjo URL ir antraščių konfigūracija                                 |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                           | Pasirinktiniai projekto ir sesijos ID, Retry-After analizė, 429 maskavimas                |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                 | Diegimu pagrįstas maršruto parinkimas, privalomas api-version užklausos parametras        |
-| `BlackboxWebExecutor`     | Blackbox AI (žiniatinklio režimas)                                                                                                                           | Žiniatinklio sesijos atvirkštinė inžinerija su TLS piršto atspaudo emuliavimu             |
-| `ClaudeIdentityExecutor`  | Claude.ai (CCH kelias)                                                                                                                                       | Apribojimų ir įrankių persiejimo konvejeriai, piršto atspaudo formavimas                  |
-| `CliProxyApiExecutor`     | Su CLIProxyAPI suderinami teikėjai                                                                                                                           | Pasirinktinis autentifikavimas ir protokolo apdorojimas                                   |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                        | Paskyros ID įterpimas, Neurons pagrįstas naudojimo stebėjimas                             |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                                 | Įterpia sistemos instrukcijas, priverstinai nustato samprotavimo intensyvumą              |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                          | Naršyklės sesijos Responses API tiltas su gijos ir replikos fiksavimu                     |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                                 | OAuth ir kiekvienai sesijai taikoma antraščių rotacija                                    |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                   | ConnectRPC protokolas, Protobuf kodavimas, užklausų pasirašymas kontroline suma           |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                    | Devin užduočių gyvavimo ciklo susiejimas per debesies agento modulį                       |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                               | Copilot prieigos rakto atnaujinimas, VSCode imituojančios antraštės                       |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                   | GitLab OAuth ir projekto aprėptimi pagrįstas maršruto parinkimas                          |
-| `GlmExecutor`             | Z.AI GLM (įskaitant `glmt` išankstinę parinktį)                                                                                                              | Atsižvelgia į samprotavimo biudžetą, GLMT išankstinės parinkties konstantos               |
-| `GrokWebExecutor`         | xAI Grok žiniatinklis                                                                                                                                        | Žiniatinklio sesijos atvirkštinė inžinerija, režimo pasirinkimas (mąstymo / standartinis) |
-| `KieExecutor`             | KIE                                                                                                                                                          | Pasirinktinis prieigos raktų išdavimas naudojant rotuojamus sesijos inkarus               |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                       | AWS EventStream dvejetainio formato → SSE konvertavimas                                   |
-| `MuseSparkWebExecutor`    | Muse Spark (žiniatinklis)                                                                                                                                    | Žiniatinklio sesijos atvirkštinė inžinerija su vaizdų ir pranešimų susiejimu              |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                    | Teikėjui būdinga užklausos turinio struktūra                                              |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                     | Su AI SDK suderinama teikėjo konfigūracija                                                |
-| `PerplexityWebExecutor`   | Perplexity žiniatinklis                                                                                                                                      | Žiniatinklio sesijos atvirkštinė inžinerija pokalbiui tęsti                               |
-| `PetalsExecutor`          | Petals paskirstytasis išvedimas                                                                                                                              | Decentralizuotas spiečiaus maršruto parinkimas                                            |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                              | API raktas nereikalingas, užklausų dažnis ribojamas                                       |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                     | PAT ir OAuth palaikymas, nemokama kelių modelių pakopa                                    |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                             | Paslaugos paskyros autentifikavimas, regionais pagrįsti galiniai taškai                   |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                                | Importuotas API raktas ir Connect-protobuf pokalbių srautinis perdavimas                  |
+| Vykdytojas                | Teikėjas (-ai)                                                                                                                                        | Specialus valdymas                                                                   |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, Together, Mistral, Perplexity , Fireworks, Cerebras, Cohere, NVIDIAxAI. | Dinaminė URL/header konfigūracija vienam teikėjui                                    |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                    | Tinkintas project/session IDs, bandykite dar kartą po analizės, 429 užmaskavimas     |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                          | Diegimu pagrįstas maršruto parinkimas, API versijos užklausos vykdymas               |
+| `BlackboxWebExecutor`     | „Blackbox AI (žiniatinklio režimas)                                                                                                                   | Žiniatinklio seanso atbulinė eiga su TLS pirštų atspaudų emuliacija                  |
+| `ClaudeIdentityExecutor`  | Claude.ai (CCH kelias)                                                                                                                                | Apriboti + įrankio pertvarkymo konvejeriai, pirštų atspaudų formavimas               |
+| `CliProxyApiExecutor`     | Su CLIProxyAPI suderinami tiekėjai                                                                                                                    | Pasirinktinis autentifikavimas ir protokolų tvarkymas                                |
+| `CloudflareAiExecutor`    | Cloudflare Darbuotojai AI                                                                                                                             | Paskyros ID injekcija, neuronais pagrįstas naudojimo stebėjimas                      |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                          | Suleidžia sistemos nurodymus, verčia samprotauti                                     |
+| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                   | Naršyklės seanso atsakymai API tiltas su thread/turn prisegimu                       |
+| `CommandCodeExecutor`     | Komandos kodas                                                                                                                                        | OAuth + antraštės pasukimas per seansą                                               |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                            | ConnectRPC protokolas, Protobuf kodavimas, užklausos pasirašymas per kontrolinę sumą |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                             | Devin užduočių gyvavimo ciklo perjungimas naudojant debesies agento modulį           |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                        | Copilot prieigos rakto atnaujinimas, VSCodą imituojančios antraštės                  |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                            | GitLab OAuth + projekto apimties maršrutas                                           |
+| `GlmExecutor`             | Z.AI GLM (įskaitant iš anksto nustatytą `glmt` )                                                                                                      | Mąstymas apie biudžetą, GLMT iš anksto nustatytos konstantos                         |
+| `GrokWebExecutor`         | xAI Grok web                                                                                                                                          | Interneto seanso atvirkštinė padėtis, režimo pasirinkimas (think/standard)           |
+| `KieExecutor`             | KIE                                                                                                                                                   | Pasirinktinis prieigos rakto išdavimas su besisukančiais seanso prierais             |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                | AWS EventStream dvejetainio formato → SSE konvertavimas                              |
+| `MuseSparkWebExecutor`    | „Muse Spark“ (žiniatinklis)                                                                                                                           | Žiniatinklio seanso atbulinė eiga su vaizdo pranešimo tiltu                          |
+| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                             | Konkretaus teikėjo užklausa kūno forma                                               |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                              | AI SDK suderinama teikėjo sąranka                                                    |
+| `PerplexityWebExecutor`   | Sumaišties žiniatinklis                                                                                                                               | Interneto sesija atvirkštinė pokalbio tęsimui                                        |
+| `PetalsExecutor`          | Žiedlapių paskirstyta išvada                                                                                                                          | Decentralizuotas spiečių maršrutas                                                   |
+| `PollinationsExecutor`    | Apdulkinimai AI                                                                                                                                       | Nereikia API rakto, užklausos ribojamos                                              |
+| `QoderExecutor`           | Qoder AI                                                                                                                                              | PAT ir OAuth palaikymas, kelių modelių nemokama pakopa                               |
+| `VertexExecutor`          | Google Vertex AI                                                                                                                                      | Paslaugos paskyros autentifikavimas, regioniniai galutiniai taškai                   |
+| `DevinDesktopExecutor`    | Devin darbalaukis                                                                                                                                     | Importuotas API raktas + Connect-protobuf pokalbių srautinis perdavimas              |
 
-Visi kiti teikėjai (įskaitant pasirinktinius suderinamus mazgus) naudoja `DefaultExecutor`.
+Visi kiti teikėjai (įskaitant tinkintus suderinamus mazgus) naudoja `DefaultExecutor`.
+
+### Automatizuoti tyrimai ir žiniatinklio seansų paskyros
+
+Modelių testai, Viską išbandyti, kombinuoti testai ir vertinimai siunčia tikrus pokalbių užklausas. Žiniatinklio seanso teikėjas veikia kaip prisijungęs vartotojas, todėl kiekviena iš tų užklausų bus išsaugota kaip pokalbis toje paskyroje; automatiniams tyrimams, kurie paliko tokius pokalbius, paskyra buvo sustabdyta (#14780). Todėl pokalbių kanalas atmeta kiekvieną taikinį, kurį pasiekia automatinis tyrimas, kurio teikėjas gauna žiniatinklio seanso kredencialus, kai tik bus nustatytas tikslo teikėjas ir prieš pasirenkant kredencialą (`src/lib/providers/chatProbePolicy.ts`). Atsisakymas yra `422` su `error.code` `chat_probe_not_isolated`, o zondo bėgikai praneša apie tai kaip praleidimą, o ne gedimą.
+
+Vykdytojas, vykdantis kiekvieną pokalbį teikėjo režimu be istorijos, deklaruoja jį su `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`); tada leidžiami zondai tam paslaugų teikėjui. ChatGPT Web deklaruoja `temporary-chat`. Prisekite deklaraciją prie jos mechanizmo naudodami testą, kad teiginys negalėtų gyvuoti kodo, dėl kurio ji yra teisinga.
 
 ## Teikėjų suderinamumo matrica
 
@@ -1056,11 +1065,11 @@ suderinamumo su senosiomis versijomis. Dabartinė vykdymo aplinkos sutartis naud
 - SQLite schemos migracijos ir automatinio naujovinimo procedūros paleidimo metu
 - suderinamumo kelias senųjų JSON duomenų migracijai į SQLite
 
-## 6) SSRF / siunčiamų URL apsauga
+## 6) SSRF / Outbound URL Guard
 
-- `src/shared/network/outboundUrlGuard.ts` blokuoja visus privačius, grįžtamojo ryšio ir vietinio ryšio paskirties URL prieš jiems pasiekiant teikėjo vykdymo priemones
-- teikėjo modelių aptikimo ir tikrinimo maršrutai naudoja `src/shared/network/safeOutboundFetch.ts`, kuri pritaiko apsaugą prieš kiekvieną siunčiamą užklausą
-- apsaugos klaidos pateikiamos kaip `URL_GUARD_BLOCKED` su HTTP 422 ir registruojamos atitikties audito žurnale naudojant `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) taiko `src/shared/network/outboundUrlGuard.ts` pokalbių užklausoms, išsiųstoms per `BaseExecutor.execute()`. Tik viešajame režime (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` su išjungta privačia vėliava ) blokuoja privačius ir atgalinio ryšio pagrindinius kompiuterius ir 169.254.0.0/16; visais kitais režimais jis blokuoja debesies metaduomenų pagrindinius kompiuterius. Jis patikrina pagrindinio kompiuterio pavadinimą arba IP literalą, kaip parašyta, prieš bet kokią DNS paiešką. Integruoti vietiniai paslaugų teikėjai tai praleidžia.
+- Teikėjo modelio aptikimo ir patvirtinimo maršrutai naudoja `src/shared/network/safeOutboundFetch.ts`, kuris taiko apsaugą prieš kiekvieną siunčiamą užklausą
+- Apsaugos klaidos rodomos kaip `URL_GUARD_BLOCKED` naudojant HTTP 503 (`getSafeOutboundFetchErrorStatus`; modelio atradimo maršrutas grąžina 400), o tikri SSRF blokai tikrinimo metu registruojami audito sekoje kaip `provider.validation.ssrf_blocked` įvykiai
 
 ## Stebimumas ir veikimo signalai
 

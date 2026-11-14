@@ -812,6 +812,43 @@ Web/search 공급자 추상화(Tavily, Brave, Exa, Serper 등).
 
 **인증:** 베어러 API 키(`extractApiKey` + `isValidApiKey`). `enforceApiKeyPolicy` 통해 시행되는 검색 정책.
 
+### 명명된 search/fetch 조합
+
+`POST /v1/search` 와 `POST /v1/web/fetch` 모두 `model` 저장된 콤보 이름으로 허용합니다. `model` 또는 명시적인 `provider` 사용하세요. 둘 다 보내면 `400` 반환됩니다. 두 필드가 없으면 기존 자동 공급자 선택은 변경되지 않습니다.
+
+Combo Builder와 해당 모델 추가 카탈로그는 LLM 모델 목록이 없는 경우에도 연결된 공급자에 대한 기본 웹 작업 항목을 노출합니다. 서퍼 쇼** 웹 검색** ; 타빌리 쇼** 웹 검색/페이지 추출** 및 가져오기 전용 공급자가 표시됩니다.** 페이지 추출** . 평소와 같이 항목과 계정을 선택합니다. 단일 Tavily 항목은 두 웹 엔드포인트 모두에 서비스를 제공합니다. 이러한 작업 항목은 채팅 전용 클라이언트 선택기 또는 채팅 모델 프로브에 추가되지 않습니다.
+
+예를 들어** 우선 사항** 다음 순서의 대상을 사용하여 `shared-free` 라는 콤보를 사용합니다.
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+그런 다음 각 표면에 동일한 이름을 사용합니다.
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+검색에서는 Tavily와 Serper를 차례로 고려합니다. fetch는 Tavily를 고려한 다음 Jina Reader를 고려합니다. chat은 전용 search/fetch 제공자를 건너뛰고 OpenAI 고려합니다. 호환성은 모델 이름의 단어가 아닌 search/fetch 실행기 레지스트리에서 비롯됩니다. 필터링은 자격 증명 선택 및 발송보다 우선하며 저장된 콤보를 편집하지 않습니다.
+
+비채팅 기능 경로는 `priority`, `fill-first`, `round-robin`, `weighted`, `random`, `strict-random`, `least-used` 및 `p2c` 를 지원합니다. `fusion`, `pipeline` 및 `context-relay` 와 같은 채팅 전용 합성 전략은 검색 또는 생성된 미디어에 자동으로 적용되지 않고 비채팅 경로에서 거부됩니다. 기존 콤보 엔진은 업스트림 할당량 실패를 포함하여 순서가 지정된 대체를 처리하고 IDs 단계, 계정 핀, 단계별 계정 허용 목록, 중첩된 참조, 호출자 connection/quota 범위 및 콤보 액세스 정책을 유지합니다. 결과는 실제 공급자를 포함하여 기본 search/fetch 스키마를 유지합니다. `X-OmniRoute-Combo-Trace` 라우팅 결정을 식별합니다. 알 수 없는 콤보는 `404` 반환합니다. 비활성 콤보와 호환되는 대상이 없는 조합은 `400` 반환합니다.
+
+각 콤보 시도에는 하나의 명시적 공급자가 사용됩니다. 콤보 뒤에서 기본 자동 공급자 풀을 호출할 수 없습니다. 명시적 공급자 요청은 기존 단일 공급자 동작을 유지합니다. 전용 search/fetch 제공자를 대상으로 하는 직접 채팅 요청은 OpenAI 스타일 실행기로 전달되는 대신 실행 가능한 JSON `400` 를 반환합니다.
+
+### 기능별 콤보 경로
+
+저장된 콤보에는 키가 API 기능인 `routes` 개체가 포함될 수 있습니다. 모든 경로는 대상 목록, 전략 및 런타임 구성을 소유합니다. 최상위 `models`, `strategy` 및 `config` 는 레거시 호환 Chat 계획으로 유지됩니다. `routes` 없는 기존 콤보는 변경 없이 계속 작동합니다.
+
+지원되는 경로 키는 `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`, `image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`, `audio-translations` 및 `audio-generation` 입니다. 엔드포인트 예측은 자격 증명 선택, 채점 또는 발송 전에 발생합니다. 중첩된 콤보 참조는 동일한 기능에 대해 하위 콤보의 경로를 선택합니다.
+
+`POST /v1/music/generations` 및 `POST /v1/ocr` `model` 에서 콤보 이름을 허용합니다. 기본 ElevenLabs 호환 `POST /v1/music` 도 `model_id` 의 콤보 이름을 허용하지만 해당 기본 엔드포인트에서 사용 가능한 모든 대상은 바이너리 응답 계약이 유지되도록 ElevenLabs 음악 모델이어야 합니다. `POST /v1/sound-generation` 동일한 기본 바이너리 제약 조건 하에서 `model_id` 의 `audio-generation` 콤보를 허용합니다. 이기종 음악 제공업체에는 `/v1/music/generations` 사용하세요.
+
 **자동 선택:** `provider` 없으면 연결이 구성된 가장 저렴한 공급자가 먼저 실행되고 다음으로 가장 저렴한 공급자가 장애 조치입니다. 무료 최후의 수단 공급자(`duckduckgo-free`)는 아무것도 구성되지 않은 경우에만 사용됩니다. 자체 호스팅 SearXNG 연결이 실제 `baseUrl` (카탈로그 기본값 `http://localhost:8888/search` 아님)를 저장하면 구성된 것으로 계산됩니다. 그런 다음 SearXNG 400, 401, 403 또는 404로 응답하는 경우를 포함하여 가장 저렴한 키 공급자를 장애 조치로 사용하여 키 공급자보다 $0 공급자로 순위를 매깁니다. 유효한 `http(s)` URL 아니거나 클라우드 메타데이터 주소를 가리키는 `baseUrl` 는 계산되지 않습니다. 토큰을 저장하는 SearXNG 연결은 `https://` 또는 루프백 `http://` 에 대해서만 이러한 방식으로 순위를 매깁니다. 원격 일반 `http://` 에서는 결코 장애 조치가 아니며 최후의 수단으로 유지되며 다른 공급자가 구성되지 않거나 이름으로 요청될 때만 사용되므로 이 두 경우에 일반 텍스트로 토큰을 보냅니다.
 
 ### 엑사와 타빌리 `provider_options`
@@ -835,27 +872,27 @@ Exa 결과는 `id`, `highlights` ( `snippet` 로 사용된 첫 번째 하이라�
 
 Exa `type: "lite"` (Exa 3.0)는 더 작은 필드 집합을 허용하고 다른 필드가 설정되면 전체 요청을 거부합니다. 라이트의 경우 `additionalQueries`, `systemPrompt` 및 `text` 및 `highlights` 제외한 모든 `contents` 키는 호출 전에 삭제됩니다. 더 이상 사용되지 않는 `subpages`, `subpageTarget`, `highlights.numSentences` 및 `highlights.highlightsPerUrl` 는 더 이상 전달되지 않습니다.
 
-비용 계산은 평면 레지스트리 `costPerQuery` 입니다. 단, Exa의 자체 가격을 따르는 Exa는 다음과 같습니다. `auto` (및 레거시 `fast`)의 경우 호출당 $0.007, `lite` (및 레거시 `instant`)의 경우 $0.004, 10개 결과 포함. 추가 결과당 $0.001; `contents.summary` 설정된 경우 반환된 결과당 $0.001입니다. Tavily는 `search_depth` `basic`, `fast` 및 `ultra-fast` 에 대해 1 크레딧($0.008), `advanced` ( [Tavily API 크레딧](https://docs.tavily.com/documentation/api-credits) )에 대해 2 크레딧($0.016)으로 기록됩니다. Tavily가 고급으로 업그레이드한 `auto_parameters: true` 사용한 통화는 여전히 1크레딧으로 기록됩니다.
+비용 계산은 평면 레지스트리 `costPerQuery` 입니다. 단, Exa의 자체 가격 책정을 따르는 Exa는 제외됩니다. `auto` (및 레거시 `fast`)의 경우 호출당 $0.007, `lite` (및 레거시 `instant`)의 경우 $0.004, 10개 결과 포함; 추가 결과당 $0.001; `contents.summary` 설정된 경우 반환된 결과당 $0.001입니다. Tavily는 `search_depth` `basic`, `fast` 및 `ultra-fast` 에 대해 1 크레딧($0.008), `advanced` ( [Tavily API 크레딧](https://docs.tavily.com/documentation/api-credits) )에 대해 2 크레딧($0.016)으로 기록됩니다. Tavily가 고급으로 업그레이드한 `auto_parameters: true` 사용한 통화는 여전히 1크레딧으로 기록됩니다.
 
 ---
 
-## Web Fetch API
+## 웹 페치 API
 
-구성된 웹 가져오기 제공자(Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract)를 통해 URL에서 콘텐츠를 추출합니다.
+구성된 웹 가져오기 공급자(Firecrawl, Jina Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch)를 통해 URL 에서 콘텐츠를 추출합니다.
 
-Parallel Extract(`parallel-search`, Parallel Search와 동일한 API 키 사용)는 Markdown만 반환합니다. 다른 `format`은 모두 `400`이 되며, 콘텐츠는 100,000자로 제한됩니다. 대상 페이지 자체를 추출할 수 없는 경우 upstream은 이를 HTTP 200 내부에 보고하고, OmniRoute는 고정 메시지와 함께 이를 `422`로 표시합니다.
+병렬 추출(`parallel-search`, 병렬 검색과 동일한 API 키)은 Markdown만 — 반환하고 다른 `format` 는 `400` — 이며 콘텐츠를 100,000자로 제한합니다. 대상 페이지 자체를 추출할 수 없는 경우 업스트림은 이를 HTTP 200 내부에 보고합니다. OmniRoute 고정된 메시지가 있는 `422` 로 표시됩니다.
 
-| Method | Path            | Description                                              |
-| ------ | --------------- | -------------------------------------------------------- |
-| POST   | `/v1/web/fetch` | URL 가져오기/스크랩 — 본문은 `v1WebFetchSchema`로 검증됨 |
+Keenable Fetch(`keenable-search`)는 Markdown만 반환하고(다른 모든 `format` 는 `400` 입니다) 콘텐츠를 100,000자로 제한합니다. 키 없이 작동합니다. 연결이 없는 명시적인 `provider: "keenable-search"` 요청은 Keenable의 키 없는 엔드포인트(IP당 속도 제한)를 사용합니다. 구성된 키는 이러한 제한만 해제합니다. 자동 선택은 키가 구성된 경우에만 Keenable을 사용합니다.
 
-**인증:** Bearer API 키(`extractApiKey` + `isValidApiKey`). 정책은 `enforceApiKeyPolicy`를 통해 적용됩니다.
+| 방법 | 길              | 설명                                                        |
+| ---- | --------------- | ----------------------------------------------------------- |
+| POST | `/v1/web/fetch` | Fetch/scrape a URL `v1WebFetchSchema` 에 의해 검증된 — 본문 |
 
-**쿼터 인식 대체 처리 (#8297):** 명시적인 `provider`가 지정되지 않은 경우, 풀
-(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`)은 고정된
-우선순위 순서로(선착순 방식) 순회됩니다. 요청 시 속도 제한 상태이지만 구성된 제공자는 요청을 중단하는 대신 건너뛰며, 재시도 가능한 upstream/쿼터 실패(HTTP 429는 항상 해당하며, Firecrawl/Tavily/TinyFish의 쿼터 방식 무료 티어에서는 402/403도 해당 — Jina Reader에는 해당하지 않고, 일반적인 잘못된 요청인 400에는 절대 해당하지 않음)는 요청 시 아직 시도하지 않은 인증된 다음 제공자로 전달됩니다. 풀의 모든 제공자가 소진되면 엔드포인트는 이전의 일반적인 `400` 대신 단일 `429`( `Retry-After` 헤더 포함)를 반환합니다. 명시적인 `provider`가 요청된 경우에는 자동 대체 처리가 없습니다. 속도 제한 또는 실패한 명시적 제공자는 자체 오류를 표시합니다(속도 제한이면 `429`, 그 외에는 upstream 상태 코드).
+**인증:** 베어러 API 키(`extractApiKey` + `isValidApiKey`). `enforceApiKeyPolicy` 통해 정책이 시행됩니다.
+
+명명된 조합은 위의 [`model` 라우팅 계약을](#named-searchfetch-combinations) 사용하여 가져오기 관련 옵션과 응답을 유지합니다.
+
+**할당량 인식 대체(#8297):** `provider` 나 `model` 모두 주어지지 않으면 풀(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` → `parallel-search` → `keenable-search`)은 고정된 우선순위 순서(채우기 우선)로 진행됩니다. — 속도가 제한되어 있지만 구성된 공급자는 요청을 단락시키는 대신 건너뛰고 retryable/quota 업스트림 실패(항상 HTTP 429; Firecrawl/Tavily/TinyFish 할당량 스타일 무료 계층 — 402/403 Jina Reader용이 아니며 일반 400개의 잘못된 요청에는 절대 사용되지 않음)는 요청 시 시도되지 않은 자격 증명을 갖춘 다음 공급자에게 전달됩니다. 풀의 모든 공급자가 소진되면 엔드포인트는 이전의 일반 `400` 대신 단일 `429` ( `Retry-After` 헤더 포함)를 반환합니다. 명시적인 `provider` 요청되면** 아니요** 자동 폴백 — 속도가 제한되거나 실패한 명시적 공급자는 자체 오류를 표시합니다(속도가 제한된 경우 `429`, 그렇지 않으면 업스트림 상태).
 
 ---
 
@@ -914,35 +951,26 @@ CLI는 `base_url + /responses`를 WebSocket으로 업그레이드하고, OmniRou
 
 ---
 
-## 할당량 및 이슈 보고
+## 할당량 및 문제 보고
 
-| Method | Path                | Description                                                             |
-| ------ | ------------------- | ----------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | 등록된 키를 발급하기 전에 `provider` + `accountId`의 할당량을 사전 검증 |
-| POST   | `/v1/issues/report` | 할당량/키 발급 실패를 GitHub에 보고 (`GITHUB_ISSUES_REPO` + 토큰 필요)  |
+| 방법 | 길                  | 설명                                                                                 |
+| ---- | ------------------- | ------------------------------------------------------------------------------------ |
+| GET  | `/v1/quotas/check`  | 등록된 키를 발급하기 전에 `provider` + `accountId` 에 대한 할당량을 사전 검증하세요. |
+| POST | `/v1/issues/report` | quota/key 발급 실패를 GitHub 에 보고합니다( `GITHUB_ISSUES_REPO` + 토큰 필요)        |
 
-**인증:** Bearer API 키 (`isAuthenticated`).
+**인증:** `/v1/quotas/check` Bearer API 키(`isAuthenticated`)를 사용합니다. `/v1/issues/report` `/api/v1/registered-keys` 와 같이 관리 전용(`requireManagementAuth`)입니다. 대시보드 세션, 로컬 CLI 토큰 또는 `manage`/`admin` 범위가 있는 API 키입니다. 추론 전용 API 키는 `403` 얻습니다.
 
-### 할당량 세션 복구 (선택 사항)
+### 할당량 세션 복구(선택)
 
-터미널 할당량 오류(`402`/`429`/`503`이며 본문에 할당량 또는 크레딧이 소진되었다고 표시됨)로
-실패한 비스트리밍 `POST /v1/chat/completions` 또는 `POST /v1/responses` 요청은 오류를
-반환하는 대신 보류한 후 나중에 재생할 수 있습니다. 호출자는 요청별로 다음 세 헤더를 사용하여
-옵트인합니다.
+터미널 할당량 오류(본문에 할당량이나 크레딧이 소진되었다고 표시된 `402`/`429`/`503` )로 인해 실패한 비스트리밍 `POST /v1/chat/completions` 또는 `POST /v1/responses` 오류를 반환하는 대신 나중에 주차하고 재생할 수 있습니다. 호출자는 세 개의 헤더를 사용하여 요청별로 옵트인합니다.
 
-| Header                       | Value                                  |
-| ---------------------------- | -------------------------------------- |
-| `x-omniroute-quota-recovery` | `auto`                                 |
-| `x-omniroute-session`        | 세션 ID, `[A-Za-z0-9._:-]{1,128}`      |
-| `x-omniroute-recovery-turn`  | 세션 내에서 고유한 턴 ID (동일한 규칙) |
+| 헤더                         | 값                                              |
+| ---------------------------- | ----------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                          |
+| `x-omniroute-session`        | 세션 ID, `[A-Za-z0-9._:-]{1,128}`               |
+| `x-omniroute-recovery-turn`  | 세션 내에서 ID를 고유하게 설정합니다(동일 규칙) |
 
-`stream: false`이고 도구, 도구 기록 또는 `previous_response_id`가 없으며
-`x-omniroute-connection` 고정이 없는 턴만 대상이 됩니다. 또한 `STORAGE_ENCRYPTION_KEY`가
-설정되어 있어야 합니다(요청은 최대 24시간 동안 암호화된 상태로 저장됨). 이후 응답은
-`202` 및 `recovery.poll`이 되며, 폴링은 `GET /v1/quota-recoveries/{id}`를 사용합니다
-(대기 중에는 `202`, 완료되면 복구된 본문과 함께 `200`). 또는 `DELETE`로 취소할 수 있습니다.
-티켓은 해당 티켓을 생성한 API 키에만 표시됩니다. 결과가 불확실한 재생은 두 번 전송되는 대신
-`needs_confirmation` 상태로 종료됩니다. 출처: `src/lib/quota/quotaSessionRecovery.ts`.
+도구, 도구 기록 또는 `previous_response_id` 없고 `x-omniroute-connection` 핀이 없는 `stream: false` 회전만 적격하며 `STORAGE_ENCRYPTION_KEY` 설정해야 합니다(요청은 최대 24시간 동안 암호화되어 저장됩니다). 그러면 응답은 `202` 와 `recovery.poll` 입니다. `GET /v1/quota-recoveries/{id}` 폴링하거나(보류 중인 동안 `202`, 완료되면 복구된 본문을 사용하여 `200` ) `DELETE` 로 취소합니다. 티켓은 티켓을 생성한 API 키에만 표시됩니다. 결과가 불확실한 재생은 두 번 전송되는 대신 `needs_confirmation` 로 끝납니다. 출처: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1682,17 +1710,21 @@ OmniRoute 이벤트(요청 완료, 할당량 소진, 키 순환 등)에 대한 �
 
 ## 등록된 키(자동 관리)
 
-자동 키 관리 하위 시스템에서 백업 제공자/계정에 대한 API 키를 발급하고 순환하는 데 사용하며, 일일/시간별 할당량을 적용합니다.
+자동 키 관리 하위 시스템에서 daily/hourly 할당량을 사용하여 지원 provider/account 에 대해 API 키를 발급하고 순환하는 데 사용됩니다.
 
-| Method | Path                                  | Description                                                                                                                                                                             |
-| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | 등록된 키 목록 조회 (마스킹된 접두사만 표시)                                                                                                                                            |
-| POST   | `/api/v1/registered-keys`             | 새 등록 키 발급 — 본문: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. 원본 키는 **한 번만** 반환됩니다. 할당량 거부 시 `429`를 반환합니다. |
-| GET    | `/api/v1/registered-keys/[id]`        | 등록된 키의 메타데이터 조회 (원본 키 자료 없음)                                                                                                                                         |
-| DELETE | `/api/v1/registered-keys/[id]`        | 등록된 키 폐기                                                                                                                                                                          |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | 명시적 폐기 엔드포인트 (DELETE와 동일한 효과)                                                                                                                                           |
+| 방법   | 길                                    | 설명                                                                                                                                                                                               |
+| ------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | 등록된 키 나열(마스킹된 접두사만)                                                                                                                                                                  |
+| POST   | `/api/v1/registered-keys`             | 새로 등록된 키 — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}` 발급합니다. 원시 키를 반환합니다.** 한 번** . 할당량이 거부되면 `429` 반환합니다. |
+| GET    | `/api/v1/registered-keys/[id]`        | 등록된 키의 메타데이터 검색(원본 없음)                                                                                                                                                             |
+| DELETE | `/api/v1/registered-keys/[id]`        | 등록된 키 취소                                                                                                                                                                                     |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | 명시적 취소 엔드포인트( DELETE 와 동일한 효과)                                                                                                                                                     |
+| GET    | `/api/v1/providers/[provider]/limits` | 공급자의 발행 한도 읽기                                                                                                                                                                            |
+| PUT    | `/api/v1/providers/[provider]/limits` | 공급자의 발행 한도 설정 — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                            |
+| GET    | `/api/v1/accounts/[id]/limits`        | 계정의 발행 한도 읽기                                                                                                                                                                              |
+| PUT    | `/api/v1/accounts/[id]/limits`        | 계정의 발행 한도 — 공급자 경로와 동일한 본문으로 설정합니다.                                                                                                                                       |
 
-**인증:** 관리 세션/API 키(`requireManagementAuth`) — `/api/keys`와 동일한 가드입니다. 대시보드 세션, 로컬 CLI 토큰 또는 `manage`/`admin` 스코프가 있는 API 키를 사용할 수 있으며, 추론 전용 API 키는 `403`을 반환합니다. `/v1/quotas/check` 및 `/v1/issues/report`도 참조하세요.
+**인증:** 관리 session/API 키(`requireManagementAuth`) — `/api/keys` 와 동일한 가드: 대시보드 세션, 로컬 CLI 토큰 또는 `manage`/`admin` 범위가 있는 API 키. 추론 전용 API 키는 `403` 얻습니다. `/v1/quotas/check` 및 `/v1/issues/report` 도 참조하세요.
 
 ---
 

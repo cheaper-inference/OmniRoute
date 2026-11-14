@@ -59,10 +59,10 @@ Fun provider/model kanna, awọn iye lati awọn ipele ti o ni ayo ti o ga jul�
 
 **modeli.dev ìsiṣẹpọ** yato si ìsiṣẹpọ LiteLLM ati pe o tun jẹ alaabo nipasẹ aiyipada. Mu ṣiṣẹ ni Eto (models.dev sync) tabi lo awọn oniyipada wọnyi:
 
-| Env var                    | Aiyipada      | Idi                                                                                                                                   |
-| -------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(a ko ṣeto)_ | Unset telẹ awọn Eto toggle; `1/true/on/yes` fi agbara mu lori ati ki o fi agbara mu `0/false/off/no` (paapaa ti Eto ba jẹ ki o ṣiṣẹ). |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`       | Default model.dev sync aarin ni iṣẹju-aaya (ojoojumọ).                                                                                |
+| Env var                    | Aiyipada       | Idi                                                                                                                              |
+| -------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(a ko ṣeto) _ | Unset telẹ awọn Eto toggle; `1/true/on/yes` fi agbara mu ati ki o fi agbara mu `0/false/off/no` (paapaa ti Eto ba jẹ ki o ṣiṣẹ). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`        | Default model.dev sync aarin ni iṣẹju-aaya (ojoojumọ).                                                                           |
 
 `PRICING_SYNC_SOURCES` ṣe** kii ṣe** jeki awọn modeli.dev; o nṣakoso ìsiṣẹpọ LiteLLM nikan. Piparẹ ifasilẹ olumulo kan ko ṣe ko boya aaye orukọ ti a muṣiṣẹpọ; Layer ifowoleri ti o wa atẹle yoo munadoko. Fun awoṣe ti ko ni idiyele, ṣayẹwo mejeeji awọn eto amuṣiṣẹpọ ati `sourceMap` ṣaaju ki o to ṣafikun ifasilẹ afọwọṣe kan.
 
@@ -74,7 +74,7 @@ A ṣe iṣiro idiyele fun ibeere lati awọn iṣiro ami-ami ati awọn oṣuw�
 - **Kaṣe-ka àmi** oṣuwọn × `cached` (ṣubu pada si iwọn titẹ sii).
 - **Kaṣe-ẹda àmi** oṣuwọn × `cache_creation` (ṣubu pada si iwọn titẹ sii).
 - **Awọn ami ijade** × `output` oṣuwọn.
-- **Awọn ami idi** oṣuwọn × `reasoning` (ṣubu pada si oṣuwọn iṣelọpọ).
+- **Awọn ami idi** × `reasoning` oṣuwọn (ṣubu pada si awọn ti o wu oṣuwọn).
 
 Gbogbo awọn oṣuwọn ni a tumọ bi USD fun awọn ami-ami 1,000,000. A Codex "yara"/" ayo" tabi "flex" ipele iṣẹ kan kan iye owo isodipupo (`getCodexFastCostMultiplier`) — fun apẹẹrẹ Flex ti wa ni idiyele ni ẹdinwo ami ami 50%, ti o farahan bi** Flex ifowopamọ** ninu Dasibodu.
 
@@ -82,15 +82,37 @@ Awọn orukọ awoṣe jẹ deede ni akọkọ (awọn ami-iṣaaju ti olupese-�
 
 ### Bawo ni na ti wa ni gba silẹ
 
-- Iye idiyele ibeere-kọọkan jẹ iṣiro lẹhin idahun ati igbasilẹ ina-ati-igbagbe nitorina ko ṣe afikun aiiri si alabara rara. Lilo ipin-pin jẹ eto lori ami iṣẹlẹ-lupu atẹle nipasẹ [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Awọn inawo bọtini API jẹ ifipamọ ati ki o ṣan ni awọn ipele nipasẹ [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (aiyipada 60s aarin aarin, ifipamọ-iwọle 1,000). Tunṣe nipasẹ:
+- Iye idiyele ibeere-kọọkan jẹ iṣiro ni ipari ibeere. Lilo ipin-pin jẹ eto lori ami iṣẹlẹ-lupu atẹle nipasẹ [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Awọn inawo bọtini API jẹ ifipamọ ati ki o ṣan ni awọn ipele nipasẹ [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (aiyipada 60s aarin, ifipamọ-iwọle 1,000). Tunṣe nipasẹ:
 
   | Env var                             | Aiyipada | Idi                                       |
   | ----------------------------------- | -------- | ----------------------------------------- |
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Fọ aarin ni milliseconds.                 |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Awọn titẹ sii ti o pọju ṣaaju ki o to fọ. |
 
-Awọn isiro iye owo Dasibodu naa jẹ** kii ṣe** ka lati owo dola kan ti o fipamọ fun — wọn ṣe iṣiro lori fo lati awọn iṣiro tokini ati tabili idiyele lọwọlọwọ ni gbogbo igba ti aaye ipari atupale ba ṣiṣẹ. Iyẹn tumọ si atunṣe idiyele ti ko tọ (ati tun mimuuṣiṣẹpọ) ṣe imudojuiwọn awọn iṣiro idiyele itan-pada sẹhin.
+Awọn idiyele fẹran idiyele ti olupese ti o royin (`provider_cost_usd`), lẹhinna fọto-ibeere ti o ni idiyele katalogi (`calculated_cost_usd`), lẹhinna atunṣe ami-ami lati katalogi lọwọlọwọ. Awọn idiyele ti o fipamọ ko ni idiyele lẹẹkansi nipasẹ awọn iṣiro ami-ami wọn. Legacy tokini-awọn ori ila nikan tun yipada nigbati idiyele katalogi wọn yipada.
+
+### OCR ati awọn ifibọ
+
+- Awọn ibeere `/v1/ocr` ti o ṣaṣeyọri lo `usage_info.pages_processed` oke, kii ṣe iwọn oju-iwe ti o beere tabi nọmba awọn nkan oju-iwe ti o pada. Iṣiro naa jẹ awọn oju-iwe × `ocr_cost_per_page` ( USD/page pipe,** kii ṣe** USD/million).
+- Awọn ibeere pẹlu iwe-ipamọ tabi awọn asọye apoti-isopọ nilo idiyele `ocr_cost_per_annotated_page` lọtọ. Laisi rẹ, iye owo wa aimọ; Tarifu OCR lasan ko ni firọpo dakẹ.
+- LiteLLM muṣiṣẹpọ awọn maapu aaye `annotation_cost_per_page` oke rẹ sinu `ocr_cost_per_annotated_page`, ni idaduro iye USD/page pipe ati awọn titẹ sii-akọsilẹ nikan, pẹlu odo ti o fojuhan. Aaye canonical ti a pese gba iṣaaju; awọn iye inagijẹ ti ko tọ ko bikita. Ifowoleri olumulo dojuiwọn ni idaduro pataki deede wọn. Wo [awọn bọtini idiyele LiteLLM's OCR](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- lilo OCR tọju kika oju-iwe naa, idiyele ẹyọkan, idiyele USD iṣiro, bọtini API ati asopọ ti o yan. Awọn oju-iwe ko ni ipoduduro bi awọn ami-ami. Awọn akọọlẹ ipe ni metadata ìdíyelé, kii ṣe iwe URLs, PDF baiti tabi ọrọ ti a fa jade.
+- Awọn ibeere `/v1/embeddings` ti o ṣaṣeyọri ṣe igbasilẹ laini lilo kan fun ipele ti ara, pẹlu awọn ipele lọtọ ti o pari ni millisecond kanna. Awọn idiyele ti o royin olupese jẹ iṣaaju lori awọn iṣiro ami; konbo wrappers ko fi kan idiyele.
+- Itan-akọọlẹ lilo, awọn atupale Awọn idiyele, awọn window provider/account, awọn opin inawo bọtini API, iwe-ipamọ idiyele-ibere ati awọn iyipo lilo ojoojumọ pẹlu awọn idiyele wọnyi. Awọn bọtini iforukọsilẹ ko si ṣe idaduro iṣiro nọmba laisi idaduro ọrọ orisun.
+- Sonu lilo tabi owo-ori jẹ** aimọ** , kii ṣe ọfẹ: akọsori idiyele idiyele ti yọkuro, ati pe eto imulo lilo-ailopin ti o wa tẹlẹ kan awọn bọtini API to lopin. Awọn oṣuwọn odo ti a tunto ni gbangba jẹ lilo iye owo odo to wulo.
+
+Eleyi jẹ siwaju-nikan iṣiro. Awọn ipe OCR/embedding atijọ ti ko kọ itan-akọọlẹ lilo rara ko le ṣe atunto lati ijira yii. Awọn iṣiro katalogi jẹ awọn iṣiro USD, kii ṣe iwe-owo, ati pe ko pẹlu iyipada owo, owo-ori tabi awọn ẹdinwo.
+
+### Ọrọ ati awọn aworan
+
+- `/v1/audio/transcriptions` ti o ṣaṣeyọri, `/v1/audio/speech` ati awọn igbiyanju iran-aworan pin ṣiṣe iṣiro nọmba. Awọn ipe taara ati awọn konbo gbe bọtini API olupe ati asopọ ti o yan; a konbo wrapper kò fi kan keji debiti.
+- USD ti o royin olupese bori lori iṣiro katalogi kan, pẹlu idiyele odo ti o fojuhan. OpenRouter's JSON `usage.cost` jẹ deede si `cost_usd`. Bibẹẹkọ, awọn ami wiwọn lo awọn idiyele ami, awọn iṣẹju-aaya transcription lo awọn idiyele iṣẹju-aaya, igbewọle ọrọ nlo awọn iṣiro ohun kikọ Unicode, ati awọn aworan idiyele alapin lo nọmba ti o da pada, kii ṣe `n` ti o beere.
+- Alakomeji OpenRouter TTS ko ni ara lilo JSON. Lẹhin ti ohun ti pari tabi olupe ti fagile, OmniRoute yoo beere iran rẹ ID lori** kanna** tunto OpenRouter Oti. Ibeere EU kan ko ṣubu pada si ipilẹṣẹ agbaye. Eleyi jẹ kan didi, kika-nikan wiwa; kolaginni ti ko ba tun gbiyanju fun iṣiro. Awọn igbasilẹ ìdíyelé le han lẹhin ti ohun naa ti pari: awọn igbiyanju wiwa ṣiṣẹ ni abẹlẹ fun bii awọn aaya 52, pẹlu awọn akoko ipari nẹtiwọki.
+- Lakoko wiwa yẹn, idahun ohun ni `X-OmniRoute-Cost-Status: pending` ko si si akọsori idiyele-idahun. Idiyele ipari rẹ han ninu itan-akọọlẹ lilo, awọn atupale ati iwe akọọlẹ bọtini lẹhin ilaja. Ti metadata ko ba si, aworan iwoye ti owo atunto ni a lo; bibẹkọ ti iye owo duro aimọ.
+- Awọn iṣẹju-aaya, awọn kikọ ati awọn iṣiro aworan ni awọn aaye ipin-isanwo lọtọ, kii ṣe awọn iṣiro ami iro rara. Iṣiro ṣe idaduro lilo nọmba nikan, kii ṣe ọrọ ọrọ, awọn iwe afọwọkọ tabi awọn baiti aworan. Awọn imukuro aworan ti ko ni idiyele tẹlẹ ko yipada: idiyele aworan ti o padanu nitootọ ko ni titiipa bọtini ti o lopin tuntun, ati pe idahun fi akọsori iye owo kuku ju sisọ ipe naa lọfẹ. Ikuna ile-itaja idiyele ṣi daduro ẹri lilo fun imuṣeduro pipade-ikuna.
+
+Ko si idiyele speech/image itan ti o ṣẹda tabi ti o kun. Idiyele olupese jẹ itọkasi fun awọn risiti ati fun awọn ipe ti idiyele wọn ko royin.
 
 ---
 
@@ -142,7 +164,7 @@ Gbogbo awọn wọnyi nilo auth iṣakoso (loopback/JWT, nipasẹ `requireManage
 
 ### Lilo & atupale iye owo
 
-| Ọna   | Opin ipari               | Idi                                                                                                                                                                 |
+| Ọna   | Opin ojuami              | Idi                                                                                                                                                                 |
 | ----- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GET` | `/api/usage/analytics`   | Awọn atupale cost/usage ni kikun: akopọ, aṣa ojoojumọ, nipasẹ provider/model/API key/account/tier. Ibeere: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
 | `GET` | `/api/usage/utilization` | Lilo ipin ipin-olupese lori akoko. Ibeere: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                             |
@@ -153,7 +175,7 @@ Gbogbo awọn wọnyi nilo auth iṣakoso (loopback/JWT, nipasẹ `requireManage
 
 ### Awọn inawo
 
-| Ọna    | Opin ipari               | Idi                                                                                 |
+| Ọna    | Opin ojuami              | Idi                                                                                 |
 | ------ | ------------------------ | ----------------------------------------------------------------------------------- |
 | `GET`  | `/api/usage/budget`      | Akopọ iye owo + ayẹwo isuna fun bọtini API kan (awọn ibeere `apiKeyId` param nilo). |
 | `POST` | `/api/usage/budget`      | Ṣeto daily/weekly/monthly USD fi opin si aaye ikilọ + fun bọtini API.               |
@@ -163,7 +185,7 @@ Gbogbo awọn wọnyi nilo auth iṣakoso (loopback/JWT, nipasẹ `requireManage
 
 ### Ifowoleri
 
-| Ọna      | Opin ipari              | Idi                                                                                                                                                        |
+| Ọna      | Opin ojuami             | Idi                                                                                                                                                        |
 | -------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GET`    | `/api/pricing`          | Merged four-layer pricing (user, models.dev, LiteLLM, defaults). `?includeSources=1` returns `pricing` + `sourceMap`.                                      |
 | `PATCH`  | `/api/pricing`          | Daju idiyele fun `{ provider: { model: { input, output, cached, … } } }`.                                                                                  |
@@ -176,7 +198,7 @@ Gbogbo awọn wọnyi nilo auth iṣakoso (loopback/JWT, nipasẹ `requireManage
 
 ### Miiran iye owo-ti o yẹ endpoints
 
-| Ọna   | Opin ipari                    | Idi                                                            |
+| Ọna   | Opin ojuami                   | Idi                                                            |
 | ----- | ----------------------------- | -------------------------------------------------------------- |
 | `GET` | `/api/free-tier/summary`      | Apapọ ami-ami awoṣe-ọfẹ, lilo-oṣu yii, ati iyọọda ọfẹ ti o ku. |
 | `GET` | `/api/quota/pools/[id]/usage` | Lilo fun adagun-ipin ipin.                                     |

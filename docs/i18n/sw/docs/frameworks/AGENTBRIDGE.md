@@ -20,7 +20,7 @@ Wakati wakala wa IDE (km, GitHub Copilot, Cursor, Claude Code) anapiga simu API,
 
 Hii inamaanisha kuwa unaweza:
 
-- **Rudisha wakala yeyote kwa mtoa huduma yeyote** : Copilot kuzungumza na OpenAI? Ielekeze upya kwa Anthropic Claude, Gemini, au yeyote kati ya watoa huduma 381 wa OmniRoute.
+- **Rudisha wakala yeyote kwa mtoa huduma yeyote** : Copilot kuzungumza na OpenAI? Ielekeze upya kwa Anthropic Claude, Gemini, au yeyote kati ya watoa huduma 394 wa OmniRoute.
 - **Tumia michoro za kielelezo** : `gemini-3-flash` → `claude-sonnet-4.7` kwa uwazi katika kiwango cha kidhibiti.
 - **Angalia trafiki yote ya wakala** : kila ombi lililoingiliwa huchapishwa kwa [Mkaguzi wa Trafiki](./TRAFFIC_INSPECTOR.md).
 - **Tumia ustahimilivu wa OmniRoute** : uelekezaji wa mseto, vivunja saketi, vikwazo, na kazi ya kufuatilia gharama kwa trafiki ya wakala IDE pia.
@@ -544,26 +544,26 @@ Skimu kamili za OpenAPI: `docs/openapi.yaml` → lebo `AgentBridge`.
 
 ---
 
-## §8 Ramani ya utekelezaji
+## §8 Ramani ya barabara
 
-### Uchunguzi wa Trae
+### Uchunguzi wa trae
 
-Trae ni msaidizi mpya kwa kiasi fulani wa uandishi wa msimbo kwa kutumia AI. Kabla ya kutekeleza kishughulikiaji:
+Trae ni msaidizi mpya wa usimbaji AI. Kabla ya kutekeleza kidhibiti:
 
-1. Tambua faili ya binary/kiendelezi katika masoko ya VS Code / JetBrains au kama programu inayojitegemea
-2. Nasa trafiki kwa kutumia mitmproxy ili kugundua seva za API na miundo ya endpoint
-3. Bainisha utaratibu wa uthibitishaji
-4. Tathmini kuendelea/kutoendelea kulingana na TOS na uwezekano wa kugundua API
+1. Tambua binary/extension katika soko la VS Code / JetBrains au kama programu inayojitegemea
+2. Nasa trafiki ukitumia mitmproxy ili kugundua wapangishi wa API na maumbo ya mwisho
+3. Amua utaratibu wa uthibitishaji
+4. Tathmini go/no-go kulingana na ugunduzi wa TOS na API
 
-Hadi uchunguzi utakapokamilika, kadi ya Trae kwenye dashibodi itaonyesha beji ya "Inachunguzwa" yenye kiungo cha "Ripoti uwezekano wa kutekelezeka". Kiolezo cha kishughulikiaji kilicho katika `src/mitm/handlers/trae.ts` hutupa hitilafu iliyopangwa ya `Bado haijatekelezwa`.
+Hadi uchunguzi ukamilike, kadi ya Trae kwenye dashibodi inaonyesha beji ya "Kuchunguza" yenye kiungo cha "Ripoti uwezekano". Kishikizi kwenye `src/mitm/handlers/trae.ts` hutupa hitilafu iliyopangwa ya `Not yet implemented`.
 
-### Ajenti zilizo kwenye orodha ya kusubiri (MITM inahitajika — hazitumii URL maalum ya msingi)
+### Mawakala wa kumbukumbu (MITM inahitajika — hakuna usaidizi maalum URL )
 
-Zana zifuatazo hazitumii URL maalum za msingi katika matoleo yake ya sasa, hivyo kufanya MITM kuwa njia pekee ya kuingilia mawasiliano. Tathmini ya uwezekano wa kutekelezeka bado inasubiri:
+Zana zifuatazo hazitumii msingi maalum URLs katika matoleo yao ya sasa, na kufanya MITM kuwa njia pekee ya kukatiza. Tathmini ya uwezekano inasubiri:
 
 - **Windsurf** (Codeium/Cognition)
-- **Amp** (Sourcegraph)
+- **Amp** (Chanzo)
 - **Amazon Q / Kiro CLI** (AWS Bedrock — tofauti na Kiro IDE)
-- **Cowork** (programu ya eneo-kazi ya Anthropic)
+- **Kazi mwenza** (Anthropic desktop)
 
-Kumbuka: GitHub Copilot CLI ≥v1.0.19 hutumia `COPILOT_PROVIDER_BASE_URL` — tumia usanidi wa moja kwa moja badala ya MITM kwa zana hiyo.
+Kumbuka: GitHub Copilot CLI ≥ v1.0.19 inasaidia `COPILOT_PROVIDER_BASE_URL` — kutumia usanidi wa moja kwa moja badala ya MITM kwa zana hiyo.

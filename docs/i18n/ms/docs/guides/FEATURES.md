@@ -59,27 +59,17 @@ Sambungan OpenRouter boleh menyimpan `preset` bagi setiap sambungan dalam Tetapa
 
 ## 🎨 Kombo
 
-Cipta kombo penghalaan model dengan 19 strategi awam: priority, weighted, round-robin, context-relay, fill-first, p2c (pilihan kuasa dua), random, least-used, cost-optimized, reset-aware, reset-window, headroom, strict-random, auto, lkgp (penyedia-terakhir-yang-diketahui-baik), context-optimized, cache-optimized, **fusion** (menghantar permintaan kepada sekumpulan model secara selari, kemudian mensintesis satu jawapan melalui penilai), dan **pipeline**. Setiap kombo merantaikan berbilang model dengan sandaran automatik serta menyertakan templat pantas dan semakan kesiapsiagaan.
+Cipta gabungan penghalaan model dengan 22 strategi awam: keutamaan, berwajaran, round-robin, geganti konteks, isikan dahulu, p2c (kuasa dua pilihan), rawak, paling kurang digunakan, dioptimumkan kos, sedar semula, tetapkan semula tetingkap, tamat tempoh dahulu, ruang kepala, wajaran kuota, rawak-terkenal, (last-wajaran, gpter-terkenal), dioptimumkan konteks, dioptimumkan cache,** gabungan** (kipas ke panel model secara selari, kemudian sintesis satu jawapan melalui hakim),** saluran paip** , dan** jev** (kemasukan TypeSafe Jev opt-in atas senarai kedudukan anda). Setiap kombo merangkai berbilang model dengan sandaran automatik dan termasuk templat pantas dan semakan kesediaan.
 
 Penambahbaikan kombo terkini:
 
-- **Pembina kombo berstruktur** — cipta setiap langkah dengan memilih penyedia, model, dan akaun/sambungan yang tepat
-- **Sokongan penyedia berulang** — gunakan semula penyedia yang sama berkali-kali dalam satu kombo selagi tupel `(provider, model, connection)` adalah unik
-- **Kesihatan sasaran kombo** — paparan analitik dan kesihatan kini membezakan setiap sasaran/langkah kombo dan bukannya menggabungkan semuanya menjadi rentetan model
-- **Susunan peringkat komposit** — `defaultTier -> fallbackTier` kini mempengaruhi susunan pelaksanaan/sandaran masa jalan untuk langkah kombo peringkat teratas
-- **Templat gesaan sistem** — `system_message` kombo menyokong ruang letak bahagian pelayan
-  `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` dan `{{FINGERPRINT}}`
-  yang dikembangkan daripada sasaran yang benar-benar dihalakan sejurus sebelum penghantaran.
-  Dikawal melalui senarai dibenarkan dan tidak rekursif; ruang letak yang tidak diketahui kekal sebagai teks literal; nilai kosong
-  dikembangkan kepada kosong; gesaan sistem klien tidak pernah ditulis semula. `{{FINGERPRINT}}`
-  hanya diselesaikan untuk penyedia percuma berasaskan cap jari dengan cap jari yang dipinkan atau
-  diputarkan secara automatik — ia dikembangkan kepada kosong di tempat lain (contohnya
-  sambungan cap jari tunggal, penyedia bukan fp). Pengembangan meliputi
-  gelung penghantaran standard, round-robin, dan sesi cache konteks yang dipinkan;
-  strategi fusion, chaos, pipeline dan nested-execute belum lagi mengembangkan
-  ruang letak.
+- **Pembina kombo berstruktur** — membuat setiap langkah dengan memilih pembekal, model dan account/connection tepat
+- **Sokongan pembekal berulang** — menggunakan semula pembekal yang sama berkali-kali dalam satu kombo asalkan tuple `(provider, model, connection)` adalah unik
+- **Kesihatan sasaran kombo** analisis — dan permukaan kesihatan kini membezakan kombo targets/steps individu dan bukannya meruntuhkan segala-galanya ke dalam rentetan model
+- **Susunan peringkat komposit** — `defaultTier -> fallbackTier` kini mempengaruhi urutan execution/fallback masa jalan untuk langkah kombo peringkat atas
+- **Templat gesaan sistem** — combo `system_message` menyokong ruang letak bahagian pelayan `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` dan `{{FINGERPRINT}}`, dikembangkan daripada sasaran yang dihalakan betul-betul sebelum penghantaran. Disenarai dibenarkan dan bukan rekursif; ruang letak yang tidak diketahui kekal literal; nilai kosong berkembang kepada kosong; gesaan sistem pelanggan tidak pernah ditulis semula. `{{FINGERPRINT}}` menyelesaikan hanya untuk pembekal percuma berasaskan cap jari dengan cap jari yang disematkan atau diputar secara automatik — ia mengembang untuk mengosongkan tempat lain (cth sambungan cap jari tunggal, pembekal bukan fp). Pengembangan meliputi sesi gelung penghantaran standard, round-robin dan sesi cache konteks yang disematkan; gabungan, huru-hara, saluran paip dan strategi laksana bersarang belum mengembangkan ruang letak lagi.
 
-![Papan Pemuka Kombo](../screenshots/02-combos.png)
+![Combos Dashboard](../screenshots/02-combos.png)
 
 ---
 
@@ -200,23 +190,23 @@ E-mel akaun OAuth disamarkan secara lalai (contohnya `di*****@g****.com`) untuk 
 
 ---
 
-## 👁️ Togol Keterlihatan Model _(v3.5.6+)_
+## 👁️ Togol Keterlihatan Model _(v3.5.6 +)_
 
-Senarai model pada halaman penyedia kini merangkumi:
+Senarai model halaman penyedia kini termasuk:
 
-- **Bar carian/penapis masa nyata** — Cari model tertentu dengan pantas
-- **Togol keterlihatan bagi setiap model** (ikon 👁) — Model tersembunyi dikelabukan dan dikecualikan daripada katalog `/v1/models`
-- **Lencana kiraan aktif** (`N/M aktif`) — Menunjukkan sepintas lalu bilangan model yang didayakan berbanding jumlah keseluruhan
+- **search/filter bar masa nyata** — Cari model tertentu dengan pantas
+- **Togol keterlihatan setiap model** ( ikon 👁 ) — Model tersembunyi dikelabukan dan dikecualikan daripada katalog `/v1/models`
+- **Lencana kiraan aktif** (`N/M active`) — Menunjukkan sepintas lalu berapa banyak model yang didayakan berbanding jumlah
 
 ---
 
-## 🔧 Pembaikan Env OAuth _(v3.6.1+)_
+## 🔧 OAuth Env Repair _(v3.6.1 +)_
 
-Tindakan "Baiki env" dengan satu klik untuk penyedia OAuth yang memulihkan pemboleh ubah persekitaran yang hilang dan membaiki keadaan pengesahan yang rosak. Boleh diakses melalui `Papan Pemuka → Penyedia → [Penyedia OAuth] → Baiki env`. Mengesan dan membaiki secara automatik:
+Tindakan "Baiki env" satu klik untuk penyedia OAuth yang memulihkan pembolehubah persekitaran yang hilang dan membetulkan keadaan pengesahan yang rosak. Boleh diakses daripada `Dashboard → Providers → [OAuth Provider] → Repair env`. Mengesan dan membaiki secara automatik:
 
-- Bukti kelayakan klien OAuth yang hilang
-- Entri fail env yang rosak
-- Penormalan laluan sandaran
+- Tiada kelayakan pelanggan OAuth
+- Entri fail env rosak
+- Sanitasi laluan sandaran
 
 ---
 

@@ -20,7 +20,7 @@ Kun IDE agentti (esim. GitHub Copilot, Cursor, Claude Code) soittaa API puhelun,
 
 Tämä tarkoittaa, että voit:
 
-- **Ohjaa kaikki edustajat mille tahansa palveluntarjoajalle** : Copilot puhuu OpenAI:lle? Ohjaa se Anthropic Claude, Gemini tai johonkin OmniRoute:n 381 palveluntarjoajalta.
+- **Ohjaa kaikki edustajat mille tahansa palveluntarjoajalle** : Copilot puhuu OpenAI:lle? Ohjaa se Anthropic Claude, Gemini tai johonkin OmniRoute:n 394 tarjoajasta.
 - **Käytä mallikartoituksia** : `gemini-3-flash` → `claude-sonnet-4.7` läpinäkyvästi ohjaajan tasolla.
 - **Tarkkaile kaikkea agenttiliikennettä** : jokainen pysäytetty pyyntö julkaistaan [liikennetarkastajalle](./TRAFFIC_INSPECTOR.md).
 - **Käytä OmniRoute kimmoisuutta** : yhdistelmäreititys, katkaisijat, varaosat ja kustannusseurantatyöt myös IDE -agenttiliikenteelle.
@@ -543,26 +543,26 @@ Täydelliset OpenAPI-skeemat: `docs/openapi.yaml` → tunniste `AgentBridge`.
 
 ---
 
-## §8 Kehityssuunnitelma
+## §8 Etenemissuunnitelma
 
-### Trae-selvitys
+### Traen tutkinta
 
-Trae on suhteellisen uusi tekoälyavusteinen ohjelmointiassistentti. Ennen käsittelijän toteuttamista:
+Trae on suhteellisen uusi AI koodausavustaja. Ennen käsittelijän käyttöönottoa:
 
-1. Tunnista binääri/laajennus VS Code- tai JetBrains-markkinapaikoista tai erillissovelluksena
-2. Tallenna liikenne mitmproxylla API-isäntien ja päätepisteiden rakenteiden selvittämiseksi
-3. Selvitä todennusmekanismi
-4. Arvioi käyttöehtojen ja API:n löydettävyyden perusteella, jatketaanko toteutusta vai ei
+1. Tunnista binary/extension VS Code / JetBrains -markkinapaikoissa tai erillisenä sovelluksena
+2. Sieppaa liikennettä mitmproxylla löytääksesi API isäntiä ja päätepisteen muotoja
+3. Määritä todennusmekanismi
+4. Arvioi go/no-go TOS ja API löydettävyyden perusteella
 
-Kunnes selvitys valmistuu, hallintapaneelin Trae-kortissa näkyy "Selvitetään"-tunniste ja "Raportoi toteuttamiskelpoisuus" -linkki. Käsittelijän runko tiedostossa `src/mitm/handlers/trae.ts` antaa rakenteisen `Ei vielä toteutettu` -virheen.
+Kunnes tutkinta on valmis, Trae-kortissa kojelaudassa näkyy "Tutkitaan" -merkki, jossa on "Raportoi elinkelpoisuus" -linkki. Käsittelijän tynkä kohdassa `src/mitm/handlers/trae.ts` antaa strukturoidun `Not yet implemented` virheen.
 
-### Työjonossa olevat agentit (MITM vaaditaan — ei mukautetun perus-URL-osoitteen tukea)
+### Ruuhka-agentit (MITM vaaditaan — ei mukautettua perus- URL tukea)
 
-Seuraavat työkalut eivät nykyisissä versioissaan tue mukautettuja perus-URL-osoitteita, joten MITM on ainoa tapa siepata liikennettä. Toteuttamiskelpoisuuden arviointi on kesken:
+Seuraavat työkalut eivät tue mukautettua perus- URLs nykyisissä versioissaan, joten MITM on ainoa sieppauspolku. Elinkelpoisuusarviointi odottaa:
 
 - **Windsurf** (Codeium/Cognition)
-- **Amp** (Sourcegraph)
-- **Amazon Q / Kiro CLI** (AWS Bedrock — erillään Kiro IDE:stä)
-- **Cowork** (Anthropicin työpöytäsovellus)
+- **Amp** (Lähdekaavio)
+- **Amazon Q / Kiro CLI** (AWS Bedrock — erillinen Kiro IDE)
+- **Cowork** (Anthropic desktop)
 
-Huomautus: GitHub Copilot CLI ≥v1.0.19 tukee `COPILOT_PROVIDER_BASE_URL`-ympäristömuuttujaa — käytä kyseiselle työkalulle suoraa määritystä MITM:n sijaan.
+Huomautus: GitHub Copilot CLI ≥ v1.0.19 tukee `COPILOT_PROVIDER_BASE_URL` — -työkalua. Käytä suoraa konfigurointia MITM sijaan.

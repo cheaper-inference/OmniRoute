@@ -279,15 +279,15 @@ Hook halaman:
 
 ## Variabel Lingkungan
 
-| Variabel                           | Nilai Bawaan | Deskripsi                                                        |
-| ---------------------------------- | ------------ | ---------------------------------------------------------------- |
-| `QUOTA_STORE_DRIVER`               | `sqlite`     | Driver yang digunakan: `sqlite` atau `redis`                     |
-| `QUOTA_STORE_REDIS_URL`            | _(kosong)_   | URL Redis, misalnya `redis://localhost:6379`                     |
-| `QUOTA_SATURATION_THRESHOLD`       | `0.5`        | 0..1; `>= ambang batas` mengaktifkan mode ketat                  |
-| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`        | 0..1; pengali untuk skor gabungan kebijakan lunak                |
-| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`         | Jumlah hari sebelum GC menghapus bucket `quota_consumption` lama |
+| Variabel                           | Bawaan     | Keterangan                                                        |
+| ---------------------------------- | ---------- | ----------------------------------------------------------------- |
+| `QUOTA_STORE_DRIVER`               | `sqlite`   | Driver yang digunakan: `sqlite` atau `redis`                      |
+| `QUOTA_STORE_REDIS_URL`            | _(kosong)_ | Redis URL, misalnya `redis://localhost:6379`                      |
+| `QUOTA_SATURATION_THRESHOLD`       | `0.5`      | 0..1; `>= threshold` mengaktifkan mode ketat                      |
+| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`      | 0..1; pengganda untuk skor kombo kebijakan lunak                  |
+| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`       | Beberapa hari sebelum GC menghapus ember `quota_consumption` lama |
 
-Pengaturan DB (`quotaStore.*`) menggantikan variabel lingkungan.
+pengaturan DB (`quotaStore.*`) menimpa env vars.
 
 ---
 

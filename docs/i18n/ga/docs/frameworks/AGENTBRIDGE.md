@@ -20,7 +20,7 @@ Nuair a dhéanann gníomhaire IDE (m.sh., GitHub Copilot, Cursor, Claude Code) g
 
 Ciallaíonn sé seo gur féidir leat:
 
-- **Déan gníomhaire ar bith a atreorú chuig aon soláthraí** : Copilot ag caint le OpenAI? Déan é a atreorú chuig Anthropic Claude, Gemini, nó chuig aon cheann de na 381 soláthraí OmniRoute.
+- **Déan gníomhaire ar bith a atreorú chuig aon soláthraí** : Copilot ag caint le OpenAI? Déan é a atreorú chuig Anthropic Claude, Gemini, nó chuig aon cheann de na 394 soláthraí OmniRoute.
 - **Cuir mapálacha samhlacha i bhfeidhm** : `gemini-3-flash` → `claude-sonnet-4.7` trédhearcach ag leibhéal an láimhseála.
 - **Breathnaigh ar gach trácht gníomhaire** : foilsítear gach iarratas idircheapadh don [Chigire Tráchta](./TRAFFIC_INSPECTOR.md).
 - **Cuir athléimneacht OmniRoute i bhfeidhm** : ródú teaglama, scoradáin chiorcaid, fallbacks, agus obair rianaithe costais do thrácht gníomhaire IDE freisin.
@@ -545,24 +545,24 @@ Scéimeanna iomlána OpenAPI: `docs/openapi.yaml` → clib `AgentBridge`.
 
 ## §8 Treochlár
 
-### Imscrúdú ar Trae
+### Imscrúdú trae
 
-Is cúntóir códaithe AI measartha nua é Trae. Sula gcuirtear láimhseálaí i bhfeidhm:
+Cúntóir códaithe AI nua is ea Trae. Sula gcuirtear láimhseálaí i bhfeidhm:
 
-1. Sainaithin an clár dénártha/an eisínteacht i margaí VS Code / JetBrains nó mar aip neamhspleách
-2. Gabh an trácht le mitmproxy chun óstaigh API agus cruthanna críochphointí a aimsiú
-3. Aimsigh an mheicníocht fíordheimhnithe
-4. Déan cinneadh dul ar aghaidh/gan dul ar aghaidh bunaithe ar na TOS agus ar in-aimsitheacht an API
+1. Sainaithin an binary/extension i margaí Cód VS / JetBrains nó mar aip neamhspleách
+2. Gabh trácht le mitmproxy chun óstaigh API agus cruthanna críochphointí a fháil amach
+3. Meicníocht fíordheimhnithe a chinneadh
+4. Déan go/no-go a mheasúnú bunaithe ar infhionnachtacht TOS agus API
 
-Go dtí go mbeidh an t-imscrúdú críochnaithe, taispeánfaidh cárta Trae sa deais suaitheantas "Á Imscrúdú" mar aon le nasc "Tuairiscigh inmharthanacht". Caitheann creatlach an láimhseálaí ag `src/mitm/handlers/trae.ts` earráid struchtúrtha `Níl sé curtha i bhfeidhm fós`.
+Go dtí go mbeidh an t-imscrúdú críochnaithe, taispeánann an cárta Trae ar an deais suaitheantas "Imscrúdú" agus nasc "Inmharthanacht na tuarascála". Caitheann stub an láimhseála ag `src/mitm/handlers/trae.ts` earráid struchtúrtha `Not yet implemented`.
 
-### Gníomhairí sa riaráiste (MITM riachtanach — gan aon tacaíocht do bhun-URL saincheaptha)
+### Gníomhairí riaráiste (MITM ag teastáil — gan aon tacaíocht URL bonn saincheaptha)
 
-Ní thacaíonn na huirlisí seo a leanas le bun-URLanna saincheaptha ina leaganacha reatha, rud a fhágann gurb é MITM an t-aon bhealach idircheaptha. Tá measúnú inmharthanachta fós ar feitheamh:
+Ní thacaíonn na huirlisí seo a leanas le bonn saincheaptha URLs ina leaganacha reatha, rud a fhágann gurb MITM an t-aon chosán idirghabhála. Tá measúnú inmharthanachta ar feitheamh:
 
 - **Windsurf** (Codeium/Cognition)
-- **Amp** (Sourcegraph)
-- **Amazon Q / Kiro CLI** (AWS Bedrock — ar leithligh ó Kiro IDE)
-- **Cowork** (aip deisce Anthropic)
+- **Amp** (Foinseghraf)
+- **Amazon Q / Kiro CLI** (AWS Buncharraige — scartha ó Kiro IDE)
+- **Cowork** ( deasc Anthropic )
 
-Nóta: Tacaíonn GitHub Copilot CLI ≥v1.0.19 le `COPILOT_PROVIDER_BASE_URL` — bain úsáid as cumraíocht dhíreach in ionad MITM don uirlis sin.
+Nóta: tacaíonn GitHub Copilot CLI ≥ v1.0.19 `COPILOT_PROVIDER_BASE_URL` — úsáid config díreach in ionad MITM don uirlis sin.

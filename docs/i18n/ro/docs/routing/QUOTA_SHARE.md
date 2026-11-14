@@ -279,15 +279,15 @@ Hook-urile paginii:
 
 ## Variabile de mediu
 
-| Variabilă                          | Valoare implicită | Descriere                                                                       |
-| ---------------------------------- | ----------------- | ------------------------------------------------------------------------------- |
-| `QUOTA_STORE_DRIVER`               | `sqlite`          | Driver de utilizat: `sqlite` sau `redis`                                        |
-| `QUOTA_STORE_REDIS_URL`            | _(gol)_           | URL Redis, de ex. `redis://localhost:6379`                                      |
-| `QUOTA_SATURATION_THRESHOLD`       | `0.5`             | 0..1; `>= prag` activează modul strict                                          |
-| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`             | 0..1; multiplicator pentru scorul combinat al politicii soft                    |
-| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`              | Numărul de zile înainte ca GC să elimine bucket-urile `quota_consumption` vechi |
+| Variabilă                          | Implicit | Descriere                                                           |
+| ---------------------------------- | -------- | ------------------------------------------------------------------- |
+| `QUOTA_STORE_DRIVER`               | `sqlite` | Driver de utilizat: `sqlite` sau `redis`                            |
+| `QUOTA_STORE_REDIS_URL`            | _(gol)_  | Redis URL, de exemplu `redis://localhost:6379`                      |
+| `QUOTA_SATURATION_THRESHOLD`       | `0.5`    | 0..1; `>= threshold` activează modul strict                         |
+| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`    | 0..1; multiplicator pentru scorul combinat soft-policy              |
+| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`     | Cu zile înainte ca GC să elimine vechile găleți `quota_consumption` |
 
-Setările BD (`quotaStore.*`) suprascriu variabilele de mediu.
+setările DB (`quotaStore.*`) suprascriu vars.
 
 ---
 

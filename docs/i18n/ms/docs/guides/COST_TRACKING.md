@@ -82,15 +82,37 @@ Nama model dinormalisasi dahulu (awalan laluan pembekal seperti `openai/` atau `
 
 ### Cara perbelanjaan direkodkan
 
-- Kos setiap permintaan dikira selepas respons dan direkodkan kebakaran-dan-lupa supaya ia tidak sekali-kali menambah kependaman kepada pelanggan. Penggunaan kuota dikongsi dijadualkan pada tanda gelung acara seterusnya melalui [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Kos setiap permintaan dikira semasa permintaan selesai. Penggunaan kuota dikongsi dijadualkan pada tanda gelung acara seterusnya melalui [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
 - Perbelanjaan kunci API ditimbal dan disiram secara berkelompok oleh [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (selang siram 60s lalai, penimbal 1,000 kemasukan). Boleh ditala melalui:
 
-  | Env var                             | Lalai   | Tujuan                                 |
-  | ----------------------------------- | ------- | -------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Selang siram dalam milisaat.           |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Masukan buffer maksimum sebelum siram. |
+  | Env var                             | Lalai   | Tujuan                                   |
+  | ----------------------------------- | ------- | ---------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Selang siram dalam milisaat.             |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Masukan penimbal maksimum sebelum siram. |
 
-Angka kos papan pemuka ialah** bukan** dibaca daripada jumlah dolar setiap baris yang disimpan — ia dikira semula dengan segera daripada kiraan token dan jadual harga semasa setiap kali titik akhir analitik dijalankan. Ini bermakna membetulkan harga yang salah (dan penyegerakan semula) mengemas kini anggaran kos sejarah secara retroaktif.
+Kos lebih suka caj yang dilaporkan pembekal yang tepat (`provider_cost_usd`), kemudian petikan permintaan harga katalog (`calculated_cost_usd`), kemudian harga semula token daripada katalog semasa. Kos yang disimpan tidak dicaj semula melalui kiraan token mereka. Baris token sahaja warisan masih berubah apabila harga katalognya berubah.
+
+### OCR dan embeddings
+
+- Permintaan `/v1/ocr` yang berjaya menggunakan `usage_info.pages_processed` huluan , bukan julat halaman yang diminta atau bilangan objek halaman yang dikembalikan. Anggaran ialah halaman × `ocr_cost_per_page` ( USD/page mutlak,** bukan** USD/million).
+- Permintaan dengan anotasi dokumen atau kotak sempadan memerlukan tarif `ocr_cost_per_annotated_page` yang berasingan. Tanpa itu, kos masih tidak diketahui; tarif OCR biasa tidak diganti secara senyap.
+- LiteLLM sync memetakan medan `annotation_cost_per_page` huluannya ke dalam `ocr_cost_per_annotated_page`, mengekalkan nilai USD/page mutlak dan entri anotasi sahaja, termasuk sifar eksplisit. Medan kanonik yang dibekalkan diutamakan; nilai alias tidak sah diabaikan. Penggantian harga pengguna mengekalkan keutamaan biasa mereka. Lihat [kunci harga OCR LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- penggunaan OCR menyimpan kiraan halaman, harga seunit, kos USD yang dikira, kunci API dan sambungan yang dipilih. Halaman tidak pernah diwakili sebagai token. Log panggilan mengandungi metadata pengebilan, bukan dokumen URLs, PDF bait atau teks yang diekstrak.
+- Permintaan `/v1/embeddings` yang berjaya merekodkan satu baris penggunaan bagi setiap kelompok fizikal, termasuk kumpulan berasingan yang diselesaikan dalam milisaat yang sama. Caj yang dilaporkan pembekal diutamakan daripada anggaran token; pembalut kombo tidak menambah caj.
+- Sejarah penggunaan, analisis Kos, tetingkap provider/account, had perbelanjaan kunci API, lejar kos permintaan dan rollup penggunaan harian termasuk caj ini. Kekunci tanpa log mengekalkan perakaunan berangka tanpa mengekalkan teks sumber.
+- Kehilangan penggunaan atau tarif adalah** tidak diketahui** , bukan percuma: pengepala kos tindak balas ditinggalkan dan dasar penggunaan tanpa harga sedia ada digunakan pada kunci API terhad. Kadar sifar yang dikonfigurasikan secara eksplisit kekal penggunaan kos sifar yang sah.
+
+Ini adalah perakaunan hadapan sahaja. Panggilan OCR/embedding lama yang tidak pernah menulis sejarah penggunaan tidak boleh dibina semula daripada penghijrahan ini. Anggaran katalog ialah anggaran USD, bukan invois dan tidak termasuk penukaran mata wang, cukai atau diskaun.
+
+### Ucapan dan imej
+
+- Percubaan `/v1/audio/transcriptions`, `/v1/audio/speech` dan penjanaan imej yang berjaya berkongsi perakaunan berangka. Panggilan terus dan kombo membawa kekunci API pemanggil dan sambungan yang dipilih; pembalut kombo tidak pernah menambah debit kedua.
+- USD yang dilaporkan pembekal memenangi anggaran katalog, termasuk caj sifar yang jelas. OpenRouterJSON `usage.cost` dinormalkan kepada `cost_usd`. Jika tidak, token yang diukur menggunakan harga token, saat transkripsi menggunakan harga sesaat, input pertuturan menggunakan kiraan aksara Unicode dan imej harga rata menggunakan nombor yang sebenarnya dikembalikan, bukan `n` yang diminta.
+- Binari OpenRouter TTS tidak mempunyai badan penggunaan JSON. Selepas audio selesai atau pemanggil membatalkan, OmniRoute menanyakan ID penjanaannya pada** sama** asal OpenRouter dikonfigurasikan. Permintaan EU tidak pernah kembali kepada asal global. Ini ialah carian terhad, baca sahaja; sintesis tidak dicuba semula untuk perakaunan. Rekod pengebilan boleh muncul selepas audio selesai: carian semula dijalankan di latar belakang sehingga kira-kira 52 saat, termasuk tarikh akhir rangkaian.
+- Semasa carian itu, respons audio mempunyai `X-OmniRoute-Cost-Status: pending` dan tiada pengepala kos respons. Caj terakhirnya muncul dalam sejarah penggunaan, analitik dan lejar utama selepas penyelarasan. Jika metadata tidak tersedia, petikan tarif yang dikonfigurasikan digunakan; jika tidak kos tetap tidak diketahui.
+- Saat, aksara dan kiraan imej mempunyai medan unit pengebilan yang berasingan, tidak pernah mengira token palsu. Perakaunan hanya mengekalkan penggunaan berangka, bukan teks pertuturan, transkrip atau bait imej. Pengecualian imej tidak berharga sedia ada tidak berubah: tarif imej yang benar-benar hilang tidak baru mengunci kunci terhad dan respons mengetepikan pengepala kos dan bukannya mengisytiharkan panggilan percuma. Kegagalan kedai harga masih mengekalkan bukti penggunaan untuk penguatkuasaan yang gagal ditutup.
+
+Tiada caj speech/image sejarah dicipta atau diisi semula. Bil pembekal kekal sebagai rujukan untuk invois dan untuk panggilan yang cajnya tidak dilaporkan.
 
 ---
 

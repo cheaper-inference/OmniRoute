@@ -403,52 +403,53 @@ Wannan yana amfani da API na ajiyar kwafi ta kan layi na SQLite — babu matsala
 
 ---
 
-## Daidaita Aiki
+## Tuning Performance
 
-### Yanayin WAL
+### WAL Mode
 
-Ana kunna WAL ta tsohuwa. Don ayyukan da ke yawan rubutu, yi la’akari da:
+WAL yana kunna ta tsohuwa. Don manyan ayyuka na rubutu, la'akari:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Yi checkpoint bayan kowane shafi 1000
-PRAGMA journal_size_limit = 67108864;  -- Iyakar WAL ta 64MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute baya saita `journal_size_limit`. Wurin bincike yana motsa firam ɗin WAL zuwa babban fayil, amma fayil ɗin WAL yana riƙe girman girman sa. Mai gadin `OMNIROUTE_WAL_GUARD_MAX_MB` yayi kashedi da gudu `wal_checkpoint(RESTART)`; ba hular girman faifai ba ce.
 
 ### Fihirisa
 
-Muhimman fihirisa don ingantaccen aiki (migrations ne ke ƙirƙirar su ta atomatik):
+Maɓallin maɓalli don yin aiki ( ƙaura ta ƙirƙira ta atomatik):
 
-- `idx_models_provider` — nemo samfura bisa provider
-- `idx_combo_targets_combo_id` — faɗaɗa combo target
-- `idx_usage_history_api_key_timestamp` — nazarin amfani
-- `idx_quota_snapshots_api_key_window` — bin diddigin quota
-- `idx_call_logs_timestamp` — tambayoyin rajistar kira
+- `idx_models_provider` — samfurin duba ta mai bayarwa
+- `idx_combo_targets_combo_id` — combo manufa fadada
+- `idx_usage_history_api_key_timestamp` — amfani analytics
+- `idx_quota_snapshots_api_key_window` — kwatance tracking
+- `idx_call_logs_timestamp` — kira log queries
 
-Don ƙara sabon fihirisa, ƙirƙiri migration:
+Don ƙara sabon fihirisar, ƙirƙiri ƙaura:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### I/O Mai Amfani da Taswirar Ƙwaƙwalwa
+### Ƙwaƙwalwar taswira I/O
 
-Ga manyan ma’ajiyar bayanai sosai (>10GB), ana iya daidaita memory mapping ta hanyar SQLite pragma:
+Don manyan bayanai (> 10GB), ana iya daidaita taswirar ƙwaƙwalwar ajiya ta hanyar SQLite pragma:
 
 ```sql
--- Saita ta SQLite pragma (daidaita a core.ts ko runtime)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Matsewa
+### Ƙarfafawa
 
-OmniRoute instances da ke aiki na dogon lokaci suna amfana daga gudanar da `VACUUM` lokaci-lokaci:
+Misalin OmniRoute masu tsayi suna amfana daga `VACUUM` lokaci-lokaci:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Gudanar da shi kowane wata a lokutan ƙarancin zirga-zirga. (Yanayin WAL yana rage buƙatar hakan, amma ba ya kawar da ita gaba ɗaya.)
+Gudu kowane wata a lokacin taga masu ƙarancin zirga-zirga. (Yanayin WAL yana rage buƙata, amma baya kawar da shi.)
 
 ---
 

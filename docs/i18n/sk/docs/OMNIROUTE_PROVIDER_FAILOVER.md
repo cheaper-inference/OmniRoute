@@ -4,10 +4,20 @@
 
 ---
 
-Zlyhania sa klasifikujú pred prijatím rozhodnutia o opakovaní pokusu.
+Zlyhania sa klasifikujú pred prijatím rozhodnutia o opätovnom pokuse.
 
-Pri dočasných zlyhaniach, ako sú vypršanie časového limitu, sieťové chyby, limity frekvencie požiadaviek a odpovede poskytovateľa 5xx, sa môže použiť záložný poskytovateľ. Chyby autentifikácie, chyby oprávnení, neplatné požiadavky, nedostupné modely a neznáme zlyhania sa neopakujú bez rozmyslu.
+Prechodné zlyhania, ako sú časové limity, chyby siete, limity rýchlosti a odpovede poskytovateľa 5xx, môžu zlyhať. Vyčerpaná kvóta alebo kredit (kvóta 429 alebo 402 Vyžaduje sa platba) sa nikdy nezopakuje u toho istého poskytovateľa, ale dôjde k zlyhaniu u iného poskytovateľa, ktorého kvóta je samostatná. Chyby overovania, chyby povolení, neplatné požiadavky, nedostupné modely a neznáme zlyhania nie sú opakovane skúšané naslepo.
 
-Predvolená politika medzi poskytovateľmi povoľuje najviac tri pokusy u poskytovateľov, opakuje pokusy pri limitoch frekvencie požiadaviek a vypršaní časového limitu a udržiava administratívne zakázanie oddelené od dočasného stavu ističa.
+Predvolená politika medzi poskytovateľmi povoľuje až tri pokusy poskytovateľa, limity počtu opakovaní a časové limity, zlyhanie pri vyčerpaní kvóty a udržiava zablokovanie správy oddelené od stavu dočasného okruhu.
 
-Stavy ističa sú `closed`, `open` a `half_open`. Po uplynutí čakacej lehoty sa naplánuje časovo obmedzená skúšobná požiadavka; úspešná skúšobná požiadavka istič uzavrie a neúspešná ho znova otvorí.
+## Kde platí
+
+- **kombá** zlyhanie medzi ich cieľmi podľa vlastnej stratégie a nastavenia komba.
+- **Holé ID modelu** (bez predpony `provider/` ), ktorú poskytuje niekoľko aktívnych poskytovateľov, bez kombinácie tohto presného názvu, sa najprv odošle výberom z odvodenia poskytovateľa. Ak tento pokus zlyhá tak, že politika zlyhá, rovnaká požiadavka sa odošle ďalšiemu aktívnemu poskytovateľovi, ktorý poskytuje ID. Odpoveď nesie `x-omniroute-fallback-attempts` s počtom skúšaných poskytovateľov pred tým, ktorý odpovedal.
+  - Každý náhradník je autorizovaný presne tak, ako keby si ho vybral záver. Cieľ, ktorý kľúč API blokuje alebo nepripúšťa, je preskočený bez upstream volania a klient dostane skutočnú upstream chybu, nie odmietnutie politiky pre cieľ, ktorý nikdy nepomenoval.
+  - Iba neúspešná odpoveď sa posunie ďalej: po prvom streamovanom byte nič nezlyhá.
+  - Núdzová výmena záložného modelu sa použije až po zlyhaní každého poskytovateľa požadovaného modelu.
+  - Žiadosť pripojená k pripojeniu (`x-omniroute-connection`) na ňom zostane.
+  - Predpona id (`provider/model`) sa nikdy nepresmeruje k inému poskytovateľovi.
+
+Stavy obvodu sú `closed`, `open` a `half_open`. Cooldown naplánuje ohraničenú sondu; úspešná sonda uzatvorí okruh a neúspešná sonda ho znovu otvorí.

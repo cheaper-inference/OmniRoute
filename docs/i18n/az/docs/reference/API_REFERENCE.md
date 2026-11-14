@@ -818,6 +818,43 @@ Web/search provayderi abstraksiya (Tavily, Brave, Exa, Serper və s.).
 
 **Auth:** Daşıyıcı API açarı (`extractApiKey` + `isValidApiKey`). Axtarış siyasəti `enforceApiKeyPolicy` vasitəsilə həyata keçirilir.
 
+### search/fetch birləşmələri adlandırıldı
+
+Həm `POST /v1/search`, həm də `POST /v1/web/fetch` `model` saxlanmış kombinasiya adı kimi qəbul edir. `model` və ya açıq `provider` istifadə edin; hər iki qaytarmanın göndərilməsi `400`. Hər iki sahə olmadan mövcud avtomatik provayder seçimi dəyişməz olaraq qalır.
+
+Həm Combo Builder, həm də onun Əlavə Model kataloqu, hətta onların LLM model siyahısı olmadıqda belə, qoşulmuş provayderlər üçün yerli veb-əməliyyat qeydlərini ifşa edir. Serper göstərir** Veb axtarışı** ; Tavily göstərir** Veb axtarışı / Səhifənin çıxarılması** , və yalnız gətirmə təminatçıları göstərir** Səhifənin çıxarılması** . Həmişə olduğu kimi giriş və hesabı seçin. Tək Tavily girişi hər iki veb son nöqtəsinə xidmət edir; bu əməliyyat qeydləri yalnız söhbət üçün müştəri seçicilərinə və ya söhbət modeli problarına əlavə edilmir.
+
+Məsələn, yaradın** prioritet** bu sifarişli hədəflərlə `shared-free` adlı kombo:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+Sonra hər səthdə eyni adı istifadə edin:
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+Axtar Tavily sonra Serper hesab edir; gətirmək Tavily sonra Jina Reader hesab edir; chat xüsusi search/fetch provayderlərini atlayır və OpenAI hesab edir. Uyğunluq model adındakı sözlərdən deyil, search/fetch icraçı reyestrlərindən gəlir. Filtrləmə etimadnamənin seçilməsi və göndərilməsindən əvvəl həyata keçirilir və heç vaxt saxlanmış kombinatı redaktə etmir.
+
+Qeyri-chat qabiliyyəti marşrutları `priority`, `fill-first`, `round-robin`, `weighted`, `random`, `strict-random`, `least-used` və `p2c` dəstəkləyir. `fusion`, `pipeline` və `context-relay` kimi yalnız söhbət üçün sintez strategiyaları axtarışa və ya yaradılan mediaya səssizcə tətbiq edilmək əvəzinə qeyri-chat marşrutlarında rədd edilir. Mövcud kombinə edilmiş mühərrik yuxarı axın kvota xətaları da daxil olmaqla sifarişli geri dönüşü idarə edir və addım IDs, hesab sancaqları, hər addım hesab icazə siyahıları, iç-içə istinadlar, zəng edənin connection/quota əhatə dairəsi və kombinə giriş siyasətini saxlayır. Nəticələr faktiki provayder daxil olmaqla, öz doğma search/fetch sxemini saxlayır; `X-OmniRoute-Combo-Trace` marşrutlaşdırma qərarını müəyyən edir. Naməlum kombinlər `404` qaytarır; qeyri-aktiv kombinasiyalar və uyğun hədəfləri olmayan birləşmələr `400` qaytarır.
+
+Hər bir kombinasiya cəhdi bir açıq provayderdən istifadə edir. O, kombinin arxasında yerli avtomatik provayder hovuzunu işə sala bilməz. Açıq-aşkar provayder sorğuları mövcud tək provayder davranışını saxlayır. Xüsusi search/fetch provayderlərini hədəf alan birbaşa söhbət sorğuları OpenAI tipli icraçıya keçmək əvəzinə, işlək JSON `400` qaytarır.
+
+### Qabiliyyət üçün xüsusi birləşmiş marşrutlar
+
+Saxlanılan kombinlərdə açarları API imkanları olan `routes` obyekti ola bilər. Hər marşrut öz hədəf siyahısına, strategiyasına və iş vaxtı konfiqurasiyasına malikdir. Ən yüksək səviyyəli `models`, `strategy` və `config` köhnəyə uyğun Chat planı olaraq qalır; `routes` olmayan köhnə kombinlər dəyişməz işləməyə davam edir.
+
+Dəstəklənən marşrut düymələri `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`, `image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`, `audio-translations` və `audio-generation` dir . Son nöqtənin proyeksiyası etimadnamənin seçilməsi, qiymətləndirilməsi və ya göndərilməsindən əvvəl baş verir. İç içə daxil edilmiş kombin istinadları eyni imkan üçün uşaq kombinasiyasının marşrutunu seçir.
+
+`POST /v1/music/generations` və `POST /v1/ocr` `model`-də kombinasiya adını qəbul edir. Doğma ElevenLabs uyğun `POST /v1/music` həmçinin `model_id`-də kombinasiya adını qəbul edir, lakin bu yerli son nöqtədə istifadə edilə bilən hər bir hədəf ElevenLabs musiqi modeli olmalıdır ki, onun ikili cavab müqaviləsi qorunsun. `POST /v1/sound-generation` eyni yerli-ikili məhdudiyyət altında `model_id` -də `audio-generation` kombinasiyasını qəbul edir. Heterojen musiqi provayderləri üçün `/v1/music/generations` istifadə edin.
+
 **Auto-select:** without `provider`, the cheapest provider with a configured connection runs first and the next cheapest is the failover. Free last-resort providers (`duckduckgo-free`) are used only when nothing else is configured. A self-hosted SearXNG counts as configured once its connection stores a real `baseUrl` (not the catalog default `http://localhost:8888/search`): it then ranks as a $0 provider ahead of keyed ones, with the cheapest keyed provider as failover, including when SearXNG answers 400, 401, 403 or 404. A `baseUrl` that is not a valid `http(s)` URL or that points at a cloud-metadata address does not count. A SearXNG connection that stores a token ranks this way only over `https://` or loopback `http://`. Over remote plain `http://` it is never a failover and stays a last resort, used only when no other provider is configured or when requested by name, so it does send the token in cleartext in those two cases.
 
 ### Exa və Tavily `provider_options`
@@ -845,23 +882,23 @@ Xərclərin uçotu Exa-nın öz qiymətinə uyğun gələn Exa istisna olmaqla, 
 
 ---
 
-## Vebdən Gətirmə API-si
+## Web Fetch API
 
-Konfiqurasiya edilmiş vebdən-gətirmə provayderi (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract) vasitəsilə URL-dən məzmun çıxarır.
+Konfiqurasiya edilmiş veb-gəlmə provayderi (Firecrawl, Jina Reader, Tavily Extract, TinyFish Fetch, Çevik Çıxarış, Paralel Çıxarış, Keenable Fetch) vasitəsilə məzmunu URL dan çıxarın.
 
-Parallel Extract (`parallel-search`, Parallel Search ilə eyni API açarı) yalnız Markdown qaytarır — istənilən digər `format` dəyəri `400` nəticələnir — və məzmunu 100.000 simvolla məhdudlaşdırır. Hədəf səhifənin özündən məzmun çıxarıla bilmədikdə, upstream bunu HTTP 200 daxilində bildirir; OmniRoute bunu sabit mesajla `422` kimi təqdim edir.
+Paralel Çıxarış (`parallel-search`, Paralel Axtarış ilə eyni API açarı) yalnız Markdown-u qaytarır — hər hansı digər `format` `400` — dir və məzmunu 100.000 simvolla başlar. Hədəf səhifənin özü çıxarıla bilmədikdə, yuxarı axın onu HTTP 200 daxilində bildirir; OmniRoute səthlər ki, sabit mesajı olan `422` kimi.
 
-| Method | Path            | Description                                                               |
-| ------ | --------------- | ------------------------------------------------------------------------- |
-| POST   | `/v1/web/fetch` | URL-i gətirir/skrep edir — gövdə `v1WebFetchSchema` tərəfindən yoxlanılır |
+Keenable Fetch (`keenable-search`) həmçinin yalnız Markdown-u qaytarır (hər hansı digər `format` `400` dir) və məzmunu 100.000 simvolla əhatə edir. O, açarsız işləyir: heç bir əlaqəsi olmayan açıq `provider: "keenable-search"` sorğusu Keenable-in açarsız son nöqtəsindən istifadə edir (İP tarif limitləri). Konfiqurasiya edilmiş açar yalnız bu məhdudiyyətləri qaldırır; avtomatik seçim yalnız açar konfiqurasiya edildikdə Keenable-dən istifadə edir.
 
-**Autentifikasiya:** Bearer API açarı (`extractApiKey` + `isValidApiKey`). Siyasət `enforceApiKeyPolicy` vasitəsilə tətbiq edilir.
+| Metod | Yol             | Təsvir                                                                     |
+| ----- | --------------- | -------------------------------------------------------------------------- |
+| POST  | `/v1/web/fetch` | Fetch/scrape a URL — bədən `v1WebFetchSchema` tərəfindən təsdiq edilmişdir |
 
-**Kvotadan xəbərdar ehtiyat keçidi (#8297):** açıq `provider` göstərilmədikdə, hovuz
-(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) sabit
-prioritet sırası ilə (ilk uyğun provayderi seçərək) işlənir — sürət limiti tətbiq edilmiş, lakin konfiqurasiya olunmuş provayder sorğunu dərhal dayandırmaq əvəzinə ötürülür və yenidən cəhd edilə bilən/kvota ilə bağlı upstream xətası (həmişə HTTP 429; Firecrawl/Tavily/TinyFish kvota tipli pulsuz səviyyələri üçün 402/403 — Jina Reader üçün deyil və adi 400 səhv sorğusu üçün heç vaxt deyil) sorğu zamanı növbəti, hələ sınanmamış autentifikasiya olunmuş provayderə ötürülür. Hovuzdakı bütün provayderlərin kvotası tükəndikdə endpoint əvvəlki ümumi `400` əvəzinə `Retry-After` başlığı ilə vahid `429` qaytarır. Açıq `provider` tələb edildikdə isə səssiz ehtiyat keçidi yoxdur — sürət limiti tətbiq edilmiş və ya xətalı açıq provayder öz xətasını qaytarır (sürət limiti olduqda `429`, əks halda upstream statusu).
+**Auth:** Daşıyıcı API açarı (`extractApiKey` + `isValidApiKey`). Siyasət `enforceApiKeyPolicy` vasitəsilə həyata keçirilir.
+
+Adlandırılmış birləşmələr gətirmə üçün xüsusi seçimləri və cavabları qoruyaraq yuxarıdakı [`model` marşrutlaşdırma müqaviləsindən](#named-searchfetch-combinations) istifadə edir.
+
+**Quota-aware fallback (#8297):** when neither `provider` nor `model` is given, the pool (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` → `parallel-search` → `keenable-search`) is walked in fixed priority order (fill-first) — a rate-limited-but-configured provider is skipped instead of short-circuiting the request, and a retryable/quota upstream failure (HTTP 429 always; 402/403 for Firecrawl/Tavily/TinyFish quota-style free tiers — not for Jina Reader, and never for a plain 400 bad request) falls through to the next untried credentialed provider at request time. When every provider in the pool is exhausted, the endpoint returns a single `429` (with a `Retry-After` header) instead of the previous generic `400`. When an explicit `provider` is requested, there is **no** silent fallback — a rate-limited or failing explicit provider surfaces its own error (`429` if rate-limited, otherwise the upstream status).
 
 ---
 
@@ -923,35 +960,26 @@ CLI `base_url + /responses` ünvanını WebSocket-ə yüksəldir və OmniRoute o
 
 ---
 
-## Kvotalar və Problemlər üzrə Hesabat
+## Kvotalar və Məsələlər Hesabatı
 
-| Metod | Yol                 | Təsvir                                                                                                    |
-| ----- | ------------------- | --------------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/quotas/check`  | Qeydiyyatdan keçmiş açarı təqdim etməzdən əvvəl `provider` + `accountId` üçün kvotanı əvvəlcədən yoxlayır |
-| POST  | `/v1/issues/report` | GitHub-a kvota/açar təqdimetmə xətası barədə məlumat verir (`GITHUB_ISSUES_REPO` + token tələb olunur)    |
+| Metod | Yol                 | Təsvir                                                                                                |
+| ----- | ------------------- | ----------------------------------------------------------------------------------------------------- |
+| GET   | `/v1/quotas/check`  | Qeydə alınmış açarı verməzdən əvvəl `provider` + `accountId` üçün kvotanı əvvəlcədən təsdiqləyin      |
+| POST  | `/v1/issues/report` | quota/key buraxılışının uğursuzluğunu GitHub ə bildirin ( `GITHUB_ISSUES_REPO` + nişanı tələb olunur) |
 
-**Autentifikasiya:** Bearer API açarı (`isAuthenticated`).
+**Auth:** `/v1/quotas/check` Daşıyıcı API açarını (`isAuthenticated`) götürür. `/v1/issues/report` yalnız idarəetmə üçündür (`requireManagementAuth`), `/api/v1/registered-keys` kimi: idarə paneli sessiyası, yerli CLI nişanı və ya `manage`/`admin` əhatə dairəsi olan API açarı; yalnız nəticə çıxaran API düymələri `403` alır.
 
-### Kvota sessiyasının bərpası (istəyə bağlı)
+### Kvota sessiyasının bərpası (daxil olmaq)
 
-Terminal kvota xətası ilə (cavab gövdəsində kvotanın və ya kreditlərin tükəndiyi bildirilən
-`402`/`429`/`503`) nəticələnən axınsız `POST /v1/chat/completions` və ya `POST /v1/responses`
-sorğusu xətanı qaytarmaq əvəzinə gözləməyə alına və daha sonra yenidən icra oluna bilər. Çağıran tərəf
-hər sorğu üçün üç başlıqla bu funksiyanı aktivləşdirir:
+Terminal kvota xətası (bədəni kvota və ya kreditlərin tükəndiyini bildirən `402`/`429`/`503` ) ilə uğursuz olan, axın etməyən `POST /v1/chat/completions` və ya `POST /v1/responses` xətanı qaytarmaq əvəzinə park edilə və sonra yenidən oxuna bilər. Zəng edən şəxs üç başlıq ilə hər sorğuya qoşulur:
 
-| Başlıq                       | Dəyər                                             |
-| ---------------------------- | ------------------------------------------------- |
-| `x-omniroute-quota-recovery` | `auto`                                            |
-| `x-omniroute-session`        | sessiya ID-si, `[A-Za-z0-9._:-]{1,128}`           |
-| `x-omniroute-recovery-turn`  | sessiya daxilində unikal dönüş ID-si (eyni qayda) |
+| Başlıq                       | Dəyər                                          |
+| ---------------------------- | ---------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                         |
+| `x-omniroute-session`        | sessiya id, `[A-Za-z0-9._:-]{1,128}`           |
+| `x-omniroute-recovery-turn`  | sessiya daxilində unikal id çevir (eyni qayda) |
 
-Yalnız `stream: false`, alətlər, alət tarixçəsi və ya `previous_response_id` olmayan və
-`x-omniroute-connection` pin-i təyin edilməyən dönüşlər uyğun hesab olunur; həmçinin
-`STORAGE_ENCRYPTION_KEY` təyin edilməlidir (sorğu 24 saata qədər şifrələnmiş şəkildə saxlanılır). Cavab daha sonra
-`202` və `recovery.poll` ilə qaytarılır; `GET /v1/quota-recoveries/{id}` sorğusu ilə yoxlama aparılır
-(gözləmə zamanı `202`, tamamlandıqda bərpa edilmiş gövdə ilə `200`) və ya `DELETE` ilə ləğv edilir. Biletlər yalnız
-onları yaradan API açarına görünür. Nəticəsi qeyri-müəyyən olan təkrar icra iki dəfə göndərilmək əvəzinə
-`needs_confirmation` vəziyyəti ilə başa çatır. Mənbə: `src/lib/quota/quotaSessionRecovery.ts`.
+Yalnız alətləri, alət tarixçəsi və ya `previous_response_id` olmayan və `x-omniroute-connection` pinsiz `stream: false` növbələri uyğundur və `STORAGE_ENCRYPTION_KEY` təyin edilməlidir (sorğu 24 saata qədər şifrələnmiş şəkildə saxlanılır). Cavab daha sonra `recovery.poll` ilə `202` olur; sorğu `GET /v1/quota-recoveries/{id}` (`202` gözləyəndə, `200` tamamlandıqda bərpa edilmiş bədənlə) və ya `DELETE` ilə ləğv edin. Biletləri yalnız onları yaradan API açarı görə bilər. Nəticəsi qeyri-müəyyən olan təkrar oxunuş iki dəfə göndərilmək əvəzinə `needs_confirmation` ilə bitir. Mənbə: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1693,19 +1721,23 @@ OmniRoute hadisələri üçün çıxan vebhuk abunəlikləri (sorğunun tamamlan
 
 ---
 
-## Qeydiyyatdan Keçirilmiş Açarlar (Avtomatik İdarəetmə)
+## Qeydiyyatlı Açarlar (Avtomatik İdarəetmə)
 
-Gündəlik/saatlıq kvotalarla dəstəkləyici provayderə/hesaba qarşı API açarlarının verilməsi və rotasiyası üçün avtomatik açar idarəetməsi altsistemi tərəfindən istifadə olunur.
+Avtomatik açar idarəetmə alt sistemi tərəfindən daily/hourly kvotaları ilə dəstəklənən provider/account-ə qarşı API düymələrini buraxmaq və fırlatmaq üçün istifadə olunur.
 
-| Metod  | Yol                                   | Təsvir                                                                                                                                                                                                                  |
-| ------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Qeydiyyatdan keçirilmiş açarları siyahıla (yalnız maskalanmış prefiks)                                                                                                                                                  |
-| POST   | `/api/v1/registered-keys`             | Yeni qeydiyyatdan keçirilmiş açar ver — gövdə: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Xam açarı **yalnız bir dəfə** qaytarır. Kvota imtinası zamanı `429` qaytarır. |
-| GET    | `/api/v1/registered-keys/[id]`        | Qeydiyyatdan keçirilmiş açarın metadatasını əldə et (xam material yoxdur)                                                                                                                                               |
-| DELETE | `/api/v1/registered-keys/[id]`        | Qeydiyyatdan keçirilmiş açarı ləğv et                                                                                                                                                                                   |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Açıq ləğvetmə endpoint-i (DELETE ilə eyni təsirə malikdir)                                                                                                                                                              |
+| Metod  | Yol                                   | Təsvir                                                                                                                                                                                                             |
+| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/api/v1/registered-keys`             | Qeydiyyatdan keçmiş açarların siyahısı (yalnız maskalı prefiks)                                                                                                                                                    |
+| POST   | `/api/v1/registered-keys`             | Yeni qeydiyyatdan keçmiş açarı buraxın — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Xam açarı qaytarır** bir dəfə** . Kvotadan imtina zamanı `429` qaytarır. |
+| GET    | `/api/v1/registered-keys/[id]`        | Qeydə alınmış açarın metadatasını əldə edin (xammal yoxdur)                                                                                                                                                        |
+| DELETE | `/api/v1/registered-keys/[id]`        | Qeydə alınmış açarı ləğv edin                                                                                                                                                                                      |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Aydın ləğv son nöqtəsi ( DELETE ilə eyni effekt)                                                                                                                                                                   |
+| GET    | `/api/v1/providers/[provider]/limits` | Provayderin buraxılış qapaqlarını oxuyun                                                                                                                                                                           |
+| PUT    | `/api/v1/providers/[provider]/limits` | Provayderin buraxılış qapaqlarını təyin edin — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                       |
+| GET    | `/api/v1/accounts/[id]/limits`        | Hesabın buraxılış qapaqlarını oxuyun                                                                                                                                                                               |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Hesabın buraxılış qapaqlarını provayder marşrutu ilə eyni — təyin edin                                                                                                                                             |
 
-**Autentifikasiya:** idarəetmə sessiyası/API açarı (`requireManagementAuth`) — `/api/keys` ilə eyni qoruyucu: idarə paneli sessiyası, lokal CLI tokeni və ya `manage`/`admin` əhatə dairəsinə malik API açarı; yalnız inference üçün olan API açarları `403` alır. Həmçinin `/v1/quotas/check` və `/v1/issues/report` bölmələrinə baxın.
+**Auth:** idarəetmə session/API açarı (`requireManagementAuth`) — `/api/keys` ilə eyni qoruyucu: tablosuna sessiya, yerli CLI nişanı və ya `manage`/`admin` əhatə dairəsi olan API açarı; yalnız nəticə çıxaran API düymələri `403` alır. Həmçinin `/v1/quotas/check` və `/v1/issues/report` baxın.
 
 ---
 

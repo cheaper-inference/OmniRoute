@@ -86,7 +86,7 @@ Os nomes dos modelos são normalizados primeiro (os prefixos do caminho do prove
 
 ### Como os gastos são registrados
 
-- O custo por solicitação é calculado após a resposta e registrado como disparar e esquecer, para que nunca adicione latência ao cliente. O consumo da cota compartilhada é agendado no próximo tick do loop de eventos via [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- O custo por solicitação é calculado na conclusão da solicitação. O consumo da cota compartilhada é agendado no próximo tick do loop de eventos via [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
 - O gasto da chave de API é armazenado em buffer e liberado em lotes pelo [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (intervalo de liberação padrão de 60 segundos, buffer de 1.000 entradas). Ajustável via:
 
   | Variável ambiente                   | Padrão  | Propósito                                        |
@@ -94,7 +94,29 @@ Os nomes dos modelos são normalizados primeiro (os prefixos do caminho do prove
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Intervalo de liberação em milissegundos.         |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Máximo de entradas em buffer antes da liberação. |
 
-Os valores de custo do painel são** não** lidos a partir de um valor em dólares armazenado por linha — eles são recalculados dinamicamente a partir da contagem de tokens e da tabela de preços atual cada vez que o endpoint de análise é executado. Isso significa corrigir um preço errado (e ressincronizar) e atualizar as estimativas históricas de custos retroativamente.
+Os custos preferem uma cobrança exata informada pelo provedor (`provider_cost_usd`), depois um instantâneo de solicitação com preço de catálogo (`calculated_cost_usd`) e, em seguida, uma redefinição de preço do token do catálogo atual. Os custos armazenados não são cobrados novamente através da contagem de tokens. As linhas somente de token legado ainda mudam quando o preço de catálogo muda.
+
+### OCR e incorporações
+
+- Solicitações `/v1/ocr` bem-sucedidas usam `usage_info.pages_processed` upstream, não o intervalo de páginas solicitado ou o número de objetos de página retornados. A estimativa é de páginas × `ocr_cost_per_page` (absoluto USD/page,** não** USD/million).
+- Solicitações com anotações de documento ou caixa delimitadora exigem uma tarifa `ocr_cost_per_annotated_page` separada. Sem isso, o custo permanece desconhecido; a tarifa OCR normal não é substituída silenciosamente.
+- LiteLLM sync mapeia seu campo upstream `annotation_cost_per_page` em `ocr_cost_per_annotated_page`, retendo o valor USD/page absoluto e entradas somente de anotação, incluindo zero explícito. Um campo canônico fornecido tem precedência; valores de alias inválidos são ignorados. As substituições de preços do usuário mantêm a prioridade normal. Consulte [as chaves de preços OCR do LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- O uso OCR armazena a contagem de páginas, o preço unitário, o custo USD calculado, a chave API e a conexão selecionada. As páginas nunca são representadas como tokens. Os registros de chamadas contêm metadados de cobrança, não documentos URLs, PDF bytes ou texto extraído.
+- As solicitações `/v1/embeddings` bem-sucedidas registram uma linha de uso por lote físico, incluindo lotes separados concluídos no mesmo milissegundo. As cobranças informadas pelo provedor têm precedência sobre as estimativas simbólicas; wrappers combinados não adicionam cobrança.
+- O histórico de uso, a análise de custos, as janelas provider/account, os limites de gastos da chave de API, o livro-razão de custos de solicitação e os acúmulos de uso diário incluem essas cobranças. As chaves sem registro mantêm a contabilidade numérica sem reter o texto fonte.
+- O uso ou as tarifas ausentes são** desconhecido** , não gratuito: o cabeçalho de custo de resposta é omitido e a política de uso sem preço existente se aplica a chaves API limitadas. As taxas zero explicitamente configuradas permanecem válidas para uso de custo zero.
+
+Esta é uma contabilidade somente futura. Chamadas OCR/embedding antigas que nunca gravaram o histórico de uso não podem ser reconstruídas a partir desta migração. As estimativas de catálogo são estimativas USD, não uma fatura, e não incluem conversão de moeda, impostos ou descontos.
+
+### Fala e imagens
+
+- As tentativas bem-sucedidas `/v1/audio/transcriptions`, `/v1/audio/speech` e geração de imagens compartilham a contabilidade numérica. As chamadas diretas e combinadas carregam a chave API do chamador e a conexão selecionada; um wrapper combinado nunca adiciona um segundo débito.
+- USD informado pelo provedor vence uma estimativa de catálogo, incluindo uma cobrança zero explícita. OpenRouterJSON de `usage.cost` é normalizado para `cost_usd`. Caso contrário, os tokens medidos usam preços de token, os segundos de transcrição usam preços por segundo, a entrada de fala usa contagens de caracteres Unicode e as imagens de preço fixo usam o número realmente retornado, não o `n` solicitado.
+- O binário OpenRouter TTS não possui corpo de uso JSON. Depois que o áudio for concluído ou o chamador cancelar, OmniRoute consulta sua geração ID no** mesmo** origem OpenRouter configurada. Uma solicitação EU nunca retorna à origem global. Esta é uma pesquisa limitada e somente leitura; a síntese não é repetida para contabilização. Os registros de cobrança podem aparecer após o término do áudio: novas tentativas de pesquisa são executadas em segundo plano por até 52 segundos, incluindo prazos de rede.
+- Durante essa pesquisa, a resposta de áudio possui `X-OmniRoute-Cost-Status: pending` e nenhum cabeçalho de custo de resposta. Sua cobrança final aparece no histórico de uso, na análise e no livro principal após a reconciliação. Se os metadados não estiverem disponíveis, é utilizado um instantâneo tarifário configurado; caso contrário, o custo permanecerá desconhecido.
+- Contagens de segundos, caracteres e imagens têm campos de unidade de cobrança separados, nunca contagens de tokens falsos. A contabilidade retém apenas o uso numérico, não texto de fala, transcrições ou bytes de imagem. As isenções existentes para imagens sem preço permanecem inalteradas: uma tarifa de imagem genuinamente ausente não bloqueia novamente uma chave limitada e a resposta omite o cabeçalho de custo em vez de declarar a chamada gratuita. Uma falha na loja de preços ainda retém evidências de uso para aplicação de falha fechada.
+
+Nenhuma cobrança histórica speech/image é inventada ou preenchida. A faturação do prestador continua a ser a referência para faturas e chamadas cuja cobrança não foi reportada.
 
 ---
 
@@ -178,7 +200,7 @@ Tudo isso requer autenticação de gerenciamento (loopback/JWT, via `requireMana
 | `GET`    | `/api/pricing/sync`     | Status de sincronização atual.                                                                                                                                    |
 | `DELETE` | `/api/pricing/sync`     | Limpar apenas preços sincronizados com LiteLLM (`pricing_synced`); Os dados de models.dev são separados.                                                          |
 
-### Outros endpoints relevantes em termos de custo
+### Outros endpoints relevantes em termos de custos
 
 | Método | Ponto final                   | Propósito                                                                           |
 | ------ | ----------------------------- | ----------------------------------------------------------------------------------- |

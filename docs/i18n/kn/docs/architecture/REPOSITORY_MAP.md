@@ -241,10 +241,10 @@ src/
 | ಮಾಡ್ಯೂಲ್                         | ಉದ್ದೇಶ                                                                                                |
 | -------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | `components/`                    | ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಘಟಕ API: `packages/ui-kit` — ಮೇಲಿನ ಅಡಾಪ್ಟರುಗಳು `docs/architecture/DESIGN_SYSTEM.md` ನೋಡಿ |
-| `constants/iconMap.ts`           | `ICON_MAP`: ಪರದೆಗಳಿಂದ ಬಳಸಲಾಗುವ ಐಕಾನ್ ಹೆಸರುಗಳು → ಲುಸೈಡ್ ಘಟಕಗಳು (`<Icon>`)                              |
-| `constants/providers.ts`         | **381 ಪೂರೈಕೆದಾರರು** Zod ಮೌಲ್ಯೀಕರಣದೊಂದಿಗೆ (ಸತ್ಯದ ಮೂಲ)                                                  |
+| `constants/iconMap.ts`           | `ICON_MAP`: ಪರದೆಗಳಿಂದ ಬಳಸಲಾಗುವ ಐಕಾನ್ ಹೆಸರುಗಳು → ಲುಸಿಡ್ ಘಟಕಗಳು (`<Icon>`)                              |
+| `constants/providers.ts`         | **394 ಪೂರೈಕೆದಾರರು** Zod ಮೌಲ್ಯೀಕರಣದೊಂದಿಗೆ (ಸತ್ಯದ ಮೂಲ)                                                  |
 | `constants/cliTools.ts`          | ಬಾಹ್ಯ CLI ಟೂಲ್ ರಿಜಿಸ್ಟ್ರಿ                                                                             |
-| `constants/routingStrategies.ts` | **20 ರೂಟಿಂಗ್ ತಂತ್ರಗಳು** ಆದ್ಯತೆಗಳೊಂದಿಗೆ                                                                |
+| `constants/routingStrategies.ts` | **22 ರೂಟಿಂಗ್ ತಂತ್ರಗಳು** ಆದ್ಯತೆಗಳೊಂದಿಗೆ                                                                |
 | `constants/publicApiRoutes.ts`   | ಬೇರರ್ (ವಿರುದ್ಧ ನಿರ್ವಹಣೆ) ದೃಢೀಕರಣದ ಅಗತ್ಯವಿರುವ ಮಾರ್ಗಗಳು                                                 |
 | `constants/upstreamHeaders.ts`   | ಅಪ್ಸ್ಟ್ರೀಮ್ ವಿನಂತಿಗಳಿಗಾಗಿ ಶಿರೋಲೇಖ ನಿರಾಕರಣೆ                                                            |
 | `validation/schemas.ts`          | ~ 80 Zod ಸ್ಕೀಮಾಗಳು ( API ಒಪ್ಪಂದಗಳಿಗೆ ಸತ್ಯದ ಏಕೈಕ ಮೂಲ)                                                  |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — ಸ್ಟ್ರೀಮಿಂಗ್ ಎಂಜಿನ್ ವರ್ಕ್ಸ್ಪೇಸ್
+## `open-sse/` — ಸ್ಟ್ರೀಮಿಂಗ್ ಎಂಜಿನ್ ಕಾರ್ಯಕ್ಷೇತ್ರ
 
-ಪ್ರತ್ಯೇಕ npm ವರ್ಕ್ಸ್ಪೇಸ್ (`@omniroute/open-sse`). ವಿನಂತಿ ಪ್ರಕ್ರಿಯೆಗೊಳಿಸುವಿಕೆ + ಪೂರೈಕೆದಾರ ಕಾರ್ಯಗತಗೊಳಿಸುವಿಕೆಯನ್ನು ನಿರ್ವಹಿಸುತ್ತದೆ.
+npm ಕಾರ್ಯಸ್ಥಳವನ್ನು ಪ್ರತ್ಯೇಕಿಸಿ (`@omniroute/open-sse`). ವಿನಂತಿ ಪ್ರಕ್ರಿಯೆ + ಪೂರೈಕೆದಾರರ ಕಾರ್ಯಗತಗೊಳಿಸುವಿಕೆಯನ್ನು ನಿಭಾಯಿಸುತ್ತದೆ.
 
 ```
 open-sse/
-├── handlers/            # 16 ಫೈಲ್ಗಳು (12 ಹ್ಯಾಂಡ್ಲರ್ಗಳು + 4 ಸಹಾಯಕಗಳು): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, ಇತ್ಯಾದಿ.
-├── executors/           # 150 ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮಾಡ್ಯೂಲ್ಗಳು (BaseExecutor ಅನ್ನು ವಿಸ್ತರಿಸುವ ಕ್ಲಾಸ್ಗಳು + ಪ್ರತಿ ಪೂರೈಕೆದಾರನ ಸಹಾಯಕಗಳು)
-├── translator/          # ಫಾರ್ಮ್ಯಾಟ್ ಪರಿವರ್ತಕಗಳು (9 ವಿನಂತಿ, 9 ಪ್ರತಿಕ್ರಿಯೆ, 9 ಸಹಾಯಕಗಳು)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ ಸೇವಾ ಮಾಡ್ಯೂಲ್ಗಳು (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, ಇತ್ಯಾದಿ.)
-├── mcp-server/          # MCP ಸರ್ವರ್ (110 ಪರಿಕರಗಳು, 3 ಟ್ರಾನ್ಸ್ಪೋರ್ಟ್ಗಳು, 33 ಸ್ಕೋಪ್ಗಳು)
-├── config/              # ಪೂರೈಕೆದಾರ/ಮಾದರಿ ರಿಜಿಸ್ಟ್ರಿಗಳು, ಹೆಡರ್ ಕಾನ್ಫಿಗ್, ಮಾದರಿ ಅಲಿಯಾಸ್ಗಳು
-├── utils/               # TLS ಕ್ಲೈಂಟ್, ಪ್ರಾಕ್ಸಿ fetch/dispatcher, ನೆಟ್ವರ್ಕ್ ಸಹಾಯಕಗಳು
-├── index.ts             # ವರ್ಕ್ಸ್ಪೇಸ್ ಪ್ರವೇಶ ಬಿಂದು
-├── package.json         # ವರ್ಕ್ಸ್ಪೇಸ್ ಮ್ಯಾನಿಫೆಸ್ಟ್
-├── tsconfig.json        # ವರ್ಕ್ಸ್ಪೇಸ್ TS ಕಾನ್ಫಿಗ್
-└── types.d.ts           # ವರ್ಕ್ಸ್ಪೇಸ್ ಟೈಪ್ ಘೋಷಣೆಗಳು
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| ಪಥ                          | ಉದ್ದೇಶ                                                                               |
-| --------------------------- | ------------------------------------------------------------------------------------ |
-| `server.ts`                 | MCP ಸರ್ವರ್ ಜೀವನಚಕ್ರ (stdio + HTTP ಟ್ರಾನ್ಸ್ಪೋರ್ಟ್ಗಳು)                                 |
-| `httpTransport.ts`          | HTTP Streamable + SSE ಟ್ರಾನ್ಸ್ಪೋರ್ಟ್ಗಳು (`/api/mcp/sse`, `/api/mcp/stream`)          |
-| `audit.ts`                  | `mcp_tool_audit` ಟೇಬಲ್ಗೆ ಆಡಿಟ್ ಲಾಗಿಂಗ್                                               |
-| `scopeEnforcement.ts`       | ಪ್ರತಿ ಪರಿಕರದ ಸ್ಕೋಪ್ ಮೌಲ್ಯೀಕರಣ                                                        |
-| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json` ಗೆ ಆರೋಗ್ಯ ಹಾರ್ಟ್ಬೀಟ್                           |
-| `descriptionCompressor.ts`  | ಸಂದರ್ಭವನ್ನು ಉಳಿಸಲು ಪರಿಕರ ವಿವರಣೆಯ ಮೆಟಾಡೇಟಾವನ್ನು ಸಂಕುಚಿತಗೊಳಿಸುತ್ತದೆ                    |
-| `schemas/tools.ts`          | 36 ಮೂಲ ಪರಿಕರ ವ್ಯಾಖ್ಯಾನಗಳು + ಸ್ಕೋಪ್ಗಳು                                                |
-| `tools/advancedTools.ts`    | ಸುಧಾರಿತ ಪರಿಕರ ಅನುಷ್ಠಾನಗಳು                                                            |
-| `tools/memoryTools.ts`      | 3 ಮೆಮೊರಿ ಪರಿಕರಗಳು (ಹುಡುಕಾಟ/ಸೇರಿಸುವಿಕೆ/ತೆರವುಗೊಳಿಸುವಿಕೆ)                               |
-| `tools/skillTools.ts`       | 4 ಕೌಶಲ್ಯ ಪರಿಕರಗಳು (ಪಟ್ಟಿ/ಸಕ್ರಿಯಗೊಳಿಸುವಿಕೆ/ಕಾರ್ಯಗತಗೊಳಿಸುವಿಕೆ/ಕಾರ್ಯಗತಗೊಳಿಸುವಿಕೆಗಳು)    |
-| `tools/compressionTools.ts` | 5 ಸಂಕೋಚನ ಪರಿಕರಗಳು                                                                    |
-| `README.md`                 | ಆಂತರಿಕ MCP ಸರ್ವರ್ README (`docs/frameworks/MCP-SERVER.md` ನಿಂದ ಅಡ್ಡ-ಲಿಂಕ್ ಮಾಡಲಾಗಿದೆ) |
+| ಮಾರ್ಗ                       | ಉದ್ದೇಶ                                                                       |
+| --------------------------- | ---------------------------------------------------------------------------- |
+| `server.ts`                 | MCP ಸರ್ವರ್ ಜೀವನಚಕ್ರ (stdio + HTTP ಸಾರಿಗೆ)                                    |
+| `httpTransport.ts`          | HTTP ಸ್ಟ್ರೀಮಬಲ್ + SSE ಸಾರಿಗೆಗಳು (`/api/mcp/sse`, `/api/mcp/stream`)          |
+| `audit.ts`                  | `mcp_tool_audit` ಟೇಬಲ್ಗೆ ಲಾಗಿಂಗ್ ಅನ್ನು ಆಡಿಟ್ ಮಾಡಿ                            |
+| `scopeEnforcement.ts`       | ಪರ್-ಟೂಲ್ ಸ್ಕೋಪ್ ಮೌಲ್ಯೀಕರಣ                                                    |
+| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json` ಗೆ ಆರೋಗ್ಯ ಹೃದಯ ಬಡಿತ                    |
+| `descriptionCompressor.ts`  | ಸಂದರ್ಭವನ್ನು ಉಳಿಸಲು ಪರಿಕರ ವಿವರಣೆ ಮೆಟಾಡೇಟಾವನ್ನು ಕುಗ್ಗಿಸಿ                       |
+| `schemas/tools.ts`          | 36 ಬೇಸ್ ಟೂಲ್ ವ್ಯಾಖ್ಯಾನಗಳು + ಸ್ಕೋಪ್ಗಳು                                        |
+| `tools/advancedTools.ts`    | ಸುಧಾರಿತ ಉಪಕರಣದ ಅಳವಡಿಕೆಗಳು                                                    |
+| `tools/memoryTools.ts`      | 3 ಮೆಮೊರಿ ಉಪಕರಣಗಳು (search/add/clear)                                         |
+| `tools/skillTools.ts`       | 4 ಕೌಶಲ್ಯ ಉಪಕರಣಗಳು (list/enable/execute/executions)                           |
+| `tools/compressionTools.ts` | 5 ಕಂಪ್ರೆಷನ್ ಉಪಕರಣಗಳು                                                         |
+| `README.md`                 | ಆಂತರಿಕ MCP ಸರ್ವರ್ README ( `docs/frameworks/MCP-SERVER.md` ನಿಂದ ಅಡ್ಡ-ಸಂಪರ್ಕ) |
 
 ---
 
@@ -395,24 +395,24 @@ open-sse/
 
 ### ಉನ್ನತ ಮಟ್ಟದ ಮಾರ್ಗದರ್ಶಿಗಳು
 
-| ಡಾಕ್                        | ಉದ್ದೇಶ                                                                                   |
-| --------------------------- | ---------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | ಉನ್ನತ ಮಟ್ಟದ ಆರ್ಕಿಟೆಕ್ಚರ್, ಉಪವ್ಯವಸ್ಥೆಯ ನಕ್ಷೆ, ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಮೇಲ್ಮೈ                         |
-| `CODEBASE_DOCUMENTATION.md` | ಎಂಜಿನಿಯರಿಂಗ್ ಉಲ್ಲೇಖ: ಡೈರೆಕ್ಟರಿಗಳು, ಮಾಡ್ಯೂಲ್ಗಳು, ಸಂಪ್ರದಾಯಗಳು                              |
-| `FEATURES.md`               | v3.8 ಮುಖ್ಯಾಂಶಗಳೊಂದಿಗೆ ವೈಶಿಷ್ಟ್ಯ ಮ್ಯಾಟ್ರಿಕ್ಸ್                                             |
-| `USER_GUIDE.md`             | ಅಂತಿಮ-ಬಳಕೆದಾರ ಕೈಪಿಡಿ (ಸೆಟಪ್, ಮಾದರಿಗಳು, ಕಾಂಬೊಸ್, CLIs, ಆಡಿಯೋ, ಇತ್ಯಾದಿ.)                   |
-| `API_REFERENCE.md`          | ದೃಢೀಕರಣ ಮಾದರಿಯೊಂದಿಗೆAPI ಅಂತಿಮ ಬಿಂದು ಉಲ್ಲೇಖ                                               |
-| `openapi.yaml`              | OpenAPI 3.0 ಸ್ಪೆಕ್ (121 ಮಾರ್ಗಗಳು)                                                        |
-| `SETUP_GUIDE.md`            | ವಿಧಾನಗಳನ್ನು ಸ್ಥಾಪಿಸಿ (npm, npx, Docker, Electron, Termux, ಮೂಲ)                           |
-| `ENVIRONMENT.md`            | ಎಲ್ಲಾ env vars (~ 800 ದಾಖಲಿಸಲಾಗಿದೆ, ~ 3,050 ಸಾಲುಗಳು `.env.example`)                      |
-| `TROUBLESHOOTING.md`        | ಸಾಮಾನ್ಯ ದೋಷಗಳು + v3.8.0 ತಿಳಿದಿರುವ ಸಮಸ್ಯೆಗಳು                                              |
-| `RELEASE_CHECKLIST.md`      | ಪೂರ್ಣ ಬಿಡುಗಡೆಯ ಹರಿವು (ಕೌಶಲ್ಯಗಳು, ಹಸ್ಕಿ, ಸಾಂಪ್ರದಾಯಿಕ ಬದ್ಧತೆಗಳು, ನಿಯೋಜನೆ)                  |
-| `COVERAGE_PLAN.md`          | ವ್ಯಾಪ್ತಿ ಗುರಿಗಳು ಮತ್ತು ಪ್ರಸ್ತುತ ಸ್ಥಿತಿ                                                   |
-| `FREE_TIERS.md`             | ಕ್ಯುರೇಟೆಡ್ ಫ್ರೀ-ಟೈಯರ್ ಪೂರೈಕೆದಾರರು (48 + ಉಚಿತ + 11 OAuth)                                 |
-| `CLI-TOOLS.md`              | ಬಾಹ್ಯ CLI ಸಂಯೋಜನೆಗಳು + ಆಂತರಿಕ OmniRoute CLI                                              |
-| `I18N.md`                   | i18n ಆರ್ಕಿಟೆಕ್ಚರ್, ಒಂದು ಭಾಷೆಯನ್ನು ಸೇರಿಸುವುದು, 67 ಲೊಕೇಲ್ಗಳು                               |
-| `UNINSTALL.md`              | ಅನ್ಇನ್ಸ್ಟಾಲ್ ಹಂತಗಳನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸಿ                                                      |
-| `PROVIDER_REFERENCE.md`     | **ಸ್ವಯಂ-ರಚಿಸಲಾಗಿದೆ** 381 ಪೂರೈಕೆದಾರರ ಕ್ಯಾಟಲಾಗ್ (ರೀಜೆನ್: `npm run gen:provider-reference`) |
+| ಡಾಕ್                        | ಉದ್ದೇಶ                                                                                  |
+| --------------------------- | --------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | ಉನ್ನತ ಮಟ್ಟದ ಆರ್ಕಿಟೆಕ್ಚರ್, ಉಪವ್ಯವಸ್ಥೆಯ ನಕ್ಷೆ, ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಮೇಲ್ಮೈ                        |
+| `CODEBASE_DOCUMENTATION.md` | ಎಂಜಿನಿಯರಿಂಗ್ ಉಲ್ಲೇಖ: ಡೈರೆಕ್ಟರಿಗಳು, ಮಾಡ್ಯೂಲ್ಗಳು, ಸಂಪ್ರದಾಯಗಳು                             |
+| `FEATURES.md`               | v3.8 ಮುಖ್ಯಾಂಶಗಳೊಂದಿಗೆ ವೈಶಿಷ್ಟ್ಯ ಮ್ಯಾಟ್ರಿಕ್ಸ್                                            |
+| `USER_GUIDE.md`             | ಅಂತಿಮ-ಬಳಕೆದಾರ ಕೈಪಿಡಿ (ಸೆಟಪ್, ಮಾದರಿಗಳು, ಕಾಂಬೊಸ್, CLIs, ಆಡಿಯೋ, ಇತ್ಯಾದಿ.)                  |
+| `API_REFERENCE.md`          | ದೃಢೀಕರಣ ಮಾದರಿಯೊಂದಿಗೆAPI ಅಂತಿಮ ಬಿಂದು ಉಲ್ಲೇಖ                                              |
+| `openapi.yaml`              | OpenAPI 3.0 ಸ್ಪೆಕ್ (121 ಮಾರ್ಗಗಳು)                                                       |
+| `SETUP_GUIDE.md`            | ವಿಧಾನಗಳನ್ನು ಸ್ಥಾಪಿಸಿ (npm, npx, Docker, Electron, Termux, ಮೂಲ)                          |
+| `ENVIRONMENT.md`            | ಎಲ್ಲಾ env vars (~ 800 ದಾಖಲಿಸಲಾಗಿದೆ, ~ 3,050 ಸಾಲುಗಳು `.env.example`)                     |
+| `TROUBLESHOOTING.md`        | ಸಾಮಾನ್ಯ ದೋಷಗಳು + v3.8.0 ತಿಳಿದಿರುವ ಸಮಸ್ಯೆಗಳು                                             |
+| `RELEASE_CHECKLIST.md`      | ಪೂರ್ಣ ಬಿಡುಗಡೆಯ ಹರಿವು (ಕೌಶಲ್ಯಗಳು, ಹಸ್ಕಿ, ಸಾಂಪ್ರದಾಯಿಕ ಬದ್ಧತೆಗಳು, ನಿಯೋಜನೆ)                 |
+| `COVERAGE_PLAN.md`          | ವ್ಯಾಪ್ತಿ ಗುರಿಗಳು ಮತ್ತು ಪ್ರಸ್ತುತ ಸ್ಥಿತಿ                                                  |
+| `FREE_TIERS.md`             | ಕ್ಯುರೇಟೆಡ್ ಫ್ರೀ-ಟೈಯರ್ ಪೂರೈಕೆದಾರರು (48 + ಉಚಿತ + 11 OAuth)                                |
+| `CLI-TOOLS.md`              | ಬಾಹ್ಯ CLI ಸಂಯೋಜನೆಗಳು + ಆಂತರಿಕ OmniRoute CLI                                             |
+| `I18N.md`                   | i18n ಆರ್ಕಿಟೆಕ್ಚರ್, ಒಂದು ಭಾಷೆಯನ್ನು ಸೇರಿಸುವುದು, 67 ಲೊಕೇಲ್ಗಳು                              |
+| `UNINSTALL.md`              | ಅನ್ಇನ್ಸ್ಟಾಲ್ ಹಂತಗಳನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸಿ                                                     |
+| `PROVIDER_REFERENCE.md`     | **ಸ್ವಯಂ-ರಚಿಸಲಾಗಿದೆ** 394 ಪೂರೈಕೆದಾರರ ಕ್ಯಾಟಲಾಗ್ (regen: `npm run gen:provider-reference`) |
 
 ### ಉಪವ್ಯವಸ್ಥೆಯ ಡೀಪ್-ಡೈವ್ಸ್
 

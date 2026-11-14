@@ -403,28 +403,29 @@ sqlite3 ~/.omniroute/storage.sqlite ".backup /backups/omniroute-hot.db"
 
 ---
 
-## कार्यसम्पादन ट्युनिङ
+## प्रदर्शन ट्युनिङ
 
 ### WAL मोड
 
-WAL पूर्वनिर्धारित रूपमा सक्षम छ। धेरै लेखन हुने कार्यभारका लागि, निम्नलाई विचार गर्नुहोस्:
+WAL पूर्वनिर्धारित रूपमा सक्षम छ। उच्च-लेखन कार्यभारहरूको लागि, विचार गर्नुहोस्:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- प्रत्येक 1000 पृष्ठमा चेकपोइन्ट गर्नुहोस्
-PRAGMA journal_size_limit = 67108864;  -- 64MB WAL सीमा
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
 
-### इन्डेक्सहरू
+OmniRoute ले `journal_size_limit` सेट गर्दैन। चेकपोइन्टले WAL फ्रेमहरूलाई मुख्य फाइलमा सार्छ, तर WAL फाइलले यसको सबैभन्दा ठूलो आवंटित साइज राख्छ। `OMNIROUTE_WAL_GUARD_MAX_MB` गार्डले मात्र चेतावनी दिन्छ र `wal_checkpoint(RESTART)` चलाउँछ; यो डिस्क साइज टोपी होइन।
 
-कार्यसम्पादनका लागि मुख्य इन्डेक्सहरू (माइग्रेसनद्वारा स्वतः सिर्जना गरिएका):
+### अनुक्रमणिकाहरू
 
-- `idx_models_provider` — प्रदायकअनुसार मोडेल खोज
+कार्यसम्पादनका लागि प्रमुख अनुक्रमणिकाहरू (माइग्रेसनद्वारा स्वत: सिर्जना गरिएको):
+
+- प्रदायक द्वारा`idx_models_provider` — मोडेल लुकअप
 - `idx_combo_targets_combo_id` — कम्बो लक्ष्य विस्तार
-- `idx_usage_history_api_key_timestamp` — प्रयोग विश्लेषण
+- `idx_usage_history_api_key_timestamp` — उपयोग विश्लेषण
 - `idx_quota_snapshots_api_key_window` — कोटा ट्र्याकिङ
-- `idx_call_logs_timestamp` — कल लग क्वेरीहरू
+- `idx_call_logs_timestamp` — कल लग प्रश्नहरू
 
-नयाँ इन्डेक्स थप्न, एउटा माइग्रेसन सिर्जना गर्नुहोस्:
+नयाँ अनुक्रमणिका थप्न, माइग्रेसन सिर्जना गर्नुहोस्:
 
 ```sql
 -- 023_add_my_index.sql
@@ -433,22 +434,22 @@ CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 
 ### मेमोरी-म्याप गरिएको I/O
 
-धेरै ठूला डेटाबेसहरूका लागि (>10GB), SQLite pragma मार्फत मेमोरी म्यापिङ समायोजन गर्न सकिन्छ:
+धेरै ठूला डाटाबेसहरूको लागि (> 10GB), मेमोरी म्यापिङ SQLite pragma मार्फत समायोजन गर्न सकिन्छ:
 
 ```sql
--- SQLite pragma मार्फत सेट गर्नुहोस् (core.ts वा रनटाइममा समायोजन गर्नुहोस्)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### कम्प्याक्सन
+### कम्प्याक्शन
 
-लामो समयसम्म चल्ने OmniRoute इन्स्ट्यान्सहरूले बेलाबेलामा `VACUUM` चलाउँदा लाभ पाउँछन्:
+लामो समयदेखि चलिरहेको OmniRoute उदाहरणहरू कहिलेकाहीं `VACUUM` बाट लाभ उठाउँछन्:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-कम ट्राफिक हुने अवधिमा मासिक रूपमा चलाउनुहोस्। (WAL मोडले यसको आवश्यकता घटाउँछ, तर पूर्ण रूपमा हटाउँदैन।)
+कम ट्राफिक विन्डोको समयमा मासिक चलाउनुहोस्। (WAL मोडले आवश्यकता घटाउँछ, तर यसलाई हटाउँदैन।)
 
 ---
 

@@ -167,7 +167,7 @@ src/
 
 | မော်ဂျူး                                 | ရည်ရွယ်ချက်                                                                                                                                                                                                                                                                                                             |
 | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | A2A ပရိုတိုကော အလုပ်မန်နေဂျာ၊ ကျွမ်းကျင်မှု (၅) ခု၊ ထုတ်လွှင့်ခြင်း။                                                                                                                                                                                                                                                    |
+| `a2a/`                                   | A2A ပရိုတိုကော အလုပ်မန်နေဂျာ၊ ကျွမ်းကျင်မှု (၅) ခု၊ တိုက်ရိုက်လွှင့်ခြင်း။                                                                                                                                                                                                                                              |
 | `acp/`                                   | CLI Agent Registry (ပြည်တွင်း CLI ရှာဖွေတွေ့ရှိမှု — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md` ကိုကြည့်ပါ)                                                                                                                                                                                                             |
 | `api/`                                   | မျှဝေထားသော API အကူအညီများ (`requireManagementAuth`၊ အတည်ပြုချက်)                                                                                                                                                                                                                                                       |
 | `auth/`                                  | စက်ရှင်၊ စကားဝှက် ဟက်ခြင်း၊ တိုကင် အတည်ပြုခြင်း။                                                                                                                                                                                                                                                                        |
@@ -241,10 +241,10 @@ src/
 | မော်ဂျူး                         | ရည်ရွယ်ချက်                                                                                                          |
 | -------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | ဒက်ရှ်ဘုတ် အစိတ်အပိုင်း API: `packages/ui-kit` — ပေါ်ရှိ အဒက်တာများသည် `docs/architecture/DESIGN_SYSTEM.md` ကြည့်ပါ။ |
-| `constants/iconMap.ts`           | `ICON_MAP`: မျက်နှာပြင်များ → Lucide အစိတ်အပိုင်းများ (`<Icon>`) အသုံးပြုသည့် အိုင်ကွန်အမည်များ                      |
-| `constants/providers.ts`         | **381 ပံ့ပိုးပေးသည်။** Zod မှန်ကန်မှု (အမှန်တရားအရင်းအမြစ်) နှင့်အတူ                                                 |
+| `constants/iconMap.ts`           | `ICON_MAP`: စခရင်များ → Lucide အစိတ်အပိုင်းများ (`<Icon>`) အသုံးပြုသည့် အိုင်ကွန်အမည်များ                            |
+| `constants/providers.ts`         | **394 ပံ့ပိုးပေးသည်။** Zod မှန်ကန်မှု (အမှန်တရားအရင်းအမြစ်) နှင့်အတူ                                                 |
 | `constants/cliTools.ts`          | ပြင်ပ CLI ကိရိယာ မှတ်ပုံတင်ခြင်း                                                                                     |
-| `constants/routingStrategies.ts` | **လမ်းကြောင်း ဗျူဟာ 20** ဦးစားပေးများဖြင့်                                                                           |
+| `constants/routingStrategies.ts` | **လမ်းကြောင်းဗျူဟာ 22 ခု** ဦးစားပေးများဖြင့်                                                                         |
 | `constants/publicApiRoutes.ts`   | Bearer (vs စီမံခန့်ခွဲမှု) auth လိုအပ်သောလမ်းကြောင်းများ                                                             |
 | `constants/upstreamHeaders.ts`   | အထက်စီးကြောင်း တောင်းဆိုချက်များ အတွက် ခေါင်းစီး ငြင်းဆိုစာရင်း                                                      |
 | `validation/schemas.ts`          | ~ 80 Zod schemas ( API စာချုပ်များအတွက် အမှန်တရား၏ တစ်ခုတည်းသောအရင်းအမြစ်)                                           |
@@ -254,46 +254,46 @@ src/
 | `utils/circuitBreaker.ts`        | ပံ့ပိုးပေးသူ circuit breaker ( `docs/architecture/RESILIENCE_GUIDE.md` ကြည့်ပါ)                                      |
 | `utils/apiAuth.ts`               | API သော့အတည်ပြုခြင်း၊ နယ်ပယ်စစ်ဆေးခြင်း။                                                                             |
 | `utils/fetchTimeout.ts`          | ရေဆန်ရယူရန်အတွက်Timeout/abort ထုပ်ပိုးမှုများ                                                                        |
-| `utils/releaseNotes.ts`          | ပိတ်ထားသော v2/legacy ကြေငြာချက်ကို ခွဲခြမ်းစိတ်ဖြာခြင်း၊ ဒေသပြောင်းခြင်းနှင့် ID ထုတ်ပယ်ခြင်း                        |
+| `utils/releaseNotes.ts`          | ပိတ်ထားသော v2/legacy ကြေညာချက်ကို ခွဲခြမ်းစိတ်ဖြာခြင်း၊ ဒေသပြောင်းခြင်းနှင့် ID ထုတ်ပယ်ခြင်း                         |
 
 ---
 
-## `open-sse/` — Streaming Engine Workspace
+## `open-sse/` — လွှင့်အင်ဂျင်အလုပ်ခွင်
 
-သီးခြား npm workspace (`@omniroute/open-sse`) ဖြစ်သည်။ တောင်းဆိုချက် စီမံဆောင်ရွက်ခြင်းနှင့် provider လုပ်ဆောင်မှုကို ကိုင်တွယ်သည်။
+npm အလုပ်ခွင် (`@omniroute/open-sse`) ခွဲခြားပါ။ + ဝန်ဆောင်မှုပေးသူကို စီမံဆောင်ရွက်ရာတွင် တောင်းဆိုမှုကို ကိုင်တွယ်သည်။
 
 ```
 open-sse/
-├── handlers/            # ဖိုင် 16 ခု (handler 12 ခု + helper 4 ခု): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search စသည်
-├── executors/           # executor module 150 ခု (BaseExecutor ကို တိုးချဲ့ထားသော class များ + provider တစ်ခုချင်းအလိုက် helper များ)
-├── translator/          # Format converter များ (request 9 ခု၊ response 9 ခု၊ helper 9 ခု)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # service module ~80+ ခု (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM စသည်)
-├── mcp-server/          # MCP ဆာဗာ (tool 110 ခု၊ transport 3 ခု၊ scope 33 ခု)
-├── config/              # Provider/model registry များ၊ header config၊ model alias များ
-├── utils/               # TLS client၊ proxy fetch/dispatcher၊ network helper များ
-├── index.ts             # Workspace ဝင်ပေါက်
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
 ├── package.json         # Workspace manifest
 ├── tsconfig.json        # Workspace TS config
-└── types.d.ts           # Workspace type declaration များ
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| လမ်းကြောင်း                 | ရည်ရွယ်ချက်                                                                                   |
-| --------------------------- | --------------------------------------------------------------------------------------------- |
-| `server.ts`                 | MCP ဆာဗာ lifecycle (stdio + HTTP transport များ)                                              |
-| `httpTransport.ts`          | HTTP Streamable + SSE transport များ (`/api/mcp/sse`, `/api/mcp/stream`)                      |
-| `audit.ts`                  | `mcp_tool_audit` table သို့ audit log ရေးသားခြင်း                                             |
-| `scopeEnforcement.ts`       | Tool တစ်ခုချင်းအလိုက် scope အတည်ပြုစစ်ဆေးခြင်း                                                |
-| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json` သို့ ကျန်းမာရေးအခြေအနေ heartbeat ပေးပို့ခြင်း           |
-| `descriptionCompressor.ts`  | Context ချွေတာရန် tool ဖော်ပြချက် metadata ကို ချုံ့ခြင်း                                     |
-| `schemas/tools.ts`          | အခြေခံ tool definition 36 ခု + scope များ                                                     |
-| `tools/advancedTools.ts`    | အဆင့်မြင့် tool implementation များ                                                           |
-| `tools/memoryTools.ts`      | Memory tool 3 ခု (ရှာဖွေခြင်း/ထည့်ခြင်း/ရှင်းလင်းခြင်း)                                       |
-| `tools/skillTools.ts`       | Skill tool 4 ခု (စာရင်းပြုစုခြင်း/ဖွင့်ခြင်း/လုပ်ဆောင်ခြင်း/လုပ်ဆောင်မှုများ)                 |
-| `tools/compressionTools.ts` | Compression tool 5 ခု                                                                         |
-| `README.md`                 | အတွင်းပိုင်း MCP ဆာဗာ README (`docs/frameworks/MCP-SERVER.md` မှ အပြန်အလှန်လင့်ခ်ချိတ်ထားသည်) |
+| မဂ်                         | ရည်ရွယ်ချက်                                                                       |
+| --------------------------- | --------------------------------------------------------------------------------- |
+| `server.ts`                 | MCP ဆာဗာဘဝသံသရာ (stdio + HTTP ပို့ဆောင်မှုများ)                                   |
+| `httpTransport.ts`          | HTTP Streamable + SSE သယ်ယူပို့ဆောင်ရေးများ (`/api/mcp/sse`, `/api/mcp/stream`)   |
+| `audit.ts`                  | `mcp_tool_audit` ဇယားသို့စာရင်းစစ်                                                |
+| `scopeEnforcement.ts`       | ကိရိယာတစ်ခုချင်း အတိုင်းအတာကို အတည်ပြုခြင်း။                                      |
+| `runtimeHeartbeat.ts`       | ကျန်းမာရေးအတွက် နှလုံးခုန်ဖို့ `DATA_DIR/runtime/mcp-heartbeat.json`              |
+| `descriptionCompressor.ts`  | အကြောင်းအရာကို သိမ်းဆည်းရန် ကိရိယာဖော်ပြချက် မက်တာဒေတာကို ချုံ့ပါ။                |
+| `schemas/tools.ts`          | 36 အခြေခံကိရိယာ အဓိပ္ပါယ်ဖွင့်ဆိုချက် + နယ်ပယ်များ                                |
+| `tools/advancedTools.ts`    | အဆင့်မြင့်ကိရိယာ အကောင်အထည်ဖော်မှုများ                                            |
+| `tools/memoryTools.ts`      | မှတ်ဉာဏ်ကိရိယာ ၃ ခု (search/add/clear)                                            |
+| `tools/skillTools.ts`       | ကျွမ်းကျင်မှုကိရိယာ ၄ မျိုး (list/enable/execute/executions)                      |
+| `tools/compressionTools.ts` | ချုံ့ကိရိယာ ၅ ခု                                                                  |
+| `README.md`                 | အတွင်းပိုင်း MCP ဆာဗာ README ( `docs/frameworks/MCP-SERVER.md` မှ ချိတ်ဆက်ထားသည်) |
 
 ---
 
@@ -395,24 +395,24 @@ open-sse/
 
 ### ထိပ်တန်းလမ်းညွှန်များ
 
-| ဒေါက်တာ                     | ရည်ရွယ်ချက်                                                                                             |
-| --------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | အဆင့်မြင့်ဗိသုကာပညာ၊ စနစ်ခွဲမြေပုံ၊ ဒက်ရှ်ဘုတ်မျက်နှာပြင်                                               |
-| `CODEBASE_DOCUMENTATION.md` | အင်ဂျင်နီယာအကိုးအကား- လမ်းညွှန်များ၊ မော်ဂျူးများ၊ ကွန်ဗင်းရှင်းများ                                    |
-| `FEATURES.md`               | v3.8 အထူးအသားပေးများဖြင့် အင်္ဂါရပ်များ                                                                 |
-| `USER_GUIDE.md`             | အသုံးပြုသူလက်စွဲ (တပ်ဆင်မှု၊ မော်ဒယ်များ၊ ပေါင်းစပ်၊ CLIs၊ အသံ၊ စသည်ဖြင့်)                              |
-| `API_REFERENCE.md`          | auth မော်ဒယ်နှင့်အတူAPI အဆုံးမှတ်ကိုးကား                                                                |
-| `openapi.yaml`              | OpenAPI 3.0 spec (121 လမ်းများ)                                                                         |
-| `SETUP_GUIDE.md`            | ထည့်သွင်းနည်းများ (npm၊ npx၊ Docker၊ Electron၊ Termux၊ အရင်းအမြစ်)                                      |
-| `ENVIRONMENT.md`            | env vars များအားလုံး (~ 800 မှတ်တမ်းတင်ထားသော၊ ~ 3,050 လိုင်း `.env.example`)                           |
-| `TROUBLESHOOTING.md`        | အဖြစ်များသောအမှားများ + v3.8.0 လူသိများသောပြဿနာများ                                                     |
-| `RELEASE_CHECKLIST.md`      | အပြည့်အဝထွက်ရှိခြင်း (ကျွမ်းကျင်မှု၊ ပျော့ပျောင်းမှု၊ သမားရိုးကျလုပ်ဆောင်မှု၊ အသုံးချမှု)               |
-| `COVERAGE_PLAN.md`          | လွှမ်းခြုံရည်မှန်းချက်များနှင့် လက်ရှိအခြေအနေ                                                           |
-| `FREE_TIERS.md`             | အခမဲ့အဆင့် ပံ့ပိုးပေးသူများ (48 + အခမဲ့ + 11 OAuth)                                                     |
-| `CLI-TOOLS.md`              | ပြင်ပ CLI ပေါင်းစည်းမှု + အတွင်းပိုင်း OmniRoute CLI                                                    |
-| `I18N.md`                   | i18n ဗိသုကာလက်ရာ၊ ဘာသာစကားတစ်ခု၊ ဘာသာစကား ၆၇ ခုကို ပေါင်းထည့်ခြင်း။                                     |
-| `UNINSTALL.md`              | ဖယ်ရှားရှင်းလင်းရေးအဆင့်များ                                                                            |
-| `PROVIDER_REFERENCE.md`     | **အလိုအလျောက်ထုတ်ပေးသည်။** ဝန်ဆောင်မှုပေးသူ ၃၈၁ ဦး၏ ကတ်တလောက် (regen- `npm run gen:provider-reference`) |
+| ဒေါက်တာ                     | ရည်ရွယ်ချက်                                                                                           |
+| --------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | အဆင့်မြင့်ဗိသုကာ၊ စနစ်ခွဲမြေပုံ၊ ဒက်ရှ်ဘုတ်မျက်နှာပြင်                                                |
+| `CODEBASE_DOCUMENTATION.md` | အင်ဂျင်နီယာအကိုးအကား- လမ်းညွှန်များ၊ မော်ဂျူးများ၊ ကွန်ဗင်းရှင်းများ                                  |
+| `FEATURES.md`               | v3.8 အထူးအသားပေးများဖြင့် အင်္ဂါရပ်များ                                                               |
+| `USER_GUIDE.md`             | အသုံးပြုသူလက်စွဲ (တပ်ဆင်မှု၊ မော်ဒယ်များ၊ ပေါင်းစပ်၊ CLIs၊ အသံ၊ စသည်)                                 |
+| `API_REFERENCE.md`          | auth မော်ဒယ်နှင့်အတူAPI အဆုံးမှတ်ကိုးကား                                                              |
+| `openapi.yaml`              | OpenAPI 3.0 spec (121 လမ်းများ)                                                                       |
+| `SETUP_GUIDE.md`            | ထည့်သွင်းနည်းများ (npm၊ npx၊ Docker၊ Electron၊ Termux၊ အရင်းအမြစ်)                                    |
+| `ENVIRONMENT.md`            | env vars များအားလုံး (~ 800 မှတ်တမ်းတင်ထားသော၊ ~ 3,050 လိုင်း `.env.example`)                         |
+| `TROUBLESHOOTING.md`        | အဖြစ်များသောအမှားများ + v3.8.0 လူသိများသောပြဿနာများ                                                   |
+| `RELEASE_CHECKLIST.md`      | အပြည့်အဝထွက်ရှိခြင်း (ကျွမ်းကျင်မှု၊ ပျော့ပျောင်းမှု၊ သမားရိုးကျလုပ်ဆောင်မှု၊ အသုံးချမှု)             |
+| `COVERAGE_PLAN.md`          | လွှမ်းခြုံရည်မှန်းချက်များနှင့် လက်ရှိအခြေအနေ                                                         |
+| `FREE_TIERS.md`             | အခမဲ့အဆင့် ပံ့ပိုးပေးသူများ (48 + အခမဲ့ + 11 OAuth)                                                   |
+| `CLI-TOOLS.md`              | ပြင်ပ CLI ပေါင်းစည်းမှု + အတွင်းပိုင်း OmniRoute CLI                                                  |
+| `I18N.md`                   | i18n ဗိသုကာလက်ရာ၊ ဘာသာစကားတစ်ခု၊ ဘာသာစကား ၆၇ ခုကို ပေါင်းထည့်ခြင်း။                                   |
+| `UNINSTALL.md`              | ဖယ်ရှားရှင်းလင်းရေးအဆင့်များ                                                                          |
+| `PROVIDER_REFERENCE.md`     | **အလိုအလျောက်ထုတ်ပေးသည်။** ဝန်ဆောင်မှုပေးသူ 394 ၏ ကတ်တလောက် (regen- `npm run gen:provider-reference`) |
 
 ### စနစ်ခွဲများသည် နက်ရှိုင်းစွာ ငုပ်လျှိုးနေသည်။
 

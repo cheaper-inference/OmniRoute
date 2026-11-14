@@ -6,8 +6,18 @@
 
 Các lỗi được phân loại trước khi đưa ra quyết định thử lại.
 
-Các lỗi tạm thời như hết thời gian chờ, lỗi mạng, giới hạn tốc độ và phản hồi 5xx từ nhà cung cấp có thể được chuyển sang nhà cung cấp dự phòng. Lỗi xác thực, lỗi quyền truy cập, yêu cầu không hợp lệ, mô hình không khả dụng và lỗi không xác định sẽ không được thử lại một cách mù quáng.
+Các lỗi tạm thời như hết thời gian chờ, lỗi mạng, giới hạn tốc độ và phản hồi 5xx của nhà cung cấp có thể không thành công. Hạn ngạch hoặc tín dụng đã hết (hạn ngạch 429 hoặc Yêu cầu thanh toán 402) không bao giờ được thử lại trên cùng một nhà cung cấp nhưng sẽ chuyển sang một nhà cung cấp khác có hạn ngạch riêng biệt. Lỗi xác thực, lỗi cấp phép, yêu cầu không hợp lệ, mô hình không khả dụng và lỗi không xác định không được thử lại một cách mù quáng.
 
-Chính sách mặc định giữa các nhà cung cấp cho phép tối đa ba lần thử với nhà cung cấp, thử lại khi gặp giới hạn tốc độ và hết thời gian chờ, đồng thời tách biệt việc vô hiệu hóa vì lý do quản trị khỏi trạng thái mạch tạm thời.
+Chính sách nhà cung cấp chéo mặc định cho phép tối đa ba lần thử của nhà cung cấp, thử lại giới hạn tốc độ và thời gian chờ, vượt quá hạn mức đã hết và tách biệt việc vô hiệu hóa quản trị khỏi trạng thái mạch tạm thời.
 
-Các trạng thái mạch gồm `closed`, `open` và `half_open`. Khoảng thời gian chờ sẽ lên lịch một lần thăm dò có giới hạn; lần thăm dò thành công sẽ đóng mạch, còn lần thăm dò thất bại sẽ mở lại mạch.
+## Áp dụng ở đâu
+
+- **Combo** thất bại giữa các mục tiêu của họ theo chiến lược và cài đặt riêng của tổ hợp.
+- **Id mô hình trần** (không có tiền tố `provider/` ) mà một số nhà cung cấp đang hoạt động phục vụ, không có tổ hợp tên chính xác đó, trước tiên sẽ được gửi đến các lựa chọn suy luận của nhà cung cấp. Nếu nỗ lực đó không thành công theo cách không thực hiện được chính sách, thì yêu cầu tương tự sẽ được gửi đến nhà cung cấp đang hoạt động tiếp theo phân phát id. Phản hồi mang `x-omniroute-fallback-attempts` với số lượng nhà cung cấp đã thử trước nhà cung cấp trả lời.
+  - Mỗi phương án thay thế được ủy quyền chính xác như thể suy luận đã chọn nó. Mục tiêu mà khóa API hoặc không thừa nhận sẽ bị bỏ qua nếu không có lệnh gọi ngược dòng và máy khách nhận được lỗi ngược dòng thực sự chứ không phải từ chối chính sách đối với mục tiêu mà nó chưa bao giờ đặt tên.
+  - Chỉ có phản hồi không thành công tiếp tục: không có phản hồi nào bị lỗi sau byte được truyền phát đầu tiên.
+  - Việc hoán đổi mô hình dự phòng khẩn cấp chỉ áp dụng sau khi mọi nhà cung cấp mô hình được yêu cầu đều không thành công.
+  - Yêu cầu được ghim vào kết nối (`x-omniroute-connection`) vẫn ở trên đó.
+  - Id có tiền tố (`provider/model`) không bao giờ được định tuyến lại đến nhà cung cấp khác.
+
+Các trạng thái của mạch là `closed`, `open` và `half_open`. Thời gian hồi chiêu lên lịch cho một cuộc thăm dò có giới hạn; đầu dò thành công sẽ đóng mạch và đầu dò không thành công sẽ mở lại mạch.

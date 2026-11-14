@@ -149,23 +149,17 @@ Coinníonn léarscáil fágtha ar lár nó léarscáil folamh an ródú atá ann
 
 Úsáideann sainroghanna cumraithe an chonair Uathoibríoch atá feasach ar an gcuntas: ní sheoltar aicearraí comhthéacs-thaisce, píblíne chliste, caos agus scáthanna neamhcheangailte. Tá fálú amhantrach díchumasaithe le haghaidh na n-iarratas seo agus mar sin ní féidir leis na cuntais chúlchiste na cinn is fearr a leanúint. Ní léirmhíníonn straitéisí teaglama eile an socrú seo. Má dhéantar teaglama a athrú ó Auto coinnítear na sainroghanna sábháilte le haghaidh athrú ar ais níos déanaí.
 
-## Ainmneacha Combo a Mheaitseálann le Fíor-Aitheantas Múnla
+## Ainmneacha Teaglama a Meaitseálann le Fíor-Aitheantas Múnla
 
-Is **phatrún intentional, tacaíochta** é combo a bhfuil a `name` mar an gcéanna le bare aitheantas múnla (m.sh. combo dar ainm `gpt-5.5`), ní fabht: is é an meicníocht é le haghaidh tacaíocht soláthraí in aghaidh an aitheantas múnla, mar atá cur síos air in [#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Toisc go ndéantar seiceáil ar réiteach combo roimh réiteach bare aitheantas múnla (`getComboForModel()` in `src/sse/services/model.ts`), tá iarratas ar an bare aitheantas `gpt-5.5` á ródú trí spriocanna an combo (m.sh. `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5)` in ionad dul díreach chuig soláthraí amháin — athúsáidtear an tosaíocht combo-roimh-athscríobh a tógadh le haghaidh [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) agus tá sé á thástáil aisghníomhaíochta ag `tests/unit/responses-combo-resolution-3227.test.ts` agus `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
+Is teaglama a bhfuil `name` comhionann le haitheantas múnla lom (m.sh. teaglama darb ainm `gpt-5.5`) ina** patrún tacaithe d'aon ghnó** , ní fabht: is é an mheicníocht le haghaidh aisíocaíocht in aghaidh an tsoláthraí id samhail atá doiciméadaithe in [#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Toisc go ndéantar taifeach teaglama a sheiceáil roimh thaifeach lom-mhúnla-id (`getComboForModel()` in `src/sse/services/model.ts`), cuirtear iarratas ar an id lom `gpt-5.5` trí spriocanna an teaglama (m.sh. `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) in ionad díreach chuig soláthraí amháin — athúsáideann sé seo an tosaíocht teaglama-roimh-athscríobh a tógadh le haghaidh [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) -rewrite agus `tests/unit/responses-combo-resolution-3227.test.ts` -test agus é `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
-Nuair a chruthaítear nó a athainmnítear combo go hainm a chlúdaíonn fíor-aitheantas múnla, **ní dhéantar é a dhiúltú riamh** — bhrisfeadh sin an sreabhadh oibre seo atá cur síos air. Ina áit sin (#8530), cuireann `POST /api/combos` agus `PUT /api/combos/[id]` réimse `warning` neamh-bhlocála leis an bhfreagra nuair a thagann an t-ainm (nua) salach ar fíor-aitheantas múnla:
+Is éard atá i gceist le teaglama a chruthú nó a athainmniú go hainm a scáthaíonn fíoraitheantas eiseamláireach** riamh diúltaithe** bhrisfeadh — an sreabhadh oibre doiciméadaithe seo. Ina áit sin (#8530) , ceanglaíonn `POST /api/combos` agus `PUT /api/combos/[id]` réimse `warning` neamh-blocála leis an bhfreagra nuair a imbhuaileann an t-ainm (nua) le fíoraitheantas samhail:
 
 ```json
-{
-  "warning": {
-    "code": "COMBO_NAME_SHADOWS_MODEL",
-    "modelId": "gpt-5.5",
-    "providerId": "openai"
-  }
-}
+{ "warning": { "code": "COMBO_NAME_SHADOWS_MODEL", "modelId": "gpt-5.5", "providerId": "openai" } }
 ```
 
-Ag am tosaithe, logáiltear freisin monatóireacht `[STARTUP]` aonlíne ag `scanComboModelNameCollisionsAtBoot()` (`src/instrumentation-node.ts`) a liostaíonn gach combo atá ann cheana a chlúdaíonn aitheantas múnla, ionas go mbeidh comhartha ag oibreoirí a shroichfidh seo de thaisme (seachas go heolasach, de réir #6940). Tá an cúntóir braite suiteáilte in `src/lib/combos/modelNameCollision.ts`.
+Ag tosaithe, logálann `scanComboModelNameCollisionsAtBoot()` (`src/instrumentation-node.ts`) rabhadh `[STARTUP]` aon-líne freisin ina n-áirithítear gach teaglama atá ann cheana féin a scáthaíonn samhail id, ionas go mbeidh comhartha ag oibreoirí a bhuaileann é seo trí thimpiste (seachas d'aon ghnó, per #6940). Cónaíonn an cúntóir braite i `src/lib/combos/modelNameCollision.ts`.
 
 ## Glaoch ar Combo Saincheaptha ó Chliant
 
@@ -189,36 +183,38 @@ Dá pholl coitianta:
 
 Féach [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) agus [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) le haghaidh an mearbhail bhunúsháite a ndéanann an doiciméad seo cur síos air.
 
-## Conas a Oibríonn Sé (Uath-Theaglamaí Marthanacha)
+## Conas a Oibríonn sé (Combanna Auto Leanúnacha)
 
-Roghnaíonn an tInneall Uath-Theaglama go dinimiciúil an soláthraí/samhail is fearr do gach iarratas trí úsáid a bhaint as **feidhm scórála 16 fhachtóir** (sainmhínithe in `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Is é `1.0` suim na n-ualuithe réamhshocraithe; déantar ualuithe saincheaptha a athnormalú le `normalizeScoringWeights()`. Tá ualú réamhshocraithe `0` ag dhá cheann den sé cinn déag — `cacheAffinity` agus `resetWindowAffinity`; tá `0` ag `reliability` in `DEFAULT_WEIGHTS` ach `0.03` i bpacáistí ginearálta agus `0.04` in `reliability-first`, agus tá `0.02` ag `quality` i bpacáistí (`0.03` in `quality-first`): ríomhtar iad fós do gach iarrthóir, agus rialaíonn `cacheAffinity` dí-dhúbláil thaisce na leid lasmuigh den scór, mar sin ní chaitheann na fachtóirí a bhfuil luach réamhshocraithe nialais acu vóta de réir réamhshocraithe, cé go gcaitheann pacáistí vóta.
+Roghnaíonn an tInneall Uath-Teaglaim go dinimiciúil an provider/model is fearr do gach iarratas ag baint úsáide as a** Feidhm scórála 16-fachtóir** (arna shainmhíniú i `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Suim na meáchain réamhshocraithe go `1.0`; déantar meáchain saincheaptha a athnormalú le `normalizeScoringWeights()`. Tá meáchan réamhshocraithe `0` ag dhá cheann de na sé cinn déag — `cacheAffinity` agus `resetWindowAffinity` — ; iompraíonn `reliability` `0` i `DEFAULT_WEIGHTS` ach `0.03` i bpacáistí cineálacha agus `0.04` i `reliability-first`, agus iompraíonn `quality` `0.02` i bpacáistí (`0.03` in `quality-first`): tá siad fós á ríomh do gach iarrthóir, agus geataí `cacheAffinity` díshealbhú pras-taisce lasmuigh den scór, mar sin ní dhéanann na fachtóirí réamhshocraithe vótáil trí réamhshocrú agus pacáistí.
 
-![Scóráil 16 fhachtóir Uath-Theaglama](../diagrams/exported/auto-combo-scoring.svg)
+![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
-> Foinse: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (athghin trí `npm run docs:render-diagrams`). Is ainm stairiúil é ainm an chomhaid; taispeánann an fhoinse agus an léaráid rindreáilte na 16 fhachtóir uile a dhearbhaítear in `DEFAULT_WEIGHTS`.
+> Foinse: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (athghin trí `npm run docs:render-diagrams`). Tá ainm an chomhaid stairiúil; Taispeánann an fhoinse agus an léaráid rindreáilte na 16 thoisc go léir a dearbhaíodh in `DEFAULT_WEIGHTS`.
 
-| Fachtóir              | Ualú Réamhshocraithe | Cur Síos                                                                                                                                                                                                                                    |
-| :-------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `quota`               | 0.1429               | Cuóta atá fágtha / spás saor ó thaobh teorann ráta de [0..1]                                                                                                                                                                                |
-| `health`              | 0.1605               | Scór sláinte ón scoradán ciorcaid (CLOSED=1.0, HALF_OPEN=0.5, OPEN=0.0)                                                                                                                                                                     |
-| `costInv`             | 0.1429               | Costas **cumaiscthe** inbhéartach (60% praghas comharthaí ionchuir + 40% praghas comharthaí aschuir, normalaithe) — níos saoire = scór níos airde                                                                                           |
-| `latencyInv`          | 0.1143               | Aga folaigh p95 inbhéartach, normalaithe de réir na linne — níos tapa = scór níos airde                                                                                                                                                     |
-| `taskFit`             | 0.0762               | Oiriúnacht don chineál taisc (códú, athbhreithniú, pleanáil, anailís, dífhabhtú, doiciméadú)                                                                                                                                                |
-| `stability`           | 0.0476               | Cobhsaíocht bunaithe ar athraitheas ó dhiall caighdeánach na haga folaigh — faigheann iarrthóir a mbíonn a aga freagartha luaineach scór níos ísle                                                                                          |
-| `tierPriority`        | 0.0476               | Tosaíocht shraith an chuntais — Ultra=1.0, Pro=0.67, Standard=0.33, Free=0.0                                                                                                                                                                |
-| `tierAffinity`        | 0.0476               | Cleamhnas idir sraith an iarrthóra agus an tsraith atá molta ag an léiriúchán                                                                                                                                                               |
-| `specificityMatch`    | 0.0476               | Meaitseáil idir sainiúlacht an iarratais (leid ón léiriúchán) agus sraith na samhla                                                                                                                                                         |
-| `contextAffinity`     | 0.0476               | Cleamhnas idir riachtanas fuinneoige comhthéacs an iarratais agus fuinneog chomhthéacs na samhla                                                                                                                                            |
-| `sessionAvailability` | 0.0476               | Infhaighteacht sheisiún OAuth nasc an iarrthóra don seisiún seo (`getOAuthSessionAvailability()`; faigheann naisc neamh-OAuth scór 1.0)                                                                                                     |
-| `connectionDensity`   | 0.0476               | Scaipeann sé ualach thar naisc leis an soláthraí céanna (frith-chomhchruinniú)                                                                                                                                                              |
-| `cacheAffinity`       | 0.00                 | Cleamhnas haise rendezvous i dtreo an naisc is dóichí a bhfuil réimír thaisce leide an iarratais seo ina sheilbh cheana féin (`open-sse/services/combo/promptCacheAffinity.ts`); díchumasaithe de réir réamhshocraithe (#8008)              |
-| `resetWindowAffinity` | 0.00                 | Claonadh i dtreo nasc a bhfuil a fhuinneog athshocraithe cuóta fabhrach (díchumasaithe de réir réamhshocraithe)                                                                                                                             |
-| `quality`             | 0.03                 | Comhartha cáilíochta aschuir atá bunaithe ar aiseolas ó rianaire cáilíochta na dteagmhas ródúcháin; faigheann iarrthóirí nach bhfuil aon bhreathnuithe acu luach neodrach 0.5                                                               |
-| `reliability`         | 0.00                 | Cion na n-éachtaí breathnaithe, `1 - failureRate`, ó 24 uair an chloig de stair úsáide faoi réir íosmhéid deich sampla (méadrachtaí fíor-ama murach sin); léitear 1.0 d'iarrthóirí gan bhreathnuithe. Díchumasaithe de réir réamhshocraithe |
+| Fachtóir              | Meáchan Réamhshocraithe | Cur síos                                                                                                                                                                                                                                    |
+| :-------------------- | :---------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `quota`               | 0.1429                  | An cuóta / seomra cloiginn ráta atá fágtha [0..1]                                                                                                                                                                                           |
+| `health`              | 0.1605                  | Scór sláinte ón scoradán ciorcaid (CLOSED= 1.0, HALF_OPEN= 0.5, OPEN= 0.0)                                                                                                                                                                  |
+| `costInv`             | 0.1429                  | Inbhéartach** chumasc** costas (60% ionchur + 40% praghas comhartha aschur, normalaithe) — níos saoire = scór níos airde                                                                                                                    |
+| `latencyInv`          | 0.1143                  | latency inbhéartach p95 normalaithe chun comhthiomsú — níos tapúla = scór níos airde                                                                                                                                                        |
+| `taskFit`             | 0.0762                  | Aclaíocht de chineál tascanna (códú, athbhreithniú, pleanáil, anailís, dífhabhtú, doiciméid)                                                                                                                                                |
+| `stability`           | 0.0476                  | Cobhsaíocht bunaithe ar athraitheas ó dhiall caighdeánach latency — iarrthóir a bhfuil scóir níos ísle ag luascadh aga freagartha                                                                                                           |
+| `tierPriority`        | 0.0476                  | Tosaíocht sraithe cuntais — Ultra = 1.0, Pro = 0.67, Caighdeán = 0.33,= saor in aisce 0.0                                                                                                                                                   |
+| `tierAffinity`        | 0.0476                  | Cleamhnas idir sraith an iarrthóra agus an tsraith a mholtar go follasach                                                                                                                                                                   |
+| `specificityMatch`    | 0.0476                  | Meaitseáil idir sainiúlacht an iarratais (leid follasach) agus sraith na samhla                                                                                                                                                             |
+| `contextAffinity`     | 0.0476                  | Cleamhnas idir riachtanas comhthéacs-fhuinneog an iarratais agus fuinneog chomhthéacs na samhla                                                                                                                                             |
+| `sessionAvailability` | 0.0476                  | infhaighteacht seisiún OAuth ar nasc an iarrthóra don seisiún seo (`getOAuthSessionAvailability()`; scór naisc neamh-OAuth 1.0)                                                                                                             |
+| `connectionDensity`   | 0.0476                  | Scaiptear an t-ualach trasna naisc an tsoláthraí céanna (frith-chomhchruinniú)                                                                                                                                                              |
+| `cacheAffinity`       | 0.00                    | cleamhnas rendezvous-hash leis an gceangal is dóichí go mbeidh réimír pras-taisce an iarratais seo (`open-sse/services/combo/promptCacheAffinity.ts`); díchumasaithe de réir réamhshocraithe (#8008)                                        |
+| `resetWindowAffinity` | 0.00                    | Laofacht i dtreo naisc a bhfuil a bhfuinneog athshocraithe cuóta fabhrach (díchumasaithe de réir réamhshocraithe)                                                                                                                           |
+| `quality`             | 0.03                    | Comhartha cáilíochta aschuir bunaithe ar aiseolas ón rianaire cáilíochta ródú-imeachta; faigheann iarrthóirí nach bhfuil barúlacha acu 0.5 neodrach                                                                                         |
+| `reliability`         | 0.00                    | Comhroinn ratha breathnaithe, `1 - failureRate`, ó 24h de stair úsáide taobh thiar d'urlár deich sampla (méadracht fíor-ama ar shlí eile); léann iarrthóirí nach bhfuil aon breathnuithe acu mar 1.0. Díchumasaithe de réir réamhshocraithe |
 
-`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+Tá an rianaitheoir `quality` i gcuimhne (`open-sse/services/routing/quality.ts`) folamh tar éis atosú fuar, mar sin scórálann gach iarrthóir `0.5` neodrach go dtí go dtagann na chéad breathnuithe i dtír.
 
-**Suim:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` mar a dhearbhaítear in `DEFAULT_WEIGHTS`; déanann `normalizeScoringWeights()` ualuithe atá cumraithe ag an úsáideoir a athnormalú ina ndáileadh roimh an scóráil.
+> **Cuóta do-léite (#15347).** Nuair a bhíonn lorgaire cuóta ag soláthraí ach nach dtugann sé aon rud inléite ar ais (teip ar ghabháil, dintiúir in easnamh, úsáid teachtaireachta amháin, nó pictiúr míchumtha gan aon `windows` in-parseable agus gan aon `percentUsed` críochta, lena n-áirítear `percentUsed: null`), scóir an t-iarrthóir `0` ar an ais `quota` agus iolraítear a scór deiridh faoi `UNREADABLE_QUOTA_SOFT_DEPRIORITIZE_FACTOR`, an patrún bog mar an gcéanna, an patrún `autoStrategy.ts` 0.5. pionós maidir le stádas ceangail. Is fianaise ar an teiliméadracht, ní ar an soláthraí, í léamh úsáide teipthe, agus mar sin tá sé go docht faoi bhun aon léamh fíor, lena n-áirítear ceann deimhnithe 100%-used, ach ní dhéantar é a bhlocáil go crua ná a dhíshealbhú. Tuairiscíonn soláthraí gan caipín `unlimited: true` agus scóir mar chuóta iomlán; níl aon fhoinse teiliméadrachta ar chor ar bith ag soláthraí nach bhfuil faighteoir cuóta cláraithe aige agus coinníonn sé an réamhshocrú `100`.
+
+**Suim:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` mar a dhearbhaítear i `DEFAULT_WEIGHTS`; déantar meáchain atá cumraithe don úsáideoir a athnormalú go dáileadh de réir `normalizeScoringWeights()` roimh scóráil.
 
 ## Pacáistí Móid
 
@@ -285,30 +281,32 @@ luachanna réitithe isteach sna hionchuir `config.modePack` / `config.budgetCap`
 
 ## Gach Straitéis Ródúcháin
 
-Tacaíonn inneall teaglama OmniRoute'** 20 straitéis ródaithe** (arna dhearbhú i `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Tá an t-inneall Auto Combo féin nochta faoin straitéis `auto` ; tá na cinn eile ar fáil le haghaidh combos leanúnach.
+Tacaíonn inneall teaglama OmniRoute'** 22 straitéis ródaithe** (arna dhearbhú i `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Tá an t-inneall Auto Combo féin nochta faoin straitéis `auto` ; tá na cinn eile ar fáil le haghaidh combos leanúnach.
 
-| Straitéis           | Cur síos                                                                                                                                                                                                |
-| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `priority`          | Liosta ordaithe den chéad sprioc le tosaíocht shainráite                                                                                                                                                |
-| `weighted`          | ualaithe randamach de réir meáchain in aghaidh an sprice                                                                                                                                                |
-| `round-robin`       | Rothaigh trí spriocanna in ord (baisceáilte; féach thíos)                                                                                                                                               |
-| `context-relay`     | Tabhair comhthéacs trasna na spriocanna (comhráite fada)                                                                                                                                                |
-| `fill-first`        | Líon cuóta gach sprice roimh bogadh go dtí an chéad cheann eile                                                                                                                                         |
-| `p2c`               | Power-of-2-choices cothromú ualach randamach                                                                                                                                                            |
-| `random`            | Roghnú randamach aonfhoirmeach                                                                                                                                                                          |
-| `least-used`        | Roghnaigh sprioc leis an ualach reatha is ísle                                                                                                                                                          |
-| `cost-optimized`    | Íoslaghdaigh $ in aghaidh an iarratais nuair a thugtar praghas catalóige                                                                                                                                |
-| `reset-aware` ⭐    | Tabhair tosaíocht de réir am athshocraithe cuóta — fuinneoga athshocraithe gearr rangaithe níos airde                                                                                                   |
-| `reset-window`      | Is fearr le spriocanna a n-athshocraíonn a bhfuinneog cuóta is túisce                                                                                                                                   |
-| `headroom`          | Roghnaigh an sprioc leis an spás cloiginn is mó atá fágtha                                                                                                                                              |
-| `quota-weighted`    | Léim amach cuntais ídithe, ansin roghnaigh i measc an chuid eile i gcomhréir leis an gcuóta fágtha roinnte ar ualach san eitilt; fanann na comhráite atá ann cheana féin pinned                         |
-| `strict-random`     | Randamach gan athdhúbailt a dhéanamh                                                                                                                                                                    |
-| `auto`              | Úsáid scóráil Auto Teaglama (16-fachtóir) —** molta**                                                                                                                                                   |
-| `lkgp`              | An Conair De Deiridh ar Aithnítear (bioráin chuig an soláthraí deireanach ar éirigh leis, agus ansin tagann sé ar ais chuig na rialacha)                                                                |
-| `context-optimized` | Roghnaigh an sprioc is fearr a oireann do mhéid an chomhthéacs reatha                                                                                                                                   |
-| `cache-optimized`   | Spriocanna a athordú trí chleamhnas leid-taisce — baintear triail as an nasc is dócha go bhfuil réimír i dtaisce an iarratais seo cheana féin (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | Fan amach chuig painéal samhlacha ag an am céanna, ansin sintéis freagra amháin trí bhreitheamh (féach thíos)                                                                                           |
-| `pipeline`          | Rith na spriocanna go seicheamhach, ag cur aschuir gach céime isteach in ionchur na chéad chéime eile; ní thugtar ach an freagra deiridh ar ais (#6396)                                                 |
+| Straitéis           | Cur síos                                                                                                                                                                                                                                        |
+| :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | Liosta ordaithe den chéad sprioc le tosaíocht shainráite                                                                                                                                                                                        |
+| `weighted`          | ualaithe randamach de réir meáchain in aghaidh an sprice                                                                                                                                                                                        |
+| `round-robin`       | Rothaigh trí spriocanna in ord (baisceáilte; féach thíos)                                                                                                                                                                                       |
+| `context-relay`     | Tabhair comhthéacs trasna na spriocanna (comhráite fada)                                                                                                                                                                                        |
+| `fill-first`        | Líon cuóta gach sprice roimh bogadh go dtí an chéad cheann eile                                                                                                                                                                                 |
+| `p2c`               | Power-of-2-choices cothromú ualach randamach                                                                                                                                                                                                    |
+| `random`            | Roghnú randamach aonfhoirmeach                                                                                                                                                                                                                  |
+| `least-used`        | Roghnaigh sprioc leis an ualach reatha is ísle                                                                                                                                                                                                  |
+| `cost-optimized`    | Íoslaghdaigh $ in aghaidh an iarratais nuair a thugtar praghas catalóige                                                                                                                                                                        |
+| `reset-aware` ⭐    | Tabhair tosaíocht de réir am athshocraithe cuóta — fuinneoga athshocraithe gearr rangaithe níos airde                                                                                                                                           |
+| `reset-window`      | Is fearr le spriocanna a n-athshocraíonn a bhfuinneog cuóta is túisce                                                                                                                                                                           |
+| `expiry-first`      | Caith an cuntas a rachadh a chuóta in éag murach sin ar dtús — téann an fuílleach is airde agus an spriocdháta athshocraithe is gaire ar dtús                                                                                                   |
+| `headroom`          | Roghnaigh an sprioc leis an spás cloiginn is mó atá fágtha                                                                                                                                                                                      |
+| `quota-weighted`    | Léim amach cuntais ídithe, ansin roghnaigh i measc an chuid eile i gcomhréir leis an gcuóta fágtha roinnte ar ualach san eitilt; fanann na comhráite atá ann cheana féin pinned                                                                 |
+| `strict-random`     | Randamach gan athdhúbailt a dhéanamh                                                                                                                                                                                                            |
+| `auto`              | Úsáid scóráil Auto Teaglama (16-fachtóir) —** molta**                                                                                                                                                                                           |
+| `lkgp`              | An Conair De Deiridh ar Aithnítear (bioráin chuig an soláthraí deireanach ar éirigh leis, agus ansin tagann sé ar ais chuig na rialacha)                                                                                                        |
+| `context-optimized` | Roghnaigh an sprioc is fearr a oireann do mhéid an chomhthéacs reatha                                                                                                                                                                           |
+| `cache-optimized`   | Spriocanna a athordú trí chleamhnas leid-taisce — baintear triail as an nasc is dócha go bhfuil réimír i dtaisce an iarratais seo cheana féin (`open-sse/services/combo/promptCacheAffinity.ts`, #8008)                                         |
+| `fusion` 🧬         | Fan amach chuig painéal samhlacha ag an am céanna, ansin sintéis freagra amháin trí bhreitheamh (féach thíos)                                                                                                                                   |
+| `pipeline`          | Rith na spriocanna go seicheamhach, ag cur aschuir gach céime isteach in ionchur na chéad chéime eile; ní thugtar ach an freagra deiridh ar ais (#6396)                                                                                         |
+| `jev`               | Liosta tosaíochta úsáideoir-rangaithe; TypeSafe Admhaíonn Jev cé na hiontrálacha a ritheann don iarratas seo. Buaiteoir ar dtús, coinníonn spriocanna glactha eile ord úsáideora. Titeann ordú úsáideora nuair nach bhfuil Jev ar fáil (#15276) |
 
 ⭐ = Nua i v3.8.0 · 🧬 = Nua i v3.8.36
 
@@ -318,7 +316,7 @@ Tá `weighted` a** tarraingt randamach comhréireach in aghaidh an iarratais** (
 
 - Tarraingíonn gach iarratas** aon** céim le dóchúlacht `weight / totalWeight`; ordaítear na céimeanna atá fágtha de réir meáchain íslitheach mar an slabhra fallback don iarraidh sin.
 - Céim a bhfuil a meáchan `0` (nó in easnamh).** riamh tarraingthe** cé go bhfuil meáchan ar bith eile > 0 — ní féidir leis fónamh ach mar chúltaca tar éis theipeann ar an gcéim tharraingthe. Ach amháin nuair a** go léir** meáchain atá 0 dhéanann roghnú a bheith aonfhoirmeach.
-- Baintear na céimeanna a bhfuil a gcuid spriocanna go léir nach bhfuil ar fáil — provider breaker ciorcaid `OPEN`, fuarú nasc, frithdhúnadh múnla — ón tarraingt sula dtarlaíonn sé (`open-sse/services/combo/targetResolution.ts`), ionas gur féidir le céim shláintiúil amháin gach iarratas a bhuachan go sealadach.
+- Baintear na céimeanna a bhfuil a gcuid spriocanna go léir ar fáil — provider breaker ciorcaid `OPEN`, fuarú nasc, frithdhúnadh múnla — ón tarraingt sula dtarlaíonn sé (`open-sse/services/combo/targetResolution.ts`), ionas gur féidir le céim shláintiúil amháin gach iarratas a bhuachan go sealadach.
 - `stickyWeightedLimit` (comb config, réamhshocraithe `1` = off) bioráin an chéim tarraingthe do go leor rath i ndiaidh a chéile roimh ath-líníocht.
 
 Le haghaidh rothlú dian úsáid `round-robin`; meáchain comhionann ar `weighted` tabhair — staidrimh ní cothromaíocht dhian —.
@@ -327,9 +325,23 @@ Le haghaidh rothlú dian úsáid `round-robin`; meáchain comhionann ar `weighte
 
 Is féidir le teaglama `pipeline` ina bhfuil ar a laghad dhá shamhail rogha a dhéanamh de ródú planner/executor le `config.agenticOrchestration.enabled`. Is leis an gcéad sprioc na freagraí pleanála agus deiridh; scaoileann an dara sprioc glaonna uirlis dúchais cliant. Aimsíonn OmniRoute leanúint ar aghaidh le torthaí uirlisí ón bprótacal iarratais, fiafraíonn sé den phleanálaí an bhfuil gá le babhta uirlisí eile, agus go dinimiciúil déanann sé an seiceadóir nó an pleanálaí an chéim dheireanach os comhair an chliaint.
 
+Cuireann `config.agenticOrchestration.contextCompaction` roghnach buiséad pálasta ar leith i bhfeidhm roimh gach seolta pleanálaí nó seiceadóir. Cumasaigh go soiléir é:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Is buiséid srathaithe carachtar JSON iad seo a roghnaíonn an t-oibreoir, ní fuinneoga comhthéacs comharthacha ná teorainneacha in aghaidh srutha ráthaithe. Sáraíonn múnla cruinn IDs an réamhshocrú. Os cionn na tairsí, baintear sainmhínithe comhionanna uirlisí le balcadh, gearrtar fianaise uirlisí rómhór le achoimre, agus baintear seanghrúpaí staire iomlána i dtreo an chóimheas sprice. Coinníonn sé treoracha system/developer, an t-iarratas úsáideora is déanaí, an babhta uirlisí deiridh lena n-áirítear comhthreomhar calls/results, agus príomh-threoir ródaithe Gemini. Coimeádtar treoracha ardleibhéil agus socruithe uirlisí. Taifeadann marcóir easnamh an stair bainte; scamhadh cinntitheach é seo, ní achoimre shéimeantach. Má sháraíonn an comhthéacs pinnáilte an buiséad fós, seolfaidh an t-iarratas 413 ar ais sula ndéantar teagmháil leis an tsamhail. Má bhíonn balcadh díchumasaithe nó faoi bhun na tairsí, téann an t-iarratas ar aghaidh gan athrú.
+
 Maidir le leanúint ar aghaidh le huirlisí-torthaí, cuireann OmniRoute stop leis an bhforghníomhú freisin nuair a athdhéantar na glaonna uirlise céanna le dhá bhabhta críochnaithe i ndiaidh a chéile agus torthaí gan athrú, nó nuair a theip ar gach toradh atá marcáilte go sainráite in dhá bhabhta as a chéile. Ceadaíonn torthaí athraithe glaonna arís agus arís eile (mar shampla, vótaíocht). Athshocraíonn an garda ar iarratas úr úsáideora, grúpálann sé glaonna comhthreomhar isteach i mbabhta amháin, agus tacaíonn sé le Anthropic, Críochnú Comhrá, Freagraí agus stair Gemini. Faigheann an pleanálaí an chúis agus is leis nó léi an freagra deiridh fiú má iarrann sé babhta uirlisí eile.
 
-Ordaítear samhlacha breise tar éis an dara sprioc cúltacaí seiceadóir. Téann freagra teipthe HTTP nó eisceacht iompair ar aghaidh chuig an gcéad seiceadóir eile, ag iompar an chinnidh phleanála chéanna agus na huirlisí dúchais céanna ach céim an tseiceadóra sin a nascadh pras agus réitithe. Cuirtear an chéad fhreagra rathúil ar ais gan athrú, lena n-áirítear sruthú SSE ; ní féidir teipeanna tar éis tosú sruth rathúil a chur ar ais anseo. Má theipeann ar gach seiceadóir, cuirtear an teip dheireanach ar ais. Stopann ginmhilleadh cliant le seoladh.
+Déantar samhlacha breise tar éis an dara sprioc a ordú cúltacaí seiceadóir. Téann freagra teipthe HTTP nó eisceacht iompair ar aghaidh chuig an gcéad seiceadóir eile, ag iompar an chinnidh phleanála chéanna agus na huirlisí dúchais céanna ach céim an tseiceadóra sin a nascadh pras agus réitithe. Cuirtear an chéad fhreagra rathúil ar ais gan athrú, lena n-áirítear sruthú SSE ; ní féidir teipeanna tar éis tosú sruth rathúil a chur ar ais anseo. Má theipeann ar gach seiceadóir, cuirtear an teip dheireanach ar ais. Stopann ginmhilleadh cliant le seoladh.
 
 ```json
 {
@@ -347,38 +359,38 @@ Féadfaidh an seiceadóir glaonna neamhspleácha iolracha a astú in aon fhreagr
 
 Is baisceáil an robáin bhabhta, ní aon iarratas amháin in aghaidh na céime:
 
-- `stickyRoundRobinLimit` (cumraíocht teaglama, ansin `comboStickyRoundRobinLimit`, ansin `settings.stickyRoundRobinLimit`, réamhshocraithe** 3** ) go gcoimeádann sé an sprioc chéanna maidir leis an iliomad rath as a chéile roimh rothlú. Socraigh an sáraíocht teaglama go `1` le haghaidh rothlú aon-iarratais. Léiríonn an t-eagarthóir teaglama an luach éifeachtach agus cén ciseal as ar tháinig sé.
-- `connectionAwareExpansion` (cumraíocht teaglama, ansin socruithe, réamhshocraithe** bréagach** ) leathnaíonn sé gach céim ar leibhéal an tsoláthraí go spriocanna in aghaidh an chuntais roimh an uainíocht. Straitéisí Grúpa-B (tosaíocht, ualaithe, bhabhta-robín, randamach, p2c, is lú úsáid, cost-optamaithe, lkgp, líonadh-an chéad, docht-randamach, comhthéacs-optamaithe, taisce-optamaithe, comhthéacs-seoladh, comhleá, píblíne) a choinneáil ar an leibhéal soláthraí go dtí go bhfuil sé seo ar siúl. Nochtann an t-eagarthóir teaglama oidhreacht / ar / as; Úsáideann inherit an réamhshocrú domhanda (as).
-- Ródú ceantair pras-taisce (`promptCacheAffinityEnabled`, réamhshocraithe** fíor** ) athordaíonn naisc phionnáilte ionas go bhfanann na heochracha taisce meaitseála ar aon chuntas amháin. Bíonn tús áite aige ar uainíocht bhabhta-robín agus ar rothlú ualaithe thar chéimeanna pinnithe in aghaidh an chuntais. Múch é faoi Socruithe → mainneachtainí teaglama má theastaíonn rothlú dian uait. Níl aon sárú in aghaidh na teaglama.
+- `stickyRoundRobinLimit` (cumraíocht teaglama, ansin `comboStickyRoundRobinLimit`, ansin `settings.stickyRoundRobinLimit`, réamhshocraithe** 3** ) go gcoimeádann sé an sprioc chéanna don iliomad rath leanúnach roimh rothlú. Socraigh an sáraíocht teaglama go `1` le haghaidh rothlú aon-iarratais. Léiríonn an t-eagarthóir teaglama an luach éifeachtach agus cén ciseal as ar tháinig sé.
+- `connectionAwareExpansion` (cumraíocht teaglama, ansin socruithe, réamhshocraithe** bréagach** ) leathnaíonn sé gach céim ar leibhéal an tsoláthraí go spriocanna in aghaidh an chuntais roimh an uainíocht. Coinníonn straitéisí Grúpa-B (tosaíocht, ualaithe, robin bhabhta, randamach, p2c, is lú úsáid, optamaithe ó thaobh costais, lkgp, fill-an chéad, docht-randamach, comhthéacs-optamaithe, taisce-optamaithe, comhthéacs-seoladh, comhleá, píblíne, jev) léargas ar leibhéal an tsoláthraí go dtí go mbeidh sé seo ar siúl. Nochtann an t-eagarthóir teaglama oidhreacht / ar / as; Úsáideann inherit an réamhshocrú domhanda (as).
+- Ródú ceantair pras-taisce (`promptCacheAffinityEnabled`, réamhshocraithe** fíor** ) athordaíonn naisc phionnáilte ionas go bhfanann na heochracha taisce meaitseála ar aon chuntas amháin. Bíonn tús áite aige ar uainíocht bhabhta-robín agus ar rothlú ualaithe thar chéimeanna pinnithe in aghaidh an chuntais. Múch é faoi Socruithe → mainneachtainí teaglama má tá rothlú dian uait. Níl aon sárú in aghaidh na teaglama.
 
 Le haghaidh rothlú ilchuntais ar mhúnla amháin, is fearr** céim amháin dinimiciúil-chuntas** ( `connectionId` folamh, linn snámha iomlán) le teorainn greamaitheach `1`, ní trí `connectionId` pinned s. Titeann céimeanna pinned agus cleamhnas ar an gcuntas céanna fiú agus an cuntar RR ag dul chun cinn.
 
-## Strataisí Fúnáise
+## Straitéis Chomhleá
 
-Is é an t-aon straitéis nach roghaíonn **sprioc amháin** é `fusion`. Téann an t-ordú amach **go comhuaineach le gach samhail painéil**, agus ansin déanann **múnla breithiúna** cumraithe síntéar ar fhreagra aonfhoirmeach deiridh ó na freagraí painéil go léir. Portáilte ó upstream `decolua/9router` (dearadh Fusion ag OpenRouter); cur i bhfeidhm i `open-sse/services/fusion.ts`.
+Is é `fusion` an straitéis amháin a dhéanann** nach bhfuil** Pioc sprioc amháin. Fanann sé an leid amach go** gach múnla painéil ag an am céanna** , ansin configurable** samhail breitheamh** sintéisíonn sé freagra deiridh amháin ó gach freagra painéil. Portáilte ó `decolua/9router` in aghaidh an tsrutha (dearadh Comhleá OpenRouter); cur i bhfeidhm i `open-sse/services/fusion.ts`.
 
 Conas a oibríonn sé:
 
-0. **Tríd an tréith-lódáil uirlise** — má iompraíonn iarratas eagar neamh-fholamh `tools` le `tool_choice` gan bheith sainráite `"none"`, trasnóidh sé an painéal ar fad: déanann sé ródú go samhail amháin (an breitheoir cumraithe, nó `panel[0]`) le `tools`/`tool_choice` á n-iompar gan athrú. Níl rogha uirlise ag baill an phainéil agus seasann treoir shintéarúcháin an bhreitheora in aghaidh eisiúna glaonna uirlise, mar sin faigheann cliantanna gníomhach/uirlis-glaonnaí cinneadh fíor-uirlise in ionad próis shintéaraithe (#6771).
-1. **Féan-amach** (arrachtaí gan uirlise amháin) — seoltar an t-ordú chuig gach samhail painéil ag an am céanna, gan sruthú agus na huirlisí á n-gearradh (teonnas an bhreitheora próis iomlán le síntéarú).
-2. **Bailiúchán grásta ceathrún** — chomh luath agus a shroichfidh `minPanel` freagraí, tosaíonn an t-amire gásta gearr le haghaidh na ndálanna mall, agus ansin téann fúnáis ar aghaidh le cibé a bailíodh. Srianann sé seo pian an tsamhail is mall ar an am fíor, teoranta le ham crua.
-3. **Sintéarúchán breitheora** — déantar freagraí na painéle a ainmniú (`Foinse 1`, `Foinse 2`, … — ionas go meáann an breitheoir an t-ábhar, ní branda na samhla) agus tugtar don bhreitheoir iad, a dhéanann anailís ar chomhthuiscint / contrárthachtaí / clúdach páirt-mhír / léargais uathúla / dalltaí, agus ansin scríobhann **amháin** freagra údarásach. Coinníonn an glao breitheora bratach `stream` bunúsach an chliaint + uirlisí, mar sin oibríonn sruthú agus úsáid uirlise ina dhiaidh fós.
-4. **Meath flaithiúil** — 0 freagra painéil → `503`; 1 marthanóir díreach → filleann an freagra sin go díreach (níl aon ní le fúnáil); freagraíonn painéal samhail amháin go díreach.
+0. **Seachbhóthar iompar uirlisí** — iarratas a iompraíonn eagar `tools` neamhfholamh le `tool_choice` nach bhfuil go sainráite `"none"` scipeann sé an painéal go hiomlán: téann sé go díreach chuig samhail amháin (an breitheamh cumraithe, nó `panel[0]`) le `tools`/`tool_choice` curtha tríd gan mhodhnú. Níl aon rochtain ar uirlisí ag baill an phainéil agus díspreagann treoir shintéise an bhreithimh astuithe glao-uirlis, mar sin faigheann cliaint agentic/tool-calling cinneadh maidir le glao-uirlis a dhéanamh in ionad prós sintéiseithe (#6771).
+1. **Fan-amach** (iarratais nach mbaineann le huirlisí amháin) — seoltar an leid chuig gach múnla painéil ag an am céanna, neamh-sruthú éigeantach agus na huirlisí bainte (tá prós iomlán ag teastáil ón mbreitheamh chun sintéisiú a dhéanamh).
+2. **Bailiúchán córam-grásta** — chomh luath agus a thagann freagraí `minPanel`, tosaíonn lasc ama gearr cairde do na stragglers, ansin téann an comhleá ar aghaidh le cibé rud a bailíodh. Cuireann sé seo teorainn le pionós an mhúnla is moille ar am balla, agus teorainn ama chrua leis.
+3. **sintéis breitheamh** déantar freagraí painéil — a anaithnidiú (`Source 1`, `Source 2`, … — ionas gur meá an breitheamh substaint, ní branda eiseamláireach) agus tugtar don bhreitheamh iad, a dhéanann anailís ar chomhdhearcadh / contrárthachtaí / clúdach páirteach / léargais uathúla / spotaí dalla, ansin scríobhann** aon** freagra údarásach. Coinníonn an glao breitheamh uirlisí bunaidh `stream` flag + an chliaint, mar sin tá sruthú agus úsáid uirlisí iartheachtacha fós ag obair.
+4. **Díghrádú galánta** freagraí painéal — 0 → `503`; go díreach 1 marthanóir → a sheoltar an freagra sin ar ais go díreach (ní dhéanfaidh aon ní le fuse); freagraíonn painéal aon-mhúnla go díreach.
 
-Is féidir le ball painéil a bheith ina chéim `combo-ref` freisin (`{kind: "combo-ref", comboName: "..."}`) ag tagairt do combo eile — réitítear é mar **guth amháin painéil dubh-phláta** (aghluaiseadh iomlán aisghníomhach sa combo atá tagairte, ní féan-amach ar na spriocanna féin an combo sin), le an cosaint doimhneacht/sroichimh chéanna a úsáideann gach straitéis eile a itheann combo-ref cheana féin (#6764).
+Féadfaidh ball painéil a bheith ina chéim `combo-ref` (`{kind: "combo-ref", comboName: "..."}`) freisin ag tagairt do teaglama eile — réitíonn sé mar** guth painéal bosca dubh amháin** (seoladh athfhillteach iomlán isteach sa teaglama tagartha, ní lucht leanúna as spriocanna an teaglama féin), leis an gcosaint depth/cycle céanna gach straitéis teaglama-thógann eile a úsáideann cheana féin (#6764).
 
 ### Cumraíocht
 
-Cumraítear ar bhlob `config` an combo (gan aistriúchán scéime — úsáidtear an tábla `combos` atá ann cheana):
+Cumraithe ar `config` blob an teaglama (gan imirce scéimre — athúsáideann sé an tábla `combos` reatha):
 
-| Réimse                                   | Cineál   | Réamhshocrú       | Cuspóir                                                                                           |
-| :--------------------------------------- | :------- | :---------------- | :------------------------------------------------------------------------------------------------ |
-| `config.judgeModel`                      | `string` | samhail painéil 1 | An samhail a dhéanann síntéarú ar an bhfreagra deiridh                                            |
-| `config.fusionTuning.minPanel`           | `number` | `2`               | Freagraí rathúla atá ag teastáil sula dtosaíonn an t-amire gásta (giorraithe go `[2, panelSize]`) |
-| `config.fusionTuning.stragglerGraceMs`   | `number` | `8000`            | Chomh fada agus a bhfanfar le dálanna mall nuair a bheidh an ceathrún bainte amach                |
-| `config.fusionTuning.panelHardTimeoutMs` | `number` | `90000`           | Teorainn iomlán ionas nach féidir le samhail a shníomh tarraingt ar an iarratas                   |
+| Réimse                                   | Cineál   | Réamhshocrú             | Cuspóir                                                                                          |
+| :--------------------------------------- | :------- | :---------------------- | :----------------------------------------------------------------------------------------------- |
+| `config.judgeModel`                      | `string` | múnla an chéad phainéil | Múnla a shintéisíonn an freagra deiridh                                                          |
+| `config.fusionTuning.minPanel`           | `number` | `2`                     | Freagraí rathúla ag teastáil sula dtosaíonn an t-amadóir cairde (clampáilte go `[2, panelSize]`) |
+| `config.fusionTuning.stragglerGraceMs`   | `number` | `8000`                  | Cé chomh fada le fanacht ar laggartaí a luaithe a shroichfear an córam                           |
+| `config.fusionTuning.panelHardTimeoutMs` | `number` | `90000`                 | Caipín iomlán ionas nach féidir le múnla crochta amháin stop a chur leis an iarratas             |
 
-Tá na réamhshocruithe i `FUSION_DEFAULTS` (`open-sse/services/fusion.ts`).
+Maireann mainneachtainí in `FUSION_DEFAULTS` (`open-sse/services/fusion.ts`).
 
 ### Sampla
 
@@ -401,21 +413,21 @@ curl -X POST http://localhost:20128/api/combos \
   }'
 ```
 
-Ansin glaoigh air cosúil le aon combo: `{"model":"fusion-panel","messages":[...]}`.
+Ansin glaoch air mar aon teaglama: `{"model":"fusion-panel","messages":[...]}`.
 
-## Monarcha Comhshásaithe Fíorúil
+## Monarcha Auto Teaglama Fíorúil
 
-Níl combochomhshóite réamhshainithe ag an innill Comhshásaithe Auto. Ina ionad sin, cruthaíonn `open-sse/services/autoCombo/virtualFactory.ts` iarrthóirí ar an bpointe boise:
+Níl combos réamhshainithe ag teastáil ón inneall Teaglama Uathoibríoch. Ina áit sin, tógann `open-sse/services/autoCombo/virtualFactory.ts` iarrthóirí ar an eitilt:
 
-1. Tarraingíonn `getProviderConnections({ isActive: true })` (gach ceangal cumasaithe)
-2. Scagann iad siúd le dintiúirí bailí (eochair API nó comhartha OAuth nach bhfuil imithe in éag tríd an `hasUsableOAuthToken()`)
-3. Déanann trasn-tagarmharc le `getProviderRegistry()` le haghaidh infhaighteacht múnla + praghsáil
-4. Do gach teaglach `(soláthraí, múnla, ceangal)`, cruthaíonn sé `VirtualAutoComboCandidate`
-5. Roghnaíonn `connection.defaultModel` (nó an chéad mhúnla sa chlár禧) mar sprioc sheachadta
-6. Scóráil gach iarrthóir ag baint úsáide as an 16-fhachtóir `scorePool()` agus pacáiste meáchain an leagan
-7. Filleann an `AutoComboConfig` cuimhne thoraidh do `handleComboChat()` — ní stóráiltear é go bunachar sonraí riamh
+1. Tarraingíonn `getProviderConnections({ isActive: true })` (gach nasc cumasaithe)
+2. Scagairí chucu siúd a bhfuil dintiúir bhailí acu ( eochair API nó comhartha OAuth neamhéagtha via `hasUsableOAuthToken()`)
+3. Crostagairtí le `getProviderRegistry()` le haghaidh infhaighteacht samhail praghsanna +
+4. I gcás gach tuple `(provider, model, connection)`, tógann `VirtualAutoComboCandidate`
+5. Roghnaíonn sé `connection.defaultModel` (nó an chéad mhúnla den chlár) mar an sprioc seolta
+6. Scórálann gach iarrthóir an `scorePool()` 16-fachtóir agus pacáiste meáchain an mhalairte
+7. Tugann sé ar ais an `AutoComboConfig` i gcuimhne mar thoradh air le haghaidh `handleComboChat()` — nár lean go DB riamh
 
-Ciallaíonn sé seo go **leathnaíonn soláthraí nua le `auto/*` cumasaithe go huathoibríoch an linn iarrthóirí** — níl gá le cur eisi combo a dhéanamh de láimh. Atógáiltear an combo fíorúil in aghaidh an iarratais, mar sin tugtar aghaidh ar cheangail nua-churtha nó nua-shláintiúla láithreach bonn.
+Ciallaíonn sé seo** Má chuirtear soláthraí nua le `auto/*` ar chumas, méadaítear an linn iarrthóirí go huathoibríoch** — níl gá le comheagarthóireacht láimhe. Déantar an teaglama fíorúil a atógáil de réir iarratais, agus mar sin déantar naisc nua-bhreisithe nó nua-shláintiúla a phiocadh suas láithreach.
 
 ## Féinfhíochú
 
@@ -760,9 +772,9 @@ Réimsí atá feasach ar SLA:
 }
 ```
 
-## Oiriúnacht Tasc
+## Tasc Fitness
 
-Níos mó ná 30 samhlacha meáite ar 6 chineál tasc (`coding`, `review`, `planning`, `analysis`, `debugging`, `discussion`). Tacaíonn sé le patrúin whildchaird (m.sh., `*-coder` → scór ard codála).
+Scóráil 30 samhail + thar 6 chineál tasc (`coding`, `review`, `planning`, `analysis`, `debugging`, `documentation`). Tacaíonn sé le patrúin saoróg (m.sh., scór ardchódaithe `*-coder` → ).
 
 ## Achoimre ar Athróganna Auto
 
@@ -795,45 +807,41 @@ Chun tús áite láidir a thabhairt do Shraith 1 (síntiús), méadaigh meáchan
 
 Féach ar [`docs/guides/TIERS.md`](../guides/TIERS.md) le haghaidh sainmhínithe ar na sraitheanna agus aicmiú na soláthraithe.
 
-## Tástáil agus Clúdach
+## Tástáil & Clúdach
 
-### Maitrícs chinntí ríochtála (`npm run test:combo:matrix`)
+### Maitrís ródú cinntitheach cinntitheach (`npm run test:combo:matrix`)
 
-Déanann `tests/integration/combo-matrix/*.test.ts` deimhniú go bhfuil an cinneadh **riochtála** de gach ceann de na 19
-straitéis phoiblí críochnaithe go hiomlán tríd an tseicheamh chomhcheangail fíor le huaschóras meaitseáilte.
-Tá an clúdach san áireamh:
+`tests/integration/combo-matrix/*.test.ts` go gcruthóidh an ródú** cinneadh** de gach ceann de na 21 straitéis phoiblí ceann go ceann tríd an bpíblíne teaglama fíor le magadh in aghaidh an tsrutha. Áirítear le clúdach:
 
-- Na 19 straitéis `ROUTING_STRATEGY_VALUES` uile (ordaithe, meáite, costas, comhthéacs, leá, …).
-- `quota-share` (inmheánach) críochnaithe go hiomlán: cothromas DRR + tosaíocht sa chomhshó áitiúil trí
-  seac `selectQuotaShareTarget` fíor (`registerQuotaFetcher` / `setLKGP` /
-  `__setHeadroomSaturationFetcherForTests`).
-- Clúdach handoff uilíoch `context-relay` trasna gach cuntas spriocdhírithe.
+- Gach 21 straitéis `ROUTING_STRATEGY_VALUES` (ordaithe, ualaithe, costas, comhthéacs, comhleá, ...).
+- `quota-share` (inmheánach) deireadh go deireadh: cothroime DRR díréimniú sáithiúcháin + tríd an seam `selectQuotaShareTarget` fíor (`registerQuotaFetcher` / `setLKGP` / `__setHeadroomSaturationFetcherForTests`).
+- `context-relay` clúdach uilíoch-handoff ar fud gach comhaireamh sprice.
 
-Ritheann an tsraith seo in CI (`test:integration` post) le `--test-concurrency=1` agus
-`--test-force-exit` ionas go bhfuil sé cinntitheach agus nach gá diarbharrantaí beo a bheith ann.
+Ritheann an tsraith seo i CI ( post `test:integration` ) le `--test-concurrency=1` agus `--test-force-exit` mar sin tá sé cinntitheach agus ní gá dintiúir bheo.
 
-### Smotháiste beo faoi ghlas (NÍL i CI — soláthraithe fíora)
+### Deatach beo gated (NOT i soláthraithe CI — )
 
-| Ordú                                   | Cad a dhéanann sé                                                                                     |
-| :------------------------------------- | :---------------------------------------------------------------------------------------------------- |
-| `npm run test:combo:live`              | Ríochtáil fíor in-phróiseas le `RUN.ImageLayoutLIVE=1`; snapshootann sé bunachar sonraí OmniRoute beo |
-| `npm run test:combo:live:vps`          | Glaonna HTTP i gcoinne freastalaí OmniRoute beo (socraigh `COMBO_LIVE_BASE_URL`)                      |
-| `npm run test:combo:live:vps:failover` | Amhlaidh, le cásanna teip éignithe                                                                    |
+| Ordú                                   | Cad a dhéanann sé                                                                |
+| :------------------------------------- | :------------------------------------------------------------------------------- |
+| `npm run test:combo:live`              | Fíorródú in-phróiseas le `RUN_COMBO_LIVE=1`; snapshots a OmniRoute DB            |
+| `npm run test:combo:live:vps`          | glaonna HTTP i gcoinne freastalaí OmniRoute beo (socraigh `COMBO_LIVE_BASE_URL`) |
+| `npm run test:combo:live:vps:failover` | Mar an gcéanna, le cásanna teipe d'aon ghnó                                      |
 
-Cothaíonn na tástálacha smotháiste seo an cosán fíor sreafa (comhcheangal → soláthraí → críochnú). Tá siad
-dílis faoin dearmad ó CI toisc go dteastaíonn diarbharrantaí beo agus rochtain VPS uathu.
+Feidhmíonn na tástálacha deataigh seo an cosán sreinge fíor (comhlánú soláthraí → soláthraí → ). Déantar iad a eisiamh ó CI d'aon ghnó mar go dteastaíonn dintiúirí beo agus rochtain VPS uathu.
+
+---
 
 ## Comhaid
 
-| Comhad                                                    | Cuspóir                                                                                                                             |
-| :-------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------- |
-| `open-sse/services/autoCombo/scoring.ts`                  | Feidhm scórála 16 fhachtóir, `DEFAULT_WEIGHTS`, norm na linne                                                                       |
-| `open-sse/services/autoCombo/taskFitness.ts`              | Cuardach oiriúnachta samhla × taisc                                                                                                 |
-| `open-sse/services/autoCombo/engine.ts`                   | Loighic roghnúcháin, bandit, teorainn bhuiséid                                                                                      |
-| `open-sse/services/autoCombo/selfHealing.ts`              | Eisiamh, tóireadóirí, mód teagmhais                                                                                                 |
-| `open-sse/services/autoCombo/modePacks.ts`                | 6 phróifíl meáchain (seol-go-tapa, coigilteoir-costais, cáilíocht-ar-dtús, fabhrach don as líne, iontaofacht-ar-dtús, mód anordúil) |
-| `open-sse/services/autoCombo/autoPrefix.ts`               | Parsálaí réimíre `auto/` + 6 leagan                                                                                                 |
-| `open-sse/services/autoCombo/virtualFactory.ts`           | Tógann `AutoComboConfig` sa chuimhne ó naisc bheo                                                                                   |
-| `open-sse/services/autoCombo/providerRegistryAccessor.ts` | Duán tástála chun bréagchlár soláthraithe a chruthú                                                                                 |
-| `src/shared/constants/routingStrategies.ts`               | `ROUTING_STRATEGY_VALUES` (20 straitéis)                                                                                            |
-| `src/sse/handlers/chat.ts`                                | Comhtháthú: gearrchiorcad réimíre uathoibríche                                                                                      |
+| Comhad                                                    | Cuspóir                                                                                                                      |
+| :-------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------- |
+| `open-sse/services/autoCombo/scoring.ts`                  | Feidhm scórála 16-fachtóir, `DEFAULT_WEIGHTS`, norm linn snámha                                                              |
+| `open-sse/services/autoCombo/taskFitness.ts`              | Samhail × tasc aclaíochta cuardaigh                                                                                          |
+| `open-sse/services/autoCombo/engine.ts`                   | Loighic roghnúcháin, meirleach, caipín buiséid                                                                               |
+| `open-sse/services/autoCombo/selfHealing.ts`              | Eisiamh, tóireadóirí, modh teagmhais                                                                                         |
+| `open-sse/services/autoCombo/modePacks.ts`                | 6 phróifíl meáchain (long-tapa, coigilteas costais, cáilíocht-an chéad, cairdiúil as líne, iontaofacht-an chéad, modh chaos) |
+| `open-sse/services/autoCombo/autoPrefix.ts`               | parsálaí réimír `auto/` + 6 leagan                                                                                           |
+| `open-sse/services/autoCombo/virtualFactory.ts`           | Tógann sé `AutoComboConfig` i gcuimhne ó naisc bheo                                                                          |
+| `open-sse/services/autoCombo/providerRegistryAccessor.ts` | Hook tástála le haghaidh clárlann soláthraithe magadh                                                                        |
+| `src/shared/constants/routingStrategies.ts`               | `ROUTING_STRATEGY_VALUES` (22 straitéis)                                                                                     |
+| `src/sse/handlers/chat.ts`                                | Comhtháthú: uathréimír gearrchiorcad                                                                                         |

@@ -24,19 +24,21 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 การจับภาพเกิดขึ้นใน `open-sse/handlers/chatCore.ts` (สองไซต์ ที่ไซต์การโทร `cacheReasoningFromAssistantMessage` สองแห่ง) การเล่นซ้ำเกิดขึ้นใน `open-sse/translator/index.ts` หลังจากการบังคับสคีมา แต่ก่อนที่จะส่ง
+
+รายการการเรียกเครื่องมือจะถูกเก็บไว้ภายใต้ `buildToolCallCacheKey()` ซึ่งเป็นส่วนย่อยของขอบเขตคำขอและรหัสการเรียกเครื่องมือ ดังนั้น id เดียวกันที่ใช้โดยคีย์ API หรือเซสชันอื่นจึงไม่ได้เลือกรายการ ขอบเขตมาจาก `buildReasoningCacheScope()`: รหัสคีย์ API บวกกับคีย์เซสชันเมื่อคำขอมี คอลัมน์ `tool_call_id` และแดชบอร์ดจึงแสดงรายการย่อยนี้สำหรับรายการเหล่านั้น
 
 การเลี้ยวของผู้ช่วยแบบธรรมดา (ไม่ใช่การเรียกใช้เครื่องมือ) จะมีการคีย์ที่แตกต่างกัน: `buildAssistantMessageCacheKey()` ย่อยขอบเขตเซสชันบวกกับการถอดเสียงรูปแบบ OpenAI ที่เป็นมาตรฐานจนถึงเทิร์นนั้น เนื่องจาก DeepSeek ต้องการเหตุผลของ _every_ ก่อนเทิร์นเมื่อมี `tools` ปรากฏ สำหรับเป้าหมาย Responses-API (เช่น `opencode-go/deepseek-v4-flash` ที่ถูกกำหนดเส้นทางไปยัง `/responses`) ส่วนอัปสตรีมจะมี `input` ไม่ใช่ `messages` ดังนั้น `translateRequest()` (`open-sse/translator/index.ts`) จะรายงานการถอดเสียง Pivot ที่ย่อยผ่านตัวเลือกการโทรกลับ และไซต์ที่จับภาพจะย่อยการถอดเสียงเดียวกันนั้น บัตรผ่านการเล่นซ้ำของ Responses ทำงานบน OpenAI pivot สำหรับทุกรูปแบบต้นฉบับ ดังนั้นไคลเอ็นต์ข้อความ Anthropic (Claude → OpenAI → Responses) จะถูกเล่นซ้ำด้วยเช่นกัน
 

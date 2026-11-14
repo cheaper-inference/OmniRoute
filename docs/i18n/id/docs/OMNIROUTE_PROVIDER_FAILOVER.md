@@ -6,8 +6,18 @@
 
 Kegagalan diklasifikasikan sebelum keputusan percobaan ulang dibuat.
 
-Kegagalan sementara seperti batas waktu, kesalahan jaringan, batas laju, dan respons 5xx dari penyedia dapat dialihkan ke penyedia lain. Kesalahan autentikasi, kesalahan izin, permintaan tidak valid, model yang tidak tersedia, dan kegagalan yang tidak diketahui tidak dicoba ulang secara membabi buta.
+Kegagalan sementara seperti waktu habis, kesalahan jaringan, batas kecepatan, dan respons penyedia 5xx mungkin gagal. Kuota atau pulsa yang habis (Kuota 429, atau Pembayaran 402 Diperlukan) tidak pernah dicoba lagi pada penyedia yang sama tetapi dialihkan ke penyedia lain, yang kuotanya terpisah. Kesalahan autentikasi, kesalahan izin, permintaan tidak valid, model tidak tersedia, dan kegagalan yang tidak diketahui tidak dicoba ulang secara membabi buta.
 
-Kebijakan lintas penyedia bawaan mengizinkan hingga tiga percobaan ke penyedia, mencoba ulang saat terjadi batas laju dan batas waktu, serta memisahkan penonaktifan administratif dari status sirkuit sementara.
+Kebijakan lintas penyedia default mengizinkan hingga tiga upaya penyedia, mencoba ulang batas laju dan batas waktu, melakukan failover pada kuota yang telah habis, dan memisahkan penonaktifan administratif dari status sirkuit sementara.
 
-Status sirkuit adalah `closed`, `open`, dan `half_open`. Periode tunggu menjadwalkan pemeriksaan terbatas; pemeriksaan yang berhasil menutup sirkuit, sedangkan pemeriksaan yang gagal membukanya kembali.
+## Dimana penerapannya
+
+- **kombo** gagal di antara target mereka sesuai dengan strategi dan pengaturan kombo itu sendiri.
+- **ID model telanjang** (tanpa awalan `provider/` ) yang dilayani oleh beberapa penyedia aktif, tanpa kombinasi nama persis tersebut, pertama kali dikirim ke pilihan inferensi penyedia. Jika upaya tersebut gagal sehingga kebijakan gagal, permintaan yang sama dikirim ke penyedia aktif berikutnya yang menyajikan id. Responsnya membawa `x-omniroute-fallback-attempts` dengan jumlah penyedia yang mencoba sebelum yang menjawab.
+  - Setiap alternatif diotorisasi persis seolah-olah inferensi telah memilihnya. Target yang diblokir atau tidak diakui oleh kunci API dilewati tanpa panggilan upstream, dan klien mendapatkan kesalahan upstream yang sebenarnya, bukan penolakan kebijakan untuk target yang tidak pernah disebutkan namanya.
+  - Hanya respons gagal yang berlanjut: tidak ada yang gagal setelah byte streaming pertama.
+  - Pertukaran model cadangan darurat hanya berlaku setelah setiap penyedia model yang diminta gagal.
+  - Permintaan yang disematkan ke koneksi (`x-omniroute-connection`) tetap ada di sana.
+  - Id awalan (`provider/model`) tidak pernah dialihkan ke penyedia lain.
+
+Status sirkuit adalah `closed`, `open`, dan `half_open`. Cooldown menjadwalkan penyelidikan terbatas; probe yang berhasil menutup sirkuit dan probe yang gagal membukanya kembali.

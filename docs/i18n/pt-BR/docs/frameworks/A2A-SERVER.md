@@ -160,10 +160,10 @@ OmniRoute expõe 6 habilidades A2A conectadas em `src/lib/a2a/taskExecution.ts::
 | Gerenciamento de cotas | `quota-management`   | Informa o estado da cota por provedor e ajuda os chamadores a decidir quando fazer throttle/switch                                                                                    | cota, provedores                  | “Verificar cota para antrópicos”                   |
 | Descoberta de provedor | `provider-discovery` | Lista provedores instalados com recursos, sinalizadores de nível gratuito, status OAuth                                                                                               | provedores, descoberta            | "Quais provedores estão disponíveis?"              |
 | Análise de custos      | `cost-analysis`      | Estima o custo de um request/conversation considerando o uso recente do catálogo +                                                                                                    | custo, uso                        | "Estimar o custo desta conversa"                   |
-| Relatório de saúde     | `health-report`      | Agrega disjuntor, resfriamento e estado de bloqueio por provedor                                                                                                                      | saúde, resiliência                | "Mostrar o estado de saúde de todos os provedores" |
+| Relatório de Saúde     | `health-report`      | Agrega disjuntor, resfriamento e estado de bloqueio por provedor                                                                                                                      | saúde, resiliência                | "Mostrar o estado de saúde de todos os provedores" |
 | Listar recursos        | `list-capabilities`  | Retorna o catálogo completo de habilidades do agente com 45 entradas (configuração 23 API + 21 CLI + 1) como uma tabela de descontos com SKILL.md URLs bruto para injeção de contexto | catálogo, descoberta, habilidades | "Listar todos os recursos OmniRoute "              |
 
-> O Cartão de Agente deve ser mantido alinhado com o catálogo ativo de 381 provedores; contagens de provedores e metadados free/no-auth são provenientes do registro de tempo de execução.
+> O Cartão de Agente deve ser mantido alinhado com o catálogo ativo de 394 provedores; contagens de provedores e metadados free/no-auth são provenientes do registro de tempo de execução.
 
 ### Detalhe da habilidade `list-capabilities`
 

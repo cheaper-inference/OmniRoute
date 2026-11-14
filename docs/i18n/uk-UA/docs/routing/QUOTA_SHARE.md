@@ -184,53 +184,48 @@ QuotaDimension {
 
 ---
 
-## Інтеграція з конвеєром
+## Інтеграція конвеєра
 
-### Хук PRE (`open-sse/handlers/chatCore.ts`)
+### гачок PRE (`open-sse/handlers/chatCore.ts`)
 
-Виконується перед висхідним виконавцем, після перевірок автентифікації та політик:
+Запускається перед вищим виконавцем, після перевірки авторизації та політики:
 
 ```
 resolveComboTargets / handleSingleModel
   → enforceQuotaShare(apiKeyId, connectionId, provider, estimatedCost)
-      → getQuotaStore().peek() для кожного виміру
+      → getQuotaStore().peek() per dimension
       → fairShare.decideFairShare()
-      → якщо блокування → повернути 429 (buildErrorBody, жорстке правило №12)
-      → якщо дозволено + зниження пріоритету → встановити quotaSoftPenalty=true для кандидата
+      → if block → return 429 (buildErrorBody, Hard Rule #12)
+      → if allow + deprioritize → set quotaSoftPenalty=true on candidate
   → executor.execute()
 ```
 
-**Пропуск у разі помилки**: якщо `enforceQuotaShare` викидає виняток, запит пропускається
-із записом `pino.warn` у журналі. Це запобігає блокуванню всього трафіку через помилку
-рушія квот.
+**Відмовно відкритий** : якщо `enforceQuotaShare` видає, запит дозволяється через журнал `pino.warn`. Це запобігає блокуванню всього трафіку через помилку механізму квотування.
 
-### Хук POST (запис споживання)
+### POST хук (рекордне споживання)
 
 Після успішної відповіді:
 
 ```
-executor повертає успішний результат
+executor returns success
   → spendRecorder.recordConsumption(apiKeyId, connectionId, provider, actualCost)
-      → getQuotaStore().consume() для кожного виміру
-      → пропуск у разі помилки: помилки записуються як pino.warn і ніколи не передаються клієнту
+      → getQuotaStore().consume() per dimension
+      → fail-open: errors logged as pino.warn, never propagated to client
 ```
 
-**Примітка щодо розбіжності**: якщо `consume` завершується помилкою після відповіді, ковзний лічильник
-недораховує споживання. Сигнал насичення від постачальника (наприклад, `anthropic-ratelimit-unified-5h-utilization`)
-коригує глобальну оцінку під час наступного запиту.
+**Дрифтова записка** : якщо `consume` не відповідає після відповіді, поточний лічильник занижується. Сигнал насичення від постачальника (наприклад, `anthropic-ratelimit-unified-5h-utilization`) коригує глобальну оцінку на наступний запит.
 
-### М’який штраф комбінації (`open-sse/services/combo.ts`)
+### Комбінований м'який штраф (`open-sse/services/combo.ts`)
 
 Коли `decision.deprioritize === true`:
 
 ```ts
 if (candidate.quotaSoftPenalty) {
-  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // за замовчуванням 0.7
+  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // default 0.7
 }
 ```
 
-Штраф застосовується після всіх інших коефіцієнтів оцінювання. Він знижує ймовірність
-вибору насиченого ключа автоматичною комбінацією, не блокуючи його повністю.
+Покарання застосовується після всіх інших факторів нарахування очок. Це знижує ймовірність автоматичного вибору насиченого ключа без його жорсткого блокування.
 
 ---
 

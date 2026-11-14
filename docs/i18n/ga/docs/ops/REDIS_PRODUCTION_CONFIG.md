@@ -65,67 +65,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Tiúnadh Molta don Táirgeadh
+## Tiúnadh Táirgeadh Molta
 
-### 1. Linn Nasc / Roghanna Cliant (cruthaitheoir `Redis` i ioredis)
+### 1. Snámha Nasctha / Roghanna Cliant (iredis `Redis` constructor)
 
-Cruthaíonn an cód reatha `new Redis(url)` amháin gan aon roghanna saincheaptha. Le haghaidh imscaradh táirgthe
-le macasamhla iolracha, cuir monarcha cliant ar fáil sa chód nó cuir cumhdach timpeall ar `getRedisClient()`:
+Cruthaíonn an cód reatha `new Redis(url)` amháin gan aon roghanna saincheaptha. Le haghaidh imscaradh il-macasamhail táirgeachta, pas a fháil i monarcha cliant sa chód nó wrap `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // gan teorainn athiarrachtaí; lig do retryStrategy cinneadh a dhéanamh
-  enableReadyCheck: true, // deimhnigh go bhfuil an freastalaí réidh sula nglactar le glaonna
-  lazyConnect: true, // ná ceangail tráth an chruthaithe; fan leis an gcéad ghlao
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // éirigh as tar éis 10 n-atiarracht → athcheangail ar ball
-    return Math.min(times * 200, 5000); // 200ms, 400ms, …, uasteorainn 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // comhcheangail orduithe comhthráthacha in aon scríobh TCP amháin
-  keepAlive: 10000, // coimeád beo TCP gach 10s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**Príomh-chomhghéilltí:**
+**Comhbhabhtáil eochair:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — is fearr é seo don táirgeadh ionas nach dteipfidh gach
-  iarratas láithreach de bharr atosuithe sealadacha Redis. Maolaíonn an cúltaca sa chuimhne in
-  `checkRateLimit()` an chonair teipe.
-- `lazyConnect: true` — seachnaíonn sé spleáchas tosaithe ar Redis a bheith ag feidhmiú sula
-  dtosaíonn an freastalaí ag glacadh le naisc.
-- `enableAutoPipelining: true` — laghdaíonn sé turais fhillte le haghaidh seiceálacha comhtheorannaithe ráta;
-  tá sé tairbheach ag >50 RPS ar nasc amháin.
+- `maxRetriesPerRequest: null` + `retryStrategy` — is fearr le haghaidh táirgeadh ionas nach dteipeann ar atosú Redis neamhbhuan láithreach gach iarratas. Ionsúnn an t-aischur cuimhne i `checkRateLimit()` an cosán teip.
+- Seachnaíonn `lazyConnect: true` — spleáchas tosaithe ar Redis a bheith suas sula dtosaíonn an freastalaí ag glacadh le naisc.
+- laghdaíonn `enableAutoPipelining: true` — turais bhabhta le haghaidh seiceálacha comhthráthacha teorainneacha ráta; tairbheach ag > 50 RPS ar nasc amháin.
 
 ### 2. Cumraíocht Freastalaí Redis (`redis.conf`)
 
 ```
-# Cuimhne
-maxmemory 80%                        # fág spás do thaisce leathanaigh an OS
-maxmemory-policy allkeys-lru         # díshealbhaigh iontrálacha seanchaite ón taisce fíordheimhnithe faoi bhrú
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Marthanacht (roghnach — tá OmniRoute sábháilte ar thuairt gan í)
-save 300 1                           # tóg seat gach 5 nóiméad ar a laghad má athraíodh ≥1 eochair
-appendonly no                        # níl AOF de dhíth; is féidir na sonraí a athghiniúint
-appendfsync no                       # gan forchostas fsync (is leor RDB)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Líonrú
-timeout 0                            # gan dícheangal díomhaoin
-tcp-keepalive 300                    # coimeád beo 5 nóiméad
-tcp-backlog 511                      # riaráiste nasc le haghaidh ualach tobann
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Feidhmíocht
-hz 10                                # réamhshocrú; 100 nuair atá aga folaigh ríthábhachtach
-activedefrag yes                     # díbhloghdaigh go huathoibríoch nuair atá an bloghadh >10%
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Comhghéilleadh maidir le `maxmemory-policy allkeys-lru`:** D’fhéadfaí iontrálacha sa taisce fíordheimhnithe a dhíshealbhú faoi
-bhrú cuimhne. Tá sé seo sábháilte — athlíonann `setCachedApiKey` i gcónaí iad nuair nach bhfaightear iad, agus is é an
-cúltaca SQLite an fhoinse údarásach. Cruthaíonn script Lua an teorannóra ráta eochracha beaga atá
-gearrshaolach de réir dearaidh.
+**Comhthrádáil le haghaidh `maxmemory-policy allkeys-lru`:** Féadfar iontrálacha taisce Údar a dhíshealbhú faoi bhrú cuimhne. Tá sé seo sábháilte — `setCachedApiKey` ag teacht arís ar an chailleann, agus tá an t-aiseolas SQLite údarásach. Cruthaíonn an script teorann-ráta Lua eochracha beaga atá gearrthéarmach ó thaobh dearaidh.
 
-### 3. Socruithe Docker Compose
+### 3. Docker Socruithe Cum
 
-Úsáideann an chumraíocht compose táirgthe (`docker-compose.prod.yml`) `redis:8.6.2-alpine`. Cuir leis:
+Úsáideann an cumadóireacht táirgí (`docker-compose.prod.yml`) `redis:8.6.2-alpine`. Cuir leis:
 
 ```yaml
 redis:
@@ -150,35 +142,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Breithnithe maidir le hIlásc / Scálú
+### 4. Cúinsí Ilchéime / Scálú
 
-**Redis amháin do gach macasamhail** — braitheann script Lua an teorannóra ráta ar aon spás eochracha
-údarásach amháin. Dá mbeadh áscanna iolracha Redis taobh thiar de mhacasamhlacha, chaillfí an adamhacht
-agus dhúblófaí an buiséad. Úsáid Redis amháin (nó cnuasach Redis Sentinel le teipaistriú) le haghaidh
-gach macasamhla feidhmchláir.
+**Redis aonair do gach macasamhail** — braitheann an script Lua teorannaithe ráta ar eochairspás amháin údarásach. Chaillfeadh cásanna iolracha Redis taobh thiar de na macasamhla adamhacht agus dhá oiread an buiséad. Úsáid Redis amháin (nó braisle Redis Sentinel le failover) le haghaidh gach macasamhail feidhmchlár.
 
-**Líon nasc:** Osclaíonn gach macasamhail feidhmchláir **2 nasc TCP** le Redis
-(cliant an teorannóra ráta + cliant stór na gcuótaí). Le 10 macasamhail → 20 nasc, rud atá go maith
-faoi bhun uasteorainn réamhshocraithe 10k nasc d’ásc Redis.
+**Comhaireamh ceangail:** Osclaíonn gach macasamhail feidhmchlár** 2 nasc TCP** go Redis (teorainn ráta cliant siopa cuóta + ). Ag 10 macasamhail → 20 nasc, go maith laistigh den uasteorainn nasc 10k de réir réamhshocraithe shampla Redis.
 
 ### 5. Monatóireacht
 
-Nocht tríd an gcríochphointe seiceála sláinte iad:
+Nochtadh trí chríochphointe seiceála sláinte:
 
 ```typescript
-// Glaonn src/app/api/monitoring/health/route.ts feidhmeanna rateLimiter cheana féin
-// Cuir seiceálacha a bhaineann go sonrach le Redis leis:
-//   1. Aga folaigh PING trí .ping() i ioredis
-//   2. Úsáid cuimhne trí INFO memory
-//   3. Líon nasc trí INFO clients
-//   4. Ráta amas do maxmemory-policy (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-Príomh-mhéadrachtaí le faire:
+Príomhmhéadracht le féachaint:
 
-- **Eochracha díbeartha / soic** — má bhíonn sé neamh-nialasach go leanúnach, méadaigh `maxmemory`
-- **Cliaint bhlocáilte** — tugann luach neamh-nialasach le fios go bhfuil scripteanna Lua mall nó go bhfuil ardchonspóid ann
-- **Naisc diúltaithe** — baineadh an teorainn nasc amach; rud annamh le 20 nasc
+- **Eochracha / soic díshealbhaithe** — más rud é go leanúnach neamh-nialas, méadú `maxmemory`
+- **Cliaint blocáilte** molann — non-zero scripteanna Lua mall nó ard-áitiú
+- **Naisc diúltaithe** bhuail teorainn nasc — ; annamh ag 20 nasc
+
+### 6. Freastalaithe Redis-Comhoiriúnach
+
+Caithfidh aon fhreastalaí a úsáidtear anseo scripteanna Lua a rith: is é an teorannóir rátaí ná `EVAL`. Ar fhreastalaí gan Lua, logálann `checkRateLimit()` `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` agus déantar é a chomhaireamh in aghaidh an phróisis, agus mar sin forfheidhmíonn gach macasamhail an teorainn leis féin. Léann agus nuashonraíonn an siopa cleamhnais seisiún-roinnte rogha an diúltaithe (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) bioráin le `EVAL`; gan Lua logálann sé `[SESSION_AFFINITY] Redis error; falling back to SQLite.` agus coinníonn gach macasamhail a phionnaí féin. Úsáideann na hualaí oibre eile gnáthorduithe (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, hashes agus tacair), agus ní sheolann inneall Redis an taisce shéimeantach aon orduithe `FT.*`.
+
+Thástáil le OmniRoute 3.8.52: KiviDB 1.2.0 lena íomhá Lua (`kividb/kividb:v1.2.0-lua`). D'éirigh leis an teorannóir rátaí (lena n-áirítear an dara próiseas a chomhroinneann na cuntair), taisce an údair, stór cuóta, scoradán ciorcaid téamh, stór taisce shéimeantach, agus iarratas `/v1/chat/completions` tríd an láimhseálaí comhrá 18 de na 19 seiceáil a théann ar aghaidh Redis 8.10.3. An ceann atá difriúil: stórálann `INCRBYFLOAT` `0.1 + 0.2` mar `0.30000000000000004` áit a stórálann Redis `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Déanann an stór cuóta an dá cheann a pharsáil le `parseFloat`, ach tá difríocht idir an dá uimhir sna digití deiridh, agus mar sin is féidir comparáid a thiteann go díreach ar theorainn cuóta a bhaint amach ar bhealach difriúil. Ní raibh an siopa cleamhnais seisiúin mar chuid den rith sin. ( [socrú](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [torthaí](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 

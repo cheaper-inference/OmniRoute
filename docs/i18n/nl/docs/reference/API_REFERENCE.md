@@ -851,6 +851,43 @@ Web/search provider abstractie (Tavily, Brave, Exa, Serper, etc.).
 
 **Autorisatie:** Drager API sleutel (`extractApiKey` + `isValidApiKey`). Zoekbeleid wordt afgedwongen via `enforceApiKeyPolicy`.
 
+### Genoemde search/fetch -combinaties
+
+Zowel `POST /v1/search` als `POST /v1/web/fetch` accepteren `model` als een opgeslagen combonaam. Gebruik `model` of een expliciete `provider`; beide retourzendingen `400` verzenden. Zonder beide velden blijft de bestaande automatische providerselectie ongewijzigd.
+
+Zowel de Combo Builder als de Add Model-catalogus geven native webbewerkingsitems weer voor aangesloten providers, zelfs als ze geen LLM -modellijst hebben. Serper laat zien** Zoeken op internet** ; Tavily laat zien** Zoeken op internet / Pagina-extractie** , en alleen-ophaal-providers worden weergegeven** Pagina-extractie** . Kies de invoer en het account zoals gewoonlijk. Eén enkele Tavily-invoer bedient beide webeindpunten; deze bewerkingsitems worden niet toegevoegd aan alleen-chat-clientkiezers of chatmodeltests.
+
+Maak bijvoorbeeld een** prioriteit** combo genaamd `shared-free` met deze geordende doelen:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+Gebruik vervolgens op elk oppervlak dezelfde naam:
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+Search beschouwt Tavily en vervolgens Serper; fetch beschouwt Tavily en vervolgens Jina Reader; chat slaat de toegewijde search/fetch providers over en houdt rekening met OpenAI. Compatibiliteit komt van de search/fetch uitvoerderregisters, niet van woorden in een modelnaam. Filteren gaat vooraf aan de selectie en verzending van inloggegevens, en bewerkt nooit de opgeslagen combinatie.
+
+Routes voor niet-chatmogelijkheden ondersteunen `priority`, `fill-first`, `round-robin`, `weighted`, `random`, `strict-random`, `least-used` en `p2c`. Synthesestrategieën voor alleen chatten, zoals `fusion`, `pipeline` en `context-relay` worden afgewezen op niet-chatroutes in plaats van stilletjes te worden toegepast op zoek- of gegenereerde media. De bestaande combo-engine handelt geordende fallback af, inclusief upstream-quotumfouten, en behoudt stap IDs, accountpins, per-stap-toelatingslijsten voor accounts, geneste referenties, connection/quota -bereiken van bellers en combo-toegangsbeleid. Resultaten behouden hun oorspronkelijke search/fetch schema, inclusief de daadwerkelijke provider; `X-OmniRoute-Combo-Trace` identificeert de routeringsbeslissing. Onbekende combo's retourneren `404`; inactieve combo's en combinaties zonder compatibele doelen retourneren `400`.
+
+Elke combinatiepoging maakt gebruik van één expliciete provider. Het kan de native automatische providerpool niet achter de rug van de combo aanroepen. Expliciete providerverzoeken behouden hun bestaande single-provider-gedrag. Directe chatverzoeken gericht op specifieke search/fetch providers retourneren een bruikbare JSON `400` in plaats van door te schakelen naar een OpenAI-achtige uitvoerder.
+
+### Mogelijkheidsspecifieke combo-routes
+
+Opgeslagen combo's kunnen een `routes` object bevatten waarvan de sleutels API mogelijkheden zijn. Elke route is eigenaar van zijn doellijst, strategie en runtime-configuratie. De `models`, `strategy` en `config` op het hoogste niveau blijven het verouderde chatplan; oude combo's zonder `routes` blijven onveranderd werken.
+
+Ondersteunde routesleutels zijn `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`, `image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`, `audio-translations` en `audio-generation`. Eindpuntprojectie vindt plaats vóór de selectie, scoring of verzending van inloggegevens. Geneste combo-referenties selecteren de route van de onderliggende combo voor dezelfde mogelijkheid.
+
+`POST /v1/music/generations` en `POST /v1/ocr` accepteren een combonaam in `model`. De native ElevenLabs-compatibele `POST /v1/music` accepteert ook een combonaam in `model_id`, maar elk bruikbaar doel op dat native eindpunt moet een ElevenLabs muziekmodel zijn, zodat het binaire responscontract behouden blijft. `POST /v1/sound-generation` accepteert een `audio-generation` combinatie in `model_id` onder dezelfde native binaire beperking. Gebruik `/v1/music/generations` voor heterogene muziekaanbieders.
+
 **Automatische selectie:** zonder `provider` draait de goedkoopste aanbieder met een geconfigureerde verbinding als eerste en de volgende goedkoopste is de failover. Gratis last-resort providers (`duckduckgo-free`) worden alleen gebruikt als er niets anders is geconfigureerd. Een zelf-gehoste SearXNG telt zoals geconfigureerd zodra de verbinding een echte `baseUrl` opslaat (niet de standaard `http://localhost:8888/search` uit de catalogus): het wordt dan gerangschikt als een $0-provider vóór de ingetoetste providers, met de goedkoopste ingetoetste provider als failover, ook wanneer SearXNG 400, 401, 403 of 404 antwoordt. Een `baseUrl` die geen geldige `http(s)` URL is of die naar een cloud-metadata-adres verwijst, telt niet. Een SearXNG verbinding die een token opslaat, scoort op deze manier alleen boven `https://` of loopback `http://`. Via gewone `http://` op afstand is het nooit een failover en blijft het een laatste redmiddel, het wordt alleen gebruikt als er geen andere provider is geconfigureerd of als er op naam wordt gevraagd, dus het verzendt het token in die twee gevallen wel in leesbare tekst.
 
 ### Exa en Tavily `provider_options`
@@ -872,31 +909,29 @@ Exa-resultaten behouden `id`, `highlights` (elk hoogtepunt, niet alleen de eerst
 
 De zoekkosten voor koppelingen worden vastgelegd op $0,005 voor `depth` `fast` en `standard` en $0,05 voor `deep` ( [Linkup-prijzen](https://docs.linkup.so/pages/documentation/development/pricing) ), ongeacht of `depth` afkomstig is van `provider_options` of van de instellingen van de verbinding.
 
-Exa `type: "lite"` (Exa 3.0) accepteert een kleinere set velden en wijst het hele verzoek af wanneer een ander veld wordt ingesteld. Voor lite worden `additionalQueries`, `systemPrompt` en elke `contents` -sleutel behalve `text` en `highlights` verwijderd vóór de aanroep. De verouderde `subpages`, `subpageTarget`, `highlights.numSentences` en `highlights.highlightsPerUrl` worden niet langer doorgestuurd.
+Exa `type: "lite"` (Exa 3.0) accepteert een kleinere set velden en wijst het hele verzoek af wanneer een ander veld wordt ingesteld. Voor lite worden `additionalQueries`, `systemPrompt` en elke `contents` -sleutel behalve `text` en `highlights` vóór de aanroep verwijderd. De verouderde `subpages`, `subpageTarget`, `highlights.numSentences` en `highlights.highlightsPerUrl` worden niet langer doorgestuurd.
 
 Kostenberekening is het platte register `costPerQuery`, met uitzondering van Exa, dat Exa's eigen prijzen volgt: $0,007 per oproep voor `auto` (en de oude `fast`) of $0,004 voor `lite` (en de oude `instant`), wat 10 resultaten omvat; $ 0,001 voor elk verder resultaat; en $ 0,001 per geretourneerd resultaat wanneer `contents.summary` is ingesteld. Tavily wordt geregistreerd op 1 credit ($0,008) voor `search_depth` `basic`, `fast` en `ultra-fast`, en 2 credits ($0,016) voor `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Een gesprek met `auto_parameters: true` dat Tavily upgradet naar geavanceerd wordt nog steeds geregistreerd tegen 1 credit.
 
 ---
 
-## Web Fetch API
+## Web ophalen API
 
-Extraheer inhoud van een URL via een geconfigureerde web-fetchprovider (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
+Extraheer inhoud van een URL via een geconfigureerde web-fetch-provider (Firecrawl, Jina Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-Parallel Extract (`parallel-search`, dezelfde API-sleutel als Parallel Search) retourneert uitsluitend Markdown — elke andere `format` resulteert in een `400` — en beperkt de inhoud tot 100.000 tekens. Wanneer de doelpagina zelf niet kan worden geëxtraheerd, rapporteert de upstream dit binnen een HTTP 200;
-OmniRoute geeft dit door als een `422` met een vaste melding.
+Parallel Extract (`parallel-search`, dezelfde API sleutel als Parallel Search) retourneert alleen Markdown — elke andere `format` is een `400` — en beperkt de inhoud tot 100.000 tekens. Wanneer de doelpagina zelf niet kan worden geëxtraheerd, rapporteert de upstream dit in een HTTP 200; OmniRoute brengt dat naar voren als een `422` met een vaste boodschap.
+
+Keenable Fetch (`keenable-search`) retourneert ook alleen Markdown (elke andere `format` is een `400`) en beperkt de inhoud tot 100.000 tekens. Het werkt zonder sleutel: een expliciet `provider: "keenable-search"` verzoek zonder verbinding maakt gebruik van het sleutelloze eindpunt van Keenable (snelheidslimieten per IP). Een geconfigureerde sleutel heft alleen die limieten op; automatisch selecteren gebruikt Keenable alleen als er een sleutel is geconfigureerd.
 
 | Methode | Pad             | Beschrijving                                                       |
 | ------- | --------------- | ------------------------------------------------------------------ |
-| POST    | `/v1/web/fetch` | Een URL ophalen/scrapen — body gevalideerd door `v1WebFetchSchema` |
+| POST    | `/v1/web/fetch` | Fetch/scrape een URL — lichaam gevalideerd door `v1WebFetchSchema` |
 
-**Authenticatie:** Bearer API-sleutel (`extractApiKey` + `isValidApiKey`). Beleid wordt afgedwongen via `enforceApiKeyPolicy`.
+**Autorisatie:** Drager API sleutel (`extractApiKey` + `isValidApiKey`). Beleid wordt afgedwongen via `enforceApiKeyPolicy`.
 
-**Quota-bewuste fallback (#8297):** wanneer geen expliciete `provider` is opgegeven, wordt de pool
-(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) in een vaste
-prioriteitsvolgorde (fill-first) doorlopen — een provider die beperkt is door rate limiting maar wel geconfigureerd is, wordt overgeslagen in plaats van het verzoek vroegtijdig af te breken, en een opnieuw te proberen/upstreamfout door quota (HTTP 429 altijd; 402/403 voor quota-achtige gratis tiers van Firecrawl/Tavily/TinyFish —
-niet voor Jina Reader, en nooit voor een gewone 400 vanwege een ongeldig verzoek) gaat tijdens het verzoek door naar de volgende niet eerder uitgeprobeerde provider waarvoor inloggegevens beschikbaar zijn. Wanneer elke provider in de pool is uitgeput, retourneert het endpoint één `429` (met een `Retry-After`-header) in plaats van de eerdere algemene `400`. Wanneer een expliciete `provider` wordt aangevraagd, is er **geen** stille fallback — een provider waarvoor rate limiting geldt of die faalt, geeft zijn eigen fout door (`429` bij rate limiting, anders de upstreamstatus).
+Benoemde combinaties gebruiken het bovenstaande [`model` routeringscontract](#named-searchfetch-combinations), waarbij ophaalspecifieke opties en antwoorden behouden blijven.
+
+**Quotabewuste fallback (#8297):** wanneer noch `provider` noch `model` wordt gegeven, wordt de pool (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` → `parallel-search` → `keenable-search`) gelopen in een vaste prioriteitsvolgorde (eerst vullen) — een provider met beperkte snelheid maar geconfigureerd wordt overgeslagen in plaats van het verzoek kort te sluiten, en een upstream-fout van retryable/quota ( altijd HTTP 429; 402/403 voor Firecrawl/Tavily/TinyFish quota-stijl gratis niveaus — niet voor Jina Reader, en nooit voor een gewone 400 slechte aanvraag) valt op het moment van de aanvraag door naar de volgende niet-geprobeerde, geaccrediteerde provider. Wanneer elke provider in de pool uitgeput is, retourneert het eindpunt een enkele `429` (met een `Retry-After` header) in plaats van de vorige generieke `400`. Wanneer een expliciete `provider` wordt gevraagd, is die er** Nee** stille terugval — een expliciete provider met een beperkte snelheid of een falende provider brengt zijn eigen fout naar voren (`429` indien een beperkte snelheid, anders de upstream-status).
 
 ---
 
@@ -963,34 +998,26 @@ De CLI upgradet `base_url + /responses` naar een WebSocket en OmniRoute zet een 
 
 ---
 
-## Rapportage van quota's en problemen
+## Rapportage van quota en problemen
 
-| Methode | Pad                 | Beschrijving                                                                                                 |
-| ------- | ------------------- | ------------------------------------------------------------------------------------------------------------ |
-| GET     | `/v1/quotas/check`  | Quota vooraf valideren voor een `provider` + `accountId` voordat een geregistreerde sleutel wordt uitgegeven |
-| POST    | `/v1/issues/report` | Een mislukte quota-/sleuteluitgifte rapporteren aan GitHub (vereist `GITHUB_ISSUES_REPO` + token)            |
+| Methode | Pad                 | Beschrijving                                                                                               |
+| ------- | ------------------- | ---------------------------------------------------------------------------------------------------------- |
+| GET     | `/v1/quotas/check`  | Valideer het quotum voor een `provider` + `accountId` vooraf voordat u een geregistreerde sleutel uitgeeft |
+| POST    | `/v1/issues/report` | Rapporteer een quota/key -uitgiftefout aan GitHub (vereist `GITHUB_ISSUES_REPO` + token)                   |
 
-**Authenticatie:** Bearer API-sleutel (`isAuthenticated`).
+**Autorisatie:** `/v1/quotas/check` neemt een Bearer API sleutel (`isAuthenticated`). `/v1/issues/report` is alleen voor beheer (`requireManagementAuth`), zoals `/api/v1/registered-keys`: een dashboardsessie, het lokale CLI token of een API sleutel met `manage`/`admin` scope; API -sleutels met alleen gevolgtrekking krijgen `403`.
 
-### Herstel van quotasessies (opt-in)
+### Herstel van quotasessie (opt-in)
 
-Een niet-streamende `POST /v1/chat/completions` of `POST /v1/responses` die mislukt met een
-terminale quota-fout (`402`/`429`/`503` waarvan de body aangeeft dat het quota of de credits zijn uitgeput)
-kan worden geparkeerd en later opnieuw worden afgespeeld in plaats van de fout terug te geven. De aanroeper kiest dit per verzoek met drie headers:
+Een niet-streaming `POST /v1/chat/completions` of `POST /v1/responses` die faalt met een terminalquotumfout (`402`/`429`/`503` waarvan de body zegt dat de quota of credits zijn opgebruikt) kan worden geparkeerd en later opnieuw worden afgespeeld in plaats van de fout te retourneren. De beller meldt zich per verzoek aan met drie headers:
 
-| Header                       | Waarde                                                  |
-| ---------------------------- | ------------------------------------------------------- |
-| `x-omniroute-quota-recovery` | `auto`                                                  |
-| `x-omniroute-session`        | sessie-id, `[A-Za-z0-9._:-]{1,128}`                     |
-| `x-omniroute-recovery-turn`  | beurt-id die uniek is binnen de sessie (dezelfde regel) |
+| Koptekst                     | Waarde                                          |
+| ---------------------------- | ----------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                          |
+| `x-omniroute-session`        | sessie-ID, `[A-Za-z0-9._:-]{1,128}`             |
+| `x-omniroute-recovery-turn`  | maak ID uniek binnen de sessie (dezelfde regel) |
 
-Alleen beurten met `stream: false`, zonder tools, toolgeschiedenis of `previous_response_id`, en zonder
-een `x-omniroute-connection`-pin komen in aanmerking, en `STORAGE_ENCRYPTION_KEY` moet zijn ingesteld
-(het verzoek wordt maximaal 24 uur versleuteld opgeslagen). Het antwoord is vervolgens `202` met
-`recovery.poll`; poll `GET /v1/quota-recoveries/{id}` (`202` zolang de bewerking in behandeling is, `200` met de
-herstelde body wanneer deze is voltooid) of annuleer met `DELETE`. Tickets zijn alleen zichtbaar voor de API-sleutel
-waarmee ze zijn aangemaakt. Een replay waarvan de uitkomst onzeker is, eindigt in `needs_confirmation`
-in plaats van tweemaal te worden verzonden. Bron: `src/lib/quota/quotaSessionRecovery.ts`.
+Alleen `stream: false` -beurten zonder gereedschap, gereedschapsgeschiedenis of `previous_response_id` en zonder `x-omniroute-connection` pin komen in aanmerking, en `STORAGE_ENCRYPTION_KEY` moet worden ingesteld (het verzoek wordt maximaal 24 uur versleuteld opgeslagen). Het antwoord is dan `202` met `recovery.poll`; poll `GET /v1/quota-recoveries/{id}` (`202` terwijl in behandeling, `200` met het herstelde lichaam wanneer voltooid) of annuleer met `DELETE`. Tickets zijn alleen zichtbaar voor de API sleutel waarmee ze zijn gemaakt. Een herhaling waarvan de uitkomst onzeker is, eindigt in `needs_confirmation` in plaats van twee keer te worden verzonden. Bron: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1721,17 +1748,21 @@ Uitgaande webhook-abonnementen voor OmniRoute-gebeurtenissen (voltooide aanvrage
 
 ## Geregistreerde sleutels (automatisch beheer)
 
-Wordt gebruikt door het subsysteem voor automatisch sleutelbeheer om API-sleutels uit te geven en te roteren bij een achterliggende provider/account, met dagelijkse/uurquota.
+Wordt gebruikt door het subsysteem voor automatisch sleutelbeheer om API sleutels uit te geven en te roteren tegen een back-up provider/account, met daily/hourly quota.
 
-| Methode | Pad                                   | Beschrijving                                                                                                                                                                                                                                  |
-| ------- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET     | `/api/v1/registered-keys`             | Geregistreerde sleutels weergeven (alleen gemaskeerd voorvoegsel)                                                                                                                                                                             |
-| POST    | `/api/v1/registered-keys`             | Een nieuwe geregistreerde sleutel uitgeven — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Retourneert de onbewerkte sleutel **eenmalig**. Retourneert `429` bij weigering vanwege quotum. |
-| GET     | `/api/v1/registered-keys/[id]`        | Metagegevens van een geregistreerde sleutel ophalen (geen onbewerkte gegevens)                                                                                                                                                                |
-| DELETE  | `/api/v1/registered-keys/[id]`        | Een geregistreerde sleutel intrekken                                                                                                                                                                                                          |
-| POST    | `/api/v1/registered-keys/[id]/revoke` | Expliciet eindpunt voor intrekking (hetzelfde effect als DELETE)                                                                                                                                                                              |
+| Methode | Pad                                   | Beschrijving                                                                                                                                                                                                                             |
+| ------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET     | `/api/v1/registered-keys`             | Lijst met geregistreerde sleutels (alleen gemaskeerd voorvoegsel)                                                                                                                                                                        |
+| POST    | `/api/v1/registered-keys`             | Geef een nieuwe geregistreerde sleutel — body uit: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Retourneert de onbewerkte sleutel** eenmaal** . Retourneert `429` bij weigering van quota. |
+| GET     | `/api/v1/registered-keys/[id]`        | Haal de metadata van een geregistreerde sleutel op (geen ruw materiaal)                                                                                                                                                                  |
+| DELETE  | `/api/v1/registered-keys/[id]`        | Een geregistreerde sleutel intrekken                                                                                                                                                                                                     |
+| POST    | `/api/v1/registered-keys/[id]/revoke` | Expliciet intrekkingseindpunt (hetzelfde effect als DELETE)                                                                                                                                                                              |
+| GET     | `/api/v1/providers/[provider]/limits` | Lees de uitgiftelimieten van de aanbieder                                                                                                                                                                                                |
+| PUT     | `/api/v1/providers/[provider]/limits` | Stel de uitgiftelimieten van de aanbieder — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                                                |
+| GET     | `/api/v1/accounts/[id]/limits`        | Lees de uitgiftelimieten van de rekening                                                                                                                                                                                                 |
+| PUT     | `/api/v1/accounts/[id]/limits`        | Stel de uitgiftelimieten van de rekening in — dezelfde manier als de providerroute                                                                                                                                                       |
 
-**Authenticatie:** beheersessie/API-sleutel (`requireManagementAuth`) — dezelfde beveiliging als `/api/keys`: een dashboardsessie, het lokale CLI-token of een API-sleutel met de scope `manage`/`admin`; API-sleutels die alleen voor inferentie zijn krijgen `403`. Zie ook `/v1/quotas/check` en `/v1/issues/report`.
+**Autorisatie:** beheer session/API sleutel (`requireManagementAuth`) — dezelfde bewaker als `/api/keys`: een dashboardsessie, het lokale CLI token of een API sleutel met `manage`/`admin` scope; API -sleutels met alleen gevolgtrekking krijgen `403`. Zie ook `/v1/quotas/check` en `/v1/issues/report`.
 
 ---
 

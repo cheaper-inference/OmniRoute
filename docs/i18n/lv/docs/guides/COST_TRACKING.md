@@ -82,7 +82,7 @@ Modeļu nosaukumi vispirms tiek normalizēti (tiek noņemti pakalpojumu sniedzē
 
 ### Kā tiek reģistrēti tēriņi
 
-- Maksa par pieprasījumu tiek aprēķināta pēc atbildes saņemšanas un reģistrēta, lai aizmirstu, lai klients nekad nepalielinātu latentumu. Koplietotās kvotas patēriņš ir ieplānots nākamajā notikumu cilpas atzīmēšanā, izmantojot [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Pieprasījuma izmaksas tiek aprēķinātas pēc pieprasījuma aizpildīšanas. Koplietotās kvotas patēriņš ir ieplānots nākamajā notikumu cilpas atzīmēšanā, izmantojot [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
 - API atslēgas tēriņi tiek buferizēti un pa daļām tiek izskaloti, izmantojot [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (noklusējuma skalošanas intervāls 60 s, 1000 ierakstu buferis). Noskaņojams, izmantojot:
 
   | Env var                             | Noklusējums | Mērķis                                                   |
@@ -90,7 +90,29 @@ Modeļu nosaukumi vispirms tiek normalizēti (tiek noņemti pakalpojumu sniedzē
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`     | Skalošanas intervāls milisekundēs.                       |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`      | Maksimālais buferizēto ierakstu skaits pirms skalošanas. |
 
-Informācijas paneļa izmaksu skaitļi ir šādi** nē** nolasa no rindiņā saglabātās summas dolāros — tie tiek pārrēķināti lidojuma laikā no pilnvaru skaita un pašreizējās cenu tabulas katru reizi, kad tiek izpildīts analītikas galapunkts. Tas nozīmē, ka nepareizas cenas labošana (un atkārtota sinhronizācija) ar atpakaļejošu datumu atjaunina vēsturisko izmaksu aprēķinus.
+Izmaksas dod priekšroku precīzai pakalpojumu sniedzēja norādītai maksai (`provider_cost_usd`), pēc tam pieprasījuma momentuzņēmumam par kataloga cenām (`calculated_cost_usd`), pēc tam marķiera pārcenošanai no pašreizējā kataloga. Saglabātās izmaksas netiek atkārtoti iekasētas, izmantojot to marķieru skaitu. Mantotās tikai marķiera rindas joprojām mainās, kad mainās to kataloga cena.
+
+### OCR un iegulšanas
+
+- Veiksmīgiem `/v1/ocr` pieprasījumiem tiek izmantots augšējais `usage_info.pages_processed`, nevis pieprasītais lapu diapazons vai atgriezto lapas objektu skaits. Aprēķins ir lapas × `ocr_cost_per_page` (absolūtais USD/page,** nē** USD/million).
+- Pieprasījumiem ar dokumentu vai norobežojošo lodziņu anotācijām ir nepieciešams atsevišķs `ocr_cost_per_annotated_page` tarifs. Bez tā izmaksas paliek nezināmas; parastais OCR tarifs netiek klusībā aizstāts.
+- LiteLLM sync kartē savu augšupējo `annotation_cost_per_page` lauku uz `ocr_cost_per_annotated_page`, saglabājot absolūto USD/page vērtību un tikai anotāciju ierakstus, tostarp skaidru nulli. Priekšroka tiek dota piegādātajam kanoniskajam laukam; nederīgās aizstājvārdu vērtības tiek ignorētas. Lietotāja cenu ignorēšana saglabā savu parasto prioritāti. Skatiet [LiteLLMOCR cenu atslēgas](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- OCR lietojums saglabā lapu skaitu, vienības cenu, aprēķinātās USD izmaksas, API atslēgu un izvēlēto savienojumu. Lapas nekad netiek attēlotas kā marķieri. Zvanu žurnālos ir ietverti norēķinu metadati, nevis dokumenta URLs, PDF baiti vai izvilkts teksts.
+- Veiksmīgi `/v1/embeddings` pieprasījumi reģistrē vienu lietojuma rindu katrā fiziskajā paketē, tostarp atsevišķas partijas, kas pabeigtas tajā pašā milisekundē. Pakalpojumu sniedzēja ziņotajām maksām ir prioritāte pār simboliskām aplēsēm; kombinētie iesaiņojumi nepievieno maksu.
+- Šīs maksas ir iekļautas lietojuma vēsturē, izmaksu analīzē, provider/account logos, API atslēgas tēriņu limitos, pieprasījumu izmaksu virsgrāmatā un ikdienas lietošanas apkopojumos. Atslēgas bez reģistrēšanas saglabā skaitlisko uzskaiti, nesaglabājot avota tekstu.
+- Trūkst lietojuma vai tarifu** nezināms** , nav bezmaksas: atbildes izmaksu galvene ir izlaista, un esošā bezcenas lietošanas politika attiecas uz ierobežotām API atslēgām. Skaidri konfigurētas nulles likmes paliek spēkā bez maksas.
+
+Šī ir tikai uz priekšu vērsta grāmatvedība. Vecos OCR/embedding zvanus, kuros nekad nav ierakstīta lietošanas vēsture, nevar rekonstruēt no šīs migrācijas. Kataloga aprēķini ir USD aprēķini, nevis rēķins, un tajos nav iekļauta valūtas konvertācija, nodokļi vai atlaides.
+
+### Runa un attēli
+
+- Veiksmīgiem `/v1/audio/transcriptions`, `/v1/audio/speech` un attēlu ģenerēšanas mēģinājumiem ir kopīga skaitliskā uzskaite. Tiešajiem un kombinētajiem zvaniem ir zvanītāja API taustiņš un izvēlētais savienojums; kombinētais iesaiņotājs nekad nepievieno otro debetu.
+- Pakalpojumu sniedzēja ziņotais USD pārspēj kataloga aprēķinu, tostarp skaidru nulles maksu. OpenRouterJSON `usage.cost` ir normalizēts uz `cost_usd`. Pretējā gadījumā izmērītajiem marķieriem tiek izmantotas marķiera cenas, transkripcijas sekundēs tiek izmantotas sekundes cenas, runas ievadei tiek izmantots unikoda rakstzīmju skaits, un vienotas cenas attēlos tiek izmantots faktiski atgrieztais skaitlis, nevis pieprasītais `n`.
+- Binārajam OpenRouter TTS nav JSON lietojuma pamatteksta. Kad audio ir pabeigts vai zvanītājs atceļ, OmniRoute vaicā tā ģenerēšanas ID** tas pats** konfigurēta OpenRouter izcelsme. EU pieprasījums nekad neatgriežas globālajā izcelsmē. Šis ir ierobežots, tikai lasāms uzmeklējums; sintēze netiek atkārtoti mēģināta uzskaitei. Norēķinu ieraksti var parādīties pēc tam, kad audio ir beidzies: uzmeklēšanas atkārtotie mēģinājumi tiek veikti fonā aptuveni 52 sekundes, ieskaitot tīkla termiņus.
+- Šīs uzmeklēšanas laikā audio atbildei ir `X-OmniRoute-Cost-Status: pending` un nav atbildes maksas galvenes. Tās pēdējā maksa pēc saskaņošanas parādās lietošanas vēsturē, analīzē un atslēgu grāmatā. Ja metadati nav pieejami, tiek izmantots konfigurēts tarifa momentuzņēmums; pretējā gadījumā izmaksas paliek nezināmas.
+- Sekunžu, rakstzīmju un attēlu skaitam ir atsevišķi norēķinu vienības lauki, nekad nav norādīti viltoti marķieri. Grāmatvedība saglabā tikai skaitlisko lietojumu, nevis runas tekstu, atšifrējumus vai attēlu baitus. Esošie bezcenas attēlu izņēmumi ir nemainīgi: patiesi trūkstošais attēla tarifs nebloķē ierobežotu atslēgu, un atbildē tiek izlaista izmaksu galvene, nevis paziņots, ka zvans ir bezmaksas. Cenu noteikšanas veikala kļūmes gadījumā joprojām tiek saglabāti lietojuma pierādījumi, lai veiktu izpildi bez atteices.
+
+Neviens vēsturisks speech/image lādiņš nav izdomāts vai aizpildīts. Pakalpojumu sniedzēja norēķini joprojām ir atsauce rēķiniem un zvaniem, par kuriem maksa netika ziņots.
 
 ---
 

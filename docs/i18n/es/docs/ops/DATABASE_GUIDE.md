@@ -403,52 +403,53 @@ Esto utiliza la API de copia de seguridad en línea de SQLite; es seguro ejecuta
 
 ---
 
-## Ajuste del rendimiento
+## Ajuste de rendimiento
 
 ### Modo WAL
 
-WAL está habilitado de forma predeterminada. Para cargas de trabajo con muchas escrituras, considere:
+WAL está habilitado de forma predeterminada. Para cargas de trabajo de alta escritura, considere:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Punto de control cada 1000 páginas
-PRAGMA journal_size_limit = 67108864;  -- Límite de WAL de 64 MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute no establece `journal_size_limit`. Un punto de control mueve fotogramas WAL al archivo principal, pero el archivo WAL mantiene su tamaño asignado más grande. El `OMNIROUTE_WAL_GUARD_MAX_MB` guard sólo advierte y ejecuta `wal_checkpoint(RESTART)`; no es un límite del tamaño de un disco.
 
 ### Índices
 
-Índices clave para el rendimiento (creados automáticamente mediante migraciones):
+Índices clave para el rendimiento (creados automáticamente por migraciones):
 
-- `idx_models_provider` — búsquedas de modelos por proveedor
-- `idx_combo_targets_combo_id` — expansión de destinos combinados
-- `idx_usage_history_api_key_timestamp` — análisis de uso
-- `idx_quota_snapshots_api_key_window` — seguimiento de cuotas
-- `idx_call_logs_timestamp` — consultas de registros de llamadas
+- Búsquedas de modelos `idx_models_provider` — por proveedor
+- Expansión de objetivo combo `idx_combo_targets_combo_id` —
+- análisis de uso — `idx_usage_history_api_key_timestamp`
+- seguimiento de cuota `idx_quota_snapshots_api_key_window` —
+- consultas del registro de llamadas `idx_call_logs_timestamp` —
 
-Para añadir un índice nuevo, cree una migración:
+Para agregar un nuevo índice, cree una migración:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### E/S asignada en memoria
+### I/O mapeado en memoria
 
-Para bases de datos muy grandes (>10 GB), la asignación de memoria se puede ajustar mediante una pragma de SQLite:
+Para bases de datos muy grandes (> 10 GB), la asignación de memoria se puede ajustar mediante SQLite pragma:
 
 ```sql
--- Configurar mediante una pragma de SQLite (ajustar en core.ts o en tiempo de ejecución)
-PRAGMA mmap_size = 268435456;  -- 256 MB
+-- Set via SQLite pragma (adjust in core.ts or runtime)
+PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
 ### Compactación
 
-Las instancias de OmniRoute que se ejecutan durante largos periodos se benefician de ejecutar `VACUUM` ocasionalmente:
+Las instancias OmniRoute de larga duración se benefician de `VACUUM` ocasional:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Ejecútelo mensualmente durante periodos de poco tráfico. (El modo WAL reduce la necesidad, pero no la elimina).
+Ejecute mensualmente durante períodos de poco tráfico. (El modo WAL reduce la necesidad, pero no la elimina).
 
 ---
 

@@ -24,19 +24,21 @@ Nhưng các khách hàng thông thường (Cursor, Cline, Roo Code, OpenAI SDK) 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Việc chụp xảy ra ở `open-sse/handlers/chatCore.ts` (hai địa điểm, tại hai địa điểm gọi `cacheReasoningFromAssistantMessage` ). Việc phát lại xảy ra trong `open-sse/translator/index.ts` sau khi ép buộc lược đồ nhưng trước khi gửi đi.
+
+Các mục nhập lệnh gọi công cụ được lưu trữ trong `buildToolCallCacheKey()`, bản tóm tắt phạm vi yêu cầu và id lệnh gọi công cụ, do đó, cùng một id được sử dụng bởi khóa hoặc phiên API khác sẽ không chọn mục nhập. Phạm vi đến từ `buildReasoningCacheScope()`: id khóa API, cộng với khóa phiên khi yêu cầu có. Do đó, cột `tool_call_id` và bảng điều khiển hiển thị thông báo này cho các mục nhập đó.
 
 Các lượt trợ lý đơn giản (không gọi công cụ) được khóa khác nhau: `buildAssistantMessageCacheKey()` phân tích phạm vi phiên cộng với bản ghi định dạng OpenAI được chuẩn hóa cho đến lượt đó, bởi vì DeepSeek yêu cầu lý luận _every_ lượt trước khi `tools` có mặt. Đối với các mục tiêu API phản hồi (ví dụ `opencode-go/deepseek-v4-flash`, được định tuyến đến `/responses`), phần thượng nguồn mang `input`, không phải `messages`, do đó `translateRequest()` (`open-sse/translator/index.ts`) báo cáo bản ghi trục mà nó đã tiêu hóa thông qua tùy chọn gọi lại và các trang web chụp sẽ tiêu hóa cùng bản ghi đó. Thẻ phát lại Phản hồi chạy trên trục OpenAI cho mọi định dạng nguồn, do đó, ứng dụng khách Tin nhắn Anthropic (Claude → OpenAI → Phản hồi) cũng được phát lại.
 

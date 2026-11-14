@@ -64,7 +64,7 @@ Maidir leis an provider/model céanna , forscríobhann luachanna ó shraitheanna
 | `MODELS_DEV_SYNC_ENABLED`  | _(díshuiteáil)_ | Leanann Unset an scoránaigh Socruithe; fórsaí `1/true/on/yes` ar aghaidh agus fórsaí `0/false/off/no` as (fiú má chumasaíonn Socruithe é). |
 | `MODELS_DEV_SYNC_INTERVAL` | `86400`         | Eatramh sioncronaithe models.dev réamhshocraithe i soicindí (laethúil).                                                                    |
 
-dhéanann `PRICING_SYNC_SOURCES`** nach bhfuil** samhlacha a chumasú.dev; rialaíonn sé an sioncrónú LiteLLM amháin. Ní ghlanann scriosadh sáraithe úsáideora ceachtar den dá ainmspás sioncronaithe; éiríonn an chéad chiseal praghsála eile atá ar fáil i bhfeidhm. Le haghaidh samhail gan phraghas, seiceáil an dá shocruithe sioncronaithe agus an `sourceMap` sula gcuireann tú sáraíocht láimhe leis.
+déanann `PRICING_SYNC_SOURCES`** nach bhfuil** samhlacha a chumasú.dev; rialaíonn sé an sioncrónú LiteLLM amháin. Ní ghlanann scriosadh sáraithe úsáideora ceachtar den dá ainmspás sioncronaithe; éiríonn an chéad chiseal praghsála eile atá ar fáil i bhfeidhm. Le haghaidh samhail gan phraghas, seiceáil an dá shocruithe sioncronaithe agus an `sourceMap` sula gcuireann tú sáraíocht láimhe leis.
 
 ### An fhoirmle costais
 
@@ -82,15 +82,37 @@ Normalaítear ainmneacha samhlacha ar dtús (baintear réimíreanna cosán solá
 
 ### Conas a thaifeadtar caiteachas
 
-- Ríomhtar an costas in aghaidh an iarratais tar éis na freagartha agus taifeadtar tine agus dearmad mar sin ní chuireann sé foighne leis an gcliant riamh. Tá tomhaltas cuóta comhroinnte sceidealta ar an gcéad tic lúb imeachta eile trí [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Déantar caiteachas API-eochair a mhaolánú agus a shruthlú i mbaisceanna ag an [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (eatramh sruthlaithe réamhshocraithe 60idí, maolán iontrála 1,000). Iniúchadh trí:
+- Ríomhtar an costas in aghaidh an iarratais nuair a dhéantar iarratas. Tá tomhaltas cuóta comhroinnte sceidealta ar an gcéad tic lúb imeachta eile trí [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Déantar caiteachas API-eochair a mhaolánú agus a shruthlú i mbaisceanna ag an [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (eatramh sruthlaithe réamhshocraithe 60s, maolán iontrála 1,000). Intuite trí:
 
   | Env var                             | Réamhshocrú | Cuspóir                                           |
   | ----------------------------------- | ----------- | ------------------------------------------------- |
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`     | Eatramh sruthlaithe i milleasoicindí.             |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`      | Uasmhéid iontrálacha maolánacha roimh an sruthlú. |
 
-Is iad figiúirí costais an deais** nach bhfuil** léamh ó mhéid dollar stóráilte in aghaidh an tsraith — déantar iad a athríomh ar an eitilt ó chomhaireamh chomharthaí agus an tábla praghsála reatha gach uair a ritheann críochphointe na hanailíse. Ciallaíonn sé sin praghas mícheart a cheartú (agus athshioncronú) meastacháin chostais stairiúla a nuashonrú go haisghníomhach.
+Is fearr le costais muirear beacht arna thuairisciú ag an soláthraí (`provider_cost_usd`), ansin pictiúr iarratais ar phraghas catalóige (`calculated_cost_usd`), ansin athphraghsáil chomharthaí ón gcatalóg reatha. Ní ghearrtar costais stóráilte arís trína n-áirimh chomharthaí. Ní athraíonn sraitheanna seanchomharthaí amháin fós nuair a athraíonn a bpraghas catalóige.
+
+### OCR agus leabaithe
+
+- Úsáideann iarratais `/v1/ocr` rathúla `usage_info.pages_processed` in aghaidh an tsrutha, ní an raon leathanach iarrtha nó líon na n-oibiachtaí leathanaigh a cuireadh ar ais. Is é an meastachán ná leathanaigh × `ocr_cost_per_page` ( iomlán USD/page,** nach bhfuil** USD/million).
+- Teastaíonn taraif `ocr_cost_per_annotated_page` ar leith le haghaidh iarratais le nótaí doiciméad nó bosca teorann. Gan é, tá an costas fós anaithnid; ní chuirtear an gnáth-tharaif OCR in ionad go ciúin.
+- Déanann LiteLLM sync a réimse `annotation_cost_per_page` in aghaidh an tsrutha a léarscáiliú go `ocr_cost_per_annotated_page`, ag coinneáil an luach USD/page absalóideach agus iontrálacha anótála amháin, lena n-áirítear nialas follasach. Tá tús áite ag réimse canónach a sholáthraítear; déantar neamhaird ar luachanna ailias neamhbhailí. Coinníonn sáruithe praghsála úsáideoirí a ngnáththosaíocht. Féach [eochracha praghsála LiteLLM's OCR](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Stórálann úsáid OCR líon na leathanach, praghas aonaid, costas USD ríofa, eochair API agus nasc roghnaithe. Ní léirítear leathanaigh mar chomharthaí riamh. Tá meiteashonraí billeála i logaí glaonna, ní doiciméad URLs, PDF bytes nó téacs asbhainte.
+- Taifeadann iarratais `/v1/embeddings` rathúla sraith úsáide amháin in aghaidh an bhaisc fhisiciúil, lena n-áirítear baisceanna ar leith a críochnaíodh sa milleasoicind céanna. Tá tús áite ag muirir a thuairiscítear ó sholáthraí ar mheastacháin chomharthaí; ní chuireann cumhdaigh teaglama muirear.
+- Áiríonn stair úsáide, anailísíocht Costas, fuinneoga provider/account, teorainneacha caiteachais API-eochair, an mórleabhar costas iarratais agus rolladh suas úsáide laethúil na muirir seo. Coinníonn eochracha gan loga cuntasaíocht uimhriúil gan an téacs foinseach a choinneáil.
+- Tá úsáid nó taraifí ar iarraidh** anaithnid** , níl sé saor in aisce: fágtar an ceanntásc costais freagartha ar lár, agus baineann an beartas úsáide neamhphraghas atá ann cheana le heochracha API teoranta. Tá rátaí nialais atá cumraithe go soiléir fós ina n-úsáid nialasach costais.
+
+Cuntasaíocht chun cinn amháin atá anseo. Ní féidir seanghlaonna OCR/embedding nár scríobh stair úsáide riamh a athchruthú ón imirce seo. Is meastacháin USD iad meastacháin chatalóige, ní sonrasc, agus ní chuimsíonn siad comhshó airgeadra, cáin ná lascainí.
+
+### Óráid agus íomhánna
+
+- Déanann iarrachtaí rathúla `/v1/audio/transcriptions`, `/v1/audio/speech` agus giniúint íomhá cuntasaíocht uimhriúil a roinnt. Iompraíonn glaonna díreacha agus teaglama eochair API an ghlaoiteora agus an nasc roghnaithe; ní chuireann cumhdach teaglama an dara dochar riamh.
+- Bhuaigh USD arna thuairisciú ag soláthraí thar mheastachán catalóige, lena n-áirítear muirear nialasach sainráite. Tá OpenRouterJSON `usage.cost` normalaithe go `cost_usd`. Seachas sin, úsáideann comharthaí tomhaiste praghsanna comharthaí, úsáideann soicind trascríobh praghsanna in aghaidh an tsoicind, úsáideann ionchur cainte comhaireamh carachtair Unicode, agus úsáideann íomhánna ar phraghas comhréidh an uimhir ar ais iarbhír, ní an `n` iarrtha.
+- Níl aon chomhlacht úsáide JSON TTS OpenRouter Tar éis an fhuaim a chríochnú nó an glaoiteoir a chealú, cuireann OmniRoute ceist ar a ghlúin ID ar an** céanna** tionscnaimh OpenRouter cumraithe. Ní thagann iarratas EU siar go dtí an bunús domhanda. Is cuardach teoranta, inléite amháin é seo; ní dhéantar sintéis a aisghabháil le haghaidh cuntasaíochta. Is féidir taifid bhilleála a thaispeáint tar éis don fhuaim a bheith críochnaithe: ritheann atriail chuardaigh sa chúlra ar feadh suas le 52 soicind, lena n-áirítear spriocdhátaí líonra.
+- Le linn an chuardaigh sin, tá `X-OmniRoute-Cost-Status: pending` agus níl aon cheanntásc freagartha-chostas ag an bhfreagra fuaime. Tá a lucht deiridh le feiceáil sa stair úsáide, san anailísíocht agus sa mhórleabhar mór tar éis an athmhuintearais. Mura bhfuil meiteashonraí ar fáil, úsáidtear pictiúr taraife cumraithe; seachas sin fanann an costas anaithnid.
+- Tá réimsí aonad billeála ar leith ag soicind, carachtair agus comhaireamh íomhá, ní chomhaireamh chomharthaí bréige riamh. Ní choinníonn an chuntasaíocht ach úsáid uimhriúil, ní téacs cainte, tras-scríbhinní nó bearta íomhá. Níl aon athrú ar dhíolúintí íomhá neamhphraghas atá ann faoi láthair: ní ghlasann taraif íomhá atá in easnamh i ndáiríre eochair theoranta, agus fágann an fhreagairt an ceanntásc costais ar lár seachas an glao a fhógairt saor in aisce. Coinníonn teip i siopa praghsála fianaise úsáide fós maidir le forghníomhú teip-dúnta.
+
+Ní dhéantar aon mhuirear speech/image stairiúil a chumadh ná a aislíonadh. Tá billeáil soláthraí fós mar thagairt do shonraisc agus do ghlaonna nár tuairiscíodh a muirear.
 
 ---
 

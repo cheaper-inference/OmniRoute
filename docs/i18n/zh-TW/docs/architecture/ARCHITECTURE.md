@@ -21,7 +21,7 @@ OmniRoute是基於Next.js建構的本機AI路由閘道器和儀表板。它提�
 
 核心能力：
 
-- 用於CLI/tools的 OpenAI 相容API表面（381 個提供程序，159 個執行程序模組）
+- OpenAI-compatible API surface for CLI/tools (394 providers, 159 executor modules)
 - 跨提供者格式的Request/response翻譯
 - 模型組合後備（多模型序列）
 - 結構化組合步驟 (`provider + model + connection`)，運行時按`compositeTiers`排序
@@ -76,7 +76,7 @@ OmniRoute是基於Next.js建構的本機AI路由閘道器和儀表板。它提�
 - 用於相容於 OpenAI 的WS客戶端的WebSocket橋接器 (`/v1/ws`)
 - 同步令牌管理（issue/revoke、ETag 版本設定包下載）
 - GLM思維（`glmt`）一流提供者預設
-- 混合令牌計數（具有估計回退的提供者端`/messages/count_tokens` ）
+- 混合令牌計數（具有估計回退的提供者方`/messages/count_tokens` ）
 - 模型別名自動播種（啟動時 30 個+跨代理方言標準化）
 - 透過SSRF防護、私有URL阻止和可配置重試進行安全出站提取
 - 使用可設定的`requestRetry`和`maxRetryIntervalSec`進行冷卻感知聊天重試
@@ -270,73 +270,72 @@ flowchart LR
 - 設定套件：`src/app/api/sync/bundle`（GET，設定/提供者/組合/金鑰的 ETag 版本化快照）
 - WebSocket：`src/app/api/v1/ws/route.ts` — OpenAI 相容 WS 客戶端的升級處理器
 
-## 2) SSE + 翻譯核心
+## 2) SSE +翻譯核心
 
 主要流程模組：
 
-- 入口：`src/sse/handlers/chat.ts`
-- 核心協調：`open-sse/handlers/chatCore.ts`
-- 提供者執行配接器：`open-sse/executors/*`
-- 格式偵測／提供者設定：`open-sse/services/provider.ts`
-- 模型解析／解析決策：`src/sse/services/model.ts`、`open-sse/services/model.ts`
-- 帳戶備援邏輯：`open-sse/services/accountFallback.ts`
-- 翻譯器登錄表：`open-sse/translator/index.ts`
-- 串流轉換：`open-sse/utils/stream.ts`、`open-sse/utils/streamHandler.ts`
-- 使用量擷取／正規化：`open-sse/utils/usageTracking.ts`
-- Think 標籤剖析器：`open-sse/utils/thinkTagParser.ts`
-- 嵌入處理器：`open-sse/handlers/embeddings.ts`
-- 嵌入提供者登錄表：`open-sse/config/embeddingRegistry.ts`
-- 圖像生成處理器：`open-sse/handlers/imageGeneration.ts`
-- 圖像提供者登錄表：`open-sse/config/imageRegistry.ts`
-- 回應清理：`open-sse/handlers/responseSanitizer.ts`
-- 角色正規化：`open-sse/services/roleNormalizer.ts`
+- 條目： `src/sse/handlers/chat.ts`
+- 核心編排： `open-sse/handlers/chatCore.ts`
+- 提供者執行適配器： `open-sse/executors/*`
+- 格式detection/provider配置： `open-sse/services/provider.ts`
+- 型號parse/resolve: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- 帳戶回退邏輯： `open-sse/services/accountFallback.ts`
+- 翻譯登記處： `open-sse/translator/index.ts`
+- 流轉換： `open-sse/utils/stream.ts`、 `open-sse/utils/streamHandler.ts`
+- 用法extraction/normalization: `open-sse/utils/usageTracking.ts`
+- 認為標籤解析器： `open-sse/utils/thinkTagParser.ts`
+- 嵌入處理程序： `open-sse/handlers/embeddings.ts`
+- 嵌入提供者註冊表： `open-sse/config/embeddingRegistry.ts`
+- 影像產生處理程序： `open-sse/handlers/imageGeneration.ts`
+- 影像提供者註冊表： `open-sse/config/imageRegistry.ts`
+- 回應清理： `open-sse/handlers/responseSanitizer.ts`
+- 角色規範化： `open-sse/services/roleNormalizer.ts`
 
 服務（業務邏輯）：
 
-- 帳戶選擇／評分：`open-sse/services/accountSelector.ts`
-- 上下文生命週期管理：`open-sse/services/contextManager.ts`
-- IP 篩選器強制執行：`open-sse/services/ipFilter.ts`
-- 工作階段追蹤：`open-sse/services/sessionManager.ts`
-- 請求去重：`open-sse/services/signatureCache.ts`
-- 系統提示詞注入：`open-sse/services/systemPrompt.ts`
-- 思考預算管理：`open-sse/services/thinkingBudget.ts`
-- 萬用字元模型路由：`open-sse/services/wildcardRouter.ts`
-- 速率限制管理：`open-sse/services/rateLimitManager.ts`
-- 斷路器：`src/shared/utils/circuitBreaker.ts`
-- 上下文移交：`open-sse/services/contextHandoff.ts` — 為上下文中繼策略產生並注入移交摘要
-- 壓縮：`open-sse/services/compression/*` — 在提供者翻譯前主動壓縮；
-  包含 Caveman 規則、RTK 篩選器、堆疊管線、壓縮組合、統計資料及驗證
-- Codex 配額擷取器：`open-sse/services/codexQuotaFetcher.ts` — 擷取 Codex 配額，以供上下文中繼移交決策使用
-- 感知冷卻時間的重試：`src/sse/services/cooldownAwareRetry.ts` — 依模型執行冷卻重試，並可透過 `requestRetry`／`maxRetryIntervalSec` 設定
-- 安全對外擷取：`src/shared/network/safeOutboundFetch.ts` — 受保護的提供者／模型擷取，具備 SSRF 防護、私有 URL 封鎖、重試及逾時機制
-- 對外 URL 防護：`src/shared/network/outboundUrlGuard.ts` — 檢查提供者 URL 的主機；`src/shared/network/outboundUrlGuardPolicy.ts` 會根據 `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`、`OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` 及其儀表板切換設定選擇模式（請參閱 `docs/reference/ENVIRONMENT.md`）
-- 提供者請求預設值：`open-sse/services/providerRequestDefaults.ts` — 提供者層級的 `maxTokens`、`temperature`、`thinkingBudgetTokens` 預設值
-- GLM 提供者常數：`open-sse/config/glmProvider.ts` — 共用的 GLM 模型、配額 URL、GLMT 逾時及預設值
-- Antigravity 上游：`open-sse/config/antigravityUpstream.ts` — 基礎 URL 與探索路徑常數
-- Codex 用戶端常數：`open-sse/config/codexClient.ts` — 帶版本的使用者代理程式與用戶端版本值
-- 模型別名種子：`src/lib/modelAliasSeed.ts` — 在啟動時植入 30 多個跨代理方言別名
+- 帳號selection/scoring: `open-sse/services/accountSelector.ts`
+- 情境生命週期管理： `open-sse/services/contextManager.ts`
+- IP過濾器執行： `open-sse/services/ipFilter.ts`
+- 會話追蹤： `open-sse/services/sessionManager.ts`
+- 請求重複資料刪除： `open-sse/services/signatureCache.ts`
+- 系統提示注入： `open-sse/services/systemPrompt.ts`
+- 預算管理思維： `open-sse/services/thinkingBudget.ts`
+- 通配符模型路由： `open-sse/services/wildcardRouter.ts`
+- 速率限制管理： `open-sse/services/rateLimitManager.ts`
+- 斷路器： `src/shared/utils/circuitBreaker.ts`
+- 上下文切換： `open-sse/services/contextHandoff.ts` —切換摘要產生和上下文中繼策略注入
+- 壓縮：提供者翻譯之前的`open-sse/services/compression/*` —主動壓縮；包括 Caveman 規則、 RTK過濾器、堆疊管道、壓縮組合、統計資料和驗證
+- Codex配額取得器： `open-sse/services/codexQuotaFetcher.ts` —取得Codex配額以進行情境中繼切換決策
+- 冷卻感知重試： `src/sse/services/cooldownAwareRetry.ts` —每個模型冷卻重試，可配置`requestRetry` / `maxRetryIntervalSec`
+- 安全出站提取： `src/shared/network/safeOutboundFetch.ts` —保護的provider/model提取，具有SSRF保護、私有 URL 阻止、重試和超時
+- 出站URL防護： `src/shared/network/outboundUrlGuard.ts` —主機檢查提供者URLs； `src/shared/network/outboundUrlGuardPolicy.ts`從`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`、 `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`及其儀表板切換中選擇模式（請參閱`docs/reference/ENVIRONMENT.md`）
+- 提供者請求預設值： `open-sse/services/providerRequestDefaults.ts` —提供者等級`maxTokens`、 `temperature`、 `thinkingBudgetTokens`預設值
+- GLM提供者常數： `open-sse/config/glmProvider.ts` —共享GLM模型、配額URLs、 GLMT timeout/defaults
+- Antigravity上游： `open-sse/config/antigravityUpstream.ts` —基礎URL和發現路徑常數
+- Codex客戶端常數： `open-sse/config/codexClient.ts` —版本化用戶代理程式和客戶端版本值
+- 模型別名種子： `src/lib/modelAliasSeed.ts` — seeds 啟動時的 30 個+跨代理方言別名
 
 領域層模組：
 
-- 成本規則／預算：`src/domain/costRules.ts`
-- 備援政策：`src/domain/fallbackPolicy.ts`
-- 組合解析器：`src/domain/comboResolver.ts`
-- 鎖定政策：`src/domain/lockoutPolicy.ts`
-- 政策引擎：`src/domain/policyEngine.ts` — 集中進行鎖定 → 預算 → 備援評估
-- 錯誤代碼目錄：`src/shared/constants/errorCodes.ts`
-- 請求 ID：`src/shared/utils/requestId.ts`
-- 擷取逾時：`src/shared/utils/fetchTimeout.ts`
-- 請求遙測：`src/shared/utils/requestTelemetry.ts`
-- 合規／稽核：`src/lib/compliance/index.ts`
-- 評估執行器：`src/lib/evals/evalRunner.ts`
-- 領域狀態持久化：`src/lib/db/domainState.ts` — 對備援鏈、預算、成本歷程、鎖定狀態及斷路器執行 SQLite CRUD
+- 成本rules/budgets: `src/domain/costRules.ts`
+- 後備策略： `src/domain/fallbackPolicy.ts`
+- 預留組合解析合約： `src/domain/comboResolver.ts`；即時路由使用`open-sse/services/combo.ts`
+- 鎖定政策： `src/domain/lockoutPolicy.ts`
+- 預留策略評估合約： `src/domain/policyEngine.ts`；請求路徑透過`src/shared/utils/apiKeyPolicy.ts`強制執行 API 金鑰策略，並透過`src/sse/handlers/chat/resolvedModelPolicy.ts`強制解析目標授權
+- 錯誤代碼目錄： `src/shared/constants/errorCodes.ts`
+- 請求ID: `src/shared/utils/requestId.ts`
+- 取得超時： `src/shared/utils/fetchTimeout.ts`
+- 請求遙測： `src/shared/utils/requestTelemetry.ts`
+- Compliance/audit: `src/lib/compliance/index.ts`
+- 評估跑者： `src/lib/evals/evalRunner.ts`
+- 域狀態持久性： `src/lib/db/domainState.ts` — SQLite CRUD用於後備鏈、預算、成本歷史記錄、鎖定狀態、斷路器
 
-OAuth 提供者模組（`src/lib/oauth/providers/` 下的 27 個獨立檔案）：
+OAuth提供者模組（ `src/lib/oauth/providers/`下有 27 個單獨的檔案）：
 
-- 登錄表索引：`src/lib/oauth/providers/index.ts`
-- 個別提供者：`agy.ts`、`antigravity.ts`、`claude.ts`、`cline.ts`、`codebuddy-cn.ts`、`codebuddy-intl.ts`、`codex.ts`、`cursor.ts`、`devin-desktop.ts`、`ghe-copilot.ts`、`github.ts`、`gitlab-duo.ts`、`grok-cli-oauth.ts`、`grok-cli.ts`、`kilocode.ts`、`kimi-coding.ts`、`kiro.ts`、`muse-code.ts`、`openference.ts`、`qoder.ts`、`trae.ts`、`workbuddy.ts`、`xai-oauth.ts`、`zed-hosted.ts`、`zed.ts`
-- 共用輔助工具：`codebuddyDeviceAuth.ts`（CodeBuddy CN／intl 裝置流程）、`museCodeDeviceResponse.ts`
-- 輕量包裝器：`src/lib/oauth/providers.ts` — 從個別模組重新匯出
+- 註冊表索引： `src/lib/oauth/providers/index.ts`
+- 個體提供者`muse-code.ts` `agy.ts`、 `antigravity.ts`、 `claude.ts`、 `cline.ts`、 `codebuddy-cn.ts`、 `codebuddy-intl.ts`、 `codex.ts`、 `cursor.ts`、 `devin-desktop.ts`、 `ghe-copilot.ts`、 `github.ts`、 `gitlab-duo.ts`、 `grok-cli-oauth.ts`、 `grok-cli.ts`、 `kilocode.ts`、 `kimi-coding.ts`、 `kiro.ts`、 `openference.ts`、 `qoder.ts`、 `trae.ts` `zed.ts` `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`
+- 共享助理： `codebuddyDeviceAuth.ts` （CodeBuddy CN/intl設備流程）、 `museCodeDeviceResponse.ts`
+- 瘦包裝器： `src/lib/oauth/providers.ts` —從各個模組重新導出
 
 ## 5) 嵌入式服務（v3.8.4）
 
@@ -366,13 +365,13 @@ OmniRoute 可以安裝、監督並路由至本地運行的 AI 工具程序，
 自動組合在請求時動態評分和選擇路由目標，而不是依賴靜態組合定義。它為`auto/*`模型前綴系列提供支援。
 
 - 引擎條目： `open-sse/services/autoCombo/` （`autoComboEngine.ts`， `scoringEngine.ts`， `virtualFactory.ts`， `modePacks.ts`）
-- 解析器： `src/domain/comboResolver.ts` （自動偵測`auto/`前綴）
+- 即時組合條目： `open-sse/services/combo.ts` （`handleComboChat`， `resolveComboTargets`），由`src/sse/handlers/chat.ts`呼叫
 - 儀表板： `/dashboard/auto-combo`
 - 遙測： `auto_combo_decisions` SQLite表
 
 關鍵能力：
 
-- **20種路由策略**（優先順序、加權、先填充、循環、 P2C、隨機、最少使用、成本優化、重置感知、重置視窗、淨空、配額加權、嚴格隨機、**汽車**、lkgp、上下文優化、快取優化、上下文中繼、**融合**，管道） — auto是v3.8.0中的標題添加； `fusion` （面板扇出+判斷綜合， `open-sse/services/fusion.ts`）是 v3.8.36 中的新增功能。
+- **22種路由策略**（優先順序、加權、先填充、循環、 P2C、隨機、最少使用、成本優化、重置感知、重置視窗、到期優先、淨空、配額加權、嚴格隨機、**汽車**、lkgp、上下文優化、快取優化、上下文中繼、**融合**、pipeline、jev) — auto 是 v3.8.0 中的標題添加內容； `fusion` （面板扇出+判斷綜合， `open-sse/services/fusion.ts`）是 v3.8.36 中的新增功能。
 - **16因素評分**：配額、運作狀況、逆成本、逆延遲、任務適合度等等。因素的規範表及其預設權重位於[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) —中，在這裡重述它會使其成為第二個過時的地方。
 - **虛擬工廠**當不存在匹配的命名組合時，會實現臨時組合，從健康的活躍提供者連接中尋找候選人。
 - **自動前綴**： `auto/coding`、 `auto/cheap`、 `auto/fast`、 `auto/offline`、 `auto/smart`、 `auto/lkgp` —每個都由調整後的權重配置檔案支援。
@@ -406,14 +405,18 @@ Guardrails 模組是一個可熱重載的中間件層，用於檢查PII、提示
 
 ### D. 域層
 
-`src/domain/`命名空間集中了策略決策，因此路由處理程序不必自行組裝lockout/budget/fallback邏輯。
+`src/domain/`命名空間包含域服務和保留的評估合約。它不是每個請求的強制策略入口點。
 
-- 策略引擎： `src/domain/policyEngine.ts` —執行前評估的單一入口點（鎖定→預算→後備排序）
+即時聊天路徑從`src/shared/utils/apiKeyPolicy.ts`呼叫`enforceApiKeyPolicy()` ；解析模型和組合成員的授權是在`src/sse/handlers/chat/resolvedModelPolicy.ts`中實現的。 `src/app/api/v1/chat/completions/route.ts`中的自託管項目還在調度之前強制執行 API 金鑰策略。組合解析透過`open-sse/services/combo.ts`進行。
+
+`src/domain/policyEngine.ts`、 `src/domain/comboResolver.ts`和`src/lib/container.ts`仍然是經過測試的合約，而不是該請求路徑的接線。容器註冊策略引擎，但檢查的生產請求路徑未解析它。單獨更改這些合約不會更改即時聊天策略或組合路由；連接或移除它們需要單獨的設計決策。
+
+- 預留策略引擎： `src/domain/policyEngine.ts` —鎖定→預算→後備評估
 - 費用規則： `src/domain/costRules.ts`
 - 後備策略： `src/domain/fallbackPolicy.ts`
 - 鎖定政策： `src/domain/lockoutPolicy.ts`
 - 基於標籤的路由： `src/domain/tagRouter.ts`
-- 組合解析器： `src/domain/comboResolver.ts` —將組合名稱、auto/\* 前綴和通配符模型目標解析為特定的執行計劃
+- 預留組合解析器： `src/domain/comboResolver.ts` —獨立選擇合約；即時組合路由是在`open-sse/services/combo.ts`中實現的
 - Connection/model規則加入者： `src/domain/connectionModelRules.ts`
 - 模型可用性快照： `src/domain/modelAvailability.ts`
 - 提供者到期追蹤： `src/domain/providerExpiration.ts`
@@ -474,31 +477,31 @@ FSM轉換納入 Auto Combo 的評分中，偏向於background/automation任務�
   - DB層： `src/lib/db/reasoningCache.ts`
   - 服務層： `open-sse/services/reasoningCache.ts`
   - 有關重播語義，請參閱[`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md) 。
-- **讀取快取**—短期回應快取，由簽章鍵入，用於崩潰來自損壞的上游SDKs相同重試。
+- **讀取快取**—短期回應快取，由簽名鍵控，用於崩潰來自損壞的上游SDKs相同重試。
   - DB層： `src/lib/db/readCache.ts`
   - 統計端點： `GET /api/cache/stats`，儀表板位於`/dashboard/cache`
 
-## 3) 持久化層
+## 3）持久層
 
-主要狀態 DB（SQLite）：
+主狀態DB (SQLite):
 
-- 核心基礎設施：`src/lib/db/core.ts`（better-sqlite3、遷移、WAL）
-- 重新匯出外觀：`src/lib/localDb.ts`（供呼叫者使用的薄相容層）
-- 檔案：`${DATA_DIR}/storage.sqlite`（或設定了 `$XDG_CONFIG_HOME/omniroute/storage.sqlite` 時使用該路徑，否則為 `~/.omniroute/storage.sqlite`）
-- 實體（表格 + KV 命名空間）：providerConnections、providerNodes、modelAliases、combos、apiKeys、settings、pricing、**customModels**、**proxyConfig**、**ipFilter**、**thinkingBudget**、**systemPrompt**
+- 核心基礎設施： `src/lib/db/core.ts` （better-sqlite3、遷移、 WAL）
+- DB接入：直接導入特定的`src/lib/db/*`模組（舊的`localDb.ts`桶被移除）
+- 文件： `${DATA_DIR}/storage.sqlite` （或設定時為`$XDG_CONFIG_HOME/omniroute/storage.sqlite` ，否則`~/.omniroute/storage.sqlite`）
+- 實體（表+ KV命名空間）： providerConnections、 providerNodes、 modelAliases、組合、 apiKeys、設定、定價、**customModels** ,**proxyConfig** ,**ipFilter** ,**thinkingBudget** ,**systemPrompt**
 
-用量持久化：
+使用持久性：
 
-- 外觀：`src/lib/usageDb.ts`（`src/lib/usage/*` 中的分解模組）
-- `storage.sqlite` 中的 SQLite 表格：`usage_history`、`call_logs`、`proxy_logs`
-- 為相容性/除錯目的保留的選用檔案工件（`${DATA_DIR}/log.txt`、`${DATA_DIR}/call_logs/`、`<repo>/logs/...`）
-- 舊版 JSON 檔案在啟動遷移時會移轉至 SQLite（若存在）
+- 門面： `src/lib/usageDb.ts` （ `src/lib/usage/*`中分解的模組）
+- `storage.sqlite`中的SQLite表： `usage_history`、 `call_logs`、 `proxy_logs`
+- compatibility/debug保留可選檔案工件（`${DATA_DIR}/log.txt`、 `${DATA_DIR}/call_logs/`、 `<repo>/logs/...`）
+- 舊版JSON檔案透過啟動遷移遷移到SQLite如果存在）
 
-領域狀態 DB（SQLite）：
+域狀態DB (SQLite):
 
-- `src/lib/db/domainState.ts` — 領域狀態的 CRUD 操作
-- 表格（在 `src/lib/db/core.ts` 中建立）：`domain_fallback_chains`、`domain_budgets`、`domain_cost_history`、`domain_lockout_state`、`domain_circuit_breakers`
-- 寫穿透快取模式：記憶體中的 Maps 在執行時期具有權威性；變更同步寫入 SQLite；冷啟動時從 DB 恢復狀態
+- `src/lib/db/domainState.ts` — CRUD域狀態操作
+- 表（在`src/lib/db/core.ts`中建立）： `domain_fallback_chains`、 `domain_budgets`、 `domain_cost_history`、 `domain_lockout_state`、 `domain_circuit_breakers`
+- 直寫式快取模式：記憶體中的Map在運行時具有權威性；突變同步寫入SQLite；冷啟動時狀態從DB恢復
 
 ## 4) 驗證 + 安全介面
 
@@ -803,99 +806,105 @@ flowchart LR
     Next --> SyncCloud
 ```
 
-## 模組對映（決策關鍵）
+## 模組映射（決策關鍵）
 
-### 路由與 API 模組
+### 路由和API模組
 
-- `src/app/api/v1/*`、`src/app/api/v1beta/*`：相容性 API
-- `src/app/api/v1/providers/[provider]/*`：專屬的每個提供者路由（聊天、嵌入、圖片）
-- `src/app/api/providers*`：提供者 CRUD、驗證、測試
+- `src/app/api/v1/*`、 `src/app/api/v1beta/*`：相容性APIs
+- `src/app/api/v1/providers/[provider]/*`：每個提供者的專用路由（聊天、嵌入、映像）
+- `src/app/api/providers*`：提供者CRUD，驗證，測試
 - `src/app/api/provider-nodes*`：自訂相容節點管理
 - `src/app/api/provider-models`：自訂模型管理（CRUD）
-- `src/app/api/models/route.ts`：模型目錄 API（別名 + 自訂模型）
-- `src/app/api/oauth/*`：OAuth/裝置碼流程
-- `src/app/api/keys*`：本地 API 金鑰生命週期
+- `src/app/api/models/route.ts`：模型目錄API （別名+自訂模型）
+- `src/app/api/oauth/*`： OAuth/device-code流
+- `src/app/api/keys*`：本地API密鑰生命週期
 - `src/app/api/models/alias`：別名管理
-- `src/app/api/combos*`：備援組合管理
-- `src/app/api/pricing`：用於成本計算的定價覆蓋
-- `src/app/api/settings/proxy`：代理設定（GET/PUT/DELETE）
-- `src/app/api/settings/proxy/test`：外送代理連線測試（POST）
-- `src/app/api/usage/*`：用量與記錄 API
-- `src/app/api/sync/*` + `src/app/api/cloud/*`：雲端同步與雲端面向輔助
-- `src/app/api/cli-tools/*`：本地 CLI 設定寫入器/檢查器
-- `src/app/api/settings/ip-filter`：IP 允許清單/封鎖清單（GET/PUT）
-- `src/app/api/settings/thinking-budget`：思考令牌預算設定（GET/PUT）
-- `src/app/api/settings/system-prompt`：全域系統提示（GET/PUT）
+- `src/app/api/combos*`：後備組合管理
+- `src/app/api/pricing`：成本計算的定價覆蓋
+- `src/app/api/settings/proxy`：代理配置（GET/PUT/DELETE）
+- `src/app/api/settings/proxy/test`：出站代理連線測試 (POST)
+- `src/app/api/usage/*`：使用和日誌APIs
+- `src/app/api/sync/*` + `src/app/api/cloud/*`：雲同步與麵向雲的助手
+- `src/app/api/cli-tools/*`：本地CLI配置writers/checkers
+- `src/app/api/settings/ip-filter`: IP allowlist/blocklist (GET/PUT)
+- `src/app/api/settings/thinking-budget`：思考代幣預算配置（GET/PUT）
+- `src/app/api/settings/system-prompt`：全域系統提示符號（GET/PUT）
 - `src/app/api/settings/compression`：全域壓縮設定（GET/PUT）
-- `src/app/api/compression/*`：壓縮預覽、規則中繼資料與語言套件
-- `src/app/api/context/caveman/config`：Caveman 設定別名（GET/PUT）
-- `src/app/api/context/rtk/*`：RTK 設定、過濾器目錄、測試端點與原始輸出恢復
-- `src/app/api/context/combos*`：壓縮組合 CRUD 與路由組合指派
+- `src/app/api/compression/*`：壓縮預覽、規則元資料和語言包
+- `src/app/api/context/caveman/config`：穴居人設定別名 (GET/PUT)
+- `src/app/api/context/rtk/*`： RTK配置、過濾器目錄、測試端點和原始輸出恢復
+- `src/app/api/context/combos*`：壓縮組合CRUD和路由組合分配
 - `src/app/api/context/analytics`：壓縮分析別名
-- `src/app/api/sessions`：活躍工作階段列表（GET）
-- `src/app/api/rate-limits`：每個帳戶的速率限制狀態（GET）
-- `src/app/api/sync/tokens`：同步令牌 CRUD（GET/POST）
-- `src/app/api/sync/tokens/[id]`：同步令牌取得/刪除（GET/DELETE）
-- `src/app/api/sync/bundle`：設定套件下載（GET，ETag 版本化）
-- `src/app/api/v1/ws`：OpenAI 相容 WS 客戶端的 WebSocket 升級處理器
+- `src/app/api/sessions`：活動會話清單（GET）
+- `src/app/api/rate-limits`: 每個帳戶的速率限制狀態 (GET)
+- `src/app/api/sync/tokens`: 同步令牌CRUD (GET/POST)
+- `src/app/api/sync/tokens/[id]`: 同步令牌get/delete (GET/DELETE)
+- `src/app/api/sync/bundle`：設定包下載（GET、 ETag版本控制）
+- `src/app/api/v1/ws`：OpenAI 相容WS客戶端的WebSocket升級處理程序
 
-### 路由與執行核心
+### 路由和執行核心
 
-- `src/sse/handlers/chat.ts`：請求解析、組合處理、帳戶選擇迴圈
-- `open-sse/handlers/chatCore.ts`：轉換、執行器調度、重試/刷新處理、串流設定
-- `open-sse/executors/*`：提供者特定的網路與格式行為
+- `src/sse/handlers/chat.ts`：請求解析、組合處理、帳戶選擇循環
+- `open-sse/handlers/chatCore.ts`：翻譯、執行器調度、 retry/refresh處理、流設置
+- `open-sse/executors/*`：提供者特定的網路和格式行為
 
-### 轉換註冊表與格式轉換器
+### 翻譯註冊表和格式轉換器
 
-- `open-sse/translator/index.ts`：轉換器註冊表與協調
-- 請求轉換器：`open-sse/translator/request/*`（9 個模組 — `antigravity-to-openai`、`claude-to-gemini`、`claude-to-openai`、`gemini-to-openai`、`openai-responses`、`openai-to-claude`、`openai-to-cursor`、`openai-to-gemini`、`openai-to-kiro`）
-- 回應轉換器：`open-sse/translator/response/*`（8 個模組 — `claude-to-openai`、`cursor-to-openai`、`gemini-to-claude`、`gemini-to-openai`、`kiro-to-openai`、`openai-responses`、`openai-to-antigravity`、`openai-to-claude`）
-- 輔助工具：`open-sse/translator/helpers/*`（8 個模組 — `claudeHelper`、`geminiHelper`、`geminiToolsSanitizer`、`maxTokensHelper`、`openaiHelper`、`responsesApiHelper`、`schemaCoercion`、`toolCallHelper`）
-- 格式常數：`open-sse/translator/formats.ts`
-- 啟動與註冊表：`open-sse/translator/bootstrap.ts`、`open-sse/translator/registry.ts`
-- 圖片格式輔助：`open-sse/translator/image/`
+- `open-sse/translator/index.ts`：翻譯器註冊與編排
+- 請求翻譯： `open-sse/translator/request/*` （9 個模組— `antigravity-to-openai`、 `claude-to-gemini`、 `claude-to-openai`、 `gemini-to-openai`、 `openai-responses`、 `openai-to-claude`、 `openai-to-cursor`、 `openai-to-gemini`、 `openai-to-kiro`）
+- 回應翻譯者： `open-sse/translator/response/*` （11 個模組— `claude-to-openai`、 `cursor-to-openai`、 `gemini-to-claude`、 `gemini-to-openai`、 `kiro-to-openai`、 `openai-responses`、 `openai-to-antigravity`、 `openai-to-claude`、 `openai-to-gemini`、 `openai-to-gemini-sse`、 `responsesToolItem`）
+- 助理： `open-sse/translator/helpers/*` （12 個模組— `claudeHelper`、 `geminiHelper`、 `geminiToolsSanitizer`、 `jsonUtil`、 `markdownBoundary`、 `maxTokensHelper`、 `openaiHelper`、 `responsesApiHelper`、 `schemaCoercion`、 `strictSystemHoist`、 `toolCallHelper`、 `toolCallShim`）
+- 格式常數： `open-sse/translator/formats.ts`
+- 引導程式和登錄： `open-sse/translator/bootstrap.ts`、 `open-sse/translator/registry.ts`
+- 圖片格式助手： `open-sse/translator/image/`
 
-### 持久化
+### 堅持
 
-- `src/lib/db/*`：SQLite 上的持久設定/狀態與領域持久化
-- `src/lib/localDb.ts`：DB 模組的相容性重新匯出
-- `src/lib/usageDb.ts`：基於 SQLite 表格的用量歷史/呼叫記錄外觀
+- `src/lib/db/*`： config/state持久化和SQLite上的域持久化
+- `src/lib/db/*`：直接匯入特定模組—無桶（舊的`localDb.ts`重新匯出層已被刪除）
+- `src/lib/usageDb.ts`：使用history/call在SQLite表頂部記錄外觀
 
-## 提供者執行器覆蓋範圍（策略模式）
+## 提供者執行者涵蓋範圍（策略模式）
 
-每個提供者都有一個專門的執行器，繼承自 `BaseExecutor`（位於 `open-sse/executors/base.ts`），提供 URL 建置、標頭建構、指數退避重試、憑證刷新鉤子與 `execute()` 協調方法。
+每個提供者都有一個擴展`BaseExecutor`專門執行器（在`open-sse/executors/base.ts`中），它提供URL構建、標頭構建、指數退避重試、憑證刷新掛鉤和`execute()`編排方法。
 
-| 執行器                    | 提供者                                                                                                                                                   | 特殊處理                                                 |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI、Claude、Gemini、Qwen、OpenRouter、GLM、Kimi、MiniMax、DeepSeek、Groq、xAI、Mistral、Perplexity、Together、Fireworks、Cerebras、Cohere、NVIDIA 等 | 每個提供者的動態 URL/標頭設定                            |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                       | 自訂專案/工作階段 ID、Retry-After 解析、429 混淆         |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                             | 基於部署的路由、api-version 查詢強制                     |
-| `BlackboxWebExecutor`     | Blackbox AI（網頁模式）                                                                                                                                  | 含 TLS 指紋模擬的網頁工作階段反向                        |
-| `ClaudeIdentityExecutor`  | Claude.ai（CCH 路徑）                                                                                                                                    | 約束 + 工具重新對應管線、指紋塑造                        |
-| `CliProxyApiExecutor`     | CLIProxyAPI 相容提供者                                                                                                                                   | 自訂驗證與協定處理                                       |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                    | 帳戶 ID 注入、基於 Neurons 的用量追蹤                    |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                             | 注入系統指令、強制推理努力                               |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                      | 瀏覽器工作階段 Responses API 橋接與執行緒/輪次固定       |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                             | OAuth + 每個工作階段的標頭輪換                           |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                               | ConnectRPC 協定、Protobuf 編碼、透過 checksum 的請求簽署 |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                | 透過雲端代理模組的 Devin 任務生命週期橋接                |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                           | Copilot 令牌刷新、模擬 VSCode 標頭                       |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                               | GitLab OAuth + 專案範圍路由                              |
-| `GlmExecutor`             | Z.AI GLM（含 `glmt` 預設）                                                                                                                               | 思考預算感知、GLMT 預設常數                              |
-| `GrokWebExecutor`         | xAI Grok 網頁                                                                                                                                            | 網頁工作階段反向、模式選擇（think/standard）             |
-| `KieExecutor`             | KIE                                                                                                                                                      | 自訂令牌簽發，含輪換的工作階段錨點                       |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                   | AWS EventStream 二進位格式 → SSE 轉換                    |
-| `MuseSparkWebExecutor`    | Muse Spark（網頁）                                                                                                                                       | 含圖片訊息橋接的網頁工作階段反向                         |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                | 提供者特定的請求主體形式                                 |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                 | AI SDK 相容提供者設定                                    |
-| `PerplexityWebExecutor`   | Perplexity 網頁                                                                                                                                          | 用於聊天延續的網頁工作階段反向                           |
-| `PetalsExecutor`          | Petals 分散式推理                                                                                                                                        | 去中心化群組路由                                         |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                          | 無需 API 金鑰、速率限制請求                              |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                 | PAT 與 OAuth 支援、多模型免費方案                        |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                         | 服務帳戶驗證、基於區域的端點                             |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                            | 匯入的 API 金鑰 + Connect-protobuf 聊天串流              |
+| 執行者                    | 提供者                                                                                                                                                                | 特殊處理                                              |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI、 Claude、 Gemini、 Qwen、 OpenRouter、 GLM、 Kimi、 MiniMax、 DeepSeek、 Groq、 xAI、 Mistral、困惑度、 Together、 Fireworks、 Cerebras、 Cohere、 NVIDIA等。 | 每個提供者的動態URL/header配置                        |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                                    | 自訂project/session IDs，解析後重試，429混淆          |
+| `AzureOpenAIExecutor`     | 蔚藍OpenAI                                                                                                                                                            | 基於部署的路由、api 版本查詢執行                      |
+| `BlackboxWebExecutor`     | Blackbox AI （網路模式）                                                                                                                                              | 使用TLS指紋模擬進行 Web 會話反向                      |
+| `ClaudeIdentityExecutor`  | Claude（CCH路徑）                                                                                                                                                     | 約束+工具-重新映射管道、指紋整形                      |
+| `CliProxyApiExecutor`     | CLIProxyAPI 相容的提供程序                                                                                                                                            | 自訂身份驗證和協定處理                                |
+| `CloudflareAiExecutor`    | Cloudflare工人AI                                                                                                                                                      | 帳戶ID注入，基於神經元的使用跟踪                      |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                                          | 注入系統指令，強制推理工作                            |
+| `ChatGptWebCodexExecutor` | ChatGPT網 (Codex)                                                                                                                                                     | 瀏覽器會話回應API橋接thread/turn固定                  |
+| `CommandCodeExecutor`     | 指令碼                                                                                                                                                                | OAuth +每會話標頭輪換                                 |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                            | ConnectRPC協議、Protobuf 編碼、透過校驗和進行請求簽名 |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                             | 透過雲端代理模組進行Devin任務生命週期橋接             |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                                        | Copilot令牌刷新，模仿 VSCode 的標頭                   |
+| `GitlabExecutor`          | GitLab朵                                                                                                                                                              | GitLab OAuth +項目範圍路由                            |
+| `GlmExecutor`             | AI GLM （含`glmt`預設）                                                                                                                                               | 思維-預算意識， GLMT預設常數                          |
+| `GrokWebExecutor`         | xAI Grok網站                                                                                                                                                          | Web 會話反向、模式選擇 (think/standard)               |
+| `KieExecutor`             | KIE                                                                                                                                                                   | 具有旋轉會話錨點的自訂令牌發行                        |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                                | AWS EventStream二進位格式→ SSE轉換                    |
+| `MuseSparkWebExecutor`    | 繆斯火花（網）                                                                                                                                                        | 透過影像訊息橋接實現網路會話反向                      |
+| `NlpCloudExecutor`        | NLP汽雲                                                                                                                                                               | 提供者特定的請求正文形狀                              |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                              | AI SDK相容提供者設置                                  |
+| `PerplexityWebExecutor`   | 困惑網                                                                                                                                                                | 網路會話反向以繼續聊天                                |
+| `PetalsExecutor`          | 花瓣分佈式推理                                                                                                                                                        | 分散群路由                                            |
+| `PollinationsExecutor`    | 授粉AI                                                                                                                                                                | 無需API密鑰，請求速率受限                             |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                              | PAT和OAuth支持，多模型免費套餐                        |
+| `VertexExecutor`          | Google頂點AI                                                                                                                                                          | 服務帳戶身份驗證、基於區域的端點                      |
+| `DevinDesktopExecutor`    | Devin桌面                                                                                                                                                             | 匯入API金鑰+ Connect-protobuf 聊天串流                |
 
-所有其他提供者（包括自訂相容節點）使用 `DefaultExecutor`。
+所有其他提供者（包括自訂相容節點）都使用`DefaultExecutor`。
+
+### 自動探測和網路會話帳戶
+
+模型測試、測試全部、組合測試和評估發送真實的聊天請求。網路會話提供者充當登入用戶，因此每個請求都將保存為該帳戶上的對話；留下此類對話的自動探測會導致帳戶被暫停（#14780）。因此，一旦目標的提供者被解析並且在選擇憑證之前（`src/lib/providers/chatProbePolicy.ts`），聊天管道就會拒絕自動探測到達的每個提供者獲取網路會話憑證的目標。拒絕是`422`和`error.code` `chat_probe_not_isolated`，探測運行器將其報告為跳過，而不是失敗。
+
+在提供者自己的無歷史模式下執行每個聊天的執行器使用`ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`) 進行聲明；然後允許對該提供者進行探測。 ChatGPT Web 聲明`temporary-chat`。透過測試將聲明固定到其機制上，因此該聲明不能比使其成立的程式碼更長久。
 
 ## 提供者相容性矩陣
 
@@ -1059,11 +1068,11 @@ flowchart LR
 - SQLite 架構遷移與啟動時的自動升級鉤子
 - 舊版 JSON → SQLite 遷移相容性路徑
 
-## 6) SSRF / 外送 URL 防護
+## 6) SSRF /出站URL守衛
 
-- `src/shared/network/outboundUrlGuard.ts` 在請求到達提供者執行器前封鎖所有私人/迴路/鏈結本地目標 URL
-- 提供者模型探索與驗證路由使用 `src/shared/network/safeOutboundFetch.ts`，該函數在每個外送請求前應用防護
-- 防護錯誤以 `URL_GUARD_BLOCKED` 呈現，附 HTTP 422，並透過 `providerAudit.ts` 記錄到合規稽核軌跡
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) 將`src/shared/network/outboundUrlGuard.ts`應用於透過`BaseExecutor.execute()`調度的聊天請求。在僅限公有模式（`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false`且私有標誌關閉）下，它會阻止私有和環回主機以及169.254.0.0/16；在所有其他模式下，它都會阻止雲元資料主機。在任何DNS查找之前，它會檢查寫入的主機名稱或IP文字。內建本地提供者會跳過它。
+- 提供者模型發現和驗證路由使用`src/shared/network/safeOutboundFetch.ts` ，它在每個出站請求之前應用防護
+- 防護錯誤表現為`URL_GUARD_BLOCKED`和HTTP 503（`getSafeOutboundFetchErrorStatus`；模型發現路徑返回 400），驗證期間的真實SSRF區塊將作為`provider.validation.ssrf_blocked`事件記錄到審計追蹤中
 
 ## 可觀測性與操作訊號
 

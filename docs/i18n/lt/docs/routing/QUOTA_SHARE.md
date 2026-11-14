@@ -196,53 +196,48 @@ Pirmenybės tvarka (nuo aukščiausios iki žemiausios):
 
 ---
 
-## Integravimas į konvejerį
+## Dujotiekio integravimas
 
-### PRE kabliukas (`open-sse/handlers/chatCore.ts`)
+### PRE kablys (`open-sse/handlers/chatCore.ts`)
 
-Vykdomas prieš aukštesniojo lygmens vykdyklę, po autentifikavimo ir politikos patikrų:
+Vykdoma prieš ankstesnį vykdytoją, po autentifikavimo ir politikos patikrinimų:
 
 ```
 resolveComboTargets / handleSingleModel
   → enforceQuotaShare(apiKeyId, connectionId, provider, estimatedCost)
-      → getQuotaStore().peek() kiekvienam matmeniui
+      → getQuotaStore().peek() per dimension
       → fairShare.decideFairShare()
-      → jei blokuoti → grąžinti 429 (buildErrorBody, griežtoji taisyklė Nr. 12)
-      → jei leisti + sumažinti prioritetą → kandidatui nustatyti quotaSoftPenalty=true
+      → if block → return 429 (buildErrorBody, Hard Rule #12)
+      → if allow + deprioritize → set quotaSoftPenalty=true on candidate
   → executor.execute()
 ```
 
-**Leidimas gedimo atveju**: jei `enforceQuotaShare` pateikia išimtį, užklausa praleidžiama
-su `pino.warn` žurnalo įrašu. Tai neleidžia kvotų variklio klaidai užblokuoti viso
-srauto.
+**Nesėkmingas atidarymas** : jei `enforceQuotaShare` meta, užklausa leidžiama per `pino.warn` žurnalą. Tai neleidžia kvotos variklio klaidai blokuoti viso srauto.
 
-### POST kabliukas (suvartojimo registravimas)
+### POST kabliukas (rekordinis suvartojimas)
 
-Po sėkmingo atsako:
+Po sėkmingo atsakymo:
 
 ```
-executor grąžina sėkmę
+executor returns success
   → spendRecorder.recordConsumption(apiKeyId, connectionId, provider, actualCost)
-      → getQuotaStore().consume() kiekvienam matmeniui
-      → leidimas gedimo atveju: klaidos registruojamos kaip pino.warn, klientui niekada neperduodamos
+      → getQuotaStore().consume() per dimension
+      → fail-open: errors logged as pino.warn, never propagated to client
 ```
 
-**Nuokrypio pastaba**: jei po atsako `consume` nepavyksta, slankusis skaitiklis rodo per mažą reikšmę.
-Teikėjo prisotinimo signalas (pvz., `anthropic-ratelimit-unified-5h-utilization`)
-per kitą užklausą pataiso visuotinį įvertį.
+**Dreifo nata** : jei `consume` nepavyksta reaguoti, slenkantis skaitiklis skaičiuojamas per mažai. Prisotinimo signalas iš teikėjo (pvz., `anthropic-ratelimit-unified-5h-utilization`) pataiso bendrą įvertinimą kitoje užklausoje.
 
-### Švelnioji kombinacijos nuobauda (`open-sse/services/combo.ts`)
+### Kombinuotas švelnus baudinys (`open-sse/services/combo.ts`)
 
 Kai `decision.deprioritize === true`:
 
 ```ts
 if (candidate.quotaSoftPenalty) {
-  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // numatytoji reikšmė 0.7
+  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // default 0.7
 }
 ```
 
-Nuobauda pritaikoma po visų kitų vertinimo veiksnių. Ji sumažina tikimybę, kad automatinė kombinacija
-pasirinks prisotintą raktą, jo griežtai neužblokuodama.
+Nuobauda skiriama po visų kitų taškų skaičiavimo faktorių. Tai sumažina automatinio derinimo tikimybę, kad bus pasirinktas prisotintas klavišas jo neužblokavus.
 
 ---
 

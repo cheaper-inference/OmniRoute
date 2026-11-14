@@ -113,160 +113,157 @@ E2E secara otomatis, tanpa label apa pun.
 
 ### Pra-rilis
 
-- [ ] Semua PR yang ditargetkan untuk rilis ini telah digabungkan ke `release/vX.Y.0`
-- [ ] Semua item Linear/isu yang masih terbuka untuk versi ini telah ditutup atau dipindahkan ke milestone berikutnya
-- [ ] CI berhasil pada cabang `release/vX.Y.0`
+- [ ] Semua PRs yang ditargetkan untuk rilis ini digabungkan ke `release/vX.Y.0`
+- [ ] Semua item Linear/issue yang terbuka untuk versi ini ditutup atau didorong ke pencapaian berikutnya
+- [ ] CI hijau di cabang `release/vX.Y.0`
 - [ ] Tidak ada penanda `TODO(release)` dalam kode: `grep -r "TODO(release)" src/ open-sse/`
-- [ ] Image dasar Docker sudah terbaru (saat ini `node:24.15.0-trixie-slim`)
+- [ ] gambar dasar Docker terkini (saat ini `node:24.15.0-trixie-slim`)
 
-### Versi & Log Perubahan
+### Versi & Changelog
 
-- [ ] Jalankan `/version-bump-cc <patch|minor|major>` (skill Claude Code)
-  - Menaikkan versi `package.json`, `electron/package.json`
-  - Membuat ulang `CHANGELOG.md` dari commit git sejak tag terakhir
-  - Memperbarui badge README.md
-- [ ] Tinjau CHANGELOG.md secara manual dan rapikan pesan commit jika diperlukan
+- [ ] Jalankan `/version-bump-cc <patch|minor|major>` (keterampilan Kode Claude )
+  - Benjolan `package.json`, `electron/package.json`
+  - Meregenerasi `CHANGELOG.md` dari git yang dilakukan sejak tag terakhir
+  - Memperbarui lencana README.md
+- [ ] Tinjau CHANGELOG.md secara manual dan bersihkan pesan komit jika diperlukan
 - [ ] Pastikan bagian semver terbaru di `CHANGELOG.md` sama dengan versi `package.json`
-- [ ] Pertahankan `## [Unreleased]` sebagai bagian log perubahan pertama untuk pekerjaan mendatang
+- [ ] Pertahankan `## [Unreleased]` sebagai bagian changelog pertama untuk pekerjaan selanjutnya
 - [ ] Perbarui `docs/openapi.yaml` → `info.version` harus sama dengan versi `package.json`
 
 ### Kualitas Kode
 
-- [ ] `npm run lint` — 0 galat (peringatan sudah ada sebelumnya)
+- [ ] kesalahan `npm run lint` — 0 (peringatan sudah ada sebelumnya)
 - [ ] `npm run typecheck:core` — bersih
 - [ ] `npm run typecheck:noimplicit:core` — bersih (ketat)
-- [ ] `npm run check:cycles:ratchet` — berada dalam batas maksimum `metrics.cycles` yang dibekukan (`check:cycles` biasa keluar dengan kode 1 jika ada siklus apa pun, #15281)
-- [ ] `npm run check:any-budget:t11` — berada dalam anggaran
+- [ ] `npm run check:cycles:ratchet` — di dalam langit-langit `metrics.cycles` yang membeku ( `check:cycles` kosong keluar 1 pada siklus apa pun, #15281)
+- [ ] `npm run check:any-budget:t11` — sesuai anggaran
 - [ ] `npm run check:route-validation:t06` — bersih
-- [ ] `npm run check:node-runtime` — batas minimum runtime yang didukung terpenuhi (`>=22.22.2 <23`, `>=24.0.0 <27`, sesuai `SUPPORTED_NODE_RANGE` di `src/shared/utils/nodeRuntimeSupport.ts`; selaras dengan `engines` di `package.json`)
+- [ ] `npm run check:node-runtime` — didukung runtime floor met (`>=22.22.2 <23`, `>=24.0.0 <27`, per `SUPPORTED_NODE_RANGE` in `src/shared/utils/nodeRuntimeSupport.ts`; selaras dengan `package.json` `engines`)
 
 ### Pengujian
 
-- [ ] `npm run test:unit` — lulus
-- [ ] `npm run test:vitest` — lulus (server MCP, autoCombo, cache)
-- [ ] `npm run test:coverage` — ambang 60/60/60/60 terpenuhi (pernyataan/baris/fungsi/cabang)
-- [ ] `npm run test:integration` — lulus (jika perubahan menyentuh DB / handler)
-- [ ] `npm run test:combo:matrix` — lulus (matriks strategi combo: membuktikan keputusan pemilihan seluruh 19 strategi perutean publik secara deterministik; jalankan saat menyentuh perutean combo, resolusi strategi, atau logika fallback)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **opsional/manual** (smoke test real-upstream yang dilindungi gate; mengambil snapshot DB hanya-baca dari VPS `root@192.168.0.15`; mengakses penyedia nyata dan menggunakan kredit; tidak pernah berjalan di CI; dilewati secara bersih tanpa gate)
-- [ ] `npm run test:combo:live:vps` — **opsional/manual** (smoke test langsung VPS Fase-3: 7 skenario HTTP terhadap server `.15` yang aktif melalui Node ESM biasa; memerlukan `ssh root@192.168.0.15`; hanya membuat/menghapus combo `__live_test__*`; mengakses penyedia nyata; tidak pernah berjalan di CI)
-- [ ] `npm run test:e2e` — lulus (perubahan UI)
-- [ ] `npm run test:protocols:e2e` — lulus (perubahan MCP/A2A)
-- [ ] `npm run test:ecosystem` — lulus
+- [ ] lulus `npm run test:unit` —
+- [ ] `npm run test:vitest` — pass (server MCP, autoCombo, cache)
+- [ ] `npm run test:coverage` — gerbang 60/60/60/60 puas (statements/lines/functions/branches)
+- [ ] `npm run test:integration` — pass (jika perubahan sentuh DB / handler)
+- [ ] `npm run test:combo:matrix` — pass (matriks strategi kombo: membuktikan semua 22 keputusan pemilihan strategi perutean publik secara deterministik; dijalankan ketika menyentuh perutean kombo, resolusi strategi, atau logika fallback)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (asap hulu nyata yang terjaga keamanannya; mengambil snapshot DB yang hanya dapat dibaca dari VPS `root@192.168.0.15`; mengenai penyedia nyata, memerlukan kredit; tidak pernah berjalan di CI; melewati dengan rapi tanpa gerbang)
+- [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS live smoke: 7 skenario HTTP melawan server `.15` langsung melalui Node biasa ESM; membutuhkan `ssh root@192.168.0.15`; creates/deletes hanya kombo `__live_test__*` ; mengenai penyedia nyata; tidak pernah berjalan di CI)
+- [ ] `npm run test:e2e` — lulus ( perubahan UI )
+- [ ] `npm run test:protocols:e2e` — lulus ( perubahan MCP/A2A )
+- [ ] lulus `npm run test:ecosystem` —
 
-### Hook (Divalidasi Husky)
+### Kait (Husky divalidasi)
 
-Hook Husky berada di `.husky/` dan berjalan secara otomatis pada operasi git.
+Husky hooks ada di `.husky/` dan dijalankan secara otomatis pada operasi git.
 
-- **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** gate deterministik yang cepat — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (diaktifkan 2026-06-13). Sengaja tidak menyertakan `test:unit` (lambat; dicakup oleh job CI `test-unit`).
+- **pra-komitmen:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
+- **pra-dorongan:** gerbang deterministik cepat — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (diaktifkan 13-06-2026). Sengaja mengecualikan `test:unit` (lambat; tercakup dalam tugas CI `test-unit` ).
   - Jalankan `npm run test:unit` secara manual sebelum mendorong cabang rilis.
 
-Jika hook gagal: perbaiki masalah yang mendasarinya, jangan lewati dengan `--no-verify`.
+Jika pengait gagal: perbaiki masalah mendasarnya, jangan lewati dengan `--no-verify`.
 
-### Conventional Commits
+### Komitmen Konvensional
 
-Semua commit yang ditujukan untuk rilis harus mengikuti format `type(scope): subject`.
+Semua komitmen terikat rilis harus mengikuti format `type(scope): subject`.
 
-**Tipe yang valid:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
+**Jenis yang valid:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
 **Cakupan yang valid:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
 
-Perubahan yang merusak kompatibilitas: tambahkan footer `BREAKING CHANGE:` atau `!` setelah cakupan (misalnya `feat(api)!: drop /v0`).
+Perubahan yang dapat menyebabkan gangguan: tambahkan `BREAKING CHANGE:` footer atau `!` setelah cakupan (misalnya `feat(api)!: drop /v0`).
 
 ### Dokumentasi
 
-- [ ] `npm run check:docs-sync` lulus (dijalankan otomatis oleh pre-commit)
-- [ ] `npm run check:docs-all` lulus (payung: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` keluar dengan kode 0 — kontrak env antara kode ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` tetap konsisten
-- [ ] `npm run check:doc-links` keluar dengan kode 0 — tidak ada referensi markdown internal yang rusak setelah restrukturisasi
-- [ ] `docs/architecture/ARCHITECTURE.md` telah ditinjau untuk penyimpangan penyimpanan/runtime
-- [ ] `docs/guides/TROUBLESHOOTING.md` telah ditinjau untuk penyimpangan variabel env dan operasional
+- [ ] `npm run check:docs-sync` pass (dijalankan otomatis dengan pra-komit)
+- [ ] `npm run check:docs-all` pass (payung: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:env-doc-sync` keluar 0 kode — ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env kontrak masih utuh
+- [ ] `npm run check:doc-links` keluar 0 — tidak ada referensi penurunan harga internal yang rusak setelah restrukturisasi
+- [ ] `docs/architecture/ARCHITECTURE.md` ditinjau untuk penyimpangan storage/runtime
+- [ ] `docs/guides/TROUBLESHOOTING.md` ditinjau untuk env var dan penyimpangan operasional
 - [ ] Jika `.env.example` berubah: `docs/reference/ENVIRONMENT.md` diperbarui
 - [ ] Jika fitur baru memiliki UI: `docs/guides/USER_GUIDE.md` menyebutkannya
 - [ ] Jika fitur baru memiliki API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` diperbarui
-- [ ] Jika fitur baru merupakan modul: tersedia `docs/<MODULE>.md` khusus
-- [ ] Jika terdapat perubahan yang merusak kompatibilitas: `docs/guides/TROUBLESHOOTING.md` memiliki catatan migrasi
+- [ ] Jika fitur baru adalah modul: ada `docs/<MODULE>.md` khusus
+- [ ] Jika melanggar perubahan: `docs/guides/TROUBLESHOOTING.md` memiliki catatan migrasi
 
 ### i18n
 
-- [ ] `npm run i18n:check` keluar dengan kode 0 — status terjemahan (`.i18n-state.json`) sinkron dengan dokumen sumber (tidak ada sumber yang menyimpang dalam mode ketat; pemberitahuan dalam mode peringatan dapat diterima untuk perbaikan dokumen pada saat-saat terakhir, tetapi harus bernilai 0 sebelum membuat tag)
-- [ ] `npm run i18n:check-ui-coverage` keluar dengan kode 0 — setiap locale UI berada pada atau di atas batas minimum cakupan 80%
-- [ ] `npm run i18n:sync-ui:dry` melaporkan 0 kunci yang hilang di seluruh 66 locale target (setiap locale kecuali sumber `en`)
-- [ ] Jika dokumen sumber berbahasa Inggris berubah, jalankan `npm run i18n:run` (memerlukan `OMNIROUTE_TRANSLATION_API_KEY` di `.env`) sebelum membuat tag
-- [ ] Kontribusi terjemahan dapat ditunda ke rilis berikutnya jika bersifat minor (catat di CHANGELOG)
+- [ ] `npm run i18n:check` keluar dari status terjemahan — (`.i18n-state.json`) yang sinkron dengan dokumen sumber (tidak ada sumber yang menyimpang dalam mode ketat; saran mode peringatan dapat diterima untuk perbaikan dokumen di menit-menit terakhir, tetapi harus 0 sebelum memberi tag)
+- [ ] `npm run i18n:check-ui-coverage` keluar dari 0 — setiap lokasi UI pada atau di atas cakupan lantai 80%.
+- [ ] `npm run i18n:sync-ui:dry` melaporkan 0 kunci yang hilang di 66 lokal target (setiap lokal kecuali sumber `en` )
+- [ ] Jika dokumen sumber bahasa Inggris berubah, jalankan `npm run i18n:run` (memerlukan `OMNIROUTE_TRANSLATION_API_KEY` di `.env`) sebelum memberi tag
+- [ ] Kontribusi terjemahan dapat ditunda ke rilis berikutnya jika masih kecil (track in CHANGELOG)
 
-### Migrasi Database
+### Migrasi Basis Data
 
 - [ ] Jika `src/lib/db/migrations/` memiliki file baru:
   - [ ] Setiap migrasi bersifat idempoten (`CREATE TABLE IF NOT EXISTS`, dll.)
   - [ ] Migrasi dibungkus dalam transaksi
-  - [ ] Dinomori dengan benar (tidak ada celah dalam urutan)
+  - [ ] Diberi nomor dengan benar (tidak ada spasi secara berurutan)
 - [ ] Uji pada instalasi baru: hapus `~/.omniroute/omniroute.db` dan jalankan `npm run dev`
-- [ ] Uji pada instalasi yang sudah ada: cadangkan DB, jalankan migrasi, verifikasi skema
-- [ ] File WAL (`-wal`, `-shm`) ditangani dengan benar jika migrasi menulis ulang tabel
+- [ ] Uji pada instalasi yang ada: buat cadangan DB, jalankan migrasi, verifikasi skema
+- [ ] file WAL (`-wal`, `-shm`) ditangani dengan benar jika migrasi menulis ulang tabel
 
 ### Katalog Penyedia (divalidasi Zod)
 
-- [ ] Skema Zod `src/shared/constants/providers.ts` valid saat dimuat
-  - [ ] Semua penyedia memiliki kolom wajib (`id`, `label`, `kind`, dll.)
+- [ ] skema `src/shared/constants/providers.ts` Zod valid pada waktu muat
+  - [ ] Semua penyedia memiliki bidang yang wajib diisi (`id`, `label`, `kind`, dll.)
   - [ ] `freeNote` disediakan untuk penyedia gratis baru
-  - [ ] Penyedia OAuth memiliki `oauthConfig` yang terdaftar di `src/lib/oauth/constants/oauth.ts`
-- [ ] Jika penyedia baru ditambahkan: tersedia eksekutor yang sesuai di `open-sse/executors/`
-- [ ] Jika formatnya bukan OpenAI: tersedia penerjemah di `open-sse/translator/`
+  - [ ] penyedia OAuth telah `oauthConfig` terdaftar di `src/lib/oauth/constants/oauth.ts`
+- [ ] Jika penyedia baru ditambahkan: pelaksana yang sesuai di `open-sse/executors/`
+- [ ] Jika format non-OpenAI: penerjemah dalam `open-sse/translator/`
 - [ ] Model terdaftar di `open-sse/config/providerRegistry.ts`
-- [ ] Pengujian unit di `tests/unit/` mencakup klasifikasi dan perutean penyedia
+- [ ] Tes unit di `tests/unit/` mencakup klasifikasi dan perutean penyedia
 
 ### Desktop (Electron)
 
 Jika `electron/` berubah:
 
-- [ ] `npm run electron:smoke:packaged` berhasil
-- [ ] Build diuji untuk setidaknya salah satu dari `:win`, `:mac`, `:linux`
-- [ ] Sertifikat penandatanganan kode belum kedaluwarsa (jika melakukan penandatanganan)
-- [ ] Versi `electron/package.json` sama dengan `package.json` root
-- [ ] Pointer kanal pembaruan otomatis diperbarui jika merilis ke `stable`
+- [ ] `npm run electron:smoke:packaged` lolos
+- [ ] Build diuji untuk setidaknya satu dari `:win`, `:mac`, `:linux`
+- [ ] Sertifikat penandatanganan kode belum kedaluwarsa (jika penandatanganan)
+- [ ] versi `electron/package.json` cocok dengan root `package.json`
+- [ ] Pembaruan otomatis penunjuk saluran diperbarui jika dirilis ke `stable`
 
-### Tata Letak Build
+### Bangun Tata Letak
 
-Repositori menggunakan tiga direktori output yang berbeda — jangan pernah tertukar:
+Repositori menggunakan tiga direktori keluaran berbeda — jangan pernah mencampuradukkannya:
 
-| Direktori | Tujuan                                                              | Dilacak?              |
-| --------- | ------------------------------------------------------------------- | --------------------- |
-| `src/`    | Sumber aplikasi (TypeScript / TSX)                                  | Ya                    |
-| `.build/` | Perantara build — output `next build` (`distDir`)                   | Tidak (diabaikan git) |
-| `dist/`   | Bundel npm siap didistribusikan — dirakit oleh `assembleStandalone` | Tidak (diabaikan git) |
+| Direktori | Tujuan                                                            | Dilacak?              |
+| --------- | ----------------------------------------------------------------- | --------------------- |
+| `src/`    | Sumber aplikasi (TypeScript / TSX)                                | Ya                    |
+| `.build/` | Bangun keluaran perantara — `next build` (`distDir`)              | Tidak (git diabaikan) |
+| `dist/`   | Bundel npm — yang dapat dikirim dirakit oleh `assembleStandalone` | Tidak (git diabaikan) |
 
-> **Catatan operator:** direktori image VPS jarak jauh tetap `/usr/lib/node_modules/omniroute/app/`.
-> Hanya output build **dalam repositori** yang dipindahkan (`app/` → `dist/`). Skill deployment melakukan rsync
-> terhadap isi `dist/` ke direktori `app/` jarak jauh — tidak diperlukan perubahan jalur VPS.
+> **Catatan operator:** direktori gambar VPS jarak jauh tetap `/usr/lib/node_modules/omniroute/app/`. Hanya itu** dalam repo** keluaran build dipindahkan (`app/` → `dist/`). Keterampilan menyebarkan konten rsync `dist/` ke dalam `app/` dir — jarak jauh tidak diperlukan perubahan jalur VPS.
 
-**Alur build tunggal:**
+**Aliran build tunggal:**
 
 ```
 npm run build:release
-  └─ rm -rf .build dist          (pembersihan)
-  └─ next build → .build/next/   (perantara)
-  └─ assembleStandalone          (menyalin standalone + static + public + native → dist/)
-  └─ writes dist/BUILD_SHA       (sentinel HEAD)
+  └─ rm -rf .build dist          (clean)
+  └─ next build → .build/next/   (intermediates)
+  └─ assembleStandalone          (copies standalone + static + public + natives → dist/)
+  └─ writes dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-JANGAN jalankan `npm run build` yang diikuti dengan `npm run build:cli` terpisah untuk deployment — gunakan
-`npm run build:release` yang melakukan build ulang bersih + sentinel dalam satu perintah.
+Lakukan NOT run `npm run build` diikuti dengan `npm run build:cli` terpisah untuk penerapan — gunakan `npm run build:release` yang melakukan pembangunan kembali + sentinel dalam satu perintah.
 
 ### Validasi Artefak
 
 - [ ] `npm run build:release` berhasil dan `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` bersih — tidak ada `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, atau residu lokal lainnya
-- [ ] `dist/server.js` tersedia setelah build
-- [ ] Smoke test runtime terpaket lokal opsional: `npm run dev:candidate -- validate` setelah `npm run dev:candidate -- build` menjalankan tarball terpaket pada `DATA_DIR` terisolasi dan memeriksa `/api/health` + `/v1/models` (lihat [Alur Utama Kontribusi](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
+- [ ] `npm run check:pack-artifact` clean — no `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, atau residu lokal lainnya
+- [ ] `dist/server.js` ada setelah dibangun
+- [ ] Asap runtime paket lokal opsional: `npm run dev:candidate -- validate` setelah `npm run dev:candidate -- build` mem-boot tarball yang dikemas pada `DATA_DIR` yang terisolasi dan memeriksa `/api/health` + `/v1/models` (lihat [Contribution Golden Path](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) )
 
-### Pemberian Tag & Rilis
+### Penandaan & Rilis
 
-- [ ] Jalankan `/generate-release-cc` (skill Claude Code):
+- [ ] Jalankan `/generate-release-cc` (keterampilan Kode Claude ):
   - Membuat tag `vX.Y.Z`
-  - Melakukan push tag dan branch
-  - Membuka GitHub Release dengan isi changelog
-  - Melampirkan installer Electron (jika dibuat)
+  - Mendorong tag dan cabang
+  - Membuka Rilis GitHub dengan badan changelog
+  - Melampirkan pemasang Electron (jika dibuat)
 - [ ] Atau secara manual:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
@@ -274,46 +271,45 @@ JANGAN jalankan `npm run build` yang diikuti dengan `npm run build:cli` terpisah
   gh release create vX.Y.Z --notes-from-tag
   ```
 
-### Deployment
+### Menyebarkan
 
-Skill deployment menggunakan alur rsync ringan — tanpa `npm pack`, tanpa `npm i -g`:
+Terapkan keterampilan menggunakan aliran rsync ringan — no `npm pack`, no `npm i -g`:
 
-- [ ] Gunakan skill deployment yang sesuai dengan target:
-  - `/deploy-vps-local-cc` — VPS lokal (192.168.0.15)
-  - `/deploy-vps-akamai-cc` — VPS Akamai (69.164.221.35)
+- [ ] Gunakan keterampilan penyebaran yang sesuai dengan target:
+  - `/deploy-vps-local-cc` — lokal VPS (192.168.0.15)
+  - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — keduanya
-- [ ] Sebelum melakukan deployment, pastikan `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] Build harus dijalankan di tempat `node_modules` benar-benar tersedia (checkout utama atau worktree yang telah menjalankan `npm ci` — BUKAN worktree dengan symlink)
-- [ ] Lakukan smoke test terhadap instance yang telah di-deploy:
-  - Buka `/dashboard/health` → periksa apakah string versi sesuai dengan rilis
-  - Jalankan permintaan `/v1/chat/completions` terhadap penyedia yang sudah diketahui
-  - Verifikasi bahwa `/api/monitoring/health` mengembalikan circuit breaker `CLOSED`
-  - Pastikan transport MCP merespons (`/mcp` HTTP, `/mcp-sse` SSE)
+- [ ] Sebelum menerapkan, konfirmasikan `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] Build harus dijalankan di tempat `node_modules` nyata (checkout utama atau `npm ci`'d worktree — NOT a worktree yang disinkronkan)
+- [ ] Contoh penerapan uji asap:
+  - Buka `/dashboard/health` → periksa versi string yang cocok dengan rilis
+  - Jalankan permintaan `/v1/chat/completions` terhadap penyedia yang dikenal
+  - Verifikasi `/api/monitoring/health` mengembalikan pemutus sirkuit `CLOSED`
+  - Konfirmasikan respons transportasi MCP (`/mcp` HTTP, `/mcp-sse` SSE)
 
-### Setelah Rilis
+### Pasca rilis
 
-- [ ] Jalankan `/capture-release-evidences-cc` (skill Claude Code)
-  - Mengambil tangkapan layar/rekaman WebP untuk fitur baru
-  - Melampirkannya ke catatan rilis / postingan blog
-- [ ] Perbarui GitHub Discussions / Discord dengan pengumuman rilis
-- [ ] Buka milestone untuk versi berikutnya
-- [ ] Jika kritis: sematkan diskusi atau posting di `news.json` untuk banner dalam aplikasi
+- [ ] Jalankan `/capture-release-evidences-cc` (keterampilan Kode Claude )
+  - Menangkap WebP screenshots/recordings fitur baru
+  - Terlampir pada catatan rilis/postingan blog
+- [ ] Perbarui Diskusi GitHub / Discord dengan pengumuman rilis
+- [ ] Buka tonggak sejarah untuk versi berikutnya
+- [ ] Jika penting: sematkan diskusi atau posting di `news.json` untuk spanduk dalam aplikasi
 
-### Gerbang peluncuran publik Radar
+### Gerbang peluncuran publik radar
 
-Pengumuman Radar sengaja di-commit dengan `active: false`. Aktivasi merupakan perubahan terpisah
-setelah bukti untuk setiap item di bawah ini tersedia:
+Pengumuman Radar sengaja dilakukan dengan `active: false`. Aktivasi adalah perubahan terpisah setelah setiap item di bawah ini dibuktikan:
 
-- [ ] Semua PR Radar bertumpuk telah di-merge dan CI pada ujung rilis berstatus hijau
-- [ ] Deploy dan lakukan smoke test terhadap route Radar OSS dengan `RADAR_ENABLED` tetap nonaktif secara default
-- [ ] Lakukan smoke test terhadap `GET /planos`, `/termos`, `/privacidade`, dan `/reembolso` pada host Radar yang telah ditentukan
-- [ ] Catat identitas/kontak/alamat operator serta tinjauan hukum yang disetujui pemilik di layanan privat
-- [ ] Uji Stripe Checkout dan webhook bertanda tangan hanya dalam mode pengujian
-- [ ] Uji satu pengiriman email transaksional terenkripsi menggunakan pengirim/domain yang disetujui
-- [ ] Buktikan pemulihan cadangan dan satu proses riset yang diawasi serta dibatasi anggaran
-- [ ] Setujui kebijakan peninjauan BRL/PIX sebelum menerima bukti donasi
-- [ ] Aktifkan Checkout publik hanya setelah gerbang sebelumnya terpenuhi, lalu aktifkan ID `news.json` baru
-- [ ] Verifikasi bahwa banner Home menggunakan salinan yang dilokalkan dan ID baru muncul kembali setelah ID lama ditutup
+- [ ] Semua Radar PRs yang ditumpuk digabungkan dan ujung pelepas CI berwarna hijau
+- [ ] Menyebarkan dan menghentikan rute OSS Radar dengan `RADAR_ENABLED` masih nonaktif secara default
+- [ ] Asap `GET /planos`, `/termos`, `/privacidade`, dan `/reembolso` pada host Radar bernama
+- [ ] Catat operator identity/contact/address dan tinjauan hukum yang disetujui pemilik di layanan swasta
+- [ ] Latihan Stripe Checkout dan webhook yang ditandatangani hanya dalam mode uji coba
+- [ ] Lakukan satu pengiriman email transaksional terenkripsi dengan sender/domain yang disetujui
+- [ ] Buktikan pemulihan cadangan dan satu penelitian yang diawasi dan dibatasi anggaran
+- [ ] Menyetujui kebijakan peninjauan BRL/PIX sebelum menerima bukti sumbangan
+- [ ] Aktifkan Checkout publik hanya setelah gerbang sebelumnya, lalu aktifkan `news.json` ID baru
+- [ ] Pastikan spanduk Beranda menggunakan salinan yang dilokalkan dan ID baru muncul kembali setelah ID lama ditutup
 
 ## Uji asap Embedded Services (v3.8.4+)
 

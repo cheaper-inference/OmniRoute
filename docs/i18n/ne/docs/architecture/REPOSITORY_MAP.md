@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `components/`                    | ड्यासबोर्ड कम्पोनेन्ट API: `packages/ui-kit` मा एडेप्टरहरू — `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: स्क्रिनहरू द्वारा प्रयोग गरिएको आइकन नामहरू → लुसाइड कम्पोनेन्टहरू (`<Icon>`)         |
-| `constants/providers.ts`         | **381 प्रदायकहरू** Zod प्रमाणीकरणको साथ (सत्यको स्रोत)                                            |
+| `constants/providers.ts`         | **394 प्रदायकहरू** Zod प्रमाणीकरणको साथ (सत्यको स्रोत)                                            |
 | `constants/cliTools.ts`          | बाह्य CLI उपकरण रजिस्ट्री                                                                         |
-| `constants/routingStrategies.ts` | **20 मार्ग रणनीतिहरू** प्राथमिकताहरु संग                                                          |
+| `constants/routingStrategies.ts` | **22 मार्ग रणनीतिहरू** प्राथमिकताहरु संग                                                          |
 | `constants/publicApiRoutes.ts`   | बियरर (बनाम व्यवस्थापन) प्रमाणीकरण आवश्यक पर्ने मार्गहरू                                          |
 | `constants/upstreamHeaders.ts`   | अपस्ट्रीम अनुरोधहरूको लागि हेडर अस्वीकारसूची                                                      |
 | `validation/schemas.ts`          | ~ 80 Zod योजनाहरू ( API अनुबंधहरूको लागि सत्यको एकल स्रोत)                                        |
@@ -260,40 +260,40 @@ src/
 
 ## `open-sse/` — स्ट्रिमिङ इन्जिन कार्यस्थान
 
-छुट्टै npm कार्यस्थान (`@omniroute/open-sse`)। अनुरोध प्रशोधन + प्रदायक कार्यान्वयन सम्हाल्छ।
+अलग npm कार्यस्थान (`@omniroute/open-sse`)। अनुरोध प्रशोधन + प्रदायक कार्यान्वयन ह्यान्डल गर्दछ।
 
 ```
 open-sse/
-├── handlers/            # 16 फाइलहरू (12 ह्यान्डलर + 4 सहायक): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, आदि।
-├── executors/           # 150 कार्यान्वयनकर्ता मोड्युलहरू (BaseExecutor विस्तार गर्ने क्लासहरू + प्रत्येक प्रदायकका सहायकहरू)
-├── translator/          # ढाँचा रूपान्तरणकर्ताहरू (9 अनुरोध, 9 प्रतिक्रिया, 9 सहायक)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ सेवा मोड्युलहरू (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, आदि।)
-├── mcp-server/          # MCP सर्भर (110 उपकरण, 3 ट्रान्सपोर्ट, 33 स्कोप)
-├── config/              # प्रदायक/मोडेल रजिस्ट्रीहरू, हेडर कन्फिगरेसन, मोडेल उपनामहरू
-├── utils/               # TLS क्लाइन्ट, प्रोक्सी fetch/dispatcher, नेटवर्क सहायकहरू
-├── index.ts             # कार्यस्थान प्रवेशबिन्दु
-├── package.json         # कार्यस्थान म्यानिफेस्ट
-├── tsconfig.json        # कार्यस्थान TS कन्फिगरेसन
-└── types.d.ts           # कार्यस्थान प्रकार घोषणाहरू
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| पथ                          | उद्देश्य                                                                         |
-| --------------------------- | -------------------------------------------------------------------------------- |
-| `server.ts`                 | MCP सर्भर जीवनचक्र (stdio + HTTP ट्रान्सपोर्टहरू)                                |
-| `httpTransport.ts`          | HTTP Streamable + SSE ट्रान्सपोर्टहरू (`/api/mcp/sse`, `/api/mcp/stream`)        |
-| `audit.ts`                  | `mcp_tool_audit` तालिकामा अडिट लगिङ                                              |
-| `scopeEnforcement.ts`       | प्रत्येक उपकरणको स्कोप प्रमाणीकरण                                                |
-| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json` मा स्वास्थ्य हार्टबिट                      |
-| `descriptionCompressor.ts`  | कन्टेक्स्ट बचत गर्न उपकरण विवरणको मेटाडेटा कम्प्रेस गर्छ                         |
-| `schemas/tools.ts`          | 36 आधारभूत उपकरण परिभाषाहरू + स्कोपहरू                                           |
-| `tools/advancedTools.ts`    | उन्नत उपकरण कार्यान्वयनहरू                                                       |
-| `tools/memoryTools.ts`      | 3 मेमोरी उपकरणहरू (खोज्ने/थप्ने/खाली गर्ने)                                      |
-| `tools/skillTools.ts`       | 4 सीप उपकरणहरू (सूचीबद्ध गर्ने/सक्षम गर्ने/कार्यान्वयन गर्ने/कार्यान्वयनहरू)     |
-| `tools/compressionTools.ts` | 5 कम्प्रेसन उपकरणहरू                                                             |
-| `README.md`                 | आन्तरिक MCP सर्भर README (`docs/frameworks/MCP-SERVER.md` बाट क्रस-लिङ्क गरिएको) |
+| बाटो                        | उद्देश्य                                                                          |
+| --------------------------- | --------------------------------------------------------------------------------- |
+| `server.ts`                 | MCP सर्भर जीवनचक्र (stdio + HTTP यातायात)                                         |
+| `httpTransport.ts`          | HTTP स्ट्रिमेबल + SSE यातायात (`/api/mcp/sse`, `/api/mcp/stream`)                 |
+| `audit.ts`                  | `mcp_tool_audit` तालिकामा लगिङ अडिट                                               |
+| `scopeEnforcement.ts`       | प्रति-उपकरण दायरा प्रमाणीकरण                                                      |
+| `runtimeHeartbeat.ts`       | स्वास्थ्य मुटुको धड्कन `DATA_DIR/runtime/mcp-heartbeat.json` लाई                  |
+| `descriptionCompressor.ts`  | सन्दर्भ बचत गर्न उपकरण विवरण मेटाडेटा कम्प्रेस गर्नुहोस्                          |
+| `schemas/tools.ts`          | 36 आधार उपकरण परिभाषाहरू + स्कोपहरू                                               |
+| `tools/advancedTools.ts`    | उन्नत उपकरण कार्यान्वयन                                                           |
+| `tools/memoryTools.ts`      | 3 मेमोरी उपकरण (search/add/clear)                                                 |
+| `tools/skillTools.ts`       | 4 कौशल उपकरण (list/enable/execute/executions)                                     |
+| `tools/compressionTools.ts` | 5 सङ्कुचन उपकरण                                                                   |
+| `README.md`                 | आन्तरिक MCP सर्भर README ( `docs/frameworks/MCP-SERVER.md` बाट क्रस-लिङ्क गरिएको) |
 
 ---
 
@@ -400,7 +400,7 @@ open-sse/
 | `ARCHITECTURE.md`           | उच्च-स्तरीय वास्तुकला, उपप्रणाली नक्सा, ड्यासबोर्ड सतह                            |
 | `CODEBASE_DOCUMENTATION.md` | इन्जिनियरिङ सन्दर्भ: निर्देशिका, मोड्युल, सम्मेलन                                 |
 | `FEATURES.md`               | v3.8 हाइलाइटहरूको साथ फिचर म्याट्रिक्स                                            |
-| `USER_GUIDE.md`             | अन्त-प्रयोगकर्ता म्यानुअल (सेटअप, मोडेल, कम्बो, CLIs, अडियो, आदि)                 |
+| `USER_GUIDE.md`             | अन्त-प्रयोगकर्ता पुस्तिका (सेटअप, मोडेल, कम्बो, CLIs, अडियो, आदि)                 |
 | `API_REFERENCE.md`          | प्रमाणीकरण मोडेलको साथ API अन्त्य बिन्दु सन्दर्भ                                  |
 | `openapi.yaml`              | OpenAPI 3.0 spec (121 पथ)                                                         |
 | `SETUP_GUIDE.md`            | स्थापना विधिहरू (npm, npx, Docker, Electron, Termux, स्रोत)                       |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | बाह्य CLI एकीकरण + आन्तरिक OmniRoute CLI                                          |
 | `I18N.md`                   | i18n वास्तुकला, भाषा थप्दै, 67 स्थानहरू                                           |
 | `UNINSTALL.md`              | स्थापना रद्द गर्ने चरणहरू सफा गर्नुहोस्                                           |
-| `PROVIDER_REFERENCE.md`     | **स्वतः उत्पन्न** 381 प्रदायकहरूको सूची (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **स्वतः उत्पन्न** 394 प्रदायकहरूको सूची (regen: `npm run gen:provider-reference`) |
 
 ### उपप्रणाली गहिरो डाइभ्स
 

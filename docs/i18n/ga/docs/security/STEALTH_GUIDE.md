@@ -136,41 +136,63 @@ Modúil ghaolmhara sa bheart céanna:
 
 ---
 
-## Rúndacht Antigravity
+## Antigravity Stealth
 
-Caomhnaíonn iarratais Antigravity téacs an ghlaoiteora beart ar bheart. Ní chuireann OmniRoute carachtair nialasleithead isteach i leid ná ní athainmníonn/insteallann sé uirlisí chun aithris a dhéanamh ar chliant IDE.
+iarratais Antigravity caomhnú téacs an ghlaoiteora beart-do-bheart. Ní chuireann OmniRoute carachtair nial-leithead isteach i leideanna nó uirlisí rename/inject chun aithris a dhéanamh ar chliant IDE.
 
 ### `antigravityHeaderScrub.ts`
 
-Baineann sé marcóirí SDK Stainless (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) sula gcuirtear ar aghaidh iad.
+Stiallacha marcóirí SDK dhosmálta (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) sula gcuirtear ar aghaidh iad.
 
-### ⚠️ Riosca: `ANTIGRAVITY_CREDITS=always` (pointe baolach do thoirmeasc cuntais)
+### Riosca ⚠️ : `ANTIGRAVITY_CREDITS=always` (láthair te toirmeasc cuntais)
 
-Treoraíonn `ANTIGRAVITY_CREDITS=always` (a úsáideann `open-sse/executors/antigravity.ts`) **gach** iarratas trí Bharrachais Chreidmheasanna AI Antigravity (creidmheasanna íoctha Google), seachas ligean do chuóta sraithe in aisce Google na hiarratais a theorannú. Tá sé seo doiciméadaithe mar ghné, ach is é **an tuairisc is coitianta ar shárú na dTéarmaí Seirbhíse a fheicimid** — cuireadh toirmeasc ar roinnt cuntas Google Ultra le `403 / "service disabled for ToS violation" / insufficient_quota` tar éis dóibh rith ar feadh cúpla uair an chloig le `=always`.
+bealaí `ANTIGRAVITY_CREDITS=always` ( arna gcaitheamh ag `open-sse/executors/antigravity.ts`).** gach** iarratas trí Antigravity AI Overages Creidmheasa (creidmheasanna Google íoctha) in ionad rudaí geata cuóta saorshraith Google a ligean ar cíos. Tá sé seo doiciméadaithe mar ghné, ach tá sé** an tuarascáil aonair is coitianta ar shárú ToS a fheicimid** Tá cosc ar chuntais — iolracha Google Ultra le `403 / "service disabled for ToS violation" / insufficient_quota` tar éis dóibh a bheith ag rith le `=always` ar feadh cúpla uair an chloig .
 
-Déantar an forfheidhmiú réamhtheachtach ar **thaobh Google**, agus ní féidir le OmniRoute é a chosc. Tugann ainm na hathróige timpeallachta agus an doiciméadacht reatha le tuiscint gur socrú sábháilte é seo le casadh air; ní hea.
+Tá an forfheidhmiú in aghaidh an tsrutha ar siúl** taobh Google** , ní féidir aon rud OmniRoute a chosc. Fágann an t-ainm env var agus na doiciméid atá ann cheana go bhfuil sé cosúil le cnapán sábháilte le smeach; nach bhfuil sé.
 
-**An fáth a dtarraingíonn sé seo brath mí-úsáide níos ionsaithí ná úsáid na sraithe in aisce amháin:**
+**Cén fáth a tharraingíonn sé seo braite mí-úsáide níos ionsaithí ná úsáid saorshraith amháin:**
 
-- Marcáiltear caiteachas uathoibrithe leanúnach ar chuntas aonair Google ar bhealach eile seachas úsáid na sraithe in aisce a shroicheann an cuóta agus a stopann.
-- Níl aon uasteorainn ráta ar bharrachais chreidmheasa, mar sin is féidir le cliant míchumraithe na céadta USD a chaitheamh i gceann nóiméad agus cuma athdhíola eochracha API nó tráchta róbait a bheith air.
-- Méadaítear an comhartha nuair a úsáideann roinnt úsáideoirí OmniRoute creidmheasanna barrachais go comhthreomhar ón seoladh IP seachtrach céanna.
+- Léiríonn caiteachas uathoibríoch marthanach ar chuntas Google amháin ar bhealach difriúil ná amas-chuóta agus stadanna saorshraitheanna.
+- Níl aon uasteorainn ráta ag ró-íocaíochtaí creidmheasa, mar sin is féidir le cliant míchumraithe sruthán trí na céadta USD i nóiméid agus cuma tráchta athdhíola nó bot API-eochair.
+- Comhdhúile an comhartha ag úsáideoirí iolracha OmniRoute a bhuaileann creidmheasanna overage go comhthreomhar ón IP seachtrach céanna.
 
-**Cur chuige molta:**
+**Staidiúir mholta:**
 
-1. Coinnigh an réamhshocrú `ANTIGRAVITY_CREDITS=off` mura nglacann an t-oibreoir go sainráite le riosca creidmheasanna íoctha agus forfheidhmithe cuntais. Seolann `retry` an gnáthiarratas ar dtús agus insteallann sé creidmheasanna uair amháin ar a mhéad tar éis 429 cuóta incháilithe; insteallann `always` creidmheasanna ar an gcéad iarratas.
-2. **Dáil an t-ualach ar sholáthraithe trí Auto-Combo** (`model: "auto"` nó teaglama `kr/glm/etc`) in ionad cuntas aonair Antigravity a sháithiú.
-3. **Socraigh teorainneacha RPM in aghaidh an naisc** ar leathanach eagarthóireachta sholáthraí Antigravity (Deais → Soláthraithe → Antigravity → nasc → teorainn ráta). Is uasteorainn inchosanta é 30–60 RPM d’úsáid leanúnach.
-4. **Úsáid líonrú réamhtheachtach cobhsaí atá faoi rialú an oibreora** agus seachain cuntas amháin a roinnt idir úsáideoirí nó ualaí oibre neamhghaolmhara.
-5. **Má chuirtear toirmeasc ort**: déan achomharc trí `support.google.com` → “Restore Workspace/Account access” leis an gcorp freagartha cruinn `quota_exceeded` / `service disabled` a sheol Google. Ní ráthaítear go n-athbhunófar an cuntas.
+1. Coinnigh an `ANTIGRAVITY_CREDITS=off` réamhshocraithe mura nglacann an t-oibreoir go sainráite le creidmheas íoctha agus riosca forghníomhaithe cuntais. cuireann `retry` an gnáthiarratas ar aghaidh ar dtús agus cuireann sé isteach creidmheasanna uair amháin ar a mhéad tar éis cuóta incháilithe 429; `always` instealladh creidmheasanna ar an gcéad iarratas.
+2. **Scaip an t-ualach trasna soláthraithe trí Auto-Combo** (`model: "auto"` nó `kr/glm/etc` -combo) in ionad cuntas Antigravity amháin a sháithiú.
+3. **Socraigh teorainneacha RPM in aghaidh an cheangail** i leathanach eagarthóireachta an tsoláthraí Antigravity (Teorainn ráta → nasc Soláthraithe → → Antigravity → ). Is teorainn inchosanta uachtair é 30-60 RPM le haghaidh úsáide marthanach.
+4. **Úsáid líonraithe in aghaidh an tsrutha cobhsaí, arna rialú ag oibreoir** agus seachain cuntas amháin a roinnt thar úsáideoirí nó ualaí oibre nach mbaineann leo.
+5. **Má toirmeasc** : achomharc trí `support.google.com` → "Athchóirigh rochtain Workspace/Account " leis an gcomhlacht freagra cruinn `quota_exceeded` / `service disabled` Google seolta. Níl athchóiriú ráthaithe.
 
-Déantar impleachtaí gach móid creidmheasa do chuntais agus do chaiteachas a dhoiciméadú sa tagairt timpeallachta.
+Déanann an tagairt comhshaoil doiciméadú ar impleachtaí cuntais agus caiteachais gach modh creidmheasa.
 
-Pointí teagmhála:
+#### Ní hamháin `=always`: ródú Antigravity OAuth go ginearálta
 
-- `open-sse/executors/antigravity.ts` — léann sé `process.env.ANTIGRAVITY_CREDITS`
-- `src/lib/oauth/providers/antigravity.ts` — sreangú dintiúr
-- Buntuairisc teagmhais: Plé [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+Níl na fionraíochta teoranta do ró-íocaíochtaí creidmheasa. Déanann tuarascálacha i mí na Samhna 2026 (#19223, #19266) cur síos ar roinnt cuntas Google a cuireadh ar fionraí agus iad ag dul tríd na soláthraithe `antigravity` agus `agy` (Antigravity CLI), le:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+Fíordheimhníonn an dá sholáthraí leis an seisiún táirge Antigravity OAuth, is é sin an cás fógra riosca an deais ("Úsáideann an soláthraí seo do tháirge oifigiúil session/OAuth, nach bhfuil údaraithe le haghaidh úsáide proxy/router ") rabhadh faoi sula gcuirtear nasc leis. Níl an úsáid sin údaraithe in aon cheann de na moltaí thuas; ní laghdaíonn siad ach an méid tráchta a iompraíonn cuntas amháin.
+
+**Comhéadain údaraithe API le haghaidh samhlacha Gemini.** Cuireann Google rochtain ríomhchláraithe ar fáil ar Gemini trína APIs, a thacaíonn OmniRoute mar ghnáthsholáthraithe API-eochair:
+
+| Aitheantas an tsoláthraí | Ainm an phainéil            | Dintiúir                                                                               |
+| ------------------------ | --------------------------- | -------------------------------------------------------------------------------------- |
+| `gemini`                 | Gemini (Google AI Stiúideo) | eochair Gemini API ó Google AI Studio (sraith saor in aisce ar fáil)                   |
+| `vertex`                 | vertex AI                   | Cuntas Seirbhíse JSON, comhartha rochtana OAuth nó eochair Vertex Express API (Gemini) |
+
+Úsáideann na soláthraithe seo ceisteanna Google dintiúir le haghaidh rochtain API, murab ionann agus an seisiún táirge Antigravity. Ní ghéilleann siad do gach úsáid agus ní chuireann siad deireadh leis an riosca forghníomhaithe: tá gach ceann díobh á rialú ag a théarmaí féin, a chaithfidh an t-oibreoir a sheiceáil lena n-imscaradh. Mar shampla, ní cheadaíonn [Téarmaí Seirbhíse Breise Gemini API](https://ai.google.dev/gemini-api/terms) ach Seirbhísí Íoctha nuair a chuirtear cliaint API ar fáil d’úsáideoirí sa Limistéar Eorpach Eacnamaíoch, san Eilvéis nó sa Ríocht Aontaithe, agus féadfar ábhar a sheoltar chuig Seirbhísí Neamhíoctha a úsáid chun táirgí Google a fheabhsú. Tagann Vertex AI faoi na téarmaí Google Cloud ina ionad sin ( [Téarmaí Seirbhíse Sonracha](https://cloud.google.com/terms/service-terms) ). Leanann praghsanna agus cuótaí na téarmaí API sin seachas síntiús Antigravity.
+
+Ba chóir d'oibreoirí atá ag iarraidh na fionraí Antigravity a bhfuil cur síos orthu thuas a sheachaint an trácht Gemini a chur trí cheann de na soláthraithe seo in ionad `antigravity` / `agy`, tar éis dóibh a sheiceáil go n-oireann a n-úsáid do théarmaí an tsoláthraí.
+
+Pointí tadhaill:
+
+- `open-sse/executors/antigravity.ts` — léann `process.env.ANTIGRAVITY_CREDITS`
+- pluiméireacht inchreidte `src/lib/oauth/providers/antigravity.ts` —
+- Tuairisc bhunaidh teagmhais: Plé [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

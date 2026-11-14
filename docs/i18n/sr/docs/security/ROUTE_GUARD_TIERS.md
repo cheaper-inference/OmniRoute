@@ -10,219 +10,144 @@
 заштите. Класификација је статичка, дефинисана у `src/server/authz/routeGuard.ts`
 и проверава се пре покретања било које друге гране аутентификације.
 
-## Нивои
+## Тиерс
 
-### Ниво 1 — LOCAL_ONLY
+### Тиер 1 — LOCAL_ONLY
 
-**Спроводи:** `isLocalOnlyPath(path)` → провера loopback хоста
-**Заобилажење:** Нема подразумевано. Узан изузетак за путање у
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` када захтев носи важећи
-API кључ са `manage` опсегом (погледајте [Изузетак за manage опсег](#manage-scope-carve-out)).
+**Наметнуто од:** `isLocalOnlyPath(path)` → провера хоста повратне петље** заобићи:** Подразумевано ништа. Уско издвајање за путање у `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` када захтев носи важећи API кључ са `manage` опсегом (погледајте [Управљање изрезивањем опсега](#manage-scope-carve-out) ).
 
-Ове руте покрећу подређене процесе или извршавају код у току рада. Излагање
-њих саобраћају ван loopback-а омогућило би нападачу који је дошао до важећег
-JWT-а (нпр. преко Cloudflared/Ngrok тунела) да покрене стварање процеса —
-позната класа CVE рањивости
-([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
+Ове руте покрећу подређене процесе или извршавају рунтиме код. Излагање саобраћају без повратне петље омогућило би нападачу који је добио важећи JWT (нпр. преко Cloudflared/Ngrok тунела) да покрене процес који покреће — познату CVE класу ( [GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj) ).
 
-**Шта је GHSA-fhh6-4qxv-rpqj (класа напада):** сервер за управљање/агент
-излаже крајњу тачку која покреће подпроцес (`npm install`, `node`, прегледач,
-прокси, `git`, `tar`, …). Ако је та крајња тачка доступна ван хоста — зато што
-је оператер поставио OmniRoute иза nginx/Cloudflare/Tailscale тунела а JWT је
-процурио, или је аутентификација погрешно подешена — нападач претвара „позови
-API" у „изврши команду на хосту" (удаљено извршавање кода). OmniRoute ово
-затвара тако што на свакој рути која може да покрене процес спроводи
-**проверу loopback хоста безусловно, пре било какве провере аутентификације**:
-процурели токен преко тунела и даље не може да допре до покретања процеса.
+**Шта је GHSA-fhh6-4qxv-rpqj (класа напада):** management/agent сервер излаже крајњу тачку која покреће подпроцес (`npm install`, `node`, претраживач, проки, `git`, `tar`, …). Ако је та крајња тачка доступна са офф-хост — јер је оператер ставио OmniRoute иза nginx/Cloudflare/Tailscale тунела и JWT је процурио, или је аутх погрешно конфигурисан — нападач претвара "позови API" у "покрени команду на хосту" (даљинско извршавање кода). OmniRoute ово затвара спровођењем а** лоопбацк хост провера безусловно, пре било какве провере аутентификације** , на свакој рути која је способна за мријештење: процурели жетон преко тунела још увијек не може доћи до мријеста.
 
-**Комплетан LOCAL_ONLY скуп.** Меродаван извор је
-`LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` у
-`src/server/authz/routeGuard.ts`; табела испод одражава тренутно стање. Капија
-`check-route-guard-membership` набраја сваки `route.ts` под префиксима који
-могу да покрећу процесе и обара CI ако било који од њих није класификован као
-local-only.
+**Комплетан LOCAL_ONLY сет.** Ауторитативни извор је `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` у `src/server/authz/routeGuard.ts`; табела испод одражава тренутно стање. `check-route-guard-membership` капија набраја сваки `route.ts` под префиксима који су способни за стварање и не успева CI ако неки није класификован само локално.
 
-| Prefiks / obrazac                                                                                        | Zašto je dostupan samo lokalno                                                                         |
-| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `/api/mcp/`                                                                                              | MCP server — pokreće stdio mostove + SSE rukovaoce                                                     |
-| `/api/cli-tools/runtime/`                                                                                | Izvršno okruženje CLI alata — izvršava proizvoljan kod dodataka                                        |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Upisivači podešavanja po alatu koji mogu da menjaju binarne fajlove/konfiguraciju alata na domaćinu    |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Isto pokretanje `getCliRuntimeStatus()` kao kod šest gore navedenih (GHSA-35fw-cv32-2373)              |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | Provere inventara CLI alata — pokreću `command -v` / `--version` po alatu (GHSA-35fw-cv32-2373)        |
-| `/api/cli-tools/antigravity-mitm`                                                                        | Kontrola Antigravity MITM proksija (pokreće/usmerava sistemski proksi)                                 |
-| `/api/modality-bridge/video/`                                                                            | Stroga provera izvršnog okruženja Video Bridge-a na pouzdanom loopback-u i interni most za ekstrakciju |
-| `/api/services/`                                                                                         | Ugrađeni servisi (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + pokretanje             |
-| `/dashboard/providers/services/`                                                                         | Reverzni proksi ka korisničkim interfejsima ugrađenih servisa                                          |
-| `/api/tunnels/cloudflared`                                                                               | Instalira/pokreće cloudflared binarni fajl                                                             |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Instalira/kontroliše tailscaled na domaćinu                                                            |
-| `/api/copilot/`                                                                                          | Neautentifikovani LLM drajver — podrazumevano samo za CLI                                              |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — pokreće MITM server + izmene DNS-a                                                       |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy osluškivač + sistemski proksi                                           |
-| `/api/settings/mitm`                                                                                     | Omogućava MITM presretanje (stanje proksija na nivou sistema)                                          |
-| `/api/issue-agent/`                                                                                      | Agent za probleme — pokreće lokalne alate nad repozitorijumom                                          |
-| `/api/plugins/`, `/api/plugins`                                                                          | Dodaci — učitavanje/izvršavanje preko `worker_threads` + `child_process`                               |
-| `/api/middleware/`                                                                                       | Korisnički middleware — učitava/izvršava kod operatora u okviru procesa                                |
-| `/api/system/version`                                                                                    | Automatsko ažuriranje (samo POST; GET/HEAD/OPTIONS izuzeti) — pokreće `git checkout` + `npm install`   |
-| `/api/db-backups/exportAll`                                                                              | Pokreće `tar` za arhivu izvoza                                                                         |
-| `/api/local/`                                                                                            | Lokalni pokretači na jedan klik (trenutno Redis) — pokreću podman/docker                               |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | Životni ciklus Headroom proksija — pokreće python CLI / šalje signale PID-u                            |
-| `/api/jobs`, `/api/jobs/`                                                                                | Kontrola izvršioca poslova — izvršava zakazane poslove na strani domaćina                              |
-| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` pre uvoza kredencijala                                                 |
-| `/api/oauth/kiro/auto-import`                                                                            | Čita fajlove sa kredencijalima Kiro CLI-ja sa domaćina                                                 |
-| `/api/skills/collect/`                                                                                   | Prikupljanje veština — detektuje/instalira lokalne alate                                               |
-| `/api/skills/install`, `/api/skills/executions`                                                          | Регистрација хендлера вештина + извршавање — допире до покретања sandbox контејнера (GHSA-jx89)        |
-| `/api/discovery/`                                                                                        | Сонде откривања локалне мреже/провајдера                                                               |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Покреће headful прегледач + VNC сесију за интерактивне пријаве                                         |
-| `/api/acp/agents`                                                                                        | ACP — открива и покреће локалне бинарне фајлове CLI агената                                            |
-| `/api/resilience/connections`                                                                            | JSON отпорности по налогу (cooldown, breaker, lockout). HTML контролне табле није само локалан.        |
-| `/api/providers/cursor/agent-availability`                                                               | Провера подстицаја инсталације на контролној табли — покреће `cursor-agent status --format json`       |
-| `/api/providers/{id}/login` (regex)                                                                      | Покреће headful Playwright Chromium за пријаву путем веб колачића                                      |
-| `/api/providers/volcengine-plan/connect` (regex)                                                         | Ручни headful ток + аутоматска пријава путем телефона/SMS-а заснована на сесији (покреће Playwright)   |
-| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Ручно обнављање Cursor сесије — подстиче `cursor-agent`                                                |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Дијагностикује локалну инсталацију Codex CLI-ја (покреће бинарни фајл)                                 |
+| Префикс / образац                                                                                        | Зашто је само локално                                                                                 |
+| -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `/api/mcp/`                                                                                              | MCP сервер — ствара стдио мостове + SSE руковаоце                                                     |
+| `/api/cli-tools/runtime/`                                                                                | CLI тоол рунтиме — извршава произвољан код додатка                                                    |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Писци поставки по алату који могу додирнути алат binaries/config на хосту                             |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Исти `getCliRuntimeStatus()` се појављује као шесторо браће и сестара изнад (GHSA-35fw-cv32-2373)     |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI инвентар сонде — спавн `command -v` / `--version` по алату (GHSA-35fw-cv32-2373)                  |
+| `/api/cli-tools/antigravity-mitm`                                                                        | Antigravity MITM проки контрола (spawns/points систем прокси)                                         |
+| `/api/modality-bridge/video/`                                                                            | Строга провера за време рада видео моста са поузданом петљом и интерни мост за екстракцију            |
+| `/api/services/`                                                                                         | Уграђене услуге (9Роутер / CLIProxy / Бифрост / Мук / Дарио) — `npm install` + спавн                  |
+| `/dashboard/providers/services/`                                                                         | Обрнути прокси на уграђену услугу UIs                                                                 |
+| `/api/tunnels/cloudflared`                                                                               | Installs/spawns бинарни фајл у облаку                                                                 |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Installs/controls таилсцалед на домаћину                                                              |
+| `/api/copilot/`                                                                                          | Подразумевано, само за зка драјвер LLM — без аутентификације                                          |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — покреће MITM сервер + DNS измене                                                        |
+| `/api/tools/traffic-inspector/`                                                                          | Траффиц Инспецтор — хттп-проки листенер + систем проки                                                |
+| `/api/settings/mitm`                                                                                     | Омогућава MITM пресретање (прокси стање на нивоу система)                                             |
+| `/api/issue-agent/`                                                                                      | Агент за издавање — покреће локални алат против репо                                                  |
+| `/api/plugins/`, `/api/plugins`                                                                          | Додаци — load/execute преко `worker_threads` + `child_process`                                        |
+| `/api/middleware/`                                                                                       | Кориснички међуверски програм — loads/executes операторски код у процесу                              |
+| `/api/system/version`                                                                                    | Аутоматско ажурирање (само POST ; изузетак GET/HEAD/OPTIONS ) — ствара `git checkout` + `npm install` |
+| `/api/db-backups/exportAll`                                                                              | Појављује `tar` за архиву за извоз                                                                    |
+| `/api/local/`                                                                                            | Локални покретачи једним кликом (Redis данас) — ствара podman/docker                                  |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | Животни циклус проки сервера — ствара питхон CLI / сигнале PID                                        |
+| `/api/jobs`, `/api/jobs/`                                                                                | Контрола покретача послова — извршава планирани рад на страни домаћина                                |
+| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` пре увоза кредита                                                     |
+| `/api/oauth/kiro/auto-import`                                                                            | Чита Kiro CLI датотеке акредитива са хоста                                                            |
+| `/api/skills/collect/`                                                                                   | Прикупљање вештина — detects/installs локални алати                                                   |
+| `/api/skills/install`, `/api/skills/executions`                                                          | Регистрација руковаоца вештинама + извршење — доспети у сандбок контејнер (GHSA-jx89)                 |
+| `/api/discovery/`                                                                                        | Локалне сонде за откривање network/provider                                                           |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Покреће велику VNC + претраживача за интерактивне пријаве                                             |
+| `/api/acp/agents`                                                                                        | ACP — открива и ствара локалне бинарне CLI агенте                                                     |
+| `/api/resilience/connections`                                                                            | Отпорност по налогу JSON (хлађење, прекид, закључавање). Контролна табла HTML није само локална.      |
+| `/api/providers/cursor/agent-availability`                                                               | Контролна табла инсталл-нудге — ствара `cursor-agent status --format json`                            |
+| `/api/providers/{id}/login` (регекс)                                                                     | Покреће велики Playwright Цхромиум за пријављивање на веб-колачиће                                    |
+| `/api/providers/volcengine-plan/connect` (регекс)                                                        | Аутоматско пријављивање на phone/SMS засновано на сесији ручног тока + (појављује Playwright)         |
+| `/api/providers/{id}/refresh-cursor` (регекс)                                                            | Ручно обнављање Cursor сесије — гура `cursor-agent`                                                   |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (регекс)                                                  | Дијагностикује локалну инсталацију Codex CLI (покреће бинарни фајл)                                   |
 
-**Одговор при кршењу:** `403 LOCAL_ONLY`
+**Одговор на кршење:** `403 LOCAL_ONLY`
 
-#### Изузетак за manage опсег
+#### Издвајање обима управљања
 
-Подскуп LOCAL_ONLY путања такође СМЕ бити приступљен са non-loopback адреса ако и
-само ако захтев носи `Authorization: Bearer <api-key>` чији метаподаци укључују
-`manage` опсег (или `admin`). Изузетак је експлицитно контролисан по путањи преко
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` тако да подразумевано понашање за сваку
-нову LOCAL_ONLY путању остаје стриктни loopback. Неаутентификовани захтеви и
-захтеви са кључевима без manage опсега се и даље одбијају са `403 LOCAL_ONLY`.
+Подскупу LOCAL_ONLY путања MAY се такође може приступити из без повратне петље ако и само ако захтев носи `Authorization: Bearer <api-key>` чији метаподаци укључују `manage` опсег (или `admin`). Издвајање је експлицитно затворено по путањи преко `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` тако да подразумевана вредност за сваку нову LOCAL_ONLY путању остаје строга петља. Захтеви без аутентификације и захтеви са кључевима који нису за управљање и даље се одбијају помоћу `403 LOCAL_ONLY`.
 
-Данас је једини префикс који се може заобићи `/api/mcp/`. `/api/cli-tools/runtime/` и
-`/api/services/` су намерно искључени јер могу покретати произвољне
-подпроцесе (`npm install`, `node`), што је управо она класа CVE-а коју
-LOCAL_ONLY ниво постоји да спречи.
+Данас је једини префикс који се може заобићи `/api/mcp/`. `/api/cli-tools/runtime/` и `/api/services/` су намерно искључени јер могу да покрену произвољне подпроцесе (`npm install`, `node`), што је тачна CVE класа коју LOCAL_ONLY ниво постоји да спречи.
 
-**#7895 — `mcp:connect` уски опсег:** изузетак за `/api/mcp/` ТАКОЂЕ прихвата
-Bearer кључ који поседује уски `mcp:connect` опсег
-(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), проверен преко
-`hasMcpConnectOrManageScope()` у `src/server/authz/policies/management.ts`.
-Ово је ограничено САМО на `/api/mcp/` — `mcp:connect` не даје ништа на било којој
-другој рути управљања (укључујући сваки други LOCAL_ONLY bypass префикс, ако би икада
-био додат), и намерно је искључен из `MANAGEMENT_API_KEY_SCOPES`. Кључ који поседује
-`manage`/`admin` и даље пролази изузетак тачно као раније; `mcp:connect` је
-алтернатива са нижим привилегијама за удаљене позиваоце који користе само MCP и којима
-не би требао бити потребан широк приступ управљању.
+**#7895 — `mcp:connect` уски опсег:** `/api/mcp/` изрезивање ALSO прихвата кључ носиоца који држи уски `mcp:connect` опсег (`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), проверен преко `hasMcpConnectOrManageScope()` у `src/server/authz/policies/management.ts`. Ово је ограничено на `/api/mcp/` ONLY — `mcp:connect` не даје ништа на било којој другој рути управљања (укључујући сваки други LOCAL_ONLY префикс заобилазнице, ако се икада дода), и намерно је искључен из `MANAGEMENT_API_KEY_SCOPES`. Кључ који држи `manage`/`admin` и даље пролази кроз изрезивање тачно као и раније; `mcp:connect` је алтернатива са нижим привилегијама за удаљене МЦП позиваоце којима не би требало да буде потребан широк приступ управљању.
 
-| Захтев                                          | Путања                     | Резултат                    |
-| ----------------------------------------------- | -------------------------- | --------------------------- |
-| Non-loopback, без Bearer-а                      | `/api/mcp/*`               | 403 LOCAL_ONLY              |
-| Non-loopback, Bearer са `manage` опсегом        | `/api/mcp/*`               | Дозвољено                   |
-| Non-loopback, Bearer са `mcp:connect` опсегом   | `/api/mcp/*`               | Дозвољено                   |
-| Non-loopback, Bearer без `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY              |
-| Non-loopback, Bearer са `mcp:connect` опсегом   | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY              |
-| Non-loopback, Bearer са `manage` опсегом        | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY              |
-| Loopback, било који/без Bearer-а                | било која LOCAL_ONLY       | Дозвољено (провера пролази) |
+| Захтев                                           | Пут                        | Резултат                       |
+| ------------------------------------------------ | -------------------------- | ------------------------------ |
+| Без повратне петље, без носиоца                  | `/api/mcp/*`               | 403 LOCAL_ONLY                 |
+| Ноон-лоопбацк, носилац са `manage` опсегом       | `/api/mcp/*`               | Дозволи                        |
+| Ноон-лоопбацк, носилац са `mcp:connect` опсегом  | `/api/mcp/*`               | Дозволи                        |
+| Нон-лоопбацк, Носилац без `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY                 |
+| Ноон-лоопбацк, носилац са `mcp:connect` опсегом  | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                 |
+| Ноон-лоопбацк, носилац са `manage` опсегом       | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                 |
+| Лоопбацк, any/no Беарер                          | било LOCAL_ONLY            | Дозволи (пролази преко капије) |
 
-#### Смернице за оператера и ревизија
+#### Вођење оператера и ревизија
 
-Ако покрећете OmniRoute иза reverse proxy-ја или тунела (nginx, Caddy, Cloudflare
-Tunnel, Tailscale, Ngrok), loopback провера и даље штити горе наведене руте које могу
-покретати процесе — захтев чија је адреса клијента non-loopback се одбија са
-`403 LOCAL_ONLY` **пре него што се auth покрене**, тако да процурели JWT не може доћи
-до покретања процеса. Остају две одговорности оператера:
+Ако покренете OmniRoute иза обрнутог проксија или тунела (нгинк, Цадди, Cloudflare Туннел, Tailscale, Нгрок), провера повратне петље и даље штити руте које су способне за покретање изнад зкд- — захтев чија адреса клијента није повратна петља се одбија са `403 LOCAL_ONLY`** пре покретања аутх** , тако да процурели JWT не може доћи до мријеста. Остају две одговорности оператера:
 
-- **Ne „popravljajte“ 403 krivotvorenjem IP adrese klijenta kao loopback.** Postavljanje
-  `X-Forwarded-For: 127.0.0.1`, ili proksija koji prepisuje izvornu adresu na
-  loopback, ponovo otvara tačno onu klasu RCE ranjivosti koju ovaj nivo zatvara. Izložite
-  kontrolnu tablu/API kroz proksi — nikada spawn-capable rute.
-- **Održavajte zaobilaženje manage opsega minimalnim.** Samo `/api/mcp/` može da se
-  zaobiđe, i to samo API ključem sa opsegom `manage`. `SPAWN_CAPABLE_PREFIXES` nikada
-  ne mogu biti dodati na listu zaobilaženja — zod šema ih odbija, a
-  `isLocalOnlyBypassableByManageScope` ih odbija u vreme izvršavanja (odbrana u dubinu),
-  što je ono što kontrolna tabla podrazumeva pod „cannot be made bypassable“. Ista
-  deny-lista sadrži i nekoliko LOCAL_ONLY ruta koje ne pokreću procese, ali takođe
-  nikada ne smeju biti daljinski dostupne — `/api/oauth/kiro/auto-import` (čita lokalne
-  Kiro fajlove sa kredencijalima na hostu), `/api/discovery/` i `/api/issue-agent/`.
-  Učitavač snimaka u vreme izvršavanja takođe izbacuje takve stavke iz sačuvanog reda
-  podešavanja, a nasleđeni JSON import (`/api/settings/import-json`) nikada ne upisuje
-  ključeve zaobilaženja. Svaka stavka u `LOCAL_ONLY_API_PREFIXES` mora biti ili na
-  deny-listi ili pregledana kao podobna za zaobilaženje (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`).
-  Spawn-capable rute sa dinamičkim segmentima i statičkim putanjama pod `/api/providers/`
-  (npr. `/login`, `/refresh-cursor`) pokriva prateći mehanizam zasnovan na regex
-  izrazima `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` u
-  `src/shared/constants/spawnCapablePrefixes.ts`, a ne ravni niz
-  `SPAWN_CAPABLE_PREFIXES` — ravni niz bi morao da pokriva ceo prefiks
-  `/api/providers/` da bi ih uhvatio, čime bi previše proširio stablo ruta koje
-  udaljene kontrolne table legitimno koriste za CRUD operacije nad provajderima.
+- **Немојте "поправљати" 403 тако што ћете фалсифицирати IP клијента као лоопбацк.** Подешавање `X-Forwarded-For: 127.0.0.1` или проксија који преписује изворну адресу у повратну петљу, поново отвара тачно RCE класу коју овај ниво затвара. Изложите dashboard/API преко проксија — никада руте које су способне за покретање.
+- **Нека заобилажење опсега управљања буде минимално.** Само `/api/mcp/` се може заобићи и само са `manage` -scoped API кључем. `SPAWN_CAPABLE_PREFIXES` се никада не може додати на заобилазну листу — зод шема их одбија, а `isLocalOnlyBypassableByManageScope` их одбија у току извршавања (дефенце-ин-дептх), што контролна табла подразумева под "не може се учинити заобилазним". Иста листа забране такође садржи неколико LOCAL_ONLY рута које се не појављују, али никада не смеју бити удаљене ни — `/api/oauth/kiro/auto-import` (чита локалне Kiro датотеке акредитива), `/api/discovery/` и `/api/issue-agent/`. Учитавач снимака времена извршавања такође испушта такве уносе из реда сачуваних поставки, а застарели JSON импорт (`/api/settings/import-json`) никада не уписује заобилазне кључеве. Сваки `LOCAL_ONLY_API_PREFIXES` унос мора бити или на листи одбијања или мора бити прегледан као заобилазни (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). Руте са могућности покретања динамичког сегмента и статике под `/api/providers/` (нпр. `/login`, `/refresh-cursor`) покривене су `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` пратиоцем заснованим на регуларним изразима у `src/shared/constants/spawnCapablePrefixes.ts`, а не равним `SPAWN_CAPABLE_PREFIXES` низом — равни низ би морао да покрије цео `/api/providers/` префикс им, преко легитимног префикса зкз дасхбоард да ухвате стабло. за провајдера CRUD.
 
-**Nadzor pristupa** — da proverite da ništa van hosta ne pristupa ovim rutama:
+**Ревизијски приступ** — да провери да ништа ван хоста не стиже до ових рута:
 
-- Otvorite **Authorization Inventory** na `/dashboard/settings/security`: prikazuje
-  aktuelnu listu LOCAL_ONLY prefiksa uživo, koji prefiksi se mogu zaobići i skup
-  spawn-capable ruta definisan u vreme kompilacije („cannot be made bypassable“).
-- Pretražite (grep) logove reverznog proksija / pristupa za gore navedene prefikse
-  uparene sa adresom klijenta koja nije loopback. Svaki takav pogodak koji je vratio
-  `200` umesto `403 LOCAL_ONLY` znači da proksi maskira stvarnu IP adresu klijenta —
-  popravite proksi.
-- `403 LOCAL_ONLY` u OmniRoute logovima za neku od ovih putanja znači da zaštita
-  radi kako je predviđeno, a ne greška koju treba potisnuti.
+- Отворите** Инвентар ауторизације** на `/dashboard/settings/security`: приказује живу листу LOCAL_ONLY префикса, који префикси се могу заобићи, и скуп који је способан за покретање („не може се учинити заобилазним“).
+- Греп своје реверсе-проки / приступне евиденције за горе наведене префиксе упарене са адресом клијента без повратне петље. Сваки такав погодак који је вратио `200` уместо `403 LOCAL_ONLY` значи да прокси маскира правог клијента IP — поправи прокси.
+- `403 LOCAL_ONLY` у OmniRoute-овим евиденцијама за једну од ових путања је заштита која ради како је предвиђено, а не грешка за потискивање.
 
-#### Daljinski dostupne rute sa kontrolom probe-a na mestu poziva
+#### Руте које су доступне на даљину са капијом за испитивање локације позива
 
-Neke rute moraju ostati dostupne sa udaljene kontrolne table, ali pokreću probe na
-strani hosta (`which <binary>`, `<binary> --version`, `tailscale status --json`) za
-lokalne pozivaoce. One nisu LOCAL_ONLY za `GET`; umesto toga, rukovalac čita pouzdanu
-ocenu peera pomoću `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) i pokreće
-probe samo za `loopback` / `lan` pozivaoce. `remote` pozivalac dobija isti oblik
-odgovora izgrađen iz izvora koji ne pokreću procese (sačuvano stanje, podešavanja, fs
-provere), označen sa `probed: false`.
+Неке руте морају остати доступне са удаљене контролне табле, али покрећу сонду на страни домаћина (`which <binary>`, `<binary> --version`, `tailscale status --json`) за локалне позиваоце. Они нису LOCAL_ONLY за `GET`; уместо тога руковалац чита поуздану пресуду равноправног корисника са `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) и покреће само испитивање за `loopback` / `lan` позиваоце. `remote` позивалац добија исти облик одговора изграђен од извора који се не пуштају (стално стање, подешавања, фс провере), означен `probed: false`.
 
-| Ruta                                                             | Probe koji se preskače za udaljene pozivaoce                      |
+| Рута                                                             | Сонда је прескочена за удаљене позиваоце                          |
 | ---------------------------------------------------------------- | ----------------------------------------------------------------- |
-| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | CLI runtime probe (`allowLocalRuntimeProbe`) i CLI-fallback spawn |
-| `GET /api/headroom/status`                                       | `which headroom` i python `--version` probe-ovi                   |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | CLI рунтиме пробе (`allowLocalRuntimeProbe`) и ЦЛИ-фаллбацк спавн |
+| `GET /api/headroom/status`                                       | `which headroom` и питхон `--version` сонде                       |
 | `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew` |
-| `GET /api/tunnels/cloudflared` (izuzet od LOCAL_ONLY za GET)     | `which cloudflared` pretraga PATH                                 |
+| `GET /api/tunnels/cloudflared` (ГЕТ-ослобођен од LOCAL_ONLY)     | `which cloudflared` PATH лоокуп                                   |
 
-Nova ruta za čitanje koja sondira host prati isti obrazac ili se odmah klasifikuje
-kao LOCAL_ONLY.
+Нова рута за читање која испитује хост прати исти образац или је директно класификована LOCAL_ONLY.
 
-### Nivo 2 — ALWAYS_PROTECTED
+### Тиер 2 — ALWAYS_PROTECTED
 
-**Nameće:** `isAlwaysProtectedPath(path)` → preskače zaobilaženje `requireLogin=false`
-**Zaobilaženje:** Nema kada je `requireLogin=false`; JWT je uvek obavezan
+**Наметнуто од:** `isAlwaysProtectedPath(path)` → прескочи `requireLogin=false` обилазницу** заобићи:** Нема када `requireLogin=false`; JWT увек потребно
 
-Ove rute su destruktivne ili nepovratne. Dozvoliti ih u instalaciji „bez lozinke“
-značilo bi da bilo ko na istoj LAN mreži može obrisati bazu podataka ili ubiti
-serverski proces.
+Ови путеви су деструктивни или неповратни. Ако им дозволите инсталацију „без лозинке“, значило би да би свако на истом LAN могао да обрише базу података или убије серверски процес.
 
-| Putanja                                   | Razlog                                                            |
-| ----------------------------------------- | ----------------------------------------------------------------- |
-| `/api/shutdown`                           | Prekida serverski proces                                          |
-| `/api/settings/database`                  | Izvoz, uvoz i brisanje baze podataka                              |
-| `/api/db-backups`                         | Pristup kompletnoj arhivi rezervnih kopija baze                   |
-| `/api/settings/export-json`               | Izvozi kompletan blob podešavanja (uklj. tajne)                   |
-| `/api/settings/import-json`               | Zamenjuje kompletan blob podešavanja                              |
-| `/api/providers/health-autopilot/actions` | Izvršava autopilot radnje otklanjanja problema                    |
-| `/api/settings/obsidian`                  | Izdaje višekratne WebDAV kredencijale za bilo koji korenski vault |
-| `/api/relay/tokens`                       | Izdaje, lista, menja i opoziva relay tokene                       |
-| `/api/cli-tools/apply`                    | Prepisuje CLI konfiguraciju hosta operatora                       |
-| `/api/cli-tools/guide-settings`           | Upisuje CLI konfiguracione fajlove vođene vodičem                 |
-| `/api/cli-tools/hermes-agent-settings`    | Upisuje konfiguraciju Hermes agenta                               |
-| `/api/cli-tools/backups`                  | Vraća i briše rezervne kopije CLI konfiguracije                   |
-| `/api/log-export`                         | Šalje logove poziva na konfigurisano odredište                    |
-| `/api/restart`                            | Ponovo pokreće serverski proces                                   |
+| Пут                                       | Разлог                                                                 |
+| ----------------------------------------- | ---------------------------------------------------------------------- |
+| `/api/shutdown`                           | Завршава процес сервера                                                |
+| `/api/settings/database`                  | Извоз, увоз и брисање базе података                                    |
+| `/api/db-backups`                         | Потпуни приступ архиви резервних копија базе података                  |
+| `/api/settings/export-json`               | Извози пуну блоб подешавања (укључујући тајне)                         |
+| `/api/settings/import-json`               | Замењује пуну блоб подешавања                                          |
+| `/api/providers/health-autopilot/actions` | Извршава акције санације аутопилота                                    |
+| `/api/settings/obsidian`                  | Минтс WebDAV кредите за вишекратну употребу за било који корен трезора |
+| `/api/relay/tokens`                       | Кова, листа, мења и опозива релејне токене                             |
+| `/api/agent-skills/generate`              | Уписује и обрезује фасцикле вештина на хосту                           |
+| `/api/skills/marketplace/install`         | Инсталира глобалну вештину за сваки кључ                               |
+| `/api/skills/skillssh/install`            | Инсталира глобалну вештину за сваки кључ                               |
+| `/api/cli-tools/apply`                    | Преписује CLI конфигурацију хоста оператора                            |
+| `/api/cli-tools/guide-settings`           | Пише конфигурационе датотеке CLI вођене водичем                        |
+| `/api/cli-tools/hermes-agent-settings`    | Пише конфигурацију Хермес агента                                       |
+| `/api/cli-tools/backups`                  | Враћа и брише резервне копије CLI конфигурације                        |
+| `/api/log-export`                         | Шаље евиденцију позива на конфигурисано одредиште                      |
+| `/api/restart`                            | Поново покреће процес сервера                                          |
 
-**Odgovor pri kršenju:** `401 Authentication required`
+**Одговор на кршење:** `401 Authentication required`
 
-`/api/settings/obsidian` покрива своју подређену путању `/webdav`: `POST` усмерава WebDAV сервис датотека — који послужује прилагођени Node слој пре Next.js-а, изван овог цевовода — на корен који бира позивалац и враћа свеже генерисане Basic акредитиве, `DELETE` их ротира, а родитељски `POST` чува токен Obsidian REST API-ја. GHSA-62vw је само прикрио откривање лозинке кроз `GET`; издавање је и даље било на fail-open нивоу (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` додатно одбија трезор који јесте, налази се унутар или садржи директоријум података.
+`/api/settings/obsidian` покрива своје `/webdav` дете: `POST` указује на WebDAV услугу датотека — опслужује прилагођени слој чвора пре Next.js, изван овог цевовода — на корен који је изабрао позивалац и одјекује свеже исковане основне акредитиве, `DELETE` их ротира, а родитељ `POST` чува Obsidian REST API. GHSA-62vw је само маскирао `GET` откривање лозинке; издавање је још увек било на нивоу неуспешног отварања (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` додатно одбија трезор који се налази унутра или садржи директоријум података.
 
-#### Извоз и враћање акредитива су резервисани за операторе
+#### Извоз и враћање акредитива су само за оператере
 
-Ниво изнад само одређује да ли је _неки_ акредитив неопходан. Путеви који преузимају сачуване акредитиве додају другу проверу у обрађивачу: `GET /api/settings/export-json` (дешифроване везе са провајдерима и сирови API кључеви), `GET /api/db-backups/export` (SQLite датотека) и `GET /api/db-backups/exportAll` (комплетна архива) позивају `requireOperatorCredential()` (`src/lib/api/operatorCredential.ts`). Он прихвата сесију контролне табле, локални CLI субјекат или инстанцу са искљученом пријавом, а одговара са `403` на API кључеве било ког опсега (укључујући `manage` и `admin`) и на `oma_` приступне токене. Деструктивне варијанте држе исту границу: `POST /api/db-backups/import` (отпремљена `.sqlite`, укључујући и `dryRun=true`), `POST /api/db-backups` (враћање сачуване резервне копије по идентификатору) и `POST /api/settings/import-json` (враћање из застарелог JSON-а) замењују активну базу података или цео скуп подешавања/веза/API кључева, тако да их машински акредитив такође не може покренути. Уништавање тачака за враћање држи исту границу: `DELETE /api/db-backups` (чишћење — задржи најновијих N / одбаци старије од D дана) и `PATCH /api/db-backups` (подешавања задржавања), јер је трајно сачувано задржавање управо оно што `cleanupDbBackups()` примењује након сваке аутоматске резервне копије (`src/lib/db/backup.ts`), тако да би машински акредитив који би могао да сачува `keepLatest: 1` уклонио све при следећем снимку. Листање и креирање резервних копија (`GET`/`PUT /api/db-backups`) задржавају уобичајену управљачку аутентификацију. Издавање токена синхронизације (`POST /api/sync/tokens`) користи исти помоћник, уз поуздани loopback токен интерног сервиса.
+Горњи ниво само одлучује да ли је потребан _неки_ акредитив. Руте које преузимају ускладиштене акредитиве додају другу проверу у руковаоцу: `GET /api/settings/export-json` (дешифроване везе добављача и необрађени API кључеви), `GET /api/db-backups/export` ( SQLite датотека) и `GET /api/db-backups/exportAll` (пуна архива) позивају `requireOperatorCredential()` (`src/lib/api/operatorCredential.ts`). Прихвата сесију контролне табле, локални CLI субјект или инстанцу са онемогућеном пријавом и одговара `403` на API кључеве било ког опсега (укључујући `manage` и `admin`) и на `oma_` приступне токене. Деструктивни парњаци имају исту границу: `POST /api/db-backups/import` (отпремљен `.sqlite`, `dryRun=true` укључен), `POST /api/db-backups` (враћање сачуване резервне копије помоћу ид-а) и `POST /api/settings/import-json` (застарело JSON враћање) замењују живу базу података или цео settings/connections/API-key скуп, тако да ни акредитив машине не може да их покрене. Уништавање тачака враћања има исту границу: `DELETE /api/db-backups` (чишћавање — задржава најновије Н/дроп старије од Д дана) и `PATCH /api/db-backups` (подешавања задржавања), јер је трајно задржавање управо оно што се `cleanupDbBackups()` примењује након сваке аутоматске резервне копије (`src/lib/db/backup.ts`), тако да би акредитив машине који би могао да сачува `keepLatest: 1` све смањио на следећем снимку. Листинг и прављење резервних копија (`GET`/`PUT /api/db-backups`) одржавају уобичајену ауторизацију управљања. Издавање токена за синхронизацију (`POST /api/sync/tokens`) користи исти помоћник, плус токен интерне услуге повратне петље од поверења.
 
-### Bootstrap свеже инсталације је само за loopback — према стварном партнеру, а не `Host`-у
+### Боотстрап за нову инсталацију је — од стварног равноправног корисника, а не `Host`
 
-Када управљачка лозинка није конфигурисана (и нема `INITIAL_PASSWORD`), `isAuthRequired()` у `src/shared/utils/apiAuth.ts` држи анонимни bootstrap отвореним **само за loopback партнере**. Loopback се одређује из поузданих сигнала о партнеру, овим редоследом: стварни TCP партнер означен токеном (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, оно што политика види), сопствена оцена цевовода `AUTHZ_HEADER_PEER_LOCALITY` (оно што виде обрађивачи путева, поуздана само док је `OMNIROUTE_PEER_STAMP_TOKEN` постављен), или стварни сокет-партнер за директне позиваоце. `Host` / `nextUrl.hostname` се никада не узимају у обзир, а упис прве лозинке (`POST /api/settings/require-login`) је под истим ограничењем, уместо да буде отворен сваком мрежном партнеру (GHSA-7pq4-8pvv-rx7r). `managementPolicy` експлицитно прослеђује надоле сопствену оцену `peerContext`-а, тако да заглавља ОРИГИНАЛНОГ захтева (пре уклањања) никада не одлучују о томе.
+Без конфигурисане лозинке за управљање (и без `INITIAL_PASSWORD`), `isAuthRequired()` у `src/shared/utils/apiAuth.ts` држи анонимни стартер отворен** само за лоопбацк пеер** . Повратна петља се одлучује на основу поузданих равноправних сигнала, по редоследу: прави TCP пеер са токеном (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, шта политика види), сопствена `AUTHZ_HEADER_PEER_LOCALITY` пресуда цевовода (шта руковаоци рута виде, поуздано само док је `OMNIROUTE_PEER_STAMP_TOKEN` подешен) или прави равноправни сокет за директне позиваоце. `Host` / `nextUrl.hostname` се никада не консултују, а упис прве лозинке (`POST /api/settings/require-login`) је под истим ограничењем, а не отворен за све мреже равноправних (GHSA-7pq4-8pvv-rx7r). `managementPolicy` експлицитно доноси сопствену `peerContext` пресуду, тако да заглавља захтева ORIGINAL (пре-стрип) никада не одлучују о томе.
 
 ### Ниво 3 — MANAGEMENT (подразумевано)
 
-Сви остали управљачки путеви. Аутентификација је обавезна осим ако није конфигурисано `requireLogin=false`. CLI токени могу да аутентификују ове путеве (loopback + важећи HMAC).
+Сви други путеви управљања. Аутх је потребан осим ако `requireLogin=false` није конфигурисан. CLI токени могу потврдити аутентичност ових рута (повратна + валидна HMAC).
 
 ## Редослед евалуације
 
@@ -251,16 +176,12 @@ managementPolicy.evaluate(ctx)
 LOCAL_ONLY руту; режим отказа позадинског система за аутентификацију враћа 503 (а не 403), тако да
 истекла база података не доведе неприметно до деградације на „одбиј“.
 
-## Додавање нове руте која може да покреће процесе
+## Додавање нове руте способне за стварање
 
-1. Додајте префикс путање у `LOCAL_ONLY_API_PREFIXES` у
-   `src/server/authz/routeGuard.ts`
-2. Додајте тест у `tests/unit/authz/routeGuard.test.ts` који потврђује да
-   `isLocalOnlyPath()` враћа true за нови префикс
-3. **Никада не прескачите овај корак** — погледајте строго правило бр. 15 у `CLAUDE.md`
-4. Одлучите: да ли ова рута ТАКОЂЕ припада у `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`?
-   Подразумевани одговор је **не**. Укључите је само када је рута безбедна за излагање
-   власнику опсега manage (тј. НЕ покреће произвољан код који контролише корисник).
+1. Додајте префикс путање у `LOCAL_ONLY_API_PREFIXES` у `src/server/authz/routeGuard.ts`
+2. Додајте тест у `tests/unit/authz/routeGuard.test.ts` који потврђује да `isLocalOnlyPath()` враћа труе за нови префикс
+3. **Никада не прескачите овај корак** — види тврдо правило #15 у `CLAUDE.md`
+4. Одлучите: да ли ова рута ALSO припада `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`? Подразумевани одговор је** бр** . Омогућите се само када је рута безбедна за излагање носиоцу опсега управљања (тј. да ли NOT покреће произвољан код који контролише корисник).
 
 ## Додавање путање коју опсег manage може да заобиђе
 

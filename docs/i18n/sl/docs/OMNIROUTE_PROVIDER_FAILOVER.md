@@ -4,10 +4,20 @@
 
 ---
 
-Napake so razvrščene, preden se sprejmejo odločitve o ponovnem poskusu.
+Napake so razvrščene, preden se sprejme odločitev o ponovnem poskusu.
 
-Pri prehodnih napakah, kot so časovne omejitve, omrežne napake, omejitve hitrosti in odzivi ponudnika 5xx, se lahko izvede preklop na drugega ponudnika. Pri napakah pri preverjanju pristnosti, napakah dovoljenj, neveljavnih zahtevah, nerazpoložljivih modelih in neznanih napakah se ponovni poskusi ne izvajajo na slepo.
+Prehodne napake, kot so časovne omejitve, omrežne napake, omejitve hitrosti in odgovori ponudnika 5xx, se lahko preklopijo. Izčrpana kvota ali dobroimetje (kvota 429 ali 402 Zahtevano plačilo) se nikoli ne poskusi znova pri istem ponudniku, ampak se prekine pri drugem, katerega kvota je ločena. Napake pri preverjanju pristnosti, napake pri dovoljenjih, neveljavne zahteve, nerazpoložljivi modeli in neznane napake se ne poskusijo znova na slepo.
 
-Privzeti pravilnik za več ponudnikov dovoljuje do tri poskuse pri ponudnikih, ponovno izvaja zahteve pri omejitvah hitrosti in časovnih omejitvah ter administrativno onemogočenje obravnava ločeno od začasnega stanja odklopnika.
+Privzeti pravilnik med ponudniki omogoča do tri poskuse ponudnika, omejitve števila ponovnih poskusov in časovne omejitve, preklop ob izčrpani kvoti in ohranja administrativno onemogočanje ločeno od stanja začasnega vezja.
 
-Stanja odklopnika so `closed`, `open` in `half_open`. Obdobje ohlajanja razporedi omejeno preverjanje; uspešno preverjanje zapre odklopnik, neuspešno pa ga znova odpre.
+## Kje velja
+
+- **Kombinacije** preklapljajo med svojimi cilji v skladu s strategijo in nastavitvami kombinacije.
+- **ID golega modela** (brez predpone `provider/` ), ki ga streže več aktivnih ponudnikov, brez kombinacije s tem natančnim imenom, se najprej pošlje izborom sklepanja ponudnika. Če je ta poskus neuspešen na način, na katerega pravilnik ne uspe, se ista zahteva pošlje naslednjemu aktivnemu ponudniku, ki streže ID. Odgovor nosi `x-omniroute-fallback-attempts` s številom ponudnikov, ki so bili preizkušeni pred tistim, ki je odgovoril.
+  - Vsak namestnik je pooblaščen natanko tako, kot da bi ga izbral sklep. Cilj, ki ga ključ API blokira ali ne dovoli, je preskočen brez klica navzgor in odjemalec prejme pravo napako navzgor in ne zavrnitve pravilnika za cilj, ki ga ni nikoli poimenoval.
+  - Samo neuspeli odgovor se premakne naprej: po prvem pretočnem bajtu se nič ne prekine.
+  - Zamenjava nadomestnega modela v sili se uporabi šele, ko vsak ponudnik zahtevanega modela odpove.
+  - Zahteva, pripeta na povezavo (`x-omniroute-connection`), ostane na njej.
+  - ID s predpono (`provider/model`) ni nikoli preusmerjen k drugemu ponudniku.
+
+Stanja vezja so `closed`, `open` in `half_open`. Ohladitev načrtuje omejeno sondo; uspešna sonda zapre tokokrog in neuspešna sonda ga ponovno odpre.

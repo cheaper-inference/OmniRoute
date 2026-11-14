@@ -57,27 +57,17 @@ OpenRouter veze mogu pohraniti `preset` po vezi u Advanced Settings. Kada je pos
 
 ---
 
-## 🎨 Combosi
+## 🎨 kombinacije
 
-Kreirajte combose za usmjeravanje modela s 19 javnih strategija: priority, weighted, round-robin, context-relay, fill-first, p2c (power-of-two choices), random, least-used, cost-optimized, reset-aware, reset-window, headroom, strict-random, auto, lkgp (last-known-good-provider), context-optimized, cache-optimized, **fusion** (paralelno raspoređivanje na panel modela, zatim sinteza jednog odgovora putem suca) i **pipeline**. Svaki combo povezuje više modela s automatskim fallbackom te uključuje brze predloške i provjere spremnosti.
+Stvorite kombinacije usmjeravanja modela s 22 javne strategije: prioritet, ponderirana, kružna, kontekstualni relej, prvo popuni, p2c (power-of-two izbora), nasumična, najmanje korištena, troškovno optimizirana, reset-svjesna, reset-window, expiry-first, headroom, kvota-weighted, strict-random, auto, lkgp (posljednji-poznati-dobar-pružatelj), optimizirano za kontekst, optimizirano za predmemoriju,** fuzija** (paralelno se proširite na panel modela, zatim sintetizirajte jedan odgovor preko suca),** cjevovod** , i** jev** (opt-in TypeSafe Jev prijem umjesto vaše rangirane liste). Svaka kombinacija povezuje više modela s automatskim vraćanjem i uključuje brze predloške i provjere spremnosti.
 
-Nedavna poboljšanja comboa:
+Nedavna poboljšanja kombinacije:
 
-- **Strukturirani combo builder** — kreirajte svaki korak odabirom providera, modela i točnog računa/veze
-- **Podrška za ponovljene providere** — ponovno koristite isti provider više puta u jednom combou sve dok je tuple `(provider, model, connection)` jedinstven
-- **Zdravlje combo ciljeva** — analitika i prikazi zdravlja sada razlikuju pojedinačne combo ciljeve/korake umjesto da sve sažimaju u niz modela
-- **Redoslijed kompozitnih razina (tier)** — `defaultTier -> fallbackTier` sada utječe na redoslijed izvršavanja/fallbacka pri izvođenju za korake comboa na vrhovnoj razini
-- **Predlošci sistemskih poruka** — combo `system_message` podržava poslužiteljske
-  placeholdere `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` i `{{FINGERPRINT}}`,
-  koji se proširuju iz stvarno usmjerenog cilja neposredno prije slanja.
-  Nalaze se na dopuštenom popisu i nisu rekurzivni; nepoznati placeholderi ostaju u izvornom obliku; prazne vrijednosti
-  proširuju se u prazno; klijentski sistemski prompti se nikada ne prepisuju. `{{FINGERPRINT}}`
-  razrješava se samo za besplatne providere temeljene na fingerprintu s pinanim ili
-  automatski rotiranim fingerprintom — svugdje drugdje proširuje se u prazno (npr.
-  veze s jednim fingerprintom, provideri koji nisu fp). Proširenje obuhvaća
-  standardnu petlju slanja, round-robin i pinane sesije s context-cacheom;
-  fusion, chaos, pipeline i strategije s ugniježđenim izvršavanjem (nested-execute) još ne proširuju
-  placeholdere.
+- **Strukturirani combo builder** — kreirajte svaki korak odabirom pružatelja usluga, modela i točnog account/connection
+- **Ponovna podrška pružatelja usluga** — više puta koristi istog pružatelja u jednoj kombinaciji sve dok je `(provider, model, connection)` tuple jedinstven
+- **Combo target zdravlje** — analitika i zdravstvene površine sada razlikuju pojedinačne kombinacije targets/steps umjesto sažimanja svega u nizove modela
+- **Složeni poredak slojeva** — `defaultTier -> fallbackTier` sada utječe na redoslijed execution/fallback vremena izvođenja za kombinirane korake najviše razine
+- **Predlošci odzivnika sustava** — combo `system_message` podržava `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` i `{{FINGERPRINT}}` rezervirana mjesta na strani poslužitelja, proširena od stvarno preusmjerenog cilja neposredno prije slanja. Na popisu dopuštenih i nerekurzivni; nepoznata rezervirana mjesta ostaju doslovna; prazne vrijednosti proširuju se u prazne; odzivnici klijentskog sustava nikad se ne prepisuju. `{{FINGERPRINT}}` rješava samo besplatne pružatelje koji se temelje na otisku prsta s prikvačenim ili automatski rotiranim otiskom prsta — proširuje se u prazno na drugim mjestima (npr. veze s jednim otiskom prsta, pružatelji koji nisu fp). Proširenje pokriva standardnu petlju slanja, kružni postupak i prikvačenu sesiju predmemorije konteksta; fuzija, kaos, cjevovod i strategije ugniježđenog izvršavanja još ne proširuju rezervirana mjesta.
 
 ![Combos Dashboard](../screenshots/02-combos.png)
 
@@ -316,14 +306,14 @@ Konfiguracijski paket izrađuje `src/lib/sync/bundle.ts`. Klijenti uspoređuju z
 
 ---
 
-## 🛡️ Sigurni izlazni dohvat i SSRF zaštita _(v3.6.6+)_
+## 🛡️ Safe Outbound Fetch & SSRF Guard _(v3.6.6 +)_
 
-Sva validacija pružatelja usluga i pozivi za otkrivanje modela sada prolaze kroz dvoslojnu zaštitu izlaznog prometa:
+Svi pozivi za provjeru valjanosti i otkrivanje modela sada prolaze kroz dvoslojnu izlaznu zaštitu:
 
-1. **URL zaštita** (`src/shared/network/outboundUrlGuard.ts`) — Blokira privatne/loopback/link-local raspone IP adresa prije otvaranja utičnice (socket).
-2. **Omotač za siguran dohvat** (`src/shared/network/safeOutboundFetch.ts`) — Primjenjuje URL zaštitu, normalizira istek vremena i ponavlja privremene pogreške eksponencijalnim odgađanjem (backoff).
+1. **URL stražar** (`src/shared/network/outboundUrlGuard.ts`) — Provjerava ciljno ime hosta ili IP literal kako je prvo napisano; u načinu samo za javnost omotač sigurnog dohvaćanja također rješava ime i odbija privatne odgovore. Prema zadanim postavkama blokira krajnje točke metapodataka u oblaku — cijeli 169.254.0.0/16 plus poznata imena hostova metapodataka; `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` također blokira privatne i povratne hostove; `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` (ili naslijeđeni `OUTBOUND_SSRF_GUARD_ENABLED=false`) isključuje kvačice. Vrijednost spremljena s prekidača nadzorne ploče zastavice ima prednost nad svojom varijablom, a ugrađeni lokalni pružatelji usluga preskaču nadzor tijekom provjere valjanosti ključa. Vidi `docs/reference/ENVIRONMENT.md`.
+2. **Omot za sigurno dohvaćanje** (`src/shared/network/safeOutboundFetch.ts`) — Primjenjuje URL zaštitu, normalizira vremensko ograničenje i ponavlja prolazne pogreške s eksponencijalnim odmakom.
 
-Kršenja zaštite prikazuju se kao HTTP 422 (`URL_GUARD_BLOCKED`) i zapisuju se u dnevnik revizije usklađenosti putem `providerAudit.ts`.
+Guard kršenja pojavljuju se kao `URL_GUARD_BLOCKED` — HTTP 503 putem `getSafeOutboundFetchErrorStatus` (400 na putu otkrivanja modela) — i originalni SSRF blokovi tijekom provjere valjanosti zapisuju se u dnevnik revizije kao `provider.validation.ssrf_blocked` događaji.
 
 ---
 

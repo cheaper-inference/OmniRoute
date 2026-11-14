@@ -851,6 +851,43 @@ Web/search -leverantörsabstraktion (Tavily, Brave, Exa, Serper, etc.).
 
 **Auth:** Bärare API nyckel (`extractApiKey` + `isValidApiKey`). Sökpolicy tillämpas via `enforceApiKeyPolicy`.
 
+### Namngivna search/fetch -kombinationer
+
+Både `POST /v1/search` och `POST /v1/web/fetch` accepterar `model` som ett sparat kombinationsnamn. Använd antingen `model` eller en explicit `provider`; skickar båda returerna `400`. Utan något av fälten förblir det befintliga automatiska leverantörsvalet oförändrat.
+
+Både Combo Builder och dess Add Model-katalog visar infödda webboperationsposter för anslutna leverantörer, även när de inte har någon LLM -modelllista. Serper visar** Webbsökning** ; Tavily visar** Webbsökning / Sidextraktion** , och leverantörer endast för hämtning visas** Sidextraktion** . Välj posten och kontot som vanligt. En enda Tavily-post betjänar båda webbändpunkterna; dessa operationsposter läggs inte till i klientväljare som endast är chattbara eller prober för chattmodeller.
+
+Skapa till exempel en** prioritet** combo som heter `shared-free` med dessa ordnade mål:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+Använd sedan samma namn på varje yta:
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+Sök anser Tavily sedan Serper; hämta anser Tavily sedan Jina Reader; chat hoppar över de dedikerade search/fetch leverantörerna och överväger OpenAI. Kompatibilitet kommer från search/fetch executor-registren, inte från ord i ett modellnamn. Filtrering föregår val och utskick av autentiseringsuppgifter och redigerar aldrig den sparade kombinationen.
+
+Rutter för icke-chatfunktioner stöder `priority`, `fill-first`, `round-robin`, `weighted`, `random`, `strict-random`, `least-used` och `p2c`. Syntesstrategier för enbart chatt som `fusion`, `pipeline` och `context-relay` avvisas på icke-chattrutter snarare än att tyst tillämpas på sökningar eller genererade media. Den befintliga kombinationsmotorn hanterar beställd reserv, inklusive uppströms kvotmisslyckanden, och behåller steg IDs, kontonålar, kontotillståndslistor per steg, kapslade referenser, anroparens connection/quota omfång och combo-åtkomstpolicy. Resultaten behåller sitt ursprungliga search/fetch schema, inklusive den faktiska leverantören; `X-OmniRoute-Combo-Trace` identifierar routingbeslutet. Okända kombinationer returnerar `404`; inaktiva kombinationer och kombinationer utan kompatibla mål returnerar `400`.
+
+Varje kombinationsförsök använder en explicit leverantör. Den kan inte anropa den inbyggda automatiska leverantörspoolen bakom kombinationens rygg. Explicita leverantörsbegäranden behåller sitt befintliga beteende från en leverantör. Direkta chattförfrågningar riktade mot dedikerade search/fetch leverantörer returnerar en handlingsbar JSON `400` istället för att falla igenom till en OpenAI-liknande exekutor.
+
+### Kapacitetsspecifika kombinationsrutter
+
+Sparade kombinationer kan innehålla ett `routes` objekt vars nycklar är API funktioner. Varje rutt äger sin mållista, strategi och körtidskonfiguration. Toppnivåerna `models`, `strategy` och `config` förblir den äldre-kompatibla chattplanen; gamla kombinationer utan `routes` fortsätter att fungera oförändrat.
+
+Ruttnycklar som stöds är `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`, `image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`, `audio-translations` och `audio-generation`. Slutpunktsprojektion sker före val av behörighet, poängsättning eller utskick. Kapslade kombinationsreferenser väljer den underordnade kombinationens rutt för samma funktion.
+
+`POST /v1/music/generations` och `POST /v1/ocr` accepterar ett kombinationsnamn i `model`. Den inbyggda ElevenLabs-kompatibla `POST /v1/music` accepterar också ett kombinationsnamn i `model_id`, men alla användbara mål på den inbyggda slutpunkten måste vara en ElevenLabs musikmodell så att dess binära svarskontrakt bevaras. `POST /v1/sound-generation` accepterar en `audio-generation` kombination i `model_id` under samma native-binära begränsning. Använd `/v1/music/generations` för heterogena musikleverantörer.
+
 **Välj automatiskt:** utan `provider` körs den billigaste leverantören med en konfigurerad anslutning först och den näst billigaste är failover. Gratis sista utvägsleverantörer (`duckduckgo-free`) används endast när inget annat är konfigurerat. En självvärderad SearXNG räknas som konfigurerad när dess anslutning lagrar en riktig `baseUrl` (inte katalogens standard `http://localhost:8888/search`): den rankas sedan som en $0-leverantör före nycklade, med den billigaste nyckelleverantören som failover, inklusive när SearXNG svarar 400, 401, 403 eller 404. A `baseUrl` URL eller som inte är a `http(s)` -poäng molnmetadataadress räknas inte. En SearXNG anslutning som lagrar en token rankas endast på detta sätt över `https://` eller loopback `http://`. Över remote plain `http://` är det aldrig en failover och förblir en sista utväg, används endast när ingen annan leverantör är konfigurerad eller när den efterfrågas av namn, så den skickar token i klartext i dessa två fall.
 
 ### Exa och Tavily `provider_options`
@@ -872,41 +909,29 @@ Exa-resultat behåller `id`, `highlights` (varje höjdpunkt, inte bara den förs
 
 Kostnaden för länksökning registreras till $0,005 för `depth` `fast` och `standard` och $0,05 för `deep` ( [Linkup-prissättning](https://docs.linkup.so/pages/documentation/development/pricing) ), oavsett om `depth` kommer från `provider_options` eller anslutningens inställningar.
 
-Exa `type: "lite"` (Exa 3.0) accepterar en mindre uppsättning fält och avvisar hela begäran när något annat fält ställs in. För lite släpps `additionalQueries`, `systemPrompt` och varje `contents` knapp utom `text` och `highlights` före samtalet. De föråldrade `subpages`, `subpageTarget`, `highlights.numSentences` och `highlights.highlightsPerUrl` vidarebefordras inte längre.
+Exa `type: "lite"` (Exa 3.0) accepterar en mindre uppsättning fält och avvisar hela begäran när något annat fält är inställt. För lite släpps `additionalQueries`, `systemPrompt` och varje `contents` knapp utom `text` och `highlights` före samtalet. De föråldrade `subpages`, `subpageTarget`, `highlights.numSentences` och `highlights.highlightsPerUrl` vidarebefordras inte längre.
 
 Kostnadsredovisning är det platta registret `costPerQuery`, förutom Exa, som följer Exas egen prissättning: 0,007 USD per samtal för `auto` (och äldre `fast`) eller 0,004 USD för `lite` (och äldre `instant`), som täcker 10 resultat; $0,001 för varje ytterligare resultat; och $0,001 per returnerat resultat när `contents.summary` är inställt. Tavily registreras till 1 poäng ($0,008) för `search_depth` `basic`, `fast` och `ultra-fast`, och 2 poäng ($0,016) för `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Ett samtal med `auto_parameters: true` som Tavily uppgraderar till avancerad spelas fortfarande in med 1 poäng.
 
 ---
 
-## Web Fetch API
+## Webbhämtning API
 
-Extrahera innehåll från en URL via en konfigurerad webbhämtningsleverantör (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
+Extrahera innehåll från en URL via en konfigurerad webbhämtningsleverantör (Firecrawl, Jina Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-Parallel Extract (`parallel-search`, samma API-nyckel som Parallel Search) returnerar endast Markdown — alla andra
-`format`-värden ger ett `400` — och begränsar innehållet till 100 000 tecken. När målsidan
-själv inte kan extraheras rapporterar upstream detta i ett HTTP 200;
-OmniRoute exponerar det som ett `422` med ett fast meddelande.
+Parallellextrakt (`parallel-search`, samma API nyckel som parallellsökning) returnerar endast Markdown — alla andra `format` är en `400` — och begränsar innehållet till 100 000 tecken. När själva målsidan inte kan extraheras, rapporterar uppströms den i en HTTP 200; OmniRoute visar det som en `422` med ett fast meddelande.
 
-| Method | Path            | Description                                                |
-| ------ | --------------- | ---------------------------------------------------------- |
-| POST   | `/v1/web/fetch` | Hämta/skrapa en URL — body valideras av `v1WebFetchSchema` |
+Keenable Fetch (`keenable-search`) returnerar också endast Markdown (alla andra `format` är en `400`) och begränsar innehållet till 100 000 tecken. Det fungerar utan nyckel: en explicit `provider: "keenable-search"` förfrågan utan anslutning använder Keenables nyckellösa slutpunkt (hastighetsgränser per IP). En konfigurerad nyckel lyfter bara dessa gränser; auto-select använder Keenable endast när en nyckel är konfigurerad.
 
-**Autentisering:** Bearer API-nyckel (`extractApiKey` + `isValidApiKey`). Policyn tillämpas via
-`enforceApiKeyPolicy`.
+| Metod | Väg             | Beskrivning                                               |
+| ----- | --------------- | --------------------------------------------------------- |
+| POST  | `/v1/web/fetch` | Fetch/scrape a URL — body validerad av `v1WebFetchSchema` |
 
-**Kvotmedveten fallback (#8297):** när ingen explicit `provider` anges gås poolen
-(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) igenom i fast
-prioritetsordning (fill-first) — en hastighetsbegränsad men konfigurerad leverantör hoppas över
-i stället för att avbryta begäran, och ett återförsökningsbart upstream-fel/kvotfel
-(HTTP 429 alltid; 402/403 för Firecrawl/Tavily/TinyFish-kvoter i kostnadsfria nivåer —
-inte för Jina Reader och aldrig för en vanlig felaktig 400-begäran) går vidare till
-nästa oprövade leverantör med autentiserade uppgifter vid tiden för begäran. När alla leverantörer i
-poolen är uttömda returnerar slutpunkten ett enda `429` (med en `Retry-After`-header)
-i stället för det tidigare generiska `400`. När en explicit `provider` begärs finns
-ingen tyst fallback — en hastighetsbegränsad eller felande explicit leverantör visar sitt eget fel (`429`
-vid hastighetsbegränsning, annars upstream-statusen).
+**Auth:** Bärare API nyckel (`extractApiKey` + `isValidApiKey`). Policy upprätthålls via `enforceApiKeyPolicy`.
+
+Namngivna kombinationer använder [`model` dirigeringskontraktet](#named-searchfetch-combinations) ovan och bevarar hämtningsspecifika alternativ och svar.
+
+**Kvotmedveten reserv (#8297):** när varken `provider` eller `model` ges, går poolen (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` → `parallel-search` → `keenable-search`) i fast prioritetsordning (fyll först) — en hastighetsbegränsad-men-konfigurerad leverantör hoppar över begäran i stället för att kortsluta, 29 a HTTP retryable/quota -kortsluta) alltid; 402/403 för Firecrawl/Tavily/TinyFish quota-style free tiers — inte för Jina Reader, och aldrig för en vanlig 400 dålig begäran) faller igenom till nästa oprövade legitimationsleverantör vid begäran. När varje leverantör i poolen är slut, returnerar slutpunkten en enda `429` (med en `Retry-After` rubrik) istället för den tidigare generiska `400`. När en explicit `provider` efterfrågas finns det** inga** tyst fallback — en hastighetsbegränsad eller misslyckad explicit leverantör visar sitt eget fel (`429` om hastighetsbegränsad, annars uppströmsstatus).
 
 ---
 
@@ -985,33 +1010,24 @@ slutförandet.
 
 ## Rapportering av kvoter och problem
 
-| Metod | Sökväg              | Beskrivning                                                                                              |
-| ----- | ------------------- | -------------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/quotas/check`  | Förvalidera kvoten för en `provider` + `accountId` innan en registrerad nyckel utfärdas                  |
-| POST  | `/v1/issues/report` | Rapportera ett misslyckande vid kvot-/nyckelutfärdande till GitHub (kräver `GITHUB_ISSUES_REPO` + token) |
+| Metod | Väg                 | Beskrivning                                                                                |
+| ----- | ------------------- | ------------------------------------------------------------------------------------------ |
+| GET   | `/v1/quotas/check`  | Förvalidera kvoten för en `provider` + `accountId` innan du utfärdar en registrerad nyckel |
+| POST  | `/v1/issues/report` | Rapportera ett quota/key -emissionsfel till GitHub (kräver `GITHUB_ISSUES_REPO` + token)   |
 
-**Autentisering:** Bearer API-nyckel (`isAuthenticated`).
+**Auth:** `/v1/quotas/check` tar en bärare API nyckel (`isAuthenticated`). `/v1/issues/report` är enbart för hantering (`requireManagementAuth`), som `/api/v1/registered-keys`: en instrumentpanelsession, den lokala CLI tokenen eller en API nyckel med `manage`/`admin` omfattning; API -nycklar endast för slutledning får `403`.
 
-### Återställning av kvotsession (valfritt)
+### Återställning av kvotsession (opt-in)
 
-En icke-strömmande `POST /v1/chat/completions` eller `POST /v1/responses` som misslyckas med
-ett terminalt kvotfel (`402`/`429`/`503` vars body anger att kvoten eller krediterna är slut)
-kan parkeras och spelas upp senare i stället för att returnera felet. Anroparen väljer detta per
-begäran med tre headers:
+En icke-strömmande `POST /v1/chat/completions` eller `POST /v1/responses` som misslyckas med ett terminal kvotfel (`402`/`429`/`503` vars kropp säger att kvoten eller krediterna är slut) kan parkeras och spelas upp senare istället för att returnera felet. Den som ringer väljer att delta per begäran med tre rubriker:
 
-| Header                       | Värde                                            |
-| ---------------------------- | ------------------------------------------------ |
-| `x-omniroute-quota-recovery` | `auto`                                           |
-| `x-omniroute-session`        | sessions-ID, `[A-Za-z0-9._:-]{1,128}`            |
-| `x-omniroute-recovery-turn`  | tur-ID som är unikt inom sessionen (samma regel) |
+| Rubrik                       | Värde                                      |
+| ---------------------------- | ------------------------------------------ |
+| `x-omniroute-quota-recovery` | `auto`                                     |
+| `x-omniroute-session`        | sessions-id, `[A-Za-z0-9._:-]{1,128}`      |
+| `x-omniroute-recovery-turn`  | turn-id unikt inom sessionen (samma regel) |
 
-Endast turer med `stream: false` utan verktyg, verktygshistorik eller `previous_response_id`, och utan
-`x-omniroute-connection`-bindning, är berättigade, och `STORAGE_ENCRYPTION_KEY` måste vara angiven
-(begäran lagras krypterad i upp till 24 timmar). Svaret blir då `202` med
-`recovery.poll`; polla `GET /v1/quota-recoveries/{id}` (`202` medan den väntar, `200` med den
-återställda bodyn när den är klar) eller avbryt med `DELETE`. Ärenden är endast synliga för den API-
-nyckel som skapade dem. En uppspelning vars resultat är osäkert avslutas i `needs_confirmation`
-i stället för att skickas två gånger. Källa: `src/lib/quota/quotaSessionRecovery.ts`.
+Endast `stream: false` varv utan verktyg, verktygshistorik eller `previous_response_id`, och ingen `x-omniroute-connection` -stift, är berättigade, och `STORAGE_ENCRYPTION_KEY` måste ställas in (förfrågan lagras krypterad i upp till 24 timmar). Svaret är sedan `202` med `recovery.poll`; poll `GET /v1/quota-recoveries/{id}` (`202` i väntan, `200` med den återställda kroppen när den är klar) eller avbryt med `DELETE`. Biljetter är endast synliga för API nyckeln som skapade dem. En repris vars utfall är osäkert slutar i `needs_confirmation` istället för att skickas två gånger. Källa: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1766,17 +1782,21 @@ Utgående webhookprenumerationer för OmniRoute-händelser (slutförda begärand
 
 ## Registrerade nycklar (automatisk hantering)
 
-Används av undersystemet för automatisk nyckelhantering för att utfärda och rotera API-nycklar mot en underliggande leverantör/ett konto, med dagliga/timvisa kvoter.
+Används av undersystemet för automatisk nyckelhantering för att utfärda och rotera API nycklar mot en stödjande provider/account, med daily/hourly kvoter.
 
-| Metod  | Sökväg                                | Beskrivning                                                                                                                                                                                                  |
+| Metod  | Väg                                   | Beskrivning                                                                                                                                                                                                  |
 | ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/api/v1/registered-keys`             | Lista registrerade nycklar (endast maskerat prefix)                                                                                                                                                          |
-| POST   | `/api/v1/registered-keys`             | Utfärda en ny registrerad nyckel — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Returnerar den råa nyckeln **en gång**. Returnerar `429` vid nekad kvot. |
-| GET    | `/api/v1/registered-keys/[id]`        | Hämta metadata för en registrerad nyckel (inget råvärde)                                                                                                                                                     |
+| GET    | `/api/v1/registered-keys`             | Lista registrerade nycklar (endast maskerade prefix)                                                                                                                                                         |
+| POST   | `/api/v1/registered-keys`             | Ge en ny registrerad nyckel — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Returnerar den råa nyckeln** en gång** . Returnerar `429` vid avslag på kvot. |
+| GET    | `/api/v1/registered-keys/[id]`        | Hämta en registrerad nyckels metadata (inget råmaterial)                                                                                                                                                     |
 | DELETE | `/api/v1/registered-keys/[id]`        | Återkalla en registrerad nyckel                                                                                                                                                                              |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Explicit endpoint för återkallande (samma effekt som DELETE)                                                                                                                                                 |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Explicit återkallelseslutpunkt (samma effekt som DELETE)                                                                                                                                                     |
+| GET    | `/api/v1/providers/[provider]/limits` | Läs leverantörens emissionstak                                                                                                                                                                               |
+| PUT    | `/api/v1/providers/[provider]/limits` | Ställ in leverantörens emissionstak — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                          |
+| GET    | `/api/v1/accounts/[id]/limits`        | Läs kontots emissionstak                                                                                                                                                                                     |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Ställ in kontots emissionstak — samma text som leverantörsvägen                                                                                                                                              |
 
-**Autentisering:** hanteringssession/API-nyckel (`requireManagementAuth`) — samma skydd som `/api/keys`: en dashboardsession, den lokala CLI-token eller en API-nyckel med scopet `manage`/`admin`; API-nycklar som endast har behörighet för inferens får `403`. Se även `/v1/quotas/check` och `/v1/issues/report`.
+**Auth:** management session/API nyckel (`requireManagementAuth`) — samma skydd som `/api/keys`: en instrumentpanelsession, den lokala CLI tokenen eller en API nyckel med `manage`/`admin` -omfattning; API -nycklar endast för slutledning får `403`. Se även `/v1/quotas/check` och `/v1/issues/report`.
 
 ---
 

@@ -13,18 +13,22 @@ OmniRoute は、プラットフォームイベントの発生時に HTTP Webhook
 
 ## サポートされているイベント
 
-`WebhookEvent` 型（`src/lib/webhooks/eventDescriptions.ts`。`src/lib/webhookDispatcher.ts` から使用）は、現在、次の4つのイベントのみをモデル化しています。
+`WebhookEvent`タイプ (`src/lib/webhooks/eventDescriptions.ts`、 `src/lib/webhookDispatcher.ts`によって消費される) は現在、8 つのイベントをモデル化します。
 
-| イベント            | 発生条件                                                                 |
-| ------------------- | ------------------------------------------------------------------------ |
-| `request.completed` | プロキシされたリクエストが正常に完了したとき                             |
-| `request.failed`    | すべての再試行／フォールバック後にプロキシされたリクエストが失敗したとき |
-| `quota.exceeded`    | API キーが予算／クォータのしきい値を超えたとき                           |
-| `test.ping`         | テストエンドポイントで使用される合成イベント                             |
+| イベント                  | 発火時期                                                                                                      |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | プロキシされたリクエストが正常に完了しました                                                                  |
+| `request.failed`          | プロキシされたリクエストはすべてretries/fallbackの後に失敗します                                              |
+| `quota.exceeded`          | APIキーがbudget/quotaしきい値を超える                                                                         |
+| `proxy.set_aside`         | プロキシ プール メンバーは、繰り返し拒否された後に確保されます (移行のみ)                                     |
+| `proxy.pool.exhausted`    | プロキシ プール スコープのすべてのメンバーが確保されます                                                      |
+| `provider.reset_redeemed` | バンク リセットの自動適用により、リセット クレジットまたはClaude毎週のセッション リセットが引き換えられました |
+| `provider.exhausted`      | プロバイダーのすべてのアカウントがクールダウンしています (プロバイダーごとに最大 10 分に 1 回)                |
+| `test.ping`               | テストエンドポイントによって使用される合成イベント                                                            |
 
-サブスクリプションでは、すべてのイベントを受信するためにリテラル `"*"` を指定できます。`events` 内の不明なイベント名は、ディスパッチ時に無視されます。
+サブスクリプションは、すべてのイベントを受信するためにリテラルの`"*"`を受け入れます。 `events`内の不明なイベント名はディスパッチ時に無視されます。
 
-> 注: ディスパッチャー API は接続済みですが、一部の `test.ping` 以外のイベントについては、本番環境の呼び出し元がまだ実装途上です。お使いのリリースで現在どのパスがディスパッチャーを呼び出しているかを確認するには、`grep dispatchEvent` を実行してください。
+> 注: ディスパッチャAPIは接続されていますが、一部の非`test.ping`イベントの運用呼び出しサイトはまだ着陸中です。 `grep dispatchEvent`をチェックして、現在リリースでディスパッチャを呼び出しているパスを確認してください。
 
 ## アーキテクチャ
 
@@ -45,23 +49,23 @@ OmniRoute は、プラットフォームイベントの発生時に HTTP Webhook
 
 ディスパッチは、呼び出し元にとってファイア・アンド・フォーゲット方式です。`Promise.allSettled` が Webhook ごとのエラーを吸収するため、1つの不正なレシーバーが他のレシーバーをブロックすることはありません。
 
-## HMAC 署名
+## HMAC署名
 
-Webhook に `secret` が設定されている場合、OmniRoute は JSON 本文に署名し、次のヘッダーを送信します。
+Webhook に`secret`がある場合、 OmniRoute JSON本文に署名し、以下を送信します。
 
 ```
 Content-Type: application/json
 User-Agent: OmniRoute-Webhook/1.0
-X-Webhook-Event: <イベント>
+X-Webhook-Event: <event>
 X-Webhook-Timestamp: <ISO-8601>
-X-Webhook-Signature: sha256=<16進数の HMAC-SHA256(secret, body)>
+X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
 ```
 
-> ヘッダー名には `X-Webhook-*` プレフィックスを使用します（`X-OmniRoute-*` ではありません）。署名値は `sha256=<16進数>` です。プレフィックスを含む値全体を検証してください。
+> ヘッダー名には ( `X-OmniRoute-*`ではなく) `X-Webhook-*`プレフィックスが使用されます。署名値は`sha256=<hex>` —で、完全なプレフィックスを検証します。
 
-secret を指定せずに `createWebhook` を呼び出した場合、DB モジュールが secret（`whsec_<48桁の16進数>`）を生成するため、デフォルトですべての Webhookが署名されます。
+`createWebhook`がシークレットなしで呼び出された場合、 DBモジュールはシークレット (`whsec_<48 hex>`) を生成するため、すべての Webhook がデフォルトで署名されます。
 
-### レシーバー側での検証
+### 受信機で確認する
 
 ```typescript
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -74,7 +78,7 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-JSON を解析する前に、必ず**未加工の**リクエスト本文に対して検証してください。
+常に照合して検証してください**生**JSON解析前のリクエスト本文。
 
 ## 再試行と失敗に関するポリシー
 
@@ -110,20 +114,20 @@ JSON を解析する前に、必ず**未加工の**リクエスト本文に対�
 
 ## REST API
 
-すべてのエンドポイントで管理認証（`requireManagementAuth`）が必要です。
+すべてのエンドポイントには管理認証 (`requireManagementAuth`) が必要です。
 
-| エンドポイント                  | メソッド | 説明                                       |
-| ------------------------------- | -------- | ------------------------------------------ |
-| `/api/webhooks`                 | GET      | Webhook の一覧（シークレットはマスク済み） |
-| `/api/webhooks`                 | POST     | Webhook を作成                             |
-| `/api/webhooks/[id]`            | GET      | Webhook の詳細（完全なシークレット）       |
-| `/api/webhooks/[id]`            | PUT      | フィールドを更新                           |
-| `/api/webhooks/[id]`            | DELETE   | 削除                                       |
-| `/api/webhooks/[id]/test`       | POST     | `test.ping` を送信（再試行なし）           |
-| `/api/webhooks/[id]/deliveries` | GET      | 1つの Webhook の最近の配信試行             |
-| `/api/webhooks/validate-url`    | POST     | 事前 URL 検証（SSRF ガード）               |
+| 終点                            | 方法   | 説明                                        |
+| ------------------------------- | ------ | ------------------------------------------- |
+| `/api/webhooks`                 | GET    | Webhook のリスト (マスクされたシークレット) |
+| `/api/webhooks`                 | POST   | Webhook の作成                              |
+| `/api/webhooks/[id]`            | GET    | Webhook の詳細 (完全な秘密)                 |
+| `/api/webhooks/[id]`            | PUT    | フィールドを更新する                        |
+| `/api/webhooks/[id]`            | DELETE | 取り除く                                    |
+| `/api/webhooks/[id]/test`       | POST   | `test.ping`を起動する (再試行なし)          |
+| `/api/webhooks/[id]/deliveries` | GET    | 1 つの Webhook に対する最近の配信試行       |
+| `/api/webhooks/validate-url`    | POST   | プリフライトURL検証 (SSRFガード)            |
 
-`GET /api/webhooks` は、一覧ページでの漏えいを防ぐため、シークレットを `<先頭10文字>...` にマスクします。実際にシークレットが必要な場合は、`[id]` の GET を使用してください。
+`GET /api/webhooks`リスト ページでの漏洩を避けるために、 `<first 10 chars>...`に対して秘密をマスクします。実際にシークレットが必要な場合は、 `[id]` GETを使用してください。
 
 ### Webhook の作成
 
@@ -139,16 +143,16 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-`secret` を省略した場合、サーバーは `whsec_<hex>` 形式のシークレットを生成し、レスポンスで返します。
+`secret`が省略された場合、サーバーは`whsec_<hex>`シークレットを生成し、応答でそれを返します。
 
-### Webhook のテスト
+### Webhook をテストする
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-`{ delivered, status, error }` を返します。再試行は行われません。受信側がペイロードと署名を受け入れるかどうかを素早く検証する場合に便利です。
+`{ delivered, status, error }`を返します。再試行は行われません—は、受信者がペイロードと署名を受け入れるかどうかを迅速に検証するのに役立ちます。
 
 ## ダッシュボード
 

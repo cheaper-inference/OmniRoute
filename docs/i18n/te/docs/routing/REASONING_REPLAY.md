@@ -24,19 +24,21 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
-క్యాప్చర్ `open-sse/handlers/chatCore.ts` లో జరుగుతుంది (రెండు సైట్లు, రెండు `cacheReasoningFromAssistantMessage` కాల్ సైట్లలో). స్కీమా బలవంతం తర్వాత కానీ పంపడానికి ముందు రీప్లే `open-sse/translator/index.ts` లో జరుగుతుంది.
+క్యాప్చర్ `open-sse/handlers/chatCore.ts` లో జరుగుతుంది (రెండు సైట్లు, రెండు `cacheReasoningFromAssistantMessage` కాల్ సైట్లలో). స్కీమా బలవంతం తర్వాత కానీ పంపే ముందు రీప్లే `open-sse/translator/index.ts` లో జరుగుతుంది.
+
+టూల్-కాల్ ఎంట్రీలు రిక్వెస్ట్ స్కోప్ మరియు టూల్ కాల్ ఐడి యొక్క డైజెస్ట్ అయిన `buildToolCallCacheKey()` క్రింద నిల్వ చేయబడతాయి, కాబట్టి మరొక API కీ లేదా సెషన్ ఉపయోగించే అదే id ఎంట్రీని ఎంచుకోదు. స్కోప్ `buildReasoningCacheScope()` నుండి వస్తుంది : API కీ id, అలాగే అభ్యర్థనలో సెషన్ కీ ఒకటి ఉన్నప్పుడు. `tool_call_id` నిలువు వరుస మరియు డాష్బోర్డ్ ఆ ఎంట్రీల కోసం ఈ డైజెస్ట్ను చూపుతాయి.
 
 సాదా (నాన్-టూల్-కాల్) అసిస్టెంట్ టర్న్లు విభిన్నంగా కీ చేయబడ్డాయి: `buildAssistantMessageCacheKey()` సెషన్ స్కోప్ను మరియు సాధారణీకరించిన OpenAI-ఫార్మాట్ ట్రాన్స్క్రిప్ట్ను ఆ మలుపు వరకు జీర్ణం చేస్తుంది, ఎందుకంటే DeepSeek ఒకసారి `tools` ఉన్నప్పుడు _every_ ముందు మలుపు యొక్క తార్కికం అవసరం. ప్రతిస్పందనలు-API లక్ష్యాల కోసం (ఉదాహరణకు `opencode-go/deepseek-v4-flash`, `/responses` కి మళ్లించబడింది) అప్స్ట్రీమ్ బాడీ `messages` కాకుండా `input` కలిగి ఉంటుంది, కాబట్టి `translateRequest()` (`open-sse/translator/index.ts`) అది కాల్బ్యాక్ ఎంపిక ద్వారా జీర్ణం చేసిన పివోట్ ట్రాన్స్క్రిప్ట్ను నివేదిస్తుంది మరియు క్యాప్చర్ సైట్లు అదే ట్రాన్స్క్రిప్ట్ను జీర్ణం చేస్తాయి. ప్రతిస్పందనల రీప్లే పాస్ ప్రతి మూల ఆకృతికి OpenAI పైవట్పై నడుస్తుంది, కాబట్టి Anthropic సందేశాల క్లయింట్లు (Claude → OpenAI → ప్రతిస్పందనలు) కూడా రీప్లే చేయబడతాయి.
 

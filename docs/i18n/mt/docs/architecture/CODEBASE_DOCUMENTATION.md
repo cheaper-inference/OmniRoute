@@ -71,60 +71,54 @@ OmniRoute/
 
 ---
 
-## 3. `src/` — Applikazzjoni Next.js
+## 3. `src/` — Next.js Applikazzjoni
 
 ```
 src/
-├── app/                  Paġni tal-App Router + rotot tal-API
-├── lib/                  Libreriji ewlenin (DB, awtentikazzjoni, OAuth, ħiliet, memorja, …)
-├── domain/               Saff pur tad-dominju (politika, riżerva, spiża, lockout, …)
-├── server/               Moduli għas-server biss (authz, cors, awtentikazzjoni)
-├── shared/               Tipi, kostanti, validazzjoni, kuntratti, utilitajiet (sikuri bejn il-konfini)
-├── mitm/                 Għodod ta’ proxy man-in-the-middle għall-integrazzjoni mas-CLI
-├── models/               Metadata lokali tal-mudelli / psewdonimi
-├── sse/                  Maniġġjaturi SSE legati li għadhom jinsabu taħt src/ (mhux open-sse/)
-├── store/                Ħażniet tal-istat fuq in-naħa tal-klijent
-├── middleware/           Utilitajiet ta’ middleware fil-livell tar-rotta (mhux middleware globali ta’ Next.js)
-├── scripts/              Skripts fis-siġra li jistgħu jiġu importati mill-kodiċi tal-applikazzjoni
-├── types/                Tipi TS ambjentali u kondiviżi
-├── i18n/                 Pakketti tal-lokalizzazzjoni
-├── instrumentation.ts    Hook tal-istrumentazzjoni ta’ Next.js
+├── app/                  App Router pages + API routes
+├── lib/                  Core libraries (DB, auth, OAuth, skills, memory, …)
+├── domain/               Pure domain layer (policy, fallback, cost, lockout, …)
+├── server/               Server-only modules (authz, cors, auth)
+├── shared/               Types, constants, validation, contracts, utils (cross-boundary safe)
+├── mitm/                 Man-in-the-middle proxy helpers for CLI integration
+├── models/               Local model metadata / aliasing
+├── sse/                  Legacy SSE handlers that still live under src/ (not open-sse/)
+├── store/                Client-side state stores
+├── middleware/           Route-level middleware utilities (not Next.js global middleware)
+├── scripts/              In-tree scripts importable by app code
+├── types/                Ambient and shared TS types
+├── i18n/                 Locale bundles
+├── instrumentation.ts    Next.js instrumentation hook
 ├── instrumentation-node.ts
-└── proxy.ts              Għodda ewlenija għall-inizjalizzazzjoni tal-proxy
+└── proxy.ts              Top-level proxy bootstrap helper
 ```
 
 ### 3.1 `src/app/` — App Router
 
-L-App Router jesponi kemm l-interfaċċa tad-dashboard kif ukoll l-API HTTP pubblika/tal-ġestjoni.
-**Ma hemm l-ebda middleware globali** — l-interċettazzjoni ssir għal kull rotta separatament.
+L-App Router jesponi kemm id-dashboard UI kif ukoll iż- public/management HTTP API. Hemm** ebda middleware globali** — interċettazzjoni ssir kull rotta.
 
 Segmenti tal-ogħla livell taħt `src/app/`:
 
-| Mogħdija                                                                      | Għan                                                                 |
-| ----------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `api/`                                                                        | Ir-rotot kollha tal-API HTTP (ara d-dettalji hawn taħt)              |
-| `a2a/`                                                                        | Endpoint A2A JSON-RPC 2.0 (`POST /a2a`)                              |
-| `.well-known/agent.json/`                                                     | Dokument għall-iskoperta tal-A2A Agent Card                          |
-| `(dashboard)/`                                                                | Interfaċċa tad-dashboard (grupp ta’ rotot, mingħajr prefiss tal-URL) |
-| `auth/`, `login/`, `forgot-password/`, `callback/`                            | Flussi tal-awtentikazzjoni                                           |
-| `landing/`                                                                    | Paġna promozzjonali/tad-dħul                                         |
-| `docs/`                                                                       | Viewer integrat tad-dokumentazzjoni tal-API                          |
-| `status/`, `maintenance/`, `offline/`                                         | Paġni operazzjonali                                                  |
-| `privacy/`, `terms/`                                                          | Paġni legali                                                         |
-| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Paġni statiċi tal-iżbalji                                            |
-| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | Konfini tal-iżbalji/tat-tagħbija tal-framework                       |
-| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Qoxra ewlenija                                                       |
+| Mogħdija                                                                      | Għan                                                |
+| ----------------------------------------------------------------------------- | --------------------------------------------------- |
+| `api/`                                                                        | Ir-rotot kollha HTTP API (ara t-tqassim hawn taħt)  |
+| `a2a/`                                                                        | A2A JSON-RPC 2.0 endpoint (`POST /a2a`)             |
+| `.well-known/agent.json/`                                                     | A2A Agent Card sejbien dokument                     |
+| `(dashboard)/`                                                                | Dashboard UI (grupp tar-rotot, l-ebda prefiss URL ) |
+| `auth/`, `login/`, `forgot-password/`, `callback/`                            | Flussi ta' awtorizzazzjoni                          |
+| `landing/`                                                                    | Marketing/landing page                              |
+| `docs/`                                                                       | Inkorporat API docs viewer                          |
+| `status/`, `maintenance/`, `offline/`                                         | Paġni operattivi                                    |
+| `privacy/`, `terms/`                                                          | Paġni legali                                        |
+| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Paġni ta' żball statiċi                             |
+| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | Framework error/loading confini                     |
+| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Qoxra tal-għeruq                                    |
 
-#### 3.1.1 `src/app/(dashboard)/dashboard/` — Paġni tal-interfaċċa
+#### 3.1.1 `src/app/(dashboard)/dashboard/` — UI paġni
 
-`agents`, `analytics`, `api-manager`, `audit`, `auto-combo`, `batch`, `cache`,
-`changelog`, `cli-tools`, `cloud-agents`, `combos`, `compression`, `context`,
-`costs`, `endpoint`, `health`, `limits`, `logs`, `memory`, `onboarding`,
-`playground`, `providers`, `search-tools`, `settings`, `skills`, `system`,
-`translator`, `usage`, `webhooks`, flimkien mal-`page.tsx` ewlieni, `HomePageClient.tsx`,
-`BootstrapBanner.tsx`.
+`agents`, `analytics`, `api-manager`, `audit`, `auto-combo`, `batch`, `cache`, `changelog`, `cli-tools`, `cloud-agents`, `combos`, `compression`, `context`, `costs`, `endpoint`, `health`, `limits`, `logs`, `memory`, `onboarding` `playground`, `providers`, `search-tools`, `settings`, `system` `skills` `translator`, `usage`, `webhooks`, flimkien ma għerq `page.tsx`, `HomePageClient.tsx`, `BootstrapBanner.tsx`.
 
-#### 3.1.2 `src/app/api/` — Gruppi tal-API tal-ogħla livell
+#### 3.1.2 `src/app/api/` — Gruppi API tal-ogħla livell
 
 ```
 src/app/api/
@@ -177,144 +171,137 @@ src/app/api/
 ├── token-health/
 ├── translator/
 ├── tunnels/
-├── services/   Ġestjoni tas-servizzi integrati (9router, cliproxy) — LOCAL_ONLY
+├── services/   Embedded service management (9router, cliproxy) — LOCAL_ONLY
 ├── upstream-proxy/
 ├── usage/
-├── v1/         API pubblika kompatibbli ma’ OpenAI
-├── v1beta/     Kompatibbiltà fl-istil ta’ Gemini
+├── v1/         OpenAI-compatible public API
+├── v1beta/     Gemini-style compat
 ├── version-manager/
 └── webhooks/
 ```
 
-#### 3.1.2a `src/app/api/services/` — Ġestjoni tas-Servizzi Integrati
+#### 3.1.2a `src/app/api/services/` — Ġestjoni tas-Servizzi Inkorporati
 
-Rotot għall-installazzjoni, il-bidu, il-waqfien u l-monitoraġġ ta’ 9Router u CLIProxyAPI.
-Il-mogħdijiet kollha huma kklassifikati bħala **LOCAL_ONLY** (loopback biss, regola stretta #17) minħabba li jistgħu
-jsejħu `npm install` u joħolqu proċessi sekondarji.
+Rotot għall-installazzjoni, startjar, waqfien, u monitoraġġ 9Router u CLIProxyAPI. Il-mogħdijiet kollha huma klassifikati**LOCAL_ONLY** (loopback biss, regola iebsa #17) minħabba li jistgħu jinvokaw `npm install` u jbid proċessi tfal.
 
 ```
 src/app/api/services/
 ├── 9router/
-│   ├── _lib.ts             helper getOrInitSupervisor()
-│   ├── install/route.ts    POST — npm install permezz ta’ execFile
+│   ├── _lib.ts             getOrInitSupervisor() helper
+│   ├── install/route.ts    POST — npm install via execFile
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — npm install ta’ verżjoni aktar ġdida
-│   ├── rotate-key/route.ts POST — iġġenera API key ġdida + erġa’ ibda
-│   ├── status/route.ts     GET  — status live + tad-DB + metadata tal-verżjoni
-│   └── auto-start/route.ts POST — aqleb il-flag auto_start
+│   ├── update/route.ts     POST — npm install newer version
+│   ├── rotate-key/route.ts POST — generate new API key + restart
+│   ├── status/route.ts     GET  — live + DB status + version metadata
+│   └── auto-start/route.ts POST — toggle auto_start flag
 ├── cliproxy/
-│   ├── _lib.ts             helper getOrInitSupervisor()
+│   ├── _lib.ts             getOrInitSupervisor() helper
 │   ├── install/route.ts    POST — npm install
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — npm install ta’ verżjoni aktar ġdida
-│   ├── status/route.ts     GET  — status live + tad-DB + metadata tal-verżjoni
-│   └── auto-start/route.ts POST — aqleb il-flag auto_start
+│   ├── update/route.ts     POST — npm install newer version
+│   ├── status/route.ts     GET  — live + DB status + version metadata
+│   └── auto-start/route.ts POST — toggle auto_start flag
 └── [name]/
-    └── logs/route.ts       GET  — tarf tal-log permezz ta’ SSE (kondiviż mis-servizzi kollha)
+    └── logs/route.ts       GET  — SSE log tail (shared by all services)
 ```
 
-UI korrispondenti tad-dashboard:
-`src/app/(dashboard)/dashboard/providers/services/` — paġna b’żewġ tabs (CLIProxyAPI + 9Router).
-Reverse proxy għall-UI inkorporata ta’ 9Router:
-`src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
+Dashboard korrispondenti UI: `src/app/(dashboard)/dashboard/providers/services/` — two-tab page (CLIProxyAPI + 9Router). Reverse proxy għal 9Router inkorporat UI: `src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
 
-Analiżi dettaljata: `docs/frameworks/EMBEDDED-SERVICES.md`
+Deep-dive: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-#### 3.1.3 `src/app/api/v1/` — API pubblika kompatibbli ma’ OpenAI
+#### 3.1.3 `src/app/api/v1/` — API pubbliku kompatibbli mal-OpenAI
 
 ```
 v1/
-├── accounts/[id]/                       tfittxija tal-kont
-├── agents/tasks/[id]/, agents/tasks/    endpoints tal-kompiti fl-istil A2A
-├── api/                                 helpers interni tal-API esposti taħt v1/api
+├── accounts/[id]/                       account lookup
+├── agents/tasks/[id]/, agents/tasks/    A2A-flavored task endpoints
+├── api/                                 internal API helpers exposed under v1/api
 ├── audio/{speech, transcriptions}/      TTS + STT
 ├── batches/[id]/{cancel}, batches/      OpenAI Batches API
-├── chat/completions/                    Chat Completions (l-endpoint ewlieni)
-├── completions/                         completions tat-test legacy
-├── embeddings/                          embeddings
+├── chat/completions/                    Chat Completions (the main endpoint)
+├── completions/                         Legacy text completions
+├── embeddings/                          Embeddings
 ├── files/[id]/, files/                  Files API
-├── _helpers/                            helpers kondiviżi tar-routes (l-ebda URL pubbliku)
-├── images/{edits, generations}/         ġenerazzjoni + editjar tal-immaġnijiet
-├── issues/                              endpoints helper għat-triage
-├── management/{proxies}/                routes fl-ambitu tal-management ġewwa v1
-├── messages/{count_tokens}/             kompatibbiltà ma’ messages fl-istil Anthropic
-├── models/                              lista tal-mudelli (`route.ts`, `catalog.ts`)
-├── moderations/                         moderazzjoni
-├── music/                               ġenerazzjoni tal-mużika
-├── providers/[provider]/                operazzjonijiet għal kull provider
-├── quotas/{check}                       verifiki tal-kwota
-├── registered-keys/                     amministrazzjoni tal-keys irreġistrati
-├── rerank/                              klassifikazzjoni mill-ġdid
+├── _helpers/                            Shared route helpers (no public URL)
+├── images/{edits, generations}/         Image gen + edit
+├── issues/                              Triage helper endpoints
+├── management/{proxies}/                Management-scoped routes inside v1
+├── messages/{count_tokens}/             Anthropic-style messages compat
+├── models/                              Model listing (`route.ts`, `catalog.ts`)
+├── moderations/                         Moderation
+├── music/                               Music gen
+├── providers/[provider]/                Per-provider operations
+├── quotas/{check}                       Quota probes
+├── registered-keys/                     Registered key admin
+├── rerank/                              Reranking
 ├── responses/[...path]/                 OpenAI Responses API (catch-all)
-├── search/                              tfittxija fuq il-web
-├── videos/                              ġenerazzjoni tal-vidjows
-├── ws/                                  bridge tal-WebSocket
-└── route.ts                             handler tal-indiċi
+├── search/                              Web search
+├── videos/                              Video gen
+├── ws/                                  WebSocket bridge
+└── route.ts                             Index handler
 ```
 
-Kull fajl ta’ route jsegwi l-istess mudell:
+Kull fajl tar-rotta jsegwi l-istess mudell:
 
 ```
-Route → preflight ta’ CORS → validazzjoni tal-body b’Zod → auth fakultattiva
-      → infurzar tal-politika tal-API key → delegazzjoni lill-handler (open-sse)
+Route → CORS preflight → Zod body validation → optional auth
+      → API key policy enforcement → handler delegation (open-sse)
 ```
 
-`v1beta/` hija s-superfiċje ta’ kompatibbiltà fl-istil Gemini (wrapper irqiq li jittraduċi
-għall-istess pipeline `open-sse/handlers/`).
+`v1beta/` huwa l-wiċċ ta 'kompat ta' stil Gemini (tgeżwir irqiq li jissarraf fl-istess pipeline `open-sse/handlers/` ).
 
 ### 3.2 `src/lib/` — Libreriji ewlenin
 
-Dejjem importa d-data, is-sinkronizzazzjoni, OAuth, il-ħiliet, il-memorja, eċċ. permezz ta’ dawn il-moduli. It-
-tabella tiġbor id-direttorji attwali u l-fajls notevoli tal-ogħla livell.
+Dejjem importa data, sync, OAuth, ħila, memorja, eċċ permezz ta 'dawn il-moduli. It-tabella tiġbor id-direttorji attwali u l-fajls notevoli tal-ogħla livell.
 
-| Modulu            | Għan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `a2a/`            | Server tal-protokoll A2A: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 ħiliet: analiżi tal-ispejjeż, rapport dwar is-saħħa, skoperta tal-fornituri, ġestjoni tal-kwoti, routing intelliġenti, elenkar tal-kapaċitajiet)                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `acp/`            | Agent-Control-Protocol: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `api/`            | Għodod ta’ għajnuna interni tal-API: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `auth/`           | `managementPassword.ts` (issettjar mill-ġdid tal-password / hashing)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `batches/`        | Servizz tal-API OpenAI Batches (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `catalog/`        | Sinkronizzazzjoni tal-katalgu OpenRouter (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `cloudAgent/`     | Reġistru tal-aġenti tal-cloud: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `combos/`         | Għodod awżiljarji għar-riżoluzzjoni tal-kombinazzjonijiet                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `compliance/`     | Awditjar + awditjar tal-fornitur: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `config/`         | Kodiċi ta' integrazzjoni għall-konfigurazzjoni waqt l-eżekuzzjoni                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `db/`             | Moduli tad-dominju SQLite (ara §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `display/`        | Għodod awżiljarji tal-UI/wiri użati mir-risposti tal-API                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `embeddings/`     | Reġistru tas-servizzi tal-inkorporazzjoni                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `env/`            | Tagħbija + introspezzjoni tal-ambjent                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `evals/`          | Ambjent ta’ eżekuzzjoni tal-evalwazzjonijiet                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `jobs/`           | Kompiti fl-isfond (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `memory/`         | Memorja persistenti: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `oauth/`          | Moduli ta’ fornituri OAuth/importazzjoni (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, flimkien ma’ `services/`, `utils/`, u `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                       |
-| `plugins/`        | Modulu għat-tagħbija tal-plugins (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `providerModels/` | Ċiklu tal-ħajja tal-mudelli ġestiti: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `providers/`      | Funzjonijiet awżiljarji tal-fornitur: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `resilience/`     | `settings.ts` — konfigurazzjonijiet għas-circuit breaker, il-perjodu ta’ stennija u l-imblukkar                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `runtime/`        | Sejbien tal-karatteristiċi waqt l-eżekuzzjoni                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `services/`       | Qafas tas-servizzi inkorporati: `ServiceSupervisor.ts` (superviżur ġeneriku ta’ proċessi sekondarji b’serratura tal-operazzjonijiet, buffer ċirkolari u kontrollur tas-saħħa), `bootstrap.ts` (reġistrazzjoni fil-livell tal-proċess u startjar awtomatiku), `registry.ts` (mappa minn għodda għal superviżur), `apiKey.ts` (maħżen taċ-ċwievet AES-256-GCM), `modelSync.ts` (sinkronizzazzjoni perjodika tal-mudelli), `ringBuffer.ts` (buffer ċirkolari tar-reġistru ta’ 5 MB), `healthCheck.ts` (sonda HTTP tas-saħħa), `types.ts`, `embedWsProxy.ts` (proxy WebSocket), `installers/{ninerouter,cliproxy}.ts`. Ara `docs/frameworks/EMBEDDED-SERVICES.md`                                          |
-| `agentSkills/`    | Katalgu u ġeneratur ta’ Agent Skills: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → jikteb f’`skills/{id}/SKILL.md`), `openapiParser.ts` (jislet l-endpoints REST mill-ispeċifikazzjoni OpenAPI), `cliRegistryParser.ts` (jislet is-subcommands CLI minn bin/cli-registry), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). Użat mir-rotot REST (`/api/agent-skills/*`), mill-għodod MCP (`omniroute_agent_skills_*`) u mill-ħila A2A `list-capabilities`. Ara [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
-| `skills/`         | Qafas tal-ħiliet: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, flimkien ma’ `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `spend/`          | `batchWriter.ts` (buffer ta’ write-behind)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `sync/`           | `bundle.ts`, `tokens.ts` (Sinkronizzazzjoni mal-Cloud)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `system/`         | Għodod awżiljarji fil-livell tas-sistema                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `translator/`     | Kodiċi ta’ integrazzjoni tat-traduttur fl-ogħla livell (jiddelega lil `open-sse/translator/`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `usage/`          | Kontabilità tal-użu: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `versionManager/` | Aġġornament awtomatiku + manifest tal-verżjoni                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `ws/`             | Pont WebSocket                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `zed-oauth/`      | Fluss OAuth tal-editur Zed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Modulu            | Għan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`            | Server tal-protokoll A2A : `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 ħiliet: analiżi tal-ispejjeż, rapport tas-saħħa, skoperta tal-fornitur, ġestjoni tal-kwoti, rotta intelliġenti, kapaċitajiet tal-lista)                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `acp/`            | Aġent-Kontroll-Protokoll: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `api/`            | Helpers interni API : `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `auth/`           | `managementPassword.ts` (reset tal-password / hashing)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `batches/`        | OpenAI Lottijiet API service (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `catalog/`        | OpenRouter catalog sync (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `cloudAgent/`     | Reġistru tal-aġent tal-cloud: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `combos/`         | Helpers ta' riżoluzzjoni kombo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `compliance/`     | Verifika + fornitur verifika: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `config/`         | Runtime konfig kolla                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `db/`             | moduli tad-dominju SQLite (ara §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `display/`        | UI/display helpers użati minn tweġibiet API                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `embeddings/`     | Inkorporazzjoni tar-reġistru tas-servizz                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `env/`            | Env loading + introspection                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `evals/`          | Eval runtime                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `jobs/`           | Impjiegi fl-isfond (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `memory/`         | Memorja persistenti: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `oauth/`          | moduli tal-fornitur OAuth/import (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `qoder`, `trae`, `xai-oauth`, `zed-hosted` `zed` flimkien `openference` `services/`, `utils/`, u `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                 |
+| `plugins/`        | Plugin loader (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `providerModels/` | Ċiklu tal-ħajja tal-mudell immaniġġjat: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `providers/`      | Helpers tal-fornitur: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `resilience/`     | `settings.ts` — settings għal circuit breaker, cooldown, lockout                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `runtime/`        | Sejbien tal-karatteristika runtime                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `services/`       | Qafas tas-servizzi inkorporati: `ServiceSupervisor.ts` (superviżur ġeneriku tal-proċess tat-tfal b'illokkjar tal-operat, ring buffer, kontrollur tas MB saħħa), `bootstrap.ts` (reġistrazzjoni fil-livell tal-proċess u awto-start), `registry.ts` (għodda → superviżur mappa), `apiKey.ts` (maħżen taċ-ċavetta AES-256-GCM ), `modelSync.ts` (sinkronizzazzjoni tal-mudell perjodiku), `ringBuffer.ts` ċirkolari log (sinkronizzazzjoni tal-mudell), `healthCheck.ts` (sonda tas-saħħa HTTP ), `types.ts`, `embedWsProxy.ts` (WebSocket proxy ), `installers/{ninerouter,cliproxy}.ts`. Ara `docs/frameworks/EMBEDDED-SERVICES.md`                                               |
+| `agentSkills/`    | Katalogu tal-Ħiliet tal-Aġent + generator: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → jikteb `skills/{id}/SKILL.md`), `openapiParser.ts` (estratti REST endpoints minn OpenAPI spec), `cliRegistryParser.ts` (estratti CLI subkmandi minn bin/cli-registry), `schemas.ts` (Zod, SkillCoverageSchema, GenerateBodySchemaListQuerySchema, `types.ts` (AgentSkill, AgentSkillSchema, SkillCoverage, SkillMarkdownGeneratorReport. Ikkunsmat minn REST rotot (`/api/agent-skills/*`), MCP tools (`omniroute_agent_skills_*`), u A2A skill `list-capabilities`. Ara [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
+| `skills/`         | Qafas tal-ħiliet: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, plus `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `spend/`          | `batchWriter.ts` (write-behind buffer)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `sync/`           | `bundle.ts`, `tokens.ts` (Cloud Sync)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `system/`         | Helpers fil-livell tas-sistema                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `translator/`     | Kolla tat-traduttur tal-ogħla livell (delegati `open-sse/translator/`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `usage/`          | Kontabilità tal-użu: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `versionManager/` | Aġġorna awtomatikament il-manifest tal-verżjoni +                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `ws/`             | WebSocket pont                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `zed-oauth/`      | Zed editur OAuth flow                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 
-Fajls fl-ogħla livell f’`src/lib/`:
+Fajls tal-ogħla livell `src/lib/`:
 
-- Il-`localDb.ts` barrel l-antik tneħħa — il-konsumaturi jimportaw direttament moduli speċifiċi minn `src/lib/db/*`.
+- Il-barmil `localDb.ts` antik tneħħa — konsumaturi jimportaw moduli `src/lib/db/*` speċifiċi direttament.
 - `proxyHealth.ts`, `proxyLogger.ts`, `tokenHealthCheck.ts`, `localHealthCheck.ts`
 - `apiBridgeServer.ts`, `cacheLayer.ts`, `semanticCache.ts`, `settingsCache.ts`
 - `cloudSync.ts`, `initCloudSync.ts`
@@ -328,119 +315,72 @@ Fajls fl-ogħla livell f’`src/lib/`:
 
 #### 3.2.1 `src/lib/db/`
 
-Bażi tad-data SQLite singleton (`getDbInstance()` f’`core.ts`, journaling WAL).
-**Qatt tikteb SQL mhux ipproċessat fir-rotot jew fil-handlers** — għaddi minn dawn il-moduli.
+Singleton SQLite database (`getDbInstance()` in `core.ts`, WAL journaling).** Qatt tikteb SQL mhux maħdum fir-rotot jew handlers** — jgħaddu minn dawn il-moduli.
 
-![Ħarsa ġenerali lejn l-iskema tal-bażi tad-data (tabelli ewlenin magħżula)](../diagrams/exported/db-schema-overview.svg)
+![Database schema overview (selected core tables)](../diagrams/exported/db-schema-overview.svg)
 
 > Sors: [diagrams/db-schema-overview.mmd](../diagrams/db-schema-overview.mmd)
 
-Moduli tad-dominju (kull wieħed jamministra tabella waħda jew aktar): `apiKeys.ts`, `backup.ts`,
-`batches.ts`, `cleanup.ts`, `cliToolState.ts`, `combos.ts`,
-`commandCodeAuth.ts`, `compression.ts`, `compressionAnalytics.ts`,
-`compressionCacheStats.ts`, `compressionCombos.ts`, `compressionScheduler.ts`,
-`contextHandoffs.ts`, `core.ts`, `creditBalance.ts`, `databaseSettings.ts`,
-`detailedLogs.ts`, `domainState.ts`, `encryption.ts`, `evals.ts`, `files.ts`,
-`healthCheck.ts`, `jsonMigration.ts`, `migrationRunner.ts`,
-`modelComboMappings.ts`, `models.ts`, `oneproxy.ts`, `prompts.ts`,
-`providers.ts`, `providerLimits.ts`, `proxies.ts`, `quotaSnapshots.ts`,
-`readCache.ts`, `reasoningCache.ts`, `registeredKeys.ts`, `secrets.ts`,
-`sessionAccountAffinity.ts`, `settings.ts`, `stateReset.ts`, `stats.ts`,
-`syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts`,
-`webhooks.ts`.
+Domain modules (each owns one or more tables): `apiKeys.ts`, `backup.ts`, `batches.ts`, `cleanup.ts`, `cliToolState.ts`, `combos.ts`, `commandCodeAuth.ts`, `compression.ts`, `compressionAnalytics.ts`, `compressionCacheStats.ts`, `compressionCombos.ts`, `compressionScheduler.ts`, `contextHandoffs.ts`, `core.ts`, `creditBalance.ts`, `databaseSettings.ts`, `detailedLogs.ts`, `domainState.ts`, `encryption.ts`, `evals.ts`, `files.ts`, `healthCheck.ts`, `jsonMigration.ts`, `migrationRunner.ts`, `modelComboMappings.ts`, `models.ts`, `oneproxy.ts`, `prompts.ts`, `providers.ts`, `providerLimits.ts`, `proxies.ts`, `quotaSnapshots.ts`, `readCache.ts`, `reasoningCache.ts`, `registeredKeys.ts`, `secrets.ts`, `sessionAccountAffinity.ts`, `settings.ts`, `stateReset.ts`, `stats.ts`, `syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts`, `webhooks.ts`.
 
-`migrations/` fih 168 fajl `.sql` b’verżjonijiet (idempotenti u transazzjonali) u
-jiġi eżegwit minn `migrationRunner.ts` waqt l-istartjar.
+`migrations/` għandu 168 fajl `.sql` verżjoni (idempotenti, transazzjonali) u huwa eżegwit minn `migrationRunner.ts` fil-boot.
 
-Tabelli maħluqa fil-migrazzjonijiet kollha (123 b’kollox):
+Tabelli maħluqa matul il-migrazzjoni (123 total):
 
-`a`, `account_key_limits`, `api_keys`, `batches`, `call_logs`,
-`combo_adaptation_state`, `combos`, `command_code_auth_sessions`,
-`compression_analytics`, `compression_cache_stats`,
-`compression_combo_assignments`, `compression_combos`, `context_handoffs`,
-`daily_usage_summary`, `db_meta`, `domain_budgets`, `domain_circuit_breakers`,
-`domain_cost_history`, `domain_fallback_chains`, `domain_lockout_state`,
-`eval_cases`, `eval_runs`, `eval_suites`, `files`, `hourly_usage_summary`,
-`key_value`, `mcp_tool_audit`, `memories`, `model_combo_mappings`,
-`provider_connections`, `provider_key_limits`, `provider_nodes`,
-`proxy_assignments`, `proxy_logs`, `proxy_registry`, `quota_snapshots`,
-`reasoning_cache`, `registered_keys`, `request_detail_logs`,
-`routing_decisions`, `semantic_cache`, `session_account_affinity`,
-`skill_executions`, `skills`, `sync_tokens`, `tier_assignments`,
-`tier_config`, `upstream_proxy_config`, `usage_history`, `version_manager`,
-`webhooks` (flimkien ma’ tabelli virtwali FTS5 għat-tiftix fil-memorja).
+`a`, `account_key_limits`, `api_keys`, `batches`, `call_logs`, `combo_adaptation_state`, `combos`, `command_code_auth_sessions`, `compression_analytics`, `compression_cache_stats`, `compression_combo_assignments`, `compression_combos`, `context_handoffs`, `daily_usage_summary`, `db_meta`, `domain_budgets`, `domain_circuit_breakers`, `domain_cost_history`, `domain_fallback_chains`, `domain_lockout_state` `eval_cases`, `eval_runs`, `eval_suites`, `key_value`, `files`, `hourly_usage_summary`, `mcp_tool_audit`, `memories`, `model_combo_mappings`, `provider_connections`, `provider_key_limits`, `provider_nodes`, `proxy_assignments`, `proxy_logs`, `proxy_registry`, `quota_snapshots`, `reasoning_cache`, `registered_keys` `request_detail_logs`, `routing_decisions`, `semantic_cache`, `session_account_affinity`, `skill_executions`, `skills`, `sync_tokens`, `tier_assignments`, `tier_config`, `upstream_proxy_config`, `usage_history`, `version_manager`, `webhooks` (plus FTS5 virtual tables for search).
 
-### 3.3 `src/domain/` — Saff tad-dominju
+### 3.3 `src/domain/` — Dominju saff
 
-Loġika tan-negozju pura, mingħajr I/O. Importata mir-rotot u mill-handlers.
+Servizzi ta' dominju u kuntratti ta' evalwazzjoni. Xi moduli huma msejħa mill-mogħdija tat-talba ħajjin; oħrajn jibqgħu kuntratti waħedhom. Tassumux li dan id-direttorju kollu huwa ħieles minn I/O jew li t-tibdil ta' kull modulu jaffettwa r-rotot tal-produzzjoni.
 
-| Fajl                                       | Għan                                                             |
-| ------------------------------------------ | ---------------------------------------------------------------- |
-| `policyEngine.ts`                          | Riżolvitur tal-politiki tal-ogħla livell                         |
-| `fallbackPolicy.ts`                        | Siġra tad-deċiżjonijiet ta’ fallback                             |
-| `costRules.ts`                             | Regoli għall-kalkolu tal-ispejjeż                                |
-| `lockoutPolicy.ts`                         | Deċiżjonijiet dwar l-imblukkar tal-mudelli                       |
-| `tagRouter.ts`                             | Routing ibbażat fuq tags                                         |
-| `comboResolver.ts`                         | Riżoluzzjoni tal-combo mit-talba → lista ta’ miri                |
-| `connectionModelRules.ts`                  | Filtri tal-mudelli għal kull konnessjoni                         |
-| `modelAvailability.ts`                     | Verifika tad-disponibbiltà tal-mudell                            |
-| `degradation.ts`                           | Tranżizzjonijiet għall-modalità degradata                        |
-| `providerExpiration.ts`                    | Identifikazzjoni ta’ kontijiet/ċwievet skaduti                   |
-| `quotaCache.ts`                            | Deċiżjonijiet tal-kwota miżmuma fil-cache                        |
-| `responses.ts`, `omnirouteResponseMeta.ts` | Helpers għall-istruttura tar-rispons                             |
-| `configAudit.ts`                           | Awditjar tal-bidliet fil-konfigurazzjoni                         |
-| `assessment/`                              | Valutazzjoni tal-mudelli (skont l-RFC, implimentata parzjalment) |
-| `types.ts`                                 | Tipi kondiviżi tad-dominju                                       |
+L-uċuħ tal-politika ħajjin huma `src/shared/utils/apiKeyPolicy.ts` u `src/sse/handlers/chat/resolvedModelPolicy.ts`. L-immaniġġjar tal-combo live u r-riżoluzzjoni tal-mira jużaw `open-sse/services/combo.ts`. Il-kuntratti `policyEngine.ts` u `comboResolver.ts` ittestjati, flimkien ma ' `src/lib/container.ts`, mhumiex il-wajers tal-mogħdija tat-talba taċ-chat spezzjonata. Żommhom separati minn dawk l-uċuħ attivi meta tippjana bidla fir-rotta.
 
-### 3.4 `src/server/` — Għas-server biss
+| Fajl                                       | Għan                                                              |
+| ------------------------------------------ | ----------------------------------------------------------------- |
+| `policyEngine.ts`                          | Kuntratt riservat ta' valutazzjoni tal-politika                   |
+| `fallbackPolicy.ts`                        | Siġra tad-deċiżjonijiet fallback                                  |
+| `costRules.ts`                             | Regoli tal-kalkolu tal-ispejjeż                                   |
+| `lockoutPolicy.ts`                         | Mudell ta' deċiżjonijiet ta' lockout                              |
+| `tagRouter.ts`                             | Rotot ibbażat fuq tag                                             |
+| `comboResolver.ts`                         | Kuntratt riservat ta' għażla ta' combo                            |
+| `connectionModelRules.ts`                  | Filtri tal-mudell għal kull konnessjoni                           |
+| `modelAvailability.ts`                     | Kontroll tad-disponibbiltà tal-mudell                             |
+| `degradation.ts`                           | Transizzjonijiet b'mod degradat                                   |
+| `providerExpiration.ts`                    | Skaduta account/key detection                                     |
+| `quotaCache.ts`                            | Deċiżjonijiet tal-kwota fil-cache                                 |
+| `responses.ts`, `omnirouteResponseMeta.ts` | Helpers tal-forma tar-rispons                                     |
+| `configAudit.ts`                           | Awditjar tal-bidla tal-konfigurazzjoni                            |
+| `assessment/`                              | Valutazzjoni tal-mudell (għal kull RFC, implimentata parzjalment) |
+| `types.ts`                                 | Tipi ta' domain kondiviżi                                         |
 
-Ma jistax jiġi importat minn komponenti tal-klijent.
+### 3.4 `src/server/` — Server-biss
+
+Ma jistax jiġi importat minn komponenti tal-klijenti.
 
 ```
 server/
 ├── auth/loginGuard.ts
 ├── authz/
-│   ├── classify.ts        Jikklassifika r-rotot bħala pubbliċi jew ta’ ġestjoni
-│   ├── assertAuth.ts      Helper għall-asserzjonijiet
-│   ├── context.ts         Kuntest authz għal kull talba
+│   ├── classify.ts        Classifies routes as public vs management
+│   ├── assertAuth.ts      Assertion helper
+│   ├── context.ts         Per-request authz context
 │   ├── headers.ts
-│   ├── pipeline.ts        Pipeline authz
-│   ├── policies/          Politiki konkreti
+│   ├── pipeline.ts        Authz pipeline
+│   ├── policies/          Concrete policies
 │   └── types.ts
-└── cors/origins.ts        Lista ta’ oriġini CORS permessi
+└── cors/origins.ts        CORS origin allowlist
 ```
 
-### 3.5 `src/shared/` — Sikur għall-kondiviżjoni
+### 3.5 `src/shared/` — Safe-to-share
 
-Maqsum f’subdirettorji ffukati:
+Aqsam f'subdirettorji ffukati:
 
-- `constants/` — `providers.ts` (katalgu tal-fornituri vvalidat b’Zod), `models.ts`,
-  `modelSpecs.ts`, `modelCompat.ts`, `pricing.ts`, `cliTools.ts`,
-  `cliCompatProviders.ts`, `routingStrategies.ts`, `comboConfigMode.ts`,
-  `headers.ts`, `upstreamHeaders.ts` (lista ta’ projbizzjoni), `mcpScopes.ts`,
-  `errorCodes.ts`, `publicApiRoutes.ts`, `batch.ts`, `batchEndpoints.ts`,
-  `bodySize.ts`, `colors.ts`, `appConfig.ts`, `config.ts`,
-  `sidebarVisibility.ts`, `visionBridgeDefaults.ts`.
-- `validation/` — `schemas.ts` (~80 skema Zod), `compressionConfigSchemas.ts`,
-  `providerSchema.ts`, `settingsSchemas.ts`, `helpers.ts`.
-- `contracts/` — kuntratti tal-API pubblika mqassma permezz ta’ npm.
-- `types/` — tipi TS kondiviżi.
-- `utils/` — `circuitBreaker.ts`, `apiAuth.ts`, `apiKey.ts`, `apiKeyPolicy.ts`,
-  `api.ts`, `classify429.ts`, `cliCompat.ts`, `clipboard.ts`, `cloud.ts`, `cn.ts`,
-  `cors.ts`, `featureFlags.ts`,
-  `fetchTimeout.ts`, `formatting.ts`, `inputSanitizer.ts`, `logger.ts`,
-  `machine.ts`, `machineId.ts`, `maskEmail.ts`, `modelCatalogSearch.ts`,
-  `nodeRuntimeSupport.ts`, `parseApiKeys.ts`, `providerHints.ts`,
-  `providerModelAliases.ts`, `rateLimiter.ts`, `releaseNotes.ts`,
-  `a11yAudit.ts`, flimkien ma’ hooks/komponenti tad-dashboard taħt `services/`, `network/`,
-  `middleware/`, `schemas/`, `hooks/`, `components/`.
-- `components/` — l-API tal-komponenti tad-dashboard (barrel `index.tsx`: `Button`, `Input`,
-  `Select`, `Modal`, `Card`, `DataTable`, …). Il-primitives huma adapters fuq il-kit
-  inkorporat (`packages/ui-kit`, importat permezz tas-subpath tal-komponent bħal
-  `@omniroute/ui-kit/button`), sabiex l-iskrins iżommu l-importazzjonijiet tagħhom filwaqt
-  li l-markup ikun dak tal-kit. Is-shell huwa `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
-  (`SidebarProvider`/`SidebarInset` tal-kit) b’`Sidebar.tsx` u `Header.tsx`; l-ikoni jgħaddu
-  minn `Icon.tsx` u `constants/iconMap.ts`. Ara `docs/architecture/DESIGN_SYSTEM.md`.
+- `constants/` — `providers.ts` (Katalgu tal-fornitur validat bi Zod), `models.ts`, `modelSpecs.ts`, `modelCompat.ts`, `pricing.ts`, `cliTools.ts`, `cliCompatProviders.ts`, `routingStrategies.ts`, `comboConfigMode.ts`, `headers.ts`, `upstreamHeaders.ts` (denylist), `mcpScopes.ts`, `errorCodes.ts`, `publicApiRoutes.ts`, `batch.ts`, `batchEndpoints.ts`, `bodySize.ts`, `colors.ts`, `appConfig.ts`, `config.ts`, `sidebarVisibility.ts` `visionBridgeDefaults.ts`
+- `validation/` — `schemas.ts` (~ 80 Zod schemas), `compressionConfigSchemas.ts`, `providerSchema.ts`, `settingsSchemas.ts`, `helpers.ts`.
+- `contracts/` — kuntratti API pubbliku mibgħuta lil npm.
+- `types/` — shared TS types.
+- `utils/` — `circuitBreaker.ts`, `apiAuth.ts`, `apiKey.ts`, `apiKeyPolicy.ts`, `api.ts`, `classify429.ts`, `cliCompat.ts`, `clipboard.ts`, `cloud.ts`, `cn.ts`, `cors.ts`, `fetchTimeout.ts`, `featureFlags.ts`, `formatting.ts`, `inputSanitizer.ts`, `logger.ts`, `machine.ts`, `machineId.ts`, `maskEmail.ts`, `modelCatalogSearch.ts`, `nodeRuntimeSupport.ts`, `parseApiKeys.ts`, `providerHints.ts`, `rateLimiter.ts`, `providerModelAliases.ts`, `releaseNotes.ts`, `a11yAudit.ts`, flimkien ma ' dashboard hooks/components taħt `services/`, `network/`, `middleware/`, `schemas/`, `hooks/`, `components/`.
+- `components/` — il-komponent tad-daxxbord API (`index.tsx` barmil: `Button`, `Input`, `Select`, `Modal`, `Card`, `DataTable`, …). Il-primittivi huma adapters fuq il-kit tal-bejgħ (`packages/ui-kit`, importat minn subpath tal-komponent bħal `@omniroute/ui-kit/button`), sabiex l-iskrins iżommu l-importazzjonijiet tagħhom filwaqt li l-markup huwa tal-kit. Il-qoxra hija `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx` (kit `SidebarProvider`/`SidebarInset`) ma `Sidebar.tsx` u `Header.tsx`; ikoni jgħaddu minn `Icon.tsx` u `constants/iconMap.ts`. Ara `docs/architecture/DESIGN_SYSTEM.md`.
 
 ---
 
@@ -456,7 +396,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              159 provider executor modules (executor classes + per-provider helpers)
+├── executors/              170 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +426,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-159 modulu eżekutur tal-ogħla livell (`*.ts` nieqes `base.ts`, `index.ts` u testijiet — l-għadd `npm run check:docs-counts` miżuri). Kull klassi ta' eżekutur testendi `BaseExecutor` (`base.ts`), direttament jew permezz `DefaultExecutor` jew eżekutur ieħor; il-moduli li jifdal huma helpers għal kull fornitur (skemi ta 'għodda, adapters fetch/TTS, quirk handlers). L-eżekuturi jinkludu:
+170 modulu eżekutur tal-ogħla livell (`*.ts` nieqes `base.ts`, `index.ts` u testijiet — l-għadd `npm run check:docs-counts` miżuri). Kull klassi ta 'eżekutur testendi `BaseExecutor` (`base.ts`), direttament jew permezz `DefaultExecutor` jew eżekutur ieħor; il-moduli li jifdal huma helpers għal kull fornitur (skemi ta 'għodda, adapters fetch/TTS, quirk handlers). L-eżekuturi jinkludu:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `opencode`, `nlpcloud`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop` flimkien ma `claudeIdentity.ts` (helper ta’ identità kondiviża) u `index.ts` (reġistru).
 
-> Nota: fornituri mhux elenkati hawn huma moqdija minn `default.ts` bl-użu tal-eżekutur ġeneriku kompatibbli mal-OpenAI. Il-katalgu sħiħ tal-fornituri (381 fornitur) jgħix fi `src/shared/constants/providers.ts`.
+> Nota: fornituri mhux elenkati hawn huma moqdija minn `default.ts` bl-użu tal-eżekutur ġeneriku kompatibbli mal-OpenAI. Il-katalgu sħiħ tal-fornituri (394 fornitur) jgħix fi `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
@@ -512,7 +452,7 @@ Punti ewlenin (lista sħiħa taħt `open-sse/services/`):
 
 | Tħassib                 | Fajls                                                                                                                                                                                                                                                    |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Combo routing           | `combo.ts` (20 strateġija), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                    |
+| Combo routing           | `combo.ts` (22 strateāija), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                    |
 | Magna Auto Combo        | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
 | Reżiljenza              | `accountFallback.ts` (cooldown + lockout), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                         |
 | Kwoti                   | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
@@ -541,7 +481,7 @@ Provider registries (`providerRegistry.ts`, `providerModels.ts`, `providerHeader
 
 ### 4.8 `open-sse/utils/`
 
-Streaming primitives u provider helpers: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts` `aiSdkCompat.ts`, `thinkTagParser.ts`, `requestLogger.ts` `urlSanitize.ts` `usageTracking.ts`, `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`, `ollamaTransform.ts`.
+Streaming primitives u provider helpers: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`, `thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`, `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`, `ollamaTransform.ts`.
 
 ---
 
@@ -658,45 +598,45 @@ Organizzati f’6 subfolders skont l-iskop.
 
 ---
 
-## 9. Pipeline tat-Talbiet (Sommarju)
+## 9. Talba Pipeline (Sommarju)
 
-![Pipeline tat-talbiet (/v1/chat/completions)](../diagrams/exported/request-pipeline.svg)
+![Request pipeline (/v1/chat/completions)](../diagrams/exported/request-pipeline.svg)
 
 > Sors: [diagrams/request-pipeline.mmd](../diagrams/request-pipeline.mmd)
 
 ```
-Talbiet tal-klijent
+Client request
   → /v1/chat/completions (route.ts)
-     Kontroll ta' qabel CORS
-     Validazzjoni Zod (chatCompletionsSchema f'shared/validation/schemas.ts)
-     Awtorizzazzjoni (extractApiKey + isValidApiKey JEW requireManagementAuth)
-     Magna tal-politika (src/server/authz/pipeline.ts)
+     CORS preflight check
+     Zod validation (chatCompletionsSchema in shared/validation/schemas.ts)
+     Auth (extractApiKey + isValidApiKey OR requireManagementAuth)
+     Route authorization (src/server/authz/pipeline.ts)
+     API-key policy (src/shared/utils/apiKeyPolicy.ts; enforced on the selected path)
      Guardrails (PII masker, prompt injection, vision bridge)
   → handleChatCore() (open-sse/handlers/chatCore.ts)
-     Kontroll tal-cache (semantiku + cache tal-qari)
-     Limitu tar-rata (rateLimitManager, accountSemaphore)
-     Routing tal-combo (jekk il-mudell jirriżolvi għal combo)
-       comboResolver → loop għal kull mira → handleSingleModel()
+     Cache check (semantic + read cache)
+     Rate limit (rateLimitManager, accountSemaphore)
+     Combo routing (if model resolves to a combo)
+       resolveComboTargets (open-sse/services/combo.ts) → per-target dispatch
      translateRequest()  (open-sse/translator/request/*)
      getExecutor(providerId).execute()  (open-sse/executors/*)
-       fetch upstream → retry/backoff permezz ta' accountFallback
+       fetch upstream → retry/backoff via accountFallback
      translateResponse() (open-sse/translator/response/*)
-     Stream SSE JEW rispons JSON
-     Jekk Responses API: TransformStream permezz ta' open-sse/transformer/responsesTransformer.ts
-  → Verifika ta' konformità (src/lib/compliance/)
-  → Rispons lill-klijent
+     SSE stream OR JSON response
+     If Responses API: TransformStream via open-sse/transformer/responsesTransformer.ts
+  → Compliance audit (src/lib/compliance/)
+  → Response to client
 ```
 
-### Stat tar-runtime tar-reżiljenza (tliet mekkaniżmi)
+### Stat runtime ta' reżiljenza (tliet mekkaniżmi)
 
-| Mekkaniżmu                   | Ambitu                          | Fejn                                                                                                           |
-| ---------------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Circuit breaker tal-fornitur | Fornitur kollu                  | `src/shared/utils/circuitBreaker.ts`, persistut f'`domain_circuit_breakers`                                    |
-| Cooldown tal-konnessjoni     | Kont/ċavetta waħda              | `markAccountUnavailable()` f'`src/sse/services/auth.ts`; ikkunsmat minn `accountFallback.checkFallbackError()` |
-| Lockout tal-mudell           | Fornitur + konnessjoni + mudell | `open-sse/services/accountFallback.ts`, persistut f'`domain_lockout_state`                                     |
+| Mekkaniżmu               | Ambitu                          | Fejn                                                                                                            |
+| ------------------------ | ------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Fornitur circuit breaker | Fornitur sħiħ                   | `src/shared/utils/circuitBreaker.ts`, ppersistew fiż- `domain_circuit_breakers`                                 |
+| Tkessiħ tal-konnessjoni  | One account/key                 | `markAccountUnavailable()` in `src/sse/services/auth.ts`; ikkunsmat minn `accountFallback.checkFallbackError()` |
+| Mudell lockout           | Fornitur + konnessjoni + mudell | `open-sse/services/accountFallback.ts`, ppersistew fiż- `domain_lockout_state`                                  |
 
-Ara [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) u t-taqsima ddedikata f'
-[CLAUDE.md](../../CLAUDE.md).
+Ara [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) u s-sezzjoni dedikata fiz- [CLAUDE.md](../../CLAUDE.md).
 
 ---
 

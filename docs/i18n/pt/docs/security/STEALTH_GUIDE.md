@@ -139,40 +139,62 @@ Módulos relacionados no mesmo pacote:
 
 ---
 
-## Ocultação do Antigravity
+## Antigravity furtivo
 
-Os pedidos Antigravity preservam o texto do chamador byte por byte. O OmniRoute não insere caracteres de largura zero nos pedidos nem muda os nomes/injeta ferramentas para imitar um cliente IDE.
+Os pedidos Antigravity preservam o texto do chamador byte a byte. OmniRoute não insere caracteres de largura zero em prompts ou ferramentas rename/inject para imitar um cliente IDE.
 
 ### `antigravityHeaderScrub.ts`
 
-Remove os marcadores do SDK Stainless (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) antes do reencaminhamento.
+Tira marcadores SDK inoxidáveis (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) antes de encaminhar.
 
-### ⚠️ Risco: `ANTIGRAVITY_CREDITS=always` (ponto crítico para suspensão de contas)
+### Risco ⚠️ : `ANTIGRAVITY_CREDITS=always` (hot spot de ban de conta)
 
-`ANTIGRAVITY_CREDITS=always` (utilizado por `open-sse/executors/antigravity.ts`) encaminha **todos** os pedidos através dos Excedentes de Créditos de IA do Antigravity (créditos Google pagos), em vez de permitir que a quota do nível gratuito da Google limite a utilização. Isto está documentado como uma funcionalidade, mas é **o relatório de violação dos Termos de Serviço mais comum que recebemos** — várias contas Google Ultra foram suspensas com `403 / "service disabled for ToS violation" / insufficient_quota` após funcionarem durante algumas horas com `=always`.
+`ANTIGRAVITY_CREDITS=always` rotas (consumidas por `open-sse/executors/antigravity.ts`)** cada** solicitar através de Antigravity AI Credit Overages (créditos Google pagos) em vez de permitir que a quota de nível gratuito de Google bloqueie as coisas. Isto está documentado como um recurso, mas é** o relatório de violação de ToS mais comum que vemos** — múltiplas contas Google Ultra foram banidas do `403 / "service disabled for ToS violation" / insufficient_quota` depois de funcionarem durante algumas horas com `=always`.
 
-A aplicação das regras a montante ocorre **do lado da Google** e não é algo que o OmniRoute possa impedir. O nome da variável de ambiente e a documentação existente fazem com que pareça uma opção segura de ativar; não é.
+A aplicação upstream está ativada** lado de Google** , nada que OmniRoute possa evitar. O nome da variável env e os documentos existentes fazem com que esta pareça um botão seguro para rodar; não é.
 
-**Por que motivo isto aciona a deteção de abuso de forma mais agressiva do que a utilização exclusiva do nível gratuito:**
+**Porque é que isto atrai a deteção de abuso de forma mais agressiva do que o uso apenas no nível gratuito:**
 
-- Gastos automatizados contínuos numa única conta Google são sinalizados de forma diferente de utilizações do nível gratuito que atingem a quota e param.
-- Os excedentes de créditos não têm limite de taxa, pelo que um cliente mal configurado pode gastar várias centenas de USD em minutos e assemelhar-se à revenda de chaves de API ou a tráfego de bots.
-- Vários utilizadores do OmniRoute a consumirem créditos excedentes em paralelo a partir do mesmo IP externo agravam o sinal.
+- Os gastos automatizados sustentados numa única conta Google são sinalizados de forma diferente dos hits-quota-e-stops de nível gratuito.
+- Os excedentes de crédito não têm limite de taxa, pelo que um cliente mal configurado pode queimar várias centenas USD em minutos e parecer revenda de chaves API ou tráfego de bot.
+- Vários utilizadores OmniRoute a atingir créditos excedentes em paralelo do mesmo IP externo compõem o sinal.
 
 **Postura recomendada:**
 
-1. Manter a predefinição `ANTIGRAVITY_CREDITS=off`, a menos que o operador aceite explicitamente o risco de utilização de créditos pagos e de medidas contra a conta. `retry` envia primeiro o pedido normal e injeta créditos, no máximo, uma vez após um erro 429 de quota elegível; `always` injeta créditos no primeiro pedido.
-2. **Distribuir a carga por vários fornecedores através do Auto-Combo** (`model: "auto"` ou combo `kr/glm/etc`), em vez de saturar uma única conta Antigravity.
-3. **Definir limites de RPM por ligação** na página de edição do fornecedor Antigravity (Painel → Fornecedores → Antigravity → ligação → limite de taxa). 30–60 RPM é um limite máximo defensável para utilização contínua.
-4. **Utilizar uma rede a montante estável e controlada pelo operador** e evitar partilhar uma conta entre utilizadores ou cargas de trabalho não relacionados.
-5. **Em caso de suspensão**: recorrer através de `support.google.com` → "Restore Workspace/Account access", incluindo o corpo exato da resposta `quota_exceeded` / `service disabled` enviada pela Google. O restabelecimento não é garantido.
+1. Mantenha o `ANTIGRAVITY_CREDITS=off` padrão, a menos que a operadora aceite explicitamente o risco de crédito pago e de execução de conta. `retry` envia primeiro o pedido normal e injeta créditos no máximo uma vez após uma quota elegível 429; `always` injeta créditos no primeiro pedido.
+2. **Distribuir a carga entre os fornecedores via Auto-Combo** (`model: "auto"` ou `kr/glm/etc` -combo) em vez de saturar uma única conta Antigravity.
+3. **Definir limites RPM por ligação** na página de edição do fornecedor Antigravity (Dashboard → Providers → Antigravity → connection → rate limit). 30–60 RPM é um limite superior defensável para uma utilização sustentada.
+4. **Utilizar rede upstream estável e controlada pelo operador** e evite partilhar uma conta com utilizadores ou cargas de trabalho não relacionadas.
+5. **Se banido** : recurso via `support.google.com` → "Restaurar acesso Workspace/Account " com o corpo de resposta `quota_exceeded` / `service disabled` exato Google enviado. A restauração não é garantida.
 
-A referência das variáveis de ambiente documenta as implicações de cada modo de créditos para a conta e para os gastos.
+A referência ambiental documenta as implicações da conta e dos gastos de cada modo de créditos.
 
-Pontos de contacto:
+#### Não apenas `=always`: Antigravity OAuth encaminhamento em geral
+
+As suspensões não se limitam aos excedentes de crédito. Os relatórios de novembro de 2026 (#19223, #19266) descrevem várias contas Google suspensas durante o encaminhamento pelos fornecedores `antigravity` e `agy` (Antigravity CLI), com:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+Ambos os fornecedores se autenticam com a sessão OAuth do produto Antigravity, que é o caso que o aviso de risco do painel ("Este fornecedor utiliza o seu produto oficial session/OAuth, que não está autorizado para utilização proxy/router ") avisa antes de ser adicionada uma ligação. Nenhuma das recomendações acima referidas autoriza esta utilização; apenas reduzem a quantidade de tráfego que uma conta transporta.
+
+**Interfaces API autorizadas para modelos Gemini.** Google oferece acesso programático ao Gemini através do seu APIs, que OmniRoute suporta como fornecedores de chaves API comuns:
+
+| ID do fornecedor | Nome do painel             | Credencial                                                                        |
+| ---------------- | -------------------------- | --------------------------------------------------------------------------------- |
+| `gemini`         | Gemini (Google AI Estúdio) | Gemini API do Google AI Studio (nível gratuito disponível)                        |
+| `vertex`         | Vértice AI                 | Conta de serviço JSON, token de acesso OAuth ou chave API Vertex Express (Gemini) |
+
+Estes fornecedores utilizam as credenciais Google Issues para o acesso API, ao contrário da sessão do produto Antigravity. Não tornam todas as utilizações conformes nem eliminam o risco de aplicação: cada uma é regida pelos seus próprios termos, que o operador deve verificar para a sua implantação. Por exemplo, os [Termos de Serviço Adicionais Gemini API](https://ai.google.dev/gemini-api/terms) apenas permitem Serviços Pagos quando os clientes API são disponibilizados aos utilizadores no Espaço Económico Europeu, na Suíça ou no Reino Unido, e o conteúdo enviado para os Serviços Não Pagos pode ser utilizado para melhorar os produtos do Google. Em vez disso, o Vertex AI enquadra-se nos termos do Google Cloud ( [Termos Específicos do Serviço](https://cloud.google.com/terms/service-terms) ). Os preços e as quotas seguem os termos API, em vez de uma assinatura Antigravity.
+
+Os operadores que pretendam evitar as suspensões Antigravity descritas acima devem encaminhar o tráfego Gemini através de um destes fornecedores em vez do `antigravity` / `agy`, após verificarem se a sua utilização se enquadra nos termos do fornecedor.
+
+Pontos de toque:
 
 - `open-sse/executors/antigravity.ts` — lê `process.env.ANTIGRAVITY_CREDITS`
-- `src/lib/oauth/providers/antigravity.ts` — gestão das credenciais
+- canalização de credenciais `src/lib/oauth/providers/antigravity.ts` —
 - Relatório original do incidente: Discussão [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---

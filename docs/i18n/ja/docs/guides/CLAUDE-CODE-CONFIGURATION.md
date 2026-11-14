@@ -49,6 +49,53 @@ This is how Entra ID SSO works: `scripts/cli/omniroute-sso.mjs token` prints a s
 
 ---
 
+## 使用量の属性: セッションとプロジェクト
+
+OmniRoute各APIキーのリクエストをグループ化します。**エージェントセッション**そしてそれを記録します**プロジェクト**各セッションで作業が行われたため (`agent_sessions`テーブル)、チームメンバーごと、プロジェクトごと、セッションごとに使用量とコストをレポートできます。
+
+クライアントをセットアップせずに記録されるもの:
+
+| 分野         | ソース                                                                                                                                                 |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| セッション   | `x-claude-code-session-id`ヘッダー ( `metadata.user_id.session_id`と同じ値)、セッションごとに安定                                                      |
+| プロジェクト | `Primary working directory:`行Claudeコードが環境メッセージで送信します。 `.claude/worktrees/`の下のワークツリー フォルダーはリポジトリ名に解決されます |
+| 支店         | git status からの`Current branch:` Claudeコードは最初のメッセージとともに送信されます                                                                  |
+| クライアント | `user-agent` (`claude-cli/<version>`)                                                                                                                  |
+
+Codex (`<environment_context><cwd>`) とOpenCode (`x-opencode-session`) は同じように認識されます。キー付き**ログなし**有効にすると、セッション ID とヘッダーによって提供されたプロジェクト フィールドのみが保持されます。プロンプトから読み取られたもの (パス、ブランチ) は何も保存されません。
+
+### プロジェクトに明示的に名前を付ける (推奨)
+
+The working directory differs between machines, so the same repository can show up under different paths. Send the project explicitly instead: Claude Code adds any headers listed in `ANTHROPIC_CUSTOM_HEADERS` to every model request, and OmniRoute reads two of them:
+
+| ヘッダ                     | 価値                                                          |
+| -------------------------- | ------------------------------------------------------------- |
+| `x-omniroute-project`      | プロジェクト名、例: `omniroute`                               |
+| `x-omniroute-project-repo` | 正規化されたリモート、例: `github.com/diegosouzapw/OmniRoute` |
+
+どちらも帰属を確認するためにのみ読み取られます。上流のプロバイダーに転送されることはありません。
+
+`ANTHROPIC_CUSTOM_HEADERS`は起動時に 1 回読み取られ、設定ファイルにはリテラル値が保存されるため、 Claudeコードの起動時に計算されます。これを`~/.zshrc`または`~/.bashrc`に追加し、プロジェクト フォルダーから`claude`を起動し続けます。
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+`sed`式は、リモートURLに埋め込まれている資格情報をすべて削除します。 IDE拡張機能はシェルを使用せずにClaudeコードを起動するため、セッションは作業ディレクトリにフォールバックします。
+
+---
+
 ## ディスカバリエイリアス — `/model` ピッカーに Claude 以外のモデルを表示する
 
 Claude Code のゲートウェイモデルディスカバリは、`claude` または `anthropic` で始まる ID のみをリストアップします。そのため、`CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` を設定しても、ネイティブの `/model` ピッカーには通常 OmniRoute の Claude/Anthropic モデル**のみ**が表示され、`kimi/kimi-k2.6` や `glm/glm-5.2` はルーティングが正常に機能していても一切表示されません。

@@ -224,36 +224,38 @@ Burada belgelenen ilk karışıklık için
 [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) ve
 [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) bölümlerine bakın.
 
-## Nasıl Çalışır (Kalıcı Otomatik Kombolar)
+## Nasıl Çalışır (Sürekli Otomatik Kombinasyonlar)
 
-Otomatik Kombo Motoru, **16 faktörlü bir puanlama işlevi** (`open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS` içinde tanımlanmıştır) kullanarak her istek için en iyi sağlayıcıyı/modeli dinamik olarak seçer. Varsayılan ağırlıkların toplamı `1.0` değerindedir; özel ağırlıklar `normalizeScoringWeights()` tarafından yeniden normalize edilir. On altı faktörden ikisi — `cacheAffinity` ve `resetWindowAffinity` — varsayılan olarak `0` ağırlığına sahiptir; `reliability`, `DEFAULT_WEIGHTS` içinde `0`, genel paketlerde ise `0.03` ve `reliability-first` paketinde `0.04` ağırlığına sahiptir; `quality` ise paketlerde `0.02` (`quality-first` paketinde `0.03`) ağırlığına sahiptir: bunlar yine de her aday için hesaplanır ve `cacheAffinity`, puanın dışında istem önbelleği tekilleştirmesini denetler; dolayısıyla varsayılan ağırlığı sıfır olan faktörler varsayılan olarak seçime katkıda bulunmazken paketlerde katkıda bulunur.
+Auto-Combo Engine, bir komut kullanarak her istek için en iyi provider/model dinamik olarak seçer.** 16 faktörlü puanlama fonksiyonu** ( `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS` tanımlıdır). Varsayılan ağırlıkların toplamı `1.0`; özel ağırlıklar `normalizeScoringWeights()` tarafından yeniden normalleştirilir. On altı — `cacheAffinity` ve `resetWindowAffinity` — ikisi varsayılan olarak `0` ağırlığını taşır; `reliability` `DEFAULT_WEIGHTS` `0` taşır, ancak genel paketlerde `0.03` ve `reliability-first` `0.04` ve `quality`, paketlerde `0.02` taşır (`0.03` `quality-first`): bunlar hâlâ her aday için hesaplanır ve `cacheAffinity` geçitleri, puanın dışında istemli önbellek tekilleştirmeyi gerçekleştirir, dolayısıyla sıfır varsayılan faktörler, paketler oy verirken varsayılan olarak oy vermez.
 
-![Otomatik Kombo 16 faktörlü puanlama](../diagrams/exported/auto-combo-scoring.svg)
+![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
-> Kaynak: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (`npm run docs:render-diagrams` aracılığıyla yeniden oluşturun). Dosya adı geçmişten kalmadır; kaynak ve oluşturulan diyagram, `DEFAULT_WEIGHTS` içinde bildirilen 16 faktörün tamamını gösterir.
+> Kaynak: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) ( `npm run docs:render-diagrams` aracılığıyla yeniden oluşturun). Dosya adı tarihseldir; kaynak ve oluşturulan diyagram `DEFAULT_WEIGHTS` bildirilen 16 faktörün tamamını gösterir.
 
-| Faktör                | Varsayılan Ağırlık | Açıklama                                                                                                                                                                                                                                                |
-| :-------------------- | :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `quota`               | 0.1429             | Kalan kota / hız sınırı boşluğu [0..1]                                                                                                                                                                                                                  |
-| `health`              | 0.1605             | Devre kesiciden alınan sağlık puanı (CLOSED=1.0, HALF_OPEN=0.5, OPEN=0.0)                                                                                                                                                                               |
-| `costInv`             | 0.1429             | Tersine çevrilmiş **harmanlanmış** maliyet (%60 girdi + %40 çıktı token fiyatı, normalize edilmiş) — daha ucuz = daha yüksek puan                                                                                                                       |
-| `latencyInv`          | 0.1143             | Havuza göre normalize edilmiş tersine çevrilmiş p95 gecikme — daha hızlı = daha yüksek puan                                                                                                                                                             |
-| `taskFit`             | 0.0762             | Görev türü uygunluğu (kodlama, inceleme, planlama, analiz, hata ayıklama, dokümantasyon)                                                                                                                                                                |
-| `stability`           | 0.0476             | Gecikme standart sapmasına dayalı varyans tabanlı kararlılık — yanıt süresi dalgalanan bir aday daha düşük puan alır                                                                                                                                    |
-| `tierPriority`        | 0.0476             | Hesap katmanı önceliği — Ultra=1.0, Pro=0.67, Standard=0.33, Free=0.0                                                                                                                                                                                   |
-| `tierAffinity`        | 0.0476             | Adayın katmanı ile manifest tarafından önerilen katman arasındaki yakınlık                                                                                                                                                                              |
-| `specificityMatch`    | 0.0476             | İstek özgüllüğü (manifest ipucu) ile model katmanı arasındaki eşleşme                                                                                                                                                                                   |
-| `contextAffinity`     | 0.0476             | İsteğin bağlam penceresi gereksinimi ile modelin bağlam penceresi arasındaki yakınlık                                                                                                                                                                   |
-| `sessionAvailability` | 0.0476             | Bu oturum için aday bağlantının OAuth oturumu kullanılabilirliği (`getOAuthSessionAvailability()`; OAuth dışı bağlantılar 1.0 puan alır)                                                                                                                |
-| `connectionDensity`   | 0.0476             | Yükü aynı sağlayıcının bağlantıları arasında dağıtır (yoğunlaşma karşıtı)                                                                                                                                                                               |
-| `cacheAffinity`       | 0.00               | Bu isteğin istem önbelleği önekini hâlihazırda barındırma olasılığı en yüksek bağlantıya yönelik buluşma karması yakınlığı (`open-sse/services/combo/promptCacheAffinity.ts`); varsayılan olarak devre dışıdır (#8008)                                  |
-| `resetWindowAffinity` | 0.00               | Kota sıfırlama penceresi elverişli olan bağlantılara yönelik tercih (varsayılan olarak devre dışıdır)                                                                                                                                                   |
-| `quality`             | 0.03               | Yönlendirme olayı kalite izleyicisinden alınan, geri bildirime dayalı çıktı kalitesi sinyali; gözlemi olmayan adaylar nötr 0.5 değeri alır                                                                                                              |
-| `reliability`         | 0.00               | On örneklik alt sınırın ardındaki 24 saatlik kullanım geçmişinden (aksi hâlde gerçek zamanlı metriklerden) elde edilen gözlemlenmiş başarı payı, `1 - failureRate`; gözlemi olmayan adaylar 1.0 olarak değerlendirilir. Varsayılan olarak devre dışıdır |
+| Faktör                | Varsayılan Ağırlık | Tanım                                                                                                                                                                                                                   |
+| :-------------------- | :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `quota`               | 0.1429             | Kalan kota / hız sınırı boşluğu [0..1]                                                                                                                                                                                  |
+| `health`              | 0.1605             | Devre kesiciden gelen sağlık puanı (CLOSED= 1,0, HALF_OPEN= 0,5, OPEN= 0,0)                                                                                                                                             |
+| `costInv`             | 0.1429             | Ters** harmanlanmış** maliyet (%60 girdi + %40 çıktı token fiyatı, normalleştirilmiş) — daha ucuz = daha yüksek puan                                                                                                    |
+| `latencyInv`          | 0.1143             | — daha hızlı = daha yüksek puan alması için ters p95 gecikmesi normalleştirildi                                                                                                                                         |
+| `taskFit`             | 0.0762             | Görev türü uygunluğu (kodlama, inceleme, planlama, analiz, hata ayıklama, dokümanlar)                                                                                                                                   |
+| `stability`           | 0.0476             | Gecikme standart sapmasından varyansa dayalı kararlılık — Tepki süresinde değişiklik gösteren bir adayın puanları daha düşük olur                                                                                       |
+| `tierPriority`        | 0.0476             | Hesap katmanı önceliği — Ultra = 1.0, Pro = 0.67, Standard = 0.33, Free = 0.0                                                                                                                                           |
+| `tierAffinity`        | 0.0476             | Adayın katmanı ile manifestte önerilen katman arasındaki yakınlık                                                                                                                                                       |
+| `specificityMatch`    | 0.0476             | İstek özgüllüğü (açık ipucu) ile model katmanı arasındaki eşleşme                                                                                                                                                       |
+| `contextAffinity`     | 0.0476             | İsteğin bağlam penceresi ihtiyacı ile modelin bağlam penceresi arasındaki yakınlık                                                                                                                                      |
+| `sessionAvailability` | 0.0476             | Bu oturum için aday bağlantının OAuth oturumu kullanılabilirliği (`getOAuthSessionAvailability()`; OAuth olmayan bağlantılar puanı 1,0)                                                                                 |
+| `connectionDensity`   | 0.0476             | Yükü aynı sağlayıcının bağlantıları arasında dağıtır (yoğunlaşmayı önleme)                                                                                                                                              |
+| `cacheAffinity`       | 0.00               | Bu isteğin istem-önbellek önekini (`open-sse/services/combo/promptCacheAffinity.ts`) zaten tutması en muhtemel bağlantıya yönelik buluşma karma yakınlığı; varsayılan olarak devre dışı (#8008)                         |
+| `resetWindowAffinity` | 0.00               | Kota sıfırlama aralığı uygun olan bağlantılara yönelik önyargı (varsayılan olarak devre dışıdır)                                                                                                                        |
+| `quality`             | 0.03               | Yönlendirme olayı kalitesi izleyicisinden gelen geri bildirime dayalı çıktı kalitesi sinyali; gözlemi olmayan adaylar nötr 0,5 alırlar                                                                                  |
+| `reliability`         | 0.00               | On örnek tabanın arkasındaki 24 saatlik kullanım geçmişinden gözlemlenen başarı payı ( `1 - failureRate`) (aksi halde gerçek zamanlı ölçümler); gözlemi olmayan adaylar 1.0 olarak okunur. Varsayılan olarak devre dışı |
 
-`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+Bellek içi `quality` izleyici (`open-sse/services/routing/quality.ts`), soğuk yeniden başlatmanın ardından boştur, dolayısıyla her aday, ilk gözlemler gelene kadar nötr bir `0.5` puanı alır.
 
-**Toplam:** `DEFAULT_WEIGHTS` içinde bildirildiği üzere `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0`; kullanıcı tarafından yapılandırılan ağırlıklar, puanlamadan önce `normalizeScoringWeights()` tarafından bir dağılım hâline gelecek şekilde yeniden normalize edilir.
+> **Okunamayan kota (#15347).** Bir sağlayıcının bir kota alıcısı varsa ancak okunabilir hiçbir şey döndürmediğinde (başarısız getirme, eksik kimlik bilgileri, yalnızca mesaj kullanımı veya ayrıştırılabilir `windows` olmayan ve `percentUsed: null` dahil sonlu `percentUsed` olmayan hatalı biçimlendirilmiş bir anlık görüntü), aday `quota` ekseninde `0` puanı alır ve nihai puanı `UNREADABLE_QUOTA_SOFT_DEPRIORITIZE_FACTOR` (0,5, `autoStrategy.ts`) ile çarpılır; bu, bağlantı durumu cezasıyla aynı yumuşak ceza modelidir. Başarısız bir kullanım okuması, sağlayıcıyla değil telemetriyle ilgili bir kanıttır; bu nedenle, onaylanmış %100 -used de dahil olmak üzere herhangi bir gerçek okumanın kesinlikle altında yer alır, ancak hiçbir zaman sabit olarak engellenmez veya tahliye edilmez. Sınırı olmayan bir sağlayıcı `unlimited: true` bildirir ve kotanın tamamı olarak puan verir; kayıtlı kota alıcısı olmayan bir sağlayıcının hiçbir telemetri kaynağı yoktur ve varsayılan `100` değerini korur.
+
+**Toplam:** `DEFAULT_WEIGHTS` bildirildiği gibi `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` ; Kullanıcı tarafından yapılandırılan ağırlıklar, puanlamadan önce `normalizeScoringWeights()` tarafından bir dağılım halinde yeniden normalleştirilir.
 
 ## Mod Paketleri
 
@@ -317,34 +319,36 @@ curl -sS http://localhost:20128/v1/chat/completions \
 
 ## Tüm Yönlendirme Stratejileri
 
-OmniRoute birleşik motor destekleri** 20 yönlendirme stratejisi** ( `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES` bildirildi). Auto Combo motorunun kendisi `auto` stratejisi kapsamında ortaya çıkıyor; diğerleri kalıcı kombinasyonlar için kullanılabilir.
+OmniRoute birleşik motor destekleri** 22 yönlendirme stratejisi** ( `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES` bildirildi). Auto Combo motorunun kendisi `auto` stratejisi kapsamında ortaya çıkıyor; diğerleri kalıcı kombinasyonlar için kullanılabilir.
 
-| Strateji            | Tanım                                                                                                                                                                                                            |
-| :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | Açık önceliğe sahip ilk hedef sıralı liste                                                                                                                                                                       |
-| `weighted`          | Hedef ağırlığa göre rastgele ağırlıklandırılmış                                                                                                                                                                  |
-| `round-robin`       | Hedefler arasında sırayla geçiş yapın (toplu; aşağıya bakın)                                                                                                                                                     |
-| `context-relay`     | Hedefler arasında bağlamın dağıtılması (uzun konuşmalar)                                                                                                                                                         |
-| `fill-first`        | Bir sonrakine geçmeden önce her hedefin kotasını doldurun                                                                                                                                                        |
-| `p2c`               | Power-of-2-choices rastgele yük dengeleme                                                                                                                                                                        |
-| `random`            | Tek tip rastgele seçim                                                                                                                                                                                           |
-| `least-used`        | En düşük akım yüküne sahip hedefi seç                                                                                                                                                                            |
-| `cost-optimized`    | Katalog fiyatlandırmasına göre istek başına $'ı en aza indirin                                                                                                                                                   |
-| `reset-aware` ⭐    | Kota sıfırlama süresine göre önceliklendirin — kısa sıfırlama aralıkları daha üst sıralarda yer alır                                                                                                             |
-| `reset-window`      | Kota penceresi en kısa sürede sıfırlanan hedefleri tercih edin                                                                                                                                                   |
-| `headroom`          | En fazla kota boşluğuna sahip hedefi seçin                                                                                                                                                                       |
-| `quota-weighted`    | Tükenen hesapları atlayın, ardından kalan kotanın uçuş sırasındaki yüke bölünmesiyle orantılı olarak geri kalanlar arasından seçim yapın; mevcut görüşmeler sabit kalıyor                                        |
-| `strict-random`     | Tekrarların tekilleştirilmesi olmadan rastgele                                                                                                                                                                   |
-| `auto`              | Otomatik Birleşik puanlamayı (16 faktörlü) — kullanın** tavsiye edilen**                                                                                                                                         |
-| `lkgp`              | Bilinen Son İyi Yol (son başarılı sağlayıcıya sabitlenir, ardından kurallara geri döner)                                                                                                                         |
-| `context-optimized` | Mevcut bağlam boyutuna en uygun hedefi seçin                                                                                                                                                                     |
-| `cache-optimized`   | Hedefleri istem-önbellek benzeşimine göre yeniden sıralayın — bu isteğin önbelleğe alınmış önekini zaten tutması en muhtemel bağlantı ilk önce denenir (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | Modellerden oluşan bir paneli paralel olarak genişletin, ardından bir jüri aracılığıyla bir cevabı sentezleyin (aşağıya bakın)                                                                                   |
-| `pipeline`          | Her adımın çıktısını bir sonraki adımın girdisine aktararak hedefleri sırayla çalıştırın; yalnızca son yanıt döndürülür (#6396)                                                                                  |
+| Strateji            | Tanım                                                                                                                                                                                                                                             |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `priority`          | Açık önceliğe sahip ilk hedef sıralı liste                                                                                                                                                                                                        |
+| `weighted`          | Hedef ağırlığa göre rastgele ağırlıklandırılmış                                                                                                                                                                                                   |
+| `round-robin`       | Hedefler arasında sırayla geçiş yapın (toplu; aşağıya bakın)                                                                                                                                                                                      |
+| `context-relay`     | Hedefler arasında bağlamın dağıtılması (uzun konuşmalar)                                                                                                                                                                                          |
+| `fill-first`        | Bir sonrakine geçmeden önce her hedefin kotasını doldurun                                                                                                                                                                                         |
+| `p2c`               | Power-of-2-choices rastgele yük dengeleme                                                                                                                                                                                                         |
+| `random`            | Tek tip rastgele seçim                                                                                                                                                                                                                            |
+| `least-used`        | En düşük akım yüküne sahip hedefi seç                                                                                                                                                                                                             |
+| `cost-optimized`    | Katalog fiyatlandırmasına göre istek başına $'ı en aza indirin                                                                                                                                                                                    |
+| `reset-aware` ⭐    | Kota sıfırlama süresine göre önceliklendirin — kısa sıfırlama aralıkları daha üst sıralarda yer alır                                                                                                                                              |
+| `reset-window`      | Kota penceresi en kısa sürede sıfırlanan hedefleri tercih edin                                                                                                                                                                                    |
+| `expiry-first`      | Aksi takdirde kotası kullanılmadan dolacak olan hesabı ilk önce harcayın — en yakın sıfırlama tarihine kadar kalan en yüksek miktar ilk önce gider                                                                                                |
+| `headroom`          | En fazla kota boşluğuna sahip hedefi seçin                                                                                                                                                                                                        |
+| `quota-weighted`    | Tükenen hesapları atlayın, ardından kalan kotanın uçuş sırasındaki yüke bölünmesiyle orantılı olarak geri kalanlar arasından seçim yapın; mevcut görüşmeler sabit kalıyor                                                                         |
+| `strict-random`     | Tekrarların tekilleştirilmesi olmadan rastgele                                                                                                                                                                                                    |
+| `auto`              | Otomatik Birleşik puanlamayı (16 faktörlü) — kullanın** tavsiye edilen**                                                                                                                                                                          |
+| `lkgp`              | Bilinen Son İyi Yol (son başarılı sağlayıcıya sabitlenir, ardından kurallara geri döner)                                                                                                                                                          |
+| `context-optimized` | Mevcut bağlam boyutuna en uygun hedefi seçin                                                                                                                                                                                                      |
+| `cache-optimized`   | Hedefleri istem-önbellek benzeşimine göre yeniden sıralayın — bu isteğin önbelleğe alınmış önekini zaten tutması en muhtemel bağlantı ilk önce denenir (`open-sse/services/combo/promptCacheAffinity.ts`, #8008)                                  |
+| `fusion` 🧬         | Modellerden oluşan bir paneli paralel olarak genişletin, ardından bir jüri aracılığıyla bir cevabı sentezleyin (aşağıya bakın)                                                                                                                    |
+| `pipeline`          | Her adımın çıktısını bir sonraki adımın girdisine aktararak hedefleri sırayla çalıştırın; yalnızca son yanıt döndürülür (#6396)                                                                                                                   |
+| `jev`               | Kullanıcı dereceli tercih listesi; TypeSafe Jev, bu istek için hangi girişlerin çalıştırıldığını kabul ediyor. Önce kazanan, kabul edilen diğer hedefler kullanıcı sırasını korur. Jev kullanılamadığında kullanıcı siparişine açık olur (#15276) |
 
 ⭐ = v3.8.0'daki yenilikler · 🧬 = v3.8.36'daki yenilikler
 
-### `weighted` anlambilimi
+### `weighted` semantiği
 
 `weighted` bir** istek başına orantılı rastgele çekiliş** (`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), ekolayzır değil:
 
@@ -358,6 +362,20 @@ Kesin rotasyon için `round-robin` kullanın; `weighted` üzerindeki eşit ağı
 ### Ajan boru hattı modu
 
 En az iki modele sahip bir `pipeline` kombinasyonu, `config.agenticOrchestration.enabled` ile planner/executor yönlendirmeyi tercih edebilir. İlk hedef planlama ve nihai cevaplara sahiptir; ikinci hedef istemciye özgü araç çağrıları yayar. OmniRoute istek protokolünden gelen araç-sonuç devamlılıklarını tespit eder, planlayıcıya başka bir araç turunun gerekli olup olmadığını sorar ve dinamik olarak yürütücüyü veya planlayıcıyı müşteriye yönelik son adım yapar.
+
+İsteğe bağlı `config.agenticOrchestration.contextCompaction` her planlayıcı veya uygulayıcı gönderiminden önce ayrı bir yük bütçesi uygular. Açıkça etkinleştirin:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Bunlar, belirteç bağlam pencereleri veya garanti edilen yukarı akış sınırları değil, operatör tarafından seçilen serileştirilmiş JSON karakter bütçeleridir. Tam model IDs varsayılanı geçersiz kılar. Eşiğin üzerinde sıkıştırma, aynı takım tanımlarını kaldırır, büyük boyutlu takım kanıtlarını bir özet ile kırpar ve eski tam geçmiş gruplarını hedef orana doğru kaldırır. system/developer talimatlarını, en son kullanıcı isteğini, paralel calls/results dahil son araç turunu ve Gemini önde gelen yönlendirme talimatını korur. Üst düzey talimatlar ve araç ayarları korunur. Bir ihmal işaretleyicisi, kaldırılan geçmişi kaydeder; bu deterministik bir düzeltmedir, anlamsal bir özet değil. Sabitlenmiş bağlam hâlâ bütçeyi aşıyorsa istek, modelle iletişime geçmeden önce 413 değerini döndürür. Sıkıştırma devre dışı bırakıldığında veya eşiğin altındayken istek değişmeden geçer.
 
 Araç-sonucu devamlılıklarında OmniRoute, birbirini takip eden iki tamamlanmış tur aynı araç çağrılarını değişmeden sonuçlarla tekrarladığında veya ardışık iki turda açıkça işaretlenen her sonuç başarısız olduğunda yürütmeyi durdurur. Değiştirilen sonuçlar tekrarlanan aramalara (örneğin yoklama) izin verir. Koruma, yeni bir kullanıcı isteği üzerine sıfırlanır, paralel çağrıları tek bir turda gruplandırır ve Anthropic, Sohbet Tamamlamaları, Yanıtlar ve Gemini geçmişlerini destekler. Planlayıcı nedeni alır ve başka bir araç turu talep etse bile nihai cevabın sahibi olur.
 
@@ -380,7 +398,7 @@ Yürütücü tek bir yanıtta birden fazla bağımsız çağrı yapabilir. Bağ�
 Round-robin, adım başına bir istek yerine toplu olarak gerçekleştirilir:
 
 - `stickyRoundRobinLimit` (birleşik yapılandırma, ardından `comboStickyRoundRobinLimit`, ardından `settings.stickyRoundRobinLimit`, varsayılan** 3** ) dönmeden önce art arda birçok başarı için aynı hedefi korur. Tek istek rotasyonu için kombo geçersiz kılmayı `1` olarak ayarlayın. Birleşik düzenleyici, etkin değeri ve bunun hangi katmandan geldiğini gösterir.
-- `connectionAwareExpansion` (birleşik yapılandırma, ardından ayarlar, varsayılan** YANLIŞ** ), sağlayıcı düzeyindeki her adımı rotasyondan önce hesap başına hedeflere genişletir. Grup B stratejileri (öncelik, ağırlıklı, hepsini bir kez deneme, rastgele, p2c, en az kullanılan, maliyet açısından optimize edilmiş, lkgp, ilk önce doldur, katı rastgele, bağlam açısından optimize edilmiş, önbellek için optimize edilmiş, bağlam aktarımı, füzyon, boru hattı), bu açık olana kadar sağlayıcı düzeyinde bir görünümü korur. Birleşik düzenleyici, devralmayı / açmayı / kapatmayı gösterir; inherit genel varsayılanı (kapalı) kullanır.
+- `connectionAwareExpansion` (birleşik yapılandırma, ardından ayarlar, varsayılan** YANLIŞ** ), sağlayıcı düzeyindeki her adımı rotasyondan önce hesap başına hedeflere genişletir. Grup B stratejileri (öncelik, ağırlıklı, hepsini bir kez deneme, rastgele, p2c, en az kullanılan, maliyet açısından optimize edilmiş, lkgp, ilk önce doldur, katı rastgele, bağlam açısından optimize edilmiş, önbellek için optimize edilmiş, bağlam aktarımı, füzyon, boru hattı, jev), bu açık olana kadar sağlayıcı düzeyinde bir görünüm korur. Birleşik düzenleyici, devralmayı / açmayı / kapatmayı gösterir; inherit genel varsayılanı (kapalı) kullanır.
 - İstem önbellek konumu yönlendirmesi (`promptCacheAffinityEnabled`, varsayılan** doğru** ) eşleşen önbellek anahtarlarının tek bir hesapta kalması için sabitlenmiş bağlantıları yeniden sıralar. Hesap başına sabitlenmiş adımlar boyunca çevrimsel ve ağırlıklı rotasyona göre önceliklidir. Katı rotasyona ihtiyacınız varsa Ayarlar → Birleşik varsayılanlar altında bunu kapatın. Kombinasyon başına geçersiz kılma yoktur.
 
 Tek bir modelde çoklu hesap rotasyonu için şunu tercih edin:** tek dinamik hesap adımı** (boş `connectionId`, tüm havuz) yapışkan limitli `1`, üç sabitlenmiş `connectionId` s değil. Sabitlenmiş adımlar artı benzeşim, RR sayacı ilerlerken bile aynı hesaba çöker.
@@ -851,42 +869,37 @@ Katman tanımları ve sağlayıcı sınıflandırması için [`docs/guides/TIERS
 
 ### Deterministik yönlendirme-karar matrisi (`npm run test:combo:matrix`)
 
-`tests/integration/combo-matrix/*.test.ts`, gerçek combo işlem hattı ve sahte bir üst hizmet
-üzerinden 19 genel stratejinin tamamının uçtan uca yönlendirme **kararını** doğrular.
-Kapsam şunları içerir:
+`tests/integration/combo-matrix/*.test.ts` yönlendirmeyi kanıtlıyor** karar** 21 genel stratejinin tümünün, sahte bir yukarı akışla gerçek birleşik boru hattı aracılığıyla uçtan uca. Kapsam şunları içerir:
 
-- 19 `ROUTING_STRATEGY_VALUES` stratejisinin tamamı (ordered, weighted, cost, context, fusion, …).
-- `quota-share` (dahili) uçtan uca: gerçek `selectQuotaShareTarget` bağlantı noktası üzerinden DRR adaleti + doygunluk durumunda önceliğin düşürülmesi (`registerQuotaFetcher` / `setLKGP` /
-  `__setHeadroomSaturationFetcherForTests`).
-- Her hedef sayısı genelinde `context-relay` evrensel devir kapsamı.
+- 21 `ROUTING_STRATEGY_VALUES` stratejisinin tümü (sıralı, ağırlıklı, maliyet, bağlam, füzyon,…).
+- `quota-share` (dahili) uçtan uca: gerçek `selectQuotaShareTarget` dikişi (`registerQuotaFetcher` / `setLKGP` / `__setHeadroomSaturationFetcherForTests`) aracılığıyla DRR adaleti + doygunluğunun önceliklendirilmesi.
+- Her hedef sayısında `context-relay` evrensel aktarım kapsamı.
 
-Bu paket, deterministik olması ve canlı kimlik bilgileri gerektirmemesi için CI'da (`test:integration` işi)
-`--test-concurrency=1` ve `--test-force-exit` ile çalıştırılır.
+Bu paket, `--test-concurrency=1` ve `--test-force-exit` ile CI (`test:integration` job) ile çalışır, dolayısıyla deterministiktir ve canlı kimlik bilgileri gerektirmez.
 
-### Koşullu canlı smoke testi (CI'da DEĞİL — gerçek sağlayıcılar)
+### Geçitli canlı duman ( CI — gerçek sağlayıcılarda NOT )
 
-| Komut                                  | Ne yapar                                                                                                 |
-| :------------------------------------- | :------------------------------------------------------------------------------------------------------- |
-| `npm run test:combo:live`              | `RUN_COMBO_LIVE=1` ile işlem içi gerçek yönlendirme; canlı bir OmniRoute DB'sinin anlık görüntüsünü alır |
-| `npm run test:combo:live:vps`          | Canlı bir OmniRoute sunucusuna HTTP çağrıları yapar (`COMBO_LIVE_BASE_URL` değerini ayarlayın)           |
-| `npm run test:combo:live:vps:failover` | Aynı işlemi kasıtlı yük devretme senaryolarıyla gerçekleştirir                                           |
+| Emretmek                               | Ne işe yarar                                                                                  |
+| :------------------------------------- | :-------------------------------------------------------------------------------------------- |
+| `npm run test:combo:live`              | `RUN_COMBO_LIVE=1` ile süreç içi gerçek yönlendirme; canlı bir OmniRoute DB anlık görüntüleri |
+| `npm run test:combo:live:vps`          | canlı bir OmniRoute sunucusuna karşı HTTP çağrıları ( `COMBO_LIVE_BASE_URL` ayarlayın)        |
+| `npm run test:combo:live:vps:failover` | Kasıtlı yük devretme senaryolarında da durum aynıdır                                          |
 
-Bu smoke testleri gerçek bağlantı yolunu (combo → sağlayıcı → tamamlama) çalıştırır. Canlı kimlik
-bilgileri ve VPS erişimi gerektirdikleri için kasıtlı olarak CI kapsamı dışında tutulurlar.
+Bu duman testleri gerçek kablo yolunu (kombinasyon → sağlayıcısı → tamamlama) uygular. Canlı kimlik bilgileri ve VPS erişimi gerektirdiğinden kasıtlı olarak CI hariç tutulurlar.
 
 ---
 
 ## Dosyalar
 
-| Dosya                                                     | Amaç                                                                                                                      |
-| :-------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------ |
-| `open-sse/services/autoCombo/scoring.ts`                  | 16 faktörlü puanlama işlevi, `DEFAULT_WEIGHTS`, havuz normalizasyonu                                                      |
-| `open-sse/services/autoCombo/taskFitness.ts`              | Model × görev uygunluğu araması                                                                                           |
-| `open-sse/services/autoCombo/engine.ts`                   | Seçim mantığı, bandit, bütçe sınırı                                                                                       |
-| `open-sse/services/autoCombo/selfHealing.ts`              | Hariç tutma, problar, olay modu                                                                                           |
-| `open-sse/services/autoCombo/modePacks.ts`                | 6 ağırlık profili (hızlı yayın, maliyet tasarrufu, kalite öncelikli, çevrimdışı dostu, güvenilirlik öncelikli, kaos modu) |
-| `open-sse/services/autoCombo/autoPrefix.ts`               | `auto/` önek ayrıştırıcısı + 6 varyant                                                                                    |
-| `open-sse/services/autoCombo/virtualFactory.ts`           | Canlı bağlantılardan bellek içi `AutoComboConfig` oluşturur                                                               |
-| `open-sse/services/autoCombo/providerRegistryAccessor.ts` | Sağlayıcı kayıt defterini taklit etmek için test kancası                                                                  |
-| `src/shared/constants/routingStrategies.ts`               | `ROUTING_STRATEGY_VALUES` (20 strateji)                                                                                   |
-| `src/sse/handlers/chat.ts`                                | Entegrasyon: auto-prefix kısa devresi                                                                                     |
+| Dosya                                                     | Amaç                                                                                                               |
+| :-------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------- |
+| `open-sse/services/autoCombo/scoring.ts`                  | 16 faktörlü puanlama fonksiyonu, `DEFAULT_WEIGHTS`, havuz normu                                                    |
+| `open-sse/services/autoCombo/taskFitness.ts`              | Model × görev uygunluğu araması                                                                                    |
+| `open-sse/services/autoCombo/engine.ts`                   | Seçim mantığı, haydut, bütçe sınırı                                                                                |
+| `open-sse/services/autoCombo/selfHealing.ts`              | Hariç tutma, sondalar, olay modu                                                                                   |
+| `open-sse/services/autoCombo/modePacks.ts`                | 6 ağırlık profili (hızlı gönderim, maliyet tasarrufu, önce kalite, çevrimdışı dostu, önce güvenilirlik, kaos modu) |
+| `open-sse/services/autoCombo/autoPrefix.ts`               | `auto/` önek ayrıştırıcısı + 6 çeşitleri                                                                           |
+| `open-sse/services/autoCombo/virtualFactory.ts`           | Canlı bağlantılardan bellek içi `AutoComboConfig` oluşturur                                                        |
+| `open-sse/services/autoCombo/providerRegistryAccessor.ts` | Sağlayıcı kayıt defterini taklit etmek için test kancası                                                           |
+| `src/shared/constants/routingStrategies.ts`               | `ROUTING_STRATEGY_VALUES` (22 strateji)                                                                            |
+| `src/sse/handlers/chat.ts`                                | Entegrasyon: otomatik önek kısa devre                                                                              |

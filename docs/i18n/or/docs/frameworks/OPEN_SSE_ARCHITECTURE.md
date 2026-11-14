@@ -165,30 +165,30 @@ needsTranslation(source, target): boolean
 
 ---
 
-## ମୁଖ୍ୟ ଫାଇଲଗୁଡ଼ିକର ଗଭୀର ବିଶ୍ଳେଷଣ
+## କି ଫାଇଲଗୁଡିକ ଗଭୀର-ଡାଇଭ୍।
 
-### chatCore.ts (5977 ଧାଡ଼ି)
+### chatCore.ts (5977 ରେଖା)
 
-**ମୁଖ୍ୟ ଅନୁରୋଧ ପରିଚାଳକ (request handler)**। ଏହାର ଆକାର ସତ୍ତ୍ୱେ, ଏହାର ଏକ ସ୍ପଷ୍ଟ ସଂରଚନା ଅଛି:
+The** ମୁଖ୍ୟ ଅନୁରୋଧ ନିୟନ୍ତ୍ରକ।** । ଏହାର ଆକାର ସତ୍ତ୍ it େ ଏହାର ଏକ ସ୍ପଷ୍ଟ ଗଠନ ଅଛି:
 
 ```ts
-// chatCore.ts ର ଛଦ୍ମ-ସଂରଚନା
+// Pseudo-structure of chatCore.ts
 export async function handleChat(request: NextRequest) {
-  // 1. ପ୍ରାମାଣୀକରଣ (Auth) + CORS
+  // 1. Auth + CORS
   await authenticateRequest(request);
   applyCorsHeaders(response);
 
-  // 2. Body ବୈଧତା ଯାଞ୍ଚ
+  // 2. Body validation
   const body = await parseRequestBody(request);
 
-  // 3. Format ଚିହ୍ନଟ + ଅନୁବାଦ
+  // 3. Format detection + translation
   const sourceFormat = detectFormat(request);
   const targetFormat = getTargetFormat(providerId);
   if (needsTranslation(sourceFormat, targetFormat)) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. Combo ରାଉଟିଂ
+  // 4. Combo routing
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -196,20 +196,20 @@ export async function handleChat(request: NextRequest) {
       await recordUsage(result);
       return result;
     } catch (err) {
-      // ପରବର୍ତ୍ତୀ target କୁ ଆଗକୁ ବଢ଼ନ୍ତୁ
+      // Continue to next target
     }
   }
 
-  // 5. ଜରୁରୀକାଳୀନ fallback
+  // 5. Emergency fallback
   return await emergencyFallback(body);
 }
 ```
 
-ଏହା ଗୋଟିଏ ବିଶାଳ ଫଙ୍କସନ୍ ହେଲେ ମଧ୍ୟ, ଏହା **ମନ୍ତବ୍ୟ-ଚିହ୍ନିତ ବିଭାଗଗୁଡ଼ିକରେ** ସଜାଡ଼ା ହୋଇଛି ଯାହା 5-ପର୍ଯ୍ୟାୟ pipeline ସହ ମେଳ ଖାଏ।
+ଗୋଟିଏ ବିଶାଳ କାର୍ଯ୍ୟ ସତ୍ତ୍ it େ, ଏଥିରେ ସଂଗଠିତ।** ବିଭାଗଗୁଡିକ ମନ୍ତବ୍ୟ ଦେଇଛନ୍ତି।** ସେହି ମାନଚିତ୍ର 5-ପର୍ଯ୍ୟାୟ ପାଇପଲାଇନକୁ।
 
 ### combo.ts (4456 LOC)
 
-**ରାଉଟିଂ ଇଞ୍ଜିନ୍** ଯାହା ଏକ combo କୁ କ୍ରମିତ targetଗୁଡ଼ିକରେ ସମାଧାନ (resolve) କରେ।
+The** ରାଉଟିଙ୍ଗ୍ ଇଞ୍ଜିନ୍।** ଅର୍ଡର ହୋଇଥିବା ଟାର୍ଗେଟ୍ ପାଇଁ ଏକ କମ୍ବୋ ସମାଧାନ କରେ।
 
 ```ts
 // services/combo.ts
@@ -226,138 +226,140 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-**20ଟି ରାଉଟିଂ କୌଶଳ** ସମର୍ଥନ କରେ (`src/shared/constants/routingStrategies.ts` ଦେଖନ୍ତୁ):
+ସମର୍ଥନ କରେ।** 22 ରାଉଟିଙ୍ଗ୍ ରଣନୀତି।** ( `src/shared/constants/routingStrategies.ts` ଦେଖନ୍ତୁ):
 
-| କୌଶଳ                | ଆଚରଣ                                                                                          |
-| ------------------- | --------------------------------------------------------------------------------------------- |
-| `priority`          | ପ୍ରଥମ ଟାର୍ଗେଟ ଅନୁଯାୟୀ କ୍ରମିତ ତାଲିକା                                                           |
-| `weighted`          | ପ୍ରତି-ଟାର୍ଗେଟ ଓଜନ (weight) ଅନୁଯାୟୀ ସମ୍ଭାବ୍ୟତାମୂଳକ                                             |
-| `round-robin`       | କ୍ରମାନୁସାରେ ଟାର୍ଗେଟଗୁଡ଼ିକ ମଧ୍ୟରେ ଚକ୍ରାକାର ଭାବେ ଘୂରି ବୁଲେ                                      |
-| `context-relay`     | ଟାର୍ଗେଟଗୁଡ଼ିକ ମଧ୍ୟରେ context ହସ୍ତାନ୍ତର କରେ                                                    |
-| `fill-first`        | ପରବର୍ତ୍ତୀକୁ ଯିବା ପୂର୍ବରୁ quota ପୂରଣ କରେ                                                       |
-| `p2c`               | ଦୁଇଟି ପସନ୍ଦର ଶକ୍ତି (power of two choices)                                                     |
-| `random`            | ସମାନ ଯାଦୃଚ୍ଛିକ (uniform random)                                                               |
-| `least-used`        | ସାମ୍ପ୍ରତିକ ସମୟରେ ସବୁଠାରୁ କମ୍ ଥର ବ୍ୟବହୃତ ହୋଇଥିବାକୁ ବାଛେ                                        |
-| `cost-optimized`    | ସବୁଠାରୁ ଶସ୍ତା ସୁସ୍ଥ (healthy) ଟାର୍ଗେଟ ପ୍ରଥମେ                                                  |
-| `reset-aware`       | provider reset window ବିଷୟରେ ସଚେତନ                                                            |
-| `reset-window`      | reset window-ଆଧାରିତ ରାଉଟିଂ                                                                    |
-| `headroom`          | ସର୍ବାଧିକ ଅବଶିଷ୍ଟ quota headroom ଥିବା ଟାର୍ଗେଟ ପ୍ରଥମେ                                           |
-| `quota-weighted`    | ସମାପ୍ତ ହୋଇଯାଇଥିବା ଆକାଉଣ୍ଟଗୁଡ଼ିକୁ ଛାଡ଼ି ଦିଏ, ତାପରେ ଅବଶିଷ୍ଟ quota ÷ in-flight ଲୋଡ୍ ଅନୁଯାୟୀ ବାଛେ |
-| `strict-random`     | ପ୍ରକୃତରେ ସମାନ (କୌଣସି ଗୁଣବତ୍ତା ଓଜନ ନାହିଁ)                                                      |
-| `auto`              | 16-କାରକ ସ୍କୋରିଂ ବ୍ୟବହାର କରେ (`autoCombo/`)                                                    |
-| `lkgp`              | ଶେଷ ଜଣାଶୁଣା ଭଲ provider ପ୍ରଥମେ                                                                |
-| `context-optimized` | ଲମ୍ବା context ଅନୁରୋଧ ପାଇଁ ସର୍ବୋତ୍ତମ                                                           |
-| `cache-optimized`   | ପ୍ରତ୍ୟେକ ପୁନଃବ୍ୟବହାରଯୋଗ୍ୟ prompt prefix କୁ ସମାନ ଆକାଉଣ୍ଟ ସହ ପିନ୍ କରେ (prompt-cache hit ପାଇଁ)   |
-| `fusion`            | ଏକ ପ୍ୟାନେଲକୁ ସମାନ୍ତରାଳ ଭାବେ fan out କରେ, ତାପରେ ଜଣେ judge ମାଧ୍ୟମରେ ସଂଶ୍ଳେଷଣ କରେ (`fusion.ts`)  |
-| `pipeline`          | ପଦକ୍ଷେପଗୁଡ଼ିକୁ ଶୃଙ୍ଖଳିତ କରେ — ପ୍ରତ୍ୟେକ ଟାର୍ଗେଟର ଆଉଟପୁଟ ପରବର୍ତ୍ତୀକୁ ଯୋଗାଏ                      |
+| ରଣନୀତି              | ଆଚରଣ                                                                                               |
+| ------------------- | -------------------------------------------------------------------------------------------------- |
+| `priority`          | ପ୍ରଥମ ଟାର୍ଗେଟ୍ ଅର୍ଡର ତାଲିକା।                                                                       |
+| `weighted`          | ପ୍ରତି ଟାର୍ଗେଟ୍ ଓଜନ ଅନୁଯାୟୀ ସମ୍ଭାବ୍ୟତା।                                                             |
+| `round-robin`       | କ୍ରମରେ ଟାର୍ଗେଟ୍ ମାଧ୍ୟମରେ ଚକ୍ର।                                                                     |
+| `context-relay`     | ଟାର୍ଗେଟଗୁଡିକରେ ପ୍ରସଙ୍ଗ ବନ୍ଦ କରନ୍ତୁ।                                                                |
+| `fill-first`        | ପରବର୍ତ୍ତୀକୁ ଯିବା ପୂର୍ବରୁ କୋଟା ପୁରଣ କରନ୍ତୁ।                                                         |
+| `p2c`               | ଦୁଇଟି ପସନ୍ଦର ଶକ୍ତି।                                                                                |
+| `random`            | ୟୁନିଫର୍ମ ରାଣ୍ଡମ।                                                                                   |
+| `least-used`        | ସାମ୍ପ୍ରତିକ ବ୍ୟବହାର ସହିତ ଗୋଟିଏ ବାଛନ୍ତୁ।                                                             |
+| `cost-optimized`    | ପ୍ରଥମେ ଶସ୍ତା ସୁସ୍ଥ ଲକ୍ଷ୍ୟ।                                                                         |
+| `reset-aware`       | ପ୍ରଦାନକାରୀ ୱିଣ୍ଡୋ ପୁନ res ସେଟ୍ କରିବା ବିଷୟରେ ସଚେତନ।                                                 |
+| `reset-window`      | ୱିଣ୍ଡୋ-ଆଧାରିତ ରାଉଟିଙ୍ଗ୍ ପୁନ Res ସେଟ୍ କରନ୍ତୁ।                                                       |
+| `expiry-first`      | ଖାତା ଖର୍ଚ୍ଚ କରନ୍ତୁ ଯାହାର କୋଟା ପ୍ରଥମେ ଅବ୍ୟବହୃତ ହେବ।                                                 |
+| `headroom`          | ଅଧିକାଂଶ ଅବଶିଷ୍ଟ କୋଟା ହେଡରୁମ୍ ପ୍ରଥମେ।                                                               |
+| `quota-weighted`    | କ୍ଳାନ୍ତ ହୋଇଥିବା ଖାତାଗୁଡ଼ିକୁ ଏଡ଼ାଇ ଦିଅ, ତାପରେ ଅବଶିଷ୍ଟ କୋଟା ÷ ଇନ୍-ଫ୍ଲାଇଟ୍ ଲୋଡ୍ ଦ୍ୱାରା ଅଙ୍କନ କର।      |
+| `strict-random`     | ପ୍ରକୃତରେ ୟୁନିଫର୍ମ (କ quality ଣସି ଗୁଣାତ୍ମକ ଓଜନ ନାହିଁ)                                               |
+| `auto`              | 16-ଫ୍ୟାକ୍ଟର୍ ସ୍କୋରିଂ (`autoCombo/`) ବ୍ୟବହାର କରନ୍ତୁ।                                                |
+| `lkgp`              | ପ୍ରଥମେ ଜଣାଶୁଣା ଭଲ ପ୍ରଦାନକାରୀ।                                                                      |
+| `context-optimized` | ଦୀର୍ଘ ପ୍ରସଙ୍ଗ ଅନୁରୋଧ ପାଇଁ ସର୍ବୋତ୍ତମ।                                                               |
+| `cache-optimized`   | ପ୍ରତ୍ୟେକ ପୁନ us ବ୍ୟବହାରଯୋଗ୍ୟ ପ୍ରମ୍ପ୍ଟ ଉପସର୍ଗକୁ ସମାନ ଆକାଉଣ୍ଟରେ ପିନ୍ କରନ୍ତୁ (ପ୍ରମ୍ପ୍ଟ-କ୍ୟାଚ୍ ହିଟ୍)   |
+| `fusion`            | ସମାନ୍ତରାଳ ଭାବରେ ଏକ ପ୍ୟାନେଲକୁ ଫ୍ୟାନ୍ କରନ୍ତୁ, ତାପରେ ଜଣେ ଜଜ୍ (`fusion.ts`) ମାଧ୍ୟମରେ ସିନ୍ଥାଇଜ୍ କରନ୍ତୁ। |
+| `pipeline`          | ଚେନ୍ ଷ୍ଟେପ୍ — ପ୍ରତ୍ୟେକ ଟାର୍ଗେଟର ଆଉଟପୁଟ୍ ପରବର୍ତ୍ତୀକୁ ଫିଡ୍ କରେ।                                      |
+| `jev`               | ଅପ୍ଟ-ଇନ୍: TypeSafe Jev କେଉଁ ମାନ୍ୟତା ପ୍ରବିଷ୍ଟଗୁଡିକ ଚଲାଇଥାଏ ସ୍ୱୀକାର କରେ; ଅନ୍ୟଥା ତୁମର ଅର୍ଡର।          |
 
 ### base.ts (1170 LOC)
 
-**ବିମୂର୍ତ୍ତ (abstract) executor** ଯାହାକୁ ପ୍ରତ୍ୟେକ executor class ବିସ୍ତାର (extend) କରେ (ସିଧାସଳଖ କିମ୍ବା `DefaultExecutor` ଏବଂ ଅନ୍ୟ subclassଗୁଡ଼ିକ ମାଧ୍ୟମରେ)। ଏଥିରେ ଅଛି:
+The** ବିସ୍ତୃତ କାର୍ଯ୍ୟନିର୍ବାହୀ।** ପ୍ରତ୍ୟେକ ଏକଜେକ୍ୟୁଟର୍ କ୍ଲାସ୍ ବିସ୍ତାର କରେ (ସିଧାସଳଖ କିମ୍ବା `DefaultExecutor` ଏବଂ ଅନ୍ୟାନ୍ୟ ସବ୍କ୍ଲାସ୍ ମାଧ୍ୟମରେ)। ଏଥିରେ ଅଛି:
 
-- `buildUrl()` — ଡିଫଲ୍ଟ URL ନିର୍ମାଣ (subclassଗୁଡ଼ିକ କଷ୍ଟମ ପାଇଁ override କରନ୍ତି)
-- `buildHeaders()` — ଡିଫଲ୍ଟ headerଗୁଡ଼ିକ (auth, content-type)
-- `transformRequest()` — ଡିଫଲ୍ଟରେ pass-through
-- `execute()` — retry/backoff/breaker ସହ ମୁଖ୍ୟ HTTP loop
+- `buildUrl()` — ଡିଫଲ୍ଟ URL ନିର୍ମାଣ (କଷ୍ଟମ୍ ପାଇଁ ସବ୍କ୍ଲାସ୍ ନବଲିଖନ)
+- `buildHeaders()` — ଡିଫଲ୍ଟ ହେଡର୍ (auth, ବିଷୟବସ୍ତୁ-ପ୍ରକାର)
+- ଡିଫଲ୍ଟ ଭାବରେ`transformRequest()` — ପାସ୍-ଇନ୍।
+- `execute()` — retry/backoff/breaker ସହିତ ମୁଖ୍ୟ HTTP ଲୁପ୍।
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
-  // ସମସ୍ତ OpenAI/Anthropic-ସୁସଙ୍ଗତ providerଗୁଡ଼ିକୁ ପରିଚାଳନା କରେ
-  // Providerଗୁଡ଼ିକ configuration (URL, auth, headers) ପଞ୍ଜୀକରଣ କରନ୍ତି କିନ୍ତୁ executor logic ଅଂଶୀଦାର କରନ୍ତି
+  // Handles all OpenAI/Anthropic-compatible providers
+  // Providers register configurations (URL, auth, headers) but share executor logic
 }
 ```
 
-Provider-ନିର୍ଦ୍ଦିଷ୍ଟ ଆଚରଣ (auth header, base URL, version header) provider registry ମାଧ୍ୟମରେ କନଫିଗର୍ କରାଯାଏ, ପୃଥକ ପୃଥକ executor class ମାଧ୍ୟମରେ ନୁହେଁ।
+ପ୍ରଦାନକାରୀ-ନିର୍ଦ୍ଦିଷ୍ଟ ଆଚରଣ (auth ହେଡର୍ସ, ଆଧାର URL, ସଂସ୍କରଣ ହେଡର୍) ପ୍ରଦାନକାରୀ ରେଜିଷ୍ଟ୍ରି ମାଧ୍ୟମରେ ବିନ୍ୟାସିତ ହୋଇଛି, ପୃଥକ ନିର୍ବାହୀ ଶ୍ରେଣୀ ନୁହେଁ।
 
 ````
 
 ---
 
-## ସେବାଗୁଡ଼ିକ (117 ମଡ୍ୟୁଲ୍)
+## ସେବାଗୁଡିକ (117 ମଡ୍ୟୁଲ୍)
 
-ସେବାଗୁଡ଼ିକ ହେଉଛି **କେନ୍ଦ୍ରୀଭୂତ, ଏକକ-ଉଦ୍ଦେଶ୍ୟ ମଡ୍ୟୁଲ୍**, ଯାହାକୁ ହ୍ୟାଣ୍ଡଲରମାନେ ରଚନା କରନ୍ତି। ପ୍ରମୁଖ ବର୍ଗଗୁଡ଼ିକ:
+ସେବାଗୁଡିକ ହେଉଛି।** ଫୋକସ୍, ଏକକ-ଉଦ୍ଦେଶ୍ୟ ମଡ୍ୟୁଲ୍।** ସେହି ନିୟନ୍ତ୍ରକମାନେ ରଚନା କରନ୍ତି। ବଡ ବର୍ଗଗୁଡିକ:
 
-### ରାଉଟିଂ ଓ କମ୍ବୋ
+### ମାର୍ଗ ଏବଂ କମ୍ବୋ।
 
-- `combo.ts` — କମ୍ବୋ-ରାଉଟ୍ ହୋଇଥିବା ଅନୁରୋଧଗୁଡ଼ିକ ପାଇଁ ପ୍ରବେଶ ବିନ୍ଦୁ
-- `services/autoCombo/` — 16-କାରକ ସ୍କୋରିଂ, 8 ସ୍ୱୟଂଚାଳିତ ରାଉଟିଂ ରଣନୀତି
-- `wildcardRouter.ts` — ୱାଇଲ୍ଡକାର୍ଡ ରାଉଟ୍ ମେଳ କରେ (`gpt-*`)
-- `modelFamilyFallback.ts` — T5 ପାରିବାରିକ-ଅନ୍ତର୍ଗତ ଫଲବ୍ୟାକ୍
+- କମ୍ବୋ-ରୁଟେଡ୍ ଅନୁରୋଧ ପାଇଁ`combo.ts` — ପ୍ରବେଶ ବିନ୍ଦୁ।
+- `services/autoCombo/` — 16-ଫ୍ୟାକ୍ଟର୍ ସ୍କୋରିଂ, 8 ଅଟୋ ରାଉଟିଙ୍ଗ୍ ରଣନୀତି।
+- `wildcardRouter.ts` — ୱାଇଲ୍ଡକାର୍ଡ ମାର୍ଗ (`gpt-*`) ସହିତ ମେଳ ଖାଉଛି।
+- `modelFamilyFallback.ts` — T5 ଆନ୍ତ a- ପରିବାର ପତନ।
 
-### ହାର ସୀମା ଓ କୋଟା
+### ହାର ସୀମା ଏବଂ କୋଟା
 
-- `rateLimitManager.ts` — ପ୍ରତି key+provider ପାଇଁ ଟୋକନ୍ ବାଲ୍ଟି
-- `usage.ts` — ବ୍ୟବହାର ରେକର୍ଡିଂ
-- `quotaCache.ts` — ଇନ୍-ମେମୋରି କୋଟା ସ୍ନାପସଟ୍
+- + ପ୍ରଦାନକାରୀ ପ୍ରତି`rateLimitManager.ts` — ଟୋକେନ୍ ବାଲ୍ଟି।
+- `usage.ts` — ବ୍ୟବହାର ରେକର୍ଡିଂ।
+- `quotaCache.ts` — ମେମୋରୀ କୋଟା ସ୍ନାପସଟ୍।
 
-### ଆକାଉଣ୍ଟ ଓ ଟୋକନ୍
+### ଆକାଉଣ୍ଟ୍ ଏବଂ ଟୋକେନ୍।
 
-- `tokenRefresh.ts` — 401 ଉପରେ OAuth ରିଫ୍ରେସ୍
-- `accountFallback.ts` — ବିକଳ୍ପ ଆକାଉଣ୍ଟକୁ ପରିବର୍ତ୍ତନ
-- `sessionManager.ts` — ବହୁ-ଟର୍ଣ୍ଣ ସେସନ୍ ସ୍ଥିତି
+- 401 ରେ`tokenRefresh.ts` — OAuth ସତେଜ।
+- `accountFallback.ts` — ବିକଳ୍ପ ଆକାଉଣ୍ଟକୁ ସୁଇଚ୍ କରନ୍ତୁ।
+- `sessionManager.ts` — ମଲ୍ଟି ଟର୍ନ ଅଧିବେଶନ ଅବସ୍ଥା।
 
-### ବୁଦ୍ଧିମତ୍ତା
+### ବୁଦ୍ଧି
 
-- `intentClassifier.ts` — ଅନୁରୋଧର ଉଦ୍ଦେଶ୍ୟ ବର୍ଗୀକରଣ
-- `taskAwareRouter.ts` — କାର୍ଯ୍ୟ ପ୍ରକାର ଅନୁଯାୟୀ ରାଉଟ୍
-- `thinkingBudget.ts` — ଥିଙ୍କିଂ ଟୋକନ୍ ବଣ୍ଟନ
-- `contextManager.ts` — ରାଉଟିଂ ପ୍ରସଙ୍ଗ ଇଞ୍ଜେକ୍ଟ୍ କରେ
+- `intentClassifier.ts` — ଅନୁରୋଧ ଉଦ୍ଦେଶ୍ୟକୁ ଶ୍ରେଣୀଭୁକ୍ତ କର।
+- ଟାସ୍କ ପ୍ରକାର ଅନୁଯାୟୀ`taskAwareRouter.ts` — ମାର୍ଗ।
+- `thinkingBudget.ts` — ଚିନ୍ତାଧାରା ଟୋକେନ୍ ବଣ୍ଟନ କରେ।
+- `contextManager.ts` — ରାଉଟିଙ୍ଗ୍ ପ୍ରସଙ୍ଗ ଇଞ୍ଜେକ୍ସନ୍ କରନ୍ତୁ।
 
-### ସ୍ଥିତିସ୍ଥାପକତା
+### ସ୍ଥିରତା।
 
-- `resilience.ts` — ପୁନଃଚେଷ୍ଟା, ବ୍ୟାକ୍ଅଫ୍, ବ୍ରେକର୍ ଅର୍କେଷ୍ଟ୍ରେସନ୍
-- `emergencyFallback.ts` — ଶେଷ ଉପାୟ ଫଲବ୍ୟାକ୍
-- `modelDeprecation.ts` — ଉତ୍ତରାଧିକାରୀ ମଡେଲଗୁଡ଼ିକକୁ ସ୍ୱୟଂଚାଳିତ ରାଉଟ୍
+- `resilience.ts` — ପୁନ ry ଚେଷ୍ଟା, ବ୍ୟାକଅଫ୍, ବ୍ରେକର୍ ଅର୍କେଷ୍ଟ୍ରେସନ୍।
+- `emergencyFallback.ts` — ଶେଷ-ରିସର୍ଟ ଫଲବ୍ୟାକ୍।
+- `modelDeprecation.ts` — ଉତ୍ତରାଧିକାରୀ ମଡେଲଗୁଡିକ ପାଇଁ ଅଟୋ-ରୁଟ୍।
 
-### ସ୍ଥିତି
+### ରାଜ୍ୟ
 
-- `signatureCache.ts` — ଅନୁରୋଧ ସ୍ୱାକ୍ଷର ଦ୍ୱାରା ଡିଡ୍ୟୁପ୍
-- `volumeDetector.ts` — ଲୋଡ୍ ସେଡିଂ
-- `contextHandoff.ts` — ସେସନ୍ ସିରିଆଲାଇଜେସନ୍
+- ଅନୁରୋଧ ଦସ୍ତଖତ ଦ୍ୱାରା`signatureCache.ts` — dedup।
+- `volumeDetector.ts` — ଲୋଡ୍ ସେଡିଙ୍ଗ୍।
+- `contextHandoff.ts` — ଅଧିବେଶନ କ୍ରମିକୀକରଣ।
 
-### ସଙ୍କୋଚନ
+### ସଙ୍କୋଚନ।
 
-- `compression/` (ଉପ-ଡିରେକ୍ଟୋରି) — ସମ୍ପୂର୍ଣ୍ଣ ସଙ୍କୋଚନ ପାଇପଲାଇନ୍
-- ଇଞ୍ଜିନ୍, ନିୟମ ପ୍ୟାକ୍, ଆଡାପ୍ଟରଗୁଡ଼ିକୁ ଅନ୍ତର୍ଭୁକ୍ତ କରୁଥିବା 39 ଫାଇଲ୍
+- `compression/` (ଉପଡିରେକ୍ଟୋରୀ) — ପୂର୍ଣ୍ଣ ସଙ୍କୋଚନ ପାଇପଲାଇନ।
+- 39 ଟି ଫାଇଲ୍ ଇଞ୍ଜିନ, ନିୟମ ପ୍ୟାକ୍, ଆଡାପ୍ଟର।
 
-### ଦକ୍ଷତା
+### ଦକ୍ଷତା।
 
-- ([SKILLS.md](./SKILLS.md) ରେ ଆଚ୍ଛାଦିତ)
+- ( [SKILLS.md](./SKILLS.md) ରେ ଆବୃତ)
 
-### ମେମୋରି
+### ସ୍ମୃତି
 
-- ([MEMORY.md](./MEMORY.md) ରେ ଆଚ୍ଛାଦିତ)
+- ( [MEMORY.md](./MEMORY.md) ରେ ଆବୃତ)
 
 ---
 
-## ଏକ୍ସିକ୍ୟୁଟରଗୁଡ଼ିକ (150 ମଡ୍ୟୁଲ୍)
+## ନିର୍ବାହକାରୀ (150 ମଡ୍ୟୁଲ୍)
 
-ଅଧିକାଂଶ କ୍ଷେତ୍ରରେ ପ୍ରତି ପ୍ରୋଭାଇଡର ପାଇଁ ଗୋଟିଏ ଫାଇଲ୍। ଏକ୍ସିକ୍ୟୁଟର କ୍ଲାସଗୁଡ଼ିକ ସମସ୍ତେ `BaseExecutor` କୁ ବିସ୍ତାର କରନ୍ତି ଏବଂ ଯାହା ଭିନ୍ନ ତାହାକୁ ଓଭରରାଇଡ୍ କରନ୍ତି; ଅନ୍ୟ ମଡ୍ୟୁଲଗୁଡ଼ିକ ହେଉଛି ପ୍ରତି-ପ୍ରୋଭାଇଡର ସହାୟକ (ଟୁଲ୍ ସ୍କିମା, fetch/TTS ଆଡାପ୍ଟର, କ୍ୱିର୍କ ହ୍ୟାଣ୍ଡଲର)।
+ପ୍ରଦାନକାରୀଙ୍କ ପାଇଁ ପ୍ରାୟତ one ଗୋଟିଏ ଫାଇଲ୍। ଏକଜେକ୍ୟୁଟର୍ କ୍ଲାସ୍ ସବୁ `BaseExecutor` ବିସ୍ତାର କରେ ଏବଂ ଯାହା ଭିନ୍ନ ତାହା ନବଲିଖନ କରେ। ଅନ୍ୟ ମଡ୍ୟୁଲଗୁଡିକ ହେଉଛି ପ୍ରତି-ପ୍ରଦାନକାରୀ ସହାୟକକାରୀ (ଟୁଲ୍ ସ୍କିମା, fetch/TTS ଆଡାପ୍ଟର, କ୍ୱିକ୍ ହ୍ୟାଣ୍ଡେଲର୍)।
 
-### ସାଧାରଣ ପ୍ୟାଟର୍ଣ୍ଣ
+### ସାଧାରଣ ନମୁନା
 
-ପ୍ରୋଭାଇଡରଗୁଡ଼ିକ `getExecutor(providerId)` ମାଧ୍ୟମରେ ସମାଧାନ ହୁଅନ୍ତି, ଯାହା କନଫିଗର୍ ହୋଇଥିବା ଏକ୍ସିକ୍ୟୁଟର ଫେରାଏ। OpenAI/Anthropic-ସୁସଙ୍ଗତ ପ୍ରୋଭାଇଡରଗୁଡ଼ିକ `DefaultExecutor` (`executors/default.ts`) ବ୍ୟବହାର କରନ୍ତି। ପ୍ରୋଭାଇଡର-ନିର୍ଦ୍ଦିଷ୍ଟ ଆଚରଣ (ମୂଳ URL, ଅথ୍ ହେଡର, API ସଂସ୍କରଣ) `open-sse/config/providers/` ରେ କନଫିଗର୍ କରାଯାଏ, ଯେତେବେଳେ ଅନୁରୋଧ ବଡି ରୂପାନ୍ତରଣ `open-sse/translator/` ରେ ପରିଚାଳିତ ହୁଏ।
+ପ୍ରଦାନକାରୀମାନେ `getExecutor(providerId)` ମାଧ୍ୟମରେ ସମାଧାନ ହୁଅନ୍ତି, ଯାହା ବିନ୍ୟାସିତ ଏକଜେକ୍ୟୁଟର୍ ରିଟର୍ନ କରେ। OpenAI/Anthropic-compatible ପ୍ରଦାନକାରୀମାନେ `DefaultExecutor` (`executors/default.ts`) ବ୍ୟବହାର କରନ୍ତି। ପ୍ରଦାନକାରୀ-ନିର୍ଦ୍ଦିଷ୍ଟ ଆଚରଣ (ଆଧାର URL, auth ହେଡର୍, API ସଂସ୍କରଣ) `open-sse/config/providers/` ରେ ବିନ୍ୟାସିତ ହୋଇଥିବାବେଳେ ଅନୁରୋଧ ଶରୀରର ପରିବର୍ତ୍ତନ `open-sse/translator/` ରେ ପରିଚାଳିତ ହୋଇଥାଏ।
 
-**କଷ୍ଟମ୍ URL** ପ୍ରୋଭାଇଡର କନଫିଗରେସନ୍ ମାଧ୍ୟମରେ ସେଟ୍ କରାଯାଏ:
+**କଷ୍ଟମ୍ URL** ପ୍ରଦାନକାରୀ ବିନ୍ୟାସ ମାଧ୍ୟମରେ ସେଟ୍ ହୋଇଛି:
 
 ```ts
-// open-sse/config/providers/ ରେ ପ୍ରୋଭାଇଡର କନଫିଗ୍
+// Provider config in open-sse/config/providers/
 export default {
   id: "together",
   baseURL: "https://api.together.xyz/v1/chat/completions",
 }
 ````
 
-**କଷ୍ଟମ୍ ଅথ୍** ପ୍ରୋଭାଇଡର ରେଜିଷ୍ଟ୍ରିର ଅথ୍ କନଫିଗରେସନ୍ (API କି, OAuth, ହେଡର ପ୍ରୋଫାଇଲ୍) ମାଧ୍ୟମରେ ପରିଚାଳିତ ହୁଏ।
+**କଷ୍ଟମ୍ auth** ପ୍ରଦାନକାରୀ ରେଜିଷ୍ଟ୍ରିର auth ବିନ୍ୟାସ (API କି, OAuth, ହେଡର୍ ପ୍ରୋଫାଇଲ୍) ମାଧ୍ୟମରେ ନିୟନ୍ତ୍ରିତ।
 
-**କଷ୍ଟମ୍ ଅନୁରୋଧ ବଡି** ରୂପାନ୍ତରଣ (ଯେପରିକି Anthropic `system` କୁ `messages` ରୁ ପୃଥକ କରିବା) `open-sse/translator/` ରେ ପ୍ରତି-ପ୍ରୋଭାଇଡର ପଞ୍ଜୀକୃତ ହୁଏ।
+**କଷ୍ଟମ୍ ଅନୁରୋଧ ସଂସ୍ଥା।** ପରିବର୍ତ୍ତନଗୁଡ଼ିକ (ଉଦାହରଣ ସ୍ୱରୂପ, `messages` ରୁ `system` ପୃଥକ କରୁଥିବା Anthropic ) `open-sse/translator/` ରେ ପ୍ରତି-ପ୍ରଦାନକାରୀ ପଞ୍ଜିକୃତ।
 
 ````
 
-### ଏକ୍ସିକ୍ୟୁଟର ଫ୍ୟାକ୍ଟୋରି
+### The Executor Factory
 
-`executors/index.ts` `getExecutor(providerId)` ରପ୍ତାନି କରେ:
+`executors/index.ts` exports `getExecutor(providerId)`:
 
 ```ts
 import { getExecutor } from "@omniroute/open-sse/executors";
@@ -369,7 +371,7 @@ const result = await executor.execute({
 });
 ````
 
-ସମାଧାନ `ExecutorRegistry` (`executors/registry.ts`) ମାଧ୍ୟମରେ ହୁଏ: ପ୍ରତ୍ୟେକ ବିଶେଷୀକୃତ ଏକ୍ସିକ୍ୟୁଟର `executors/index.ts` ର ଅନ୍ତର୍ନିର୍ମିତ ସାରଣୀରେ ଘୋଷିତ ହୁଏ ଏବଂ ମଡ୍ୟୁଲ୍ ଲୋଡ୍ ସମୟରେ `registerExecutor(alias, instance)` ମାଧ୍ୟମରେ ପଞ୍ଜୀକୃତ ହୁଏ; `getExecutor()` ରେଜିଷ୍ଟ୍ରି ସହ ପରାମର୍ଶ କରେ ଏବଂ ବିଶେଷୀକୃତ ଏଣ୍ଟ୍ରି ନଥିବା ଯେକୌଣସି ପ୍ରୋଭାଇଡର ପାଇଁ ମେମୋଇଜ୍ ହୋଇଥିବା `DefaultExecutor` କୁ ଫେରିଯାଏ। ସମ୍ପୂର୍ଣ୍ଣ alias → executor ମ୍ୟାପିଂ ଗୋଲ୍ଡେନ୍ ଟେଷ୍ଟ `tests/unit/executor-map-golden.test.ts` ଦ୍ୱାରା ଚିହ୍ନିତ ହୁଏ।
+ରେଜୋଲୁସନ `ExecutorRegistry` (`executors/registry.ts`) ଦେଇ ଗତି କରେ: ପ୍ରତ୍ୟେକ ବିଶେଷଜ୍ଞ ନିର୍ବାହୀ `executors/index.ts` ର ବିଲ୍ଟ-ଇନ୍ ଟେବୁଲରେ ଘୋଷିତ ହୁଏ ଏବଂ ମଡ୍ୟୁଲ୍ ଲୋଡ୍ ରେ `registerExecutor(alias, instance)` ମାଧ୍ୟମରେ ପଞ୍ଜିକୃତ ହୁଏ। `getExecutor()` ରେଜିଷ୍ଟ୍ରି ସହିତ ପରାମର୍ଶ କରେ ଏବଂ ଏକ ବିଶେଷ ପ୍ରବେଶ ବିନା ଯେକ provider ଣସି ପ୍ରଦାନକାରୀଙ୍କ ପାଇଁ ଏକ ସ୍ମରଣୀୟ `DefaultExecutor` କୁ ଫେରିଯାଏ। ପୂର୍ଣ୍ଣ ଛଦ୍ମନାମ → ନିର୍ବାହୀ ମ୍ୟାପିଂ ସୁବର୍ଣ୍ଣ ପରୀକ୍ଷା `tests/unit/executor-map-golden.test.ts` ଦ୍ୱାରା ବର୍ଣ୍ଣିତ।
 
 ---
 
@@ -488,7 +490,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | ଫାଇଲ୍।                        | ଉଦ୍ଦେଶ୍ୟ                                           |
 | ----------------------------- | -------------------------------------------------- |
-| `providerRegistry.ts`         | 381-ପ୍ରଦାନକାରୀ କାଟାଲଗ୍ ଉପରେ ଚାଟ୍-ମଡେଲ୍ ରେଜିଷ୍ଟ୍ରି। |
+| `providerRegistry.ts`         | 394-ପ୍ରଦାନକାରୀ କାଟାଲଗ୍ ଉପରେ ଚାଟ୍-ମଡେଲ୍ ରେଜିଷ୍ଟ୍ରି। |
 | `providerModels.ts`           | ମଡେଲ୍ ଛଦ୍ମନାମ, ଫର୍ମାଟ୍ ମ୍ୟାପିଙ୍ଗ୍।                 |
 | `constants.ts`                | ସମୟ ସମାପ୍ତ, ସୀମା, ସ୍ଥିତି ସଂକେତ।                    |
 | `defaultThinkingSignature.ts` | ଡିଫଲ୍ଟ Claude ଚିନ୍ତାଧାରା।                          |

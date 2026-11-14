@@ -109,211 +109,207 @@ unit shards, integration, vitest, lint/typecheck, docs-sync, `check:pack-artifac
 టెస్ట్లకు మాత్రమే సంబంధించిన diffs (`tests/` కింద ఉన్న అన్ని ఫైళ్లు, `tests/e2e/` కింద ఏవీ ఉండకూడదు) ఎలాంటి లేబుల్ లేకుండానే E2E
 మ్యాట్రిక్స్ను స్వయంచాలకంగా దాటవేస్తాయి.
 
-## వివరణాత్మక తనిఖీ జాబితా
+## వివరణాత్మక చెక్లిస్ట్
 
-### విడుదలకు ముందు
+### ప్రీ-రిలీజ్
 
-- [ ] ఈ విడుదలను లక్ష్యంగా చేసుకున్న అన్ని PRలు `release/vX.Y.0`లో విలీనం చేయబడ్డాయి
-- [ ] ఈ సంస్కరణకు సంబంధించిన అన్ని తెరిచి ఉన్న Linear/issue అంశాలు మూసివేయబడ్డాయి లేదా తదుపరి మైలురాయికి తరలించబడ్డాయి
-- [ ] `release/vX.Y.0` బ్రాంచ్లో CI విజయవంతంగా ఉంది
-- [ ] కోడ్లో `TODO(release)` మార్కర్లు లేవు: `grep -r "TODO(release)" src/ open-sse/`
-- [ ] Docker బేస్ ఇమేజ్ తాజాగా ఉంది (ప్రస్తుతం `node:24.15.0-trixie-slim`)
+- [ ] ఈ విడుదలకు లక్ష్యంగా ఉన్న అన్ని PRs `release/vX.Y.0` కి విలీనం చేయబడ్డాయి
+- [ ] ఈ సంస్కరణ కోసం అన్ని ఓపెన్ Linear/issue అంశాలు మూసివేయబడ్డాయి లేదా తదుపరి మైలురాయికి నెట్టబడ్డాయి
+- [ ] `release/vX.Y.0` శాఖలోCI ఆకుపచ్చ
+- [ ] కోడ్లో `TODO(release)` గుర్తులు లేవు: `grep -r "TODO(release)" src/ open-sse/`
+- [ ] Docker బేస్ చిత్రం తాజాగా ఉంది (ప్రస్తుతం `node:24.15.0-trixie-slim`)
 
-### సంస్కరణ & మార్పుల చిట్టా
+### వెర్షన్ & చేంజ్లాగ్
 
-- [ ] `/version-bump-cc <patch|minor|major>` అమలు చేయండి (Claude Code skill)
-  - `package.json`, `electron/package.json` సంస్కరణలను పెంచుతుంది
-  - చివరి tag నుండి ఉన్న git commitల ఆధారంగా `CHANGELOG.md`ను మళ్లీ రూపొందిస్తుంది
-  - README.md బ్యాడ్జ్లను నవీకరిస్తుంది
-- [ ] CHANGELOG.mdను మాన్యువల్గా సమీక్షించి, అవసరమైతే commit సందేశాలను సరిచేయండి
-- [ ] `CHANGELOG.md`లోని తాజా semver విభాగం `package.json` సంస్కరణకు సమానంగా ఉందని నిర్ధారించండి
-- [ ] రాబోయే పని కోసం `## [Unreleased]`ను మొదటి మార్పుల చిట్టా విభాగంగా ఉంచండి
-- [ ] `docs/openapi.yaml`ను నవీకరించండి → `info.version` తప్పనిసరిగా `package.json` సంస్కరణకు సమానంగా ఉండాలి
+- [ ] `/version-bump-cc <patch|minor|major>` (Claude కోడ్ నైపుణ్యం)ని అమలు చేయండి
+  - బంప్స్ `package.json`, `electron/package.json`
+  - చివరి ట్యాగ్ నుండి git కమిట్ల నుండి `CHANGELOG.md` పునరుత్పత్తి చేస్తుంది
+  - README.md బ్యాడ్జ్లను అప్డేట్ చేస్తుంది
+- [ ] CHANGELOG.md మాన్యువల్గా సమీక్షించండి మరియు అవసరమైతే కమిట్ మెసేజ్లను క్లీన్ అప్ చేయండి
+- [ ] `CHANGELOG.md` లోని తాజా సెమ్వర్ విభాగం `package.json` వెర్షన్కు సమానం అని నిర్ధారించుకోండి
+- [ ] రాబోయే పని కోసం `## [Unreleased]` మొదటి చేంజ్లాగ్ విభాగంగా ఉంచండి
+- [ ] నవీకరణ `docs/openapi.yaml` → `info.version` తప్పనిసరిగా `package.json` సంస్కరణకు సమానం
 
 ### కోడ్ నాణ్యత
 
-- [ ] `npm run lint` — 0 లోపాలు (హెచ్చరికలు ముందే ఉన్నవి)
-- [ ] `npm run typecheck:core` — లోపాలు లేవు
-- [ ] `npm run typecheck:noimplicit:core` — లోపాలు లేవు (కఠిన తనిఖీ)
-- [ ] `npm run check:cycles:ratchet` — స్థిరపరచిన `metrics.cycles` గరిష్ఠ పరిమితిలో ఉంది (ఏదైనా cycle ఉంటే సాధారణ `check:cycles` 1తో నిష్క్రమిస్తుంది, #15281)
-- [ ] `npm run check:any-budget:t11` — బడ్జెట్ పరిమితిలో ఉంది
-- [ ] `npm run check:route-validation:t06` — లోపాలు లేవు
-- [ ] `npm run check:node-runtime` — మద్దతు ఉన్న కనిష్ఠ runtime నిబంధన నెరవేరింది (`>=22.22.2 <23`, `>=24.0.0 <27`, `src/shared/utils/nodeRuntimeSupport.ts`లోని `SUPPORTED_NODE_RANGE` ప్రకారం; `package.json`లోని `engines`తో సమలేఖనం చేయబడింది)
+- [ ] `npm run lint` — 0 లోపాలు (హెచ్చరికలు ముందే ఉన్నాయి)
+- [ ] `npm run typecheck:core` — శుభ్రంగా
+- [ ] `npm run typecheck:noimplicit:core` — క్లీన్ (స్ట్రిక్ట్)
+- [ ] ఘనీభవించిన `metrics.cycles` సీలింగ్లో`npm run check:cycles:ratchet` — (బేర్ `check:cycles` ఏదైనా చక్రంలో 1 నుండి నిష్క్రమిస్తుంది, #15281)
+- [ ] బడ్జెట్లో`npm run check:any-budget:t11` —
+- [ ] `npm run check:route-validation:t06` — శుభ్రంగా
+- [ ] `npm run check:node-runtime` — మద్దతు ఉన్న రన్టైమ్ ఫ్లోర్ మెట్ (`>=22.22.2 <23`, `>=24.0.0 <27`, `src/shared/utils/nodeRuntimeSupport.ts` లో `SUPPORTED_NODE_RANGE` కి; `package.json` `engines` తో సమలేఖనం చేయబడింది)
 
-### పరీక్షలు
+### పరీక్షిస్తోంది
 
-- [ ] `npm run test:unit` — ఉత్తీర్ణం
-- [ ] `npm run test:vitest` — ఉత్తీర్ణం (MCP server, autoCombo, cache)
-- [ ] `npm run test:coverage` — 60/60/60/60 గేట్ సంతృప్తి చెందింది (statements/lines/functions/branches)
-- [ ] `npm run test:integration` — ఉత్తీర్ణం (మార్పులు DB / handlersను ప్రభావితం చేస్తే)
-- [ ] `npm run test:combo:matrix` — ఉత్తీర్ణం (combo వ్యూహ మ్యాట్రిక్స్: మొత్తం 19 పబ్లిక్ routing వ్యూహాల ఎంపిక నిర్ణయాలను నిర్దిష్టంగా నిరూపిస్తుంది; combo routing, strategy resolution లేదా fallback logicను మార్చినప్పుడు అమలు చేయండి)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **ఐచ్ఛికం/మాన్యువల్** (గేట్ చేయబడిన వాస్తవ-upstream smoke పరీక్ష; VPS `root@192.168.0.15` నుండి చదవడానికి-మాత్రమే అనుమతిగల DB snapshotను తీసుకుంటుంది; వాస్తవ providersను సంప్రదిస్తుంది, credits ఖర్చవుతాయి; CIలో ఎప్పుడూ అమలు కాదు; గేట్ లేకపోతే లోపం లేకుండా దాటవేయబడుతుంది)
-- [ ] `npm run test:combo:live:vps` — **ఐచ్ఛికం/మాన్యువల్** (దశ-3 VPS ప్రత్యక్ష smoke పరీక్ష: సాధారణ Node ESM ద్వారా ప్రత్యక్ష `.15` serverపై 7 HTTP సందర్భాలు; `ssh root@192.168.0.15` అవసరం; `__live_test__*` combosను మాత్రమే సృష్టించి/తొలగిస్తుంది; వాస్తవ providersను సంప్రదిస్తుంది; CIలో ఎప్పుడూ అమలు కాదు)
-- [ ] `npm run test:e2e` — ఉత్తీర్ణం (UI మార్పులు)
-- [ ] `npm run test:protocols:e2e` — ఉత్తీర్ణం (MCP/A2A మార్పులు)
-- [ ] `npm run test:ecosystem` — ఉత్తీర్ణం
+- [ ] `npm run test:unit` — పాస్
+- [ ] `npm run test:vitest` — పాస్ (MCP సర్వర్, autoCombo, కాష్)
+- [ ] `npm run test:coverage` — గేట్ 60/60/60/60 సంతృప్తి చెందింది (statements/lines/functions/branches)
+- [ ] `npm run test:integration` — పాస్ (మార్పులు DB / హ్యాండ్లర్లను తాకినట్లయితే)
+- [ ] `npm run test:combo:matrix` — పాస్ (కాంబో స్ట్రాటజీ మ్యాట్రిక్స్: మొత్తం 22 పబ్లిక్ రూటింగ్ స్ట్రాటజీల ఎంపిక నిర్ణయాలను నిర్ణయాత్మకంగా రుజువు చేస్తుంది; కాంబో రూటింగ్, స్ట్రాటజీ రిజల్యూషన్ లేదా ఫాల్బ్యాక్ లాజిక్ను తాకినప్పుడు అమలు చేయండి)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (గేటెడ్ రియల్-అప్స్ట్రీమ్ స్మోక్; VPS `root@192.168.0.15` నుండి రీడ్-ఓన్లీ DB స్నాప్షాట్ సోర్స్; రియల్ ప్రొవైడర్లను హిట్ చేస్తుంది, ఖర్చుల క్రెడిట్లు; CI లో ఎప్పుడూ నడవదు; గేట్ లేకుండా శుభ్రంగా దాటవేస్తుంది)
+- [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS లైవ్ స్మోక్: సాదా నోడ్ ESM ద్వారా లైవ్ `.15` సర్వర్కు వ్యతిరేకంగా 7 HTTP దృశ్యాలు; `ssh root@192.168.0.15` అవసరం; creates/deletes మాత్రమే `__live_test__*` కాంబోలు; నిజమైన ప్రొవైడర్లను తాకుతుంది; CI లో ఎప్పుడూ రన్ అవ్వదు)
+- [ ] `npm run test:e2e` — పాస్ (UI మార్పులు)
+- [ ] `npm run test:protocols:e2e` — పాస్ (MCP/A2A మార్పులు)
+- [ ] `npm run test:ecosystem` — పాస్
 
-### Hooks (Husky ద్వారా ధృవీకరించబడినవి)
+### హుక్స్ (హస్కీ ధృవీకరించబడింది)
 
-Husky hooks `.husky/`లో ఉంటాయి మరియు git ఆపరేషన్ల సమయంలో స్వయంచాలకంగా అమలవుతాయి.
+హస్కీ హుక్స్ `.husky/` లో నివసిస్తాయి మరియు git కార్యకలాపాలలో స్వయంచాలకంగా అమలు అవుతాయి.
 
-- **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** వేగవంతమైన నిర్దిష్ట గేట్లు — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (2026-06-13న సక్రియం చేయబడింది). ఉద్దేశపూర్వకంగా `test:unit`ను మినహాయిస్తుంది (నెమ్మదిగా ఉంటుంది; CI `test-unit` job ద్వారా కవర్ చేయబడుతుంది).
-  - విడుదల బ్రాంచ్లను push చేయడానికి ముందు `npm run test:unit`ను మాన్యువల్గా అమలు చేయండి.
+- **ముందస్తు కట్టుబడి:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
+- **ముందస్తు పుష్:** ఫాస్ట్ డిటర్మినిస్టిక్ గేట్లు — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (2026-06-13 యాక్టివేట్ చేయబడింది). ఉద్దేశపూర్వకంగా `test:unit` మినహాయిస్తుంది (నెమ్మదిగా; CI `test-unit` జాబ్ ద్వారా కవర్ చేయబడింది).
+  - విడుదల శాఖలను నెట్టడానికి ముందు `npm run test:unit` మానవీయంగా అమలు చేయండి.
 
-ఏదైనా hook విఫలమైతే: మూల సమస్యను పరిష్కరించండి, `--no-verify`తో దాటవేయవద్దు.
+హుక్ విఫలమైతే: అంతర్లీన సమస్యను పరిష్కరించండి, `--no-verify` తో బైపాస్ చేయవద్దు .
 
-### సాంప్రదాయ Commitలు
+### సంప్రదాయ కమిట్లు
 
-విడుదలలో చేర్చబడే అన్ని commitలు తప్పనిసరిగా `type(scope): subject` ఆకృతిని అనుసరించాలి.
+అన్ని విడుదల-బౌండ్ కమిట్లు తప్పనిసరిగా `type(scope): subject` ఆకృతిని అనుసరించాలి.
 
 **చెల్లుబాటు అయ్యే రకాలు:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**చెల్లుబాటు అయ్యే scopeలు:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**చెల్లుబాటు అయ్యే పరిధులు:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker` `authz` `ci`, `mcp`, `a2a`, `memory`, `cloud-agent`, `guardrails`, `compression` `translator` `auto-combo`, `resilience`, `providers`, `executors` `skills` `domain`
 
-అనుకూలతను విచ్ఛిన్నం చేసే మార్పులు: `BREAKING CHANGE:` footerను లేదా scope తర్వాత `!`ను జోడించండి (ఉదా. `feat(api)!: drop /v0`).
+బ్రేకింగ్ మార్పులు: స్కోప్ తర్వాత `BREAKING CHANGE:` ఫుటర్ లేదా `!` జోడించండి (ఉదా `feat(api)!: drop /v0`).
 
 ### డాక్యుమెంటేషన్
 
-- [ ] `npm run check:docs-sync` ఉత్తీర్ణమవుతుంది (pre-commit ద్వారా స్వయంచాలకంగా అమలవుతుంది)
-- [ ] `npm run check:docs-all` ఉత్తీర్ణమవుతుంది (సమగ్ర తనిఖీ: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` 0తో నిష్క్రమిస్తుంది — కోడ్ ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env ఒప్పందం చెక్కుచెదరకుండా ఉంది
-- [ ] `npm run check:doc-links` 0తో నిష్క్రమిస్తుంది — పునర్వ్యవస్థీకరణ తర్వాత అంతర్గత markdown సూచనలు ఏవీ తెగిపోలేదు
-- [ ] storage/runtime వ్యత్యాసాల కోసం `docs/architecture/ARCHITECTURE.md` సమీక్షించబడింది
-- [ ] env var మరియు నిర్వహణపరమైన వ్యత్యాసాల కోసం `docs/guides/TROUBLESHOOTING.md` సమీక్షించబడింది
-- [ ] `.env.example` మారితే: `docs/reference/ENVIRONMENT.md` నవీకరించబడింది
-- [ ] కొత్త featureకు UI ఉంటే: `docs/guides/USER_GUIDE.md` దాన్ని ప్రస్తావిస్తుంది
-- [ ] కొత్త featureకు API ఉంటే: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` నవీకరించబడ్డాయి
-- [ ] కొత్త feature ఒక module అయితే: ప్రత్యేక `docs/<MODULE>.md` ఉంది
-- [ ] అనుకూలతను విచ్ఛిన్నం చేసే మార్పు ఉంటే: `docs/guides/TROUBLESHOOTING.md`లో migration గమనిక ఉంది
+- [ ] `npm run check:docs-sync` పాస్లు (ప్రీ-కమిట్ ద్వారా ఆటో-రన్)
+- [ ] `npm run check:docs-all` పాస్లు (గొడుగు: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:env-doc-sync` నిష్క్రమణ 0 — కోడ్ ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env ఒప్పందం చెక్కుచెదరకుండా ఉంది
+- [ ] `npm run check:doc-links` 0 — నుండి నిష్క్రమిస్తుంది పునర్నిర్మాణం తర్వాత విచ్ఛిన్నమైన అంతర్గత మార్క్డౌన్ సూచనలు లేవు
+- [ ] storage/runtime డ్రిఫ్ట్ కోసం`docs/architecture/ARCHITECTURE.md` సమీక్షించబడింది
+- [ ] `docs/guides/TROUBLESHOOTING.md` env var మరియు కార్యాచరణ డ్రిఫ్ట్ కోసం సమీక్షించబడింది
+- [ ] `.env.example` మారినట్లయితే: `docs/reference/ENVIRONMENT.md` నవీకరించబడింది
+- [ ] కొత్త ఫీచర్లో UI ఉంటే : `docs/guides/USER_GUIDE.md` దానిని ప్రస్తావిస్తుంది
+- [ ] కొత్త ఫీచర్ API కలిగి ఉంటే : `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` నవీకరించబడింది
+- [ ] కొత్త ఫీచర్ మాడ్యూల్ అయితే: అంకితమైన `docs/<MODULE>.md` ఉంది
+- [ ] మార్పును విచ్ఛిన్నం చేస్తే: `docs/guides/TROUBLESHOOTING.md` మైగ్రేషన్ నోట్ ఉంది
 
 ### i18n
 
-- [ ] `npm run i18n:check` 0తో నిష్క్రమిస్తుంది — అనువాద స్థితి (`.i18n-state.json`) మూల డాక్యుమెంట్లతో సమకాలీకరించబడింది (కఠిన modeలో వ్యత్యాసమున్న మూలాలు లేవు; చివరి నిమిషపు డాక్యుమెంట్ సవరణల కోసం warn-mode సూచన ఆమోదయోగ్యమే, కానీ tag చేయడానికి ముందు ఇది 0గా ఉండాలి)
-- [ ] `npm run i18n:check-ui-coverage` 0తో నిష్క్రమిస్తుంది — ప్రతి UI locale 80% coverage కనిష్ఠ పరిమితి వద్ద లేదా దానికంటే ఎక్కువగా ఉంది
-- [ ] `npm run i18n:sync-ui:dry` మొత్తం 66 లక్ష్య localeలలో 0 మిస్సయిన keyలను నివేదిస్తుంది (`en` మూలం మినహా ప్రతి locale)
-- [ ] మూల ఆంగ్ల డాక్యుమెంట్లు మారితే, tag చేయడానికి ముందు `npm run i18n:run`ను అమలు చేయండి (`.env`లో `OMNIROUTE_TRANSLATION_API_KEY` అవసరం)
-- [ ] అనువాద సహకారాలు స్వల్పమైనవైతే తదుపరి విడుదలకు వాయిదా వేయవచ్చు (CHANGELOGలో నమోదు చేయండి)
+- [ ] సోర్స్ డాక్స్తో సింక్లో`npm run i18n:check` 0 — అనువాద స్థితి (`.i18n-state.json`) నుండి నిష్క్రమిస్తుంది (కఠినమైన మోడ్లో డ్రిఫ్టెడ్ సోర్స్లు లేవు; చివరి నిమిషంలో డాక్ టచ్-అప్ల కోసం వార్న్-మోడ్ అడ్వైజరీ ఆమోదయోగ్యమైనది, అయితే ట్యాగ్ చేయడానికి ముందు 0 ఉండాలి)
+- [ ] `npm run i18n:check-ui-coverage` 0 — ప్రతి UI లొకేల్ నుండి 80% కవరేజ్ ఫ్లోర్లో లేదా అంతకంటే ఎక్కువ నుండి నిష్క్రమిస్తుంది
+- [ ] `npm run i18n:sync-ui:dry` మొత్తం 66 లక్ష్య లొకేల్లలో 0 మిస్సింగ్ కీలను నివేదించింది ( `en` మూలం మినహా ప్రతి లొకేల్)
+- [ ] మూలాధార ఆంగ్ల డాక్స్ మారినట్లయితే, ట్యాగ్ చేయడానికి ముందు `npm run i18n:run` ( `.env` లో `OMNIROUTE_TRANSLATION_API_KEY` అవసరం)ని అమలు చేయండి
+- [ ] అనువాద రచనలు చిన్నవి అయితే ( CHANGELOG లో ట్రాక్) తదుపరి విడుదలకు వాయిదా వేయబడతాయి
 
-### డేటాబేస్ Migrationలు
+### డేటాబేస్ వలసలు
 
-- [ ] `src/lib/db/migrations/`లో కొత్త ఫైళ్లు ఉంటే:
-  - [ ] ప్రతి migration idempotentగా ఉంటుంది (`CREATE TABLE IF NOT EXISTS`, మొదలైనవి)
-  - [ ] Migrationలు transactionలలో చుట్టబడ్డాయి
-  - [ ] సరిగ్గా సంఖ్యలు కేటాయించబడ్డాయి (క్రమంలో ఖాళీలు లేవు)
-- [ ] కొత్త installationపై పరీక్షించండి: `~/.omniroute/omniroute.db`ను తొలగించి `npm run dev` అమలు చేయండి
-- [ ] ఇప్పటికే ఉన్న installationపై పరీక్షించండి: DB backup తీసుకుని, migrationను అమలు చేసి, schemaను ధృవీకరించండి
-- [ ] migration పట్టికలను తిరిగి వ్రాస్తే WAL ఫైళ్లు (`-wal`, `-shm`) సరిగ్గా నిర్వహించబడ్డాయి
+- [ ] `src/lib/db/migrations/` కొత్త ఫైల్లను కలిగి ఉంటే:
+  - [ ] ప్రతి మైగ్రేషన్ ఐడెంపోటెంట్ (`CREATE TABLE IF NOT EXISTS`, మొదలైనవి)
+  - [ ] లావాదేవీలలో చుట్టబడిన వలసలు
+  - [ ] సరిగ్గా నంబర్ చేయబడింది (క్రమంలో ఖాళీలు లేవు)
+- [ ] తాజా ఇన్స్టాల్పై పరీక్షించండి: `~/.omniroute/omniroute.db` తొలగించి, `npm run dev` అమలు చేయండి
+- [ ] ఇప్పటికే ఉన్న ఇన్స్టాల్పై పరీక్షించండి: బ్యాకప్ DB, రన్ మైగ్రేషన్, స్కీమాను ధృవీకరించండి
+- [ ] మైగ్రేషన్ పట్టికలను తిరిగి వ్రాస్తేWAL ఫైల్లు (`-wal`, `-shm`) సరిగ్గా నిర్వహించబడతాయి
 
-### ప్రొవైడర్ కాటలాగ్ (Zod-ధృవీకరించబడింది)
+### ప్రొవైడర్ కేటలాగ్ (Zod-ధృవీకరించబడింది)
 
-- [ ] `src/shared/constants/providers.ts` Zod స్కీమా లోడ్ సమయంలో చెల్లుబాటు అవుతుంది
-  - [ ] అన్ని ప్రొవైడర్లలో అవసరమైన ఫీల్డ్లు (`id`, `label`, `kind`, మొదలైనవి) ఉన్నాయి
-  - [ ] కొత్త ఉచిత ప్రొవైడర్లకు `freeNote` అందించబడింది
-  - [ ] OAuth ప్రొవైడర్లకు `src/lib/oauth/constants/oauth.ts`లో `oauthConfig` నమోదు చేయబడింది
-- [ ] కొత్త ప్రొవైడర్ జోడించబడితే: `open-sse/executors/`లో దానికి సంబంధించిన ఎగ్జిక్యూటర్ ఉంది
-- [ ] OpenAI కాని ఫార్మాట్ అయితే: `open-sse/translator/`లో ట్రాన్స్లేటర్ ఉంది
-- [ ] మోడల్లు `open-sse/config/providerRegistry.ts`లో నమోదు చేయబడ్డాయి
-- [ ] `tests/unit/`లోని యూనిట్ పరీక్షలు ప్రొవైడర్ వర్గీకరణ మరియు రూటింగ్ను కవర్ చేస్తాయి
+- [ ] `src/shared/constants/providers.ts` Zod స్కీమా లోడ్ సమయంలో చెల్లుతుంది
+  - [ ] అందరు ప్రొవైడర్లు అవసరమైన ఫీల్డ్లను కలిగి ఉన్నారు (`id`, `label`, `kind`, మొదలైనవి)
+  - [ ] కొత్త ఉచిత ప్రొవైడర్ల కోసం`freeNote` అందించబడింది
+  - [ ] OAuth ప్రొవైడర్లు `src/lib/oauth/constants/oauth.ts` లో `oauthConfig` నమోదు చేసుకున్నారు
+- [ ] కొత్త ప్రొవైడర్ జోడించబడితే: `open-sse/executors/` లో సంబంధిత ఎగ్జిక్యూటర్
+- [ ] నాన్-OpenAI ఫార్మాట్ అయితే: `open-sse/translator/` లో అనువాదకుడు
+- [ ] `open-sse/config/providerRegistry.ts` లో నమోదు చేయబడిన నమూనాలు
+- [ ] `tests/unit/` కవర్ ప్రొవైడర్ వర్గీకరణ మరియు రూటింగ్లో యూనిట్ పరీక్షలు
 
 ### డెస్క్టాప్ (Electron)
 
 `electron/` మారినట్లయితే:
 
-- [ ] `npm run electron:smoke:packaged` విజయవంతమవుతుంది
-- [ ] `:win`, `:mac`, `:linux`లలో కనీసం ఒకదానికి బిల్డ్లు పరీక్షించబడ్డాయి
-- [ ] కోడ్ సైనింగ్ సర్టిఫికేట్ల గడువు ముగియలేదు (సైనింగ్ చేస్తుంటే)
-- [ ] `electron/package.json` వెర్షన్ రూట్ `package.json`తో సరిపోలుతుంది
-- [ ] `stable`కు విడుదల చేస్తుంటే ఆటో-అప్డేట్ ఛానల్ పాయింటర్ నవీకరించబడింది
+- [ ] `npm run electron:smoke:packaged` పాస్లు
+- [ ] బిల్డ్లు కనీసం `:win`, `:mac`, `:linux` లలో ఒకదాని కోసం పరీక్షించబడ్డాయి
+- [ ] కోడ్ సంతకం ధృవపత్రాల గడువు ముగియలేదు (సంతకం చేస్తే)
+- [ ] `electron/package.json` వెర్షన్ రూట్ `package.json` తో సరిపోతుంది
+- [ ] `stable` కి విడుదల చేస్తే ఆటో-అప్డేట్ ఛానెల్ పాయింటర్ నవీకరించబడుతుంది
 
-### బిల్డ్ లేఅవుట్
+### లేఅవుట్ని నిర్మించండి
 
-రిపోజిటరీ మూడు వేర్వేరు అవుట్పుట్ డైరెక్టరీలను ఉపయోగిస్తుంది — వాటిని ఎప్పుడూ కలపవద్దు:
+రిపోజిటరీ మూడు విభిన్న అవుట్పుట్ డైరెక్టరీలను ఉపయోగిస్తుంది — వాటిని ఎప్పుడూ కలపదు:
 
-| డైరెక్టరీ | ఉద్దేశ్యం                                                                | ట్రాక్ చేయబడుతుందా? |
-| --------- | ------------------------------------------------------------------------ | ------------------- |
-| `src/`    | అప్లికేషన్ సోర్స్ (TypeScript / TSX)                                     | అవును               |
-| `.build/` | బిల్డ్ మధ్యంతర ఫైళ్లు — `next build` అవుట్పుట్ (`distDir`)               | కాదు (gitignored)   |
-| `dist/`   | పంపిణీ చేయదగిన npm బండిల్ — `assembleStandalone` ద్వారా సమీకరించబడుతుంది | కాదు (gitignored)   |
+| డైరెక్టరీ | ప్రయోజనం                                                                  | ట్రాక్ చేసారా?         |
+| --------- | ------------------------------------------------------------------------- | ---------------------- |
+| `src/`    | అప్లికేషన్ మూలం (TypeScript / TSX)                                        | అవును                  |
+| `.build/` | మధ్యవర్తుల — `next build` అవుట్పుట్ (`distDir`) బిల్డ్ చేయండి             | లేదు (విస్మరించబడినవి) |
+| `dist/`   | రవాణా చేయదగిన npm బండిల్ — `assembleStandalone` ద్వారా అసెంబుల్ చేయబడింది | లేదు (విస్మరించబడినవి) |
 
-> **ఆపరేటర్ గమనిక:** రిమోట్ VPS ఇమేజ్ డైరెక్టరీ `/usr/lib/node_modules/omniroute/app/`గానే ఉంటుంది.
-> **రిపోజిటరీలోని** బిల్డ్ అవుట్పుట్ మాత్రమే మారింది (`app/` → `dist/`). డిప్లాయ్ స్కిల్స్
-> `dist/` కంటెంట్ను రిమోట్ `app/` డైరెక్టరీలోకి rsync చేస్తాయి — VPS పాత్ మార్పులు అవసరం లేదు.
+> **ఆపరేటర్ గమనిక:** రిమోట్ VPS ఇమేజ్ డైరెక్టరీ `/usr/lib/node_modules/omniroute/app/` మిగిలిపోయింది. మాత్రమే** ఇన్-రెపో** బిల్డ్ అవుట్పుట్ తరలించబడింది (`app/` → `dist/`). రిమోట్ `app/` dir — VPS పాత్ మార్పులు అవసరం లేకుండా నైపుణ్యాల rsync `dist/` కంటెంట్లను అమలు చేస్తుంది.
 
-**ఒకే-బిల్డ్ ఫ్లో:**
+**సింగిల్-బిల్డ్ ఫ్లో:**
 
 ```
 npm run build:release
-  └─ rm -rf .build dist          (శుభ్రపరచడం)
-  └─ next build → .build/next/   (మధ్యంతర ఫైళ్లు)
-  └─ assembleStandalone          (standalone + static + public + nativesను dist/లోకి కాపీ చేస్తుంది)
-  └─ writes dist/BUILD_SHA       (HEAD సెంటినెల్)
+  └─ rm -rf .build dist          (clean)
+  └─ next build → .build/next/   (intermediates)
+  └─ assembleStandalone          (copies standalone + static + public + natives → dist/)
+  └─ writes dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-డిప్లాయ్ కోసం `npm run build` అమలు చేసిన తర్వాత విడిగా `npm run build:cli` అమలు చేయవద్దు — ఒకే కమాండ్లో క్లీన్ రీబిల్డ్ + సెంటినెల్ను చేసే
-`npm run build:release`ను ఉపయోగించండి.
+ఒక కమాండ్లో + సెంటినెల్ను క్లీన్ రీబిల్డ్ చేసే — యూజ్ `npm run build:release` కోసం ప్రత్యేక `npm run build:cli` తర్వాత NOT రన్ `npm run build` చేయండి.
 
-### ఆర్టిఫాక్ట్ ధృవీకరణ
+### ఆర్టిఫాక్ట్ ధ్రువీకరణ
 
-- [ ] `npm run build:release` విజయవంతమవుతుంది మరియు `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` క్లీన్గా ఉంటుంది — `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, లేదా ఇతర లోకల్ అవశేషాలు లేవు
-- [ ] బిల్డ్ తర్వాత `dist/server.js` ఉంటుంది
-- [ ] ఐచ్ఛిక లోకల్ ప్యాకేజ్డ్-రన్టైమ్ స్మోక్ పరీక్ష: `npm run dev:candidate -- build` తర్వాత `npm run dev:candidate -- validate` ఒక ప్రత్యేక `DATA_DIR`లో ప్యాక్ చేసిన tarballను బూట్ చేసి `/api/health` + `/v1/models`ను తనిఖీ చేస్తుంది ([కాంట్రిబ్యూషన్ గోల్డెన్ పాత్](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) చూడండి)
+- [ ] `npm run build:release` విజయవంతమైంది మరియు `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] `npm run check:pack-artifact` క్లీన్ — నో `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, లేదా ఇతర స్థానిక అవశేషాలు
+- [ ] బిల్డ్ తర్వాత `dist/server.js` ఉంది
+- [ ] ఐచ్ఛిక స్థానిక ప్యాకేజ్డ్-రన్టైమ్ పొగ: `npm run dev:candidate -- validate` తర్వాత `npm run dev:candidate -- build` ప్యాక్ చేయబడిన టార్బాల్ను వివిక్త `DATA_DIR` పై బూట్ చేస్తుంది మరియు `/api/health` + `/v1/models` తనిఖీ చేస్తుంది ( [కంట్రిబ్యూషన్ గోల్డెన్ పాత్](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) చూడండి)
 
 ### ట్యాగింగ్ & విడుదల
 
-- [ ] `/generate-release-cc` (Claude Code స్కిల్) అమలు చేయండి:
-  - `vX.Y.Z` ట్యాగ్ను సృష్టిస్తుంది
-  - ట్యాగ్ మరియు బ్రాంచ్ను పుష్ చేస్తుంది
-  - చేంజ్లాగ్ బాడీతో GitHub Releaseను తెరుస్తుంది
-  - Electron ఇన్స్టాలర్లను జతచేస్తుంది (బిల్డ్ చేసి ఉంటే)
-- [ ] లేదా మాన్యువల్గా:
+- [ ] `/generate-release-cc` (Claude కోడ్ నైపుణ్యం)ని అమలు చేయండి:
+  - ట్యాగ్ `vX.Y.Z` సృష్టిస్తుంది
+  - ట్యాగ్ మరియు శాఖను నెట్టివేస్తుంది
+  - చేంజ్లాగ్ బాడీతో GitHub విడుదలను తెరుస్తుంది
+  - Electron ఇన్స్టాలర్లను జత చేస్తుంది (నిర్మించినట్లయితే)
+- [ ] లేదా మానవీయంగా:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
   git push origin vX.Y.Z
   gh release create vX.Y.Z --notes-from-tag
   ```
 
-### డిప్లాయ్
+### మోహరించు
 
-డిప్లాయ్ స్కిల్స్ తేలికపాటి rsync ఫ్లోను ఉపయోగిస్తాయి — `npm pack` లేదు, `npm i -g` లేదు:
+లైట్ rsync ఫ్లో — no `npm pack`, no `npm i -g` ని ఉపయోగించడం నైపుణ్యాలను అమలు చేయండి:
 
-- [ ] లక్ష్యానికి సరిపోయే డిప్లాయ్ స్కిల్ను ఉపయోగించండి:
-  - `/deploy-vps-local-cc` — లోకల్ VPS (192.168.0.15)
-  - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
+- [ ] లక్ష్యానికి సరిపోయే విస్తరణ నైపుణ్యాన్ని ఉపయోగించండి:
+  - `/deploy-vps-local-cc` — స్థానిక VPS (192.168.0.15)
+  - `/deploy-vps-akamai-cc` — అకామై VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — రెండూ
-- [ ] డిప్లాయ్ చేసే ముందు, `dist/BUILD_SHA` == `git rev-parse --short HEAD` అని నిర్ధారించండి
-- [ ] `node_modules` వాస్తవంగా ఉన్న చోటనే బిల్డ్ అమలు కావాలి (ప్రధాన చెక్అవుట్ లేదా `npm ci` అమలు చేసిన worktree — సింబాలిక్ లింక్ చేసిన worktreeలో కాదు)
-- [ ] డిప్లాయ్ చేసిన ఇన్స్టాన్స్ను స్మోక్ టెస్ట్ చేయండి:
-  - `/dashboard/health` తెరవండి → వెర్షన్ స్ట్రింగ్ విడుదలతో సరిపోలుతుందో తనిఖీ చేయండి
-  - తెలిసిన ప్రొవైడర్పై `/v1/chat/completions` రిక్వెస్ట్ను అమలు చేయండి
-  - `/api/monitoring/health` `CLOSED` సర్క్యూట్ బ్రేకర్లను అందిస్తుందో ధృవీకరించండి
-  - MCP ట్రాన్స్పోర్ట్లు స్పందిస్తున్నాయని నిర్ధారించండి (`/mcp` HTTP, `/mcp-sse` SSE)
+- [ ] అమలు చేయడానికి ముందు, `dist/BUILD_SHA` == `git rev-parse --short HEAD` నిర్ధారించండి
+- [ ] బిల్డ్ తప్పనిసరిగా `node_modules` ఉన్న చోట అమలు చేయాలి (ప్రధాన చెక్అవుట్ లేదా `npm ci`'d వర్క్ట్రీ — NOT ఒక సిమ్లింక్డ్ వర్క్ట్రీ)
+- [ ] పొగ పరీక్ష అమలు చేయబడిన ఉదాహరణ:
+  - `/dashboard/health` → చెక్ వెర్షన్ స్ట్రింగ్ మ్యాచ్ల విడుదలను తెరవండి
+  - తెలిసిన ప్రొవైడర్కు వ్యతిరేకంగా `/v1/chat/completions` అభ్యర్థనను అమలు చేయండి
+  - `/api/monitoring/health` రిటర్న్స్ `CLOSED` సర్క్యూట్ బ్రేకర్లను ధృవీకరించండి
+  - MCP రవాణా ప్రతిస్పందనను నిర్ధారించండి (`/mcp` HTTP, `/mcp-sse` SSE)
 
-### విడుదల తర్వాత
+### పోస్ట్-రిలీజ్
 
-- [ ] `/capture-release-evidences-cc` (Claude Code స్కిల్) అమలు చేయండి
-  - కొత్త ఫీచర్ల WebP స్క్రీన్షాట్లు/రికార్డింగ్లను క్యాప్చర్ చేస్తుంది
-  - వాటిని విడుదల నోట్స్ / బ్లాగ్ పోస్ట్కు జతచేస్తుంది
-- [ ] విడుదల ప్రకటనతో GitHub Discussions / Discordను నవీకరించండి
-- [ ] తదుపరి వెర్షన్ కోసం మైలురాయిని తెరవండి
-- [ ] అత్యవసరమైతే: చర్చను పిన్ చేయండి లేదా యాప్లోని బ్యానర్ కోసం `news.json`లో పోస్ట్ చేయండి
+- [ ] `/capture-release-evidences-cc` (Claude కోడ్ నైపుణ్యం)ని అమలు చేయండి
+  - కొత్త ఫీచర్ల WebP screenshots/recordings ని క్యాప్చర్ చేస్తుంది
+  - విడుదల గమనికలు / బ్లాగ్ పోస్ట్కు జోడించబడింది
+- [ ] విడుదల ప్రకటనతో GitHub చర్చలు / Discord ని నవీకరించండి
+- [ ] తదుపరి సంస్కరణ కోసం మైలురాయిని తెరవండి
+- [ ] క్లిష్టమైనది అయితే: ఇన్-యాప్ బ్యానర్ కోసం పిన్ చర్చ లేదా `news.json` లో పోస్ట్ చేయండి
 
-### Radar పబ్లిక్-లాంచ్ గేట్
+### రాడార్ పబ్లిక్-లాంచ్ గేట్
 
-Radar ప్రకటన ఉద్దేశపూర్వకంగా `active: false`తో కమిట్ చేయబడింది. దిగువన ఉన్న ప్రతి అంశానికి ఆధారాలు సమకూరిన తర్వాత యాక్టివేషన్ను ప్రత్యేక
-మార్పుగా చేయాలి:
+రాడార్ ప్రకటన ఉద్దేశపూర్వకంగా `active: false` తో కట్టుబడి ఉంది. దిగువన ఉన్న ప్రతి అంశం రుజువు చేయబడిన తర్వాత యాక్టివేషన్ అనేది ప్రత్యేక మార్పు:
 
-- [ ] అన్ని స్టాక్ చేసిన Radar PRలు విలీనం చేయబడ్డాయి మరియు release-tip CI గ్రీన్గా ఉంది
-- [ ] డిఫాల్ట్గా `RADAR_ENABLED` ఆఫ్లోనే ఉంచి OSS Radar రూట్లను డిప్లాయ్ చేసి స్మోక్ టెస్ట్ చేయండి
-- [ ] నిర్దేశిత Radar హోస్ట్లో `GET /planos`, `/termos`, `/privacidade`, మరియు `/reembolso`లను స్మోక్ టెస్ట్ చేయండి
-- [ ] ప్రైవేట్ సర్వీస్లో ఆపరేటర్ గుర్తింపు/సంప్రదింపు/చిరునామా మరియు యజమాని ఆమోదించిన చట్టపరమైన సమీక్షను రికార్డ్ చేయండి
-- [ ] టెస్ట్ మోడ్లో మాత్రమే Stripe Checkout మరియు సైన్ చేసిన webhookను పరీక్షించండి
-- [ ] ఆమోదించిన పంపినవారు/డొమైన్తో ఒక ఎన్క్రిప్ట్ చేసిన లావాదేవీ ఇమెయిల్ డెలివరీని పరీక్షించండి
-- [ ] బ్యాకప్ పునరుద్ధరణను మరియు పర్యవేక్షణలో, బడ్జెట్ పరిమితితో నిర్వహించిన ఒక పరిశోధన రన్ను రుజువు చేయండి
-- [ ] విరాళం ఆధారాలను స్వీకరించే ముందు BRL/PIX సమీక్ష విధానాన్ని ఆమోదించండి
-- [ ] పైన పేర్కొన్న గేట్లు పూర్తయిన తర్వాత మాత్రమే పబ్లిక్ Checkoutను ప్రారంభించి, ఆపై కొత్త `news.json` IDని యాక్టివేట్ చేయండి
-- [ ] Home బ్యానర్ స్థానికీకరించిన కాపీని ఉపయోగిస్తుందని మరియు పాత IDని విస్మరించిన తర్వాత కొత్త ID మళ్లీ కనిపిస్తుందని ధృవీకరించండి
+- [ ] అన్ని పేర్చబడిన రాడార్ PRs విలీనం చేయబడ్డాయి మరియు విడుదల-చిట్కా CI ఆకుపచ్చగా ఉంటుంది
+- [ ] డిఫాల్ట్గా ఇప్పటికీ `RADAR_ENABLED` ఆఫ్లో ఉన్న OSS రాడార్ మార్గాలను అమలు చేయండి మరియు స్మోక్ చేయండి
+- [ ] పేరున్న రాడార్ హోస్ట్లో `GET /planos`, `/termos`, `/privacidade` మరియు `/reembolso` స్మోక్ చేయండి
+- [ ] ప్రైవేట్ సేవలో రికార్డ్ ఆపరేటర్ identity/contact/address మరియు యజమాని-ఆమోదించిన చట్టపరమైన సమీక్ష
+- [ ] పరీక్ష మోడ్లో మాత్రమే గీత చెక్అవుట్ మరియు సంతకం చేసిన వెబ్హుక్ని వ్యాయామం చేయండి
+- [ ] ఆమోదించబడిన sender/domain తో ఒక ఎన్క్రిప్టెడ్ లావాదేవీ-ఇమెయిల్ డెలివరీని వ్యాయామం చేయండి
+- [ ] బ్యాకప్ పునరుద్ధరణ మరియు ఒక పర్యవేక్షించబడిన, బడ్జెట్-క్యాప్డ్ పరిశోధనను నిరూపించండి
+- [ ] విరాళం సాక్ష్యాలను అంగీకరించే ముందు BRL/PIX సమీక్ష విధానాన్ని ఆమోదించండి
+- [ ] మునుపటి గేట్ల తర్వాత మాత్రమే పబ్లిక్ చెక్అవుట్ను ప్రారంభించండి, ఆపై కొత్త `news.json` ID సక్రియం చేయండి
+- [ ] హోమ్ బ్యానర్ స్థానికీకరించిన కాపీని ఉపయోగిస్తుందని ధృవీకరించండి మరియు పాత ID తీసివేయబడిన తర్వాత కొత్త ID మళ్లీ కనిపిస్తుంది
 
 ## Embedded Services స్మోక్ పరీక్ష (v3.8.4+)
 

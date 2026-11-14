@@ -35,53 +35,53 @@ Search Tools Studio transformiše `/dashboard/search-tools` iz osnovnog igrališ
 
 ---
 
-## Kartice
+## Tabs
 
-### Kartica za pretragu
+### Search Tab
 
-Pretvara postojeće `SearchForm` + `ResultsPanel` + `RerankPanel` u karticu:
+Razvija postojeći `SearchForm` + `ResultsPanel` + `RerankPanel` u karticu:
 
-- Upit → rezultati (naslov, URL, isječak, ocjena relevantnosti).
-- Metapodaci pružatelja u oknu za konfiguraciju (trošak, kvota, status).
-- Odjeljak za ponovno rangiranje: odaberite model za ponovno rangiranje, promijenite redoslijed rezultata, prikažite `positionDelta`.
-- Prazno stanje s pozivom na radnju kada nijedan pružatelj pretrage nije konfigurisan.
-- Historija pretrage putem `SearchHistory.tsx`.
-- Poziva `POST /v1/search` (postojeća krajnja tačka, bez izmjena).
+- Upit → rezultata (naslov, URL, isječak, ocjena relevantnosti).
+- Metapodaci dobavljača u oknu Config (cijena, kvota, status).
+- Odjeljak za ponovno rangiranje: odaberite model za ponovno rangiranje, promijenite redoslijed rezultata, pokažite `positionDelta`.
+- Prazno stanje sa CTA kada nije konfigurisan nijedan provajder pretraživanja.
+- Historija pretraživanja putem `SearchHistory.tsx`.
+- Poziva `POST /v1/search` (postojeća krajnja tačka, bez promjena).
 
-### Kartica za prikupljanje sadržaja
+### Scrape Tab
 
-Nova kartica za izdvajanje sadržaja s URL-a putem `POST /v1/web/fetch` (kreirano u planu 05):
+Nova kartica za izdvajanje sadržaja iz URL putem `POST /v1/web/fetch` (kreirano u planu 05):
 
-- Unos: URL + prekidač za cijelu stranicu + odabir formata (markdown / tekst / HTML).
-- Slanje → dohvaćanje → prikazivanje `ScrapeResult.tsx`.
-- `ScrapeResult` prikazuje pregled markdowna + prekidač za sirovi prikaz.
-- Ograničenje: ako je tijelo odgovora veće od **256 KB**, korisničko sučelje prikazuje `(skraćeno, prikaži sirovo)` i otvara sirovi sadržaj u Monaco modalnom prozoru (D21).
-- Ploča s metapodacima: pružatelj (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latencija, trošak, veličina odgovora, broj linkova.
-- Koristi hook `useScrapeFetch.ts`.
+- Unos: URL + preko cijele stranice birač + formata (markdown / text / HTML).
+- Pošalji → dohvati → render `ScrapeResult.tsx`.
+- `ScrapeResult` renderira pregled maraka + raw prekidač.
+- Cap: ako tijelo odgovora >** 256 KB** , UI prikazuje `(truncated, view raw)` i otvara se sirovo u modalnom načinu Monako (D21).
+- Panel metapodataka: provajder (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search/keenable-search), kašnjenje, cena, veličina odgovora, broj linkova.
+- Koristi `useScrapeFetch.ts` kuku.
 
-### Kartica za poređenje
+### Compare Tab
 
-Pokreće isti upit/URL paralelno kod najviše **4 pružatelja** (D22):
+Pokreće isti query/URL preko do** 4 provajdera paralelno** (D22):
 
-- Uporedne kolone za svakog pružatelja.
-- Metrike: latencija, trošak, broj rezultata, veličina odgovora.
-- Izračunavanje preklapanja URL-ova za pretragu (broj zajedničkih URL-ova u odnosu na početni rezultat).
-- Poziva `POST /v1/search` (pretraga) ili `POST /v1/web/fetch` (prikupljanje sadržaja) za svakog pružatelja.
+- Uporedne kolone po provajderu.
+- metrika: kašnjenje, cijena, broj rezultata, veličina odgovora.
+- izračunavanje URL preklapanja za pretragu (broj zajedničkih URLs u odnosu na početni rezultat).
+- Poziva `POST /v1/search` (pretraga) ili `POST /v1/web/fetch` (scrape) po provajderu.
 
 ---
 
-## Panel Konfiguracija (Dijeljeno)
+## Okno za konfiguraciju (dijeljeno)
 
-`SearchToolsConfigPane.tsx` — uvijek vidljivo, može se skupiti.
+`SearchToolsConfigPane.tsx` — uvijek vidljiv, sklopiv.
 
-| Polje           | Napomene                                                                          |
-| --------------- | --------------------------------------------------------------------------------- |
-| Provajder       | Padajući meni sa statusnom oznakom (konfigurisano / nedostaje / ograničena stopa) |
-| Tip             | `web` ili `vijesti` (samo pretraga)                                               |
-| Cijela stranica | Prekidač za scrape — dohvaća cijelu stranicu naspram prvog vidljivog sadržaja     |
-| Format          | `markdown`, `tekst`, ili `html` (samo scrape)                                     |
-| Model za rerank | Opcioni model za rerank nakon pretrage                                            |
-| Istorija        | Sekcija istorije pretrage koja se može skupiti                                    |
+| Polje                     | Bilješke                                                                          |
+| ------------------------- | --------------------------------------------------------------------------------- |
+| Provajder                 | Padajući meni sa statusnom značkom (konfigurirano / nedostaje / stopa ograničena) |
+| Tip                       | `web` ili `news` (samo pretraga)                                                  |
+| Cijela stranica           | Prebaci za skrape — preuzima cijelu stranicu u odnosu na prvi vidljivi sadržaj    |
+| Format                    | `markdown`, `text` ili `html` (samo scrape)                                       |
+| Ponovno rangiranje modela | Opcioni model za ponovno rangiranje nakon pretraživanja                           |
+| Istorija                  | Sklopivi odjeljak historije pretraživanja                                         |
 
 ---
 
@@ -99,15 +99,15 @@ Pokreće isti upit/URL paralelno kod najviše **4 pružatelja** (D22):
 
 ---
 
-## Katalog pružatelja usluga
+## Provider Catalog
 
-`ProviderCatalog.tsx` prikazuje potpunu listu pružatelja usluga iz `GET /api/search/providers`
-(proširenu u F4 kako bi uključivala pružatelje usluga dohvaćanja):
+`ProviderCatalog.tsx` izlaže potpunu listu dobavljača iz `GET /api/search/providers` (prošireno u F4 da bi uključilo dobavljače preuzimanja):
 
-| `kind` | `"search"` (20 pružatelja usluga) ili `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (24 provajdera) ili `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, okretno pretraživanje, anysearch-search, paralelno pretraživanje, keenable-search) |
 
-Status se **izvodi u trenutku zahtjeva** provjerom postoje li pristupni podaci i jesu li
-svi ključevi trenutno u periodu čekanja.
+Status je** izvedeno u vrijeme zahtjeva** provjerom da li postoje vjerodajnice i da li su svi ključevi trenutno u fazi hlađenja.
+
+`codex-search` (Codex Web Search) nema svoj ključ: ponovo koristi povezani Codex (ChatGPT) nalog, tako da svako pretraživanje troši ChatGPT kvotu pretplate i traje oko 10–40 s. Pokreće se kada ga zahtjev imenuje; za automatski odabir potrebna je zastavica funkcije `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` (podrazumevano isključena).
 
 ---
 
@@ -119,18 +119,18 @@ Rezervisano mjesto za API ključ je uvijek `$OMNIROUTE_API_KEY` (D11, dijeljeno 
 
 ---
 
-## Promjene na backendu
+## Backend Changes
 
-Za ovu funkcionalnost bila je potrebna samo jedna promjena na backendu:
+Za ovu funkciju bila je potrebna samo jedna pozadinska promjena:
 
-### Prošireni `GET /api/search/providers`
+### Extended `GET /api/search/providers`
 
-`src/app/api/search/providers/route.ts` je proširen kako bi:
+`src/app/api/search/providers/route.ts` je proširena na:
 
-- Uključio svakog pružaoca dohvata (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) u niz.
-- Dodao `kind: "search" | "fetch"` svakoj stavci.
-- Dodao `status: "configured" | "missing" | "rate_limited"` izveden iz trenutnog stanja vjerodajnica.
-- Zadržao kompatibilnost unazad — postojeća polja (`id`, `name` itd.) ostala su nepromijenjena.
+- Uključite sve dobavljače preuzimanja (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`, `keenable-search`) u niz.
+- Dodajte `kind: "search" | "fetch"` svakoj stavci.
+- Dodajte `status: "configured" | "missing" | "rate_limited"` izvedenu iz stanja vjerodajnice uživo.
+- Održavajte kompatibilnost unatrag — postojeća polja (`id`, `name`, itd.) nepromijenjena.
 
 ---
 

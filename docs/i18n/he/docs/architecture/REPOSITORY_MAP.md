@@ -242,12 +242,12 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------- |
 | `components/`                    | רכיב לוח המחוונים API: מתאמים מעל `packages/ui-kit` — ראה `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: שמות סמלים המשמשים את המסכים רכיבי → Lucide (`<Icon>`)                             |
-| `constants/providers.ts`         | **381 ספקים** עם אימות Zod (מקור האמת)                                                         |
+| `constants/providers.ts`         | **394 ספקים** עם אימות Zod (מקור האמת)                                                         |
 | `constants/cliTools.ts`          | רישום כלי CLI חיצוני                                                                           |
-| `constants/routingStrategies.ts` | **20 אסטרטגיות ניתוב** עם סדרי עדיפויות                                                        |
+| `constants/routingStrategies.ts` | **22 אסטרטגיות ניתוב** עם סדרי עדיפויות                                                        |
 | `constants/publicApiRoutes.ts`   | מסלולים הדורשים אישור נושאת (לעומת ניהול).                                                     |
 | `constants/upstreamHeaders.ts`   | רשימת דחיית כותרות לבקשות במעלה הזרם                                                           |
-| `validation/schemas.ts`          | סכימות ~ 80 Zod (מקור יחיד של אמת עבור חוזי API )                                              |
+| `validation/schemas.ts`          | סכימות ~ 80 Zod (מקור יחיד של אמת לחוזי API )                                                  |
 | `validation/helpers.ts`          | עוזרי אימות Zod (`validateBody` וכו')                                                          |
 | `types/`                         | סוגי TS משותפים                                                                                |
 | `contracts/`                     | חוזי API ציבוריים (נצרך על ידי `files:` ב- `package.json`)                                     |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — סביבת עבודה של מנוע הזרמה
+## `open-sse/` — סביבת עבודה של מנוע סטרימינג
 
-סביבת עבודה נפרדת של npm‏ (`@omniroute/open-sse`). מטפלת בעיבוד בקשות ובהפעלת ספקים.
+סביבת עבודה נפרדת npm (`@omniroute/open-sse`). מטפל בביצוע עיבוד בקשות של ספק +.
 
 ```
 open-sse/
-├── handlers/            # 16 קבצים (12 מטפלים + 4 כלי עזר): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search וכו'
-├── executors/           # 150 מודולי ביצוע (מחלקות המרחיבות את BaseExecutor + כלי עזר ייעודיים לכל ספק)
-├── translator/          # ממירי פורמטים (9 לבקשות, 9 לתגובות, 9 כלי עזר)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # כ־80+ מודולי שירות (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM וכו')
-├── mcp-server/          # שרת MCP‏ (110 כלים, 3 תעבורות, 33 תחומי הרשאה)
-├── config/              # מאגרי ספקים/מודלים, תצורת כותרות, כינויים למודלים
-├── utils/               # לקוח TLS, אחזור/מנתב פרוקסי, כלי עזר לרשת
-├── index.ts             # נקודת הכניסה של סביבת העבודה
-├── package.json         # מניפסט סביבת העבודה
-├── tsconfig.json        # תצורת TS של סביבת העבודה
-└── types.d.ts           # הצהרות הטיפוסים של סביבת העבודה
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| נתיב                        | מטרה                                                                                    |
-| --------------------------- | --------------------------------------------------------------------------------------- |
-| `server.ts`                 | מחזור החיים של שרת MCP‏ (תעבורות stdio + HTTP)                                          |
-| `httpTransport.ts`          | תעבורות HTTP ניתנות להזרמה + SSE‏ (`/api/mcp/sse`, `/api/mcp/stream`)                   |
-| `audit.ts`                  | רישום ביקורת בטבלה `mcp_tool_audit`                                                     |
-| `scopeEnforcement.ts`       | אימות תחום הרשאה לכל כלי                                                                |
-| `runtimeHeartbeat.ts`       | פעימת תקינות אל `DATA_DIR/runtime/mcp-heartbeat.json`                                   |
-| `descriptionCompressor.ts`  | דחיסת מטא־נתונים של תיאורי כלים כדי לחסוך הקשר                                          |
-| `schemas/tools.ts`          | 36 הגדרות בסיסיות של כלים + תחומי הרשאה                                                 |
-| `tools/advancedTools.ts`    | מימושים של כלים מתקדמים                                                                 |
-| `tools/memoryTools.ts`      | 3 כלי זיכרון (חיפוש/הוספה/ניקוי)                                                        |
-| `tools/skillTools.ts`       | 4 כלי מיומנות (רשימה/הפעלה/ביצוע/ביצועים)                                               |
-| `tools/compressionTools.ts` | 5 כלי דחיסה                                                                             |
-| `README.md`                 | קובץ README פנימי של שרת MCP‏ (מקושר בהפניה צולבת מתוך `docs/frameworks/MCP-SERVER.md`) |
+| נָתִיב                      | מַטָרָה                                                         |
+| --------------------------- | --------------------------------------------------------------- |
+| `server.ts`                 | מחזור חיים של שרת MCP (תעבורת + HTTP stdio)                     |
+| `httpTransport.ts`          | HTTP הזרמת + SSE transports (`/api/mcp/sse`, `/api/mcp/stream`) |
+| `audit.ts`                  | רישום ביקורת לשולחן `mcp_tool_audit`                            |
+| `scopeEnforcement.ts`       | אימות היקף לכלי                                                 |
+| `runtimeHeartbeat.ts`       | דופק בריאות ל- `DATA_DIR/runtime/mcp-heartbeat.json`            |
+| `descriptionCompressor.ts`  | דחוס מטא נתונים של תיאור הכלי כדי לשמור הקשר                    |
+| `schemas/tools.ts`          | 36 הגדרות כלי בסיס + scopes                                     |
+| `tools/advancedTools.ts`    | יישומי כלים מתקדמים                                             |
+| `tools/memoryTools.ts`      | 3 כלי זיכרון (search/add/clear)                                 |
+| `tools/skillTools.ts`       | 4 כלי מיומנות (list/enable/execute/executions)                  |
+| `tools/compressionTools.ts` | 5 כלי דחיסה                                                     |
+| `README.md`                 | שרת MCP פנימי README (מוצלב מ- `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | שילובי CLI חיצוניים + פנימי OmniRoute CLI                                      |
 | `I18N.md`                   | ארכיטקטורת i18n, הוספת שפה, 67 מקומות                                          |
 | `UNINSTALL.md`              | נקה את שלבי הסרת ההתקנה                                                        |
-| `PROVIDER_REFERENCE.md`     | **נוצר אוטומטית** קטלוג של 381 ספקים (Regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **נוצר אוטומטית** קטלוג של 394 ספקים (Regen: `npm run gen:provider-reference`) |
 
 ### צלילות עמוקות של תת-מערכת
 

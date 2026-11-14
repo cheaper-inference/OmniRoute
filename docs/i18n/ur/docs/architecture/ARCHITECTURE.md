@@ -14,7 +14,7 @@ OmniRoute ایک مقامی AI روٹنگ گیٹ وے اور ڈیش بورڈ ہ�
 
 بنیادی صلاحیتیں:
 
-- CLI/tools کے لیے OpenAI سے مطابقت رکھنے والی API سطح (381 فراہم کنندگان، 159 ایگزیکیوٹر ماڈیولز)
+- CLI/tools کے لیے OpenAI سے مطابقت رکھنے والی API سطح (394 فراہم کنندگان، 159 ایگزیکیوٹر ماڈیولز)
 - فراہم کنندہ فارمیٹس میں Request/response ترجمہ
 - ماڈل کومبو فال بیک (ملٹی ماڈل ترتیب)
 - `compositeTiers` کے ذریعے رن ٹائم آرڈرنگ کے ساتھ سٹرکچرڈ کومبو سٹیپس (`provider + model + connection`)
@@ -51,7 +51,7 @@ OmniRoute ایک مقامی AI روٹنگ گیٹ وے اور ڈیش بورڈ ہ�
 - مرکزی درخواست کی تشخیص کے لیے پالیسی انجن (لاک آؤٹ → بجٹ → فال بیک)
 - p50/p95/p99 لیٹنسی ایگریگیشن کے ساتھ ٹیلی میٹری کی درخواست کریں۔
 - کومبو ٹارگٹ ٹیلی میٹری اور تاریخی کومبو ٹارگٹ ہیلتھ بذریعہ `combo_execution_key` / `combo_step_id`
-- اختتام سے آخر تک ٹریسنگ کے لیے ارتباط ID (X-Request-Id)
+- اینڈ ٹو اینڈ ٹریسنگ کے لیے ارتباط ID (X-Request-Id)
 - آپٹ آؤٹ فی API کلید کے ساتھ تعمیل آڈٹ لاگنگ
 - LLM کوالٹی اشورینس کے لیے Eval فریم ورک
 - ریئل ٹائم فراہم کنندہ سرکٹ بریکر اسٹیٹس کے ساتھ ہیلتھ ڈیش بورڈ
@@ -267,71 +267,70 @@ flowchart LR
 
 ## 2) SSE + ترجمہ کور
 
-مرکزی فلو ماڈیولز:
+مین فلو ماڈیولز:
 
-- انٹری: `src/sse/handlers/chat.ts`
-- بنیادی آرکیسٹریشن: `open-sse/handlers/chatCore.ts`
-- پرووائیڈر ایگزیکیوشن اڈاپٹرز: `open-sse/executors/*`
-- فارمیٹ کی شناخت/پرووائیڈر کنفیگریشن: `open-sse/services/provider.ts`
-- ماڈل پارس/ریزولو: `src/sse/services/model.ts`، `open-sse/services/model.ts`
+- اندراج: `src/sse/handlers/chat.ts`
+- کور آرکیسٹریشن: `open-sse/handlers/chatCore.ts`
+- فراہم کنندہ کے عمل درآمد اڈاپٹر: `open-sse/executors/*`
+- فارمیٹ detection/provider config: `open-sse/services/provider.ts`
+- ماڈل parse/resolve: `src/sse/services/model.ts`، `open-sse/services/model.ts`
 - اکاؤنٹ فال بیک منطق: `open-sse/services/accountFallback.ts`
 - ترجمہ رجسٹری: `open-sse/translator/index.ts`
-- اسٹریم ٹرانسفارمیشنز: `open-sse/utils/stream.ts`، `open-sse/utils/streamHandler.ts`
-- استعمال کا اخذ/نارملائزیشن: `open-sse/utils/usageTracking.ts`
+- سٹریم کی تبدیلیاں: `open-sse/utils/stream.ts`، `open-sse/utils/streamHandler.ts`
+- استعمال extraction/normalization: `open-sse/utils/usageTracking.ts`
 - تھنک ٹیگ پارسر: `open-sse/utils/thinkTagParser.ts`
 - ایمبیڈنگ ہینڈلر: `open-sse/handlers/embeddings.ts`
-- ایمبیڈنگ پرووائیڈر رجسٹری: `open-sse/config/embeddingRegistry.ts`
-- تصویر تخلیق کرنے کا ہینڈلر: `open-sse/handlers/imageGeneration.ts`
-- امیج پرووائیڈر رجسٹری: `open-sse/config/imageRegistry.ts`
+- ایمبیڈنگ فراہم کنندہ رجسٹری: `open-sse/config/embeddingRegistry.ts`
+- امیج جنریشن ہینڈلر: `open-sse/handlers/imageGeneration.ts`
+- تصویر فراہم کنندہ کی رجسٹری: `open-sse/config/imageRegistry.ts`
 - ریسپانس سینیٹائزیشن: `open-sse/handlers/responseSanitizer.ts`
 - رول نارملائزیشن: `open-sse/services/roleNormalizer.ts`
 
-سروسز (کاروباری منطق):
+خدمات (کاروباری منطق):
 
-- اکاؤنٹ کا انتخاب/اسکورنگ: `open-sse/services/accountSelector.ts`
-- کانٹیکسٹ لائف سائیکل مینجمنٹ: `open-sse/services/contextManager.ts`
-- IP فلٹر کا نفاذ: `open-sse/services/ipFilter.ts`
+- اکاؤنٹ selection/scoring: `open-sse/services/accountSelector.ts`
+- سیاق و سباق کی زندگی کا انتظام: `open-sse/services/contextManager.ts`
+- IP فلٹر نفاذ: `open-sse/services/ipFilter.ts`
 - سیشن ٹریکنگ: `open-sse/services/sessionManager.ts`
-- درخواستوں کی نقل ختم کرنا: `open-sse/services/signatureCache.ts`
+- نقل کی درخواست کریں: `open-sse/services/signatureCache.ts`
 - سسٹم پرامپٹ انجیکشن: `open-sse/services/systemPrompt.ts`
-- تھنکنگ بجٹ مینجمنٹ: `open-sse/services/thinkingBudget.ts`
-- وائلڈ کارڈ ماڈل راؤٹنگ: `open-sse/services/wildcardRouter.ts`
-- ریٹ لمٹ مینجمنٹ: `open-sse/services/rateLimitManager.ts`
+- بجٹ کا انتظام سوچنا: `open-sse/services/thinkingBudget.ts`
+- وائلڈ کارڈ ماڈل روٹنگ: `open-sse/services/wildcardRouter.ts`
+- شرح کی حد کا انتظام: `open-sse/services/rateLimitManager.ts`
 - سرکٹ بریکر: `src/shared/utils/circuitBreaker.ts`
-- کانٹیکسٹ ہینڈ آف: `open-sse/services/contextHandoff.ts` — کانٹیکسٹ-ریلے حکمت عملی کے لیے ہینڈ آف خلاصے کی تخلیق اور انجیکشن
-- کمپریشن: `open-sse/services/compression/*` — پرووائیڈر ترجمے سے پہلے پیشگی کمپریشن؛
-  اس میں Caveman اصول، RTK فلٹرز، اسٹیکڈ پائپ لائنز، کمپریشن امتزاج، اعداد و شمار، اور توثیق شامل ہیں
-- Codex کوٹا فیچر: `open-sse/services/codexQuotaFetcher.ts` — کانٹیکسٹ-ریلے ہینڈ آف کے فیصلوں کے لیے Codex کوٹا حاصل کرتا ہے
-- کول ڈاؤن سے آگاہ ری ٹرائی: `src/sse/services/cooldownAwareRetry.ts` — قابلِ کنفیگریشن `requestRetry` / `maxRetryIntervalSec` کے ساتھ فی ماڈل کول ڈاؤن ری ٹرائز
-- محفوظ آؤٹ باؤنڈ فیچ: `src/shared/network/safeOutboundFetch.ts` — SSRF گارڈ، نجی URL بلاکنگ، ری ٹرائی، اور ٹائم آؤٹ کے ساتھ محفوظ پرووائیڈر/ماڈل فیچ
-- آؤٹ باؤنڈ URL گارڈ: `src/shared/network/outboundUrlGuard.ts` — پرووائیڈر URLs پر ہوسٹ کی جانچ؛ `src/shared/network/outboundUrlGuardPolicy.ts`، `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`، `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`، اور ان کے ڈیش بورڈ ٹوگلز سے موڈ منتخب کرتا ہے (`docs/reference/ENVIRONMENT.md` دیکھیں)
-- پرووائیڈر درخواست کی ڈیفالٹ اقدار: `open-sse/services/providerRequestDefaults.ts` — پرووائیڈر سطح کی `maxTokens`، `temperature`، `thinkingBudgetTokens` ڈیفالٹ اقدار
-- GLM پرووائیڈر کانسٹنٹس: `open-sse/config/glmProvider.ts` — مشترکہ GLM ماڈلز، کوٹا URLs، GLMT ٹائم آؤٹ/ڈیفالٹس
-- Antigravity اپ اسٹریم: `open-sse/config/antigravityUpstream.ts` — بنیادی URL اور ڈسکوری پاتھ کانسٹنٹس
-- Codex کلائنٹ کانسٹنٹس: `open-sse/config/codexClient.ts` — ورژن شدہ یوزر ایجنٹ اور کلائنٹ ورژن اقدار
-- ماڈل عرف سیڈ: `src/lib/modelAliasSeed.ts` — آغاز پر 30+ کراس پراکسی ڈائلیکٹ عرف سیڈ کرتا ہے
+- سیاق و سباق ہینڈ آف: `open-sse/services/contextHandoff.ts` — ہینڈ آف سمری جنریشن اور سیاق و سباق سے متعلق ریلے کی حکمت عملی کے لیے انجیکشن
+- کمپریشن: فراہم کنندہ کے ترجمہ سے پہلے `open-sse/services/compression/*` — فعال کمپریشن؛ Caveman کے قوانین، RTK فلٹرز، اسٹیک شدہ پائپ لائنز، کمپریشن کومبوز، اعدادوشمار، اور توثیق شامل ہیں
+- Codex کوٹہ لانے والا: `open-sse/services/codexQuotaFetcher.ts` — سیاق و سباق سے متعلق ریلے ہینڈ آف فیصلوں کے لیے Codex کوٹہ حاصل کرتا ہے
+- کولڈاؤن سے آگاہی کی دوبارہ کوشش: `src/sse/services/cooldownAwareRetry.ts` — فی ماڈل کولڈاؤن کی دوبارہ کوششیں قابل ترتیب `requestRetry` / `maxRetryIntervalSec` کے ساتھ
+- محفوظ آؤٹ باؤنڈ بازیافت: `src/shared/network/safeOutboundFetch.ts` — گارڈڈ provider/model بازیافت SSRF گارڈ کے ساتھ، نجی-URL کو بلاک کرنا، دوبارہ کوشش کریں، اور ٹائم آؤٹ
+- آؤٹ باؤنڈ URL گارڈ: `src/shared/network/outboundUrlGuard.ts` — میزبان فراہم کنندہ URLs پر چیک کرتا ہے؛ `src/shared/network/outboundUrlGuardPolicy.ts` `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`، `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`، اور ان کے ڈیش بورڈ ٹوگلز سے موڈ چنتا ہے (دیکھیں `docs/reference/ENVIRONMENT.md`)
+- فراہم کنندہ کی درخواست کے ڈیفالٹس: `open-sse/services/providerRequestDefaults.ts` — فراہم کنندہ کی سطح کے `maxTokens`، `temperature`، `thinkingBudgetTokens` ڈیفالٹس
+- GLM فراہم کنندہ مستقل: `open-sse/config/glmProvider.ts` — مشترکہ GLM ماڈلز، کوٹا URLs، GLMT timeout/defaults
+- Antigravity upstream: `open-sse/config/antigravityUpstream.ts` — بیس URL اور دریافت پاتھ مستقل
+- Codex کلائنٹ مستقل: `open-sse/config/codexClient.ts` — ورژن شدہ صارف ایجنٹ اور کلائنٹ ورژن کی قدریں
+- ماڈل عرف بیج: `src/lib/modelAliasSeed.ts` — بیج 30 + کراس پراکسی بولی عرفی آغاز میں
 
-ڈومین لیئر ماڈیولز:
+ڈومین پرت کے ماڈیولز:
 
-- لاگت کے اصول/بجٹس: `src/domain/costRules.ts`
+- لاگت rules/budgets: `src/domain/costRules.ts`
 - فال بیک پالیسی: `src/domain/fallbackPolicy.ts`
-- کومبو ریزولور: `src/domain/comboResolver.ts`
+- محفوظ شدہ کومبو ریزولوشن معاہدہ: `src/domain/comboResolver.ts`; لائیو روٹنگ `open-sse/services/combo.ts` استعمال کرتی ہے۔
 - لاک آؤٹ پالیسی: `src/domain/lockoutPolicy.ts`
-- پالیسی انجن: `src/domain/policyEngine.ts` — مرکزی لاک آؤٹ → بجٹ → فال بیک جائزہ
-- ایرر کوڈز کیٹلاگ: `src/shared/constants/errorCodes.ts`
+- محفوظ پالیسی کی تشخیص کا معاہدہ: `src/domain/policyEngine.ts`; درخواست کا راستہ `src/shared/utils/apiKeyPolicy.ts` کے ذریعے API-key پالیسی کو نافذ کرتا ہے اور `src/sse/handlers/chat/resolvedModelPolicy.ts` کے ذریعے حل شدہ ہدف کی اجازت دیتا ہے
+- ایرر کوڈز کیٹلوگ: `src/shared/constants/errorCodes.ts`
 - درخواست ID: `src/shared/utils/requestId.ts`
-- فیچ ٹائم آؤٹ: `src/shared/utils/fetchTimeout.ts`
-- درخواست ٹیلی میٹری: `src/shared/utils/requestTelemetry.ts`
-- تعمیل/آڈٹ: `src/lib/compliance/index.ts`
-- ایویل رنر: `src/lib/evals/evalRunner.ts`
-- ڈومین اسٹیٹ پرسسٹنس: `src/lib/db/domainState.ts` — فال بیک چینز، بجٹس، لاگت کی تاریخ، لاک آؤٹ اسٹیٹ، اور سرکٹ بریکرز کے لیے SQLite CRUD
+- بازیافت کا ٹائم آؤٹ: `src/shared/utils/fetchTimeout.ts`
+- ٹیلی میٹری کی درخواست کریں: `src/shared/utils/requestTelemetry.ts`
+- Compliance/audit: `src/lib/compliance/index.ts`
+- Eval رنر: `src/lib/evals/evalRunner.ts`
+- ڈومین اسٹیٹ پرسٹینس: فال بیک چینز، بجٹ، لاگت کی تاریخ، لاک آؤٹ اسٹیٹ، سرکٹ بریکرز کے لیے `src/lib/db/domainState.ts` — SQLite CRUD
 
-OAuth پرووائیڈر ماڈیولز (`src/lib/oauth/providers/` کے تحت 27 انفرادی فائلیں):
+OAuth فراہم کرنے والے ماڈیولز ( `src/lib/oauth/providers/` کے تحت 27 انفرادی فائلیں):
 
 - رجسٹری انڈیکس: `src/lib/oauth/providers/index.ts`
-- انفرادی پرووائیڈرز: `agy.ts`، `antigravity.ts`، `claude.ts`، `cline.ts`، `codebuddy-cn.ts`، `codebuddy-intl.ts`، `codex.ts`، `cursor.ts`، `devin-desktop.ts`، `ghe-copilot.ts`، `github.ts`، `gitlab-duo.ts`، `grok-cli-oauth.ts`، `grok-cli.ts`، `kilocode.ts`، `kimi-coding.ts`، `kiro.ts`، `muse-code.ts`، `openference.ts`، `qoder.ts`، `trae.ts`، `workbuddy.ts`، `xai-oauth.ts`، `zed-hosted.ts`، `zed.ts`
-- مشترکہ ہیلپرز: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl ڈیوائس فلو)، `museCodeDeviceResponse.ts`
-- ہلکا ریپر: `src/lib/oauth/providers.ts` — انفرادی ماڈیولز سے دوبارہ ایکسپورٹ کرتا ہے
+- انفرادی فراہم `workbuddy.ts`: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts` `zed.ts` `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `xai-oauth.ts`, `zed-hosted.ts`
+- مشترکہ مددگار: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl ڈیوائس فلو)، `museCodeDeviceResponse.ts`
+- پتلا ریپر: `src/lib/oauth/providers.ts` — انفرادی ماڈیولز سے دوبارہ برآمد کرتا ہے۔
 
 ## 5) ایمبیڈڈ سروسز (v3.8.4)
 
@@ -363,15 +362,15 @@ OmniRoute مقامی طور پر چلنے والے AI ٹول پراسیسز کو
 آٹو کومبو متحرک طور پر اسکور کرتا ہے اور درخواست کے وقت روٹنگ کے اہداف کو چنتا ہے، بجائے اس کے کہ جامد کومبو تعریف پر انحصار کیا جائے۔ یہ `auto/*` ماڈل پریفکس فیملی کو طاقت دیتا ہے۔
 
 - انجن کا اندراج: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- حل کرنے والا: `src/domain/comboResolver.ts` ( `auto/` سابقے کا خود بخود پتہ لگانا)
+- لائیو کومبو اندراج: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), جسے `src/sse/handlers/chat.ts` کہتے ہیں
 - ڈیش بورڈ: `/dashboard/auto-combo`
 - ٹیلی میٹری: `auto_combo_decisions` SQLite ٹیبل
 
 کلیدی صلاحیتیں:
 
-- **20 روٹنگ کی حکمت عملی** (ترجیح، وزن والا، پہلے بھرنے والا، راؤنڈ-رابن، P2C، بے ترتیب، کم سے کم استعمال شدہ، لاگت کے لیے بہتر، دوبارہ ترتیب دینے سے آگاہ، دوبارہ ترتیب دینے والی ونڈو، ہیڈ روم، کوٹہ وزنی، سخت بے ترتیب،** آٹو** , lkgp، سیاق و سباق سے بہتر بنایا گیا، کیشے سے بہتر بنایا گیا، سیاق و سباق سے متعلق ریلے،** فیوژن** , پائپ لائن) — آٹو v3.8.0 میں سرخی کا اضافہ ہے۔ `fusion` (پینل فین آؤٹ + جج ترکیب، `open-sse/services/fusion.ts`) v3.8.36 میں نیا ہے۔
+- **22 روٹنگ کی حکمت عملی** (ترجیح، ویٹڈ، فل فرسٹ، راؤنڈ روبن، P2C، بے ترتیب، کم سے کم استعمال شدہ، لاگت کے لیے بہتر، دوبارہ ترتیب دینے سے آگاہ، دوبارہ ترتیب دینے والی ونڈو، ایکسپائری فرسٹ، ہیڈ روم، کوٹہ-ویٹڈ، سخت بے ترتیب،** آٹو** , lkgp، سیاق و سباق سے بہتر بنایا گیا، کیشے سے بہتر بنایا گیا، سیاق و سباق سے متعلق ریلے،** فیوژن** , pipeline, jev) — auto v3.8.0 میں سرخی کا اضافہ ہے۔ `fusion` (پینل فین آؤٹ + جج ترکیب، `open-sse/services/fusion.ts`) v3.8.36 میں نیا ہے۔
 - **16 فیکٹر اسکورنگ** : کوٹہ، صحت، الٹا لاگت، الٹا تاخیر، ٹاسک فٹ اور مزید دس۔ عوامل اور ان کے پہلے سے طے شدہ وزن کا کینونیکل جدول [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — میں رہتا ہے اسے یہاں پر بحال کرنے سے اسے باسی ہونے کے لئے دوسرا مقام ملے گا۔
-- **ورچوئل فیکٹری** جب کوئی مماثل نامی کومبو موجود نہ ہو، تو صحت مند فعال فراہم کنندہ کنکشنز سے امیدواروں کو سورس کر کے عارضی کمبوز کو حقیقت بناتا ہے۔
+- **ورچوئل فیکٹری** صحت مند فعال فراہم کنندہ کنکشنز سے امیدواروں کو سورس کرتے ہوئے، نام کا کوئی مماثل کمبو موجود نہ ہونے پر عارضی کمبوز کو حقیقت بناتا ہے۔
 - **خودکار سابقے** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — ہر ایک کو ٹیونڈ ویٹ پروفائل کی حمایت حاصل ہے۔
 - **6 موڈ پیک** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` اور `chaos-mode` — پیش سیٹ وزن کی کنفیگریشنز ڈیش بورڈ سے کال کی جا سکتی ہیں۔ (مندرجہ بالا `auto/*` سابقے کے ساتھ الجھن میں نہ پڑیں، جو درخواست کے وقت کی مختلف حالتیں ہیں۔)
 
@@ -403,22 +402,26 @@ OmniRoute مقامی طور پر چلنے والے AI ٹول پراسیسز کو
 
 ### D. ڈومین پرت
 
-`src/domain/` نام کی جگہ پالیسی فیصلوں کو مرکزی بناتی ہے لہذا روٹ ہینڈلرز کو خود lockout/budget/fallback منطق کو جمع کرنے کی ضرورت نہیں ہے۔
+`src/domain/` نام کی جگہ میں ڈومین خدمات اور محفوظ تشخیصی معاہدے شامل ہیں۔ ہر درخواست کے لیے یہ ایک لازمی پالیسی انٹری پوائنٹ نہیں ہے۔
 
-- پالیسی انجن: `src/domain/policyEngine.ts` — سنگل انٹری پوائنٹ برائے عمل درآمد سے پہلے کی تشخیص (لاک آؤٹ → بجٹ → فال بیک آرڈرنگ)
+لائیو چیٹ پاتھ `enforceApiKeyPolicy()` `src/shared/utils/apiKeyPolicy.ts` سے کال کرتا ہے۔ حل شدہ ماڈلز اور کومبو ممبرز کی اجازت `src/sse/handlers/chat/resolvedModelPolicy.ts` میں لاگو ہوتی ہے۔ `src/app/api/v1/chat/completions/route.ts` میں خود میزبان اندراج بھی بھیجنے سے پہلے API-key پالیسی کو نافذ کرتی ہے۔ کومبو ریزولوشن `open-sse/services/combo.ts` کے ذریعے چلتا ہے۔
+
+`src/domain/policyEngine.ts`، `src/domain/comboResolver.ts` اور `src/lib/container.ts` آزمائشی معاہدے ہیں، اس درخواست کے راستے کی وائرنگ نہیں۔ کنٹینر پالیسی انجن کو رجسٹر کرتا ہے، لیکن معائنہ شدہ پیداوار کی درخواست کا راستہ اسے حل نہیں کرتا ہے۔ صرف ان معاہدوں کو تبدیل کرنے سے لائیو چیٹ پالیسی یا کومبو روٹنگ تبدیل نہیں ہوتی ہے۔ ان کو جوڑنے یا ہٹانے کے لیے الگ ڈیزائن کے فیصلے کی ضرورت ہوتی ہے۔
+
+- محفوظ پالیسی انجن: `src/domain/policyEngine.ts` — لاک آؤٹ → بجٹ → فال بیک تشخیص
 - لاگت کے اصول: `src/domain/costRules.ts`
 - فال بیک پالیسی: `src/domain/fallbackPolicy.ts`
 - لاک آؤٹ پالیسی: `src/domain/lockoutPolicy.ts`
 - ٹیگ پر مبنی روٹنگ: `src/domain/tagRouter.ts`
-- کومبو حل کرنے والا: `src/domain/comboResolver.ts` — کامبو ناموں، آٹو/\* سابقہ جات، اور وائلڈ کارڈ ماڈل کے اہداف کو ٹھوس عملدرآمد کے منصوبوں کو حل کرتا ہے
+- محفوظ شدہ کومبو حل کرنے والا: `src/domain/comboResolver.ts` — اسٹینڈ اسٹون سلیکشن معاہدہ؛ لائیو کومبو روٹنگ `open-sse/services/combo.ts` میں لاگو ہوتی ہے۔
 - Connection/model قاعدہ جوڑنے والا: `src/domain/connectionModelRules.ts`
 - ماڈل کی دستیابی کے اسنیپ شاٹس: `src/domain/modelAvailability.ts`
 - فراہم کنندہ کی میعاد ختم ہونے سے باخبر رہنا: `src/domain/providerExpiration.ts`
-- کوٹہ کیش: `src/domain/quotaCache.ts` فراہم `src/lib/usage/usageReading.ts` کوٹہ ونڈو کو شامل اور ہٹاتے ہیں (OpenAI کچھ منصوبوں کے لیے 5 گھنٹے کی Codex ونڈو کو گرا دیا)، اس لیے فراہم کنندہ کے اڈاپٹر کے مکمل ہونے کی تصدیق کو پڑھنے `quotasComplete` استعمال اکاؤنٹ کا مکمل ونڈو سیٹ ہے: ایک ونڈو جو پہلے معلوم ہوتی ہے لیکن اس سے غیر حاضر ہے، ریٹائرڈ ہے، `quota_snapshots` میں، ری ہائیڈرینڈ ایپ میں ریکارڈ)، مسلسل Codex کوٹہ حالت میں اور Claude کی سیچوریشن بالٹی میں۔ جزوی ثبوت (رسپانس ہیڈرز، باسی کاپیاں) صرف ان کھڑکیوں کو اپ ڈیٹ کرتا ہے جو اس کے پاس ہے۔
+- کوٹہ کیش: `src/domain/quotaCache.ts` فراہم `src/lib/usage/usageReading.ts` کوٹہ ونڈو کو شامل اور ہٹاتے ہیں (OpenAI کچھ منصوبوں کے لیے 5 گھنٹے کی Codex ونڈو کو گرا دیا)`quotasComplete` اس لیے فراہم کنندہ کے اڈاپٹر کے مکمل ہونے کی تصدیق کو پڑھنے والا استعمال اکاؤنٹ کا مکمل ونڈو سیٹ ہے: ایک ونڈو جو پہلے معلوم ہوتی ہے لیکن اس سے غیر حاضر ہے، ریٹائرڈ ہے، کیشے میں، ری ہائیڈرینڈ `quota_snapshots` میں ریکارڈ)، مسلسل Codex کوٹہ کی حالت میں اور Claude کی سنترپتی بالٹیوں میں۔ جزوی ثبوت (جوابی ہیڈر، باسی کاپیاں) صرف ان کھڑکیوں کو اپ ڈیٹ کرتا ہے جو اس کے پاس ہے۔
 - تنزلی کی حالت: `src/domain/degradation.ts`
 - کنفیگریشن آڈٹ: `src/domain/configAudit.ts`
 - OmniRoute جواب میٹا ڈیٹا بلڈر: `src/domain/omnirouteResponseMeta.ts`
-- تشخیص کا ذیلی نظام: `src/domain/assessment/` — متواتر تشخیصی جابز
+- تشخیص کا ذیلی نظام: `src/domain/assessment/` — متواتر تشخیص کی نوکریاں
 
 ### E. اجازت دینے والی پائپ لائن
 
@@ -441,7 +444,7 @@ OmniRoute مقامی طور پر چلنے والے AI ٹول پراسیسز کو
 کامبو سلیکشن کے اوپر ایک محدود ریاستی مشین سے چلنے والا راؤٹر پتہ چلا ورک فلو اسٹیج (منصوبہ بندی، عمل درآمد، جائزہ) اور بیک گراؤنڈ ٹاسک سے تعلق کی بنیاد پر براہ راست ٹریفک کے لیے لیئرڈ ہے۔
 
 - ورک فلو FSM: `open-sse/services/workflowFSM.ts`
-- ٹاسک سے آگاہ راؤٹر: `open-sse/services/taskAwareRouter.ts`
+- ٹاسک سے آگاہ روٹر: `open-sse/services/taskAwareRouter.ts`
 - بیک گراؤنڈ ٹاسک ڈیٹیکٹر: `open-sse/services/backgroundTaskDetector.ts`
 - ارادے کی درجہ بندی کرنے والا: `open-sse/services/intentClassifier.ts`
 
@@ -858,41 +861,47 @@ flowchart LR
 - `src/lib/db/*`: مخصوص ماڈیولز براہِ راست درآمد کریں — کوئی بیرل نہیں (پرانی `localDb.ts` ری ایکسپورٹ تہہ ہٹا دی گئی تھی)
 - `src/lib/usageDb.ts`: SQLite ٹیبلز کے اوپر استعمال کی ہسٹری/کال لاگز کا فساڈ
 
-## پرووائیڈر ایگزیکیوٹر کوریج (اسٹریٹیجی پیٹرن)
+## فراہم کنندہ ایگزیکیوٹر کوریج (حکمت عملی کا نمونہ)
 
-ہر پرووائیڈر کے پاس ایک مخصوص ایگزیکیوٹر ہوتا ہے جو `BaseExecutor` (درج `open-sse/executors/base.ts`) کو توسیع دیتا ہے، جو URL بنانا، ہیڈر تشکیل دینا، ایکسپونینشل بیک آف کے ساتھ دوبارہ کوشش کرنا، کریڈینشل ریفریش ہُکس، اور `execute()` آرکیسٹریشن میتھڈ فراہم کرتا ہے۔
+ہر فراہم کنندہ کے پاس `BaseExecutor` ( `open-sse/executors/base.ts` میں) کی توسیع کرنے والا ایک خصوصی ایگزیکیٹر ہوتا ہے، جو URL بلڈنگ، ہیڈر کی تعمیر، ایکسپونینشل بیک آف کے ساتھ دوبارہ کوشش، کریڈینشل ریفریش ہکس، اور `execute()` آرکیسٹریشن کا طریقہ فراہم کرتا ہے۔
 
-| ایگزیکیوٹر                | فراہم کنندہ (فراہم کنندگان)                                                                                                                                  | خصوصی ہینڈلنگ                                                           |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI، Claude، Gemini، Qwen، OpenRouter، GLM، Kimi، MiniMax، DeepSeek، Groq، xAI، Mistral، Perplexity، Together، Fireworks، Cerebras، Cohere، NVIDIA، وغیرہ | ہر فراہم کنندہ کے لیے متحرک URL/ہیڈر کنفیگریشن                          |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                           | حسبِ ضرورت پروجیکٹ/سیشن IDs، Retry-After کی پارسنگ، 429 کی مبہم سازی    |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                 | ڈیپلائمنٹ پر مبنی روٹنگ، api-version کوئری کا نفاذ                      |
-| `BlackboxWebExecutor`     | Blackbox AI (ویب موڈ)                                                                                                                                        | TLS فنگرپرنٹ ایمولیشن کے ساتھ ویب سیشن ریورس                            |
-| `ClaudeIdentityExecutor`  | Claude.ai (CCH پاتھ)                                                                                                                                         | پابندی + ٹول ری میپ پائپ لائنز، فنگرپرنٹ کی تشکیل                       |
-| `CliProxyApiExecutor`     | CLIProxyAPI سے مطابقت رکھنے والے فراہم کنندگان                                                                                                               | حسبِ ضرورت توثیق اور پروٹوکول ہینڈلنگ                                   |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                        | اکاؤنٹ ID کا اندراج، Neurons پر مبنی استعمال کی ٹریکنگ                  |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                                 | سسٹم ہدایات شامل کرتا ہے، استدلالی کاوش کو لازمی بناتا ہے               |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                          | تھریڈ/ٹرن پننگ کے ساتھ براؤزر سیشن Responses API برج                    |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                                 | OAuth + ہر سیشن کے لیے ہیڈر روٹیشن                                      |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                   | ConnectRPC پروٹوکول، Protobuf انکوڈنگ، چیک سم کے ذریعے درخواست پر دستخط |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                    | کلاؤڈ ایجنٹ ماڈیول کے ذریعے Devin ٹاسک لائف سائیکل برجنگ                |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                               | Copilot ٹوکن ریفریش، VSCode کی نقل کرنے والے ہیڈرز                      |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                   | GitLab OAuth + پروجیکٹ کے دائرۂ کار والی روٹنگ                          |
-| `GlmExecutor`             | Z.AI GLM (بشمول `glmt` پری سیٹ)                                                                                                                              | تھنکنگ بجٹ سے آگاہ، GLMT پری سیٹ مستقلات                                |
-| `GrokWebExecutor`         | xAI Grok ویب                                                                                                                                                 | ویب سیشن ریورس، موڈ کا انتخاب (سوچ/معیاری)                              |
-| `KieExecutor`             | KIE                                                                                                                                                          | گھومتے ہوئے سیشن اینکرز کے ساتھ حسبِ ضرورت ٹوکن کا اجرا                 |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                       | AWS EventStream بائنری فارمیٹ → SSE تبدیلی                              |
-| `MuseSparkWebExecutor`    | Muse Spark (ویب)                                                                                                                                             | امیج میسج برجنگ کے ساتھ ویب سیشن ریورس                                  |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                    | فراہم کنندہ کے لیے مخصوص ریکویسٹ باڈی کی ساخت                           |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                     | AI SDK سے مطابقت رکھنے والا فراہم کنندہ سیٹ اپ                          |
-| `PerplexityWebExecutor`   | Perplexity ویب                                                                                                                                               | چیٹ جاری رکھنے کے لیے ویب سیشن ریورس                                    |
-| `PetalsExecutor`          | Petals تقسیم شدہ انفرنس                                                                                                                                      | غیر مرکزی سوارم روٹنگ                                                   |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                              | API کلید درکار نہیں، شرح محدود درخواستیں                                |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                     | PAT اور OAuth سپورٹ، متعدد ماڈلز والا مفت درجہ                          |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                             | سروس اکاؤنٹ کی توثیق، خطے پر مبنی اینڈ پوائنٹس                          |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                                | درآمد شدہ API کلید + Connect-protobuf چیٹ اسٹریمنگ                      |
+| عمل کرنے والا             | فراہم کنندگان                                                                                                                                                | خصوصی ہینڈلنگ                                                                          |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity , Together, Fireworks, Cerebras, Cohere, NVIDIA وغیرہ | متحرک URL/header تشکیل فی فراہم کنندہ                                                  |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                           | اپنی مرضی کے مطابق project/session IDs، دوبارہ کوشش کریں-تصریف کے بعد، 429 obfuscation |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                 | تعیناتی پر مبنی روٹنگ، اے پی آئی ورژن کے استفسار کا نفاذ                               |
+| `BlackboxWebExecutor`     | بلیک باکس AI (ویب موڈ)                                                                                                                                       | TLS فنگر پرنٹ ایمولیشن کے ساتھ ویب سیشن ریورس                                          |
+| `ClaudeIdentityExecutor`  | Claude.ai (CCH راستہ)                                                                                                                                        | پابندی + ٹول ری میپ پائپ لائنز، فنگر پرنٹ کی تشکیل                                     |
+| `CliProxyApiExecutor`     | CLIProxyAPI کے موافق فراہم کنندگان                                                                                                                           | حسب ضرورت تصدیق اور پروٹوکول ہینڈلنگ                                                   |
+| `CloudflareAiExecutor`    | Cloudflare ورکرز AI                                                                                                                                          | اکاؤنٹ ID انجیکشن، نیوران پر مبنی استعمال سے باخبر رہنا                                |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                                 | نظام کی ہدایات کو انجیکشن دیتا ہے، استدلال کی کوشش پر مجبور کرتا ہے۔                   |
+| `ChatGptWebCodexExecutor` | ChatGPT ویب (Codex)                                                                                                                                          | براؤزر سیشن API پل کو thread/turn پننگ کے ساتھ جواب دیتا ہے۔                           |
+| `CommandCodeExecutor`     | کمانڈ کوڈ                                                                                                                                                    | OAuth + فی سیشن ہیڈر گردش                                                              |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                   | ConnectRPC پروٹوکول، پروٹوبف انکوڈنگ، چیکسم کے ذریعے دستخط کرنے کی درخواست             |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                    | Devin ٹاسک لائف سائیکل برجنگ بذریعہ کلاؤڈ ایجنٹ ماڈیول                                 |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                               | Copilot ٹوکن ریفریش، VSCode کی نقل کرنے والے ہیڈر                                      |
+| `GitlabExecutor`          | GitLab جوڑی                                                                                                                                                  | GitLab OAuth + پروجیکٹ اسکوپڈ روٹنگ                                                    |
+| `GlmExecutor`             | Z.AI GLM (بشمول `glmt` پیش سیٹ)                                                                                                                              | سوچ - بجٹ سے آگاہ، GLMT پیش سیٹ مستقل                                                  |
+| `GrokWebExecutor`         | xAI Grok ویب                                                                                                                                                 | ویب سیشن ریورس، موڈ سلیکشن (think/standard)                                            |
+| `KieExecutor`             | KIE                                                                                                                                                          | گھومنے والے سیشن اینکرز کے ساتھ حسب ضرورت ٹوکن کا اجراء                                |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                       | AWS EventStream بائنری فارمیٹ → SSE تبدیلی                                             |
+| `MuseSparkWebExecutor`    | میوزک اسپارک (ویب)                                                                                                                                           | تصویری پیغام برجنگ کے ساتھ ویب سیشن ریورس                                              |
+| `NlpCloudExecutor`        | NLP کلاؤڈ                                                                                                                                                    | فراہم کنندہ کے لیے مخصوص درخواست کے جسم کی شکل                                         |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                     | AI SDK ہم آہنگ فراہم کنندہ سیٹ اپ                                                      |
+| `PerplexityWebExecutor`   | الجھن کا جال                                                                                                                                                 | چیٹ کے تسلسل کے لیے ویب سیشن ریورس                                                     |
+| `PetalsExecutor`          | پنکھڑیوں نے تخمینہ تقسیم کیا۔                                                                                                                                | وکندریقرت سوارم روٹنگ                                                                  |
+| `PollinationsExecutor`    | جرگن AI                                                                                                                                                      | API کلید کی ضرورت نہیں، شرح محدود درخواستیں۔                                           |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                     | PAT اور OAuth سپورٹ، ملٹی ماڈل فری ٹائر                                                |
+| `VertexExecutor`          | Google ورٹیکس AI                                                                                                                                             | سروس اکاؤنٹ کی توثیق، علاقے پر مبنی اختتامی پوائنٹس                                    |
+| `DevinDesktopExecutor`    | Devin ڈیسک ٹاپ                                                                                                                                               | درآمد شدہ API کلید + Connect-protobuf چیٹ اسٹریمنگ                                     |
 
-دیگر تمام فراہم کنندگان (بشمول حسبِ ضرورت ہم آہنگ نوڈز) `DefaultExecutor` استعمال کرتے ہیں۔
+دیگر تمام فراہم کنندگان (بشمول حسب ضرورت مطابقت پذیر نوڈس) `DefaultExecutor` استعمال کرتے ہیں۔
+
+### خودکار تحقیقات اور ویب سیشن اکاؤنٹس
+
+ماڈل ٹیسٹ، ٹیسٹ آل، کومبو ٹیسٹ اور تشخیص حقیقی چیٹ کی درخواستیں بھیجتے ہیں۔ ایک ویب سیشن فراہم کنندہ سائن ان صارف کے طور پر کام کرتا ہے، لہذا ان درخواستوں میں سے ہر ایک کو اس اکاؤنٹ پر گفتگو کے طور پر محفوظ کیا جائے گا۔ ایسی بات چیت کو چھوڑنے والی خودکار تحقیقات نے ایک اکاؤنٹ معطل کر دیا (#14780)۔ اس لیے چیٹ پائپ لائن ہر اس ہدف سے انکار کرتی ہے جس تک ایک خودکار تحقیقات پہنچتی ہے جس کا فراہم کنندہ ویب سیشن کی سند لیتا ہے، ایک بار جب ہدف کا فراہم کنندہ حل ہو جاتا ہے اور اس سے پہلے کہ کسی سند کا انتخاب کیا جائے (`src/lib/providers/chatProbePolicy.ts`)۔ انکار `error.code` `chat_probe_not_isolated` کے ساتھ `422` ہے، اور پروب چلانے والے اسے skip کے طور پر رپورٹ کرتے ہیں، ناکامی نہیں۔
+
+ایک ایگزیکیوٹر جو ہر چیٹ کو فراہم کنندہ کے اپنے نو ہسٹری موڈ میں چلاتا ہے اس کا اعلان `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`) کے ساتھ کرتا ہے۔ اس کے بعد اس فراہم کنندہ سے تحقیقات کی اجازت ہے۔ ChatGPT ویب نے `temporary-chat` کا اعلان کیا۔ ٹیسٹ کے ساتھ اس کے میکانزم میں اعلان کو پن کریں، لہذا دعوی اس کوڈ سے زیادہ زندہ نہیں رہ سکتا جو اسے سچ بناتا ہے۔
 
 ## پرووائیڈر مطابقت میٹرکس
 
@@ -1056,9 +1065,9 @@ flowchart LR
 
 ## 6) SSRF / آؤٹ باؤنڈ URL گارڈ
 
-- `src/shared/network/outboundUrlGuard.ts` تمام نجی/لوپ بیک/لنک-لوکل ہدف URLs کو فراہم کنندہ کے ایگزیکیوٹرز تک پہنچنے سے پہلے بلاک کرتا ہے
-- فراہم کنندہ کے ماڈل کی دریافت اور توثیقی روٹس `src/shared/network/safeOutboundFetch.ts` استعمال کرتے ہیں، جو ہر آؤٹ باؤنڈ درخواست سے پہلے گارڈ لاگو کرتا ہے
-- گارڈ کی خرابیاں HTTP 422 کے ساتھ `URL_GUARD_BLOCKED` کے طور پر ظاہر ہوتی ہیں اور `providerAudit.ts` کے ذریعے تعمیلی آڈٹ ٹریل میں لاگ کی جاتی ہیں
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) `BaseExecutor.execute()` کے ذریعے بھیجی جانے والی چیٹ کی درخواستوں پر `src/shared/network/outboundUrlGuard.ts` کا اطلاق کرتا ہے۔ صرف پبلک موڈ میں (پرائیویٹ فلیگ آف کے ساتھ `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` ) یہ پرائیویٹ اور لوپ بیک ہوسٹس اور 169.254.0.0/16 روکتا ہے۔ ہر دوسرے موڈ میں یہ کلاؤڈ میٹا ڈیٹا میزبانوں کو روکتا ہے۔ یہ کسی بھی DNS تلاش کرنے سے پہلے میزبان نام یا IP لٹریل جیسا لکھا ہوا چیک کرتا ہے۔ بلٹ ان مقامی فراہم کنندگان اسے چھوڑ دیتے ہیں۔
+- فراہم کنندہ ماڈل کی دریافت اور توثیق کے راستے `src/shared/network/safeOutboundFetch.ts` استعمال کرتے ہیں جو ہر آؤٹ باؤنڈ درخواست سے پہلے گارڈ کو لاگو کرتا ہے
+- HTTP 503 کے ساتھ `URL_GUARD_BLOCKED` کے طور پر گارڈ کی غلطیاں سامنے آتی ہیں (`getSafeOutboundFetchErrorStatus`؛ ماڈل-دریافت کا راستہ 400 واپس کرتا ہے) اور تصدیق کے دوران حقیقی SSRF بلاکس آڈٹ ٹریل میں `provider.validation.ssrf_blocked` ایونٹس کے طور پر لاگ ان ہوتے ہیں۔
 
 ## مشاہدہ پذیری اور آپریشنل اشارے
 

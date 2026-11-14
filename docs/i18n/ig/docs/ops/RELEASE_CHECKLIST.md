@@ -109,211 +109,207 @@ akụkụ coverage/ratchet ndị a mafere — ụzọ ahụ na-amafere naanị I
 Diffs nke metụtara naanị tests (faịlụ niile dị n'okpuru `tests/`, ọ dịghị nke dị n'okpuru `tests/e2e/`) na-amafere matriks E2E
 na-akpaghị aka, na-enweghị label ọ bụla.
 
-## Ndepụta Nlele Zuru Ezu
+## Ndepụta nyocha zuru ezu
 
-### Tupu mwepụta
+### Ntọhapụ tupu
 
-- [ ] Ejikọtala PR niile ezubere maka mwepụta a na `release/vX.Y.0`
-- [ ] Emechiela ihe Linear/issue niile mepere emepe maka ụdị a ma ọ bụ bugharịa ha na milestone na-esote
-- [ ] CI na-aga nke ọma na alaka `release/vX.Y.0`
+- [ ] PRs niile edoro anya na ntọhapụ a jikọtara ya na `release/vX.Y.0`
+- [ ] A na-emechi ihe Linear/issue niile mepere emepe maka ụdị a ma ọ bụ kwaga n'ọkwa na-esote
+- [ ] CI green na alaka `release/vX.Y.0`
 - [ ] Enweghị akara `TODO(release)` na koodu: `grep -r "TODO(release)" src/ open-sse/`
-- [ ] Docker base image bụ nke kachasị ọhụrụ (ugbu a `node:24.15.0-trixie-slim`)
+- [ ] foto ntọala Docker ruo ugbu a (ugbu a `node:24.15.0-trixie-slim`)
 
-### Ụdị na Ndekọ Mgbanwe
+### Ụdị & Changelog
 
-- [ ] Gbaa `/version-bump-cc <patch|minor|major>` (nkà Claude Code)
-  - Na-ebuli ụdị dị na `package.json`, `electron/package.json`
-  - Na-emepụtaghachi `CHANGELOG.md` site na git commits kemgbe tag ikpeazụ
+- [ ] Gbaa `/version-bump-cc <patch|minor|major>` ( nka koodu Claude )
+  - Bumps `package.json`, `electron/package.json`
+  - Na-eweghachi `CHANGELOG.md` na git eme kemgbe mkpado ikpeazụ
   - Na-emelite baajị README.md
-- [ ] Jiri aka nyochaa CHANGELOG.md ma dozie ozi commit ma ọ bụrụ na ọ dị mkpa
-- [ ] Gbaa mbọ hụ na ngalaba semver kachasị ọhụrụ na `CHANGELOG.md` hà nhata ụdị dị na `package.json`
-- [ ] Debe `## [Unreleased]` dịka ngalaba mbụ nke ndekọ mgbanwe maka ọrụ na-abịa
-- [ ] Melite `docs/openapi.yaml` → `info.version` ga-aharịrị nhata ụdị dị na `package.json`
+- [ ] Jiri aka nyochaa CHANGELOG.md wee hichaa ozi ma ọ bụrụ na achọrọ ya
+- [ ] Gbaa mbọ hụ na ngalaba semver kacha ọhụrụ na `CHANGELOG.md` hà nhata ụdị `package.json`
+- [ ] Debe `## [Unreleased]` dị ka ngalaba mgbanwe mbụ maka ọrụ na-abịa
+- [ ] Mmelite `docs/openapi.yaml` → `info.version` ga-enwerịrị ụdị `package.json` nhata
 
-### Ogo Koodu
+### Ogo koodu
 
-- [ ] `npm run lint` — njehie 0 (ịdọ aka ná ntị ndị ahụ adịlarị)
-- [ ] `npm run typecheck:core` — enweghị nsogbu
-- [ ] `npm run typecheck:noimplicit:core` — enweghị nsogbu (siri ike)
-- [ ] `npm run check:cycles:ratchet` — nọ n'ime oke `metrics.cycles` a kpachiri akpachi (ịgba naanị `check:cycles` na-apụta na 1 ma ọ bụrụ na cycle ọ bụla dị, #15281)
-- [ ] `npm run check:any-budget:t11` — nọ n'ime budget
-- [ ] `npm run check:route-validation:t06` — enweghị nsogbu
-- [ ] `npm run check:node-runtime` — emezuola runtime floor akwadoro (`>=22.22.2 <23`, `>=24.0.0 <27`, dịka `SUPPORTED_NODE_RANGE` dị na `src/shared/utils/nodeRuntimeSupport.ts`; kwekọrọ na `engines` dị na `package.json`)
+- [ ] `npm run lint` — 0 njehie (ịdọ aka ná ntị adịlarịrị)
+- [ ] `npm run typecheck:core` — dị ọcha
+- [ ] `npm run typecheck:noimplicit:core` — dị ọcha (siri ike)
+- [ ] `npm run check:cycles:ratchet` — n'ime ụlọ `metrics.cycles` oyi kpọnwụrụ (obere `check:cycles` na-apụ na 1 na okirikiri ọ bụla, #15281)
+- [ ] `npm run check:any-budget:t11` — n'ime mmefu ego
+- [ ] `npm run check:route-validation:t06` — dị ọcha
+- [ ] `npm run check:node-runtime` — kwadoro oge ịgba ọsọ n'ala zutere (`>=22.22.2 <23`, `>=24.0.0 <27`, kwa `SUPPORTED_NODE_RANGE` na `src/shared/utils/nodeRuntimeSupport.ts`; kwadoro na `package.json` `engines`)
 
 ### Nnwale
 
-- [ ] `npm run test:unit` — gafere
-- [ ] `npm run test:vitest` — gafere (MCP server, autoCombo, cache)
-- [ ] `npm run test:coverage` — gate 60/60/60/60 emezuola (statements/lines/functions/branches)
-- [ ] `npm run test:integration` — gafere (ọ bụrụ na mgbanwe metụtara DB / handlers)
-- [ ] `npm run test:combo:matrix` — gafere (matrix atụmatụ combo: na-egosi n'ụzọ a pụrụ ịtụkwasị obi mkpebi nhọrọ nke atụmatụ routing ọha niile 19; gbaa ya mgbe a metụrụ combo routing, strategy resolution, ma ọ bụ fallback logic)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **nhọrọ/jiri aka mee** (nnwale anwụrụ ọkụ real-upstream nke gate na-achịkwa; na-enweta snapshot DB read-only site na VPS `root@192.168.0.15`; na-akpọtụrụ ezigbo providers, na-eri credits; anaghị agba ọsọ na CI ma ọlị; na-awụli ya nke ọma mgbe gate adịghị)
-- [ ] `npm run test:combo:live:vps` — **nhọrọ/jiri aka mee** (nnwale anwụrụ ọkụ VPS dị ndụ nke Phase-3: ọnọdụ HTTP 7 megide server `.15` dị ndụ site na Node ESM nkịtị; chọrọ `ssh root@192.168.0.15`; na-emepụta/na-ehichapụ naanị combo `__live_test__*`; na-akpọtụrụ ezigbo providers; anaghị agba ọsọ na CI ma ọlị)
-- [ ] `npm run test:e2e` — gafere (mgbanwe UI)
-- [ ] `npm run test:protocols:e2e` — gafere (mgbanwe MCP/A2A)
-- [ ] `npm run test:ecosystem` — gafere
+- [ ] `npm run test:unit` — ngafe
+- [ ] ngafe `npm run test:vitest` — (ihe nkesa MCP, autoCombo, cache)
+- [ ] `npm run test:coverage` — ọnụ ụzọ 60/60/60/60 juru (statements/lines/functions/branches)
+- [ ] `npm run test:integration` — ngafe (ma ọ bụrụ na mgbanwe metụ DB / handlers)
+- [ ] `npm run test:combo:matrix` — ngafe (matrix combo Strategy matrix: na-egosi mkpebi 22 ọhaneze ụzọ ụzọ 'mkpebi nhọpụta nke ọma; na-agba ọsọ mgbe ị na-emetụ usoro ụzọ combo, mkpebi atụmatụ, ma ọ bụ mgbagha ọdịda)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (anwụrụ n'ezie na-agbago elu; na-enweta foto naanị DB na-agụ site na VPS `root@192.168.0.15`; na-enweta ezigbo ndị na-eweta ya, na-akwụ ụgwọ kredit; anaghị agba ọsọ na CI; na-amali nke ọma na-enweghị ọnụ ụzọ ámá)
+- [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS anwụrụ ọkụ na-ebi ndụ: 7 HTTP ndapụta megide ihe nkesa `.15` dị ndụ site na Node ESM; chọrọ `ssh root@192.168.0.15`; creates/deletes naanị `__live_test__*` combos; na-akụta ezigbo ndị na-eweta ya; anaghị agba ọsọ na CI)
+- [ ] ngafe `npm run test:e2e` — (mgbanwe UI )
+- [ ] ngafe `npm run test:protocols:e2e` — (mgbanwe MCP/A2A )
+- [ ] `npm run test:ecosystem` — ngafe
 
-### Hooks (Husky kwadoro)
+### nko (Husky kwadoro)
 
-Husky hooks dị na `.husky/` ma na-agba ọsọ n'onwe ha mgbe a na-arụ ọrụ git.
+Husky hooks bi na `.husky/` ma na-arụ ọrụ git na-akpaghị aka.
 
-- **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** gates ngwa ngwa ndị na-enye otu nsonaazụ mgbe niile — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (e mere ka ọ rụọ ọrụ 2026-06-13). E wepụrụ `test:unit` na ụma (ọ na-egbu oge; ọrụ CI `test-unit` na-ekpuchi ya).
-  - Jiri aka gbaa `npm run test:unit` tupu ị push alaka mwepụta.
+- **buru ụzọ mee:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
+- **tupu igbapu:** ọnụ ụzọ ekpebi ngwa ngwa — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (2026-06-13 arụnyere). Ma ụma ewepu `test:unit` (nwayọọ; ọrụ `test-unit` CI kpuchie).
+  - Jiri aka gbaa `npm run test:unit` tupu ịkwanye alaka ntọhapụ.
 
-Ọ bụrụ na hook daa: dozie nsogbu kpatara ya, ejikwala `--no-verify` gafee ya.
+Ọ bụrụ nko daa: dozie nsogbu dị n'okpuru, ejirila `--no-verify`.
 
-### Conventional Commits
+### Nkwekọrịta Ọgbakọ
 
-Commit niile ga-abanye na mwepụta ga-agbasorịrị usoro `type(scope): subject`.
+Ntọhapụ niile ga-agbaso usoro `type(scope): subject`.
 
-**Types ziri ezi:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
+**Ụdị ndị bara uru:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**Scopes ziri ezi:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**Oghere ndị ziri ezi:** `db` `authz` `sse` `translator` `oauth` `domain` `dashboard` `compression` `api` `docker` `mcp` `ci` `cloud-agent` `a2a` `cli` `memory` `guardrails` `skills` `executors` `auto-combo` `resilience` `providers`
 
-Mgbanwe ndị na-emebi ndakọrịta: tinye footer `BREAKING CHANGE:` ma ọ bụ `!` mgbe scope gasịrị (dịka `feat(api)!: drop /v0`).
+Mgbanwe na-agbaji: tinye `BREAKING CHANGE:` footer ma ọ bụ `!` mgbe oke ahụ gasịrị (dịka `feat(api)!: drop /v0`).
 
-### Akwụkwọ Nkọwa
+### Akwụkwọ
 
-- [ ] `npm run check:docs-sync` gafere (pre-commit na-agba ya n'onwe ya)
-- [ ] `npm run check:docs-all` gafere (nchịkọta: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` na-apụta na 0 — nkwekọrịta env dị n'etiti koodu ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` ka zuru oke
-- [ ] `npm run check:doc-links` na-apụta na 0 — enweghị ntụaka markdown dị n'ime mebiri emebi mgbe emezigharịrị nhazi
-- [ ] A nyochala `docs/architecture/ARCHITECTURE.md` maka mgbanwe storage/runtime
-- [ ] A nyochala `docs/guides/TROUBLESHOOTING.md` maka mgbanwe env var na arụmọrụ
-- [ ] Ọ bụrụ na `.env.example` gbanwere: emelitela `docs/reference/ENVIRONMENT.md`
-- [ ] Ọ bụrụ na feature ọhụrụ nwere UI: `docs/guides/USER_GUIDE.md` na-akpọtụrụ ya
-- [ ] Ọ bụrụ na feature ọhụrụ nwere API: emelitela `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml`
-- [ ] Ọ bụrụ na feature ọhụrụ bụ module: `docs/<MODULE>.md` nke ya dị
-- [ ] Ọ bụrụ na ọ bụ mgbanwe na-emebi ndakọrịta: `docs/guides/TROUBLESHOOTING.md` nwere ndetu migration
+- [ ] `npm run check:docs-sync` gafere (na-ebu ụzọ na-agba ọsọ)
+- [ ] `npm run check:docs-all` gafere ( nche anwụ: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:env-doc-sync` exits 0 — koodu ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env nkwekọrịta adịghị
+- [ ] `npm run check:doc-links` na-apụ 0 — enweghị nrụtụ aka akara n'ime agbajiri agbaji ka emezigharịrị
+- [ ] `docs/architecture/ARCHITECTURE.md` nyochara maka mbugharị storage/runtime
+- [ ] `docs/guides/TROUBLESHOOTING.md` enyochara maka env var na mbanye arụmọrụ
+- [ ] Ọ bụrụ na `.env.example` gbanwere: `docs/reference/ENVIRONMENT.md` emelitere
+- [ ] Ọ bụrụ na njirimara ọhụrụ nwere UI: `docs/guides/USER_GUIDE.md` kwuru ya
+- [ ] Ọ bụrụ na njirimara ọhụrụ nwere API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` emelitere
+- [ ] Ọ bụrụ na njirimara ọhụrụ bụ modul: `docs/<MODULE>.md` raara onwe ya dị adị
+- [ ] Ọ bụrụ na agbaji mgbanwe: `docs/guides/TROUBLESHOOTING.md` nwere ndetu ọpụpụ
 
 ### i18n
 
-- [ ] `npm run i18n:check` na-apụta na 0 — ọnọdụ ntụgharị asụsụ (`.i18n-state.json`) kwekọrọ na akwụkwọ mmalite (enweghị source gbanwere n'ụzọ na-ekwekọghị na strict mode; ndụmọdụ warn-mode dị mma maka obere ndozi akwụkwọ n'oge ikpeazụ, mana ọ kwesịrị ịbụ 0 tupu tagging)
-- [ ] `npm run i18n:check-ui-coverage` na-apụta na 0 — locale UI ọ bụla ruru ma ọ bụ gafere coverage floor 80%
-- [ ] `npm run i18n:sync-ui:dry` na-akọ key 0 na-efu n'ime target locales 66 niile (locale ọ bụla ma e wezụga source `en`)
-- [ ] Ọ bụrụ na akwụkwọ Bekee mmalite gbanwere, gbaa `npm run i18n:run` (chọrọ `OMNIROUTE_TRANSLATION_API_KEY` na `.env`) tupu tagging
-- [ ] Enwere ike ibugharị onyinye ntụgharị asụsụ na mwepụta na-esote ma ọ bụrụ na ha pere mpe (dekọọ ya na CHANGELOG)
+- [ ] `npm run i18n:check` exits 0 — translation state (`.i18n-state.json`) in sync with source docs (no drifted sources in strict mode; warn-mode advisory is acceptable for last-minute doc touch-ups, but should be 0 before tagging)
+- [ ] `npm run i18n:check-ui-coverage` na-apụ 0 — mpaghara UI ọ bụla na ma ọ bụ karịa ala mkpuchi 80%.
+- [ ] `npm run i18n:sync-ui:dry` na-akọ igodo 0 na-efu efu n'ofe mpaghara 66 niile (mpaghara ọ bụla ma e wezụga isi iyi `en` )
+- [ ] Ọ bụrụ na isi akwụkwọ Bekee gbanwere, gbaa `npm run i18n:run` (chọrọ `OMNIROUTE_TRANSLATION_API_KEY` na `.env`) tupu ịkpado
+- [ ] Enwere ike ịnyefe ntinye ntụgharị na ntọhapụ ọzọ ma ọ bụrụ na ọ dị obere (usoro na CHANGELOG)
 
-### Database Migrations
+### Mbugharị nchekwa data
 
 - [ ] Ọ bụrụ na `src/lib/db/migrations/` nwere faịlụ ọhụrụ:
-  - [ ] Migration ọ bụla bụ idempotent (`CREATE TABLE IF NOT EXISTS`, wdg.)
-  - [ ] E tinyere migrations n'ime transactions
-  - [ ] E nyere ha nọmba nke ọma (enweghị oghere n'usoro)
-- [ ] Nwalee na nrụnye ọhụrụ: hichapụ `~/.omniroute/omniroute.db` ma gbaa `npm run dev`
-- [ ] Nwalee na nrụnye dị adị: mee backup DB, gbaa migration, ma nyochaa schema
-- [ ] A na-ejikwa faịlụ WAL (`-wal`, `-shm`) nke ọma ma ọ bụrụ na migration edegharị tables
+  - [ ] Mbugharị ọ bụla nwere ike (`CREATE TABLE IF NOT EXISTS`, wdg)
+  - [ ] Migrations ọbọp na azụmahịa
+  - [ ] Akpọrọ aha ya nke ọma (enweghị oghere na usoro)
+- [ ] Nwalee na nrụnye ọhụrụ: hichapụ `~/.omniroute/omniroute.db` wee mee `npm run dev`
+- [ ] Nwalee na wụnye dị ugbu a: ndabere DB, na-agba ọsọ migration, nyochaa schema
+- [ ] faịlụ WAL (`-wal`, `-shm`) edozi ya nke ọma ma ọ bụrụ na njem na-edegharị tebụl
 
-### Katalọgụ Ndị Na-eweta (Zod kwadoro)
+### Katalọgụ onye na-eweta (Zod kwadoro)
 
-- [ ] Schema Zod dị na `src/shared/constants/providers.ts` ziri ezi n'oge mbido
-  - [ ] Ndị na-eweta niile nwere mpaghara ndị achọrọ (`id`, `label`, `kind`, wdg.)
-  - [ ] E nyere `freeNote` maka ndị na-eweta ọhụrụ n'efu
-  - [ ] Ndị na-eweta OAuth nwere `oauthConfig` edebanyere na `src/lib/oauth/constants/oauth.ts`
-- [ ] Ọ bụrụ na agbakwunyere onye na-eweta ọhụrụ: nwee ngwa mmezu kwekọrọ na `open-sse/executors/`
-- [ ] Ọ bụrụ na usoro ahụ abụghị nke OpenAI: nwee ngwa ntụgharị na `open-sse/translator/`
-- [ ] Edebanyere model na `open-sse/config/providerRegistry.ts`
-- [ ] Ule unit dị na `tests/unit/` na-ekpuchi nhazi ndị na-eweta na ntụgharị ụzọ
+- [ ] `src/shared/constants/providers.ts` Zod schema dị irè n'oge ibu
+  - [ ] Ndị na-enye ihe niile chọrọ ubi (`id`, `label`, `kind`, wdg)
+  - [ ] `freeNote` nyere maka ndị na-eweta n'efu ọhụrụ
+  - [ ] ndị na-enye OAuth edebanyela aha `oauthConfig` na `src/lib/oauth/constants/oauth.ts`
+- [ ] Ọ bụrụ na onye na-eweta ọhụrụ gbakwunyere: onye mmebe kwekọrọ na `open-sse/executors/`
+- [ ] Ọ bụrụ na ọ bụghị usoro OpenAI: onye ntụgharị na `open-sse/translator/`
+- [ ] Ụdị edebanyere aha na `open-sse/config/providerRegistry.ts`
+- [ ] Nnwale otu n'ime `tests/unit/` mkpuchi nke ndị na-eweta na nhazi
 
 ### Desktọpụ (Electron)
 
 Ọ bụrụ na `electron/` gbanwere:
 
 - [ ] `npm run electron:smoke:packaged` gafere
-- [ ] A nwalere mwube maka opekata mpe otu n'ime `:win`, `:mac`, `:linux`
-- [ ] Asambodo mbinye aka koodu agwụbeghị (ọ bụrụ na a na-etinye mbinye aka)
-- [ ] Vershọn dị na `electron/package.json` kwekọrọ na nke dị na `package.json` nke mgbọrọgwụ
-- [ ] Emelitere ntụaka ọwa mmelite akpaaka ma ọ bụrụ na a na-ewepụta gaa na `stable`
+- [ ] Nrụpụta nwalere ma ọ dịkarịa ala otu `:win`, `:mac`, `:linux`
+- [ ] Asambodo mbinye aka koodu emebibeghị (ọ bụrụ mbinye aka)
+- [ ] ụdị `electron/package.json` dabara mgbọrọgwụ `package.json`
+- [ ] Emelite ihe nrịbama ọwa na-akpaghị aka ma ọ bụrụ na ahapụ ya na `stable`
 
-### Nhazi Mwube
+### Mee Nhazi
 
-Ebe nchekwa ahụ na-eji ndekọ mmepụta atọ dị iche iche — agwakọtala ha:
+Ebe nchekwa ahụ na-eji akwụkwọ ndekọ aha mmepụta atọ dị iche — agwakọtaghị ha:
 
-| Ndekọ     | Ebumnuche                                                          | A na-esochi ya?       |
-| --------- | ------------------------------------------------------------------ | --------------------- |
-| `src/`    | Koodu mmalite ngwa (TypeScript / TSX)                              | Ee                    |
-| `.build/` | Ngwa etiti mwube — mmepụta `next build` (`distDir`)                | Mba (git na-eleghara) |
-| `dist/`   | Ngwugwu npm enwere ike ibupu — `assembleStandalone` na-achịkọta ya | Mba (git na-eleghara) |
+| Akwụkwọ ndekọ aha | Ebumnuche                                                  | Esochiri?           |
+| ----------------- | ---------------------------------------------------------- | ------------------- |
+| `src/`            | Isi mmalite ngwa (TypeScript / TSX)                        | Ee                  |
+| `.build/`         | Mepụta mmepụta — `next build` nke etiti (`distDir`)        | Mba (agọrọ onwe ya) |
+| `dist/`           | Mbupu npm ngwugwu — gbakọtara site na `assembleStandalone` | Mba (agọrọ onwe ya) |
 
-> **Ndetu maka onye ọrụ:** ndekọ image VPS dị anya ka bụ `/usr/lib/node_modules/omniroute/app/`.
-> Naanị mmepụta mwube **dị n'ime repo** ka e bugharịrị (`app/` → `dist/`). Ngwa deploy na-eji rsync ebufe
-> ọdịnaya `dist/` n'ime ndekọ `app/` dị anya — ọ dịghị mgbanwe ụzọ VPS achọrọ.
+> **Mara onye ọrụ:** ndekọ ihe onyonyo VPS dịpụrụ adịpụ ka dị `/usr/lib/node_modules/omniroute/app/`. Naanị nke** na-repo** wuo mmepụta kwagara (`app/` → `dist/`). The ibuga nkà rsync `dist/` ọdịnaya n'ime ime `app/` dir — dịghị VPS ụzọ mgbanwe chọrọ.
 
-**Usoro otu mwube:**
+**Efere otu-ewu:**
 
 ```
 npm run build:release
-  └─ rm -rf .build dist          (nhicha)
-  └─ next build → .build/next/   (ngwa etiti)
-  └─ assembleStandalone          (na-edepụtaghachi standalone + static + public + natives → dist/)
-  └─ na-ede dist/BUILD_SHA       (akara nche HEAD)
+  └─ rm -rf .build dist          (clean)
+  └─ next build → .build/next/   (intermediates)
+  └─ assembleStandalone          (copies standalone + static + public + natives → dist/)
+  └─ writes dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-AGBAKWALA `npm run build` nke `npm run build:cli` ọzọ dị iche na-esochi maka deploy — jiri
-`npm run build:release`, nke na-eme mwube ọhụrụ dị ọcha yana akara nche n'otu iwu.
+Mee NOT na-agba ọsọ `npm run build` sochiri `npm run build:cli` dị iche maka ibuga — jiri `npm run build:release` nke na-emeghachi + sentinel dị ọcha n'otu iwu.
 
-### Nkwado Ngwa Mwube
+### Nkwado artifact
 
-- [ ] `npm run build:release` gara nke ọma ma `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` dị ọcha — enweghị `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, ma ọ bụ ihe fọdụrụ n'ógbè
-- [ ] `dist/server.js` dị mgbe mwube gachara
-- [ ] Ule ngwa ngwa packaged-runtime nke mpaghara, ma ọ bụrụ na achọrọ: `npm run dev:candidate -- validate` mgbe `npm run dev:candidate -- build` gachara na-ebido tarball e kwakọbara na `DATA_DIR` dịpụrụ iche ma na-enyocha `/api/health` + `/v1/models` (lee [Ụzọ Kwesịrị Ekwesị Maka Ntinye Aka](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
+- [ ] `npm run build:release` gara nke ọma na `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] `npm run check:pack-artifact` dị ọcha — enweghị `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, ma ọ bụ ihe fọdụrụ mpaghara ndị ọzọ
+- [ ] `dist/server.js` dị mgbe ewuchara
+- [ ] Anwụrụ ọkụ ngwungwu mpaghara nke nhọrọ: `npm run dev:candidate -- validate` ka `npm run dev:candidate -- build` gbasịrị akpụkpọ ụkwụ tarball na `DATA_DIR` dịpụrụ adịpụ wee lelee `/api/health` + `/v1/models` (lee [Onyinye Ọlaedo](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) )
 
-### Itinye Tag na Mwepụta
+### Nkpado & Hapụ
 
-- [ ] Gbaa `/generate-release-cc` (ngwa Claude Code):
-  - Na-emepụta tag `vX.Y.Z`
-  - Na-ebuga tag na branch
-  - Na-emepe GitHub Release nwere ọdịnaya changelog
-  - Na-etinye installers Electron (ọ bụrụ na e wuru ha)
-- [ ] Ma ọ bụ jiri aka mee ya:
+- [ ] Gbaa `/generate-release-cc` ( nka koodu Claude ):
+  - Na-emepụta mkpado `vX.Y.Z`
+  - Na-agbanye mkpado na alaka
+  - Mepee ntọhapụ GitHub na ahụ mgbanwe
+  - Na-agbakwunye ndị nrụnye Electron (ọ bụrụ na arụnyere ya)
+- [ ] Ma ọ bụ aka:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
   git push origin vX.Y.Z
   gh release create vX.Y.Z --notes-from-tag
   ```
 
-### Deploy
+### Nyefee
 
-Ngwa deploy na-eji usoro rsync dị mfe — enweghị `npm pack`, enweghị `npm i -g`:
+Nhazi nka na-eji ọkụ rsync eruba — no `npm pack`, enweghị `npm i -g`:
 
-- [ ] Jiri ngwa deploy kwekọrọ na ebe ebumnuche:
-  - `/deploy-vps-local-cc` — VPS mpaghara (192.168.0.15)
-  - `/deploy-vps-akamai-cc` — VPS Akamai (69.164.221.35)
-  - `/deploy-vps-both-cc` — ha abụọ
-- [ ] Tupu deploy, gosi na `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] Mwube ga-agba ebe `node_modules` bụ nke ezigbo ya (ebe nlele isi ma ọ bụ worktree e jiri `npm ci` kwadebe — Ọ BỤGHỊ worktree ejikọtara site na symlink)
-- [ ] Mee ule ngwa ngwa n'ebe e mere deploy:
-  - Mepee `/dashboard/health` → lelee na eriri vershọn kwekọrọ na mwepụta
-  - Gbaa arịrịọ `/v1/chat/completions` megide onye na-eweta a maara
-  - Nyochaa na `/api/monitoring/health` na-eweghachi circuit breakers `CLOSED`
-  - Gosi na usoro mbufe MCP na-aza (`/mcp` HTTP, `/mcp-sse` SSE)
+- [ ] Jiri ike tinye nka dabara na ebumnuche:
+  - `/deploy-vps-local-cc` — mpaghara VPS (192.168.0.15)
+  - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
+  - `/deploy-vps-both-cc` — abụọ
+- [ ] Tupu ibuga, gosi `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] Mee ga-agba ọsọ ebe `node_modules` dị adị (isi ndenye ego ma ọ bụ `npm ci`'d worktree — NOT a symlinked worktree)
+- [ ] Ebufere ule anwụrụ ọkụ:
+  - Mepee `/dashboard/health` → nlele ntọhapụ dakọtara ụdị eriri
+  - Gbaa arịrịọ `/v1/chat/completions` megide onye na-eweta amaara
+  - Nyochaa `/api/monitoring/health` na-eweghachi sekit sekit `CLOSED`
+  - Kwenye azịza MCP na-ebufe (`/mcp` HTTP, `/mcp-sse` SSE)
 
-### Mgbe Mwepụta Gasịrị
+### Mwepụta ya gachara
 
-- [ ] Gbaa `/capture-release-evidences-cc` (ngwa Claude Code)
-  - Na-ejide screenshots/recordings WebP nke atụmatụ ọhụrụ
-  - Na-etinye ha na ndetu mwepụta / post blọọgụ
-- [ ] Jiri ọkwa mwepụta melite GitHub Discussions / Discord
-- [ ] Mepee milestone maka vershọn na-esote
-- [ ] Ọ bụrụ na ọ dị oke mkpa: kpachie mkparịta ụka n'elu ma ọ bụ bipụta na `news.json` maka banner dị n'ime ngwa
+- [ ] Gbaa `/capture-release-evidences-cc` ( nka koodu Claude )
+  - Na-eweghara WebP screenshots/recordings nke atụmatụ ọhụrụ
+  - Na-agbakwunye iji wepụta ndetu / blọgụ biputere
+- [ ] Melite mkparịta ụka GitHub / Discord na ọkwa mwepụta
+- [ ] Mepee ihe ịrịba ama maka ụdị ọzọ
+- [ ] Ọ bụrụ na ọ dị mkpa: pinye mkparịta ụka ma ọ bụ bipute na `news.json` maka ọkọlọtọ in-app
 
-### Ọnụ ụzọ mwepụta Radar n'ihu ọha
+### Ọnụ ụzọ mmalite ọha radar
 
-E tinyere ọkwa Radar na ụma yana `active: false`. Ịgbalite ya bụ mgbanwe dị iche
-mgbe e gosipụtara ihe akaebe maka ihe niile dị n'okpuru:
+A na-ama ụma mee ọkwa Radar na `active: false`. Ntinye ọrụ bụ mgbanwe dị iche mgbe egosiri ihe ọ bụla dị n'okpuru:
 
-- [ ] Ejikọtala Radar PR niile a chịkọtara, CI nke release-tip dịkwa green
-- [ ] Mee deploy ma nwalee ụzọ OSS Radar ngwa ngwa ebe `RADAR_ENABLED` ka gbanyụrụ na ndabara
-- [ ] Nwalee `GET /planos`, `/termos`, `/privacidade`, na `/reembolso` ngwa ngwa na host Radar a kpọrọ aha
-- [ ] Dekọọ njirimara/ozi kọntaktị/adreesị onye ọrụ yana nyocha iwu onye nwe kwadoro n'ime ọrụ nzuzo
-- [ ] Nwalee Stripe Checkout na webhook e tinyere mbinye aka naanị na ọnọdụ ule
-- [ ] Nwalee otu nnyefe ozi-e azụmahịa ezoro ezo site na onye zitere/domain a kwadoro
-- [ ] Gosipụta mweghachi backup na otu nyocha e lekọtara anya nke nwere oke mmefu ego
-- [ ] Kwado iwu nyocha BRL/PIX tupu ịnabata ihe akaebe onyinye
-- [ ] Gbanyụọ Checkout ọhaneze naanị mgbe ọnụ ụzọ ndị bu ụzọ gafere, wee mee ka ID ọhụrụ dị na `news.json` rụọ ọrụ
-- [ ] Nyochaa na banner Home na-eji ederede ahaziri maka asụsụ mpaghara nakwa na ID ọhụrụ na-apụta ọzọ mgbe a kagburu ID ochie
+- [ ] Ngwakọta radar PRs niile ekpokọtara ọnụ na ntọhapụ CI bụ akwụkwọ ndụ akwụkwọ ndụ
+- [ ] Bugharịa na anwụrụ ụzọ OSS Radar na `RADAR_ENABLED` adịghị na ndabara
+- [ ] Anwụrụ ọkụ `GET /planos`, `/termos`, `/privacidade`, na `/reembolso` na onye nnabata Radar aha ya bụ
+- [ ] Onye ọrụ ndekọ identity/contact/address na nyocha iwu kwadoro onye nwe ya na ọrụ nkeonwe
+- [ ] Checkout Stripe Exercipe na webhook bịanyere aka na ya na ọnọdụ nnwale naanị
+- [ ] Jiri sender/domain akwadoro mee otu nnyefe ozi-e-mail ezoro ezo
+- [ ] Gosipụta nkwado ndabere na mpaghara na otu nleba anya na-eme nyocha nke nwere mmefu ego
+- [ ] Kwado amụma nyocha BRL/PIX tupu ịnakwere akaebe onyinye
+- [ ] Kwado nlele ọhaneze naanị ka ọnụ ụzọ ámá ndị bu ụzọ megharịa, rụọ ọrụ `news.json` ID ọhụrụ
+- [ ] Nyochaa ọkọlọtọ ụlọ na-eji nnomi edebere ma ID ọhụrụ ga-apụtakwa mgbe achụpụrụ ID ochie
 
 ## Nnwale anwụrụ ọkụ nke Ọrụ Agbakwunyere (v3.8.4+)
 

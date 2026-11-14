@@ -33,38 +33,38 @@ Search Tools Studio `/dashboard/search-tools` sahifasini oddiy qidiruv sinov may
 
 ---
 
-## Tablar
+## Yorliqlar
 
-### Qidiruv tabi
+### Qidiruv yorlig'i
 
-Mavjud `SearchForm` + `ResultsPanel` + `RerankPanel` komponentlarini tabga aylantiradi:
+Mavjud `SearchForm` + `ResultsPanel` + `RerankPanel` ni tabga aylantiradi:
 
-- Soʻrov → natijalar (sarlavha, URL, parcha, moslik bali).
-- Config panelida provayder metamaʼlumotlari (narx, kvota, holat).
-- Qayta tartiblash boʻlimi: qayta tartiblash modelini tanlash, natijalarni qayta tartiblash, `positionDelta`ni koʻrsatish.
-- Hech qanday qidiruv provayderi sozlanmaganida CTA bilan boʻsh holat.
+- Soʻrov → natijalari (sarlavha, URL, parcha, moslik balli).
+- Konfiguratsiya panelidagi provayder metamaʼlumotlari (narx, kvota, holat).
+- Qayta tartiblash bo'limi: qayta tartiblash modelini tanlang, natijalarni qayta tartiblang, `positionDelta` ko'rsating.
+- Qidiruv provayderlari sozlanmagan bo'lsa, CTA bilan bo'sh holat.
 - `SearchHistory.tsx` orqali qidiruv tarixi.
-- `POST /v1/search`ga murojaat qiladi (mavjud endpoint, oʻzgarishlarsiz).
+- `POST /v1/search` chaqiradi (mavjud oxirgi nuqta, o'zgarishlar yo'q).
 
-### Skreyping tabi
+### Yorliqni qirib tashlash
 
-`POST /v1/web/fetch` orqali URL manzilidan kontent ajratib olish uchun yangi tab (05-rejada yaratilgan):
+`POST /v1/web/fetch` orqali URL dan tarkibni olish uchun yangi yorliq (05-rejada yaratilgan):
 
-- Kiritish: URL + toʻliq sahifa almashtirgichi + format selektori (markdown / matn / HTML).
-- Yuborish → olish → `ScrapeResult.tsx`ni render qilish.
-- `ScrapeResult` markdown oldindan koʻrish oynasi + xom format almashtirgichini render qiladi.
-- Cheklov: agar javob tanasi **256 KB**dan katta boʻlsa, UI `(qisqartirilgan, xom holatda ko‘rish)` yozuvini koʻrsatadi va xom kontentni Monaco modal oynasida ochadi (D21).
-- Metamaʼlumotlar paneli: provayder (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), kechikish, narx, javob hajmi, havolalar soni.
-- `useScrapeFetch.ts` hukidan foydalanadi.
+- Kirish: URL + to‘liq sahifali + formatini tanlash moslamasi (markdown / text / HTML).
+- → fetch → render `ScrapeResult.tsx` yuboring.
+- `ScrapeResult` markdown oldindan ko'rish + raw almashuvini ko'rsatadi.
+- Cap: agar javob tanasi >** 256 KB** , UI `(truncated, view raw)` ko'rsatadi va Monako modali (D21) da raw ochadi.
+- Metadata paneli: provayder (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search/keenable-search), kechikish, narx, javob hajmi, havolalar soni.
+- `useScrapeFetch.ts` kancasidan foydalanadi.
 
-### Taqqoslash tabi
+### Tabni solishtiring
 
-Bir xil soʻrov/URLni **4 tagacha provayderda parallel ravishda** ishga tushiradi (D22):
+gacha bo'ylab bir xil query/URL ishlaydi** 4 ta provayder parallel ravishda** (D22):
 
 - Har bir provayder uchun yonma-yon ustunlar.
-- Koʻrsatkichlar: kechikish, narx, natijalar soni, javob hajmi.
-- Qidiruv uchun URL mos tushishlarini hisoblash (boshlangʻich natijaga nisbatan umumiy URLlar soni).
-- Har bir provayder uchun `POST /v1/search` (qidiruv) yoki `POST /v1/web/fetch` (skreyping)ga murojaat qiladi.
+- Ko'rsatkichlar: kechikish, narx, natijalar soni, javob hajmi.
+- Qidiruv uchun URL bir-biriga mos kelishini hisoblash (birgalikda URLs soni va dastlabki natija).
+- Har bir provayder uchun `POST /v1/search` (qidirish) yoki `POST /v1/web/fetch` (scrape) qo'ng'iroqlari.
 
 ---
 
@@ -99,13 +99,13 @@ Bir xil soʻrov/URLni **4 tagacha provayderda parallel ravishda** ishga tushirad
 
 ## Provayderlar katalogi
 
-`ProviderCatalog.tsx` `GET /api/search/providers` dan olingan provayderlarning toʻliq roʻyxatini taqdim etadi
-(F4 da fetch provayderlarini ham qamrab olish uchun kengaytirilgan):
+`ProviderCatalog.tsx` `GET /api/search/providers` dan to‘liq provayderlar ro‘yxatini ochib beradi (F4 da kengaytirilgan, olib keluvchi provayderlarni o‘z ichiga oladi):
 
-| `kind` | `"search"` (20 ta provayder) yoki `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (24 ta provayder) yoki `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search, eenable-search) |
 
-Holat soʻrov vaqtida hisob maʼlumotlari mavjudligi va barcha kalitlar hozirda cooldown holatida ekanligini
-tekshirish orqali **aniqlanadi**.
+Holati shunday** so'rov vaqtida olingan** hisob ma'lumotlari mavjudligini va barcha kalitlar hozirda sovutish rejimida ekanligini tekshirish orqali.
+
+`codex-search` (Codex Web Search) ning o‘ziga xos kaliti yo‘q: u ulangan Codex (ChatGPT) hisobini qayta ishlatadi, shuning uchun har bir qidiruv ChatGPT obuna kvotasini sarflaydi va taxminan 10–40 soniya vaqt oladi. So'rov uni nomlaganda ishlaydi; avtomatik tanlash uchun `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` xususiyat bayrog'i kerak (sukut bo'yicha o'chirilgan).
 
 ---
 
@@ -117,18 +117,18 @@ API kaliti to‘ldiruvchisi har doim `$OMNIROUTE_API_KEY` (D11, Playground Studi
 
 ---
 
-## Backenddagi oʻzgarishlar
+## Backend o'zgarishlar
 
-Ushbu funksiya uchun backendda faqat bitta oʻzgarish talab qilindi:
+Ushbu xususiyat uchun faqat bitta orqa qismni o'zgartirish kerak edi:
 
 ### Kengaytirilgan `GET /api/search/providers`
 
-`src/app/api/search/providers/route.ts` quyidagicha kengaytirildi:
+`src/app/api/search/providers/route.ts` kengaytirildi:
 
-- Barcha maʼlumot olish provayderlari (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) massivga kiritildi.
-- Har bir elementga `kind: "search" | "fetch"` qoʻshildi.
-- Amaldagi hisob maʼlumotlari holatidan kelib chiqadigan `status: "configured" | "missing" | "rate_limited"` qoʻshildi.
-- Orqaga qarab muvofiqlik saqlandi — mavjud maydonlar (`id`, `name` va hokazo) oʻzgartirilmadi.
+- Massivga har bir olib keluvchi provayderni (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`, `keenable-search`) qo'shing.
+- Har bir elementga `kind: "search" | "fetch"` qo'shing.
+- Jonli hisob ma'lumotlari holatidan olingan `status: "configured" | "missing" | "rate_limited"` qo'shing.
+- `id` — `name` va boshqalar) orqaga qarab muvofiqligini o'zgarishsiz saqlang.
 
 ---
 

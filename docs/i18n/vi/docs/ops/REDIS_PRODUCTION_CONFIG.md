@@ -65,67 +65,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Tinh chỉnh được khuyến nghị cho môi trường Production
+## Điều chỉnh sản xuất được đề xuất
 
-### 1. Tùy chọn Connection Pool / Client (hàm khởi tạo `Redis` của ioredis)
+### 1. Tùy chọn nhóm kết nối / máy khách (ioredis `Redis` constructor)
 
-Mã hiện tại tạo một `new Redis(url)` duy nhất mà không có tùy chọn tùy chỉnh. Đối với các
-triển khai production có nhiều replica, hãy truyền một client factory vào mã hoặc bọc `getRedisClient()`:
+Mã hiện tại tạo một `new Redis(url)` duy nhất không có tùy chọn tùy chỉnh. Để triển khai nhiều bản sao sản xuất, hãy chuyển nhà máy khách trong mã hoặc gói `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // không giới hạn số lần thử lại; để retryStrategy quyết định
-  enableReadyCheck: true, // xác minh máy chủ đã sẵn sàng trước khi chấp nhận lời gọi
-  lazyConnect: true, // không kết nối khi khởi tạo; chờ lời gọi đầu tiên
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // từ bỏ sau 10 lần thử lại → kết nối lại sau
-    return Math.min(times * 200, 5000); // 200ms, 400ms, …, giới hạn 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // gộp các lệnh đồng thời vào một lần ghi TCP
-  keepAlive: 10000, // TCP keep-alive mỗi 10s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**Các đánh đổi chính:**
+**Sự đánh đổi chính:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — được ưu tiên cho production để các lần
-  khởi động lại Redis tạm thời không làm mọi request thất bại ngay lập tức. Cơ chế dự phòng
-  trong bộ nhớ của `checkRateLimit()` xử lý nhánh lỗi này.
-- `lazyConnect: true` — tránh việc khởi động phụ thuộc vào Redis phải hoạt động trước khi máy chủ
-  bắt đầu chấp nhận kết nối.
-- `enableAutoPipelining: true` — giảm số lượt khứ hồi cho các lần kiểm tra giới hạn tốc độ đồng thời;
-  hữu ích khi >50 RPS trên một kết nối duy nhất.
+- `maxRetriesPerRequest: null` + `retryStrategy` — được ưu tiên cho sản xuất để việc khởi động lại Redis tạm thời không làm thất bại ngay lập tức mọi yêu cầu. Dự phòng trong bộ nhớ trong `checkRateLimit()` sẽ hấp thụ đường dẫn lỗi.
+- `lazyConnect: true` — tránh sự phụ thuộc khởi động vào Redis trước khi máy chủ bắt đầu chấp nhận kết nối.
+- `enableAutoPipelining: true` — giảm các chuyến đi khứ hồi để kiểm tra giới hạn tỷ lệ đồng thời; có lợi ở > 50 RPS trên một kết nối.
 
 ### 2. Cấu hình máy chủ Redis (`redis.conf`)
 
 ```
-# Bộ nhớ
-maxmemory 80%                        # chừa không gian cho bộ nhớ đệm trang của hệ điều hành
-maxmemory-policy allkeys-lru         # loại bỏ các mục bộ nhớ đệm xác thực cũ khi thiếu bộ nhớ
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Tính bền vững dữ liệu (tùy chọn — OmniRoute an toàn khi gặp sự cố mà không cần tính năng này)
-save 300 1                           # tạo snapshot ít nhất mỗi 5 phút nếu có ≥1 khóa thay đổi
-appendonly no                        # không cần AOF; dữ liệu có thể được tái tạo
-appendfsync no                       # không có chi phí fsync (RDB là đủ)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Mạng
-timeout 0                            # không ngắt kết nối khi không hoạt động
-tcp-keepalive 300                    # keep-alive 5 phút
-tcp-backlog 511                      # hàng đợi kết nối cho tải tăng đột biến
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Hiệu năng
-hz 10                                # mặc định; dùng 100 nếu nhạy cảm với độ trễ
-activedefrag yes                     # tự động chống phân mảnh khi độ phân mảnh >10%
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Đánh đổi của `maxmemory-policy allkeys-lru`:** Các mục bộ nhớ đệm xác thực có thể bị loại bỏ khi
-thiếu bộ nhớ. Điều này an toàn — `setCachedApiKey` luôn điền lại khi không tìm thấy, và cơ chế
-dự phòng SQLite là nguồn dữ liệu có thẩm quyền. Script Lua của bộ giới hạn tốc độ tạo ra các khóa nhỏ,
-được thiết kế để tồn tại trong thời gian ngắn.
+**Sự đánh đổi cho `maxmemory-policy allkeys-lru`:** Các mục trong bộ đệm xác thực có thể bị xóa dưới áp lực bộ nhớ. Đây là — `setCachedApiKey` an toàn luôn được điền lại khi bị bỏ lỡ và dự phòng SQLite là có thẩm quyền. Tập lệnh Lua giới hạn tốc độ tạo ra các khóa nhỏ có thời gian tồn tại ngắn theo thiết kế.
 
-### 3. Thiết lập Docker Compose
+### 3. Cài đặt soạn thảo Docker
 
-Cấu hình compose production (`docker-compose.prod.yml`) sử dụng `redis:8.6.2-alpine`. Hãy thêm:
+Sản phẩm soạn thảo (`docker-compose.prod.yml`) sử dụng `redis:8.6.2-alpine`. Thêm vào:
 
 ```yaml
 redis:
@@ -150,35 +142,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Các cân nhắc về nhiều instance / khả năng mở rộng
+### 4. Cân nhắc về đa phiên bản / Mở rộng quy mô
 
-**Một Redis duy nhất cho tất cả replica** — script Lua của bộ giới hạn tốc độ phụ thuộc vào một
-không gian khóa có thẩm quyền duy nhất. Việc sử dụng nhiều instance Redis phía sau các replica sẽ làm mất
-tính nguyên tử và tăng gấp đôi hạn mức. Hãy sử dụng một Redis duy nhất (hoặc cụm Redis Sentinel có khả năng
-chuyển đổi dự phòng) cho tất cả replica của ứng dụng.
+**Redis đơn cho tất cả các bản sao** — tập lệnh Lua giới hạn tốc độ phụ thuộc vào một không gian khóa có thẩm quyền duy nhất. Nhiều phiên bản Redis đằng sau các bản sao sẽ mất tính nguyên tử và tăng gấp đôi ngân sách. Sử dụng một Redis (hoặc cụm Redis Sentinel có chuyển đổi dự phòng) cho tất cả các bản sao ứng dụng.
 
-**Số lượng kết nối:** Mỗi replica ứng dụng mở **2 kết nối TCP** đến Redis
-(client của bộ giới hạn tốc độ + client của kho hạn ngạch). Với 10 replica → 20 kết nối, vẫn
-nằm trong giới hạn mặc định 10k kết nối của một instance Redis.
+**Số lượng kết nối:** Mỗi bản sao ứng dụng sẽ mở ra** 2 kết nối TCP** đến Redis (máy khách giới hạn tốc độ máy khách lưu trữ hạn ngạch + ). Ở 10 bản sao → 20 kết nối, nằm trong giới hạn kết nối 10k của phiên bản Redis mặc định.
 
 ### 5. Giám sát
 
-Cung cấp thông qua endpoint kiểm tra tình trạng:
+Tiếp xúc thông qua điểm cuối kiểm tra sức khỏe:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts đã gọi các hàm rateLimiter
-// Thêm các kiểm tra dành riêng cho Redis:
-//   1. Độ trễ PING thông qua ioredis .ping()
-//   2. Mức sử dụng bộ nhớ thông qua INFO memory
-//   3. Số lượng kết nối thông qua INFO clients
-//   4. Tỷ lệ hit của maxmemory-policy (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-Các chỉ số chính cần theo dõi:
+Các số liệu chính cần theo dõi:
 
-- **Số khóa bị loại bỏ / giây** — nếu liên tục khác 0, hãy tăng `maxmemory`
-- **Client bị chặn** — giá trị khác 0 cho thấy script Lua chạy chậm hoặc mức độ tranh chấp cao
-- **Kết nối bị từ chối** — đã đạt giới hạn kết nối; hiếm khi xảy ra với 20 kết nối
+- **Phím bị loại bỏ / giây** — nếu liên tục khác 0, hãy tăng `maxmemory`
+- **Khách hàng bị chặn** — khác 0 gợi ý tập lệnh Lua chậm hoặc có tính cạnh tranh cao
+- **Kết nối bị từ chối** đạt giới hạn kết nối — ; hiếm ở 20 kết nối
+
+### 6. Máy chủ tương thích với Redis
+
+Bất kỳ máy chủ nào được sử dụng ở đây đều phải chạy tập lệnh Lua: giới hạn tốc độ là một `EVAL`. Trên máy chủ không có Lua, `checkRateLimit()` ghi lại `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` và tính trên mỗi quy trình, do đó, mỗi bản sao sẽ tự thực thi giới hạn. Cửa hàng sở thích phiên chia sẻ chọn tham gia (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) cũng đọc và cập nhật các ghim bằng `EVAL`; không có Lua, nó sẽ ghi `[SESSION_AFFINITY] Redis error; falling back to SQLite.` và mỗi bản sao giữ các chân riêng của nó. Các khối lượng công việc khác sử dụng các lệnh đơn giản (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, băm và bộ) và phần phụ trợ Redis của bộ nhớ đệm ngữ nghĩa không gửi lệnh `FT.*`.
+
+Đã thử nghiệm với OmniRoute 3.8.52: KiviDB 1.2.0 với hình ảnh Lua của nó (`kividb/kividb:v1.2.0-lua`). Bộ giới hạn tốc độ (bao gồm quy trình thứ hai chia sẻ bộ đếm), bộ đệm xác thực, bộ lưu trữ hạn ngạch, bộ ngắt mạch khởi động, bộ nhớ đệm ngữ nghĩa và yêu cầu `/v1/chat/completions` thông qua trình xử lý trò chuyện đã vượt qua 18 trong số 19 bước kiểm tra vượt qua Redis 8.10.3. Một cái khác: `INCRBYFLOAT` lưu trữ `0.1 + 0.2` dưới dạng `0.30000000000000004` trong đó Redis lưu trữ `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Kho hạn ngạch phân tích cả hai bằng `parseFloat`, nhưng hai số khác nhau ở các chữ số cuối, do đó, phép so sánh nằm chính xác trên ranh giới hạn ngạch có thể cho ra kết quả khác nhau. Cửa hàng sở thích phiên không phải là một phần của hoạt động đó. ( [thiết lập](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [kết quả](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 

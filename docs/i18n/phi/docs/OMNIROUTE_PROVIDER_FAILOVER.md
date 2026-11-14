@@ -4,10 +4,20 @@
 
 ---
 
-Inuuri ang mga pagkabigo bago magpasya kung muling susubukan.
+Ang mga pagkabigo ay inuuri bago muling subukan ang mga desisyon.
 
-Maaaring lumipat sa ibang provider kapag may mga pansamantalang pagkabigo gaya ng mga timeout, error sa network, limitasyon sa rate, at mga 5xx na tugon ng provider. Ang mga error sa authentication, error sa pahintulot, invalid na request, hindi available na mga modelo, at hindi matukoy na mga pagkabigo ay hindi basta-bastang muling sinusubukan.
+Ang mga pansamantalang pagkabigo gaya ng mga timeout, mga error sa network, mga limitasyon sa rate, at mga tugon ng provider 5xx ay maaaring mabigo. Ang naubos na quota o credit (isang quota 429, o 402 Payment Required) ay hindi na muling susubukan sa parehong provider ngunit nabigo sa isa pa, na ang quota ay hiwalay. Ang mga error sa pagpapatotoo, mga error sa pahintulot, mga di-wastong kahilingan, hindi magagamit na mga modelo, at hindi kilalang mga pagkabigo ay hindi sinusubukang muli nang walang taros.
 
-Pinapayagan ng default na patakaran sa iba’t ibang provider ang hanggang tatlong pagtatangka sa provider, muling sinusubukan kapag may mga limitasyon sa rate at timeout, at pinananatiling hiwalay ang administratibong pag-disable sa pansamantalang estado ng circuit.
+Ang default na patakaran sa cross-provider ay nagbibigay-daan sa hanggang tatlong pagtatangka ng provider, muling subukan ang mga limitasyon sa rate at timeout, mabibigo sa naubos na quota, at pinananatiling hiwalay ang administrative disablement sa pansamantalang estado ng circuit.
 
-Ang mga estado ng circuit ay `closed`, `open`, at `half_open`. Nag-iiskedyul ang cooldown ng probe na may takdang limitasyon; isinasara ng matagumpay na probe ang circuit, at muli itong binubuksan ng nabigong probe.
+## Kung saan ito nalalapat
+
+- **Mga combo** mabigo sa pagitan ng kanilang mga target ayon sa sariling diskarte at setting ng combo.
+- **Isang hubad na modelong id** (walang prefix `provider/` ) na inihahatid ng ilang aktibong provider, na walang combo ng eksaktong pangalan na iyon, ay unang ipinadala sa mga piniling inference ng provider. Kung nabigo ang pagtatangkang iyon sa paraang hindi natuloy ang patakaran, ipapadala ang parehong kahilingan sa susunod na aktibong provider na naghahatid ng id. Ang tugon ay nagdadala ng `x-omniroute-fallback-attempts` kasama ang bilang ng mga provider na sinubukan bago ang isa na sumagot.
+  - Ang bawat kahaliling ay awtorisado nang eksakto kung paano ito kinuha ng hinuha. Ang target na hinaharangan o hindi inamin ng API key ay nilaktawan nang walang upstream na tawag, at nakukuha ng kliyente ang totoong upstream na error, hindi isang pagtanggi sa patakaran para sa isang target na hindi nito pinangalanan.
+  - Isang bigong tugon lang ang nagpapatuloy: walang nabibigo pagkatapos ng unang na-stream na byte.
+  - Nalalapat lang ang emergency fallback model swap pagkatapos mabigo ang bawat provider ng hiniling na modelo.
+  - Ang kahilingang naka-pin sa isang koneksyon (`x-omniroute-connection`) ay nananatili dito.
+  - Ang isang prefixed na id (`provider/model`) ay hindi kailanman inilipat sa ibang provider.
+
+Ang mga estado ng circuit ay `closed`, `open`, at `half_open`. Nag-iskedyul ang isang cooldown ng bounded probe; ang isang matagumpay na probe ay nagsasara ng circuit at ang isang nabigong probe ay muling nagbubukas nito.

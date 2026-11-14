@@ -14,23 +14,24 @@ Olùpín náà máa ń fi ìfọwọ́sí HMAC-SHA256 sí ìfiránṣẹ́ kọ�
 ìkùnà fún ìgbà díẹ̀, ó máa ń tọpinpin ìlera ìfiránṣẹ́ fún webhook kọ̀ọ̀kan, ó sì máa ń pa àwọn endpoint
 tí ìkùnà wọn ń bá a lọ láìfọwọ́sí.
 
-## Àwọn Ìṣẹ̀lẹ̀ Tí A Ṣàtìlẹ́yìn Fún
+## Awọn iṣẹlẹ atilẹyin
 
-Irú `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, tí `src/lib/webhookDispatcher.ts` ń lò) ń ṣàpẹẹrẹ àwọn ìṣẹ̀lẹ̀ mẹ́rin péré lọ́wọ́lọ́wọ́:
+Iru `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, ti o jẹ nipasẹ `src/lib/webhookDispatcher.ts`) lọwọlọwọ ṣe apẹẹrẹ awọn iṣẹlẹ mẹjọ:
 
-| Ìṣẹ̀lẹ̀               | Ó máa ń ṣẹlẹ̀ nígbà tí                                              |
-| ------------------- | ------------------------------------------------------------------ |
-| `request.completed` | Ìbéèrè tí a gba kọjá bá parí láṣeyọrí                              |
-| `request.failed`    | Ìbéèrè tí a gba kọjá bá kùnà lẹ́yìn gbogbo àtúngbìyànjú/ọ̀nà àfidípò |
-| `quota.exceeded`    | Kọ́kọ́rọ́ API kan bá kọjá ààlà ìnáwó/quota                            |
-| `test.ping`         | Ìṣẹ̀lẹ̀ àfarawé tí endpoint ìdánwò ń lò                              |
+| Iṣẹlẹ                     | Ina nigbati                                                                                   |
+| ------------------------- | --------------------------------------------------------------------------------------------- |
+| `request.completed`       | Ibere asoju kan pari ni aṣeyọri                                                               |
+| `request.failed`          | Ibere asoju kan kuna lẹhin gbogbo retries/fallback                                            |
+| `quota.exceeded`          | Bọtini API kan kọja iloro budget/quota kan                                                    |
+| `proxy.set_aside`         | Ọmọ ẹgbẹ adagun-aṣoju kan ti ya sọtọ lẹhin awọn ijusilẹ leralera (iyipada nikan)              |
+| `proxy.pool.exhausted`    | Gbogbo ọmọ ẹgbẹ ti aaye adagun aṣoju aṣoju ti ṣeto si apakan                                  |
+| `provider.reset_redeemed` | Awọn atunto ile-ifowo kan-laifọwọyi ṣe irapada kirẹditi atunto tabi atunto igba ọsẹ Claude    |
+| `provider.exhausted`      | Gbogbo akọọlẹ ti olupese kan n tutu (ni pupọ julọ lẹẹkan fun olupese ni gbogbo iṣẹju mẹwa 10) |
+| `test.ping`               | Iṣẹlẹ sintetiki lo nipasẹ aaye ipari idanwo                                                   |
 
-Àwọn subscription gba literal `"*"` láti gba gbogbo ìṣẹ̀lẹ̀. Àwọn orúkọ ìṣẹ̀lẹ̀
-tí a kò mọ̀ nínú `events` ni a máa kọjú sí nígbà ìpínkiri.
+Awọn iforukọsilẹ gba `"*"` gangan lati gba gbogbo iṣẹlẹ. Awọn orukọ iṣẹlẹ ti a ko mọ ni `events` jẹ aibikita ni akoko fifiranṣẹ.
 
-> Àkíyèsí: a ti so API olùpín náà pọ̀, ṣùgbọ́n àwọn ibi ìpè production fún díẹ̀ lára
-> àwọn ìṣẹ̀lẹ̀ tí kì í ṣe `test.ping` ṣì ń dé. Ṣàyẹ̀wò `grep dispatchEvent` láti rí
-> àwọn ọ̀nà tí ó ń pe olùpín náà lọ́wọ́lọ́wọ́ nínú ẹ̀dà rẹ.
+> Akiyesi: API dispatcher ti wa ni ti firanṣẹ, ṣugbọn awọn aaye ipe ti iṣelọpọ fun diẹ ninu awọn iṣẹlẹ ti kii ṣe `test.ping` tun wa ni ibalẹ. Ṣayẹwo `grep dispatchEvent` lati rii iru awọn ipa-ọna ti n pe olufiranṣẹ lọwọlọwọ ninu itusilẹ rẹ.
 
 ## Ìṣètò Ẹ̀rọ
 

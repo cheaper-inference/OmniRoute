@@ -57,29 +57,19 @@ Připojení OpenRouter mohou v Rozšířených nastaveních ukládat `preset` pr
 
 ---
 
-## 🎨 Kombinace
+## 🎨 komba
 
-Vytvářejte kombinace směrování modelů s 19 veřejnými strategiemi: priority, weighted, round-robin, context-relay, fill-first, p2c (výběr ze dvou možností), random, least-used, cost-optimized, reset-aware, reset-window, headroom, strict-random, auto, lkgp (poslední známý funkční poskytovatel), context-optimized, cache-optimized, **fusion** (paralelně rozešle požadavek skupině modelů a poté pomocí hodnoticího modelu syntetizuje jednu odpověď) a **pipeline**. Každá kombinace řetězí více modelů s automatickým přechodem na záložní variantu a zahrnuje rychlé šablony a kontroly připravenosti.
+Vytvářejte komba směrování modelů s 22 veřejnými strategiemi: priorita, vážená, cyklická, kontextová, vyplňovací, p2c (síla dvou možností), náhodná, nejméně používaná, optimalizovaná z hlediska nákladů, s ohledem na reset, okno pro obnovení, první expirace, rezerva, vážená kvóta, přísná náhodná, automatická, kontextová-známá lgovidp, optimalizovaná mezipaměť,** fúze** (vějíř do panelu modelů paralelně, poté syntetizujte jednu odpověď prostřednictvím porotce),** potrubí** a** jev** (přihlášení TypeSafe Jev nad vaším hodnoceným seznamem). Každé kombo řetězí více modelů s automatickým nouzovým návratem a zahrnuje rychlé šablony a kontroly připravenosti.
 
-Nedávná vylepšení kombinací:
+Nedávná vylepšení komba:
 
-- **Strukturovaný nástroj pro tvorbu kombinací** — každý krok vytvoříte výběrem poskytovatele, modelu a konkrétního účtu či připojení
-- **Podpora opakovaných poskytovatelů** — stejného poskytovatele můžete v jedné kombinaci použít vícekrát, pokud je n-tice `(provider, model, connection)` jedinečná
-- **Stav cílů kombinace** — analytické a stavové přehledy nyní rozlišují jednotlivé cíle či kroky kombinace, místo aby vše slučovaly do řetězců modelů
-- **Řazení složených úrovní** — `defaultTier -> fallbackTier` nyní ovlivňuje pořadí provádění a přechodu na záložní varianty za běhu u kroků kombinace nejvyšší úrovně
-- **Šablony systémových výzev** — `system_message` kombinace podporuje na straně serveru
-  zástupné symboly `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` a `{{FINGERPRINT}}`,
-  které se těsně před odesláním nahradí podle skutečně směrovaného cíle.
-  Jsou omezené seznamem povolených hodnot a nejsou rekurzivní; neznámé zástupné symboly zůstávají doslovné a prázdné hodnoty
-  se rozbalí na prázdný řetězec; klientské systémové výzvy se nikdy nepřepisují. `{{FINGERPRINT}}`
-  se vyhodnocuje pouze u bezplatných poskytovatelů založených na otisku s připnutým nebo
-  automaticky rotovaným otiskem — jinde se rozbalí na prázdný řetězec (např.
-  u připojení s jediným otiskem nebo poskytovatelů bez otisků). Nahrazování zahrnuje
-  standardní smyčku odesílání, round-robin a připnuté relace mezipaměti kontextu;
-  strategie fusion, chaos, pipeline a nested-execute zatím zástupné symboly
-  nenahrazují.
+- **Strukturovaný kombo builder** — vytvořte každý krok výběrem poskytovatele, modelu a přesného account/connection
+- **Opakovaná podpora poskytovatele** — opakovaně používá stejného poskytovatele mnohokrát v jedné kombinaci, pokud je n-tice `(provider, model, connection)` jedinečná
+- **Kombinovaný cíl zdraví** Analytické a zdravotní povrchy — nyní rozlišují jednotlivá kombinovaná targets/steps namísto sbalování všeho do modelových řetězců
+- **Složené uspořádání vrstev** — `defaultTier -> fallbackTier` nyní ovlivňuje pořadí běhu execution/fallback pro kombinované kroky nejvyšší úrovně
+- **Šablony systémových výzev** — combo `system_message` podporuje zástupné symboly `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` a `{{FINGERPRINT}}` na straně serveru, rozšířené ze skutečně směrovaného cíle těsně před odesláním. Seznam povolených a nerekurzivní; neznámé zástupné symboly zůstávají doslovné; prázdné hodnoty expandovat na prázdné; výzvy klientského systému se nikdy nepřepisují. `{{FINGERPRINT}}` se řeší pouze u bezplatných poskytovatelů založených na otisku prstu s připnutým nebo automaticky otočeným otiskem prstu — se rozbalí a vyprázdní jinam (např. připojení s jedním otiskem prstu, poskytovatelé bez fp). Rozšíření pokrývá standardní odesílací smyčku, relace typu round-robin a připnuté kontextové mezipaměti; fusion, chaos, pipeline a nested-execute strategie zatím nerozšiřují zástupné symboly.
 
-![Přehled kombinací](../screenshots/02-combos.png)
+![Combos Dashboard](../screenshots/02-combos.png)
 
 ---
 
@@ -200,13 +190,13 @@ E-mailové adresy účtů OAuth jsou ve výchozím nastavení maskovány (např.
 
 ---
 
-## 👁️ Přepínač viditelnosti modelů _(v3.5.6+)_
+## 👁️ Přepínač viditelnosti modelu _(v3.5.6 +)_
 
-Seznam modelů na stránce poskytovatele nyní obsahuje:
+Seznam modelů stránky poskytovatele nyní obsahuje:
 
-- **Vyhledávací/filtrovací panel v reálném čase** — Umožňuje rychle najít konkrétní modely
-- **Přepínač viditelnosti pro jednotlivé modely** (ikona 👁) — Skryté modely jsou zobrazeny šedě a vyloučeny z katalogu `/v1/models`
-- **Odznak počtu aktivních modelů** (`N/M aktivních`) — Na první pohled ukazuje, kolik modelů je povoleno v porovnání s jejich celkovým počtem
+- **search/filter bar v reálném čase** — Rychlé vyhledání konkrétních modelů
+- **Přepínač viditelnosti podle modelu** ( ikona 👁 ) — Skryté modely jsou zašedlé a vyloučeny z katalogu `/v1/models`
+- **Odznak aktivního počítání** (`N/M active`) — Na první pohled ukazuje, kolik modelů je povoleno v porovnání s celkovým počtem
 
 ---
 
@@ -316,14 +306,14 @@ Ve verzi v3.6.6 je také zavedeno **hybridní počítání tokenů**: když posk
 
 ---
 
-## 🛡️ Bezpečné odchozí požadavky a ochrana proti SSRF _(v3.6.6+)_
+## 🛡️ Safe Outbound Fetch & SSRF Guard _(v3.6.6 +)_
 
-Všechna volání pro ověření poskytovatelů a vyhledávání modelů nyní procházejí dvouvrstvou ochranou odchozích požadavků:
+Všechna volání pro ověření poskytovatele a zjišťování modelů nyní procházejí dvouvrstvým odchozím strážcem:
 
-1. **Ochrana URL** (`src/shared/network/outboundUrlGuard.ts`) — Blokuje privátní, loopback a link-local rozsahy IP adres ještě před otevřením socketu.
-2. **Bezpečný obal funkce fetch** (`src/shared/network/safeOutboundFetch.ts`) — Aplikuje ochranu URL, sjednocuje časové limity a při přechodných chybách opakuje požadavky s exponenciálním prodlužováním intervalů.
+1. **URL stráž** (`src/shared/network/outboundUrlGuard.ts`) — Kontroluje název hostitele cíle nebo literál IP jako první; v režimu pouze pro veřejnost obal bezpečného načtení také řeší název a odmítá soukromé odpovědi. Ve výchozím nastavení blokuje koncové body cloudových metadat — všechny 169.254.0.0/16 plus známé názvy hostitelů metadat; `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` blokuje také soukromé hostitele a hostitele se zpětnou smyčkou; `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` (nebo starší `OUTBOUND_SSRF_GUARD_ENABLED=false`) vypíná kontroly. Hodnota uložená z přepínače řídicího panelu příznaku má přednost před jeho proměnnou a vestavění místní poskytovatelé vynechávají ochranu během ověřování klíče. Viz `docs/reference/ENVIRONMENT.md`.
+2. **Obálka bezpečného načtení** (`src/shared/network/safeOutboundFetch.ts`) — Aplikuje ochranu URL, normalizuje časové limity a opakuje přechodné chyby s exponenciálním stažením.
 
-Porušení ochrany se projeví jako HTTP 422 (`URL_GUARD_BLOCKED`) a prostřednictvím `providerAudit.ts` se zapíší do auditního protokolu souladu.
+Narušení ochrany se objeví jako `URL_GUARD_BLOCKED` — HTTP 503 přes `getSafeOutboundFetchErrorStatus` (400 na trase zjišťování modelu) — a skutečné bloky SSRF během ověřování se zapisují do protokolu auditu jako události `provider.validation.ssrf_blocked`.
 
 ---
 

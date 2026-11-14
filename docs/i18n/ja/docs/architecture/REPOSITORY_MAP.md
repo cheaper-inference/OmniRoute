@@ -155,7 +155,7 @@ src/
 | `app/(dashboard)/dashboard/activity/`                                        | アクティビティ フィード ページ (グループ B): `page.tsx` (サーバー) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md`参照                                                                                                            |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | クォータ共有ページ (グループ B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                                       |
 | `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | プロバイダー プランの構成ページ (グループ B): `page.tsx` + `ProviderPlanConfigClient.tsx` —接続オーバーライドごとのクォータ ディメンション                                                                                                                                                                                         |
-| `app/docs/`                                                                  | 埋め込みドキュメント ビューア ( `docs/*.md`をレンダリング)                                                                                                                                                                                                                                                                         |
+| `app/docs/`                                                                  | 埋め込みドキュメントビューア ( `docs/*.md`をレンダリング)                                                                                                                                                                                                                                                                          |
 | `app/landing/`                                                               | マーケティングのランディング ページ                                                                                                                                                                                                                                                                                                |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | 認証関連ページ                                                                                                                                                                                                                                                                                                                     |
 | `app/{400,401,403,408,429,500,502,503}/`                                     | HTTPエラーページ                                                                                                                                                                                                                                                                                                                   |
@@ -177,7 +177,7 @@ src/
 | `combos/`                                | コンボ解決+並べ替えヘルパー                                                                                                                                                                                                                                                                                                          |
 | `audit/`                                 | アクティビティ フィード ヘルパー: `highLevelActions.ts` (ホワイトリスト+ `isHighLevelAction()`)、 `activityIcons.ts` (アクション→ icon/verbマップ)、 `timeline.ts` (groupByDay/relativeTime) — `docs/architecture/MONITORING_SECTIONS.md`参照                                                                                        |
 | `compliance/`                            | 監査ログ+プロバイダ監査— `docs/security/COMPLIANCE.md`を参照                                                                                                                                                                                                                                                                         |
-| `compression/`                           | 圧縮エンジンの接着剤 (エンジンは`open-sse/services/compression/`にあります)                                                                                                                                                                                                                                                          |
+| `compression/`                           | 圧縮エンジン接着剤 (エンジンは`open-sse/services/compression/`にあります)                                                                                                                                                                                                                                                            |
 | `config/`                                | ランタイム構成ヘルパー                                                                                                                                                                                                                                                                                                               |
 | `db/`                                    | 120 の+ドメインDBモジュール+ 168 の移行 ( SQLiteについては常にここを経由します)                                                                                                                                                                                                                                                      |
 | `quota/`                                 | クォータ共有エンジン: `dimensions.ts` (types/Zod)、 `types.ts` (QuotaStoreインターフェイス)、 `sqliteQuotaStore.ts`、 `redisQuotaStore.ts`、 `storeFactory.ts`、 `fairShare.ts`、 `burnRate.ts`、 `planResolver.ts`、 `planRegistry.ts`、 `saturationSignals.ts`、 `enforce.ts`、 `spendRecorder.ts` — `docs/routing/QUOTA_SHARE.md` |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | ダッシュボードコンポーネントAPI: `packages/ui-kit`上のアダプター— `docs/architecture/DESIGN_SYSTEM.md`を参照 |
 | `constants/iconMap.ts`           | `ICON_MAP`: 画面で使用されるアイコン名→ Lucide コンポーネント (`<Icon>`)                                     |
-| `constants/providers.ts`         | **381 プロバイダー**Zod検証あり (信頼できる情報源)                                                           |
+| `constants/providers.ts`         | **394 プロバイダー**Zod検証あり (信頼できる情報源)                                                           |
 | `constants/cliTools.ts`          | 外部CLIツール レジストリ                                                                                     |
-| `constants/routingStrategies.ts` | **20 のルーティング戦略**優先順位を付けて                                                                    |
+| `constants/routingStrategies.ts` | **22 のルーティング戦略**優先順位を付けて                                                                    |
 | `constants/publicApiRoutes.ts`   | ベアラー (管理ではなく) 認証が必要なルート                                                                   |
 | `constants/upstreamHeaders.ts`   | アップストリームリクエストのヘッダー拒否リスト                                                               |
 | `validation/schemas.ts`          | ~ 80 Zodスキーマ ( APIコントラクトの信頼できる唯一の情報源)                                                  |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — ストリーミングエンジンワークスペース
+## `open-sse/` —ストリーミング エンジン ワークスペース
 
-独立した npm ワークスペース（`@omniroute/open-sse`）。リクエスト処理とプロバイダー実行を担当します。
+個別の npm ワークスペース (`@omniroute/open-sse`)。リクエスト処理+プロバイダーの実行を処理します。
 
 ```
 open-sse/
-├── handlers/            # 16ファイル（12個のハンドラー + 4個のヘルパー）：chatCore、responsesHandler、embeddings、audio、image、video、music、rerank、moderations、searchなど
-├── executors/           # 150個のエグゼキューターモジュール（BaseExecutorを拡張するクラス + プロバイダーごとのヘルパー）
-├── translator/          # フォーマットコンバーター（リクエスト用9個、レスポンス用9個、ヘルパー9個）
-├── transformer/         # Responses API ↔ Chat Completions（TransformStream）
-├── services/            # 約80以上のサービスモジュール（combo、accountFallback、autoCombo、reasoningCache、claude code/chatgpt stealth、modelDeprecation、taskAwareRouter、workflowFSMなど）
-├── mcp-server/          # MCPサーバー（110個のツール、3種類のトランスポート、33個のスコープ）
-├── config/              # プロバイダー／モデルレジストリ、ヘッダー設定、モデルエイリアス
-├── utils/               # TLSクライアント、プロキシfetch／dispatcher、ネットワークヘルパー
-├── index.ts             # ワークスペースエントリ
-├── package.json         # ワークスペースマニフェスト
-├── tsconfig.json        # ワークスペースのTS設定
-└── types.d.ts           # ワークスペースの型宣言
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
+├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| パス                        | 目的                                                                     |
-| --------------------------- | ------------------------------------------------------------------------ |
-| `server.ts`                 | MCPサーバーのライフサイクル（stdio + HTTPトランスポート）                |
-| `httpTransport.ts`          | HTTP Streamable + SSEトランスポート（`/api/mcp/sse`、`/api/mcp/stream`） |
-| `audit.ts`                  | `mcp_tool_audit`テーブルへの監査ログ記録                                 |
-| `scopeEnforcement.ts`       | ツールごとのスコープ検証                                                 |
-| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json`へのヘルスハートビート              |
-| `descriptionCompressor.ts`  | コンテキストを節約するためのツール説明メタデータの圧縮                   |
-| `schemas/tools.ts`          | 36個の基本ツール定義 + スコープ                                          |
-| `tools/advancedTools.ts`    | 高度なツールの実装                                                       |
-| `tools/memoryTools.ts`      | 3個のメモリツール（検索／追加／クリア）                                  |
-| `tools/skillTools.ts`       | 4個のスキルツール（一覧／有効化／実行／実行履歴）                        |
-| `tools/compressionTools.ts` | 5個の圧縮ツール                                                          |
-| `README.md`                 | 内部MCPサーバーREADME（`docs/frameworks/MCP-SERVER.md`から相互リンク）   |
+| パス                        | 目的                                                                             |
+| --------------------------- | -------------------------------------------------------------------------------- |
+| `server.ts`                 | MCPサーバーのライフサイクル (stdio + HTTPトランスポート)                         |
+| `httpTransport.ts`          | HTTPストリーミング可能な+ SSEトランスポート (`/api/mcp/sse`、 `/api/mcp/stream`) |
+| `audit.ts`                  | `mcp_tool_audit`テーブルへの監査ログ                                             |
+| `scopeEnforcement.ts`       | ツールごとのスコープ検証                                                         |
+| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json`へのヘルス ハートビート                     |
+| `descriptionCompressor.ts`  | ツール説明メタデータを圧縮してコンテキストを保存する                             |
+| `schemas/tools.ts`          | 36 の基本ツール定義+スコープ                                                     |
+| `tools/advancedTools.ts`    | 高度なツールの実装                                                               |
+| `tools/memoryTools.ts`      | 3 つのメモリ ツール (search/add/clear)                                           |
+| `tools/skillTools.ts`       | 4つのスキルツール（list/enable/execute/executions）                              |
+| `tools/compressionTools.ts` | 5つの圧縮ツール                                                                  |
+| `README.md`                 | 内部MCPサーバーREADME ( `docs/frameworks/MCP-SERVER.md`からクロスリンク)         |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | 外部CLI統合+内部OmniRoute CLI                                                     |
 | `I18N.md`                   | i18n アーキテクチャ、言語の追加、67 ロケール                                      |
 | `UNINSTALL.md`              | クリーンなアンインストール手順                                                    |
-| `PROVIDER_REFERENCE.md`     | **自動生成**381 プロバイダーのカタログ (再生成: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **自動生成**394 プロバイダーのカタログ (再生成: `npm run gen:provider-reference`) |
 
 ### サブシステムの詳細
 

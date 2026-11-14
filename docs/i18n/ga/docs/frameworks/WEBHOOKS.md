@@ -14,23 +14,24 @@ Síníonn an seoltóir gach seachadadh le HMAC-SHA256, déanann sé iarracht eil
 teipeanna sealadacha, rianaíonn sé sláinte seachadta gach glao gréasáin, agus díchumasaíonn sé go huathoibríoch críochphointí
 a leanann orthu ag teip.
 
-## Teagmhais a dTacaítear Leo
+## Imeachtaí Tacaithe
 
-Samhlaíonn an cineál `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, arna úsáid ag `src/lib/webhookDispatcher.ts`) ceithre theagmhas go díreach faoi láthair:
+Múnlaíonn an cineál `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, arna thomhailt ag `src/lib/webhookDispatcher.ts`) ocht n-imeacht faoi láthair:
 
-| Teagmhas            | Seoltar é nuair a                                                    |
-| ------------------- | -------------------------------------------------------------------- |
-| `request.completed` | A chríochnaíonn iarratas seachfhreastail go rathúil                  |
-| `request.failed`    | A theipeann ar iarratas seachfhreastail tar éis gach atriail/cúltaca |
-| `quota.exceeded`    | A sháraíonn eochair API tairseach buiséid/cuóta                      |
-| `test.ping`         | Teagmhas sintéiseach a úsáideann an críochphointe tástála            |
+| Imeacht                   | Tinte nuair                                                                                                                                |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request.completed`       | Críochnaíonn iarratas seachfhreastalaí go rathúil                                                                                          |
+| `request.failed`          | Teipeann ar iarratas seachfhreastalaí tar éis gach retries/fallback                                                                        |
+| `quota.exceeded`          | Trasnaíonn eochair API tairseach budget/quota                                                                                              |
+| `proxy.set_aside`         | Cuirtear ball comhthiomsaithe seachfhreastalaí ar leataobh tar éis diúltú arís agus arís eile (aistriú amháin)                             |
+| `proxy.pool.exhausted`    | Cuirtear raon feidhme comhthiomsaithe seachfhreastalaí ar leataobh do gach ball                                                            |
+| `provider.reset_redeemed` | D’fhuascail athshocraithe bainc a chuirfí i bhfeidhm go huathoibríoch creidmheas athshocraithe nó athshocrú seisiúin sheachtainiúil Claude |
+| `provider.exhausted`      | Tá gach cuntas soláthraí ag fuarú síos (uair amháin ar a mhéad in aghaidh an tsoláthraí gach 10 nóiméad)                                   |
+| `test.ping`               | Ócáid shintéiseach a úsáideann críochphointe na tástála                                                                                    |
 
-Glacann síntiúis leis an luach litriúil `"*"` chun gach teagmhas a fháil. Déantar neamhaird d’ainmneacha
-teagmhas anaithnid in `events` tráth an tseolta.
+Glacann síntiúis leis an `"*"` litriúil chun gach imeacht a fháil. Ní thugtar aird ar ainmneacha teagmhais anaithnid in `events` ag am seolta.
 
-> Nóta: tá API an tseoltóra nasctha, ach tá suíomhanna glao táirgthe do chuid de na
-> teagmhais nach `test.ping` iad fós á gcur i bhfeidhm. Seiceáil `grep dispatchEvent` chun a fháil amach
-> cé na conairí a agraíonn an seoltóir i d’eisiúint faoi láthair.
+> Tabhair faoi deara: tá an seoltóir API sreangaithe, ach tá láithreacha glaonna táirgeachta do chuid de na himeachtaí neamh-`test.ping` fós ag teacht i dtír. Seiceáil `grep dispatchEvent` chun a fháil amach cé na cosáin a úsáideann an seoltóir i do scaoileadh faoi láthair.
 
 ## Ailtireacht
 
@@ -180,9 +181,9 @@ Soláthraíonn leathanach an phainéil ag `/dashboard/webhooks` (féach
 - Seachadadh tástála le clic amháin
 - Scorán láimhe chun cumasú/díchumasú
 
-## Samplaí Pálasta
+## Samplaí de phárolla
 
-### request.completed
+### iarratas.críochnaithe
 
 ```json
 {
@@ -201,7 +202,7 @@ Soláthraíonn leathanach an phainéil ag `/dashboard/webhooks` (féach
 }
 ```
 
-### test.ping
+### tástáil.ping
 
 ```json
 {
@@ -214,9 +215,7 @@ Soláthraíonn leathanach an phainéil ag `/dashboard/webhooks` (féach
 }
 ```
 
-Sainítear cruthanna na réimsí do theagmhais seachas `test.ping` ag na suíomhanna glao a astaíonn
-iad; caith leis an réad `data` mar réad atá comhoiriúnach chun cinn (cuir réimsí leis, ná bí ag brath ar
-a n-éagmais).
+Sainítear cruthanna allamuigh le haghaidh imeachtaí neamh-`test.ping` ag na suíomhanna glaonna a astaíonn iad; caitheamh leis an oibiacht `data` mar rud atá comhoiriúnach chun tosaigh (cuir réimsí leis, ná bí ag brath ar neamhláithreacht).
 
 ## Dea-Chleachtais
 

@@ -144,7 +144,7 @@ src/
 | `app/api/playground/`                                                        | Playground Studio rotaları: `improve-prompt/` (POST — LLM istemi yeniden yazan), `presets/` (GET listesi / POST oluştur), `presets/[id]/` (GET / PUT / DELETE) — bkz `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                            |
 | `app/api/` (non-v1)                                                          | Management/admin rotaları (~ 60 dizinleri: sağlayıcılar, kombinasyonlar, ayarlar, mcp, a2a, değerlendirmeler, bellek, beceriler, web kancaları, uyumluluk, esneklik, izleme, tüneller, iklimlendirme araçları vb.)                                                                                                     |
 | `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 rota (sunucu kontrolü, aracı state/DNS/mappings, bypass, sertifika, yukarı akış CA). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/AGENTBRIDGE.md §7` bakın.                                                                                                                                  |
-| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16 + rotası (istekler, oturumlar, ana bilgisayarlar, yakalama modları, dışa aktarma, ws). LOCAL_ONLY + SPAWN_CAPABLE. Bakınız `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                             |
+| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16 + rotası (istekler, oturumlar, ana bilgisayarlar, yakalama modları, dışa aktarma, ws). LOCAL_ONLY + SPAWN_CAPABLE. Bkz `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                 |
 | `app/a2a/`                                                                   | A2A JSON-RPC 2.0 giriş noktası (`POST /a2a`)                                                                                                                                                                                                                                                                           |
 | `app/.well-known/agent.json/`                                                | A2A Temsilci Kartı (keşif)                                                                                                                                                                                                                                                                                             |
 | `app/(dashboard)/dashboard/`                                                 | Kontrol paneli UI sayfaları (50 + bölümü, ~ 118 page.tsx dosyaları: sağlayıcılar, kombinasyonlar, ayarlar, bellek, beceriler, web kancaları, değerlendirmeler, denetim, toplu iş, önbellek, maliyetler, sağlık, sistem, etkinlik vb.)                                                                                  |
@@ -201,7 +201,7 @@ src/
 | `webhookDispatcher.ts`                   | HMAC webhook teslimatı — bkz `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                            |
 | `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Tünel yöneticileri — bkz `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                  |
 | `cloudSync.ts`, `initCloudSync.ts`       | Durumun isteğe bağlı bulut senkronizasyonu                                                                                                                                                                                                                                                                            |
-| `localDb.ts`                             | Db modülleri için varili yeniden dışa aktarma (yalnızca mantıksal — yeniden dışa aktarma yok)                                                                                                                                                                                                                         |
+| `localDb.ts`                             | Db modülleri için yeniden dışa aktarma varili (yalnızca mantıksal — yeniden dışa aktarma yok)                                                                                                                                                                                                                         |
 | `cacheLayer.ts`, `idempotencyLayer.ts`   | + uyumsuzluğunu önbelleğe alma isteği                                                                                                                                                                                                                                                                                 |
 | (~ 30 üst düzey dosya daha)              | Uzmanlaşmış yardımcılar (logEnv, modelsDevSync, piiSanitizer, vb.)                                                                                                                                                                                                                                                    |
 
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Kontrol paneli bileşeni API: `packages/ui-kit` üzerindeki adaptörler — bkz. `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ekranlar tarafından kullanılan simge adları → Lucide bileşenleri (`<Icon>`)                          |
-| `constants/providers.ts`         | **381 sağlayıcı** Zod doğrulaması ile (gerçeğin kaynağı)                                                         |
+| `constants/providers.ts`         | **394 sağlayıcı** Zod doğrulaması ile (gerçeğin kaynağı)                                                         |
 | `constants/cliTools.ts`          | Harici CLI aracı kaydı                                                                                           |
-| `constants/routingStrategies.ts` | **20 yönlendirme stratejisi** önceliklere sahip                                                                  |
+| `constants/routingStrategies.ts` | **22 yönlendirme stratejisi** önceliklere sahip                                                                  |
 | `constants/publicApiRoutes.ts`   | Taşıyıcı (yönetim vs.) kimlik doğrulaması gerektiren rotalar                                                     |
 | `constants/upstreamHeaders.ts`   | Yukarı akış istekleri için başlık reddetme listesi                                                               |
 | `validation/schemas.ts`          | ~ 80 Zod şemaları ( API sözleşmeleri için tek gerçek kaynak)                                                     |
@@ -260,40 +260,40 @@ src/
 
 ## `open-sse/` — Akış Motoru Çalışma Alanı
 
-Ayrı npm çalışma alanı (`@omniroute/open-sse`). İstek işleme ve sağlayıcı yürütme işlemlerini gerçekleştirir.
+Ayrı npm çalışma alanı (`@omniroute/open-sse`). İstek işleme + sağlayıcısının yürütülmesini yönetir.
 
 ```
 open-sse/
-├── handlers/            # 16 dosya (12 işleyici + 4 yardımcı): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search vb.
-├── executors/           # 150 yürütücü modülü (BaseExecutor sınıfını genişleten sınıflar + sağlayıcı başına yardımcılar)
-├── translator/          # Biçim dönüştürücüler (9 istek, 9 yanıt, 9 yardımcı)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ hizmet modülü (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM vb.)
-├── mcp-server/          # MCP sunucusu (110 araç, 3 aktarım, 33 kapsam)
-├── config/              # Sağlayıcı/model kayıtları, başlık yapılandırması, model takma adları
-├── utils/               # TLS istemcisi, proxy fetch/dispatcher, ağ yardımcıları
-├── index.ts             # Çalışma alanı giriş noktası
-├── package.json         # Çalışma alanı manifesti
-├── tsconfig.json        # Çalışma alanı TS yapılandırması
-└── types.d.ts           # Çalışma alanı tür bildirimleri
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Yol                         | Amaç                                                                                             |
-| --------------------------- | ------------------------------------------------------------------------------------------------ |
-| `server.ts`                 | MCP sunucusu yaşam döngüsü (stdio + HTTP aktarımları)                                            |
-| `httpTransport.ts`          | HTTP Streamable + SSE aktarımları (`/api/mcp/sse`, `/api/mcp/stream`)                            |
-| `audit.ts`                  | `mcp_tool_audit` tablosuna denetim günlükleme                                                    |
-| `scopeEnforcement.ts`       | Araç başına kapsam doğrulaması                                                                   |
-| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json` dosyasına sistem durumu sinyali                            |
-| `descriptionCompressor.ts`  | Bağlamdan tasarruf etmek için araç açıklaması meta verilerini sıkıştırır                         |
-| `schemas/tools.ts`          | 36 temel araç tanımı + kapsamlar                                                                 |
-| `tools/advancedTools.ts`    | Gelişmiş araç uygulamaları                                                                       |
-| `tools/memoryTools.ts`      | 3 bellek aracı (arama/ekleme/temizleme)                                                          |
-| `tools/skillTools.ts`       | 4 beceri aracı (listeleme/etkinleştirme/yürütme/yürütmeler)                                      |
-| `tools/compressionTools.ts` | 5 sıkıştırma aracı                                                                               |
-| `README.md`                 | Dahili MCP sunucusu README dosyası (`docs/frameworks/MCP-SERVER.md` üzerinden çapraz bağlantılı) |
+| Yol                         | Amaç                                                                            |
+| --------------------------- | ------------------------------------------------------------------------------- |
+| `server.ts`                 | MCP sunucusu yaşam döngüsü (stdio + HTTP aktarımları)                           |
+| `httpTransport.ts`          | HTTP Akış yapılabilir + SSE aktarımları (`/api/mcp/sse`, `/api/mcp/stream`)     |
+| `audit.ts`                  | `mcp_tool_audit` tablosuna denetim günlüğü kaydı                                |
+| `scopeEnforcement.ts`       | Araç başına kapsam doğrulama                                                    |
+| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json` sağlık kalp atışı                         |
+| `descriptionCompressor.ts`  | Bağlamı kaydetmek için araç açıklaması meta verilerini sıkıştırın               |
+| `schemas/tools.ts`          | 36 temel araç tanımı + kapsamı                                                  |
+| `tools/advancedTools.ts`    | Gelişmiş araç uygulamaları                                                      |
+| `tools/memoryTools.ts`      | 3 hafıza aracı (search/add/clear)                                               |
+| `tools/skillTools.ts`       | 4 beceri aracı (list/enable/execute/executions)                                 |
+| `tools/compressionTools.ts` | 5 sıkıştırma aracı                                                              |
+| `README.md`                 | Dahili MCP sunucusu README ( `docs/frameworks/MCP-SERVER.md` çapraz bağlantılı) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Harici CLI entegrasyonları + Dahili OmniRoute CLI                                                      |
 | `I18N.md`                   | i18n mimarisi, dil ekleme, 67 yerel ayar                                                               |
 | `UNINSTALL.md`              | Kaldırma adımlarını temizleyin                                                                         |
-| `PROVIDER_REFERENCE.md`     | **Otomatik olarak oluşturuldu** 381 sağlayıcının kataloğu (yenileme: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Otomatik olarak oluşturuldu** 394 sağlayıcının kataloğu (yenileme: `npm run gen:provider-reference`) |
 
 ### Alt sistem derinlemesine incelemeleri
 

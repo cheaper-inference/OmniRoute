@@ -24,19 +24,21 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Заснемането се извършва в `open-sse/handlers/chatCore.ts` (два сайта, на двата сайта за повикване `cacheReasoningFromAssistantMessage` ). Повторното възпроизвеждане се случва в `open-sse/translator/index.ts` след принуда на схема, но преди изпращане.
+
+Записите за извикване на инструмента се съхраняват под `buildToolCallCacheKey()`, обобщение на обхвата на заявката и идентификатора на извикване на инструмента, така че същият идентификатор, използван от друг API ключ или сесия, не избира записа. Обхватът идва от `buildReasoningCacheScope()`: идентификаторът на API ключ плюс сесийният ключ, когато заявката има такъв. Колоната `tool_call_id` и таблото за управление следователно показват това обобщение за тези записи.
 
 Обикновените ходове на асистента (без извикване на инструмент) се въвеждат по различен начин: `buildAssistantMessageCacheKey()` усвоява обхвата на сесията плюс нормализирания препис във формат OpenAI до този ход, тъй като DeepSeek изисква мотивирането на _всеки_ предходен ход, след като `tools` присъства. За цели на Responses-API (например `opencode-go/deepseek-v4-flash`, насочен към `/responses`) тялото нагоре по веригата носи `input`, а не `messages`, така че `translateRequest()` (`open-sse/translator/index.ts`) отчита основния транскрипт, който е усвоил чрез опция за обратно извикване, а сайтовете за улавяне усвояват същия транскрипт. Пропускът за повторно възпроизвеждане на отговорите се изпълнява на OpenAI пивота за всеки изходен формат, така че клиентите на Anthropic съобщения (Claude → OpenAI → отговори) също се възпроизвеждат.
 

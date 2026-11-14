@@ -823,9 +823,46 @@ Web/search sniedzēja abstrakcija (Tavily, Brave, Exa, Serper utt.).
 
 **Auth:** Nesēja API atslēga (`extractApiKey` + `isValidApiKey`). Meklēšanas politika tiek īstenota, izmantojot `enforceApiKeyPolicy`.
 
+### Nosauktas search/fetch kombinācijas
+
+Gan `POST /v1/search`, gan `POST /v1/web/fetch` akceptē `model` kā saglabātu kombinēto nosaukumu. Izmantojiet vai nu `model`, vai nepārprotamu `provider`; nosūtot abas atgriežas `400`. Bez neviena no laukiem esošā automātiskā pakalpojumu sniedzēja izvēle paliek nemainīga.
+
+Gan Combo Builder, gan tā Add Model katalogs parāda vietējos tīmekļa darbības ierakstus saistītajiem pakalpojumu sniedzējiem, pat ja tiem nav LLM modeļu saraksta. Serpera šovi** Meklēšana tīmeklī** ; Tavilijs rāda** Meklēšana tīmeklī / lapu izvilkšana** , un rāda tikai ieneses nodrošinātāji** Lapas izvilkšana** . Izvēlieties ierakstu un kontu kā parasti. Viens Tavily ieraksts apkalpo abus tīmekļa galapunktus; šie operāciju ieraksti netiek pievienoti tikai tērzēšanas klientu atlasītājiem vai tērzēšanas modeļu zondēm.
+
+Piemēram, izveidojiet a** prioritāte** kombinācija ar nosaukumu `shared-free` ar šiem sakārtotajiem mērķiem:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+Pēc tam katrai virsmai izmantojiet vienu un to pašu nosaukumu:
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+Meklēšana ņem vērā Taviliju, pēc tam Serperu; atnest uzskata Taviliju, tad Džinu lasītāju; tērzēšana izlaiž īpašos search/fetch pakalpojumu sniedzējus un apsver OpenAI. Saderība nāk no search/fetch izpildītāju reģistriem, nevis no vārdiem modeļa nosaukumā. Filtrēšana notiek pirms akreditācijas datu atlases un nosūtīšanas, un saglabātā kombinācija nekad netiek rediģēta.
+
+Maršruti, kas nav tērzēšanas iespējas, atbalsta `priority`, `fill-first`, `round-robin`, `weighted`, `random`, `strict-random`, `least-used` un `p2c`. Tikai tērzēšanai paredzētas sintēzes stratēģijas, piemēram, `fusion`, `pipeline` un `context-relay` tiek noraidītas maršrutos, kas nav tērzēšana, nevis tiek klusi lietoti meklēšanai vai ģenerētajiem multivides līdzekļiem. Esošais kombinētais dzinējs apstrādā pasūtītos atkāpšanās gadījumus, tostarp iepriekšējās kvotu kļūdas, un saglabā darbību IDs, konta tapas, katra soļa konta atļaušanas sarakstus, ligzdotas atsauces, zvanītāja connection/quota darbības jomas un kombinētās piekļuves politiku. Rezultāti saglabā savu sākotnējo search/fetch shēmu, tostarp faktisko nodrošinātāju; `X-OmniRoute-Combo-Trace` identificē maršrutēšanas lēmumu. Nezināmas kombinācijas atgriež `404`; neaktīvas kombinācijas un kombinācijas bez saderīgiem mērķiem atgriež `400`.
+
+Katrs kombinētais mēģinājums izmanto vienu nepārprotamu nodrošinātāju. Tas nevar izsaukt vietējo automātisko pakalpojumu sniedzēju kopu aiz kombinācijas muguras. Tiešie pakalpojumu sniedzēja pieprasījumi saglabā esošo viena nodrošinātāja darbību. Tiešie tērzēšanas pieprasījumi, kuru mērķauditorija ir īpaši search/fetch nodrošinātāji, atgriež JSON `400` kas var darboties, tā vietā, lai tie nonāktu OpenAI stila izpildītājā.
+
+### Iespējam specifiski kombinētie maršruti
+
+Saglabātās kombinācijas var saturēt `routes` objektu, kura atslēgas ir API iespējas. Katram maršrutam ir savs mērķa saraksts, stratēģija un izpildlaika konfigurācija. Augstākā līmeņa `models`, `strategy` un `config` joprojām ir ar mantojumu saderīgs tērzēšanas plāns; vecās kombinācijas bez `routes` turpina strādāt bez izmaiņām.
+
+Atbalstītie maršruta taustiņi ir `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`, `image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`, `audio-translations` un `audio-generation`. Galapunkta projicēšana notiek pirms akreditācijas datu atlases, vērtēšanas vai nosūtīšanas. Ligzdotas kombinācijas atsauces atlasa pakārtotās kombinācijas maršrutu tai pašai iespējai.
+
+`POST /v1/music/generations` un `POST /v1/ocr` pieņem kombinēto nosaukumu `model`. Vietējā ar ElevenLabs saderīgā `POST /v1/music` arī pieņem kombinēto nosaukumu `model_id`, taču katram izmantojamam mērķim šajā vietējā galapunktā ir jābūt ElevenLabs mūzikas modelim, lai tā binārās atbildes līgums tiktu saglabāts. `POST /v1/sound-generation` akceptē `audio-generation` kombināciju `model_id` ar to pašu native-bināro ierobežojumu. Izmantojiet `/v1/music/generations` neviendabīgiem mūzikas nodrošinātājiem.
+
 **Automātiskā atlase:** bez `provider` lētākais pakalpojumu sniedzējs ar konfigurētu savienojumu darbojas pirmais, un nākamais lētākais ir kļūmjpārlēce. Bezmaksas pēdējās iespējas nodrošinātāji (`duckduckgo-free`) tiek izmantoti tikai tad, ja nekas cits nav konfigurēts. Pašmitinātais SearXNG tiek uzskatīts par konfigurētu, tiklīdz tā savienojumā tiek saglabāts īsts `baseUrl` (nevis kataloga noklusējuma `http://localhost:8888/search`): pēc tam tas tiek ierindots kā 0 dolāru nodrošinātājs, apsteidzot atslēgas nodrošinātājus, bet lētākais nodrošinātājs ar atslēgām ir kļūmjpārlēce, tostarp gadījumos, `baseUrl` SearXNG atbild uz 400, 401, 403 vai 404. Tas nav derīgs `http(s)` vai 404 punktos URL mākoņa metadatu adrese netiek skaitīta. SearXNG savienojums, kurā tiek glabāts marķieris, šādā veidā tiek ierindots tikai `https://` vai loopback `http://` vietā. Izmantojot attālo vienkāršu `http://` tas nekad nav kļūmjpārlēce un ir pēdējais līdzeklis, ko izmanto tikai tad, ja nav konfigurēts neviens cits pakalpojumu sniedzējs vai kad tas tiek pieprasīts pēc nosaukuma, tāpēc šajos divos gadījumos tas nosūta pilnvaru skaidrā tekstā.
 
-### Exa un Tavily `provider_options`
+### Exa un Tavilijs `provider_options`
 
 Exa un Tavily nolasa pakalpojumu sniedzējam raksturīgus laukus no nosaukumiem sadalīta maisa: `provider_options.exa` (vai `provider_options["exa-search"]`) un `provider_options.tavily` (vai `provider_options["tavily-search"]`). Tiek pārsūtītas tikai tālāk norādītās atslēgas. Katrs no tiem tiek pārbaudīts, salīdzinot ar savu Zod shēmu `open-sse/handlers/search/providerOptionsPassthrough.ts`, un tiek atmesta atslēga ar nepareizu veidu. Jebkura cita atslēga tiek ignorēta, tostarp auth, base URL, `stream` un `outputSchema`. Plakanie taustiņi, ko izmanto citi pakalpojumu sniedzēji (`cx`, `depth`, ...) darbojas tāpat kā iepriekš.
 
@@ -852,35 +889,21 @@ Izmaksu uzskaite ir vienotais reģistrs `costPerQuery`, izņemot Exa, kas atbils
 
 ## Web Fetch API
 
-Izgūt saturu no URL, izmantojot konfigurētu tīmekļa izgūšanas nodrošinātāju (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
+Izņemiet saturu no URL, izmantojot konfigurētu tīmekļa ielādes nodrošinātāju (Firecrawl, Jina Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-Parallel Extract (`parallel-search`, tā pati API atslēga kā Parallel Search) atgriež tikai Markdown
-— jebkura cita `format` vērtība izraisa `400`, un satura ierobežojums ir 100 000 rakstzīmes. Ja
-pašu mērķa lapu nevar izgūt, augšupstraume par to ziņo HTTP 200 atbildē;
-OmniRoute to parāda kā `422` ar fiksētu ziņojumu.
+Paralēlais izvilkums (`parallel-search`, tas pats API taustiņš kā Parallel Search) atgriež tikai Markdown — Jebkurš cits `format` ir `400` — un saturs ir 100 000 rakstzīmju lielos burtos. Ja pašu mērķa lapu nevar izvilkt, augšpuse par to ziņo HTTP 200; OmniRoute parāda to kā `422` ar fiksētu ziņojumu.
 
-| Method | Path            | Description                                               |
-| ------ | --------------- | --------------------------------------------------------- |
-| POST   | `/v1/web/fetch` | Izgūt/nokasīt URL — pamattekstu validē `v1WebFetchSchema` |
+Keenable Fetch (`keenable-search`) arī atgriež tikai Markdown (jebkurš cits `format` ir `400`) un ierobežo saturu līdz 100 000 rakstzīmēm. Tas darbojas bez atslēgas: precīzs `provider: "keenable-search"` pieprasījums bez savienojuma izmanto Keenable bezatslēgas galapunktu (per-IP ātruma ierobežojumi). Konfigurēta atslēga tikai paceļ šos ierobežojumus; automātiskā atlase izmanto Keenable tikai tad, ja ir konfigurēta atslēga.
 
-**Autentifikācija:** Bearer API atslēga (`extractApiKey` + `isValidApiKey`). Politika tiek
-piemērota, izmantojot `enforceApiKeyPolicy`.
+| Metode | Ceļš            | Apraksts                                                          |
+| ------ | --------------- | ----------------------------------------------------------------- |
+| POST   | `/v1/web/fetch` | Fetch/scrape a URL — korpuss, ko apstiprinājis `v1WebFetchSchema` |
 
-**Kvotas apzinoša atkāpšanās (#8297):** ja nav norādīts `provider`, kopa
-(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) tiek
-izstaigāta fiksētā
-prioritātes secībā (vispirms aizpildot) — konfigurēts, bet ātruma ierobežojumu sasniedzis nodrošinātājs
-tiek izlaists, nevis pieprasījums tiek pārtraukts, un atkārtojama/kvotas augšupstraumes kļūme
-(HTTP 429 vienmēr; 402/403 Firecrawl/Tavily/TinyFish kvotas tipa bezmaksas līmeņiem —
-nevis Jina Reader un nekad vienkāršam 400 nederīgam pieprasījumam) pieprasījuma izpildes laikā
-tiek nodota nākamajam neizmēģinātajam nodrošinātājam ar akreditācijas datiem. Ja visi kopas
-nodrošinātāji ir izsmelti, galapunkts iepriekšējā vispārīgā `400` vietā atgriež vienu
-`429` (ar `Retry-After`
-galveni). Ja tiek pieprasīts konkrēts `provider`, **klusā atkāpšanās nenotiek** — ātruma ierobežojumu
-sasniegušais vai kļūmains norādītais nodrošinātājs parāda savu kļūdu (`429`, ja sasniegts ātruma
-ierobežojums, citādi augšupstraumes statusu).
+**Auth:** Nesēja API atslēga (`extractApiKey` + `isValidApiKey`). Politika tiek īstenota, izmantojot `enforceApiKeyPolicy`.
+
+Nosauktajās kombinācijās tiek izmantots iepriekš minētais [`model` maršrutēšanas līgums](#named-searchfetch-combinations), saglabājot nolasīšanai specifiskās opcijas un atbildes.
+
+**Atkāpšanās no kvotām (#8297):** ja nav norādīts ne `provider` ne `model`, baseins (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` → `parallel-search` → `keenable-search`) tiek staigāts fiksētā prioritātes secībā (aizpildiet vispirms) pieprasījumu, un retryable/quota augšupējā kļūme (HTTP 429 vienmēr; — 402/403 Firecrawl/Tavily/TinyFish stila bezmaksas līmeņiem — ne Jina Reader un nekad vienkāršam 400 sliktam pieprasījumam) pieprasījuma laikā saņem nākamo neizmēģināto akreditācijas nodrošinātāju. Kad katrs pūla nodrošinātājs ir izsmelts, galapunkts atgriež vienu `429` (ar `Retry-After` galveni) iepriekšējā vispārīgā `400` vietā. Ja tiek pieprasīts precīzs `provider`, tas ir** nē** kluss atkāpšanās — ar ātruma ierobežotu vai neveiksmīgu skaidru pakalpojumu sniedzēju atklāj savu kļūdu (`429`, ja ātrums ir ierobežots, pretējā gadījumā augšējais statuss).
 
 ---
 
@@ -956,35 +979,26 @@ ChatGPT atgriež `codex.rate_limits` + `response.created` un straumē pabeigto a
 
 ---
 
-## Kvotu un problēmu ziņošana
+## Ziņošana par kvotām un problēmām
 
-| Metode | Ceļš                | Apraksts                                                                                               |
-| ------ | ------------------- | ------------------------------------------------------------------------------------------------------ |
-| GET    | `/v1/quotas/check`  | Iepriekš pārbaudīt kvotu `provider` + `accountId` kombinācijai pirms reģistrētas atslēgas izsniegšanas |
-| POST   | `/v1/issues/report` | Ziņot par kvotas/atslēgas izsniegšanas kļūmi GitHub (nepieciešams `GITHUB_ISSUES_REPO` + marķieris)    |
+| Metode | Ceļš                | Apraksts                                                                                      |
+| ------ | ------------------- | --------------------------------------------------------------------------------------------- |
+| GET    | `/v1/quotas/check`  | Pirms reģistrētas atslēgas izsniegšanas iepriekš apstipriniet `provider` + `accountId` kvotu  |
+| POST   | `/v1/issues/report` | Ziņojiet par quota/key izdošanas kļūmi GitHub (nepieciešams `GITHUB_ISSUES_REPO` + marķieris) |
 
-**Autentifikācija:** Bearer API atslēga (`isAuthenticated`).
+**Auth:** `/v1/quotas/check` paņem nesēja API atslēgu (`isAuthenticated`). `/v1/issues/report` ir paredzēts tikai pārvaldībai (`requireManagementAuth`), piemēram `/api/v1/registered-keys`: informācijas paneļa sesija, lokālais CLI marķieris vai API atslēga ar `manage`/`admin` tvērumu; API taustiņi tikai secinājumiem iegūst `403`.
 
-### Kvotas sesijas atkopšana (pēc izvēles)
+### Kvotas sesijas atkopšana (izvēlēties)
 
-Neplūstošs `POST /v1/chat/completions` vai `POST /v1/responses`, kas neizdodas ar
-terminālu kvotas kļūdu (`402`/`429`/`503`), kuras pamatteksts norāda, ka kvota vai kredīti ir izsmelti,
-var tikt atlikts un vēlāk atkārtots, nevis atgriezt kļūdu. Izsaucējs var to aktivizēt katram pieprasījumam,
-izmantojot trīs galvenes:
+Nestraumētu `POST /v1/chat/completions` vai `POST /v1/responses`, kas neizdodas ar termināļa kvotas kļūdu (`402`/`429`/`503`, kura pamattekstā norādīts, ka kvota vai kredīti ir izsmelti), var novietot stāvvietā un vēlāk atskaņot, nevis atgriezt kļūdu. Zvanītājs izvēlas katram pieprasījumam ar trim galvenēm:
 
-| Galvene                      | Vērtība                                                    |
-| ---------------------------- | ---------------------------------------------------------- |
-| `x-omniroute-quota-recovery` | `auto`                                                     |
-| `x-omniroute-session`        | sesijas ID, `[A-Za-z0-9._:-]{1,128}`                       |
-| `x-omniroute-recovery-turn`  | apgrieziena ID, kas sesijā ir unikāls (tas pats noteikums) |
+| Virsraksts                   | Vērtība                                         |
+| ---------------------------- | ----------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                          |
+| `x-omniroute-session`        | sesijas id, `[A-Za-z0-9._:-]{1,128}`            |
+| `x-omniroute-recovery-turn`  | pārvērst ID sesijā unikālu (tas pats noteikums) |
 
-Kvalificēti ir tikai `stream: false` apgriezieni bez rīkiem, rīku vēstures vai `previous_response_id`,
-kā arī bez `x-omniroute-connection` piesaistes, un ir jābūt iestatītam `STORAGE_ENCRYPTION_KEY`
-(pieprasījums tiek glabāts šifrētā veidā līdz 24 stundām). Pēc tam atbilde ir `202` ar
-`recovery.poll`; veiciet aptauju, izmantojot `GET /v1/quota-recoveries/{id}` (`202`, kamēr gaida,
-`200` ar atkoptu pamattekstu pēc pabeigšanas), vai atceliet, izmantojot `DELETE`. Biļetes ir redzamas tikai
-API atslēgai, kas tās izveidoja. Ja atkārtojuma iznākums ir neskaidrs, tas beidzas stāvoklī
-`needs_confirmation`, nevis tiek nosūtīts divreiz. Avots: `src/lib/quota/quotaSessionRecovery.ts`.
+Ir piemēroti tikai `stream: false` pagriezieni bez instrumentiem, instrumentu vēstures vai `previous_response_id` un bez `x-omniroute-connection` tapas, un ir jāiestata `STORAGE_ENCRYPTION_KEY` (pieprasījums tiek glabāts šifrēts līdz 24 stundām). Tad atbilde ir `202` ar `recovery.poll`; aptauja `GET /v1/quota-recoveries/{id}` (`202` gaidīšanas laikā, `200` ar atkopto pamattekstu, kad tas ir pabeigts) vai atcelt ar `DELETE`. Biļetes ir redzamas tikai API taustiņam, kas tās izveidoja. Atkārtojums, kura iznākums nav skaidrs, beidzas ar `needs_confirmation`, nevis tiek nosūtīts divreiz. Avots: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1736,17 +1750,21 @@ Izejošo tīmekļa āķu abonementi OmniRoute notikumiem (pieprasījuma pabeigš
 
 ## Reģistrētās atslēgas (automātiskā pārvaldība)
 
-Izmanto automātiskās atslēgu pārvaldības apakšsistēma, lai izsniegtu un rotētu API atslēgas pret atbalsta pakalpojumu sniedzēju/kontu, ar dienas/stundas kvotām.
+To izmanto automātiskās atslēgu pārvaldības apakšsistēma, lai izdotu un pagrieztu API atslēgas pret provider/account ar daily/hourly kvotām.
 
-| Metode | Ceļš                                  | Apraksts                                                                                                                                                                                                                                      |
-| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Uzskaitīt reģistrētās atslēgas (tikai maskēts prefikss)                                                                                                                                                                                       |
-| POST   | `/api/v1/registered-keys`             | Izsniegt jaunu reģistrētu atslēgu — pamatteksts: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Neapstrādātā atslēga tiek atgriezta **vienreiz**. Kvotas atteikuma gadījumā tiek atgriezts `429`. |
-| GET    | `/api/v1/registered-keys/[id]`        | Iegūt reģistrētās atslēgas metadatus (bez neapstrādātās atslēgas)                                                                                                                                                                             |
-| DELETE | `/api/v1/registered-keys/[id]`        | Atsaukt reģistrētu atslēgu                                                                                                                                                                                                                    |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Skaidras atsaukšanas galapunkts (tāds pats rezultāts kā DELETE)                                                                                                                                                                               |
+| Metode | Ceļš                                  | Apraksts                                                                                                                                                                                                             |
+| ------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Reģistrēto atslēgu saraksts (tikai maskēts prefikss)                                                                                                                                                                 |
+| POST   | `/api/v1/registered-keys`             | Izdodiet jaunu reģistrēto atslēgu — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Atgriež neapstrādāto atslēgu** vienreiz** . Atgriež `429` par kvotas atteikumu. |
+| GET    | `/api/v1/registered-keys/[id]`        | Reģistrētās atslēgas metadatu izgūšana (bez izejmateriāla)                                                                                                                                                           |
+| DELETE | `/api/v1/registered-keys/[id]`        | Atsaukt reģistrēto atslēgu                                                                                                                                                                                           |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Skaidrs atsaukšanas galapunkts (tāds pats efekts kā DELETE)                                                                                                                                                          |
+| GET    | `/api/v1/providers/[provider]/limits` | Izlasiet pakalpojumu sniedzēja izdošanas ierobežojumus                                                                                                                                                               |
+| PUT    | `/api/v1/providers/[provider]/limits` | Iestatiet nodrošinātāja izdošanas ierobežojumus — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                      |
+| GET    | `/api/v1/accounts/[id]/limits`        | Izlasiet konta izdošanas ierobežojumus                                                                                                                                                                               |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Iestatiet konta izdošanas ierobežojumus — tādi paši kā pakalpojumu sniedzēja maršrutā                                                                                                                                |
 
-**Autentifikācija:** pārvaldības sesija/API atslēga (`requireManagementAuth`) — tas pats aizsargs, kas tiek izmantots `/api/keys`: informācijas panelī izveidota sesija, lokālais CLI marķieris vai API atslēga ar `manage`/`admin` tvērumu; tikai secināšanai paredzētās API atslēgas saņem `403`. Skatiet arī `/v1/quotas/check` un `/v1/issues/report`.
+**Auth:** pārvaldības session/API atslēga (`requireManagementAuth`) — tas pats aizsargs kā `/api/keys`: informācijas paneļa sesija, lokālais CLI marķieris vai API atslēga ar `manage`/`admin` tvērumu; API taustiņi tikai secinājumiem iegūst `403`. Skatiet arī `/v1/quotas/check` un `/v1/issues/report`.
 
 ---
 
@@ -1870,23 +1888,23 @@ Persistenta sarunu/faktu atmiņas krātuve, kas ierobežota ar API atslēgu / se
 
 ## MCP serveris
 
-OmniRoute ietver iegultu Model Context Protocol serveri ar 3 transportiem (stdio, SSE, streamable-http) un tvēruma ierobežotiem rīkiem. Tālāk norādītie paneļa galapunkti nolasa statusa/audita datus un starpnieko HTTP transportiem.
+OmniRoute piegādā iegultu modeļa konteksta protokola serveri ar 3 transportēšanas veidiem (stdio, SSE, straumējamu-http) un tvēruma rīkiem. Tālāk esošie informācijas paneļa beigu punkti nolasa status/audit datus un izmanto starpniekserveri HTTP transportēšanai.
 
-| Metode | Ceļš                   | Apraksts                                                                                                                  |                      |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| GET    | `/api/mcp/status`      | Sirdsdarbības signāls, transports, tiešsaistes statuss, pēdējais izsaukums, populārākie rīki, 24 stundu veiksmes rādītājs |
-| GET    | `/api/mcp/tools`       | MCP rīku saraksts ar `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                            |
-| GET    | `/api/mcp/sse`         | Atvērt SSE straumi SSE transportam (atgriež `503`, ja MCP ir atspējots vai transports neatbilst)                          |
-| POST   | `/api/mcp/sse`         | Nosūtīt JSON-RPC ietvaru SSE transportā                                                                                   |
-| GET    | `/api/mcp/stream`      | Atvērt Streamable HTTP transporta SSE pusi (servera iniciētiem ziņojumiem)                                                |
-| POST   | `/api/mcp/stream`      | Nosūtīt JSON-RPC ietvaru Streamable HTTP transportā                                                                       |
-| DELETE | `/api/mcp/stream`      | Beigt Streamable HTTP sesiju                                                                                              |
-| GET    | `/api/mcp/audit`       | Vaicāt audita žurnālu — `?limit=`, `?offset=`, `?tool=`, `?success=true                                                   | false`, `?apiKeyId=` |
-| GET    | `/api/mcp/audit/stats` | Apkopotā audita statistika (kopskaiti, veiksmes rādītājs, vidējais ilgums, populārākie rīki)                              |
+| Metode | Ceļš | Apraksts |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
+| GET | `/api/mcp/status` | Sirdsdarbība, transports, tiešsaistes stāvoklis, pēdējais zvans, populārākie rīki, 24 stundu panākumu rādītājs |
+| GET | `/api/mcp/tools` | MCP rīku saraksts ar `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
+| GET | `/api/mcp/sse` | Atvērt SSE straumi SSE transportēšanai (atgriež `503`, ja MCP ir atspējots vai transporta neatbilstība) |
+| POST | `/api/mcp/sse` | Nosūtiet JSON-RPC rāmi uz SSE transportu |
+| GET | `/api/mcp/stream` | Atvērt straumējamā HTTP transporta SSE pusi (servera iniciēti ziņojumi) |
+| POST | `/api/mcp/stream` | Nosūtiet JSON-RPC rāmi, izmantojot straumējamo HTTP transportu |
+| DELETE | `/api/mcp/stream` | Beidziet straumējamu HTTP sesiju |
+| GET | `/api/mcp/audit` | Vaicājiet audita žurnālu — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
+| GET | `/api/mcp/audit/stats` | Apkopotā audita statistika (kopējie rādītāji, panākumu līmenis, vidējais ilgums, populārākie rīki) |
 
-**Autentifikācija:** `sse`/`stream` transporti izmanto MCP specifisko autentifikācijas saskarni (Bearer API atslēga ar `mcp` tvērumu); `status`/`tools`/`audit*` maršruti ir nolasāmi no paneļa (nav nepieciešama papildu autentifikācija, izņemot piekļuvi paneļa resursdatoram).
+**Auth:** `sse`/`stream` transports ievēro MCP specifisko autentifikācijas virsmu (nesēja API atslēga ar `mcp` tvērumu); `status`/`tools`/`audit*` maršruti ir nolasāmi no informācijas paneļa (nav nepieciešama papildu autentifikācija, izņemot informācijas paneļa saimniekdatora sasniegšanu).
 
-> Abus HTTP transportus kontrolē `settings.mcpEnabled` un `settings.mcpTransport` — neatbilstošs transports atgriež `400`, bet atspējots MCP stāvoklis atgriež `503`.
+> Abus HTTP transportus ierobežo `settings.mcpEnabled` un `settings.mcpTransport` — transportēšanas neatbilstība atgriež `400`, MCP atspējots stāvoklis atgriež `503`.
 
 ---
 

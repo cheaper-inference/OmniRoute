@@ -83,7 +83,7 @@ Imena modelov so najprej normalizirana (predpone poti ponudnika, kot sta `openai
 
 ### Kako se beleži poraba
 
-- Strošek na zahtevo se izračuna po odgovoru in zabeleži sproži in pozabi, tako da odjemalcu nikoli ne doda zakasnitve. Poraba kvote v skupni rabi je načrtovana ob naslednji kljukici zanke dogodka prek [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Stroški na zahtevo se izračunajo ob zaključku zahteve. Poraba kvote v skupni rabi je načrtovana ob naslednji kljukici zanke dogodka prek [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
 - Porabo ključa API-ja [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) shrani in izprazni v paketih (privzeti interval splakovanja 60 s, medpomnilnik za 1000 vnosov). Nastavljivo prek:
 
   | Env var                             | Privzeto | Namen                                         |
@@ -91,7 +91,29 @@ Imena modelov so najprej normalizirana (predpone poti ponudnika, kot sta `openai
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Interval izpiranja v milisekundah.            |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Največ vnosov v medpomnilnik pred izpiranjem. |
 
-Podatki o stroških armaturne plošče so** ne** preberejo iz shranjenega zneska v dolarjih na vrstico — ki se sproti znova izračunajo iz števila žetonov in trenutne tabele cen vsakič, ko se končna točka analitike zažene. To pomeni, da popravek napačne cene (in ponovna sinhronizacija) posodobi pretekle ocene stroškov za nazaj.
+Stroški dajejo prednost natančni ceni, ki jo prijavi ponudnik (`provider_cost_usd`), nato posnetku zahtevka po kataloški ceni (`calculated_cost_usd`), nato ponovni ceni žetona iz trenutnega kataloga. Shranjeni stroški se ne zaračunajo ponovno prek števila žetonov. Podedovane vrstice samo za žetone se še vedno spremenijo, ko se spremeni njihova kataloška cena.
+
+### OCR in vdelave
+
+- Uspešne zahteve `/v1/ocr` uporabljajo navzgor `usage_info.pages_processed`, ne pa zahtevanega obsega strani ali števila vrnjenih predmetov strani. Ocena je strani × `ocr_cost_per_page` (absolutno USD/page,** ne** USD/million).
+- Za zahteve z opombami v dokumentu ali omejevalnem polju je potrebna ločena tarifa `ocr_cost_per_annotated_page`. Brez tega ostanejo stroški neznani; navadna tarifa OCR ni tiho nadomeščena.
+- LiteLLM sync preslika svoje gornje polje `annotation_cost_per_page` v `ocr_cost_per_annotated_page`, pri čemer ohrani absolutno vrednost USD/page in vnose samo za opombe, vključno z eksplicitno ničlo. Podano kanonično polje ima prednost; neveljavne vrednosti vzdevkov so prezrte. Preglasitve uporabniških cen ohranijo svojo običajno prednost. Oglejte si [ključe za cene OCR za LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- OCR usage shrani število strani, ceno na enoto, izračunan strošek USD, ključ API in izbrano povezavo. Strani niso nikoli predstavljene kot žetoni. Dnevniki klicev vsebujejo metapodatke o obračunavanju, ne dokumentov URLs, PDF bajtov ali izvlečenega besedila.
+- Uspešne zahteve `/v1/embeddings` zabeležijo eno vrstico uporabe na fizični paket, vključno z ločenimi paketi, dokončanimi v isti milisekundi. Stroški, ki jih poroča ponudnik, imajo prednost pred žetonskimi ocenami; kombinirani ovoji ne zaračunavajo.
+- Te stroške vključujejo zgodovina uporabe, analitika stroškov, okna provider/account, omejitve porabe ključa API-ja, knjiga stroškov zahtev in skupna dnevna uporaba. Ključi brez dnevnika ohranijo numerično obračunavanje brez ohranitve izvornega besedila.
+- Manjkajoča uporaba ali tarife so** neznano** , ni brezplačno: glava stroškov odziva je izpuščena, obstoječa politika uporabe brez cene pa velja za omejene ključe API. Izrecno konfigurirane ničelne stopnje ostanejo veljavne pri uporabi brez stroškov.
+
+To je samo vnaprejšnje računovodstvo. Iz te selitve ni mogoče rekonstruirati starih klicev OCR/embedding, ki nikoli niso zapisali zgodovine uporabe. Ocene v katalogu so ocene USD, ne račun in ne vključujejo pretvorbe valut, davka ali popustov.
+
+### Govor in slike
+
+- Uspešni poskusi `/v1/audio/transcriptions`, `/v1/audio/speech` in generiranja slik imajo skupno numerično obračunavanje. Direktni in kombinirani klici nosijo klicateljev ključ API in izbrano povezavo; kombinirani ovoj nikoli ne doda druge bremenitve.
+- USD, ki ga poroča ponudnik, je boljši od kataloške ocene, vključno z izrecno ničelno ceno. OpenRouterJSON `usage.cost` je normaliziran na `cost_usd`. V nasprotnem primeru izmerjeni žetoni uporabljajo cene žetonov, sekunde prepisa uporabljajo cene na sekundo, govorni vnos uporablja število znakov Unicode in slike s pavšalno ceno uporabljajo dejansko vrnjeno številko, ne zahtevanega `n`.
+- Binarni OpenRouter TTS nima telesa uporabe JSON. Ko je zvok končan ali klicatelj prekliče, OmniRoute poizveduje o svoji generaciji ID na** enako** konfiguriran izvor OpenRouter. Zahteva EU se nikoli ne vrne na globalni izvor. To je omejeno iskanje samo za branje; sinteza ni ponovno poskusena za obračunavanje. Zapisi zaračunavanja se lahko prikažejo, ko je zvok končan: ponovni poskusi iskanja se izvajajo v ozadju do približno 52 sekund, vključno z omrežnimi roki.
+- Med tem iskanjem ima zvočni odgovor `X-OmniRoute-Cost-Status: pending` in nima glave stroškov odgovora. Njegova končna bremenitev se prikaže v zgodovini uporabe, analitiki in glavni knjigi po uskladitvi. Če metapodatki niso na voljo, se uporabi posnetek konfigurirane tarife; sicer cena ostane neznana.
+- Število sekund, znakov in slik ima ločena polja za obračunsko enoto, nikoli lažno štetje žetonov. Računovodstvo ohranja le številčno uporabo, ne pa govornega besedila, prepisov ali slikovnih bajtov. Obstoječe izjeme za sliko brez cene so nespremenjene: tarifa za dejansko manjkajočo sliko ne zaklene na novo omejenega ključa, odgovor pa izpusti glavo stroškov, namesto da bi klic razglasil za brezplačnega. Napaka v trgovini s cenami še vedno ohranja dokaze o uporabi za uveljavljanje zaprtja zaradi napake.
+
+Nobena zgodovinska dajatev speech/image ni izmišljena ali zapolnjena. Zaračunavanje ponudnika ostaja referenca za račune in klice, katerih stroški niso bili prijavljeni.
 
 ---
 

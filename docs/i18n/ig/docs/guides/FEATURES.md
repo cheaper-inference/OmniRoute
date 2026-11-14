@@ -57,29 +57,19 @@ Njikọ OpenRouter nwere ike idobe `preset` nke njikọ ọ bụla na Advanced S
 
 ---
 
-## 🎨 Combo
+## 🎨 Combos
 
-Mepụta combo njikwa ụzọ model site na atụmatụ ọha 19: priority, weighted, round-robin, context-relay, fill-first, p2c (power-of-two choices), random, least-used, cost-optimized, reset-aware, reset-window, headroom, strict-random, auto, lkgp (last-known-good-provider), context-optimized, cache-optimized, **fusion** (na-eziga arịrịọ n’otu oge gaa na panel model, wee jiri onye ọkaikpe chịkọta otu azịza), na **pipeline**. Combo ọ bụla na-ejikọta ọtụtụ model nwere fallback akpaghị aka ma tinyekwa template ngwa ngwa na nyocha ịdị njikere.
+Mepụta combos ntugharị ihe atụ nwere atụmatụ ọha 22: mkpa, arọ, okirikiri, okirikiri, okirikiri, fill-mbụ, p2c (nhọrọ ike nke abụọ), random, obere-eji, ọnụ ahịa- kacha, nrụpụta-mara, nrụpụta-window, expiry-mbụ, headroom, quota-arọ, siri ike-random, auto-prost-amaara. emeziwanye onodu-ọkọlọtọ, nke kachasi n'ime oghere,** ngwakọta** (onye ofufe gaa na panel nke ụdị n'otu oge, wee mepụta otu azịza site na onye ọka ikpe),** ọkpọkọ** , na** jev** (nbanye TypeSafe Jev nnabata n'elu ndepụta aha gị). Ngwakọta ngwakọta nke ọ bụla nwere ọtụtụ ụdị nwere azụ azụ na-akpaghị aka ma gụnye ndebiri ngwa ngwa yana nlele njikere.
 
-Mmezi combo ndị e mere n’oge na-adịbeghị anya:
+Nkwalite mkpokọta nso nso a:
 
-- **Onye nrụpụta combo ahaziri ahazi** — mepụta nzọụkwụ ọ bụla site n’ịhọrọ provider, model, na akaụntụ/njikọ kpọmkwem
-- **Nkwado maka provider ugboro ugboro** — jiri otu provider ahụ ọzọ ọtụtụ ugboro n’ime otu combo ma ọ bụrụhaala na tuple `(provider, model, connection)` pụrụ iche
-- **Ahụike ebumnuche combo** — nyocha na ngosipụta ahụike na-amatazi ebumnuche/nzọụkwụ combo n’otu n’otu kama ijikọta ihe niile n’ime eriri model
-- **Nhazi usoro tier jikọtara ọnụ** — `defaultTier -> fallbackTier` na-emetụtazi usoro mmezu/fallback n’oge runtime maka nzọụkwụ combo nke ọkwa kachasị elu
-- **Template system prompt** — combo `system_message` na-akwado
-  placeholder `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` na `{{FINGERPRINT}}`
-  n’akụkụ server, nke a na-agbasawanye site na ebumnuche e zigara arịrịọ n’ezie tupu dispatch.
-  A na-anabata naanị ndị nọ na allowlist ma anaghị eme ya ugboro ọzọ; placeholder ndị a na-amaghị na-anọ dịka ederede nkịtị; uru efu
-  na-agbasawanye ka ọ bụrụ efu; anaghị edegharị system prompt nke onye ahịa ma ọlị. `{{FINGERPRINT}}`
-  na-enweta uru naanị maka ndị na-eweta ọrụ n’efu dabere na fingerprint nwere fingerprint etinyere
-  ma ọ bụ nke a na-agbanwe akpaghị aka — ọ na-agbasawanye ka ọ bụrụ efu n’ebe ndị ọzọ (dịka ọmụmaatụ
-  njikọ nwere otu fingerprint, provider ndị na-abụghị fp). Mgbasawanye a na-emetụta
-  usoro dispatch ọkọlọtọ, round-robin, na session context-cache etinyere;
-  fusion, chaos, pipeline na atụmatụ nested-execute anaghị agbasawanye
-  placeholder ugbu a.
+- **Onye nrụpụta ngwakọta ahaziri ahazi** — mepụta nzọụkwụ ọ bụla site na ịhọrọ onye na-eweta, ihe nlereanya na account/connection ziri ezi
+- **Nkwado ndị na-eweta ya ugboro ugboro** — jigharịa otu onye na-eweta ya ọtụtụ oge n'otu ngwakọta ma ọ bụrụhaala na `(provider, model, connection)` tuple pụrụ iche
+- **Combo lekwasịrị anya ahụike** nyocha — na elu ahụike ugbu a na-amata ọdịiche dị n'otu n'otu n'otu n'otu targets/steps kama ịdaba ihe niile n'ime eriri ihe nlereanya.
+- **Ịtụ ọkwa n'ọkwa mejupụtara** — `defaultTier -> fallbackTier` ugbu a na-emetụta usoro ojiri gaa execution/fallback maka usoro nchikota nke ọkwa dị elu
+- **Ndebiri ngwa ngwa sistemụ** — combo `system_message` na-akwado ihe nkesa-n'akụkụ `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` na `{{FINGERPRINT}}` ebe agbasawanye site na ebumnobi na-ebugharị ozugbo tupu izipu ya. Enyere aha na nke na-abụghị nke a na-emegharị; ebe amaghi ama na-anọ nkịtị; ụkpụrụ efu gbasaa ruo efu; Agaghị edegharị usoro mkpali ndị ahịa. `{{FINGERPRINT}}` na-ekpebi naanị maka ndị na-eweta n'efu dabere na mkpisiaka nwere akara mkpkpkpkp mkpkpkp mkpkpkp nkpkp nke akpaghachịrị — ọ na-agbasa ka ọ tọgbọ chakoo ebe ọzọ (dịka njikọ otu mkpịsị aka, ndị na-enyeghị fp). Mgbasawanye na-ekpuchi loop izipu ọkọlọtọ, okirikiri-robin, na oge ihe ndebe ihe nkedo etinyere; njikọ, ọgba aghara, pipeline na atumatu akwụ ụgwọ anaghị agbasawanye ndị na-edebe ebe.
 
-![Dashboard Combo](../screenshots/02-combos.png)
+![Combos Dashboard](../screenshots/02-combos.png)
 
 ---
 
@@ -316,14 +306,14 @@ A na-eji `src/lib/sync/bundle.ts` arụ ngwugwu nhazi ahụ. Ndị na-eji ya na-
 
 ---
 
-## 🛡️ Nweta Mpụga Nchekwa & Nchedo SSRF _(v3.6.6+)_
+## 🛡️ Nchekwa ọpụpụ ọpụpụ & SSRF Nche _(v3.6.6 +)_
 
-Oku nkwado onye na-eweta ọrụ na nchọpụta model niile na-agafezi na nchedo mpụga nwere ọkwa abụọ:
+Nkwenye niile nke ndị na-eweta na oku nchọpụta ụdị ugbu a na-aga site na nche ọpụpụ oyi akwa abụọ:
 
-1. **Nchedo URL** (`src/shared/network/outboundUrlGuard.ts`) — Na-egbochi adreesị IP nke private/loopback/link-local tupu emepee socket.
-2. **Ihe mkpuchi nweta nchebe** (`src/shared/network/safeOutboundFetch.ts`) — Na-etinye nchedo URL n'ọrụ, na-ahazi oge nkwụsị ka ha bụrụ otu, ma na-anwalegharị njehie nwa oge site n'ịgbatị oge nchere n'ụdị exponential backoff.
+1. **URL nche** (`src/shared/network/outboundUrlGuard.ts`) — Na-enyocha aha nnabata ma ọ bụ IP nke onye a tụrụ anya dịka edere ya na mbụ; n'ụdị naanị ọhaneze, ihe mkpuchi nchekwa nchekwa na-edozi aha ahụ wee jụ azịza nzuzo. Site na ndabara ọ na-egbochi ígwé ojii-metadata njedebe — niile 169.254.0.0/16 gbakwunyere aha nnabata metadata ama ama; `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` na-egbochikwa ndị ọbịa nzuzo na loopback; `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` (ma ọ bụ ihe nketa `OUTBOUND_SSRF_GUARD_ENABLED=false`) na-atụgharị ego nlele. Uru echekwara na toggle dashboard ọkọlọtọ na-ebute ụzọ karịa mgbanwe ya, ndị na-eweta mpaghara arụnyere na-amafe onye nche n'oge nkwado igodo. Lee `docs/reference/ENVIRONMENT.md`.
+2. **Ihe mkpuchi weta nke ọma** (`src/shared/network/safeOutboundFetch.ts`) — Na-etinye ihe nchekwa URL, na-edozi oge nkwụsịtụ, ma na-emegharị mperi ndị na-adịte nwa oge na-eji nkwụghachi azụ.
 
-Mmebi iwu nchedo na-apụta dị ka HTTP 422 (`URL_GUARD_BLOCKED`), a na-edekwa ya na ndekọ nyocha nrubeisi site na `providerAudit.ts`.
+Edere mmebi iwu nchekwa dị ka `URL_GUARD_BLOCKED` — HTTP 503 site na `getSafeOutboundFetchErrorStatus` (400 n'ụzọ ihe atụ-nchọpụta) — na ezigbo ngọngọ SSRF n'oge nkwado ka edere ya na ndekọ nyocha dị ka mmemme `provider.validation.ssrf_blocked`.
 
 ---
 

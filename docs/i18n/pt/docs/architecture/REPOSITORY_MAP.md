@@ -188,7 +188,7 @@ src/
 | `evals/`                                 | Estrutura de avaliação (suites, runner, runtime) — ver `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                                |
 | `guardrails/`                            | mascarador PII, injecção imediata, ponte de visão — ver `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                            |
 | `jobs/`                                  | Trabalhos em segundo plano (semelhantes ao cron)                                                                                                                                                                                                                                                                                 |
-| `memory/`                                | Memória de conversação (SQLite FTS5 + sqlite-vec híbrido RRF + Qdrant layer 2) — ver `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                 |
+| `memory/`                                | Memória de conversação (SQLite FTS5 + sqlite-vec híbrido RRF + Qdrant nível 2) — ver `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                 |
 | `memory/embedding/`                      | Camada de incorporação de múltiplas fontes: `index.ts` (resolver), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (plano 21)                                                                                                                                                                     |
 | `memory/vectorStore.ts`                  | wrapper sqlite-vec v0.1.9 — KNN força bruta + híbrido RRF (vetor FTS5 +, k = 60). Lazy-init, degrada-se normalmente quando o sqlite-vec não está disponível. (plano 21)                                                                                                                                                          |
 | `memory/reindex.ts`                      | `runReindexBatch()` — processa memórias com `needs_reindex=1` em segundo plano; chamado por `POST /api/memory/reindex` e caminho de preenchimento lento. (plano 21)                                                                                                                                                              |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Componente do painel API: adaptadores sobre `packages/ui-kit` — ver `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nomes de ícones utilizados pelos ecrãs → componentes Lucide (`<Icon>`)                       |
-| `constants/providers.ts`         | **381 fornecedores** com validação Zod (fonte da verdade)                                                |
+| `constants/providers.ts`         | **394 fornecedores** com validação Zod (fonte da verdade)                                                |
 | `constants/cliTools.ts`          | Registo externo da ferramenta CLI                                                                        |
-| `constants/routingStrategies.ts` | **20 estratégias de encaminhamento** com prioridades                                                     |
+| `constants/routingStrategies.ts` | **22 estratégias de encaminhamento** com prioridades                                                     |
 | `constants/publicApiRoutes.ts`   | Rotas que requerem autenticação do portador (vs gestão)                                                  |
 | `constants/upstreamHeaders.ts`   | Lista de bloqueio de cabeçalho para pedidos upstream                                                     |
 | `validation/schemas.ts`          | Esquemas ~ 80 Zod (fonte única de verdade para contratos API )                                           |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — Área de Trabalho do Motor de Streaming
+## Espaço de trabalho do motor de streaming `open-sse/` —
 
-Área de trabalho npm separada (`@omniroute/open-sse`). Processa pedidos e executa fornecedores.
+Espaço de trabalho npm separado (`@omniroute/open-sse`). Trata do processamento de pedidos e da execução do fornecedor +.
 
 ```
 open-sse/
-├── handlers/            # 16 ficheiros (12 processadores + 4 auxiliares): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
-├── executors/           # 150 módulos executores (classes que estendem BaseExecutor + auxiliares por fornecedor)
-├── translator/          # Conversores de formatos (9 de pedidos, 9 de respostas, 9 auxiliares)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ módulos de serviço (combo, accountFallback, autoCombo, reasoningCache, modo furtivo de claude code/chatgpt, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
-├── mcp-server/          # Servidor MCP (110 ferramentas, 3 transportes, 33 âmbitos)
-├── config/              # Registos de fornecedores/modelos, configuração de cabeçalhos, aliases de modelos
-├── utils/               # Cliente TLS, obtenção/dispatcher de proxy, auxiliares de rede
-├── index.ts             # Ponto de entrada da área de trabalho
-├── package.json         # Manifesto da área de trabalho
-├── tsconfig.json        # Configuração TS da área de trabalho
-└── types.d.ts           # Declarações de tipos da área de trabalho
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Caminho                     | Finalidade                                                                                |
-| --------------------------- | ----------------------------------------------------------------------------------------- |
-| `server.ts`                 | Ciclo de vida do servidor MCP (transportes stdio + HTTP)                                  |
-| `httpTransport.ts`          | Transportes HTTP Streamable + SSE (`/api/mcp/sse`, `/api/mcp/stream`)                     |
-| `audit.ts`                  | Registo de auditoria na tabela `mcp_tool_audit`                                           |
-| `scopeEnforcement.ts`       | Validação do âmbito por ferramenta                                                        |
-| `runtimeHeartbeat.ts`       | Sinal de estado em `DATA_DIR/runtime/mcp-heartbeat.json`                                  |
-| `descriptionCompressor.ts`  | Comprime os metadados das descrições das ferramentas para poupar contexto                 |
-| `schemas/tools.ts`          | 36 definições de ferramentas base + âmbitos                                               |
-| `tools/advancedTools.ts`    | Implementações de ferramentas avançadas                                                   |
-| `tools/memoryTools.ts`      | 3 ferramentas de memória (pesquisar/adicionar/limpar)                                     |
-| `tools/skillTools.ts`       | 4 ferramentas de competências (listar/ativar/executar/execuções)                          |
-| `tools/compressionTools.ts` | 5 ferramentas de compressão                                                               |
-| `README.md`                 | README interno do servidor MCP (com referência cruzada a `docs/frameworks/MCP-SERVER.md`) |
+| Percurso                    | Finalidade                                                                  |
+| --------------------------- | --------------------------------------------------------------------------- |
+| `server.ts`                 | Ciclo de vida do servidor MCP (transportes stdio + HTTP )                   |
+| `httpTransport.ts`          | HTTP Transportes + SSE transmitíveis (`/api/mcp/sse`, `/api/mcp/stream`)    |
+| `audit.ts`                  | Registo de auditoria na tabela `mcp_tool_audit`                             |
+| `scopeEnforcement.ts`       | Validação do âmbito por ferramenta                                          |
+| `runtimeHeartbeat.ts`       | Batimento cardíaco de saúde para `DATA_DIR/runtime/mcp-heartbeat.json`      |
+| `descriptionCompressor.ts`  | Comprimir metadados de descrição da ferramenta para poupar contexto         |
+| `schemas/tools.ts`          | 36 definições de ferramentas básicas escopos +                              |
+| `tools/advancedTools.ts`    | Implementações de ferramentas avançadas                                     |
+| `tools/memoryTools.ts`      | 3 ferramentas de memória (search/add/clear)                                 |
+| `tools/skillTools.ts`       | 4 ferramentas de habilidade (list/enable/execute/executions)                |
+| `tools/compressionTools.ts` | 5 ferramentas de compressão                                                 |
+| `README.md`                 | Servidor MCP interno README (reticulado de `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Integrações CLI externas + OmniRoute interno CLI                                                  |
 | `I18N.md`                   | Arquitetura i18n, adicionar um idioma, 67 localizações                                            |
 | `UNINSTALL.md`              | Limpe os passos de desinstalação                                                                  |
-| `PROVIDER_REFERENCE.md`     | **Gerado automaticamente** catálogo de 381 fornecedores (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Gerado automaticamente** catálogo de 394 fornecedores (regen: `npm run gen:provider-reference`) |
 
 ### Aprofundamentos do subsistema
 

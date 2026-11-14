@@ -167,7 +167,7 @@ src/
 
 | Modul                                    | Svrha                                                                                                                                                                                                                                                                                                                               |
 | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | A2A protokol task manager, vještine (5), streaming                                                                                                                                                                                                                                                                                  |
+| `a2a/`                                   | upravitelj zadataka protokola A2A, vještine (5), strujanje                                                                                                                                                                                                                                                                          |
 | `acp/`                                   | CLI registar agenata (lokalno CLI otkriće — vidi `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                                        |
 | `api/`                                   | Dijeljeni API pomagači (`requireManagementAuth`, provjera valjanosti)                                                                                                                                                                                                                                                               |
 | `auth/`                                  | Sesija, raspršivanje lozinke, provjera valjanosti tokena                                                                                                                                                                                                                                                                            |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Komponenta nadzorne ploče API: adapteri preko `packages/ui-kit` — vidi `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nazivi ikona koje koriste zasloni → Lucide komponente (`<Icon>`)                                |
-| `constants/providers.ts`         | **381 pružatelja usluga** sa Zod validacijom (izvor istine)                                                 |
+| `constants/providers.ts`         | **394 pružatelja usluga** sa Zod validacijom (izvor istine)                                                 |
 | `constants/cliTools.ts`          | Vanjski registar CLI alata                                                                                  |
-| `constants/routingStrategies.ts` | **20 strategija usmjeravanja** s prioritetima                                                               |
+| `constants/routingStrategies.ts` | **22 strategije usmjeravanja** s prioritetima                                                               |
 | `constants/publicApiRoutes.ts`   | Rute koje zahtijevaju autorizaciju nositelja (nasuprot upravljanju).                                        |
 | `constants/upstreamHeaders.ts`   | Popis odbijenih zaglavlja za uzvodne zahtjeve                                                               |
 | `validation/schemas.ts`          | ~ 80 Zod shema (jedan izvor istine za API ugovore)                                                          |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — Radni prostor mehanizma za streaming
+## `open-sse/` — Radni prostor Streaming Enginea
 
-Zaseban npm radni prostor (`@omniroute/open-sse`). Upravlja obradom zahtjeva i izvršavanjem pružatelja usluga.
+Odvojeni npm radni prostor (`@omniroute/open-sse`). Rukuje izvršavanjem + pružatelja obrade zahtjeva.
 
 ```
 open-sse/
-├── handlers/            # 16 datoteka (12 obrađivača + 4 pomoćne datoteke): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search itd.
-├── executors/           # 150 izvršnih modula (klase koje proširuju BaseExecutor + pomoćne datoteke po pružatelju)
-├── translator/          # Pretvarači formata (9 za zahtjeve, 9 za odgovore, 9 pomoćnih)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ servisnih modula (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM itd.)
-├── mcp-server/          # MCP poslužitelj (110 alata, 3 transporta, 33 opsega)
-├── config/              # Registri pružatelja/modela, konfiguracija zaglavlja, pseudonimi modela
-├── utils/               # TLS klijent, dohvaćanje/raspoređivač putem proxyja, mrežne pomoćne funkcije
-├── index.ts             # Ulazna točka radnog prostora
-├── package.json         # Manifest radnog prostora
-├── tsconfig.json        # TS konfiguracija radnog prostora
-└── types.d.ts           # Deklaracije tipova radnog prostora
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Putanja                     | Svrha                                                                                 |
-| --------------------------- | ------------------------------------------------------------------------------------- |
-| `server.ts`                 | Životni ciklus MCP poslužitelja (stdio + HTTP transporti)                             |
-| `httpTransport.ts`          | HTTP Streamable + SSE transporti (`/api/mcp/sse`, `/api/mcp/stream`)                  |
-| `audit.ts`                  | Zapisivanje revizijskih zapisa u tablicu `mcp_tool_audit`                             |
-| `scopeEnforcement.ts`       | Provjera opsega za svaki alat                                                         |
-| `runtimeHeartbeat.ts`       | Signal stanja u `DATA_DIR/runtime/mcp-heartbeat.json`                                 |
-| `descriptionCompressor.ts`  | Sažimanje metapodataka opisa alata radi uštede konteksta                              |
-| `schemas/tools.ts`          | 36 osnovnih definicija alata + opsezi                                                 |
-| `tools/advancedTools.ts`    | Napredne implementacije alata                                                         |
-| `tools/memoryTools.ts`      | 3 memorijska alata (pretraživanje/dodavanje/brisanje)                                 |
-| `tools/skillTools.ts`       | 4 alata za vještine (popis/omogućavanje/izvršavanje/izvršenja)                        |
-| `tools/compressionTools.ts` | 5 alata za sažimanje                                                                  |
-| `README.md`                 | Interni README MCP poslužitelja (unakrsno povezan iz `docs/frameworks/MCP-SERVER.md`) |
+| Put                         | Svrha                                                                                |
+| --------------------------- | ------------------------------------------------------------------------------------ |
+| `server.ts`                 | životni ciklus MCP poslužitelja (stdio + HTTP prenosi)                               |
+| `httpTransport.ts`          | HTTP Streamable + SSE prijenosi (`/api/mcp/sse`, `/api/mcp/stream`)                  |
+| `audit.ts`                  | Zapisivanje revizije u `mcp_tool_audit` tablicu                                      |
+| `scopeEnforcement.ts`       | Provjera opsega po alatu                                                             |
+| `runtimeHeartbeat.ts`       | Zdrav otkucaj srca do `DATA_DIR/runtime/mcp-heartbeat.json`                          |
+| `descriptionCompressor.ts`  | Komprimirajte metapodatke opisa alata za spremanje konteksta                         |
+| `schemas/tools.ts`          | 36 osnovnih definicija alata + opsega                                                |
+| `tools/advancedTools.ts`    | Napredne implementacije alata                                                        |
+| `tools/memoryTools.ts`      | 3 memorijska alata (search/add/clear)                                                |
+| `tools/skillTools.ts`       | 4 alata za vještine (list/enable/execute/executions)                                 |
+| `tools/compressionTools.ts` | 5 alata za kompresiju                                                                |
+| `README.md`                 | Interni MCP poslužitelj README (unakrsno povezan sa `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -395,24 +395,24 @@ open-sse/
 
 ### Vodiči na najvišoj razini
 
-| O tome govori doc           | Svrha                                                                                      |
-| --------------------------- | ------------------------------------------------------------------------------------------ |
-| `ARCHITECTURE.md`           | Arhitektura visoke razine, karta podsustava, površina nadzorne ploče                       |
-| `CODEBASE_DOCUMENTATION.md` | Inženjerske reference: imenici, moduli, konvencije                                         |
-| `FEATURES.md`               | Matrica značajki s istaknutim točkama v3.8                                                 |
-| `USER_GUIDE.md`             | Priručnik za krajnjeg korisnika (postavljanje, modeli, kombinacije, CLIs, audio itd.)      |
-| `API_REFERENCE.md`          | API referenca krajnje točke s modelom autentifikacije                                      |
-| `openapi.yaml`              | specifikacija OpenAPI 3.0 (121 staza)                                                      |
-| `SETUP_GUIDE.md`            | Metode instalacije (npm, npx, Docker, Electron, Termux, izvor)                             |
-| `ENVIRONMENT.md`            | Sve env vars (~ 800 dokumentirano, ~ 3050 redaka `.env.example`)                           |
-| `TROUBLESHOOTING.md`        | Uobičajene pogreške + v3.8.0 poznati problemi                                              |
-| `RELEASE_CHECKLIST.md`      | Potpuni tijek izdanja (vještine, husky, konvencionalna predaja, implementacija)            |
-| `COVERAGE_PLAN.md`          | Ciljevi pokrića i trenutno stanje                                                          |
-| `FREE_TIERS.md`             | Odabrani pružatelji besplatne razine (48 + besplatno + 11 OAuth)                           |
-| `CLI-TOOLS.md`              | Vanjske CLI integracije + Interne OmniRoute CLI                                            |
-| `I18N.md`                   | i18n arhitektura, dodavanje jezika, 67 jezika                                              |
-| `UNINSTALL.md`              | Čisti koraci deinstalacije                                                                 |
-| `PROVIDER_REFERENCE.md`     | **Automatski generirano** katalog 381 pružatelja (regen: `npm run gen:provider-reference`) |
+| O tome govori doc           | Svrha                                                                                    |
+| --------------------------- | ---------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Arhitektura visoke razine, karta podsustava, površina nadzorne ploče                     |
+| `CODEBASE_DOCUMENTATION.md` | Inženjerske reference: imenici, moduli, konvencije                                       |
+| `FEATURES.md`               | Matrica značajki s istaknutim točkama v3.8                                               |
+| `USER_GUIDE.md`             | Priručnik za krajnjeg korisnika (postavljanje, modeli, kombinacije, CLIs, audio itd.)    |
+| `API_REFERENCE.md`          | API referenca krajnje točke s modelom autentifikacije                                    |
+| `openapi.yaml`              | specifikacija OpenAPI 3.0 (121 staza)                                                    |
+| `SETUP_GUIDE.md`            | Metode instalacije (npm, npx, Docker, Electron, Termux, izvor)                           |
+| `ENVIRONMENT.md`            | Sve env vars (~ 800 dokumentirano, ~ 3050 redaka `.env.example`)                         |
+| `TROUBLESHOOTING.md`        | Uobičajene pogreške + v3.8.0 poznati problemi                                            |
+| `RELEASE_CHECKLIST.md`      | Potpuni tijek izdanja (vještine, husky, konvencionalna predaja, implementacija)          |
+| `COVERAGE_PLAN.md`          | Ciljevi pokrića i trenutno stanje                                                        |
+| `FREE_TIERS.md`             | Odabrani pružatelji besplatne razine (48 + besplatno + 11 OAuth)                         |
+| `CLI-TOOLS.md`              | Vanjske CLI integracije + Interne OmniRoute CLI                                          |
+| `I18N.md`                   | i18n arhitektura, dodavanje jezika, 67 jezika                                            |
+| `UNINSTALL.md`              | Čisti koraci deinstalacije                                                               |
+| `PROVIDER_REFERENCE.md`     | **Automatski generirano** katalog 394 ponuđača (regen: `npm run gen:provider-reference`) |
 
 ### Podsustav dubokog ronjenja
 
@@ -458,7 +458,7 @@ open-sse/
 | `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Lijevak                                   |
 | `PROXY_GUIDE.md`             | 4-razinski izlazni proxy + 1proxy tržište                                 |
 
-### Podimenici
+### Poddirektorije
 
 | Poddir                | Svrha                                                                                                                                                                                                                |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

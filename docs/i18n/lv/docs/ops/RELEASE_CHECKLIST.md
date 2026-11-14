@@ -111,209 +111,205 @@ matricu bez jebkādas etiķetes.
 
 ## Detalizēts kontrolsaraksts
 
-### Pirms laidiena
+### Pirmsizlaide
 
-- [ ] Visi šim laidienam paredzētie PR ir sapludināti zarā `release/vX.Y.0`
-- [ ] Visi šīs versijas atvērtie Linear/problēmu ieraksti ir aizvērti vai pārcelti uz nākamo atskaites punktu
-- [ ] CI pārbaudes zarā `release/vX.Y.0` ir sekmīgas
+- [ ] Visi PRs kas paredzēti šim laidienam, ir apvienoti ar `release/vX.Y.0`
+- [ ] Visi atvērtie Linear/issue vienumi šai versijai ir aizvērti vai pārsūtīti uz nākamo atskaites punktu
+- [ ] CI zaļš uz `release/vX.Y.0` zara
 - [ ] Kodā nav `TODO(release)` marķieru: `grep -r "TODO(release)" src/ open-sse/`
 - [ ] Docker bāzes attēls ir atjaunināts (pašlaik `node:24.15.0-trixie-slim`)
 
 ### Versija un izmaiņu žurnāls
 
-- [ ] Palaidiet `/version-bump-cc <patch|minor|major>` (Claude Code prasme)
-  - Atjaunina versijas failos `package.json`, `electron/package.json`
-  - No jauna ģenerē `CHANGELOG.md`, izmantojot git iesniegumus kopš pēdējās birkas
+- [ ] Palaist `/version-bump-cc <patch|minor|major>` (Claude koda prasme)
+  - Izciļņi `package.json`, `electron/package.json`
+  - Atjauno `CHANGELOG.md` no git saistībām kopš pēdējā taga
   - Atjaunina README.md emblēmas
-- [ ] Manuāli pārskatiet CHANGELOG.md un, ja nepieciešams, sakārtojiet iesniegumu ziņojumus
-- [ ] Pārliecinieties, ka jaunākā semver sadaļa failā `CHANGELOG.md` atbilst `package.json` versijai
-- [ ] Saglabājiet `## [Unreleased]` kā pirmo izmaiņu žurnāla sadaļu turpmākajiem darbiem
-- [ ] Atjauniniet `docs/openapi.yaml` → `info.version` ir jāatbilst `package.json` versijai
+- [ ] Manuāli pārskatiet CHANGELOG.md un, ja nepieciešams, notīriet commit ziņojumus
+- [ ] Pārliecinieties, vai jaunākā semver sadaļa `CHANGELOG.md` ir vienāda ar `package.json` versiju
+- [ ] Saglabājiet `## [Unreleased]` kā pirmo izmaiņu žurnāla sadaļu gaidāmajam darbam
+- [ ] Atjaunināt `docs/openapi.yaml` → `info.version` ir jābūt vienādam ar `package.json` versiju
 
 ### Koda kvalitāte
 
-- [ ] `npm run lint` — 0 kļūdu (brīdinājumi pastāvēja jau iepriekš)
-- [ ] `npm run typecheck:core` — bez kļūdām
-- [ ] `npm run typecheck:noimplicit:core` — bez kļūdām (stingrā pārbaude)
-- [ ] `npm run check:cycles:ratchet` — nepārsniedz fiksēto `metrics.cycles` slieksni (atsevišķa `check:cycles` komanda jebkura cikla gadījumā beidzas ar kodu 1, #15281)
-- [ ] `npm run check:any-budget:t11` — budžeta robežās
-- [ ] `npm run check:route-validation:t06` — bez kļūdām
-- [ ] `npm run check:node-runtime` — ievērota minimālā atbalstītā izpildvides versija (`>=22.22.2 <23`, `>=24.0.0 <27`, atbilstoši `SUPPORTED_NODE_RANGE` failā `src/shared/utils/nodeRuntimeSupport.ts`; saskaņots ar `package.json` `engines`)
+- [ ] `npm run lint` — 0 kļūdas (brīdinājumi ir jau iepriekš)
+- [ ] `npm run typecheck:core` — tīrs
+- [ ] `npm run typecheck:noimplicit:core` — tīrs (stingrs)
+- [ ] `npm run check:cycles:ratchet` — sastingušajos `metrics.cycles` griestos (kails `check:cycles` izejas 1 jebkurā ciklā, #15281)
+- [ ] `npm run check:any-budget:t11` — budžeta ietvaros
+- [ ] `npm run check:route-validation:t06` — tīrs
+- [ ] `npm run check:node-runtime` — atbalstītā izpildlaika grīda (`>=22.22.2 <23`, `>=24.0.0 <27`, uz `SUPPORTED_NODE_RANGE` in `src/shared/utils/nodeRuntimeSupport.ts`; līdzināta ar `package.json` `engines`)
 
 ### Testēšana
 
-- [ ] `npm run test:unit` — sekmīgi
-- [ ] `npm run test:vitest` — sekmīgi (MCP serveris, autoCombo, kešatmiņa)
-- [ ] `npm run test:coverage` — izpildīta 60/60/60/60 prasība (priekšraksti/rindas/funkcijas/zari)
-- [ ] `npm run test:integration` — sekmīgi (ja izmaiņas skar DB/apstrādātājus)
-- [ ] `npm run test:combo:matrix` — sekmīgi (combo stratēģiju matrica: deterministiski pierāda visu 19 publisko maršrutēšanas stratēģiju atlases lēmumus; palaidiet, ja tiek mainīta combo maršrutēšana, stratēģiju noteikšana vai atkāpšanās loģika)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **neobligāts/manuāls** (nosacīti izpildāms īsts augšupstraumes dūmu tests; no VPS `root@192.168.0.15` iegūst tikai lasāmu DB momentuzņēmumu; izmanto īstus pakalpojumu sniedzējus un patērē kredītus; nekad netiek palaists CI; bez aktivizēšanas nosacījuma tiek korekti izlaists)
-- [ ] `npm run test:combo:live:vps` — **neobligāts/manuāls** (3. posma VPS reālais dūmu tests: 7 HTTP scenāriji pret reālo `.15` serveri, izmantojot vienkāršu Node ESM; nepieciešams `ssh root@192.168.0.15`; izveido/dzēš tikai `__live_test__*` combo; izmanto īstus pakalpojumu sniedzējus; nekad netiek palaists CI)
-- [ ] `npm run test:e2e` — sekmīgi (UI izmaiņas)
-- [ ] `npm run test:protocols:e2e` — sekmīgi (MCP/A2A izmaiņas)
-- [ ] `npm run test:ecosystem` — sekmīgi
+- [ ] `npm run test:unit` — caurlaide
+- [ ] `npm run test:vitest` — caurlaide (MCP serveris, autoCombo, kešatmiņa)
+- [ ] `npm run test:coverage` — vārti 60/60/60/60 apmierināti (statements/lines/functions/branches)
+- [ ] `npm run test:integration` — pass (ja izmaiņas, pieskarieties DB /apdarinātājiem)
+- [ ] `npm run test:combo:matrix` — pass (kombinētā stratēģijas matrica: deterministiski pierāda visu 22 publisko maršrutēšanas stratēģiju atlases lēmumus; palaist, kad pieskaras kombinētajai maršrutēšanai, stratēģijas izšķirtspējai vai atkāpšanās loģikai)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (vārtiem reāli augšteces dūmi; iegūst tikai lasāmu DB momentuzņēmumu no VPS `root@192.168.0.15`; sasniedz reālus pakalpojumu sniedzējus, maksā kredītus; nekad nedarbojas CI; izlaiž tīri bez vārtiem)
+- [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS live smoke: 7 HTTP scenāriji pret tiešraides `.15` serveri, izmantojot vienkāršu mezglu ESM; nepieciešams `ssh root@192.168.0.15`; creates/deletes tikai `__live_test__*` kombinācijas; trāpa reāliem pakalpojumu sniedzējiem; nekad nedarbojas CI)
+- [ ] `npm run test:e2e` — pass (UI izmaiņas)
+- [ ] `npm run test:protocols:e2e` — pass (MCP/A2A izmaiņas)
+- [ ] `npm run test:ecosystem` — caurlaide
 
-### Āķi (pārbaudīti ar Husky)
+### Āķi (Husky apstiprināti)
 
-Husky āķi atrodas `.husky/` un git operāciju laikā tiek palaisti automātiski.
+Husky āķi dzīvo `.husky/` un darbojas automātiski git operācijās.
 
-- **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** ātras deterministiskas pārbaudes — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (aktivizētas 2026-06-13). Apzināti neietver `test:unit` (lēns; to nodrošina CI `test-unit` uzdevums).
-  - Pirms laidiena zaru nosūtīšanas manuāli palaidiet `npm run test:unit`.
+- **iepriekšēja apņemšanās:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
+- **iepriekšēja nospiešana:** ātri determinēti vārti — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (aktivizēts 2026-06-13). Ar nolūku izslēdz `test:unit` (lēnu; uz to attiecas CI `test-unit` darbs).
+  - Palaidiet `npm run test:unit` manuāli, pirms spiežat atbrīvošanas zarus.
 
-Ja āķis neizdodas: novērsiet pamatproblēmu, nevis apejiet pārbaudi ar `--no-verify`.
+Ja āķis neizdodas: novērsiet pamatproblēmu, neapejiet to ar `--no-verify`.
 
-### Conventional Commits
+### Parastās saistības
 
-Visiem laidienā iekļaujamajiem iesniegumiem jāatbilst formātam `type(scope): subject`.
+Visām ar izlaišanu saistītām saistībām ir jāatbilst `type(scope): subject` formātam.
 
-**Derīgie tipi:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
+**Derīgi veidi:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**Derīgie tvērumi:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**Derīgi tvērumi:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker` `authz` `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers` `executors`, `translator`, `domain`
 
-Nesaderīgas izmaiņas: pievienojiet `BREAKING CHANGE:` kājenē vai `!` pēc tvēruma (piemēram, `feat(api)!: drop /v0`).
+Pārtraucošas izmaiņas: pievienojiet `BREAKING CHANGE:` kājeni vai `!` aiz tvēruma (piemēram `feat(api)!: drop /v0`).
 
 ### Dokumentācija
 
-- [ ] `npm run check:docs-sync` izpildās sekmīgi (to automātiski palaiž pre-commit)
-- [ ] `npm run check:docs-all` izpildās sekmīgi (apvienotā pārbaude: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` beidzas ar kodu 0 — koda ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` vides līgums nav pārkāpts
-- [ ] `npm run check:doc-links` beidzas ar kodu 0 — pēc pārstrukturēšanas nav bojātu iekšējo markdown atsauču
-- [ ] `docs/architecture/ARCHITECTURE.md` ir pārskatīts, lai noteiktu krātuves/izpildvides neatbilstības
-- [ ] `docs/guides/TROUBLESHOOTING.md` ir pārskatīts, lai noteiktu vides mainīgo un darbības neatbilstības
-- [ ] Ja ir mainīts `.env.example`: atjauniniet `docs/reference/ENVIRONMENT.md`
-- [ ] Ja jaunajai funkcijai ir UI: tā ir pieminēta failā `docs/guides/USER_GUIDE.md`
-- [ ] Ja jaunajai funkcijai ir API: ir atjaunināti `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml`
-- [ ] Ja jaunā funkcija ir modulis: pastāv tai veltīts fails `docs/<MODULE>.md`
-- [ ] Ja tās ir nesaderīgas izmaiņas: failā `docs/guides/TROUBLESHOOTING.md` ir migrācijas piezīme
+- [ ] `npm run check:docs-sync` caurlaides (automātiska palaišana ar iepriekšēju apstiprinājumu)
+- [ ] `npm run check:docs-all` caurlaides (jumts: docs-sync + docs-counts + env-doc-sync + novecojušas versijas + doc-links)
+- [ ] `npm run check:env-doc-sync` iziet 0 — kods ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env līgums ir neskarts
+- [ ] `npm run check:doc-links` iziet no 0 — pēc pārstrukturēšanas nav bojātu iekšējo atzīmju atsauču
+- [ ] `docs/architecture/ARCHITECTURE.md` novērtēja storage/runtime drift
+- [ ] `docs/guides/TROUBLESHOOTING.md` pārskatīts attiecībā uz env var un darbības novirzi
+- [ ] Ja `.env.example` ir mainīts: `docs/reference/ENVIRONMENT.md` atjaunināts
+- [ ] Ja jaunai funkcijai ir UI: `docs/guides/USER_GUIDE.md` to piemin
+- [ ] Ja jaunajai funkcijai ir API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` ir atjaunināts
+- [ ] Ja jauna funkcija ir modulis: pastāv īpaša `docs/<MODULE>.md`
+- [ ] Ja tiek pārkāptas izmaiņas: `docs/guides/TROUBLESHOOTING.md` ir migrācijas piezīme
 
 ### i18n
 
-- [ ] `npm run i18n:check` beidzas ar kodu 0 — tulkojumu stāvoklis (`.i18n-state.json`) ir sinhronizēts ar avota dokumentāciju (stingrajā režīmā nav mainītu avotu; brīdinājumu režīma ieteikumi ir pieņemami pēdējā brīža dokumentācijas labojumiem, taču pirms birkas izveides rezultātam jābūt 0)
-- [ ] `npm run i18n:check-ui-coverage` beidzas ar kodu 0 — katras UI lokalizācijas pārklājums sasniedz vai pārsniedz 80% slieksni
-- [ ] `npm run i18n:sync-ui:dry` ziņo par 0 trūkstošām atslēgām visās 66 mērķa lokalizācijās (visās lokalizācijās, izņemot avota `en`)
-- [ ] Ja ir mainīta avota dokumentācija angļu valodā, pirms birkas izveides palaidiet `npm run i18n:run` (failā `.env` nepieciešams `OMNIROUTE_TRANSLATION_API_KEY`)
-- [ ] Nelielus tulkojumu papildinājumus var atlikt līdz nākamajam laidienam (reģistrējiet CHANGELOG)
+- [ ] `npm run i18n:check` iziet no 0 — tulkošanas stāvokļa (`.i18n-state.json`) sinhronizācijā ar avota dokumentiem (stingrā režīmā nav novirzītu avotu; brīdinājuma režīma ieteikums ir pieņemams pēdējā brīža dokumenta labojumiem, taču pirms atzīmju pievienošanas tam jābūt 0)
+- [ ] `npm run i18n:check-ui-coverage` iziet no 0 — katrā UI lokalizācijā 80% pārklājuma līmenī vai virs tās
+- [ ] `npm run i18n:sync-ui:dry` ziņo par 0 trūkstošām atslēgām visās 66 mērķa lokalizācijās (katrā lokalizācijā, izņemot `en` avotu)
+- [ ] Ja ir mainīti avota dokumenti angļu valodā, pirms atzīmēšanas palaidiet `npm run i18n:run` (nepieciešams `OMNIROUTE_TRANSLATION_API_KEY` `.env` valodā).
+- [ ] Tulkošanas ieguldījumu var atlikt uz nākamo laidienu, ja tas ir mazsvarīgs (celiņš CHANGELOG valodā)
 
-### Datubāzes migrācijas
+### Datu bāzu migrācija
 
-- [ ] Ja mapē `src/lib/db/migrations/` ir jauni faili:
+- [ ] Ja `src/lib/db/migrations/` ir jauni faili:
   - [ ] Katra migrācija ir idempotenta (`CREATE TABLE IF NOT EXISTS` utt.)
-  - [ ] Migrācijas ir ietvertas transakcijās
-  - [ ] Tās ir pareizi numurētas (secībā nav iztrūkumu)
-- [ ] Pārbaudiet svaigā instalācijā: izdzēsiet `~/.omniroute/omniroute.db` un palaidiet `npm run dev`
-- [ ] Pārbaudiet esošā instalācijā: izveidojiet DB dublējumu, palaidiet migrāciju un pārbaudiet shēmu
-- [ ] Ja migrācija pārraksta tabulas, WAL faili (`-wal`, `-shm`) tiek apstrādāti pareizi
+  - [ ] Migrācijas, kas ietītas ar darījumiem
+  - [ ] Numurēts pareizi (secībā nav atstarpju)
+- [ ] Jaunas instalēšanas pārbaude: izdzēsiet `~/.omniroute/omniroute.db` un palaidiet `npm run dev`
+- [ ] Esošās instalācijas pārbaude: dublējiet DB, palaidiet migrāciju, pārbaudiet shēmu
+- [ ] WAL faili (`-wal`, `-shm`) tiek apstrādāti pareizi , ja migrācija pārraksta tabulas
 
-### Pakalpojumu sniedzēju katalogs (validēts ar Zod)
+### Pakalpojumu sniedzēju katalogs (Zod apstiprināts)
 
 - [ ] `src/shared/constants/providers.ts` Zod shēma ir derīga ielādes laikā
-  - [ ] Visiem pakalpojumu sniedzējiem ir obligātie lauki (`id`, `label`, `kind` utt.)
-  - [ ] Jaunajiem bezmaksas pakalpojumu sniedzējiem ir norādīts `freeNote`
-  - [ ] OAuth pakalpojumu sniedzējiem `oauthConfig` ir reģistrēts failā `src/lib/oauth/constants/oauth.ts`
-- [ ] Ja pievienots jauns pakalpojumu sniedzējs: atbilstošs izpildītājs direktorijā `open-sse/executors/`
-- [ ] Ja formāts nav OpenAI: pārveidotājs direktorijā `open-sse/translator/`
-- [ ] Modeļi ir reģistrēti failā `open-sse/config/providerRegistry.ts`
-- [ ] Vienībtesti direktorijā `tests/unit/` aptver pakalpojumu sniedzēju klasifikāciju un maršrutēšanu
+  - [ ] Visiem pakalpojumu sniedzējiem ir obligāti aizpildāmie lauki (`id`, `label`, `kind` utt.)
+  - [ ] `freeNote` nodrošina jaunus bezmaksas pakalpojumu sniedzējus
+  - [ ] OAuth pakalpojumu sniedzējiem ir `oauthConfig` reģistrēti `src/lib/oauth/constants/oauth.ts`
+- [ ] Ja ir pievienots jauns pakalpojumu sniedzējs: atbilstošais izpildītājs `open-sse/executors/`
+- [ ] Ja formāts nav OpenAI: tulkotājs `open-sse/translator/` valodā
+- [ ] Modeļi reģistrēti `open-sse/config/providerRegistry.ts`
+- [ ] Vienību testi `tests/unit/` aptver pakalpojumu sniedzēju klasifikāciju un maršrutēšanu
 
 ### Darbvirsma (Electron)
 
-Ja mainīts `electron/`:
+Ja `electron/` mainīts:
 
-- [ ] `npm run electron:smoke:packaged` tiek izpildīts sekmīgi
-- [ ] Būvējumi ir testēti vismaz vienai no platformām `:win`, `:mac`, `:linux`
-- [ ] Koda parakstīšanas sertifikātu derīguma termiņš nav beidzies (ja tiek veikta parakstīšana)
+- [ ] `npm run electron:smoke:packaged` piespēlē
+- [ ] Būvēs ir pārbaudītas vismaz vienam no `:win`, `:mac`, `:linux`
+- [ ] Koda parakstīšanas sertifikātu derīguma termiņš nav beidzies (ja paraksta)
 - [ ] `electron/package.json` versija atbilst saknes `package.json`
-- [ ] Automātiskās atjaunināšanas kanāla rādītājs ir atjaunināts, ja laidiens paredzēts kanālam `stable`
+- [ ] Automātiskās atjaunināšanas kanāla rādītājs ir atjaunināts, ja tiek atbrīvots `stable`
 
-### Būvējuma struktūra
+### Būvējuma izkārtojums
 
-Repozitorijā tiek izmantotas trīs atsevišķas izvades direktorijas — nekad tās nesajauciet:
+Repozitorijs izmanto trīs atšķirīgus izvades direktorijus — nekad tos nesajaukt:
 
-| Direktorija | Nolūks                                                    | Versiju kontrolē? |
-| ----------- | --------------------------------------------------------- | ----------------- |
-| `src/`      | Lietotnes pirmkods (TypeScript / TSX)                     | Jā                |
-| `.build/`   | Būvējuma starprezultāti — `next build` izvade (`distDir`) | Nē (gitignored)   |
-| `dist/`     | Izplatāma npm pakotne — to izveido `assembleStandalone`   | Nē (gitignored)   |
+| Direktorija | Mērķis                                                    | Izsekots?     |
+| ----------- | --------------------------------------------------------- | ------------- |
+| `src/`      | Lietojumprogrammas avots (TypeScript / TSX)               | Jā            |
+| `.build/`   | Veidot starpproduktu — `next build` izvadi (`distDir`)    | Nē (ignorēts) |
+| `dist/`     | Nosūtāms npm komplekts — ko montējis `assembleStandalone` | Nē (ignorēts) |
 
-> **Operatora piezīme:** attālā VPS attēla direktorija joprojām ir `/usr/lib/node_modules/omniroute/app/`.
-> Mainīta ir tikai būvējuma izvade **repozitorijā** (`app/` → `dist/`). Izvietošanas prasmes ar rsync kopē
-> `dist/` saturu attālajā `app/` direktorijā — VPS ceļi nav jāmaina.
+> **Operatora piezīme:** attālais VPS attēlu direktorijs paliek `/usr/lib/node_modules/omniroute/app/`. Tikai** in-repo** uzbūves izvade pārvietota (`app/` → `dist/`). Iemaņu izvietošana rsync `dist/` saturs attālajā `app/` dir — nav nepieciešamas VPS ceļa izmaiņas.
 
-**Vienas būvēšanas plūsma:**
+**Viena korpusa plūsma:**
 
 ```
 npm run build:release
-  └─ rm -rf .build dist          (tīrīšana)
-  └─ next build → .build/next/   (starprezultāti)
-  └─ assembleStandalone          (kopē autonomo būvējumu + statiskos failus + publiskos failus + natīvos moduļus → dist/)
-  └─ writes dist/BUILD_SHA       (HEAD kontrolvērtība)
+  └─ rm -rf .build dist          (clean)
+  └─ next build → .build/next/   (intermediates)
+  └─ assembleStandalone          (copies standalone + static + public + natives → dist/)
+  └─ writes dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-Izvietošanai NEPALAIDIET `npm run build` un pēc tam atsevišķi `npm run build:cli` — izmantojiet
-`npm run build:release`, kas ar vienu komandu veic tīru pārbūvēšanu un izveido kontrolvērtību.
+Vai NOT palaist `npm run build` kam seko atsevišķs `npm run build:cli` — izvietošanai, izmantojiet `npm run build:release` kas vienā komandā veic tīru + sardzes pārbūvi.
 
-### Artefakta validācija
+### Artefaktu apstiprināšana
 
-- [ ] `npm run build:release` tiek izpildīts sekmīgi, un `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` neatrod problēmas — nav `app.__qa_backup`, `scripts/scratch`, `package-lock.json` vai citu lokālu atlikumu
-- [ ] Pēc būvēšanas pastāv `dist/server.js`
-- [ ] Neobligāta lokālā iepakotās izpildvides dūmu pārbaude: `npm run dev:candidate -- validate` pēc `npm run dev:candidate -- build` palaiž iepakoto tarball izolētā `DATA_DIR` un pārbauda `/api/health` + `/v1/models` (skatiet [Ieguldījumu ieteicamo procesu](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
+- [ ] `npm run build:release` izdodas un `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] `npm run check:pack-artifact` clean — bez `app.__qa_backup`, `scripts/scratch`, `package-lock.json` vai citiem vietējiem atlikumiem
+- [ ] `dist/server.js` pastāv pēc izveides
+- [ ] Izvēles vietējā pakotne izpildlaika dūmi: `npm run dev:candidate -- validate` pēc tam, kad `npm run dev:candidate -- build` sāk pakotēto tarbolu izolētā `DATA_DIR` un pārbauda `/api/health` + `/v1/models` (skatiet [ieguldījumu Golden Path](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) )
 
-### Tagu izveide un laidiens
+### Atzīmēšana un izlaišana
 
-- [ ] Palaidiet `/generate-release-cc` (Claude Code prasmi):
+- [ ] Palaist `/generate-release-cc` (Claude koda prasme):
   - Izveido tagu `vX.Y.Z`
-  - Nosūta tagu un zaru
-  - Izveido GitHub laidienu ar izmaiņu žurnālu aprakstā
-  - Pievieno Electron instalētājus (ja tie ir izveidoti)
-- [ ] Vai veiciet manuāli:
+  - Nospiež birku un zaru
+  - Atver GitHub laidienu ar izmaiņu žurnāla pamattekstu
+  - Pievieno Electron uzstādītājus (ja ir iebūvēti)
+- [ ] Vai manuāli:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
   git push origin vX.Y.Z
   gh release create vX.Y.Z --notes-from-tag
   ```
 
-### Izvietošana
+### Izvietot
 
-Izvietošanas prasmes izmanto vieglo rsync plūsmu — bez `npm pack` un bez `npm i -g`:
+Izvērst prasmes izmantot vieglo rsync plūsmu — no `npm pack`, no `npm i -g`:
 
-- [ ] Izmantojiet mērķim atbilstošo izvietošanas prasmi:
-  - `/deploy-vps-local-cc` — lokālais VPS (192.168.0.15)
+- [ ] Izmantojiet izvietošanas prasmi, kas atbilst mērķim:
+  - `/deploy-vps-local-cc` — local VPS (192.168.0.15)
   - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
-  - `/deploy-vps-both-cc` — abi
-- [ ] Pirms izvietošanas apstipriniet, ka `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] Būvēšana jāveic vietā, kur `node_modules` ir īsta direktorija (galvenajā darba kopijā vai ar `npm ci` sagatavotā worktree — NEVIS worktree ar simbolisko saiti)
-- [ ] Veiciet izvietotās instances dūmu pārbaudi:
-  - Atveriet `/dashboard/health` → pārbaudiet, vai versijas virkne atbilst laidienam
-  - Izpildiet `/v1/chat/completions` pieprasījumu zināmam pakalpojumu sniedzējam
-  - Pārbaudiet, vai `/api/monitoring/health` atgriež automātiskos slēdžus ar statusu `CLOSED`
-  - Apstipriniet, ka MCP transporti atbild (`/mcp` HTTP, `/mcp-sse` SSE)
+  - `/deploy-vps-both-cc` — gan
+- [ ] Pirms izvietošanas apstipriniet `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] Būvējumam ir jādarbojas tur, kur `node_modules` ir reāls (galvenā izrakstīšanās vai `npm ci`'d worktree — NOT simlinked workkoks)
+- [ ] Izvietotā dūmu testa instance:
+  - Atvērt `/dashboard/health` → pārbaudīt versiju virkne atbilst laidienam
+  - Izpildiet `/v1/chat/completions` pieprasījumu pret zināmu pakalpojumu sniedzēju
+  - Pārbaudiet `/api/monitoring/health` atgriež `CLOSED` slēdžus
+  - Apstipriniet MCP transports atbildi (`/mcp` HTTP, `/mcp-sse` SSE)
 
-### Pēc laidiena
+### Pēc izlaišanas
 
-- [ ] Palaidiet `/capture-release-evidences-cc` (Claude Code prasmi)
-  - Uzņem jauno funkciju WebP ekrānuzņēmumus/ierakstus
-  - Pievieno tos laidiena piezīmēm / emuāra ierakstam
-- [ ] Atjauniniet GitHub Discussions / Discord ar paziņojumu par laidienu
-- [ ] Izveidojiet atskaites punktu nākamajai versijai
-- [ ] Ja informācija ir kritiski svarīga: piespraudiet diskusiju vai publicējiet to failā `news.json`, lai parādītu reklāmkarogu lietotnē
+- [ ] Palaist `/capture-release-evidences-cc` (Claude koda prasme)
+  - Tver jaunas funkcijas WebP screenshots/recordings
+  - Pievieno izlaiduma piezīmēm/emuāra ierakstam
+- [ ] Atjauniniet GitHub Discussions / Discord ar paziņojumu par izlaišanu
+- [ ] Atvērt pagrieziena punktu nākamajai versijai
+- [ ] Ja tas ir kritisks: piespraudiet diskusiju vai ziņu `news.json`, lai iegūtu reklāmkarogu lietotnē
 
-### Radar publiskās palaišanas kontrolpunkts
+### Radara publiskās palaišanas vārti
 
-Radar paziņojums ir apzināti komitots ar `active: false`. Aktivizēšana ir atsevišķa
-izmaiņa pēc tam, kad ir dokumentēta katra tālāk norādītā pozīcija:
+Radara paziņojums ir apzināti saistīts ar `active: false`. Aktivizācija ir atsevišķa izmaiņa pēc tam, kad ir apstiprināts katrs tālāk norādītais vienums:
 
-- [ ] Visi secīgie Radar PR ir sapludināti, un laidiena galotnes CI pārbaudes ir sekmīgas
-- [ ] Izvietojiet un veiciet OSS Radar maršrutu dūmu pārbaudi, kamēr `RADAR_ENABLED` pēc noklusējuma joprojām ir izslēgts
-- [ ] Veiciet `GET /planos`, `/termos`, `/privacidade` un `/reembolso` dūmu pārbaudi norādītajā Radar resursdatorā
-- [ ] Privātajā pakalpojumā reģistrējiet operatora identitāti/kontaktinformāciju/adresi un īpašnieka apstiprināto juridisko pārbaudi
-- [ ] Pārbaudiet Stripe Checkout un parakstīto webhook tikai testa režīmā
-- [ ] Pārbaudiet vienu šifrēta transakciju e-pasta piegādi ar apstiprināto sūtītāju/domēnu
-- [ ] Aplieciniet rezerves kopijas atjaunošanu un vienu uzraudzītu izpētes izpildi ar ierobežotu budžetu
-- [ ] Pirms ziedojuma apliecinājumu pieņemšanas apstipriniet BRL/PIX pārskatīšanas politiku
-- [ ] Iespējojiet publisko Checkout tikai pēc iepriekšējo kontrolpunktu izpildes un pēc tam aktivizējiet jauno `news.json` ID
-- [ ] Pārbaudiet, vai sākumlapas reklāmkarogā tiek izmantots lokalizēts teksts un jaunais ID atkal parādās pēc vecāka ID noraidīšanas
+- [ ] Visas saliktās radara PRs ir apvienotas, un atlaišanas uzgaļa CI ir zaļā krāsā
+- [ ] Izvietojiet un kūpiniet OSS radara maršrutus ar `RADAR_ENABLED` joprojām izslēgtu pēc noklusējuma
+- [ ] Dūmu `GET /planos`, `/termos`, `/privacidade` un `/reembolso` nosauktajā radara resursdatorā
+- [ ] Ierakstu operatora identity/contact/address un īpašnieka apstiprināta juridiskā pārbaude privātajā pakalpojumā
+- [ ] Vingrinājumu Stripe Checkout un parakstīto tīmekļa aizķeri tikai testa režīmā
+- [ ] Veiciet vienu šifrētu darījumu e-pasta piegādi ar apstiprināto sender/domain
+- [ ] Pierādiet dublējuma atjaunošanu un vienu uzraudzītu, budžeta ierobežotu pētījumu
+- [ ] Pirms ziedojumu pierādījumu pieņemšanas apstipriniet BRL/PIX pārskatīšanas politiku
+- [ ] Iespējojiet publisko Checkout tikai pēc iepriekšējiem vārtiem, pēc tam aktivizējiet jauno `news.json` ID
+- [ ] Pārbaudiet, vai mājas reklāmkarogā tiek izmantota lokalizēta kopija, un pēc vecāka ID noraidīšanas atkal parādās jauns ID
 
 ## Iegulto pakalpojumu dūmu pārbaude (v3.8.4+)
 

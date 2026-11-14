@@ -733,6 +733,43 @@ Web/search አቅራቢ ማጠቃለያ (Tavily, Brave, Exa, Serper, ወዘተ.)
 
 **ማረጋገጫ፡** ተሸካሚ API ቁልፍ (`extractApiKey` + `isValidApiKey`)። የፍለጋ መመሪያ በ `enforceApiKeyPolicy` ተፈጻሚ ነው።
 
+### search/fetch ጥምረት የሚል ስያሜ ተሰጥቶታል።
+
+ሁለቱም `POST /v1/search` እና `POST /v1/web/fetch` `model` እንደ የተቀመጠ ጥምር ስም ይቀበላሉ። `model` ወይም ግልጽ `provider` ይጠቀሙ; ሁለቱንም መልሶች መላክ `400`. ከሁለቱም መስክ ውጭ፣ ያለው አውቶማቲክ አገልግሎት ሰጪ ምርጫ ሳይለወጥ ይቆያል።
+
+የኮምቦ ገንቢው እና የእሱ አክል ሞዴል ካታሎግ ለተገናኙ አቅራቢዎች ቤተኛ የድር-ኦፕሬሽን ግቤቶችን ያጋልጣሉ፣ ምንም እንኳን LLM ሞዴል ዝርዝር ባይኖራቸውም። Serper ያሳያል** የድር ፍለጋ** ; በቴቪ ያሳያል** የድር ፍለጋ / ገጽ ማውጣት** ፣ እና አምጣ-ብቻ አቅራቢዎች ያሳያሉ** ገጽ ማውጣት** . እንደተለመደው መግቢያውን እና መለያውን ይምረጡ። አንድ ነጠላ Tavily ግቤት ሁለቱንም የድር የመጨረሻ ነጥቦችን ያገለግላል; እነዚህ የክዋኔ ግቤቶች ወደ ቻት-ብቻ ደንበኛ መራጮች ወይም የውይይት ሞዴል መመርመሪያዎች አይታከሉም።
+
+ለምሳሌ ሀ ፍጠር** ቅድሚያ የሚሰጡዋቸውን** `shared-free` የሚል ስም ያለው ጥምር ከእነዚህ የታዘዙ ኢላማዎች ጋር፡-
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+ከዚያ በእያንዳንዱ ገጽ ላይ ተመሳሳይ ስም ይጠቀሙ-
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+ፍለጋ Tavily ከዚያም Serper ይመለከታል; fetch ከግምት Tavily ከዚያም Jina Reader; ቻት ራሳቸውን የወሰኑ search/fetch አቅራቢዎችን በመዝለል OpenAI ይመለከታል። ተኳኋኝነት የሚመጣው ከ search/fetch ፈጻሚ መዝገቦች ነው እንጂ በሞዴል ስም ካሉ ቃላት አይደለም። ማጣራት ከምስክርነት ምርጫ እና መላክ ይቀድማል፣ እና የተቀመጠ ጥምርን በጭራሽ አያርትዕም።
+
+የውይይት ያልሆኑ የችሎታ መንገዶች `priority`, `fill-first`, `round-robin`, `weighted`, `random`, `strict-random`, `least-used`, እና `p2c` ይደግፋሉ። እንደ `fusion`፣ `pipeline` እና `context-relay` ያሉ የውይይት-ብቻ ውህደት ስልቶች በጸጥታ ወደ ፍለጋ ወይም የመነጨ ሚዲያ ከመተግበር ይልቅ ቻት ባልሆኑ መንገዶች ውድቅ ይደረጋሉ። ነባሩ ጥምር ሞተር የወራጅ ኮታ ውድቀቶችን ጨምሮ የታዘዘ መልሶ መመለስን ያስተናግዳል፣ እና ደረጃ IDs፣ የመለያ ፒንን፣ በየደረጃው የመለያ ፍቃድ ዝርዝሮችን፣ የጎጆ ማጣቀሻዎችን፣ የደዋይ connection/quota ወሰኖችን እና ጥምር መዳረሻ ፖሊሲን ይይዛል። ውጤቶቹ ትክክለኛውን አቅራቢን ጨምሮ ቤተኛቸውን search/fetch እቅድ ይዘው ይቆያሉ፤ `X-OmniRoute-Combo-Trace` የማዞሪያ ውሳኔውን ይለያል። ያልታወቁ ጥንብሮች `404` ይመለሳሉ; የቦዘኑ ጥንብሮች እና ተኳዃኝ ያልሆኑ ኢላማዎች የሌላቸው ጥንብሮች `400` ይመለሳሉ።
+
+እያንዳንዱ ጥምር ሙከራ አንድ ግልጽ አቅራቢን ይጠቀማል። ከኮምቦው ጀርባ ያለውን ቤተኛ አውቶማቲክ አቅራቢ ገንዳ ሊጠራ አይችልም። ግልጽ-የአቅራቢዎች ጥያቄዎች የነጠላ አቅራቢ ባህሪያቸውን ይዘው ይቆያሉ። የወሰኑ search/fetch አቅራቢዎችን ያነጣጠሩ የቀጥታ የውይይት ጥያቄዎች በOpenAI-style ፈጻሚ ውስጥ ከመውደቅ ይልቅ ሊተገበር የሚችል JSON `400` ይመለሳሉ።
+
+### አቅም-ተኮር ጥምር መንገዶች
+
+የተቀመጡ ጥንብሮች ቁልፎቹ API ችሎታዎች የሆኑ `routes` ነገር ሊይዝ ይችላል። እያንዳንዱ መንገድ የዒላማ ዝርዝር፣ ስትራቴጂ እና የሩጫ ጊዜ ውቅረት አለው። ከፍተኛ ደረጃ `models`፣ `strategy` እና `config` ከውርስ ጋር የሚስማማ የውይይት እቅድ ሆነው ይቆያሉ። የድሮ ጥንብሮች ያለ `routes` ሳይቀየሩ መስራታቸውን ቀጥለዋል።
+
+የሚደገፉ የመንገድ ቁልፎች `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`, `image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`, `audio-translations` እና `audio-generation` ናቸው። የማብቂያ ነጥብ ትንበያ የሚከናወነው ከማረጋገጫ ምርጫ፣ ውጤት ወይም ከመላክ በፊት ነው። የጎጆ ጥምር ማጣቀሻዎች ለተመሳሳይ ችሎታ የልጁን ጥምር መንገድ ይመርጣሉ።
+
+`POST /v1/music/generations` እና `POST /v1/ocr` በ `model` ውስጥ ጥምር ስም ይቀበላሉ። ተወላጁ ElevenLabs-ተኳሃኝ `POST /v1/music` እንዲሁ በ `model_id` ውስጥ ጥምር ስም ይቀበላል፣ ነገር ግን በዚያ ቤተኛ የመጨረሻ ነጥብ ላይ ያለው እያንዳንዱ ኢላማ የ ElevenLabs ሙዚቃ ሞዴል መሆን አለበት ስለዚህ የሁለትዮሽ ምላሽ ኮንትራቱ ተጠብቆ ይቆያል። `POST /v1/sound-generation` በተመሳሳይ ቤተኛ-ሁለትዮሽ ገደብ ስር `audio-generation` ጥምርን በ `model_id` ይቀበላል። ለተለያዩ የሙዚቃ አቅራቢዎች `/v1/music/generations` ተጠቀም።
+
 **ራስ-ሰር ይምረጡ፡** ያለ `provider`፣ የተዋቀረው ግንኙነት ያለው በጣም ርካሹ አቅራቢ በመጀመሪያ ይሰራል እና ቀጣዩ ርካሽ የሆነው ውድቀት ነው። ነጻ የመጨረሻ ሪዞርት አቅራቢዎች (`duckduckgo-free`) ጥቅም ላይ የሚውሉት ምንም ነገር ካልተዋቀረ ብቻ ነው። በራሱ የሚስተናገድ SearXNG አንዴ እንደተዋቀረ ይቆጥራል ግንኙነቱ ትክክለኛ `baseUrl` (ካታሎግ ነባሪ `http://localhost:8888/search` አይደለም) `baseUrl` ፡ ከዛ እንደ $0 አቅራቢ ከቁልፍ ቀድመው ያስቀምጣል፣ በጣም ርካሹ የቁልፍ አቅራቢው URL `http(s)` SearXNG 400፣ 401፣ 403 ወይም 404 ሲመልስ ጨምሮ። መቁጠር. ማስመሰያ የሚያከማች የ SearXNG ግንኙነት በዚህ መንገድ ደረጃ የሚሰጠው `https://` ወይም loopback `http://` ብቻ ነው። ከርቀት `http://` በላይ በጭራሽ አይሳካም እና የመጨረሻ አማራጭ ሆኖ ይቆያል ፣ ሌላ አቅራቢ ካልተዋቀረ ወይም በስም ሲጠየቅ ብቻ ጥቅም ላይ ይውላል ፣ ስለዚህ በእነዚያ ሁለት ጉዳዮች ላይ ቶክን በንፁህ ጽሑፍ ውስጥ ይልካል ።
 
 ### Exa እና Tavily `provider_options`
@@ -744,7 +781,7 @@ Exa እና Tavily አቅራቢ-ተኮር መስኮችን በስም ከተሰየ�
 | ምሳሌ  | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives)፣ `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` በነባሪ `{ text: true, highlights: true }` ላይ ተዋህዷል |
 | ታቪሊ  | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                              |
 
-አጠቃላይ መስኮች ሁል ጊዜ ያሸንፋሉ `query`፣ `max_results`፣ `filters` (ጎራዎች)፣ `country` እና ከ `search_type` የተወሰደ ርዕስ። በ Exa ላይ፣ `search_type: "news"` `category: "news"` ን ይይዛል። ታቪሊ ደግሞ `search_type: "finance"` (`topic: "finance"`) ይቀበላል።
+አጠቃላይ መስኮች ሁል ጊዜ ያሸንፋሉ `query`፣ `max_results`፣ `filters` (ጎራዎች)፣ `country` እና ከ `search_type` የተወሰደ ርዕስ። በ Exa፣ `search_type: "news"` `category: "news"` ን ይይዛል። ታቪሊ ደግሞ `search_type: "finance"` (`topic: "finance"`) ይቀበላል።
 
 የFirecrawl ፍለጋ ዋጋ በተጀመረ 10 የተመለሱ ውጤቶች፣ በ$0.002 (2 ክሬዲት) ብሎክ እና ቢያንስ አንድ ብሎክ በጥሪ ( [Firecrawl ክፍያ](https://docs.firecrawl.dev/billing) ) ይመዘገባል፡ 11 ውጤቶች ዋጋ $0.004 ነው።
 
@@ -760,24 +797,23 @@ Exa `type: "lite"` (Exa 3.0) አነስተኛ የመስኮች ስብስብ ይቀ
 
 ---
 
-## Web Fetch API
+## ድር አምጣ API
 
-የተዋቀረ የድር-ማምጫ አቅራቢን (Firecrawl፣ Jina
-Reader፣ Tavily Extract፣ TinyFish Fetch፣ Nimble Extract፣ Parallel Extract) በመጠቀም ይዘትን ከURL ያውጡ።
+ይዘቱን URL ያውጡ በተዋቀረ የድር-አፈልስ አቅራቢ (Firecrawl፣ Jina Reader፣ Tavily Extract፣ TinyFish Fetch፣ Nimble Extract፣ Parallel Extract፣ Keenable Fetch)።
 
-Parallel Extract (`parallel-search`፣ ከParallel Search ጋር ተመሳሳይ API key) Markdown
-ብቻ ይመልሳል — ማንኛውም ሌላ `format` የ`400` ምላሽ ያስከትላል — እና ይዘቱን በ100,000 ቁምፊዎች ይገድባል። የታለመው ገጽ ራሱ ሊወጣ በማይችልበት ጊዜ፣ upstream ይህንን በHTTP 200 ውስጥ ያሳውቃል፤ OmniRoute ደግሞ ይህንን በቋሚ መልዕክት `422` ሆኖ ያስተላልፋል።
+ትይዩ ኤክስትራክት (`parallel-search`፣ ከትይዩ የዝቅቢ ቁልፍ ጋር ተመሳሳይ API ቁልፍ) ይመልሳል Markdown ብቻ — ሌላ ማንኛውም `format` `400` — ነው እና ይዘቱን በ100,000 ቁምፊዎች ይይዛል። የዒላማው ገጽ እራሱ ማውጣት በማይቻልበት ጊዜ, የላይኛው ተፋሰስ በ HTTP 200 ውስጥ ሪፖርት ያደርጋል. OmniRoute ያንን እንደ `422` ከቋሚ መልእክት ጋር ያርጋል።
 
-| Method | Path            | Description                                        |
-| ------ | --------------- | -------------------------------------------------- |
-| POST   | `/v1/web/fetch` | URL ያምጡ/ይቃኙ — የሰውነት ይዘት በ`v1WebFetchSchema` ይረጋገጣል |
+Keenable Fetch (`keenable-search`) እንዲሁም Markdown ብቻ ይመልሳል (ሌላ ማንኛውም `format` `400` ነው) እና ይዘቱን በ100,000 ቁምፊዎች ይይዛል። ያለ ቁልፍ ነው የሚሰራው፡ ግልጽ የሆነ `provider: "keenable-search"` ጥያቄ ምንም አይነት ግንኙነት የሌለው የKeenable's keyless ማለቂያ ነጥብ ይጠቀማል (በአይፒ ተመን ገደቦች)። የተዋቀረ ቁልፍ እነዚህን ገደቦች ብቻ ያነሳል; ራስ-ሰር ምረጥ Keenable የሚጠቀመው ቁልፉ ሲዋቀር ብቻ ነው።
 
-**Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`)። ፖሊሲው በ`enforceApiKeyPolicy` ይተገበራል።
+| ዘዴ   | መንገድ            | መግለጫ                                                 |
+| ---- | --------------- | ---------------------------------------------------- |
+| POST | `/v1/web/fetch` | Fetch/scrape a URL — አካል በ `v1WebFetchSchema` የተረጋገጠ |
 
-**Quota-aware fallback (#8297):** ግልጽ `provider` ካልተሰጠ፣ ገንዳው
-(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) በቋሚ
-የቅድሚያ ቅደም ተከተል (fill-first) ይፈተሻል — የጥድፊያ ገደብ የደረሰበት ነገር ግን የተዋቀረ አቅራቢ ጥያቄውን ከማቋረጥ ይልቅ ይዘለላል፤ እንዲሁም እንደገና ሊሞከር የሚችል/የኮታ upstream አለመሳካት (HTTP 429 ሁልጊዜ፤ 402/403 ለFirecrawl/Tavily/TinyFish የኮታ አይነት ነፃ ደረጃዎች — ለJina Reader አይደለም፣ እና ቀላል የ400 መጥፎ ጥያቄ በፍጹም አይደለም) በጥያቄው ጊዜ ወደሚቀጥለው ገና ያልተሞከረ ምስክርነት ያለው አቅራቢ ይተላለፋል። በገንዳው ውስጥ ያሉ ሁሉም አቅራቢዎች ሲያልቁ፣ መጨረሻ ላይ ከነበረው አጠቃላይ `400` ይልቅ መጨረሻ አንድ `429` (ከ`Retry-After` ራስጌ ጋር) ይመለሳል። ግልጽ `provider` ሲጠየቅ ግን ምንም ዝምተኛ መተካት የለም — የጥድፊያ ገደብ የደረሰበት ወይም ያልተሳካ ግልጽ አቅራቢ የራሱን ስህተት ያሳያል (የጥድፊያ ገደብ ከደረሰ `429`፣ ካልሆነ ደግሞ upstream ሁኔታውን)።
+**ማረጋገጫ፡** ተሸካሚ API ቁልፍ (`extractApiKey` + `isValidApiKey`)። ፖሊሲ በ `enforceApiKeyPolicy` ተፈጻሚ ነው።
+
+የተሰየሙ ጥምረቶች ከላይ ያለውን [`model` ማዘዋወር ውል](#named-searchfetch-combinations) ይጠቀማሉ፣ ይህም የተወሰኑ አማራጮችን እና ምላሾችን ይጠብቃል።
+
+**በኮታ የሚታወቅ ውድቀት (#8297):** `provider` ወይም `model` በማይሰጥበት ጊዜ ገንዳው (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` → `parallel-search` → `keenable-search`) በቋሚ ቅድሚያ ቅደም ተከተል (ሙላ-መጀመሪያ) — ፍጥነት-የተገደበ ነገር ግን የተዋቀረ አቅራቢ ይዘለላል አጭር-ማዞሪያ; 402/403 ለ Firecrawl/Tavily/TinyFish ኮታ-ቅጥ ነፃ እርከኖች — ለጂና አንባቢ አይደለም ፣ እና retryable/quota HTTP 400 መጥፎ ጥያቄ) በሚቀጥለው ጊዜ ያልሞከረ ምስክርነት ወደሌለው አቅራቢ ይመጣል። በገንዳው ውስጥ ያለው እያንዳንዱ አቅራቢ ሲደክም የመጨረሻው ነጥብ ከቀዳሚው አጠቃላይ `400` ይልቅ አንድ `429` (በ `Retry-After` ራስጌ) ይመልሳል። ግልጽ `provider` ሲጠየቅ፣ አለ።** አይ** ጸጥ ያለ መልሶ መመለሻ — ተመን-የተገደበ ወይም ያልተሳካ ግልጽ አቅራቢ የራሱን ስህተት (`429` በታሪፍ ከተገደበ፣ ያለበለዚያ የላይኛው ተፋሰስ ሁኔታ) ያሳያል።
 
 ---
 
@@ -838,35 +874,26 @@ CLIው `base_url + /responses`ን ወደ WebSocket ያሳድጋል፣ OmniRoute�
 
 ---
 
-## ኮታዎች እና የጉዳዮች ሪፖርት
+## ኮታዎች እና ጉዳዮችን ሪፖርት ማድረግ
 
-| ዘዴ   | መንገድ                | መግለጫ                                                                         |
-| ---- | ------------------- | ---------------------------------------------------------------------------- |
-| GET  | `/v1/quotas/check`  | የተመዘገበ ቁልፍ ከመስጠት በፊት ለ`provider` + `accountId` ኮታን ቀድሞ ማረጋገጥ                 |
-| POST | `/v1/issues/report` | የኮታ/ቁልፍ አሰጣጥ አለመሳካትን ለGitHub ሪፖርት ማድረግ (`GITHUB_ISSUES_REPO` + token ያስፈልጋል) |
+| ዘዴ   | መንገድ                | መግለጫ                                                                                |
+| ---- | ------------------- | ----------------------------------------------------------------------------------- |
+| GET  | `/v1/quotas/check`  | የተመዘገበ ቁልፍ ከመስጠትዎ በፊት ለ `provider` + `accountId` ኮታ አስቀድመው ያረጋግጡ                    |
+| POST | `/v1/issues/report` | የ quota/key መውጣት አለመሳካቱን ለ GitHub ሪፖርት አድርግ ( `GITHUB_ISSUES_REPO` + token ያስፈልገዋል) |
 
-**ማረጋገጫ:** Bearer API key (`isAuthenticated`)።
+**ማረጋገጫ፡** `/v1/quotas/check` ተሸካሚ API ቁልፍ (`isAuthenticated`) ይወስዳል። `/v1/issues/report` አስተዳደር-ብቻ (`requireManagementAuth`) ነው፣ ልክ እንደ `/api/v1/registered-keys`፡ የዳሽቦርድ ክፍለ ጊዜ፣ የአካባቢው CLI ቶከን፣ ወይም API ቁልፍ ከ `manage`/`admin` ስፋት ጋር። ግምት-ብቻ API ቁልፎች `403` ያገኛሉ።
 
-### የኮታ ክፍለ ጊዜ መልሶ ማግኘት (አማራጭ)
+### የኮታ ክፍለ ጊዜ መልሶ ማግኛ (መርጦ መግባት)
 
-የstream ያልሆነ `POST /v1/chat/completions` ወይም `POST /v1/responses` ጥያቄ በ
-የመጨረሻ ኮታ ስህተት (`402`/`429`/`503` አካሉ ኮታው ወይም ክሬዲቶቹ እንደተጠናቀቁ
-የሚገልጽ ከሆነ) ሲሳካ ስህተቱን ከመመለስ ይልቅ ቆሞ በኋላ እንደገና ሊላክ ይችላል። ጠሪው በእያንዳንዱ
-ጥያቄ ላይ በሚከተሉት ሶስት ራስጌዎች አማራጩን ያነቃል፦
+በቴርሚናል ኮታ ስህተት (`402`/`429`/`503` ) አካሉ ኮታው ወይም ክሬዲቱ ደክሟል የሚል ዥረት የማይሰራ `POST /v1/chat/completions` ወይም `POST /v1/responses` ስህተቱን ከመመለስ ይልቅ ቆሞ እንደገና መጫወት ይችላል። ደዋዩ በሶስት ራስጌዎች በጥያቄው መርጧል፡-
 
-| ራስጌ                          | ዋጋ                                      |
-| ---------------------------- | --------------------------------------- |
-| `x-omniroute-quota-recovery` | `auto`                                  |
-| `x-omniroute-session`        | የክፍለ ጊዜ መለያ፣ `[A-Za-z0-9._:-]{1,128}`   |
-| `x-omniroute-recovery-turn`  | በክፍለ ጊዜው ውስጥ ልዩ የሆነ የዙር መለያ (ተመሳሳይ ደንብ) |
+| ራስጌ                          | ዋጋ                                     |
+| ---------------------------- | -------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                 |
+| `x-omniroute-session`        | ክፍለ ጊዜ መታወቂያ፣ `[A-Za-z0-9._:-]{1,128}` |
+| `x-omniroute-recovery-turn`  | በክፍለ-ጊዜው ውስጥ ልዩ መታወቂያ መታጠፍ (ተመሳሳይ ደንብ) |
 
-`stream: false` የሆኑ እና tools፣ tool history ወይም `previous_response_id` የሌላቸው፣ እንዲሁም
-`x-omniroute-connection` pin የሌላቸው ዙሮች ብቻ ብቁ ናቸው፣ እና
-`STORAGE_ENCRYPTION_KEY` መዘጋጀት አለበት (ጥያቄው እስከ 24 ሰዓት ድረስ በምስጠራ ይቀመጣል)። ምላሹ
-ከዚያ `202` ከ`recovery.poll` ጋር ይሆናል፤ `GET /v1/quota-recoveries/{id}` በመጠየቅ ይከታተሉ (`202`
-በሂደት ላይ ሲሆን፣ ሲጠናቀቅ ከተመለሰው አካል ጋር `200`) ወይም `DELETE` በመጠቀም ይሰርዙ። ትኬቶች እነሱን
-በፈጠረው API key ብቻ ይታያሉ። ውጤቱ እርግጠኛ ያልሆነበት እንደገና ላክ ከሁለት ጊዜ እንዳይላክ
-ከመላኩ ይልቅ በ`needs_confirmation` ይጠናቀቃል። ምንጭ፦ `src/lib/quota/quotaSessionRecovery.ts`።
+`stream: false` ብቻ ያለ ምንም መሳሪያ፣ የመሳሪያ ታሪክ ወይም `previous_response_id`፣ እና ምንም `x-omniroute-connection` ፒን ሳይኖር፣ ብቁ ናቸው፣ እና `STORAGE_ENCRYPTION_KEY` መዘጋጀት አለበት (ጥያቄው እስከ 24 ሰአታት ድረስ ተመስጥሯል)። ምላሹ ከዚያም `202` ጋር `recovery.poll` ነው; የሕዝብ አስተያየት መስጫ `GET /v1/quota-recoveries/{id}` (በመጠባበቅ ላይ ያለ `202` ፣ ሲጠናቀቅ ከተመለሰው አካል ጋር `200` ) ወይም በ `DELETE` ይሰርዙ። ትኬቶች የታዩት ለፈጠረው API ቁልፍ ብቻ ነው። ውጤቱ ያልተረጋገጠ ድጋሚ ማጫወት ሁለት ጊዜ ከመላኩ ይልቅ በ `needs_confirmation` ያበቃል። ምንጭ `src/lib/quota/quotaSessionRecovery.ts`
 
 ---
 
@@ -1618,19 +1645,23 @@ DELETE /api/usage/token-limits?id=tl-abc
 
 ---
 
-## የተመዘገቡ ቁልፎች (በራስ-ሰር አስተዳደር)
+## የተመዘገቡ ቁልፎች (ራስ-ማስተዳደር)
 
-በመሠረት አቅራቢ/መለያ ላይ የAPI ቁልፎችን ለማውጣትና ለማሽከርከር፣ እንዲሁም ዕለታዊ/የሰዓት ኮታዎችን ለመቆጣጠር በራስ-ሰር በሚሰራው የቁልፍ አስተዳደር ንዑስ ስርዓት ይጠቀማል።
+በራስ-ቁልፍ አስተዳደር ንዑስ ስርዓት API ቁልፎችን ከzqb ድጋፍ ሰጪ provider/account ጋር ለማሽከርከር በ daily/hourly ኮታዎች ጥቅም ላይ ይውላል።
 
-| Method | Path                                  | Description                                                                                                                                                              |
+| ዘዴ     | መንገድ                                  | መግለጫ                                                                                                                                                                     |
 | ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/api/v1/registered-keys`             | የተመዘገቡ ቁልፎችን ይዘርዝሩ (የተሸፈነው ቅድመ ቅጥያ ብቻ)                                                                                                                                   |
-| POST   | `/api/v1/registered-keys`             | አዲስ የተመዘገበ ቁልፍ ያውጡ — አካል፦ `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`። ጥሬው ቁልፍ **አንድ ጊዜ ብቻ** ይመለሳል። ኮታ ከተከለከለ `429` ይመልሳል። |
-| GET    | `/api/v1/registered-keys/[id]`        | የተመዘገበ ቁልፍ ሜታዳታን ያስመልሱ (ጥሬ ይዘት አይካተትም)                                                                                                                                   |
-| DELETE | `/api/v1/registered-keys/[id]`        | የተመዘገበ ቁልፍን ይሰርዙ                                                                                                                                                         |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | ግልጽ የስረዛ ኤንድፖይንት (ከDELETE ጋር ተመሳሳይ ውጤት)                                                                                                                                  |
+| GET    | `/api/v1/registered-keys`             | የተመዘገቡ ቁልፎችን ይዘርዝሩ (ጭምብል የተደረገ ቅድመ ቅጥያ ብቻ)                                                                                                                               |
+| POST   | `/api/v1/registered-keys`             | አዲስ የተመዘገበ ቁልፍ — አካል ያወጣል `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. ጥሬ ቁልፉን ይመልሳል** አንድ ጊዜ** . በኮታ እምቢታ ላይ `429` ይመልሳል። |
+| GET    | `/api/v1/registered-keys/[id]`        | የተመዘገበ ቁልፍ ሜታዳታ ያውጡ (ጥሬ ዕቃ የለም)                                                                                                                                          |
+| DELETE | `/api/v1/registered-keys/[id]`        | የተመዘገበ ቁልፍ ይሽሩ                                                                                                                                                           |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | ግልጽ መሻሪያ የመጨረሻ ነጥብ (ከ DELETE ጋር ተመሳሳይ ውጤት)                                                                                                                               |
+| GET    | `/api/v1/providers/[provider]/limits` | የአቅራቢውን የመልቀቂያ ካፕ ያንብቡ                                                                                                                                                   |
+| PUT    | `/api/v1/providers/[provider]/limits` | የአቅራቢውን የማውጫ ቁልፎች — አካል ያዘጋጁ `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                     |
+| GET    | `/api/v1/accounts/[id]/limits`        | የመለያውን የማውጫ ቁልፎች ያንብቡ                                                                                                                                                    |
+| PUT    | `/api/v1/accounts/[id]/limits`        | የመለያውን የመስጠት ገደብ — ከአቅራቢው መንገድ ጋር ተመሳሳይ አካል ያዘጋጁ                                                                                                                         |
 
-**ማረጋገጫ፦** የአስተዳደር ክፍለ ጊዜ/API ቁልፍ (`requireManagementAuth`) — ከ`/api/keys` ጋር ተመሳሳይ ጥበቃ፦ የዳሽቦርድ ክፍለ ጊዜ፣ የአካባቢ CLI ቶከን፣ ወይም `manage`/`admin` ስኮፕ ያለው API ቁልፍ፤ ለግምት ብቻ የሚያገለግሉ API ቁልፎች `403` ያገኛሉ። እንዲሁም `/v1/quotas/check` እና `/v1/issues/report` ይመልከቱ።
+**ማረጋገጫ፡** አስተዳደር session/API ቁልፍ (`requireManagementAuth`) — ከ `/api/keys` ጋር አንድ አይነት ጠባቂ፡ የዳሽቦርድ ክፍለ ጊዜ፣ የአካባቢው CLI token፣ ወይም API ቁልፍ `manage`/`admin` ስፋት ጋር; ግምት-ብቻ API ቁልፎች `403` ያገኛሉ። በተጨማሪም `/v1/quotas/check` እና `/v1/issues/report` ይመልከቱ.
 
 ---
 

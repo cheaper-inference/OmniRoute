@@ -25,15 +25,21 @@ Awọn ṣiṣan iṣẹ mejeeji bo PRs sinu awọn ẹka main/release, titari s
 
 Arinrin PR nṣiṣẹ awọn sare aṣayan. Awọn ọna `full-code` ati `full-code-e2e` ti eto imulo gbigba (E2E, isọpọ, artifact package, Electron èéfín, Bun SQLite, ilolupo eda ati awọn alabara ilana) ṣiṣẹ nikan lori apẹrẹ isinyi Mergify tabi lori ṣiṣe ni kikun: `gh workflow run ci.yml --ref <branch>`.
 
-Iwe-ẹri JSON kọọkan n ṣe idanimọ SHA ti a ṣayẹwo, ṣiṣe ṣiṣiṣẹ ati igbiyanju. CLI na kọ aiṣedeede checkout/event SHA kan. Awọn idanwo ṣiṣiṣẹsiṣẹpọ di ọmọ ẹgbẹ eto imulo si atokọ `needs` iṣẹ idajo nitorina ọna tuntun tabi yiyọ kuro ko le parẹ ni idakẹjẹ. Awọn owo-owo naa bo ṣiṣan iṣẹ tiwọn, kii ṣe titẹjade, imuṣiṣẹ, tabi awọn inu inu ẹrọ aṣayẹwo imọran ti o wa tẹlẹ. Ṣiṣẹ awọn orukọ ayẹwo mejeeji ni awọn ofin ẹka jẹ iyipada iṣakoso lọtọ; fifi awọn iṣẹ wọnyi kun ko ṣe aabo fun ẹka kan funrararẹ.
+Iwe-ẹri JSON kọọkan n ṣe idanimọ SHA ti a ṣayẹwo-jade, ṣiṣe ṣiṣiṣẹsiṣẹ ati igbiyanju. CLI na kọ aiṣedeede checkout/event SHA kan. Awọn idanwo ṣiṣiṣẹsiṣẹpọ di ọmọ ẹgbẹ eto imulo si atokọ `needs` iṣẹ idajo nitorina ọna tuntun tabi yiyọ kuro ko le parẹ ni idakẹjẹ. Awọn owo-owo naa bo ṣiṣan iṣẹ tiwọn, kii ṣe atẹjade, imuṣiṣẹ, tabi awọn inu inu ẹrọ ọlọjẹ imọran ti o wa tẹlẹ. Ṣiṣẹ awọn orukọ ayẹwo mejeeji ni awọn ofin ẹka jẹ iyipada iṣakoso lọtọ; fifi awọn iṣẹ wọnyi kun kii ṣe aabo fun ẹka kan funrararẹ.
 
 ### Àkópọ̀ isinyi
 
 Aami `queue` nfi PR ranṣẹ si isinyi Mergify (`.mergify.yml`). Mergify ṣi PR osere kan lori ẹka `mergify/merge-queue/`, CI nṣiṣẹ yiyan ni kikun nibẹ, ati pe PR atilẹba dapọ nigbati `Gate / CI`, `Gate / Quality` ati `Merge integrity (changelog + generated skills)` kọja.
 
-Mergify kọ akopọ isinyin rẹ sinu apejuwe yiyan, ati pe awọn ohun elo miiran le ṣatunkọ paapaa. Iṣẹlẹ `pull_request` `edited` kan lori iru apẹrẹ kan gba ẹgbẹ concurrency tirẹ (`-queue-edit-<run_id>`) nitori naa ko le fagilee ṣiṣe gidi ti osere naa, o si fo ẹnu-bode ati matrix naa. Nikan `Merge integrity` ṣi nṣiṣẹ. Iṣẹ ẹnu-ọna ti o fo naa n gbe orukọ ayẹwo ti o yatọ, nitori Mergify ka `Gate / CI` ti o fo silẹ gẹgẹbi ayẹwo ti o kuna ati pe o yọkuro PR naa.
+Mergify kọ akopọ isinyin rẹ sinu apejuwe yiyan, ati pe awọn ohun elo miiran le ṣatunkọ paapaa. Iṣẹlẹ `pull_request` `edited` kan lori iru apẹrẹ kan gba ẹgbẹ concurrency tirẹ (`-queue-edit-<run_id>`) nitori naa ko le fagilee ṣiṣe gidi ti osere naa, o si fo ẹnu-bode ati matrix naa. Nikan `Merge integrity` ṣi nṣiṣẹ. Iṣẹ ẹnu-ọna ti o fo naa n gbe orukọ ayẹwo ti o yatọ, nitori Mergify ka `Gate / CI` ti o fo bi ayẹwo ti o kuna ati pe o yọkuro PR naa.
 
 Lẹhin isọdi, titari ko ni beere nigbagbogbo PR. Ọrọìwòye `@mergifyio queue` lori rẹ.
+
+### Ẹri ti o ni idaduro ni idinku gbigba
+
+`scripts/quality/validate-release-acceptance.mjs` dinku eto ti a pese ati awọn ifihan rẹ; ko ṣe fi idi rẹ mulẹ pe ero naa ni wiwa opo gigun ti itusilẹ pipe. Awọn ijabọ rẹ ṣeto `releaseAcceptance: false` ni kedere, paapaa nigba ti ero naa jẹ `VERIFIED`. Ṣiṣan iṣẹ ṣiṣe `release-acceptance.yml` tun nlo awọn imuduro ojiji, kii ṣe itumọ gidi, package, bata tabi awọn owo igbega.
+
+CLI naa nilo `--evidence-root` lati mọ daju ẹri ti o daduro. Awọn faili ti wa ni ipinnu bi `<evidence-root>/<artifact_id>/<member>` ati hashed bi SHA-256. Igbasilẹ PASS laisi ẹri, sonu tabi faili ti o yipada, ọna ti ko lewu tabi aami-ọna kan ṣe idilọwọ ijẹrisi. Awọn faili ti o nsọnu ko ṣe deede si awọn akọọlẹ aṣeyọri ofo. Awọn sọwedowo SHA/run/attempt ti o wa tẹlẹ wa ni ominira: awọn baiti ti o baamu ko le gba iwe-ẹri ti o duro duro. Iduroṣinṣin fáìlì kii ṣe ẹ̀rí ìfójútó ipaniyan tabi igbega artifact.
 
 ### Iṣiro ọlọjẹ aimi
 
@@ -41,7 +47,7 @@ Oja ọja npm-alias ti ikede ati awọn ọmọ ẹgbẹ ọlọjẹ-imi gbe ni 
 
 Lo `npm run quality:scan -- --list` tabi `npm run quality:scan:fast -- --list` lati ṣayẹwo awọn inagijẹ ti o yan laisi ṣiṣe wọn. Isare n pe aaye titẹsi npm, nitorinaa akoko asiko rẹ (pẹlu Bun nibiti a ti tunto) ti wa ni ipamọ. Awọn igbasilẹ ti o farahan ni ita awọn profaili wọnyẹn bi a ti pe ni lọtọ, ati awọn aṣẹ itọju jẹ eewọ ni awọn profaili ọlọjẹ kika-nikan.
 
-Awọn profaili wọnyi bo ọlọjẹ aimi nikan. Wọn ko jẹri awọn idanwo ọja, agbegbe, apoti, awọn sọwedowo ita tabi gbigba idasilẹ ni kikun ti oludije. Gbigbawọle ṣiṣan iṣẹ nlo `config/quality/admission-policy.json` ti o sopọ ati `scripts/quality/admission-verdict.mjs`. Awọn profaili oluwoye itusilẹ wa lọtọ; ṣayẹwo awọn sọwedowo ti o wulo ati awọn iwe-ẹri ni ominira. Oja prose ti o wa ni isalẹ jẹ itọkasi, kii ṣe ẹri pe ẹnu-bode kan nṣiṣẹ gangan.
+Awọn profaili wọnyi bo ọlọjẹ aimi nikan. Wọn ko jẹri awọn idanwo ọja, agbegbe, apoti, awọn sọwedowo ita tabi gbigba idasilẹ ni kikun ti oludije. Gbigbawọle ṣiṣan iṣẹ nlo `config/quality/admission-policy.json` ti o sopọ ati `scripts/quality/admission-verdict.mjs`. Awọn profaili oluwoye itusilẹ wa lọtọ; ṣayẹwo awọn sọwedowo ti o wulo ati awọn iwe-ẹri ni ominira. Awọn aṣẹ aimi Oluwoye ni kikun jẹ ikede ni `config/quality/release-green-static-profile.json`, pẹlu `audit:deps`, yiyan-idanwo iyipada ati awọn sọwedowo itumọ. Agberu naa fọwọsi awọn aṣẹ npm lodi si package.json ati awọn ikede CI/Quality awoṣe; o kọ fiseete dipo ti ṣiṣe awọn aami ikarahun bi awọn ariyanjiyan. Iṣẹjade SKIP/INCOMPLETE scanner ti a beere ko le fi idi PASS mulẹ. Profaili naa ṣe igbasilẹ awọn imukuro ita ati pe ko rọpo agbegbe ti o gbalejo, awọn matiri idanwo, package tabi ẹri imuṣiṣẹ. Oja prose ti o wa ni isalẹ jẹ itọkasi, kii ṣe ẹri pe ẹnu-bode kan nṣiṣẹ gangan.
 
 Awọn iwe afọwọkọ n gbe labẹ `scripts/check/` (awọn ẹnubode eto imulo) ati `scripts/quality/` (ẹnjini ratchet). Orisun otitọ CI ni `.github/workflows/ci.yml`.
 
@@ -58,9 +64,9 @@ Awọn iwe afọwọkọ n gbe labẹ `scripts/check/` (awọn ẹnubode eto imu
 
 #### Iroyin idanwo arakunrin ti o gbagbe
 
-`npm run check:forgotten-sibling-tests` nṣiṣẹ bi igbesẹ imọran ti `Fast Quality Gates` o si tun lo ipinnu agbewọle lẹhin maapu ipa-idanwo. Fun gbogbo module iṣelọpọ ti o yipada, o ṣe ijabọ awọn ẹwọn `changed module/symbol -> static consumer -> candidate sibling test` ipinnu ipinnu nigbati idanwo oludije ko si ni iyatọ ibeere-fa. Akopọ Markdown ati abajade JSON ti wa ni idaduro bi iṣẹ ọna iṣan-iṣẹ `forgotten-sibling-tests` fun isọdiwọn ṣaaju yiyọkuro eyikeyi.
+`npm run check:forgotten-sibling-tests` nṣiṣẹ bi igbesẹ imọran ti `Fast Quality Gates` o si tun lo ipinnu agbewọle lẹhin maapu ipa-idanwo. Fun gbogbo module iṣelọpọ ti o yipada, o ṣe ijabọ awọn ẹwọn `changed module/symbol -> static consumer -> candidate sibling test` ipinnu ipinnu nigbati idanwo oludije ko si ni iyatọ ibeere-fa. Akopọ Markdown ati abajade JSON ti wa ni idaduro bi iṣẹ ọna iṣan-iṣẹ `forgotten-sibling-tests` fun isọdiwọn ṣaaju eyikeyi yiyọkuro idilọwọ.
 
-Awọn agbewọle ilu okeere ati awọn agbewọle ti o ni agbara jẹ awọn iwadii ipinnu ipinnu nikan; nwọn kò ṣẹda a ìdènà wiwa. Awọn imukuro ti a ṣe ayẹwo n gbe ni `config/quality/forgotten-sibling-allowlist.json`. Titẹ sii kọọkan gbọdọ lorukọ olumulo ati idanwo oludije, funni ni oye kan pato, ati sopọ ọrọ GitHub kan tabi ibeere fa. Awọn titẹ sii aiṣedeede kuna pipade. Awọn imukuro ko le dinku idanwo oludije ti paarẹ tabi iyatọ ti o ṣafikun `.skip`/`.todo`; irẹwẹsi irẹwẹsi ati iboju iparada miiran jẹ ohun ini nipasẹ ẹnu-ọna `check:test-masking` dina ominira.
+Awọn agbewọle ilu okeere ati awọn agbewọle ti o ni agbara jẹ awọn iwadii ipinnu ipinnu nikan; nwọn kò ṣẹda a ìdènà wiwa. Awọn imukuro ti a ṣe ayẹwo n gbe ni `config/quality/forgotten-sibling-allowlist.json`. Titẹsi kọọkan gbọdọ lorukọ olumulo ati idanwo oludije, funni ni ọgbọn kan pato, ati sopọ ọrọ GitHub tabi ibeere fa. Awọn titẹ sii aiṣedeede kuna pipade. Awọn imukuro ko le dinku idanwo oludije ti paarẹ tabi iyatọ ti o ṣafikun `.skip`/`.todo`; irẹwẹsi irẹwẹsi ati iboju iparada miiran jẹ ohun ini nipasẹ ẹnu-ọna `check:test-masking` dina ominira.
 
 ### Job: `lint`
 
@@ -77,7 +83,7 @@ Nṣiṣẹ lori gbogbo PR si `main`. Awọn bulọọki dapọ lori ikuna.
 | `check:model-lifecycle`           | Awọn tabili afisona ti ọwọ mẹta ti a ṣe itọju duro ni ibamu pẹlu aworan aye ti a ṣayẹwo-ni (#11503): `FITNESS_TABLE` (`taskFitness.ts`) ko si id ifẹhinti ti `REGISTRY` le ṣe; gbogbo ibi-afẹde `BUILT_IN_ALIASES` wa ni `REGISTRY` ati pe ko si si aworan ifẹhinti-id; gbogbo id ifẹhinti ti o wa ni `REGISTRY` ni a firanṣẹ siwaju tabi ṣe akojọ si ni `allowedRetiredInCatalog`; ati pe ko si orisun `DEFAULT_DEGRADATION_MAP` tabi ibi-afẹde ti o han ti fẹyìntì ni aworan fọto yẹn. Eyi ko ṣe afihan pe awoṣe lọwọlọwọ yoo ṣiṣẹ nipasẹ ṣiṣan ifiwe kan. Aisinipo — ṣe afiwe si `config/quality/model-lifecycle.json`, ti a tu pẹlu ọwọ pẹlu `npm run quality:refresh-model-lifecycle` (nẹtiwọọki; ko firanṣẹ sinu CI). `allowedRetiredInCatalog` jẹ ratchet sisun-isalẹ: ṣafikun titẹ sii nikan pẹlu ọran titele kan.                                                               | Bẹẹni                                         |
 | `check:fetch-targets`             | Gbogbo `fetch("/api/...")` ni ẹgbẹ onibara `src/` pinnu si `route.ts` gidi kan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Bẹẹni                                         |
 | `check:deps`                      | Gbogbo `npm install` -able deps kọja gbogbo `package.json` ni repo wa ni `dependency-allowlist.json`; titun unpinned tabi slopsquatted jo ti asia                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Bẹẹni                                         |
-| `audit:deps`                      | `npm audit` (root + elekitironi) — ko si awọn imọran high/critical (awọn agbekọja osv `check:vuln-ratchet`; wo Afẹyinti Rationalization)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Bẹẹni                                         |
+| `audit:deps`                      | Ayẹwo npm ti gbogbo awọn faili titiipa ominira marun (root, Electron, awọn afikun OpenCode v1/v2 ati olupese). Lominu ni awọn imọran dènà; ga Advisory wa han ikilo. Missing/failed audits ni INCOMPLETE ati Àkọsílẹ; fun-dofo titiipa hashes ati awọn iroyin ti wa ni idaduro.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Bẹẹni                                         |
 | `check:lockfile`                  | `package-lock.json` iyege — https iforukọsilẹ, iyege hashes, ko si ogun agbelẹrọ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Bẹẹni                                         |
 | `check:licenses`                  | akojọ iyọọda iwe-aṣẹ SPDX fun awọn igbẹkẹle iṣelọpọ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Bẹẹni                                         |
 | `check:tracked-artifacts`         | Ko si awọn ohun-ọṣọ ti a kọ / awọn aami `node_modules` ti o ṣe adehun (tun nṣiṣẹ ni ifaramọ husky; titari iṣaaju jẹ imomose ina — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Bẹẹni                                         |
@@ -102,11 +108,11 @@ Nṣiṣẹ lori gbogbo PR si `main`. Awọn bulọọki dapọ lori ikuna.
 
 #### Awọn eto titẹ titẹ meji dahun oriṣiriṣi
 
-`typecheck:core` ati `check:build-typecheck` ṣe akojọpọ awọn eto oriṣiriṣi labẹ awọn aṣayan oriṣiriṣi, ati pe faili kanna le jẹ mimọ ninu ọkan ati kun fun awọn aṣiṣe ni ekeji.
+`typecheck:core` ati `check:build-typecheck` ṣe akojọpọ awọn eto oriṣiriṣi labẹ awọn aṣayan oriṣiriṣi, ati pe faili kanna le jẹ mimọ ni ọkan ati kun fun awọn aṣiṣe ni ekeji.
 
 `tsconfig.build.json` ṣeto `"strict": false`, nitorina `noImplicitAny` wa ni pipa. Atunto mojuto ṣe akopọ atokọ iyọọda faili 27 ti a ti sọ di mimọ pẹlu awọn aṣayan ti o muna ati tẹle awọnya agbewọle titẹ sii kọọkan, nitorinaa awọn faili ti ko han ninu eto kikọ naa tun ṣayẹwo nibẹ.
 
-Abajade naa ṣe pataki nigbati o ba ṣe idajọ boya ti tẹ faili kan:** Ayẹwo odo labẹ `check:build-typecheck` ko tumọ si odo** . Yiyọ `@ts-nocheck` lati awọn faili 26 fihan 23 ninu wọn ni mimọ ninu eto kikọ; mẹrindilogun ti awon surfaced nipa 120 implicit-eyikeyi aṣiṣe ninu awọn ti o muna ọkan. Ṣayẹwo awọn mejeeji ṣaaju pipe faili ti o mọ.
+Abajade naa ṣe pataki nigbati o ba ṣe idajọ boya ti tẹ faili kan:** Ayẹwo odo labẹ `check:build-typecheck` ko tumọ si odo** . Yiyọ `@ts-nocheck` lati awọn faili 26 fihan 23 ninu wọn ti o mọ ni eto kikọ; mẹrindilogun ti awon surfaced nipa 120 implicit-eyikeyi aṣiṣe ninu awọn ti o muna ọkan. Ṣayẹwo awọn mejeeji ṣaaju pipe faili ti o mọ.
 
 ### Job: `quality-gate`
 
@@ -133,9 +139,9 @@ Gbogbo iṣẹ jẹ imọran (`continue-on-error: true`). Awọn ratchets orisun
 | `check:circular-deps`    | Ko si awọn igbẹkẹle ipin (dpdm)                                                                                                                                                           | **Igbaninimoran**                         |
 | `check:bundle-size`      | Iwọn lapapo ko kọja fila                                                                                                                                                                  | **Igbaninimoran**                         |
 | `check:secrets`          | Ṣiṣayẹwo asiri (gitleaks) — fo ti alakomeji ko ba si                                                                                                                                      | **Igbaninimoran**                         |
-| `check:vuln-ratchet`     | Awọn ailagbara ti igbẹkẹle (osv-scanner) ko tun fo — fo ti alakomeji ko ba si                                                                                                             | **Igbaninimoran**                         |
+| `check:vuln-ratchet`     | Awọn ailagbara igbẹkẹle (osv-scanner) ko ṣe atunṣe — `--ratchet` kuna bi INCOMPLETE (jade 2) ti ko ba ni iwọn.                                                                            | **Igbaninimoran**                         |
 | `check:workflows`        | Ṣiṣan lint (actionlint + zizmor); awọn aṣayẹwo missing/broken, awọn ijabọ aitọ tabi sonu ipilẹ ratchet kuna bi INCOMPLETE. Awọn awari to wulo tẹle ilana strict/advisory/ratchet ti o yan | Ipaniyan nilo; zizmor ratchet ìdènà ni CI |
-| `check:openapi-breaking` | Awọn iyipada fifọ si adehun API ti gbogbo eniyan (`openapi.yaml`) vs ẹka ipilẹ (oasdiff) — njade `openapiBreaking=N`; skips ti o ba ti oasdiff nílé tabi mimọ spec unresolvable           | **Igbaninimoran**                         |
+| `check:openapi-breaking` | Adehun API ti gbogbo eniyan lodi si awọn iṣẹ iṣẹlẹ ti a pinni (PR ìpapọ-ipilẹ, titari ṣaaju, ipilẹ akojọpọ-ẹgbẹ; isanwo scheduled/manual obi akọkọ); wiwọn ti a beere kuna ni pipade      | **Dina pẹlu --ratchet**                   |
 
 ### Job: `docs-sync-strict`
 
@@ -164,7 +170,7 @@ README SVGs mejila ti o wa labẹ `docs/diagrams/` ti wa ni ipilẹṣẹ (`scri
 | Iwe afọwọkọ                    | Awọn ijẹrisi                                                                                                                                                             | Ìdènà             |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
 | `check-ui-keys-coverage` (ila) | agbegbe bọtini UI i18n jẹ ≥ 65%                                                                                                                                          | Bẹẹni             |
-| `check-ui-value-drift` (ila)   | Gẹẹsi ti a tun kọ** iye** fi oju ko stale translation sile                                                                                                               | Bẹẹni             |
+| `check-ui-value-drift` (ila)   | Gẹẹsi ti a tun kọ** iye** fi oju ko si stale translation sile                                                                                                            | Bẹẹni             |
 | `check-new-key-coverage` (ila) | A** titun** Bọtini Gẹẹsi jẹ itumọ ni gbogbo agbegbe — a ti kọ ami ami `__MISSING__:` kan                                                                                 | Bẹẹni             |
 | `check-translation-ratio`      | Iwọn itumọ-gidi fun agbegbe (aami-si-Gẹẹsi / ibi ipamọ / awọn ewe ti o padanu ni ita atokọ iyọọda) ko gbọdọ kọja `config/quality/i18n-translation-baseline.json` + slack | **Igbaninimoran** |
 
@@ -180,7 +186,7 @@ Eleyi bawa fun gidi. `oauthModal.googleOAuthWarning` ni a tun kọ nigbati olura
 - `check-ui-keys-coverage` ka bọtini _presence_, nitorinaa awọn iṣiro itumọ ti o duro bi o ti bo;
 - `check-translation-drift` tọpa awọn digi awọn iwe aṣẹ `docs/i18n/<locale>/**.md` — ko ka `src/i18n/messages/*.json` rara. Dinamọ ni `docs-sync-strict` iṣẹ lati igba imuṣiṣẹpọ 2026-09: ṣatunkọ doc mojuto → `npm run i18n:run -- --files=<doc>` (ipele-apakan, olowo poku).
 
-**Iyatọ-mọ, kii ṣe atilẹyin ipilẹ.** O ṣe afiwe `en.json` ni ipilẹ idapọ si igi ti n ṣiṣẹ; fun gbogbo bọtini ti iye Gẹẹsi rẹ yipada, eyikeyi agbegbe ti o tun di itumọ ti a ko fowo kan duro. Eyi mọọmọ** didi gbese ti o ti wa tẹlẹ** — a diff ko le ṣe afihan iru Gẹẹsi atijọ ti itumọ pipẹ ti wa lati, nitorinaa ẹnu-ọna ṣe idajọ ohun ti iyipada lọwọlọwọ fọwọkan. Yiyan (ipilẹṣẹ hash bọtini-fun-kọtini) yoo jẹ iye owo ~ 600 KB ti ipilẹṣẹ, 3 × ipilẹ ti o tobi julọ ti o wa tẹlẹ, ti n tẹ lori gbogbo i18n PR.
+**Iyatọ-mọ, kii ṣe atilẹyin ipilẹ.** O ṣe afiwe `en.json` ni ipilẹ idapọ si igi ti n ṣiṣẹ; fun gbogbo bọtini ti iye Gẹẹsi rẹ yipada, eyikeyi agbegbe ti o tun di itumọ ti a ko fowo kan duro. Eyi mọọmọ** didi gbese ti o ti wa tẹlẹ** — a diff ko le ṣafihan iru Gẹẹsi atijọ ti itumọ pipẹ ti wa lati, nitorinaa ẹnu-bode naa ṣe idajọ kini iyipada lọwọlọwọ kan. Yiyan (ipilẹṣẹ hash bọtini-fun-kọtini) yoo jẹ iye owo ~ 600 KB ti ipilẹṣẹ, 3 × ipilẹ ti o tobi julọ ti o wa tẹlẹ, ti n tẹ lori gbogbo i18n PR.
 
 Awọn ọna meji lati ni itẹlọrun:
 
@@ -515,118 +521,57 @@ kò gbé e wọlé láìfọwọ́ṣe (ìwọ ni yóò yan afárá MCP↔LSP t�
 
 ---
 
-## Àtòjọ Àwọn Iṣẹ́ Ìṣàlàyé (àtúnyẹ̀wò ROI — Ìpele 9 Ìgbì 3)
+## Ipilẹhin Rationalization (ROI awotẹlẹ — Fase 9 Onda 3)
 
-A ṣe ìbámu àkójọ yìí pẹ̀lú `ci.yml` ní 2026-06-17 (ẹ̀yà àtẹ̀yìnwá kò ní
-`audit:deps`, `check:tracked-artifacts`, `check:lockfile`, `check:licenses`,
-`check:dead-code`, `check:cognitive-complexity`, `check:type-coverage`,
-`check:codeql-ratchet`, `check:pr-evidence`). Àtúnyẹ̀wò ROI lórí àkójọ tí a mú bá ara wọn mu
-ṣàwárí àwọn olùdíje ìṣàlàyé wọ̀nyí. **Àwọn ìṣọ̀kan náà jẹ́ àwọn àyípadà CI
-aláìlọ́gbọ́n-ọ̀nà; àwọn ìyípadà/iparẹ́ jẹ́ àwọn ìpinnu ìlànà tí a fi sílẹ̀ fún olùṣàkóso.** Kò sí ohunkóhun nísàlẹ̀
-tí a ti lò síbẹ̀.
+Oja yii jẹ ilaja lodisi `ci.yml` ni ọdun 2026-06-17 (ẹya iṣaaju ti yọkuro `audit:deps`, `check:tracked-artifacts`, `check:lockfile`, `check:licenses`, `check:dead-code`, `check:cognitive-complexity`, `check:type-coverage`, `check:codeql-ratchet`, `check:pr-evidence`). Atunyẹwo ROI ti iṣeto ti a ti laja ṣe idanimọ awọn oludije onipinpin wọnyi.** Awọn akojọpọ jẹ awọn ayipada CI darí; flips/drops jẹ awọn ipinnu eto imulo ti o wa ni ipamọ fun oniṣẹ.** Ko si ohun ti o wa ni isalẹ ti a lo sibẹsibẹ.
 
-**Ohun mìíràn tí a kò ṣàkọsílẹ̀ lókè** (ìmọ̀ràn, àmì aláìlágbára): iṣẹ́ `docs-lint`
-(markdownlint + Vale, gbogbo iṣẹ́ náà jẹ́ `continue-on-error`) àti àwọn ìṣàn-iṣẹ́ aṣàyẹ̀wò olóminira
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` wà nínú
-`quality-baseline.json` ṣùgbọ́n a kò so mọ́ ratchet ìdènà nínú `ci.yml` — òṣùwọ̀n náà
-kò ní ohun tí ó ń lò ó lọ́wọ́lọ́wọ́.
+**Paapaa ti ko ni iwe-aṣẹ loke** (imọran, ifihan agbara kekere): iṣẹ `docs-lint` (markdownlint + Vale, gbogbo iṣẹ `continue-on-error`) ati ṣiṣan ọlọjẹ standalone `semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` wa ni `quality-baseline.json` ṣugbọn kii ṣe ti firanṣẹ si ratchet dina ni `ci.yml` — metric ti jẹ alainibaba lọwọlọwọ.
 
-### Ṣọ̀kan / yọ àtúnsí kúrò (aláìlọ́gbọ́n-ọ̀nà, ewu kéré)
+### Darapọ / didasilẹ (ẹrọ, eewu kekere)
 
-A fìdí olùdíje kọ̀ọ̀kan múlẹ̀ pẹ̀lú ipò ẹnu-ọ̀nà tó ń ṣiṣẹ́ ní 2026-06-17 (gbọ́kànlé-ṣùgbọ́n-ṣàyẹ̀wò);
-ọ̀pọ̀ àwọn ìṣọ̀kan tí ó dàbí ẹni pé ó “hàn gbangba” fi hàn pé wọ́n ń fi gbèsè pamọ́, wọn kò sì jẹ́
-àwọn àfidípò tààrà **rárá**.
+Oludije kọọkan jẹ ifọwọsi ni ilodi si ipo ẹnu-ọna ifiwe ni 2026-06-17 (igbekele-ṣugbọn-ṣayẹwo); orisirisi "kedere" merges ni tan-jade lati tọju gbese ati ki o jẹ** kii ṣe** mọ silẹ-ins.
 
-- **`check:docs-sync` ń ṣiṣẹ́ lẹ́ẹ̀mejì** — gẹ́gẹ́ bí ohun olóminira nínú iṣẹ́ `lint` àti lẹ́ẹ̀kan sí i nínú `check:docs-all` (`docs-sync-strict`) àti ìkọ̀ husky pre-commit. ✅ **TI PARÍ** — a yọ ìpè `lint` olóminira náà kúrò.
-- **Àyẹ̀wò CVE** — ❌ **KÌ Í ṢE ìṣọ̀kan tó mọ́ tónítóní.** `audit:deps` máa ń kùnà pátápátá lórí CVE èyíkéyìí tó ga/pàtàkì; `check:vuln-ratchet` (osv) máa ń kùnà nìkan lórí _ìfàsẹ́yìn_ ní ìfiwéra pẹ̀lú baseline (lọ́wọ́lọ́wọ́ 1 MODERATE). Ìtumọ̀ wọn yàtọ̀ — píparẹ́ `audit:deps` yóò mú kí ẹnu-ọ̀nà pípé fún ga/pàtàkì pàdánù. Ẹ jẹ́ kí àwọn méjèèjì wà.
-- **Ìṣàwárí cycle** — ✅ **TI PARÍ** (#15159 G-01/G-02). Ọ̀rọ̀ àtijọ́ níbí pe `check:cycles` ní ẹnu-ọ̀nà “aláwọ̀ ewé, tí a ṣàyàn pẹ̀lú ìṣọ́ra” ó sì ṣàlàyé pé kí ó máa dí iṣẹ́ lọ́nà nítorí `check:circular-deps` (dpdm) ròyìn cycle 91. Àwọ̀ ewé yẹn jẹ́ **àwọ̀ ewé èké**: `check:cycles` ṣàyẹ̀wò àwọn subdirectory 5 (fáìlì 450), ó bá `import|export … from` aimi nìkan mu, ó sì sọ gbogbo specifier `@/` àti `@omniroute/open-sse/` nù, nítorí náà kò lè rí àwọn cycle dynamic-import + alias tí ó pọ̀ jù nínú repo. A ti tún un ṣe: ẹnu-ọ̀nà náà ń rìn ká `src` + `open-sse` báyìí (fáìlì 5023), ó ń kó àwọn specifier láti TypeScript AST (nítorí náà `import("…")` wúlò ṣùgbọ́n `typeof import("…")` ní ipò type kò wúlò), ó sì ń yanjú `paths` tsconfig. Ó rí cycle **14**, kì í ṣe 0. Nítorí pé a kò lè tún àwọn cycle 14 tó ti wà tẹ́lẹ̀ ṣe nínú PR ẹnu-ọ̀nà kan, `check:cycles` ti di **ratchet** báyìí (`--ratchet`, òrùlé `metrics.cycles.value = 14` nínú `quality-baseline.json`, `direction: down`) — ó ń dí _ìfàsẹ́yìn_ èyíkéyìí, iye náà sì lè dín kù nìkan. CI ń ṣiṣẹ́ `npm run check:cycles:ratchet`. Ìdínkù díẹ̀díẹ̀ máa lọ pẹ̀lú **A-01**. `check:circular-deps` (dpdm) ṣì jẹ́ ìmọ̀ràn gẹ́gẹ́ bí èrò kejì tó gbòòrò.
-- **Ìdíjú** — ✅ **TI PARÍ** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): ìrìn ESLint kan ṣoṣo, ó ń ka nípasẹ̀ ruleId kí baseline cyclomatic+max-lines àti cognitive lè dúró lọ́tọ̀ọ̀tọ̀; `check:complexity` / `check:cognitive-complexity` kọ̀ọ̀kan ṣì wà fún `--update` agbègbè.
-- **Ìdènà ìròsọ `/api`** — ✅ **TI PARÍ** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): àkójọ FS kan ṣoṣo ti `src/app/api`, openapi-routes + docs-symbols ṣì ń ròyìn lọ́tọ̀ọ̀tọ̀; àwọn ti ẹnìkọ̀ọ̀kan ṣì wà fún ṣíṣiṣẹ́ agbègbè.
-- **`check:node-runtime` ń ṣiṣẹ́ nínú iṣẹ́ 11** — ⚠️ **ROI kéré.** Ọ̀kọ̀ọ̀kan jẹ́ runner lọ́tọ̀, àyẹ̀wò náà sì jẹ́ <1s; àpapọ̀ àkókò tí a lè fipamọ́ ~10s, ní ìfiwéra pẹ̀lú pípàdánù olùṣọ́ olówó-pọ́ọ́kú fún iṣẹ́ kọ̀ọ̀kan. Kò tọ́ ìrúkèrúdò náà.
-- **`typecheck:noimplicit:core` lórí lint CI** — ✅ **a ti yọ ọ́ kúrò nínú iṣẹ́ lint** (ó jẹ́ `continue-on-error` ìmọ̀ràn); àyè type tó ń dí iṣẹ́ ni `typecheck:core` + `check:type-coverage`. A dá script agbègbè sílẹ̀.
+- **`check:docs-sync` nṣiṣẹ lemeji** — standalone ninu iṣẹ `lint` ati lẹẹkansi inu `check:docs-all` (`docs-sync-strict`) ati kio husky ami-ipinnu. ✅**DONE** — standalone `lint` epe kuro.
+- **CVE wíwo** — ❌**NOT a mọ àkópọ.** `audit:deps` ṣe idiwọ awọn imọran to ṣe pataki ati awọn iṣayẹwo ti ko pe ni gbogbo awọn faili titiipa marun, lakoko ti o ṣe ijabọ awọn imọran giga bi awọn ikilọ labẹ eto imulo lọwọlọwọ; `check:vuln-ratchet` (osv) kuna nikan lori _regression_ vs ipilẹ ti a ṣayẹwo ati kọ awọn wiwọn ti o padanu nigbati o nilo. Itumọ oriṣiriṣi — sisọ `audit:deps` yoo padanu ẹnu-ọna pataki to peye ati awọn owo-owo iṣayẹwo package ominira. Pa mejeeji.
+- **Wiwa kẹkẹ** — ✅**DONE** (#15159 G-01/G-02). Ọrọ atijọ nibi ti a npe ni `check:cycles` "alawọ ewe, curated" ẹnu-bode ati idalare fifi o ìdènà nitori `check:circular-deps` (dpdm) royin 91 iyika. Ti alawọ ewe je kan** alawọ ewe eke** : `check:cycles` ṣe ayẹwo awọn iwe-ilana 5 (awọn faili 450), ti o baamu `import|export … from` aimi nikan , o si sọ gbogbo `@/` ati `@omniroute/open-sse/` specifier silẹ, nitori naa ko le rii awọn iyipo-imu wọle + inagijẹ ti o jẹ gaba lori repo. Ti o wa titi: ẹnu-bode bayi nrin `src` + `open-sse` (awọn faili 5023), gba awọn asọye lati TypeScript AST (nitorinaa awọn iṣiro `import("…")` ati iru-ipo `typeof import("…")` ko), ati pinnu tsconfig `paths`. O wa** 14** cycles, kii ṣe 0. Nitoripe awọn iyipo ti o wa tẹlẹ 14 ko le ṣe atunṣe ni ẹnu-ọna PR, `check:cycles` jẹ bayi a** ratchet** (`--ratchet`, aja `metrics.cycles.value = 14` ni `quality-baseline.json`, `direction: down`) — o dina eyikeyi _regression_ ati pe kika le ṣubu nikan. CI nṣiṣẹ `npm run check:cycles:ratchet`. Iná-mọlẹ gigun pẹlu**A-01** . `check:circular-deps` (dpdm) duro ni imọran gẹgẹbi ero keji ti o gbooro.
+- **Idiju** — ✅**DONE** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): ọkan ESLint rin, kika nipasẹ ruleId ki cyclomatic + max-ila ati imo baselines duro ominira; olukuluku `check:complexity` / `check:cognitive-complexity` wa fun `--update` agbegbe.
+- **`/api` egboogi-hallucination** — ✅**DONE** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): akojo oja FS kan ti `src/app/api`, openapi-routes + docs-symbols ṣi jabo ni ominira; awọn ẹni-kọọkan wa fun awọn ṣiṣe agbegbe.
+- **`check:node-runtime` nṣiṣẹ ni 11 ise** — ⚠️** ROI kekere.** Olukuluku jẹ olusare lọtọ ati ayẹwo jẹ < 1s; lapapọ ifowopamọ ~ 10s, lodi si ọdun poku kan fun-ise oluso. Ko tọ awọn churn.
+- **`typecheck:noimplicit:core` lori CI lint** — ✅** kuro lati iṣẹ lint** (je advisory `continue-on-error`); ìdènà iru dada ni `typecheck:core` + `check:type-coverage`. Iwe afọwọkọ agbegbe ni idaduro.
 
-### Yípadà / pinnu (ìlànà olùṣàkóso)
+### Yipada / pinnu (ilana oniṣẹ)
 
-- `check:openapi-security-tiers` (ìmọ̀ràn) — ❌ **KÒ ṢEÉ yípadà ní mímọ́.** Ó jáde pẹ̀lú 0 ṣùgbọ́n ó kìlọ̀ pé ọ̀pọ̀ àwọn route `traffic-inspector` lábẹ́ `LOCAL_ONLY_API_PREFIXES` kò ní àkọsílẹ̀ `x-loopback-only: true`. Fífi agbára mú un nílò fífi àwọn àkọsílẹ̀ yẹn kún `openapi.yaml` lákọ̀ọ́kọ́.
-- `typecheck:noimplicit:core` (ìmọ̀ràn) — ratchet `check:type-coverage` tó ń dí iṣẹ́ ti bo ọ́ púpọ̀. Yí i padà sí ratchet tàbí pa ìrìn `tsc` kejì tó tún ara rẹ̀ ṣe rẹ́.
-- `test:vitest:ui` (tó jẹ́ **olùdènà** báyìí) — àwọn ìkùnà tó ti wà tẹ́lẹ̀ ni a yọ kúrò ní pàtó nínú `vitest.config.ts` pẹ̀lú àwọn àlàyé ìtọ́pasẹ̀ `// #8618`; àwọn ìkùnà tuntun máa ń mú kí iṣẹ́ náà kùnà.
-- `check:secrets` (gitleaks, ratchet olùdènà tí a dì mọ́ àwọn false-positive 3 tí a ṣàkọsílẹ̀) — fi àwọn 3 náà sí allowlist láti dé 0, tàbí sọ ọ́ kalẹ̀ sí ìmọ̀ràn. Ó ní àgbélébùú pẹ̀lú secret-scanning abinibi GitHub + `check:public-creds`.
-- `check:pr-evidence` (olùdènà, ń lo grep lórí ọ̀rọ̀ inú PR-body) — ewu false-positive ga; píparẹ́ rẹ̀ máa sọ ìmúlò Hard Rule #18 di aláìlágbára, nítorí náà èyí jẹ́ ìpinnu ìlànà gidi.
-- `semgrep` (olóminira ìmọ̀ràn) — ó ní àgbélébùú pẹ̀lú CodeQL fún àwọn ẹbí OWASP; so baseline rẹ̀ mọ́ ratchet kan tàbí pa á rẹ́.
+- `check:openapi-security-tiers` (imọran) — ❌**NOT mọto flippable.** O jade 0 ṣugbọn kilo wipe ọpọlọpọ awọn ipa ọna `traffic-inspector` labẹ `LOCAL_ONLY_API_PREFIXES` ko ni alaye `x-loopback-only: true`. Imuse rẹ nilo fifi awọn akọsilẹ wọnyẹn kun si `openapi.yaml` ni akọkọ.
+- `typecheck:noimplicit:core` (imọran) — ni pataki nipasẹ idinamọ `check:type-coverage` ratchet. Yipada si ratchet tabi ju silẹ `tsc` keji laiṣe.
+- `test:vitest:ui` (bayi** ìdènà** ) Awọn ikuna ti tẹlẹ — ti wa ni iyasọtọ ni gbangba ni `vitest.config.ts` pẹlu awọn asọye ipasẹ `// #8618` ; awọn ikuna titun kuna iṣẹ naa.
+- `check:secrets` (gitleaks, didi ratchet tio tutunini ni 3 ti o ni akọsilẹ eke-positives) — gba akojọ awọn 3 lati de ọdọ 0, tabi dinku si imọran. Ni lqkan GitHub abinibi ìkọkọ wíwo + `check:public-creds`.
+- `check:pr-evidence` (ìdènà, greps PR-body prose) — ga ewu eke-rere; ṣe irẹwẹsi ofin Lile #18 imuse ti o ba lọ silẹ, nitorinaa eyi jẹ ipe eto imulo tootọ.
+- `semgrep` (iduroṣinṣin imọran) — gberapo CodeQL fun awọn idile OWASP ; waya awọn oniwe-ipile to a ratchet tabi ju.
 
 ---
 
-## Ìwé Àkọsílẹ̀ Tó Jẹmọ́
+## Iwe ti o jọmọ
 
-- Ẹ̀wọ̀n-ìpèsè (provenance, SBOM, Trivy, Scorecard): [`docs/security/SUPPLY_CHAIN.md`](../security/SUPPLY_CHAIN.md)
+- Ipese-pq (provenance, SBOM, Trivy, Scorecard): [`docs/security/SUPPLY_CHAIN.md`](../security/SUPPLY_CHAIN.md)
 
-#### `check-key-completeness` — ìdènà ìbámu àkójọpọ̀ kọ́kọ́rọ́
+#### `check-key-completeness` — bọtini-ṣeto parity ẹnu-bode
 
-`scripts/i18n/check-key-completeness.mjs` (`npm run i18n:check-keys`, iṣẹ́ `i18n-ui-coverage`).
-Ó ń fi àkójọpọ̀ àwọn kọ́kọ́rọ́ ewé inú gbogbo `src/i18n/messages/<locale>.json` wé `en.json`, ó sì
-máa ń kùnà lórí èyíkéyìí tí kò sí tàbí tí ó jẹ́ àfikún, láìka ìgbà tí a fi kọ́kọ́rọ́ náà kún un sí.
-Àwọn ààyè ìdádúró `__MISSING__:` ni a kà sí èyí tó wà (àkóónú wọn jẹ́ ọ̀ràn ìdènà ìpín).
-Ó jẹ́ alábàáṣe pípé fún àwọn ìdènà méjì tó dá lórí ìyàtọ̀/ìdá-ọgọ́rùn-ún: `check-ui-keys-coverage`
-ń fipá mú ààlà ìsàlẹ̀ 80 % fún locale kọ̀ọ̀kan (àwọn kọ́kọ́rọ́ 43 tí kò sí nínú ~13,000 ṣì máa ń
-fi 99.7 % hàn), `check-new-key-coverage` sì ń ṣàyẹ̀wò kìkì àwọn kọ́kọ́rọ́ tí PR kan fi kún
-`en.json`. Àkójọpọ̀ locale kan ni a ń ṣẹ̀dá láti inú `en.json` ti ọjọ́ tí a gé ẹ̀ka rẹ̀, ó sì ń
-túmọ̀ fún ọ̀pọ̀ ọjọ́ nígbà tí ìpìlẹ̀ ṣì ń fi àwọn kọ́kọ́rọ́ kún un; PR àkójọpọ̀ náà kò fi kọ́kọ́rọ́
-kankan kún un fúnra rẹ̀, nítorí náà àwọn méjèèjì tó jọ ọ́ kò fi ìkìlọ̀ hàn nígbà tí àkójọpọ̀ 1
-(#13044) wọlé pẹ̀lú àìní kọ́kọ́rọ́ 43 nínú locale mẹ́sàn-án àti àkójọpọ̀ 2 (#13660) pẹ̀lú àìní
-kọ́kọ́rọ́ 10 nínú mẹ́jọ (2026-09-15). Ṣàtúnṣe ìkùnà pẹ̀lú
-`node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers`; ewé `extra` túmọ̀ sí
-pé orísun ti yọ ọ́ kúrò — pa á rẹ́ kúrò nínú locale náà. `--warn` máa ń ṣe ìròyìn láìkùnà.
-`--catalog=cli` ń ṣe ìfiwéra kan náà lórí `bin/cli/locales` (`npm run i18n:check-keys:cli`);
-àwọn ìgbésẹ̀ méjèèjì wà nínú iṣẹ́ `i18n-ui-coverage`.
+`scripts/i18n/check-key-completeness.mjs` (`npm run i18n:check-keys`, iṣẹ `i18n-ui-coverage`). Ṣe afiwe eto bọtini bunkun ti gbogbo `src/i18n/messages/<locale>.json` pẹlu `en.json` ati kuna lori eyikeyi ti ko si tabi afikun ewe, laibikita igbati bọtini ti ṣafikun. Awọn oniduro `__MISSING__:` ka bi lọwọlọwọ (akoonu wọn jẹ iṣowo ẹnu-ọna ipin). O jẹ ibamu pipe ti awọn ẹnu-bode diff-based/percentage meji: `check-ui-keys-coverage` fi ipa mu ilẹ 80% kan fun agbegbe kan (awọn bọtini 43 ti ko wa ninu ~ 13,000 ṣi ka 99.7%) ati `check-new-key-coverage` ṣe idajọ awọn bọtini nikan PR kan si `en.json`. Apejọ agbegbe kan ti ipilẹṣẹ lati `en.json` ti ọjọ ti a ge ẹka rẹ ati tumọ fun awọn ọjọ lakoko ti ipilẹ ntọju awọn bọtini fifi kun; ipele PR ko ṣe afikun bọtini funrararẹ, nitorinaa awọn arakunrin mejeeji dakẹ nigbati ipele 1 (#13044) gbe awọn bọtini 43 kukuru ni agbegbe mẹsan ati ipele 2 (#13660) awọn bọtini 10 kukuru ni mẹjọ (2026-09-15). Ṣe atunṣe pupa kan pẹlu `node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers`; ewe `extra` tumọ si orisun ti o lọ silẹ — paarẹ rẹ lati agbegbe. awọn ijabọ `--warn` laisi ikuna. `--catalog=cli` nṣiṣẹ afiwera kanna lori `bin/cli/locales` (`npm run i18n:check-keys:cli`); awọn igbesẹ mejeeji n gbe ni iṣẹ `i18n-ui-coverage`.
 
-#### `check-new-key-coverage` — ìdènà i18n fún kọ́kọ́rọ́ tuntun
+#### `check-new-key-coverage` — titun-bọtini i18n ẹnu-bode
 
-Ẹgbẹ́ `check-ui-value-drift`. Èyí ń mú iye Gẹ̀ẹ́sì kan tí a **kọ ní ọ̀nà míràn**
-nígbà tí a fi àwọn ìtumọ̀ rẹ̀ sílẹ̀ sẹ́yìn; èyí sì ń mú kọ́kọ́rọ́ Gẹ̀ẹ́sì kan tí a **fi kún un**
-nígbà tí àwọn locale kan kò rí i gbà rárá.
+Arakunrin `check-ui-value-drift`. Ti o apeja ohun English iye ti o wà** tun kọ** nigba ti a fi awọn itumọ rẹ silẹ; yi ọkan mu English bọtini ti o wà** kun** nigba ti diẹ ninu awọn locales kò gba o.
 
-`check-ui-keys-coverage` kò lè rí irú èyí: ó ń fipá mú ààlà ìdá-ọgọ́rùn-ún fún locale kọ̀ọ̀kan,
-àti pé àìní kọ́kọ́rọ́ mọ́kànlá nínú ~13,000 fi àgbájọ ìborí sí 99.9%. Ìdá-ọgọ́rùn-ún fún èdè
-kọ̀ọ̀kan kò lè ṣàlàyé pé “a ṣe ìtújáde ẹ̀yà yìí láìtumọ̀ rẹ̀” — gbogbo ẹ̀yà kan lè wọ inú locale
-tuntun láìsí ọ̀rọ̀ kankan, láìsí ìyípadà kankan sí nọ́ńbà náà.
+`check-ui-keys-coverage` ko le rii kilasi yii: o fi agbara mu ilẹ-ipin ogorun kan fun agbegbe, ati awọn bọtini mọkanla ti ko wa ninu ~ 13,000 fi aaye silẹ ni 99.9%. Iwọn ogorun kan fun ede ko le ṣe afihan “ẹya-ara yii ti a fi ranṣẹ aitumọ” — gbogbo ẹya le de ni agbegbe tuntun ti ko si ọrọ ati pe ko gbe nọmba naa.
 
-Ìṣẹ̀lẹ̀ tí ó dúró fún: Ìpele 3 ti Orchestration Canvas túmọ̀ àwọn kọ́kọ́rọ́ mọ́kànlá rẹ̀ káàkiri
-àwọn locale 42 tó wà nígbà náà. Wákàtí díẹ̀ lẹ́yìn náà, àkójọpọ̀ èdè EU (#13044) mú ibi ìpamọ́ náà
-dé locale 51, àwọn tuntun mẹ́sàn-án (`el`, `et`, `ga`, `hr`, `lt`, `lv`, `mt`, `sl`, `sr`) kò sì
-rí wọn gbà rárá. `deepMergeFallback` ń fi Gẹ̀ẹ́sì rọ́pò kọ́kọ́rọ́ tí kò sí, nítorí náà ọ̀nà ìkùnà
-náà jẹ́ UI tí a kò túmọ̀ dípò UI òfìfo — ó jẹ́ gidi, ó sì dákẹ́ nípasẹ̀ àpẹrẹ rẹ̀.
+Iṣẹlẹ ti o fi koodu si: Ipele 3 ti Canvas Orchestration tumọ awọn bọtini mọkanla rẹ kọja awọn agbegbe 42 ti o wa ni akoko yẹn. Awọn wakati nigbamii ipele ti EU-ede (#13044) mu repo si awọn agbegbe 51, ati awọn tuntun mẹsan (`el`, `et`, `ga`, `hr`, `lt`, `lv`, `mt`, `sl`, `sr`) ko gba wọn rara. `deepMergeFallback` rọpo Gẹẹsi fun bọtini ti ko si, nitorinaa ipo ikuna jẹ ṣiṣitumọ UI dipo UI — òfo, ati ipalọlọ nipasẹ ikole.
 
-Gẹ́gẹ́ bí ẹgbẹ́ rẹ̀, ó **mọ ìyàtọ̀**, ó ń fi Gẹ̀ẹ́sì ní ìpìlẹ̀ ìdàpọ̀ wé igi iṣẹ́, nítorí náà
-àwọn àlàfo tó ti wà tẹ́lẹ̀ dúró gẹ́gẹ́ bí wọ́n ṣe rí, ìdènà náà kò sì nílò ìṣíkiri kankan láti
-ṣiṣẹ́.
+Gẹgẹbi arakunrin rẹ o jẹ** diff-mọ** , Ti o ṣe afiwe Gẹẹsi ni ipilẹ iṣọpọ lodi si igi ti n ṣiṣẹ, nitorina awọn ela ti o wa tẹlẹ wa ni didi ati ẹnu-ọna ko nilo ijira lati tan-an.
 
-**Àmì `__MISSING__:<english>` kò mú un ṣẹ mọ́ (láti 2026-09-17).** Ó ti jẹ́ ìdádúró tí ìwé
-àkọsílẹ̀ sọ tẹ́lẹ̀ — àsìkò ìṣiṣẹ́ máa ń padà sí Gẹ̀ẹ́sì tó tọ́ — títí tí àwọn PR ẹ̀yà mẹ́jọ ní
-2026-09-16 fi kún kọ́kọ́rọ́ 61, tí wọ́n sì tẹ àmì náà sínú gbogbo locale 65 dípò títúmọ̀ wọn:
-ìdènà yìí gba gbogbo wọn, kò sí ohun tó dá àwọn PR náà dúró, lẹ́yìn náà ìdènà ìpín ìtumọ̀ gidi
-tó ń dí iṣẹ́ kọ́ lórí òkè ìtújáde fún gbogbo ènìyàn (pt-BR 3.2 % > 2.5 % + 0.5). Ní báyìí,
-a ń ṣe ìdájọ́ àmì kan gẹ́gẹ́ bí ìtumọ̀ tí kò sí. Ṣàtúnṣe ìkùnà pẹ̀lú
-`node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers --batch-size=40`, tàbí
-gbogbo locale lẹ́ẹ̀kan náà pẹ̀lú `npm run i18n:translate-new-keys`
-(`scripts/i18n/translate-new-keys.sh`, ó láìléwu nígbà tí a yà á kúrò, kò ní bẹ̀rẹ̀ láìsí env
-`OMNIROUTE_TRANSLATION_*`). Kọ́kọ́rọ́ kan tí ó gbọ́dọ̀ dúró ní Gẹ̀ẹ́sì (orúkọ
-ọjà/engine/flag tí a dì mọ́lẹ̀) yẹ kí ó wà nínú `scripts/i18n/untranslatable-keys.json`,
-kì í ṣe lẹ́yìn àmì kan. `vi` fòfin de àwọn àmì pátápátá
-(`tests/unit/i18n-vi-completeness.test.ts`).
+**Aami `__MISSING__:<english>` ko ni itẹlọrun rẹ (lati ọdun 2026-09-17).** O lo lati jẹ idaduro ti o ti gbasilẹ — akoko asiko naa yoo pada sẹhin lati ṣe atunṣe — Gẹẹsi titi ti ẹya mẹjọ PRs ni ọdun 2026-09-16 fi kun awọn bọtini 61 ti o fi ami si gbogbo awọn agbegbe 65 dipo titumọ: ẹnu-bode yii gba gbogbo ọkan, ko si ohun ti o dina PRs, ati idinamọ gidi-itumọ ipin-itumọ ti ẹnu-bode BR + > ). A ṣe idajọ asami bayi bi itumọ ti ko si. Ṣe atunṣe pupa kan pẹlu `node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers --batch-size=40`, tabi gbogbo awọn agbegbe ni afiwe pẹlu `npm run i18n:translate-new-keys` (`scripts/i18n/translate-new-keys.sh`, silori-ailewu, kọ lati bẹrẹ laisi `OMNIROUTE_TRANSLATION_*` env). Bọtini ti o gbọdọ duro ni Gẹẹsi (orukọ product/engine/flag pinned) jẹ ninu `scripts/i18n/untranslatable-keys.json`, kii ṣe lẹhin asami kan. `vi` gbesele awọn asami taara (`tests/unit/i18n-vi-completeness.test.ts`).
 
-#### `check-vitest-exclusions` — ìdènà ìdánwò tí a dá dúró
+#### `check-vitest-exclusions` — o duro si ibikan-igbeyewo
 
-Fáìlì kan nínú àkójọ `exclude` ti `vitest.config.ts` jẹ́ ìdánwò tí kò ṣiṣẹ́, ó sì dà bí
-ìborí lójú ẹni tó bá ka igi náà. Fáìlì méjìlélọ́gọ́ta kójọ sẹ́yìn àlàyé
-`// #8618 — ìkùnà tó ti wà tẹ́lẹ̀; yọ ìyọkúrò yìí nígbà tí a bá ṣàtúnṣe rẹ̀`. A ti pa Issue #8618
-ní 2026-08-11 nígbà tí àkójọ tí ó ń tọ́pinpin dàgbà láti àwọn àkọsílẹ̀ 45 sí 62, tí ọ̀kọ̀ọ̀kan
-tuntun sì jogún àlàyé tó tọ́ka sí issue tí kò ṣiṣẹ́ mọ́. Nígbà tí a wọn àkójọ náà ní fáìlì
-kọ̀ọ̀kan níkẹyìn (#13204), **51 nínú 62 náà kọjá lórí igi lọ́wọ́lọ́wọ́ láìsí ìyípadà kankan
-sí orísun**.
+Faili kan ninu akojọ `vitest.config.ts`'s `exclude` jẹ idanwo ti ko ṣiṣẹ, ati pe o dabi agbegbe fun ẹnikẹni ti o ka igi naa. Awọn faili mejilelọgọta ti a kojọpọ lẹhin asọye `// #8618 — pre-existing failure; remove this exclusion when fixed`. Ọrọ #8618 ti wa ni pipade ni 2026-08-11 lakoko ti atokọ ti o tọpinpin dagba lati awọn titẹ sii 45 si 62, ọkan tuntun kọọkan jogun asọye kan ti o tọka si ọran ti o ku. Nigbati atokọ naa ti ni iwọn nipari faili nipasẹ faili (#13204),** 51 ti 62 kọja lodi si igi ti o wa lọwọlọwọ laisi iyipada orisun** .
 
-Ìdènà náà ń béèrè pé gbogbo ìyọkúrò tí ó tọ́ka sí fáìlì gidi gbọ́dọ̀ (a) dárúkọ issue
-ìtọ́pinpin kan àti (b) hàn nínú `config/quality/vitest-exclusions.json` pẹ̀lú ipò rẹ̀ tí a ti
-wọn, kí fífi ọ̀kan kún un lè jẹ́ ìyàtọ̀ tí a lè ṣàgbéyẹ̀wò nínú fáìlì àkànṣe, dípò kàn jẹ́ ìlà
-míràn nínú àkójọpọ̀ oní-àkọsílẹ̀ 60. Ó mọ̀ọ́mọ̀ kò tún àwọn ìdánwò tí a yọ kúrò ṣiṣẹ́ — ìyẹn
-ń gba ~10 ìṣẹ́jú, ó sì yẹ iṣẹ́ alákòókò; àkójọ ohun-ìní náà ń ṣàkọsílẹ̀ ìgbà tí a wọn ọ̀kọ̀ọ̀kan
-wọn kẹ́yìn.
+Ẹnu naa nilo gbogbo iyasoto ti o pinnu si faili gidi kan si (a) lorukọ ọrọ ipasẹ kan ati (b) han ni `config/quality/vitest-exclusions.json` pẹlu ipo iwọn rẹ, nitorinaa fifi ọkan kun jẹ iyatọ atunwo ni faili iyasọtọ dipo laini diẹ sii ni akojọpọ 60-iwọle. Ko mọọmọ tun-ṣe awọn idanwo ti a yọkuro — ti o jẹ owo ~ iṣẹju mẹwa 10 ati pe o jẹ ninu iṣẹ igbakọọkan; awọn akojo oja igbasilẹ nigbati kọọkan ti a kẹhin won.

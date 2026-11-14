@@ -73,56 +73,50 @@ OmniRoute/
 
 ```
 src/
-├── app/                  App Router පිටු + API මාර්ග
-├── lib/                  මූලික පුස්තකාල (DB, සත්යාපනය, OAuth, කුසලතා, මතකය, …)
-├── domain/               පිරිසිදු වසම් ස්තරය (ප්රතිපත්ති, පසුබැසීම, පිරිවැය, අගුලු දැමීම, …)
-├── server/               සේවාදායකයට පමණක් අදාළ මොඩියුල (අවසරකරණය, cors, සත්යාපනය)
-├── shared/               වර්ග, නියත, වලංගුකරණය, ගිවිසුම්, උපයෝගිතා (සීමා හරහා ආරක්ෂිත)
-├── mitm/                 CLI ඒකාබද්ධ කිරීම සඳහා අතරමැදි ප්රොක්සි උපකාරක
-├── models/               දේශීය ආකෘති පාරදත්ත / අන්වර්ථ නාමකරණය
-├── sse/                  තවමත් src/ යටතේ පවතින පැරණි SSE හසුරුවන (open-sse/ නොවේ)
-├── store/                සේවාලාභී පාර්ශ්වීය තත්ත්ව ගබඩා
-├── middleware/           මාර්ග මට්ටමේ මිඩ්ල්වෙයා උපයෝගිතා (Next.js ගෝලීය මිඩ්ල්වෙයා නොවේ)
-├── scripts/              යෙදුම් කේතය මඟින් ආයාත කළ හැකි ගස තුළ ඇති ස්ක්රිප්ට්
-├── types/                පරිසරගත සහ හවුල් TS වර්ග
-├── i18n/                 ස්ථානීය භාෂා බණ්ඩල
-├── instrumentation.ts    Next.js උපකරණකරණ හුක් එක
+├── app/                  App Router pages + API routes
+├── lib/                  Core libraries (DB, auth, OAuth, skills, memory, …)
+├── domain/               Pure domain layer (policy, fallback, cost, lockout, …)
+├── server/               Server-only modules (authz, cors, auth)
+├── shared/               Types, constants, validation, contracts, utils (cross-boundary safe)
+├── mitm/                 Man-in-the-middle proxy helpers for CLI integration
+├── models/               Local model metadata / aliasing
+├── sse/                  Legacy SSE handlers that still live under src/ (not open-sse/)
+├── store/                Client-side state stores
+├── middleware/           Route-level middleware utilities (not Next.js global middleware)
+├── scripts/              In-tree scripts importable by app code
+├── types/                Ambient and shared TS types
+├── i18n/                 Locale bundles
+├── instrumentation.ts    Next.js instrumentation hook
 ├── instrumentation-node.ts
-└── proxy.ts              ඉහළ මට්ටමේ ප්රොක්සි ආරම්භක උපකාරකය
+└── proxy.ts              Top-level proxy bootstrap helper
 ```
 
-### 3.1 `src/app/` — App Router
+### 3.1 `src/app/` — යෙදුම් රවුටරය
 
-App Router මඟින් උපකරණ පුවරු UI එක සහ පොදු/කළමනාකරණ HTTP API එක යන දෙකම නිරාවරණය කරයි.
-**ගෝලීය මිඩ්ල්වෙයා නොමැත** — අවහිර කිරීම එක් එක් මාර්ගය අනුව සිදු කෙරේ.
+යෙදුම් රවුටරය උපකරණ පුවරුව UI සහ public/management HTTP API දෙකම නිරාවරණය කරයි. අර තියෙන්නේ** ගෝලීය මිඩ්ල්වෙයාර් නැත** — බාධා කිරීම් එක් මාර්ගයකට සිදු කෙරේ.
 
-`src/app/` යටතේ ඇති ඉහළ මට්ටමේ ඛණ්ඩ:
+`src/app/` යටතේ ඉහළ මට්ටමේ කොටස්:
 
-| මාර්ගය                                                                        | අරමුණ                                           |
-| ----------------------------------------------------------------------------- | ----------------------------------------------- |
-| `api/`                                                                        | සියලු HTTP API මාර්ග (පහත විස්තරය බලන්න)        |
-| `a2a/`                                                                        | A2A JSON-RPC 2.0 අන්ත ලක්ෂ්යය (`POST /a2a`)     |
-| `.well-known/agent.json/`                                                     | A2A Agent Card සොයාගැනීමේ ලේඛනය                 |
-| `(dashboard)/`                                                                | උපකරණ පුවරු UI (මාර්ග සමූහය, URL උපසර්ගයක් නැත) |
-| `auth/`, `login/`, `forgot-password/`, `callback/`                            | සත්යාපන ප්රවාහ                                  |
-| `landing/`                                                                    | අලෙවිකරණ/ගොඩබැසීමේ පිටුව                        |
-| `docs/`                                                                       | කාවැද්දූ API ලේඛන නරඹනය                         |
-| `status/`, `maintenance/`, `offline/`                                         | මෙහෙයුම් පිටු                                   |
-| `privacy/`, `terms/`                                                          | නීතිමය පිටු                                     |
-| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | ස්ථිතික දෝෂ පිටු                                |
-| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | රාමුක දෝෂ/පූරණ සීමා                             |
-| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | මූල කවචය                                        |
+| මාර්ගය                                                                        | අරමුණ                                            |
+| ----------------------------------------------------------------------------- | ------------------------------------------------ |
+| `api/`                                                                        | සියලුම HTTP API මාර්ග (පහත බිඳවැටීම බලන්න)       |
+| `a2a/`                                                                        | A2A JSON-RPC 2.0 අන්ත ලක්ෂ්‍යය (`POST /a2a`)     |
+| `.well-known/agent.json/`                                                     | A2A නියෝජිත කාඩ්පත් සොයාගැනීමේ ලේඛනය             |
+| `(dashboard)/`                                                                | උපකරණ පුවරුව UI (මාර්ග කණ්ඩායම, URL උපසර්ගය නැත) |
+| `auth/`, `login/`, `forgot-password/`, `callback/`                            | Aut ගලා යයි                                      |
+| `landing/`                                                                    | Marketing/landing පිටුව                          |
+| `docs/`                                                                       | Embedded API docs viewer                         |
+| `status/`, `maintenance/`, `offline/`                                         | මෙහෙයුම් පිටු                                    |
+| `privacy/`, `terms/`                                                          | නීතිමය පිටු                                      |
+| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | ස්ථිතික දෝෂ පිටු                                 |
+| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | රාමු error/loading මායිම්                        |
+| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | මූල කවචය                                         |
 
 #### 3.1.1 `src/app/(dashboard)/dashboard/` — UI පිටු
 
-`agents`, `analytics`, `api-manager`, `audit`, `auto-combo`, `batch`, `cache`,
-`changelog`, `cli-tools`, `cloud-agents`, `combos`, `compression`, `context`,
-`costs`, `endpoint`, `health`, `limits`, `logs`, `memory`, `onboarding`,
-`playground`, `providers`, `search-tools`, `settings`, `skills`, `system`,
-`translator`, `usage`, `webhooks`, සහ මූල `page.tsx`, `HomePageClient.tsx`,
-`BootstrapBanner.tsx`.
+`agents`, `analytics`, `api-manager`, `audit`, `auto-combo`, `batch`, `cache`, `changelog`, `cli-tools`, `cloud-agents`, `combos`, `compression`, `context`, `costs`, `endpoint`, `health`, `limits`, `logs` `BootstrapBanner.tsx` `memory`, `onboarding`, `playground`, `providers`, `search-tools`, `settings`, `skills`, `translator` `usage` plus `system` `page.tsx`, `webhooks`, `HomePageClient.tsx`.
 
-#### 3.1.2 `src/app/api/` — ඉහළ මට්ටමේ API සමූහ
+#### 3.1.2 `src/app/api/` — ඉහළ මට්ටමේ API කණ්ඩායම්
 
 ```
 src/app/api/
@@ -175,144 +169,137 @@ src/app/api/
 ├── token-health/
 ├── translator/
 ├── tunnels/
-├── services/   කාවැද්දූ සේවා කළමනාකරණය (9router, cliproxy) — LOCAL_ONLY
+├── services/   Embedded service management (9router, cliproxy) — LOCAL_ONLY
 ├── upstream-proxy/
 ├── usage/
-├── v1/         OpenAI-අනුකූල පොදු API
-├── v1beta/     Gemini-ශෛලියේ අනුකූලතාව
+├── v1/         OpenAI-compatible public API
+├── v1beta/     Gemini-style compat
 ├── version-manager/
 └── webhooks/
 ```
 
-#### 3.1.2a `src/app/api/services/` — කාවැද්දූ සේවා කළමනාකරණය
+#### 3.1.2a `src/app/api/services/` — Embedded Services කළමනාකරණය
 
-9Router සහ CLIProxyAPI ස්ථාපනය කිරීම, ආරම්භ කිරීම, නැවැත්වීම සහ අධීක්ෂණය කිරීම සඳහා මාර්ග.
-ඒවාට `npm install` ආයාචනය කර උප ක්රියාවලි ආරම්භ කළ හැකි බැවින්, සියලු මාර්ග
-**LOCAL_ONLY** (ලූප්බැක් පමණි, දැඩි රීතිය #17) ලෙස වර්ගීකරණය කර ඇත.
+9Router සහ CLIProxyAPI ස්ථාපනය කිරීම, ආරම්භ කිරීම, නැවැත්වීම සහ අධීක්ෂණය සඳහා මාර්ග. සියලුම මාර්ග වර්ගීකරණය කර ඇත**LOCAL_ONLY** (ලූප්බැක් පමණි, දෘඪ රීතිය #17) මන්ද ඔවුන්ට `npm install` ආයාචනා කර ළමා ක්‍රියාවලීන් බිහි කළ හැකි බැවිනි.
 
 ```
 src/app/api/services/
 ├── 9router/
-│   ├── _lib.ts             getOrInitSupervisor() සහායකය
-│   ├── install/route.ts    POST — execFile හරහා npm install
+│   ├── _lib.ts             getOrInitSupervisor() helper
+│   ├── install/route.ts    POST — npm install via execFile
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — නව අනුවාදයක් npm install කිරීම
-│   ├── rotate-key/route.ts POST — නව API යතුරක් ජනනය කිරීම + නැවත ආරම්භ කිරීම
-│   ├── status/route.ts     GET  — සජීවී + DB තත්ත්වය + අනුවාද පාරදත්ත
-│   └── auto-start/route.ts POST — auto_start සලකුණ මාරු කිරීම
+│   ├── update/route.ts     POST — npm install newer version
+│   ├── rotate-key/route.ts POST — generate new API key + restart
+│   ├── status/route.ts     GET  — live + DB status + version metadata
+│   └── auto-start/route.ts POST — toggle auto_start flag
 ├── cliproxy/
-│   ├── _lib.ts             getOrInitSupervisor() සහායකය
+│   ├── _lib.ts             getOrInitSupervisor() helper
 │   ├── install/route.ts    POST — npm install
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — නව අනුවාදයක් npm install කිරීම
-│   ├── status/route.ts     GET  — සජීවී + DB තත්ත්වය + අනුවාද පාරදත්ත
-│   └── auto-start/route.ts POST — auto_start සලකුණ මාරු කිරීම
+│   ├── update/route.ts     POST — npm install newer version
+│   ├── status/route.ts     GET  — live + DB status + version metadata
+│   └── auto-start/route.ts POST — toggle auto_start flag
 └── [name]/
-    └── logs/route.ts       GET  — SSE ලොගයේ අවසාන කොටස (සියලු සේවා අතර හවුල් වේ)
+    └── logs/route.ts       GET  — SSE log tail (shared by all services)
 ```
 
-අදාළ උපකරණ පුවරු UI:
-`src/app/(dashboard)/dashboard/providers/services/` — ටැබ් දෙකක පිටුවක් (CLIProxyAPI + 9Router).
-9Router කාවැද්දූ UI සඳහා ප්රතිලෝම ප්රොක්සිය:
-`src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
+අනුරූප උපකරණ පුවරුව UI: `src/app/(dashboard)/dashboard/providers/services/` — ටැබ් දෙකේ පිටුව (CLIProxyAPI + 9Router). 9Router කාවැද්දූ UI සඳහා ප්‍රතිලෝම ප්‍රොක්සි : `src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
 
-ගැඹුරු විස්තරය: `docs/frameworks/EMBEDDED-SERVICES.md`
+ගැඹුරට කිමිදීම: `docs/frameworks/EMBEDDED-SERVICES.md`
 
 #### 3.1.3 `src/app/api/v1/` — OpenAI-අනුකූල පොදු API
 
 ```
 v1/
-├── accounts/[id]/                       ගිණුම් සෙවීම
-├── agents/tasks/[id]/, agents/tasks/    A2A ආකාරයේ කාර්ය අන්ත ලක්ෂ්ය
-├── api/                                 v1/api යටතේ නිරාවරණය කළ අභ්යන්තර API සහායක
+├── accounts/[id]/                       account lookup
+├── agents/tasks/[id]/, agents/tasks/    A2A-flavored task endpoints
+├── api/                                 internal API helpers exposed under v1/api
 ├── audio/{speech, transcriptions}/      TTS + STT
 ├── batches/[id]/{cancel}, batches/      OpenAI Batches API
-├── chat/completions/                    Chat Completions (ප්රධාන අන්ත ලක්ෂ්යය)
-├── completions/                         පැරණි පෙළ සම්පූර්ණ කිරීම්
-├── embeddings/                          කාවැද්දීම්
+├── chat/completions/                    Chat Completions (the main endpoint)
+├── completions/                         Legacy text completions
+├── embeddings/                          Embeddings
 ├── files/[id]/, files/                  Files API
-├── _helpers/                            හවුල් මාර්ග සහායක (පොදු URL එකක් නැත)
-├── images/{edits, generations}/         රූප ජනනය + සංස්කරණය
-├── issues/                              ප්රමුඛතා වර්ගීකරණ සහායක අන්ත ලක්ෂ්ය
-├── management/{proxies}/                v1 තුළ කළමනාකරණ විෂයපථයට අයත් මාර්ග
-├── messages/{count_tokens}/             Anthropic ආකාරයේ පණිවිඩ අනුකූලතාව
-├── models/                              ආකෘති ලැයිස්තුගත කිරීම (`route.ts`, `catalog.ts`)
-├── moderations/                         අන්තර්ගත පාලනය
-├── music/                               සංගීත ජනනය
-├── providers/[provider]/                සැපයුම්කරු අනුව මෙහෙයුම්
-├── quotas/{check}                       කෝටා පිරික්සුම්
-├── registered-keys/                     ලියාපදිංචි යතුරු පරිපාලනය
-├── rerank/                              නැවත ශ්රේණිගත කිරීම
-├── responses/[...path]/                 OpenAI Responses API (සියල්ල ග්රහණය කරන)
-├── search/                              වෙබ් සෙවීම
-├── videos/                              වීඩියෝ ජනනය
-├── ws/                                  WebSocket සම්බන්ධකය
-└── route.ts                             දර්ශක හසුරුවනය
+├── _helpers/                            Shared route helpers (no public URL)
+├── images/{edits, generations}/         Image gen + edit
+├── issues/                              Triage helper endpoints
+├── management/{proxies}/                Management-scoped routes inside v1
+├── messages/{count_tokens}/             Anthropic-style messages compat
+├── models/                              Model listing (`route.ts`, `catalog.ts`)
+├── moderations/                         Moderation
+├── music/                               Music gen
+├── providers/[provider]/                Per-provider operations
+├── quotas/{check}                       Quota probes
+├── registered-keys/                     Registered key admin
+├── rerank/                              Reranking
+├── responses/[...path]/                 OpenAI Responses API (catch-all)
+├── search/                              Web search
+├── videos/                              Video gen
+├── ws/                                  WebSocket bridge
+└── route.ts                             Index handler
 ```
 
-සෑම මාර්ග ගොනුවක්ම එකම රටාව අනුගමනය කරයි:
+සෑම මාර්ග ගොනුවක්ම එකම රටාවක් අනුගමනය කරයි:
 
 ```
-මාර්ගය → CORS පූර්ව පරීක්ෂාව → Zod ඉල්ලීම් දේහ සත්යාපනය → විකල්ප සත්යාපනය
-       → API යතුරු ප්රතිපත්ති බලාත්මක කිරීම → හසුරුවනයට පැවරීම (open-sse)
+Route → CORS preflight → Zod body validation → optional auth
+      → API key policy enforcement → handler delegation (open-sse)
 ```
 
-`v1beta/` යනු Gemini ආකාරයේ අනුකූලතා මතුපිටයි (එකම
-`open-sse/handlers/` නල මාර්ගයට පරිවර්තනය කරන සිහින් ආවරණයකි).
+`v1beta/` යනු Gemini-style compat මතුපිට (එකම `open-sse/handlers/` නල මාර්ගයට පරිවර්තනය කරන තුනී එතුමකි).
 
 ### 3.2 `src/lib/` — මූලික පුස්තකාල
 
-සෑම විටම දත්ත, සමමුහුර්තකරණය, OAuth, කුසලතා, මතකය ආදිය මෙම මොඩියුල හරහා ආයාත කරන්න.
-වගුවෙහි සැබෑ නාමාවලි සහ කැපී පෙනෙන ඉහළ මට්ටමේ ගොනු කාණ්ඩගත කර ඇත.
+මෙම මොඩියුල හරහා සෑම විටම දත්ත, සමමුහුර්තකරණය, OAuth, කුසලතා, මතකය, ආදිය ආයාත කරන්න. වගුව සත්‍ය නාමාවලි සහ කැපී පෙනෙන ඉහළ මට්ටමේ ගොනු සමූහගත කරයි.
 
-| මොඩියුලය          | අරමුණ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`            | A2A ප්රොටෝකෝල සේවාදායකය: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (කුසලතා 6ක්: පිරිවැය විශ්ලේෂණය, සෞඛ්ය වාර්තාව, සැපයුම්කරු සොයාගැනීම, කෝටා කළමනාකරණය, බුද්ධිමත් මාර්ගගත කිරීම, හැකියාවන් ලැයිස්තුගත කිරීම)                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `acp/`            | නියෝජිත-පාලන-ප්රොටෝකෝලය: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `api/`            | අභ්යන්තර API සහායක: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `auth/`           | `managementPassword.ts` (මුරපදය යළි සැකසීම / හැෂ් කිරීම)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `batches/`        | OpenAI Batches API සේවාව (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `catalog/`        | OpenRouter නාමාවලිය සමමුහුර්ත කිරීම (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `cloudAgent/`     | Cloud agent රෙජිස්ට්රිය: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `combos/`         | Combo නිරාකරණ සහායක                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `compliance/`     | විගණනය + provider විගණනය: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `config/`         | Runtime වින්යාස සම්බන්ධකය                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `db/`             | SQLite domain මොඩියුල (§3.2.1 බලන්න)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `display/`        | API ප්රතිචාර සඳහා භාවිත කරන UI/display සහායක                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `embeddings/`     | Embedding සේවා රෙජිස්ට්රිය                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `env/`            | Env පූරණය + අභ්යන්තර පරීක්ෂාව                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `evals/`          | ඇගයීම් ධාවන පරිසරය                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `jobs/`           | පසුබිම් කාර්යයන් (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `memory/`         | ස්ථිර මතකය: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `oauth/`          | OAuth/ආයාත සැපයුම්කරු මොඩියුල (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, සහ `services/`, `utils/`, හා `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                 |
-| `plugins/`        | ප්ලගිනය පූරණය කරන්නා (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `providerModels/` | කළමනාකරණය කළ ආකෘති ජීවන චක්රය: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `providers/`      | සැපයුම්කරු සහායක: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `resilience/`     | `settings.ts` — පරිපථ බිඳුම, සිසිලන කාලය සහ අගුලු දැමීම සඳහා සැකසුම්                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `runtime/`        | ධාවනකාල විශේෂාංග හඳුනාගැනීම                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `services/`       | කාවැද්දූ සේවා රාමුව: `ServiceSupervisor.ts` (මෙහෙයුම් අගුලක්, වළලු බෆරයක් සහ සෞඛ්ය පරීක්ෂකයක් සහිත සාමාන්ය උප-ක්රියාවලි අධීක්ෂකය), `bootstrap.ts` (ක්රියාවලි මට්ටමේ ලියාපදිංචිය සහ ස්වයංක්රීය ආරම්භය), `registry.ts` (මෙවලම → අධීක්ෂක සිතියම), `apiKey.ts` (AES-256-GCM යතුරු ගබඩාව), `modelSync.ts` (කාලානුරූපී ආකෘති සමමුහුර්තකරණය), `ringBuffer.ts` (5 MB වෘත්තාකාර ලොග් බෆරය), `healthCheck.ts` (HTTP සෞඛ්ය පරීක්ෂණය), `types.ts`, `embedWsProxy.ts` (WebSocket ප්රොක්සිය), `installers/{ninerouter,cliproxy}.ts`. `docs/frameworks/EMBEDDED-SERVICES.md` බලන්න                                                                                                                          |
-| `agentSkills/`    | නියෝජිත කුසලතා නාමාවලිය + ජනකය: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → `skills/{id}/SKILL.md` වෙත ලියයි), `openapiParser.ts` (OpenAPI පිරිවිතරයෙන් REST අන්ත ලක්ෂ්ය උකහා ගනී), `cliRegistryParser.ts` (bin/cli-registry වෙතින් CLI උපවිධාන උකහා ගනී), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). REST මාර්ග (`/api/agent-skills/*`), MCP මෙවලම් (`omniroute_agent_skills_*`) සහ A2A කුසලතාව `list-capabilities` විසින් භාවිත කරයි. [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md) බලන්න. |
-| `skills/`         | කුසලතා රාමුව: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, සහ `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `spend/`          | `batchWriter.ts` (පසුබැසී ලිවීමේ බෆරය)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `sync/`           | `bundle.ts`, `tokens.ts` (Cloud Sync)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `system/`         | පද්ධති මට්ටමේ සහායක                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `translator/`     | ඉහළ මට්ටමේ පරිවර්තක සම්බන්ධකය (`open-sse/translator/` වෙත පැවරේ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `usage/`          | භාවිත ගණනය: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `versionManager/` | ස්වයංක්රීය යාවත්කාලීන කිරීම + අනුවාද මැනිෆෙස්ට් එක                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `ws/`             | WebSocket සම්බන්ධකය                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `zed-oauth/`      | Zed සංස්කාරකයේ OAuth ප්රවාහය                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| මොඩියුලය          | අරමුණ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `a2a/`            | A2A ප්‍රොටෝකෝල සේවාදායකය: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (නිපුණතා 6: පිරිවැය විශ්ලේෂණය, සෞඛ්‍ය වාර්තාව, සැපයුම්කරු සොයා ගැනීම, කෝටා කළමනාකරණය, ස්මාර්ට් මාර්ගගත කිරීම, ලැයිස්තු-හැකියාවන්)                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `acp/`            | නියෝජිත-පාලක-ප්‍රොටෝකෝලය: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `api/`            | අභ්‍යන්තර API සහායකයින්: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `auth/`           | `managementPassword.ts` (මුරපද යළි පිහිටුවීම / හැෂිං)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `batches/`        | OpenAI කණ්ඩායම් API සේවාව (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `catalog/`        | OpenRouter නාමාවලිය සමමුහුර්ත කිරීම (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `cloudAgent/`     | වලාකුළු නියෝජිත ලේඛනය: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `combos/`         | සංයුක්ත විභේදන සහායක                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `compliance/`     | විගණන + සපයන්නා විගණනය: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `config/`         | ධාවන කාල සැකසුම් මැලියම්                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `db/`             | SQLite වසම් මොඩියුල (§3.2.1 බලන්න)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `display/`        | UI/display සහායකයන් API ප්‍රතිචාර මගින් භාවිතා කරයි                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `embeddings/`     | කාවැද්දීමේ සේවා ලේඛනය                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `env/`            | Env පූරණය + අභ්‍යන්තර පරීක්‍ෂණය                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `evals/`          | Eval ධාවන කාලය                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `jobs/`           | පසුබිම් රැකියා (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `memory/`         | ස්ථිර මතකය: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `oauth/`          | OAuth/import සපයන්නාගේ මොඩියුල (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex` `zed-hosted` `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, plus `zed`, `services/`, `constants/oauth.ts` `utils/`                                                                                                                                                                                                                                                                                                                            |
+| `plugins/`        | ප්ලගින කාරකය (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `providerModels/` | කළමනාකරණය කළ ආදර්ශ ජීවන චක්‍රය: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `providers/`      | සපයන්නන්ගේ සහායකයින්: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `resilience/`     | පරිපථ කඩනය, සිසිල් කිරීම, අගුලු දැමීම සඳහා`settings.ts` — සැකසුම්                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `runtime/`        | ධාවන කාල විශේෂාංග හඳුනාගැනීම                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `services/`       | කාවැද්දූ සේවා රාමුව: `ServiceSupervisor.ts` (මෙහෙයුම් අගුල සහිත සාමාන්‍ය ළමා ක්‍රියාවලි අධීක්ෂක, මුද්ද බෆරය, සෞඛ්‍ය පරීක්ෂක), `bootstrap.ts` (ක්‍රියාවලි මට්ටමේ ලියාපදිංචිය සහ ස්වයංක්‍රීය-ආරම්භය), `registry.ts` (මෙවලම් → අධීක්ෂක සිතියම), `apiKey.ts` (AES-256-GCM යතුරු ගබඩාව), `modelSync.ts` (ආවර්තිතා ආවර්තිතා ආදර්ශ සමමුහුර්ත), MB `ringBuffer.ts` (HTTP සෞඛ්‍ය පරීක්ෂණය), `types.ts`, `healthCheck.ts` (WebSocket proxy), `embedWsProxy.ts` `installers/{ninerouter,cliproxy}.ts` `docs/frameworks/EMBEDDED-SERVICES.md` බලන්න                                                                                                                                              |
+| `agentSkills/`    | නියෝජිත නිපුණතා නාමාවලිය + උත්පාදක: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → `skills/{id}/SKILL.md`), `openapiParser.ts` ( OpenAPI පිරිවිතරයෙන් REST අන්ත ලක්ෂ්‍ය උපුටා ගනී), `cliRegistryParser.ts` ( `schemas.ts` SkillCoverageSchemabin/cli-registry වෙතින් CLI උප විධාන උපුටා ගනී), , AgentSkillSchema, ListQuerySchemaGenerateBodySchema,Zod( `types.ts`,AgentSkill, SkillCoverage, SkillMarkdownGeneratorReport. REST මාර්ග (`/api/agent-skills/*`), MCP මෙවලම් (`omniroute_agent_skills_*`) සහ A2A කුසලතා `list-capabilities` මගින් පරිභෝජනය කරයි. [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md) බලන්න. |
+| `skills/`         | නිපුණතා රාමුව: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, plus `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `spend/`          | `batchWriter.ts` (ලියන්න පිටුපස බෆරය)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `sync/`           | `bundle.ts`, `tokens.ts` (Cloud Sync)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `system/`         | පද්ධති මට්ටමේ සහායකයින්                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `translator/`     | ඉහළ මට්ටමේ පරිවර්තක මැලියම් ( `open-sse/translator/` වෙත නියෝජිතයන්)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `usage/`          | භාවිත ගිණුම්කරණය: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `versionManager/` | + අනුවාදය මැනිෆෙස්ටය ස්වයංක්‍රීයව යාවත්කාලීන කරන්න                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `ws/`             | WebSocket පාලම                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `zed-oauth/`      | Zed සංස්කාරක OAuth ප්‍රවාහය                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 
 `src/lib/` හි ඉහළ මට්ටමේ ගොනු:
 
-- පැරණි `localDb.ts` barrel එක ඉවත් කර ඇත — පරිභෝජකයන් නිශ්චිත `src/lib/db/*` මොඩියුල සෘජුවම ආයාත කරයි.
+- පැරණි `localDb.ts` බැරලය ඉවත් කරන ලදී — පාරිභෝගිකයින් නිශ්චිත `src/lib/db/*` මොඩියුල සෘජුවම ආනයනය කරයි.
 - `proxyHealth.ts`, `proxyLogger.ts`, `tokenHealthCheck.ts`, `localHealthCheck.ts`
 - `apiBridgeServer.ts`, `cacheLayer.ts`, `semanticCache.ts`, `settingsCache.ts`
 - `cloudSync.ts`, `initCloudSync.ts`
@@ -326,119 +313,72 @@ v1/
 
 #### 3.2.1 `src/lib/db/`
 
-Singleton SQLite දත්ත සමුදාය (`core.ts` තුළ `getDbInstance()`, WAL journaling).
-**routes හෝ handlers තුළ කිසිවිටෙක raw SQL නොලියන්න** — මෙම මොඩියුල හරහා ක්රියා කරන්න.
+Singleton SQLite දත්ත සමුදාය ( `core.ts` හි`getDbInstance()`, WAL සඟරාව).** කිසිවිටක raw SQL මාර්ගවල හෝ හසුරුවන්නෙහි ලියන්න එපා** — මෙම මොඩියුල හරහා යන්න.
 
-![දත්ත සමුදා schema දළ විශ්ලේෂණය (තෝරාගත් මූලික වගු)](../diagrams/exported/db-schema-overview.svg)
+![Database schema overview (selected core tables)](../diagrams/exported/db-schema-overview.svg)
 
 > මූලාශ්රය: [diagrams/db-schema-overview.mmd](../diagrams/db-schema-overview.mmd)
 
-Domain මොඩියුල (එක් එක් මොඩියුලයට වගු එකක් හෝ කිහිපයක් අයත් වේ): `apiKeys.ts`, `backup.ts`,
-`batches.ts`, `cleanup.ts`, `cliToolState.ts`, `combos.ts`,
-`commandCodeAuth.ts`, `compression.ts`, `compressionAnalytics.ts`,
-`compressionCacheStats.ts`, `compressionCombos.ts`, `compressionScheduler.ts`,
-`contextHandoffs.ts`, `core.ts`, `creditBalance.ts`, `databaseSettings.ts`,
-`detailedLogs.ts`, `domainState.ts`, `encryption.ts`, `evals.ts`, `files.ts`,
-`healthCheck.ts`, `jsonMigration.ts`, `migrationRunner.ts`,
-`modelComboMappings.ts`, `models.ts`, `oneproxy.ts`, `prompts.ts`,
-`providers.ts`, `providerLimits.ts`, `proxies.ts`, `quotaSnapshots.ts`,
-`readCache.ts`, `reasoningCache.ts`, `registeredKeys.ts`, `secrets.ts`,
-`sessionAccountAffinity.ts`, `settings.ts`, `stateReset.ts`, `stats.ts`,
-`syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts`,
-`webhooks.ts`.
+වසම් මොඩියුල (සෑම එකකටම වගු එකක් හෝ කිහිපයක් ඇත): `apiKeys.ts`, `backup.ts`, `batches.ts`, `cleanup.ts`, `cliToolState.ts`, `combos.ts`, `commandCodeAuth.ts`, `compression.ts`, `compressionAnalytics.ts`, `compressionCacheStats.ts`, `compressionCombos.ts`, `compressionScheduler.ts`, `contextHandoffs.ts`, `core.ts`, `creditBalance.ts`, `databaseSettings.ts`, `detailedLogs.ts` `files.ts` `domainState.ts` `encryption.ts` `evals.ts` `healthCheck.ts`, `jsonMigration.ts`, `migrationRunner.ts`, `modelComboMappings.ts` `webhooks.ts` `models.ts`, `oneproxy.ts`, `prompts.ts`, `providers.ts`, `providerLimits.ts` `readCache.ts` `proxies.ts`, `reasoningCache.ts` `quotaSnapshots.ts`, `secrets.ts`, `sessionAccountAffinity.ts`, `settings.ts`, `stateReset.ts`, `stats.ts`, `syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts` `registeredKeys.ts`
 
-`migrations/` තුළ අනුවාදගත `.sql` ගොනු 168ක් (idempotent, transactional) අඩංගු වන අතර, ආරම්භයේදී
-`migrationRunner.ts` මඟින් ඒවා ක්රියාත්මක කරයි.
+`migrations/` සතුව අනුවාදිත `.sql` ගොනු 168ක් (idempotent, ගනුදෙනු) ඇති අතර එය ඇරඹීමේදී `migrationRunner.ts` මගින් ක්‍රියාත්මක වේ.
 
-migrations පුරා නිර්මාණය කරන ලද වගු (මුළු ගණන 123කි):
+සංක්‍රමණය හරහා සාදන ලද වගු (මුළු 123):
 
-`a`, `account_key_limits`, `api_keys`, `batches`, `call_logs`,
-`combo_adaptation_state`, `combos`, `command_code_auth_sessions`,
-`compression_analytics`, `compression_cache_stats`,
-`compression_combo_assignments`, `compression_combos`, `context_handoffs`,
-`daily_usage_summary`, `db_meta`, `domain_budgets`, `domain_circuit_breakers`,
-`domain_cost_history`, `domain_fallback_chains`, `domain_lockout_state`,
-`eval_cases`, `eval_runs`, `eval_suites`, `files`, `hourly_usage_summary`,
-`key_value`, `mcp_tool_audit`, `memories`, `model_combo_mappings`,
-`provider_connections`, `provider_key_limits`, `provider_nodes`,
-`proxy_assignments`, `proxy_logs`, `proxy_registry`, `quota_snapshots`,
-`reasoning_cache`, `registered_keys`, `request_detail_logs`,
-`routing_decisions`, `semantic_cache`, `session_account_affinity`,
-`skill_executions`, `skills`, `sync_tokens`, `tier_assignments`,
-`tier_config`, `upstream_proxy_config`, `usage_history`, `version_manager`,
-`webhooks` (මතක සෙවීම සඳහා FTS5 virtual tables ද ඇතුළුව).
+`a`, `account_key_limits`, `api_keys`, `batches`, `call_logs`, `combo_adaptation_state`, `combos`, `command_code_auth_sessions`, `compression_analytics`, `compression_cache_stats`, `compression_combo_assignments`, `compression_combos`, `context_handoffs`, `daily_usage_summary`, `db_meta`, `domain_budgets`, `domain_circuit_breakers`, `domain_cost_history`, `domain_fallback_chains`, `domain_lockout_state`, `eval_cases`, `eval_runs`, `eval_suites`, `files`, `hourly_usage_summary`, `mcp_tool_audit`, `memories`, `model_combo_mappings`, `provider_connections`, `provider_key_limits`, `provider_nodes`, `proxy_assignments`, `proxy_logs` `proxy_registry`, `quota_snapshots` `request_detail_logs` `reasoning_cache`, `registered_keys`, `semantic_cache`, `session_account_affinity`, `skill_executions`, `skills`, `sync_tokens`, `tier_assignments`, `tier_config`, `upstream_proxy_config`, `usage_history` `key_value` `version_manager` සඳහා virt `routing_decisions` මතකය (ප්ලස් `webhooks` FTS5 ).
 
-### 3.3 `src/domain/` — Domain ස්තරය
+### 3.3 `src/domain/` — වසම් ස්ථරය
 
-I/O නොමැති පිරිසිදු ව්යාපාරික තර්කනය. routes සහ handlers මඟින් ආයාත කරයි.
+වසම් සේවා සහ ඇගයීම් ගිවිසුම්. සමහර මොඩියුල සජීවී ඉල්ලීම් මාර්ගයෙන් හැඳින්වේ; අනෙක් ඒවා ස්වාධීන ගිවිසුම් ලෙස පවතී. මෙම සම්පූර්ණ නාමාවලිය I/O වලින් තොර හෝ සෑම මොඩියුලයක්ම වෙනස් කිරීම නිෂ්පාදන මාර්ගකරණයට බලපාන බව උපකල්පනය නොකරන්න.
+
+සජීවී ප්‍රතිපත්ති මතුපිට `src/shared/utils/apiKeyPolicy.ts` සහ `src/sse/handlers/chat/resolvedModelPolicy.ts` වේ. සජීවී සංයෝජන හැසිරවීම සහ ඉලක්ක විභේදනය `open-sse/services/combo.ts` භාවිතා කරයි. පරීක්ෂා කරන ලද `policyEngine.ts` සහ `comboResolver.ts` කොන්ත්‍රාත්තු, `src/lib/container.ts` සමඟ එක්ව, පරීක්‍ෂා කළ කතාබස් ඉල්ලීම් මාර්ගයේ රැහැන්වීම නොවේ. මාර්ග වෙනස් කිරීමක් සැලසුම් කිරීමේදී එම ක්‍රියාකාරී මතුපිටින් ඒවා වෙන් කර තබන්න.
 
 | ගොනුව                                      | අරමුණ                                               |
 | ------------------------------------------ | --------------------------------------------------- |
-| `policyEngine.ts`                          | ඉහළම මට්ටමේ policy resolver                         |
-| `fallbackPolicy.ts`                        | Fallback තීරණ වෘක්ෂය                                |
-| `costRules.ts`                             | පිරිවැය ගණනය කිරීමේ රීති                            |
-| `lockoutPolicy.ts`                         | Model lockout තීරණ                                  |
-| `tagRouter.ts`                             | Tag මත පදනම් වූ routing                             |
-| `comboResolver.ts`                         | ඉල්ලීමෙන් → ඉලක්ක ලැයිස්තුවට combo resolution       |
-| `connectionModelRules.ts`                  | එක් එක් connection සඳහා model filters               |
-| `modelAvailability.ts`                     | Model ලබාගත හැකි බව පරීක්ෂා කිරීම                   |
-| `degradation.ts`                           | Degraded-mode සංක්රාන්ති                            |
-| `providerExpiration.ts`                    | කල් ඉකුත් වූ account/key හඳුනාගැනීම                 |
-| `quotaCache.ts`                            | Cache කළ quota තීරණ                                 |
-| `responses.ts`, `omnirouteResponseMeta.ts` | Response හැඩය සඳහා සහායක                            |
-| `configAudit.ts`                           | Config වෙනස්කම් විගණනය                              |
-| `assessment/`                              | Model තක්සේරුව (RFC අනුව, අර්ධ වශයෙන් ක්රියාත්මකයි) |
-| `types.ts`                                 | හවුල් domain වර්ග                                   |
+| `policyEngine.ts`                          | වෙන් කර ඇති ප්රතිපත්ති-ඇගයුම් කොන්ත්රාත්තුව         |
+| `fallbackPolicy.ts`                        | Fallback තීරණ ගස                                    |
+| `costRules.ts`                             | පිරිවැය ගණනය කිරීමේ නීති                            |
+| `lockoutPolicy.ts`                         | ආදර්ශ අගුලු දැමීමේ තීරණ                             |
+| `tagRouter.ts`                             | ටැග් මත පදනම් වූ මාර්ගගත කිරීම                      |
+| `comboResolver.ts`                         | වෙන් කළ සංයෝජන-තේරීමේ කොන්ත්‍රාත්තුව                |
+| `connectionModelRules.ts`                  | එක්-සම්බන්ධතා ආකෘති පෙරහන්                          |
+| `modelAvailability.ts`                     | මාදිලියේ ඇති බව පරීක්ෂා කිරීම                       |
+| `degradation.ts`                           | පිරිහුණු මාදිලියේ සංක්‍රාන්ති                       |
+| `providerExpiration.ts`                    | කල් ඉකුත් වූ account/key අනාවරණය                    |
+| `quotaCache.ts`                            | හැඹිලිගත කෝටා තීරණ                                  |
+| `responses.ts`, `omnirouteResponseMeta.ts` | ප්‍රතිචාර හැඩ සහායකයන්                              |
+| `configAudit.ts`                           | වින්‍යාස වෙනස් කිරීමේ විගණනය                        |
+| `assessment/`                              | ආදර්ශ තක්සේරුව ( RFC සඳහා, අර්ධ වශයෙන් ක්‍රියාත්මක) |
+| `types.ts`                                 | හවුල් වසම් වර්ග                                     |
 
-### 3.4 `src/server/` — Server සඳහා පමණි
+### 3.4 `src/server/` — සේවාදායකයට පමණි
 
-Client components වෙතින් ආයාත කළ නොහැක.
+සේවාදායක සංරචක වලින් ආනයනය කළ නොහැක.
 
 ```
 server/
 ├── auth/loginGuard.ts
 ├── authz/
-│   ├── classify.ts        Routes public හෝ management ලෙස වර්ගීකරණය කරයි
-│   ├── assertAuth.ts      Assertion සහායකය
-│   ├── context.ts         එක් එක් request සඳහා authz context
+│   ├── classify.ts        Classifies routes as public vs management
+│   ├── assertAuth.ts      Assertion helper
+│   ├── context.ts         Per-request authz context
 │   ├── headers.ts
 │   ├── pipeline.ts        Authz pipeline
-│   ├── policies/          නිශ්චිත policies
+│   ├── policies/          Concrete policies
 │   └── types.ts
-└── cors/origins.ts        CORS origin අවසර ලැයිස්තුව
+└── cors/origins.ts        CORS origin allowlist
 ```
 
-### 3.5 `src/shared/` — බෙදාගැනීමට ආරක්ෂිතයි
+### 3.5 `src/shared/` — ආරක්ෂිතව බෙදා ගැනීමට
 
-නිශ්චිත කාර්යයන් කෙරෙහි අවධානය යොමු කළ උපනාමාවලිවලට බෙදා ඇත:
+නාභිගත උප බහලුම් වලට බෙදන්න:
 
-- `constants/` — `providers.ts` (Zod මඟින් වලංගු කළ සැපයුම්කරු නාමාවලිය), `models.ts`,
-  `modelSpecs.ts`, `modelCompat.ts`, `pricing.ts`, `cliTools.ts`,
-  `cliCompatProviders.ts`, `routingStrategies.ts`, `comboConfigMode.ts`,
-  `headers.ts`, `upstreamHeaders.ts` (ප්රතික්ෂේප ලැයිස්තුව), `mcpScopes.ts`,
-  `errorCodes.ts`, `publicApiRoutes.ts`, `batch.ts`, `batchEndpoints.ts`,
-  `bodySize.ts`, `colors.ts`, `appConfig.ts`, `config.ts`,
-  `sidebarVisibility.ts`, `visionBridgeDefaults.ts`.
-- `validation/` — `schemas.ts` (Zod යෝජනා ක්රම ~80ක්), `compressionConfigSchemas.ts`,
-  `providerSchema.ts`, `settingsSchemas.ts`, `helpers.ts`.
-- `contracts/` — npm වෙත නිකුත් කෙරෙන පොදු API ගිවිසුම්.
-- `types/` — හවුල් TS වර්ග.
-- `utils/` — `circuitBreaker.ts`, `apiAuth.ts`, `apiKey.ts`, `apiKeyPolicy.ts`,
-  `api.ts`, `classify429.ts`, `cliCompat.ts`, `clipboard.ts`, `cloud.ts`, `cn.ts`,
-  `cors.ts`, `featureFlags.ts`,
-  `fetchTimeout.ts`, `formatting.ts`, `inputSanitizer.ts`, `logger.ts`,
-  `machine.ts`, `machineId.ts`, `maskEmail.ts`, `modelCatalogSearch.ts`,
-  `nodeRuntimeSupport.ts`, `parseApiKeys.ts`, `providerHints.ts`,
-  `providerModelAliases.ts`, `rateLimiter.ts`, `releaseNotes.ts`,
-  `a11yAudit.ts`, සහ `services/`, `network/`,
-  `middleware/`, `schemas/`, `hooks/`, `components/` යටතේ ඇති උපකරණ පුවරු හුක්/සංරචක.
-- `components/` — උපකරණ පුවරු සංරචක API එක (`index.tsx` බැරලය: `Button`, `Input`,
-  `Select`, `Modal`, `Card`, `DataTable`, …). මූලික සංරචක, ව්යාපෘතියට ඇතුළත් කළ
-  කට්ටලය මත ඇති ඇඩැප්ටර වේ (`packages/ui-kit`, `@omniroute/ui-kit/button` වැනි
-  සංරචක උපමාර්ගයක් මඟින් ආයාත කෙරේ), එබැවින් තිර ඒවායේ ආයාත පවත්වා ගන්නා අතර
-  සලකුණුකරණය කට්ටලයට අයත් වේ. ෂෙල් එක `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
-  (කට්ටලයේ `SidebarProvider`/`SidebarInset`) වන අතර එයට `Sidebar.tsx` සහ `Header.tsx` ඇතුළත් වේ;
-  අයිකන `Icon.tsx` සහ `constants/iconMap.ts` හරහා ගමන් කරයි. `docs/architecture/DESIGN_SYSTEM.md` බලන්න.
+- `constants/` — `providers.ts` (Zod-validated provider නාමාවලිය), `models.ts`, `modelSpecs.ts`, `modelCompat.ts`, `pricing.ts`, `cliTools.ts`, `cliCompatProviders.ts`, `routingStrategies.ts`, `comboConfigMode.ts`, `headers.ts`, `upstreamHeaders.ts` (denylist), `mcpScopes.ts`, `errorCodes.ts` `publicApiRoutes.ts`, `batch.ts`, `batchEndpoints.ts` `config.ts` `bodySize.ts` `sidebarVisibility.ts` `colors.ts` `appConfig.ts` `visionBridgeDefaults.ts`
+- `validation/` — `schemas.ts` (~ 80 Zod යෝජනා ක්‍රම), `compressionConfigSchemas.ts`, `providerSchema.ts`, `settingsSchemas.ts`, `helpers.ts`.
+- `contracts/` — පොදු API ගිවිසුම් npm වෙත නැව්ගත කරන ලදී.
+- `types/` — බෙදාගත් TS වර්ග.
+- `utils/` — `circuitBreaker.ts`, `apiAuth.ts`, `apiKey.ts`, `apiKeyPolicy.ts`, `api.ts`, `classify429.ts`, `cliCompat.ts`, `clipboard.ts`, `cloud.ts`, `cn.ts`, `cors.ts`, `featureFlags.ts`, `fetchTimeout.ts`, `formatting.ts`, `inputSanitizer.ts`, `logger.ts`, `machine.ts` `schemas/` `machineId.ts`, `maskEmail.ts`, `modelCatalogSearch.ts`, `nodeRuntimeSupport.ts`, `parseApiKeys.ts`, `providerHints.ts`, `providerModelAliases.ts`, plus dashboard hooks/components යටතේ `services/`, `a11yAudit.ts` `releaseNotes.ts` `network/`, `middleware/` `rateLimiter.ts` `hooks/` `components/`
+- `components/` — උපකරණ පුවරුව API (`index.tsx` බැරලය: `Button`, `Input`, `Select`, `Modal`, `Card`, `DataTable`, …). ප්‍රාථමික යනු විකුණුම් කට්ටලය මත ඇඩප්ටර වේ (`packages/ui-kit`, `@omniroute/ui-kit/button` වැනි සංරචක උපපථ මගින් ආනයනය කර ඇත), එබැවින් සලකුණු කට්ටලය වන අතර තිර ඔවුන්ගේ ආයාත තබා ගනී. කවචය `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx` (kit `SidebarProvider`/`SidebarInset`) `Sidebar.tsx` සහ `Header.tsx` සමඟ ; අයිකන `Icon.tsx` සහ `constants/iconMap.ts` හරහා ගමන් කරයි. `docs/architecture/DESIGN_SYSTEM.md` බලන්න.
 
 ---
 
@@ -454,7 +394,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              159 provider executor modules (executor classes + per-provider helpers)
+├── executors/              170 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -484,11 +424,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-ඉහළ මට්ටමේ විධායක මොඩියුල 159 (`*.ts` minus `base.ts`, `index.ts` සහ පරීක්ෂණ — ගණන් කිරීමේ `npm run check:docs-counts` මිනුම්). සෑම විධායක පන්තියක්ම `BaseExecutor` (`base.ts`) සෘජුව හෝ `DefaultExecutor` හරහා හෝ වෙනත් ක්‍රියාත්මක කරන්නෙකු හරහා දිගු කරයි; ඉතිරි මොඩියුලයන් එක්-සැපයුම්කරුට සහායකයින් වේ (මෙවලම් ක්‍රම, fetch/TTS ඇඩප්ටර, quirk හසුරුවන්න). විධායකයින්ට ඇතුළත් වන්නේ:
+ඉහළ මට්ටමේ විධායක මොඩියුල 170 (`*.ts` minus `base.ts`, `index.ts` සහ පරීක්ෂණ — ගණන් කිරීමේ `npm run check:docs-counts` මිනුම්). සෑම විධායක පන්තියක්ම `BaseExecutor` (`base.ts`) සෘජුව හෝ `DefaultExecutor` හරහා හෝ වෙනත් ක්‍රියාත්මක කරන්නෙකු හරහා දිගු කරයි; ඉතිරි මොඩියුලයන් එක්-සැපයුම්කරුට සහායකයින් වේ (මෙවලම් ක්‍රම, fetch/TTS ඇඩප්ටර, quirk හසුරුවන්න). විධායකයින්ට ඇතුළත් වන්නේ:
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `pollinations`, `qoder`, plus `devin-desktop` `petals` බෙදාගත් අනන්‍යතා සහායකයා) සහ `claudeIdentity.ts` (රෙජිස්ට්‍රිය) `index.ts`
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode` `cursor` `default` `devin-cli` `muse-spark-web` `nlpcloud` `opencode` `perplexity-web` `pollinations` `qoder` `devin-desktop` `petals` `claudeIdentity.ts` රෙජිස්ට්‍රිය) `index.ts`
 
-> සටහන: මෙහි ලැයිස්තුගත කර නොමැති සපයන්නන් සඳහා සාමාන්‍ය OpenAI-අනුකූල ක්‍රියාකාරකය භාවිතයෙන් `default.ts` විසින් සේවය කරනු ලැබේ. සම්පූර්ණ සැපයුම්කරුවන්ගේ නාමාවලිය (සපයන්නන් 381) `src/shared/constants/providers.ts` හි වාසය කරයි.
+> සටහන: මෙහි ලැයිස්තුගත කර නොමැති සපයන්නන් සඳහා සාමාන්‍ය OpenAI-අනුකූල ක්‍රියාකාරකය භාවිතයෙන් `default.ts` විසින් සේවය කරනු ලැබේ. සම්පූර්ණ සැපයුම්කරුවන්ගේ නාමාවලිය (සපයන්නන් 394) `src/shared/constants/providers.ts` හි වාසය කරයි.
 
 ### 4.3 `open-sse/translator/`
 
@@ -510,7 +450,7 @@ open-sse/
 
 | කනස්සල්ල             | ගොනු                                                                                                                                                                                                                                                     |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Combo routing        | `combo.ts` (උපාය මාර්ග 20), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                    |
+| Combo routing        | `combo.ts` (උපාය 22), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                          |
 | ඔටෝ කොම්බෝ එන්ජිම    | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
 | ඔරොත්තු දීමේ හැකියාව | `accountFallback.ts` (cooldown + lockout), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                         |
 | කෝටා                 | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
@@ -519,7 +459,7 @@ open-sse/
 | ආදර්ශ හැසිරවීම       | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
 | සම්පීඩනය             | `compression/` — සම්පූර්ණ සම්පීඩන එන්ජින් රැහැන්                                                                                                                                                                                                         |
 | ටෝකන් + සැසිය        | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| ස්ථරය / මැනිෆෙස්ටය   | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| ස්ථරය / මැනිෆෙස්ට්   | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / ජාලය            | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
 | කණ්ඩායම්             | `batchProcessor.ts`                                                                                                                                                                                                                                      |
 | භාවිතය               | `usage.ts`                                                                                                                                                                                                                                               |
@@ -656,45 +596,45 @@ bin/
 
 ---
 
-## 9. ඉල්ලීම් නලමාර්ගය (සාරාංශය)
+## 9. ඉල්ලීම් නල මාර්ගය (සාරාංශය)
 
-![ඉල්ලීම් නලමාර්ගය (/v1/chat/completions)](../diagrams/exported/request-pipeline.svg)
+![Request pipeline (/v1/chat/completions)](../diagrams/exported/request-pipeline.svg)
 
 > මූලාශ්රය: [diagrams/request-pipeline.mmd](../diagrams/request-pipeline.mmd)
 
 ```
-සේවාලාභී ඉල්ලීම
+Client request
   → /v1/chat/completions (route.ts)
-     CORS පූර්ව පියාසැරි පරීක්ෂාව
-     Zod වලංගුකරණය (shared/validation/schemas.ts තුළ chatCompletionsSchema)
-     සත්යාපනය (extractApiKey + isValidApiKey හෝ requireManagementAuth)
-     ප්රතිපත්ති එන්ජිම (src/server/authz/pipeline.ts)
-     ආරක්ෂක සීමා (PII ආවරණකය, ප්රේරක ඇතුළු කිරීම, දෘශ්ය පාලම)
+     CORS preflight check
+     Zod validation (chatCompletionsSchema in shared/validation/schemas.ts)
+     Auth (extractApiKey + isValidApiKey OR requireManagementAuth)
+     Route authorization (src/server/authz/pipeline.ts)
+     API-key policy (src/shared/utils/apiKeyPolicy.ts; enforced on the selected path)
+     Guardrails (PII masker, prompt injection, vision bridge)
   → handleChatCore() (open-sse/handlers/chatCore.ts)
-     හැඹිලි පරීක්ෂාව (අර්ථකථන + කියවීම් හැඹිලිය)
-     අනුපාත සීමාව (rateLimitManager, accountSemaphore)
-     සංයෝජන මාර්ගගත කිරීම (ආකෘතියක් සංයෝජනයකට විසඳේ නම්)
-       comboResolver → එක් එක් ඉලක්කය සඳහා ලූපය → handleSingleModel()
+     Cache check (semantic + read cache)
+     Rate limit (rateLimitManager, accountSemaphore)
+     Combo routing (if model resolves to a combo)
+       resolveComboTargets (open-sse/services/combo.ts) → per-target dispatch
      translateRequest()  (open-sse/translator/request/*)
      getExecutor(providerId).execute()  (open-sse/executors/*)
-       ඉහළ ධාරාවෙන් ලබාගැනීම → accountFallback හරහා නැවත උත්සාහය/ප්රමාදය
+       fetch upstream → retry/backoff via accountFallback
      translateResponse() (open-sse/translator/response/*)
-     SSE ප්රවාහය හෝ JSON ප්රතිචාරය
-     Responses API නම්: open-sse/transformer/responsesTransformer.ts හරහා TransformStream
-  → අනුකූලතා විගණනය (src/lib/compliance/)
-  → සේවාලාභියාට ප්රතිචාරය
+     SSE stream OR JSON response
+     If Responses API: TransformStream via open-sse/transformer/responsesTransformer.ts
+  → Compliance audit (src/lib/compliance/)
+  → Response to client
 ```
 
-### ප්රත්යස්ථතා ධාවනකාල තත්ත්වය (යාන්ත්රණ තුනක්)
+### ඔරොත්තු දීමේ ධාවන කාලය (යාන්ත්‍රණ තුනක්)
 
-| යාන්ත්රණය               | විෂය පථය                         | පිහිටීම                                                                                                            |
-| ----------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| සැපයුම්කරු පරිපථ බිඳිනය | සම්පූර්ණ සැපයුම්කරු              | `src/shared/utils/circuitBreaker.ts`, `domain_circuit_breakers` තුළ ස්ථිරව ගබඩා කර ඇත                              |
-| සම්බන්ධතා විරාමය        | එක් ගිණුමක්/යතුරක්               | `src/sse/services/auth.ts` තුළ `markAccountUnavailable()`; `accountFallback.checkFallbackError()` මඟින් භාවිත කරයි |
-| ආකෘති අගුලු දැමීම       | සැපයුම්කරු + සම්බන්ධතාව + ආකෘතිය | `open-sse/services/accountFallback.ts`, `domain_lockout_state` තුළ ස්ථිරව ගබඩා කර ඇත                               |
+| යාන්ත්රණය             | විෂය පථය                     | කොහෙද                                                                                                                |
+| --------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| සැපයුම්කරු පරිපථ කඩනය | සම්පූර්ණ සැපයුම්කරු          | `src/shared/utils/circuitBreaker.ts`, `domain_circuit_breakers` හි පැවතිණි                                           |
+| සම්බන්ධතා සිසිලනය     | එක් account/key              | `markAccountUnavailable()` හි `src/sse/services/auth.ts`; `accountFallback.checkFallbackError()` මගින් පරිභෝජනය කරයි |
+| ආදර්ශ අගුලු දැමීම     | සපයන්නා + සම්බන්ධතා + ආකෘතිය | `open-sse/services/accountFallback.ts`, `domain_lockout_state` හි පැවතිණි                                            |
 
-[RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) සහ
-[CLAUDE.md](../../CLAUDE.md) තුළ ඇති වෙන් කළ කොටස බලන්න.
+[RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) සහ [CLAUDE.md](../../CLAUDE.md) හි කැප වූ කොටස බලන්න.
 
 ---
 

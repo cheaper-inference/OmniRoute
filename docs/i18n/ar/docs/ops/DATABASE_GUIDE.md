@@ -407,22 +407,23 @@ sqlite3 ~/.omniroute/storage.sqlite ".backup /backups/omniroute-hot.db"
 
 ### وضع WAL
 
-يكون WAL مفعّلًا افتراضيًا. بالنسبة إلى أعباء العمل كثيفة الكتابة، ضع في اعتبارك ما يلي:
+يتم تمكين WAL بشكل افتراضي. بالنسبة لأحمال العمل عالية الكتابة، ضع في اعتبارك ما يلي:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- إنشاء نقطة تحقق كل 1000 صفحة
-PRAGMA journal_size_limit = 67108864;  -- حد أقصى لـ WAL يبلغ 64MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+لم يتم تعيين OmniRoute `journal_size_limit`. تقوم نقطة التفتيش بنقل إطارات WAL إلى الملف الرئيسي، لكن ملف WAL يحتفظ بأكبر حجم مخصص له. حارس `OMNIROUTE_WAL_GUARD_MAX_MB` يحذر فقط ويدير `wal_checkpoint(RESTART)`؛ إنه ليس غطاء بحجم القرص.
 
 ### الفهارس
 
-الفهارس الرئيسية لتحسين الأداء (تُنشأ تلقائيًا بواسطة عمليات الترحيل):
+الفهارس الرئيسية للأداء (يتم إنشاؤها تلقائيًا بواسطة عمليات الترحيل):
 
-- `idx_models_provider` — البحث عن النماذج حسب المزوّد
-- `idx_combo_targets_combo_id` — توسيع أهداف المجموعة
-- `idx_usage_history_api_key_timestamp` — تحليلات الاستخدام
-- `idx_quota_snapshots_api_key_window` — تتبّع الحصص
-- `idx_call_logs_timestamp` — استعلامات سجل الاستدعاءات
+- عمليات البحث عن نموذج `idx_models_provider` — حسب الموفر
+- `idx_combo_targets_combo_id` — والسرد الهدف التوسع
+- تحليلات استخدام `idx_usage_history_api_key_timestamp` —
+- `idx_quota_snapshots_api_key_window` — تتبع الحصص
+- `idx_call_logs_timestamp` — استعلامات سجل المكالمات
 
 لإضافة فهرس جديد، أنشئ عملية ترحيل:
 
@@ -431,24 +432,24 @@ PRAGMA journal_size_limit = 67108864;  -- حد أقصى لـ WAL يبلغ 64MB
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### الإدخال/الإخراج المعيّن في الذاكرة
+### الذاكرة المعينة I/O
 
-بالنسبة إلى قواعد البيانات الكبيرة جدًا (>10GB)، يمكن ضبط تعيين الذاكرة عبر توجيه SQLite:
+بالنسبة لقواعد البيانات الكبيرة جدًا (> 10 جيجابايت)، يمكن تعديل تعيين الذاكرة عبر SQLite pragma:
 
 ```sql
--- الضبط عبر توجيه SQLite (عدّله في core.ts أو أثناء التشغيل)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
 ### الضغط
 
-تستفيد مثيلات OmniRoute التي تعمل لفترات طويلة من تنفيذ `VACUUM` من حين لآخر:
+تستفيد مثيلات OmniRoute طويلة الأمد من `VACUUM` العرضي:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-شغّله شهريًا خلال فترات انخفاض حركة المرور. (يقلّل وضع WAL الحاجة إلى ذلك، لكنه لا يلغيها.)
+قم بالتشغيل شهريًا أثناء النوافذ ذات حركة المرور المنخفضة. (وضع WAL يقلل الحاجة، لكنه لا يلغيها.)
 
 ---
 

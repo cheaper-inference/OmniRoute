@@ -14,23 +14,24 @@ Trình điều phối ký mỗi lần gửi bằng HMAC-SHA256, thử lại khi 
 lỗi tạm thời, theo dõi tình trạng gửi của từng webhook và tự động vô hiệu hóa các endpoint
 liên tục gặp lỗi.
 
-## Các sự kiện được hỗ trợ
+## Sự kiện được hỗ trợ
 
-Kiểu `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, được `src/lib/webhookDispatcher.ts` sử dụng) hiện mô hình hóa chính xác bốn sự kiện:
+Loại `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, được sử dụng bởi `src/lib/webhookDispatcher.ts`) hiện mô hình hóa tám sự kiện:
 
-| Sự kiện             | Kích hoạt khi                                                |
-| ------------------- | ------------------------------------------------------------ |
-| `request.completed` | Một yêu cầu được proxy hoàn tất thành công                   |
-| `request.failed`    | Một yêu cầu được proxy thất bại sau mọi lần thử lại/dự phòng |
-| `quota.exceeded`    | Một khóa API vượt qua ngưỡng ngân sách/hạn mức               |
-| `test.ping`         | Sự kiện mô phỏng được endpoint kiểm thử sử dụng              |
+| Sự kiện                   | Cháy khi                                                                                          |
+| ------------------------- | ------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Yêu cầu được ủy quyền hoàn tất thành công                                                         |
+| `request.failed`          | Sau tất cả, yêu cầu được ủy quyền không thành công retries/fallback                               |
+| `quota.exceeded`          | Khóa API vượt qua ngưỡng budget/quota                                                             |
+| `proxy.set_aside`         | Thành viên nhóm proxy bị loại sau nhiều lần bị từ chối (chỉ chuyển đổi)                           |
+| `proxy.pool.exhausted`    | Mọi thành viên của phạm vi nhóm proxy đều được đặt sang một bên                                   |
+| `provider.reset_redeemed` | Tự động áp dụng đặt lại ngân hàng đã đổi tín dụng đặt lại hoặc đặt lại phiên Claude hàng tuần     |
+| `provider.exhausted`      | Mọi tài khoản của nhà cung cấp đang hạ nhiệt (tối đa một lần cho mỗi nhà cung cấp cứ sau 10 phút) |
+| `test.ping`               | Sự kiện tổng hợp được điểm cuối thử nghiệm sử dụng                                                |
 
-Các đăng ký chấp nhận giá trị cố định `"*"` để nhận mọi sự kiện. Tên sự kiện
-không xác định trong `events` sẽ bị bỏ qua tại thời điểm điều phối.
+Đăng ký chấp nhận `"*"` theo nghĩa đen để nhận mọi sự kiện. Tên sự kiện không xác định trong `events` sẽ bị bỏ qua tại thời điểm gửi.
 
-> Lưu ý: API của trình điều phối đã được kết nối, nhưng các vị trí gọi trong môi trường sản xuất cho một số
-> sự kiện không phải `test.ping` vẫn đang được bổ sung. Hãy kiểm tra `grep dispatchEvent` để xem
-> những luồng nào hiện đang gọi trình điều phối trong bản phát hành của bạn.
+> Lưu ý: bộ điều phối API có dây, nhưng các địa điểm gọi sản xuất cho một số sự kiện không phải `test.ping` vẫn đang cập bến. Kiểm tra `grep dispatchEvent` để xem đường dẫn nào hiện đang gọi bộ điều phối trong bản phát hành của bạn.
 
 ## Kiến trúc
 
@@ -124,23 +125,22 @@ Lịch sử gửi được lưu trữ trong bảng chuyên dụng `webhook_deliv
 các bộ đếm tổng hợp trên hàng `webhooks`. Siêu dữ liệu loại (Slack / Discord /
 Telegram / các trình chuyển đổi payload tùy chỉnh) được thêm bởi `070_webhooks_kind_metadata.sql`.
 
-## API REST
+## REST API
 
-Tất cả endpoint đều yêu cầu xác thực quản trị (`requireManagementAuth`).
+Tất cả các điểm cuối đều yêu cầu xác thực quản lý (`requireManagementAuth`).
 
-| Endpoint                        | Phương thức | Mô tả                                          |
-| ------------------------------- | ----------- | ---------------------------------------------- |
-| `/api/webhooks`                 | GET         | Liệt kê webhook (các bí mật được che)          |
-| `/api/webhooks`                 | POST        | Tạo webhook                                    |
-| `/api/webhooks/[id]`            | GET         | Chi tiết webhook (bí mật đầy đủ)               |
-| `/api/webhooks/[id]`            | PUT         | Cập nhật các trường                            |
-| `/api/webhooks/[id]`            | DELETE      | Xóa                                            |
-| `/api/webhooks/[id]/test`       | POST        | Kích hoạt một `test.ping` (không thử lại)      |
-| `/api/webhooks/[id]/deliveries` | GET         | Các lần thử gửi gần đây của một webhook        |
-| `/api/webhooks/validate-url`    | POST        | Xác thực URL trước khi gửi (bảo vệ chống SSRF) |
+| Điểm cuối                       | Phương pháp | Sự miêu tả                                   |
+| ------------------------------- | ----------- | -------------------------------------------- |
+| `/api/webhooks`                 | GET         | Liệt kê webhooks (bí mật bị che giấu)        |
+| `/api/webhooks`                 | POST        | Tạo webhook                                  |
+| `/api/webhooks/[id]`            | GET         | Chi tiết webhook (hoàn toàn bí mật)          |
+| `/api/webhooks/[id]`            | PUT         | Cập nhật các trường                          |
+| `/api/webhooks/[id]`            | DELETE      | Di dời                                       |
+| `/api/webhooks/[id]/test`       | POST        | Bắn `test.ping` (không thử lại)              |
+| `/api/webhooks/[id]/deliveries` | GET         | Những lần thử gửi gần đây cho một webhook    |
+| `/api/webhooks/validate-url`    | POST        | Xác thực URL trước chuyến bay (bảo vệ SSRF ) |
 
-`GET /api/webhooks` che bí mật thành `<10 ký tự đầu tiên>...` để tránh làm lộ
-trên các trang danh sách. Sử dụng GET `[id]` khi bạn thực sự cần bí mật.
+`GET /api/webhooks` che giấu bí mật về `<first 10 chars>...` để tránh bị rò rỉ trên các trang danh sách. Sử dụng `[id]` GET khi bạn thực sự cần bí mật.
 
 ### Tạo webhook
 
@@ -156,8 +156,7 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Nếu bỏ qua `secret`, máy chủ sẽ tạo một bí mật `whsec_<hex>` và trả về
-trong phản hồi.
+Nếu `secret` bị bỏ qua, máy chủ sẽ tạo bí mật `whsec_<hex>` và trả về nó trong phản hồi.
 
 ### Kiểm tra webhook
 
@@ -166,8 +165,7 @@ curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Trả về `{ delivered, status, error }`. Hệ thống không thực hiện thử lại — hữu ích để
-nhanh chóng xác thực rằng bên nhận chấp nhận payload và chữ ký.
+Trả về `{ delivered, status, error }`. Không có lần thử lại nào được thử — hữu ích để nhanh chóng xác thực rằng người nhận chấp nhận tải trọng và chữ ký.
 
 ## Bảng điều khiển
 

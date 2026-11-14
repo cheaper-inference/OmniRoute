@@ -20,7 +20,7 @@ Bir IDE aracısı (örneğin, GitHub Copilot, Cursor, Claude Code) bir API çağ
 
 Bu, şunları yapabileceğiniz anlamına gelir:
 
-- **Herhangi bir temsilciyi herhangi bir sağlayıcıya yeniden yönlendirin** : Copilot OpenAI ile mi konuşuyor? Bunu Anthropic Claude, Gemini veya OmniRoute 381 sağlayıcılarından herhangi birine yönlendirin.
+- **Herhangi bir aracıyı herhangi bir sağlayıcıya yeniden yönlendirin** : Copilot OpenAI ile mi konuşuyor? Bunu Anthropic Claude, Gemini veya OmniRoute 394 sağlayıcılarından herhangi birine yönlendirin.
 - **Model eşlemelerini uygulama** : `gemini-3-flash` → `claude-sonnet-4.7` işleyici düzeyinde şeffaf bir şekilde.
 - **Tüm temsilci trafiğini gözlemleyin** : ele geçirilen her istek [Trafik Müfettişine](./TRAFFIC_INSPECTOR.md) yayınlanır.
 - **OmniRoute esnekliğini uygulayın** : birleşik yönlendirme, devre kesiciler, geri dönüşler ve maliyet takibi IDE aracı trafiği için de çalışır.
@@ -529,24 +529,24 @@ Tam OpenAPI şemaları: `docs/openapi.yaml` → `AgentBridge` etiketi.
 
 ## §8 Yol Haritası
 
-### Trae araştırması
+### Trae soruşturması
 
-Trae nispeten yeni bir yapay zekâ kodlama asistanıdır. Bir işleyici uygulamadan önce:
+Trae nispeten yeni bir AI kodlama asistanıdır. Bir işleyiciyi uygulamadan önce:
 
-1. VS Code / JetBrains mağazalarında veya bağımsız bir uygulama olarak ikili dosyayı/uzantıyı belirleyin
-2. API ana makinelerini ve uç nokta yapılarını keşfetmek için trafiği mitmproxy ile yakalayın
+1. VS Code / JetBrains pazaryerlerinde veya bağımsız bir uygulama olarak binary/extension tanımlayın
+2. API ana bilgisayarlarını ve uç nokta şekillerini keşfetmek için mitmproxy ile trafiği yakalayın
 3. Kimlik doğrulama mekanizmasını belirleyin
-4. Kullanım Koşulları ve API'nin keşfedilebilirliğine göre devam etme/devam etmeme değerlendirmesi yapın
+4. go/no-go TOS ve API keşfedilebilirliğine göre değerlendirin
 
-Araştırma tamamlanana kadar kontrol panelindeki Trae kartında, "Uygulanabilirliği bildir" bağlantısıyla birlikte "Araştırılıyor" rozeti gösterilir. `src/mitm/handlers/trae.ts` konumundaki işleyici taslağı, yapılandırılmış bir `Henüz uygulanmadı` hatası oluşturur.
+Soruşturma tamamlanana kadar kontrol panelindeki Trae kartında "İnceleniyor" rozeti ve "Uygunluğu bildir" bağlantısı gösterilir. `src/mitm/handlers/trae.ts` işleyici saplaması yapılandırılmış bir `Not yet implemented` hatası veriyor.
 
-### Birikmiş aracılar (MITM gereklidir — özel temel URL desteği yoktur)
+### Biriktirme listesi aracıları (MITM gereklidir — özel temel URL desteği yoktur)
 
-Aşağıdaki araçlar mevcut sürümlerinde özel temel URL'leri desteklemediğinden MITM tek müdahale yoludur. Uygulanabilirlik değerlendirmesi beklemededir:
+Aşağıdaki araçlar mevcut sürümlerinde özel temel URLs desteklememektedir, bu da MITM tek müdahale yolu haline getirmektedir. Uygulanabilirlik değerlendirmesi beklemede:
 
 - **Windsurf** (Codeium/Cognition)
-- **Amp** (Sourcegraph)
-- **Amazon Q / Kiro CLI** (AWS Bedrock — Kiro IDE'den ayrıdır)
-- **Cowork** (Anthropic masaüstü)
+- **Amfi** (Kaynak grafiği)
+- **Amazon Q / Kiro CLI** (AWS Bedrock — Kiro IDE ayrıdır)
+- **Ortak çalışma** (Anthropic masaüstü)
 
-Not: GitHub Copilot CLI ≥v1.0.19, `COPILOT_PROVIDER_BASE_URL` değişkenini destekler — bu araç için MITM yerine doğrudan yapılandırmayı kullanın.
+Not: GitHub Copilot CLI ≥ v1.0.19 `COPILOT_PROVIDER_BASE_URL` — bu araç için MITM yerine doğrudan yapılandırmayı kullanmasını destekler.

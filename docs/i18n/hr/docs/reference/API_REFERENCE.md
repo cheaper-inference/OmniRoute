@@ -855,7 +855,44 @@ apstrakcija pružatelja Web/search (Tavily, Brave, Exa, Serper, itd.).
 
 **Autent:** Ključ nositelja API (`extractApiKey` + `isValidApiKey`). Pravila pretraživanja nametnuta putem `enforceApiKeyPolicy`.
 
-**Automatski odabir:** bez `provider`, najjeftiniji pružatelj s konfiguriranom vezom radi prvi, a sljedeći najjeftiniji je failover. Besplatni pružatelji zadnje instance (`duckduckgo-free`) koriste se samo kada ništa drugo nije konfigurirano. SearXNG s vlastitim hostingom računa se kao konfiguriran nakon što njegova veza pohranjuje pravi `baseUrl` (a ne kataloški zadani `http://localhost:8888/search`): tada se rangira kao pružatelj s ključem od 0 USD ispred onih s ključem, s najjeftinijim pružateljem s ključem kao preusmjeravanjem greške, uključujući kada SearXNG odgovori 400, 401, 403 ili 404. `baseUrl` koji nije važeći `http(s)` URL ili koji pokazuje na adresa metapodataka u oblaku se ne računa. SearXNG veza koja pohranjuje token rangirana je na ovaj način samo u odnosu na `https://` ili povratnu petlju `http://`. Preko udaljenog običnog `http://` to nikada nije failover i ostaje posljednje sredstvo, koristi se samo kada nijedan drugi pružatelj nije konfiguriran ili kada se traži imenom, tako da šalje token u čistom tekstu u ta dva slučaja.
+### Nazvane search/fetch kombinacije
+
+I `POST /v1/search` i `POST /v1/web/fetch` prihvaćaju `model` kao spremljeno kombinirano ime. Koristite ili `model` ili eksplicitni `provider`; slanje oba povrata `400`. Bez bilo kojeg polja, postojeći automatski odabir pružatelja usluga ostaje nepromijenjen.
+
+I Combo Builder i njegov katalog Add Model otkrivaju izvorne unose web-operacija za povezane pružatelje, čak i kada nemaju popis LLM modela. Serper pokazuje** Web pretraživanje** ; Tavily pokazuje** Web pretraživanje/Izdvajanje stranica** , a davatelji samo za dohvaćanje prikazuju** Izdvajanje stranice** . Odaberite unos i račun kao i obično. Jedan Tavily unos služi objema web krajnjim točkama; ovi unosi operacija ne dodaju se biračima klijenata samo za chat ili ispitivanjima modela chata.
+
+Na primjer, stvorite a** prioritet** kombinacija pod nazivom `shared-free` s ovim poredanim ciljevima:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+Zatim koristite isti naziv na svakoj površini:
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+Search smatra Tavilyja zatim Serpera; dohvaćanje razmatra Tavily zatim Jina Reader; chat preskače namjenske search/fetch pružatelje i uzima u obzir OpenAI. Kompatibilnost dolazi iz search/fetch registara izvršitelja, a ne iz riječi u nazivu modela. Filtriranje prethodi odabiru i slanju vjerodajnica i nikada ne uređuje spremljenu kombinaciju.
+
+Rute bez mogućnosti chata podržavaju `priority`, `fill-first`, `round-robin`, `weighted`, `random`, `strict-random`, `least-used` i `p2c`. Strategije sinteze samo za chat kao što su `fusion`, `pipeline` i `context-relay` odbijaju se na rutama bez chata umjesto da se tiho primjenjuju na pretraživanje ili generirane medije. Postojeći kombinirani mehanizam obrađuje naručene rezerve, uključujući kvarove uzvodne kvote, i zadržava korak IDs, pribadače računa, popise dopuštenih računa po koraku, ugniježđene reference, connection/quota opsege pozivatelja i pravila kombiniranog pristupa. Rezultati zadržavaju svoju izvornu search/fetch shemu, uključujući stvarnog pružatelja; `X-OmniRoute-Combo-Trace` identificira odluku o usmjeravanju. Nepoznate kombinacije vraćaju `404`; neaktivne kombinacije i kombinacije bez kompatibilnih ciljeva vraćaju `400`.
+
+Svaki pokušaj kombiniranja koristi jednog eksplicitnog pružatelja usluga. Ne može pozvati nativni automatski skup pružatelja iza leđa kombinacije. Zahtjevi eksplicitnog pružatelja zadržavaju svoje postojeće ponašanje jednog pružatelja. Zahtjevi za izravni chat koji ciljaju namjenske search/fetch pružatelje usluga vraćaju djelotvorni JSON `400` umjesto da padnu do izvršitelja u stilu OpenAI-a.
+
+### Kombinirane rute specifične za sposobnost
+
+Spremljene kombinacije mogu sadržavati `routes` objekt čiji su ključevi API mogućnosti. Svaka ruta posjeduje svoj ciljni popis, strategiju i konfiguraciju vremena izvođenja. `models`, `strategy` i `config` najviše razine ostaju Chat plan kompatibilan s naslijeđem; stare kombinacije bez `routes` nastavljaju raditi nepromijenjeno.
+
+Podržani ključevi rute su `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`, `image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`, `audio-translations` i `audio-generation`. Projekcija krajnje točke događa se prije odabira vjerodajnica, bodovanja ili slanja. Ugniježđene kombinirane reference odabiru rutu dijete kombinacije za istu sposobnost.
+
+`POST /v1/music/generations` i `POST /v1/ocr` prihvaćaju kombinirano ime u `model`. Nativni `POST /v1/music` kompatibilan s ElevenLabs također prihvaća kombinirani naziv u `model_id`, ali svaki upotrebljivi cilj na toj nativnoj krajnjoj točki mora biti ElevenLabs glazbeni model tako da je njegov ugovor o binarnom odgovoru sačuvan. `POST /v1/sound-generation` prihvaća `audio-generation` kombinaciju u `model_id` pod istim izvornim binarnim ograničenjem. Koristite `/v1/music/generations` za heterogene pružatelje glazbe.
+
+**Automatski odabir:** bez `provider`, najjeftiniji pružatelj s konfiguriranom vezom radi prvi, a sljedeći najjeftiniji je failover. Besplatni pružatelji zadnje instance (`duckduckgo-free`) koriste se samo kada ništa drugo nije konfigurirano. SearXNG s vlastitim hostingom računa se kao konfiguriran nakon što njegova veza pohranjuje pravi `baseUrl` (a ne kataloški zadani `http://localhost:8888/search`): tada se rangira kao pružatelj s ključem od 0 USD ispred onih s ključem, s najjeftinijim pružateljem s ključem kao nadogradnjom, uključujući kada SearXNG odgovori 400, 401, 403 ili 404. `baseUrl` koji nije važeći `http(s)` URL ili koji pokazuje na adresa metapodataka u oblaku se ne računa. SearXNG veza koja pohranjuje token rangirana je na ovaj način samo u odnosu na `https://` ili povratnu petlju `http://`. Preko udaljenog običnog `http://` to nikada nije failover i ostaje posljednje sredstvo, koristi se samo kada nijedan drugi pružatelj nije konfiguriran ili kada se traži imenom, tako da šalje token u čistom tekstu u ta dva slučaja.
 
 ### Exa i Tavily `provider_options`
 
@@ -884,29 +921,21 @@ Troškovno računovodstvo je jedinstveni registar `costPerQuery`, osim za Exa, k
 
 ## Web Fetch API
 
-Izdvojite sadržaj s URL-a putem konfiguriranog pružatelja web-dohvata (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
+Izdvojite sadržaj iz URL putem konfiguriranog pružatelja web-fetcha (Firecrawl, Jina Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-Parallel Extract (`parallel-search`, isti API ključ kao za Parallel Search) vraća samo Markdown
-— bilo koja druga vrijednost `format` rezultira pogreškom `400` — i ograničava sadržaj na 100.000 znakova. Kada se ciljna stranica ne može izdvojiti, nadređeni servis to prijavljuje unutar HTTP odgovora 200;
-OmniRoute to izlaže kao `422` s fiksnom porukom.
+Parallel Extract (`parallel-search`, isti ključ API kao Parallel Search) vraća samo Markdown — bilo koji drugi `format` je `400` — i ograničava sadržaj na 100 000 znakova. Kada se sama ciljana stranica ne može ekstrahirati, uzvodni to prijavljuje unutar HTTP 200; OmniRoute to prikazuje kao `422` s fiksnom porukom.
 
-| Metoda | Putanja         | Opis                                                                  |
-| ------ | --------------- | --------------------------------------------------------------------- |
-| POST   | `/v1/web/fetch` | Dohvaća/izdvaja sadržaj s URL-a — tijelo potvrđuje `v1WebFetchSchema` |
+Keenable Fetch (`keenable-search`) također vraća samo Markdown (svaki drugi `format` je `400`) i ograničava sadržaj na 100 000 znakova. Radi bez ključa: eksplicitni `provider: "keenable-search"` zahtjev bez veze koristi Keenableovu krajnju točku bez ključa (ograničenja brzine po IP-u). Konfigurirani ključ samo podiže ta ograničenja; automatski odabir koristi Keenable samo kada je tipka konfigurirana.
 
-**Autentikacija:** Bearer API ključ (`extractApiKey` + `isValidApiKey`). Pravilo se provodi putem `enforceApiKeyPolicy`.
+| metoda | Put             | Opis                                                               |
+| ------ | --------------- | ------------------------------------------------------------------ |
+| POST   | `/v1/web/fetch` | Fetch/scrape a URL — tijelo potvrđeno od strane `v1WebFetchSchema` |
 
-**Fallback uz praćenje kvote (#8297):** kada nije naveden eksplicitni `provider`, skup
-(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) prolazi se utvrđenim
-redoslijedom prioriteta (prvo popunjavanje) — pružatelj koji je dosegnuo ograničenje brzine, ali je konfiguriran, preskače se
-umjesto prekidanja zahtjeva, a ponovljivi/neuspješni zahtjev nadređenog servisa zbog kvote
-(HTTP 429 uvijek; 402/403 za kvotne besplatne razine Firecrawl/Tavily/TinyFish —
-ne za Jina Reader i nikada za običan 400 zbog neispravnog zahtjeva) prosljeđuje se sljedećem
-davatelju vjerodajnica koji još nije pokušan u trenutku zahtjeva. Kada se iscrpe svi pružatelji u skupu, krajnja točka vraća jedan `429` (uz zaglavlje
-`Retry-After`) umjesto prethodnog generičkog `400`. Kada se zatraži eksplicitni `provider`, nema
-tihog fallbacka — pružatelj koji je dosegnuo ograničenje brzine ili nije uspio izlaže vlastitu pogrešku (`429` ako je dosegnuto ograničenje brzine, inače status nadređenog servisa).
+**Autent:** Ključ nositelja API (`extractApiKey` + `isValidApiKey`). Politika se provodi putem `enforceApiKeyPolicy`.
+
+Imenovane kombinacije koriste gornji [`model` ugovor o usmjeravanju](#named-searchfetch-combinations), čuvajući opcije i odgovore specifične za dohvaćanje.
+
+**Zamjena s obzirom na kvote (#8297):** kada se ne zadaju ni `provider` ni `model`, skup (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` → `parallel-search` → `keenable-search`) hoda po fiksnom redoslijedu prioriteta (prvo popuni) — pružatelj s ograničenjem brzine, ali konfiguriranim preskače se umjesto kratkog spoja zahtjeva i greška retryable/quota uzvodno (HTTP 429 uvijek; 402/403 za Firecrawl/Tavily/TinyFish besplatne razine u stilu kvota — ne za Jina Reader i nikad za običan 400 loš zahtjev) pada do sljedećeg neisprobanog pružatelja vjerodajnica u trenutku zahtjeva. Kada je svaki pružatelj u skupu iscrpljen, krajnja točka vraća jedan `429` (sa `Retry-After` zaglavljem) umjesto prethodnog generičkog `400`. Kada se traži eksplicitni `provider`, postoji** Ne** tihi zamjenski — eksplicitni pružatelj s ograničenjem brzine ili greškom otkriva vlastitu pogrešku (`429` ako je ograničeno brzinom, inače uzlazni status).
 
 ---
 
@@ -976,35 +1005,26 @@ CLI nadograđuje `base_url + /responses` na WebSocket, a OmniRoute ga tunelira d
 
 ---
 
-## Izvještavanje o kvotama i problemima
+## Kvote i prijava problema
 
-| Metoda | Putanja             | Opis                                                                                          |
-| ------ | ------------------- | --------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Prethodna provjera kvote za `provider` + `accountId` prije izdavanja registriranog ključa     |
-| POST   | `/v1/issues/report` | Prijava neuspješnog izdavanja kvote/ključa na GitHub (zahtijeva `GITHUB_ISSUES_REPO` + token) |
+| metoda | Put                 | Opis                                                                                       |
+| ------ | ------------------- | ------------------------------------------------------------------------------------------ |
+| GET    | `/v1/quotas/check`  | Prethodno potvrdite kvotu za `provider` + `accountId` prije izdavanja registriranog ključa |
+| POST   | `/v1/issues/report` | Prijavite neuspjeh izdavanja quota/key GitHub (zahtijeva `GITHUB_ISSUES_REPO` + token)     |
 
-**Autentikacija:** Bearer API ključ (`isAuthenticated`).
+**Autent:** `/v1/quotas/check` uzima ključ nositelja API (`isAuthenticated`). `/v1/issues/report` je samo za upravljanje (`requireManagementAuth`), poput `/api/v1/registered-keys`: sesija nadzorne ploče, lokalni CLI token ili API ključ s opsegom `manage`/`admin` ; ključevi API samo za zaključivanje dobivaju `403`.
 
-### Oporavak sesije kvote (uz uključivanje)
+### Oporavak sesije kvote (opt-in)
 
-Nestreaming zahtjev `POST /v1/chat/completions` ili `POST /v1/responses` koji ne uspije s
-konačnom pogreškom kvote (`402`/`429`/`503` čije tijelo navodi da su kvota ili krediti iscrpljeni)
-može se privremeno pohraniti i ponovno reproducirati kasnije umjesto vraćanja pogreške. Pozivatelj
-to uključuje za pojedinačni zahtjev pomoću triju zaglavlja:
+Ne-streaming `POST /v1/chat/completions` ili `POST /v1/responses` koji ne uspije s pogreškom terminalske kvote (`402`/`429`/`503` čije tijelo kaže da su kvota ili krediti iscrpljeni) može se parkirati i reproducirati kasnije umjesto vraćanja pogreške. Pozivatelj se odlučuje po zahtjevu s tri zaglavlja:
 
-| Zaglavlje                    | Vrijednost                                        |
-| ---------------------------- | ------------------------------------------------- |
-| `x-omniroute-quota-recovery` | `auto`                                            |
-| `x-omniroute-session`        | ID sesije, `[A-Za-z0-9._:-]{1,128}`               |
-| `x-omniroute-recovery-turn`  | ID poteza jedinstven unutar sesije (isto pravilo) |
+| Zaglavlje                    | Vrijednost                                          |
+| ---------------------------- | --------------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                              |
+| `x-omniroute-session`        | id sesije, `[A-Za-z0-9._:-]{1,128}`                 |
+| `x-omniroute-recovery-turn`  | pretvori ID jedinstven unutar sesije (isto pravilo) |
 
-Samo su potezi s `stream: false`, bez alata, povijesti alata ili `previous_response_id`, te bez
-prikvačivanja `x-omniroute-connection`, podobni za ovo, a `STORAGE_ENCRYPTION_KEY` mora biti postavljen
-(zahtjev se pohranjuje šifriran do 24 sata). Odgovor je zatim `202` s
-`recovery.poll`; dohvatite `GET /v1/quota-recoveries/{id}` (`202` dok je na čekanju, `200` s
-oporavljenim tijelom po dovršetku) ili otkažite pomoću `DELETE`. Ulaznice su vidljive samo API
-ključu koji ih je izradio. Ponovna reprodukcija čiji je ishod neizvjestan završava u stanju
-`needs_confirmation` umjesto da se pošalje dvaput. Izvor: `src/lib/quota/quotaSessionRecovery.ts`.
+Samo `stream: false` okretaji bez alata, povijesti alata ili `previous_response_id` i bez `x-omniroute-connection` pina su prihvatljivi, a `STORAGE_ENCRYPTION_KEY` mora biti postavljen (zahtjev se pohranjuje šifriran do 24 sata). Odgovor je tada `202` sa `recovery.poll`; poll `GET /v1/quota-recoveries/{id}` (`202` dok je na čekanju, `200` s pronađenim tijelom kada je završeno) ili otkaži s `DELETE`. Ulaznice su vidljive samo API ključu koji ih je kreirao. Ponavljanje čiji je ishod neizvjestan završava u `needs_confirmation` umjesto da bude poslano dva puta. Izvor: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1757,17 +1777,21 @@ Izlazne pretplate na webhookove za događaje OmniRoutea (dovršetak zahtjeva, is
 
 ## Registrirani ključevi (automatsko upravljanje)
 
-Koristi ga podsustav za automatsko upravljanje ključevima za izdavanje i rotaciju API ključeva prema pozadinskom pružatelju/računu, uz dnevne/satne kvote.
+Koristi ga podsustav za automatsko upravljanje ključevima za izdavanje i rotiranje API ključeva u odnosu na prateći provider/account, sa daily/hourly kvotama.
 
-| Metoda | Putanja                               | Opis                                                                                                                                                                                                                     |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/api/v1/registered-keys`             | Popis registriranih ključeva (samo maskirani prefiks)                                                                                                                                                                    |
-| POST   | `/api/v1/registered-keys`             | Izdavanje novog registriranog ključa — tijelo: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Vraća neobrađeni ključ **jednom**. Vraća `429` u slučaju odbijanja zbog kvote. |
-| GET    | `/api/v1/registered-keys/[id]`        | Dohvaćanje metapodataka registriranog ključa (bez neobrađenog materijala)                                                                                                                                                |
-| DELETE | `/api/v1/registered-keys/[id]`        | Opoziv registriranog ključa                                                                                                                                                                                              |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Eksplicitna krajnja točka za opoziv (isti učinak kao DELETE)                                                                                                                                                             |
+| metoda | Put                                   | Opis                                                                                                                                                                                                     |
+| ------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Popis registriranih ključeva (samo maskirani prefiks)                                                                                                                                                    |
+| POST   | `/api/v1/registered-keys`             | Izdajte novi registrirani ključ — tijelo: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Vraća neobrađeni ključ** jednom** . Vraća `429` na odbijanje kvote. |
+| GET    | `/api/v1/registered-keys/[id]`        | Dohvaćanje metapodataka registriranog ključa (bez sirovog materijala)                                                                                                                                    |
+| DELETE | `/api/v1/registered-keys/[id]`        | Opozovi registrirani ključ                                                                                                                                                                               |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Eksplicitno opoziv krajnje točke (isti učinak kao DELETE)                                                                                                                                                |
+| GET    | `/api/v1/providers/[provider]/limits` | Pročitajte ograničenja izdavanja davatelja                                                                                                                                                               |
+| PUT    | `/api/v1/providers/[provider]/limits` | Postavite davateljeva ograničenja izdavanja — tijelo: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                            |
+| GET    | `/api/v1/accounts/[id]/limits`        | Pročitajte ograničenja izdavanja računa                                                                                                                                                                  |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Postavite ograničenja izdavanja računa — isto tijelo kao ruta pružatelja                                                                                                                                 |
 
-**Autentikacija:** upravljačka sesija/API ključ (`requireManagementAuth`) — ista zaštita kao za `/api/keys`: sesija nadzorne ploče, lokalni CLI token ili API ključ s opsegom `manage`/`admin`; API ključevi samo za izvođenje zaključivanja dobivaju `403`. Pogledajte i `/v1/quotas/check` i `/v1/issues/report`.
+**Autent:** upravljanje session/API ključem (`requireManagementAuth`) — isti čuvar kao `/api/keys`: sesija nadzorne ploče, lokalni CLI token ili API ključ s opsegom `manage`/`admin` ; API ključevi samo za zaključivanje dobivaju `403`. Vidi također `/v1/quotas/check` i `/v1/issues/report`.
 
 ---
 
@@ -1891,23 +1915,23 @@ Trajna memorija razgovora/činjenica, ograničena na API ključ / sesiju.
 
 ## MCP poslužitelj
 
-OmniRoute uključuje ugrađeni poslužitelj Model Context Protocol s 3 transporta (stdio, SSE, streamable-http) i alatima ograničenima opsegom. Krajnje točke nadzorne ploče u nastavku čitaju podatke o statusu i reviziji te prosljeđuju HTTP transporte.
+OmniRoute isporučuje ugrađeni poslužitelj Model Context Protocol s 3 prijenosa (stdio, SSE, streamable-http) i alatima s opsegom. Krajnje točke nadzorne ploče u nastavku čitaju status/audit podatke i posreduju HTTP prijenose.
 
-| Metoda | Putanja                | Opis                                                                                                                       | -------------------- |
-| ------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| GET    | `/api/mcp/status`      | Otkucaj, transport, stanje povezanosti, posljednji poziv, najčešće korišteni alati, stopa uspješnosti u posljednja 24 sata |
-| GET    | `/api/mcp/tools`       | Popis MCP alata s `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                                |
-| GET    | `/api/mcp/sse`         | Otvaranje SSE toka za SSE transport (vraća `503` ako je MCP onemogućen ili se transport ne podudara)                       |
-| POST   | `/api/mcp/sse`         | Slanje JSON-RPC okvira putem SSE transporta                                                                                |
-| GET    | `/api/mcp/stream`      | Otvaranje SSE strane Streamable HTTP transporta (poruke koje pokreće poslužitelj)                                          |
-| POST   | `/api/mcp/stream`      | Slanje JSON-RPC okvira putem Streamable HTTP transporta                                                                    |
-| DELETE | `/api/mcp/stream`      | Završetak Streamable HTTP sesije                                                                                           |
-| GET    | `/api/mcp/audit`       | Upitnik dnevnika revizije — `?limit=`, `?offset=`, `?tool=`, `?success=true                                                | false`, `?apiKeyId=` |
-| GET    | `/api/mcp/audit/stats` | Objedinjena statistika revizije (ukupne vrijednosti, stopa uspješnosti, prosječno trajanje, najčešće korišteni alati)      |
+| metoda | Put | Opis |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
+| GET | `/api/mcp/status` | Otkucaj srca, transport, stanje na mreži, posljednji poziv, vrhunski alati, stopa uspješnosti 24 sata |
+| GET | `/api/mcp/tools` | Popis MCP alata sa `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
+| GET | `/api/mcp/sse` | Otvori SSE tok za SSE prijenos (vraća `503` ako je MCP onemogućen ili prijenos nije usklađen) |
+| POST | `/api/mcp/sse` | Pošalji JSON-RPC okvir na SSE prijenosu |
+| GET | `/api/mcp/stream` | Otvorite SSE stranu prijenosa Streamable HTTP (poruke koje pokreće poslužitelj) |
+| POST | `/api/mcp/stream` | Pošalji JSON-RPC okvir na prijenosu Streamable HTTP |
+| DELETE | `/api/mcp/stream` | Završite Streamable HTTP sesiju |
+| GET | `/api/mcp/audit` | Dnevnik revizije upita — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
+| GET | `/api/mcp/audit/stats` | Skupna revizijska statistika (ukupni iznosi, stopa uspješnosti, prosječno trajanje, najbolji alati) |
 
-**Autentikacija:** transporti `sse`/`stream` poštuju MCP-specifičnu površinu za autentikaciju (Bearer API ključ s opsegom `mcp`); rute `status`/`tools`/`audit*` dostupne su za čitanje s nadzorne ploče (nije potrebna dodatna autentikacija osim pristupa hostu nadzorne ploče).
+**Autent:** prijenosi `sse`/`stream` poštuju površinu autentifikacije specifičnu za MCP (ključ nositelja API s opsegom `mcp` ); rute `status`/`tools`/`audit*` čitljive su s nadzorne ploče (nije potrebna dodatna autentifikacija osim dosezanja hosta nadzorne ploče).
 
-> Oba HTTP transporta kontroliraju `settings.mcpEnabled` i `settings.mcpTransport` — nepodudaranje transporta vraća `400`, a onemogućeno stanje MCP-a vraća `503`.
+> Oba HTTP transporta imaju vrata `settings.mcpEnabled` i `settings.mcpTransport` — neusklađenost transporta vraća `400`, MCP onemogućeno stanje vraća `503`.
 
 ---
 

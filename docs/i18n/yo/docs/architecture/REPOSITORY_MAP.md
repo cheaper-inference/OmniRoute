@@ -242,9 +242,9 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dasibodu paati API: awọn oluyipada lori `packages/ui-kit` — wo `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: aami awọn orukọ ti a lo nipasẹ awọn iboju → Lucide irinše (`<Icon>`)                    |
-| `constants/providers.ts`         | **381 olupese** pẹlu afọwọsi Zod (orisun otitọ)                                                     |
+| `constants/providers.ts`         | **394 olupese** pẹlu afọwọsi Zod (orisun otitọ)                                                     |
 | `constants/cliTools.ts`          | Iforukọsilẹ irinṣẹ CLI ita                                                                          |
-| `constants/routingStrategies.ts` | **20 afisona ogbon** pẹlu ayo                                                                       |
+| `constants/routingStrategies.ts` | **22 afisona ogbon** pẹlu ayo                                                                       |
 | `constants/publicApiRoutes.ts`   | Awọn ipa-ọna ti o nilo Olutọju (la iṣakoso) auth                                                    |
 | `constants/upstreamHeaders.ts`   | Akokọ akọsori fun awọn ibeere oke                                                                   |
 | `validation/schemas.ts`          | ~ 80 Zod schemas (orisun kan ti otitọ fun awọn adehun API )                                         |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — Àyè Iṣẹ́ Ẹ́ńjìnnì Ṣíṣàn
+## `open-sse/` — śiśanwọle Engine Workspace
 
-Àyè iṣẹ́ npm ọ̀tọ̀ (`@omniroute/open-sse`). Ó ń bójú tó ṣíṣe àwọn ìbéèrè àti ìmúṣẹ olùpèsè.
+Lọtọ aaye iṣẹ npm (`@omniroute/open-sse`). Kapa ìbéèrè processing + olupese ipaniyan.
 
 ```
 open-sse/
-├── handlers/            # Fáìlì 16 (olùṣàkóso 12 + olùrànlọ́wọ́ 4): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ.
-├── executors/           # Module executor 150 (àwọn class tó ń fa BaseExecutor gùn + àwọn olùrànlọ́wọ́ fún olùpèsè kọ̀ọ̀kan)
-├── translator/          # Àwọn olùyípadà fọ́ọ̀mù (ìbéèrè 9, èsì 9, olùrànlọ́wọ́ 9)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ module iṣẹ́ (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ.)
-├── mcp-server/          # Server MCP (irinṣẹ́ 110, ọ̀nà ìbánisọ̀rọ̀ 3, ààlà àṣẹ 33)
-├── config/              # Àwọn ìforúkọsílẹ̀ olùpèsè/model, àtúnṣe header, àwọn orúkọ mìíràn fún model
-├── utils/               # Client TLS, proxy fetch/dispatcher, àwọn olùrànlọ́wọ́ nẹ́tíwọ́ọ̀kì
-├── index.ts             # Ojú-ọ̀nà ìwọlé àyè iṣẹ́
-├── package.json         # Manifest àyè iṣẹ́
-├── tsconfig.json        # Àtúnṣe TS àyè iṣẹ́
-└── types.d.ts           # Àwọn ìkéde type àyè iṣẹ́
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Ọ̀nà                         | Ète                                                                           |
-| --------------------------- | ----------------------------------------------------------------------------- |
-| `server.ts`                 | Ìgbésí-ayé server MCP (stdio + àwọn ọ̀nà ìbánisọ̀rọ̀ HTTP)                       |
-| `httpTransport.ts`          | Àwọn ọ̀nà ìbánisọ̀rọ̀ HTTP Streamable + SSE (`/api/mcp/sse`, `/api/mcp/stream`)  |
-| `audit.ts`                  | Ìkọ àyẹ̀wò sínú tábìlì `mcp_tool_audit`                                        |
-| `scopeEnforcement.ts`       | Ìfọwọ́sí ààlà àṣẹ fún irinṣẹ́ kọ̀ọ̀kan                                            |
-| `runtimeHeartbeat.ts`       | Ìlù-ọkàn ìlera sí `DATA_DIR/runtime/mcp-heartbeat.json`                       |
-| `descriptionCompressor.ts`  | Dín metadata àpèjúwe irinṣẹ́ kù láti fi ààyè àkóónú pamọ́                       |
-| `schemas/tools.ts`          | Àwọn ìtumọ̀ irinṣẹ́ ìpìlẹ̀ 36 + àwọn ààlà àṣẹ                                    |
-| `tools/advancedTools.ts`    | Àwọn ìmúṣẹ irinṣẹ́ onípele-gíga                                                |
-| `tools/memoryTools.ts`      | Irinṣẹ́ ìrántí 3 (ṣàwárí/ṣàfikún/pa rẹ́)                                        |
-| `tools/skillTools.ts`       | Irinṣẹ́ ọgbọ́n 4 (ṣe àkójọ/mú ṣiṣẹ́/ṣe/àwọn ìmúṣẹ)                               |
-| `tools/compressionTools.ts` | Irinṣẹ́ ìdínkù 5                                                               |
-| `README.md`                 | README abẹ́nú fún server MCP (tí a so pọ̀ láti `docs/frameworks/MCP-SERVER.md`) |
+| Ona                         | Idi                                                                    |
+| --------------------------- | ---------------------------------------------------------------------- |
+| `server.ts`                 | igbesi aye olupin MCP (awọn gbigbe stdio + HTTP )                      |
+| `httpTransport.ts`          | HTTP Gbigbe + SSE awọn gbigbe (`/api/mcp/sse`, `/api/mcp/stream`)      |
+| `audit.ts`                  | Ṣiṣayẹwo wọle si tabili `mcp_tool_audit`                               |
+| `scopeEnforcement.ts`       | Fun-irinṣẹ afọwọsi                                                     |
+| `runtimeHeartbeat.ts`       | Lilu ọkan ilera si `DATA_DIR/runtime/mcp-heartbeat.json`               |
+| `descriptionCompressor.ts`  | Tẹ metadata apejuwe irinṣẹ lati ṣafipamọ ọrọ-ọrọ pamọ                  |
+| `schemas/tools.ts`          | 36 mimọ ọpa itumo + scopes                                             |
+| `tools/advancedTools.ts`    | Awọn imuse irinṣẹ to ti ni ilọsiwaju                                   |
+| `tools/memoryTools.ts`      | Awọn irinṣẹ iranti 3 (search/add/clear)                                |
+| `tools/skillTools.ts`       | Awọn irinṣẹ ọgbọn 4 (list/enable/execute/executions)                   |
+| `tools/compressionTools.ts` | 5 funmorawon irinṣẹ                                                    |
+| `README.md`                 | Olupin MCP inu README (asopọmọra lati `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Awọn akojọpọ CLI ita + Ti abẹnu OmniRoute CLI                                                   |
 | `I18N.md`                   | i18n faaji, fifi a ede, 67 locales                                                              |
 | `UNINSTALL.md`              | Nu aifi si awọn igbesẹ                                                                          |
-| `PROVIDER_REFERENCE.md`     | **Ti ipilẹṣẹ laifọwọyi** katalogi ti awọn olupese 381 (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Ti ipilẹṣẹ laifọwọyi** katalogi ti awọn olupese 394 (regen: `npm run gen:provider-reference`) |
 
 ### Subsystem jin-dives
 
@@ -445,7 +445,7 @@ open-sse/
 | `COMPRESSION_LANGUAGE_PACKS.md` | Iṣakojọpọ akopọ ofin fun ede-ede         |
 | `RTK_COMPRESSION.md`            | opo gigun ti epo alaye RTK (awọn asẹ 56) |
 
-### Ifiranṣẹ
+### Gbigbe
 
 | Dókítà                       | Idi                                                                 |
 | ---------------------------- | ------------------------------------------------------------------- |

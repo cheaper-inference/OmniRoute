@@ -116,33 +116,10 @@ Los orígenes se comparan sin distinguir entre mayúsculas y minúsculas e ignor
 puede configurarse durante la ejecución en **Panel → Seguridad → Orígenes CORS permitidos** sin
 reiniciar.
 
-## Claves de API frente a sesiones con cookies
+## claves API vs sesiones de cookies
 
-- **Bearer/`x-api-key` (la superficie de inferencia `/v1/*`):** los navegadores nunca adjuntan
-  estos datos automáticamente. CORS no constituye una barrera significativa aquí —la clave de API es la
-  barrera—, razón por la que esta superficie es intencionadamente permisiva para que los clientes web y
-  Electron puedan leer las respuestas a las que ya tienen derecho.
-  La devolución relajada del origen depende de la clave validada, no de la mera presencia
-  del encabezado: cuando `REQUIRE_API_KEY=false` atiende una solicitud de forma anónima,
-  su respuesta correcta mantiene la lista de permitidos cerrada de forma predeterminada.
-  Los rechazos de autenticación (401) siguen siendo legibles para que los clientes puedan
-  indicar una clave revocada o mal escrita (#5242): el propio 401 del pipeline conserva la
-  devolución del origen, y una ruta que rechaza la clave por sí misma después de que el
-  pipeline la atendiera como anónima (`/v1/models` y `/v1beta/models` con autenticación de
-  administración configurada, las rutas limitadas al propietario `/v1/files`,
-  `/v1/batches`, `/v1/media`, `/v1/session-leases` y las rutas de candidatos de
-  auto-combo) añade la devolución del origen a ese 401 mediante
-  `credentialRejectionHeaders()`. La devolución del origen depende de que la solicitud
-  lleve un encabezado de credenciales (`Authorization`, `x-api-key`, `x-goog-api-key` o la
-  cookie `auth_token`), no de cuál de ellos haya comprobado la ruta, y nunca se combina con
-  `Access-Control-Allow-Credentials`; el cuerpo es un sobre de error fijo. Las rutas de
-  administración bajo `/api/v1/` protegidas por `requireManagementAuth()`
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) no añaden la devolución del origen:
-  con `REQUIRE_API_KEY=false`, sus respuestas 401/403 no son legibles entre orígenes.
-- **Sesión con cookies (el panel):** está protegida por el valor predeterminado de cierre ante fallos **y**
-  por la ausencia de `Access-Control-Allow-Credentials` en la ruta compartida. Mantenga
-  los orígenes de administración/del panel fuera de cualquier configuración permisiva; deben permanecer
-  completamente cerrados ante fallos.
+- **Portador/ `x-api-key` (la superficie de inferencia `/v1/*` ):** Los navegadores nunca los adjuntan automáticamente. CORS no es una barrera significativa aquí — la clave API es la barrera — por lo que esa superficie es intencionalmente permisiva para que el navegador y los clientes Electron puedan leer las respuestas a las que ya tienen derecho. El eco relajado sigue la clave validada, no la mera presencia del encabezado: cuando `REQUIRE_API_KEY=false` atiende una solicitud de forma anónima, su respuesta exitosa mantiene la lista de permitidos cerrados por fallas. Los rechazos de autenticación (401) permanecen legibles para que los clientes puedan mostrar una clave revocada o mal escrita (#5242): el propio 401 de la canalización mantiene el eco, y una ruta que rechaza la clave misma después de que la canalización la entregó como anónima (`/v1/models` y `/v1beta/models` con la autenticación de administración configurada, las rutas candidatas `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` y auto-combo con alcance del propietario) agrega el eco a ese 401 a través de `credentialRejectionHeaders()`. El eco se codifica en la solicitud que lleva un encabezado de credencial (`Authorization`, `x-api-key`, `x-goog-api-key` o la cookie `auth_token` ), no en cuál de ellas se verificó la ruta, y nunca se empareja con `Access-Control-Allow-Credentials`; el cuerpo es un sobre de error fijo. Las rutas de administración bajo `/api/v1/` custodiadas por `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) no agregan el eco: con `REQUIRE_API_KEY=false` su 401/403 no es legible en origen cruzado.
+- **Sesión de cookies (el panel de control):** protegido por el valor predeterminado de cierre fallido** y** por la ausencia de `Access-Control-Allow-Credentials` en el camino compartido. Mantenga los orígenes management/dashboard fuera de cualquier configuración permisiva; deben permanecer exactamente cerrados a prueba de fallos.
 
 ## Handshakes de WebSocket (`/v1/responses`, `/v1/ws`)
 

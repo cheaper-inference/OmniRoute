@@ -855,6 +855,43 @@ Web/search -udbyderabstraktion (Tavily, Brave, Exa, Serper osv.).
 
 **Auth:** Bærer API nøgle (`extractApiKey` + `isValidApiKey`). Søgepolitik håndhæves via `enforceApiKeyPolicy`.
 
+### Navngivne search/fetch -kombinationer
+
+Både `POST /v1/search` og `POST /v1/web/fetch` accepterer `model` som et gemt kombinationsnavn. Brug enten `model` eller en eksplicit `provider`; sender begge returnerer `400`. Uden begge felter forbliver det eksisterende automatiske udbydervalg uændret.
+
+Både Combo Builder og dets Add Model-katalog afslører native web-driftsindgange for tilsluttede udbydere, selv når de ikke har nogen LLM -modelliste. Serper viser** Websøgning** ; Tavily viser** Websøgning / Sideudtræk** , og udbydere, der kun kan hentes, vises** Sideudtræk** . Vælg post og konto som normalt. En enkelt Tavily-indgang tjener begge web-endepunkter; disse operationsindgange føjes ikke til kun chat-klientvælgere eller chatmodelsonder.
+
+Opret f.eks. en** prioritet** combo ved navn `shared-free` med disse ordnede mål:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+Brug derefter samme navn på hver overflade:
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+Søg anser Tavily derefter Serper; hente betragter Tavily derefter Jina Reader; chat springer de dedikerede search/fetch udbydere over og overvejer OpenAI. Kompatibilitet kommer fra search/fetch executor-registrene, ikke fra ord i et modelnavn. Filtrering går forud for valg og afsendelse af legitimationsoplysninger og redigerer aldrig den gemte kombination.
+
+Ruter uden chatfunktion understøtter `priority`, `fill-first`, `round-robin`, `weighted`, `random`, `strict-random`, `least-used` og `p2c`. Syntesestrategier for kun chat som `fusion`, `pipeline` og `context-relay` afvises på ikke-chat-ruter i stedet for at blive anvendt i det stille på søgninger eller genererede medier. Den eksisterende kombinationsmotor håndterer bestilt fallback, inklusive upstream-kvotefejl, og bevarer trin IDs, kontonåle, per-trin kontotilladelseslister, indlejrede referencer, opkalds connection/quota omfang og combo-adgangspolitik. Resultater bevarer deres oprindelige search/fetch skema, inklusive den faktiske udbyder; `X-OmniRoute-Combo-Trace` identificerer routingbeslutningen. Ukendte kombinationer returnerer `404`; inaktive kombinationer og kombinationer uden kompatible mål returnerer `400`.
+
+Hvert kombinationsforsøg bruger én eksplicit udbyder. Den kan ikke påkalde den oprindelige automatiske udbyderpulje bag comboens ryg. Eksplicitte udbyderanmodninger bevarer deres eksisterende enkeltudbyderadfærd. Direkte chat-anmodninger rettet mod dedikerede search/fetch udbydere returnerer en handlingsvenlig JSON `400` i stedet for at falde igennem til en OpenAI-lignende executor.
+
+### Mulighedsspecifikke kombinationsruter
+
+Gemte kombinationer kan indeholde et `routes` objekt, hvis nøgler er API funktioner. Hver rute ejer sin målliste, strategi og runtime-konfiguration. `models`, `strategy` og `config` på øverste niveau forbliver den legacy-kompatible Chat-plan; gamle kombinationer uden `routes` fortsætter med at fungere uændret.
+
+Understøttede rutenøgler er `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`, `image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`, `audio-translations` og `audio-generation`. Endpoint-projektion sker før legitimationsvalg, scoring eller afsendelse. Indlejrede kombinationsreferencer vælger den underordnede kombinationsrute for den samme funktion.
+
+`POST /v1/music/generations` og `POST /v1/ocr` accepterer et kombinationsnavn i `model`. Den native ElevenLabs-kompatible `POST /v1/music` accepterer også et kombinationsnavn i `model_id`, men hvert brugbart mål på det native endepunkt skal være en ElevenLabs musikmodel, så dens binære responskontrakt bevares. `POST /v1/sound-generation` accepterer en `audio-generation` kombination i `model_id` under den samme native-binære begrænsning. Brug `/v1/music/generations` til heterogene musikudbydere.
+
 **Automatisk valg:** uden `provider` kører den billigste udbyder med en konfigureret forbindelse først, og den næstbilligste er failover. Gratis sidste udvej-udbydere (`duckduckgo-free`) bruges kun, når intet andet er konfigureret. En selv-hostet SearXNG tæller som konfigureret, når dens forbindelse lagrer en rigtig `baseUrl` (ikke katalogets standard `http://localhost:8888/search`): den rangerer derefter som en $0-udbyder foran de nøglede, med den billigste nøgleudbyder som failover, inklusive når SearXNG svarer 400, 401, 403 eller 404. A `baseUrl`, der ikke er a `http(s)` URL punkter cloud-metadata-adresse tæller ikke. En SearXNG forbindelse, der gemmer et token, rangerer kun på denne måde over `https://` eller loopback `http://`. Over remote plain `http://` er det aldrig en failover og forbliver en sidste udvej, der kun bruges, når ingen anden udbyder er konfigureret, eller når det anmodes om ved navn, så det sender tokenet i klartekst i disse to tilfælde.
 
 ### Exa og Tavily `provider_options`
@@ -882,29 +919,23 @@ Omkostningsregnskab er det flade register `costPerQuery` undtagen Exa, som følg
 
 ---
 
-## Web Fetch API
+## Web Hent API
 
-Udtræk indhold fra en URL via en konfigureret web-fetch-udbyder (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
+Uddrag indhold fra en URL via en konfigureret webhentningsudbyder (Firecrawl, Jina Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-Parallel Extract (`parallel-search`, samme API-nøgle som Parallel Search) returnerer kun Markdown — alle andre `format`-værdier giver en `400` — og begrænser indholdet til 100.000 tegn. Når selve målsiden ikke kan udtrækkes, rapporterer upstream dette i et HTTP 200-svar; OmniRoute viser det som en `422` med en fast meddelelse.
+Parallel Extract (`parallel-search`, samme API nøgle som Parallel Search) returnerer kun Markdown — enhver anden `format` er en `400` — og begrænser indholdet til 100.000 tegn. Når selve målsiden ikke kan udtrækkes, rapporterer upstream det inde i en HTTP 200; OmniRoute viser det som en `422` med en fast besked.
 
-| Metode | Sti             | Beskrivelse                                              |
-| ------ | --------------- | -------------------------------------------------------- |
-| POST   | `/v1/web/fetch` | Hent/scrap en URL — body valideres af `v1WebFetchSchema` |
+Keenable Fetch (`keenable-search`) returnerer også kun Markdown (enhver anden `format` er en `400`) og begrænser indholdet til 100.000 tegn. Det fungerer uden en nøgle: en eksplicit `provider: "keenable-search"` -anmodning uden forbindelse bruger Keenables nøgleløse slutpunkt (per-IP-hastighedsgrænser). En konfigureret nøgle løfter kun disse grænser; auto-select bruger kun Keenable, når en nøgle er konfigureret.
 
-**Godkendelse:** Bearer API-nøgle (`extractApiKey` + `isValidApiKey`). Politikken håndhæves via `enforceApiKeyPolicy`.
+| Metode | Sti             | Beskrivelse                                               |
+| ------ | --------------- | --------------------------------------------------------- |
+| POST   | `/v1/web/fetch` | Fetch/scrape a URL — krop valideret af `v1WebFetchSchema` |
 
-**Kvotebevidst fallback (#8297):** Når der ikke er angivet nogen eksplicit `provider`, gennemløbes puljen
-(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) i fast
-prioritetsrækkefølge (først tilgængelige) — en hastighedsbegrænset, men konfigureret udbyder springes over
-i stedet for at afkorte forespørgslen, og en genforsøgsbar/upstream-fejl relateret til kvoten
-(HTTP 429 altid; 402/403 for Firecrawl/Tavily/TinyFish-kvotestile på gratis niveauer —
-ikke for Jina Reader og aldrig for en almindelig 400-fejlanmodning) går videre til
-den næste uprøvede udbyder med legitimationsoplysninger på forespørgselstidspunktet. Når alle udbydere i
-puljen er opbrugt, returnerer endpointet en enkelt `429` (med en `Retry-After`-header)
-i stedet for den tidligere generiske `400`. Når der anmodes om en eksplicit `provider`, er der **ingen** lydløs fallback — en hastighedsbegrænset eller fejlende eksplicit udbyder viser sin egen fejl (`429` ved hastighedsbegrænsning, ellers upstream-statussen).
+**Auth:** Bærer API nøgle (`extractApiKey` + `isValidApiKey`). Politik håndhæves via `enforceApiKeyPolicy`.
+
+Navngivne kombinationer bruger [`model` -routingkontrakten](#named-searchfetch-combinations) ovenfor, og bevarer hente-specifikke muligheder og svar.
+
+**Kvotebevidst fallback (#8297):** når hverken `provider` eller `model` er givet, går puljen (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` → `parallel-search` → `keenable-search`) i fast prioriteret rækkefølge (fill-first) — en hastighedsbegrænset-men-konfigureret udbyder springes over anmodningen i stedet for at kortslutte, 29 retryable/quota (HTTP q) altid; 402/403 for Firecrawl/Tavily/TinyFish kvote-stil gratis niveauer — ikke for Jina Reader, og aldrig for en almindelig 400 dårlig anmodning) falder igennem til den næste uafprøvede legitimationsudbyder på anmodningstidspunktet. Når hver udbyder i puljen er opbrugt, returnerer slutpunktet en enkelt `429` (med en `Retry-After` header) i stedet for den tidligere generiske `400`. Når der anmodes om en eksplicit `provider`, er der** ingen** Silent fallback — en hastighedsbegrænset eller svigtende eksplicit udbyder viser sin egen fejl (`429` hvis hastighedsbegrænset, ellers upstream-status).
 
 ---
 
@@ -982,32 +1013,24 @@ fuldførelsen.
 
 ## Rapportering af kvoter og problemer
 
-| Metode | Sti                 | Beskrivelse                                                                                   |
-| ------ | ------------------- | --------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Forudvalider kvoten for en `provider` + `accountId`, før en registreret nøgle udstedes        |
-| POST   | `/v1/issues/report` | Rapportér en fejl ved kvote-/nøgleudstedelse til GitHub (kræver `GITHUB_ISSUES_REPO` + token) |
+| Metode | Sti                 | Beskrivelse                                                                                 |
+| ------ | ------------------- | ------------------------------------------------------------------------------------------- |
+| GET    | `/v1/quotas/check`  | Forhåndsvalider kvoten for en `provider` + `accountId` før du udsteder en registreret nøgle |
+| POST   | `/v1/issues/report` | Rapporter en quota/key -udstedelsesfejl til GitHub (kræver `GITHUB_ISSUES_REPO` + token)    |
 
-**Godkendelse:** Bearer API-nøgle (`isAuthenticated`).
+**Auth:** `/v1/quotas/check` tager en bærer API nøgle (`isAuthenticated`). `/v1/issues/report` er kun til administration (`requireManagementAuth`), ligesom `/api/v1/registered-keys`: en dashboard-session, det lokale CLI token eller en API nøgle med `manage`/`admin` omfang; inferens-kun API nøgler får `403`.
 
-### Gendannelse af kvotesession (tilvælgelse)
+### Gendannelse af kvotesession (tilvalg)
 
-En ikke-streamende `POST /v1/chat/completions` eller `POST /v1/responses`, der mislykkes med
-en terminal kvotefejl (`402`/`429`/`503` hvis body'en angiver, at kvoten eller kreditterne er opbrugt),
-kan parkeres og afspilles senere i stedet for at returnere fejlen. Klienten tilvælger dette pr. anmodning med tre headers:
+En ikke-streaming `POST /v1/chat/completions` eller `POST /v1/responses`, der fejler med en terminal kvotefejl (`402`/`429`/`503`, hvis krop siger, at kvoten eller kreditterne er opbrugt) kan parkeres og afspilles senere i stedet for at returnere fejlen. Den, der ringer op, tilmelder sig pr. anmodning med tre overskrifter:
 
-| Header                       | Værdi                                            |
-| ---------------------------- | ------------------------------------------------ |
-| `x-omniroute-quota-recovery` | `auto`                                           |
-| `x-omniroute-session`        | sessions-id, `[A-Za-z0-9._:-]{1,128}`            |
-| `x-omniroute-recovery-turn`  | turn-id, unikt inden for sessionen (samme regel) |
+| Overskrift                   | Værdi                                   |
+| ---------------------------- | --------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                  |
+| `x-omniroute-session`        | sessions-id, `[A-Za-z0-9._:-]{1,128}`   |
+| `x-omniroute-recovery-turn`  | turn id unikt i sessionen (samme regel) |
 
-Kun `stream: false`-turns uden værktøjer, værktøjshistorik eller `previous_response_id` og uden
-en `x-omniroute-connection`-fastlåsning er kvalificerede, og `STORAGE_ENCRYPTION_KEY` skal være angivet
-(anmodningen gemmes krypteret i op til 24 timer). Svaret er derefter `202` med
-`recovery.poll`; afvent med `GET /v1/quota-recoveries/{id}` (`202` mens den afventer, `200` med det
-gendannede body, når den er færdig), eller annullér med `DELETE`. Billetter er kun synlige for den API-nøgle,
-der oprettede dem. En afspilning, hvis resultat er usikkert, afsluttes i `needs_confirmation`
-i stedet for at blive sendt to gange. Kilde: `src/lib/quota/quotaSessionRecovery.ts`.
+Kun `stream: false` -sving uden værktøjer, værktøjshistorik eller `previous_response_id` og ingen `x-omniroute-connection` pin er berettigede, og `STORAGE_ENCRYPTION_KEY` skal indstilles (anmodningen gemmes krypteret i op til 24 timer). Svaret er så `202` med `recovery.poll`; poll `GET /v1/quota-recoveries/{id}` (`202` mens afventende, `200` med den genoprettede krop når den er fuldført) eller annuller med `DELETE`. Billetter er kun synlige for den API nøgle, der oprettede dem. En gentagelse, hvis udfald er usikkert, ender med `needs_confirmation` i stedet for at blive sendt to gange. Kilde: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1748,19 +1771,23 @@ Udgående webhook-abonnementer for OmniRoute-hændelser (fuldførelse af anmodni
 
 ---
 
-## Registrerede nøgler (automatisk administration)
+## Registrerede nøgler (automatisk styring)
 
-Bruges af undersystemet til automatisk nøgleadministration til at udstede og rotere API-nøgler mod en underliggende udbyder/konto med daglige og timelige kvoter.
+Bruges af undersystemet til automatisk nøglestyring til at udstede og rotere API nøgler mod en backing- provider/account med daily/hourly kvoter.
 
-| Metode | Sti                                   | Beskrivelse                                                                                                                                                                                                              |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/api/v1/registered-keys`             | Vis registrerede nøgler (kun maskeret præfiks)                                                                                                                                                                           |
-| POST   | `/api/v1/registered-keys`             | Udsted en ny registreret nøgle — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Returnerer den rå nøgle **én gang**. Returnerer `429` ved afvisning på grund af kvote. |
-| GET    | `/api/v1/registered-keys/[id]`        | Hent en registreret nøgles metadata (ingen rå nøgledata)                                                                                                                                                                 |
-| DELETE | `/api/v1/registered-keys/[id]`        | Tilbagekald en registreret nøgle                                                                                                                                                                                         |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Eksplicit slutpunkt til tilbagekaldelse (samme effekt som DELETE)                                                                                                                                                        |
+| Metode | Sti                                   | Beskrivelse                                                                                                                                                                                              |
+| ------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Liste registrerede nøgler (kun maskeret præfiks)                                                                                                                                                         |
+| POST   | `/api/v1/registered-keys`             | Udsted en ny registreret nøgle — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Returnerer den rå nøgle** engang** . Returnerer `429` ved kvoteafslag. |
+| GET    | `/api/v1/registered-keys/[id]`        | Hent en registreret nøgles metadata (ingen råmateriale)                                                                                                                                                  |
+| DELETE | `/api/v1/registered-keys/[id]`        | Tilbagekald en registreret nøgle                                                                                                                                                                         |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Eksplicit tilbagekaldende slutpunkt (samme effekt som DELETE)                                                                                                                                            |
+| GET    | `/api/v1/providers/[provider]/limits` | Læs udbyderens udstedelseslofter                                                                                                                                                                         |
+| PUT    | `/api/v1/providers/[provider]/limits` | Indstil udbyderens udstedelsesgrænser — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                    |
+| GET    | `/api/v1/accounts/[id]/limits`        | Læs kontoens udstedelsesgrænser                                                                                                                                                                          |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Indstil kontoens udstedelsesgrænser — samme tekst som udbyderruten                                                                                                                                       |
 
-**Godkendelse:** administrationssession/API-nøgle (`requireManagementAuth`) — samme kontrol som `/api/keys`: en dashboardsession, det lokale CLI-token eller en API-nøgle med `manage`-/`admin`-scope; API-nøgler, der kun bruges til inferens, får `403`. Se også `/v1/quotas/check` og `/v1/issues/report`.
+**Auth:** management session/API key (`requireManagementAuth`) — den samme vagt som `/api/keys`: en dashboard-session, det lokale CLI token eller en API nøgle med `manage`/`admin` omfang; API -nøgler, der kun er inferens, får `403`. Se også `/v1/quotas/check` og `/v1/issues/report`.
 
 ---
 

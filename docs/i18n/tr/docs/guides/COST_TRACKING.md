@@ -68,7 +68,7 @@ Aynı provider/model için, yüksek öncelikli katmanlardan gelen değerler, alt
 | `MODELS_DEV_SYNC_ENABLED`  | _(ayarlanmadı)_ | Unset, Ayarlar geçişini takip eder; `1/true/on/yes` açılır ve `0/false/off/no` kapanır (Ayarlar bunu etkinleştirse bile). |
 | `MODELS_DEV_SYNC_INTERVAL` | `86400`         | Varsayılan models.dev senkronizasyon aralığı saniye cinsinden (günlük).                                                   |
 
-`PRICING_SYNC_SOURCES` yapar** Olumsuz** models.dev'i etkinleştirin; yalnızca LiteLLM senkronizasyonunu kontrol eder. Kullanıcı geçersiz kılmayı silmek, senkronize edilen ad alanlarının ikisini de temizlemez; bir sonraki mevcut fiyatlandırma katmanı etkili olur. Fiyatlandırılmamış bir model için manuel geçersiz kılma eklemeden önce hem senkronizasyon ayarlarını hem de `sourceMap` kontrol edin.
+`PRICING_SYNC_SOURCES` yapar** Olumsuz** models.dev'i etkinleştirin; yalnızca LiteLLM senkronizasyonunu kontrol eder. Kullanıcı geçersiz kılmayı silmek, senkronize edilen ad alanlarını da temizlemez; bir sonraki kullanılabilir fiyatlandırma katmanı etkin hale gelir. Fiyatlandırılmamış bir model için manuel geçersiz kılma eklemeden önce hem senkronizasyon ayarlarını hem de `sourceMap` kontrol edin.
 
 ### Maliyet formülü
 
@@ -86,7 +86,7 @@ Tüm oranlar 1.000.000 token başına USD olarak yorumlanır. Bir Codex "hızlı
 
 ### Harcama nasıl kaydedilir?
 
-- İstek başına maliyet, yanıttan sonra hesaplanır ve ateşle ve unut kaydedildikten sonra istemciye hiçbir zaman gecikme eklemez. Paylaşılan kota tüketimi [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) aracılığıyla bir sonraki olay döngüsü işaretinde planlanır.
+- İstek başına maliyet, istek tamamlandığında hesaplanır. Paylaşılan kota tüketimi [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) aracılığıyla bir sonraki olay döngüsü işaretinde planlanır.
 - API anahtarı harcaması [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) tarafından toplu olarak arabelleğe alınır ve temizlenir (varsayılan 60 saniyelik temizleme aralığı, 1.000 girişli arabellek). Şu şekilde ayarlanabilir:
 
   | Ortam değişkeni                     | Varsayılan | Amaç                                                    |
@@ -94,7 +94,29 @@ Tüm oranlar 1.000.000 token başına USD olarak yorumlanır. Bir Codex "hızlı
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`    | Milisaniye cinsinden yıkama aralığı.                    |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`     | Temizlemeden önce maksimum ara belleğe alınan girişler. |
 
-Kontrol panelinin maliyet rakamları** Olumsuz** satır başına depolanan dolar tutarındaki — okunur ve analiz uç noktası her çalıştırıldığında jeton sayımlarından ve mevcut fiyatlandırma tablosundan anında yeniden hesaplanır. Bu, yanlış bir fiyatın düzeltilmesi (ve yeniden senkronize edilmesi) geçmiş maliyet tahminlerinin geriye dönük olarak güncellenmesi anlamına gelir.
+Maliyetler, sağlayıcı tarafından bildirilen kesin bir ücreti (`provider_cost_usd`), ardından katalog fiyatına göre talep anlık görüntüsünü (`calculated_cost_usd`) ve ardından mevcut katalogdan belirtecin yeniden fiyatlandırmasını tercih eder. Saklanan maliyetler, jeton sayımları aracılığıyla yeniden ücretlendirilmez. Yalnızca eski token satırları, katalog fiyatları değiştiğinde değişmeye devam eder.
+
+### OCR ve yerleştirmeler
+
+- Başarılı `/v1/ocr` istekleri, istenen sayfa aralığını veya döndürülen sayfa nesnelerinin sayısını değil, yukarı akış `usage_info.pages_processed` kullanır. Tahmin sayfa × `ocr_cost_per_page` (mutlak USD/page,** Olumsuz** USD/million).
+- Belge veya sınırlayıcı kutu açıklamaları içeren talepler ayrı bir `ocr_cost_per_annotated_page` tarifesi gerektirir. Onsuz maliyet bilinmiyor; sıradan OCR tarifesi sessizce ikame edilmez.
+- LiteLLM senkronizasyonu, mutlak USD/page değerini ve açık sıfır da dahil olmak üzere yalnızca açıklama girişlerini koruyarak yukarı akış `annotation_cost_per_page` alanını `ocr_cost_per_annotated_page` ile eşler. Sağlanan bir kanonik alan önceliklidir; geçersiz takma ad değerleri göz ardı edilir. Kullanıcı fiyatlandırmasını geçersiz kılma işlemleri normal önceliklerini korur. [LiteLLMOCR fiyatlandırma anahtarlarına](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking) bakın.
+- OCR kullanımı sayfa sayısını, birim fiyatı, hesaplanan USD maliyetini, API anahtarını ve seçilen bağlantıyı saklar. Sayfalar hiçbir zaman belirteç olarak temsil edilmez. Çağrı günlükleri, URLs belgesini, PDF baytlarını veya çıkarılan metni değil, faturalandırma meta verilerini içerir.
+- Başarılı `/v1/embeddings` istekleri, aynı milisaniyede tamamlanan ayrı gruplar da dahil olmak üzere, fiziksel grup başına bir kullanım satırını kaydeder. Sağlayıcı tarafından bildirilen ücretler, jeton tahminlerine göre önceliklidir; Birleşik paketleyiciler ücret eklemez.
+- Kullanım geçmişi, Maliyet analizleri, provider/account pencereleri, API anahtarı harcama limitleri, istek-maliyet defteri ve günlük kullanım özetleri bu ücretleri içerir. Kayıt tutmayan anahtarlar, kaynak metni saklamadan sayısal hesaplamayı korur.
+- Eksik kullanım veya tarifeler** bilinmiyor** , ücretsiz değil: Yanıt maliyeti başlığı atlanır ve mevcut fiyatlandırılmamış kullanım politikası sınırlı API anahtarları için geçerlidir. Açıkça yapılandırılmış sıfır oranlar, geçerli sıfır maliyetli kullanım olarak kalır.
+
+Bu yalnızca ileriye dönük muhasebedir. Kullanım geçmişini hiç yazmayan eski OCR/embedding çağrıları bu geçişten yeniden oluşturulamaz. Katalog tahminleri USD tahminleridir, fatura değildir ve para birimi dönüştürmeyi, vergiyi veya indirimleri içermez.
+
+### Konuşma ve görüntüler
+
+- Başarılı `/v1/audio/transcriptions`, `/v1/audio/speech` ve görüntü oluşturma girişimleri sayısal hesaplamayı paylaşır. Doğrudan ve birleşik aramalar arayanın API anahtarını ve seçilen bağlantıyı taşır; birleşik sarmalayıcı asla ikinci bir borç eklemez.
+- Sağlayıcının bildirdiği USD, açık bir sıfır ücret dahil olmak üzere katalog tahminini kazandı. OpenRouterJSON `usage.cost` `cost_usd` normalleştirilir. Aksi takdirde, ölçülen belirteçler belirteç fiyatlarını kullanır, transkripsiyon saniyeleri saniye başına fiyatları kullanır, konuşma girişi Unicode karakter sayımlarını kullanır ve sabit fiyatlı görüntüler istenen `n` değil gerçekte döndürülen sayıyı kullanır.
+- İkili OpenRouter TTS JSON kullanım gövdesi yoktur. Ses tamamlandıktan veya arayan kişi iptal ettikten sonra OmniRoute, ID neslini sorgular.** Aynı** yapılandırılmış OpenRouter kökeni. Bir EU isteği asla global kaynağa geri dönmez. Bu sınırlı, salt okunur bir aramadır; Muhasebe için sentez yeniden denenmez. Faturalandırma kayıtları ses bittikten sonra görünebilir: yeniden arama denemeleri, ağ son tarihleri de dahil olmak üzere arka planda yaklaşık 52 saniyeye kadar çalışır.
+- Bu arama sırasında sesli yanıtta `X-OmniRoute-Cost-Status: pending` bulunur ve yanıt maliyeti başlığı yoktur. Nihai ücreti, mutabakat sonrasında kullanım geçmişinde, analizlerde ve ana defterde görünür. Meta veriler mevcut değilse yapılandırılmış bir tarife anlık görüntüsü kullanılır; aksi takdirde maliyet bilinmiyor.
+- Saniyeler, karakterler ve resim sayıları ayrı faturalandırma birimi alanlarına sahiptir; asla sahte jeton sayıları yoktur. Muhasebe, konuşma metnini, transkriptleri veya resim baytlarını değil, yalnızca sayısal kullanımı korur. Mevcut fiyatlandırılmamış görüntü muafiyetleri değişmemiştir: gerçekten eksik bir görüntü tarifesi, sınırlı bir anahtarı yeni kilitlemez ve yanıtta, çağrının ücretsiz olduğu bildirilmek yerine maliyet başlığı atlanır. Fiyatlandırma deposu hatası, arızalı kapatma uygulamasına ilişkin kullanım kanıtlarını hâlâ korur.
+
+Hiçbir tarihi speech/image ücreti icat edilmedi veya doldurulmadı. Sağlayıcı faturası, faturalar ve ücreti bildirilmeyen aramalar için referans olmaya devam ediyor.
 
 ---
 

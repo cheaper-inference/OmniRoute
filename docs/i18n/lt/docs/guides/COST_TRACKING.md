@@ -82,7 +82,7 @@ Pirmiausia normalizuojami modelių pavadinimai (tiekėjo kelio priešdėliai, pv
 
 ### Kaip įrašomos išlaidos
 
-- Kaina už užklausą apskaičiuojama po atsakymo ir užregistruojama, kad „pamiršk ir pamiršk“, todėl klientui ji niekada nepadidina delsos. Pasidalintos kvotos sunaudojimas suplanuotas kito įvykio ciklo varnele per [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Užklausos kaina apskaičiuojama užpildžius užklausą. Pasidalintos kvotos sunaudojimas suplanuotas kito įvykio ciklo varnele per [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
 - API rakto išlaidos buferizuojamos ir išleidžiamos partijomis [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (numatytasis 60 s praplovimo intervalas, 1 000 įrašų buferis). Derinamas per:
 
   | Env var                             | Numatytoji | Tikslas                                       |
@@ -90,7 +90,29 @@ Pirmiausia normalizuojami modelių pavadinimai (tiekėjo kelio priešdėliai, pv
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`    | Praplovimo intervalas milisekundėmis.         |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`     | Maksimalus buferinis įrašas prieš praplovimą. |
 
-Prietaisų skydelio išlaidų skaičiai yra tokie** ne** nuskaityti iš saugomos eilutėje doleriais sumos — jie yra perskaičiuojami iš karto pagal prieigos raktų skaičių ir dabartinę kainodaros lentelę kiekvieną kartą, kai vykdomas analizės galutinis taškas. Tai reiškia, kad neteisingos kainos pataisymas (ir pakartotinis sinchronizavimas) atnaujina istorinių išlaidų įvertinimus atgaline data.
+Išlaidoms teikiama pirmenybė tiksliui teikėjo nurodytam mokesčiui (`provider_cost_usd`), tada katalogo kainomis užklausos momentinei nuotraukai (`calculated_cost_usd`), tada žetonų perkainavimui iš dabartinio katalogo. Išsaugotos išlaidos dar kartą neapmokestinamos pagal jų žetonų skaičių. Pasenusios tik prieigos rakto eilutės vis tiek keičiasi, kai pasikeičia jų katalogo kaina.
+
+### OCR ir įterpimai
+
+- Sėkmingose `/v1/ocr` užklausose naudojamas priešsrovinis `usage_info.pages_processed`, o ne prašomas puslapių diapazonas arba grąžintų puslapio objektų skaičius. Apytikslis puslapių skaičius × `ocr_cost_per_page` (absoliutus USD/page,** ne** USD/million).
+- Užklausoms su dokumento ar apribojimo langelio anotacijomis reikalingas atskiras `ocr_cost_per_annotated_page` tarifas. Be jo kaina lieka nežinoma; įprastas OCR tarifas tyliai nepakeičiamas.
+- LiteLLM sync susieja savo prieš srovę esantį `annotation_cost_per_page` lauką į `ocr_cost_per_annotated_page`, išsaugodama absoliučią USD/page reikšmę ir tik anotacijų įrašus, įskaitant aiškų nulį. Pateiktas kanoninis laukas turi pirmenybę; nepaisoma netinkamų slapyvardžių verčių. Vartotojų kainodaros nepaisymas išlaiko įprastą prioritetą. Žr. [LiteLLMOCR kainodaros raktus](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- OCR naudojimas išsaugo puslapių skaičių, vieneto kainą, apskaičiuotą USD kainą, API raktą ir pasirinktą ryšį. Puslapiai niekada nevaizduojami kaip žetonai. Skambučių žurnaluose yra atsiskaitymo metaduomenys, o ne dokumentas URLs, PDF baitai ar išskirtas tekstas.
+- Sėkmingos `/v1/embeddings` užklausos įrašo vieną naudojimo eilutę kiekvienai fizinei paketai, įskaitant atskiras paketas, užbaigtas per tą pačią milisekundę. Teikėjo nurodyti mokesčiai turi viršenybę prieš simbolinius įvertinimus; kombinuoti įvyniojimai neprideda mokesčio.
+- Naudojimo istorija, išlaidų analizė, provider/account langai, API rakto išlaidų limitai, užklausų išlaidų knyga ir kasdienio naudojimo suvestinės apima šiuos mokesčius. Neprisijungę raktai išsaugo skaitinę apskaitą, neišsaugodami šaltinio teksto.
+- Trūksta naudojimo ar tarifų** nežinomas** , nėra nemokama: atsakymo mokesčio antraštė praleista, o esama neįkainoto naudojimo politika taikoma ribotiems API raktams. Aiškiai sukonfigūruoti nuliniai įkainiai lieka galiojantys naudojant nulinį mokestį.
+
+Tai tik išankstinė apskaita. Seni OCR/embedding skambučiai, kurie niekada neparašė naudojimo istorijos, negali būti atkurti iš šios perkėlimo. Katalogo sąmatos yra USD sąmatos, o ne sąskaita faktūra ir neapima valiutos konvertavimo, mokesčių ar nuolaidų.
+
+### Kalba ir vaizdai
+
+- Sėkmingi `/v1/audio/transcriptions`, `/v1/audio/speech` ir vaizdo generavimo bandymai dalijasi skaitine apskaita. Tiesioginiai ir kombinuoti skambučiai turi skambinančiojo API klavišą ir pasirinktą ryšį; kombinuotasis paketas niekada neprideda antrojo debeto.
+- Tiekėjo pranešta USD laimi katalogo sąmatą, įskaitant aiškų nulinį mokestį. OpenRouterJSON `usage.cost` yra normalizuotas į `cost_usd`. Kitu atveju išmatuoti atpažinimo ženklai naudoja žetonų kainas, transkripcijos sekundės naudoja sekundės kainas, kalbos įvestis naudoja Unicode simbolių skaičių, o vienodos kainos vaizduose naudojamas faktiškai grąžintas skaičius, o ne prašomas `n`.
+- Dvejetainis OpenRouter TTS neturi JSON naudojimo turinio. Pasibaigus garsui arba skambintojui atšaukus, OmniRoute užklausa jo generavimo ID** tas pats** sukonfigūruota OpenRouter kilmė. EU užklausa niekada negrįžta į pasaulinę kilmę. Tai ribota, tik skaitoma paieška; sintezė nebandoma pakartotinai apskaitai. Atsiskaitymo įrašai gali būti rodomi pasibaigus garsui: peržvalgos kartojasi fone iki maždaug 52 sekundžių, įskaitant tinklo terminus.
+- Per šią peržiūrą garso atsakas turi `X-OmniRoute-Cost-Status: pending` ir jokio atsako mokesčio antraštės. Galutinis jo mokestis rodomas naudojimo istorijoje, analizėje ir raktų knygoje po suderinimo. Jei metaduomenys nepasiekiami, naudojamas sukonfigūruotas tarifo momentinis vaizdas; kitu atveju kaina lieka nežinoma.
+- Sekundžių, simbolių ir vaizdų skaičiai turi atskirus atsiskaitymo vieneto laukus, niekada netikrų žetonų skaičių. Apskaita išsaugo tik skaičių, o ne kalbos tekstą, nuorašus ar vaizdo baitus. Esamos neįkainoto vaizdo išimtys nesikeičia: tikrai trūkstamas vaizdo tarifas naujai neužrakina riboto rakto, o atsakyme praleidžiama išlaidų antraštė, o ne skelbiama, kad skambutis nemokamas. Kainodaros parduotuvės gedimas vis tiek išsaugo naudojimo įrodymus, kad būtų užtikrintas gedimas.
+
+Joks istorinis speech/image užtaisas nėra sugalvotas ar užpildytas. Sąskaitų faktūrų ir skambučių, kurių mokesčiai nebuvo pranešta, nuoroda išlieka teikėjo atsiskaitymas.
 
 ---
 

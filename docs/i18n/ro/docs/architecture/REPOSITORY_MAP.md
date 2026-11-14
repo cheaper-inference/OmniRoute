@@ -151,8 +151,8 @@ src/
 | `app/(dashboard)/dashboard/search-tools/`                                    | Instrumente de căutare Studio UI (3 file: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — vezi `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                |
 | `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (planul 21): `page.tsx` (shell cu 3 file), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatususeMemorySettings |
 | `app/(dashboard)/dashboard/tools/agent-bridge/`                              | Pagina tabloului de bord AgentBridge Card server —, 9 carduri de agent, asistent de configurare, mapare model, listă de ocolire. i18n PT-BR + EN. Vezi `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                              |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Pagina tabloului de bord Traffic Inspector — DevTools split, 7 file de detalii, 4 comutări pentru modul de captură, înregistrare de sesiune, colorare context. i18n PT-BR + EN. Vezi `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                          |
-| `app/(dashboard)/dashboard/activity/`                                        | Pagina de feed de activitate (Grupul B): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — vezi `docs/architecture/MONITORING_SECTIONS.md`                                                                                                    |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Pagina tabloului de bord Traffic Inspector — DevTools split, 7 file de detalii, 4 comutări pentru modul de captură, înregistrare sesiuni, colorare context. i18n PT-BR + EN. Vezi `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                             |
+| `app/(dashboard)/dashboard/activity/`                                        | Pagina de flux de activitate (Grupul B): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — vezi `docs/architecture/MONITORING_SECTIONS.md`                                                                                                    |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | Pagina de partajare a cotelor (Grupul B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                 |
 | `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Pagina de configurare a planului furnizorului (Grupul B): `page.tsx` + `ProviderPlanConfigClient.tsx` — dimensiunile cotei per conexiune înlocuire                                                                                                                                                                    |
 | `app/docs/`                                                                  | Vizualizator de documentație încorporat (rendează `docs/*.md`)                                                                                                                                                                                                                                                        |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Componenta tabloului de bord API: adaptoare peste `packages/ui-kit` — vezi `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nume de pictograme utilizate de ecranele componente → Lucide (`<Icon>`)                             |
-| `constants/providers.ts`         | **381 de furnizori** cu validare Zod (sursa adevărului)                                                         |
+| `constants/providers.ts`         | **394 de furnizori** cu validare Zod (sursa adevărului)                                                         |
 | `constants/cliTools.ts`          | Registrul extern al instrumentului CLI                                                                          |
-| `constants/routingStrategies.ts` | **20 de strategii de rutare** cu prioritati                                                                     |
+| `constants/routingStrategies.ts` | **22 de strategii de rutare** cu prioritati                                                                     |
 | `constants/publicApiRoutes.ts`   | Rute care necesită autentificare Bearer (vs management)                                                         |
 | `constants/upstreamHeaders.ts`   | Listă de respingere antet pentru solicitările din amonte                                                        |
 | `validation/schemas.ts`          | Scheme ~ 80 Zod (sursă unică de adevăr pentru contractele API )                                                 |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — Spațiul de lucru pentru motorul de streaming
+## `open-sse/` — Streaming Engine Workspace
 
-Spațiu de lucru npm separat (`@omniroute/open-sse`). Gestionează procesarea cererilor și execuția furnizorilor.
+Spațiu de lucru separat npm (`@omniroute/open-sse`). Se ocupă de execuția furnizorului + de procesare a cererilor.
 
 ```
 open-sse/
-├── handlers/            # 16 fișiere (12 gestionare + 4 auxiliare): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search etc.
-├── executors/           # 150 de module de execuție (clase care extind BaseExecutor + funcții auxiliare pentru fiecare furnizor)
-├── translator/          # Convertoare de format (9 pentru cereri, 9 pentru răspunsuri, 9 auxiliare)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # Peste ~80 de module de servicii (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM etc.)
-├── mcp-server/          # Server MCP (110 instrumente, 3 transporturi, 33 de domenii)
-├── config/              # Registre de furnizori/modele, configurarea anteturilor, aliasuri de modele
-├── utils/               # Client TLS, preluare/dispecer proxy, funcții auxiliare de rețea
-├── index.ts             # Punctul de intrare al spațiului de lucru
-├── package.json         # Manifestul spațiului de lucru
-├── tsconfig.json        # Configurația TS a spațiului de lucru
-└── types.d.ts           # Declarațiile de tipuri ale spațiului de lucru
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Cale                        | Scop                                                                                           |
-| --------------------------- | ---------------------------------------------------------------------------------------------- |
-| `server.ts`                 | Ciclul de viață al serverului MCP (transporturi stdio + HTTP)                                  |
-| `httpTransport.ts`          | Transporturi HTTP Streamable + SSE (`/api/mcp/sse`, `/api/mcp/stream`)                         |
-| `audit.ts`                  | Jurnalizarea auditului în tabelul `mcp_tool_audit`                                             |
-| `scopeEnforcement.ts`       | Validarea domeniului pentru fiecare instrument                                                 |
-| `runtimeHeartbeat.ts`       | Semnal periodic de stare către `DATA_DIR/runtime/mcp-heartbeat.json`                           |
-| `descriptionCompressor.ts`  | Comprimă metadatele descrierilor instrumentelor pentru a economisi context                     |
-| `schemas/tools.ts`          | 36 de definiții de bază ale instrumentelor + domenii                                           |
-| `tools/advancedTools.ts`    | Implementări avansate ale instrumentelor                                                       |
-| `tools/memoryTools.ts`      | 3 instrumente pentru memorie (căutare/adăugare/ștergere)                                       |
-| `tools/skillTools.ts`       | 4 instrumente pentru abilități (listare/activare/executare/execuții)                           |
-| `tools/compressionTools.ts` | 5 instrumente de comprimare                                                                    |
-| `README.md`                 | README intern al serverului MCP (cu referință încrucișată din `docs/frameworks/MCP-SERVER.md`) |
+| Cale                        | Scop                                                                       |
+| --------------------------- | -------------------------------------------------------------------------- |
+| `server.ts`                 | Ciclul de viață al serverului MCP (transporturi stdio + HTTP )             |
+| `httpTransport.ts`          | HTTP Transporturi în flux + SSE (`/api/mcp/sse`, `/api/mcp/stream`)        |
+| `audit.ts`                  | Înregistrare de audit în tabelul `mcp_tool_audit`                          |
+| `scopeEnforcement.ts`       | Validarea domeniului per instrument                                        |
+| `runtimeHeartbeat.ts`       | Sănătate bătăile inimii la `DATA_DIR/runtime/mcp-heartbeat.json`           |
+| `descriptionCompressor.ts`  | Comprimați metadatele descrierii instrumentului pentru a salva contextul   |
+| `schemas/tools.ts`          | 36 de definiții ale instrumentului de bază + scopes                        |
+| `tools/advancedTools.ts`    | Implementări avansate de instrumente                                       |
+| `tools/memoryTools.ts`      | 3 instrumente de memorie (search/add/clear)                                |
+| `tools/skillTools.ts`       | 4 instrumente de calificare (list/enable/execute/executions)               |
+| `tools/compressionTools.ts` | 5 instrumente de compresie                                                 |
+| `README.md`                 | Server MCP intern README (reticulat de la `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -412,13 +412,13 @@ open-sse/
 | `CLI-TOOLS.md`              | Integrari externe CLI + Intern OmniRoute CLI                                              |
 | `I18N.md`                   | Arhitectură i18n, adăugarea unei limbi, 67 de locații                                     |
 | `UNINSTALL.md`              | Curățați pașii de dezinstalare                                                            |
-| `PROVIDER_REFERENCE.md`     | **Generat automat** catalog cu 381 de furnizori (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Generat automat** catalog cu 394 de furnizori (regen: `npm run gen:provider-reference`) |
 
 ### Subsistem scufundări adânci
 
 | Doc                                         | Scop                                                                                       |
 | ------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `MCP-SERVER.md`                             | Server MCP : 110 instrumente, 3 transporturi, 33 de domenii, puncte finale REST            |
+| `MCP-SERVER.md`                             | Server MCP : 110 instrumente, 3 transporturi, 33 domenii, puncte finale REST               |
 | `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 abilități, ajutoare REST, card de agent                              |
 | `AGENT_PROTOCOLS_GUIDE.md`                  | Ghid unificat: A2A vs ACP vs Cloud Agents                                                  |
 | `CLOUD_AGENT.md`                            | Orchestrație Codex Cloud / Devin / Jules                                                   |
@@ -432,7 +432,7 @@ open-sse/
 | `REASONING_REPLAY.md`                       | Cache hibrid memory/SQLite pentru `reasoning_content`                                      |
 | `AUTHZ_GUIDE.md`                            | Conductă de autorizare (`classify` → `policies` → `enforce`)                               |
 | `RESILIENCE_GUIDE.md`                       | Întrerupător + cooldown + model lockout                                                    |
-| `docs/security/STEALTH_GUIDE.md` (doar git) | TLS fingerprinting (JA3/JA4), Claude Code CCH, MITM cert                                   |
+| `docs/security/STEALTH_GUIDE.md` (doar git) | TLS fingerprinting (JA3/JA4), cod Claude CCH, MITM cert                                    |
 | `AUTO-COMBO.md`                             | Motor Combo automat (punctare în 16 factori, pachete cu 6 moduri, fabrică virtuală)        |
 
 ### Comprimare

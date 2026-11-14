@@ -137,41 +137,63 @@ Modul terkait dalam paket yang sama:
 
 ---
 
-## Penyamaran Antigravity
+## Antigravity Siluman
 
-Permintaan Antigravity mempertahankan teks pemanggil byte demi byte. OmniRoute tidak menyisipkan karakter zero-width ke dalam prompt atau mengganti nama/menyuntikkan alat untuk meniru klien IDE.
+permintaan Antigravity mempertahankan teks pemanggil byte demi byte. OmniRoute tidak memasukkan karakter lebar nol ke dalam prompt atau alat rename/inject untuk meniru klien IDE.
 
 ### `antigravityHeaderScrub.ts`
 
-Menghapus penanda SDK Stainless (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) sebelum meneruskannya.
+Strip penanda SDK tahan karat (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) sebelum meneruskan.
 
-### ⚠️ Risiko: `ANTIGRAVITY_CREDITS=always` (titik rawan pemblokiran akun)
+### ⚠️ Risiko: `ANTIGRAVITY_CREDITS=always` (hot spot pelarangan akun)
 
-`ANTIGRAVITY_CREDITS=always` (digunakan oleh `open-sse/executors/antigravity.ts`) mengarahkan **setiap** permintaan melalui Antigravity AI Credit Overages (kredit Google berbayar), alih-alih membiarkan kuota tingkat gratis Google membatasi penggunaan. Ini didokumentasikan sebagai fitur, tetapi merupakan **laporan pelanggaran ToS paling umum yang kami terima** — beberapa akun Google Ultra telah diblokir dengan `403 / "service disabled for ToS violation" / insufficient_quota` setelah berjalan selama beberapa jam dengan `=always`.
+`ANTIGRAVITY_CREDITS=always` (dikonsumsi oleh `open-sse/executors/antigravity.ts`) rute** setiap** meminta melalui Antigravity AI Credit Overages (kredit Google berbayar) alih-alih membiarkan kuota tingkat gratis Google melakukan sesuatu. Ini didokumentasikan sebagai fitur, tetapi memang demikian** satu-satunya laporan pelanggaran ToS yang paling umum kami lihat** — beberapa akun Google Ultra telah diblokir dengan `403 / "service disabled for ToS violation" / insufficient_quota` setelah berjalan selama beberapa jam dengan `=always`.
 
-Penegakan upstream dilakukan di **pihak Google**, bukan sesuatu yang dapat dicegah oleh OmniRoute. Nama variabel lingkungan dan dokumentasi yang ada membuatnya terdengar seperti opsi yang aman untuk diaktifkan; kenyataannya tidak demikian.
+Penegakan hukum di hulu sudah aktif** sisi Google** , tidak ada yang bisa dicegah OmniRoute. Nama env var dan dokumen yang ada membuatnya terdengar seperti tombol yang aman untuk diputar; itu tidak.
 
-**Mengapa hal ini memicu deteksi penyalahgunaan lebih agresif daripada penggunaan tingkat gratis saja:**
+**Mengapa hal ini menyebabkan deteksi penyalahgunaan menjadi lebih agresif dibandingkan penggunaan tingkat gratis saja:**
 
-- Pengeluaran otomatis yang berkelanjutan pada satu akun Google ditandai secara berbeda dibandingkan penggunaan tingkat gratis yang mencapai kuota lalu berhenti.
-- Kelebihan penggunaan kredit tidak memiliki batas laju, sehingga klien yang salah konfigurasi dapat menghabiskan beberapa ratus USD dalam hitungan menit dan terlihat seperti penjualan kembali API key atau lalu lintas bot.
-- Beberapa pengguna OmniRoute yang menggunakan kredit kelebihan secara paralel dari IP eksternal yang sama memperkuat sinyal tersebut.
+- Pembelanjaan otomatis berkelanjutan pada satu akun Google ditandai secara berbeda dengan kuota-dan-berhenti tingkat gratis.
+- Kelebihan kredit tidak memiliki batas tarif, sehingga klien yang salah dikonfigurasi dapat menghabiskan beberapa ratus USD dalam hitungan menit dan terlihat seperti penjualan kembali kunci API atau lalu lintas bot.
+- Beberapa pengguna OmniRoute yang mendapatkan kelebihan kredit secara paralel dari IP eksternal yang sama akan menambah sinyal.
 
-**Sikap yang direkomendasikan:**
+**Postur yang disarankan:**
 
-1. Pertahankan nilai bawaan `ANTIGRAVITY_CREDITS=off` kecuali operator secara eksplisit menerima risiko kredit berbayar dan penindakan akun. `retry` mengirim permintaan normal terlebih dahulu dan menyuntikkan kredit paling banyak satu kali setelah respons 429 kuota yang memenuhi syarat; `always` menyuntikkan kredit pada permintaan pertama.
-2. **Sebarkan beban ke beberapa penyedia melalui Auto-Combo** (`model: "auto"` atau combo `kr/glm/etc`) alih-alih memenuhi kapasitas satu akun Antigravity.
-3. **Tetapkan batas RPM per koneksi** di halaman edit penyedia Antigravity (Dashboard → Providers → Antigravity → connection → rate limit). 30–60 RPM merupakan batas atas yang dapat dipertanggungjawabkan untuk penggunaan berkelanjutan.
-4. **Gunakan jaringan upstream yang stabil dan dikendalikan operator** serta hindari berbagi satu akun dengan pengguna atau beban kerja yang tidak terkait.
-5. **Jika diblokir**: ajukan banding melalui `support.google.com` → "Restore Workspace/Account access" dengan isi respons persis `quota_exceeded` / `service disabled` yang dikirim Google. Pemulihan tidak dijamin.
+1. Pertahankan `ANTIGRAVITY_CREDITS=off` default kecuali operator secara eksplisit menerima risiko kredit berbayar dan penegakan akun. `retry` mengirimkan permintaan normal terlebih dahulu dan menyuntikkan kredit paling banyak satu kali setelah kuota yang memenuhi syarat 429; `always` menyuntikkan kredit pada permintaan pertama.
+2. **Sebarkan beban ke seluruh penyedia melalui Auto-Combo** (`model: "auto"` atau `kr/glm/etc` -combo) alih-alih memenuhi satu akun Antigravity.
+3. **Tetapkan batas RPM per koneksi** di halaman edit penyedia Antigravity (Dasbor Penyedia → → Antigravity koneksi → batas kecepatan → ). 30–60 RPM adalah batas atas yang dapat dipertahankan untuk penggunaan berkelanjutan.
+4. **Gunakan jaringan upstream yang stabil dan dikendalikan oleh operator** dan hindari berbagi satu akun dengan pengguna atau beban kerja yang tidak terkait.
+5. **Jika dilarang** : mengajukan banding melalui `support.google.com` → "Pulihkan akses Workspace/Account " dengan isi respons `quota_exceeded` / `service disabled` yang tepat Google dikirim. Pemulihan tidak dijamin.
 
-Referensi lingkungan mendokumentasikan dampak terhadap akun dan pengeluaran dari setiap mode kredit.
+Referensi lingkungan mendokumentasikan implikasi akun dan pembelanjaan dari setiap mode kredit.
 
-Titik terkait:
+#### Tidak hanya `=always`: Antigravity OAuth routing secara umum
 
-- `open-sse/executors/antigravity.ts` — membaca `process.env.ANTIGRAVITY_CREDITS`
-- `src/lib/oauth/providers/antigravity.ts` — penyaluran kredensial
-- Laporan insiden asli: Diskusi [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+Penangguhan tersebut tidak hanya terbatas pada kelebihan kredit saja. Laporan pada bulan November 2026 (#19223, #19266) menjelaskan beberapa akun Google yang ditangguhkan saat melakukan perutean melalui penyedia `antigravity` dan `agy` (Antigravity CLI), dengan:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+Kedua penyedia mengautentikasi dengan sesi Antigravity product OAuth, yang merupakan pemberitahuan risiko dasbor ("Penyedia ini menggunakan produk resmi Anda session/OAuth, yang tidak diizinkan untuk penggunaan proxy/router ") yang memperingatkan sebelum koneksi ditambahkan. Tidak satu pun rekomendasi di atas yang mengizinkan penggunaan tersebut; mereka hanya mengurangi jumlah lalu lintas yang dihasilkan satu akun.
+
+**Antarmuka API resmi untuk model Gemini.** Google menawarkan akses terprogram ke Gemini melalui APIs, yang OmniRoute dukung sebagai penyedia kunci API biasa:
+
+| ID penyedia | Nama dasbor               | Mandat                                                                      |
+| ----------- | ------------------------- | --------------------------------------------------------------------------- |
+| `gemini`    | Gemini (Google AI Studio) | kunci Gemini API dari Google AI Studio (tersedia tingkat gratis)            |
+| `vertex`    | simpul AI                 | Akun Layanan JSON, token akses OAuth atau kunci API Vertex Express (Gemini) |
+
+Penyedia ini menggunakan masalah kredensial Google untuk akses API, tidak seperti sesi produk Antigravity. Mereka tidak membuat setiap penggunaan patuh atau menghilangkan risiko penegakan hukum: masing-masing diatur oleh ketentuannya sendiri, yang harus diperiksa oleh operator untuk penerapannya. Misalnya, [Ketentuan Layanan Tambahan Gemini API](https://ai.google.dev/gemini-api/terms) hanya mengizinkan Layanan Berbayar ketika klien API tersedia untuk pengguna di Wilayah Ekonomi Eropa, Swiss, atau Inggris, dan konten yang dikirim ke Layanan Tidak Berbayar dapat digunakan untuk menyempurnakan produk Google. Vertex AI termasuk dalam ketentuan Google Cloud ( [Ketentuan Khusus Layanan](https://cloud.google.com/terms/service-terms) ). Harga dan kuota mengikuti ketentuan API tersebut dan bukan langganan Antigravity.
+
+Operator yang ingin menghindari penangguhan Antigravity yang dijelaskan di atas harus merutekan lalu lintas Gemini melalui salah satu penyedia ini, bukan `antigravity` / `agy`, setelah memeriksa apakah penggunaannya sesuai dengan ketentuan penyedia.
+
+Titik sentuh:
+
+- `open-sse/executors/antigravity.ts` — berbunyi `process.env.ANTIGRAVITY_CREDITS`
+- pipa kredensial `src/lib/oauth/providers/antigravity.ts` —
+- Laporan kejadian asli: Diskusi [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

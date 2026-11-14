@@ -165,30 +165,30 @@ needsTranslation(source, target): boolean
 
 ---
 
-## بررسی عمیق فایلهای کلیدی
+## فایل های کلیدی Deep-Dive
 
 ### chatCore.ts (5977 خط)
 
-**هندلر اصلی درخواستها**. با وجود حجم زیادش، ساختاری شفاف دارد:
+را** رسیدگی کننده اصلی درخواست** . با وجود اندازه آن، ساختار واضحی دارد:
 
 ```ts
-// شبهساختار chatCore.ts
+// Pseudo-structure of chatCore.ts
 export async function handleChat(request: NextRequest) {
-  // ۱. احراز هویت + CORS
+  // 1. Auth + CORS
   await authenticateRequest(request);
   applyCorsHeaders(response);
 
-  // ۲. اعتبارسنجی بدنه
+  // 2. Body validation
   const body = await parseRequestBody(request);
 
-  // ۳. تشخیص فرمت + ترجمه
+  // 3. Format detection + translation
   const sourceFormat = detectFormat(request);
   const targetFormat = getTargetFormat(providerId);
   if (needsTranslation(sourceFormat, targetFormat)) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // ۴. مسیریابی کامبو
+  // 4. Combo routing
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -196,20 +196,20 @@ export async function handleChat(request: NextRequest) {
       await recordUsage(result);
       return result;
     } catch (err) {
-      // ادامه به هدف بعدی
+      // Continue to next target
     }
   }
 
-  // ۵. فالبک اضطراری
+  // 5. Emergency fallback
   return await emergencyFallback(body);
 }
 ```
 
-با وجود اینکه یک تابع غولپیکر است، در **بخشهای کامنتدار** سازماندهی شده که به پایپلاین ۵ مرحلهای نگاشت میشوند.
+علیرغم اینکه یک تابع غول پیکر است، سازماندهی شده است** بخش های نظر داده شده** آن نقشه به خط لوله 5 مرحله ای.
 
 ### combo.ts (4456 LOC)
 
-**موتور مسیریابی** که یک کامبو را به اهداف مرتبشده تبدیل میکند.
+را** موتور مسیریابی** که ترکیبی را به اهداف سفارش داده شده حل می کند.
 
 ```ts
 // services/combo.ts
@@ -226,138 +226,140 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-پشتیبانی از **۲۰ استراتژی مسیریابی** (به `src/shared/constants/routingStrategies.ts` مراجعه کنید):
+پشتیبانی می کند** 22 استراتژی مسیریابی** (نگاه کنید به `src/shared/constants/routingStrategies.ts`):
 
-| استراتژی            | رفتار                                                                           |
-| ------------------- | ------------------------------------------------------------------------------- |
-| `priority`          | فهرست مرتبشده بر اساس هدف اول                                                   |
-| `weighted`          | احتمالی بر اساس وزن هر هدف                                                      |
-| `round-robin`       | چرخش به ترتیب بین اهداف                                                         |
-| `context-relay`     | تحویل کانتکست بین اهداف                                                         |
-| `fill-first`        | پر کردن سهمیه قبل از رفتن به هدف بعدی                                           |
-| `p2c`               | قدرت دو انتخاب (power of two choices)                                           |
-| `random`            | تصادفی یکنواخت                                                                  |
-| `least-used`        | انتخاب هدفی با کمترین استفادههای اخیر                                           |
-| `cost-optimized`    | ارزانترین هدف سالم در اولویت                                                    |
-| `reset-aware`       | آگاه از پنجرههای بازنشانی ارائهدهنده                                            |
-| `reset-window`      | مسیریابی مبتنی بر پنجره بازنشانی                                                |
-| `headroom`          | بیشترین فضای آزاد سهمیه در اولویت                                               |
-| `quota-weighted`    | رد کردن حسابهای تمامشده، سپس انتخاب بر اساس سهمیه باقیمانده ÷ بار در حال پردازش |
-| `strict-random`     | کاملاً یکنواخت (بدون وزندهی کیفیت)                                              |
-| `auto`              | استفاده از امتیازدهی ۱۶عاملی (`autoCombo/`)                                     |
-| `lkgp`              | آخرین ارائهدهنده سالم شناختهشده در اولویت                                       |
-| `context-optimized` | بهترین برای درخواستهای با کانتکست طولانی                                        |
-| `cache-optimized`   | تثبیت هر پیشوند پرامپت قابلاستفادهمجدد روی همان حساب (برخورد به کش پرامپت)      |
-| `fusion`            | ارسال موازی به یک پنل، سپس ترکیب نتایج توسط یک داور (`fusion.ts`)               |
-| `pipeline`          | زنجیرهکردن مراحل — خروجی هر هدف، ورودی هدف بعدی است                             |
+| استراتژی            | رفتار                                                                                                      |
+| ------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `priority`          | لیست مرتب شده هدف اول                                                                                      |
+| `weighted`          | احتمال بر اساس وزن هر هدف                                                                                  |
+| `round-robin`       | به ترتیب در میان اهداف حرکت کنید                                                                           |
+| `context-relay`     | زمینه را در بین اهداف کنار بگذارید                                                                         |
+| `fill-first`        | قبل از رفتن به بعدی، سهمیه را پر کنید                                                                      |
+| `p2c`               | قدرت دو انتخاب                                                                                             |
+| `random`            | تصادفی یکنواخت                                                                                             |
+| `least-used`        | یکی را انتخاب کنید که کمترین استفاده اخیر را دارد                                                          |
+| `cost-optimized`    | ابتدا ارزان ترین هدف سالم                                                                                  |
+| `reset-aware`       | از بازنشانی ویندوزهای ارائه دهنده آگاه است                                                                 |
+| `reset-window`      | بازنشانی مسیریابی مبتنی بر پنجره                                                                           |
+| `expiry-first`      | ابتدا حسابی را که سهمیه آن منقضی می شود بدون استفاده خرج کنید                                              |
+| `headroom`          | ابتدا بیشترین سهمیه باقی مانده است                                                                         |
+| `quota-weighted`    | حسابهای تمامشده را رها کنید، سپس با سهمیه باقیمانده ÷ در پرواز بکشید                                       |
+| `strict-random`     | واقعا یکنواخت (بدون وزن کیفیت)                                                                             |
+| `auto`              | استفاده از امتیازدهی 16 عاملی (`autoCombo/`)                                                               |
+| `lkgp`              | آخرین ارائه دهنده خوب شناخته شده اول                                                                       |
+| `context-optimized` | بهترین برای درخواست های طولانی مدت                                                                         |
+| `cache-optimized`   | هر پیشوند درخواست قابل استفاده مجدد را به همان حساب پین کنید (بازدید از حافظه پنهان)                       |
+| `fusion`            | به صورت موازی به یک پانل فن دهید، سپس از طریق داور (`fusion.ts`) سنتز کنید.                                |
+| `pipeline`          | گام های زنجیره ای — خروجی هر هدف هدف بعدی را تغذیه می کند                                                  |
+| `jev`               | انتخاب کردن: TypeSafe Jev می پذیرد که کدام ورودی های رتبه بندی شده اجرا می شوند. در غیر این صورت سفارش شما |
 
 ### base.ts (1170 LOC)
 
-**اکزکیوتور انتزاعی** که هر کلاس executor از آن ارثبری میکند (مستقیماً یا از طریق `DefaultExecutor` و دیگر زیرکلاسها). شامل:
+را** مجری انتزاعی** که هر کلاس اجرا کننده (مستقیم یا از طریق `DefaultExecutor` و سایر کلاس های فرعی) گسترش می یابد. شامل:
 
-- `buildUrl()` — ساخت URL پیشفرض (زیرکلاسها برای موارد سفارشی آن را بازنویسی میکنند)
-- `buildHeaders()` — هدرهای پیشفرض (احراز هویت، content-type)
-- `transformRequest()` — بهصورت پیشفرض عبور مستقیم
+- ساخت URL پیشفرض `buildUrl()` — (زیر کلاسها برای سفارشی لغو میشوند)
+- سرصفحههای پیشفرض `buildHeaders()` — (تأیید، نوع محتوا)
+- `transformRequest()` — به صورت پیشفرض عبور میکند
 - `execute()` — حلقه اصلی HTTP با retry/backoff/breaker
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
-  // مدیریت تمام ارائهدهندگان سازگار با OpenAI/Anthropic
-  // ارائهدهندگان تنظیمات (URL، احراز هویت، هدرها) را ثبت میکنند اما منطق executor را به اشتراک میگذارند
+  // Handles all OpenAI/Anthropic-compatible providers
+  // Providers register configurations (URL, auth, headers) but share executor logic
 }
 ```
 
-رفتار مختص هر ارائهدهنده (هدرهای احراز هویت، URL پایه، هدرهای نسخه) از طریق رجیستری ارائهدهنده پیکربندی میشود، نه کلاسهای executor جداگانه.
+رفتار خاص ارائهدهنده (سرصفحههای تأیید، URL پایه، سرصفحههای نسخه) از طریق رجیستری ارائهدهنده پیکربندی میشود، نه کلاسهای مجری مجزا.
 
 ````
 
 ---
 
-## سرویسها (117 ماژول)
+## خدمات (117 ماژول)
 
-سرویسها **ماژولهایی متمرکز و تکمنظوره** هستند که هندلرها آنها را با هم ترکیب میکنند. دستهبندیهای اصلی:
+خدمات هستند** ماژول های متمرکز و تک منظوره** که کنترل کننده ها می سازند. دسته بندی های بزرگ:
 
-### مسیریابی و کامبو
+### مسیریابی و ترکیبی
 
-- `combo.ts` — نقطه ورود برای درخواستهای مسیریابیشده با کامبو
-- `services/autoCombo/` — امتیازدهی ۱۶عاملی، ۸ استراتژی مسیریابی خودکار
-- `wildcardRouter.ts` — تطبیق مسیرهای wildcard (مانند `gpt-*`)
-- `modelFamilyFallback.ts` — جایگزینی درونخانوادهای T5
+- نقطه ورود `combo.ts` — برای درخواست های مسیریابی ترکیبی
+- `services/autoCombo/` — امتیاز دهی 16 عاملی، 8 استراتژی مسیریابی خودکار
+- `wildcardRouter.ts` — مسیرهای حروف عام را منطبق میکند (`gpt-*`)
+- `modelFamilyFallback.ts` — T5 بازگشتی درون خانواده
 
-### محدودسازی نرخ و سهمیه
+### محدود کردن نرخ و سهمیه
 
-- `rateLimitManager.ts` — سطل توکن (token bucket) برای هر کلید+ارائهدهنده
-- `usage.ts` — ثبت میزان استفاده
-- `quotaCache.ts` — اسنپشاتهای درونحافظهای سهمیه
+- سطل توکن `rateLimitManager.ts` — در هر ارائه دهنده کلید +
+- ضبط استفاده `usage.ts` —
+- عکس های فوری سهمیه حافظه `quotaCache.ts` —
 
-### حساب و توکن
+### حساب و رمز
 
-- `tokenRefresh.ts` — تازهسازی OAuth هنگام خطای 401
-- `accountFallback.ts` — تغییر به حساب جایگزین
-- `sessionManager.ts` — وضعیت نشست چندنوبتی
+- `tokenRefresh.ts` — OAuth رفرش در 401
+- `accountFallback.ts` — به حساب جایگزین تغییر دهید
+- حالت جلسه چند چرخشی `sessionManager.ts` —
 
-### هوشمندی
+### هوش
 
-- `intentClassifier.ts` — طبقهبندی قصد درخواست
-- `taskAwareRouter.ts` — مسیریابی بر اساس نوع وظیفه
-- `thinkingBudget.ts` — تخصیص توکنهای تفکر
-- `contextManager.ts` — تزریق کانتکست مسیریابی
+- `intentClassifier.ts` — طبقه بندی قصد درخواست
+- مسیر `taskAwareRouter.ts` — بر اساس نوع کار
+- `thinkingBudget.ts` — نشانه های تفکر را اختصاص می دهد
+- `contextManager.ts` — زمینه مسیریابی را تزریق می کند
 
-### تابآوری
+### تاب آوری
 
-- `resilience.ts` — ارکستراسیون تلاش مجدد، backoff و breaker
-- `emergencyFallback.ts` — جایگزینی بهعنوان آخرین راهحل
-- `modelDeprecation.ts` — مسیریابی خودکار به مدلهای جانشین
+- `resilience.ts` — تلاش مجدد، عقب نشینی، ارکستراسیون شکن
+- `emergencyFallback.ts` — آخرین راه حل بازگشتی
+- مسیر خودکار `modelDeprecation.ts` — به مدل های جانشین
 
-### وضعیت
+### ایالت
 
-- `signatureCache.ts` — حذف موارد تکراری بر اساس امضای درخواست
-- `volumeDetector.ts` — کنترل بار (load shedding)
-- `contextHandoff.ts` — سریالایز کردن نشست
+- `signatureCache.ts` — dedup با امضای درخواست
+- `volumeDetector.ts` — بارریزی
+- سریال سازی جلسات `contextHandoff.ts` —
 
-### فشردهسازی
+### فشرده سازی
 
-- `compression/` (زیرشاخه) — پایپلاین کامل فشردهسازی
-- 39 فایل شامل موتورها، بستههای قواعد و آداپتورها
+- خط لوله فشرده سازی کامل `compression/` (دایرکتوری فرعی) —
+- 39 فایل شامل موتورها، بستههای قانون، آداپتورها
 
-### مهارتها
+### مهارت ها
 
-- (در [SKILLS.md](./SKILLS.md) پوشش داده شده است)
+- (پوشیده در [SKILLS.md](./SKILLS.md) )
 
 ### حافظه
 
-- (در [MEMORY.md](./MEMORY.md) پوشش داده شده است)
+- (پوشیده در [MEMORY.md](./MEMORY.md) )
 
 ---
 
-## اجراکنندهها (150 ماژول)
+## مجریان (150 ماژول)
 
-بیشتر یک فایل به ازای هر ارائهدهنده. کلاسهای اجراکننده همگی از `BaseExecutor` ارثبری میکنند و موارد متفاوت را بازنویسی میکنند؛ ماژولهای دیگر توابع کمکی مخصوص هر ارائهدهنده هستند (اسکیماهای ابزار، آداپتورهای fetch/TTS، مدیریتکنندههای رفتارهای خاص).
+اکثراً یک فایل برای هر ارائه دهنده. کلاسهای اجراکننده همگی `BaseExecutor` گسترش میدهند و موارد متفاوت را لغو میکنند. ماژول های دیگر کمک کننده های هر ارائه دهنده هستند (طرحواره های ابزار، آداپتورهای fetch/TTS ، کنترل کننده های عجیب و غریب).
 
 ### الگوهای رایج
 
-ارائهدهندگان از طریق `getExecutor(providerId)` resolve میشوند که اجراکننده پیکربندیشده را برمیگرداند. ارائهدهندگان سازگار با OpenAI/Anthropic از `DefaultExecutor` (`executors/default.ts`) استفاده میکنند. رفتار مخصوص هر ارائهدهنده (URL پایه، هدرهای احراز هویت، نسخه API) در `open-sse/config/providers/` پیکربندی میشود، در حالی که تبدیلهای بدنه درخواست در `open-sse/translator/` انجام میشوند.
+ارائه دهندگان از طریق `getExecutor(providerId)` حل و فصل می شوند، که مجری پیکربندی شده را برمی گرداند. ارائه دهندگان OpenAI/Anthropic-compatible `DefaultExecutor` (`executors/default.ts`) استفاده می کنند. رفتار خاص ارائهدهنده (پایه URL، هدرهای تأیید، نسخه API ) در `open-sse/config/providers/` پیکربندی میشود، در حالی که تبدیلهای بدنه درخواست در `open-sse/translator/` انجام میشود.
 
-**URL سفارشی** از طریق پیکربندی ارائهدهنده تنظیم میشود:
+**URL سفارشی** از طریق پیکربندی ارائه دهنده تنظیم می شود:
 
 ```ts
-// پیکربندی ارائهدهنده در open-sse/config/providers/
+// Provider config in open-sse/config/providers/
 export default {
   id: "together",
   baseURL: "https://api.together.xyz/v1/chat/completions",
 }
 ````
 
-**احراز هویت سفارشی** از طریق پیکربندی auth در رجیستری ارائهدهنده (کلید API، OAuth، پروفایلهای هدر) مدیریت میشود.
+**اعتبار سفارشی** از طریق پیکربندی تأیید اعتبار رجیستری ارائه دهنده (کلید API ، OAuth، نمایه های سرصفحه) انجام می شود.
 
-تبدیلهای **بدنه درخواست سفارشی** (مثلاً جدا کردن `system` از `messages` در Anthropic) به ازای هر ارائهدهنده در `open-sse/translator/` ثبت میشوند.
+**بدنه درخواست سفارشی** تحولات (مثلا Anthropic جداسازی `system` از `messages`) برای هر ارائه دهنده در `open-sse/translator/` ثبت می شود.
 
 ````
 
-### کارخانه اجراکننده
+### The Executor Factory
 
-`executors/index.ts` تابع `getExecutor(providerId)` را export میکند:
+`executors/index.ts` exports `getExecutor(providerId)`:
 
 ```ts
 import { getExecutor } from "@omniroute/open-sse/executors";
@@ -369,7 +371,7 @@ const result = await executor.execute({
 });
 ````
 
-فرآیند resolve از طریق `ExecutorRegistry` (`executors/registry.ts`) انجام میشود: هر اجراکننده تخصصی در جدول داخلی `executors/index.ts` اعلام شده و هنگام بارگذاری ماژول از طریق `registerExecutor(alias, instance)` ثبت میشود؛ `getExecutor()` رجیستری را بررسی میکند و برای هر ارائهدهندهای که ورودی تخصصی ندارد، به یک `DefaultExecutor` مموایزشده بازمیگردد. نگاشت کامل alias → اجراکننده توسط تست golden در `tests/unit/executor-map-golden.test.ts` مشخص شده است.
+وضوح از طریق `ExecutorRegistry` (`executors/registry.ts`) می رود: هر مجری تخصصی در جدول داخلی `executors/index.ts` اعلام شده و از طریق `registerExecutor(alias, instance)` در بارگذاری ماژول ثبت می شود. `getExecutor()` با رجیستری مشورت میکند و به یک `DefaultExecutor` حفظشده برای هر ارائهدهندهای بدون ورودی تخصصی بازمیگردد. نگاشت مجری نام مستعار کامل → با تست طلایی `tests/unit/executor-map-golden.test.ts` مشخص می شود.
 
 ---
 
@@ -486,13 +488,13 @@ createResponsesApiTransformStream(): TransformStream
 
 `open-sse/config/` لایه پیکربندی را نگه می دارد:
 
-| فایل                          | هدف                                           |
-| ----------------------------- | --------------------------------------------- |
-| `providerRegistry.ts`         | رجیستری مدل چت بر روی کاتالوگ ارائه دهنده 381 |
-| `providerModels.ts`           | نام مستعار مدل، نگاشت قالب                    |
-| `constants.ts`                | مهلت زمانی، محدودیت ها، کدهای وضعیت           |
-| `defaultThinkingSignature.ts` | امضای پیش فرض تفکر Claude                     |
-| `modelStrip.ts` (در خدمات)    | حذف زمینه به ازای هر ارائه دهنده              |
+| فایل                          | هدف                                       |
+| ----------------------------- | ----------------------------------------- |
+| `providerRegistry.ts`         | رجیستری مدل چت روی کاتالوگ ارائهدهنده 394 |
+| `providerModels.ts`           | نام مستعار مدل، نگاشت قالب                |
+| `constants.ts`                | مهلت زمانی، محدودیت ها، کدهای وضعیت       |
+| `defaultThinkingSignature.ts` | امضای پیش فرض تفکر Claude                 |
+| `modelStrip.ts` (در خدمات)    | حذف زمینه به ازای هر ارائه دهنده          |
 
 ### طرحواره ثبت ارائه دهنده
 

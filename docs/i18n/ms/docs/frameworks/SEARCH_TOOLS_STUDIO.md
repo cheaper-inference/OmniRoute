@@ -38,34 +38,34 @@ Studio tiga tab yang menyatukan carian web, pengikisan web dan perbandingan peny
 
 ### Tab Carian
 
-Mengembangkan `SearchForm` + `ResultsPanel` + `RerankPanel` sedia ada menjadi sebuah tab:
+Mengembangkan `SearchForm` + `ResultsPanel` + `RerankPanel` sedia ada menjadi tab:
 
-- Pertanyaan → hasil (tajuk, URL, petikan, skor kerelevanan).
-- Metadata penyedia dalam anak tetingkap Konfigurasi (kos, kuota, status).
-- Bahagian penyusunan semula: pilih model penyusunan semula, susun semula hasil, paparkan `positionDelta`.
-- Keadaan kosong dengan seruan tindakan apabila tiada penyedia carian dikonfigurasikan.
+- Soal hasil → (tajuk, URL, coretan, skor perkaitan).
+- Metadata pembekal dalam anak tetingkap Konfigurasi (kos, kuota, status).
+- Bahagian rerank: pilih model rerank, susun semula keputusan, tunjukkan `positionDelta`.
+- Keadaan kosong dengan CTA apabila tiada penyedia carian dikonfigurasikan.
 - Sejarah carian melalui `SearchHistory.tsx`.
 - Memanggil `POST /v1/search` (titik akhir sedia ada, tiada perubahan).
 
-### Tab Pengerukan
+### Tab Kikis
 
 Tab baharu untuk mengekstrak kandungan daripada URL melalui `POST /v1/web/fetch` (dicipta dalam pelan 05):
 
-- Input: URL + togol halaman penuh + pemilih format (markdown / teks / HTML).
-- Serah → ambil → paparkan `ScrapeResult.tsx`.
-- `ScrapeResult` memaparkan pratonton markdown + togol mentah.
-- Had: jika badan respons > **256 KB**, UI memaparkan `(dipendekkan, lihat data mentah)` dan membuka data mentah dalam modal Monaco (D21).
-- Panel metadata: penyedia (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), kependaman, kos, saiz respons, bilangan pautan.
-- Menggunakan pencangkuk `useScrapeFetch.ts`.
+- Input: URL + togol halaman penuh pemilih format + (penurunan / teks / HTML).
+- Serahkan → fetch → render `ScrapeResult.tsx`.
+- `ScrapeResult` membuat pratonton turun togol + mentah.
+- Cap: jika respon badan >** 256 KB** , UI menunjukkan `(truncated, view raw)` dan membuka mentah dalam modal Monaco (D21).
+- Panel metadata: pembekal (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search/keenable-search), kependaman, kos, saiz respons, kiraan pautan.
+- Menggunakan cangkuk `useScrapeFetch.ts`.
 
-### Tab Perbandingan
+### Bandingkan Tab
 
-Menjalankan pertanyaan/URL yang sama merentas sehingga **4 penyedia secara selari** (D22):
+Menjalankan query/URL yang sama melintasi sehingga** 4 pembekal secara selari** (D22):
 
-- Lajur bersebelahan bagi setiap penyedia.
-- Metrik: kependaman, kos, bilangan hasil, saiz respons.
-- Pengiraan pertindihan URL untuk carian (bilangan URL yang dikongsi berbanding hasil awal).
-- Memanggil `POST /v1/search` (carian) atau `POST /v1/web/fetch` (pengerukan) bagi setiap penyedia.
+- Lajur sebelah menyebelah bagi setiap pembekal.
+- Metrik: kependaman, kos, kiraan hasil, saiz tindak balas.
+- pengiraan pertindihan URL untuk carian (bilangan URLs yang dikongsi vs hasil awal).
+- Memanggil `POST /v1/search` (cari) atau `POST /v1/web/fetch` (mengikis) setiap pembekal.
 
 ---
 
@@ -98,15 +98,15 @@ Menjalankan pertanyaan/URL yang sama merentas sehingga **4 penyedia secara selar
 
 ---
 
-## Katalog Penyedia
+## Katalog Pembekal
 
-`ProviderCatalog.tsx` mendedahkan senarai penuh penyedia daripada `GET /api/search/providers`
-(diperluas dalam F4 untuk menyertakan penyedia pengambilan):
+`ProviderCatalog.tsx` mendedahkan senarai penyedia penuh daripada `GET /api/search/providers` (dilanjutkan dalam F4 untuk memasukkan penyedia pengambilan):
 
-| `kind` | `"search"` (20 penyedia) atau `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (24 penyedia) atau `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search, keenable-search) |
 
-Status **ditentukan pada masa permintaan** dengan memeriksa sama ada kelayakan wujud dan sama ada
-semua kunci sedang dalam tempoh bertenang.
+Statusnya ialah** diperolehi pada masa permintaan** dengan menyemak sama ada bukti kelayakan wujud dan sama ada semua kekunci sedang dalam cooldown.
+
+`codex-search` ( Carian Web Codex ) tidak mempunyai kunci sendiri: ia menggunakan semula akaun Codex (ChatGPT) yang disambungkan, jadi setiap carian membelanjakan kuota langganan ChatGPT dan mengambil masa kira-kira 10–40 saat. Ia berjalan apabila permintaan menamakannya; pemilihan automatik memerlukan bendera ciri `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` (dimatikan secara lalai).
 
 ---
 
@@ -118,18 +118,18 @@ Ruang letak kunci API sentiasa `$OMNIROUTE_API_KEY` (D11, dikongsi dengan Playgr
 
 ---
 
-## Perubahan Bahagian Pelayan
+## Perubahan Bahagian Belakang
 
-Hanya satu perubahan bahagian pelayan diperlukan untuk ciri ini:
+Hanya satu perubahan bahagian belakang diperlukan untuk ciri ini:
 
-### `GET /api/search/providers` yang Diperluas
+### Dipanjangkan `GET /api/search/providers`
 
-`src/app/api/search/providers/route.ts` telah diperluas untuk:
+`src/app/api/search/providers/route.ts` telah dilanjutkan kepada:
 
-- Menyertakan setiap penyedia pengambilan (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) dalam tatasusunan.
-- Menambahkan `kind: "search" | "fetch"` pada setiap item.
-- Menambahkan `status: "configured" | "missing" | "rate_limited"` yang diperoleh daripada keadaan kelayakan semasa.
-- Mengekalkan keserasian ke belakang — medan sedia ada (`id`, `name`, dan sebagainya) tidak berubah.
+- Sertakan setiap pembekal pengambilan (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`, `keenable-search`) dalam tatasusunan.
+- Tambahkan `kind: "search" | "fetch"` pada setiap item.
+- Tambahkan `status: "configured" | "missing" | "rate_limited"` yang diperoleh daripada keadaan kelayakan langsung.
+- Kekalkan keserasian ke belakang — medan sedia ada (`id`, `name`, dsb.) tidak berubah.
 
 ---
 

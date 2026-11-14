@@ -49,6 +49,53 @@ Näin Entra ID SSO toimii: `scripts/cli/omniroute-sso.mjs token` tulostaa lyhyti
 
 ---
 
+## Käyttötarkoitus: istunnot ja projektit
+
+OmniRoute ryhmittelee jokaisen API -avaimen pyynnöt** agenttiistunnot** ja tallentaa mitkä** hanke** jokainen istunto työskenteli (`agent_sessions` taulukko), joten käyttö ja kustannukset voidaan raportoida ryhmän jäsentä, projektia ja istuntoa kohti.
+
+Mitä tallennetaan ilman asiakasasetuksia:
+
+| Ala      | Lähde                                                                                                                                       |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Istunto  | `x-claude-code-session-id` otsikko (sama arvo kuin `metadata.user_id.session_id`), vakaa istuntoa kohti                                     |
+| Projekti | `Primary working directory:` -rivi Claude -koodi lähettää ympäristösanoman; `.claude/worktrees/` n työpuukansiot ratkaisevat arkiston nimen |
+| Haara    | `Current branch:` git-tilasta Claude Koodi lähettää ensimmäisen viestin kanssa                                                              |
+| Asiakas  | `user-agent` (`claude-cli/<version>`)                                                                                                       |
+
+Codex (`<environment_context><cwd>`) ja OpenCode (`x-opencode-session`) tunnistetaan samalla tavalla. Avaimet kanssa** ei lokia** käytössä säilyttää vain istunnon tunnuksen ja otsikon toimittamat projektikentät; mitään kehotteesta luettua (polku, haara) ei tallenneta.
+
+### Projektin nimeäminen selkeästi (suositus)
+
+Työhakemisto vaihtelee koneiden välillä, joten sama arkisto voi näkyä eri poluilla. Lähetä projekti sen sijaan nimenomaisesti: Claude Code lisää kaikki `ANTHROPIC_CUSTOM_HEADERS` ssä luetellut otsikot jokaiseen mallipyyntöön, ja OmniRoute lukee niistä kaksi:
+
+| Otsikko                    | Arvo                                                               |
+| -------------------------- | ------------------------------------------------------------------ |
+| `x-omniroute-project`      | Projektin nimi, esim `omniroute`                                   |
+| `x-omniroute-project-repo` | Normalisoitu kaukosäädin, esim `github.com/diegosouzapw/OmniRoute` |
+
+Molemmat luetaan vain nimeämistä varten; niitä ei koskaan välitetä eteenpäin toimittajalle.
+
+`ANTHROPIC_CUSTOM_HEADERS` luetaan kerran käynnistyksen yhteydessä, ja asetustiedostot tallentavat kirjaimellisia arvoja, joten laske se, kun Claude Code käynnistyy. Lisää tämä tiedostoon `~/.zshrc` tai `~/.bashrc` ja jatka `claude` aloittamista projektikansiosta:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+`sed` -lauseke poistaa kaikki etä- URL hen upotetut tunnistetiedot. IDE laajennukset käynnistävät Claude koodin ilman komentotulkkiasi, joten niiden istunnot palaavat työhakemistoon.
+
+---
+
 ## Discovery-aliakset — muut kuin Claude-mallit näkyviin `/model`-valitsimeen
 
 Claude Coden gateway-mallidiscovery listaa vain tunnisteet, jotka alkavat `claude`- tai `anthropic`-etuliitteellä, joten kun `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` on asetettu, natiivi `/model`-valitsin näyttää normaalisti **vain** OmniRouten Claude/Anthropic-mallit — esimerkiksi `kimi/kimi-k2.6` tai `glm/glm-5.2` ei koskaan ilmesty listaan, vaikka reititys toimisikin moitteettomasti.

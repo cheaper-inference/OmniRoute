@@ -779,11 +779,48 @@ Web/search ပံ့ပိုးပေးသူ abstraction (Tavily၊ Brave၊ 
 
 | နည်းလမ်း | မဂ်                    | ဖော်ပြချက်                                                                                              |
 | -------- | ---------------------- | ------------------------------------------------------------------------------------------------------- |
-| GET      | `/v1/search`           | ပြင်ဆင်သတ်မှတ်ထားသော ရှာဖွေရေးဝန်ဆောင်မှုပေးသူများ + စွမ်းရည်များကို စာရင်းပြုစုပါ။                     |
+| GET      | `/v1/search`           | ပြင်ဆင်သတ်မှတ်ထားသော ရှာဖွေမှုပံ့ပိုးပေးသူများ + စွမ်းရည်များကို စာရင်းပြုစုပါ။                         |
 | POST     | `/v1/search`           | `v1SearchSchema` မှ အတည်ပြုထားသော ရှာဖွေမှု query — body ကိုဖွင့်ပါ၊ caching/coalescing ကို ပံ့ပိုးသည်။ |
 | GET      | `/v1/search/analytics` | ဝန်ဆောင်မှုပေးသူတိုင်း hit/latency/cache ကိန်းဂဏန်းများ                                                 |
 
 **အထောက်အထား-** ထမ်းသူ API သော့ (`extractApiKey` + `isValidApiKey`)။ ရှာဖွေမှုမူဝါဒကို `enforceApiKeyPolicy` မှတစ်ဆင့် ပြဋ္ဌာန်းထားသည်။
+
+### search/fetch ပေါင်းစပ်မှုများဟု အမည်ပေးထားသည်။
+
+`POST /v1/search` နှင့် `POST /v1/web/fetch` နှစ်ခုလုံးသည် `model` သိမ်းဆည်းထားသော ပေါင်းစပ်အမည်အဖြစ် လက်ခံသည်။ `model` သို့မဟုတ် တိကျပြတ်သားသော `provider` သုံးပါ။ နှစ်ခုလုံးကို `400` ပြန်ပို့သည်။ အကွက်နှစ်ခုမရှိလျှင် ရှိပြီးသား အလိုအလျောက်ပံ့ပိုးပေးသူ ရွေးချယ်မှုမှာ မပြောင်းလဲပါ။
+
+Combo Builder နှင့် ၎င်း၏ Add Model ကတ်တလောက် နှစ်ခုစလုံးသည် LLM မော်ဒယ်စာရင်းမရှိသော်လည်း ချိတ်ဆက်ပေးသူများအတွက် မူရင်းဝဘ်-လည်ပတ်မှု ထည့်သွင်းမှုများကို ဖော်ထုတ်ပါသည်။ Serper ရှိုး** ဝဘ်ရှာဖွေမှု** ; Tavily ရှိုး** ဝဘ်ရှာဖွေမှု / စာမျက်နှာထုတ်ယူခြင်း။** နှင့် အကျိူးအမြတ်အတွက်သာ ပံ့ပိုးပေးသူများကို ပြသသည်။** စာမျက်နှာထုတ်ယူခြင်း။** . ဝင်ခွင့်နှင့် အကောင့်ကို ပုံမှန်အတိုင်း ရွေးချယ်ပါ။ Tavily entry တစ်ခုတည်းက web endpoints နှစ်ခုလုံးကို ဝန်ဆောင်မှုပေးပါတယ်။ ဤလုပ်ဆောင်ချက်ထည့်သွင်းချက်များကို ချတ်သီးသန့်အသုံးပြုသူရွေးချယ်သူများ သို့မဟုတ် chat model probes တွင် ထည့်မထားပါ။
+
+ဥပမာတစ်ခုဖန်တီးပါ။** ဦးစားပေး** ဤအမိန့်ပေးထားသောပစ်မှတ်များဖြင့် `shared-free` ဟုအမည်ပေးထားသော combo သည်-
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+ထို့နောက် မျက်နှာပြင်တစ်ခုစီတွင် တူညီသောအမည်ကို အသုံးပြုပါ။
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+Search သည် Tavily ထို့နောက် Serper ဟုယူဆသည်။ fetch သည် Tavily ထို့နောက် Jina Reader ကိုစဉ်းစားသည်။ ချတ်သည် သီးခြား search/fetch ဝန်ဆောင်မှုပေးသူများကို ကျော်သွားကာ OpenAI ကို စဉ်းစားသည်။ လိုက်ဖက်ညီမှုမှာ search/fetch executor registries များမှ လာသည်၊ မော်ဒယ်အမည်ရှိ စကားလုံးများမှ လာသည်။ စစ်ထုတ်ခြင်းသည် အထောက်အထားရွေးချယ်ခြင်းနှင့် ပေးပို့ခြင်းတို့ကို ရှေ့တွင်လုပ်ဆောင်ပြီး သိမ်းဆည်းထားသော ကွန်ဘိုကို ဘယ်သောအခါမှ တည်းဖြတ်မည်မဟုတ်ပါ။
+
+ချတ်မဟုတ်သော စွမ်းရည်လမ်းကြောင်းများသည် `priority`, `fill-first`, `round-robin`, `weighted`, `random`, `strict-random`, `least-used`, နှင့် `p2c` တို့ကို ပံ့ပိုးပေးသည်။ `fusion`၊ `pipeline` နှင့် `context-relay` ကဲ့သို့သော ချတ်သီးသန့်ပေါင်းစပ်နည်းဗျူဟာများကို ရှာဖွေခြင်း သို့မဟုတ် ထုတ်လုပ်ထားသောမီဒီယာတွင် တိတ်တဆိတ်အသုံးပြုခြင်းထက် ချတ်မဟုတ်သောလမ်းကြောင်းများတွင် ငြင်းပယ်ထားသည်။ ရေစီးကြောင်းခွဲတမ်းမအောင်မြင်မှုများအပါအဝင်၊ လက်ရှိ ပေါင်းစပ်အင်ဂျင်သည် ကျောခိုင်းခိုင်းစေကာ အဆင့် IDs၊ အကောင့်ပင်နံပါတ်များ၊ တစ်လှမ်းချင်း အကောင့်ခွင့်ပြုစာရင်းများ၊ nested ကိုးကားချက်များ၊ ခေါ်ဆိုသူ connection/quota နယ်ပယ်များနှင့် ပေါင်းစပ်ဝင်ရောက်ခွင့်မူဝါဒတို့ကို ထိန်းသိမ်းထားသည်။ ရလဒ်များသည် အမှန်တကယ် ပံ့ပိုးပေးသူ အပါအဝင် ၎င်းတို့၏ မူလ search/fetch schema ကို ထိန်းသိမ်းထားသည်။ `X-OmniRoute-Combo-Trace` လမ်းကြောင်းဆိုင်ရာ ဆုံးဖြတ်ချက်ကို ဖော်ထုတ်သည်။ အမည်မသိ combo များသည် `404` ပြန်ပေးသည်။ လိုက်ဖက်ညီသောပစ်မှတ်များမရှိသော မလှုပ်ရှားနိုင်သော ပေါင်းစပ်မှုများနှင့် ပေါင်းစပ်များသည် `400` သို့ပြန်လာသည်။
+
+ပေါင်းစပ်ကြိုးပမ်းမှုတစ်ခုစီသည် တိကျပြတ်သားသောဝန်ဆောင်မှုပေးသူတစ်ဦးကို အသုံးပြုသည်။ ၎င်းသည် ပေါင်းစပ်၏နောက်ဘက်ရှိ မူလအလိုအလျောက် ပံ့ပိုးပေးသူအုပ်စုကို ခေါ်ဆို၍မရပါ။ တိကျပြတ်သားသော ပံ့ပိုးပေးသူ တောင်းဆိုချက်များသည် ၎င်းတို့၏ လက်ရှိ ဝန်ဆောင်မှုပေးသူ တစ်ခုတည်း၏ အပြုအမူကို ထိန်းသိမ်းထားသည်။ သီးသန့် search/fetch ပံ့ပိုးပေးသူများကို ပစ်မှတ်ထား၍ တိုက်ရိုက်ချတ်တောင်းဆိုမှုများသည် OpenAI စတိုင် စီမံဆောင်ရွက်သူထံ ကျရောက်မည့်အစား အရေးယူနိုင်သော JSON `400` ကို ပြန်ပေးသည်။
+
+### စွမ်းရည်- သီးသန့်ပေါင်းစပ်လမ်းကြောင်းများ
+
+သိမ်းဆည်းထားသော ပေါင်းစပ်မှုများတွင် သော့များသည် API လုပ်ဆောင်နိုင်စွမ်းရှိသည့် `routes` အရာတစ်ခု ပါဝင်နိုင်သည်။ လမ်းကြောင်းတိုင်းသည် ၎င်း၏ပစ်မှတ်စာရင်း၊ ဗျူဟာနှင့် runtime config ကို ပိုင်ဆိုင်သည်။ ထိပ်တန်းအဆင့် `models`၊ `strategy` နှင့် `config` တို့သည် အမွေအနှစ်နှင့် လိုက်ဖက်သော ချတ်အစီအစဉ်အဖြစ် ကျန်ရှိနေပါသည်။ `routes` မပါသော combo အဟောင်းများသည် မပြောင်းလဲဘဲ ဆက်လက်အလုပ်လုပ်ပါသည်။
+
+ပံ့ပိုးပေးထားသော လမ်းကြောင်းသော့များသည် `chat`၊ `search`၊ `web-fetch`၊ `embeddings`၊ `rerank`၊ `images`၊ `image-edits`၊ `videos`၊ `music`၊ `ocr`၊ `audio-speech`၊ `audio-transcriptions`၊ `audio-translations` နှင့် `audio-generation` တို့ဖြစ်သည်။ အထောက်အထားရွေးချယ်မှု၊ အမှတ်ပေးမှု သို့မဟုတ် ပေးပို့ခြင်းမပြုမီ အဆုံးမှတ်ကို ခန့်မှန်းခြင်းသည် ဖြစ်လိမ့်မည်။ Nested combo ကိုးကားချက်များသည် တူညီသောစွမ်းရည်အတွက် ကလေးတွဲဖက်၏လမ်းကြောင်းကို ရွေးချယ်ပါ။
+
+`POST /v1/music/generations` နှင့် `POST /v1/ocr` `model` တွင် ပေါင်းစပ်အမည်ကို လက်ခံသည်။ မူလ ElevenLabs နှင့် တွဲဖက်အသုံးပြုနိုင်သော `POST /v1/music` `model_id` တွင် ပေါင်းစပ်အမည်ကိုလည်း လက်ခံပါသည်၊ သို့သော် မူရင်းအဆုံးအမှတ်ပေါ်ရှိ အသုံးပြုနိုင်သော ပစ်မှတ်တိုင်းသည် ElevenLabs ဂီတမော်ဒယ်ဖြစ်ရမည်ဖြစ်သောကြောင့် ၎င်း၏ binary တုံ့ပြန်မှုစာချုပ်ကို ထိန်းသိမ်းထားသည်။ `POST /v1/sound-generation` တူညီသောဇာတိ-ဒွိကန့်သတ်မှုအောက်တွင် `model_id` တွင် `audio-generation` ပေါင်းစပ်မှုကို လက်ခံသည်။ ကွဲပြားသောဂီတပံ့ပိုးပေးသူများအတွက် `/v1/music/generations` သုံးပါ။
 
 **Auto-select:** without `provider`, the cheapest provider with a configured connection runs first and the next cheapest is the failover. Free last-resort providers (`duckduckgo-free`) are used only when nothing else is configured. A self-hosted SearXNG counts as configured once its connection stores a real `baseUrl` (not the catalog default `http://localhost:8888/search`): it then ranks as a $0 provider ahead of keyed ones, with the cheapest keyed provider as failover, including when SearXNG answers 400, 401, 403 or 404. A `baseUrl` that is not a valid `http(s)` URL or that points at a cloud-metadata address does not count. A SearXNG connection that stores a token ranks this way only over `https://` or loopback `http://`. Over remote plain `http://` it is never a failover and stays a last resort, used only when no other provider is configured or when requested by name, so it does send the token in cleartext in those two cases.
 
@@ -806,7 +843,7 @@ Exa ရလဒ်များသည် `id`, `highlights` (အလေးပေး�
 
 Linkup ရှာဖွေမှုကုန်ကျစရိတ်သည် `depth` `fast` နှင့် `standard` အတွက် $0.005 နှင့် `deep` အတွက် $0.05 ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ) ၊ `depth` မှ `provider_options` သို့မဟုတ် ချိတ်ဆက်မှု၏ဆက်တင်များတွင်ဖြစ်စေ မှတ်တမ်းတင်ထားသည်။
 
-Exa `type: "lite"` (Exa 3.0) သည် သေးငယ်သော နယ်ပယ်အစုံကို လက်ခံပြီး အခြားနယ်ပယ်တစ်ခုခုကို သတ်မှတ်သည့်အခါ တောင်းဆိုချက်တစ်ခုလုံးကို ငြင်းပယ်သည်။ Lite၊ `additionalQueries`၊ `systemPrompt` နှင့် `contents` ကီးတိုင်းကို ဖုန်းခေါ်ဆိုမှုမပြုမီ `text` နှင့် `highlights` မှလွဲ၍ ကျန်ရှိနေပါသည်။ ကန့်ကွက်ထားသော `subpages`၊ `subpageTarget`၊ `highlights.numSentences` နှင့် `highlights.highlightsPerUrl` တို့ကို ထပ်ဆင့်မပို့တော့ပါ။
+Exa `type: "lite"` (Exa 3.0) သည် သေးငယ်သော နယ်ပယ်အစုံကို လက်ခံပြီး အခြားနယ်ပယ်တစ်ခုခုကို သတ်မှတ်သည့်အခါ တောင်းဆိုချက်တစ်ခုလုံးကို ငြင်းပယ်သည်။ Lite၊ `additionalQueries`၊ `systemPrompt` နှင့် `contents` ကီးတိုင်းကို ဖုန်းခေါ်ဆိုမှုမတိုင်မီ `text` နှင့် `highlights` မှလွဲ၍ ကျန်သည်။ ကန့်ကွက်ထားသော `subpages`၊ `subpageTarget`၊ `highlights.numSentences` နှင့် `highlights.highlightsPerUrl` တို့ကို ထပ်ဆင့်မပို့တော့ပါ။
 
 ကုန်ကျစရိတ်စာရင်းအင်းသည် Exa ၏ကိုယ်ပိုင်စျေးနှုန်းဖြင့်လိုက်နာသော Exa မှလွဲ၍ `costPerQuery`, `auto` (နှင့် အမွေအနှစ် `fast`) သို့မဟုတ် `lite` (နှင့် အမွေအနှစ် `instant`) အတွက် 10 ရလဒ်များကို လွှမ်းခြုံပေးသည့် Exa မှလွဲ၍ နောက်ထပ်ရလဒ်တစ်ခုစီအတွက် $0.001; `contents.summary` သတ်မှတ်လိုက်သောအခါ ရလဒ်တစ်ခုလျှင် $0.001။ Tavily ကို `search_depth` `basic`၊ `fast` နှင့် `ultra-fast` အတွက် 1 ခရက်ဒစ် ($0.008) နှင့် `advanced` ( [Tavily API ခရက်ဒစ်](https://docs.tavily.com/documentation/api-credits) ) အတွက် ခရက်ဒစ် 2 ခု ($0.016) ဖြင့် မှတ်တမ်းတင်ထားသည်။ Tavily အဆင့်မြှင့်တင်ထားသော `auto_parameters: true` ဖြင့်ခေါ်ဆိုမှုကို 1 ခရက်ဒစ်တွင် မှတ်တမ်းတင်ထားဆဲဖြစ်သည်။
 
@@ -814,24 +851,21 @@ Exa `type: "lite"` (Exa 3.0) သည် သေးငယ်သော နယ်ပ�
 
 ## Web Fetch API
 
-သတ်မှတ်ပြင်ဆင်ထားသော web-fetch provider (Firecrawl၊ Jina
-Reader၊ Tavily Extract၊ TinyFish Fetch၊ Nimble Extract၊ Parallel Extract) မှတစ်ဆင့် URL တစ်ခုမှ အကြောင်းအရာကို ထုတ်ယူပါ။
+သတ်မှတ်ထားသော web-fetch provider (Firecrawl၊ Jina Reader၊ Tavily Extract၊ TinyFish Fetch၊ Nimble Extract၊ Parallel Extract၊ Keenable Fetch) မှတဆင့် URL မှ အကြောင်းအရာကို ထုတ်ယူပါ။
 
-Parallel Extract (`parallel-search`၊ Parallel Search နှင့် API key တစ်ခုတည်းကို အသုံးပြုသည်) သည် Markdown
-သာ ပြန်ပေးသည် — အခြား `format` တန်ဖိုးများအားလုံးသည် `400` ဖြစ်သည် — ထို့အပြင် အကြောင်းအရာကို စာလုံး
-100,000 အထိသာ ကန့်သတ်ထားသည်။ ရည်ညွှန်းထားသော စာမျက်နှာကိုယ်တိုင် ထုတ်ယူ၍မရသောအခါ upstream က ၎င်းကို HTTP 200
-အတွင်း အကြောင်းကြားသည်၊ OmniRoute က ၎င်းကို သတ်မှတ်ထားသောစာသားဖြင့် `422` အဖြစ် ပြသသည်။
+Parallel Extract (`parallel-search`၊ Parallel Search ကဲ့သို့တူညီသော API သော့) သည် Markdown ကိုသာ — ပြန်ပေးသည် အခြား `format` `400` — ဖြစ်ပြီး အကြောင်းအရာကို စာလုံးရေ 100,000 ဖြင့် ထုပ်ပါသည်။ ပစ်မှတ်စာမျက်နှာကို ကိုယ်တိုင်မထုတ်ယူနိုင်သောအခါ၊ အထက်စီးကြောင်းမှ ၎င်းကို HTTP 200 အတွင်း အစီရင်ခံသည်။ OmniRoute သည် ၎င်းကို `422` အဖြစ် ပုံသေစာတိုဖြင့် ဖော်ပြသည်။
 
-| Method | Path            | Description                                                                 |
-| ------ | --------------- | --------------------------------------------------------------------------- |
-| POST   | `/v1/web/fetch` | URL ကို fetch/scrape လုပ်သည် — body ကို `v1WebFetchSchema` ဖြင့် အတည်ပြုသည် |
+Keenable Fetch (`keenable-search`) သည် Markdown ကိုသာ ပြန်ပေးသည် (အခြား `format` သည် `400` ဖြစ်သည်) နှင့် အကြောင်းအရာကို စာလုံးရေ 100,000 ဖြင့် ထုပ်ထားသည်။ ၎င်းသည် သော့မပါဘဲ အလုပ်လုပ်သည်- ချိတ်ဆက်မှုမရှိသော တိကျပြတ်သားသော `provider: "keenable-search"` တောင်းဆိုချက်သည် Keenable ၏ သော့မဲ့အဆုံးမှတ် (တစ် IP နှုန်းကန့်သတ်ချက်များ) ကို အသုံးပြုသည်။ ပြင်ဆင်ထားသောသော့သည် ထိုကန့်သတ်ချက်များကိုသာ ရုတ်သိမ်းပေးသည်။ သော့ကို စီစဉ်သတ်မှတ်ထားမှသာ အလိုအလျောက်ရွေးချယ်ခြင်းသည် Keenable ကို အသုံးပြုသည်။
 
-**Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`)။ Policy ကို `enforceApiKeyPolicy` မှတစ်ဆင့် အတည်ပြုသည်။
+| နည်းလမ်း | မဂ်             | ဖော်ပြချက်                                                            |
+| -------- | --------------- | --------------------------------------------------------------------- |
+| POST     | `/v1/web/fetch` | Fetch/scrape a URL — body ကို `v1WebFetchSchema` ဖြင့် အတည်ပြုထားသည်။ |
 
-**Quota-aware fallback (#8297):** တိကျသော `provider` မပေးထားပါက pool
-(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) ကို သတ်မှတ်ထားသော
-ဦးစားပေးအစီအစဉ်အတိုင်း (fill-first) ဖြတ်သန်းရွေးချယ်သည် — rate limit ဖြစ်နေသော်လည်း ပြင်ဆင်သတ်မှတ်ထားသော provider ကို request ကို ရပ်တန့်မည့်အစား ကျော်သွားသည်၊ ထို့အပြင် ပြန်လည်ကြိုးစားနိုင်သော/quota ဆိုင်ရာ upstream အမှားတစ်ခု (HTTP 429 အမြဲတမ်း၊ Firecrawl/Tavily/TinyFish quota ပုံစံ free tier များအတွက် 402/403 — Jina Reader အတွက် မဟုတ်သကဲ့သို့ ရိုးရိုး 400 bad request အတွက်လည်း မဟုတ်) ဖြစ်ပါက request ပြုလုပ်ချိန်တွင် မစမ်းရသေးသော credential ပါ provider နောက်တစ်ခုသို့ ဆက်လက်ကျော်သွားသည်။ pool အတွင်းရှိ provider အားလုံး ကုန်ဆုံးသွားသောအခါ ယခင် generic `400` အစား endpoint က `Retry-After` header ပါသော တစ်ခုတည်းသော `429` ကို ပြန်ပေးသည်။ `provider` ကို တိကျစွာ တောင်းဆိုထားပါက **silent fallback မရှိပါ** — rate limit ဖြစ်နေသော သို့မဟုတ် အလုပ်မလုပ်သော explicit provider ၏ ကိုယ်ပိုင်အမှားကို ပြသသည် (rate limit ဖြစ်ပါက `429`၊ မဟုတ်ပါက upstream status)။
+**အထောက်အထား-** ထမ်းသူ API သော့ (`extractApiKey` + `isValidApiKey`)။ `enforceApiKeyPolicy` မှတစ်ဆင့် မူဝါဒချမှတ်ခဲ့သည်။
+
+အမည်ပေးထားသော ပေါင်းစပ်မှုများသည် အထက်ဖော်ပြပါ [`model` လမ်းကြောင်းဆိုင်ရာ စာချုပ်ကို](#named-searchfetch-combinations) အသုံးပြုကာ ထုတ်ယူမှုဆိုင်ရာ သီးခြားရွေးချယ်မှုများနှင့် တုံ့ပြန်မှုများကို ထိန်းသိမ်းထားသည်။
+
+**Quota-aware fallback (#8297):** `provider` ရော `model` နှစ်ခုစလုံးကို မပေးသည့်အခါ၊ pool (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` → `parallel-search` → `keenable-search`) သည် ပုံသေ ဦးစားပေးအစီအစဉ် (ပထမဖြည့်စွက်ခြင်း) — နှုန်းထား — ကန့်သတ်ထားသော-သို့သော်-configured provider က တောင်းဆိုချက်ကို ဖြတ်တောက်ပြီး ပျက်ကွက်သွားသည် ( retryable/quota Firecrawl/Tavily/TinyFish အစား အတိုချုံးခြင်း)HTTP 429 အတွက် 402/403 အမြဲတမ်း; ရေကူးကန်ရှိ ပံ့ပိုးသူတိုင်း ကုန်ဆုံးသွားသောအခါ၊ အဆုံးမှတ်သည် ယခင် `400` အစား `429` တစ်ခုတည်း ( `Retry-After` ခေါင်းစီးဖြင့်) ပြန်ပေးသည်။ တိကျပြတ်သားသော `provider` တောင်းဆိုသောအခါ၊ ရှိပါသည်။** မဟုတ်ဘူး** အသံတိတ် တုံ့ပြန်မှု — နှုန်းကန့်သတ်ထားသော သို့မဟုတ် ပြတ်သားစွာ ပံ့ပိုးပေးသူ ပျက်ကွက်ပါက ၎င်း၏ကိုယ်ပိုင်အမှား (`429` နှုန်းကန့်သတ်ထားပါက၊ သို့မဟုတ်ပါက အထက်ပိုင်းအခြေအနေ)။
 
 ---
 
@@ -893,30 +927,26 @@ CLI သည် `base_url + /responses` ကို WebSocket သို့ upgrade �
 
 ---
 
-## Quota နှင့် ပြဿနာ အစီရင်ခံခြင်း
+## ပမာဏနှင့် ပြဿနာများ အစီရင်ခံခြင်း။
 
-| နည်းလမ်း | လမ်းကြောင်း         | ဖော်ပြချက်                                                                                               |
-| -------- | ------------------- | -------------------------------------------------------------------------------------------------------- |
-| GET      | `/v1/quotas/check`  | မှတ်ပုံတင်ထားသော key မထုတ်ပေးမီ `provider` + `accountId` အတွက် quota ကို ကြိုတင်စစ်ဆေးရန်                |
-| POST     | `/v1/issues/report` | quota/key ထုတ်ပေးမှု မအောင်မြင်ခြင်းကို GitHub သို့ အစီရင်ခံရန် (`GITHUB_ISSUES_REPO` + token လိုအပ်သည်) |
+| နည်းလမ်း | မဂ်                 | ဖော်ပြချက်                                                                                            |
+| -------- | ------------------- | ----------------------------------------------------------------------------------------------------- |
+| GET      | `/v1/quotas/check`  | စာရင်းသွင်းသော့ကို မထုတ်ပေးမီ `provider` + `accountId` အတွက် ခွဲတမ်းကို ကြိုတင်အတည်ပြုပါ။             |
+| POST     | `/v1/issues/report` | GitHub သို့ quota/key ထုတ်ပေးမှု ပျက်ကွက်မှုကို အစီရင်ခံပါ ( `GITHUB_ISSUES_REPO` + တိုကင် လိုအပ်သည်) |
 
-**အထောက်အထားပြခြင်း:** Bearer API key (`isAuthenticated`)။
+**အထောက်အထား-** `/v1/quotas/check` Bearer API key (`isAuthenticated`) ကိုယူသည်။ `/v1/issues/report` သည် စီမံခန့်ခွဲမှုသီးသန့် (`requireManagementAuth`) ကဲ့သို့ `/api/v1/registered-keys`: ဒက်ရှ်ဘုတ်စက်ရှင်တစ်ခု၊ ပြည်တွင်း CLI တိုကင် သို့မဟုတ် `manage`/`admin` နယ်ပယ်ပါသော API သော့တစ်ခု။ အနုမာန-သီးသန့် API သော့များသည် `403` ရရှိသည်။
 
-### Quota session ပြန်လည်ရယူခြင်း (ရွေးချယ်အသုံးပြုနိုင်သည်)
+### ခွဲတမ်းစက်ရှင် ပြန်လည်ရယူခြင်း (ရွေးချယ်မှု)
 
-stream မပြုသော `POST /v1/chat/completions` သို့မဟုတ် `POST /v1/responses` တစ်ခုသည်
-terminal quota error (`402`/`429`/`503` — body တွင် quota သို့မဟုတ် credits ကုန်ဆုံးကြောင်း ဖော်ပြထားသောအခါ) ဖြင့်
-မအောင်မြင်ပါက error ပြန်ပေးမည့်အစား ခေတ္တသိမ်းထားပြီး နောက်ပိုင်းတွင် ပြန်လည်လုပ်ဆောင်နိုင်သည်။ ခေါ်ဆိုသူသည် request တစ်ခုချင်းစီအတွက် အောက်ပါ header သုံးခုဖြင့် ရွေးချယ်အသုံးပြုနိုင်သည်-
+terminal ခွဲတမ်း အမှား ( terminal quota အမှားဖြင့် ပျက်ကွက်သော streaming မဟုတ်သော `POST /v1/chat/completions` သို့မဟုတ် `POST /v1/responses` ကို (`402`/`429`/`503` ၏ quota သို့မဟုတ် credits များ ကုန်သွားပြီဟု ခန္ဓာကိုယ်က ပြောသည်) ကို ရပ်ထားပြီး error ပြန်ပေးမည့်အစား နောက်ပိုင်းတွင် ပြန်ဖွင့်နိုင်ပါသည်။ ခေါ်ဆိုသူသည် ခေါင်းစီးသုံးခုပါသော တောင်းဆိုချက်တစ်ခုတွင် ပါဝင်သည်-
 
-| Header                       | တန်ဖိုး                                                 |
+| ခေါင်းစီး                    | တန်ဖိုး                                                 |
 | ---------------------------- | ------------------------------------------------------- |
 | `x-omniroute-quota-recovery` | `auto`                                                  |
 | `x-omniroute-session`        | session id, `[A-Za-z0-9._:-]{1,128}`                    |
-| `x-omniroute-recovery-turn`  | session အတွင်း ထူးခြားရမည့် turn id (တူညီသော စည်းမျဉ်း) |
+| `x-omniroute-recovery-turn`  | စက်ရှင်အတွင်း ထူးခြားသော turn id ကို (တူညီသောစည်းမျဉ်း) |
 
-`stream: false` ဖြစ်ပြီး tools၊ tool history သို့မဟုတ် `previous_response_id` မပါဝင်သော turn များနှင့်
-`x-omniroute-connection` pin မပါဝင်သော turn များသာ အကျုံးဝင်သည်။ ထို့အပြင် `STORAGE_ENCRYPTION_KEY` သတ်မှတ်ထားရမည် (request ကို 24 နာရီအထိ encryption ဖြင့် သိမ်းဆည်းထားသည်)။ ထို့နောက် response သည်
-`recovery.poll` ပါသော `202` ဖြစ်လာမည်။ `GET /v1/quota-recoveries/{id}` ဖြင့် poll ပြုလုပ်နိုင်သည် (စောင့်ဆိုင်းနေစဉ် `202`၊ ပြီးဆုံးသောအခါ recovered body ပါသော `200`) သို့မဟုတ် `DELETE` ဖြင့် ပယ်ဖျက်နိုင်သည်။ Ticket များကို ၎င်းတို့ဖန်တီးခဲ့သော API key တစ်ခုတည်းကသာ မြင်နိုင်သည်။ ရလဒ်မသေချာသော replay သည် နှစ်ကြိမ်ပေးပို့ခြင်းမဖြစ်စေရန် `needs_confirmation` အခြေအနေဖြင့် အဆုံးသတ်မည်။ မူရင်းရင်းမြစ်: `src/lib/quota/quotaSessionRecovery.ts`။
+`stream: false` ကိရိယာမရှိသော၊ တူးလ်မှတ်တမ်း သို့မဟုတ် `previous_response_id` နှင့် `x-omniroute-connection` ပင်နံပါတ်မရှိသောသာလျှင် လှည့်ပတ်မှုတွင် အရည်အချင်းပြည့်မီပြီး `STORAGE_ENCRYPTION_KEY` သတ်မှတ်ရပါမည် (တောင်းဆိုချက်ကို 24 နာရီအထိ ကုဒ်ကုဒ်ဖြင့် သိမ်းဆည်းထားသည်)။ တုံ့ပြန်မှုသည် `202` နှင့် `recovery.poll` ဖြစ်သည် . စစ်တမ်း `GET /v1/quota-recoveries/{id}` (ဆိုင်းငံ့နေစဉ်`202` ၊ ပြီးသွားသောအခါ ပြန်လည်ရယူထားသော ကိုယ်ထည်နှင့်အတူ `200` ) သို့မဟုတ် `DELETE` ဖြင့် ပယ်ဖျက်ပါ။ လက်မှတ်များကို ၎င်းတို့ဖန်တီးသော API သော့ဖြင့်သာ မြင်နိုင်သည်။ ရလဒ်သည် မသေချာမရေရာသော ပြန်လည်ပြသမှုတွင် နှစ်ကြိမ်ပေးပို့ရမည့်အစား `needs_confirmation` ဖြင့် အဆုံးသတ်သည်။ အရင်းအမြစ်: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1672,19 +1702,23 @@ OmniRoute ဖြစ်ရပ်များ (တောင်းဆိုမှ�
 
 ---
 
-## Registered Keys (Auto-Management)
+## မှတ်ပုံတင်ထားသော သော့များ (အလိုအလျောက် စီမံခန့်ခွဲခြင်း)
 
-နောက်ခံ provider/account တစ်ခုနှင့် ချိတ်ဆက်၍ API keys များ ထုတ်ပေးခြင်းနှင့် လဲလှယ်ခြင်းများကို auto-key management subsystem မှ လုပ်ဆောင်ရန် အသုံးပြုသည်။ နေ့စဉ်/နာရီအလိုက် quota များ ပါဝင်သည်။
+အလိုအလျောက်သော့စီမံခန့်ခွဲမှုစနစ်ခွဲမှ API သော့များကို ကျောထောက်နောက်ခံ provider/account နှင့် daily/hourly ခွဲတမ်းများထုတ်ပေးရန်နှင့် လှည့်ရန်အတွက် အသုံးပြုသည်။
 
-| Method | Path                                  | Description                                                                                                                                                                                                                     |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | စာရင်းသွင်းထားသော keys များကို စာရင်းပြုစုရန် (ဖုံးကွယ်ထားသော prefix သာ)                                                                                                                                                        |
-| POST   | `/api/v1/registered-keys`             | စာရင်းသွင်းထားသော key အသစ်တစ်ခု ထုတ်ပေးရန် — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`။ raw key ကို **တစ်ကြိမ်သာ** ပြန်ပေးသည်။ quota ငြင်းပယ်ခံရပါက `429` ကို ပြန်ပေးသည်။ |
-| GET    | `/api/v1/registered-keys/[id]`        | စာရင်းသွင်းထားသော key ၏ metadata ကို ရယူရန် (raw material မပါဝင်ပါ)                                                                                                                                                             |
-| DELETE | `/api/v1/registered-keys/[id]`        | စာရင်းသွင်းထားသော key ကို ရုပ်သိမ်းရန်                                                                                                                                                                                          |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | အတိအလင်း ရုပ်သိမ်းရန် endpoint (`DELETE` နှင့် အကျိုးသက်ရောက်မှု တူညီသည်)                                                                                                                                                       |
+| နည်းလမ်း | မဂ်                                   | ဖော်ပြချက်                                                                                                                                                                                                            |
+| -------- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET      | `/api/v1/registered-keys`             | စာရင်းသွင်းထားသောသော့များစာရင်း (masked prefix များသာ)                                                                                                                                                                |
+| POST     | `/api/v1/registered-keys`             | မှတ်ပုံတင်ထားသော သော့အသစ် — ကိုယ်- `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}` ကိုထုတ်ပါ။ ကီးစိုကို ပြန်ပေးသည်။** တစ်ကြိမ်** . ခွဲတမ်းငြင်းဆိုမှုတွင် `429` ပြန်ပေးသည်။ |
+| GET      | `/api/v1/registered-keys/[id]`        | မှတ်ပုံတင်ထားသောကီး၏ မက်တာဒေတာကို ရယူပါ (ကုန်ကြမ်းမရှိပါ)                                                                                                                                                             |
+| DELETE   | `/api/v1/registered-keys/[id]`        | မှတ်ပုံတင်ထားသောသော့ကို ရုပ်သိမ်းပါ။                                                                                                                                                                                  |
+| POST     | `/api/v1/registered-keys/[id]/revoke` | ပြတ်သားစွာ ရုပ်သိမ်းသည့် အဆုံးမှတ် ( DELETE နှင့် တူညီသော အကျိုးသက်ရောက်မှု)                                                                                                                                          |
+| GET      | `/api/v1/providers/[provider]/limits` | ဝန်ဆောင်မှုပေးသူ၏ ထုတ်ပေးသည့်စာထုပ်များကို ဖတ်ပါ။                                                                                                                                                                     |
+| PUT      | `/api/v1/providers/[provider]/limits` | ဝန်ဆောင်မှုပေးသူ၏ ထုတ်ပေးသည့်စာထုပ် — body ကို သတ်မှတ်ပါ- `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                     |
+| GET      | `/api/v1/accounts/[id]/limits`        | အကောင့်၏ထုတ်ပေးသည့်စာထုပ်များကိုဖတ်ပါ။                                                                                                                                                                                |
+| PUT      | `/api/v1/accounts/[id]/limits`        | အကောင့်၏ထုတ်ပေးသည့်စာထုပ် — ဝန်ဆောင်မှုပေးသည့်လမ်းကြောင်းနှင့် တူညီသောကိုယ်ထည်ကို သတ်မှတ်ပါ။                                                                                                                          |
 
-**Auth:** စီမံခန့်ခွဲမှု session/API key (`requireManagementAuth`) — `/api/keys` တွင် အသုံးပြုသည့် guard နှင့် တူညီသည်။ dashboard session၊ local CLI token သို့မဟုတ် `manage`/`admin` scope ပါသော API key တစ်ခု ဖြစ်နိုင်သည်။ inference-only API keys များသည် `403` ရရှိမည်။ `/v1/quotas/check` နှင့် `/v1/issues/report` ကိုလည်း ကြည့်ပါ။
+**အထောက်အထား-** စီမံခန့်ခွဲမှု session/API သော့ (`requireManagementAuth`) — `/api/keys` ကဲ့သို့တူညီသော guard : dashboard session တစ်ခု၊ local CLI token သို့မဟုတ် API သော့တစ်ခု `manage`/`admin` နယ်ပယ်၊ အနုမာန-သပ်သပ် API သော့များသည် `403` ရရှိသည်။ `/v1/quotas/check` နှင့် `/v1/issues/report` ကိုလည်းကြည့်ပါ။
 
 ---
 
@@ -1808,23 +1842,23 @@ API key / session တစ်ခုချင်းစီအတွက် သီး�
 
 ## MCP ဆာဗာ
 
-OmniRoute တွင် transport ၃ မျိုး (stdio၊ SSE၊ streamable-http) နှင့် scope သတ်မှတ်ထားသော tools များပါဝင်သည့် ထည့်သွင်းထားသော Model Context Protocol ဆာဗာ ပါဝင်သည်။ အောက်ပါ dashboard endpoint များသည် status/audit data များကို ဖတ်ရှုပြီး HTTP transport များအတွက် proxy အဖြစ် လုပ်ဆောင်သည်။
+OmniRoute ပို့ဆောင်မှု 3 ခု (stdio၊ SSE၊ streamable-http) နှင့် အတိုင်းအတာရှိသော ကိရိယာများပါရှိသော ထည့်သွင်းထားသော Model Context Protocol ဆာဗာကို ပေးပို့သည်။ အောက်ရှိ ဒက်ရှ်ဘုတ်တွင် အဆုံးမှတ်များသည် status/audit ဒေတာကို ဖတ်ပြီး HTTP ပို့ဆောင်မှုများကို ပရောက်စီ။
 
-| နည်းလမ်း | လမ်းကြောင်း            | ဖော်ပြချက်                                                                                                       |                      |
-| -------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------- |
-| GET      | `/api/mcp/status`      | Heartbeat၊ transport၊ online အခြေအနေ၊ နောက်ဆုံးခေါ်ဆိုမှု၊ ထိပ်တန်း tools များ၊ ၂၄ နာရီအတွင်း အောင်မြင်မှုနှုန်း |
-| GET      | `/api/mcp/tools`       | `name`၊ `description`၊ `scopes`၊ `phase`၊ `auditLevel`၊ `sourceEndpoints` ပါဝင်သည့် MCP tools စာရင်း             |
-| GET      | `/api/mcp/sse`         | SSE transport အတွက် SSE stream ကို ဖွင့်ရန် (MCP ပိတ်ထားပါက သို့မဟုတ် transport မကိုက်ညီပါက `503` ပြန်ပေးသည်)    |
-| POST     | `/api/mcp/sse`         | SSE transport ပေါ်တွင် JSON-RPC frame ပေးပို့ရန်                                                                 |
-| GET      | `/api/mcp/stream`      | Streamable HTTP transport ၏ SSE ဘက်ကို ဖွင့်ရန် (ဆာဗာမှ စတင်ပေးပို့သော messages)                                 |
-| POST     | `/api/mcp/stream`      | Streamable HTTP transport ပေါ်တွင် JSON-RPC frame ပေးပို့ရန်                                                     |
-| DELETE   | `/api/mcp/stream`      | Streamable HTTP session ကို အဆုံးသတ်ရန်                                                                          |
-| GET      | `/api/mcp/audit`       | audit log ကို query လုပ်ရန် — `?limit=`၊ `?offset=`၊ `?tool=`၊ `?success=true                                    | false`၊ `?apiKeyId=` |
-| GET      | `/api/mcp/audit/stats` | စုစည်းထားသော audit စာရင်းအင်းများ (စုစုပေါင်း၊ အောင်မြင်မှုနှုန်း၊ ပျမ်းမျှကြာချိန်၊ ထိပ်တန်း tools များ)        |
+| နည်းလမ်း | မဂ် | ဖော်ပြချက် |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
+| GET | `/api/mcp/status` | နှလုံးခုန်သံ၊ သယ်ယူပို့ဆောင်ရေး၊ အွန်လိုင်းအခြေအနေ၊ နောက်ဆုံးခေါ်ဆိုမှု၊ ထိပ်တန်းကိရိယာများ၊ 24 နာရီ အောင်မြင်မှုနှုန်း |
+| GET | `/api/mcp/tools` | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` ပါသော MCP ကိရိယာများစာရင်း |
+| GET | `/api/mcp/sse` | SSE သယ်ယူပို့ဆောင်မှုအတွက် SSE stream ကိုဖွင့်ပါ ( MCP ပိတ်ထားပါက သို့မဟုတ် ပို့ဆောင်မှုမညီပါက `503` ပြန်ပေးသည်) |
+| POST | `/api/mcp/sse` | SSE သယ်ယူပို့ဆောင်ရေးတွင် JSON-RPC ဘောင်ကို ပို့ပါ။ |
+| GET | `/api/mcp/stream` | Streamable HTTP သယ်ယူပို့ဆောင်ရေး၏ SSE ခြမ်းကိုဖွင့်ပါ (ဆာဗာမှအစပြုသည့်မက်ဆေ့ချ်များ) |
+| POST | `/api/mcp/stream` | Streamable HTTP သယ်ယူပို့ဆောင်ရေးတွင် JSON-RPC ဘောင်ကို ပို့ပါ။ |
+| DELETE | `/api/mcp/stream` | ထုတ်လွှင့်နိုင်သော HTTP စက်ရှင်ကို အဆုံးသတ်ပါ။ |
+| GET | `/api/mcp/audit` | စစ်ဆေးမေးမြန်းမှုမှတ်တမ်း — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
+| GET | `/api/mcp/audit/stats` | စုစုပေါင်းစာရင်းစစ် (စုစုပေါင်း၊ အောင်မြင်မှုနှုန်း၊ ပျမ်းမျှကြာချိန်၊ ထိပ်တန်းကိရိယာများ) |
 
-**အထောက်အထားပြုခြင်း:** `sse`/`stream` transport များသည် MCP-specific auth surface ( `mcp` scope ပါသော Bearer API key) ကို လိုက်နာသည်။ `status`/`tools`/`audit*` route များကို dashboard မှ ဖတ်ရှုနိုင်သည် (dashboard host သို့ ရောက်ရှိနိုင်ခြင်းအပြင် အပိုအထောက်အထားပြုရန် မလိုအပ်ပါ)။
+**အထောက်အထား-** `sse`/`stream` ပို့ဆောင်မှုသည် MCP-တိကျသော auth မျက်နှာပြင်ကို ဂုဏ်ပြုသည် ( `mcp` နယ်ပယ်နှင့်အတူ Bearer API key); `status`/`tools`/`audit*` လမ်းကြောင်းများကို ဒက်ရှ်ဘုတ်မှ ဖတ်ရှုနိုင်သည် (ဒက်ရှ်ဘုတ် လက်ခံသူထံ ကျော်လွန်၍ အပိုအထောက်အထား မလိုအပ်ပါ)။
 
-> HTTP transport နှစ်ခုလုံးကို `settings.mcpEnabled` နှင့် `settings.mcpTransport` တို့ဖြင့် ထိန်းချုပ်ထားသည် — transport မကိုက်ညီပါက `400`၊ MCP ပိတ်ထားသည့်အခြေအနေဖြစ်ပါက `503` ပြန်ပေးသည်။
+> HTTP သယ်ယူပို့ဆောင်ရေးနှစ်ခုလုံးကို `settings.mcpEnabled` နှင့် `settings.mcpTransport` — ဖြင့် ပိတ်ဆို့ထားပြီး သယ်ယူပို့ဆောင်ရေးမတူညီမှု `400` ပြန်လာသည်၊ MCP မသန်စွမ်းသောအခြေအနေသည် `503` ပြန်ပေးသည်။
 
 ---
 

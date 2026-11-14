@@ -154,7 +154,7 @@ src/
 | `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | It-traffic Inspector dashboard page — DevTools split, 7 tabs dettall, 4 toggles mode capture, recorder tas-sessjoni, colorization tal-kuntest. i18n PT-BR + EN. Ara `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                     |
 | `app/(dashboard)/dashboard/activity/`                                        | Paġna tal-għalf tal-attività (Grupp B): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — ara `docs/architecture/MONITORING_SECTIONS.md`                                                                                                |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | Il-paġna tal-Qsim tal-Kwoti (Grupp B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                              |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Paġna tal-konfigurazzjoni tal-pjan tal-fornitur (Grupp B): `page.tsx` + `ProviderPlanConfigClient.tsx` — dimensjonijiet tal-kwota għal kull konnessjoni override                                                                                                                                                |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Il-paġna tal-konfigurazzjoni tal-pjan tal-fornitur (Grupp B): `page.tsx` + `ProviderPlanConfigClient.tsx` — dimensjonijiet tal-kwota għal kull konnessjoni override                                                                                                                                             |
 | `app/docs/`                                                                  | Telespettatur tad-dokumentazzjoni inkorporat (renders `docs/*.md`)                                                                                                                                                                                                                                              |
 | `app/landing/`                                                               | Paġna ta 'destinazzjoni tal-marketing                                                                                                                                                                                                                                                                           |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | Paġni relatati mal-awth                                                                                                                                                                                                                                                                                         |
@@ -193,7 +193,7 @@ src/
 | `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 wrapper — KNN brute-force + hybrid RRF (FTS5 + vector, k = 60). Lazy-init, tiddegrada bil-grazzja meta sqlite-vec mhux disponibbli. (pjanta 21)                                                                                                                                                        |
 | `memory/reindex.ts`                      | `runReindexBatch()` — jipproċessa memorji `needs_reindex=1` fl-isfond; imsejħa minn `POST /api/memory/reindex` u lazy-backfill mogħdija. (pjanta 21)                                                                                                                                                                     |
 | `monitoring/`                            | Kontrolli tas-saħħa, emissjoni metrika                                                                                                                                                                                                                                                                                   |
-| `oauth/`                                 | OAuth/import flows għal 22 modulu tal-fornitur (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, xad-ooth zed)                                                                          |
+| `oauth/`                                 | OAuth/import flows għal 22 modulu tal-fornitur (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qi-ooth zed)                                                                           |
 | `plugins/`                               | Plugin reġistru                                                                                                                                                                                                                                                                                                          |
 | `promptCache/`                           | Breakpoints tal-cache fil-pront ta' stil antropiku                                                                                                                                                                                                                                                                       |
 | `skills/`                                | Qafas tal-ħiliet (built-in + marketplace + SkillsSH) — ara `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                   |
@@ -241,10 +241,10 @@ src/
 | Modulu                           | Għan                                                                                               |
 | -------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dashboard komponent API: adapters fuq `packages/ui-kit` — ara `docs/architecture/DESIGN_SYSTEM.md` |
-| `constants/iconMap.ts`           | `ICON_MAP`: ismijiet tal - ikoni użati mill - iskrins → Lucide components (`<Icon>`)               |
-| `constants/providers.ts`         | **381 fornitur** bil-validazzjoni Zod (sors tal-verità)                                            |
+| `constants/iconMap.ts`           | `ICON_MAP`: ismijiet tal-ikoni użati mill-iskrins → komponenti Lucide (`<Icon>`)                   |
+| `constants/providers.ts`         | **394 fornitur** bil-validazzjoni Zod (sors tal-verità)                                            |
 | `constants/cliTools.ts`          | Reġistru estern tal-għodda CLI                                                                     |
-| `constants/routingStrategies.ts` | **20 strateġija ta' rotta** bi prijoritajiet                                                       |
+| `constants/routingStrategies.ts` | **22 strateġiji ta' rotta** bi prijoritajiet                                                       |
 | `constants/publicApiRoutes.ts`   | Rotot li jeħtieġu awtifikazzjoni Bearer (vs management).                                           |
 | `constants/upstreamHeaders.ts`   | Lista taċ-ċaħda tal-header għal talbiet upstream                                                   |
 | `validation/schemas.ts`          | ~ 80 skemi Zod (sors uniku tal-verità għal kuntratti API )                                         |
@@ -254,46 +254,46 @@ src/
 | `utils/circuitBreaker.ts`        | Fornitur circuit breaker (ara `docs/architecture/RESILIENCE_GUIDE.md`)                             |
 | `utils/apiAuth.ts`               | validazzjoni taċ-ċavetta API, verifika tal-ambitu                                                  |
 | `utils/fetchTimeout.ts`          | Timeout/abort wrappers għal upstream fetch                                                         |
-| `utils/releaseNotes.ts`          | Parser tal-avviż v2/legacy magħluq, lokalizzazzjoni u tkeċċija ID                                  |
+| `utils/releaseNotes.ts`          | Parser avviż v2/legacy magħluq, lokalizzazzjoni u tkeċċija ID                                      |
 
 ---
 
-## `open-sse/` — Spazju tax-Xogħol tal-Magna tal-Istreaming
+## `open-sse/` — Streaming Engine Workspace
 
-Spazju tax-xogħol npm separat (`@omniroute/open-sse`). Jieħu ħsieb l-ipproċessar tat-talbiet u l-eżekuzzjoni tal-fornituri.
+Spazju tax-xogħol separat npm (`@omniroute/open-sse`). Jiġġestixxi l-eżekuzzjoni tal-fornitur + tal-ipproċessar tat-talba.
 
 ```
 open-sse/
-├── handlers/            # 16-il fajl (12-il handler + 4 utilitajiet awżiljarji): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, eċċ.
-├── executors/           # 150 modulu ta’ eżekuzzjoni (klassijiet li jestendu BaseExecutor + utilitajiet awżiljarji għal kull fornitur)
-├── translator/          # Konvertituri tal-formati (9 għat-talbiet, 9 għat-tweġibiet, 9 utilitajiet awżiljarji)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ modulu ta’ servizz (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, eċċ.)
-├── mcp-server/          # Server MCP (110 għodod, 3 trasporti, 33 ambitu)
-├── config/              # Reġistri tal-fornituri/mudelli, konfigurazzjoni tal-headers, psewdonimi tal-mudelli
-├── utils/               # Klijent TLS, proxy fetch/dispatcher, utilitajiet awżiljarji tan-network
-├── index.ts             # Punt tad-dħul tal-ispazju tax-xogħol
-├── package.json         # Manifest tal-ispazju tax-xogħol
-├── tsconfig.json        # Konfigurazzjoni TS tal-ispazju tax-xogħol
-└── types.d.ts           # Dikjarazzjonijiet tat-tipi tal-ispazju tax-xogħol
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Path                        | Skop                                                                                       |
-| --------------------------- | ------------------------------------------------------------------------------------------ |
-| `server.ts`                 | Ċiklu tal-ħajja tas-server MCP (trasporti stdio + HTTP)                                    |
-| `httpTransport.ts`          | Trasporti HTTP Streamable + SSE (`/api/mcp/sse`, `/api/mcp/stream`)                        |
-| `audit.ts`                  | Reġistrazzjoni tal-awditjar fit-tabella `mcp_tool_audit`                                   |
-| `scopeEnforcement.ts`       | Validazzjoni tal-ambitu għal kull għodda                                                   |
-| `runtimeHeartbeat.ts`       | Sinjal perjodiku tas-saħħa lejn `DATA_DIR/runtime/mcp-heartbeat.json`                      |
-| `descriptionCompressor.ts`  | Jikkompressa l-metadata tad-deskrizzjoni tal-għodod biex jiffranka l-kuntest               |
-| `schemas/tools.ts`          | 36 definizzjoni bażika tal-għodod + ambiti                                                 |
-| `tools/advancedTools.ts`    | Implimentazzjonijiet avvanzati tal-għodod                                                  |
-| `tools/memoryTools.ts`      | 3 għodod tal-memorja (tfittxija/żieda/tneħħija)                                            |
-| `tools/skillTools.ts`       | 4 għodod tal-ħiliet (elenkar/attivazzjoni/eżekuzzjoni/eżekuzzjonijiet)                     |
-| `tools/compressionTools.ts` | 5 għodod tal-kompressjoni                                                                  |
-| `README.md`                 | README intern tas-server MCP (b’referenza inkroċjata minn `docs/frameworks/MCP-SERVER.md`) |
+| Mogħdija                    | Għan                                                                         |
+| --------------------------- | ---------------------------------------------------------------------------- |
+| `server.ts`                 | ċiklu tal-ħajja tas-server MCP (trasport stdio + HTTP )                      |
+| `httpTransport.ts`          | HTTP Streamable + SSE transports (`/api/mcp/sse`, `/api/mcp/stream`)         |
+| `audit.ts`                  | Logging tal-verifika fit-tabella `mcp_tool_audit`                            |
+| `scopeEnforcement.ts`       | Validazzjoni tal-ambitu għal kull għodda                                     |
+| `runtimeHeartbeat.ts`       | Sahha tahbit tal-qalb ghal `DATA_DIR/runtime/mcp-heartbeat.json`             |
+| `descriptionCompressor.ts`  | Ikkompressa l-metadata tad-deskrizzjoni tal-għodda biex issalva l-kuntest    |
+| `schemas/tools.ts`          | 36 għodda bażi definizzjonijiet + ambiti                                     |
+| `tools/advancedTools.ts`    | Implimentazzjonijiet ta' għodda avvanzati                                    |
+| `tools/memoryTools.ts`      | 3 għodod tal-memorja (search/add/clear)                                      |
+| `tools/skillTools.ts`       | 4 għodod tal-ħiliet (list/enable/execute/executions)                         |
+| `tools/compressionTools.ts` | 5 għodod ta 'kompressjoni                                                    |
+| `README.md`                 | Server MCP intern README (cross-linked minn `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -412,9 +412,9 @@ open-sse/
 | `CLI-TOOLS.md`              | Integrazzjonijiet esterni CLI + Intern OmniRoute CLI                                          |
 | `I18N.md`                   | arkitettura i18n, li żżid lingwa, 67 lokali                                                   |
 | `UNINSTALL.md`              | Naddaf passi tad-diżinstalla                                                                  |
-| `PROVIDER_REFERENCE.md`     | **Ġenerat awtomatikament** katalgu ta' 381 fornitur (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Ġenerat awtomatikament** katalgu ta' 394 fornitur (regen: `npm run gen:provider-reference`) |
 
-### Subsistema deep-dives
+### Ads fil-fond tas-sottosistema
 
 | Dok                                         | Għan                                                                                      |
 | ------------------------------------------- | ----------------------------------------------------------------------------------------- |

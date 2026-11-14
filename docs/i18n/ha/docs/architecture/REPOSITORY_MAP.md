@@ -154,7 +154,7 @@ src/
 | `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Shafin dashboard Inspector — DevTools tsaga, shafuka 7 dalla-dalla, yanayin kamawa 4, mai rikodin zaman, canza launi. i18n PT-BR + EN. Duba `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                                                    |
 | `app/(dashboard)/dashboard/activity/`                                        | Shafin ciyarwar ayyuka (Rukunin B): `page.tsx` (uwar garken) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — duba `docs/architecture/MONITORING_SECTIONS.md`                                                                                                     |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | Shafin Sharing Quota (Group B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                            |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Shafi na saitin mai bayarwa (Rukunin B): `page.tsx` + `ProviderPlanConfigClient.tsx` — ma'auni keɓaɓɓun kowane haɗin haɗin gwiwa                                                                                                                                                                                       |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Shafi na saitin mai bayarwa (Rukunin B): `page.tsx` + `ProviderPlanConfigClient.tsx` — ma'auni ga kowane haɗin gwiwa                                                                                                                                                                                                   |
 | `app/docs/`                                                                  | Mai duba daftarin aiki (samar da `docs/*.md`)                                                                                                                                                                                                                                                                          |
 | `app/landing/`                                                               | Shafin saukar da tallace-tallace                                                                                                                                                                                                                                                                                       |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | Shafukan da ke da alaƙa                                                                                                                                                                                                                                                                                                |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `components/`                    | Bangaren dashboard API: adaftar akan `packages/ui-kit` — duba `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: icon sunayen da allon ke amfani da → Lucide components (`<Icon>`)                      |
-| `constants/providers.ts`         | **381 masu bayarwa** tare da ingancin Zod (tushen gaskiya)                                         |
+| `constants/providers.ts`         | **394 masu bayarwa** tare da ingancin Zod (tushen gaskiya)                                         |
 | `constants/cliTools.ts`          | Wurin yin rajistar kayan aikin CLI na waje                                                         |
-| `constants/routingStrategies.ts` | **20 dabaru dabaru** tare da fifiko                                                                |
+| `constants/routingStrategies.ts` | **22 dabarun kwatance** tare da fifiko                                                             |
 | `constants/publicApiRoutes.ts`   | Hanyoyin da ke buƙatar mai ba da izini ( vs management) auth                                       |
 | `constants/upstreamHeaders.ts`   | Ƙin lissafin rubutun kan buƙatun sama                                                              |
 | `validation/schemas.ts`          | ~ 80 Zod schemas (tushen gaskiya guda ɗaya don kwangilar API )                                     |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — Filin Aikin Injin Yawo
+## `open-sse/` — Yawo Inji Wurin Aiki
 
-Wani keɓantaccen filin aikin npm (`@omniroute/open-sse`). Yana sarrafa buƙatu tare da aiwatar da masu samarwa.
+Wurin aiki na npm daban (`@omniroute/open-sse`). Yana aiwatar da buƙatar aiwatar da aikin mai bada +.
 
 ```
 open-sse/
-├── handlers/            # Fayiloli 16 (masu sarrafawa 12 + mataimaka 4): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, da sauransu.
-├── executors/           # Modulan aiwatarwa 150 (azuzuwan da ke faɗaɗa BaseExecutor + mataimaka na kowane mai samarwa)
-├── translator/          # Masu sauya tsari (buƙatu 9, martani 9, mataimaka 9)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ modulan sabis (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, da sauransu.)
-├── mcp-server/          # Sabar MCP (kayan aiki 110, hanyoyin sufuri 3, iyakoki 33)
-├── config/              # Rajistocin masu samarwa/samfura, saitin header, laƙabban samfura
-├── utils/               # Abokin hulɗar TLS, proxy fetch/dispatcher, mataimakan hanyar sadarwa
-├── index.ts             # Mashigar filin aiki
-├── package.json         # Bayanin filin aiki
-├── tsconfig.json        # Saitin TS na filin aiki
-└── types.d.ts           # Bayyana nau'ikan filin aiki
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Hanya                       | Manufa                                                                                             |
-| --------------------------- | -------------------------------------------------------------------------------------------------- |
-| `server.ts`                 | Zagayen rayuwar sabar MCP (hanyoyin sufuri na stdio + HTTP)                                        |
-| `httpTransport.ts`          | Hanyoyin sufuri na HTTP Streamable + SSE (`/api/mcp/sse`, `/api/mcp/stream`)                       |
-| `audit.ts`                  | Rubuta bayanan binciken aiki zuwa jadawalin `mcp_tool_audit`                                       |
-| `scopeEnforcement.ts`       | Tabbatar da iyaka ga kowane kayan aiki                                                             |
-| `runtimeHeartbeat.ts`       | Bugun zuciyar lafiya zuwa `DATA_DIR/runtime/mcp-heartbeat.json`                                    |
-| `descriptionCompressor.ts`  | Matse metadata na bayanin kayan aiki don rage amfani da mahalli                                    |
-| `schemas/tools.ts`          | Ma'anoni 36 na kayan aiki na asali + iyakoki                                                       |
-| `tools/advancedTools.ts`    | Aiwatar da kayan aiki na ci gaba                                                                   |
-| `tools/memoryTools.ts`      | Kayan aikin ƙwaƙwalwa 3 (bincika/ƙara/sharewa)                                                     |
-| `tools/skillTools.ts`       | Kayan aikin fasaha 4 (jera/kunna/aiwatarwa/aiwatarwa da aka yi)                                    |
-| `tools/compressionTools.ts` | Kayan aikin matsawa 5                                                                              |
-| `README.md`                 | README na cikin gida na sabar MCP (wanda aka haɗa ta gicciye daga `docs/frameworks/MCP-SERVER.md`) |
+| Hanya                       | Manufar                                                                        |
+| --------------------------- | ------------------------------------------------------------------------------ |
+| `server.ts`                 | Rayuwar sabar uwar MCP (stdio + HTTP transports)                               |
+| `httpTransport.ts`          | HTTP Streamable + SSE transports (`/api/mcp/sse`, `/api/mcp/stream`)           |
+| `audit.ts`                  | Audit log to `mcp_tool_audit` table                                            |
+| `scopeEnforcement.ts`       | Tabbatar da iyakan kowane kayan aiki                                           |
+| `runtimeHeartbeat.ts`       | Lafiyayyan bugun zuciya zuwa `DATA_DIR/runtime/mcp-heartbeat.json`             |
+| `descriptionCompressor.ts`  | Matsa metadata bayanin kayan aiki don adana mahallin                           |
+| `schemas/tools.ts`          | 36 tushe kayan aiki ma'anar + scopes                                           |
+| `tools/advancedTools.ts`    | Babban aiwatar da kayan aiki                                                   |
+| `tools/memoryTools.ts`      | 3 kayan aikin ƙwaƙwalwar ajiya (search/add/clear)                              |
+| `tools/skillTools.ts`       | 4 kayan aikin fasaha (list/enable/execute/executions)                          |
+| `tools/compressionTools.ts` | 5 kayan aikin matsawa                                                          |
+| `README.md`                 | Sabar MCP ta ciki README (wanda aka haɗa daga `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -397,7 +397,7 @@ open-sse/
 
 | Doc                         | Manufar                                                                                           |
 | --------------------------- | ------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Babban matakin gine-gine, taswirar tsarin ƙasa, saman allo                                        |
+| `ARCHITECTURE.md`           | Babban matakin gine-gine, taswirar tsarin ƙasa, saman dashboard                                   |
 | `CODEBASE_DOCUMENTATION.md` | Maganar injiniya: kundayen adireshi, kayayyaki, tarurruka                                         |
 | `FEATURES.md`               | Matrix fasali tare da karin bayanai v3.8                                                          |
 | `USER_GUIDE.md`             | Littafin mai amfani na ƙarshe (saitin, samfuri, combos, CLIs, audio, da sauransu)                 |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Haɗin CLI na waje + ciki OmniRoute CLI                                                            |
 | `I18N.md`                   | i18n gine-gine, ƙara harshe, yankuna 67                                                           |
 | `UNINSTALL.md`              | Tsaftace matakan cirewa                                                                           |
-| `PROVIDER_REFERENCE.md`     | **An ƙirƙira ta atomatik** Katalogi na masu samarwa 381 (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **An ƙirƙira ta atomatik** Katalogi na masu samarwa 394 (regen: `npm run gen:provider-reference`) |
 
 ### Subsystem zurfin-nutse
 
@@ -433,7 +433,7 @@ open-sse/
 | `AUTHZ_GUIDE.md`                             | Bututun izini (`classify` → `policies` → `enforce`)                                     |
 | `RESILIENCE_GUIDE.md`                        | Makullin kewayawa + sanyaya + ƙirar ƙira                                                |
 | `docs/security/STEALTH_GUIDE.md` (git kawai) | TLS yatsa (JA3/JA4), Claude Code CCH, MITM cert                                         |
-| `AUTO-COMBO.md`                              | Injin Combo Auto (maki 16-factor, fakitin yanayin 6, masana'anta na kama-da-wane)       |
+| `AUTO-COMBO.md`                              | Injin Combo Auto (maki maki 16, fakitin yanayin 6, masana'anta na kama-da-wane)         |
 
 ### Matsi
 
@@ -443,7 +443,7 @@ open-sse/
 | `COMPRESSION_ENGINES.md`        | Caveman + RTK injuna, kwangilar rajista   |
 | `COMPRESSION_RULES_FORMAT.md`   | JSON tsarin mulkin Caveman                |
 | `COMPRESSION_LANGUAGE_PACKS.md` | Kunshin kaya na ƙa'idar kowane harshe     |
-| `RTK_COMPRESSION.md`            | bututun shelar RTK (masu tacewa 56)       |
+| `RTK_COMPRESSION.md`            | bututun shela na RTK (masu tacewa 56)     |
 
 ### Aiwatar da aiki
 

@@ -24,19 +24,21 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 ضبط در `open-sse/handlers/chatCore.ts` (دو سایت، در دو سایت تماس `cacheReasoningFromAssistantMessage` ) اتفاق می افتد. پخش مجدد در `open-sse/translator/index.ts` بعد از اجبار طرحواره اما قبل از ارسال اتفاق می افتد.
+
+ورودیهای تماس ابزار تحت `buildToolCallCacheKey()` ذخیره میشوند، خلاصهای از دامنه درخواست و شناسه تماس ابزار، بنابراین همان شناسهای که توسط کلید API یا جلسه دیگری استفاده میشود، ورودی را انتخاب نمیکند. دامنه از `buildReasoningCacheScope()` می آید: شناسه کلید API ، به علاوه کلید جلسه زمانی که درخواست یکی دارد. بنابراین، ستون `tool_call_id` و داشبورد این خلاصه را برای آن ورودیها نشان میدهند.
 
 نوبتهای دستیار ساده (غیر ابزاری) به طور متفاوت کلید میخورد: `buildAssistantMessageCacheKey()` محدوده جلسه را به اضافه رونوشت با فرمت OpenAI نرمال شده تا آن نوبت هضم میکند، زیرا DeepSeek نیاز به استدلال _every_ قبل از حضور `tools` دارد. برای اهداف Responses-API (به عنوان مثال `opencode-go/deepseek-v4-flash`، مسیریابی به `/responses`) بدنه بالادست `input` حمل می کند، نه `messages`، بنابراین `translateRequest()` (`open-sse/translator/index.ts`) رونوشت محوری را که از طریق یک گزینه برگشت هضم شده گزارش می کند و سایت های ضبط همان رونوشت را هضم می کنند. پاس بازپخش Responses در محور OpenAI برای هر فرمت منبع اجرا میشود، بنابراین مشتریان پیامهای Anthropic (پاسخهای Claude → OpenAI → ) نیز دوباره پخش میشوند.
 

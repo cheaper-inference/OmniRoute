@@ -403,52 +403,53 @@ sqlite3 ~/.omniroute/storage.sqlite ".backup /backups/omniroute-hot.db"
 
 ---
 
-## ការកែសម្រួលប្រសិទ្ធភាព
+## ការលៃតម្រូវការអនុវត្ត
 
 ### របៀប WAL
 
-WAL ត្រូវបានបើកតាមលំនាំដើម។ សម្រាប់បន្ទុកការងារដែលមានការសរសេរច្រើន សូមពិចារណា៖
+WAL ត្រូវបានបើកតាមលំនាំដើម។ សម្រាប់បន្ទុកការងារសរសេរខ្ពស់ សូមពិចារណា៖
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- បង្កើត checkpoint រៀងរាល់ 1000 ទំព័រ
-PRAGMA journal_size_limit = 67108864;  -- កំណត់ទំហំ WAL អតិបរមា 64MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
 
-### លិបិក្រម
+OmniRoute មិនកំណត់ `journal_size_limit` ទេ។ ចំណុចត្រួតពិនិត្យផ្លាស់ទី WAL frames ចូលទៅក្នុងឯកសារចម្បង ប៉ុន្តែឯកសារ WAL រក្សាទំហំដែលបានបែងចែកធំបំផុតរបស់វា។ ឆ្មាំ `OMNIROUTE_WAL_GUARD_MAX_MB` គ្រាន់តែព្រមាន និងដំណើរការ `wal_checkpoint(RESTART)`; វាមិនមែនជាទំហំថាសទេ។
 
-លិបិក្រមសំខាន់ៗសម្រាប់ប្រសិទ្ធភាព (បង្កើតដោយស្វ័យប្រវត្តិតាមរយៈ migrations)៖
+### សន្ទស្សន៍
 
-- `idx_models_provider` — ស្វែងរកម៉ូដែលតាម provider
-- `idx_combo_targets_combo_id` — ពង្រីក combo target
-- `idx_usage_history_api_key_timestamp` — វិភាគការប្រើប្រាស់
-- `idx_quota_snapshots_api_key_window` — តាមដានកូតា
-- `idx_call_logs_timestamp` — សំណួររកកំណត់ហេតុការហៅ
+លិបិក្រមសំខាន់ៗសម្រាប់ដំណើរការ (បង្កើតដោយស្វ័យប្រវត្តិដោយការធ្វើចំណាកស្រុក)៖
 
-ដើម្បីបន្ថែមលិបិក្រមថ្មី សូមបង្កើត migration៖
+- ការស្វែងរកគំរូ`idx_models_provider` — ដោយអ្នកផ្តល់សេវា
+- ការពង្រីកគោលដៅ`idx_combo_targets_combo_id` — បន្សំ
+- `idx_usage_history_api_key_timestamp` — ការវិភាគការប្រើប្រាស់
+- ការតាមដានកូតា`idx_quota_snapshots_api_key_window` —
+- `idx_call_logs_timestamp` — សំណួរកំណត់ហេតុការហៅ
+
+ដើម្បីបន្ថែមលិបិក្រមថ្មី បង្កើតការផ្លាស់ប្តូរមួយ៖
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### I/O ដែលផ្គូផ្គងនឹងអង្គចងចាំ
+### អង្គចងចាំ-Mapped I/O
 
-សម្រាប់មូលដ្ឋានទិន្នន័យដែលមានទំហំធំខ្លាំង (>10GB) ការផ្គូផ្គងអង្គចងចាំអាចកែសម្រួលបានតាមរយៈ SQLite pragma៖
+សម្រាប់មូលដ្ឋានទិន្នន័យធំណាស់ (> 10GB) ការគូសផែនទីអង្គចងចាំអាចត្រូវបានកែតម្រូវតាមរយៈ SQLite pragma៖
 
 ```sql
--- កំណត់តាមរយៈ SQLite pragma (កែសម្រួលក្នុង core.ts ឬ runtime)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
 ### ការបង្រួម
 
-OmniRoute instances ដែលដំណើរការរយៈពេលយូរ ទទួលបានអត្ថប្រយោជន៍ពីការដំណើរការ `VACUUM` ម្តងម្កាល៖
+ករណី OmniRoute ដែលដំណើរការយូរទទួលបានអត្ថប្រយោជន៍ពី `VACUUM` ម្តងម្កាល៖
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-ដំណើរការប្រចាំខែក្នុងអំឡុងពេលដែលមានចរាចរណ៍ទាប។ (របៀប WAL កាត់បន្ថយតម្រូវការ ប៉ុន្តែមិនលុបបំបាត់វាទាំងស្រុងទេ។)
+ដំណើរការប្រចាំខែក្នុងអំឡុងពេលបង្អួចចរាចរណ៍ទាប។ (របៀប WAL កាត់បន្ថយតម្រូវការ ប៉ុន្តែមិនលុបបំបាត់វាទេ។ )
 
 ---
 

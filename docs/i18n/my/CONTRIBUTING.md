@@ -299,72 +299,72 @@ production build တို့သည် CI ၏ တာဝန်ဖြစ်သည�
 
 ---
 
-## ပရောဂျက် ဖွဲ့စည်းပုံ
+## စီမံကိန်းဖွဲ့စည်းပုံ
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard စာမျက်နှာများ (ကဏ္ဍ 23 ခု)
-│   ├── api/                # API လမ်းကြောင်းများ (လမ်းညွှန် 51 ခု)
-│   └── login/              # အထောက်အထားစိစစ်ခြင်း စာမျက်နှာများ (.tsx)
-├── domain/                 # မူဝါဒအင်ဂျင် (policyEngine, comboResolver, costRules စသည်)
-├── lib/                    # အဓိက စီးပွားရေးဆိုင်ရာ လုပ်ဆောင်ချက်များ (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 ပရိုတိုကော ဆာဗာ
-│   ├── acp/                # Agent Communication Protocol မှတ်ပုံတင်စနစ်
-│   ├── compliance/         # စည်းမျဉ်းလိုက်နာမှု မူဝါဒအင်ဂျင်
-│   ├── db/                 # SQLite ဒိုမိန်းမော်ဂျူးများ + migration 130 ခု
-│   ├── memory/             # ရေရှည်သိမ်းဆည်းထားသော စကားဝိုင်းမှတ်ဉာဏ်
-│   ├── oauth/              # OAuth ပံ့ပိုးသူများ၊ ဝန်ဆောင်မှုများနှင့် အသုံးဝင်ကိရိယာများ
-│   ├── skills/             # တိုးချဲ့နိုင်သော skill မူဘောင်
-│   ├── usage/              # အသုံးပြုမှု ခြေရာခံခြင်းနှင့် ကုန်ကျစရိတ် တွက်ချက်ခြင်း
-│   └── localDb.ts          # ပြန်လည် export လုပ်သည့် အလွှာသာဖြစ်သည် — ဤနေရာတွင် logic ကို မည်သည့်အခါမျှ မထည့်ပါနှင့်
-├── middleware/              # တောင်းဆိုမှု middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (လက်မှတ်၊ DNS၊ ပစ်မှတ်လမ်းကြောင်းသတ်မှတ်ခြင်း)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React component များ (.tsx)
-│   ├── constants/          # ပံ့ပိုးသူ သတ်မှတ်ချက်များ (329)၊ MCP scope များ၊ လမ်းကြောင်းရွေးချယ်မှု မဟာဗျူဟာ 20 ခု
-│   ├── utils/              # Circuit breaker၊ sanitizer၊ အထောက်အထားစိစစ်ရေး အထောက်အကူပြုကိရိယာများ
-│   └── validation/         # Zod v4 schema များ
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
 └── sse/                    # SSE proxy pipeline
 
 open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # executor မော်ဂျူး 150 ခု (executor class များ + ပံ့ပိုးသူတစ်ခုချင်းစီအလိုက် အထောက်အကူပြုကိရိယာများ)
-├── handlers/               # တောင်းဆိုမှု handler 11 ခု (chat၊ responses၊ embeddings၊ images စသည်)
-├── mcp-server/             # MCP ဆာဗာ (ထူးခြားသော tool 110 ခု၊ transport 3 ခု၊ scope 33 ခု)
-├── services/               # ထိပ်တန်းအဆင့် service 178 ခု (combo, autoCombo, rateLimitManager စသည်)
-├── translator/             # ဖော်မတ်ပြောင်းလဲပေးသည့် translator များ (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
 ├── transformer/            # Responses API transformer
-└── utils/                  # အသုံးဝင်ကိရိယာ မော်ဂျူး 22 ခု (stream၊ TLS၊ proxy၊ logging)
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron desktop app (ပလက်ဖောင်းမျိုးစုံသုံးနိုင်သော)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js test runner (test ဖိုင် 1,574 ခု)
-├── integration/            # ပေါင်းစည်းမှု စမ်းသပ်ချက်များ
-├── e2e/                    # Playwright စမ်းသပ်ချက်များ
-├── security/               # လုံခြုံရေး စမ်းသပ်ချက်များ
-├── translator/             # Translator သီးသန့် စမ်းသပ်ချက်များ
-└── load/                   # ဝန်အား စမ်းသပ်ချက်များ
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # ဗိသုကာဆိုင်ရာ ဆုံးဖြတ်ချက် မှတ်တမ်းများ
-├── architecture/            # စနစ်ဗိသုကာနှင့် ခံနိုင်ရည်ရှိမှု
-├── comparison/              # OmniRoute နှင့် အခြားရွေးချယ်စရာများကို နှိုင်းယှဉ်ခြင်း
-├── compression/             # ချုံ့ခြင်းဆိုင်ရာ လမ်းညွှန်များနှင့် စည်းမျဉ်းများ
-├── dev/                     # ဖွံ့ဖြိုးတိုးတက်ရေး လမ်းညွှန်များ
-├── diagrams/                # ဗိသုကာပုံကြမ်းများ
-├── frameworks/              # MCP၊ A2A၊ OpenCode၊ Memory၊ Skills
-├── guides/                  # အသုံးပြုသူလမ်းညွှန်၊ Docker၊ စနစ်ထည့်သွင်းမှု၊ ပြဿနာဖြေရှင်းခြင်း
-├── i18n/                    # ဘာသာစကားအမျိုးမျိုးဖြင့် ပြန်ဆိုထားသော README များ
-├── marketing/               # စျေးကွက်ရှာဖွေရေး အကြောင်းအရာများ
-├── ops/                     # ဖြန့်ကျက်တပ်ဆင်မှု၊ proxy၊ coverage၊ release များ
-├── providers/               # ပံ့ပိုးသူအလိုက် သီးသန့်စာတမ်းများ
-├── reference/               # API ရည်ညွှန်းချက်၊ env var များ၊ CLI tool များ၊ အခမဲ့အဆင့်များ
-├── releases/                # Release မှတ်စုများ
-├── routing/                 # Auto-combo အင်ဂျင်၊ reasoning replay
-├── screenshots/             # Dashboard screenshot များ
-├── security/                # Guardrail များ၊ စည်းမျဉ်းလိုက်နာမှု၊ မမြင်သာမှု၊ token များ
-└── specs/                   # ဒီဇိုင်းသတ်မှတ်ချက်များ
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

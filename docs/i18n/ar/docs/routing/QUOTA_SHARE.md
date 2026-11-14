@@ -195,48 +195,48 @@ QuotaDimension {
 
 ---
 
-## التكامل مع خط المعالجة
+## تكامل خطوط الأنابيب
 
-### خطاف PRE ‏(`open-sse/handlers/chatCore.ts`)
+### خطاف PRE (`open-sse/handlers/chatCore.ts`)
 
-يعمل قبل منفّذ المنبع، وبعد عمليات التحقق من المصادقة والسياسات:
+يتم تشغيله قبل المنفذ الرئيسي، وبعد التحقق من المصادقة والسياسة:
 
 ```
 resolveComboTargets / handleSingleModel
   → enforceQuotaShare(apiKeyId, connectionId, provider, estimatedCost)
-      → getQuotaStore().peek() لكل بُعد
+      → getQuotaStore().peek() per dimension
       → fairShare.decideFairShare()
-      → في حال الحظر → إرجاع 429 (buildErrorBody، القاعدة الصارمة رقم 12)
-      → في حال السماح + خفض الأولوية → تعيين quotaSoftPenalty=true على المرشّح
+      → if block → return 429 (buildErrorBody, Hard Rule #12)
+      → if allow + deprioritize → set quotaSoftPenalty=true on candidate
   → executor.execute()
 ```
 
-**السماح عند الفشل**: إذا أطلقت `enforceQuotaShare` استثناءً، يُسمح بمرور الطلب مع تسجيل `pino.warn`. يمنع ذلك أي خلل في محرّك الحصص من حظر جميع الزيارات.
+**فشل مفتوح** : إذا تم طرح `enforceQuotaShare` ، فسيتم السماح بالطلب من خلال سجل `pino.warn`. يؤدي هذا إلى منع خطأ محرك الحصص من حظر كل حركة المرور.
 
-### خطاف POST (تسجيل الاستهلاك)
+### خطاف POST (استهلاك قياسي)
 
-بعد استجابة ناجحة:
+بعد الرد الناجح:
 
 ```
-يعيد executor نتيجة ناجحة
+executor returns success
   → spendRecorder.recordConsumption(apiKeyId, connectionId, provider, actualCost)
-      → getQuotaStore().consume() لكل بُعد
-      → السماح عند الفشل: تُسجَّل الأخطاء كـ pino.warn ولا تُمرَّر مطلقًا إلى العميل
+      → getQuotaStore().consume() per dimension
+      → fail-open: errors logged as pino.warn, never propagated to client
 ```
 
-**ملاحظة حول الانحراف**: إذا فشلت `consume` بعد الاستجابة، فسيُظهر العدّاد المتحرك استهلاكًا أقل من الحقيقي. تعمل إشارة التشبّع الواردة من المزوّد (مثل `anthropic-ratelimit-unified-5h-utilization`) على تصحيح التقدير العام عند الطلب التالي.
+**ملاحظة الانجراف** : إذا فشل `consume` بعد الاستجابة، فسيتم احتساب العداد المتداول بشكل أقل. تقوم إشارة التشبع الواردة من الموفر (على سبيل المثال `anthropic-ratelimit-unified-5h-utilization`) بتصحيح التقدير العالمي عند الطلب التالي.
 
-### عقوبة Combo المرنة (`open-sse/services/combo.ts`)
+### ضربة جزاء ناعمة كومبو (`open-sse/services/combo.ts`)
 
-عندما تكون `decision.deprioritize === true`:
+عندما `decision.deprioritize === true`:
 
 ```ts
 if (candidate.quotaSoftPenalty) {
-  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // القيمة الافتراضية 0.7
+  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // default 0.7
 }
 ```
 
-تُطبَّق العقوبة بعد جميع عوامل التقييم الأخرى. وهي تقلّل احتمال اختيار مفتاح مشبّع بواسطة Combo التلقائي دون حظره بشكل صارم.
+يتم تطبيق العقوبة بعد جميع عوامل التسجيل الأخرى. إنه يقلل من احتمالية التحرير والسرد التلقائي لاختيار مفتاح مشبع دون حظره بشدة.
 
 ---
 

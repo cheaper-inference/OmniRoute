@@ -201,7 +201,7 @@ src/
 | `webhookDispatcher.ts`                   | HMAC webhook वितरण — `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                              |
 | `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | बोगदा व्यवस्थापक — `docs/ops/TUNNELS_GUIDE.md` पहा                                                                                                                                                                                                                                                              |
 | `cloudSync.ts`, `initCloudSync.ts`       | राज्याचे पर्यायी क्लाउड सिंक                                                                                                                                                                                                                                                                                    |
-| `localDb.ts`                             | db मॉड्यूल्ससाठी बॅरल पुन्हा-निर्यात करा (फक्त लॉजिक — री-एक्सपोर्ट नाही)                                                                                                                                                                                                                                       |
+| `localDb.ts`                             | डीबी मॉड्यूल्ससाठी बॅरल पुन्हा-निर्यात करा (केवळ — री-एक्सपोर्ट नाही)                                                                                                                                                                                                                                           |
 | `cacheLayer.ts`, `idempotencyLayer.ts`   | कॅशिंग + idempotency विनंती                                                                                                                                                                                                                                                                                     |
 | (~ आणखी 30 उच्च-स्तरीय फाइल्स)           | विशेष मदतनीस (logEnv, modelsDevSync, piiSanitizer, इ.)                                                                                                                                                                                                                                                          |
 
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------- |
 | `components/`                    | डॅशबोर्ड घटक API: `packages/ui-kit` — अडॅप्टर `docs/architecture/DESIGN_SYSTEM.md` पहा |
 | `constants/iconMap.ts`           | `ICON_MAP`: स्क्रीनद्वारे वापरलेली चिन्हांची नावे → Lucide घटक (`<Icon>`)              |
-| `constants/providers.ts`         | **381 प्रदाता** Zod प्रमाणीकरणासह (सत्याचा स्रोत)                                      |
+| `constants/providers.ts`         | **394 प्रदाता** Zod प्रमाणीकरणासह (सत्याचा स्रोत)                                      |
 | `constants/cliTools.ts`          | बाह्य CLI साधन नोंदणी                                                                  |
-| `constants/routingStrategies.ts` | **20 राउटिंग रणनीती** प्राधान्यक्रमांसह                                                |
+| `constants/routingStrategies.ts` | **22 राउटिंग धोरण** प्राधान्यक्रमांसह                                                  |
 | `constants/publicApiRoutes.ts`   | वाहक (वि व्यवस्थापन) प्रमाणीकरण आवश्यक असलेले मार्ग                                    |
 | `constants/upstreamHeaders.ts`   | अपस्ट्रीम विनंत्यांसाठी हेडर नाकारण्याची सूची                                          |
 | `validation/schemas.ts`          | ~ 80 Zod स्कीमा ( API करारांसाठी सत्याचा एकच स्रोत)                                    |
@@ -260,40 +260,40 @@ src/
 
 ## `open-sse/` — स्ट्रीमिंग इंजिन वर्कस्पेस
 
-स्वतंत्र npm वर्कस्पेस (`@omniroute/open-sse`). विनंती प्रक्रिया + प्रदाता कार्यान्वयन हाताळते.
+एनपीएम वर्कस्पेस वेगळे करा (`@omniroute/open-sse`). विनंती प्रक्रिया + प्रदाता अंमलबजावणी हाताळते.
 
 ```
 open-sse/
-├── handlers/            # 16 फाइल्स (12 हँडलर्स + 4 सहाय्यक): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, इ.
-├── executors/           # 150 एक्झिक्युटर मॉड्यूल्स (BaseExecutor विस्तारित करणारे क्लासेस + प्रत्येक प्रदात्यासाठी सहाय्यक)
-├── translator/          # स्वरूप रूपांतरक (9 विनंती, 9 प्रतिसाद, 9 सहाय्यक)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ सेवा मॉड्यूल्स (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, इ.)
-├── mcp-server/          # MCP सर्व्हर (110 साधने, 3 ट्रान्सपोर्ट्स, 33 स्कोप्स)
-├── config/              # प्रदाता/मॉडेल रजिस्ट्रीज, हेडर कॉन्फिगरेशन, मॉडेल उपनावे
-├── utils/               # TLS क्लायंट, प्रॉक्सी fetch/dispatcher, नेटवर्क सहाय्यक
-├── index.ts             # वर्कस्पेस प्रवेशबिंदू
-├── package.json         # वर्कस्पेस मॅनिफेस्ट
-├── tsconfig.json        # वर्कस्पेस TS कॉन्फिगरेशन
-└── types.d.ts           # वर्कस्पेस प्रकार घोषणा
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| मार्ग                       | उद्देश                                                                              |
-| --------------------------- | ----------------------------------------------------------------------------------- |
-| `server.ts`                 | MCP सर्व्हर जीवनचक्र (stdio + HTTP ट्रान्सपोर्ट्स)                                  |
-| `httpTransport.ts`          | HTTP Streamable + SSE ट्रान्सपोर्ट्स (`/api/mcp/sse`, `/api/mcp/stream`)            |
-| `audit.ts`                  | `mcp_tool_audit` तक्त्यामध्ये ऑडिट लॉगिंग                                           |
-| `scopeEnforcement.ts`       | प्रत्येक साधनासाठी स्कोप प्रमाणीकरण                                                 |
-| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json` मध्ये आरोग्य हार्टबीट                         |
-| `descriptionCompressor.ts`  | संदर्भ वाचवण्यासाठी साधन-वर्णन मेटाडेटा संकुचित करते                                |
-| `schemas/tools.ts`          | 36 मूलभूत साधन व्याख्या + स्कोप्स                                                   |
-| `tools/advancedTools.ts`    | प्रगत साधन कार्यान्वयने                                                             |
-| `tools/memoryTools.ts`      | 3 मेमरी साधने (शोधा/जोडा/साफ करा)                                                   |
-| `tools/skillTools.ts`       | 4 कौशल्य साधने (सूची/सक्षम करा/कार्यान्वित करा/कार्यांन्वयने)                       |
-| `tools/compressionTools.ts` | 5 संकुचन साधने                                                                      |
-| `README.md`                 | अंतर्गत MCP सर्व्हर README (`docs/frameworks/MCP-SERVER.md` मधून क्रॉस-लिंक केलेले) |
+| मार्ग                       | उद्देश                                                                               |
+| --------------------------- | ------------------------------------------------------------------------------------ |
+| `server.ts`                 | MCP सर्व्हर लाइफसायकल (stdio + HTTP वाहतूक)                                          |
+| `httpTransport.ts`          | HTTP स्ट्रीम करण्यायोग्य + SSE वाहतूक (`/api/mcp/sse`, `/api/mcp/stream`)            |
+| `audit.ts`                  | `mcp_tool_audit` टेबलचे ऑडिट लॉगिंग                                                  |
+| `scopeEnforcement.ts`       | प्रति-साधन व्याप्ती प्रमाणीकरण                                                       |
+| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json` करण्यासाठी आरोग्य हृदयाचा ठोका                 |
+| `descriptionCompressor.ts`  | संदर्भ सेव्ह करण्यासाठी टूल वर्णन मेटाडेटा कॉम्प्रेस करा                             |
+| `schemas/tools.ts`          | 36 बेस टूल व्याख्या + स्कोप                                                          |
+| `tools/advancedTools.ts`    | प्रगत साधन अंमलबजावणी                                                                |
+| `tools/memoryTools.ts`      | 3 मेमरी टूल्स (search/add/clear)                                                     |
+| `tools/skillTools.ts`       | 4 कौशल्य साधने (list/enable/execute/executions)                                      |
+| `tools/compressionTools.ts` | 5 कॉम्प्रेशन टूल्स                                                                   |
+| `README.md`                 | अंतर्गत MCP सर्व्हर README ( `docs/frameworks/MCP-SERVER.md` वरून क्रॉस-लिंक केलेले) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | बाह्य CLI एकत्रीकरण + अंतर्गत OmniRoute CLI                                            |
 | `I18N.md`                   | i18n आर्किटेक्चर, एक भाषा जोडणे, 67 लोकॅल्स                                            |
 | `UNINSTALL.md`              | विस्थापित चरण साफ करा                                                                  |
-| `PROVIDER_REFERENCE.md`     | **स्वयं-व्युत्पन्न** 381 प्रदात्यांचे कॅटलॉग (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **स्वयं व्युत्पन्न** 394 प्रदात्यांचे कॅटलॉग (regen: `npm run gen:provider-reference`) |
 
 ### उपप्रणाली खोल-डाव
 

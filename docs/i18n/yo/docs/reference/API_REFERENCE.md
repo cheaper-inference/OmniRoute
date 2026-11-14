@@ -788,9 +788,46 @@ abstraction olupese Web/search (Tavily, Brave, Exa, Serper, bbl).
 | ---- | ---------------------- | ------------------------------------------------------------------------------------------ |
 | GET  | `/v1/search`           | Akojọ atunto awọn olupese wiwa + awọn agbara                                               |
 | POST | `/v1/search`           | Ṣiṣe ibeere wiwa — ara ti a fọwọsi nipasẹ `v1SearchSchema`, ṣe atilẹyin caching/coalescing |
-| GET  | `/v1/search/analytics` | Awọn iṣiro hit/latency/cache fun olupese                                                   |
+| GET  | `/v1/search/analytics` | Fun-olupese hit/latency/cache iṣiro                                                        |
 
 **Ifọwọsi:** Bọtini API ti nrù (`extractApiKey` + `isValidApiKey`). Ilana wiwa ti fi agbara mu nipasẹ `enforceApiKeyPolicy`.
+
+### Ti a npè ni awọn akojọpọ search/fetch
+
+Mejeeji `POST /v1/search` ati `POST /v1/web/fetch` gba `model` bi orukọ akojọpọ ti a fipamọ. Lo boya `model` tabi `provider` o fojuhan; fifiranṣẹ awọn mejeeji pada `400`. Laisi aaye mejeeji, yiyan olupese aladaaṣe ti o wa tẹlẹ ko yipada.
+
+Mejeeji Akole Akopọ ati katalogi awoṣe Fikun-un ṣe afihan awọn titẹ sii iṣẹ wẹẹbu abinibi fun awọn olupese ti o sopọ, paapaa nigba ti wọn ko ni atokọ awoṣe LLM. Serper fihan** Wiwa wẹẹbu** ; Awọn ifihan Tavily** Wiwa wẹẹbu / isediwon Oju-iwe** , ati awọn olupese ti o mu-nikan fihan** Iyọkuro oju-iwe** . Yan iwọle ati akọọlẹ bi igbagbogbo. Akọsilẹ Tavily kan n ṣe iranṣẹ awọn aaye ipari wẹẹbu mejeeji; Awọn titẹ sii iṣiṣẹ wọnyi ko ni afikun si awọn yiyan alabara iwiregbe-nikan tabi awọn iwadii awoṣe iwiregbe.
+
+Fun apẹẹrẹ, ṣẹda a** ayo** combo ti a npè ni `shared-free` pẹlu awọn ibi-afẹde ti a paṣẹ wọnyi:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+Lẹhinna lo orukọ kanna lori aaye kọọkan:
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+Search ka Tavily ki o si Serper; fatch ka Tavily lẹhinna Jina Reader; iwiregbe fo awọn olupese search/fetch igbẹhin ati ki o ro OpenAI. Ibamu wa lati awọn iforukọsilẹ awọn oluṣakoso search/fetch, kii ṣe lati awọn ọrọ ni orukọ awoṣe kan. Sisẹ ṣaju yiyan iwe-ẹri ati fifiranṣẹ, ko si tun ṣe atunṣe konbo ti o fipamọ rara.
+
+Awọn ipa ọna agbara ti kii ṣe iwiregbe ṣe atilẹyin `priority`, `fill-first`, `round-robin`, `weighted`, `random`, `strict-random`, `least-used`, ati `p2c`. Awọn ọgbọn iṣọpọ iwiregbe-nikan gẹgẹbi `fusion`, `pipeline`, ati `context-relay` jẹ kọ lori awọn ipa-ọna ti kii ṣe iwiregbe dipo ki a lo ni idakẹjẹ si wiwa tabi media ti ipilẹṣẹ. Enjini konbo ti o wa tẹlẹ n ṣe itọju ipadasẹhin, pẹlu awọn ikuna ipin oke, ati idaduro igbese IDs, awọn pinni akọọlẹ, awọn atokọ iwe-iwọn-igbesẹ, awọn itọkasi itẹ-ẹiyẹ, awọn iwọn connection/quota olupe ati eto imulo wiwọle konbo. Awọn abajade da duro eto search/fetch abinibi wọn, pẹlu olupese gangan; `X-OmniRoute-Combo-Trace` ṣe idanimọ ipinnu ipa-ọna. Aimọ combos pada `404`; Awọn akojọpọ aiṣiṣẹ ati awọn akojọpọ pẹlu ko si awọn ibi-afẹde ibaramu da `400` pada.
+
+Igbiyanju konbo kọọkan nlo olupese ti o han gbangba. Ko le pe ọdọ adagun olupese alafọwọṣe abinibi lẹhin ẹhin konbo. Awọn ibeere olupese ti o han gbangba ṣe idaduro ihuwasi olupese ẹyọkan ti o wa tẹlẹ. Awọn ibeere iwiregbe taara ti o fojusi awọn olupese search/fetch igbẹhin da pada JSON `400` ti o ṣiṣẹ dipo ti ja bo nipasẹ si oluṣe aṣa aṣa OpenAI.
+
+### Awọn ipa ọna konbo ni agbara-pato
+
+Awọn akojọpọ ti a fipamọ le ni ohun `routes` ninu eyiti awọn bọtini jẹ awọn agbara API. Gbogbo ipa-ọna ni atokọ ibi-afẹde rẹ, ilana, ati atunto akoko asiko. Ipele oke- `models`, `strategy`, ati `config` ni ero Iwiregbe ibaramu julọ; awọn combos atijọ laisi `routes` tẹsiwaju lati ṣiṣẹ ko yipada.
+
+Awọn bọtini ipa ọna ti a ṣe atilẹyin jẹ `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`, `image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`, `audio-translations`, ati `audio-generation`. Isọtẹlẹ ipari n ṣẹlẹ ṣaaju yiyan ijẹrisi, igbelewọn, tabi fifiranṣẹ. Awọn itọkasi konbo itẹle yan ipa ọna akojọpọ ọmọ fun agbara kanna.
+
+`POST /v1/music/generations` ati `POST /v1/ocr` gba orukọ konbo ni `model`. `POST /v1/music` abinibi ElevenLabs-ibaramu tun gba orukọ konbo ni `model_id`, ṣugbọn gbogbo ibi-afẹde lilo lori aaye ipari abinibi yẹn gbọdọ jẹ awoṣe orin ElevenLabs ki iwe adehun esi alakomeji rẹ wa ni fipamọ. `POST /v1/sound-generation` gba konbo `audio-generation` kan ni `model_id` labẹ idinamọ-alakomeji kanna. Lo `/v1/music/generations` fun orisirisi awọn olupese orin.
 
 **Yan laifọwọyi:** lai `provider`, awọn lawin olupese pẹlu a tunto asopọ nṣiṣẹ akọkọ ati awọn ti o tẹle lawin ni awọn failover. Awọn olupese ibi asegbeyin ti ọfẹ (`duckduckgo-free`) ni a lo nigbati ko si ohun miiran ti a tunto. SearXNG ti o gbalejo ti ara ẹni ṣe iṣiro bi atunto ni kete ti asopọ rẹ tọju `baseUrl` gidi kan (kii ṣe aiyipada `http://localhost:8888/search` katalogi): lẹhinna o wa ni ipo bi olupese $ 0 ṣaaju awọn ti a ti kọkọ, pẹlu olupese bọtini ti o rọrun julọ bi ikuna, pẹlu nigbati SearXNG dahun 400, 401, 403 tabi 404. A `baseUrl` ti ko ṣe URL `http(s)` awọsanma ti ko wulo ka. Asopọ SearXNG ti o tọju ami ami kan ni ọna yii nikan lori `https://` tabi loopback `http://`. Lori `http://` pẹtẹlẹ jijin kii ṣe ikuna ati duro ni ibi-afẹde ti o kẹhin, ti a lo nikan nigbati ko ba tunto olupese miiran tabi nigba ti o ba beere fun orukọ, nitorinaa o firanṣẹ aami ni cleartext ni awọn ọran meji yẹn.
 
@@ -813,43 +850,29 @@ Awọn abajade idanwo pa `id`, `highlights` (gbogbo afihan, kii ṣe ọkan ak�
 
 Iye owo wiwa ọna asopọ jẹ igbasilẹ ni $0.005 fun `depth` `fast` ati `standard` ati $0.05 fun `deep` ( [Ifowoleri Ọna asopọ](https://docs.linkup.so/pages/documentation/development/pricing) ), boya `depth` wa lati `provider_options` tabi awọn eto asopọ.
 
-Exa `type: "lite"` (Exa 3.0) gba awọn aaye ti o kere ju ati kọ gbogbo ibeere nigbati eyikeyi aaye miiran ti ṣeto. Fun Lite, `additionalQueries`, `systemPrompt` ati gbogbo bọtini `contents` ayafi `text` ati `highlights` ti wa silẹ ṣaaju ipe naa. `subpages`, `subpageTarget`, `highlights.numSentences` ati `highlights.highlightsPerUrl` ti a ti sọ silẹ ko ni siwaju mọ.
+Exa `type: "lite"` (Exa 3.0) gba eto ti o kere ju ti awọn aaye ati kọ gbogbo ibeere nigbati eyikeyi aaye miiran ti ṣeto. Fun Lite, `additionalQueries`, `systemPrompt` ati gbogbo bọtini `contents` ayafi `text` ati `highlights` ti wa silẹ ṣaaju ipe naa. `subpages`, `subpageTarget`, `highlights.numSentences` ati `highlights.highlightsPerUrl` ti a ti sọ silẹ ko ni siwaju mọ.
 
 Iṣiro iye owo jẹ iforukọsilẹ alapin `costPerQuery`, ayafi fun Exa, eyiti o tẹle idiyele ti ara Exa: $ 0.007 fun ipe fun `auto` (ati julọ `fast`) tabi $ 0.004 fun `lite` (ati aṣẹ `instant`), ti o bo awọn abajade 10; $ 0.001 fun abajade siwaju kọọkan; ati $0.001 fun esi pada nigbati `contents.summary` ti ṣeto. Tavily ti wa ni igbasilẹ ni 1 kirẹditi ($0.008) fun `search_depth` `basic`, `fast` ati `ultra-fast`, ati 2 kirediti ($0.016) fun `advanced` ( [Tavily API kirediti](https://docs.tavily.com/documentation/api-credits) ). Ipe pẹlu `auto_parameters: true` ti awọn iṣagbega Tavily si ilọsiwaju jẹ ṣi gbasilẹ ni kirẹditi 1.
 
 ---
 
-## API Ìgbàgbọ́ Wẹẹbù
+## Web Fa API
 
-Yọ́ akoonu jáde láti inú URL kan nípasẹ̀ olùpèsè ìgbàgbọ́ wẹẹbù tí a ti ṣètò (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
+Jade akoonu lati URL nipasẹ olupese iṣẹ wẹẹbu ti a tunto (Firecrawl, Jina Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-Parallel Extract (`parallel-search`, API key kan náà pẹ̀lú Parallel Search) máa ń dá Markdown
-péré padà — `format` èyíkéyìí mìíràn jẹ́ `400` — ó sì máa ń dí akoonu mọ́ àwọn
-àkópọ̀ 100,000. Nígbà tí a kò bá lè yọ́ ojú-ìwé ibi-afẹ́de náà jáde fúnra rẹ̀, upstream máa ń
-fi ránṣẹ́ nínú HTTP 200; OmniRoute máa ń fi èyí hàn gẹ́gẹ́ bí `422` pẹ̀lú ìfọ̀rọ̀wérọ̀ tí a
-ti ṣàkópọ̀.
+Parallel Extract (`parallel-search`, bọtini API kanna gẹgẹbi Iwadi Parallel) da Markdown pada nikan — eyikeyi `format` miiran jẹ `400` — ati akoonu akoonu ni awọn kikọ 100,000. Nigbati oju-iwe ibi-afẹde funrarẹ ko le yọ jade, oke ṣiṣan n jabo rẹ inu HTTP 200; OmniRoute dada pe bi `422` pẹlu ifiranṣẹ ti o wa titi.
 
-| Ọ̀nà  | Ọ̀nà URL         | Àpèjúwe                                                            |
-| ---- | --------------- | ------------------------------------------------------------------ |
-| POST | `/v1/web/fetch` | Gba/scrape URL kan — ara ìbéèrè ni `v1WebFetchSchema` máa ń fọwọ́sí |
+Keenable Fetch (`keenable-search`) tun da Markdown nikan pada (eyikeyi `format` jẹ `400`) ati akoonu awọn bọtini ni awọn ohun kikọ 100,000. O ṣiṣẹ laisi bọtini kan: ibeere `provider: "keenable-search"` ti o fojuhan ti ko si asopọ nlo aaye ipari ailopin bọtini Keenable (awọn opin oṣuwọn IP fun-IP). Bọtini ti a tunto nikan gbe awọn ifilelẹ lọ soke; auto-yan nlo Keenable nikan nigbati bọtini kan ba tunto.
 
-**Ìfàṣẹsí:** Bọtìnì API Bearer (`extractApiKey` + `isValidApiKey`). A máa ń mú ìlànà ṣiṣẹ́
-nípasẹ̀ `enforceApiKeyPolicy`.
+| Ọna  | Ona             | Apejuwe                                                        |
+| ---- | --------------- | -------------------------------------------------------------- |
+| POST | `/v1/web/fetch` | Fetch/scrape a URL — ara ti a fọwọsi nipasẹ `v1WebFetchSchema` |
 
-**Ìpadàbọ̀nà tó mọ́ quota (#8297):** nígbà tí a kò bá pèsè `provider` kedere, a máa ń rìn
-nípasẹ̀ adágún náà
-(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) ní àṣẹ
-ààyè pàtó (fill-first) — a máa ń fo olùpèsè tí quota rẹ̀ ti dé ààlà ṣùgbọ́n tí a ti ṣètò
-dípò dídá ìbéèrè náà dúró, àti àṣìṣe upstream tí ó yẹ kí a tún gbìyànjú/quota (HTTP 429
-ní gbogbo ìgbà; 402/403 fún Firecrawl/Tavily/TinyFish free tier tí ó ní irú quota bẹ́ẹ̀ —
-kì í ṣe fún Jina Reader, bẹ́ẹ̀ sì ni kì í ṣe 400 lasán fún ìbéèrè tí kò tọ́) máa ń kọjá lọ sí
-ẹ̀rí ìwọlé tó ní ìwé-ẹ̀rí tí a kò tíì gbìyànjú t’ókàn ní àkókò ìbéèrè. Nígbà tí gbogbo
-olùpèsè inú adágún bá ti rẹ̀, endpoint náà máa ń dá `429` kan ṣoṣo padà (pẹ̀lú akọsori
-`Retry-After`) dípò `400` gbogbogbòò àtijọ́. Nígbà tí a bá béèrè fún `provider` kedere,
-**kò sí ìpadàbọ̀nà ìdákẹ́jẹ** — aṣìṣe olùpèsè tí a béèrè fún tàbí tí quota rẹ̀ ti dé ààlà máa
-ń hàn gẹ́gẹ́ bí aṣìṣe tirẹ̀ (`429` tí quota bá ti dé ààlà, bí kò ṣe bẹ́ẹ̀, ipò upstream).
+**Ifọwọsi:** Bọtini API ti nrù (`extractApiKey` + `isValidApiKey`). Ilana imuse nipasẹ `enforceApiKeyPolicy`.
+
+Awọn akojọpọ oniwa lo [iwe adehun afisona `model`](#named-searchfetch-combinations) loke, titọju awọn aṣayan-pato ati awọn idahun.
+
+**Quota-mọ fallback (#8297):** nigbati bẹni `provider` tabi `model` ti wa ni fun, awọn pool (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` → `parallel-search` → `keenable-search`) ti wa ni rin ni ti o wa titi ayo ibere (kun-akọkọ) — Firecrawl/Tavily/TinyFish retryable/quota HTTP 402/403 free tiers — ko fun Jina Reader, ati ki o ko fun itele 400 buburu ìbéèrè) ṣubu nipasẹ si tókàn untried credentialed olupese ni ìbéèrè akoko. Nigbati gbogbo olupese ti o wa ninu adagun-odo ba ti rẹwẹsi, aaye ipari yoo da `429` kan pada (pẹlu akọsori `Retry-After` ) dipo jeneriki ti tẹlẹ `400`. Nigbati `provider` ti o fojuhan ba beere, o wa** rara** ipalọlọ fallback — oṣuwọn-opin tabi ikuna fojuhan olupese roboto ara rẹ aṣiṣe (`429` ti o ba ti oṣuwọn-lopin, bibẹẹkọ ipo oke).
 
 ---
 
@@ -930,28 +953,26 @@ lọ sí ìsopọ̀ OAuth codex tí a yàn. A ti fọwọ́sí rẹ̀ láti ìb�
 
 ---
 
-## Rírọ̀rùn àti Ìròyìn Àwọn Ìṣòro
+## Quotas & Ijabọ Awọn oran
 
-| Ọ̀nà  | Ọ̀nà URL             | Àlàyé                                                                                   |
-| ---- | ------------------- | --------------------------------------------------------------------------------------- |
-| GET  | `/v1/quotas/check`  | Ṣàyẹ̀wò quota ṣáájú fún `provider` + `accountId` kí o tó fúnni ní kọ́kọ́rọ́ tí a forúkọsílẹ̀ |
-| POST | `/v1/issues/report` | Ròyìn ìkùnà fífúnni ní quota/kọ́kọ́rọ́ sí GitHub (ó nílò `GITHUB_ISSUES_REPO` + token)     |
+| Ọna  | Ona                 | Apejuwe                                                                           |
+| ---- | ------------------- | --------------------------------------------------------------------------------- |
+| GET  | `/v1/quotas/check`  | Ṣaju-ifọwọsi ipin fun `provider` + `accountId` ṣaaju fifun bọtini ti a forukọsilẹ |
+| POST | `/v1/issues/report` | Jabọ ikuna ipinfunni quota/key kan si GitHub (nilo ami `GITHUB_ISSUES_REPO` + )   |
 
-**Ìfọwọ́sí:** Kọ́kọ́rọ́ API Bearer (`isAuthenticated`).
+**Ifọwọsi:** `/v1/quotas/check` gba bọtini API Olurù (`isAuthenticated`). `/v1/issues/report` jẹ iṣakoso-nikan (`requireManagementAuth`), bii `/api/v1/registered-keys`: igba dasibodu kan, ami CLI agbegbe, tabi bọtini API kan pẹlu aaye `manage`/`admin` ; inference-nikan awọn bọtini API gba `403`.
 
-### Ìmúpadà ìgbà quota (aṣàyàn)
+### Imularada igba ipin (ijade-wọle)
 
-Àìṣàn `POST /v1/chat/completions` tàbí `POST /v1/responses` tí ó bá kùnà pẹ̀lú àṣìṣe quota tó parí (`402`/`429`/`503` tí ara rẹ̀ bá sọ pé quota tàbí credits ti tán)
-le dúró kí a sì tún ṣe é lẹ́yìn díẹ̀ dípò kí a dá àṣìṣe náà padà. Olùpè yan èyí fún ìbéèrè kọ̀ọ̀kan pẹ̀lú àwọn akọsori mẹ́ta:
+`POST /v1/chat/completions` ti kii ṣe ṣiṣanwọle tabi `POST /v1/responses` ti o kuna pẹlu aṣiṣe ipin opin ebute (`402`/`429`/`503` ti ara rẹ sọ pe ipin tabi awọn kirẹditi ti rẹwẹsi) le duro ati tun ṣe nigbamii dipo ti aṣiṣe pada. Olupe naa jade fun ibeere kan pẹlu awọn akọle mẹta:
 
-| Akọsori                      | Iye                                              |
-| ---------------------------- | ------------------------------------------------ |
-| `x-omniroute-quota-recovery` | `auto`                                           |
-| `x-omniroute-session`        | ID ìgbà, `[A-Za-z0-9._:-]{1,128}`                |
-| `x-omniroute-recovery-turn`  | ID ìyípo tó yàtọ̀ láàárín ìgbà náà (òfin kan náà) |
+| Akọsori                      | Iye                                      |
+| ---------------------------- | ---------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                   |
+| `x-omniroute-session`        | igba id, `[A-Za-z0-9._:-]{1,128}`        |
+| `x-omniroute-recovery-turn`  | yi id alailẹgbẹ laarin igba (ofin kanna) |
 
-Àwọn ìyípo `stream: false` nìkan tí kò ní àwọn irinṣẹ́, ìtàn irinṣẹ́ tàbí `previous_response_id`, tí kò sì ní pin `x-omniroute-connection`, ni ó yẹ fún èyí, àti pé a gbọ́dọ̀ ti ṣètò `STORAGE_ENCRYPTION_KEY` (a máa fi ìbéèrè náà pamọ́ ní ìpamọ́ fún títí dé wákàtí 24). Ìdáhùn náà yóò jẹ́ `202` pẹ̀lú
-`recovery.poll`; ṣe ìwádìí pẹ̀lú `GET /v1/quota-recoveries/{id}` (`202` nígbà tí ó ń dúró, `200` pẹ̀lú ara ìdáhùn tí a gba padà nígbà tí ó bá parí) tàbí fagilé pẹ̀lú `DELETE`. Kìkì kọ́kọ́rọ́ API tí ó dá àwọn tikẹ́ẹ̀tì sílẹ̀ ni ó lè rí wọn. Títún-ṣiṣẹ́ tí àbájáde rẹ̀ kò dájú máa parí ní `needs_confirmation` dípò kí a fi ránṣẹ́ lẹ́ẹ̀mejì. Orísun: `src/lib/quota/quotaSessionRecovery.ts`.
+Nikan `stream: false` yipada laisi awọn irinṣẹ, itan irinṣẹ tabi `previous_response_id`, ati pe ko si pin `x-omniroute-connection`, ni ẹtọ, ati pe a gbọdọ ṣeto `STORAGE_ENCRYPTION_KEY` (ibeere naa ti wa ni fifipamọ fun wakati 24). Idahun lẹhinna jẹ `202` pẹlu `recovery.poll`; idibo `GET /v1/quota-recoveries/{id}` (`202` nigba ti o wa ni isunmọtosi, `200` pẹlu ara ti o gba pada nigbati o ba pari) tabi fagile pẹlu `DELETE`. Tiketi han nikan si bọtini API ti o ṣẹda wọn. Atunṣe ti abajade rẹ ko ni idaniloju dopin ni `needs_confirmation` dipo fifiranṣẹ lẹẹmeji. Orisun: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1696,19 +1717,23 @@ DELETE /api/usage/token-limits?id=tl-abc
 
 ---
 
-## Àwọn Bọtìnì Tí A Forúkọ Sílẹ̀ (Ìṣàkóso Aládàáṣiṣẹ́)
+## Awọn bọtini Iforukọsilẹ (Iṣakoso-laifọwọyi)
 
-A máa ń lò ó fún ètò ìṣàkóso bọtìnì aládàáṣiṣẹ́ láti pèsè àti yí àwọn bọtìnì API padà lòdì sí olùpèsè/àkọọlẹ̀ ẹ̀yìn, pẹ̀lú àwọn quota ojoojúmọ́/àkókò wákàtí.
+Ti a lo nipasẹ eto abẹ-iṣakoso bọtini aifọwọyi lati gbejade ati yi awọn bọtini API pada si provider/account ti o ti n ṣe atilẹyin, pẹlu awọn ipin daily/hourly.
 
-| Method | Path                                  | Description                                                                                                                                                                                                                    |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/api/v1/registered-keys`             | Ṣàkójọ àwọn bọtìnì tí a forúkọ sílẹ̀ (prefix tí a bo mọ́lẹ̀ nìkan)                                                                                                                                                                |
-| POST   | `/api/v1/registered-keys`             | Pèsè bọtìnì tí a forúkọ sílẹ̀ tuntun — ara ìbéèrè: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Ó da bọtìnì aise padà **lẹ́ẹ̀kan ṣoṣo**. Ó da `429` padà tí quota bá kọ ìbéèrè náà. |
-| GET    | `/api/v1/registered-keys/[id]`        | Gba metadata bọtìnì tí a forúkọ sílẹ̀ padà (kò sí ohun aise)                                                                                                                                                                    |
-| DELETE | `/api/v1/registered-keys/[id]`        | Fagi bọtìnì tí a forúkọ sílẹ̀                                                                                                                                                                                                   |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Endpoint fagi tí ó ṣe kedere (ipa kan náà pẹ̀lú DELETE)                                                                                                                                                                         |
+| Ọna    | Ona                                   | Apejuwe                                                                                                                                                                                                    |
+| ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Ṣe atokọ awọn bọtini ti a forukọsilẹ (iṣaaju ti o boju-boju nikan)                                                                                                                                         |
+| POST   | `/api/v1/registered-keys`             | Ṣe agbejade bọtini tuntun ti forukọsilẹ — ara: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Da bọtini aise pada** lẹẹkan** . Pada `429` pada lori kiko ipin. |
+| GET    | `/api/v1/registered-keys/[id]`        | Gba metadata bọtini ti o forukọsilẹ (ko si ohun elo aise)                                                                                                                                                  |
+| DELETE | `/api/v1/registered-keys/[id]`        | Fagilee bọtini ti a forukọsilẹ                                                                                                                                                                             |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Ifagile ti o han gbangba aaye ipari (ipa kanna bi DELETE)                                                                                                                                                  |
+| GET    | `/api/v1/providers/[provider]/limits` | Ka awọn bọtini ipinfunni ti olupese                                                                                                                                                                        |
+| PUT    | `/api/v1/providers/[provider]/limits` | Ṣeto awọn bọtini ipinfunni olupese — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                         |
+| GET    | `/api/v1/accounts/[id]/limits`        | Ka awọn bọtini ipinfunni akọọlẹ naa                                                                                                                                                                        |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Ṣeto awọn bọtini ipinfunni akọọlẹ — ara kanna gẹgẹbi ipa ọna olupese                                                                                                                                       |
 
-**Ìfọwọ́sí:** ìpàdé ìṣàkóso/bọtìnì API (`requireManagementAuth`) — ẹ̀ṣọ́ kan náà pẹ̀lú `/api/keys`: ìpàdé dashboard, token CLI agbègbè, tàbí bọtìnì API kan pẹ̀lú scope `manage`/`admin`; àwọn bọtìnì API tí ó jẹ́ fún inference nìkan máa ń gba `403`. Wo `/v1/quotas/check` àti `/v1/issues/report` pẹ̀lú.
+**Ifọwọsi:** Bọtini session/API iṣakoso (`requireManagementAuth`) — oluso kanna bi `/api/keys`: igba dasibodu kan, aami CLI agbegbe, tabi bọtini API pẹlu aaye `manage`/`admin` ; inference-nikan awọn bọtini API gba `403`. Wo tun `/v1/quotas/check` ati `/v1/issues/report`.
 
 ---
 

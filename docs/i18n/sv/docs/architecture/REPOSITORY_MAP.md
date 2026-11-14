@@ -242,9 +242,9 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Instrumentpanelskomponent API: adaptrar över `packages/ui-kit` — se `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ikonnamn som används av skärmarna → Lucide-komponenter (`<Icon>`)                            |
-| `constants/providers.ts`         | **381 leverantörer** med Zod -validering (källa till sanning)                                            |
+| `constants/providers.ts`         | **394 leverantörer** med Zod -validering (källa till sanning)                                            |
 | `constants/cliTools.ts`          | Externt CLI -verktygsregister                                                                            |
-| `constants/routingStrategies.ts` | **20 routingstrategier** med prioriteringar                                                              |
+| `constants/routingStrategies.ts` | **22 routingstrategier** med prioriteringar                                                              |
 | `constants/publicApiRoutes.ts`   | Rutter som kräver bärare (mot hantering) autentisering                                                   |
 | `constants/upstreamHeaders.ts`   | Header denylist för uppströmsförfrågningar                                                               |
 | `validation/schemas.ts`          | ~ 80 Zod scheman (enda källa till sanning för API kontrakt)                                              |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — arbetsyta för strömningsmotorn
+## `open-sse/` — Streaming Engine Workspace
 
-Separat npm-arbetsyta (`@omniroute/open-sse`). Hanterar bearbetning av förfrågningar och körning mot leverantörer.
+Separat npm-arbetsyta (`@omniroute/open-sse`). Hanterar förfrågningsbearbetning av + leverantörsexekvering.
 
 ```
 open-sse/
-├── handlers/            # 16 filer (12 hanterare + 4 hjälpfunktioner): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search osv.
-├── executors/           # 150 exekveringsmoduler (klasser som utökar BaseExecutor + hjälpfunktioner per leverantör)
-├── translator/          # Formatkonverterare (9 för förfrågningar, 9 för svar, 9 hjälpfunktioner)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ tjänstemoduler (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM osv.)
-├── mcp-server/          # MCP-server (110 verktyg, 3 transporter, 33 behörighetsomfång)
-├── config/              # Leverantörs-/modellregister, konfiguration av headers, modellalias
-├── utils/               # TLS-klient, proxy-fetch/dispatcher, nätverkshjälpfunktioner
-├── index.ts             # Arbetsytans startpunkt
-├── package.json         # Arbetsytans manifest
-├── tsconfig.json        # Arbetsytans TS-konfiguration
-└── types.d.ts           # Arbetsytans typdeklarationer
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Sökväg                      | Syfte                                                                           |
-| --------------------------- | ------------------------------------------------------------------------------- |
-| `server.ts`                 | MCP-serverns livscykel (stdio- och HTTP-transporter)                            |
-| `httpTransport.ts`          | HTTP Streamable- och SSE-transporter (`/api/mcp/sse`, `/api/mcp/stream`)        |
-| `audit.ts`                  | Granskningsloggning till tabellen `mcp_tool_audit`                              |
-| `scopeEnforcement.ts`       | Validering av behörighetsomfång per verktyg                                     |
-| `runtimeHeartbeat.ts`       | Hälsopuls till `DATA_DIR/runtime/mcp-heartbeat.json`                            |
-| `descriptionCompressor.ts`  | Komprimerar metadata för verktygsbeskrivningar för att spara kontext            |
-| `schemas/tools.ts`          | 36 grundläggande verktygsdefinitioner + behörighetsomfång                       |
-| `tools/advancedTools.ts`    | Avancerade verktygsimplementationer                                             |
-| `tools/memoryTools.ts`      | 3 minnesverktyg (sök/lägg till/rensa)                                           |
-| `tools/skillTools.ts`       | 4 färdighetsverktyg (lista/aktivera/kör/körningar)                              |
-| `tools/compressionTools.ts` | 5 komprimeringsverktyg                                                          |
-| `README.md`                 | Intern README för MCP-servern (korslänkad från `docs/frameworks/MCP-SERVER.md`) |
+| Väg                         | Ändamål                                                                    |
+| --------------------------- | -------------------------------------------------------------------------- |
+| `server.ts`                 | MCP serverlivscykel (stdio + HTTP transporter)                             |
+| `httpTransport.ts`          | HTTP strömningsbara + SSE transporter (`/api/mcp/sse`, `/api/mcp/stream`)  |
+| `audit.ts`                  | Granskningsloggning till `mcp_tool_audit` tabellen                         |
+| `scopeEnforcement.ts`       | Omfattningsvalidering per verktyg                                          |
+| `runtimeHeartbeat.ts`       | Hälsa hjärtslag till `DATA_DIR/runtime/mcp-heartbeat.json`                 |
+| `descriptionCompressor.ts`  | Komprimera verktygsbeskrivningsmetadata för att spara sammanhang           |
+| `schemas/tools.ts`          | 36 grundläggande verktygsdefinitioner + scopes                             |
+| `tools/advancedTools.ts`    | Avancerade verktygsimplementeringar                                        |
+| `tools/memoryTools.ts`      | 3 minnesverktyg (search/add/clear)                                         |
+| `tools/skillTools.ts`       | 4 färdighetsverktyg (list/enable/execute/executions)                       |
+| `tools/compressionTools.ts` | 5 kompressionsverktyg                                                      |
+| `README.md`                 | Intern MCP server README (tvärlänkad från `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Externa CLI -integreringar + Intern OmniRoute CLI                                        |
 | `I18N.md`                   | i18n-arkitektur, lägga till ett språk, 67 språk                                          |
 | `UNINSTALL.md`              | Rengör avinstallationsstegen                                                             |
-| `PROVIDER_REFERENCE.md`     | **Autogenererad** katalog med 381 leverantörer (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Autogenererad** katalog med 394 leverantörer (regen: `npm run gen:provider-reference`) |
 
 ### Delsystem djupdykning
 

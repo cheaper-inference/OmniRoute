@@ -57,29 +57,19 @@ Conexiunile OpenRouter pot stoca un `preset` pentru fiecare conexiune în Setăr
 
 ---
 
-## 🎨 Combinații
+## 🎨 Combo
 
-Creați combinații de rutare a modelelor folosind 19 strategii publice: prioritate, ponderată, round-robin, retransmiterea contextului, completarea primului, p2c (alegerea puterii lui doi), aleatorie, cel mai puțin utilizat, optimizată pentru cost, adaptată la resetare, fereastră de resetare, capacitate disponibilă, strict aleatorie, automată, lkgp (ultimul furnizor cunoscut ca funcțional), optimizată pentru context, optimizată pentru cache, **fuziune** (trimite în paralel către un grup de modele, apoi sintetizează un singur răspuns prin intermediul unui arbitru) și **pipeline**. Fiecare combinație înlănțuie mai multe modele cu mecanism automat de rezervă și include șabloane rapide și verificări ale stării de pregătire.
+Creați combinații de modele de rutare cu 22 de strategii publice: prioritare, ponderate, round-robin, context-releu, umplere mai întâi, p2c (putere a două opțiuni), aleatoriu, cel mai puțin utilizat, optimizat pentru costuri, resetare-aware, reset-window, expiry-first, headroom, ponderat în cotă, strict-aleatoriu, furnizare automată, lkg-p. optimizat pentru cache,** fuziune** (avansează către un grup de modele în paralel, apoi sintetizează un răspuns prin intermediul unui judecător),** conductă** , și** jev** (o admitere opt-in TypeSafe Jev peste lista dvs. clasată). Fiecare combo înlănțuiește mai multe modele cu rezervă automată și include șabloane rapide și verificări de pregătire.
 
-Îmbunătățiri recente ale combinațiilor:
+Îmbunătățiri recente combo:
 
-- **Constructor structurat de combinații** — creați fiecare pas selectând furnizorul, modelul și contul/conexiunea exactă
-- **Suport pentru furnizori repetați** — reutilizați același furnizor de mai multe ori într-o combinație, atât timp cât tuplul `(provider, model, connection)` este unic
-- **Starea țintelor combinației** — suprafețele de analiză și monitorizare a stării disting acum țintele/pașii individuali ai combinației, în loc să restrângă totul la șiruri de caractere corespunzătoare modelelor
-- **Ordonarea nivelurilor compozite** — `defaultTier -> fallbackTier` influențează acum ordinea de execuție/revenire în timpul rulării pentru pașii de nivel superior ai combinației
-- **Șabloane pentru promptul de sistem** — `system_message` al combinației acceptă pe server substituenții
-  `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` și `{{FINGERPRINT}}`,
-  care sunt completați pe baza țintei rutate efectiv, chiar înainte de trimitere.
-  Aceștia sunt incluși într-o listă de permisiuni și nu sunt recursivi; substituenții necunoscuți rămân literali; valorile goale
-  se extind la un șir gol; prompturile de sistem ale clientului nu sunt rescrise niciodată. `{{FINGERPRINT}}`
-  este rezolvat numai pentru furnizorii gratuiți bazați pe amprentă, care au o amprentă fixată sau
-  rotită automat — în celelalte cazuri se extinde la un șir gol (de exemplu,
-  conexiuni cu o singură amprentă, furnizori fără amprentă). Extinderea acoperă
-  bucla standard de trimitere, round-robin și sesiunile fixate de cache pentru context;
-  strategiile de fuziune, haos, pipeline și execuție imbricată nu extind
-  încă substituenții.
+- **Constructor de combo structurat** — creați fiecare pas selectând furnizorul, modelul și account/connection exact
+- **Asistență repetată a furnizorului** — refolosește același furnizor de multe ori într-un singur combo, atâta timp cât tuplul `(provider, model, connection)` este unic
+- **Combo țintă sănătate** Analiza — și suprafețele de sănătate disting acum combo-ul individual targets/steps în loc să restrângă totul în șiruri de model
+- **Comandă de niveluri compozite** — `defaultTier -> fallbackTier` influențează acum ordinea execution/fallback de rulare pentru pașii combinați de nivel superior
+- **Șabloane de prompt de sistem** — combo `system_message` acceptă substituenții `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` și `{{FINGERPRINT}}` de pe partea de server, extinși de la ținta rutată efectiv chiar înainte de expediere. Permis și nerecursiv; substituenții necunoscuți rămân literali; valorile goale se extind în gol; prompturile sistemului client nu sunt niciodată rescrise. `{{FINGERPRINT}}` se rezolvă numai pentru furnizorii gratuiti bazați pe amprentă digitală cu o amprentă fixată sau rotită automat — se extinde pentru a goli în altă parte (de exemplu, conexiuni cu o singură amprentă, furnizori non-fp). Extinderea acoperă bucla de expediere standard, sesiuni round-robin și cache de context fixat; fuziunea, haosul, pipeline și strategiile de execuție imbricată nu extind încă substituenții.
 
-![Panoul de control Combinații](../screenshots/02-combos.png)
+![Combos Dashboard](../screenshots/02-combos.png)
 
 ---
 
@@ -316,14 +306,14 @@ Pachetul de configurare este generat de `src/lib/sync/bundle.ts`. Consumatorii c
 
 ---
 
-## 🛡️ Preluare externă sigură și protecție SSRF _(v3.6.6+)_
+## 🛡️ Safe Outbound Fetch & SSRF Guard _(v3.6.6 +)_
 
-Toate apelurile pentru validarea furnizorilor și descoperirea modelelor trec acum printr-un mecanism de protecție externă pe două niveluri:
+Toate apelurile de validare a furnizorilor și de descoperire a modelului trec acum printr-o gardă de ieșire cu două straturi:
 
-1. **Protecție URL** (`src/shared/network/outboundUrlGuard.ts`) — Blochează intervalele de adrese IP private, de loopback și link-local înainte de deschiderea socketului.
-2. **Wrapper pentru preluare sigură** (`src/shared/network/safeOutboundFetch.ts`) — Aplică protecția URL, normalizează timpii de expirare și reîncearcă erorile tranzitorii folosind o temporizare exponențială.
+1. **URL gardian** (`src/shared/network/outboundUrlGuard.ts`) — Verifică numele de gazdă al țintei sau literalul IP așa cum este scris mai întâi; în modul numai public, învelișul safe-fetch rezolvă, de asemenea, numele și refuză răspunsurile private. În mod implicit, blochează punctele finale de metadate cloud — toate 169.254.0.0/16 plus numele de gazdă de metadate cunoscute; `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` blochează și gazdele private și loopback; `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` (sau moștenirea `OUTBOUND_SSRF_GUARD_ENABLED=false`) dezactivează verificările. O valoare salvată din comutatorul tabloului de bord al unui steag are prioritate față de variabila sa, iar furnizorii locali încorporați opresc garda în timpul validării cheii. Vezi `docs/reference/ENVIRONMENT.md`.
+2. **Ambalaj pentru preluare în siguranță** (`src/shared/network/safeOutboundFetch.ts`) — Aplică protecția URL, normalizează timeout-urile și reîncearcă erori tranzitorii cu backoff exponențial.
 
-Încălcările mecanismului de protecție sunt raportate ca HTTP 422 (`URL_GUARD_BLOCKED`) și sunt înregistrate în jurnalul de audit pentru conformitate prin `providerAudit.ts`.
+Încălcările de protecție apar ca `URL_GUARD_BLOCKED` — HTTP 503 prin `getSafeOutboundFetchErrorStatus` (400 pe ruta de descoperire a modelului) — și blocurile SSRF autentice în timpul validării sunt scrise în jurnalul de audit ca evenimente `provider.validation.ssrf_blocked`.
 
 ---
 

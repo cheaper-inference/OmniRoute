@@ -65,59 +65,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Ajustes Recomendados para Produção
+## Ajuste de produção recomendado
 
-### 1. Opções do Pool de Ligações / Cliente (construtor `Redis` do ioredis)
+### 1. Opções de pool de ligação/cliente (construtor ioredis `Redis` )
 
-O código atual cria uma única instância `new Redis(url)` sem opções personalizadas. Para implementações de produção com várias réplicas, passe uma factory de cliente no código ou encapsule `getRedisClient()`:
+O código atual cria um único `new Redis(url)` sem opções personalizadas. Para implementações de múltiplas réplicas de produção, passe uma fábrica do cliente no código ou envolva `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // sem limite de tentativas; deixar retryStrategy decidir
-  enableReadyCheck: true, // verificar se o servidor está pronto antes de aceitar chamadas
-  lazyConnect: true, // não estabelecer ligação ao criar; aguardar a primeira chamada
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // desistir após 10 tentativas → voltar a ligar mais tarde
-    return Math.min(times * 200, 5000); // 200 ms, 400 ms, …, limite de 5 s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // agregar comandos simultâneos numa única escrita TCP
-  keepAlive: 10000, // keep-alive TCP a cada 10 s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**Principais compromissos:**
+**Principais compensações:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — opção preferencial para produção, para que os reinícios transitórios do Redis não provoquem imediatamente a falha de todos os pedidos. O fallback em memória de `checkRateLimit()` absorve o percurso de falha.
-- `lazyConnect: true` — evita que o arranque dependa de o Redis estar disponível antes de o servidor começar a aceitar ligações.
-- `enableAutoPipelining: true` — reduz as viagens de ida e volta para verificações simultâneas de limites de pedidos; benéfico acima de 50 RPS numa única ligação.
+- `maxRetriesPerRequest: null` + `retryStrategy` — preferido para produção, para que as reinicializações transitórias Redis não falhem imediatamente em todos os pedidos. O fallback na memória no `checkRateLimit()` absorve o caminho da falha.
+- `lazyConnect: true` — evita que uma dependência de arranque do Redis esteja ativo antes de o servidor começar a aceitar ligações.
+- `enableAutoPipelining: true` — reduz as viagens de ida e volta para verificações simultâneas do limite de taxas; benéfico em > 50 RPS numa única ligação.
 
-### 2. Configuração do Servidor Redis (`redis.conf`)
+### 2. Configuração do servidor Redis (`redis.conf`)
 
 ```
-# Memória
-maxmemory 80%                        # deixar espaço para a cache de páginas do SO
-maxmemory-policy allkeys-lru         # remover entradas antigas da cache de autenticação sob pressão
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Persistência (opcional — o OmniRoute é resistente a falhas sem esta opção)
-save 300 1                           # criar um instantâneo pelo menos a cada 5 min se ≥1 chave tiver sido alterada
-appendonly no                        # AOF desnecessário; os dados podem ser regenerados
-appendfsync no                       # sem sobrecarga de fsync (RDB é suficiente)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Rede
-timeout 0                            # não desligar ligações inativas
-tcp-keepalive 300                    # keep-alive de 5 min
-tcp-backlog 511                      # fila de ligações para picos de carga
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Desempenho
-hz 10                                # predefinição; 100 para casos sensíveis à latência
-activedefrag yes                     # desfragmentar automaticamente quando a fragmentação for >10%
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Compromisso de `maxmemory-policy allkeys-lru`:** As entradas da cache de autenticação podem ser removidas sob pressão de memória. Isto é seguro — `setCachedApiKey` repõe sempre os dados quando estes não são encontrados, e o fallback para SQLite é a fonte autoritativa. O script Lua do limitador de pedidos cria chaves pequenas que, por definição, têm uma duração curta.
+**Compensação para `maxmemory-policy allkeys-lru`:** As entradas da cache de autenticação podem ser removidas sob pressão de memória. Isto é seguro — `setCachedApiKey` é sempre novamente preenchido em caso de falha, e o substituto SQLite é oficial. O script Lua do limitador de taxa cria pequenas chaves que têm uma vida curta por design.
 
-### 3. Definições do Docker Compose
+### 3. Configurações de composição Docker
 
-O ficheiro Compose de produção (`docker-compose.prod.yml`) utiliza `redis:8.6.2-alpine`. Adicione:
+O prod compose (`docker-compose.prod.yml`) utiliza `redis:8.6.2-alpine`. Adicionar:
 
 ```yaml
 redis:
@@ -142,30 +142,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Considerações sobre Múltiplas Instâncias / Escalabilidade
+### 4. Considerações sobre multiinstâncias/escalonamento
 
-**Um único Redis para todas as réplicas** — o script Lua do limitador de pedidos depende de um único espaço de chaves autoritativo. A utilização de várias instâncias Redis por trás das réplicas faria perder a atomicidade e duplicaria o orçamento. Utilize uma única instância Redis (ou um cluster Redis Sentinel com ativação pós-falha) para todas as réplicas da aplicação.
+**Redis único para todas as réplicas** — o script Lua do limitador de taxa depende de um único espaço de chaves autorizado. Várias instâncias Redis atrás de réplicas perderiam a atomicidade e duplicariam o orçamento. Utilize um único Redis (ou cluster Redis Sentinel com failover) para todas as réplicas de aplicações.
 
-**Número de ligações:** Cada réplica da aplicação abre **2 ligações TCP** ao Redis (cliente do limitador de pedidos + cliente do armazenamento de quotas). Com 10 réplicas → 20 ligações, um valor muito abaixo do limite predefinido de 10 mil ligações de uma instância Redis.
+**Contagem de ligações:** Cada réplica de aplicação é aberta** 2 ligações TCP** para Redis (cliente limitador de taxa + quota store client). Com 10 réplicas → 20 ligações, bem dentro do limite máximo de ligações de 10k de uma instância Redis padrão.
 
 ### 5. Monitorização
 
-Exponha através do endpoint de verificação de estado:
+Expor através de endpoint de verificação de integridade:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts já chama funções de rateLimiter
-// Adicionar verificações específicas do Redis:
-//   1. Latência de PING através de .ping() do ioredis
-//   2. Utilização de memória através de INFO memory
-//   3. Número de ligações através de INFO clients
-//   4. Taxa de acertos de maxmemory-policy (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-Principais métricas a monitorizar:
+Principais métricas a observar:
 
-- **Chaves removidas / s** — se o valor for persistentemente diferente de zero, aumente `maxmemory`
-- **Clientes bloqueados** — um valor diferente de zero sugere scripts Lua lentos ou contenção elevada
-- **Ligações rejeitadas** — o limite de ligações foi atingido; situação rara com 20 ligações
+- **Chaves despejadas/s** — se persistentemente diferente de zero, aumente `maxmemory`
+- **Clientes bloqueados** — diferente de zero sugere scripts Lua lentos ou alta contenção
+- **Conexões rejeitadas** limite de ligação — atingido; raro em 20 ligações
+
+### 6. Servidores compatíveis com o Redis
+
+Qualquer servidor aqui utilizado deve executar scripts Lua: o limitador de taxa é um `EVAL`. Num servidor sem Lua, `checkRateLimit()` regista `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` e conta por processo, de modo a que cada réplica imponha o limite por si só. O armazenamento de afinidade de sessão partilhada opcional (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) também lê e atualiza os pinos com `EVAL`; sem Lua regista `[SESSION_AFFINITY] Redis error; falling back to SQLite.` e cada réplica mantém os seus próprios pins. As outras cargas de trabalho utilizam comandos simples (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, hashes e sets), e o back-end Redis da cache semântica não envia comandos `FT.*`.
+
+Testado com OmniRoute 3.8.52: KiviDB 1.2.0 com a sua imagem Lua (`kividb/kividb:v1.2.0-lua`). O limitador de taxa (incluindo um segundo processo que partilha os contadores), a cache de autenticação, o armazenamento de quotas, o disjuntor de aquecimento, o armazenamento de cache semântico e um pedido `/v1/chat/completions` através do manipulador de chat passaram 18 das 19 verificações aprovadas no Redis 8.10.3. O que difere: `INCRBYFLOAT` armazena `0.1 + 0.2` como `0.30000000000000004` onde Redis armazena `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). O armazenamento de quotas analisa ambos com `parseFloat`, mas os dois números diferem nos últimos dígitos, pelo que uma comparação que caia exatamente num limite de quota pode sair de forma diferente. O armazenamento de afinidade de sessão não fez parte desta execução. ( [configuração](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [resultados](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 

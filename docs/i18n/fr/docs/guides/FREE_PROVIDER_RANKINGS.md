@@ -13,14 +13,14 @@
 
 ## Qu'est-ce que c'est
 
-OmniRoute enregistre 381 fournisseurs, dont 155 entrées de catalogue marquées**free/no-auth** (sans authentification, OAuth de niveau gratuit ou clé API de niveau gratuit — consultez le [Guide des niveaux gratuits](../getting-started/FREE-TIERS-GUIDE.md) et le [répertoire complet des niveaux gratuits](../reference/FREE_TIERS.md) ). Le hic : les fournisseurs gratuits varient énormément en termes de qualité de modèle. Un fournisseur sans authentification servant un modèle frontière est bien plus utile qu'un fournisseur servant un petit modèle existant.
+OmniRoute enregistre 394 fournisseurs, dont 155 entrées de catalogue marquées**free/no-auth** (sans authentification, OAuth de niveau gratuit ou clé API de niveau gratuit — consultez le [Guide des niveaux gratuits](../getting-started/FREE-TIERS-GUIDE.md) et le [répertoire complet des niveaux gratuits](../reference/FREE_TIERS.md) ). Le hic : les fournisseurs gratuits varient énormément en termes de qualité de modèle. Un fournisseur sans authentification servant un modèle frontière est bien plus utile qu'un fournisseur servant un petit modèle existant.
 
 **Classement des fournisseurs gratuits** réponses "** quel fournisseur gratuit me propose le meilleur modèle ?** " en rejoignant le catalogue de chaque fournisseur gratuit avec** scores de qualité issus du crowdsourcing** de la** Classement Arena AI** (préférence humaine ELO, la même idée derrière l'arène des chatbots LMArena ). Les prestataires sont ensuite classés en fonction de la force de leur** meilleur modèle gratuit** .
 
 Le classement est calculé à partir de trois sources réelles :
 
 1. Le fournisseur gratuit répertorie — `NOAUTH_PROVIDERS`, ainsi que les entrées `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` marquées `hasFree` (`src/shared/constants/providers.ts`).
-2. Catalogue de modèles de chaque fournisseur à partir du registre des fournisseurs (`open-sse/config/providerRegistry.ts`).
+2. Catalogue de modèles de chaque fournisseur provenant du registre des fournisseurs (`open-sse/config/providerRegistry.ts`).
 3. Scores d'ajustement des tâches dérivés d'ELO stockés dans la table `model_intelligence` DB par le moteur de synchronisation Arena ELO (`src/lib/arenaEloSync.ts`).
 
 La logique de jointure réside dans `src/lib/freeProviderRankings.ts`.

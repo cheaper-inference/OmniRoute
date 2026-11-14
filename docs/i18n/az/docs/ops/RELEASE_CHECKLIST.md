@@ -109,164 +109,161 @@ təsdiqlənir (davamlı uğurlu release) — xətt yoxlamanı deyil, yalnız GÖ
 Yalnız testlərdən ibarət dəyişikliklər (`tests/` altındakı bütün fayllar, `tests/e2e/` altında heç bir fayl olmamaqla)
 heç bir etiket olmadan E2E matrisini avtomatik ötürür.
 
-## Ətraflı yoxlama siyahısı
+## Ətraflı Yoxlama Siyahısı
 
-### Relizdən əvvəl
+### Öncədən buraxılış
 
-- [ ] Bu reliz üçün nəzərdə tutulmuş bütün PR-lər `release/vX.Y.0` budağına birləşdirilib
-- [ ] Bu versiya üçün bütün açıq Linear/tapşırıq elementləri bağlanıb və ya növbəti mərhələyə keçirilib
-- [ ] `release/vX.Y.0` budağında CI uğurludur
-- [ ] Kodda `TODO(release)` işarələri yoxdur: `grep -r "TODO(release)" src/ open-sse/`
-- [ ] Docker baza obrazı yenilənib (hazırda `node:24.15.0-trixie-slim`)
+- [ ] Bu buraxılışa yönəlmiş bütün PRs `release/vX.Y.0` ilə birləşdirilib
+- [ ] Bu versiya üçün bütün açıq Linear/issue elementləri bağlanır və ya növbəti mərhələyə keçirilir
+- [ ] `release/vX.Y.0` filialında CI yaşıl
+- [ ] Kodda `TODO(release)` markerləri yoxdur: `grep -r "TODO(release)" src/ open-sse/`
+- [ ] Docker əsas şəkli günə qədər (hazırda `node:24.15.0-trixie-slim`)
 
-### Versiya və dəyişiklik jurnalı
+### Versiya və Dəyişikliklər
 
-- [ ] `/version-bump-cc <patch|minor|major>` əmrini işə salın (Claude Code bacarığı)
-  - `package.json`, `electron/package.json` versiyalarını artırır
-  - Son teqdən bəri git commitləri əsasında `CHANGELOG.md` faylını yenidən yaradır
+- [ ] Run `/version-bump-cc <patch|minor|major>` (Claude Code bacarıq)
+  - Bumps `package.json`, `electron/package.json`
+  - Son teqdən bəri git əməliyyatlarından `CHANGELOG.md` bərpa edir
   - README.md nişanlarını yeniləyir
-- [ ] CHANGELOG.md faylını əl ilə nəzərdən keçirin və lazım gələrsə commit mesajlarını təmizləyin
-- [ ] `CHANGELOG.md` faylındakı ən son semver bölməsinin `package.json` versiyasına bərabər olduğuna əmin olun
-- [ ] Gələcək işlər üçün `## [Unreleased]` bölməsini dəyişiklik jurnalının ilk bölməsi kimi saxlayın
-- [ ] `docs/openapi.yaml` faylını yeniləyin → `info.version` dəyəri `package.json` versiyasına bərabər olmalıdır
+- [ ] CHANGELOG.md əl ilə nəzərdən keçirin və lazım gələrsə, öhdəçilik mesajlarını təmizləyin
+- [ ] `CHANGELOG.md` da ən son semver bölməsinin `package.json` versiyasına bərabər olduğundan əmin olun
+- [ ] Qarşıdan gələn iş üçün ilk dəyişiklik jurnalı bölməsi olaraq `## [Unreleased]` saxlayın
+- [ ] `docs/openapi.yaml` → `info.version` yeniləməsi `package.json` versiyasına bərabər olmalıdır
 
 ### Kod keyfiyyəti
 
-- [ ] `npm run lint` — 0 xəta (xəbərdarlıqlar əvvəldən mövcuddur)
-- [ ] `npm run typecheck:core` — problemsizdir
-- [ ] `npm run typecheck:noimplicit:core` — problemsizdir (sərt)
-- [ ] `npm run check:cycles:ratchet` — sabitlənmiş `metrics.cycles` həddi daxilindədir (sadə `check:cycles` hər hansı dövrə olduqda 1 kodu ilə çıxır, #15281)
-- [ ] `npm run check:any-budget:t11` — büdcə daxilindədir
-- [ ] `npm run check:route-validation:t06` — problemsizdir
-- [ ] `npm run check:node-runtime` — dəstəklənən minimum icra mühiti tələbi ödənilir (`>=22.22.2 <23`, `>=24.0.0 <27`, `src/shared/utils/nodeRuntimeSupport.ts` faylındakı `SUPPORTED_NODE_RANGE` əsasında; `package.json` faylındakı `engines` ilə uyğunlaşdırılıb)
+- [ ] `npm run lint` — 0 xəta (xəbərdarlıqlar əvvəlcədən mövcuddur)
+- [ ] `npm run typecheck:core` — təmiz
+- [ ] `npm run typecheck:noimplicit:core` — təmiz (ciddi)
+- [ ] donmuş `metrics.cycles` tavanı daxilində `npm run check:cycles:ratchet` — (çılpaq `check:cycles` istənilən dövrədə 1-dən çıxır, #15281)
+- [ ] büdcə daxilində `npm run check:any-budget:t11` —
+- [ ] `npm run check:route-validation:t06` — təmiz
+- [ ] `npm run check:node-runtime` — dəstəklənən icra zamanı mərtəbəsi qarşılandı (`>=22.22.2 <23`, `>=24.0.0 <27`, `src/shared/utils/nodeRuntimeSupport.ts`-də hər `SUPPORTED_NODE_RANGE` ; `package.json` `engines` ilə düzülmüş )
 
-### Testləmə
+### Test
 
-- [ ] `npm run test:unit` — uğurla keçir
-- [ ] `npm run test:vitest` — uğurla keçir (MCP serveri, autoCombo, keş)
-- [ ] `npm run test:coverage` — 60/60/60/60 həddi ödənilir (ifadələr/sətirlər/funksiyalar/budaqlar)
-- [ ] `npm run test:integration` — uğurla keçir (dəyişikliklər DB-yə / işləyicilərə toxunursa)
-- [ ] `npm run test:combo:matrix` — uğurla keçir (kombinasiya strategiyaları matrisi: 19 açıq marşrutlaşdırma strategiyasının hamısının seçim qərarlarını deterministik şəkildə təsdiqləyir; kombinasiya marşrutlaşdırmasına, strategiya həllinə və ya ehtiyat məntiqinə toxunduqda işə salın)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **ixtiyari/əl ilə** (şərtlə aktivləşdirilən real yuxarı axın smoke testi; VPS-dəki `root@192.168.0.15` ünvanından yalnız oxunan DB snapshot-ı əldə edir; real provayderlərə sorğu göndərir və kredit sərf edir; CI-da heç vaxt işə salınmır; şərt olmadan problemsiz şəkildə ötürülür)
-- [ ] `npm run test:combo:live:vps` — **ixtiyari/əl ilə** (Mərhələ 3 VPS canlı smoke testi: adi Node ESM vasitəsilə canlı `.15` serverinə qarşı 7 HTTP ssenarisi; `ssh root@192.168.0.15` tələb edir; yalnız `__live_test__*` kombinasiyalarını yaradır/silir; real provayderlərə sorğu göndərir; CI-da heç vaxt işə salınmır)
-- [ ] `npm run test:e2e` — uğurla keçir (UI dəyişiklikləri)
-- [ ] `npm run test:protocols:e2e` — uğurla keçir (MCP/A2A dəyişiklikləri)
-- [ ] `npm run test:ecosystem` — uğurla keçir
+- [ ] `npm run test:unit` — keçidi
+- [ ] `npm run test:vitest` — pass (MCP server, autoCombo, cache)
+- [ ] `npm run test:coverage` — qapısı 60/60/60/60 razı (statements/lines/functions/branches)
+- [ ] `npm run test:integration` — pass (əgər DB / işləyicilərə toxunursa)
+- [ ] `npm run test:combo:matrix` — keçidi (kombo strategiya matrisi: bütün 22 ictimai marşrutlaşdırma strategiyasının seçim qərarlarını qəti şəkildə sübut edir; birləşmiş marşrutlaşdırma, strategiya həlli və ya ehtiyat məntiqinə toxunarkən işləyin)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (qapalı real-yuxarı tüstü; VPS `root@192.168.0.15` dən yalnız oxumaq üçün DB snapshot mənbəyidir; real provayderləri vurur, kreditlərə xərclənir; heç vaxt CI də işləmir; qapı olmadan təmiz atlar)
+- [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS canlı tüstü: adi Node ESM vasitəsilə canlı `.15` serverinə qarşı 7 HTTP ssenari; `ssh root@192.168.0.15` tələb edir; creates/deletes yalnız `__live_test__*` kombinləri; real provayderləri vurur; heç vaxt CI-də işləmir)
+- [ ] `npm run test:e2e` — pass (UI dəyişiklikləri)
+- [ ] `npm run test:protocols:e2e` — pass (MCP/A2A dəyişiklikləri)
+- [ ] `npm run test:ecosystem` — keçidi
 
-### Hook-lar (Husky ilə yoxlanılır)
+### Qarmaqlar (Husky təsdiqlənmiş)
 
-Husky hook-ları `.husky/` qovluğunda yerləşir və git əməliyyatları zamanı avtomatik işə salınır.
+Husky qarmaqları `.husky/` -da yaşayır və git əməliyyatlarında avtomatik işləyir.
 
-- **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** sürətli deterministik yoxlamalar — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (2026-06-13 tarixində aktivləşdirilib). `test:unit` qəsdən daxil edilmir (ləngdir; CI-dakı `test-unit` tapşırığı ilə əhatə olunur).
-  - Reliz budaqlarını göndərməzdən əvvəl `npm run test:unit` əmrini əl ilə işə salın.
+- **əvvəlcədən öhdəsindən gəlmək:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
+- **əvvəlcədən itələmək:** sürətli deterministik qapılar — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (aktivləşdirilmiş 2026-06-13). `test:unit` qəsdən istisna edir (yavaş; CI `test-unit` işi ilə əhatə olunur).
+  - Buraxılış budaqlarını itələməzdən əvvəl `npm run test:unit` əl ilə işə salın.
 
-Hook uğursuz olarsa: əsas problemi aradan qaldırın, `--no-verify` ilə yan keçməyin.
+Qarmaq uğursuz olarsa: əsas problemi həll edin, `--no-verify` ilə yan keçməyin.
 
-### Konvensional commitlər
+### Adi Komitələr
 
-Relizə daxil ediləcək bütün commitlər `type(scope): subject` formatına uyğun olmalıdır.
+Bütün buraxılışlarla bağlı öhdəliklər `type(scope): subject` formatına uyğun olmalıdır.
 
 **Etibarlı növlər:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**Etibarlı əhatə dairələri:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**Etibarlı əhatə dairələri:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker` `authz` `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers` `executors`, `translator`, `domain`
 
-Uyğunluğu pozan dəyişikliklər: `BREAKING CHANGE:` sonluğu və ya əhatə dairəsindən sonra `!` əlavə edin (məsələn, `feat(api)!: drop /v0`).
+Dəyişiklikləri pozan: əhatə dairəsindən sonra `BREAKING CHANGE:` altbilgisi və ya `!` əlavə edin (məsələn, `feat(api)!: drop /v0`).
 
 ### Sənədləşdirmə
 
-- [ ] `npm run check:docs-sync` uğurla keçir (pre-commit tərəfindən avtomatik işə salınır)
-- [ ] `npm run check:docs-all` uğurla keçir (ümumi yoxlama: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` 0 kodu ilə çıxır — kod ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` mühit müqaviləsi bütövdür
-- [ ] `npm run check:doc-links` 0 kodu ilə çıxır — struktur dəyişikliyindən sonra pozulmuş daxili markdown istinadları yoxdur
-- [ ] `docs/architecture/ARCHITECTURE.md` yaddaş/iş mühiti uyğunsuzluqları baxımından nəzərdən keçirilib
-- [ ] `docs/guides/TROUBLESHOOTING.md` mühit dəyişəni və əməliyyat uyğunsuzluqları baxımından nəzərdən keçirilib
-- [ ] `.env.example` dəyişibsə: `docs/reference/ENVIRONMENT.md` yenilənib
-- [ ] Yeni funksiyanın UI-ı varsa: `docs/guides/USER_GUIDE.md` faylında qeyd olunub
-- [ ] Yeni funksiyanın API-si varsa: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` yenilənib
-- [ ] Yeni funksiya moduldursa: ayrıca `docs/<MODULE>.md` mövcuddur
-- [ ] Uyğunluğu pozan dəyişiklik varsa: `docs/guides/TROUBLESHOOTING.md` faylında miqrasiya qeydi var
+- [ ] `npm run check:docs-sync` keçidləri (əvvəlcədən icra ilə avtomatik idarə olunur)
+- [ ] `npm run check:docs-all` keçidləri (çətir: docs-sync + docs-counts + env-doc-sync + köhnəlmiş versiyalar + doc-links)
+- [ ] `npm run check:env-doc-sync` çıxır 0 — kodu ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env müqaviləsi tam
+- [ ] `npm run check:doc-links` yenidən strukturlaşdırıldıqdan sonra 0 — dən çıxır
+- [ ] `docs/architecture/ARCHITECTURE.md` storage/runtime drift üçün nəzərdən keçirilir
+- [ ] `docs/guides/TROUBLESHOOTING.md` env var və əməliyyat sürüşməsi üçün nəzərdən keçirilir
+- [ ] `.env.example` dəyişdisə: `docs/reference/ENVIRONMENT.md` yeniləndi
+- [ ] Yeni funksiyada UI varsa: `docs/guides/USER_GUIDE.md` bunu qeyd edir
+- [ ] Yeni funksiyada API varsa: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` yeniləndi
+- [ ] Yeni funksiya moduldursa: xüsusi `docs/<MODULE>.md` mövcuddur
+- [ ] Dəyişiklik pozulursa: `docs/guides/TROUBLESHOOTING.md` miqrasiya qeydi var
 
 ### i18n
 
-- [ ] `npm run i18n:check` 0 kodu ilə çıxır — tərcümə vəziyyəti (`.i18n-state.json`) mənbə sənədlərlə sinxronlaşdırılıb (sərt rejimdə yayınmış mənbələr yoxdur; son dəqiqə sənəd düzəlişləri üçün xəbərdarlıq rejimi məsləhəti qəbul edilə bilər, lakin teqləmədən əvvəl nəticə 0 olmalıdır)
-- [ ] `npm run i18n:check-ui-coverage` 0 kodu ilə çıxır — hər UI lokalı 80% əhatə minimumunda və ya ondan yuxarıdır
-- [ ] `npm run i18n:sync-ui:dry` bütün 66 hədəf lokal üzrə 0 çatışmayan açar bildirir (`en` mənbəyi istisna olmaqla hər bir lokal)
-- [ ] İngiliscə mənbə sənədlər dəyişibsə, teqləmədən əvvəl `npm run i18n:run` əmrini işə salın (`.env` faylında `OMNIROUTE_TRANSLATION_API_KEY` tələb olunur)
-- [ ] Tərcümə töhfələri kiçikdirsə, növbəti relizə təxirə salına bilər (CHANGELOG-da izləyin)
+- [ ] `npm run i18n:check` mənbə sənədləri ilə sinxronlaşdırılaraq 0 — tərcümə vəziyyətindən (`.i18n-state.json`) çıxır (ciddi rejimdə sürüşmə mənbələri yoxdur; xəbərdarlıq rejimi məsləhəti son dəqiqə sənəd toxunuşları üçün məqbuldur, lakin etiketləmədən əvvəl 0 olmalıdır)
+- [ ] `npm run i18n:check-ui-coverage` 80% əhatə dairəsi səviyyəsində və ya yuxarıda hər UI yerli 0 — çıxış edir
+- [ ] `npm run i18n:sync-ui:dry` bütün 66 hədəf yerli ( `en` mənbəyi istisna olmaqla, hər bir yerli) üzrə 0 çatışmayan açarı bildirir
+- [ ] Mənbə İngilis dili sənədləri dəyişdirilərsə, etiketləmədən əvvəl `npm run i18n:run` ( `.env`-də `OMNIROUTE_TRANSLATION_API_KEY` tələb olunur) işlədin
+- [ ] Tərcümə töhfələri azdırsa, növbəti buraxılışa təxirə salına bilər ( CHANGELOG-da trek)
 
-### Verilənlər bazası miqrasiyaları
+### Verilənlər Bazasının Miqrasiyaları
 
-- [ ] `src/lib/db/migrations/` qovluğunda yeni fayllar varsa:
-  - [ ] Hər miqrasiya idempotentdir (`CREATE TABLE IF NOT EXISTS` və s.)
-  - [ ] Miqrasiyalar tranzaksiyalara bükülüb
-  - [ ] Düzgün nömrələnib (ardıcıllıqda boşluq yoxdur)
-- [ ] Təmiz quraşdırmada test edin: `~/.omniroute/omniroute.db` faylını silin və `npm run dev` əmrini işə salın
-- [ ] Mövcud quraşdırmada test edin: DB-nin ehtiyat nüsxəsini yaradın, miqrasiyanı işə salın, sxemi yoxlayın
-- [ ] Miqrasiya cədvəlləri yenidən yazırsa, WAL faylları (`-wal`, `-shm`) düzgün idarə olunur
+- [ ] `src/lib/db/migrations/` yeni fayllar varsa:
+  - [ ] Hər bir köç idempotentdir (`CREATE TABLE IF NOT EXISTS` və s.)
+  - [ ] Miqrasiya əməliyyatlara bükülmüşdür
+  - [ ] Düzgün nömrələnmişdir (ardıcıllıqda boşluq yoxdur)
+- [ ] Təzə quraşdırmada sınaqdan keçirin: `~/.omniroute/omniroute.db` silin və `npm run dev` işə salın
+- [ ] Mövcud quraşdırmada sınaqdan keçirin: DB ehtiyat nüsxəsini çıxarın, miqrasiyanı işə salın, sxemi yoxlayın
+- [ ] miqrasiya cədvəlləri yenidən yazırsa WAL faylları (`-wal`, `-shm`) düzgün idarə olunur
 
-### Provayder kataloqu (Zod ilə doğrulanmış)
+### Provayder Kataloqu (Zod ilə təsdiqlənmiş)
 
-- [ ] `src/shared/constants/providers.ts` Zod sxemi yüklənmə zamanı etibarlıdır
-  - [ ] Bütün provayderlərdə tələb olunan sahələr (`id`, `label`, `kind` və s.) mövcuddur
-  - [ ] Yeni pulsuz provayderlər üçün `freeNote` təqdim edilib
-  - [ ] OAuth provayderlərinin `oauthConfig` konfiqurasiyası `src/lib/oauth/constants/oauth.ts` daxilində qeydiyyatdan keçirilib
-- [ ] Yeni provayder əlavə edilibsə: `open-sse/executors/` daxilində müvafiq icraçı mövcuddur
-- [ ] Format OpenAI formatında deyilsə: `open-sse/translator/` daxilində tərcüməçi mövcuddur
-- [ ] Modellər `open-sse/config/providerRegistry.ts` daxilində qeydiyyatdan keçirilib
-- [ ] `tests/unit/` daxilindəki vahid testlər provayder təsnifatını və marşrutlaşdırmanı əhatə edir
+- [ ] `src/shared/constants/providers.ts` Zod sxemi yükləmə zamanı etibarlıdır
+  - [ ] Bütün provayderlərdə tələb olunan sahələr var (`id`, `label`, `kind` və s.)
+  - [ ] `freeNote` yeni pulsuz provayderlər üçün nəzərdə tutulmuşdur
+  - [ ] OAuth provayderləri `src/lib/oauth/constants/oauth.ts`-də qeydiyyatdan keçmiş `oauthConfig` var
+- [ ] Yeni provayder əlavə edilərsə: `open-sse/executors/`-da müvafiq icraçı
+- [ ] Qeyri-OpenAI formatı varsa: `open-sse/translator/`-da tərcüməçi
+- [ ] `open-sse/config/providerRegistry.ts`-da qeydiyyatdan keçmiş modellər
+- [ ] `tests/unit/` -da vahid testləri provayderin təsnifatını və marşrutunu əhatə edir
 
-### Masaüstü (Electron)
+### İş masası (Electron)
 
-`electron/` dəyişdirilibsə:
+`electron/` dəyişibsə:
 
-- [ ] `npm run electron:smoke:packaged` uğurla keçir
-- [ ] Quruluşlar `:win`, `:mac`, `:linux` seçimlərindən ən azı biri üçün sınaqdan keçirilib
-- [ ] Kod imzalama sertifikatlarının müddəti bitməyib (imzalama istifadə olunursa)
-- [ ] `electron/package.json` versiyası kök `package.json` versiyası ilə eynidir
-- [ ] Buraxılış `stable` kanalına edilirsə, avtomatik yeniləmə kanalının göstəricisi yenilənib
+- [ ] `npm run electron:smoke:packaged` keçir
+- [ ] Quraşdırmalar ən azı `:win`, `:mac`, `:linux` üçün sınaqdan keçirilmişdir
+- [ ] Kod imzalama sertifikatlarının müddəti bitməyib (imzalanırsa)
+- [ ] `electron/package.json` versiyası kök `package.json` ilə uyğun gəlir
+- [ ] Avtomatik yeniləmə kanal göstəricisi `stable`-ya buraxılarsa yenilənir
 
-### Quruluş strukturu
+### Quraşdırma Planı
 
-Repozitoriya üç ayrı çıxış kataloqundan istifadə edir — onları heç vaxt qarışdırmayın:
+Repozitoriya üç fərqli çıxış kataloqundan istifadə edir — onları heç vaxt qarışdırmır:
 
-| Kataloq   | Məqsəd                                                            | İzlənilir?        |
-| --------- | ----------------------------------------------------------------- | ----------------- |
-| `src/`    | Tətbiqin mənbə kodu (TypeScript / TSX)                            | Bəli              |
-| `.build/` | Aralıq quruluş faylları — `next build` çıxışı (`distDir`)         | Xeyr (gitignored) |
-| `dist/`   | Yayıma hazır npm paketi — `assembleStandalone` tərəfindən yığılır | Xeyr (gitignored) |
+| kataloq   | Məqsəd                                                                   | İzlənildi?           |
+| --------- | ------------------------------------------------------------------------ | -------------------- |
+| `src/`    | Tətbiq mənbəyi (TypeScript / TSX)                                        | Bəli                 |
+| `.build/` | Aralıq — `next build` çıxışı qurun (`distDir`)                           | Xeyr (götürülmüşdür) |
+| `dist/`   | Göndərilə bilən npm paketi — `assembleStandalone` tərəfindən yığılmışdır | Xeyr (götürülmüşdür) |
 
-> **Operator qeydi:** uzaq VPS obrazının kataloqu `/usr/lib/node_modules/omniroute/app/` olaraq qalır.
-> Yalnız **repozitoriya daxilindəki** quruluş çıxışı dəyişib (`app/` → `dist/`). Yerləşdirmə bacarıqları
-> `dist/` məzmununu uzaqdakı `app/` kataloquna rsync edir — VPS yollarında heç bir dəyişiklik tələb olunmur.
+> **Operator qeydi:** uzaq VPS şəkil kataloqu `/usr/lib/node_modules/omniroute/app/` olaraq qalır. Yalnız** in-repo** qurma çıxışı köçürüldü (`app/` → `dist/`). Yerləşdirmə bacarıqları rsync `dist/` məzmununu uzaq `app/` dir — a VPS yolunda dəyişikliklər tələb etmir.
 
-**Tək quruluş axını:**
+**Tək quruluşlu axın:**
 
 ```
 npm run build:release
-  └─ rm -rf .build dist          (təmizləmə)
-  └─ next build → .build/next/   (aralıq fayllar)
-  └─ assembleStandalone          (standalone + static + public + natives fayllarını dist/ daxilinə köçürür)
-  └─ dist/BUILD_SHA yazır        (HEAD nəzarət nişanı)
+  └─ rm -rf .build dist          (clean)
+  └─ next build → .build/next/   (intermediates)
+  └─ assembleStandalone          (copies standalone + static + public + natives → dist/)
+  └─ writes dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-Yerləşdirmə üçün `npm run build` əmrindən sonra ayrıca `npm run build:cli` icra ETMƏYİN — bir əmrlə
-təmiz yenidən qurma və nəzarət nişanı yaradan `npm run build:release` əmrindən istifadə edin.
+NOT run `npm run build` ardınca ayrıca `npm run build:cli` — üçün `npm run build:release` istifadə edin, hansı ki, bir komandada + sentinel-in təmiz yenidən qurulmasını həyata keçirir.
 
-### Artefaktın doğrulanması
+### Artefaktın təsdiqi
 
-- [ ] `npm run build:release` uğurla tamamlanır və `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` təmizdir — `app.__qa_backup`, `scripts/scratch`, `package-lock.json` və ya digər lokal qalıqlar yoxdur
-- [ ] Quruluşdan sonra `dist/server.js` mövcuddur
-- [ ] İstəyə bağlı lokal paketlənmiş icra mühiti tüstü testi: `npm run dev:candidate -- build` əmrindən sonra `npm run dev:candidate -- validate` paketlənmiş tarball-u təcrid olunmuş `DATA_DIR` üzərində başladır və `/api/health` + `/v1/models` ünvanlarını yoxlayır ([Töhfə üçün əsas axına](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) baxın)
+- [ ] `npm run build:release` uğur qazanır və `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] `npm run check:pack-artifact` təmiz — `app.__qa_backup`, `scripts/scratch`, `package-lock.json` və ya digər yerli qalıq yoxdur
+- [ ] `dist/server.js` qurulduqdan sonra mövcuddur
+- [ ] İsteğe bağlı yerli paketlənmiş iş zamanı tüstüsü: `npm run dev:candidate -- build` sonra `npm run dev:candidate -- validate` paketlənmiş tarballu təcrid olunmuş `DATA_DIR` də yükləyir və `/api/health` + `/v1/models` yoxlayır ( [Töhfə Qızıl Yoluna](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) baxın)
 
-### Teqləmə və buraxılış
+### Etiketləmə və Buraxılış
 
-- [ ] `/generate-release-cc` əmrini icra edin (Claude Code bacarığı):
-  - `vX.Y.Z` teqini yaradır
-  - Teqi və budağı göndərir
-  - Dəyişiklik jurnalı mətni ilə GitHub Release açır
-  - Electron quraşdırıcılarını əlavə edir (qurulublarsa)
+- [ ] Run `/generate-release-cc` (Claude Code bacarıq):
+  - `vX.Y.Z` etiketi yaradır
+  - Etiketi və filialı itələyir
+  - Changelog gövdəsi ilə GitHub Release açır
+  - Electron quraşdırıcılarını əlavə edir (əgər qurulmuşdursa)
 - [ ] Və ya əl ilə:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
@@ -274,46 +271,45 @@ təmiz yenidən qurma və nəzarət nişanı yaradan `npm run build:release` əm
   gh release create vX.Y.Z --notes-from-tag
   ```
 
-### Yerləşdirmə
+### Yerləşdirin
 
-Yerləşdirmə bacarıqları yüngül rsync axınından istifadə edir — `npm pack` və `npm i -g` istifadə olunmur:
+Yerləşdirmə bacarıqları yüngül rsync axınından istifadə edir — no `npm pack`, no `npm i -g`:
 
-- [ ] Hədəfə uyğun yerləşdirmə bacarığından istifadə edin:
-  - `/deploy-vps-local-cc` — lokal VPS (192.168.0.15)
+- [ ] Hədəfə uyğun gələn yerləşdirmə bacarığından istifadə edin:
+  - `/deploy-vps-local-cc` — yerli VPS (192.168.0.15)
   - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — hər ikisi
-- [ ] Yerləşdirmədən əvvəl `dist/BUILD_SHA` == `git rev-parse --short HEAD` olduğunu təsdiqləyin
-- [ ] Quruluş `node_modules` kataloqunun real olduğu yerdə icra edilməlidir (əsas checkout və ya `npm ci` icra edilmiş worktree — simvolik keçidli worktree DEYİL)
-- [ ] Yerləşdirilmiş instansiyada tüstü testi aparın:
-  - `/dashboard/health` səhifəsini açın → versiya sətrinin buraxılışla uyğun olduğunu yoxlayın
-  - Məlum provayderə qarşı `/v1/chat/completions` sorğusu icra edin
-  - `/api/monitoring/health` cavabında dövrə kəsicilərinin `CLOSED` qaytardığını yoxlayın
-  - MCP nəqliyyatlarının cavab verdiyini təsdiqləyin (`/mcp` HTTP, `/mcp-sse` SSE)
+- [ ] Yerləşdirmədən əvvəl `dist/BUILD_SHA` == `git rev-parse --short HEAD` təsdiqləyin
+- [ ] Qurma `node_modules` real olduğu yerdə işləməlidir (əsas yoxlama və ya `npm ci`'d worktree — NOT simvolik iş ağacı)
+- [ ] Duman testinin yerləşdirilmiş nümunəsi:
+  - `/dashboard/health` → versiyasını yoxlayın sətir buraxılışa uyğun gəlir
+  - Tanınmış provayderə qarşı `/v1/chat/completions` sorğusu işlədin
+  - `/api/monitoring/health` `CLOSED` dövrə açarlarını qaytardığını yoxlayın
+  - MCP nəqlinin cavab verməsini təsdiqləyin (`/mcp` HTTP, `/mcp-sse` SSE)
 
-### Buraxılışdan sonra
+### Buraxılışdan sonrakı
 
-- [ ] `/capture-release-evidences-cc` əmrini icra edin (Claude Code bacarığı)
-  - Yeni funksiyaların WebP ekran görüntülərini/yazılarını çəkir
-  - Onları buraxılış qeydlərinə / bloq yazısına əlavə edir
-- [ ] GitHub Discussions / Discord platformalarında buraxılış elanını yeniləyin
-- [ ] Növbəti versiya üçün mərhələ açın
-- [ ] Kritikdirsə: müzakirəni bərkidin və ya tətbiqdaxili banner üçün `news.json` faylında paylaşın
+- [ ] Run `/capture-release-evidences-cc` (Claude Code bacarıq)
+  - Yeni funksiyaların WebP screenshots/recordings çəkir
+  - Buraxılış qeydlərinə / blog yazısına əlavə olunur
+- [ ] GitHub Discussions / Discord buraxılış elanı ilə yeniləyin
+- [ ] Növbəti versiya üçün mərhələni açın
+- [ ] Əgər kritikdirsə: proqramdaxili banner üçün müzakirə və ya postu `news.json` da yerləşdirin
 
-### Radar-ın ictimai istifadəyə verilməsi üçün keçid şərtləri
+### Radar ictimai buraxılış qapısı
 
-Radar elanı qəsdən `active: false` ilə commit edilib. Aktivləşdirmə aşağıdakı hər bir bəndin sübutu təqdim edildikdən sonra ayrıca
-dəyişiklik kimi edilməlidir:
+Radar elanı qəsdən `active: false` ilə törədilir. Aşağıdakı hər bir element sübut edildikdən sonra aktivləşdirmə ayrıca dəyişiklikdir:
 
-- [ ] Bütün yığılmış Radar PR-ları birləşdirilib və buraxılışın son nöqtəsindəki CI uğurla keçir
-- [ ] `RADAR_ENABLED` standart olaraq hələ də söndürülmüş vəziyyətdə OSS Radar marşrutlarını yerləşdirin və tüstü testindən keçirin
-- [ ] Göstərilən Radar hostunda `GET /planos`, `/termos`, `/privacidade` və `/reembolso` üçün tüstü testi aparın
-- [ ] Operatorun kimliyini/əlaqə məlumatlarını/ünvanını və sahib tərəfindən təsdiqlənmiş hüquqi yoxlamanı məxfi xidmətdə qeyd edin
-- [ ] Stripe Checkout-u və imzalanmış webhook-u yalnız test rejimində yoxlayın
-- [ ] Təsdiqlənmiş göndərici/domen ilə bir şifrələnmiş tranzaksiya e-poçtu çatdırılmasını yoxlayın
-- [ ] Ehtiyat nüsxədən bərpanı və nəzarət altında, büdcə limiti qoyulmuş bir araşdırma icrasını sübut edin
-- [ ] İanə sübutlarını qəbul etməzdən əvvəl BRL/PIX yoxlama siyasətini təsdiqləyin
-- [ ] Yalnız əvvəlki keçid şərtlərindən sonra ictimai Checkout-u aktivləşdirin, sonra yeni `news.json` ID-sini aktivləşdirin
-- [ ] Home bannerinin lokallaşdırılmış mətndən istifadə etdiyini və köhnə ID rədd edildikdən sonra yeni ID-nin yenidən göründüyünü yoxlayın
+- [ ] Bütün yığılmış Radar PRs birləşdirilib və buraxılış ucu CI yaşıldır
+- [ ] Defolt olaraq `RADAR_ENABLED` hələ də sönük vəziyyətdə OSS Radar marşrutlarını yerləşdirin və çəkin
+- [ ] Adlandırılmış Radar hostunda `GET /planos`, `/termos`, `/privacidade` və `/reembolso` tüstüləyin
+- [ ] Şəxsi xidmətdə operator identity/contact/address və sahibi tərəfindən təsdiqlənmiş hüquqi baxışı qeyd edin
+- [ ] Stripe Checkout və imzalanmış webhooku yalnız test rejimində həyata keçirin
+- [ ] Təsdiqlənmiş sender/domain ilə bir şifrəli tranzaksiya-e-poçt çatdırılmasını həyata keçirin
+- [ ] Yedək nüsxəsinin bərpasını və bir nəzarət edilən, büdcə ilə məhdudlaşan tədqiqat işini sübut edin
+- [ ] İanə sübutunu qəbul etməzdən əvvəl BRL/PIX baxış siyasətini təsdiq edin
+- [ ] Yalnız əvvəlki qapılardan sonra ictimai Checkoutu aktiv edin, sonra yeni `news.json` ID aktivləşdirin
+- [ ] Əsas səhifə bannerinin lokallaşdırılmış nüsxədən istifadə etdiyini və köhnə ID ləğv edildikdən sonra yeni ID yenidən göründüyünü yoxlayın
 
 ## Daxili xidmətlər üçün ilkin yoxlama (v3.8.4+)
 

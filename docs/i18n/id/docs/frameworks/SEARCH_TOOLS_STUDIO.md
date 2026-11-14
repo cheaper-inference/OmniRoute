@@ -34,38 +34,38 @@ Studio dengan tiga tab yang menyatukan pencarian web, scraping web, dan perbandi
 
 ---
 
-## Tab
+## tab
 
 ### Tab Pencarian
 
 Mengembangkan `SearchForm` + `ResultsPanel` + `RerankPanel` yang ada menjadi sebuah tab:
 
-- Kueri → hasil (judul, URL, cuplikan, skor relevansi).
+- Hasil kueri → (judul, URL, cuplikan, skor relevansi).
 - Metadata penyedia di panel Konfigurasi (biaya, kuota, status).
-- Bagian pemeringkatan ulang: pilih model pemeringkatan ulang, urutkan ulang hasil, tampilkan `positionDelta`.
+- Bagian pemeringkatan ulang: pilih model pemeringkatan ulang, susun ulang hasil, tampilkan `positionDelta`.
 - Status kosong dengan CTA ketika tidak ada penyedia pencarian yang dikonfigurasi.
-- Riwayat pencarian melalui `SearchHistory.tsx`.
-- Memanggil `POST /v1/search` (endpoint yang sudah ada, tanpa perubahan).
+- Cari riwayat melalui `SearchHistory.tsx`.
+- Memanggil `POST /v1/search` (titik akhir yang ada, tidak ada perubahan).
 
-### Tab Scrape
+### Tab Goresan
 
-Tab baru untuk mengekstrak konten dari URL melalui `POST /v1/web/fetch` (dibuat dalam rencana 05):
+Tab baru untuk mengekstraksi konten dari URL melalui `POST /v1/web/fetch` (dibuat pada rencana 05):
 
-- Input: URL + tombol aktif/nonaktif halaman penuh + pemilih format (markdown / teks / HTML).
-- Kirim → ambil → render `ScrapeResult.tsx`.
-- `ScrapeResult` merender pratinjau markdown + tombol aktif/nonaktif konten mentah.
-- Batas: jika isi respons > **256 KB**, UI menampilkan `(dipotong, lihat versi mentah)` dan membuka konten mentah dalam modal Monaco (D21).
-- Panel metadata: penyedia (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latensi, biaya, ukuran respons, jumlah tautan.
-- Menggunakan hook `useScrapeFetch.ts`.
+- Masukan: URL + halaman penuh beralih pemilih format + (penurunan harga / teks / HTML).
+- Kirimkan → ambil → render `ScrapeResult.tsx`.
+- `ScrapeResult` merender pratinjau penurunan harga + beralih mentah.
+- Cap: jika badan respons >** 256 KB** , UI menampilkan `(truncated, view raw)` dan dibuka mentah dalam modal Monaco (D21).
+- Panel metadata: penyedia (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search/keenable-search), latensi, biaya, ukuran respons, jumlah tautan.
+- Menggunakan kait `useScrapeFetch.ts`.
 
-### Tab Perbandingan
+### Bandingkan Tab
 
-Menjalankan kueri/URL yang sama pada hingga **4 penyedia secara paralel** (D22):
+Menjalankan query/URL yang sama hingga** 4 penyedia secara paralel** (H22):
 
-- Kolom berdampingan untuk setiap penyedia.
+- Kolom berdampingan per penyedia.
 - Metrik: latensi, biaya, jumlah hasil, ukuran respons.
-- Perhitungan tumpang tindih URL untuk pencarian (jumlah URL yang sama dibandingkan dengan hasil awal).
-- Memanggil `POST /v1/search` (pencarian) atau `POST /v1/web/fetch` (scrape) untuk setiap penyedia.
+- perhitungan URL tumpang tindih untuk pencarian (jumlah URLs bersama vs hasil awal).
+- Memanggil `POST /v1/search` (pencarian) atau `POST /v1/web/fetch` (mengikis) per penyedia.
 
 ---
 
@@ -100,13 +100,13 @@ Menjalankan kueri/URL yang sama pada hingga **4 penyedia secara paralel** (D22):
 
 ## Katalog Penyedia
 
-`ProviderCatalog.tsx` menampilkan daftar lengkap penyedia dari `GET /api/search/providers`
-(diperluas dalam F4 untuk menyertakan penyedia fetch):
+`ProviderCatalog.tsx` memperlihatkan daftar penyedia lengkap dari `GET /api/search/providers` (diperluas di F4 untuk menyertakan penyedia pengambilan):
 
-| `kind` | `"search"` (20 penyedia) atau `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (24 penyedia) atau `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search, keenable-search) |
 
-Status **ditentukan pada saat permintaan** dengan memeriksa apakah kredensial tersedia dan apakah
-semua kunci saat ini sedang dalam masa cooldown.
+Statusnya adalah** diperoleh pada waktu permintaan** dengan memeriksa apakah kredensial ada dan apakah semua kunci sedang dalam masa cooldown.
+
+`codex-search` (Codex Web Search) tidak memiliki kuncinya sendiri: ia menggunakan kembali akun Codex (ChatGPT) yang terhubung, sehingga setiap pencarian menghabiskan kuota langganan ChatGPT dan memerlukan waktu sekitar 10–40 detik. Ini berjalan ketika permintaan menamainya; pemilihan otomatis memerlukan tanda fitur `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` (dinonaktifkan secara default).
 
 ---
 
@@ -118,18 +118,18 @@ Placeholder kunci API selalu `$OMNIROUTE_API_KEY` (D11, digunakan bersama Playgr
 
 ---
 
-## Perubahan Backend
+## Perubahan Bagian Belakang
 
-Hanya satu perubahan backend yang diperlukan untuk fitur ini:
+Hanya diperlukan satu perubahan backend untuk fitur ini:
 
-### `GET /api/search/providers` yang Diperluas
+### `GET /api/search/providers` yang diperluas
 
-`src/app/api/search/providers/route.ts` diperluas untuk:
+`src/app/api/search/providers/route.ts` diperluas ke:
 
-- Menyertakan setiap penyedia fetch (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) dalam array.
-- Menambahkan `kind: "search" | "fetch"` ke setiap item.
-- Menambahkan `status: "configured" | "missing" | "rate_limited"` yang berasal dari status kredensial aktual.
-- Mempertahankan kompatibilitas mundur — field yang sudah ada (`id`, `name`, dll.) tidak berubah.
+- Sertakan setiap penyedia pengambilan (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`, `keenable-search`) dalam array.
+- Tambahkan `kind: "search" | "fetch"` ke setiap item.
+- Tambahkan `status: "configured" | "missing" | "rate_limited"` yang berasal dari status kredensial aktif.
+- Pertahankan kompatibilitas mundur — bidang yang ada (`id`, `name`, dll.) tidak berubah.
 
 ---
 

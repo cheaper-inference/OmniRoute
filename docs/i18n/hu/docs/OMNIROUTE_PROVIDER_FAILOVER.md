@@ -4,10 +4,20 @@
 
 ---
 
-A hibák osztályozása az újrapróbálkozási döntések meghozatala előtt történik.
+A hibákat az újrapróbálkozási döntések meghozatala előtt osztályozzák.
 
-Az átmeneti hibák, például az időtúllépések, a hálózati hibák, a sebességkorlátok és a szolgáltatók 5xx válaszai esetén másik szolgáltatóra lehet átváltani. A hitelesítési hibákat, a jogosultsági hibákat, az érvénytelen kéréseket, a nem elérhető modelleket és az ismeretlen hibákat a rendszer nem próbálja újra automatikusan.
+Átmeneti hibák, például időtúllépések, hálózati hibák, sebességkorlátok és a szolgáltató 5xx válaszai sikertelenek lehetnek. A kimerült kvótát vagy jóváírást (429-es kvóta vagy 402-es befizetés szükséges) a rendszer soha nem próbálja újra ugyanazon a szolgáltatónál, de átkerül egy másikhoz, amelynek a kvótája különálló. A hitelesítési hibákat, az engedélyezési hibákat, az érvénytelen kéréseket, a nem elérhető modelleket és az ismeretlen hibákat a rendszer nem próbálja újra vakon.
 
-Az alapértelmezett, szolgáltatók közötti házirend legfeljebb három szolgáltatói kísérletet engedélyez, sebességkorlátozás és időtúllépés esetén újrapróbálkozik, valamint az adminisztratív letiltást elkülöníti az áramkör ideiglenes állapotától.
+Az alapértelmezett szolgáltatók közötti házirend legfeljebb három szolgáltatói kísérletet tesz lehetővé, újrapróbálkozhat a gyakorisági korlátokkal és időtúllépésekkel, a feladatátvétel a kimerült kvóta esetén, és elkülönítve tartja az adminisztratív letiltást az ideiglenes áramkör állapotától.
 
-Az áramkör állapotai: `closed`, `open` és `half_open`. A lehűlési időszak egy korlátozott próbát ütemez; sikeres próba esetén az áramkör bezárul, sikertelen próba esetén pedig újra megnyílik.
+## Ahol ez vonatkozik
+
+- **Kombók** a kombó saját stratégiája és beállításai szerint átléphetnek a célpontjaik között.
+- **Egy csupasz modellazonosító** (nincs `provider/` előtag), amelyet több aktív szolgáltató is kiszolgál, anélkül, hogy ennek a pontos névnek a kombinációja lenne, először a szolgáltató következtetéseihez kell elküldeni. Ha ez a kísérlet olyan módon meghiúsul, hogy a házirend sikertelen, akkor ugyanaz a kérés elküldésre kerül a következő aktív szolgáltatónak, amely kiszolgálja az azonosítót. A válasz `x-omniroute-fallback-attempts` tartalmazza a válaszoló előtt próbálkozott szolgáltatók számával.
+  - Minden helyettes pontosan úgy van feljogosítva, mintha a következtetés választotta volna ki. A API kulcs által blokkolt vagy nem elismert célpont felfelé irányuló hívás nélkül kimarad, és az ügyfél a valódi upstream hibát kapja, nem pedig egy olyan cél elutasítását, amelyet soha nem nevezett meg.
+  - Csak a sikertelen válasz lép tovább: az első streamelt bájt után semmi sem sikerül.
+  - A vészhelyzeti tartalék modellcsere csak akkor érvényes, ha a kért modell minden szolgáltatója meghiúsult.
+  - A kapcsolathoz rögzített kérés (`x-omniroute-connection`) rajta marad.
+  - Az előtaggal ellátott azonosító (`provider/model`) soha nem kerül átirányításra másik szolgáltatóhoz.
+
+Az áramkör állapotai a következők: `closed`, `open` és `half_open`. A lehűlés ütemez egy korlátozott szondát; a sikeres szonda lezárja az áramkört, a sikertelen szonda pedig újra kinyitja.

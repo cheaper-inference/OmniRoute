@@ -114,209 +114,205 @@ automaticky, bez jakéhokoli štítku.
 
 ## Podrobný kontrolní seznam
 
-### Před vydáním
+### Předběžné vydání
 
-- [ ] Všechny PR určené pro toto vydání jsou sloučeny do `release/vX.Y.0`
-- [ ] Všechny otevřené položky v Linear / issues pro tuto verzi jsou uzavřeny nebo přesunuty do dalšího milníku
-- [ ] CI je na větvi `release/vX.Y.0` úspěšné
-- [ ] V kódu nejsou žádné značky `TODO(release)`: `grep -r "TODO(release)" src/ open-sse/`
-- [ ] Základní obraz Dockeru je aktuální (nyní `node:24.15.0-trixie-slim`)
+- [ ] Všechny PRs cílené na toto vydání jsou sloučeny do `release/vX.Y.0`
+- [ ] Všechny otevřené položky Linear/issue pro tuto verzi jsou uzavřeny nebo posunuty k dalšímu milníku
+- [ ] CI zelená na větvi `release/vX.Y.0`
+- [ ] V kódu nejsou žádné značky `TODO(release)` : `grep -r "TODO(release)" src/ open-sse/`
+- [ ] základní obrázek Docker aktuální (aktuálně `node:24.15.0-trixie-slim`)
 
 ### Verze a seznam změn
 
-- [ ] Spusťte `/version-bump-cc <patch|minor|major>` (dovednost Claude Code)
-  - Navýší verzi v `package.json`, `electron/package.json`
-  - Znovu vygeneruje `CHANGELOG.md` z commitů gitu od posledního tagu
-  - Aktualizuje odznaky v README.md
-- [ ] Ručně zkontrolujte CHANGELOG.md a v případě potřeby upravte zprávy commitů
-- [ ] Ověřte, že nejnovější sekce semver v `CHANGELOG.md` odpovídá verzi v `package.json`
-- [ ] Ponechte `## [Unreleased]` jako první sekci seznamu změn pro nadcházející práci
-- [ ] Aktualizujte `docs/openapi.yaml` → `info.version` musí odpovídat verzi v `package.json`
+- [ ] Spustit `/version-bump-cc <patch|minor|major>` (Claude Code skill)
+  - Nárazy `package.json`, `electron/package.json`
+  - Regeneruje `CHANGELOG.md` z git commitů od poslední značky
+  - Aktualizace odznaků README.md
+- [ ] Ručně zkontrolujte CHANGELOG.md a v případě potřeby vyčistěte zprávy odevzdání
+- [ ] Zajistěte, aby se nejnovější sekce semver v `CHANGELOG.md` rovnala verzi `package.json`
+- [ ] Ponechte si `## [Unreleased]` jako první sekci changelog pro nadcházející práci
+- [ ] Aktualizace `docs/openapi.yaml` → `info.version` se musí rovnat verzi `package.json`
 
 ### Kvalita kódu
 
-- [ ] `npm run lint` — 0 chyb (varování existovala již dříve)
-- [ ] `npm run typecheck:core` — bez chyb
-- [ ] `npm run typecheck:noimplicit:core` — bez chyb (striktní)
-- [ ] `npm run check:cycles:ratchet` — v rámci pevně stanoveného limitu `metrics.cycles` (samotný `check:cycles` skončí s kódem 1 při jakémkoli cyklu, #15281)
+- [ ] `npm run lint` — 0 chyb (upozornění již existují)
+- [ ] `npm run typecheck:core` — čistý
+- [ ] `npm run typecheck:noimplicit:core` — čistý (přísný)
+- [ ] `npm run check:cycles:ratchet` — v rámci zmrazeného stropu `metrics.cycles` (holé `check:cycles` opustí 1 v jakémkoli cyklu, #15281)
 - [ ] `npm run check:any-budget:t11` — v rámci rozpočtu
-- [ ] `npm run check:route-validation:t06` — bez chyb
-- [ ] `npm run check:node-runtime` — splněna minimální podporovaná verze běhového prostředí (`>=22.22.2 <23`, `>=24.0.0 <27`, podle `SUPPORTED_NODE_RANGE` v `src/shared/utils/nodeRuntimeSupport.ts`; v souladu s `engines` v `package.json`)
+- [ ] `npm run check:route-validation:t06` — čistý
+- [ ] `npm run check:node-runtime` — podporované runtime minimum (`>=22.22.2 <23`, `>=24.0.0 <27`, za `SUPPORTED_NODE_RANGE` v `src/shared/utils/nodeRuntimeSupport.ts`; zarovnáno s `package.json` `engines`)
 
 ### Testování
 
-- [ ] `npm run test:unit` — úspěšné
-- [ ] `npm run test:vitest` — úspěšné (server MCP, autoCombo, mezipaměť)
-- [ ] `npm run test:coverage` — splněna hranice 60/60/60/60 (příkazy/řádky/funkce/větve)
-- [ ] `npm run test:integration` — úspěšné (pokud se změny týkají DB / obslužných rutin)
-- [ ] `npm run test:combo:matrix` — úspěšné (matice strategií combo: deterministicky ověřuje rozhodnutí o výběru všech 19 veřejných strategií směrování; spusťte při změnách směrování combo, vyhodnocování strategií nebo záložní logiky)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **volitelné/ruční** (řízený test základní funkčnosti proti skutečným upstreamům; načítá snapshot DB pouze pro čtení z VPS `root@192.168.0.15`; používá skutečné poskytovatele a spotřebovává kredity; nikdy se nespouští v CI; bez povolovací proměnné se korektně přeskočí)
-- [ ] `npm run test:combo:live:vps` — **volitelné/ruční** (živý test základní funkčnosti VPS fáze 3: 7 scénářů HTTP proti živému serveru `.15` prostřednictvím čistého Node ESM; vyžaduje `ssh root@192.168.0.15`; vytváří/odstraňuje pouze combo s názvy `__live_test__*`; používá skutečné poskytovatele; nikdy se nespouští v CI)
-- [ ] `npm run test:e2e` — úspěšné (změny UI)
-- [ ] `npm run test:protocols:e2e` — úspěšné (změny MCP/A2A)
-- [ ] `npm run test:ecosystem` — úspěšné
+- [ ] `npm run test:unit` — projít
+- [ ] `npm run test:vitest` — pass (MCP server, autoCombo, cache)
+- [ ] `npm run test:coverage` — brána 60/60/60/60 splněna (statements/lines/functions/branches)
+- [ ] `npm run test:integration` — pass (pokud se změní, dotkněte se DB / handlerů)
+- [ ] `npm run test:combo:matrix` — pass (matice kombinované strategie: deterministicky prokazuje rozhodnutí o výběru všech 22 veřejných směrovacích strategií; spustí se, když se dotknete kombinovaného směrování, řešení strategie nebo záložní logiky)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (gated real-upstream smoke; získává snímek DB pouze pro čtení ze VPS `root@192.168.0.15`; zasahuje skutečné poskytovatele, stojí kredity; nikdy neběží v CI; přeskakuje čistě bez brány)
+- [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS live smoke: 7 scénářů HTTP proti živému serveru `.15` prostřednictvím prostého uzlu ESM; vyžaduje `ssh root@192.168.0.15`; creates/deletes pouze komba `__live_test__*` ; zasáhne skutečné poskytovatele; nikdy neběží v CI)
+- [ ] `npm run test:e2e` — pass (UI změny)
+- [ ] `npm run test:protocols:e2e` — pass (MCP/A2A změny)
+- [ ] `npm run test:ecosystem` — projít
 
-### Hooky (ověřované pomocí Husky)
+### Háčky (ověřeno Husky)
 
-Hooky Husky se nacházejí v `.husky/` a spouštějí se automaticky při operacích gitu.
+Husky hooky žijí v `.husky/` a spouštějí se automaticky při operacích git.
 
-- **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** rychlé deterministické kontroly — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (aktivováno 2026-06-13). Záměrně nezahrnuje `test:unit` (pomalé; pokrývá je úloha CI `test-unit`).
-  - Před odesláním větví vydání spusťte ručně `npm run test:unit`.
+- **předem se zavázat:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
+- **předtlačení:** rychlé deterministické brány — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (aktivováno 2026-06-13). Záměrně vylučuje `test:unit` (pomalé; pokryto úlohou CI `test-unit` ).
+  - Před zatlačením uvolňovacích větví spusťte `npm run test:unit` ručně.
 
-Pokud hook selže: opravte základní příčinu, neobcházejte jej pomocí `--no-verify`.
+Pokud hák selže: opravte základní problém, neobejděte pomocí `--no-verify`.
 
-### Konvenční commity
+### Konvenční závazky
 
-Všechny commity určené pro vydání musí dodržovat formát `type(scope): subject`.
+Všechny odevzdání vázané na vydání musí být ve formátu `type(scope): subject`.
 
 **Platné typy:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**Platné rozsahy:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**Platné rozsahy:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker` `authz` `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`
 
-Zpětně nekompatibilní změny: přidejte zápatí `BREAKING CHANGE:` nebo `!` za rozsah (např. `feat(api)!: drop /v0`).
+Přerušení změn: přidejte zápatí `BREAKING CHANGE:` nebo `!` za rozsah (např. `feat(api)!: drop /v0`).
 
 ### Dokumentace
 
-- [ ] `npm run check:docs-sync` proběhne úspěšně (automaticky spouštěno pomocí pre-commit)
-- [ ] `npm run check:docs-all` proběhne úspěšně (souhrnná kontrola: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` skončí s kódem 0 — kontrakt proměnných prostředí mezi kódem ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` je neporušený
-- [ ] `npm run check:doc-links` skončí s kódem 0 — po restrukturalizaci nejsou poškozeny žádné interní odkazy v markdownu
-- [ ] `docs/architecture/ARCHITECTURE.md` zkontrolováno s ohledem na odchylky úložiště a běhového prostředí
-- [ ] `docs/guides/TROUBLESHOOTING.md` zkontrolováno s ohledem na odchylky proměnných prostředí a provozu
-- [ ] Pokud se změnil `.env.example`: aktualizujte `docs/reference/ENVIRONMENT.md`
-- [ ] Pokud má nová funkce UI: musí být zmíněna v `docs/guides/USER_GUIDE.md`
-- [ ] Pokud má nová funkce API: aktualizujte `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml`
-- [ ] Pokud je nová funkce modulem: musí existovat vyhrazený soubor `docs/<MODULE>.md`
-- [ ] Pokud jde o zpětně nekompatibilní změnu: `docs/guides/TROUBLESHOOTING.md` obsahuje poznámku k migraci
+- [ ] průkazy `npm run check:docs-sync` (automatické spuštění před potvrzením)
+- [ ] `npm run check:docs-all` passy (deštník: docs-sync + docs-counts + env-doc-sync + zastaralé-verze + doc-links)
+- [ ] `npm run check:env-doc-sync` ukončí 0 kód — ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env smlouva je nedotčena
+- [ ] `npm run check:doc-links` končí 0 — po restrukturalizaci žádné nefunkční interní markdown reference
+- [ ] `docs/architecture/ARCHITECTURE.md` recenzován na storage/runtime drift
+- [ ] `docs/guides/TROUBLESHOOTING.md` recenzován pro env var a provozní drift
+- [ ] Pokud se `.env.example` změnilo: `docs/reference/ENVIRONMENT.md` aktualizováno
+- [ ] Pokud má nová funkce UI: `docs/guides/USER_GUIDE.md` ji zmiňuje
+- [ ] Pokud má nová funkce API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` aktualizováno
+- [ ] Pokud je novou funkcí modul: existuje vyhrazená `docs/<MODULE>.md`
+- [ ] Pokud dojde ke změně: `docs/guides/TROUBLESHOOTING.md` má poznámku o migraci
 
 ### i18n
 
-- [ ] `npm run i18n:check` skončí s kódem 0 — stav překladů (`.i18n-state.json`) je synchronizován se zdrojovou dokumentací (ve striktním režimu nejsou žádné odchylky zdrojů; upozornění v režimu varování je přijatelné pro úpravy dokumentace na poslední chvíli, ale před vytvořením tagu by měl být výsledek 0)
-- [ ] `npm run i18n:check-ui-coverage` skončí s kódem 0 — každé národní prostředí UI dosahuje alespoň minimálního pokrytí 80 %
-- [ ] `npm run i18n:sync-ui:dry` hlásí 0 chybějících klíčů ve všech 66 cílových národních prostředích (všechna kromě zdrojového `en`)
-- [ ] Pokud se změnila zdrojová anglická dokumentace, spusťte před vytvořením tagu `npm run i18n:run` (vyžaduje `OMNIROUTE_TRANSLATION_API_KEY` v `.env`)
-- [ ] Příspěvky k překladům lze v případě drobných změn odložit na další vydání (zaznamenejte v CHANGELOG)
+- [ ] `npm run i18n:check` ukončí 0 stav překladu — (`.i18n-state.json`) v synchronizaci se zdrojovými dokumenty (žádné posunuté zdroje v přísném režimu; upozornění v režimu varování je přijatelné pro úpravy dokumentů na poslední chvíli, ale před označením by mělo být 0)
+- [ ] `npm run i18n:check-ui-coverage` opustí 0 — každé UI locale na nebo nad hranicí 80% pokrytí
+- [ ] `npm run i18n:sync-ui:dry` hlásí 0 chybějících klíčů ve všech 66 cílových lokalitách (každé národní prostředí kromě zdroje `en` )
+- [ ] Pokud se zdrojové anglické dokumenty změnily, spusťte před tagováním `npm run i18n:run` (vyžaduje `OMNIROUTE_TRANSLATION_API_KEY` v `.env`).
+- [ ] Překladové příspěvky mohou být odloženy do dalšího vydání, pokud jsou menší (track in CHANGELOG)
 
 ### Migrace databáze
 
-- [ ] Pokud `src/lib/db/migrations/` obsahuje nové soubory:
+- [ ] Pokud má `src/lib/db/migrations/` nové soubory:
   - [ ] Každá migrace je idempotentní (`CREATE TABLE IF NOT EXISTS` atd.)
-  - [ ] Migrace jsou zabaleny do transakcí
-  - [ ] Jsou správně očíslovány (bez mezer v posloupnosti)
-- [ ] Otestujte na nové instalaci: odstraňte `~/.omniroute/omniroute.db` a spusťte `npm run dev`
-- [ ] Otestujte na existující instalaci: zazálohujte DB, spusťte migraci a ověřte schéma
-- [ ] Soubory WAL (`-wal`, `-shm`) jsou správně zpracovány, pokud migrace přepisuje tabulky
+  - [ ] Migrace zabalené do transakcí
+  - [ ] Správně očíslováno (žádné mezery v pořadí)
+- [ ] Otestujte novou instalaci: odstraňte `~/.omniroute/omniroute.db` a spusťte `npm run dev`
+- [ ] Otestujte stávající instalaci: zálohujte DB, spusťte migraci, ověřte schéma
+- [ ] WAL soubory (`-wal`, `-shm`) zpracované správně, pokud migrace přepisuje tabulky
 
-### Katalog poskytovatelů (ověřovaný pomocí Zod)
+### Katalog poskytovatelů (ověřeno Zod)
 
-- [ ] Schéma Zod v `src/shared/constants/providers.ts` je platné při načtení
+- [ ] `src/shared/constants/providers.ts` Zod schéma platné při načítání
   - [ ] Všichni poskytovatelé mají povinná pole (`id`, `label`, `kind` atd.)
-  - [ ] Pro nové bezplatné poskytovatele je uvedeno `freeNote`
-  - [ ] Poskytovatelé OAuth mají `oauthConfig` registrovanou v `src/lib/oauth/constants/oauth.ts`
-- [ ] Pokud byl přidán nový poskytovatel: odpovídající executor v `open-sse/executors/`
-- [ ] Pokud nejde o formát OpenAI: translator v `open-sse/translator/`
-- [ ] Modely jsou registrovány v `open-sse/config/providerRegistry.ts`
-- [ ] Jednotkové testy v `tests/unit/` pokrývají klasifikaci poskytovatelů a směrování
+  - [ ] `freeNote` poskytované pro nové bezplatné poskytovatele
+  - [ ] poskytovatelé OAuth mají `oauthConfig` registrovanou v `src/lib/oauth/constants/oauth.ts`
+- [ ] Pokud byl přidán nový poskytovatel: odpovídající exekutor v `open-sse/executors/`
+- [ ] Pokud není formát OpenAI: překladač v `open-sse/translator/`
+- [ ] Modely registrované v `open-sse/config/providerRegistry.ts`
+- [ ] Unit testy v `tests/unit/` pokrývají klasifikaci a směrování poskytovatelů
 
-### Desktopová aplikace (Electron)
+### Desktop (Electron)
 
-Pokud se změnil adresář `electron/`:
+Pokud se `electron/` změnil:
 
-- [ ] `npm run electron:smoke:packaged` proběhne úspěšně
-- [ ] Sestavení byla otestována alespoň pro jednu z možností `:win`, `:mac`, `:linux`
-- [ ] Certifikáty pro podepisování kódu nejsou prošlé (pokud se podepisuje)
-- [ ] Verze v `electron/package.json` odpovídá kořenovému souboru `package.json`
-- [ ] Ukazatel kanálu automatických aktualizací byl při vydání do kanálu `stable` aktualizován
+- [ ] `npm run electron:smoke:packaged` projde
+- [ ] Sestavení testována alespoň na jednu z `:win`, `:mac`, `:linux`
+- [ ] Platnost certifikátů podepisování kódu nevypršela (pokud podepisujete)
+- [ ] Verze `electron/package.json` odpovídá root `package.json`
+- [ ] Ukazatel kanálu automatické aktualizace se aktualizuje při uvolnění do `stable`
 
-### Struktura sestavení
+### Rozvržení sestavení
 
-Repozitář používá tři samostatné výstupní adresáře — nikdy je nezaměňujte:
+Úložiště používá tři různé výstupní adresáře — nikdy je nesměšují:
 
-| Adresář   | Účel                                                                 | Sledován?        |
-| --------- | -------------------------------------------------------------------- | ---------------- |
-| `src/`    | Zdrojový kód aplikace (TypeScript / TSX)                             | Ano              |
-| `.build/` | Mezivýstupy sestavení — výstup `next build` (`distDir`)              | Ne (v gitignore) |
-| `dist/`   | Distribuovatelný balíček npm — sestavený pomocí `assembleStandalone` | Ne (v gitignore) |
+| Adresář   | Účel                                                      | Sledováno?      |
+| --------- | --------------------------------------------------------- | --------------- |
+| `src/`    | Zdroj aplikace (TypeScript / TSX)                         | Ano             |
+| `.build/` | Sestavení meziproduktů — `next build` výstup (`distDir`)  | Ne (ignorováno) |
+| `dist/`   | Odesílatelný balíček npm — sestavený `assembleStandalone` | Ne (ignorováno) |
 
-> **Poznámka pro operátora:** adresář obrazu na vzdáleném VPS zůstává `/usr/lib/node_modules/omniroute/app/`.
-> Přesunul se pouze výstup sestavení **uvnitř repozitáře** (`app/` → `dist/`). Nasazovací skills pomocí rsync
-> zkopírují obsah `dist/` do vzdáleného adresáře `app/` — nejsou nutné žádné změny cest na VPS.
+> **Poznámka provozovatele:** vzdálený adresář obrazu VPS zůstává `/usr/lib/node_modules/omniroute/app/`. Pouze** in-repo** výstup sestavení se přesunul (`app/` → `dist/`). Dovednosti nasazení rsync `dist/` obsah do vzdáleného `app/` dir — žádné změny VPS cesty.
 
-**Postup jednoho sestavení:**
+**Postup jedné sestavení:**
 
 ```
 npm run build:release
-  └─ rm -rf .build dist          (vyčištění)
-  └─ next build → .build/next/   (mezivýstupy)
-  └─ assembleStandalone          (zkopíruje standalone + static + public + natives → dist/)
-  └─ zapíše dist/BUILD_SHA       (kontrolní soubor HEAD)
+  └─ rm -rf .build dist          (clean)
+  └─ next build → .build/next/   (intermediates)
+  └─ assembleStandalone          (copies standalone + static + public + natives → dist/)
+  └─ writes dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-Pro nasazení NESPOUŠTĚJTE `npm run build` následovaný samostatným `npm run build:cli` — použijte
-`npm run build:release`, který v jediném příkazu provede čisté sestavení a vytvoří kontrolní soubor.
+Proveďte NOT spuštění `npm run build` následované samostatným `npm run build:cli` pro nasazení — použijte `npm run build:release`, které provede čisté přebudování + sentinelu jedním příkazem.
 
 ### Ověření artefaktu
 
-- [ ] `npm run build:release` proběhne úspěšně a `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` proběhne čistě — bez `app.__qa_backup`, `scripts/scratch`, `package-lock.json` nebo jiných lokálních pozůstatků
-- [ ] Po sestavení existuje `dist/server.js`
-- [ ] Volitelný lokální smoke test zabaleného běhového prostředí: `npm run dev:candidate -- validate` po spuštění `npm run dev:candidate -- build` spustí zabalený tarball s izolovaným `DATA_DIR` a zkontroluje `/api/health` + `/v1/models` (viz [Doporučený postup přispívání](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
+- [ ] `npm run build:release` uspěje a `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] `npm run check:pack-artifact` clean — no `app.__qa_backup`, `scripts/scratch`, `package-lock.json` nebo jiné místní zbytky
+- [ ] `dist/server.js` existuje po sestavení
+- [ ] Volitelný místní zabalený běhový kouř: `npm run dev:candidate -- validate` poté, co `npm run dev:candidate -- build` nabootuje zabalený tarball na izolovaném `DATA_DIR` a zkontroluje `/api/health` + `/v1/models` (viz [Příspěvek Golden Path](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) )
 
-### Tagování a vydání
+### Označování a uvolnění
 
-- [ ] Spusťte `/generate-release-cc` (skill Claude Code):
-  - Vytvoří tag `vX.Y.Z`
-  - Odešle tag a větev
-  - Vytvoří GitHub Release s textem seznamu změn
-  - Připojí instalační soubory Electronu (pokud byly sestaveny)
+- [ ] Spustit `/generate-release-cc` (Claude Code skill):
+  - Vytvoří značku `vX.Y.Z`
+  - Tlačí značku a větev
+  - Otevře GitHub Release s tělem changelogu
+  - Připojuje instalační programy Electron (pokud jsou vytvořeny)
 - [ ] Nebo ručně:
   ```bash
-  git tag -a vX.Y.Z -m "Vydání vX.Y.Z"
+  git tag -a vX.Y.Z -m "Release vX.Y.Z"
   git push origin vX.Y.Z
   gh release create vX.Y.Z --notes-from-tag
   ```
 
-### Nasazení
+### Nasadit
 
-Nasazovací skills používají odlehčený postup s rsync — bez `npm pack` a bez `npm i -g`:
+Nasaďte dovednosti pomocí lehkého toku rsync — no `npm pack`, no `npm i -g`:
 
-- [ ] Použijte nasazovací skill odpovídající cíli:
-  - `/deploy-vps-local-cc` — lokální VPS (192.168.0.15)
-  - `/deploy-vps-akamai-cc` — VPS Akamai (69.164.221.35)
+- [ ] Použijte dovednost nasazení, která odpovídá cíli:
+  - `/deploy-vps-local-cc` — místní VPS (192.168.0.15)
+  - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — oba
-- [ ] Před nasazením ověřte, že `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] Sestavení musí proběhnout tam, kde je `node_modules` skutečný adresář (hlavní pracovní kopie nebo worktree vytvořený pomocí `npm ci` — NIKOLI worktree používající symbolický odkaz)
-- [ ] Proveďte smoke test nasazené instance:
-  - Otevřete `/dashboard/health` → zkontrolujte, že řetězec verze odpovídá vydání
-  - Odešlete požadavek na `/v1/chat/completions` vůči známému poskytovateli
-  - Ověřte, že `/api/monitoring/health` vrací circuit breakery ve stavu `CLOSED`
-  - Ověřte, že transporty MCP odpovídají (`/mcp` HTTP, `/mcp-sse` SSE)
+- [ ] Před nasazením potvrďte `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] Sestavení musí běžet tam, kde je `node_modules` skutečné (hlavní pokladna nebo pracovní strom `npm ci`'d — NOT symbolický pracovní strom)
+- [ ] Instance nasazení testu kouře:
+  - Otevřít `/dashboard/health` → kontrola verze řetězce odpovídá vydání
+  - Spusťte požadavek `/v1/chat/completions` proti známému poskytovateli
+  - Ověřte, `/api/monitoring/health` vrací jističe `CLOSED`
+  - Potvrďte odezvu transportů MCP (`/mcp` HTTP, `/mcp-sse` SSE)
 
 ### Po vydání
 
-- [ ] Spusťte `/capture-release-evidences-cc` (skill Claude Code)
-  - Zachytí snímky obrazovky či nahrávky nových funkcí ve formátu WebP
-  - Připojí je k poznámkám k vydání / blogovému příspěvku
-- [ ] Aktualizujte GitHub Discussions / Discord oznámením o vydání
-- [ ] Otevřete milník pro další verzi
-- [ ] Pokud je vydání kritické: připněte diskuzi nebo přidejte příspěvek do `news.json` pro banner v aplikaci
+- [ ] Spustit `/capture-release-evidences-cc` (Claude Code skill)
+  - Zachycuje WebP screenshots/recordings nových funkcí
+  - Přikládá poznámky k vydání / blogový příspěvek
+- [ ] Aktualizujte GitHub Diskuze / Discord s oznámením o vydání
+- [ ] Otevřít milník pro další verzi
+- [ ] Pokud je to kritické: připněte diskusi nebo příspěvek v `news.json` pro banner v aplikaci
 
-### Kontrolní brána veřejného spuštění Radaru
+### Radarová veřejná spouštěcí brána
 
-Oznámení Radaru je záměrně zapsáno s `active: false`. Aktivace představuje samostatnou
-změnu provedenou poté, co budou doloženy všechny níže uvedené položky:
+Radarové oznámení je úmyslně spácháno pomocí `active: false`. Aktivace je samostatnou změnou po prokázání každé položky níže:
 
-- [ ] Všechny navazující PR Radaru jsou sloučeny a CI pro špičku vydání je zelené
-- [ ] Nasaďte a proveďte smoke test OSS tras Radaru, přičemž `RADAR_ENABLED` zůstane ve výchozím nastavení vypnuté
-- [ ] Proveďte smoke testy `GET /planos`, `/termos`, `/privacidade` a `/reembolso` na určeném hostiteli Radaru
-- [ ] Zaznamenejte identitu/kontakt/adresu operátora a právní kontrolu schválenou vlastníkem v privátní službě
-- [ ] Vyzkoušejte Stripe Checkout a podepsaný webhook pouze v testovacím režimu
-- [ ] Vyzkoušejte jedno šifrované doručení transakčního e-mailu se schváleným odesílatelem/doménou
-- [ ] Prokažte obnovení ze zálohy a jeden výzkumný běh pod dohledem s omezeným rozpočtem
-- [ ] Před přijetím dokladu o daru schvalte zásady kontroly BRL/PIX
-- [ ] Veřejný Checkout povolte až po splnění předchozích podmínek a poté aktivujte nové ID v `news.json`
-- [ ] Ověřte, že banner na domovské stránce používá lokalizovaný text a že se nové ID znovu zobrazí po skrytí staršího ID
+- [ ] Všechny naskládané radarové PRs jsou sloučeny a uvolňovací hrot CI je zelený
+- [ ] Nasazujte a kouřte OSS radarové trasy se `RADAR_ENABLED` ve výchozím nastavení stále vypnutým
+- [ ] Kouřte `GET /planos`, `/termos`, `/privacidade` a `/reembolso` na pojmenovaném hostiteli radaru
+- [ ] Provozovatel záznamu identity/contact/address a vlastníkem schválené právní přezkoumání v soukromé službě
+- [ ] Cvičení Stripe Checkout a podepsaný webhook pouze v testovacím režimu
+- [ ] Proveďte jedno šifrované doručení transakčního e-mailu se schváleným sender/domain
+- [ ] Prokažte obnovení zálohy a jeden kontrolovaný výzkum s omezeným rozpočtem
+- [ ] Před přijetím důkazů o daru schvalte zásady kontroly BRL/PIX
+- [ ] Povolte veřejnou pokladnu pouze za předchozími branami a poté aktivujte novou `news.json` ID
+- [ ] Ověřte, že domovský banner používá lokalizovanou kopii a po zrušení staršího ID se znovu objeví nové ID
 
 ## Rychlý test vestavěných služeb (v3.8.4+)
 

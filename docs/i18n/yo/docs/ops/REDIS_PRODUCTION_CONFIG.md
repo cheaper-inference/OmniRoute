@@ -65,67 +65,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Ìṣàtúnṣe Iṣéjade Tí A Ṣedúró Fún
+## Niyanju Production Tuning
 
-### 1. Àwọn Àṣàyàn Pool Ìsopọ̀ / Client (ioredis `Redis` constructor)
+### 1. Pool Asopọmọra / Awọn aṣayan Onibara (ioredis `Redis` Constructor)
 
-Kóòdù tó wà lọ́wọ́lọ́wọ́ ń ṣẹ̀dá `new Redis(url)` kan ṣoṣo láìsí àwọn àṣàyàn àkànṣe. Fún àwọn ìmúṣiṣẹ́ iṣéjade
-aládàpọ̀-ẹ̀dà, fi factory client kan sínú kóòdù náà tàbí fi ohun kan yí `getRedisClient()` ká:
+Koodu lọwọlọwọ ṣẹda `new Redis(url)` ẹyọkan laisi awọn aṣayan aṣa. Fun iṣelọpọ awọn imuṣiṣẹ olona-ajọra, kọja ile-iṣẹ alabara kan ninu koodu tabi fi ipari si `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // kò sí òpin àtúnṣe; jẹ́ kí retryStrategy pinnu
-  enableReadyCheck: true, // jẹ́rìí pé server ti ṣetán kí ó tó gba àwọn ìpè
-  lazyConnect: true, // má ṣe sopọ̀ nígbà ìṣẹ̀dá; dúró de ìpè àkọ́kọ́
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // jáwọ́ lẹ́yìn àtúnṣe 10 → tún sopọ̀ nígbà tó bá yá
-    return Math.min(times * 200, 5000); // 200ms, 400ms, …, òpin 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // darapọ̀ àwọn command alásìkò-pọ̀ sí ìkọ̀wé TCP kan
-  keepAlive: 10000, // TCP keep‑alive ní gbogbo 10s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**Àwọn pàṣípààrọ̀ pàtàkì:**
+**Awọn iṣowo bọtini:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — èyí ló dára jù fún iṣéjade kí àwọn
-  ìtúnrẹ̀sílẹ̀ Redis fún ìgbà díẹ̀ má bàa fa kí gbogbo request kùnà lẹ́sẹ̀kẹsẹ̀. Fallback inú-memory tó wà nínú
-  `checkRateLimit()` ń gba ipa-ọ̀nà ìkùnà náà.
-- `lazyConnect: true` — ń yẹra fún gbígbẹ́kẹ̀lé Redis ní ìbẹ̀rẹ̀ kí server tó
-  bẹ̀rẹ̀ sí í gba àwọn ìsopọ̀.
-- `enableAutoPipelining: true` — ń dín iye ìrìn-àti-padà kù fún àwọn àyẹ̀wò rate-limit alásìkò-pọ̀;
-  ó ṣàǹfààní ní >50 RPS lórí ìsopọ̀ kan ṣoṣo.
+- `maxRetriesPerRequest: null` + `retryStrategy` — fẹ fun iṣelọpọ nitoribẹẹ awọn atunbere Redis igba diẹ maṣe kuna lẹsẹkẹsẹ gbogbo ibeere. Ipadabọ-iranti ni `checkRateLimit()` fa ọna ikuna naa.
+- `lazyConnect: true` — yago fun igbẹkẹle ibẹrẹ lori Redis ti o wa ni oke ṣaaju ki olupin bẹrẹ gbigba awọn asopọ.
+- `enableAutoPipelining: true` — dinku awọn irin-ajo-yika fun awọn sọwedowo iye-iye nigbakanna; anfani ni > 50 RPS lori kan nikan asopọ.
 
-### 2. Àtúnṣe Server Redis (`redis.conf`)
+### 2. Iṣeto olupin Redis (`redis.conf`)
 
 ```
 # Memory
-maxmemory 80%                        # fi àyè sílẹ̀ fún cache ojú-ìwé OS
-maxmemory-policy allkeys-lru         # lé àwọn àkọsílẹ̀ cache auth tí ó ti pé jáde lábẹ́ ìfúnpọ̀
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Ìtọ́jú data (kò pọn dandan — OmniRoute lè yè ìkọlù láìsí i)
-save 300 1                           # ya snapshot ó kéré tán ní gbogbo 5 min bí ≥1 key bá yípadà
-appendonly no                        # AOF kò ṣe pàtàkì; a lè tún data náà ṣe
-appendfsync no                       # kò sí overhead fsync (RDB ti tó)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Nẹ́tíwọ́ọ̀kì
-timeout 0                            # má ṣe gé ìsopọ̀ tí kò ṣiṣẹ́
-tcp-keepalive 300                    # keep‑alive 5 min
-tcp-backlog 511                      # backlog ìsopọ̀ fún ẹrù tó ń dé lojijì
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Ìṣiṣẹ́
-hz 10                                # àiyipada; 100 fún èyí tó nílò latency kékeré
-activedefrag yes                     # ṣe defragmentation fúnra rẹ̀ nígbà tí fragmentation >10%
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Pàṣípààrọ̀ fún `maxmemory-policy allkeys-lru`:** Àwọn àkọsílẹ̀ cache Auth lè jẹ́ lílé jáde lábẹ́
-ìfúnpọ̀ memory. Èyí kò léwu — `setCachedApiKey` máa ń tún un kún nígbà gbogbo tí miss bá ṣẹlẹ̀, àti pé
-fallback SQLite ni orísun àṣẹ. Script Lua rate-limiter náà ń ṣẹ̀dá àwọn key kéékèèké tí
-a ṣe láti wà fún ìgbà kúkúrú.
+**Iṣowo fun `maxmemory-policy allkeys-lru`:** Awọn titẹ sii kaṣe ijẹrisi le jẹ jade labẹ titẹ iranti. Eyi jẹ ailewu — `setCachedApiKey` nigbagbogbo tun gbejade lori miss, ati pe SQLite fallback jẹ aṣẹ. Iwe afọwọkọ Lua opin-oṣuwọn ṣẹda awọn bọtini kekere ti o jẹ igba diẹ nipasẹ apẹrẹ.
 
-### 3. Àwọn Ètò Docker Compose
+### 3. Docker Ṣajọ Eto
 
-Compose prod (`docker-compose.prod.yml`) ń lo `redis:8.6.2-alpine`. Ṣàfikún:
+Awọn prod compose (`docker-compose.prod.yml`) nlo `redis:8.6.2-alpine`. Fi kun:
 
 ```yaml
 redis:
@@ -150,35 +142,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Àwọn Ohun Tó Yẹ Kí A Gbé Yẹ̀ Wò Fún Multi‑Instance / Scaling
+### 4. Awọn Apeere Olona-Apeere / Iwọn Iwọn
 
-**Redis kan ṣoṣo fún gbogbo replica** — script Lua rate-limiter náà gbẹ́kẹ̀lé àyè key aláṣẹ kan ṣoṣo.
-Ọ̀pọ̀ instance Redis lẹ́yìn àwọn replica yóò mú atomicity sọnù
-yóò sì sọ budget náà di ìlọ́po méjì. Lo Redis kan ṣoṣo (tàbí cluster Redis Sentinel pẹ̀lú failover) fún
-gbogbo replica application.
+**Nikan Redis fun gbogbo awọn ẹda** — oṣuwọn-ipin iwe afọwọkọ Lua da lori aaye bọtini alaṣẹ ẹyọkan. Awọn iṣẹlẹ Redis pupọ lẹhin awọn ẹda yoo padanu atomity ati ilọpo meji isuna. Lo Redis ẹyọkan (tabi iṣupọ Sentinel Redis pẹlu ikuna) fun gbogbo awọn ẹda ohun elo.
 
-**Iye ìsopọ̀:** Replica application kọ̀ọ̀kan ń ṣí **ìsopọ̀ TCP 2** sí Redis
-(client rate limiter + client quota store). Ní replica 10 → ìsopọ̀ 20, èyí sì
-wà lábẹ́ òpin ìsopọ̀ 10k ti instance Redis àiyipada dáadáa.
+**Iwọn asopọ:** Ajọra ohun elo kọọkan ṣii** 2 TCP awọn isopọ** to Redis (oṣuwọn limiter klient + ktaa itaja ni ose). Ni 10 replicas → 20 awọn isopọ, daradara laarin a aiyipada Redis apeere ká 10k asopọ aja.
 
-### 5. Àbójútó
+### 5. Abojuto
 
-Ṣí i síta nípasẹ̀ endpoint health-check:
+Fihan nipasẹ aaye ipari ayẹwo ilera:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts ti ń pe àwọn function rateLimiter tẹ́lẹ̀
-// Ṣàfikún àwọn àyẹ̀wò pàtó fún Redis:
-//   1. Latency PING nípasẹ̀ ioredis .ping()
-//   2. Ìlò memory nípasẹ̀ INFO memory
-//   3. Iye ìsopọ̀ nípasẹ̀ INFO clients
-//   4. Ìwọ̀n hit fún maxmemory-policy (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-Àwọn metric pàtàkì láti ṣọ́:
+Awọn metiriki bọtini lati wo:
 
-- **Àwọn key tí a lé jáde / sec** — bí kò bá dẹ́kun jíjẹ́ iye tí kì í ṣe òdo, mú `maxmemory` pọ̀ sí i
-- **Àwọn client tí a dí** — iye tí kì í ṣe òdo ń tọ́ka sí àwọn script Lua tó lọ́ra tàbí ìjà fún resource tó pọ̀
-- **Àwọn ìsopọ̀ tí a kọ̀** — a ti dé òpin ìsopọ̀; kò wọ́pọ̀ ní ìsopọ̀ 20
+- **Awọn bọtini ti a yọ kuro / iṣẹju-aaya** — ti o ba jẹ pe kii ṣe odo, pọ si `maxmemory`
+- **Dina onibara** — ti kii-odo ni imọran awọn iwe afọwọkọ Lua ti o lọra tabi ariyanjiyan giga
+- **Kọ awọn asopọ** — to buruju; toje ni 20 awọn isopọ
+
+### 6. Redis-ibaramu Servers
+
+Olupin eyikeyi ti a lo nibi gbọdọ ṣiṣe awọn iwe afọwọkọ Lua: opin oṣuwọn jẹ ọkan `EVAL`. Lori olupin laisi Lua, `checkRateLimit()` ṣe igbasilẹ `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` ati iṣiro fun ilana kan, nitorinaa ẹda kọọkan ṣe imudara opin lori tirẹ. Ile-itaja ifaramọ igba pinpin (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) tun ka ati ṣe imudojuiwọn awọn pinni pẹlu `EVAL`; laisi Lua o ṣe igbasilẹ `[SESSION_AFFINITY] Redis error; falling back to SQLite.` ati ẹda kọọkan tọju awọn pinni tirẹ. Awọn ẹru iṣẹ miiran lo awọn aṣẹ lasan (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, hashes ati ṣeto), ati pe ẹyìn Redis kaṣe atunmọ ko firanṣẹ awọn aṣẹ `FT.*`.
+
+Idanwo pẹlu OmniRoute 3.8.52: KiviDB 1.2.0 pẹlu aworan Lua rẹ (`kividb/kividb:v1.2.0-lua`). Idiwọn oṣuwọn (pẹlu ilana keji pinpin awọn onka), kaṣe auth, ibi-itaja ipin, fifọ Circuit warmup, ile itaja kaṣe atunmọ, ati ibeere `/v1/chat/completions` nipasẹ olutọju iwiregbe kọja 18 ti awọn sọwedowo 19 ti o kọja lori Redis 8.10.3. Eyi ti o yato si: `INCRBYFLOAT` awọn ile itaja `0.1 + 0.2` bi `0.30000000000000004` nibiti awọn ile itaja Redis `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Ile-itaja ipin-ipin naa n ṣalaye mejeeji pẹlu `parseFloat`, ṣugbọn awọn nọmba meji yatọ ni awọn nọmba ti o kẹhin, nitorinaa lafiwe ti o ṣubu ni deede lori aala ipin kan le jade ni oriṣiriṣi. Ile itaja ijora igba kii ṣe apakan ti ṣiṣe yẹn. ( [Eto](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [awọn abajade](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 

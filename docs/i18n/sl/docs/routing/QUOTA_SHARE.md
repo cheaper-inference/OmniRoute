@@ -195,48 +195,48 @@ Prednostni vrstni red (od najvišje do najnižje):
 
 ---
 
-## Integracija v cevovod
+## Integracija cevovoda
 
-### Kavelj PRE (`open-sse/handlers/chatCore.ts`)
+### kavelj PRE (`open-sse/handlers/chatCore.ts`)
 
-Izvede se pred izvajalnikom pri ponudniku, po preverjanjih avtentikacije in pravilnikov:
+Zažene se pred zgornjim izvajalcem, po preverjanju avtorizacije in pravilnika:
 
 ```
 resolveComboTargets / handleSingleModel
   → enforceQuotaShare(apiKeyId, connectionId, provider, estimatedCost)
-      → getQuotaStore().peek() za vsako razsežnost
+      → getQuotaStore().peek() per dimension
       → fairShare.decideFairShare()
-      → če je blokirano → vrni 429 (buildErrorBody, strogo pravilo št. 12)
-      → če je dovoljeno + znižaj prednost → nastavi quotaSoftPenalty=true za kandidata
+      → if block → return 429 (buildErrorBody, Hard Rule #12)
+      → if allow + deprioritize → set quotaSoftPenalty=true on candidate
   → executor.execute()
 ```
 
-**Dovoljevanje ob napaki**: če `enforceQuotaShare` sproži izjemo, je zahteva dovoljena in zabeleži se dnevniški zapis `pino.warn`. To preprečuje, da bi napaka v mehanizmu kvot blokirala ves promet.
+**Neuspešno odprto** : če `enforceQuotaShare` vrže, je zahteva dovoljena prek dnevnika `pino.warn`. To preprečuje, da bi hrošč mehanizma kvot blokiral ves promet.
 
-### Kavelj POST (beleženje porabe)
+### POST hook (rekordna poraba)
 
 Po uspešnem odgovoru:
 
 ```
-izvajalnik vrne uspeh
+executor returns success
   → spendRecorder.recordConsumption(apiKeyId, connectionId, provider, actualCost)
-      → getQuotaStore().consume() za vsako razsežnost
-      → dovoljevanje ob napaki: napake se zabeležijo kot pino.warn in se nikoli ne posredujejo odjemalcu
+      → getQuotaStore().consume() per dimension
+      → fail-open: errors logged as pino.warn, never propagated to client
 ```
 
-**Opomba o odstopanju**: če `consume` po odgovoru ne uspe, drseči števec prikaže prenizko porabo. Signal zasičenosti ponudnika (npr. `anthropic-ratelimit-unified-5h-utilization`) popravi globalno oceno ob naslednji zahtevi.
+**Opomba za nanos** : če `consume` ne odgovori po odzivu, tekoči števec šteje premalo. Signal zasičenosti od ponudnika (npr. `anthropic-ratelimit-unified-5h-utilization`) popravi globalno oceno ob naslednji zahtevi.
 
-### Mehka kazen pri kombinaciji (`open-sse/services/combo.ts`)
+### Kombinirana mehka kazen (`open-sse/services/combo.ts`)
 
-Ko je `decision.deprioritize === true`:
+Ko `decision.deprioritize === true`:
 
 ```ts
 if (candidate.quotaSoftPenalty) {
-  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // privzeto 0,7
+  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // default 0.7
 }
 ```
 
-Kazen se uporabi po vseh drugih dejavnikih točkovanja. Zmanjša verjetnost, da bo samodejna kombinacija izbrala zasičen ključ, ne da bi ga dokončno blokirala.
+Kazen se uporabi po vseh drugih faktorjih točkovanja. Zmanjša verjetnost samodejnega kombiniranja izbire nasičenega ključa brez njegovega trdega blokiranja.
 
 ---
 

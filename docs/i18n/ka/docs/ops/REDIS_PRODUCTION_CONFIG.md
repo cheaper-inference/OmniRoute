@@ -65,67 +65,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## რეკომენდებული პარამეტრები საწარმოო გარემოსთვის
+## რეკომენდირებული წარმოების ტიუნინგი
 
-### 1. კავშირების პული / კლიენტის პარამეტრები (ioredis-ის `Redis` კონსტრუქტორი)
+### 1. კავშირის ფონდი / კლიენტის ოფციები (ioredis `Redis` კონსტრუქტორი)
 
-მიმდინარე კოდი ქმნის ერთ `new Redis(url)` ობიექტს მორგებული პარამეტრების გარეშე. საწარმოო გარემოში
-რამდენიმე რეპლიკით განთავსებისას, კოდში გადასცით კლიენტის ფაბრიკა ან შემოახვიეთ `getRedisClient()`:
+მიმდინარე კოდი ქმნის ერთ `new Redis(url)` მორგებული ვარიანტების გარეშე. საწარმოო მრავალ რეპლიკა განლაგებისთვის, ჩაატარეთ კლიენტის ქარხანა კოდით ან შეფუთეთ `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // განმეორებითი ცდების ლიმიტი არ არის; გადაწყვეტილება retryStrategy-ს მიანდეთ
-  enableReadyCheck: true, // გამოძახებების მიღებამდე შეამოწმეთ, რომ სერვერი მზადაა
-  lazyConnect: true, // შექმნისას არ დაუკავშირდეთ; დაელოდეთ პირველ გამოძახებას
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // 10 განმეორებითი ცდის შემდეგ შეწყვიტეთ → მოგვიანებით ხელახლა დაუკავშირდით
-    return Math.min(times * 200, 5000); // 200მწ, 400მწ, …, მაქსიმუმ 5წმ
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // პარალელური ბრძანებები გააერთიანეთ ერთ TCP-ჩაწერაში
-  keepAlive: 10000, // TCP keep-alive ყოველ 10წმ-ში
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
 **ძირითადი კომპრომისები:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — რეკომენდებულია საწარმოო გარემოსთვის, რათა Redis-ის
-  დროებითი გადატვირთვებისას ყველა მოთხოვნა დაუყოვნებლივ არ ჩავარდეს. მეხსიერებაში არსებული სარეზერვო მექანიზმი
-  `checkRateLimit()`-ში ამუშავებს შეცდომის სცენარს.
-- `lazyConnect: true` — თავიდან იცილებს გაშვებისას Redis-ის ხელმისაწვდომობაზე დამოკიდებულებას, სანამ სერვერი
-  კავშირების მიღებას დაიწყებს.
-- `enableAutoPipelining: true` — ამცირებს ქსელურ მიმოცვლებს სიხშირის ლიმიტის პარალელური შემოწმებებისას;
-  სასარგებლოა ერთ კავშირზე >50 RPS-ის შემთხვევაში.
+- `maxRetriesPerRequest: null` + `retryStrategy` — სასურველია წარმოებისთვის, ასე რომ, გარდამავალი Redis გადატვირთვები დაუყოვნებლივ არ დაასრულებს ყველა მოთხოვნას. მეხსიერებაში ჩანაცვლება `checkRateLimit()` ში შთანთქავს წარუმატებლობის გზას.
+- `lazyConnect: true` — თავიდან აიცილებს გაშვების დამოკიდებულებას Redis ზე, სანამ სერვერი დაიწყებს კავშირების მიღებას.
+- `enableAutoPipelining: true` — ამცირებს ორმხრივ მგზავრობას თანმხლები განაკვეთის ლიმიტის შემოწმებისთვის; მომგებიანი > 50 RPS ერთ კავშირზე.
 
 ### 2. Redis სერვერის კონფიგურაცია (`redis.conf`)
 
 ```
-# მეხსიერება
-maxmemory 80%                        # დატოვეთ ადგილი OS-ის გვერდების კეშისთვის
-maxmemory-policy allkeys-lru         # დატვირთვისას წაშალეთ ავთენტიფიკაციის კეშის მოძველებული ჩანაწერები
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# მდგრადობა (არასავალდებულო — OmniRoute მის გარეშეც დაცულია ავარიული გათიშვისგან)
-save 300 1                           # გადაიღეთ სნეპშოტი სულ მცირე ყოველ 5 წუთში, თუ ≥1 გასაღები შეიცვალა
-appendonly no                        # AOF საჭირო არ არის; მონაცემების ხელახლა გენერირება შესაძლებელია
-appendfsync no                       # fsync-ის ზედნადები ხარჯი არ არის (RDB საკმარისია)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# ქსელი
-timeout 0                            # უმოქმედობისას კავშირი არ გაითიშოს
-tcp-keepalive 300                    # keep-alive ყოველ 5 წუთში
-tcp-backlog 511                      # კავშირების რიგი დატვირთვის უეცარი ზრდისთვის
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# წარმადობა
-hz 10                                # ნაგულისხმევი; 100 დაყოვნებისადმი მგრძნობიარე გარემოსთვის
-activedefrag yes                     # ავტომატური დეფრაგმენტაცია, როდესაც ფრაგმენტაცია >10%-ია
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**კომპრომისი `maxmemory-policy allkeys-lru`-სთვის:** მეხსიერების
-დეფიციტისას ავთენტიფიკაციის კეშის ჩანაწერები შეიძლება წაიშალოს. ეს უსაფრთხოა — გამოტოვებისას `setCachedApiKey` ყოველთვის
-ხელახლა ავსებს კეშს, ხოლო SQLite-ის სარეზერვო მექანიზმი მონაცემთა ავტორიტეტული წყაროა. სიხშირის შემზღუდველის Lua-ს სკრიპტი ქმნის მცირე ზომის გასაღებებს, რომლებიც
-დიზაინის მიხედვით ხანმოკლეა.
+**გაცვლა `maxmemory-policy allkeys-lru` სთვის:** Auth ქეში ჩანაწერები შეიძლება ამოღებულ იქნეს მეხსიერების წნევის ქვეშ. ეს არის უსაფრთხო — `setCachedApiKey` ყოველთვის ხელახლა ივსება გამოტოვებისას და SQLite სარეზერვო ვარიანტი ავტორიტეტულია. სიჩქარის შემზღუდველი Lua სკრიპტი ქმნის პატარა გასაღებებს, რომლებიც მოკლევადიანია დიზაინით.
 
-### 3. Docker Compose-ის პარამეტრები
+### 3. Docker შეწერის პარამეტრები
 
-საწარმოო compose (`docker-compose.prod.yml`) იყენებს `redis:8.6.2-alpine`-ს. დაამატეთ:
+prod compose (`docker-compose.prod.yml`) იყენებს `redis:8.6.2-alpine`. დამატება:
 
 ```yaml
 redis:
@@ -150,34 +142,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. რამდენიმე ინსტანციის / მასშტაბირების საკითხები
+### 4. მრავალ ინსტანციის / სკალირების მოსაზრებები
 
-**ერთი Redis ყველა რეპლიკისთვის** — სიხშირის შემზღუდველის Lua-ს სკრიპტი ეყრდნობა ერთ
-ავტორიტეტულ გასაღებების სივრცეს. რეპლიკების მიღმა არსებული Redis-ის რამდენიმე ინსტანცია დაარღვევდა ატომურობას
-და ბიუჯეტს გააორმაგებდა. აპლიკაციის ყველა რეპლიკისთვის გამოიყენეთ ერთი Redis (ან Redis Sentinel-ის კლასტერი ავარიული გადართვით).
+**ერთი Redis ყველა რეპლიკისთვის** — სიჩქარის შემზღუდველი Lua სკრიპტი დამოკიდებულია ერთი ავტორიტეტული გასაღების სივრცეზე. მრავალი Redis შემთხვევა რეპლიკების უკან დაკარგავს ატომურობას და გააორმაგებს ბიუჯეტს. გამოიყენეთ ერთი Redis (ან Redis Sentinel კლასტერი failover-ით) ყველა აპლიკაციის ასლისთვის.
 
-**კავშირების რაოდენობა:** აპლიკაციის თითოეული რეპლიკა Redis-თან ხსნის **2 TCP კავშირს**
-(სიხშირის შემზღუდველის კლიენტი + კვოტების საცავის კლიენტი). 10 რეპლიკის შემთხვევაში → 20 კავშირი, რაც
-ბევრად ნაკლებია Redis-ის ნაგულისხმევი ინსტანციის 10 ათასიანი კავშირების ლიმიტზე.
+**კავშირის რაოდენობა:** თითოეული განაცხადის რეპლიკა იხსნება** 2 TCP კავშირი** Redis მდე (განაკვეთის შემზღუდველი კლიენტი + კვოტის მაღაზიის კლიენტი). 10 რეპლიკაზე → 20 კავშირზე, ნაგულისხმევი Redis მაგალითის 10k კავშირის ჭერის ფარგლებში.
 
 ### 5. მონიტორინგი
 
-ხელმისაწვდომი გახადეთ მდგომარეობის შემოწმების endpoint-ის მეშვეობით:
+გამოავლინეთ ჯანმრთელობის შემოწმების საბოლოო წერტილის მეშვეობით:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts უკვე იძახებს rateLimiter-ის ფუნქციებს
-// დაამატეთ Redis-ის სპეციფიკური შემოწმებები:
-//   1. PING-ის დაყოვნება ioredis-ის .ping()-ის მეშვეობით
-//   2. მეხსიერების გამოყენება INFO memory-ის მეშვეობით
-//   3. კავშირების რაოდენობა INFO clients-ის მეშვეობით
-//   4. maxmemory-policy-ის მოხვედრის სიხშირე (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-ძირითადი გასაკონტროლებელი მეტრიკები:
+საყურებელი ძირითადი მეტრიკა:
 
-- **წაშლილი გასაღებები / წმ** — თუ მნიშვნელობა მუდმივად ნულზე მეტია, გაზარდეთ `maxmemory`
-- **დაბლოკილი კლიენტები** — ნულზე მეტი მნიშვნელობა ნელ Lua-ს სკრიპტებზე ან მაღალ კონკურენციაზე მიუთითებს
-- **უარყოფილი კავშირები** — მიღწეულია კავშირების ლიმიტი; იშვიათია 20 კავშირის შემთხვევაში
+- **გამოძევებული გასაღებები / წმ** — თუ მუდმივად არ არის ნულოვანი, გაზარდეთ `maxmemory`
+- **დაბლოკილი კლიენტები** — არასამთავრობო ნულოვანი ვარაუდობს ნელი Lua სკრიპტები ან მაღალი კამათი
+- **უარყოფილი კავშირები** — კავშირის ლიმიტის დარტყმა; იშვიათია 20 კავშირზე
+
+### 6. Redis-თავსებადი სერვერები
+
+აქ გამოყენებული ნებისმიერი სერვერი უნდა აწარმოებდეს Lua სკრიპტებს: სიჩქარის შემზღუდველი არის ერთი `EVAL`. სერვერზე Lua-ს გარეშე, `checkRateLimit()` აღრიცხავს `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` და ითვლის თითოეულ პროცესს, ასე რომ, თითოეული რეპლიკა დამოუკიდებლად ახორციელებს ლიმიტს. გაზიარებული სესია-აფინიტობის მაღაზია (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) ასევე კითხულობს და განაახლებს პინებს `EVAL` ით; ლუას გარეშე ის იწერს `[SESSION_AFFINITY] Redis error; falling back to SQLite.` და თითოეული რეპლიკა ინახავს საკუთარ ქინძისთავებს. სხვა სამუშაო დატვირთვები იყენებს უბრალო ბრძანებებს (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, ჰეშები და ნაკრები), ხოლო სემანტიკური ქეშის Redis backend არ აგზავნის `FT.*` ბრძანებებს.
+
+დატესტილია OmniRoute 3.8.52-ით: KiviDB 1.2.0 თავისი Lua გამოსახულებით (`kividb/kividb:v1.2.0-lua`). სიჩქარის შემზღუდველი (მათ შორის მეორე პროცესის გაზიარების მრიცხველები), auth cache, quota store, warmup circuit breaker, semantic cache store და `/v1/chat/completions` მოთხოვნა ჩატის დამმუშავებლის მეშვეობით, გაიარა 19 შემოწმებიდან 18, რომელიც გადადის Redis 8.10.3-ზე. ის, რომელიც განსხვავდება: `INCRBYFLOAT` ინახავს `0.1 + 0.2` როგორც `0.30000000000000004` სადაც Redis ინახავს `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). კვოტის მაღაზია აანალიზებს ორივეს `parseFloat` ით, მაგრამ ეს ორი რიცხვი განსხვავდება ბოლო ციფრებში, ამიტომ შედარება, რომელიც ზუსტად ხვდება კვოტის ზღვარზე, შეიძლება სხვაგვარად გამოვიდეს. Sesion-affinity store არ იყო ამ პერსპექტივის ნაწილი. ( [კონფიგურაცია](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [შედეგები](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 

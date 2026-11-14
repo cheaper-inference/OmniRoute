@@ -14,7 +14,7 @@ OmniRoute είναι μια τοπική πύλη δρομολόγησης AI κ
 
 Βασικές δυνατότητες:
 
-- Επιφάνεια API συμβατή με OpenAI για CLI/tools (381 πάροχοι, 159 λειτουργικές μονάδες)
+- Επιφάνεια API συμβατή με OpenAI για CLI/tools (394 πάροχοι, 159 λειτουργικές μονάδες)
 - μετάφραση Request/response σε μορφές παρόχων
 - Εναλλακτικός συνδυασμός μοντέλων (ακολουθία πολλαπλών μοντέλων)
 - Δομημένα σύνθετα βήματα (`provider + model + connection`) με σειρά χρόνου εκτέλεσης κατά `compositeTiers`
@@ -265,73 +265,72 @@ flowchart LR
 - Πακέτο ρυθμίσεων: `src/app/api/sync/bundle` (GET, στιγμιότυπο ρυθμίσεων/παρόχων/συνδυασμών/κλειδιών με έκδοση ETag)
 - WebSocket: `src/app/api/v1/ws/route.ts` — Χειριστής Αναβάθμισης για πελάτες WS συμβατούς με OpenAI
 
-## 2) SSE + Πυρήνας Μετάφρασης
+## 2) Πυρήνας μετάφρασης SSE +
 
-Κύριες μονάδες ροής:
+Κύρια ενότητες ροής:
 
-- Σημείο εισόδου: `src/sse/handlers/chat.ts`
-- Κεντρικός συντονισμός: `open-sse/handlers/chatCore.ts`
-- Προσαρμογείς εκτέλεσης παρόχων: `open-sse/executors/*`
-- Ανίχνευση μορφής/διαμόρφωση παρόχου: `open-sse/services/provider.ts`
-- Ανάλυση/επίλυση μοντέλου: `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- Λογική εναλλακτικής χρήσης λογαριασμού: `open-sse/services/accountFallback.ts`
+- Είσοδος: `src/sse/handlers/chat.ts`
+- Βασική ενορχήστρωση: `open-sse/handlers/chatCore.ts`
+- Προσαρμογείς εκτέλεσης παρόχου: `open-sse/executors/*`
+- Μορφοποίηση διαμόρφωσης detection/provider : `open-sse/services/provider.ts`
+- Μοντέλο parse/resolve: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- Εφεδρική λογική λογαριασμού: `open-sse/services/accountFallback.ts`
 - Μητρώο μετάφρασης: `open-sse/translator/index.ts`
 - Μετασχηματισμοί ροής: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- Εξαγωγή/κανονικοποίηση χρήσης: `open-sse/utils/usageTracking.ts`
-- Αναλυτής ετικετών σκέψης: `open-sse/utils/thinkTagParser.ts`
-- Χειριστής ενσωματώσεων: `open-sse/handlers/embeddings.ts`
-- Μητρώο παρόχων ενσωματώσεων: `open-sse/config/embeddingRegistry.ts`
-- Χειριστής δημιουργίας εικόνων: `open-sse/handlers/imageGeneration.ts`
-- Μητρώο παρόχων εικόνων: `open-sse/config/imageRegistry.ts`
-- Εξυγίανση απόκρισης: `open-sse/handlers/responseSanitizer.ts`
-- Κανονικοποίηση ρόλων: `open-sse/services/roleNormalizer.ts`
+- Χρήση extraction/normalization: `open-sse/utils/usageTracking.ts`
+- Think tag parser: `open-sse/utils/thinkTagParser.ts`
+- Χειριστής ενσωμάτωσης: `open-sse/handlers/embeddings.ts`
+- Μητρώο παρόχου ενσωμάτωσης: `open-sse/config/embeddingRegistry.ts`
+- Χειριστής δημιουργίας εικόνας: `open-sse/handlers/imageGeneration.ts`
+- Μητρώο παρόχου εικόνων: `open-sse/config/imageRegistry.ts`
+- Απολύμανση απόκρισης: `open-sse/handlers/responseSanitizer.ts`
+- Ομαλοποίηση ρόλων: `open-sse/services/roleNormalizer.ts`
 
-Υπηρεσίες (επιχειρησιακή λογική):
+Υπηρεσίες (επιχειρηματική λογική):
 
-- Επιλογή/βαθμολόγηση λογαριασμών: `open-sse/services/accountSelector.ts`
+- Λογαριασμός selection/scoring: `open-sse/services/accountSelector.ts`
 - Διαχείριση κύκλου ζωής περιβάλλοντος: `open-sse/services/contextManager.ts`
-- Επιβολή φίλτρου IP: `open-sse/services/ipFilter.ts`
-- Παρακολούθηση συνεδριών: `open-sse/services/sessionManager.ts`
-- Απαλοιφή διπλότυπων αιτημάτων: `open-sse/services/signatureCache.ts`
-- Εισαγωγή προτροπής συστήματος: `open-sse/services/systemPrompt.ts`
-- Διαχείριση προϋπολογισμού σκέψης: `open-sse/services/thinkingBudget.ts`
-- Δρομολόγηση μοντέλων με χαρακτήρες μπαλαντέρ: `open-sse/services/wildcardRouter.ts`
-- Διαχείριση ορίων ρυθμού: `open-sse/services/rateLimitManager.ts`
+- Ενίσχυση φίλτρου IP : `open-sse/services/ipFilter.ts`
+- Παρακολούθηση συνεδρίας: `open-sse/services/sessionManager.ts`
+- Αίτημα κατάργησης διπλότυπων: `open-sse/services/signatureCache.ts`
+- Άμεση έγχυση συστήματος: `open-sse/services/systemPrompt.ts`
+- Σκεπτόμενη διαχείριση προϋπολογισμού: `open-sse/services/thinkingBudget.ts`
+- Δρομολόγηση μοντέλου μπαλαντέρ: `open-sse/services/wildcardRouter.ts`
+- Διαχείριση ορίων ποσοστού: `open-sse/services/rateLimitManager.ts`
 - Διακόπτης κυκλώματος: `src/shared/utils/circuitBreaker.ts`
-- Μεταβίβαση περιβάλλοντος: `open-sse/services/contextHandoff.ts` — δημιουργία και εισαγωγή σύνοψης μεταβίβασης για τη στρατηγική αναμετάδοσης περιβάλλοντος
-- Συμπίεση: `open-sse/services/compression/*` — προληπτική συμπίεση πριν από τη μετάφραση του παρόχου·
-  περιλαμβάνει κανόνες Caveman, φίλτρα RTK, στοιβαγμένες διοχετεύσεις, συνδυασμούς συμπίεσης, στατιστικά και επικύρωση
-- Ανακτητής ορίου Codex: `open-sse/services/codexQuotaFetcher.ts` — ανακτά το όριο Codex για αποφάσεις μεταβίβασης αναμετάδοσης περιβάλλοντος
-- Επανάληψη με επίγνωση περιόδου αναμονής: `src/sse/services/cooldownAwareRetry.ts` — επαναλήψεις ανά μοντέλο κατά την περίοδο αναμονής, με διαμορφώσιμα `requestRetry` / `maxRetryIntervalSec`
-- Ασφαλής εξερχόμενη ανάκτηση: `src/shared/network/safeOutboundFetch.ts` — προστατευμένη ανάκτηση παρόχου/μοντέλου με προστασία SSRF, αποκλεισμό ιδιωτικών URL, επανάληψη και χρονικό όριο
-- Προστασία εξερχόμενων URL: `src/shared/network/outboundUrlGuard.ts` — έλεγχοι κεντρικών υπολογιστών στα URL παρόχων· το `src/shared/network/outboundUrlGuardPolicy.ts` επιλέγει τη λειτουργία από τα `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` και τις αντίστοιχες εναλλαγές τους στον πίνακα ελέγχου (δείτε `docs/reference/ENVIRONMENT.md`)
-- Προεπιλογές αιτημάτων παρόχου: `open-sse/services/providerRequestDefaults.ts` — προεπιλογές επιπέδου παρόχου για `maxTokens`, `temperature`, `thinkingBudgetTokens`
-- Σταθερές παρόχου GLM: `open-sse/config/glmProvider.ts` — κοινόχρηστα μοντέλα GLM, URL ορίων, χρονικό όριο/προεπιλογές GLMT
-- Ανοδική υπηρεσία Antigravity: `open-sse/config/antigravityUpstream.ts` — βασικό URL και σταθερές διαδρομής εντοπισμού
-- Σταθερές πελάτη Codex: `open-sse/config/codexClient.ts` — τιμές παράγοντα χρήστη και έκδοσης πελάτη με εκδόσεις
-- Αρχικοποίηση ψευδωνύμων μοντέλων: `src/lib/modelAliasSeed.ts` — αρχικοποιεί περισσότερα από 30 ψευδώνυμα διαλέκτων μεταξύ διακομιστών μεσολάβησης κατά την εκκίνηση
+- Context handoff: `open-sse/services/contextHandoff.ts` — handoff δημιουργία σύνοψης και ένεση για τη στρατηγική αναμετάδοσης περιβάλλοντος
+- Συμπίεση: `open-sse/services/compression/*` — προληπτική συμπίεση πριν από τη μετάφραση του παρόχου. περιλαμβάνει κανόνες Caveman, φίλτρα RTK, στοιβαγμένες σωληνώσεις, συνδυασμούς συμπίεσης, στατιστικά και επικύρωση
+- Λήψη ορίου Codex : `open-sse/services/codexQuotaFetcher.ts` — ανακτά το όριο Codex για αποφάσεις μεταβίβασης αναμετάδοσης περιβάλλοντος
+- Επανάληψη προσπάθειας με επίγνωση του χρόνου: `src/sse/services/cooldownAwareRetry.ts` — επαναλήψεις ανά μοντέλο ψύξης με ρυθμιζόμενο `requestRetry` / `maxRetryIntervalSec`
+- Ασφαλής λήψη εξερχόμενων: `src/shared/network/safeOutboundFetch.ts` — φυλασσόμενη λήψη provider/model με προστασία SSRF, αποκλεισμός ιδιωτικής διεύθυνσης URL, επανάληψη και χρονικό όριο λήξης
+- Εξερχόμενος φρουρός URL : `src/shared/network/outboundUrlGuard.ts` — έλεγχος κεντρικού υπολογιστή στον πάροχο URLs; `src/shared/network/outboundUrlGuardPolicy.ts` επιλέγει τη λειτουργία από `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` και εναλλάσσει τον πίνακα ελέγχου τους (δείτε `docs/reference/ENVIRONMENT.md`)
+- Προεπιλογές αιτήματος παρόχου: `open-sse/services/providerRequestDefaults.ts` — σε επίπεδο παρόχου `maxTokens`, `temperature`, `thinkingBudgetTokens` προεπιλογές
+- σταθερές παρόχου GLM : `open-sse/config/glmProvider.ts` — κοινόχρηστα μοντέλα GLM, quota URLs, GLMT timeout/defaults
+- Antigravity ανάντη: `open-sse/config/antigravityUpstream.ts` — βάση URL και σταθερές διαδρομής ανακάλυψης
+- Codex σταθερές πελάτη: `open-sse/config/codexClient.ts` — εκδόσεις user-agent και client-version τιμές
+- Model alias seed: `src/lib/modelAliasSeed.ts` — seeds 30 + διαλεκτικά ψευδώνυμα cross-proxy κατά την εκκίνηση
 
-Μονάδες επιπέδου τομέα:
+Ενότητες επιπέδου τομέα:
 
-- Κανόνες κόστους/προϋπολογισμοί: `src/domain/costRules.ts`
-- Πολιτική εναλλακτικής χρήσης: `src/domain/fallbackPolicy.ts`
-- Επίλυση συνδυασμών: `src/domain/comboResolver.ts`
-- Πολιτική αποκλεισμού: `src/domain/lockoutPolicy.ts`
-- Μηχανή πολιτικών: `src/domain/policyEngine.ts` — κεντρική αξιολόγηση αποκλεισμού → προϋπολογισμού → εναλλακτικής χρήσης
+- Κόστος rules/budgets: `src/domain/costRules.ts`
+- Εφεδρική πολιτική: `src/domain/fallbackPolicy.ts`
+- Δεσμευμένο συμβόλαιο συνδυαστικής ανάλυσης: `src/domain/comboResolver.ts`; Η ζωντανή δρομολόγηση χρησιμοποιεί `open-sse/services/combo.ts`
+- Πολιτική κλειδώματος: `src/domain/lockoutPolicy.ts`
+- Με δεσμευμένο συμβόλαιο αξιολόγησης πολιτικής: `src/domain/policyEngine.ts`; η διαδρομή αιτήματος επιβάλλει την πολιτική κλειδιού API μέσω `src/shared/utils/apiKeyPolicy.ts` και την εξουσιοδότηση επίλυσης στόχου μέσω `src/sse/handlers/chat/resolvedModelPolicy.ts`
 - Κατάλογος κωδικών σφαλμάτων: `src/shared/constants/errorCodes.ts`
-- Αναγνωριστικό αιτήματος: `src/shared/utils/requestId.ts`
-- Χρονικό όριο ανάκτησης: `src/shared/utils/fetchTimeout.ts`
-- Τηλεμετρία αιτημάτων: `src/shared/utils/requestTelemetry.ts`
-- Συμμόρφωση/έλεγχος: `src/lib/compliance/index.ts`
-- Εκτελεστής αξιολογήσεων: `src/lib/evals/evalRunner.ts`
-- Μόνιμη αποθήκευση κατάστασης τομέα: `src/lib/db/domainState.ts` — λειτουργίες CRUD SQLite για αλυσίδες εναλλακτικής χρήσης, προϋπολογισμούς, ιστορικό κόστους, κατάσταση αποκλεισμού και διακόπτες κυκλώματος
+- Αίτημα ID: `src/shared/utils/requestId.ts`
+- Λήψη χρονικού ορίου: `src/shared/utils/fetchTimeout.ts`
+- Ζητήστε τηλεμετρία: `src/shared/utils/requestTelemetry.ts`
+- Compliance/audit: `src/lib/compliance/index.ts`
+- Eval runner: `src/lib/evals/evalRunner.ts`
+- Εμμονή κατάστασης τομέα: `src/lib/db/domainState.ts` — SQLite CRUD για εναλλακτικές αλυσίδες, προϋπολογισμοί, ιστορικό κόστους, κατάσταση κλειδώματος, διακόπτες κυκλώματος
 
-Μονάδες παρόχων OAuth (27 μεμονωμένα αρχεία στον κατάλογο `src/lib/oauth/providers/`):
+Ενότητες παρόχου OAuth (27 μεμονωμένα αρχεία στο `src/lib/oauth/providers/`):
 
 - Ευρετήριο μητρώου: `src/lib/oauth/providers/index.ts`
-- Μεμονωμένοι πάροχοι: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- Κοινόχρηστα βοηθητικά στοιχεία: `codebuddyDeviceAuth.ts` (ροή συσκευής CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
-- Λεπτό περίβλημα: `src/lib/oauth/providers.ts` — επανεξάγει από τις μεμονωμένες μονάδες
+- `muse-code.ts` πάροχοι: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts` `zed.ts` `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`
+- Κοινόχρηστοι βοηθοί: `codebuddyDeviceAuth.ts` ( ροή συσκευής CodeBuddy CN/intl ), `museCodeDeviceResponse.ts`
+- Λεπτό περιτύλιγμα: `src/lib/oauth/providers.ts` — επανεξάγει από μεμονωμένες μονάδες
 
 ## 5) Ενσωματωμένες Υπηρεσίες (v3.8.4)
 
@@ -360,16 +359,16 @@ flowchart LR
 
 ### A. Auto Combo Engine
 
-Το Auto Combo βαθμολογεί δυναμικά και επιλέγει στόχους δρομολόγησης σε χρόνο αιτήματος, αντί να βασίζεται σε έναν στατικό σύνθετο ορισμό. Τροφοδοτεί την οικογένεια προθέματος μοντέλων `auto/*`.
+Το Auto Combo βαθμολογεί δυναμικά και επιλέγει στόχους δρομολόγησης κατά το χρόνο αιτήματος, αντί να βασίζεται σε έναν στατικό σύνθετο ορισμό. Τροφοδοτεί την οικογένεια προθέματος μοντέλων `auto/*`.
 
 - Είσοδος κινητήρα: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Επίλυση: `src/domain/comboResolver.ts` (αυτόματος εντοπισμός του προθέματος `auto/` )
+- Ζωντανή σύνθετη καταχώρηση: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), καλείται από `src/sse/handlers/chat.ts`
 - Ταμπλό: `/dashboard/auto-combo`
 - Τηλεμετρία: τραπέζι `auto_combo_decisions` SQLite
 
 Βασικές δυνατότητες:
 
-- **20 στρατηγικές δρομολόγησης** (προτεραιότητα, σταθμισμένο, γέμισμα πρώτα, στρογγυλό, P2C, τυχαίο, λιγότερο χρησιμοποιημένο, βελτιστοποιημένο ως προς το κόστος, συνειδητοποίηση επαναφοράς, επαναφορά-παράθυρο, χώρος κεφαλής, στάθμιση ποσόστωσης, αυστηρά τυχαία,** αυτο** , lkgp, βελτιστοποιημένο ως προς το περιβάλλον, βελτιστοποιημένη κρυφή μνήμη, αναμετάδοση περιβάλλοντος,** συγχώνευση** , pipeline) — auto είναι η προσθήκη επικεφαλίδας στην έκδοση 3.8.0. `fusion` (panel fan-out + court synthesis, `open-sse/services/fusion.ts`) είναι νέο στην έκδοση 3.8.36.
+- **22 στρατηγικές δρομολόγησης** (προτεραιότητα, σταθμισμένο, γέμισμα πρώτος, στρογγυλή, P2C, τυχαία, λιγότερο χρησιμοποιούμενη, βελτιστοποιημένη ως προς το κόστος, επαναφορά, παράθυρο επαναφοράς, πρώτα στη λήξη, ελεύθερος χώρος, στάθμιση ποσόστωσης, αυστηρά τυχαία,** αυτο** , lkgp, βελτιστοποιημένο ως προς το περιβάλλον, βελτιστοποιημένο για προσωρινή μνήμη, αναμετάδοση περιβάλλοντος,** συγχώνευση** , pipeline, jev) — auto είναι η προσθήκη στην επικεφαλίδα στην έκδοση 3.8.0. `fusion` (panel fan-out + court synthesis, `open-sse/services/fusion.ts`) είναι νέο στην έκδοση 3.8.36.
 - **Σκορ 16 παραγόντων** : ποσόστωση, υγεία, αντίστροφο κόστος, αντίστροφη καθυστέρηση, προσαρμογή εργασιών και δέκα ακόμη. Ο κανονικός πίνακας των παραγόντων και τα προεπιλεγμένα βάρη τους ζουν στο [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — αν τον επαναλάβουμε εδώ θα του έδινε μια δεύτερη θέση για να μείνει μπαγιάτικο.
 - **Εικονικό εργοστάσιο** υλοποιεί εφήμερους συνδυασμούς όταν δεν υπάρχει συνδυασμός που να ταιριάζουν με το όνομα, προμηθεύοντας υποψήφιους από υγιείς ενεργές συνδέσεις παρόχου.
 - **Αυτόματα προθέματα** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — το καθένα υποστηρίζεται από ένα συντονισμένο προφίλ βάρους.
@@ -395,7 +394,7 @@ flowchart LR
 Η μονάδα προστατευτικών κιγκλιδωμάτων είναι ένα στρώμα ενδιάμεσου λογισμικού με δυνατότητα επαναφόρτωσης εν θερμώ που επιθεωρεί αιτήματα και απαντήσεις για περιεχόμενο PII, άμεσης έγχυσης και μη ασφαλές περιεχόμενο όρασης. Οι παραβιάσεις βραχυκυκλώνουν το αίτημα με HTTP** 503** συν έναν δομημένο κωδικό σφάλματος, που επιτρέπει στους μεταγενέστερους καλούντες να δοκιμάσουν ξανά ή να διακλαδώσουν.
 
 - Ρίζα ενότητας: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- Ενεργή επαναφόρτωση: το μητρώο παρακολουθεί για αλλαγές στις ρυθμίσεις παραμέτρων και αναδομεί την αλυσίδα στη θέση της
+- Hot reload: το μητρώο παρακολουθεί για αλλαγές στις ρυθμίσεις παραμέτρων και δημιουργεί ξανά την αλυσίδα στη θέση του
 - Σημεία σύνδεσης: είσοδος χειριστή συνομιλίας, χειριστής δημιουργίας εικόνας, απολυμαντικό απόκρισης
 - HTTP συμβόλαιο: οι παραβάσεις εμφανίζονται ως `503` με `error.code = "GUARDRAIL_VIOLATION"`
 
@@ -403,15 +402,19 @@ flowchart LR
 
 ### Δ. Επίπεδο τομέα
 
-Ο χώρος ονομάτων `src/domain/` συγκεντρώνει τις αποφάσεις πολιτικής, ώστε οι διαχειριστές δρομολογίων να μην χρειάζεται να συναρμολογούν οι ίδιοι τη λογική lockout/budget/fallback.
+Ο χώρος ονομάτων `src/domain/` περιέχει υπηρεσίες τομέα και δεσμευμένες συμβάσεις αξιολόγησης. Δεν είναι ένα υποχρεωτικό σημείο εισόδου πολιτικής για κάθε αίτημα.
 
-- Μηχανή πολιτικής: `src/domain/policyEngine.ts` — μοναδικό σημείο εισόδου για αξιολόγηση πριν από την εκτέλεση (κλείδωμα → προϋπολογισμού → εναλλακτική παραγγελία)
+Η διαδρομή ζωντανής συνομιλίας καλεί `enforceApiKeyPolicy()` από `src/shared/utils/apiKeyPolicy.ts`. Η εξουσιοδότηση επίλυσης μοντέλων και μελών συνδυασμού υλοποιείται στο `src/sse/handlers/chat/resolvedModelPolicy.ts`. Η αυτο-φιλοξενούμενη καταχώριση στο `src/app/api/v1/chat/completions/route.ts` επιβάλλει επίσης την πολιτική κλειδιού API πριν από την αποστολή. Η σύνθετη ανάλυση διατρέχει `open-sse/services/combo.ts`.
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` και `src/lib/container.ts` παραμένουν δοκιμασμένες συμβάσεις, όχι η καλωδίωση αυτής της διαδρομής αιτήματος. Το κοντέινερ καταγράφει τη μηχανή πολιτικής, αλλά η ελεγμένη διαδρομή αιτήματος παραγωγής δεν το επιλύει. Η αλλαγή αυτών των συμβολαίων από μόνη της δεν αλλάζει την πολιτική ζωντανής συνομιλίας ή τη συνδυαστική δρομολόγηση. Η σύνδεση ή η αφαίρεσή τους απαιτεί ξεχωριστή απόφαση σχεδιασμού.
+
+- Μηχανή δεσμευμένης πολιτικής: κλείδωμα `src/domain/policyEngine.ts` — → προϋπολογισμός → εναλλακτική αξιολόγηση
 - Κανόνες κόστους: `src/domain/costRules.ts`
 - Εφεδρική πολιτική: `src/domain/fallbackPolicy.ts`
 - Πολιτική κλειδώματος: `src/domain/lockoutPolicy.ts`
 - Δρομολόγηση βάσει ετικετών: `src/domain/tagRouter.ts`
-- Αντιμετώπιση συνδυασμού: `src/domain/comboResolver.ts` — επιλύει ονόματα συνδυασμών, προθέματα αυτόματα/\* και στόχους μοντέλων μπαλαντέρ σε συγκεκριμένα σχέδια εκτέλεσης
-- Ξυλουργός κανόνα Connection/model : `src/domain/connectionModelRules.ts`
+- Δεσμευμένος συνδυασμός επίλυσης: `src/domain/comboResolver.ts` — αυτόνομη σύμβαση επιλογής. Η ζωντανή συνδυαστική δρομολόγηση υλοποιείται στο `open-sse/services/combo.ts`
+- Connection/model κανόνας ξυλουργός: `src/domain/connectionModelRules.ts`
 - Στιγμιότυπα διαθεσιμότητας μοντέλου: `src/domain/modelAvailability.ts`
 - Παρακολούθηση λήξης παρόχου: `src/domain/providerExpiration.ts`
 - Προσωρινή μνήμη ποσόστωσης: `src/domain/quotaCache.ts`. Οι πάροχοι προσθέτουν και αφαιρούν παράθυρα ορίου (OpenAI απέρριψε το παράθυρο Codex των 5 ωρών για ορισμένα σχέδια), επομένως η χρήση που διαβάζει τον προσαρμογέα του παρόχου βεβαιώνεται ως πλήρης (`quotasComplete`, βλ. `src/lib/usage/usageReading.ts`) είναι το πλήρες σετ παραθύρων του λογαριασμού: ένα παράθυρο γνωστό νωρίτερα αλλά απουσιάζει από αυτό αποσύρεται, στην κρυφή `quota_snapshots`, στην εφαρμογή rehydrates (rehydrates a) διατηρήθηκε η κατάσταση ποσόστωσης Codex και στους κάδους κορεσμού του Claude. Μερικά στοιχεία (κεφαλίδες απόκρισης, παλιό αντίγραφο) ενημερώνουν μόνο τα παράθυρα που φέρουν.
@@ -858,41 +861,47 @@ flowchart LR
 - `src/lib/db/*`: απευθείας εισαγωγή συγκεκριμένων ενοτήτων — χωρίς barrel (το παλιό επίπεδο επανεξαγωγής `localDb.ts` αφαιρέθηκε)
 - `src/lib/usageDb.ts`: πρόσοψη ιστορικού χρήσης/καταγραφών κλήσεων πάνω από πίνακες SQLite
 
-## Κάλυψη Εκτελεστών Παρόχου (Μοτίβο Στρατηγικής)
+## Κάλυψη φορέα παροχής υπηρεσιών (Μοτίβο στρατηγικής)
 
-Κάθε πάροχος διαθέτει έναν εξειδικευμένο εκτελεστή που επεκτείνει τον `BaseExecutor` (στο `open-sse/executors/base.ts`), ο οποίος παρέχει κατασκευή URL, κατασκευή κεφαλίδων, επανάληψη με εκθετική υποχώρηση, άγκιστρα ανανέωσης διαπιστευτηρίων και τη μέθοδο ενορχήστρωσης `execute()`.
+Κάθε πάροχος έχει έναν εξειδικευμένο εκτελεστή που επεκτείνει `BaseExecutor` (σε `open-sse/executors/base.ts`), ο οποίος παρέχει κτίσμα URL, κατασκευή κεφαλίδας, επανάληψη δοκιμής με εκθετικό backoff, άγκιστρα ανανέωσης διαπιστευτηρίων και τη μέθοδο ενορχήστρωσης `execute()`.
 
-| Εκτελεστής                | Πάροχος/Πάροχοι                                                                                                                                              | Ειδικός Χειρισμός                                                                         |
+| Εκτελεστής διαθήκης       | Πάροχος(οι)                                                                                                                                                  | Ειδικός χειρισμός                                                                         |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA, κ.λπ. | Δυναμική διαμόρφωση URL/κεφαλίδων ανά πάροχο                                              |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                           | Προσαρμοσμένα ID έργου/συνεδρίας, ανάλυση Retry-After, συγκάλυψη 429                      |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                 | Δρομολόγηση βάσει ανάπτυξης, επιβολή ερωτήματος api-version                               |
-| `BlackboxWebExecutor`     | Blackbox AI (web-mode)                                                                                                                                       | Αντίστροφη web-συνεδρίας με εξομοίωση αποτυπώματος TLS                                    |
-| `ClaudeIdentityExecutor`  | Claude.ai (διαδρομή CCH)                                                                                                                                     | Αγωγοί περιορισμού + αναχαρτογράφησης εργαλείων, διαμόρφωση αποτυπώματος                  |
-| `CliProxyApiExecutor`     | Πάροχοι συμβατοί με CLIProxyAPI                                                                                                                              | Προσαρμοσμένος χειρισμός ταυτοποίησης και πρωτοκόλλου                                     |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                        | Έγχυση ID λογαριασμού, παρακολούθηση χρήσης βάσει Neurons                                 |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                                 | Εγχέει οδηγίες συστήματος, επιβάλλει προσπάθεια συλλογισμού                               |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                          | Γέφυρα Responses API συνεδρίας προγράμματος περιήγησης με καρφίτσωμα νήματος/στροφής      |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                                 | OAuth + εναλλαγή κεφαλίδων ανά συνεδρία                                                   |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA, κ.λπ. | Δυναμική διαμόρφωση URL/header ανά πάροχο                                                 |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                           | Προσαρμοσμένο project/session IDs, Επανάληψη-Μετά την ανάλυση, 429 συσκότιση              |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                 | Δρομολόγηση με βάση την ανάπτυξη, επιβολή ερωτημάτων έκδοσης api                          |
+| `BlackboxWebExecutor`     | Blackbox AI (κατάσταση ιστού)                                                                                                                                | Αντίστροφη συνεδρία ιστού με εξομοίωση δακτυλικών αποτυπωμάτων TLS                        |
+| `ClaudeIdentityExecutor`  | Claude.ai ( μονοπάτι CCH )                                                                                                                                   | Περιορισμός αγωγών + tool-remap, διαμόρφωση δακτυλικών αποτυπωμάτων                       |
+| `CliProxyApiExecutor`     | Παροχείς συμβατοί με CLIProxyAPI                                                                                                                             | Προσαρμοσμένη ταυτότητα και χειρισμός πρωτοκόλλου                                         |
+| `CloudflareAiExecutor`    | Cloudflare Εργάτες AI                                                                                                                                        | Έγχυση λογαριασμού ID, παρακολούθηση χρήσης με βάση τους νευρώνες                         |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                                 | Εισάγει οδηγίες συστήματος, επιβάλλει συλλογιστική προσπάθεια                             |
+| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                          | Browser-session Απαντήσεις API bridge με pinning thread/turn                              |
+| `CommandCodeExecutor`     | Κωδικός εντολών                                                                                                                                              | OAuth + περιστροφή κεφαλίδας ανά περίοδο σύνδεσης                                         |
 | `CursorExecutor`          | Cursor IDE                                                                                                                                                   | Πρωτόκολλο ConnectRPC, κωδικοποίηση Protobuf, υπογραφή αιτήματος μέσω αθροίσματος ελέγχου |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                    | Γεφύρωση κύκλου ζωής εργασίας Devin μέσω ενότητας πράκτορα νέφους                         |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                               | Ανανέωση token Copilot, κεφαλίδες που μιμούνται το VSCode                                 |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                   | GitLab OAuth + δρομολόγηση βάσει έργου                                                    |
-| `GlmExecutor`             | Z.AI GLM (συμπεριλ. προεπιλογής `glmt`)                                                                                                                      | Αντίληψη προϋπολογισμού σκέψης, σταθερές προεπιλογής GLMT                                 |
-| `GrokWebExecutor`         | xAI Grok web                                                                                                                                                 | Αντίστροφη web-συνεδρίας, επιλογή λειτουργίας (think/standard)                            |
-| `KieExecutor`             | KIE                                                                                                                                                          | Προσαρμοσμένη έκδοση token με εναλλασσόμενες άγκυρες συνεδρίας                            |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                    | Γεφύρωση κύκλου ζωής εργασιών Devin μέσω της μονάδας πράκτορα cloud                       |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                               | Ανανέωση διακριτικού Copilot, κεφαλίδες που μιμούνται VSCode                              |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                                   | GitLab OAuth + δρομολόγηση εμβέλειας έργου                                                |
+| `GlmExecutor`             | Z.AI GLM (συμπ. `glmt` προεπιλογή)                                                                                                                           | Με επίγνωση του προϋπολογισμού, προκαθορισμένες σταθερές GLMT                             |
+| `GrokWebExecutor`         | xAI Grok web                                                                                                                                                 | Αντίστροφη συνεδρία Ιστού, επιλογή τρόπου λειτουργίας (think/standard)                    |
+| `KieExecutor`             | KIE                                                                                                                                                          | Έκδοση προσαρμοσμένου διακριτικού με περιστρεφόμενες αγκυρώσεις συνεδρίας                 |
 | `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                       | Μετατροπή δυαδικής μορφής AWS EventStream → SSE                                           |
-| `MuseSparkWebExecutor`    | Muse Spark (web)                                                                                                                                             | Αντίστροφη web-συνεδρίας με γεφύρωση μηνυμάτων εικόνας                                    |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                    | Σχήμα σώματος αιτήματος ειδικό για τον πάροχο                                             |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                     | Ρύθμιση παρόχου συμβατή με AI SDK                                                         |
-| `PerplexityWebExecutor`   | Perplexity web                                                                                                                                               | Αντίστροφη web-συνεδρίας για συνέχιση συνομιλίας                                          |
-| `PetalsExecutor`          | Petals distributed inference                                                                                                                                 | Αποκεντρωμένη δρομολόγηση σμήνους                                                         |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                              | Δεν απαιτείται κλειδί API, αιτήματα με περιορισμό ρυθμού                                  |
+| `MuseSparkWebExecutor`    | Muse Spark (ιστός)                                                                                                                                           | Αντίστροφη συνεδρία Ιστού με γεφύρωση εικόνας-μηνυμάτων                                   |
+| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                    | Σχήμα σώματος αιτήματος για συγκεκριμένο πάροχο                                           |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                     | Ρύθμιση παρόχου συμβατής AI SDK                                                           |
+| `PerplexityWebExecutor`   | Ιστός αμηχανίας                                                                                                                                              | Αντίστροφη συνεδρία Ιστού για συνέχιση συνομιλίας                                         |
+| `PetalsExecutor`          | Πέταλα κατανεμημένο συμπέρασμα                                                                                                                               | Αποκεντρωμένη δρομολόγηση σμήνους                                                         |
+| `PollinationsExecutor`    | Επικονίαση AI                                                                                                                                                | Δεν απαιτείται κλειδί API, αιτήματα περιορισμένης τιμής                                   |
 | `QoderExecutor`           | Qoder AI                                                                                                                                                     | Υποστήριξη PAT και OAuth, δωρεάν βαθμίδα πολλαπλών μοντέλων                               |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                             | Ταυτοποίηση λογαριασμού υπηρεσίας, τελικά σημεία βάσει περιοχής                           |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                                | Εισαγόμενο κλειδί API + ροή συνομιλίας Connect-protobuf                                   |
+| `VertexExecutor`          | Google Vertex AI                                                                                                                                             | Εξουσιοδότηση λογαριασμού υπηρεσίας, τελικά σημεία βάσει περιοχής                         |
+| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                                | Εισαγωγή κλειδιού API + Συνδεθείτε-protobuf ροή συνομιλίας                                |
 
-Όλοι οι υπόλοιποι πάροχοι (συμπεριλαμβανομένων των προσαρμοσμένων συμβατών κόμβων) χρησιμοποιούν τον `DefaultExecutor`.
+Όλοι οι άλλοι πάροχοι (συμπεριλαμβανομένων προσαρμοσμένων συμβατών κόμβων) χρησιμοποιούν το `DefaultExecutor`.
+
+### Αυτοματοποιημένοι έλεγχοι και λογαριασμοί περιόδων ιστού
+
+Οι δοκιμές μοντέλων, το Test All, οι συνδυαστικές δοκιμές και οι αξιολογήσεις στέλνουν πραγματικά αιτήματα συνομιλίας. Ένας πάροχος περιόδων σύνδεσης ιστού ενεργεί ως ο συνδεδεμένος χρήστης, επομένως κάθε ένα από αυτά τα αιτήματα θα αποθηκευτεί ως συνομιλία σε αυτόν τον λογαριασμό. Οι αυτοματοποιημένοι ανιχνευτές που άφησαν τέτοιες συνομιλίες ανέστειλαν έναν λογαριασμό (#14780). Επομένως, ο αγωγός συνομιλίας απορρίπτει κάθε στόχο που φτάνει ένας αυτοματοποιημένος ανιχνευτής του οποίου ο πάροχος παίρνει ένα διαπιστευτήριο περιόδου σύνδεσης ιστού, μόλις επιλυθεί ο πάροχος του στόχου και προτού επιλεγεί ένα διαπιστευτήριο (`src/lib/providers/chatProbePolicy.ts`). Η άρνηση είναι `422` με `error.code` `chat_probe_not_isolated`, και οι δρομείς ανιχνευτή την αναφέρουν ως παράλειψη και όχι ως αποτυχία.
+
+Ένας εκτελεστής που εκτελεί κάθε συνομιλία στη λειτουργία χωρίς ιστορικό του ίδιου του παρόχου, τη δηλώνει με `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`). Στη συνέχεια, επιτρέπονται οι έρευνες σε αυτόν τον πάροχο. ChatGPT Web δηλώνει `temporary-chat`. Καρφιτσώστε μια δήλωση στον μηχανισμό της με μια δοκιμή, επομένως η αξίωση δεν μπορεί να υπερβεί τον κώδικα που την κάνει αληθινή.
 
 ## Πίνακας Συμβατότητας Παρόχων
 
@@ -1055,11 +1064,11 @@ Source Format → OpenAI (hub) → Target Format
 - μεταναστεύσεις σχήματος SQLite και άγκιστρα αυτόματης αναβάθμισης κατά την εκκίνηση
 - διαδρομή συμβατότητας μετανάστευσης από JSON → SQLite
 
-## 6) Φύλακας SSRF / Εξερχόμενων URL
+## 6) SSRF / Outbound URL Guard
 
-- Το `src/shared/network/outboundUrlGuard.ts` αποκλείει όλες τις ιδιωτικές/loopback/link-local διευθύνσεις-στόχους πριν φτάσουν στους εκτελεστές παρόχων
-- Οι διαδρομές ανακάλυψης και επικύρωσης μοντέλων παρόχου χρησιμοποιούν το `src/shared/network/safeOutboundFetch.ts`, το οποίο εφαρμόζει τον φύλακα πριν από κάθε εξερχόμενο αίτημα
-- Τα σφάλματα φύλακα εμφανίζονται ως `URL_GUARD_BLOCKED` με HTTP 422 και καταγράφονται στο αρχείο ελέγχου συμμόρφωσης μέσω του `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) εφαρμόζει `src/shared/network/outboundUrlGuard.ts` σε αιτήματα συνομιλίας που αποστέλλονται μέσω `BaseExecutor.execute()`. Σε λειτουργία μόνο δημόσιου (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` με απενεργοποιημένη την ιδιωτική σημαία) αποκλείει τους ιδιωτικούς και loopback κεντρικούς υπολογιστές και 169.254.0.0/16. σε κάθε άλλη λειτουργία αποκλείει κεντρικούς υπολογιστές μεταδεδομένων cloud. Ελέγχει το όνομα κεντρικού υπολογιστή ή IP κυριολεκτικά όπως είναι γραμμένο, πριν από οποιαδήποτε αναζήτηση DNS. Οι ενσωματωμένοι τοπικοί πάροχοι το παραλείπουν.
+- Οι διαδρομές ανακάλυψης και επικύρωσης μοντέλων παρόχου χρησιμοποιούν `src/shared/network/safeOutboundFetch.ts` που εφαρμόζει το φύλακα πριν από κάθε εξερχόμενο αίτημα
+- Τα σφάλματα προστασίας εμφανίζονται ως `URL_GUARD_BLOCKED` με HTTP 503 (`getSafeOutboundFetchErrorStatus`, η διαδρομή εντοπισμού μοντέλου επιστρέφει 400) και τα γνήσια μπλοκ SSRF κατά την επικύρωση καταγράφονται στην διαδρομή ελέγχου ως συμβάντα `provider.validation.ssrf_blocked`
 
 ## Παρατηρησιμότητα και Λειτουργικά Σήματα
 

@@ -213,36 +213,38 @@ Duas armadilhas comuns:
 
 Consulte [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) e [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) para ver a confusão original documentada aqui.
 
-## Como Funciona (Combos Automáticos Persistidos)
+## Como funciona (combos automáticos persistentes)
 
-O Mecanismo de Combo Automático seleciona dinamicamente o melhor provedor/modelo para cada solicitação usando uma **função de pontuação de 16 fatores** (definida em `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). A soma dos pesos padrão é `1.0`; pesos personalizados são renormalizados por `normalizeScoringWeights()`. Dois dos dezesseis — `cacheAffinity` e `resetWindowAffinity` — têm peso padrão `0`; `reliability` tem `0` em `DEFAULT_WEIGHTS`, mas `0.03` nos pacotes genéricos e `0.04` em `reliability-first`, enquanto `quality` tem `0.02` nos pacotes (`0.03` em `quality-first`): eles ainda são calculados para cada candidato, e `cacheAffinity` condiciona a desduplicação do cache de prompts fora da pontuação; portanto, os fatores com padrão zero simplesmente não influenciam por padrão, enquanto os pacotes influenciam.
+O Auto-Combo Engine seleciona dinamicamente o melhor provider/model para cada solicitação usando um** Função de pontuação de 16 fatores** (definido em `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Os pesos padrão somam `1.0`; pesos personalizados são renormalizados por `normalizeScoringWeights()`. Dois dos dezesseis — `cacheAffinity` e `resetWindowAffinity` — carregam um peso padrão de `0`; `reliability` carrega `0` em `DEFAULT_WEIGHTS` mas `0.03` em pacotes genéricos e `0.04` em `reliability-first`, e `quality` carrega `0.02` em pacotes (`0.03` em `quality-first`): eles ainda são calculados para cada candidato, e `cacheAffinity` bloqueia a desduplicação de cache de prompt fora da pontuação, então os fatores padrão zero simplesmente não votam por padrão, enquanto os pacotes o fazem.
 
-![Pontuação de 16 fatores do Combo Automático](../diagrams/exported/auto-combo-scoring.svg)
+![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
-> Fonte: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (gere novamente por meio de `npm run docs:render-diagrams`). O nome do arquivo é histórico; o código-fonte e o diagrama renderizado mostram todos os 16 fatores declarados em `DEFAULT_WEIGHTS`.
+> Fonte: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (regenerar via `npm run docs:render-diagrams`). O nome do arquivo é histórico; a fonte e o diagrama renderizado mostram todos os 16 fatores declarados em `DEFAULT_WEIGHTS`.
 
-| Fator                 | Peso Padrão | Descrição                                                                                                                                                                                                                                 |
-| :-------------------- | :---------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quota`               | 0.1429      | Margem restante de cota/limite de taxa [0..1]                                                                                                                                                                                             |
-| `health`              | 0.1605      | Pontuação de integridade do disjuntor (CLOSED=1.0, HALF_OPEN=0.5, OPEN=0.0)                                                                                                                                                               |
-| `costInv`             | 0.1429      | Inverso do custo **combinado** (60% do preço dos tokens de entrada + 40% do preço dos tokens de saída, normalizado) — mais barato = pontuação mais alta                                                                                   |
-| `latencyInv`          | 0.1143      | Latência p95 inversa normalizada em relação ao pool — mais rápido = pontuação mais alta                                                                                                                                                   |
-| `taskFit`             | 0.0762      | Adequação ao tipo de tarefa (programação, revisão, planejamento, análise, depuração, documentação)                                                                                                                                        |
-| `stability`           | 0.0476      | Estabilidade baseada na variância do desvio padrão da latência — um candidato cujo tempo de resposta oscila recebe uma pontuação menor                                                                                                    |
-| `tierPriority`        | 0.0476      | Prioridade do nível da conta — Ultra=1.0, Pro=0.67, Standard=0.33, Free=0.0                                                                                                                                                               |
-| `tierAffinity`        | 0.0476      | Afinidade entre o nível do candidato e o nível recomendado pelo manifesto                                                                                                                                                                 |
-| `specificityMatch`    | 0.0476      | Correspondência entre a especificidade da solicitação (indicação do manifesto) e o nível do modelo                                                                                                                                        |
-| `contextAffinity`     | 0.0476      | Afinidade entre a necessidade de janela de contexto da solicitação e a janela de contexto do modelo                                                                                                                                       |
-| `sessionAvailability` | 0.0476      | Disponibilidade da sessão OAuth da conexão candidata para esta sessão (`getOAuthSessionAvailability()`; conexões que não usam OAuth recebem pontuação 1.0)                                                                                |
-| `connectionDensity`   | 0.0476      | Distribui a carga entre conexões do mesmo provedor (anticconcentração)                                                                                                                                                                    |
-| `cacheAffinity`       | 0.00        | Afinidade de hash de rendezvous com a conexão que provavelmente já contém o prefixo do cache de prompts desta solicitação (`open-sse/services/combo/promptCacheAffinity.ts`); desativada por padrão (#8008)                               |
-| `resetWindowAffinity` | 0.00        | Tendência a favorecer conexões cuja janela de redefinição de cota seja favorável (desativada por padrão)                                                                                                                                  |
-| `quality`             | 0.03        | Sinal de qualidade da saída orientado por feedback, proveniente do rastreador de qualidade de eventos de roteamento; candidatos sem observações recebem um valor neutro de 0.5                                                            |
-| `reliability`         | 0.00        | Proporção de sucessos observada, `1 - failureRate`, com base em 24h de histórico de uso e um mínimo de dez amostras (caso contrário, métricas em tempo real); candidatos sem observações são considerados como 1.0. Desativada por padrão |
+| Fator                 | Peso padrão | Descrição                                                                                                                                                                                                                        |
+| :-------------------- | :---------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `quota`               | 0.1429      | Cota restante/espaço limite de taxa [0..1]                                                                                                                                                                                       |
+| `health`              | 0.1605      | Pontuação de integridade do disjuntor (CLOSED= 1,0, HALF_OPEN= 0,5, OPEN= 0,0)                                                                                                                                                   |
+| `costInv`             | 0.1429      | Inverso** misturado** custo (60% de entrada + 40% de preço do token de saída, normalizado) — mais barato = pontuação mais alta                                                                                                   |
+| `latencyInv`          | 0.1143      | Latência inversa p95 normalizada para agrupar — mais rápido = pontuação mais alta                                                                                                                                                |
+| `taskFit`             | 0.0762      | Aptidão do tipo de tarefa (codificação, revisão, planejamento, análise, depuração, documentação)                                                                                                                                 |
+| `stability`           | 0.0476      | Estabilidade baseada na variância do desvio padrão da latência — um candidato cujo tempo de resposta oscila com pontuação mais baixa                                                                                             |
+| `tierPriority`        | 0.0476      | Prioridade no nível da conta — Ultra = 1.0, Pro = 0.67, Standard = 0.33, Free = 0.0                                                                                                                                              |
+| `tierAffinity`        | 0.0476      | Afinidade entre o nível do candidato e o nível recomendado pelo manifesto                                                                                                                                                        |
+| `specificityMatch`    | 0.0476      | Correspondência entre a especificidade da solicitação (dica manifestada) e a camada do modelo                                                                                                                                    |
+| `contextAffinity`     | 0.0476      | Afinidade entre a necessidade da janela de contexto da solicitação e a janela de contexto do modelo                                                                                                                              |
+| `sessionAvailability` | 0.0476      | Disponibilidade da sessão OAuth da conexão candidata para esta sessão (`getOAuthSessionAvailability()`; pontuação de conexões não OAuth 1,0)                                                                                     |
+| `connectionDensity`   | 0.0476      | Distribui a carga entre conexões do mesmo provedor (anticoncentração)                                                                                                                                                            |
+| `cacheAffinity`       | 0.00        | Afinidade de hash de encontro com a conexão com maior probabilidade de já conter o prefixo de cache de prompt desta solicitação (`open-sse/services/combo/promptCacheAffinity.ts`); desabilitado por padrão (#8008)              |
+| `resetWindowAffinity` | 0.00        | Tendência para conexões cuja janela de redefinição de cota é favorável (desativada por padrão)                                                                                                                                   |
+| `quality`             | 0.03        | Sinal de qualidade de saída orientado por feedback do rastreador de qualidade de evento de roteamento; candidatos sem observações recebem um neutro 0,5                                                                          |
+| `reliability`         | 0.00        | Parcela de sucesso observada, `1 - failureRate`, de 24 horas de histórico de uso atrás de um piso de dez amostras (caso contrário, métricas em tempo real); candidatos sem observações são lidos como 1,0. Desativado por padrão |
 
-`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+O rastreador `quality` na memória (`open-sse/services/routing/quality.ts`) fica vazio após uma reinicialização a frio, então cada candidato pontua um `0.5` neutro até que as primeiras observações cheguem.
 
-**Soma:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0`, conforme declarado em `DEFAULT_WEIGHTS`; pesos configurados pelo usuário são renormalizados em uma distribuição por `normalizeScoringWeights()` antes do cálculo da pontuação.
+> **Cota ilegível (#15347).** Quando um provedor tem um coletor de cota, mas não retorna nada legível (falha na busca, credenciais ausentes, uso somente de mensagens ou um instantâneo malformado sem `windows` analisável e sem `percentUsed` finito, incluindo `percentUsed: null`), o candidato pontua `0` no eixo `quota` e sua pontuação final é multiplicada por `UNREADABLE_QUOTA_SOFT_DEPRIORITIZE_FACTOR` (0,5, `autoStrategy.ts`), o mesmo padrão de penalidade suave que a penalidade de status de conexão. Uma leitura de uso com falha é uma evidência sobre a telemetria, não sobre o provedor, portanto, ela é classificada estritamente abaixo de qualquer leitura real, incluindo uma leitura 100%-used confirmada, mas nunca é bloqueada ou despejada. Um provedor sem limite reporta `unlimited: true` e pontua como cota total; um provedor sem coletor de cota registrado não possui nenhuma fonte de telemetria e mantém o padrão `100`.
+
+**Soma:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` conforme declarado em `DEFAULT_WEIGHTS`; os pesos configurados pelo usuário são renormalizados em uma distribuição por `normalizeScoringWeights()` antes da pontuação.
 
 ## Pacotes de modo
 
@@ -309,30 +311,32 @@ valores resolvidos alimentam as entradas existentes `config.modePack` / `config.
 
 ## Todas as estratégias de roteamento
 
-O mecanismo de combinação do OmniRoute suporta** 20 estratégias de roteamento** (declarado em `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). O próprio mecanismo Auto Combo está exposto na estratégia `auto` ; os demais estão disponíveis para combos persistentes.
+O mecanismo de combinação do OmniRoute suporta** 22 estratégias de roteamento** (declarado em `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). O próprio mecanismo Auto Combo está exposto na estratégia `auto` ; os demais estão disponíveis para combos persistentes.
 
-| Estratégia          | Descrição                                                                                                                                                                                                                |
-| :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | Lista ordenada de primeiro alvo com prioridade explícita                                                                                                                                                                 |
-| `weighted`          | Ponderado aleatoriamente pelo peso por alvo                                                                                                                                                                              |
-| `round-robin`       | Percorrer os alvos em ordem (em lote; veja abaixo)                                                                                                                                                                       |
-| `context-relay`     | Distribua o contexto entre os alvos (longas conversas)                                                                                                                                                                   |
-| `fill-first`        | Preencha a cota de cada destino antes de passar para o próximo                                                                                                                                                           |
-| `p2c`               | balanceamento de carga aleatório Power-of-2-choices                                                                                                                                                                      |
-| `random`            | Seleção aleatória uniforme                                                                                                                                                                                               |
-| `least-used`        | Escolha o alvo com menor carga atual                                                                                                                                                                                     |
-| `cost-optimized`    | Minimize $ por solicitação de acordo com o preço do catálogo                                                                                                                                                             |
-| `reset-aware` ⭐    | Priorizar por tempo de redefinição de cota — janelas de redefinição curta com classificação superior                                                                                                                     |
-| `reset-window`      | Prefira destinos cuja janela de cota seja redefinida mais cedo                                                                                                                                                           |
-| `headroom`          | Escolha o alvo com o maior espaço de cota restante                                                                                                                                                                       |
-| `quota-weighted`    | Ignore as contas esgotadas e escolha entre as demais proporcionalmente à cota restante dividida pela carga de voo; as conversas existentes permanecem fixadas                                                            |
-| `strict-random`     | Aleatório sem desduplicação de repetições                                                                                                                                                                                |
-| `auto`              | Use pontuação de combinação automática (16 fatores) —** recomendado**                                                                                                                                                    |
-| `lkgp`              | Último caminho válido (fixa o último provedor bem-sucedido e depois volta às regras)                                                                                                                                     |
-| `context-optimized` | Escolha o alvo que melhor se adapta ao tamanho do contexto atual                                                                                                                                                         |
-| `cache-optimized`   | Reordene os destinos por afinidade de cache de prompt — a conexão com maior probabilidade de já conter o prefixo em cache desta solicitação é tentada primeiro (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | Distribua-se por um painel de modelos em paralelo e, em seguida, sintetize uma resposta por meio de um juiz (veja abaixo)                                                                                                |
-| `pipeline`          | Execute os destinos sequencialmente, encadeando a saída de cada etapa na entrada da próxima etapa; apenas a resposta final é retornada (#6396)                                                                           |
+| Estratégia          | Descrição                                                                                                                                                                                                                                                                |
+| :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | Lista ordenada de primeiro alvo com prioridade explícita                                                                                                                                                                                                                 |
+| `weighted`          | Ponderado aleatoriamente pelo peso por alvo                                                                                                                                                                                                                              |
+| `round-robin`       | Percorrer os alvos em ordem (em lote; veja abaixo)                                                                                                                                                                                                                       |
+| `context-relay`     | Distribua o contexto entre os alvos (longas conversas)                                                                                                                                                                                                                   |
+| `fill-first`        | Preencha a cota de cada destino antes de passar para o próximo                                                                                                                                                                                                           |
+| `p2c`               | balanceamento de carga aleatório Power-of-2-choices                                                                                                                                                                                                                      |
+| `random`            | Seleção aleatória uniforme                                                                                                                                                                                                                                               |
+| `least-used`        | Escolha o alvo com menor carga atual                                                                                                                                                                                                                                     |
+| `cost-optimized`    | Minimize $ por solicitação de acordo com o preço do catálogo                                                                                                                                                                                                             |
+| `reset-aware` ⭐    | Priorizar por tempo de redefinição de cota — janelas de redefinição curta com classificação superior                                                                                                                                                                     |
+| `reset-window`      | Prefira destinos cuja janela de cota seja redefinida mais cedo                                                                                                                                                                                                           |
+| `expiry-first`      | Gaste primeiro a conta cuja cota expiraria sem ser utilizada — o valor restante mais alto com o prazo de redefinição mais próximo vai primeiro                                                                                                                           |
+| `headroom`          | Escolha o alvo com o maior espaço de cota restante                                                                                                                                                                                                                       |
+| `quota-weighted`    | Ignore as contas esgotadas e escolha entre as demais proporcionalmente à cota restante dividida pela carga de voo; as conversas existentes permanecem fixadas                                                                                                            |
+| `strict-random`     | Aleatório sem desduplicação de repetições                                                                                                                                                                                                                                |
+| `auto`              | Use pontuação de combinação automática (16 fatores) —** recomendado**                                                                                                                                                                                                    |
+| `lkgp`              | Último caminho válido (fixa o último provedor bem-sucedido e depois volta às regras)                                                                                                                                                                                     |
+| `context-optimized` | Escolha o alvo que melhor se adapta ao tamanho do contexto atual                                                                                                                                                                                                         |
+| `cache-optimized`   | Reordene os destinos por afinidade de cache de prompt — a conexão com maior probabilidade de já conter o prefixo em cache desta solicitação é tentada primeiro (`open-sse/services/combo/promptCacheAffinity.ts`, #8008)                                                 |
+| `fusion` 🧬         | Distribua-se por um painel de modelos em paralelo e, em seguida, sintetize uma resposta por meio de um juiz (veja abaixo)                                                                                                                                                |
+| `pipeline`          | Execute os destinos sequencialmente, encadeando a saída de cada etapa na entrada da próxima etapa; apenas a resposta final é retornada (#6396)                                                                                                                           |
+| `jev`               | Lista de preferências classificadas pelo usuário; TypeSafe Jev admite quais entradas são executadas para esta solicitação. Vencedor primeiro, outros alvos admitidos mantêm a ordem do usuário. Fica aberto ao pedido do usuário quando Jev não está disponível (#15276) |
 
 ⭐ = Novo na v3.8.0 · 🧬 = Novo na v3.8.36
 
@@ -350,6 +354,20 @@ Para rotação estrita use `round-robin`; pesos iguais em `weighted` fornecem �
 ### Modo de pipeline agente
 
 Um combo `pipeline` com pelo menos dois modelos pode optar pelo roteamento planner/executor com `config.agenticOrchestration.enabled`. O primeiro alvo possui planejamento e respostas finais; o segundo alvo emite chamadas de ferramentas nativas do cliente. OmniRoute detecta continuações de resultados de ferramentas do protocolo de solicitação, pergunta ao planejador se outra rodada de ferramentas é necessária e torna dinamicamente o executor ou o planejador a etapa final voltada para o cliente.
+
+`config.agenticOrchestration.contextCompaction` opcional aplica um orçamento de carga útil separado antes de cada planejador ou envio de executor. Habilite-o explicitamente:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Estes são orçamentos de caracteres JSON serializados selecionados pelo operador, e não janelas de contexto de token ou limites de upstream garantidos. O modelo exato IDs substitui o padrão. Acima do limite, a compactação remove definições de ferramentas idênticas, corta evidências de ferramentas superdimensionadas com um resumo e remove grupos históricos completos antigos em direção à proporção desejada. Ele retém instruções system/developer, a solicitação mais recente do usuário, a última rodada de ferramentas, incluindo calls/results paralelo e as principais instruções de roteamento do Gemini. As instruções de nível superior e as configurações de ferramentas são preservadas. Um marcador de omissão registra o histórico removido; este é um recorte determinístico, não um resumo semântico. Se o contexto fixado ainda exceder o orçamento, a solicitação retornará 413 antes de entrar em contato com o modelo. Com a compactação desativada ou abaixo do limite, a solicitação passa inalterada.
 
 Nas continuações dos resultados da ferramenta, OmniRoute também interrompe a execução quando duas rodadas consecutivas concluídas repetem as mesmas chamadas de ferramenta com resultados inalterados, ou quando todos os resultados marcados explicitamente em duas rodadas consecutivas falham. Os resultados alterados permitem chamadas repetidas (por exemplo, sondagens). O guarda é redefinido em uma nova solicitação do usuário, agrupa chamadas paralelas em uma rodada e suporta Anthropic, conclusões de bate-papo, respostas e históricos Gemini. O planejador recebe o motivo e possui a resposta final, mesmo que solicite outra rodada de ferramentas.
 
@@ -372,7 +390,7 @@ O executor pode emitir múltiplas chamadas independentes em uma resposta. As cha
 O round-robin é em lote, não uma solicitação por etapa:
 
 - `stickyRoundRobinLimit` (configuração combinada, depois `comboStickyRoundRobinLimit`, depois `settings.stickyRoundRobinLimit`, padrão** 3** ) mantém o mesmo alvo por tantos sucessos consecutivos antes de girar. Defina a substituição combinada como `1` para rotação de uma solicitação. O editor combinado mostra o valor efetivo e de qual camada ele veio.
-- `connectionAwareExpansion` (configuração combinada, depois configurações, padrão** falso** ) expande cada etapa no nível do provedor em metas por conta antes da rotação. As estratégias do Grupo B (prioritária, ponderada, round-robin, aleatória, p2c, menos usada, otimizada para custos, lkgp, preencher primeiro, aleatório estrito, otimizada para contexto, otimizada para cache, retransmissão de contexto, fusão, pipeline) mantêm uma visão no nível do provedor até que esta seja ativada. O editor combinado expõe herdar/ligar/desligar; herdar usa o padrão global (desligado).
+- `connectionAwareExpansion` (configuração combinada, depois configurações, padrão** falso** ) expande cada etapa no nível do provedor em metas por conta antes da rotação. As estratégias do Grupo B (prioritária, ponderada, round-robin, aleatória, p2c, menos usada, otimizada para custos, lkgp, preencher primeiro, aleatório estrito, otimizada para contexto, otimizada para cache, retransmissão de contexto, fusão, pipeline, jev) mantêm uma visão no nível do provedor até que esta seja ativada. O editor combinado expõe herdar/ligar/desligar; herdar usa o padrão global (desligado).
 - Roteamento de localidade de cache de prompt (`promptCacheAffinityEnabled`, padrão** verdadeiro** ) reordena as conexões fixadas para que as chaves de cache correspondentes permaneçam em uma conta. Tem precedência sobre o round-robin e a rotação ponderada nas etapas fixadas por conta. Desative-o em Configurações padrões → Combo se precisar de rotação estrita. Não há substituição por combo.
 
 Para rotação de várias contas em um modelo, prefira** uma etapa de conta dinâmica** ( `connectionId` vazio, pool inteiro) com limite fixo `1`, não três `connectionId` s fixados. As etapas fixadas e a afinidade são recolhidas na mesma conta, mesmo enquanto o contador RR avança.
@@ -840,47 +858,41 @@ Para favorecer fortemente o Nível 1 (assinatura), aumente o peso de `tierPriori
 
 Consulte [`docs/guides/TIERS.md`](../guides/TIERS.md) para ver as definições dos níveis e a classificação dos provedores.
 
-## Testes e cobertura
+## Teste e cobertura
 
-### Matriz determinística de decisões de roteamento (`npm run test:combo:matrix`)
+### Matriz determinística de decisão de roteamento (`npm run test:combo:matrix`)
 
-`tests/integration/combo-matrix/*.test.ts` comprova a **decisão** de roteamento de todas as 19
-estratégias públicas de ponta a ponta, passando pelo pipeline real de combinação com um upstream simulado.
-A cobertura inclui:
+`tests/integration/combo-matrix/*.test.ts` prova o roteamento** decisão** de todas as 21 estratégias públicas de ponta a ponta por meio do pipeline de combinação real com um upstream simulado. A cobertura inclui:
 
-- Todas as 19 estratégias de `ROUTING_STRATEGY_VALUES` (ordered, weighted, cost, context, fusion, …).
-- `quota-share` (interna) de ponta a ponta: equidade DRR + redução de prioridade por saturação por meio do
-  ponto de integração real `selectQuotaShareTarget` (`registerQuotaFetcher` / `setLKGP` /
-  `__setHeadroomSaturationFetcherForTests`).
-- Cobertura de transferência universal de `context-relay` para todas as quantidades de destinos.
+- Todas as 21 estratégias `ROUTING_STRATEGY_VALUES` (ordenadas, ponderadas, custo, contexto, fusão,…).
+- `quota-share` (interno) ponta a ponta: DRR imparcialidade + despriorização da saturação por meio da costura `selectQuotaShareTarget` real (`registerQuotaFetcher` / `setLKGP` / `__setHeadroomSaturationFetcherForTests`).
+- cobertura de transferência universal `context-relay` em todas as contagens de destino.
 
-Esse conjunto é executado na CI (job `test:integration`) com `--test-concurrency=1` e
-`--test-force-exit`, portanto é determinístico e não exige credenciais reais.
+Este conjunto é executado em CI (`test:integration` job) com `--test-concurrency=1` e `--test-force-exit`, portanto é determinístico e não requer credenciais ativas.
 
-### Smoke test real controlado (NÃO executado na CI — provedores reais)
+### Fumaça ao vivo fechada (NOT em CI — provedores reais)
 
-| Comando                                | O que faz                                                                                                       |
-| :------------------------------------- | :-------------------------------------------------------------------------------------------------------------- |
-| `npm run test:combo:live`              | Roteamento real no processo com `RUN_COMBO_LIVE=1`; captura um snapshot de um banco de dados ativo do OmniRoute |
-| `npm run test:combo:live:vps`          | Chamadas HTTP para um servidor OmniRoute ativo (defina `COMBO_LIVE_BASE_URL`)                                   |
-| `npm run test:combo:live:vps:failover` | O mesmo, com cenários deliberados de failover                                                                   |
+| Comando                                | O que isso faz                                                                                    |
+| :------------------------------------- | :------------------------------------------------------------------------------------------------ |
+| `npm run test:combo:live`              | Roteamento real em processo com `RUN_COMBO_LIVE=1`; captura instantâneo de um DBOmniRoute ao vivo |
+| `npm run test:combo:live:vps`          | chamadas HTTP em um servidor OmniRoute ativo (set `COMBO_LIVE_BASE_URL`)                          |
+| `npm run test:combo:live:vps:failover` | O mesmo, com cenários de failover deliberados                                                     |
 
-Esses smoke tests exercitam o caminho real da comunicação (combinação → provedor → conclusão). Eles são
-intencionalmente excluídos da CI porque exigem credenciais reais e acesso a VPS.
+Esses testes de fumaça exercitam o caminho real do fio (conclusão → do provedor → combinado). Eles são excluídos intencionalmente do CI porque exigem credenciais ativas e acesso VPS.
 
 ---
 
 ## Arquivos
 
-| Arquivo                                                   | Finalidade                                                                                                                                                    |
-| :-------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `open-sse/services/autoCombo/scoring.ts`                  | Função de pontuação com 16 fatores, `DEFAULT_WEIGHTS`, normalização do pool                                                                                   |
-| `open-sse/services/autoCombo/taskFitness.ts`              | Tabela de adequação modelo × tarefa                                                                                                                           |
-| `open-sse/services/autoCombo/engine.ts`                   | Lógica de seleção, bandit, limite de orçamento                                                                                                                |
-| `open-sse/services/autoCombo/selfHealing.ts`              | Exclusão, sondagens, modo de incidente                                                                                                                        |
-| `open-sse/services/autoCombo/modePacks.ts`                | 6 perfis de pesos (entrega rápida, economia de custos, qualidade em primeiro lugar, compatível com modo offline, confiabilidade em primeiro lugar, modo caos) |
-| `open-sse/services/autoCombo/autoPrefix.ts`               | Analisador do prefixo `auto/` + 6 variantes                                                                                                                   |
-| `open-sse/services/autoCombo/virtualFactory.ts`           | Cria `AutoComboConfig` em memória a partir de conexões ativas                                                                                                 |
-| `open-sse/services/autoCombo/providerRegistryAccessor.ts` | Gancho de teste para simular o registro de provedores                                                                                                         |
-| `src/shared/constants/routingStrategies.ts`               | `ROUTING_STRATEGY_VALUES` (20 estratégias)                                                                                                                    |
-| `src/sse/handlers/chat.ts`                                | Integração: desvio antecipado para o prefixo auto                                                                                                             |
+| Arquivo                                                   | Propósito                                                                                                                                     |
+| :-------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
+| `open-sse/services/autoCombo/scoring.ts`                  | Função de pontuação de 16 fatores, `DEFAULT_WEIGHTS`, norma do pool                                                                           |
+| `open-sse/services/autoCombo/taskFitness.ts`              | Pesquisa de aptidão da tarefa do modelo ×                                                                                                     |
+| `open-sse/services/autoCombo/engine.ts`                   | Lógica de seleção, bandido, limite orçamentário                                                                                               |
+| `open-sse/services/autoCombo/selfHealing.ts`              | Exclusão, investigações, modo de incidente                                                                                                    |
+| `open-sse/services/autoCombo/modePacks.ts`                | 6 perfis de peso (envio rápido, econômico, qualidade em primeiro lugar, compatível com off-line, confiabilidade em primeiro lugar, modo caos) |
+| `open-sse/services/autoCombo/autoPrefix.ts`               | analisador de prefixo `auto/` + 6 variantes                                                                                                   |
+| `open-sse/services/autoCombo/virtualFactory.ts`           | Constrói `AutoComboConfig` na memória a partir de conexões ao vivo                                                                            |
+| `open-sse/services/autoCombo/providerRegistryAccessor.ts` | Gancho de teste para zombar do registro do provedor                                                                                           |
+| `src/shared/constants/routingStrategies.ts`               | `ROUTING_STRATEGY_VALUES` (22 estratégias)                                                                                                    |
+| `src/sse/handlers/chat.ts`                                | Integração: curto-circuito de prefixo automático                                                                                              |

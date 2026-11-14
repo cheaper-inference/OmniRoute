@@ -279,15 +279,15 @@ Các hook của trang:
 
 ## Biến môi trường
 
-| Biến                               | Mặc định  | Mô tả                                                      |
-| ---------------------------------- | --------- | ---------------------------------------------------------- |
-| `QUOTA_STORE_DRIVER`               | `sqlite`  | Trình điều khiển cần dùng: `sqlite` hoặc `redis`           |
-| `QUOTA_STORE_REDIS_URL`            | _(trống)_ | URL Redis, ví dụ: `redis://localhost:6379`                 |
-| `QUOTA_SATURATION_THRESHOLD`       | `0.5`     | 0..1; `>= ngưỡng` kích hoạt chế độ nghiêm ngặt             |
-| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`     | 0..1; hệ số nhân cho điểm kết hợp của chính sách mềm       |
-| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`      | Số ngày trước khi GC xóa các bucket `quota_consumption` cũ |
+| Biến                               | Mặc định  | Sự miêu tả                                                    |
+| ---------------------------------- | --------- | ------------------------------------------------------------- |
+| `QUOTA_STORE_DRIVER`               | `sqlite`  | Driver sử dụng: `sqlite` hoặc `redis`                         |
+| `QUOTA_STORE_REDIS_URL`            | _(trống)_ | Redis URL, ví dụ `redis://localhost:6379`                     |
+| `QUOTA_SATURATION_THRESHOLD`       | `0.5`     | 0..1; `>= threshold` kích hoạt chế độ nghiêm ngặt             |
+| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`     | 0..1; hệ số nhân cho điểm kết hợp chính sách mềm              |
+| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`      | Vài ngày trước khi GC loại bỏ các nhóm `quota_consumption` cũ |
 
-Các cài đặt DB (`quotaStore.*`) ghi đè các biến môi trường.
+cài đặt DB (`quotaStore.*`) ghi đè các vars env.
 
 ---
 

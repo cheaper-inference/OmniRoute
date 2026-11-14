@@ -275,17 +275,17 @@ if (candidate.quotaSoftPenalty) {
 
 ---
 
-## એન્વાયર્નમેન્ટ વેરિએબલ્સ
+## પર્યાવરણ ચલો
 
-| વેરિએબલ                            | ડિફૉલ્ટ  | વર્ણન                                                        |
-| ---------------------------------- | -------- | ------------------------------------------------------------ |
-| `QUOTA_STORE_DRIVER`               | `sqlite` | ઉપયોગ કરવા માટેનો ડ્રાઇવર: `sqlite` અથવા `redis`             |
-| `QUOTA_STORE_REDIS_URL`            | _(ખાલી)_ | Redis URL, દા.ત. `redis://localhost:6379`                    |
-| `QUOTA_SATURATION_THRESHOLD`       | `0.5`    | 0..1; `>= થ્રેશોલ્ડ` સ્ટ્રિક્ટ મોડ સક્રિય કરે છે             |
-| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`    | 0..1; સોફ્ટ-પૉલિસી કૉમ્બો સ્કોર માટેનો ગુણક                  |
-| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`     | GC જૂના `quota_consumption` બકેટ્સ દૂર કરે તે પહેલાંના દિવસો |
+| ચલ                                 | ડિફૉલ્ટ  | વર્ણન                                                    |
+| ---------------------------------- | -------- | -------------------------------------------------------- |
+| `QUOTA_STORE_DRIVER`               | `sqlite` | ઉપયોગ કરવા માટે ડ્રાઇવર: `sqlite` અથવા `redis`           |
+| `QUOTA_STORE_REDIS_URL`            | _(ખાલી)_ | Redis URL, દા.ત. `redis://localhost:6379`                |
+| `QUOTA_SATURATION_THRESHOLD`       | `0.5`    | 0..1; `>= threshold` કડક મોડને સક્રિય કરે છે             |
+| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`    | 0..1; સોફ્ટ-પોલીસી કોમ્બો સ્કોર માટે ગુણક                |
+| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`     | GC જૂની `quota_consumption` ડોલ દૂર કરે તેના દિવસો પહેલા |
 
-DB સેટિંગ્સ (`quotaStore.*`) એન્વાયર્નમેન્ટ વેરિએબલ્સને ઓવરરાઇડ કરે છે.
+DB સેટિંગ્સ (`quotaStore.*`) env vars ને ઓવરરાઇડ કરે છે.
 
 ---
 

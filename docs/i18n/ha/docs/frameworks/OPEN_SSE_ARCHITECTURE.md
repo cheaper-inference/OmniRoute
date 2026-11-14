@@ -165,30 +165,30 @@ Ana rubuta fayilolin rajistar kira (idan an kunna su) zuwa `${DATA_DIR}/call_log
 
 ---
 
-## Nazari Mai Zurfi akan Mahimman Fayiloli
+## Key Files Deep-Dive
 
-### chatCore.ts (layi 5977)
+### chatCore.ts (5977 Lines)
 
-**Babban mai sarrafa buƙatu**. Duk da girman sa, yana da tsari mai bayyani:
+The** babban mai kula da buƙatun** . Duk da girmansa, yana da tsayayyen tsari:
 
 ```ts
-// Tsarin pseudo na chatCore.ts
+// Pseudo-structure of chatCore.ts
 export async function handleChat(request: NextRequest) {
-  // 1. Tantancewa + CORS
+  // 1. Auth + CORS
   await authenticateRequest(request);
   applyCorsHeaders(response);
 
-  // 2. Tantance jikin buƙara
+  // 2. Body validation
   const body = await parseRequestBody(request);
 
-  // 3. Gano format + fassara
+  // 3. Format detection + translation
   const sourceFormat = detectFormat(request);
   const targetFormat = getTargetFormat(providerId);
   if (needsTranslation(sourceFormat, targetFormat)) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. Jagorar combo
+  // 4. Combo routing
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -196,20 +196,20 @@ export async function handleChat(request: NextRequest) {
       await recordUsage(result);
       return result;
     } catch (err) {
-      // Ci gaba zuwa manufa ta gaba
+      // Continue to next target
     }
   }
 
-  // 5. Madadin gaggawa
+  // 5. Emergency fallback
   return await emergencyFallback(body);
 }
 ```
 
-Duk da kasancewarsa babban function guda ɗaya, an tsara shi cikin **sassan da aka yi wa sharhi** waɗanda ke jituwa da pipeline mai matakai 5.
+Duk da kasancewar babban aiki ɗaya, an tsara shi cikin** sharhi sassan** wannan taswirar zuwa bututun mai mataki 5.
 
 ### combo.ts (4456 LOC)
 
-**Injin jagora** wanda ke mayar da combo zuwa jerin manufofi da aka tsara.
+The** injin kwatance** wanda ke warware haɗakarwa zuwa maƙasudai da aka yi oda.
 
 ```ts
 // services/combo.ts
@@ -226,138 +226,140 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-Yana goyon bayan **dabaru 20 na jagora** (duba `src/shared/constants/routingStrategies.ts`):
+Yana goyan bayan** 22 dabarun kwatance** (duba `src/shared/constants/routingStrategies.ts`):
 
-| Dabara              | Halayya                                                                                                      |
-| ------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `priority`          | Jerin tsari da manufa ta farko a gaba                                                                        |
-| `weighted`          | Zaɓi mai yuwuwa bisa nauyin kowace manufa                                                                    |
-| `round-robin`       | Zagaya ta manufofi bisa tsari                                                                                |
-| `context-relay`     | Mika context daga manufa zuwa manufa                                                                         |
-| `fill-first`        | Cika quota kafin ƙaura zuwa na gaba                                                                          |
-| `p2c`               | Ƙarfin zaɓuɓɓuka biyu                                                                                        |
-| `random`            | Random daidaitacce                                                                                           |
-| `least-used`        | Zaɓi wanda aka fi ƙarancin amfani da shi a kwanan nan                                                        |
-| `cost-optimized`    | Manufa mafi rahusa mai lafiya da farko                                                                       |
-| `reset-aware`       | Yana lura da tagogin sake saitin masu bada sabis                                                             |
-| `reset-window`      | Jagora bisa tagar sake saiti                                                                                 |
-| `headroom`          | Mafi yawancin ragowar quota da farko                                                                         |
-| `quota-weighted`    | Tsallake asusun da suka ƙare, sannan zaɓi bisa ragowar quota ÷ nauyin da ke gudana                           |
-| `strict-random`     | Daidaito na gaske (babu nauyin inganci)                                                                      |
-| `auto`              | Amfani da ƙididdigar abubuwa 16 (`autoCombo/`)                                                               |
-| `lkgp`              | Fara da mai bada sabis na ƙarshe da aka sani yana aiki                                                       |
-| `context-optimized` | Mafi kyau ga buƙatun masu dogon context                                                                      |
-| `cache-optimized`   | Kafa kowane prefix na prompt da ake iya sake amfani da shi a kan asushe guda (don samun bugu a prompt-cache) |
-| `fusion`            | Rarraba aiki zuwa panel a lokaci guda, sannan haɗa sakamako ta mai hukunci (`fusion.ts`)                     |
-| `pipeline`          | Sarƙa matakai — fitarwar kowace manufa tana ciyar da ta gaba                                                 |
+| Dabarun             | Hali                                                                                         |
+| ------------------- | -------------------------------------------------------------------------------------------- |
+| `priority`          | Jerin oda na farko                                                                           |
+| `weighted`          | Yiwuwa ta kowane nau'in manufa                                                               |
+| `round-robin`       | Zagaya ta hanyar hari cikin tsari                                                            |
+| `context-relay`     | Kashe mahallin cikin maƙasudai                                                               |
+| `fill-first`        | Cika adadin kafin matsawa zuwa gaba                                                          |
+| `p2c`               | Ikon zabi biyu                                                                               |
+| `random`            | Uniform bazuwar                                                                              |
+| `least-used`        | Zaɓi wanda yake da mafi ƙarancin amfani                                                      |
+| `cost-optimized`    | Maƙasudin lafiya mafi arha na farko                                                          |
+| `reset-aware`       | Sane da sake saitin windows                                                                  |
+| `reset-window`      | Sake saita hanyar tagar tagar                                                                |
+| `expiry-first`      | Kashe asusun da adadin sa zai ƙare ba a fara amfani da shi ba                                |
+| `headroom`          | Mafi saura babban ɗakin kwana na farko                                                       |
+| `quota-weighted`    | Tsallake matattun asusu, sannan zana da ragowar adadin ÷ a cikin jirgin sama                 |
+| `strict-random`     | Gaskiya uniform (babu ingancin nauyi)                                                        |
+| `auto`              | Yi amfani da maki 16-factor (`autoCombo/`)                                                   |
+| `lkgp`              | Ƙarshe sanannen mai bada sabis na farko                                                      |
+| `context-optimized` | Mafi kyau ga buƙatun dogon yanayi                                                            |
+| `cache-optimized`   | Sanya kowane prefix na gaggawar da za a sake amfani da shi zuwa asusu ɗaya (saukar da sauri) |
+| `fusion`            | Fita zuwa panel a layi daya, sannan haɗa ta hanyar alƙali (`fusion.ts`)                      |
+| `pipeline`          | Sarkar matakan — kowane abin da aka yi niyya yana ciyar da na gaba                           |
+| `jev`               | Ficewa: TypeSafe Jev ya yarda da waɗanne abubuwan shigarwa ke gudana; in ba haka ba odar ku  |
 
 ### base.ts (1170 LOC)
 
-**Abstract executor** wanda kowane class na executor yake gado (kai tsaye ko ta `DefaultExecutor` da sauran subclasses). Yana ƙunshe da:
+The** abstraction mai zartarwa** cewa kowane aji na zartarwa yana fadada (kai tsaye ko ta hanyar `DefaultExecutor` da sauran azuzuwan). Ya ƙunshi:
 
-- `buildUrl()` — gina URL na tsoho (subclasses na override don keɓancewa)
-- `buildHeaders()` — headers na tsoho (auth, content-type)
-- `transformRequest()` — wucewa kai tsaye a tsoho
-- `execute()` — babban loop na HTTP tare da retry/backoff/breaker
+- `buildUrl()` — tsohowar ginin URL (ƙarshen aji sun soke don al'ada)
+- `buildHeaders()` — tsofin rubutun kai (auth, nau'in abun ciki)
+- `transformRequest()` — wucewa ta tsohuwa
+- `execute()` — babban madauki HTTP tare da retry/backoff/breaker
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
-  // Yana sarrafa duk masu bada sabis masu jituwa da OpenAI/Anthropic
-  // Masu bada sabis suna yin rajistar tsare-tsare (URL, auth, headers) amma suna raba logic na executor
+  // Handles all OpenAI/Anthropic-compatible providers
+  // Providers register configurations (URL, auth, headers) but share executor logic
 }
 ```
 
-Ana tsara halayen da suka keɓance ga mai bada sabis (auth headers, base URL, version headers) ta hanyar rajistar masu bada sabis, ba ta class na executor daban-daban ba.
+Halaye na musamman na mai bayarwa (masu rubutun auth, tushen URL, sigar taken) an daidaita su ta wurin rajistar mai bayarwa, ba azuzuwan zartarwa daban ba.
 
 ````
 
 ---
 
-## Ayyuka (modul 117)
+## Ayyuka (Modules 117)
 
-Ayyuka sune **modul masu daɗaɗɗen nufi guda** waɗanda masu sarrafawa ke haɗawa. Babban rukunan:
+Ayyuka sune** mayar da hankali, kayayyaki guda ɗaya** masu sarrafa su ke tsarawa. Manyan nau'ikan:
 
-### Jagorantarwa & Combo
+### Hanyar hanya & Combo
 
-- `combo.ts` — wurin shiga ga buƙatun da aka jagoranta ta combo
-- `services/autoCombo/` — ƙididdigar abubuwa 16, dabarun jagorantarwa ta atomatik 8
-- `wildcardRouter.ts` — daidaita hanyoyin wildcard (`gpt-*`)
-- `modelFamilyFallback.ts` — fallback na cikin iyali na T5
+- `combo.ts` — wurin shiga don buƙatun da aka haɗa
+- `services/autoCombo/` — 16-factor, dabarun sarrafa mota 8
+- `wildcardRouter.ts` — yayi daidai da hanyoyin kati (`gpt-*`)
+- `modelFamilyFallback.ts` — T5 koma bayan dangi
 
-### Takaita Yawan Buƙatu & Rabo
+### Ƙimar Ƙidaya & Ƙidaya
 
-- `rateLimitManager.ts` — token bucket ga kowane key+provider
-- `usage.ts` — yin rijistar amfani
-- `quotaCache.ts` — kwafin rabo a cikin ƙwaƙwalwa
+- `rateLimitManager.ts` — token bokiti na maɓalli na + badawa
+- `usage.ts` — rikodin amfani
+- `quotaCache.ts` — in-memory quota snapshots
 
-### Asusun & Token
+### Account & Token
 
-- `tokenRefresh.ts` — sabunta OAuth idan 401 ya faru
-- `accountFallback.ts` — canzawa zuwa asusun madadin
-- `sessionManager.ts` — matsayin zama mai juyoyi da yawa
+- `tokenRefresh.ts` — OAuth refresh on 401
+- `accountFallback.ts` — canza zuwa asusun madadin
+- `sessionManager.ts` — yanayin zaman juyi da yawa
 
 ### Hankali
 
-- `intentClassifier.ts` — rarrabe nufin buƙata
-- `taskAwareRouter.ts` — jagoranta bisa nau'in aiki
-- `thinkingBudget.ts` — raba token ɗin tunani
-- `contextManager.ts` — shigar da mahallin jagorantarwa
+- `intentClassifier.ts` — rarraba niyyar nema
+- hanyar `taskAwareRouter.ts` — ta nau'in ɗawainiya
+- `thinkingBudget.ts` — kasafta tunanin tunani
+- `contextManager.ts` — allurar mahallin hanya
 
 ### Juriya
 
-- `resilience.ts` — gudanar da sake gwadawa, backoff, da breaker
-- `emergencyFallback.ts` — fallback na mafaka ta ƙarshe
-- `modelDeprecation.ts` — jagoranta ta atomatik zuwa samfuran da suka gaje
+- `resilience.ts` — sake gwadawa, ja da baya, ƙungiyar kaɗe-kaɗe
+- `emergencyFallback.ts` — koma baya
+- `modelDeprecation.ts` — hanya ta atomatik zuwa ƙirar magaji
 
-### Matsayi
+### Jiha
 
-- `signatureCache.ts` — cire kwafi bisa sa hannun buƙata
-- `volumeDetector.ts` — rage nauyi (load shedding)
-- `contextHandoff.ts` — mayar da zama zuwa jerin bayanai
+- `signatureCache.ts` — deup ta hanyar sa hannun buƙatun
+- `volumeDetector.ts` da kaya —
+- `contextHandoff.ts` — zaman serialization
 
-### Tattarawa
+### Matsi
 
-- `compression/` (ƙaramin babban fayil) — cikakken layin tattarawa (pipeline)
-- fayiloli 39 da suka ƙunshi injuna, fakitin dokoki, da masu daidaitawa
+- `compression/` (banda directory) — cikakken bututun matsawa
+- Fayiloli 39 da ke rufe injuna, fakitin doka, adaftar
 
 ### Ƙwarewa
 
-- (an rufe shi a cikin [SKILLS.md](./SKILLS.md))
+- (an lullube cikin [SKILLS.md](./SKILLS.md) )
 
-### Ƙwaƙwalwar Ajiya
+### Ƙwaƙwalwar ajiya
 
-- (an rufe shi a cikin [MEMORY.md](./MEMORY.md))
+- (an lullube cikin [MEMORY.md](./MEMORY.md) )
 
 ---
 
-## Masu Aiwatarwa (modul 150)
+## Masu zartarwa (Modules 150)
 
-Galibi fayil ɗaya ne ga kowane mai samarwa. Duk azuzuwan masu aiwatarwa suna gaba da `BaseExecutor` kuma suna maye gurbin abin da ya bambanta; sauran modul ɗin masu taimako ne na kowane mai samarwa (skimomin kayan aiki, masu daidaita fetch/TTS, masu sarrafa halaye na musamman).
+Galibi fayil ɗaya kowane mai bayarwa. Azuzuwan masu zartarwa duk sun shimfiɗa `BaseExecutor` kuma sun soke abin da ya bambanta; sauran nau'ikan su ne mataimakan masu ba da kyauta (tsarin tsara kayan aiki, adaftar fetch/TTS, masu sarrafa quirk).
 
-### Tsarukan da Aka Saba
+### Samfuran gama gari
 
-Ana warware masu samarwa ta hanyar `getExecutor(providerId)`, wanda ke mayar da mai aiwatarwa da aka saita. Masu samar da suka jitu da OpenAI/Anthropic suna amfani da `DefaultExecutor` (`executors/default.ts`). Ana saita halayen takamaiman mai samarwa (URL na tushe, kanun tabbaci, sigar API) a `open-sse/config/providers/`, yayin da ake sarrafa canjin jikin buƙata a `open-sse/translator/`.
+Ana warware masu samarwa ta hanyar `getExecutor(providerId)`, wanda ke dawo da mai zartarwa da aka saita. masu samar da OpenAI/Anthropic-compatible suna amfani da `DefaultExecutor` (`executors/default.ts`). Halaye na musamman na mai bayarwa (tushe URL, masu rubutun auth, sigar API ) an saita su a cikin `open-sse/config/providers/`, yayin da ake sarrafa canjin jiki a `open-sse/translator/`.
 
-**URL na musamman** ana saita shi ta saitin mai samarwa:
+**Custom URL** an saita ta ta hanyar daidaitawar mai bada:
 
 ```ts
-// Saitin mai samarwa a open-sse/config/providers/
+// Provider config in open-sse/config/providers/
 export default {
   id: "together",
   baseURL: "https://api.together.xyz/v1/chat/completions",
 }
 ````
 
-**Tabbaci na musamman** ana sarrafa shi ta saitin tabbaci na rajistar masu samarwa (maƙallin API, OAuth, profile na kanun).
+**Takaddun shaida** ana sarrafa ta ta hanyar daidaitawa na rijistar mai bayarwa (maɓallin API, OAuth, bayanan bayanan kai).
 
-**Canjin jikin buƙata na musamman** (misali, Anthropic yana raba `system` daga `messages`) ana rajistar su ga kowane mai samarwa a `open-sse/translator/`.
+**Jikin buƙatar na al'ada** canje-canje (misali, Anthropic keɓance `system` daga `messages`) an yi rajista ga kowane mai bayarwa a cikin `open-sse/translator/`.
 
 ````
 
-### Wurin Ƙirƙirar Masu Aiwatarwa
+### The Executor Factory
 
-`executors/index.ts` yana fitar da `getExecutor(providerId)`:
+`executors/index.ts` exports `getExecutor(providerId)`:
 
 ```ts
 import { getExecutor } from "@omniroute/open-sse/executors";
@@ -369,7 +371,7 @@ const result = await executor.execute({
 });
 ````
 
-Warwarewa tana wucewa ta `ExecutorRegistry` (`executors/registry.ts`): an bayyana kowane mai aiwatarwa na musamman a cikin teburin da aka gina na `executors/index.ts` kuma an rajista shi ta `registerExecutor(alias, instance)` lokacin loda modul; `getExecutor()` yana tuntubar rajistar kuma yana koma zuwa `DefaultExecutor` da aka memoize ga kowane mai samarwa da ba shi da shigarwa ta musamman. Cikakken taswirar alias → mai aiwatarwa ana bayyana ta ta gwajin zinariya (golden test) `tests/unit/executor-map-golden.test.ts`.
+ƙudirin yana tafiya ta cikin `ExecutorRegistry` (`executors/registry.ts`): kowane ƙwararren mai zartarwa ana ayyana shi a cikin ginanniyar tebur na `executors/index.ts` kuma an yi rajista ta `registerExecutor(alias, instance)` a nauyin kaya; `getExecutor()` ya tuntubi wurin yin rajista kuma ya koma zuwa ga abin da aka haddace `DefaultExecutor` ga kowane mai bayarwa ba tare da shigarwa na musamman ba. Cikakken wanda aka fi sani da → mai aiwatar da taswirar yana siffanta gwajin zinare `tests/unit/executor-map-golden.test.ts`.
 
 ---
 
@@ -488,7 +490,7 @@ Wannan yana sarrafa:
 
 | Fayil                         | Manufar                                          |
 | ----------------------------- | ------------------------------------------------ |
-| `providerRegistry.ts`         | Rijista-samfurin taɗi akan kundin masu ba da 381 |
+| `providerRegistry.ts`         | Rijista-samfurin taɗi akan kundin masu ba da 394 |
 | `providerModels.ts`           | Laƙabin ƙira, tsara taswira                      |
 | `constants.ts`                | Ƙayyadaddun lokaci, iyaka, lambobin matsayi      |
 | `defaultThinkingSignature.ts` | Claude hannu na tunani na asali                  |
@@ -509,7 +511,7 @@ interface ProviderConfig {
 }
 ```
 
-Ingancin Zod a nauyin kayan aiki yana tabbatar da duk saitin mai bada sabis yana aiki.
+Ingancin Zod a nauyin kayan masarufi yana tabbatar da duk saitin mai bada sabis na aiki.
 
 ---
 

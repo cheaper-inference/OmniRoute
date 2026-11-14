@@ -139,40 +139,62 @@ Zugehörige Module im selben Bundle:
 
 ---
 
-## Antigravity-Stealth
+## Antigravity Stealth
 
-Antigravity-Anfragen bewahren den Text des Aufrufers Byte für Byte. OmniRoute fügt weder unsichtbare Zeichen in Prompts ein noch benennt es Tools um oder injiziert sie, um einen IDE-Client zu imitieren.
+Antigravity -Anfragen bewahren den Aufrufertext Byte für Byte. OmniRoute fügt keine Zeichen mit der Breite Null in Eingabeaufforderungen oder rename/inject Tools ein, um einen IDE Client zu imitieren.
 
 ### `antigravityHeaderScrub.ts`
 
-Entfernt vor der Weiterleitung Markierungen des Stainless SDK (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`).
+Entfernt rostfreie SDK -Markierungen (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) vor dem Weiterleiten.
 
-### ⚠️ Risiko: `ANTIGRAVITY_CREDITS=always` (besonders hohes Kontosperrungsrisiko)
+### ⚠️ Risiko: `ANTIGRAVITY_CREDITS=always` (Kontosperr-Hotspot)
 
-`ANTIGRAVITY_CREDITS=always` (verarbeitet von `open-sse/executors/antigravity.ts`) leitet **jede** Anfrage über Antigravity AI Credit Overages (kostenpflichtige Google-Guthaben) weiter, anstatt das Kontingent der kostenlosen Google-Stufe als Begrenzung wirken zu lassen. Dies ist als Funktion dokumentiert, stellt jedoch **den mit Abstand häufigsten von uns beobachteten Bericht über Verstöße gegen die Nutzungsbedingungen dar** — mehrere Google-Ultra-Konten wurden nach einigen Stunden Betrieb mit `403 / "service disabled for ToS violation" / insufficient_quota` gesperrt, wenn `=always` verwendet wurde.
+`ANTIGRAVITY_CREDITS=always` -Routen (von `open-sse/executors/antigravity.ts` verbraucht).** jeder** Fordern Sie über Antigravity AI Credit Overages (bezahlte Google Credits) an, anstatt die Dinge durch die Free-Tier-Quote von Google blockieren zu lassen. Dies ist als Funktion dokumentiert, aber es ist so** der am häufigsten gemeldete Verstoß gegen die Nutzungsbedingungen, den wir sehen** Mehrere — -Ultra-Konten Google wurden mit `403 / "service disabled for ToS violation" / insufficient_quota` gesperrt, nachdem sie einige Stunden lang mit `=always` ausgeführt wurden.
 
-Die Durchsetzung auf Upstream-Seite erfolgt **durch Google** und kann von OmniRoute nicht verhindert werden. Der Name der Umgebungsvariable und die vorhandene Dokumentation lassen die Option wie eine sichere Einstellung erscheinen; das ist sie nicht.
+Die Upstream-Durchsetzung ist aktiviert**Google Seite** , nichts, was OmniRoute verhindern kann. Der Name der Env-Variable und die vorhandenen Dokumente lassen es wie einen sicheren Knopf zum Umdrehen klingen; das ist es nicht.
 
-**Warum dies die Missbrauchserkennung aggressiver auslöst als eine ausschließliche Nutzung der kostenlosen Stufe:**
+**Warum dies eine aggressivere Missbrauchserkennung zur Folge hat als die Nutzung nur im kostenlosen Kontingent:**
 
-- Kontinuierliche automatisierte Ausgaben über ein einzelnes Google-Konto werden anders eingestuft als eine kostenlose Nutzung, die beim Erreichen des Kontingents endet.
-- Guthabenüberschreitungen haben keine Ratenobergrenze. Daher kann ein falsch konfigurierter Client innerhalb weniger Minuten mehrere hundert USD verbrauchen und wie ein Weiterverkauf von API-Schlüsseln oder Bot-Datenverkehr wirken.
-- Wenn mehrere OmniRoute-Benutzer parallel von derselben externen IP auf Überschreitungsguthaben zugreifen, verstärkt dies das Signal.
+- Anhaltende automatisierte Ausgaben für ein einzelnes Google -Konto werden anders gekennzeichnet als Hits-Quota-and-Stops im kostenlosen Kontingent.
+- Für Kreditüberschreitungen gibt es keine Tarifobergrenze, daher kann ein falsch konfigurierter Client innerhalb von Minuten mehrere Hundert USD verschlingen und wie ein Weiterverkauf von API-Schlüsseln oder Bot-Traffic aussehen.
+- Mehrere OmniRoute Benutzer, die parallel von demselben externen IP auf Überschussguthaben zugreifen, verstärken das Signal.
 
-**Empfohlene Vorgehensweise:**
+**Empfohlene Haltung:**
 
-1. Behalten Sie die Standardeinstellung `ANTIGRAVITY_CREDITS=off` bei, sofern der Betreiber das Risiko kostenpflichtiger Guthaben und kontobezogener Durchsetzungsmaßnahmen nicht ausdrücklich akzeptiert. `retry` sendet zunächst die normale Anfrage und injiziert Guthaben höchstens einmal nach einer zulässigen kontingentbedingten 429-Antwort; `always` injiziert Guthaben bereits bei der ersten Anfrage.
-2. **Verteilen Sie die Last über Auto-Combo auf mehrere Provider** (`model: "auto"` oder `kr/glm/etc`-Combo), anstatt ein einzelnes Antigravity-Konto auszulasten.
-3. **Legen Sie verbindungsspezifische RPM-Limits fest** – auf der Bearbeitungsseite des Antigravity-Providers (Dashboard → Providers → Antigravity → connection → rate limit). 30–60 RPM sind eine vertretbare Obergrenze für den Dauerbetrieb.
-4. **Verwenden Sie eine stabile, vom Betreiber kontrollierte Upstream-Netzwerkanbindung** und vermeiden Sie es, ein Konto für voneinander unabhängige Benutzer oder Workloads freizugeben.
-5. **Bei einer Sperrung**: Legen Sie über `support.google.com` → „Restore Workspace/Account access“ Einspruch ein und geben Sie dabei den exakten von Google gesendeten Antwort-Body mit `quota_exceeded` / `service disabled` an. Eine Wiederherstellung ist nicht garantiert.
+1. Behalten Sie die Standard `ANTIGRAVITY_CREDITS=off` bei, es sei denn, der Betreiber akzeptiert ausdrücklich das Risiko einer bezahlten Gutschrift und einer Kontovollstreckung. `retry` sendet zuerst die normale Anfrage und injiziert Credits höchstens einmal nach einer berechtigten Quote 429; `always` fügt Credits bei der ersten Anfrage hinzu.
+2. **Verteilen Sie die Last über Auto-Combo auf verschiedene Anbieter** (`model: "auto"` oder `kr/glm/etc` -combo), anstatt ein einzelnes Antigravity Konto zu überlasten.
+3. **Legen Sie RPM -Grenzwerte pro Verbindung fest** auf der Bearbeitungsseite des Antigravity Anbieters (Dashboard → Anbieter → Antigravity → -Verbindung → -Ratenbegrenzung). 30–60 RPM ist eine vertretbare Obergrenze für den dauerhaften Gebrauch.
+4. **Nutzen Sie eine stabile, betreibergesteuerte Upstream-Vernetzung** und vermeiden Sie die gemeinsame Nutzung eines Kontos mit unabhängigen Benutzern oder Arbeitslasten.
+5. **Wenn verboten** : Einspruch über `support.google.com` → „ Workspace/Account -Zugriff wiederherstellen“ mit dem genauen `quota_exceeded` / `service disabled` -Antworttext, den Google gesendet hat. Eine Wiederherstellung ist nicht garantiert.
 
-Die Referenz zu den Umgebungsvariablen dokumentiert die Auswirkungen der einzelnen Guthabenmodi auf Konto und Ausgaben.
+Die Umgebungsreferenz dokumentiert die Konto- und Ausgabenauswirkungen jedes Credits-Modus.
+
+#### Nicht nur `=always`: Antigravity OAuth Routing im Allgemeinen
+
+Die Aussetzungen beschränken sich nicht auf Kreditüberschreitungen. Berichte vom November 2026 (#19223, #19266) beschreiben mehrere Google Konten, die während der Weiterleitung über die Anbieter `antigravity` und `agy` (Antigravity CLI) gesperrt wurden, mit:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+Beide Anbieter authentifizieren sich mit der Antigravity Produkt OAuth Sitzung, wovor der Risikohinweis des Dashboards („Dieser Anbieter verwendet Ihr offizielles Produkt session/OAuth, das nicht für proxy/router Nutzung autorisiert ist“) warnt, bevor eine Verbindung hinzugefügt wird. Keine der oben genannten Empfehlungen macht diese Nutzung zulässig; Sie reduzieren nur den Datenverkehr, den ein Konto führt.
+
+**Autorisierte API Schnittstellen für Gemini Modelle.** Google bietet programmgesteuerten Zugriff auf Gemini über seinen APIs, den OmniRoute als gewöhnliche API-Schlüsselanbieter unterstützt:
+
+| Anbieter-ID | Dashboard-Name            | Ausweis                                                                           |
+| ----------- | ------------------------- | --------------------------------------------------------------------------------- |
+| `gemini`    | Gemini (Google AI Studio) | Gemini API Schlüssel von Google AI Studio (kostenloses Kontingent verfügbar)      |
+| `vertex`    | Scheitelpunkt AI          | Dienstkonto JSON, OAuth Zugriffstoken oder Vertex Express API -Schlüssel (Gemini) |
+
+Diese Anbieter verwenden für API Zugriff im Gegensatz zur Antigravity -Produktsitzung Anmeldeinformationen, die von Google ausgegeben werden. Sie sorgen nicht dafür, dass jede Nutzung konform ist, und beseitigen auch nicht das Risiko einer Durchsetzung: Für jede Anwendung gelten eigene Bedingungen, die der Betreiber bei der Bereitstellung überprüfen muss. Beispielsweise erlauben die [zusätzlichen Nutzungsbedingungen von Gemini API](https://ai.google.dev/gemini-api/terms) nur kostenpflichtige Dienste, wenn API Clients Benutzern im Europäischen Wirtschaftsraum, in der Schweiz oder im Vereinigten Königreich zur Verfügung gestellt werden, und an unbezahlte Dienste gesendete Inhalte können zur Verbesserung der Produkte von Google verwendet werden. Vertex AI fällt stattdessen unter die Google -Cloud-Bedingungen ( [dienstspezifische Bedingungen](https://cloud.google.com/terms/service-terms) ). Preise und Kontingente richten sich nach den API Bedingungen und nicht nach einem Antigravity Abonnement.
+
+Betreiber, die die oben beschriebenen Antigravity -Sperrungen vermeiden möchten, sollten Gemini Verkehr über einen dieser Anbieter statt über `antigravity` / `agy` leiten, nachdem sie überprüft haben, dass ihre Verwendung den Bedingungen des Anbieters entspricht.
 
 Berührungspunkte:
 
 - `open-sse/executors/antigravity.ts` — liest `process.env.ANTIGRAVITY_CREDITS`
-- `src/lib/oauth/providers/antigravity.ts` — Anmeldedaten-Weiterleitung
+- `src/lib/oauth/providers/antigravity.ts` — -Anmeldeinformationen Sanitär
 - Ursprünglicher Vorfallbericht: Diskussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---

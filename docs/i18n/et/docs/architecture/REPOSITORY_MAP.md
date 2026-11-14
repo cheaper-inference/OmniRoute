@@ -144,7 +144,7 @@ src/
 | `app/api/playground/`                                                        | Playground Studio marsruudid: `improve-prompt/` (POST — LLM viipade ümberkirjutaja), `presets/` (GET list / POST create), `presets/[id]/` (GET / PUT / DELETE) — vaata `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                         |
 | `app/api/` (non-v1)                                                          | Management/admin marsruudid (~ 60 kataloogid: pakkujad, kombod, seaded, mcp, a2a, evals, mälu, oskused, veebihaagid, vastavus, vastupidavus, jälgimine, tunnelid, kliiritööriistad jne)                                                                                                                               |
 | `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 marsruuti (serveri juhtimine, agent state/DNS/mappings, ümbersõit, sert, ülesvoolu CA). LOCAL_ONLY + SPAWN_CAPABLE. Vaata `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                              |
-| `app/api/tools/traffic-inspector/`                                           | Liiklusinspektor REST + WS API — 16 + marsruuti (päringud, seansid, hostid, püüdmisrežiimid, eksport, ws). LOCAL_ONLY + SPAWN_CAPABLE. Vaata `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                               |
+| `app/api/tools/traffic-inspector/`                                           | Liiklusinspektor REST + WS API — 16 + marsruuti (päringud, seansid, hostid, püüdmisrežiimid, eksport, ws). LOCAL_ONLY + SPAWN_CAPABLE. Vaadake `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                             |
 | `app/a2a/`                                                                   | A2A JSON-RPC 2.0 sisendpunkt (`POST /a2a`)                                                                                                                                                                                                                                                                            |
 | `app/.well-known/agent.json/`                                                | A2A agendikaart (avastus)                                                                                                                                                                                                                                                                                             |
 | `app/(dashboard)/dashboard/`                                                 | Armatuurlaua UI lehed (50 + jaotist, ~ 118 page.tsx -faili: pakkujad, kombinatsioonid, seaded, mälu, oskused, veebihaagid, evals, audit, pakett, vahemälu, kulud, tervis, süsteem, tegevus jne)                                                                                                                       |
@@ -193,7 +193,7 @@ src/
 | `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 ümbris — KNN brute-force + hübriid RRF (FTS5 + vektor, k = 60). Lazy-init, laguneb graatsiliselt, kui sqlite-vec pole saadaval. (plaan 21)                                                                                                                                                             |
 | `memory/reindex.ts`                      | `runReindexBatch()` — töötleb mälestusi `needs_reindex=1` taustal; kutsutakse `POST /api/memory/reindex` ja lazy-backfill path poolt. (plaan 21)                                                                                                                                                                         |
 | `monitoring/`                            | Tervisekontroll, mõõdikud heide                                                                                                                                                                                                                                                                                          |
-| `oauth/`                                 | OAuth/import vood 22 pakkuja mooduli jaoks (agy, antigravity, claude, cline, codebuddy-cn, codex, kursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilokood, kimi-kodeerimine, traqo, xaioference, kiro, xaioference zed-hosted, zed)                                                   |
+| `oauth/`                                 | OAuth/import vood 22 pakkuja mooduli jaoks (agy, antigravity, claude, cline, codebuddy-cn, codex, kursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilokood, kimi-kodeerimine, traqo, xau-oference, kiro, xai-oference zed-hosted, zed)                                                 |
 | `plugins/`                               | Pluginate register                                                                                                                                                                                                                                                                                                       |
 | `promptCache/`                           | Antroopilises stiilis kiire vahemälu katkestuspunktid                                                                                                                                                                                                                                                                    |
 | `skills/`                                | Oskuste raamistik (sisseehitatud + turg + SkillsSH) — vt `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                     |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `components/`                    | Armatuurlaua komponent API: `packages/ui-kit` adapterid — vt `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ekraanidel kasutatavad ikooninimed → Lucide'i komponendid (`<Icon>`)                  |
-| `constants/providers.ts`         | **381 pakkujat** Zod valideerimisega (tõe allikas)                                                |
+| `constants/providers.ts`         | **394 pakkujat** Zod valideerimisega (tõe allikas)                                                |
 | `constants/cliTools.ts`          | Väline CLI tööriista register                                                                     |
-| `constants/routingStrategies.ts` | **20 marsruutimisstrateegiat** prioriteetidega                                                    |
+| `constants/routingStrategies.ts` | **22 marsruutimisstrateegiat** prioriteetidega                                                    |
 | `constants/publicApiRoutes.ts`   | Marsruudid, mis nõuavad kandja (vs haldamise) autentimist                                         |
 | `constants/upstreamHeaders.ts`   | Päise keelamisloend ülesvoolu päringute jaoks                                                     |
 | `validation/schemas.ts`          | ~ 80 Zod skeemi (üks tõeallikas API lepingute jaoks)                                              |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — voogedastusmootori tööruum
+## `open-sse/` — Streaming Engine Workspace
 
-Eraldi npm-i tööruum (`@omniroute/open-sse`). Tegeleb päringute töötlemise ja teenusepakkujate käitamisega.
+Eraldi npm tööruum (`@omniroute/open-sse`). Käsitleb päringu töötlemise + pakkuja täitmist.
 
 ```
 open-sse/
-├── handlers/            # 16 faili (12 töötlejat + 4 abifaili): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search jne.
-├── executors/           # 150 käituri moodulit (BaseExecutorit laiendavad klassid + teenusepakkuja-põhised abifailid)
-├── translator/          # Vormingute teisendajad (9 päringu-, 9 vastuse- ja 9 abimoodulit)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ teenusemoodulit (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM jne)
-├── mcp-server/          # MCP-server (110 tööriista, 3 transporti, 33 ulatust)
-├── config/              # Teenusepakkujate/mudelite registrid, päiste konfiguratsioon, mudelite aliased
-├── utils/               # TLS-klient, puhverserveri fetch/dispatcher, võrguabitööriistad
-├── index.ts             # Tööruumi sisenemispunkt
-├── package.json         # Tööruumi manifest
-├── tsconfig.json        # Tööruumi TS-konfiguratsioon
-└── types.d.ts           # Tööruumi tüübideklaratsioonid
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Tee                         | Otstarve                                                                           |
-| --------------------------- | ---------------------------------------------------------------------------------- |
-| `server.ts`                 | MCP-serveri elutsükkel (stdio- ja HTTP-transpordid)                                |
-| `httpTransport.ts`          | HTTP Streamable'i + SSE transpordid (`/api/mcp/sse`, `/api/mcp/stream`)            |
-| `audit.ts`                  | Auditilogimine tabelisse `mcp_tool_audit`                                          |
-| `scopeEnforcement.ts`       | Tööriistapõhine ulatuse valideerimine                                              |
-| `runtimeHeartbeat.ts`       | Tervise olekusignaal faili `DATA_DIR/runtime/mcp-heartbeat.json`                   |
-| `descriptionCompressor.ts`  | Tihendab konteksti säästmiseks tööriistakirjelduste metaandmeid                    |
-| `schemas/tools.ts`          | 36 põhitööriista definitsiooni + ulatused                                          |
-| `tools/advancedTools.ts`    | Täiustatud tööriistade teostused                                                   |
-| `tools/memoryTools.ts`      | 3 mälutööriista (otsimine/lisamine/tühjendamine)                                   |
-| `tools/skillTools.ts`       | 4 oskusetööriista (loend/lubamine/käivitamine/käivitused)                          |
-| `tools/compressionTools.ts` | 5 tihendustööriista                                                                |
-| `README.md`                 | MCP-serveri sisemine README (ristviidatud failist `docs/frameworks/MCP-SERVER.md`) |
+| Tee                         | Eesmärk                                                                      |
+| --------------------------- | ---------------------------------------------------------------------------- |
+| `server.ts`                 | MCP serveri elutsükkel (stdio + HTTP transpordid)                            |
+| `httpTransport.ts`          | HTTP Voogesitus + SSE transpordid (`/api/mcp/sse`, `/api/mcp/stream`)        |
+| `audit.ts`                  | Auditi logimine `mcp_tool_audit` tabelisse                                   |
+| `scopeEnforcement.ts`       | Tööriista ulatuse valideerimine                                              |
+| `runtimeHeartbeat.ts`       | Tervise südamelöögid kuni `DATA_DIR/runtime/mcp-heartbeat.json`              |
+| `descriptionCompressor.ts`  | Konteksti salvestamiseks tihendage tööriista kirjelduse metaandmed           |
+| `schemas/tools.ts`          | 36 põhitööriistade määratlust + ulatus                                       |
+| `tools/advancedTools.ts`    | Täiustatud tööriistade rakendused                                            |
+| `tools/memoryTools.ts`      | 3 mälutööriista (search/add/clear)                                           |
+| `tools/skillTools.ts`       | 4 oskuste tööriista (list/enable/execute/executions)                         |
+| `tools/compressionTools.ts` | 5 tihendustööriista                                                          |
+| `README.md`                 | Sisemine MCP server README (ristlingitud `docs/frameworks/MCP-SERVER.md`-st) |
 
 ---
 
@@ -395,24 +395,24 @@ open-sse/
 
 ### Tipptasemel juhendid
 
-| Doc                         | Eesmärk                                                                                        |
-| --------------------------- | ---------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Kõrgetasemeline arhitektuur, alamsüsteemi kaart, armatuurlaua pind                             |
-| `CODEBASE_DOCUMENTATION.md` | Tehniline viide: kataloogid, moodulid, kokkulepped                                             |
-| `FEATURES.md`               | Funktsioonimaatriks koos v3.8 esiletõstmistega                                                 |
-| `USER_GUIDE.md`             | Lõppkasutaja käsiraamat (seadistus, mudelid, kombinatsioonid, CLIs, heli jne)                  |
-| `API_REFERENCE.md`          | API lõpp-punkti viide autentimismudeliga                                                       |
-| `openapi.yaml`              | OpenAPI 3.0 spetsifikatsioon (121 rada)                                                        |
-| `SETUP_GUIDE.md`            | Installimismeetodid (npm, npx, Docker, Electron, Termux, allikas)                              |
-| `ENVIRONMENT.md`            | Kõik env-vars (dokumenteeritud ~ 800, ~ 3050 rida `.env.example`)                              |
-| `TROUBLESHOOTING.md`        | Levinud vead + v3.8.0 teadaolevad probleemid                                                   |
-| `RELEASE_CHECKLIST.md`      | Täielik vabastamise voog (oskused, husky, tavapärased kohustused, juurutamine)                 |
-| `COVERAGE_PLAN.md`          | Katvuse eesmärgid ja hetkeseis                                                                 |
-| `FREE_TIERS.md`             | Kureeritud vabataseme pakkujad (48 + tasuta + 11 OAuth)                                        |
-| `CLI-TOOLS.md`              | Välised CLI integratsioonid + Sisemine OmniRoute CLI                                           |
-| `I18N.md`                   | i18n arhitektuur, keele lisamine, 67 lokaali                                                   |
-| `UNINSTALL.md`              | Puhastage desinstalli sammud                                                                   |
-| `PROVIDER_REFERENCE.md`     | **Automaatselt genereeritud** kataloog 381 pakkujast (regen: `npm run gen:provider-reference`) |
+| Doc                         | Eesmärk                                                                                      |
+| --------------------------- | -------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Kõrgetasemeline arhitektuur, alamsüsteemi kaart, armatuurlaua pind                           |
+| `CODEBASE_DOCUMENTATION.md` | Tehniline viide: kataloogid, moodulid, kokkulepped                                           |
+| `FEATURES.md`               | Funktsioonimaatriks koos v3.8 esiletõstmistega                                               |
+| `USER_GUIDE.md`             | Lõppkasutaja käsiraamat (seadistus, mudelid, kombinatsioonid, CLIs, heli jne)                |
+| `API_REFERENCE.md`          | API lõpp-punkti viide autentimismudeliga                                                     |
+| `openapi.yaml`              | OpenAPI 3.0 spetsifikatsioon (121 rada)                                                      |
+| `SETUP_GUIDE.md`            | Installimismeetodid (npm, npx, Docker, Electron, Termux, allikas)                            |
+| `ENVIRONMENT.md`            | Kõik env-vars (dokumenteeritud ~ 800, ~ 3050 rida `.env.example`)                            |
+| `TROUBLESHOOTING.md`        | Levinud vead + v3.8.0 teadaolevad probleemid                                                 |
+| `RELEASE_CHECKLIST.md`      | Täielik vabastamise voog (oskused, husky, tavapärased kohustused, juurutamine)               |
+| `COVERAGE_PLAN.md`          | Katvuse eesmärgid ja hetkeseis                                                               |
+| `FREE_TIERS.md`             | Kureeritud vabataseme pakkujad (48 + tasuta + 11 OAuth)                                      |
+| `CLI-TOOLS.md`              | Välised CLI integratsioonid + Sisemine OmniRoute CLI                                         |
+| `I18N.md`                   | i18n arhitektuur, keele lisamine, 67 lokaali                                                 |
+| `UNINSTALL.md`              | Puhastage desinstalli sammud                                                                 |
+| `PROVIDER_REFERENCE.md`     | **Automaatselt genereeritud** 394 pakkuja kataloog (regen: `npm run gen:provider-reference`) |
 
 ### Alamsüsteemi süvasukeldumised
 

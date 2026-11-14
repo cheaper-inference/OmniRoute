@@ -242,9 +242,9 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `components/`                    | Irányítópult komponens API: `packages/ui-kit` adapterek — lásd `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: a képernyők által használt ikonnevek → Lucide összetevők (`<Icon>`)                     |
-| `constants/providers.ts`         | **381 szolgáltató** Zod érvényesítéssel (az igazság forrása)                                        |
+| `constants/providers.ts`         | **394 szolgáltató** Zod érvényesítéssel (az igazság forrása)                                        |
 | `constants/cliTools.ts`          | Külső CLI eszköznyilvántartás                                                                       |
-| `constants/routingStrategies.ts` | **20 útválasztási stratégia** prioritásokkal                                                        |
+| `constants/routingStrategies.ts` | **22 útválasztási stratégia** prioritásokkal                                                        |
 | `constants/publicApiRoutes.ts`   | Útvonalak, amelyek hordozó hitelesítést igényelnek (vs menedzsment)                                 |
 | `constants/upstreamHeaders.ts`   | Fejléc-megtagadó lista az upstream kérésekhez                                                       |
 | `validation/schemas.ts`          | ~ 80 Zod séma (az igazság egyetlen forrása API szerződésekhez)                                      |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — Streamelési motor munkaterülete
+## `open-sse/` — Streaming Engine munkaterület
 
-Különálló npm-munkaterület (`@omniroute/open-sse`). A kérések feldolgozását és a szolgáltatók végrehajtását kezeli.
+Külön npm munkaterület (`@omniroute/open-sse`). Kezeli a kérésfeldolgozás + szolgáltató végrehajtását.
 
 ```
 open-sse/
-├── handlers/            # 16 fájl (12 kezelő + 4 segéd): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search stb.
-├── executors/           # 150 végrehajtómodul (a BaseExecutor osztályt kiterjesztő osztályok + szolgáltatónkénti segédek)
-├── translator/          # Formátumkonverterek (9 kérés-, 9 válasz- és 9 segédmodul)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ szolgáltatásmodul (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM stb.)
-├── mcp-server/          # MCP-kiszolgáló (110 eszköz, 3 transzport, 33 hatókör)
-├── config/              # Szolgáltató- és modelljegyzékek, fejléc-konfiguráció, modellálnevek
-├── utils/               # TLS-kliens, proxy fetch/dispatcher, hálózati segédek
-├── index.ts             # A munkaterület belépési pontja
-├── package.json         # A munkaterület manifesztje
-├── tsconfig.json        # A munkaterület TS-konfigurációja
-└── types.d.ts           # A munkaterület típusdeklarációi
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Elérési út                  | Rendeltetés                                                                                   |
-| --------------------------- | --------------------------------------------------------------------------------------------- |
-| `server.ts`                 | Az MCP-kiszolgáló életciklusa (stdio + HTTP-transzportok)                                     |
-| `httpTransport.ts`          | HTTP Streamable + SSE transzportok (`/api/mcp/sse`, `/api/mcp/stream`)                        |
-| `audit.ts`                  | Naplózás a `mcp_tool_audit` táblába                                                           |
-| `scopeEnforcement.ts`       | Eszközönkénti hatókör-ellenőrzés                                                              |
-| `runtimeHeartbeat.ts`       | Állapotjelzés a `DATA_DIR/runtime/mcp-heartbeat.json` fájlba                                  |
-| `descriptionCompressor.ts`  | Az eszközleírások metaadatainak tömörítése a kontextus megtakarításához                       |
-| `schemas/tools.ts`          | 36 alapvető eszközdefiníció + hatókörök                                                       |
-| `tools/advancedTools.ts`    | Speciális eszközök implementációi                                                             |
-| `tools/memoryTools.ts`      | 3 memóriaeszköz (keresés/hozzáadás/törlés)                                                    |
-| `tools/skillTools.ts`       | 4 készségeszköz (listázás/engedélyezés/végrehajtás/végrehajtások)                             |
-| `tools/compressionTools.ts` | 5 tömörítési eszköz                                                                           |
-| `README.md`                 | Belső MCP-kiszolgálói README (kereszthivatkozással a `docs/frameworks/MCP-SERVER.md` fájlból) |
+| Útvonal                     | Cél                                                                             |
+| --------------------------- | ------------------------------------------------------------------------------- |
+| `server.ts`                 | MCP szerver életciklusa (stdio + HTTP szállítások)                              |
+| `httpTransport.ts`          | HTTP Streamálható + SSE transzportok (`/api/mcp/sse`, `/api/mcp/stream`)        |
+| `audit.ts`                  | Audit naplózás a `mcp_tool_audit` táblába                                       |
+| `scopeEnforcement.ts`       | Szerszámonkénti hatókör érvényesítése                                           |
+| `runtimeHeartbeat.ts`       | Egészségügyi szívverés `DATA_DIR/runtime/mcp-heartbeat.json` ra                 |
+| `descriptionCompressor.ts`  | Az eszközleírás metaadatainak tömörítése a kontextus mentéséhez                 |
+| `schemas/tools.ts`          | 36 alapszerszám definíció + hatókör                                             |
+| `tools/advancedTools.ts`    | Speciális eszközmegvalósítások                                                  |
+| `tools/memoryTools.ts`      | 3 memóriaeszköz (search/add/clear)                                              |
+| `tools/skillTools.ts`       | 4 ügyességi eszköz (list/enable/execute/executions)                             |
+| `tools/compressionTools.ts` | 5 tömörítőszerszám                                                              |
+| `README.md`                 | Belső MCP szerver README ( `docs/frameworks/MCP-SERVER.md` ből keresztlinkelve) |
 
 ---
 
@@ -391,7 +391,7 @@ open-sse/
 
 ---
 
-## `docs/` — Nyilvános dokumentáció (7 gyökérfájl + 17 aldirs)
+## `docs/` — Nyilvános dokumentáció (7 gyökérfájl, + 17 alkönyvtár)
 
 ### Legfelső szintű útmutatók
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Külső CLI integrációk + Belső OmniRoute CLI                                                     |
 | `I18N.md`                   | i18n architektúra, nyelv hozzáadása, 67 terület                                                 |
 | `UNINSTALL.md`              | Tiszta eltávolítási lépések                                                                     |
-| `PROVIDER_REFERENCE.md`     | **Automatikusan generált** 381 szolgáltató katalógusa (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automatikusan generált** 394 szolgáltató katalógusa (regen: `npm run gen:provider-reference`) |
 
 ### Alrendszer mély merülések
 

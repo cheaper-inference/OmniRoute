@@ -65,59 +65,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Shawarwarin Daidaitawa don Yanayin Samarwa
+## Gyaran Samar da Nasiha
 
-### 1. Zaɓuɓɓukan Connection Pool / Client (mai-gina `Redis` na ioredis)
+### 1. Pool Connection/Client Options (ioredis `Redis` constructor)
 
-Lambar yanzu tana ƙirƙirar `new Redis(url)` guda ɗaya ba tare da zaɓuɓɓuka na musamman ba. Don turawa zuwa yanayin samarwa mai kwafi da yawa, shigar da client factory a cikin lambar ko kuma naɗe `getRedisClient()`:
+Lambar yanzu tana ƙirƙirar `new Redis(url)` guda ɗaya ba tare da zaɓuɓɓukan al'ada ba. Don samar da kayan aiki iri-iri, wuce masana'antar abokin ciniki a cikin lambar ko kunsa `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // babu iyakar sake gwadawa; bari retryStrategy ya yanke shawara
-  enableReadyCheck: true, // tabbatar uwar garken ta shirya kafin karɓar kira
-  lazyConnect: true, // kada a haɗa yayin ginawa; jira kiran farko
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // daina bayan sake gwadawa sau 10 → sake haɗawa daga baya
-    return Math.min(times * 200, 5000); // 200ms, 400ms, …, iyakar 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // haɗa umarnin lokaci guda cikin rubutawar TCP guda ɗaya
-  keepAlive: 10000, // TCP keep-alive kowane 10s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**Muhimman abubuwan da ake yin rangwame a kansu:**
+**Mabuɗin ciniki:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — an fi son wannan a yanayin samarwa domin sake farawa na Redis na ɗan lokaci kada ya sa kowace buƙata ta gaza nan take. Madadin da ke cikin ƙwaƙwalwa a cikin `checkRateLimit()` yana ɗaukar hanyar gazawar.
-- `lazyConnect: true` — yana hana farawa dogaro da cewa Redis yana aiki kafin uwar garken ta fara karɓar haɗe-haɗe.
-- `enableAutoPipelining: true` — yana rage tafiye-tafiyen sadarwa don binciken iyakar buƙata na lokaci guda; yana da amfani idan an haura 50 RPS a kan haɗi guda ɗaya.
+- `maxRetriesPerRequest: null` + `retryStrategy` — an fi so don samarwa don haka sake kunnawa Redis na wucin gadi kada nan da nan ya gaza ga kowane buƙatu. Komawar cikin ƙwaƙwalwar ajiya a cikin `checkRateLimit()` tana ɗaukar hanyar gazawa.
+- `lazyConnect: true` — yana guje wa dogaron farawa akan Redis kasancewa sama kafin uwar garken ya fara karɓar haɗi.
+- `enableAutoPipelining: true` — yana rage tafiye-tafiye-tafiye-tafiye-tafiye-tafiye-tafiye-tafiye-tafiye-tafiye-tafiye-tafiye-tafiye-tafiye-tafiye na lokaci-lokaci; yana da fa'ida a > 50 RPS akan haɗin gwiwa guda ɗaya.
 
-### 2. Tsarin Uwar Garken Redis (`redis.conf`)
+### 2. Kanfigareshan Sabar Redis (`redis.conf`)
 
 ```
-# Ƙwaƙwalwa
-maxmemory 80%                        # bar sarari ga ma'ajiyar shafukan OS
-maxmemory-policy allkeys-lru         # cire tsofaffin bayanan auth cache idan ƙwaƙwalwa ta yi ƙasa
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Adana bayanai (na zaɓi — OmniRoute yana da kariya daga rushewa ba tare da shi ba)
-save 300 1                           # ɗauki snapshot aƙalla kowane minti 5 idan maɓalli ≥1 ya canza
-appendonly no                        # ba a buƙatar AOF; ana iya sake samar da bayanan
-appendfsync no                       # babu nauyin fsync (RDB ya isa)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Hanyar sadarwa
-timeout 0                            # babu katsewar haɗin da ba ya aiki
-tcp-keepalive 300                    # keep-alive na minti 5
-tcp-backlog 511                      # jerin jiran haɗi don cunkoson aiki na bazata
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Aiki
-hz 10                                # tsohon ƙima; 100 don tsarin da ke kula da ƙarancin jinkiri
-activedefrag yes                     # warware gutsuttsura ta atomatik idan fragmentation >10%
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Rangwamen da ke tattare da `maxmemory-policy allkeys-lru`:** Ana iya cire bayanan auth cache idan ƙwaƙwalwa ta yi ƙasa. Wannan ba shi da haɗari — `setCachedApiKey` koyaushe yana sake cike bayanan idan ba a same su ba, kuma madadin SQLite shi ne tushe na hukuma. Rubutun Lua na rate-limiter yana ƙirƙirar ƙananan maɓallai waɗanda aka tsara su su kasance na ɗan gajeren lokaci.
+**Ciniki don `maxmemory-policy allkeys-lru`:** Ana iya fitar da shigarwar bayanan cache a ƙarƙashin matsin ƙwaƙwalwar ajiya. Wannan amintaccen — `setCachedApiKey` koyaushe yana sake cikawa akan kuskure, kuma faɗuwar SQLite tana da iko. Rubutun Lua mai iyaka-ƙididdigar ƙirƙira ƙananan maɓalli waɗanda ba su daɗe da ƙira.
 
-### 3. Saitunan Docker Compose
+### 3. Docker Rubuta Saituna
 
-Compose na yanayin samarwa (`docker-compose.prod.yml`) yana amfani da `redis:8.6.2-alpine`. Ƙara:
+Ƙirƙirar samfurin (`docker-compose.prod.yml`) tana amfani da `redis:8.6.2-alpine`. Ƙara:
 
 ```yaml
 redis:
@@ -142,30 +142,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Abubuwan Lura don Multi‑Instance / Faɗaɗawa
+### 4. La'akari da Matsaloli da yawa / Sikeli
 
-**Redis guda ɗaya ga dukkan kwafi** — rubutun Lua na rate-limiter yana dogaro da sararin maɓallai guda ɗaya mai iko. Amfani da Redis instances da yawa a bayan kwafi zai kawar da atomicity kuma ya ninka kasafin. Yi amfani da Redis guda ɗaya (ko Redis Sentinel cluster mai failover) ga dukkan kwafin manhajar.
+**Redis ɗaya don duk kwafi** — rubutun Lua mai iyaka-ƙididdigar ya dogara da sarari maɓalli ɗaya mai iko. Misalin Redis da yawa a bayan kwafi zai rasa atomity kuma ya ninka kasafin kuɗi. Yi amfani da Redis guda ɗaya (ko Redis Sentinel cluster tare da gazawa) don duk kwafin aikace-aikacen.
 
-**Adadin haɗe-haɗe:** Kowane kwafin manhaja yana buɗe **haɗe-haɗen TCP guda 2** zuwa Redis (client na rate limiter + client na quota store). Idan akwai kwafi 10 → haɗe-haɗe 20, wanda yake ƙasa sosai da iyakar haɗe-haɗe 10k ta asali ta Redis instance.
+**Ƙididdigar haɗin kai:** Kowane kwafin aikace-aikacen yana buɗewa** 2 TCP haɗi** zuwa Redis (ƙididdige ƙimar abokin ciniki + keɓaɓɓen kantin sayar da abokin ciniki). A 10 replicas → 20 haɗin gwiwa, da kyau a cikin tsoho Redis misali rufin haɗin 10k.
 
-### 5. Sa Ido
+### 5. Kulawa
 
-Bayyana ta endpoint na health-check:
+Bayyana ta hanyar ƙarshen duba lafiya:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts ya riga ya kira ayyukan rateLimiter
-// Ƙara bincike na musamman ga Redis:
-//   1. Jinkirin PING ta hanyar ioredis .ping()
-//   2. Amfani da ƙwaƙwalwa ta hanyar INFO memory
-//   3. Adadin haɗe-haɗe ta hanyar INFO clients
-//   4. Adadin nasara na maxmemory-policy (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-Muhimman ma'aunan da za a sa ido a kansu:
+Mabuɗin ma'auni don kallo:
 
-- **Maɓallan da aka cire / daƙiƙa** — idan yana ci gaba da zama ba sifili ba, ƙara `maxmemory`
-- **Clients da aka toshe** — ƙima da ba sifili ba tana nuna jinkirin rubutun Lua ko yawan gogayya
-- **Haɗe-haɗen da aka ƙi** — an kai iyakar haɗe-haɗe; wannan ba kasafai yake faruwa ba a haɗe-haɗe 20
+- **Maɓallai da aka fitar / s** — idan naci ba zero ba, ƙara `maxmemory`
+- **Abokan ciniki da aka toshe** — mara sifili yana nuna jinkirin rubutun Lua ko babban jayayya
+- **An ƙi haɗin haɗin gwiwa** iyakar haɗin — buga; rare a 20 haɗi
+
+### 6. Sabis masu dacewa da Redis
+
+Duk wani uwar garken da aka yi amfani da shi anan dole ne ya gudanar da rubutun Lua: madaidaicin ƙimar `EVAL` ɗaya ce. A kan uwar garken ba tare da Lua ba, `checkRateLimit()` yana yin rajistar `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` kuma yana ƙirga kowane tsari, don haka kowane kwafi yana tilasta iyaka da kansa. Store-in shared session-affinity Store (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) yana karantawa kuma yana sabunta fil tare da `EVAL`; ba tare da Lua ba yana yin rajistar `[SESSION_AFFINITY] Redis error; falling back to SQLite.` kuma kowane kwafi yana riƙe fil ɗinsa. Sauran kayan aikin suna amfani da umarni a sarari (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, hashes da saiti ), kuma madaidaicin cache na Redis baya aika babu umarnin `FT.*`.
+
+An gwada da OmniRoute 3.8.52: KiviDB 1.2.0 tare da hoton Lua (`kividb/kividb:v1.2.0-lua`). Ƙididdigar ƙima (gami da tsari na biyu na raba masu ƙididdiga), cache na auth, kantin keɓaɓɓu, mai kashe wutar lantarki, kantin ma'ajin ma'ana, da buƙatun `/v1/chat/completions` ta wurin mai kula da taɗi sun wuce 18 daga cikin cak 19 waɗanda suka wuce Redis 8.10.3. Wanda ya bambanta: `INCRBYFLOAT` yana adana `0.1 + 0.2` a matsayin `0.30000000000000004` inda Redis ke ajiyar `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Kantin sayar da keɓaɓɓun yana rarraba duka biyu tare da `parseFloat`, amma lambobi biyu sun bambanta a cikin lambobi na ƙarshe, don haka kwatancen da ya faɗi daidai akan iyakar keɓe zai iya fitowa daban. Kantin sayar da zaman-dangin ba ya cikin wannan gudu. ( [saitin](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [sakamako](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 

@@ -4,10 +4,20 @@
 
 ---
 
-Aicmítear teipeanna sula ndéantar cinntí maidir le hatriail.
+Déantar teipeanna a rangú sula ndéantar cinntí athiarrachta.
 
-Féadfar aistriú cúltaca a dhéanamh i gcás teipeanna sealadacha amhail tréimhsí feithimh istigh, earráidí líonra, teorainneacha ráta, agus freagraí 5xx ó sholáthraithe. Ní dhéantar atriail gan idirdhealú i gcás earráidí fíordheimhnithe, earráidí ceada, iarrataí neamhbhailí, samhlacha nach bhfuil ar fáil, ná teipeanna anaithnide.
+Seans go dteipfidh ar theipeanna neamhbhuan amhail am istigh, earráidí líonra, teorainneacha rátaí, agus freagraí soláthraithe 5xx. Ní dhéantar cuóta nó creidmheas ídithe (cuóta 429, nó 402 Íocaíocht de dhíth) a aisghabháil ar an soláthraí céanna choíche ach ní theipeann air ar aghaidh chuig soláthraí eile, a bhfuil a chuóta ar leithligh. Ní dhéantar earráidí fíordheimhnithe, earráidí ceada, iarratais neamhbhailí, samhlacha nach bhfuil ar fáil, agus teipeanna anaithnide a aisghabháil go dall.
 
-Ceadaíonn an beartas réamhshocraithe tras-soláthraí suas le trí iarracht ar sholáthraithe, déanann sé atriail i gcás teorainneacha ráta agus tréimhsí feithimh istigh, agus coimeádann sé díchumasú riaracháin ar leithligh ó staid shealadach an chiorcaid.
+Ceadaíonn an polasaí réamhshocraithe tras-soláthraí suas le trí iarracht soláthraithe, déanann sé teorainneacha rátaí agus amanna ama a aistriail, teipeann ar chuóta ídithe, agus coinníonn sé míchumas riaracháin scartha ó staid an chiorcaid shealadaigh.
 
-Is iad staideanna an chiorcaid ná `closed`, `open`, agus `half_open`. Sceidealóidh tréimhse mharbhánta tóireadóir teoranta; dúnfaidh tóireadóir rathúil an ciorcad agus athosclóidh tóireadóir teipthe é.
+## I gcás ina mbaineann sé
+
+- **combs** teipeann ar a gcuid spriocanna de réir straitéis agus suímh an teaglama féin.
+- **ID samhail lom** (gan aon réimír `provider/` ) a bhfreastalaíonn roinnt soláthraithe gníomhacha orthu, gan aon teaglama den ainm cruinn sin, a sheoladh ar dtús chuig na roghanna tátail soláthraithe. Má theipeann ar an iarracht sin ar bhealach a theipeann ar an bpolasaí, seoltar an t-iarratas céanna chuig an gcéad soláthraí gníomhach eile a fhreastalaíonn ar an aitheantas. Tá `x-omniroute-fallback-attempts` ag gabháil leis an bhfreagra agus líon na soláthraithe a thriail roimh an gceann a d'fhreagair.
+  - Tá gach malartach údaraithe go díreach amhail is dá mba roghnaigh tátal é. Déantar sprioc nach n-admhaíonn nó nach n-admhaíonn an API a scipeáil gan glao in aghaidh an tsrutha, agus faigheann an cliant an fíorearráid in aghaidh an tsrutha, ní diúltú polasaí do sprioc nár ainmnigh sé riamh.
+  - Ní théann ach freagra teipthe ar aghaidh: ní theipeann ar aon rud tar éis an chéad bheart sruthaithe.
+  - Ní bheidh feidhm ag babhtáil na samhla cúltaca éigeandála ach amháin nuair a theipeann ar gach soláthraí den tsamhail iarrtha.
+  - Fanann iarratas a phionnaítear chuig nasc (`x-omniroute-connection`) air.
+  - Ní athródaítear aitheantas réamhshocrú (`provider/model`) go soláthraí eile riamh.
+
+Is iad na stáit chiorcaid ná `closed`, `open`, agus `half_open`. Déanann fuarú síos taiscéalaí teorantach a sceidealú; Dúnann taiscéalaí rathúil an ciorcad agus athosclaíonn taiscéalaí teipthe é.

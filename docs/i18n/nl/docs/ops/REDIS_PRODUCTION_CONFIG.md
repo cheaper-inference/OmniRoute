@@ -54,66 +54,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Aanbevolen productieoptimalisaties
+## Aanbevolen productieafstemming
 
-### 1. Verbindingspool-/clientopties (ioredis `Redis`-constructor)
+### 1. Verbindingspool/clientopties (ioredis `Redis` constructor)
 
-De huidige code maakt één `new Redis(url)` zonder aangepaste opties. Geef voor productie-implementaties met meerdere replica's een clientfactory door in de code of maak een wrapper rond `getRedisClient()`:
+De huidige code creëert één `new Redis(url)` zonder aangepaste opties. Voor productie-implementaties met meerdere replica's geeft u een clientfactory door in de code of verpakt u `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // geen limiet voor nieuwe pogingen; laat retryStrategy beslissen
-  enableReadyCheck: true, // controleer of de server gereed is voordat aanroepen worden geaccepteerd
-  lazyConnect: true, // maak geen verbinding bij constructie; wacht op de eerste aanroep
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // geef het na 10 pogingen op → maak later opnieuw verbinding
-    return Math.min(times * 200, 5000); // 200 ms, 400 ms, …, maximaal 5 s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // voeg gelijktijdige opdrachten samen in één TCP-schrijfactie
-  keepAlive: 10000, // TCP-keepalive elke 10 s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
 **Belangrijkste afwegingen:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — aanbevolen voor productie, zodat tijdelijke
-  herstarts van Redis niet direct elke aanvraag laten mislukken. De fallback in het geheugen in
-  `checkRateLimit()` vangt het foutpad op.
-- `lazyConnect: true` — voorkomt dat het opstarten afhankelijk is van de beschikbaarheid van Redis voordat de server
-  verbindingen begint te accepteren.
-- `enableAutoPipelining: true` — vermindert het aantal retourreizen voor gelijktijdige controles van snelheidslimieten;
-  nuttig bij >50 RPS via één verbinding.
+- `maxRetriesPerRequest: null` + `retryStrategy` — heeft de voorkeur voor productie, zodat tijdelijke Redis herstarts niet onmiddellijk elk verzoek mislukken. De terugval in het geheugen in `checkRateLimit()` absorbeert het faalpad.
+- `lazyConnect: true` — vermijdt een opstartafhankelijkheid van het feit dat Redis actief is voordat de server verbindingen begint te accepteren.
+- `enableAutoPipelining: true` — vermindert het aantal retourvluchten voor gelijktijdige tarieflimietcontroles; voordelig vanaf > 50 RPS op een enkele aansluiting.
 
-### 2. Redis-serverconfiguratie (`redis.conf`)
+### 2. Redis -serverconfiguratie (`redis.conf`)
 
 ```
-# Geheugen
-maxmemory 80%                        # laat ruimte over voor de paginacache van het besturingssysteem
-maxmemory-policy allkeys-lru         # verwijder verouderde auth-cachevermeldingen bij geheugendruk
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Persistentie (optioneel — OmniRoute is ook zonder persistentie crashbestendig)
-save 300 1                           # maak ten minste elke 5 min. een momentopname als ≥1 sleutel is gewijzigd
-appendonly no                        # AOF is niet nodig; gegevens kunnen opnieuw worden gegenereerd
-appendfsync no                       # geen fsync-overhead (RDB is voldoende)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Netwerk
-timeout 0                            # verbreek inactieve verbindingen niet
-tcp-keepalive 300                    # keepalive van 5 min.
-tcp-backlog 511                      # verbindingswachtrij voor piekbelasting
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Prestaties
-hz 10                                # standaard; 100 voor latentiegevoelige toepassingen
-activedefrag yes                     # automatisch defragmenteren wanneer fragmentatie >10% is
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Afweging voor `maxmemory-policy allkeys-lru`:** Auth-cachevermeldingen kunnen bij
-geheugendruk worden verwijderd. Dit is veilig — `setCachedApiKey` vult de cache altijd opnieuw bij een cachemisser en de
-SQLite-fallback is leidend. Het Lua-script voor de snelheidsbegrenzer maakt kleine sleutels die
-bewust een korte levensduur hebben.
+**Afweging voor `maxmemory-policy allkeys-lru`:** Auth-cachegegevens kunnen onder geheugendruk worden verwijderd. Dit is veilig. — `setCachedApiKey` wordt altijd opnieuw ingevuld bij een fout, en de terugval SQLite is gezaghebbend. Het Lua-script met snelheidsbegrenzer maakt kleine toetsen die door hun ontwerp een korte levensduur hebben.
 
 ### 3. Docker Compose-instellingen
 
-De productie-Compose-configuratie (`docker-compose.prod.yml`) gebruikt `redis:8.6.2-alpine`. Voeg het volgende toe:
+De prod compose (`docker-compose.prod.yml`) gebruikt `redis:8.6.2-alpine`. Toevoegen:
 
 ```yaml
 redis:
@@ -138,35 +131,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Overwegingen voor meerdere instanties/schaalbaarheid
+### 4. Overwegingen bij meerdere exemplaren/schalen
 
-**Eén Redis voor alle replica's** — het Lua-script voor de snelheidsbegrenzer is afhankelijk van één
-leidende sleutelruimte. Meerdere Redis-instanties achter replica's zouden de atomiciteit
-verliezen en het budget verdubbelen. Gebruik één Redis (of een Redis Sentinel-cluster met failover) voor
-alle applicatiereplica's.
+**Enkele Redis voor alle replica's** — Het Lua-script met snelheidsbegrenzer is afhankelijk van een enkele gezaghebbende sleutelruimte. Meerdere Redis instanties achter replica's zouden de atomiciteit verliezen en het budget verdubbelen. Gebruik één Redis (of Redis Sentinel-cluster met failover) voor alle toepassingsreplica's.
 
-**Aantal verbindingen:** Elke applicatiereplica opent **2 TCP-verbindingen** met Redis
-(client voor de snelheidsbegrenzer + client voor de quotaopslag). Bij 10 replica's → 20 verbindingen, ruim
-binnen de standaardlimiet van 10.000 verbindingen voor een Redis-instantie.
+**Aantal verbindingen:** Elke toepassingsreplica wordt geopend** 2 TCP -aansluitingen** naar Redis (rate limiter-client + quota-opslagclient). Bij 10 replica's → 20 verbindingen, ruim binnen het 10k-verbindingsplafond van een standaard Redis instantie.
 
-### 5. Monitoring
+### 5. Toezicht
 
-Maak het volgende beschikbaar via het statuscontrole-eindpunt:
+Blootstellen via eindpunt voor statuscontrole:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts roept al functies van rateLimiter aan
-// Voeg Redis-specifieke controles toe:
-//   1. PING-latentie via ioredis .ping()
-//   2. Geheugengebruik via INFO memory
-//   3. Aantal verbindingen via INFO clients
-//   4. Trefferpercentage voor maxmemory-policy (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-Belangrijke metrische gegevens om te bewaken:
+Belangrijke statistieken om in de gaten te houden:
 
-- **Verwijderde sleutels/sec.** — verhoog `maxmemory` als dit aanhoudend hoger is dan nul
-- **Geblokkeerde clients** — een waarde hoger dan nul duidt op trage Lua-scripts of veel concurrentie
-- **Geweigerde verbindingen** — de verbindingslimiet is bereikt; onwaarschijnlijk bij 20 verbindingen
+- **Uitgezet sleutels / sec** — indien aanhoudend niet-nul, verhoog `maxmemory`
+- **Geblokkeerde klanten** — niet-nul duidt op trage Lua-scripts of hoge conflicten
+- **Geweigerde verbindingen** — verbindingslimiet bereikt; zeldzaam bij 20 aansluitingen
+
+### 6. Redis-compatibele servers
+
+Elke server die hier wordt gebruikt, moet Lua-scripts uitvoeren: de snelheidsbegrenzer is één `EVAL`. Op een server zonder Lua logt `checkRateLimit()` `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` en telt het per proces, zodat elke replica de limiet op zichzelf afdwingt. De opt-in gedeelde sessie-affiniteitswinkel (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) leest ook pinnen met `EVAL` en werkt deze bij; zonder Lua logt het `[SESSION_AFFINITY] Redis error; falling back to SQLite.` en behoudt elke replica zijn eigen pinnen. De andere werkbelastingen gebruiken gewone opdrachten (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, hashes en sets), en de Redis -backend van de semantische cache verzendt geen `FT.*` -opdrachten.
+
+Getest met OmniRoute 3.8.52: KiviDB 1.2.0 met zijn Lua-image (`kividb/kividb:v1.2.0-lua`). De snelheidsbegrenzer (inclusief een tweede proces dat de tellers deelt), auth-cache, quota-opslag, opwarmstroomonderbreker, semantische cache-opslag en een `/v1/chat/completions` verzoek via de chat-handler heeft 18 van de 19 controles doorstaan die Redis 8.10.3 doorgeven. Degene die verschilt: `INCRBYFLOAT` slaat `0.1 + 0.2` op als `0.30000000000000004` waarbij Redis `0.3` opslaat ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Het quotaarchief parseert beide met `parseFloat`, maar de twee getallen verschillen in de laatste cijfers, dus een vergelijking die precies op een quotumgrens valt, kan er anders uit komen. De sessie-affiniteitswinkel maakte geen deel uit van die run. ( [opstelling](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [resultaten](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 

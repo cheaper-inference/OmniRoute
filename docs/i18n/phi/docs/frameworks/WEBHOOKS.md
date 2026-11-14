@@ -14,23 +14,24 @@ Nilalagdaan ng dispatcher ang bawat delivery gamit ang HMAC-SHA256, muling sinus
 pagkabigo, sinusubaybayan ang kalagayan ng delivery ng bawat webhook, at awtomatikong dini-disable ang mga endpoint na
 patuloy na nabibigo.
 
-## Mga Sinusuportahang Event
+## Mga Sinusuportahang Kaganapan
 
-Ang uri na `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, na ginagamit ng `src/lib/webhookDispatcher.ts`) ay kasalukuyang nagmomodelo ng eksaktong apat na event:
+Ang uri `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, ginagamit ng `src/lib/webhookDispatcher.ts`) ay kasalukuyang nagmomodelo ng walong kaganapan:
 
-| Event               | Nati-trigger kapag                                                     |
-| ------------------- | ---------------------------------------------------------------------- |
-| `request.completed` | Matagumpay na nakumpleto ang isang proxied request                     |
-| `request.failed`    | Nabigo ang isang proxied request pagkatapos ng lahat ng retry/fallback |
-| `quota.exceeded`    | Lumampas ang isang API key sa threshold ng budget/quota                |
-| `test.ping`         | Sintetikong event na ginagamit ng test endpoint                        |
+| Kaganapan                 | Sunog kapag                                                                                                           |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Matagumpay na nakumpleto ang isang proxy na kahilingan                                                                |
+| `request.failed`          | Ang isang proxy na kahilingan ay nabigo pagkatapos ng lahat ng retries/fallback                                       |
+| `quota.exceeded`          | Ang isang API key ay tumatawid sa isang budget/quota threshold                                                        |
+| `proxy.set_aside`         | Ang isang miyembro ng proxy pool ay isinantabi pagkatapos ng paulit-ulit na pagtanggi (transition lang)               |
+| `proxy.pool.exhausted`    | Ang bawat miyembro ng saklaw ng proxy pool ay inilalaan                                                               |
+| `provider.reset_redeemed` | Ang awtomatikong paglalapat ng mga banked reset ay nag-redeem ng isang reset credit o ang Claude weekly session reset |
+| `provider.exhausted`      | Ang bawat account ng isang provider ay lumalamig (hindi hihigit sa isang beses bawat provider bawat 10 minuto)        |
+| `test.ping`               | Sintetikong kaganapan na ginagamit ng endpoint ng pagsubok                                                            |
 
-Tinatanggap ng mga subscription ang literal na `"*"` upang matanggap ang bawat event. Ang mga hindi kilalang pangalan ng event
-sa `events` ay binabalewala sa oras ng dispatch.
+Tinatanggap ng mga subscription ang literal `"*"` upang matanggap ang bawat kaganapan. Ang mga hindi kilalang pangalan ng kaganapan sa `events` ay binabalewala sa oras ng pagpapadala.
 
-> Tandaan: nakakonekta na ang dispatcher API, ngunit ipinapatupad pa rin ang mga production call site para sa ilan sa mga
-> event na hindi `test.ping`. Suriin ang `grep dispatchEvent` upang makita
-> kung aling mga path ang kasalukuyang tumatawag sa dispatcher sa iyong release.
+> Tandaan: ang dispatcher API ay naka-wire, ngunit ang mga production call site para sa ilan sa mga hindi `test.ping` na kaganapan ay lumalapag pa rin. Suriin ang `grep dispatchEvent` upang makita kung aling mga path ang kasalukuyang humihimok sa dispatcher sa iyong release.
 
 ## Arkitektura
 
@@ -126,23 +127,22 @@ Telegram / mga custom na transformer ng payload) ay idinagdag ng `070_webhooks_k
 
 ## REST API
 
-Nangangailangan ang lahat ng endpoint ng management auth (`requireManagementAuth`).
+Ang lahat ng endpoint ay nangangailangan ng management auth (`requireManagementAuth`).
 
-| Endpoint                        | Method | Description                                                     |
-| ------------------------------- | ------ | --------------------------------------------------------------- |
-| `/api/webhooks`                 | GET    | Ilista ang mga webhook (nakatago ang mga secret)                |
-| `/api/webhooks`                 | POST   | Gumawa ng webhook                                               |
-| `/api/webhooks/[id]`            | GET    | Mga detalye ng webhook (buong secret)                           |
-| `/api/webhooks/[id]`            | PUT    | I-update ang mga field                                          |
-| `/api/webhooks/[id]`            | DELETE | Alisin                                                          |
-| `/api/webhooks/[id]/test`       | POST   | Magpadala ng `test.ping` (walang muling pagsubok)               |
-| `/api/webhooks/[id]/deliveries` | GET    | Mga kamakailang pagtatangka ng paghahatid para sa isang webhook |
-| `/api/webhooks/validate-url`    | POST   | Paunang pagpapatunay ng URL (proteksiyon laban sa SSRF)         |
+| Endpoint                        | Pamamaraan | Paglalarawan                                                    |
+| ------------------------------- | ---------- | --------------------------------------------------------------- |
+| `/api/webhooks`                 | GET        | Maglista ng mga webhook (nakamaskara ang mga lihim)             |
+| `/api/webhooks`                 | POST       | Lumikha ng webhook                                              |
+| `/api/webhooks/[id]`            | GET        | Detalye ng webhook (buong sikreto)                              |
+| `/api/webhooks/[id]`            | PUT        | I-update ang mga field                                          |
+| `/api/webhooks/[id]`            | DELETE     | Alisin                                                          |
+| `/api/webhooks/[id]/test`       | POST       | Paganahin ang isang `test.ping` (walang muling pagsubok)        |
+| `/api/webhooks/[id]/deliveries` | GET        | Kamakailang mga pagtatangka sa paghahatid para sa isang webhook |
+| `/api/webhooks/validate-url`    | POST       | Pagpapatunay URL bago ang paglipad (SSRF guard)                 |
 
-Itinatago ng `GET /api/webhooks` ang secret bilang `<unang 10 character>...` upang maiwasan ang paglantad nito
-sa mga pahina ng listahan. Gamitin ang `[id]` GET kapag talagang kailangan mo ang secret.
+Tinatakpan `GET /api/webhooks` ang sikreto sa `<first 10 chars>...` upang maiwasan ang pagtulo sa mga pahina ng listahan. Gamitin ang `[id]` GET kapag talagang kailangan mo ang sikreto.
 
-### Gumawa ng webhook
+### Lumikha ng webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -152,12 +152,11 @@ curl -X POST http://localhost:20128/api/webhooks \
     "url": "https://hooks.slack.com/services/...",
     "secret": "whsec_my_shared_secret",
     "events": ["quota.exceeded", "request.failed"],
-    "description": "Mga alerto sa Slack"
+    "description": "Slack alerts"
   }'
 ```
 
-Kung hindi isinama ang `secret`, bubuo ang server ng `whsec_<hex>` na secret at ibabalik
-ito sa response.
+Kung aalisin ang `secret`, bubuo ang server ng lihim `whsec_<hex>` at ibabalik ito sa tugon.
 
 ### Subukan ang webhook
 
@@ -166,8 +165,7 @@ curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Ibinabalik ang `{ delivered, status, error }`. Walang isinasagawang muling pagsubok — kapaki-pakinabang ito para
-mabilis na mapatunayan na tinatanggap ng receiver ang payload at signature.
+Nagbabalik `{ delivered, status, error }`. Walang muling pagsubok na tinangka — na kapaki-pakinabang para sa mabilis na pagpapatunay na tinatanggap ng receiver ang payload at lagda.
 
 ## Dashboard
 

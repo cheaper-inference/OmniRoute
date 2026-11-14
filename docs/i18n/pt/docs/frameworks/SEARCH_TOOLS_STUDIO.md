@@ -34,38 +34,38 @@ Studio com três separadores que unifica pesquisa web, extração de conteúdo w
 
 ---
 
-## Separadores
+## Guias
 
-### Separador de Pesquisa
+### Guia Pesquisar
 
-Transforma o `SearchForm` + `ResultsPanel` + `RerankPanel` existente num separador:
+Evolui o `SearchForm` + `ResultsPanel` + `RerankPanel` existente num separador:
 
-- Consulta → resultados (título, URL, excerto, pontuação de relevância).
-- Metadados do fornecedor no painel de Configuração (custo, quota, estado).
-- Secção de reordenação: selecionar um modelo de reordenação, reordenar os resultados, apresentar `positionDelta`.
-- Estado vazio com CTA quando não existem fornecedores de pesquisa configurados.
-- Histórico de pesquisas através de `SearchHistory.tsx`.
+- Consulte os resultados → (título, URL, snippet, pontuação de relevância).
+- Metadados do fornecedor no painel Configuração (custo, quota, estado).
+- Secção de reclassificação: escolha um modelo de reclassificação, reordene os resultados, mostre `positionDelta`.
+- Estado vazio com CTA quando nenhum fornecedor de pesquisa está configurado.
+- Histórico de pesquisa via `SearchHistory.tsx`.
 - Chama `POST /v1/search` (endpoint existente, sem alterações).
 
-### Separador de Extração
+### Guia Raspar
 
-Novo separador para extrair conteúdo de um URL através de `POST /v1/web/fetch` (criado no plano 05):
+Novo separador para extração de conteúdo de um URL via `POST /v1/web/fetch` (criado no plano 05):
 
-- Entrada: URL + opção de página completa + seletor de formato (markdown / texto / HTML).
-- Submeter → obter → apresentar `ScrapeResult.tsx`.
-- `ScrapeResult` apresenta a pré-visualização em markdown + opção para ver o conteúdo em bruto.
-- Limite: se o corpo da resposta for superior a **256 KB**, a IU apresenta `(truncado, ver conteúdo em bruto)` e abre o conteúdo em bruto numa janela modal do Monaco (D21).
-- Painel de metadados: fornecedor (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latência, custo, tamanho da resposta, número de ligações.
-- Utiliza o hook `useScrapeFetch.ts`.
+- Entrada: seletor de formato URL + de alternância de página inteira + (markdown/text/ HTML).
+- Enviar → fetch → render `ScrapeResult.tsx`.
+- `ScrapeResult` renderiza visualização de marcação + alternância bruta.
+- Limite: se o corpo da resposta >** 256 KB** , UI mostra `(truncated, view raw)` e abre raw num modal Monaco (D21).
+- Painel de metadados: provider (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search/keenable-search), latência, custo, tamanho da resposta, contagem de ligações.
+- Usa gancho `useScrapeFetch.ts`.
 
-### Separador de Comparação
+### Guia Comparar
 
-Executa a mesma consulta/URL em até **4 fornecedores em paralelo** (D22):
+Executa o mesmo query/URL até** 4 fornecedores em paralelo** (D22):
 
 - Colunas lado a lado por fornecedor.
-- Métricas: latência, custo, número de resultados, tamanho da resposta.
-- Cálculo da sobreposição de URLs para a pesquisa (número de URLs partilhados em comparação com o resultado inicial).
-- Chama `POST /v1/search` (pesquisa) ou `POST /v1/web/fetch` (extração) para cada fornecedor.
+- Métricas: latência, custo, contagem de resultados, tamanho da resposta.
+- cálculo de sobreposição URL para pesquisa (número de URLs partilhados versus resultado inicial).
+- Chama `POST /v1/search` (pesquisar) ou `POST /v1/web/fetch` (raspar) por fornecedor.
 
 ---
 
@@ -98,15 +98,15 @@ Executa a mesma consulta/URL em até **4 fornecedores em paralelo** (D22):
 
 ---
 
-## Catálogo de fornecedores
+## Catálogo de Fornecedores
 
-`ProviderCatalog.tsx` expõe a lista completa de fornecedores de `GET /api/search/providers`
-(alargada em F4 para incluir fornecedores de obtenção):
+`ProviderCatalog.tsx` expõe a lista completa de fornecedores do `GET /api/search/providers` (alargada em F4 para incluir fornecedores de pesquisa):
 
-| `kind` | `"search"` (20 fornecedores) ou `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (24 fornecedores) ou `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, paralela-search, afiado-search) |
 
-O estado é **determinado no momento do pedido**, verificando se existem credenciais e se
-todas as chaves estão atualmente em período de espera.
+O Estado é** derivado no momento do pedido** verificando se existem credenciais e se todas as chaves estão atualmente em espera.
+
+`codex-search` (Codex Web Search) não tem chave própria: reutiliza uma conta Codex (ChatGPT) ligada, pelo que cada pesquisa gasta a quota de assinatura ChatGPT e demora cerca de 10 a 40 s. É executado quando uma solicitação o nomeia; a seleção automática precisa do sinalizador de recurso `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` (desativado por defeito).
 
 ---
 
@@ -118,18 +118,18 @@ O marcador de posição da chave da API é sempre `$OMNIROUTE_API_KEY` (D11, par
 
 ---
 
-## Alterações no backend
+## Mudanças de back-end
 
-Foi necessária apenas uma alteração no backend para esta funcionalidade:
+Apenas foi necessária uma alteração de back-end para esta funcionalidade:
 
-### `GET /api/search/providers` alargado
+### `GET /api/search/providers` estendido
 
-O ficheiro `src/app/api/search/providers/route.ts` foi alargado para:
+`src/app/api/search/providers/route.ts` foi alargado para:
 
-- Incluir todos os fornecedores de obtenção (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) no array.
-- Adicionar `kind: "search" | "fetch"` a cada item.
-- Adicionar `status: "configured" | "missing" | "rate_limited"`, derivado do estado atual das credenciais.
-- Manter a retrocompatibilidade — os campos existentes (`id`, `name`, etc.) permanecem inalterados.
+- Inclua todos os fornecedores de pesquisa (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`, `keenable-search`) na matriz.
+- Adicione `kind: "search" | "fetch"` a cada item.
+- Adicione `status: "configured" | "missing" | "rate_limited"` derivado do estado da credencial ativa.
+- Mantenha inalterada a compatibilidade com versões anteriores dos campos — existentes (`id`, `name`, etc.).
 
 ---
 

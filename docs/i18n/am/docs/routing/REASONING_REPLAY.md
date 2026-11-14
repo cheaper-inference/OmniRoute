@@ -24,19 +24,21 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 ቀረጻ የሚከናወነው በ `open-sse/handlers/chatCore.ts` (ሁለት ጣቢያዎች፣ በሁለቱ `cacheReasoningFromAssistantMessage` የጥሪ ጣቢያዎች) ነው። ድጋሚ ማጫወት የሚከናወነው ከመርሃግብር ማስገደድ በኋላ ግን ከመላክ በፊት በ `open-sse/translator/index.ts` ነው።
+
+የመሳሪያ ጥሪ ምዝግቦች በ `buildToolCallCacheKey()` ስር ይቀመጣሉ፣ የጥያቄው ወሰን እና የመሳሪያ ጥሪ መታወቂያ፣ ስለዚህ በሌላ API ቁልፍ ወይም ክፍለ ጊዜ ጥቅም ላይ የዋለው ተመሳሳይ መታወቂያ መግቢያውን አይመርጥም። ስፋቱ የሚመጣው ከ `buildReasoningCacheScope()`: የ API ቁልፍ መታወቂያ እና ጥያቄው አንድ ሲኖረው የክፍለ-ጊዜው ቁልፍ ነው። ስለዚህ የ `tool_call_id` አምድ እና ዳሽቦርዱ ለእነዚያ ግቤቶች ይህን መፈጨት ያሳያሉ።
 
 ግልጽ (የመሳሪያ-ጥሪ ያልሆኑ) ረዳት መታጠፊያዎች በተለያየ መንገድ ተቆልፈዋል `buildAssistantMessageCacheKey()` የክፍለ ጊዜውን ወሰን እና መደበኛውን የ OpenAI-ቅርጸት ግልባጭ እስከዚያው ድረስ ያዋህዳል፣ ምክንያቱም DeepSeek አንድ ጊዜ `tools` ከተገኘ _እያንዳንዱ_ የቀደመ ተራ ምክንያትን ይፈልጋል። ለምላሾች-ኤፒአይ ኢላማዎች (ለምሳሌ `opencode-go/deepseek-v4-flash`፣ ወደ `/responses` ተዘዋውሯል) ወደ ላይ ያለው አካል `input` እንጂ `messages` አይደለም፣ስለዚህ `translateRequest()` (`open-sse/translator/index.ts`) የምሰሶውን ግልባጭ በመልሶ መደወያ አማራጭ በኩል ሪፖርት ያደርጋል እና የተያዙ ቦታዎች ያንኑ ግልባጭ ያዋህዳሉ። የምላሾች ድጋሚ ማጫወት ይለፍ በ OpenAI ምሰሶ ላይ ለእያንዳንዱ የምንጭ ቅርጸት ይሰራል፣ስለዚህ Anthropic መልእክቶች ደንበኞች (Claude → OpenAI → ምላሾች) እንደገና ይጫወታሉ።
 

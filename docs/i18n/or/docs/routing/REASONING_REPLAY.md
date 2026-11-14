@@ -24,38 +24,40 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
-`open-sse/handlers/chatCore.ts` ରେ କ୍ୟାପଚର ହୁଏ (ଦୁଇଟି ସାଇଟ୍, ଦୁଇଟି `cacheReasoningFromAssistantMessage` କଲ୍ ସାଇଟରେ) \| ସ୍କିମା ବାଧ୍ୟତାମୂଳକ ପରେ `open-sse/translator/index.ts` ରେ ରିପ୍ଲେ ହୁଏ କିନ୍ତୁ ପଠାଇବା ପୂର୍ବରୁ \|
+`open-sse/handlers/chatCore.ts` ରେ କ୍ୟାପଚର ହୁଏ (ଦୁଇଟି ସାଇଟ୍, ଦୁଇଟି `cacheReasoningFromAssistantMessage` କଲ୍ ସାଇଟରେ)। ସ୍କିମା ବାଧ୍ୟତାମୂଳକ ପରେ `open-sse/translator/index.ts` ରେ ରିପ୍ଲେ ହୁଏ କିନ୍ତୁ ପଠାଇବା ପୂର୍ବରୁ।
 
-ସାଧା (ଅଣ-ଟୁଲ୍-କଲ୍) ସହାୟକ ଟର୍ନଗୁଡିକ ଭିନ୍ନ ଭାବରେ ଚାବି ଦିଆଯାଏ: `buildAssistantMessageCacheKey()` ଅଧିବେଶନ ପରିସରକୁ ହଜମ କରେ ଏବଂ ସେହି ଟର୍ନ୍ ପର୍ଯ୍ୟନ୍ତ ସ୍ ized ାଭାବିକ OpenAI- ଫର୍ମାଟ୍ ଟ୍ରାନ୍ସକ୍ରିପ୍ଟ, କାରଣ DeepSeek ଉପସ୍ଥିତ ହେବା ପରେ `tools` _ ପ୍ରତ୍ୟେକ_ ପୂର୍ବ ଟର୍ନର କାରଣ ଆବଶ୍ୟକ କରେ \| ରେସପନ୍ସ- API ଟାର୍ଗେଟ୍ ପାଇଁ (ଉଦାହରଣ ସ୍ୱରୂପ `opencode-go/deepseek-v4-flash`, `/responses` ରୁଟ୍) ଅପଷ୍ଟ୍ରିମ୍ ଶରୀର `input` ବହନ କରେ, `messages` ନୁହେଁ, ତେଣୁ `translateRequest()` (`open-sse/translator/index.ts`) ଏକ କଲବ୍ୟାକ୍ ଅପ୍ସନ୍ ମାଧ୍ୟମରେ ହଜମ ହୋଇଥିବା ପିଭଟ୍ ଟ୍ରାନ୍ସକ୍ରିପ୍ଟକୁ ରିପୋର୍ଟ କରେ ଏବଂ କ୍ୟାପଚର ସାଇଟଗୁଡ଼ିକ ସେହି ସମାନ ଟ୍ରାନ୍ସକ୍ରିପ୍ଟକୁ ହଜମ କରେ \| ପ୍ରତ୍ୟେକ ଉତ୍ସ ଫର୍ମାଟ୍ ପାଇଁ OpenAI pivot ରେ ରେସପନ୍ସ ରିପ୍ଲେ ପାସ୍ ଚାଲିଥାଏ, ତେଣୁ Anthropic ମେସେଜ୍ କ୍ଲାଏଣ୍ଟ (Claude → OpenAI → Responses) ମଧ୍ୟ ପୁନ play ଚିତ୍ରିତ ହୁଏ \|
+ଟୁଲ୍-କଲ୍ ଏଣ୍ଟ୍ରିଗୁଡିକ `buildToolCallCacheKey()` ଅଧୀନରେ ଗଚ୍ଛିତ ହୋଇଛି, ଅନୁରୋଧ ପରିସରର ଏକ ହଜମ ଏବଂ ଟୁଲ୍ କଲ୍ id, ତେଣୁ ଅନ୍ୟ API କି କିମ୍ବା ଅଧିବେଶନ ଦ୍ୱାରା ବ୍ୟବହୃତ ସମାନ id ପ୍ରବେଶକୁ ଚୟନ କରେ ନାହିଁ। ପରିସର `buildReasoningCacheScope()` ରୁ ଆସିଥାଏ: API କି id, ଏବଂ ଅନୁରୋଧଟି ଥିବାବେଳେ ଅଧିବେଶନ ଚାବି। `tool_call_id` ସ୍ତମ୍ଭ ଏବଂ ଡ୍ୟାସବୋର୍ଡ ତେଣୁ ସେହି ଏଣ୍ଟ୍ରିଗୁଡ଼ିକ ପାଇଁ ଏହି ହଜମକୁ ଦର୍ଶାଏ।
+
+ସାଧା (ଅଣ-ଟୁଲ୍-କଲ୍) ସହାୟକ ଟର୍ନଗୁଡିକ ଭିନ୍ନ ଭାବରେ ଚାବି ଦିଆଯାଏ: `buildAssistantMessageCacheKey()` ଅଧିବେଶନ ପରିସରକୁ ହଜମ କରେ ଏବଂ ସେହି ଟର୍ନ୍ ପର୍ଯ୍ୟନ୍ତ ସ୍ ized ାଭାବିକ OpenAI- ଫର୍ମାଟ୍ ଟ୍ରାନ୍ସକ୍ରିପ୍ଟ, କାରଣ DeepSeek ଉପସ୍ଥିତ ହେବା ପରେ `tools` _ ପ୍ରତ୍ୟେକ_ ପୂର୍ବ ଟର୍ନର କାରଣ ଆବଶ୍ୟକ କରେ। ରେସପନ୍ସ- API ଟାର୍ଗେଟ୍ ପାଇଁ (ଉଦାହରଣ ସ୍ୱରୂପ `opencode-go/deepseek-v4-flash`, `/responses` ରୁଟ୍) ଅପଷ୍ଟ୍ରିମ୍ ଶରୀର `input` ବହନ କରେ, `messages` ନୁହେଁ, ତେଣୁ `translateRequest()` (`open-sse/translator/index.ts`) ଏକ କଲବ୍ୟାକ୍ ଅପ୍ସନ୍ ମାଧ୍ୟମରେ ହଜମ ହୋଇଥିବା ପିଭଟ୍ ଟ୍ରାନ୍ସକ୍ରିପ୍ଟକୁ ରିପୋର୍ଟ କରେ ଏବଂ କ୍ୟାପଚର ସାଇଟଗୁଡ଼ିକ ସେହି ସମାନ ଟ୍ରାନ୍ସକ୍ରିପ୍ଟକୁ ହଜମ କରେ। ପ୍ରତ୍ୟେକ ଉତ୍ସ ଫର୍ମାଟ୍ ପାଇଁ OpenAI pivot ରେ ରେସପନ୍ସ ରିପ୍ଲେ ପାସ୍ ଚାଲିଥାଏ, ତେଣୁ Anthropic ମେସେଜ୍ କ୍ଲାଏଣ୍ଟ (Claude → OpenAI → Responses) ମଧ୍ୟ ପୁନ play ଚିତ୍ରିତ ହୁଏ।
 
 ## ଷ୍ଟୋରେଜ୍ — ହାଇବ୍ରିଡ୍ ମେମୋରୀ + SQLite
 
-ହଟ୍ ପଥ କ୍ରାସ୍ ପୁନରୁଦ୍ଧାର ଏବଂ ଡ୍ୟାସବୋର୍ଡ ଦୃଶ୍ୟମାନତା ପାଇଁ SQLite ଟେବୁଲ୍ ଦ୍ୱାରା ସମର୍ଥିତ ଏକ ଇନ-ମେମୋରୀ `Map` (LRU-by-creation) ବ୍ୟବହାର କରେ \|
+ହଟ୍ ପଥ କ୍ରାସ୍ ପୁନରୁଦ୍ଧାର ଏବଂ ଡ୍ୟାସବୋର୍ଡ ଦୃଶ୍ୟମାନତା ପାଇଁ SQLite ଟେବୁଲ୍ ଦ୍ୱାରା ସମର୍ଥିତ ଏକ ଇନ-ମେମୋରୀ `Map` (LRU-by-creation) ବ୍ୟବହାର କରେ।
 
-| ସ୍ତର   | କାର୍ଯ୍ୟାନ୍ୱୟନ                                 | ଉଦ୍ଦେଶ୍ୟ                                       |
-| ------ | --------------------------------------------- | ---------------------------------------------- |
-| ସ୍ମୃତି | `open-sse/services/reasoningCache.ts` ରେ`Map` | ଦ୍ରୁତ ସନ୍ଧାନ, 200 ରେ ପୁରାତନକୁ ବାହାର କରିଦିଏ \|  |
-| DB     | `reasoning_cache` ଟେବୁଲ୍ (`src/lib/db/`)      | ପୁନ rest ଆରମ୍ଭ, ଷ୍ଟାଟସ୍ ଡ୍ରାଇଭ୍ ଉପରେ ରହିଥାଏ \| |
+| ସ୍ତର   | କାର୍ଯ୍ୟାନ୍ୱୟନ                                 | ଉଦ୍ଦେଶ୍ୟ                                     |
+| ------ | --------------------------------------------- | -------------------------------------------- |
+| ସ୍ମୃତି | `open-sse/services/reasoningCache.ts` ରେ`Map` | ଦ୍ରୁତ ସନ୍ଧାନ, 200 ରେ ପୁରାତନକୁ ବାହାର କରିଦିଏ।  |
+| DB     | `reasoning_cache` ଟେବୁଲ୍ (`src/lib/db/`)      | ପୁନ rest ଆରମ୍ଭ, ଷ୍ଟାଟସ୍ ଡ୍ରାଇଭ୍ ଉପରେ ରହିଥାଏ। |
 
-ଲେଖା ଉଭୟକୁ ଯାଏ \| ପ୍ରଥମେ ମେମୋରୀ ପରାମର୍ଶ ପ Read ଼େ, ତାପରେ DB କୁ ଫେରିଯାଅ (DB ହିଟ୍ ସ୍ମୃତିକୁ ପୁନ oted ପ୍ରୋତ୍ସାହିତ ହୁଏ) \| DB ବିଫଳତା ସାଂଘାତିକ ନୁହେଁ — ଇନ-ମେମୋରୀ କ୍ୟାଚ୍ ଗରମ ପଥରେ ସେବା ଜାରି ରଖିଛି \|
+ଲେଖା ଉଭୟକୁ ଯାଏ। ପ୍ରଥମେ ମେମୋରୀ ପରାମର୍ଶ ପ Read ନ୍ତୁ, ତାପରେ DB କୁ ଫେରିଯାଅ (DB ହିଟ୍ ସ୍ମୃତିକୁ ପୁନ oted ପ୍ରୋତ୍ସାହିତ ହୁଏ)। DB ବିଫଳତା ସାଂଘାତିକ ନୁହେଁ — ଇନ-ମେମୋରୀ କ୍ୟାଶେ ଗରମ ପଥରେ ସେବା ଜାରି ରଖିଛି।
 
 **ଡିଫଲ୍ଟ:**
 
 - TTL: `2h` (`TTL_MS = 2 * 60 * 60 * 1000`)
 - ସର୍ବାଧିକ ସ୍ମୃତି ଭରଣଗୁଡ଼ିକ: `200` (`MAX_MEMORY_ENTRIES`)
-- ବହିଷ୍କାର: ସର୍ବପ୍ରଥମ `createdAt` \|
+- ବହିଷ୍କାର: ସର୍ବପ୍ରଥମ `createdAt`।
 
 ## ଡାଟାବେସ୍ ସ୍କିମା \|
 
@@ -110,15 +112,15 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 
 ## REST API
 
-କ୍ୟାଚ୍ `src/app/api/cache/reasoning/route.ts` ଅଧୀନରେ ଦୁଇଟି ଏଣ୍ଡପଏଣ୍ଟ ଖୋଲିଥାଏ \| ଉଭୟ ପରିଚାଳନା ପ୍ରାମାଣିକିକରଣ ଆବଶ୍ୟକ କରନ୍ତି ( `@/shared/utils/apiAuth` ରୁ`isAuthenticated` ) \|
+କ୍ୟାଚ୍ `src/app/api/cache/reasoning/route.ts` ଅଧୀନରେ ଦୁଇଟି ଏଣ୍ଡପଏଣ୍ଟ ଖୋଲିଥାଏ। ଉଭୟ ପରିଚାଳନା ପ୍ରାମାଣିକିକରଣ ଆବଶ୍ୟକ କରନ୍ତି ( `@/shared/utils/apiAuth` ରୁ`isAuthenticated` )।
 
-| ପଦ୍ଧତି | ଶେଷ ପଏଣ୍ଟ \|                                              | ବର୍ଣ୍ଣନା                                                                    |
-| ------ | --------------------------------------------------------- | --------------------------------------------------------------------------- |
-| GET    | `/api/cache/reasoning`                                    | ପରିସଂଖ୍ୟାନ + ପୃଷ୍ଠା ପ୍ରବିଷ୍ଟଗୁଡିକ \|                                        |
-| GET    | `/api/cache/reasoning?provider=deepseek&model=...&limit=` | ଫିଲ୍ଟର ତାଲିକା (`limit` `[1, 200]` କୁ ବନ୍ଦ)                                  |
-| DELETE | `/api/cache/reasoning`                                    | ସବୁକିଛି ସଫା କରନ୍ତୁ (ମେମୋରୀ + DB) ଏବଂ hit/miss ଗଣନାକୁ ପୁନ res ସେଟ୍ କରନ୍ତୁ \| |
-| DELETE | `/api/cache/reasoning?provider=deepseek`                  | କେବଳ ଗୋଟିଏ ପ୍ରଦାନକାରୀ ପାଇଁ ଏଣ୍ଟ୍ରିଗୁଡିକ ସଫା କରନ୍ତୁ \|                       |
-| DELETE | `/api/cache/reasoning?toolCallId=call_abc`                | ଗୋଟିଏ ଏଣ୍ଟ୍ରି ଡିଲିଟ୍ କରନ୍ତୁ \|                                              |
+| ପଦ୍ଧତି | ଶେଷ ପଏଣ୍ଟ।                                                | ବର୍ଣ୍ଣନା                                                                  |
+| ------ | --------------------------------------------------------- | ------------------------------------------------------------------------- |
+| GET    | `/api/cache/reasoning`                                    | ପରିସଂଖ୍ୟାନ + ପୃଷ୍ଠା ପ୍ରବିଷ୍ଟଗୁଡିକ।                                        |
+| GET    | `/api/cache/reasoning?provider=deepseek&model=...&limit=` | ଫିଲ୍ଟର ତାଲିକା (`limit` `[1, 200]` କୁ ବନ୍ଦ)                                |
+| DELETE | `/api/cache/reasoning`                                    | ସବୁକିଛି ସଫା କରନ୍ତୁ (ମେମୋରୀ + DB) ଏବଂ hit/miss ଗଣନାକୁ ପୁନ res ସେଟ୍ କରନ୍ତୁ। |
+| DELETE | `/api/cache/reasoning?provider=deepseek`                  | କେବଳ ଗୋଟିଏ ପ୍ରଦାନକାରୀ ପାଇଁ ଏଣ୍ଟ୍ରିଗୁଡିକ ସଫା କରନ୍ତୁ।                       |
+| DELETE | `/api/cache/reasoning?toolCallId=call_abc`                | ଗୋଟିଏ ଏଣ୍ଟ୍ରି ଡିଲିଟ୍ କରନ୍ତୁ।                                              |
 
 **GET ପ୍ରତିକ୍ରିୟା ଆକୃତି:**
 

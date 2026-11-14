@@ -59,12 +59,12 @@ Don provider/model iri ɗaya , ƙima daga yadudduka masu fifiko suna sake rubuta
 
 **model.dev daidaitawa** ya bambanta da daidaitawar LiteLLM kuma an kashe shi ta tsohuwa. Kunna shi a cikin Saituna (models.dev sync) ko amfani da waɗannan masu canji:
 
-| Env var                    | Tsohuwar          | Manufar                                                                                                              |
-| -------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(Ba a saita ba)_ | Cire saiti yana biye da saiti; `1/true/on/yes` yana kunnawa da kashe `0/false/off/no` (ko da Saituna sun kunna shi). |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | Default model.dev tazarar daidaitawa a cikin daƙiƙa (kullum).                                                        |
+| Env var                    | Tsohuwar          | Manufar                                                                                                                           |
+| -------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(Ba a saita ba)_ | Cire saiti yana biye da jujjuyawar Saituna; `1/true/on/yes` yana kunnawa da kashe `0/false/off/no` (ko da Saituna sun kunna shi). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | Default model.dev tazarar daidaitawa a cikin daƙiƙa (kullum).                                                                     |
 
-`PRICING_SYNC_SOURCES` yi** ba** kunna model.dev; yana sarrafa aikin daidaita LiteLLM kawai. Share ƙetare mai amfani baya share ko dai da aka daidaita sararin sunan; Layer na gaba da ake samu na farashi ya zama mai tasiri. Don samfurin mara farashi, duba saitunan daidaitawa biyu da `sourceMap` kafin ƙara jujjuyawar hannu.
+`PRICING_SYNC_SOURCES` yi** ba** kunna model.dev; yana sarrafa aikin daidaita LiteLLM kawai. Share ƙetare mai amfani baya share ko dai da aka daidaita sararin sunan; Layer na gaba da ke akwai na farashi ya zama tasiri. Don samfurin mara farashi, duba saitunan daidaitawa biyu da `sourceMap` kafin ƙara jujjuyawar hannu.
 
 ### Tsarin farashi
 
@@ -82,15 +82,37 @@ Sunaye na ƙila an daidaita su da farko (an cire prefixes na masu bayarwa kamar 
 
 ### Yadda ake kashewa ana yin rikodin
 
-- Ana ƙididdige farashin kowane-buƙata bayan amsa kuma an rubuta wuta-da-manta don haka ba zai taɓa ƙara latency ga abokin ciniki ba. An tsara amfani da keɓaɓɓen keɓaɓɓen ƙididdiga akan alamar madauki na gaba ta hanyar [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- API-key kashe ana adanawa kuma ana zubar dashi cikin batches ta hanyar [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (tsoho na 60s flush tazara, buffer-shigarwa 1,000). Mai daidaitawa ta hanyar:
+- Ana lissafta farashin kowane buƙatu a lokacin da ake buƙata. An tsara amfani da keɓaɓɓen keɓaɓɓen ƙididdiga akan alamar madauki na gaba ta hanyar [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Ana kashe kashe makullin API kuma an watsar da shi cikin batches ta hanyar [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (tsoho na 60s flush tazara, buffer-shigarwa 1,000). Mai daidaitawa ta hanyar:
 
   | Env var                             | Tsohuwar | Manufar                                            |
   | ----------------------------------- | -------- | -------------------------------------------------- |
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Rike tazarar cikin millise seconds.                |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Matsakaicin shigarwar da aka adana kafin a watsar. |
 
-Adadin farashin dashboard sune** ba** karanta daga adadin dala-jeri-jeri da aka adana — ana ƙididdige su akan tashi daga ƙididdige ƙididdiga da kuma tebur farashin yanzu duk lokacin da ƙarshen binciken ya gudana. Wannan yana nufin gyara farashin da ba daidai ba (da sake daidaitawa) yana sabunta kididdigar farashin tarihi a baya.
+Kudade sun fi son ainihin cajin da aka ba da rahoton (`provider_cost_usd`), sannan hoton buƙatun mai farashi mai ƙima (`calculated_cost_usd`), sannan sake maimaita alama daga kasidar na yanzu. Ba a sake cajin kuɗin da aka adana ta hanyar ƙididdige su. Layukan Legacy-kawai har yanzu suna canzawa lokacin da farashin katalogin su ya canza.
+
+### OCR da sakawa
+
+- Buƙatun `/v1/ocr` masu nasara suna amfani da `usage_info.pages_processed` na sama, ba kewayon shafi da ake buƙata ko adadin abubuwan shafi da aka dawo ba. Kiyasin shine shafuka × `ocr_cost_per_page` (cikakkiyar USD/page,** ba** USD/million).
+- Buƙatun tare da daftarin aiki ko bayanin akwatunan ɗaure suna buƙatar ware kuɗin fiton `ocr_cost_per_annotated_page`. Idan ba tare da shi ba, farashin ya kasance ba a sani ba; Talatin OCR ba a musanya shi shiru.
+- LiteLLM yana daidaita taswirorin filin `annotation_cost_per_page` na sama zuwa `ocr_cost_per_annotated_page`, yana riƙe da cikakkiyar ƙimar USD/page da shigarwar bayani-kawai, gami da sifili bayyananne. Filin canonical da aka kawo yana ɗaukar fifiko; an yi watsi da ƙima mara inganci. Haɓaka farashin mai amfani yana riƙe fifikonsu na yau da kullun. Duba [maɓallan farashin OCR na LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- amfanin OCR yana adana ƙidayar shafi, farashin ɗaya, ƙididdige kuɗin USD, maɓallin API da zaɓin haɗi. Ba a taɓa wakiltar shafuka azaman alamu ba. rajistan ayyukan kira sun ƙunshi metadata na lissafin kuɗi, ba daftarin aiki ba URLs, PDF bytes ko rubutun da aka ciro.
+- Buƙatun `/v1/embeddings` masu nasara sun yi rikodin jere na amfani a kowane rukuni na zahiri, gami da batches daban waɗanda aka kammala a cikin millisecond ɗaya. Cajin da aka bayar da rahoton mai bayarwa yana kan gaba akan ƙididdige ƙididdiga; combo wrappers ba sa ƙara caji.
+- Tarihin amfani, ƙididdigar farashi, windows provider/account, iyakan kashe makullin API, lissafin farashi da buƙatun amfani da yau da kullun sun haɗa da waɗannan cajin. Maɓallan babu-log ɗin suna riƙe lissafin lambobi ba tare da riƙe rubutun tushe ba.
+- Rashin amfani ko jadawalin kuɗin fito ne** wanda ba a sani ba** , ba kyauta ba: ba a cire taken martani-farashin ba, kuma manufar amfani da mara ƙima ta shafi iyakance maɓallan API. Ƙimar sifili da aka saita a bayyane ya kasance ingantaccen amfani da tsadar sifili.
+
+Wannan lissafin gaba ne kawai. Tsohon kiran OCR/embedding wanda bai taɓa rubuta tarihin amfani ba ba za a iya sake gina shi daga wannan ƙaura ba. Ƙididdiga masu ƙididdiga na USD, ba daftari ba ne, kuma ba su haɗa da canjin kuɗi, haraji ko rangwame ba.
+
+### Magana da hotuna
+
+- Nasara `/v1/audio/transcriptions`, `/v1/audio/speech` da yunƙurin samar da hoto suna raba lissafin lissafi. Kiran kai tsaye da haɗin kai suna ɗaukar maɓallin API na mai kira da haɗin da aka zaɓa; abin rufe fuska bai taɓa ƙara zari na biyu ba.
+- USD da aka ruwaito mai bayarwa ya yi nasara akan kiyasin kasida, gami da cajin sifili bayyananne. OpenRouter's JSON `usage.cost` an daidaita shi zuwa `cost_usd`. In ba haka ba, alamun aunawa suna amfani da farashin alamar, rubutaccen daƙiƙa suna amfani da farashin daƙiƙa ɗaya, shigar da magana yana amfani da ƙidayar halayen Unicode, kuma hotuna masu tsada suna amfani da lambar da aka dawo da gaske, ba `n` ɗin da ake nema ba.
+- Binary OpenRouter TTS bashi da jikin amfanin JSON. Bayan sautin ya ƙare ko mai kiran ya soke, OmniRoute yana tambayar tsararrakinsa ID akan** iri daya** asalin OpenRouter. Buƙatar EU baya faɗuwa zuwa asalin duniya. Wannan iyakataccen bincike ne, karantawa kawai; Ba a sake gwada ƙididdiga don lissafin kuɗi ba. Rubutun lissafin kuɗi na iya bayyana bayan an gama sautin: sake dubawa yana gudana a bango har zuwa daƙiƙa 52, gami da ƙayyadaddun ƙayyadaddun hanyar sadarwa.
+- Yayin wannan binciken, martanin mai jiwuwa yana da `X-OmniRoute-Cost-Status: pending` kuma ba shi da taken amsa-farashin. Cajin sa na ƙarshe yana bayyana a tarihin amfani, nazari da maɓalli na maɓalli bayan sulhu. Idan babu metadata, ana amfani da hoton jadawalin jadawalin kuɗin fito; in ba haka ba farashin ya tsaya ba a sani ba.
+- Daƙiƙa, haruffa da ƙididdigar hoto suna da filayen lissafin raka'a daban-daban, waɗanda ba za su taɓa yin ƙirƙira na jabu ba. Lissafi yana riƙe da amfani na lambobi kawai, ba rubutun magana ba, kwafi ko hoto na hoto. Keɓewar hoton da ba ta da tsada ba ta canzawa: farashin hoton hoton da ya ɓace na gaske baya sabon kulle maɓalli mai iyaka, kuma martanin ya tsallake kan farashin maimakon bayyana kiran kyauta. Rashin lalacewar kantin farashi har yanzu yana riƙe da shaidar amfani don gazawar tilastawa-rufe.
+
+Babu wani cajin speech/image na tarihi da aka ƙirƙira ko ci gaba. Biyan kuɗaɗen mai bayarwa ya kasance maƙasudin rasitoci da kira waɗanda ba a ba da rahoton cajin su ba.
 
 ---
 

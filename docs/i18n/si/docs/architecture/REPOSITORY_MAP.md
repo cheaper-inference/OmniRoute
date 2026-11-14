@@ -168,7 +168,7 @@ src/
 | මොඩියුලය                                 | අරමුණ                                                                                                                                                                                                                                                                                                                   |
 | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `a2a/`                                   | A2A ප්‍රොටෝකෝලය කාර්ය කළමනාකරු, කුසලතා (5), ප්‍රවාහය                                                                                                                                                                                                                                                                    |
-| `acp/`                                   | CLI නියෝජිත රෙජිස්ට්‍රිය (දේශීය CLI සොයාගැනීම — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md` බලන්න)                                                                                                                                                                                                                       |
+| `acp/`                                   | CLI නියෝජිත ලේඛනය (දේශීය CLI සොයාගැනීම — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md` බලන්න)                                                                                                                                                                                                                              |
 | `api/`                                   | හවුල් API සහායකයින් (`requireManagementAuth`, වලංගුකරණය)                                                                                                                                                                                                                                                                |
 | `auth/`                                  | සැසිය, මුරපද හැෂිං, ටෝකන් වලංගුකරණය                                                                                                                                                                                                                                                                                     |
 | `batches/`                               | OpenAI කාණ්ඩ API හසුරුවන්න                                                                                                                                                                                                                                                                                              |
@@ -241,10 +241,10 @@ src/
 | මොඩියුලය                         | අරමුණ                                                                                             |
 | -------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `components/`                    | උපකරණ පුවරු සංරචක API: `packages/ui-kit` — හරහා ඇඩප්ටර `docs/architecture/DESIGN_SYSTEM.md` බලන්න |
-| `constants/iconMap.ts`           | `ICON_MAP`: තිර → Lucide සංරචක (`<Icon>`) භාවිතා කරන අයිකන නම්                                    |
-| `constants/providers.ts`         | **381 සපයන්නන්** Zod වලංගුකරණය සමඟ (සත්‍ය මූලාශ්‍රය)                                              |
+| `constants/iconMap.ts`           | `ICON_MAP`: තිර → Lucide සංරචක භාවිතා කරන අයිකන නම් (`<Icon>`)                                    |
+| `constants/providers.ts`         | **සපයන්නන් 394ක්** Zod වලංගුකරණය සමඟ (සත්‍ය මූලාශ්‍රය)                                            |
 | `constants/cliTools.ts`          | බාහිර CLI මෙවලම් ලේඛනය                                                                            |
-| `constants/routingStrategies.ts` | **මාර්ගගත කිරීමේ උපාය මාර්ග 20 ක්** ප්රමුඛතා සමඟ                                                  |
+| `constants/routingStrategies.ts` | **මාර්ගගත කිරීමේ උපාය මාර්ග 22** ප්රමුඛතා සමඟ                                                     |
 | `constants/publicApiRoutes.ts`   | Bearer (එදිරිව කළමනාකරණය) auth අවශ්‍ය මාර්ග                                                       |
 | `constants/upstreamHeaders.ts`   | උඩු ප්‍රවාහ ඉල්ලීම් සඳහා ශීර්ෂ ප්‍රතික්ෂේප කරන්නා                                                 |
 | `validation/schemas.ts`          | ~ 80 Zod යෝජනා ක්‍රම ( API ගිවිසුම් සඳහා සත්‍යයේ තනි මූලාශ්‍රය)                                   |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — ප්රවාහ එන්ජින් වැඩබිම
+## `open-sse/` — Streaming Engine Workspace
 
-වෙනම npm වැඩබිමකි (`@omniroute/open-sse`). ඉල්ලීම් සැකසීම සහ සපයන්නන් ක්රියාත්මක කිරීම හසුරුවයි.
+npm වැඩබිම (`@omniroute/open-sse`) වෙන් කරන්න. ඉල්ලීම් සැකසුම් + සපයන්නා ක්‍රියාත්මක කිරීම හසුරුවයි.
 
 ```
 open-sse/
-├── handlers/            # ගොනු 16ක් (හසුරුවන්නන් 12ක් + සහායක 4ක්): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, ආදිය.
-├── executors/           # ක්රියාත්මකකරණ මොඩියුල 150ක් (BaseExecutor දිගු කරන පන්ති + එක් එක් සපයන්නා සඳහා සහායක)
-├── translator/          # ආකෘති පරිවර්තක (ඉල්ලීම් 9ක්, ප්රතිචාර 9ක්, සහායක 9ක්)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # සේවා මොඩියුල ~80+ක් (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, ආදිය.)
-├── mcp-server/          # MCP සේවාදායකය (මෙවලම් 110ක්, ප්රවාහන 3ක්, විෂය පථ 33ක්)
-├── config/              # සපයන්නන්/මාදිලි ලේඛන, ශීර්ෂක වින්යාසය, මාදිලි අන්වර්ථ
-├── utils/               # TLS සේවාලාභියා, proxy fetch/dispatcher, ජාල සහායක
-├── index.ts             # වැඩබිම් ප්රවේශ ස්ථානය
-├── package.json         # වැඩබිම් මැනිෆෙස්ටය
-├── tsconfig.json        # වැඩබිම් TS වින්යාසය
-└── types.d.ts           # වැඩබිම් වර්ග ප්රකාශන
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| මාර්ගය                      | අරමුණ                                                                                  |
-| --------------------------- | -------------------------------------------------------------------------------------- |
-| `server.ts`                 | MCP සේවාදායක ජීවන චක්රය (stdio + HTTP ප්රවාහන)                                         |
-| `httpTransport.ts`          | HTTP Streamable + SSE ප්රවාහන (`/api/mcp/sse`, `/api/mcp/stream`)                      |
-| `audit.ts`                  | `mcp_tool_audit` වගුව වෙත විගණන ලොග්කරණය                                               |
-| `scopeEnforcement.ts`       | එක් එක් මෙවලම සඳහා විෂය පථ වලංගුකරණය                                                   |
-| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json` වෙත සෞඛ්ය ස්පන්දනය                               |
-| `descriptionCompressor.ts`  | සන්දර්භය ඉතිරි කර ගැනීමට මෙවලම් විස්තර පාරදත්ත සම්පීඩනය කරයි                           |
-| `schemas/tools.ts`          | මූලික මෙවලම් අර්ථදැක්වීම් 36ක් + විෂය පථ                                               |
-| `tools/advancedTools.ts`    | උසස් මෙවලම් ක්රියාත්මකකරණ                                                              |
-| `tools/memoryTools.ts`      | මතක මෙවලම් 3ක් (search/add/clear)                                                      |
-| `tools/skillTools.ts`       | කුසලතා මෙවලම් 4ක් (list/enable/execute/executions)                                     |
-| `tools/compressionTools.ts` | සම්පීඩන මෙවලම් 5ක්                                                                     |
-| `README.md`                 | අභ්යන්තර MCP සේවාදායක README (`docs/frameworks/MCP-SERVER.md` වෙතින් හරස්-සබැඳි කර ඇත) |
+| මාර්ගය                      | අරමුණ                                                                                   |
+| --------------------------- | --------------------------------------------------------------------------------------- |
+| `server.ts`                 | MCP සේවාදායක ජීවන චක්‍රය (stdio + HTTP ප්‍රවාහනය)                                       |
+| `httpTransport.ts`          | HTTP ප්‍රවාහ කළ හැකි + SSE ප්‍රවාහනය (`/api/mcp/sse`, `/api/mcp/stream`)                |
+| `audit.ts`                  | `mcp_tool_audit` වගුව වෙත විගණන ලොග් වීම                                                |
+| `scopeEnforcement.ts`       | එක් මෙවලමක් විෂය පථය වලංගු කිරීම                                                        |
+| `runtimeHeartbeat.ts`       | සෞඛ්ය හෘද ස්පන්දනය `DATA_DIR/runtime/mcp-heartbeat.json` වෙත                            |
+| `descriptionCompressor.ts`  | සන්දර්භය සුරැකීමට මෙවලම් විස්තර පාරදත්ත සම්පීඩනය කරන්න                                  |
+| `schemas/tools.ts`          | 36 මූලික මෙවලම් අර්ථ දැක්වීම් + විෂය පථයන්                                              |
+| `tools/advancedTools.ts`    | උසස් මෙවලම් ක්රියාත්මක කිරීම්                                                           |
+| `tools/memoryTools.ts`      | මතක මෙවලම් 3 (search/add/clear)                                                         |
+| `tools/skillTools.ts`       | කුසලතා මෙවලම් 4 (list/enable/execute/executions)                                        |
+| `tools/compressionTools.ts` | 5 සම්පීඩන මෙවලම්                                                                        |
+| `README.md`                 | අභ්‍යන්තර MCP සේවාදායකය README ( `docs/frameworks/MCP-SERVER.md` වෙතින් හරස් සම්බන්ධිත) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | බාහිර CLI ඒකාබද්ධ කිරීම් + අභ්යන්තර OmniRoute CLI                                                          |
 | `I18N.md`                   | i18n ගෘහ නිර්මාණ ශිල්පය, භාෂාවක් එකතු කිරීම, ස්ථාන 67 ක්                                                   |
 | `UNINSTALL.md`              | අස්ථාපනය කිරීමේ පියවර පිරිසිදු කරන්න                                                                       |
-| `PROVIDER_REFERENCE.md`     | **ස්වයංක්‍රීයව උත්පාදනය කරන ලදී** සපයන්නන් 381 දෙනෙකුගේ නාමාවලිය (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **ස්වයංක්‍රීයව උත්පාදනය කරන ලදී** සපයන්නන් 394 දෙනෙකුගේ නාමාවලිය (regen: `npm run gen:provider-reference`) |
 
 ### උප පද්ධතිය ගැඹුරු කිමිදුම්
 

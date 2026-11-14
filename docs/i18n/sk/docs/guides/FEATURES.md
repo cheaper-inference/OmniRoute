@@ -57,29 +57,19 @@ Pripojenia OpenRouter môžu v rozšírených nastaveniach ukladať `preset` pre
 
 ---
 
-## 🎨 Kombinácie
+## 🎨 kombá
 
-Vytvárajte kombinácie smerovania modelov s 19 verejnými stratégiami: podľa priority, vážené, round-robin, prenos kontextu, postupné napĺňanie, p2c (výber z dvoch možností), náhodné, najmenej používané, optimalizované podľa nákladov, zohľadňujúce reset, podľa okna resetu, podľa rezervy, striktne náhodné, automatické, lkgp (posledný známy funkčný poskytovateľ), optimalizované podľa kontextu, optimalizované podľa vyrovnávacej pamäte, **fusion** (paralelné rozoslanie panelu modelov a následná syntéza jednej odpovede pomocou rozhodovacieho modelu) a **pipeline**. Každá kombinácia reťazí viacero modelov s automatickým záložným prepnutím a zahŕňa rýchle šablóny a kontroly pripravenosti.
+Vytvorte kombá smerovania modelov s 22 verejnými stratégiami: priorita, vážené, cyklicky, kontextové relé, vyplňte prvé, p2c (možnosť dvoch možností), náhodné, najmenej používané, optimalizované z hľadiska nákladov, s vedomím resetovania, okno obnovenia, prvé expirácia, rezerva, vážené kvótami, prísne náhodný, automatický kontext, známy lgovidpkgp optimalizované pre vyrovnávaciu pamäť,** fúzie** (vejár na panel modelov paralelne, potom syntetizujte jednu odpoveď prostredníctvom porotcu),** potrubia** , a** jev** (prihlásenie TypeSafe Jev nad vaším poradovým zoznamom). Každé kombo spája viacero modelov s automatickým vrátením a obsahuje rýchle šablóny a kontroly pripravenosti.
 
-Nedávne vylepšenia kombinácií:
+Nedávne vylepšenia komba:
 
-- **Štruktúrovaný nástroj na tvorbu kombinácií** — vytvorte každý krok výberom poskytovateľa, modelu a presného účtu/pripojenia
-- **Podpora opakovaných poskytovateľov** — toho istého poskytovateľa môžete v jednej kombinácii použiť viackrát, pokiaľ je trojica `(provider, model, connection)` jedinečná
-- **Stav cieľov kombinácie** — analytické a zdravotné prehľady teraz rozlišujú jednotlivé ciele/kroky kombinácie namiesto zlučovania všetkého do reťazcov modelov
-- **Zložené poradie úrovní** — `defaultTier -> fallbackTier` teraz ovplyvňuje poradie vykonávania a záložného prepínania krokov kombinácie najvyššej úrovne za behu
-- **Šablóny systémových pokynov** — `system_message` kombinácie podporuje na strane servera zástupné symboly
-  `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` a `{{FINGERPRINT}}`,
-  ktoré sa rozbalia podľa skutočne smerovaného cieľa tesne pred odoslaním.
-  Povolené sú iba symboly zo zoznamu povolených hodnôt a ich spracovanie nie je rekurzívne; neznáme zástupné symboly zostávajú nezmenené; prázdne hodnoty
-  sa rozbalia na prázdny reťazec; systémové pokyny klienta sa nikdy neprepisujú. `{{FINGERPRINT}}`
-  sa vyhodnotí iba pre bezplatných poskytovateľov založených na odtlačkoch s pripnutým alebo
-  automaticky rotovaným odtlačkom — inde sa rozbalí na prázdny reťazec (napr.
-  pripojenia s jedným odtlačkom, poskytovatelia bez fp). Rozbaľovanie sa vzťahuje na
-  štandardnú slučku odosielania, round-robin a pripnuté relácie kontextovej vyrovnávacej pamäte;
-  stratégie fusion, chaos, pipeline a nested-execute zatiaľ zástupné symboly
-  nerozbaľujú.
+- **Štruktúrovaný combo builder** — vytvorte každý krok výberom poskytovateľa, modelu a presného account/connection
+- **Opakovaná podpora poskytovateľa** — opakovane používa rovnakého poskytovateľa mnohokrát v jednej kombinácii, pokiaľ je n-tica `(provider, model, connection)` jedinečná
+- **Kombinovaný cieľ zdravia** Analytické a zdravotné povrchy — teraz rozlišujú jednotlivé kombinované targets/steps namiesto toho, aby všetko zbalili do modelových reťazcov
+- **Zložené usporiadanie vrstiev** — `defaultTier -> fallbackTier` teraz ovplyvňuje poradie execution/fallback runtime pre kombinované kroky najvyššej úrovne
+- **Šablóny systémových výziev** — combo `system_message` podporuje zástupné symboly `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` a `{{FINGERPRINT}}` na strane servera, rozšírené zo skutočne smerovaného cieľa tesne pred odoslaním. Povolené a nerekurzívne; neznáme zástupné symboly zostávajú doslovné; prázdne hodnoty expandovať na prázdne; výzvy klientskeho systému sa nikdy neprepisujú. `{{FINGERPRINT}}` sa rieši iba pre bezplatných poskytovateľov založených na odtlačkoch prstov s pripnutým alebo automaticky otočeným odtlačkom prsta — sa rozbalí a vyprázdni sa inde (napr. pripojenia s jedným odtlačkom prsta, poskytovatelia bez fp). Rozšírenie pokrýva štandardnú odoslanú slučku, cyklickú obsluhu a pripnuté relácie kontextovej vyrovnávacej pamäte; fusion, chaos, pipeline a nested-execute stratégie zatiaľ nerozširujú zástupné symboly.
 
-![Panel kombinácií](../screenshots/02-combos.png)
+![Combos Dashboard](../screenshots/02-combos.png)
 
 ---
 
@@ -200,23 +190,23 @@ E-mailové adresy účtov OAuth sú predvolene maskované (napr. `di*****@g****.
 
 ---
 
-## 👁️ Prepínač viditeľnosti modelov _(v3.5.6+)_
+## 👁️ prepínač viditeľnosti modelu _(v3.5.6 +)_
 
-Zoznam modelov na stránke poskytovateľa teraz obsahuje:
+Zoznam modelov stránok poskytovateľa teraz obsahuje:
 
-- **Panel vyhľadávania/filtrovania v reálnom čase** — Rýchlo vyhľadajte konkrétne modely
-- **Prepínač viditeľnosti pre jednotlivé modely** (ikona 👁) — Skryté modely sú sivé a vylúčené z katalógu `/v1/models`
-- **Odznak počtu aktívnych modelov** (`N/M aktívnych`) — Umožňuje okamžite zistiť, koľko modelov je povolených v porovnaní s ich celkovým počtom
+- **Bar search/filter v reálnom čase** — Rýchle vyhľadanie konkrétnych modelov
+- **Prepínač viditeľnosti podľa modelu** ( ikona 👁 ) — Skryté modely sú sivé a vylúčené z katalógu `/v1/models`
+- **Odznak aktívneho počítania** (`N/M active`) — Na prvý pohľad ukazuje, koľko modelov je povolených v porovnaní s celkovým počtom
 
 ---
 
-## 🔧 Oprava premenných prostredia OAuth _(v3.6.1+)_
+## 🔧 OAuth Env Repair _(v3.6.1 +)_
 
-Akcia „Opraviť premenné prostredia“ jedným kliknutím pre poskytovateľov OAuth, ktorá obnoví chýbajúce premenné prostredia a opraví nefunkčný stav autentifikácie. Dostupná cez `Ovládací panel → Poskytovatelia → [Poskytovateľ OAuth] → Opraviť premenné prostredia`. Automaticky zisťuje a opravuje:
+Akcia „Opraviť env“ na jedno kliknutie pre poskytovateľov OAuth, ktorá obnoví chýbajúce premenné prostredia a opraví nefunkčný stav overenia. Prístupné z `Dashboard → Providers → [OAuth Provider] → Repair env`. Automaticky rozpozná a opraví:
 
-- Chýbajúce prihlasovacie údaje klienta OAuth
-- Poškodené položky v súbore premenných prostredia
-- Bezpečné upravenie ciest záloh
+- Chýbajúce poverenia klienta OAuth
+- Poškodené položky súboru env
+- Dezinfekcia záložnej cesty
 
 ---
 

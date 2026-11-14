@@ -403,52 +403,53 @@ sqlite3 ~/.omniroute/storage.sqlite ".backup /backups/omniroute-hot.db"
 
 ---
 
-## Ṣíṣe Àtúnṣe Ìṣiṣẹ́
+## Tuning Performance
 
-### Ìpo WAL
+### WAL Ipo
 
-WAL ti ṣiṣẹ́ ní àìfọwọ́yí. Fún iṣẹ́ tí ó ní ìkọ̀wé púpọ̀, ronú nípa:
+WAL ti ṣiṣẹ nipasẹ aiyipada. Fun awọn ẹru iṣẹ-kikọ giga, ronu:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Ṣe checkpoint ní gbogbo ojú-ìwé 1000
-PRAGMA journal_size_limit = 67108864;  -- Ààlà WAL 64MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
 
-### Àwọn Atọ́ka
+OmniRoute ko ṣeto `journal_size_limit`. Aaye ayẹwo kan n gbe awọn fireemu WAL sinu faili akọkọ, ṣugbọn faili WAL tọju iwọn ti a pin si. Oluso `OMNIROUTE_WAL_GUARD_MAX_MB` nikan kilo ati ṣiṣe `wal_checkpoint(RESTART)`; kii ṣe fila iwọn disk.
 
-Àwọn atọ́ka pàtàkì fún ìṣiṣẹ́ (tí àwọn migration dá ní àìfọwọ́yí):
+### Awọn atọka
 
-- `idx_models_provider` — wíwá àwọn model nípasẹ̀ provider
-- `idx_combo_targets_combo_id` — ìfẹ̀síwájú àwọn target combo
-- `idx_usage_history_api_key_timestamp` — ìtúpalẹ̀ lílò
-- `idx_quota_snapshots_api_key_window` — títọpinpin quota
-- `idx_call_logs_timestamp` — àwọn ìbéèrè àkọsílẹ̀ ìpè
+Awọn atọka bọtini fun iṣẹ ṣiṣe (ti a ṣẹda laifọwọyi nipasẹ awọn iṣikiri):
 
-Láti ṣàfikún atọ́ka tuntun, ṣẹ̀dá migration kan:
+- `idx_models_provider` — awoṣe wiwa nipasẹ olupese
+- `idx_combo_targets_combo_id` — konbo afojusun imugboroosi
+- `idx_usage_history_api_key_timestamp` — atupale lilo
+- `idx_quota_snapshots_api_key_window` — ipin titele
+- `idx_call_logs_timestamp` — ipe log ibeere
+
+Lati ṣafikun atọka tuntun, ṣẹda ijira kan:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### I/O Tí A Ṣe Àwòrán Rẹ̀ Sórí Ìrántí
+### Iranti-Mapped I/O
 
-Fún àwọn database tí ó tóbi gan-an (>10GB), a lè ṣàtúnṣe memory mapping nípasẹ̀ pragma SQLite:
+Fun awọn apoti isura infomesonu ti o tobi pupọ (> 10GB), maapu iranti le ṣe atunṣe nipasẹ SQLite pragma:
 
 ```sql
--- Ṣètò nípasẹ̀ pragma SQLite (ṣàtúnṣe nínú core.ts tàbí runtime)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Ìfúnpọ̀
+### Iwapọ
 
-Àwọn instance OmniRoute tí ń ṣiṣẹ́ fún ìgbà pípẹ́ máa ń jèrè láti `VACUUM` lẹ́ẹ̀kọ̀ọ̀kan:
+Awọn apẹẹrẹ OmniRoute ti n ṣiṣẹ pipẹ ni anfani lati `VACUUM` lẹẹkọọkan:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Ṣiṣe é lóṣooṣù ní àwọn àkókò tí traffic bá kéré. (Ìpo WAL dín àìní rẹ̀ kù, ṣùgbọ́n kò mú un kúrò pátápátá.)
+Ṣiṣe awọn oṣooṣu lakoko awọn ferese-kekere. (Ipo WAL dinku iwulo, ṣugbọn ko ṣe imukuro rẹ.)
 
 ---
 

@@ -65,67 +65,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Önerilen Üretim Ortamı Ayarları
+## Önerilen Prodüksiyon Ayarlaması
 
-### 1. Bağlantı Havuzu / İstemci Seçenekleri (ioredis `Redis` constructor)
+### 1. Bağlantı Havuzu / İstemci Seçenekleri (ioredis `Redis` yapıcısı)
 
-Mevcut kod, özel seçenekler olmadan tek bir `new Redis(url)` oluşturur. Üretim ortamındaki
-çok replikalı dağıtımlar için kod içinde bir istemci fabrikası sağlayın veya `getRedisClient()` işlevini sarmalayın:
+Geçerli kod, hiçbir özel seçenek içermeyen tek bir `new Redis(url)` oluşturur. Üretim çoklu çoğaltma dağıtımları için, kodu bir istemci fabrikasına iletin veya `getRedisClient()` sarın:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // yeniden deneme sınırı yok; kararı retryStrategy versin
-  enableReadyCheck: true, // çağrıları kabul etmeden önce sunucunun hazır olduğunu doğrula
-  lazyConnect: true, // oluşturma sırasında bağlanma; ilk çağrıyı bekle
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // 10 yeniden denemeden sonra vazgeç → daha sonra yeniden bağlan
-    return Math.min(times * 200, 5000); // 200ms, 400ms, …, üst sınır 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // eş zamanlı komutları tek bir TCP yazma işleminde birleştir
-  keepAlive: 10000, // her 10s'de bir TCP bağlantısını canlı tut
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**Temel ödünleşimler:**
+**Anahtar takaslar:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — geçici Redis yeniden başlatmalarının
-  her isteğin hemen başarısız olmasına neden olmaması için üretim ortamında tercih edilir.
-  `checkRateLimit()` içindeki bellek içi geri dönüş mekanizması, hata yolunu karşılar.
-- `lazyConnect: true` — sunucu bağlantıları kabul etmeye başlamadan önce Redis'in çalışır
-  durumda olmasına yönelik başlangıç bağımlılığını önler.
-- `enableAutoPipelining: true` — eş zamanlı hız sınırı denetimlerinde gidiş-dönüşleri azaltır;
-  tek bağlantıda >50 RPS için faydalıdır.
+- Üretim için `maxRetriesPerRequest: null` + `retryStrategy` — tercih edilir, böylece geçici Redis yeniden başlatmaları her isteğin hemen başarısızlığa uğramasına neden olmaz. `checkRateLimit()` bellek içi geri dönüş, hata yolunu emer.
+- `lazyConnect: true` — sunucu bağlantıları kabul etmeye başlamadan önce Redis çalışır durumda olmasına ilişkin başlangıç bağımlılığını önler.
+- `enableAutoPipelining: true` — eşzamanlı hız sınırı kontrolleri için gidiş-dönüş seferlerini azaltır; Tek bağlantıda > 50 RPS avantajlı.
 
-### 2. Redis Sunucu Yapılandırması (`redis.conf`)
+### Redis Sunucu Yapılandırması (`redis.conf`)
 
 ```
-# Bellek
-maxmemory 80%                        # işletim sistemi sayfa önbelleği için yer bırak
-maxmemory-policy allkeys-lru         # baskı altında eski kimlik doğrulama önbelleği girdilerini çıkar
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Kalıcılık (isteğe bağlı — OmniRoute bu olmadan da çökmelere karşı güvenlidir)
-save 300 1                           # ≥1 anahtar değiştiyse en az her 5 dakikada bir anlık görüntü al
-appendonly no                        # AOF gerekli değil; veriler yeniden oluşturulabilir
-appendfsync no                       # fsync ek yükü yok (RDB yeterlidir)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Ağ
-timeout 0                            # boşta kalan bağlantıyı kesme
-tcp-keepalive 300                    # 5 dakikalık bağlantıyı canlı tutma aralığı
-tcp-backlog 511                      # ani yükler için bağlantı bekleme kuyruğu
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Performans
-hz 10                                # varsayılan; gecikmeye duyarlı kullanım için 100
-activedefrag yes                     # parçalanma >%10 olduğunda otomatik birleştir
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**`maxmemory-policy allkeys-lru` için ödünleşim:** Kimlik doğrulama önbelleği girdileri,
-bellek baskısı altında çıkarılabilir. Bu güvenlidir — `setCachedApiKey`, önbellekte bulunamadığında
-her zaman girdiyi yeniden doldurur ve SQLite geri dönüşü yetkili kaynaktır. Hız sınırlayıcı Lua
-betiği, tasarım gereği kısa ömürlü olan küçük anahtarlar oluşturur.
+**`maxmemory-policy allkeys-lru` için takas:** Kimlik doğrulama önbellek girişleri, bellek baskısı altında çıkarılabilir. Bu güvenlidir — `setCachedApiKey` her zaman kaçırıldığında yeniden doldurulur ve SQLite geri dönüşü yetkilidir. Hız sınırlayıcı Lua komut dosyası, tasarım gereği kısa ömürlü olan küçük anahtarlar oluşturur.
 
-### 3. Docker Compose Ayarları
+### 3. Docker Oluşturma Ayarları
 
-Üretim compose dosyası (`docker-compose.prod.yml`), `redis:8.6.2-alpine` kullanır. Şunları ekleyin:
+Prod compose (`docker-compose.prod.yml`) `redis:8.6.2-alpine` kullanır. Eklemek:
 
 ```yaml
 redis:
@@ -150,35 +142,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Çoklu Örnek / Ölçeklendirme Hususları
+### 4. Çoklu Örnek / Ölçeklendirmeyle İlgili Hususlar
 
-**Tüm replikalar için tek Redis** — hız sınırlayıcı Lua betiği, tek ve yetkili bir anahtar
-alanına bağlıdır. Replikaların arkasındaki birden fazla Redis örneği atomikliği kaybeder
-ve bütçeyi ikiye katlar. Tüm uygulama replikaları için tek bir Redis (veya yük devretme
-özellikli Redis Sentinel kümesi) kullanın.
+**Tüm kopyalar için tek Redis** — hız sınırlayıcı Lua betiği tek bir yetkili anahtar alanına bağlıdır. Replikaların arkasındaki birden fazla Redis örneği atomikliği kaybeder ve bütçeyi ikiye katlar. Tüm uygulama replikaları için tek bir Redis (veya yük devretme özelliğine sahip Redis Sentinel kümesi) kullanın.
 
-**Bağlantı sayısı:** Her uygulama replikası Redis'e **2 TCP bağlantısı** açar
-(hız sınırlayıcı istemcisi + kota deposu istemcisi). 10 replikada → 20 bağlantı oluşur;
-bu, varsayılan bir Redis örneğinin 10k bağlantı üst sınırının oldukça altındadır.
+**Bağlantı sayısı:** Her uygulama kopyası açılır** 2 TCP bağlantısı** Redis (hız sınırlayıcı istemcisi + kota depolama istemcisi). 10 kopya → 20 bağlantıda, varsayılan Redis bulut sunucusunun 10.000 bağlantı tavanı dahilindedir.
 
 ### 5. İzleme
 
-Durum denetimi uç noktası üzerinden kullanıma sunun:
+Durum denetimi uç noktası aracılığıyla kullanıma sunma:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts zaten rateLimiter işlevlerini çağırıyor
-// Redis'e özgü denetimler ekleyin:
-//   1. ioredis .ping() aracılığıyla PING gecikmesi
-//   2. INFO memory aracılığıyla bellek kullanımı
-//   3. INFO clients aracılığıyla bağlantı sayısı
-//   4. maxmemory-policy için isabet oranı (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
 İzlenecek temel metrikler:
 
-- **Çıkarılan anahtarlar / sn** — sürekli olarak sıfırdan farklıysa `maxmemory` değerini artırın
-- **Engellenen istemciler** — sıfırdan farklı olması, yavaş Lua betiklerine veya yüksek çekişmeye işaret eder
-- **Reddedilen bağlantılar** — bağlantı sınırına ulaşıldı; 20 bağlantıda nadir görülür
+- **Çıkarılan anahtarlar/sn** — ısrarla sıfır değilse `maxmemory` artırın
+- **Engellenen istemciler** sıfır olmayan — yavaş Lua komut dosyalarına veya yüksek çekişmeye işaret eder
+- **Reddedilen bağlantılar** — bağlantı sınırına ulaşıldı; 20 bağlantıda nadir
+
+### 6. Redis Uyumlu Sunucular
+
+Burada kullanılan herhangi bir sunucunun Lua komut dosyalarını çalıştırması gerekir: hız sınırlayıcı bir `EVAL`. Lua'sız bir sunucuda `checkRateLimit()`, `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` günlüğe kaydeder ve işlem başına sayım yapar; böylece her kopya, sınırı kendi başına uygular. İsteğe bağlı paylaşılan oturum benzeşimi deposu (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) ayrıca `EVAL` ile pinleri okur ve günceller; Lua olmadan `[SESSION_AFFINITY] Redis error; falling back to SQLite.` günlüğe kaydeder ve her kopya kendi pinlerini tutar. Diğer iş yükleri düz komutlar kullanır (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, hash'ler ve setler) ve anlamsal önbelleğin Redis arka ucu hiçbir `FT.*` komutu göndermez.
+
+OmniRoute 3.8.52: KiviDB 1.2.0 ile Lua görüntüsü (`kividb/kividb:v1.2.0-lua`) ile test edilmiştir. Hız sınırlayıcı (sayaçları paylaşan ikinci bir işlem dahil), kimlik doğrulama önbelleği, kota deposu, ısınma devre kesicisi, anlamsal önbellek deposu ve sohbet işleyicisi aracılığıyla yapılan `/v1/chat/completions` isteği, Redis 8.10.3'te geçen 19 denetimden 18'ini geçti. Farklı olan: `INCRBYFLOAT` `0.1 + 0.2` `0.30000000000000004` olarak saklar; burada Redis `0.3` saklar ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Kota deposu her ikisini de `parseFloat` ile ayrıştırır, ancak iki sayı son basamaklarda farklılık gösterir, dolayısıyla tam olarak kota sınırına düşen bir karşılaştırma farklı şekilde ortaya çıkabilir. Oturum benzeşimi deposu bu çalıştırmanın bir parçası değildi. ( [kurulum](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [sonuçlar](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 

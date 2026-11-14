@@ -20,7 +20,7 @@ Nigbati aṣoju IDE kan (fun apẹẹrẹ, GitHub Copilot, Cursor, koodu Claude 
 
 Eyi tumọ si pe o le:
 
-- **Yipada eyikeyi aṣoju si olupese eyikeyi** : Copilot sọrọ si OpenAI? Ṣe àtúnjúwe sí Anthropic Claude, Gemini, tabi eyikeyi ninu awọn olupese 381 OmniRoute.
+- **Yipada eyikeyi aṣoju si olupese eyikeyi** : Copilot sọrọ si OpenAI? Ṣe àtúnjúwe sí Anthropic Claude, Gemini, tabi eyikeyi ninu awọn olupese 394 OmniRoute.
 - **Waye awọn aworan agbaye** : `gemini-3-flash` → `claude-sonnet-4.7` ni gbangba ni ipele oluṣakoso.
 - **Ṣe akiyesi gbogbo ijabọ aṣoju** : Gbogbo ibeere ti o gba wọle ni a gbejade si [Oluyewo Ijabọ](./TRAFFIC_INSPECTOR.md).
 - **Waye resilience OmniRoute** : ipa ọna konbo, awọn fifọ iyika, awọn ipadasẹhin, ati iṣẹ ipasẹ iye owo fun ijabọ aṣoju IDE paapaa.
@@ -543,26 +543,26 @@ Ipá-ọ̀nà ìpìlẹ̀: `/api/tools/agent-bridge/`
 
 ---
 
-## §8 Àtòjọ-ètò ọjọ́ iwájú
+## §8 Roadmap
 
-### Ìwádìí Trae
+### Trae iwadi
 
-Trae jẹ́ olùrànlọ́wọ́ AI fún kíkọ kóòdù tí ó ṣẹ̀ṣẹ̀ dé. Ṣáájú ṣíṣe handler kan:
+Trae jẹ oluranlọwọ ifaminsi AI tuntun kan. Ṣaaju lilo oluṣakoso kan:
 
-1. Ṣe ìdánimọ̀ binary/extension náà ní àwọn ọjà VS Code / JetBrains tàbí gẹ́gẹ́ bí app aládàáṣe
-2. Gba traffic pẹ̀lú mitmproxy láti ṣàwárí àwọn API host àti àwọn ìrísí endpoint
-3. Ṣàwárí ọ̀nà authentication tí ó ń lò
-4. Ṣe àyẹ̀wò go/no-go ní ìbámu pẹ̀lú TOS àti bí API ṣe ṣeé ṣàwárí tó
+1. Ṣe idanimọ binary/extension ni koodu VS / awọn ọja ọjà JetBrains tabi bi ohun elo adaduro
+2. Yaworan ijabọ pẹlu mitmproxy lati ṣawari awọn ogun API ati awọn apẹrẹ ipari
+3. Mọ siseto ìfàṣẹsí
+4. Ṣe ayẹwo go/no-go ti o da lori TOS ati wiwa API
 
-Títí ìwádìí yóò fi parí, káàdì Trae inú dashboard yóò máa fi àmì "Ó wà lábẹ́ ìwádìí" hàn pẹ̀lú ìjápọ̀ "Ṣàlàyé bóyá ó ṣeé ṣe". Àwòṣe handler ní `src/mitm/handlers/trae.ts` máa ń ju àṣìṣe `A kò tíì ṣe é` tí a ṣètò sílẹ̀.
+Titi ti iwadii yoo fi pari, kaadi Trae ti o wa ninu dasibodu n ṣe afihan baaji “Iwadii” pẹlu ọna asopọ “Ṣiṣeeṣe Ijabọ”. Ogbontarigi olutọju ni `src/mitm/handlers/trae.ts` ju aṣiṣe `Not yet implemented` ti eleto kan.
 
-### Àwọn agent inú backlog (MITM pọndandan — kò sí àtìlẹ́yìn fún custom base URL)
+### Awọn aṣoju afẹyinti (MITM nilo — ko si atilẹyin aṣa URL )
 
-Àwọn irinṣẹ́ wọ̀nyí kò ṣe àtìlẹ́yìn fún custom base URL nínú àwọn ẹ̀yà wọn lọ́wọ́lọ́wọ́, èyí mú kí MITM jẹ́ ọ̀nà interception kan ṣoṣo. Àyẹ̀wò bóyá wọ́n ṣeé lò ṣì ń dúró:
+Awọn irinṣẹ atẹle ko ṣe atilẹyin URLs ipilẹ aṣa ni awọn ẹya lọwọlọwọ wọn, ṣiṣe MITM ọna idawọle nikan. Iwadii ṣiṣeeṣe wa ni isunmọtosi:
 
 - **Windsurf** (Codeium/Cognition)
-- **Amp** (Sourcegraph)
-- **Amazon Q / Kiro CLI** (AWS Bedrock — ó yàtọ̀ sí Kiro IDE)
-- **Cowork** (Anthropic desktop)
+- **Amp** (Orisun)
+- **Amazon Q / Kiro CLI** (AWS Bedrock — yato si Kiro IDE)
+- **Ṣiṣẹpọ** ( tabili Anthropic )
 
-Àkíyèsí: GitHub Copilot CLI ≥v1.0.19 ṣe àtìlẹ́yìn fún `COPILOT_PROVIDER_BASE_URL` — lo àtúnṣe tààrà dípò MITM fún irinṣẹ́ yẹn.
+Akiyesi: GitHub Copilot CLI ≥ v1.0.19 ṣe atilẹyin `COPILOT_PROVIDER_BASE_URL` — lo atunto taara dipo MITM fun irinṣẹ yẹn.

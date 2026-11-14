@@ -36,36 +36,36 @@ Studio mit drei Tabs, das Websuche, Web-Scraping und den direkten Anbietervergle
 
 ## Tabs
 
-### Such-Tab
+### Registerkarte „Suchen“.
 
-Entwickelt das bestehende `SearchForm` + `ResultsPanel` + `RerankPanel` zu einem Tab weiter:
+Entwickelt das vorhandene `SearchForm` + `ResultsPanel` + `RerankPanel` zu einer Registerkarte:
 
-- Abfrage → Ergebnisse (Titel, URL, Ausschnitt, Relevanzbewertung).
-- Anbieter-Metadaten im Konfigurationsbereich (Kosten, Kontingent, Status).
-- Rerank-Bereich: Rerank-Modell auswählen, Ergebnisse neu sortieren, `positionDelta` anzeigen.
+- Fragen Sie → Ergebnisse ab (Titel, URL, Snippet, Relevanzbewertung).
+- Anbietermetadaten im Konfigurationsbereich (Kosten, Kontingent, Status).
+- Rerank-Bereich: Wählen Sie ein Rerank-Modell aus, ordnen Sie die Ergebnisse neu und zeigen Sie `positionDelta` an.
 - Leerer Zustand mit CTA, wenn keine Suchanbieter konfiguriert sind.
 - Suchverlauf über `SearchHistory.tsx`.
-- Ruft `POST /v1/search` auf (bestehender Endpunkt, keine Änderungen).
+- Ruft `POST /v1/search` auf (vorhandener Endpunkt, keine Änderungen).
 
-### Scrape-Tab
+### Tab „Abkratzen“.
 
-Neuer Tab zum Extrahieren von Inhalten aus einer URL über `POST /v1/web/fetch` (erstellt in Plan 05):
+Neue Registerkarte zum Extrahieren von Inhalten aus einem URL über `POST /v1/web/fetch` (erstellt in Plan 05):
 
-- Eingabe: URL + Umschalter für vollständige Seite + Formatauswahl (Markdown / Text / HTML).
-- Absenden → abrufen → `ScrapeResult.tsx` rendern.
-- `ScrapeResult` rendert eine Markdown-Vorschau + Umschalter für Rohdaten.
-- Begrenzung: Wenn der Antworttext größer als **256 KB** ist, zeigt die Benutzeroberfläche `(gekürzt, Rohdaten anzeigen)` an und öffnet die Rohdaten in einem Monaco-Modal (D21).
-- Metadatenbereich: Anbieter (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), Latenz, Kosten, Antwortgröße, Anzahl der Links.
-- Verwendet den Hook `useScrapeFetch.ts`.
+- Eingabe: URL + ganzseitiges Umschalten + -Formatselektors (Markdown / Text / HTML).
+- Senden Sie → holen Sie → und rendern Sie `ScrapeResult.tsx`.
+- `ScrapeResult` rendert Markdown-Vorschau + raw umschalten.
+- Cap: wenn Antworttext >** 256 KB** , UI zeigt `(truncated, view raw)` und wird roh in einem Monaco-Modal (D21) geöffnet.
+- Metadaten-Panel: Anbieter (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search/keenable-search), Latenz, Kosten, Antwortgröße, Anzahl der Links.
+- Verwendet `useScrapeFetch.ts` Hook.
 
-### Vergleichs-Tab
+### Tab „Vergleichen“.
 
-Führt dieselbe Abfrage/URL bei bis zu **4 Anbietern parallel** aus (D22):
+Läuft das gleiche query/URL über bis zu** 4 Anbieter parallel** (D22):
 
-- Nebeneinander angeordnete Spalten pro Anbieter.
-- Metriken: Latenz, Kosten, Anzahl der Ergebnisse, Antwortgröße.
-- Berechnung der URL-Überschneidung für die Suche (Anzahl gemeinsam vorkommender URLs im Vergleich zum ursprünglichen Ergebnis).
-- Ruft pro Anbieter `POST /v1/search` (Suche) oder `POST /v1/web/fetch` (Scraping) auf.
+- Nebeneinander liegende Spalten pro Anbieter.
+- Metriken: Latenz, Kosten, Ergebnisanzahl, Antwortgröße.
+- Berechnung URL -Überlappung für die Suche (Anzahl der gemeinsam genutzten URLs im Vergleich zum Anfangsergebnis).
+- Ruft `POST /v1/search` (Suche) oder `POST /v1/web/fetch` (Scrape) pro Anbieter auf.
 
 ---
 
@@ -98,15 +98,15 @@ Führt dieselbe Abfrage/URL bei bis zu **4 Anbietern parallel** aus (D22):
 
 ---
 
-## Anbieter-Katalog
+## Anbieterkatalog
 
-`ProviderCatalog.tsx` stellt die vollständige Anbieterliste aus `GET /api/search/providers` bereit
-(in F4 um Abrufanbieter erweitert):
+`ProviderCatalog.tsx` stellt die vollständige Anbieterliste von `GET /api/search/providers` bereit (in F4 um Abrufanbieter erweitert):
 
-| `kind` | `"search"` (20 Anbieter) oder `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (24 Anbieter) oder `"fetch"` (Firecrawl, Jina-Reader, Tavily-Search, Tinyfish, Nimble-Search, Anysearch-Search, Parallel-Search, Keenable-Search) |
 
-Der Status wird **zum Zeitpunkt der Anfrage abgeleitet**, indem geprüft wird, ob Anmeldedaten vorhanden sind und ob
-sich derzeit alle Schlüssel in der Abklingzeit befinden.
+Der Status ist** zum Zeitpunkt der Anfrage abgeleitet** indem überprüft wird, ob Anmeldeinformationen vorhanden sind und ob sich alle Schlüssel derzeit im Cooldown befinden.
+
+`codex-search` (Codex Web Search) hat keinen eigenen Schlüssel: Es verwendet ein verbundenes Codex Konto (ChatGPT) wieder, sodass jede Suche ChatGPT Abonnementkontingent verbraucht und etwa 10–40 Sekunden dauert. Es wird ausgeführt, wenn eine Anfrage es benennt. Für die automatische Auswahl ist das `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` -Feature-Flag erforderlich (standardmäßig deaktiviert).
 
 ---
 
@@ -120,16 +120,16 @@ Der Platzhalter für den API-Schlüssel ist immer `$OMNIROUTE_API_KEY` (D11, gem
 
 ## Backend-Änderungen
 
-Für dieses Feature war nur eine Backend-Änderung erforderlich:
+Für diese Funktion war nur eine Backend-Änderung erforderlich:
 
-### Erweitertes `GET /api/search/providers`
+### Erweiterte `GET /api/search/providers`
 
-`src/app/api/search/providers/route.ts` wurde erweitert, um:
+`src/app/api/search/providers/route.ts` wurde erweitert auf:
 
-- Jeden Fetch-Provider (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) in das Array aufzunehmen.
-- Jedem Element `kind: "search" | "fetch"` hinzuzufügen.
-- `status: "configured" | "missing" | "rate_limited"` hinzuzufügen, abgeleitet aus dem aktuellen Status der Anmeldedaten.
-- Die Abwärtskompatibilität zu wahren — bestehende Felder (`id`, `name` usw.) bleiben unverändert.
+- Fügen Sie jeden Abrufanbieter (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`, `keenable-search`) in das Array ein.
+- Fügen Sie `kind: "search" | "fetch"` zu jedem Artikel hinzu.
+- Fügen Sie `status: "configured" | "missing" | "rate_limited"` hinzu, das vom Status der Live-Anmeldeinformationen abgeleitet ist.
+- Behalten Sie die Abwärtskompatibilität bestehender — Felder (`id`, `name` usw.) unverändert bei.
 
 ---
 

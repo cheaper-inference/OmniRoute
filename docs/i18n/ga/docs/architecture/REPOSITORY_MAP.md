@@ -154,7 +154,7 @@ src/
 | `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Leathanach painéal Cigire Tráchta — DevTools split, 7 cluaisín sonraí, 4 scorán modh gabhála, taifeadta seisiúin, dathú comhthéacs. i18n PT-BR + EN. Féach `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                                      |
 | `app/(dashboard)/dashboard/activity/`                                        | Leathanach fotha gníomhaíochta (Grúpa B): `page.tsx` (freastalaí) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — féach `docs/architecture/MONITORING_SECTIONS.md`                                                                                                |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | Leathanach Comhroinnte Cuóta (Grúpa B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                     |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Leathanach cumraíochta an phlean soláthraí (Grúpa B): toisí cuóta `page.tsx` + `ProviderPlanConfigClient.tsx` — in aghaidh an naisc a shárú                                                                                                                                                                             |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Leathanach cumraíochta an phlean soláthraí (Grúpa B): toisí cuóta `page.tsx` + `ProviderPlanConfigClient.tsx` in aghaidh — naisc sáraithe                                                                                                                                                                               |
 | `app/docs/`                                                                  | Breathnóir doiciméadaithe leabaithe ( rindreáil `docs/*.md`)                                                                                                                                                                                                                                                            |
 | `app/landing/`                                                               | Leathanach tuirlingthe margaíochta                                                                                                                                                                                                                                                                                      |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | Leathanaigh a bhaineann le hÚdar                                                                                                                                                                                                                                                                                        |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `components/`                    | Comhpháirt painéal API: cuibheoirí thar `packages/ui-kit` — féach `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ainmneacha deilbhín a úsáideann na scáileáin → Comhpháirteanna Lucide (`<Icon>`)           |
-| `constants/providers.ts`         | **381 soláthraí** le bailíochtú Zod (foinse na fírinne)                                                |
+| `constants/providers.ts`         | **394 soláthraí** le bailíochtú Zod (foinse na fírinne)                                                |
 | `constants/cliTools.ts`          | Clár seachtrach CLI uirlisí                                                                            |
-| `constants/routingStrategies.ts` | **20 straitéis ródaithe** le tosaíochtaí                                                               |
+| `constants/routingStrategies.ts` | **22 straitéis ródaithe** le tosaíochtaí                                                               |
 | `constants/publicApiRoutes.ts`   | Bealaí óna dteastaíonn údar Iompróra (vs bainistíocht).                                                |
 | `constants/upstreamHeaders.ts`   | Liosta diúltaithe ceanntásc d'iarratais réamhtheachtacha                                               |
 | `validation/schemas.ts`          | scéimeanna ~ 80 Zod (foinse amháin fírinne le haghaidh conarthaí API )                                 |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — Spás Oibre an Innill Sruthaithe
+## Spás Oibre Inneall Sruthaithe `open-sse/` —
 
-Spás oibre npm ar leith (`@omniroute/open-sse`). Láimhseálann sé próiseáil iarratas + cur i gcrích soláthraithe.
+Spás oibre npm ar leith (`@omniroute/open-sse`). Láimhseálann próiseáil iarratais forghníomhú soláthraí +.
 
 ```
 open-sse/
-├── handlers/            # 16 chomhad (12 láimhseálaí + 4 chúntóir): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, srl.
-├── executors/           # 150 modúl forghníomhaithe (aicmí a leathnaíonn BaseExecutor + cúntóirí in aghaidh an tsoláthraí)
-├── translator/          # Tiontairí formáide (9 n-iarratas, 9 bhfreagra, 9 gcúntóir)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ modúl seirbhíse (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, srl.)
-├── mcp-server/          # Freastalaí MCP (110 uirlis, 3 iompar, 33 scóip)
-├── config/              # Clárlanna soláthraithe/samhlacha, cumraíocht ceanntásc, ailiasanna samhlacha
-├── utils/               # Cliant TLS, gabháil/seoltóir seachfhreastalaí, cúntóirí líonra
-├── index.ts             # Pointe iontrála an spáis oibre
-├── package.json         # Lastliosta an spáis oibre
-├── tsconfig.json        # Cumraíocht TS an spáis oibre
-└── types.d.ts           # Dearbhuithe cineáil an spáis oibre
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Conair                      | Cuspóir                                                                              |
-| --------------------------- | ------------------------------------------------------------------------------------ |
-| `server.ts`                 | Saolré an fhreastalaí MCP (iompair stdio + HTTP)                                     |
-| `httpTransport.ts`          | Iompair HTTP Insruthaithe + SSE (`/api/mcp/sse`, `/api/mcp/stream`)                  |
-| `audit.ts`                  | Logáil iniúchta chuig an tábla `mcp_tool_audit`                                      |
-| `scopeEnforcement.ts`       | Bailíochtú scóipe in aghaidh na huirlise                                             |
-| `runtimeHeartbeat.ts`       | Buille croí sláinte chuig `DATA_DIR/runtime/mcp-heartbeat.json`                      |
-| `descriptionCompressor.ts`  | Comhbhrúitear meiteashonraí tuairiscí uirlisí chun comhthéacs a shábháil             |
-| `schemas/tools.ts`          | 36 sainmhíniú bunúsach uirlise + scóipeanna                                          |
-| `tools/advancedTools.ts`    | Feidhmiúcháin ardleibhéil uirlisí                                                    |
-| `tools/memoryTools.ts`      | 3 uirlis chuimhne (cuardach/cur leis/glanadh)                                        |
-| `tools/skillTools.ts`       | 4 uirlis scile (liostú/cumasú/rith/ritheanna)                                        |
-| `tools/compressionTools.ts` | 5 uirlis chomhbhrúite                                                                |
-| `README.md`                 | README inmheánach an fhreastalaí MCP (trasnasctha ó `docs/frameworks/MCP-SERVER.md`) |
+| Conair                      | Cuspóir                                                                          |
+| --------------------------- | -------------------------------------------------------------------------------- |
+| `server.ts`                 | saolré freastalaí MCP (stdio + HTTP transports)                                  |
+| `httpTransport.ts`          | HTTP + SSE (`/api/mcp/sse`, `/api/mcp/stream`)                                   |
+| `audit.ts`                  | Logánú iniúchta go tábla `mcp_tool_audit`                                        |
+| `scopeEnforcement.ts`       | Fíorú raon feidhme in aghaidh na huirlise                                        |
+| `runtimeHeartbeat.ts`       | Buille croí sláinte a `DATA_DIR/runtime/mcp-heartbeat.json`                      |
+| `descriptionCompressor.ts`  | Comhbhrúigh meiteashonraí cur síos ar an uirlis chun an comhthéacs a shábháil    |
+| `schemas/tools.ts`          | 36 bunuirlis sainmhínithe + scopes                                               |
+| `tools/advancedTools.ts`    | Ardfheidhmithe uirlisí                                                           |
+| `tools/memoryTools.ts`      | 3 uirlis chuimhne (search/add/clear)                                             |
+| `tools/skillTools.ts`       | 4 uirlis scile (list/enable/execute/executions)                                  |
+| `tools/compressionTools.ts` | 5 uirlisí comhbhrú                                                               |
+| `README.md`                 | Freastalaí inmheánach MCP README (trasnasctha ó `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Comhtháthú CLI + Inmheánach OmniRoute CLI                                          |
 | `I18N.md`                   | i18n ailtireacht, ag cur teanga leis, 67 logán                                     |
 | `UNINSTALL.md`              | Glan na céimeanna díshuiteála                                                      |
-| `PROVIDER_REFERENCE.md`     | **Uathghinte** catalóg de 381 soláthraí (regen: `npm run gen:provider-reference`)  |
+| `PROVIDER_REFERENCE.md`     | **Uathghinte** catalóg de 394 soláthraí (regen: `npm run gen:provider-reference`)  |
 
 ### Tumadh domhain fochóras
 

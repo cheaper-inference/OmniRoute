@@ -24,19 +24,21 @@ Ngunit ang mga tipikal na kliyente (Cursor, Cline, Roo Code, OpenAI SDK) ay nag-
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Nangyayari ang pagkuha sa `open-sse/handlers/chatCore.ts` (dalawang site, sa dalawang site ng tawag sa `cacheReasoningFromAssistantMessage` ). Nangyayari ang replay sa `open-sse/translator/index.ts` pagkatapos ng pamimilit ng schema ngunit bago ipadala.
+
+Ang mga entry sa tool-call ay iniimbak sa ilalim ng `buildToolCallCacheKey()`, isang digest ng saklaw ng kahilingan at ang tool call id, kaya hindi pinipili ng parehong id na ginamit ng isa pang API key o session ang entry. Ang saklaw ay nagmula sa `buildReasoningCacheScope()`: ang API key id, kasama ang session key kapag ang kahilingan ay mayroon nito. Ang haligi `tool_call_id` at ang dashboard samakatuwid ay nagpapakita ng digest na ito para sa mga entry na iyon.
 
 Ang mga simpleng (non-tool-call) na pagliko ng assistant ay naiiba sa pagkaka-key: digest `buildAssistantMessageCacheKey()` ang saklaw ng session kasama ang na-normalize na OpenAI-format na transcript hanggang sa pagliko na iyon, dahil nangangailangan ang DeepSeek ng pangangatwiran ng _every_ prior turn kapag naroroon na `tools`. Para sa mga target na Responses-API (halimbawa `opencode-go/deepseek-v4-flash`, idinala sa `/responses`) ang upstream na body ay nagdadala ng `input`, hindi `messages`, kaya iniuulat ng `translateRequest()` (`open-sse/translator/index.ts`) ang pivot transcript na na-digest nito sa pamamagitan ng isang callback na opsyon at ang mga capture site ay nagdigest ng parehong transcript na iyon. Gumagana ang Responses replay pass sa OpenAI pivot para sa bawat source format, kaya Anthropic Messages clients (Claude → OpenAI → Responses) ay nire-replay din.
 

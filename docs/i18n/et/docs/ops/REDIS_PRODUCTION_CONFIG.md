@@ -65,67 +65,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Soovitatav tootmiskeskkonna häälestus
+## Soovitatav tootmise häälestamine
 
-### 1. Ühendusekogumi / kliendi valikud (ioredise `Redis`-konstruktor)
+### 1. Ühendusbassein / kliendi valikud (ioredis `Redis` konstruktor)
 
-Praegune kood loob ühe `new Redis(url)`-i ilma kohandatud valikuteta. Tootmiskeskkonna
-mitme replikatsiooniga juurutuste puhul edastage koodis klienditehas või mähkige `getRedisClient()`:
+Praegune kood loob ühe `new Redis(url)`, millel pole kohandatud valikuid. Tootmise mitme koopia juurutamiseks edastage kliendi tehas koodis või mähkige `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // korduskatsete piirang puudub; las retryStrategy otsustab
-  enableReadyCheck: true, // kontrolli enne päringute vastuvõtmist, kas server on valmis
-  lazyConnect: true, // ära loo ühendust konstrueerimisel; oota esimest päringut
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // loobu pärast 10 korduskatset → loo ühendus hiljem uuesti
-    return Math.min(times * 200, 5000); // 200 ms, 400 ms, …, ülempiir 5 s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // koonda samaaegsed käsud üheks TCP-kirjutuseks
-  keepAlive: 10000, // TCP keep-alive iga 10 s järel
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
 **Peamised kompromissid:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — tootmiskeskkonnas eelistatud, et ajutised
-  Redise taaskäivitused ei nurjaks kohe kõiki päringuid. Mälusisene varulahendus funktsioonis
-  `checkRateLimit()` võtab tõrketee üle.
-- `lazyConnect: true` — väldib käivitamisel sõltuvust sellest, et Redis peab töötama enne, kui server
-  hakkab ühendusi vastu võtma.
-- `enableAutoPipelining: true` — vähendab samaaegsete kiiruspiirangu kontrollide edasi-tagasi päringuid;
-  kasulik ühe ühenduse korral koormusel >50 RPS.
+- `maxRetriesPerRequest: null` + `retryStrategy` — on tootmiseks eelistatud, nii et mööduvad Redis taaskäivitused ei kukuks kohe iga taotluse läbi. `checkRateLimit()` -i mälusisene varu neelab tõrketee.
+- `lazyConnect: true` — väldib käivitamisel sõltuvust sellest, et Redis on üleval enne, kui server hakkab ühendusi vastu võtma.
+- `enableAutoPipelining: true` — vähendab samaaegsete piirmäärade kontrollide edasi-tagasi reise; kasulik > 50 RPS ühe ühenduse korral.
 
-### 2. Redise serveri konfiguratsioon (`redis.conf`)
+### 2. Redis serveri konfiguratsioon (`redis.conf`)
 
 ```
-# Mälu
-maxmemory 80%                        # jäta ruumi operatsioonisüsteemi leheküljevahemälule
-maxmemory-policy allkeys-lru         # eemalda koormuse all aegunud autentimisvahemälu kirjed
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Püsimälu (valikuline — OmniRoute on ka ilma selleta krahhikindel)
-save 300 1                           # loo tõmmis vähemalt iga 5 minuti järel, kui ≥1 võti muutus
-appendonly no                        # AOF pole vajalik; andmed on taastoodetavad
-appendfsync no                       # fsync-lisakulu puudub (RDB on piisav)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Võrk
-timeout 0                            # jõudeolevate ühenduste katkestamine puudub
-tcp-keepalive 300                    # 5 min keep-alive
-tcp-backlog 511                      # ühenduste järjekord hüppelise koormuse jaoks
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Jõudlus
-hz 10                                # vaikeväärtus; viiteaja suhtes tundlikul juhul 100
-activedefrag yes                     # defragmendi automaatselt, kui killustatus on >10%
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Kompromiss valiku `maxmemory-policy allkeys-lru` puhul:** autentimisvahemälu kirjed võidakse
-mälusurve korral eemaldada. See on ohutu — `setCachedApiKey` asustab vahemälu puudumisel selle alati uuesti
-ning SQLite'i varulahendus on autoriteetne. Kiiruspiiraja Lua-skript loob väikseid võtmeid, mis on
-oma olemuselt lühiajalised.
+**Kompromiss `maxmemory-policy allkeys-lru` jaoks:** Vahemälu autentimiskirjed võidakse mälu surve all välja tõsta. See on ohutu. — `setCachedApiKey` asustatakse alati uuesti vahelejätmise korral ja SQLite varundus on autoriteetne. Kiirusepiiraja Lua skript loob väikesed võtmed, mis on disainilt lühiajalised.
 
-### 3. Docker Compose'i sätted
+### 3. Docker Koostamise seaded
 
-Tootmiskeskkonna Compose (`docker-compose.prod.yml`) kasutab kujutist `redis:8.6.2-alpine`. Lisage:
+Prod-koostamine (`docker-compose.prod.yml`) kasutab `redis:8.6.2-alpine`. Lisa:
 
 ```yaml
 redis:
@@ -152,33 +144,34 @@ redis:
 
 ### 4. Mitme eksemplari / skaleerimise kaalutlused
 
-**Üks Redis kõigile replikatsioonidele** — kiiruspiiraja Lua-skript sõltub ühest
-autoriteetsest võtmeruumist. Replikatsioonide taga olevad mitu Redise eksemplari kaotaksid atomaarsuse
-ja kahekordistaksid limiidi. Kasutage kõigi rakenduse replikatsioonide jaoks üht Redist (või tõrkesiirdega
-Redis Sentineli klastrit).
+**Üksik Redis kõigi koopiate jaoks** — kiiruspiiraja Lua skript sõltub ühest autoriteetsest võtmeruumist. Mitu Redis eksemplari koopiate taga kaotaks aatomilisuse ja kahekordistaks eelarve. Kasutage kõigi rakenduste koopiate jaoks ühte Redis (või tõrkesiirdega Redis Sentinel-klastrit).
 
-**Ühenduste arv:** iga rakenduse replikatsioon avab Redisega **2 TCP-ühendust**
-(kiiruspiiraja klient + kvoodihoidla klient). 10 replikatsiooni korral → 20 ühendust, mis jääb
-Redise vaikeeksemplari 10 000 ühenduse ülempiirist tublisti allapoole.
+**Ühenduste arv:** Avaneb iga rakenduse koopia** 2 TCP ühendust** Redis (määra piiraja klient + kvoodipoe klient). 10 koopia korral → 20 ühendust, mis jääb Redis vaikeeksemplari 10 000 ühenduse piirmäära piiresse.
 
 ### 5. Seire
 
-Avaldage seisundikontrolli lõpp-punkti kaudu:
+Esitage tervisekontrolli lõpp-punkti kaudu:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts kutsub juba kiiruspiiraja funktsioone
-// Lisa Redise-põhised kontrollid:
-//   1. PING-i viiteaeg ioredise .ping() kaudu
-//   2. Mälukasutus INFO memory kaudu
-//   3. Ühenduste arv INFO clients kaudu
-//   4. maxmemory-policy tabamusmäär (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-Peamised jälgitavad mõõdikud:
+Peamised mõõdikud, mida vaadata:
 
-- **Eemaldatud võtmeid sekundis** — kui väärtus püsib nullist suurem, suurendage `maxmemory`
-- **Blokeeritud kliendid** — nullist suurem väärtus viitab aeglastele Lua-skriptidele või suurele konkurentsile
-- **Tagasilükatud ühendused** — ühenduste piirang on saavutatud; 20 ühenduse puhul haruldane
+- **Välja tõstetud võtmed / sek** — kui püsivalt nullist erinev, suurendage `maxmemory`
+- **Blokeeritud kliendid** — mitte-null viitab aeglastele Lua skriptidele või kõrgele konkurentsile
+- **Keelatud ühendused** — ühenduse limiit tabas; haruldane 20 ühenduse juures
+
+### 6. Redis-ühilduvad serverid
+
+Iga siin kasutatav server peab käivitama Lua skripte: kiiruse piiraja on üks `EVAL`. Ilma Lua-ta serveris logib `checkRateLimit()` `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` ja loendab protsessi kohta, nii et iga koopia jõustab piirangu ise. Valiku jagatud seansi affinity store (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) loeb ja värskendab ka kontakte `EVAL` abil; ilma Luata logib see `[SESSION_AFFINITY] Redis error; falling back to SQLite.` ja iga koopia säilitab oma tihvtid. Teised töökoormused kasutavad tavalisi käske (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, räsid ja komplektid) ning semantilise vahemälu Redis -taustaprogramm ei saada `FT.*` -käske.
+
+Testitud versiooniga OmniRoute 3.8.52: KiviDB 1.2.0 koos selle Lua kujutisega (`kividb/kividb:v1.2.0-lua`). Kiiruse piiraja (sealhulgas loendureid jagav teine protsess), autentimisvahemälu, kvoodisalv, soojenduskaitselüliti, semantilise vahemälu salvestusruum ja vestluse töötleja kaudu `/v1/chat/completions` päring läbisid 18 19-st kontrollist, mis edastavad Redis 8.10.3. See, mis erineb: `INCRBYFLOAT` salvestab `0.1 + 0.2` kui `0.30000000000000004`, kus Redis salvestab `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Kvoodipood analüüsib mõlemat koodiga `parseFloat`, kuid need kaks numbrit erinevad viimaste numbrite poolest, nii et täpselt kvoodipiirile langev võrdlus võib välja tulla erinevalt. Seansi seotuse pood ei olnud selle käitamise osa. ( [seadistus](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [tulemused](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 

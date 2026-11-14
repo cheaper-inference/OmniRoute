@@ -19,7 +19,7 @@ rovnakého systému nezávislý od nástrojov nájdete v dokumente
 
 ### Prijatie kandidáta
 
-Pracovné postupy CI a Quality Gates vydávajú stabilný verdikt: `Gate / CI` a `Gate / Quality`. Ich verzovaná politika prijímania vymenúva každú upstreamovú prácu podľa požiadaviek alebo odporúčaní. Príslušná požadovaná úloha musí byť úspešná: chýbajúce, zrušené, preskočené, čakajúce a neznáme výsledky nemôžu určiť PASS. Platná klasifikácia len pre dokumenty alebo len pre katalóg môže spôsobiť, že kódový pruh nebude použiteľný; návrh PR nie je akceptovaným kandidátom. Označenie `hotfix` nezbavuje dôkazov.
+Pracovné postupy CI a Quality Gates vydávajú stabilný verdikt: `Gate / CI` a `Gate / Quality`. Ich verzovaná politika prijímania vymenúva každú upstream prácu podľa požiadaviek alebo odporúčaní. Príslušná požadovaná úloha musí byť úspešná: chýbajúce, zrušené, preskočené, čakajúce a neznáme výsledky nemôžu určiť PASS. Platná klasifikácia len pre dokumenty alebo iba pre katalóg môže spôsobiť, že kódový pruh nebude použiteľný; návrh PR nie je akceptovaným kandidátom. Označenie `hotfix` nezbavuje dôkazov.
 
 Oba pracovné postupy pokrývajú PRs do main/release vetiev, presuny do `main`, manuálne odosielanie a udalosti zlučovacej skupiny. Push, dispatch a merge-group spustia úplný výber. Stlačenie `release/**` ich nespustí (2026-10-18): každá zmena už spustila maticu na svojom PR a zlúčená kombinácia je úlohou Release-Green (`docs/ops/RUNNER_BOX.md` → Hosted lane). Forks a merge groups používajú hostovaných bežcov pre úlohy, ktoré inak vyberajú samostatne hostených bežcov; Pred zavedením je potrebné overiť dostatočnú hosťovanú kapacitu.
 
@@ -31,9 +31,15 @@ Každý doklad JSON identifikuje odhlásený SHA, spustenie pracovného postupu 
 
 Označenie `queue` odošle PR do frontu Mergify (`.mergify.yml`). Mergify otvorí koncept PR na vetve `mergify/merge-queue/`, CI tam spustí úplný výber a pôvodný PR sa zlúči, keď prejdú `Gate / CI`, `Gate / Quality` a `Merge integrity (changelog + generated skills)`.
 
-Mergify zapíše svoj súhrn frontu do popisu konceptu a ďalšie aplikácie ho môžu tiež upraviť. Udalosť `pull_request` `edited` na takomto návrhu má svoju vlastnú skupinu súbežnosti (`-queue-edit-<run_id>`), takže nemôže zrušiť skutočný priebeh návrhu a preskočí bránu a maticu. Stále beží iba `Merge integrity`. Úloha vynechanej brány nesie iný názov kontroly, pretože Mergify načíta vynechané `Gate / CI` ako neúspešnú kontrolu a odstráni PR.
+Mergify zapíše svoj súhrn frontu do popisu konceptu a ďalšie aplikácie ho môžu tiež upraviť. Udalosť `pull_request` `edited` na takomto návrhu má svoju vlastnú skupinu súbežnosti (`-queue-edit-<run_id>`), takže nemôže zrušiť skutočný priebeh návrhu a preskočí bránu a maticu. Stále beží iba `Merge integrity`. Úloha preskočenej brány nesie iný názov kontroly, pretože Mergify prečíta vynechané `Gate / CI` ako neúspešnú kontrolu a zruší front PR.
 
 Po vyradení z frontu nemusí push vždy znova zaradiť PR. Komentujte to `@mergifyio queue`.
+
+### Zachovaný dôkaz v akceptačnom reduktore
+
+`scripts/quality/validate-release-acceptance.mjs` znižuje dodaný plán a jeho manifesty; nestanovuje, že plán pokrýva celý proces uvoľňovania. Jeho správy explicitne stanovujú `releaseAcceptance: false`, aj keď je plán `VERIFIED`. Pracovný postup `release-acceptance.yml` stále používa tieňové príslušenstvo, nie skutočné potvrdenie o zostavení, balíku, zavádzaní alebo propagácii.
+
+CLI vyžaduje `--evidence-root` na overenie zachovaných dôkazov. Súbory sú rozlíšené ako `<evidence-root>/<artifact_id>/<member>` a hašované ako SHA-256. Záznam PASS bez dôkazov, chýbajúci alebo zmenený súbor, nebezpečná cesta alebo symbolický odkaz bráni overeniu. Chýbajúce súbory nie sú ekvivalentom prázdnych úspešných protokolov. Existujúce kontroly SHA/run/attempt zostávajú nezávislé: zhodné bajty nemôžu zachrániť zastaraný príjem. Integrita súboru nie je dôkazom pravosti vykonania alebo propagácie artefaktu.
 
 ### Inventár statického skenovania
 
@@ -41,7 +47,7 @@ Verzovaný inventár npm-alias a členstvo v statickom skenovaní sú dostupné 
 
 Použite `npm run quality:scan -- --list` alebo `npm run quality:scan:fast -- --list` na kontrolu vybratých aliasov bez ich vykonania. Runner vyvolá vstupný bod npm, takže jeho runtime (vrátane Bun ak je nakonfigurované) sa zachová. Manifest zaznamenáva aliasy mimo týchto profilov, ktoré sa vyvolávajú samostatne, a príkazy údržby sú v profiloch skenovania iba na čítanie zakázané.
 
-Tieto profily pokrývajú iba statické skenovanie. Necertifikujú testy produktu, pokrytie, balenie, externé kontroly ani úplné prijatie kandidáta na uvoľnenie. Prijatie pracovného toku používa prepojené `config/quality/admission-policy.json` a `scripts/quality/admission-verdict.mjs`. Profily pozorovateľa uvoľnenia zostávajú oddelené; nezávisle kontrolovať ich príslušné šeky a potvrdenky. Nižšie uvedený súpis prózy je odkazom, nie dôkazom, že brána skutočne bežala.
+Tieto profily pokrývajú iba statické skenovanie. Necertifikujú testy produktu, pokrytie, balenie, externé kontroly ani úplné prijatie kandidáta na uvoľnenie. Prijatie pracovného toku používa prepojené `config/quality/admission-policy.json` a `scripts/quality/admission-verdict.mjs`. Profily pozorovateľa uvoľnenia zostávajú oddelené; nezávisle kontrolovať ich príslušné šeky a potvrdenky. Úplné statické príkazy pozorovateľa sú deklarované v `config/quality/release-green-static-profile.json`, vrátane `audit:deps`, výberu testu mutácie a kontroly prekladu. Zavádzač overuje príkazy npm voči deklaráciám package.json a modelovaným CI/Quality ; odmieta drift namiesto spustenia tokenov shellu ako argumentov. Požadovaný výstup skenera SKIP/INCOMPLETE nemôže vytvoriť PASS. Profil zaznamenáva svoje externé vylúčenia a nenahrádza hostované pokrytie, testovacie matrice, balík alebo dôkaz o nasadení. Nižšie uvedený súpis prózy je odkazom, nie dôkazom, že brána skutočne bežala.
 
 Skripty fungujú pod `scripts/check/` (politické brány) a `scripts/quality/` (ratchet engine). Zdroj pravdy CI je `.github/workflows/ci.yml`.
 
@@ -60,24 +66,24 @@ Skripty fungujú pod `scripts/check/` (politické brány) a `scripts/quality/` (
 
 `npm run check:forgotten-sibling-tests` beží ako poradný krok `Fast Quality Gates` a opätovne používa prekladač importu za mapou testovacieho vplyvu. Pre každý zmenený produkčný modul hlási deterministické reťazce `changed module/symbol -> static consumer -> candidate sibling test` keď kandidátsky test chýba v rozdiele požiadavky na stiahnutie. Súhrn Markdown a výsledok JSON sa zachovajú ako artefakt pracovného toku `forgotten-sibling-tests` na kalibráciu pred akýmkoľvek zavedením blokovania.
 
-Reexporty sudov a dynamické importy sú len diagnostikou rozlíšenia; nikdy nevytvoria blokujúci nález. Skontrolované výnimky sú zverejnené v `config/quality/forgotten-sibling-allowlist.json`. Každý záznam musí pomenovať test spotrebiteľa a kandidáta, uviesť konkrétne odôvodnenie a prepojiť problém GitHub alebo požiadavku na stiahnutie. Chybné záznamy sa nepodarilo zatvoriť. Výnimky nemôžu potlačiť vymazaný kandidátsky test alebo rozdiel, ktorý pridáva `.skip`/`.todo`; oslabenie tvrdenia a iné maskovanie zostávajú vo vlastníctve nezávisle blokujúcej brány `check:test-masking`.
+Reexporty sudov a dynamické importy sú len diagnostikou rozlíšenia; nikdy nevytvoria blokujúci nález. Skontrolované výnimky sú zverejnené v `config/quality/forgotten-sibling-allowlist.json`. Každý záznam musí pomenovať test spotrebiteľa a kandidáta, uviesť konkrétne zdôvodnenie a prepojiť problém GitHub alebo požiadavku na stiahnutie. Chybné záznamy sa nepodarilo zatvoriť. Výnimky nemôžu potlačiť vymazaný kandidátsky test alebo rozdiel, ktorý pridáva `.skip`/`.todo`; oslabenie tvrdenia a iné maskovanie zostávajú vo vlastníctve nezávisle blokujúcej brány `check:test-masking`.
 
 ### Práca: `lint`
 
-Beží na každom PR až `main`. Bloky sa pri zlyhaní spájajú.
+Beží na každom PR až `main`. Pri zlyhaní sa bloky spájajú.
 
 | skript (`npm run ...`)            | Potvrdzuje                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Blokovanie                              |
 | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
 | `check:node-runtime`              | verzia Node.js je v podporovanom rozsahu                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | áno                                     |
 | `check:cycles`                    | Kruhové importy naprieč všetkými `src/` + `open-sse/` (založené na AST, tsconfig `paths` vyriešené). Bare ukončí 1 vždy, keď existuje akýkoľvek cyklus (uzavretý zlyhaním od #15281) a vypíše SCCs. `check:cycles:ratchet` (čo beží CI ) blokuje, keď počet prekročí strop `metrics.cycles` v `quality-baseline.json` — momentálne 14, `direction: down`, takže môže iba klesnúť (#15159 G-01/G-02)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Áno (račňa)                             |
-| `check:boundary`                  | spájanie `open-sse → src` : jedinečné importy medzi súbormi z nástroja do aplikácie (`scripts/quality/measure-boundary.mjs`; okrajový zoznam je nevybavený protokol o náprave v4 core/module-split ). Holá poradenská správa = (rovnaká ako `quality:boundary`). `check:boundary:ratchet` (čo CI beží, tiež v `quality.yml` rýchlobránovej rohatkovej slučke) blokuje, keď počet prekročí strop `metrics.boundaryOpenSseToSrc` v `quality-baseline.json` — nasadených na nameraných 771, `direction: down`; `--update` ju iba zníži; základne relatívne na PRs (`--base-ref`, pozri nižšie)                                                                                                                                                                                                                                                                                                                    | Áno (račňa)                             |
+| `check:boundary`                  | spájanie `open-sse → src` : jedinečné importy medzi súbormi z nástroja do aplikácie (`scripts/quality/measure-boundary.mjs`; okrajový zoznam je nevybavený protokol o náprave v4 core/module-split ). Holá poradenská správa = (rovnaká ako `quality:boundary`). `check:boundary:ratchet` (čo CI beží, tiež v `quality.yml` rýchlobránovej rohatkovej slučke) blokuje, keď počet prekročí strop `metrics.boundaryOpenSseToSrc` v `quality-baseline.json` — nasadený na nameraných 771, `direction: down`; `--update` ju iba zníži; základne relatívne na PRs (`--base-ref`, pozri nižšie)                                                                                                                                                                                                                                                                                                                      | Áno (račňa)                             |
 | `check:route-validation:t06`      | schémy Zod prítomné na všetkých trasách (politika úrovne 6)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | áno                                     |
 | `check:any-budget:t11`            | počet `@ts-expect-error // any` nepresahuje rozpočet (Tier 11 catraca)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | áno                                     |
 | `check:provider-consistency`      | Každý poskytovateľ v `providers.ts` má zodpovedajúcu položku v `providerRegistry.ts` (a naopak, v rámci zoznamu povolených)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | áno                                     |
 | `check:model-lifecycle`           | Tri ručne udržiavané smerovacie tabuľky zostávajú konzistentné so zaznamenanou snímkou životného cyklu (#11503): `FITNESS_TABLE` (`taskFitness.ts`) nezískava žiadne vyradené ID, ktoré môže `REGISTRY` smerovať; každý cieľ `BUILT_IN_ALIASES` je prítomný v `REGISTRY` a chýba na snímke vyradeného id; každé vyradené ID stále v `REGISTRY` je preposlané alebo uvedené v `allowedRetiredInCatalog`; a žiadny zdroj alebo cieľ `DEFAULT_DEGRADATION_MAP` sa v tejto snímke nezobrazí ako vyradený. To nedokazuje, že model je v súčasnosti obsluhovaný priamym prenosom. Offline — sa porovnáva so `config/quality/model-lifecycle.json`, obnovuje sa ručne pomocou `npm run quality:refresh-model-lifecycle` (sieť; nie je zapojené do CI). `allowedRetiredInCatalog` je horľavá račňa: pridajte položku len s problémom sledovania.                                                                       | áno                                     |
 | `check:fetch-targets`             | Každé `fetch("/api/...")` v `src/` na strane klienta sa premietne do skutočného `route.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | áno                                     |
 | `check:deps`                      | Všetky hodnoty `npm install` -able v každom `package.json` v repo sú v `dependency-allowlist.json`; nové nepripnuté alebo zablokované balíky označené príznakom                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | áno                                     |
-| `audit:deps`                      | `npm audit` (koreňový elektrón + ) — žiadne upozornenia high/critical (prekrýva sa osv `check:vuln-ratchet`; pozri Backlog racionalizácie)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | áno                                     |
+| `audit:deps`                      | npm audit všetkých piatich nezávislých lockfiles (root, Electron, OpenCode pluginy v1/v2 a poskytovateľ). Blok kritických upozornení; vysoké upozornenia zostávajú viditeľnými varovaniami. Missing/failed audity sú INCOMPLETE a block; zamknuté hodnoty hash a zostavy podľa rozsahu sa zachovajú.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | áno                                     |
 | `check:lockfile`                  | `package-lock.json` integrita — https register, integrita hash, žiadne prepísanie hostiteľa                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | áno                                     |
 | `check:licenses`                  | SPDX licenčný zoznam povolených pre závislosti produkcie                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | áno                                     |
 | `check:tracked-artifacts`         | Žiadne artefakty zostavy / potvrdené symbolické odkazy `node_modules` (tiež beží v režime husky pre-commit; predbežné stlačenie je zámerne ľahké — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | áno                                     |
@@ -88,7 +94,7 @@ Beží na každom PR až `main`. Bloky sa pri zlyhaní spájajú.
 | `check:migration-numbering`       | Migračné súbory SQL sú sekvenčne očíslované, bez medzier alebo duplikátov                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | áno                                     |
 | `check:public-creds`              | Žiadne doslovné OAuth `client_id`/`client_secret` alebo webové kľúče Firebase mimo `publicCreds.ts` (pevné pravidlo #11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | áno                                     |
 | `check:db-rules`                  | Žiadne surové SQL mimo modulov `src/lib/db/` ; žiadne dovozy sudov zo `localDb.ts` (tvrdé pravidlá #2/#5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | áno                                     |
-| `check:known-symbols`             | Vykonávatelia poskytovateľov, stratégie smerovania a prekladatelia zaregistrovaní v ich odosielacích tabuľkách zodpovedajú súborom na disku — žiadne osirelé alebo nedeklarované symboly                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | áno                                     |
+| `check:known-symbols`             | Vykonávatelia poskytovateľov, stratégie smerovania a prekladatelia registrovaní v ich odosielacích tabuľkách zodpovedajú súborom na disku — žiadne osirelé alebo nedeklarované symboly                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | áno                                     |
 | `check:route-guard-membership`    | Každá cesta, ktorá vytvára podriadený proces, je klasifikovaná podľa `isLocalOnlyPath()` (tvrdé pravidlá #15/#17)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | áno                                     |
 | `check:test-discovery`            | Každý súbor `*.test.ts` / `*.spec.ts` v repo zhromažďuje aspoň jeden testovací bežec (ratchet: zoznam osirelých zvierat v `test-discovery-baseline.json` sa môže iba zmenšiť)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | áno                                     |
 | `check:test-tla-order`            | Žiadny súbor `node:test` pod `tests/unit` nezaregistruje test, zasiahne `await` najvyššej úrovne a potom zaregistruje ďalšie (#18045; ratchet: `test-tla-order-allowlist.json` sa môže iba zmenšiť)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | áno                                     |
@@ -110,7 +116,7 @@ Dôsledok je dôležitý pri posudzovaní, či je súbor napísaný:** nulová d
 
 ### Práca: `quality-gate`
 
-Beží po `test-coverage`. Bloky sa pri zlyhaní spájajú.
+Beží po `test-coverage`. Pri zlyhaní sa bloky spájajú.
 
 | Skript                       | Potvrdzuje                                                                                                                                                                       | Blokovanie        |
 | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
@@ -133,13 +139,13 @@ Celá práca je poradná (`continue-on-error: true`). Ratchety založené na npm
 | `check:circular-deps`    | Žiadne kruhové závislosti (dpdm)                                                                                                                                                                                              | **Poradný**                                         |
 | `check:bundle-size`      | Veľkosť balíka nepresahuje vrchnú časť                                                                                                                                                                                        | **Poradný**                                         |
 | `check:secrets`          | Tajné skenovanie (gitleaks) — preskočí, ak binárne chýba                                                                                                                                                                      | **Poradný**                                         |
-| `check:vuln-ratchet`     | Zraniteľnosť závislosti (osv-scanner) neregresuje — preskočí, ak binárne chýba                                                                                                                                                | **Poradný**                                         |
+| `check:vuln-ratchet`     | Chyby v závislosti (osv-scanner) neregresujú — `--ratchet` zlyhá ako INCOMPLETE (výstup 2), ak nie sú zmerané                                                                                                                 | **Poradný**                                         |
 | `check:workflows`        | Prachnutie pracovného toku (actionlint + zizmor); skenery missing/broken, neplatné hlásenia alebo chýbajúca základná čiara račne zlyhajú ako INCOMPLETE. Platné zistenia sa riadia vybranou politikou strict/advisory/ratchet | Vyžaduje sa vykonanie; blokovanie račne zizmor v CI |
-| `check:openapi-breaking` | Prerušenie zmien vo verejnej zmluve API (`openapi.yaml`) vs. základná vetva (oasdiff) — emituje `openapiBreaking=N`; preskočí, ak chýba oasdiff alebo nie je možné vyriešiť základnú špecifikáciu                             | **Poradný**                                         |
+| `check:openapi-breaking` | Verejná zmluva API proti potvrdeniam pripnutej udalosti (PR merge-base, push before, merge-group base; scheduled/manual checkout first parent); požadované meranie zlyhá zatvorené                                            | **Blokovanie pomocou --ratchet**                    |
 
 ### Práca: `docs-sync-strict`
 
-Beží na každom PR až `main`. Bloky sa pri zlyhaní spájajú.
+Beží na každom PR až `main`. Pri zlyhaní sa bloky spájajú.
 
 | Skript                         | Potvrdzuje                                                                                                                                                        | Blokovanie                |
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
@@ -157,20 +163,20 @@ Beží na každom PR až `main`. Bloky sa pri zlyhaní spájajú.
 | `check:docs-symbols`           | Každý odkaz `/api/...` v `docs/**/*.md` sa mení na skutočný `route.ts` (antihalucinácia)                                                                          | áno                       |
 | `i18n translation drift`       | Nepreložené kľúče v súboroch miestnych nastavení i18n — iba varujú                                                                                                | **Poradný**               |
 
-Vygeneruje sa dvanásť README SVGs pod `docs/diagrams/` (`scripts/docs/gen-readme-<name>.mjs`; `npm run docs:readme-diagrams` ich všetky regeneruje). Každý z nich má test jednotky porovnávania bajtov (`tests/unit/docs/readme-*-svg.test.ts`, úloha `test-unit`), ktorý zlyhá, keď je potvrdený súbor neaktuálny, a `check:docs-counts` číta kanonické čísla z ich uzlov `<text>` — čo je dôvod, prečo krok obrysu ponecháva každý načrtnutý reťazec v súbore ako neviditeľný `<text>`. Kontrola kanonických čísel SVG číta súbory uvedené v `SVG_DIAGRAM_FILES` (`scripts/check/check-docs-counts-sync.mjs`): `docs/diagrams/readme-hero.svg`, `free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`, `cli-terminal.svg`, `tier-cascade.svg`, plus `public/images/tier-flow-dark.svg` a `tier-flow-light.svg`; tvrdenia o voľnom čase, o vstupe do katalógu, o opakovanom fonde a o faktoroch hodnotenia tiež čítajú `promise-pillars.svg`, `free-tier-budget.svg` a `strategies-grid.svg`. `free-tier-budget.svg` čerpá svoje čísla zo zavádzača živého katalógu, takže zmena na `FREE_MODEL_BUDGETS` alebo na zobrazovaný názov poskytovateľa sčervená CI kým sa tento súbor nevygeneruje.
+Vygeneruje sa dvanásť README SVGs pod `docs/diagrams/` (`scripts/docs/gen-readme-<name>.mjs`; `npm run docs:readme-diagrams` ich všetky regeneruje). Každý z nich má test jednotky porovnávania bajtov (`tests/unit/docs/readme-*-svg.test.ts`, úloha `test-unit`), ktorý zlyhá, keď je potvrdený súbor neaktuálny, a `check:docs-counts` číta kanonické čísla z ich uzlov `<text>` — čo je dôvod, prečo krok obrysu zachováva každý načrtnutý reťazec v súbore ako neviditeľný `<text>`. Kontrola kanonických čísel SVG číta súbory uvedené v `SVG_DIAGRAM_FILES` (`scripts/check/check-docs-counts-sync.mjs`): `docs/diagrams/readme-hero.svg`, `free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`, `cli-terminal.svg`, `tier-cascade.svg`, plus `public/images/tier-flow-dark.svg` a `tier-flow-light.svg`; tvrdenia o voľnom pohybe navždy, o vstupe do katalógu, o opakovanom fonde a o faktoroch bodovania tiež čítajú `promise-pillars.svg`, `free-tier-budget.svg` a `strategies-grid.svg`. `free-tier-budget.svg` čerpá svoje čísla zo zavádzača živého katalógu, takže zmena na `FREE_MODEL_BUDGETS` alebo na zobrazovaný názov poskytovateľa sčervená CI kým sa súbor nevygeneruje.
 
 ### Práca: `i18n-ui-coverage`
 
 | Skript                              | Potvrdzuje                                                                                                                                                                                                        | Blokovanie  |
 | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `check-ui-keys-coverage` (v riadku) | Pokrytie kľúčom UI i18n je ≥ 65 %                                                                                                                                                                                 | áno         |
+| `check-ui-keys-coverage` (v riadku) | Pokrytie kľúčom UI i18n je 65 % ≥                                                                                                                                                                                 | áno         |
 | `check-ui-value-drift` (v riadku)   | Prepísaná angličtina** hodnotu** nezanechá za sebou žiadny zatuchnutý preklad                                                                                                                                     | áno         |
 | `check-new-key-coverage` (v riadku) | A** nové** Anglický kľúč je preložený v každom jazyku — a značka `__MISSING__:` je odmietnutá                                                                                                                     | áno         |
 | `check-translation-ratio`           | Skutočný pomer prekladu na miestne nastavenie (identický s angličtinou / zástupný symbol / chýbajúce listy mimo zoznamu povolených) nesmie presiahnuť `config/quality/i18n-translation-baseline.json` + uvoľnenie | **Poradný** |
 
 Potrebuje `fetch-depth: 0` — brána posunu hodnoty sa líši `en.json` oproti zlučovacej základni.
 
-#### `check-ui-value-drift` — zatuchnutá-prekladová brána
+#### `check-ui-value-drift` — stale-translation gate
 
 Zachytáva jednu regresiu i18n, ktorú ostatné brány štrukturálne nevidia: anglická hodnota je prepísaná a preklady odvodené z _predchádzajúcej_ angličtiny zostávajú pozadu, takže používatelia, ktorí nie sú v angličtine, pokračujú v čítaní sebavedome formulovanej, teraz nesprávnej kópie.
 
@@ -217,7 +223,7 @@ Beží len na žiadosti o stiahnutie.
 
 ### Práca: `test-vitest`
 
-Beží po `build`. Bloky sa pri zlyhaní spájajú.
+Beží po `build`. Pri zlyhaní sa bloky spájajú.
 
 | Suita            | Potvrdzuje                                                   | Blokovanie                                                                                                 |
 | ---------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
@@ -325,63 +331,38 @@ zatiaľ zostávajú globálne (ich nástroje nedokážu lacno vytvoriť rozdiel 
    súboru späť na 1000 (alebo 800), minimá pokrytia +5, počet nepoužívaných exportov pre
    modularizované balíky na 0.
 
-## Základná línia ratchetu (`quality-baseline.json`)
+## Ratchet Baseline (`quality-baseline.json`)
 
-Mechanizmus ratchetu (`scripts/quality/check-quality-ratchet.mjs`) načíta súbor `quality-baseline.json`
-a porovná ho s čerstvo zozbieraným súborom `quality-metrics.json`. Každá metrika, ktorá sa zhorší
-nad rámec svojej hodnoty epsilon, spôsobí zlyhanie zostavenia.
+Rohatkový motor (`scripts/quality/check-quality-ratchet.mjs`) číta `quality-baseline.json` a porovnáva ho s čerstvo nazbieraným `quality-metrics.json`. Akákoľvek metrika, ktorá sa vráti za hranicu epsilon, zlyhá pri zostavovaní.
 
 Aktuálne sledované metriky:
 
-| Metrika               | Smer   | Význam                                |
-| --------------------- | ------ | ------------------------------------- |
-| `eslintWarnings`      | `down` | Počet upozornení ESLint nesmie narásť |
-| `coverage.statements` | `up`   | Pokrytie príkazov nesmie klesnúť      |
-| `coverage.lines`      | `up`   | Pokrytie riadkov nesmie klesnúť       |
-| `coverage.functions`  | `up`   | Pokrytie funkcií nesmie klesnúť       |
-| `coverage.branches`   | `up`   | Pokrytie vetiev nesmie klesnúť        |
+| Metrické              | Smer   | Význam                            |
+| --------------------- | ------ | --------------------------------- |
+| `eslintWarnings`      | `down` | Počet varovaní ESLint nesmie rásť |
+| `coverage.statements` | `up`   | Pokrytie výpisu nesmie klesnúť    |
+| `coverage.lines`      | `up`   | Pokrytie linky nesmie klesnúť     |
+| `coverage.functions`  | `up`   | Funkčné pokrytie nesmie klesnúť   |
+| `coverage.branches`   | `up`   | Krytie pobočky nesmie klesnúť     |
 
-Ak chcete po skutočnom zlepšení aktualizovať základnú líniu:
+Ak chcete aktualizovať základnú líniu po skutočnom zlepšení:
 
 ```bash
 npm run quality:ratchet -- --update
 git add quality-baseline.json
 ```
 
-Príznak `--update` zapíše aktuálne namerané hodnoty do súboru `quality-baseline.json`.
-Tento súbor potvrďte spolu so zmenou, ktorá metriku zlepšila. PR, ktorý zlepší
-metriku bez aktualizácie základnej línie, zachytí `--require-tighten` (Fáza 6A.5,
-implementácia sa pripravuje).
+Príznak `--update` zapisuje aktuálne namerané hodnoty do `quality-baseline.json`. Potvrdiť tento súbor spolu so zmenou, ktorá zlepšila metriku. PR, ktorý zlepšuje metriku bez aktualizácie základnej línie, bude zachytený `--require-tighten` (fáza 6A.5, čaká sa na implementáciu).
 
-### Ratchet CodeQL: frekvencia obnovenia a manuálne spustenie
+### CodeQL račňa: obnovovacia kadencia a manuálna spúšť
 
-`check:codeql-ratchet` načítava **stav repozitára, obnovovaný podľa plánu — nie pri každom PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` hlási
-`state: configured`, `schedule: weekly`: ide o kontrolu prostredníctvom predvoleného nastavenia GitHubu, nie o analýzu
-pri každom odoslaní zmien. Dôsledok: po zlúčení PR, ktorý OPRAVUJE upozornenia, ratchet naďalej načítava
-starý, vyšší počet až do spustenia ďalšej naplánovanej kontroly — preto hlási regresiu
-pri každom otvorenom PR vrátane nadväzujúcich PR k opravnému PR, až kým sa kontrola neaktualizuje.
+`check:codeql-ratchet` číta** stav repo, obnovený podľa plánu — nie za PR.** `gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` hlási `state: configured`, `schedule: weekly`: skenovanie predvoleného nastavenia GitHub, nie analýza typu push. Dôsledok: po zlúčení PR, že FIXES výstrahy, ratchet pokračuje v čítaní starého, vyššieho počtu, až kým sa nespustí ďalšie naplánované skenovanie — takže hlási regresiu pri každom otvorenom PR, vrátane vlastných následných krokov fixujúceho PR, až kým sken nedobehne.
 
-**Manuálne obnovenie**: `gh workflow run codeql.yml --ref release/vX.Y.Z` znova spustí
-analýzu a v priebehu niekoľkých minút opätovne zverejní upozornenia. Najprv si prečítajte `.github/workflows/codeql.yml`
-— jeho hlavička vysvetľuje, že je určený **iba pre `workflow_dispatch`**, **pretože je v konflikte s
-„predvoleným nastavením“ GitHubu** (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`). Obnovenie spúšťačov `push`/`pull_request`/
-`schedule` najskôr vyžaduje **zásah vlastníka**: Nastavenia → Zabezpečenie kódu →
-CodeQL: Predvolené → Rozšírené. Bez tohto prepnutia nepridávajte spúšťač `schedule:` — spôsobí
-iba neúspešné spustenia.
+**Manuálne obnovenie** : `gh workflow run codeql.yml --ref release/vX.Y.Z` znova spustí analýzu a znova zverejní upozornenia v priebehu niekoľkých minút. Najprv si prečítajte `.github/workflows/codeql.yml` — jeho hlavička vysvetľuje, že ide `workflow_dispatch` -only** pretože je v konflikte s "predvoleným nastavením" GitHub** (`CodeQL analyses from advanced configurations cannot be processed when the default setup is enabled`). Obnovenie spúšťačov `push`/`pull_request`/ `schedule` vyžaduje** ako prvá akcia vlastníka** : Nastavenia → Zabezpečenie kódu → CodeQL: Predvolené → Rozšírené. Nepridávajte spúšť `schedule:` bez tohto prepínača — spôsobí to iba neúspešné spustenia.
 
-**Po poklese počtu sprísnite základnú líniu** — `node scripts/check/check-codeql-ratchet.mjs
---update` zapíše nový nameraný počet do `quality-baseline.json` →
-`metrics.codeqlAlerts.value`, takže ratchet nebude potichu povoľovať regresiu späť
-k pôvodnému limitu. Praktický príklad (2026-09-02/03): PR #12502 opravil 7 skutočných upozornení
-(13 → 6 nameraných otvorených); PR #12530 sprísnil zmrazenú základnú líniu z 11 → 6, aby sa zhodovala; zostávajúcich
-6 upozornení bolo následne zamietnutých s individuálnym odôvodnením pre každé upozornenie, čím sa počet otvorených upozornení znížil na 0.
+**Po poklese počtu utiahnite základnú čiaru** — `node scripts/check/check-codeql-ratchet.mjs --update` zapíše nový nameraný počet do `quality-baseline.json` → `metrics.codeqlAlerts.value`, takže račňa v tichosti nepovolí regresiu späť na starý strop. Spracovaný príklad (2026-09-02/03): PR #12502 opravených 7 skutočných upozornení (13 → 6 nameraných otvorených); PR #12530 sprísnil zamrznutú základnú líniu 11 → 6, aby zodpovedal; zvyšných 6 bolo potom zamietnutých s odôvodnením pre každé upozornenie až na 0 otvorených.
 
-**O zamietnutiach rozhoduje operátor (Prísne pravidlo č. 14)** — nikdy nezamietajte upozornenie CodeQL
-bez zaznamenania technického odôvodnenia v komentári k zamietnutiu: `won't fix` pre
-požiadavku nadradeného protokolu, `used in tests` pre testovaciu pomôcku, `false positive`
-pre sanitizér, ktorý CodeQL nedokáže rozpoznať (precedens: `docs/security/ERROR_SANITIZATION.md`).
+**Výpovede sú výzvou operátora (tvrdé pravidlo #14)** — nikdy nezruší výstrahu CodeQL bez zaznamenania technického zdôvodnenia v komentári k odmietnutiu: `won't fix` pre požiadavku upstream protokolu, `used in tests` pre testovacie zariadenie, `false positive` pre dezinfekčný prostriedok CodeQL nevidí (precedens: `docs/security/ERROR_SANITIZATION.md`).
 
 ---
 
@@ -457,39 +438,27 @@ Bot, ktorý by mohol zvýšiť limit, by bol jednoznačne horší než súčasn�
 Úloha nikdy nevykonáva push do `release/*` — PR zlučuje človek, takže nesprávne meranie
 sa nemôže dostať do vetvy bez kontroly.
 
-## Zásady zoznamu povolených položiek
+## Pravidlá zoznamu povolených
 
-Každá brána, ktorá nemôže zlyhať pri už existujúcich porušeniach, používa nemenný zoznam povolených položiek
-(napr. `KNOWN_STALE_DOC_REFS`, `KNOWN_MISSING`, `KNOWN_RAW_SQL`). Platí táto zásada:
+Každá brána, ktorá nemôže zlyhať pri už existujúcich porušeniach, používa zmrazený zoznam povolených (napr. `KNOWN_STALE_DOC_REFS`, `KNOWN_MISSING`, `KNOWN_RAW_SQL`). Zásadou je:
 
-**Odstráňte základnú príčinu; zoznam povolených položiek použite iba vtedy, keď porušenie už existovalo a
-nemožno ho opraviť v rámci rovnakého PR.**
+**Opravte hlavnú príčinu; použite zoznam povolených iba vtedy, keď porušenie už existuje a nemožno ho opraviť v rovnakom PR.**
 
-Pri pridávaní položky do zoznamu povolených položiek:
+Pri pridávaní záznamu do zoznamu povolených:
 
 1. Pridajte komentár s odôvodnením.
-2. Uveďte odkaz na sledovaný problém (napr. `// #3498 — Funkcia fázy 2, zatiaľ neimplementovaná`).
-3. Odstráňte položku v tom istom PR, ktoré opravuje porušenie — zastaraná položka, ktorá už
-   nepotláča aktívne porušenie, je sama osebe chybou (kontrola zastaraného vynucovania 6A.3
-   po implementácii spôsobí zlyhanie brány pri osamotenej položke zoznamu povolených položiek).
+2. Uveďte problém sledovania (napr. `// #3498 — Phase 2 feature, not yet implemented`).
+3. Odstráňte záznam v tom istom PR, ktorý opravuje porušenie — zastaraný záznam, ktorý už nepotláča aktívne porušenie, je sám osebe chybou (vynútenie zastaraných 6A.3 zlyhá po implementácii brány na osirelom zozname povolených položiek).
 
-**Nepridávajte** položky do zoznamu povolených položiek, aby testy prešli rýchlejšie. Zelená brána s rastúcim
-zoznamom povolených položiek vytvára falošný pocit kvality.
+Do** nie** pridajte položky zoznamu povolených, aby testy prešli rýchlejšie. Zelená brána s rastúcim zoznamom povolených je falošným pocitom kvality.
 
-### Keď brána vo vašom PR zlyhá
+### Keď zlyhá brána na vašom PR
 
-1. **Pozorne si prečítajte výstup brány** — presne uvádza, ktorý súbor alebo symbol
-   porušil pravidlo.
-2. **Opravte porušenie** — väčšina brán vykonáva deterministické kontroly súborového systému, ktoré prejdú hneď,
-   ako je kód správny.
-3. **Ak porušenie už existovalo** (t. j. nezaviedli ste ho vy, ale brána ho teraz
-   pokrýva): pridajte položku do zoznamu povolených položiek spolu s komentárom obsahujúcim odôvodnenie a odkazom na sledovaný problém.
-4. **Ak je brána západková** (pokrytie, upozornenia ESLint, duplicita, zložitosť):
-   vaša zmena metriku zhoršila. Opravte základný problém alebo (výnimočne) spustite
-   `npm run quality:ratchet -- --update`, ak je zmena zámerná a zhoršenie metriky
-   prijateľné — v popise PR však zdokumentujte dôvod.
-5. **Poradné brány** (`continue-on-error: true`) sú informačné — neblokujú
-   zlúčenie, ale zobrazujú sa v súhrne CI. Napriek tomu ich opravte.
+1. **Pozorne si prečítajte výstup brány** — vám presne povie, ktorý súbor alebo symbol porušil pravidlo.
+2. **Opravte porušenie** — väčšina brán sú deterministické kontroly súborového systému, ktoré prejdú hneď, ako je kód správny.
+3. **Ak porušenie už existuje** (tj, nezaviedli ste to, ale brána to teraz pokrýva): pridajte položku zoznamu povolených s komentárom odôvodnenia a problémom so sledovaním.
+4. **Ak je brána račňa** (pokrytie, upozornenia ESLint, duplikácia, zložitosť): vaša zmena zhoršila metriku. Opravte základný problém alebo (zriedkavo) spustite `npm run quality:ratchet -- --update` ak je zmena zámerná a zníženie metriky je prijateľné — ale v popise PR zdokumentujte dôvod.
+5. **Poradné brány** (`continue-on-error: true`) sú informačné —, neblokujú zlúčenie, ale zobrazujú sa v súhrne CI. Aj tak ich opravte.
 
 ---
 
@@ -519,43 +488,32 @@ chybu pripojenia a nikdy nepreruší relácie.
 
 ---
 
-## Zoznam racionalizačných úloh (preskúmanie ROI — fáza 9, vlna 3)
+## Nevybavená racionalizácia (ROI review — Fase 9 Onda 3)
 
-Tento inventár bol 2026-06-17 zosúladený s `ci.yml` (predchádzajúca verzia vynechávala
-`audit:deps`, `check:tracked-artifacts`, `check:lockfile`, `check:licenses`,
-`check:dead-code`, `check:cognitive-complexity`, `check:type-coverage`,
-`check:codeql-ratchet`, `check:pr-evidence`). Preskúmanie ROI zosúladenej množiny
-identifikovalo nasledujúcich kandidátov na racionalizáciu. **Zlúčenia sú mechanické zmeny CI;
-prepnutia/odstránenia sú politické rozhodnutia vyhradené pre operátora.** Nič z nižšie
-uvedeného zatiaľ nebolo aplikované.
+Tento inventár bol odsúhlasený so `ci.yml` dňa 2026-06-17 (predchádzajúca verzia vynechala `audit:deps`, `check:tracked-artifacts`, `check:lockfile`, `check:licenses`, `check:dead-code`, `check:cognitive-complexity`, `check:type-coverage`, `check:codeql-ratchet`, `check:pr-evidence`). Prehľad ROI zosúladeného súboru identifikoval nasledujúcich kandidátov na racionalizáciu.** Zlúčenia sú mechanické zmeny CI ; flips/drops sú politické rozhodnutia vyhradené pre prevádzkovateľa.** Zatiaľ nie je aplikované nič nižšie.
 
-**Vyššie takisto nezdokumentované** (informatívne, nízka výpovedná hodnota): úloha `docs-lint`
-(markdownlint + Vale, celá úloha s `continue-on-error`) a samostatné pracovné postupy skenerov
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. Hodnota `semgrepFindings: 0` sa nachádza v
-`quality-baseline.json`, ale v `ci.yml` nie je napojená na blokujúcu západku — metrika je
-momentálne osirelá.
+**Tiež nezdokumentované vyššie** (poradný, nízky signál): úloha `docs-lint` (markdownlint + Vale, celá úloha `continue-on-error`) a pracovné postupy samostatného skenera `semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` je v `quality-baseline.json`, ale nie je pripojený k blokovacej račni v `ci.yml` — metrika je momentálne osamotená.
 
-### Zlúčenie / deduplikácia (mechanické, nižšie riziko)
+### Zlúčenie / odstránenie (mechanické, nižšie riziko)
 
-Každý kandidát bol 2026-06-17 overený voči aktuálnemu stavu brán (dôveruj, ale preveruj);
-ukázalo sa, že viaceré „zjavné“ zlúčenia skrývajú dlh a **nie sú** bezproblémovými náhradami.
+Každý kandidát bol potvrdený oproti aktuálnemu stavu brány 2026-06-17 (dôveruj-ale-overuj); Ukázalo sa, že niekoľko „zrejmých“ zlúčení skrylo dlh a je** nie** čisté drop-iny.
 
-- **`check:docs-sync` sa spúšťa dvakrát** — samostatne v úlohe `lint` a znova v rámci `check:docs-all` (`docs-sync-strict`) a hooku husky pre pre-commit. ✅ **HOTOVO** — samostatné spustenie v úlohe `lint` bolo odstránené.
-- **Skenovanie CVE** — ❌ **NIE JE to bezproblémové zlúčenie.** `audit:deps` tvrdo zlyhá pri ľubovoľnej CVE s vysokou/kritickou závažnosťou; `check:vuln-ratchet` (osv) zlyhá iba pri _regresii_ oproti východiskovej hodnote (aktuálne 1 MODERATE). Odlišná sémantika — odstránením `audit:deps` by sa stratila absolútna brána pre vysokú/kritickú závažnosť. Ponechať obe.
-- **Detekcia cyklov** — ✅ **HOTOVO** (#15159 G-01/G-02). Starý text tu označoval `check:cycles` za „zelenú, starostlivo zostavenú“ bránu a odôvodňoval jej zachovanie ako blokujúcej tým, že `check:circular-deps` (dpdm) hlásil 91 cyklov. Tento zelený stav bol **falošne zelený**: `check:cycles` skenoval 5 podadresárov (450 súborov), vyhľadával iba statické `import|export … from` a zahadzoval každý špecifikátor `@/` a `@omniroute/open-sse/`, takže nemohol zachytiť cykly dynamických importov a aliasov, ktoré v repozitári prevládali. Opravené: brána teraz prechádza `src` + `open-sse` (5023 súborov), zhromažďuje špecifikátory z AST TypeScriptu (takže `import("…")` sa započítava a `typeof import("…")` v typovej pozícii nie) a rozpoznáva `paths` z tsconfig. Nachádza **14** cyklov, nie 0. Keďže 14 existujúcich cyklov nemožno opraviť v PR pre bránu, `check:cycles` je teraz **západka** (`--ratchet`, strop `metrics.cycles.value = 14` v `quality-baseline.json`, `direction: down`) — blokuje akúkoľvek _regresiu_ a počet môže iba klesať. CI spúšťa `npm run check:cycles:ratchet`. Postupné odstraňovanie prebieha spolu s **A-01**. `check:circular-deps` (dpdm) zostáva informatívny ako širší druhý názor.
-- **Zložitosť** — ✅ **HOTOVO** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): jeden prechod ESLintom, počítanie podľa ruleId, aby východiskové hodnoty cyklomatickej zložitosti + max-lines a kognitívnej zložitosti zostali nezávislé; jednotlivé `check:complexity` / `check:cognitive-complexity` zostávajú na lokálne použitie s `--update`.
-- **Ochrana `/api` proti halucináciám** — ✅ **HOTOVO** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): jeden inventár FS pre `src/app/api`, openapi-routes + docs-symbols naďalej hlásia výsledky nezávisle; jednotlivé kontroly zostávajú na lokálne spúšťanie.
-- **`check:node-runtime` sa spúšťa v 11 úlohách** — ⚠️ **nízke ROI.** Každá beží na samostatnom runneri a kontrola trvá <1 s; celková úspora je približne 10 s za cenu straty lacnej ochrany v každej úlohe. Nestojí to za súvisiace zmeny.
-- **`typecheck:noimplicit:core` v úlohe lint CI** — ✅ **odstránené z úlohy lint** (bolo informatívne s `continue-on-error`); blokujúci typový povrch tvoria `typecheck:core` + `check:type-coverage`. Lokálny skript bol zachovaný.
+- **`check:docs-sync` beží dvakrát** — samostatne v úlohe `lint` a opäť vo vnútri `check:docs-all` (`docs-sync-strict`) a husky pre-commit hook. ✅**DONE** — samostatné vyvolanie `lint` odstránené.
+- **skenovanie CVE** — ❌**NOT čisté zlúčenie.** `audit:deps` blokuje kritické upozornenia a neúplné audity vo všetkých piatich uzamykacích súboroch, pričom podľa aktuálnej politiky hlási vysoké upozornenia ako varovania; `check:vuln-ratchet` (osv) zlyhá iba na _regresii_ v porovnaní so zapísanou základnou líniou a v prípade potreby zamietne chýbajúce merania. Odlišná sémantika — vypustením `audit:deps` by stratila absolútne kritickú bránu a potvrdenia o audite nezávislého balíka. Nechajte si oboje.
+- **Detekcia cyklu** — ✅**DONE** (#15159 G-01/G-02). Starý text tu nazval `check:cycles` „zelená, kurátorská“ brána a oprávňoval ho ponechať blokovaný, pretože `check:circular-deps` (dpdm) hlásil 91 cyklov. Tá zelená bola a** falošná zelená** : `check:cycles` naskenoval 5 podadresárov (450 súborov), porovnal iba statické `import|export … from` a zrušil každý špecifikátor `@/` a `@omniroute/open-sse/`, takže nevidel cykly aliasov dynamického importu +, ktoré dominovali v repo. Opravené: brána teraz prechádza `src` + `open-sse` (5023 súborov), zbiera špecifikátory zo TypeScript AST (takže `import("…")` sa počíta a `typeof import("…")` typ-pozícia nie) a rieši tsconfig `paths`. Nájde sa** 14** cyklov, nie 0. Pretože v bráne PR nemožno opraviť 14 už existujúcich cyklov, `check:cycles` je teraz** račňa** (`--ratchet`, strop `metrics.cycles.value = 14` v `quality-baseline.json`, `direction: down`) — blokuje akúkoľvek _regresiu_ a počet môže iba klesať. CI spustí `npm run check:cycles:ratchet`. Vyhorené jazdy s**A-01** . `check:circular-deps` (dpdm) zostáva poradný ako širší druhý názor.
+- **Zložitosť** — ✅**DONE** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): jedna prechádzka ESLint, počíta sa po ruleId, takže cyklomatické + maximálne línie a kognitívne základné línie zostávajú nezávislé; jednotlivé `check:complexity` / `check:cognitive-complexity` zostávajú pre miestne `--update`.
+- **`/api` proti halucináciám** — ✅**DONE** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): jeden FS inventár `src/app/api`, openapi-trasy + docs-symboly sa stále hlásia nezávisle; jednotlivci zostávajú pre miestne behy.
+- **`check:node-runtime` má 11 pracovných miest** — ⚠️** nízke ROI.** Každý je samostatný bežec a kontrola je < 1s; celková úspora ~ 10s, proti strate lacného strážcu na pracovné miesto. Nestojí to za to.
+- **`typecheck:noimplicit:core` on CI lint** — ✅ **removed from lint job** (was advisory `continue-on-error`); blocking type surface is `typecheck:core` + `check:type-coverage`. Local script retained.
 
-### Prepnúť / rozhodnúť (politika operátora)
+### Otočiť / rozhodnúť (zásady prevádzkovateľa)
 
-- `check:openapi-security-tiers` (informatívne) — ❌ **NEDÁ SA bezproblémovo prepnúť.** Končí s kódom 0, ale upozorňuje, že viacerým trasám `traffic-inspector` pod `LOCAL_ONLY_API_PREFIXES` chýba anotácia `x-loopback-only: true`. Jej vynútenie si najprv vyžaduje pridanie týchto anotácií do `openapi.yaml`.
-- `typecheck:noimplicit:core` (informatívne) — do značnej miery ho nahrádza blokujúca západka `check:type-coverage`. Prepnúť na západku alebo odstrániť redundantný druhý prechod `tsc`.
-- `test:vitest:ui` (teraz **blokujúce**) — existujúce zlyhania sú explicitne vylúčené vo `vitest.config.ts` pomocou sledovacích komentárov `// #8618`; nové zlyhania spôsobia zlyhanie úlohy.
-- `check:secrets` (gitleaks, blokujúca západka zmrazená na 3 zdokumentovaných falošne pozitívnych nálezoch) — pridať tieto 3 prípady do zoznamu povolených a dostať sa na 0 alebo degradovať na informatívnu kontrolu. Prekrýva sa s natívnym skenovaním tajomstiev v GitHube + `check:public-creds`.
-- `check:pr-evidence` (blokujúce, prehľadáva prózu v tele PR pomocou grep) — vysoké riziko falošne pozitívnych nálezov; odstránenie oslabí vynucovanie pevného pravidla č. 18, takže ide o skutočné politické rozhodnutie.
-- `semgrep` (samostatné informatívne) — pri rodinách OWASP sa prekrýva s CodeQL; napojiť jeho východiskovú hodnotu na západku alebo ho odstrániť.
+- `check:openapi-security-tiers` (poradný) — ❌**NOT čisto preklopiteľné.** Ukončí sa 0, ale varuje, že niekoľko trás `traffic-inspector` pod `LOCAL_ONLY_API_PREFIXES` nemá anotáciu `x-loopback-only: true`. Na jeho vynútenie je potrebné najskôr pridať tieto anotácie do `openapi.yaml`.
+- `typecheck:noimplicit:core` (poradné) — z veľkej časti zahrnuté do blokovacej `check:type-coverage` račne. Otočte na rohatku alebo zahoďte nadbytočný druhý prechod `tsc`.
+- `test:vitest:ui` (teraz** blokovanie** ) už existujúce zlyhania — sú explicitne vylúčené v `vitest.config.ts` s komentármi sledovania `// #8618` ; nové zlyhania zlyhajú.
+- `check:secrets` (gitleaks, blokovanie račne zmrazené na 3 zdokumentované falošne pozitívne výsledky) — zoznam povolených 3 na dosiahnutie 0 alebo zníženie na poradný. Prekrýva GitHub natívne tajné skenovanie + `check:public-creds`.
+- `check:pr-evidence` (blokovanie, greps PR-body próza) — vysoké falošne pozitívne riziko; oslabuje presadzovanie Hard Rule #18 ak sa zruší, takže toto je skutočná výzva na politiku.
+- `semgrep` (samostatný poradca) — sa prekrýva CodeQL pre rodiny OWASP ; pripevnite jeho základnú čiaru k račni alebo k padaniu.
 
 ---
 

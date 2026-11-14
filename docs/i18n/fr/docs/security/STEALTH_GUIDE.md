@@ -116,41 +116,63 @@ Modules apparentés dans le même pack :
 
 ---
 
-## Furtivité Antigravity
+## Antigravity furtif
 
-Les requêtes Antigravity préservent le texte de l’appelant octet par octet. OmniRoute n’insère pas de caractères sans chasse dans les invites et ne renomme ni n’injecte d’outils pour imiter un client d’EDI.
+Les requêtes Antigravity préservent le texte de l'appelant octet par octet. OmniRoute n'insère pas de caractères de largeur nulle dans les invites ou les outils rename/inject pour imiter un client IDE.
 
 ### `antigravityHeaderScrub.ts`
 
-Supprime les marqueurs du SDK Stainless (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) avant le transfert.
+Supprime les marqueurs SDK en acier inoxydable (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) avant l'expédition.
 
-### ⚠️ Risque : `ANTIGRAVITY_CREDITS=always` (risque élevé de bannissement du compte)
+### Risque ⚠️ : `ANTIGRAVITY_CREDITS=always` (point chaud d'interdiction de compte)
 
-`ANTIGRAVITY_CREDITS=always` (utilisé par `open-sse/executors/antigravity.ts`) achemine **chaque** requête via les dépassements de crédits Antigravity AI (crédits Google payants), au lieu de laisser le quota de l’offre gratuite de Google faire office de limite. Cette fonctionnalité est documentée, mais il s’agit de **la source la plus courante de signalements pour violation des conditions d’utilisation que nous observons** — plusieurs comptes Google Ultra ont été bannis avec `403 / "service disabled for ToS violation" / insufficient_quota` après quelques heures d’exécution avec `=always`.
+routes `ANTIGRAVITY_CREDITS=always` (consommées par `open-sse/executors/antigravity.ts`)** chaque** demandez via Antigravity AI Credit Overages (crédits Google payés) au lieu de laisser les quotas gratuits de Google contrôler les choses. Ceci est documenté comme une fonctionnalité, mais c'est** le rapport de violation de ToS le plus courant que nous voyons** — plusieurs comptes Google Ultra ont été bannis avec `403 / "service disabled for ToS violation" / insufficient_quota` après avoir fonctionné pendant quelques heures avec `=always`.
 
-L’application des règles en amont se fait **du côté de Google** et OmniRoute ne peut rien faire pour l’empêcher. Le nom de la variable d’environnement et la documentation existante donnent l’impression qu’il s’agit d’une option sans risque à activer ; ce n’est pas le cas.
+L’application en amont est en cours** du côté de Google** , rien que OmniRoute ne puisse empêcher. Le nom de la variable d'environnement et la documentation existante donnent l'impression qu'il s'agit d'un bouton sûr à actionner ; ce n'est pas le cas.
 
-**Pourquoi cela déclenche la détection des abus plus agressivement qu’une utilisation limitée à l’offre gratuite :**
+**Pourquoi cela entraîne une détection des abus plus agressive que l'utilisation du niveau gratuit uniquement :**
 
-- Des dépenses automatisées soutenues sur un seul compte Google sont signalées différemment des requêtes de l’offre gratuite qui atteignent le quota puis s’arrêtent.
-- Les dépassements de crédits n’ont aucun plafond de débit ; un client mal configuré peut donc consommer plusieurs centaines de dollars américains en quelques minutes et ressembler à une revente de clé API ou à du trafic de robots.
-- Plusieurs utilisateurs d’OmniRoute consommant en parallèle des crédits de dépassement depuis la même adresse IP externe amplifient le signal.
+- Les dépenses automatisées soutenues sur un seul compte Google se signalent différemment des hits-quota-and-stops du niveau gratuit.
+- Les dépassements de crédit n'ont pas de plafond de taux, donc un client mal configuré peut brûler plusieurs centaines USD en quelques minutes et ressembler à une revente de clé API ou à du trafic de robots.
+- Plusieurs utilisateurs OmniRoute atteignant des crédits excédentaires en parallèle à partir du même IP externe aggravent le signal.
 
-**Approche recommandée :**
+**Posture recommandée :**
 
-1. Conserver la valeur par défaut `ANTIGRAVITY_CREDITS=off`, sauf si l’opérateur accepte explicitement les risques liés aux crédits payants et aux mesures appliquées au compte. `retry` envoie d’abord la requête normale et n’injecte les crédits qu’une seule fois au maximum après une erreur 429 de quota admissible ; `always` injecte les crédits dès la première requête.
-2. **Répartir la charge entre les fournisseurs via Auto-Combo** (`model: "auto"` ou `kr/glm/etc`-combo) au lieu de saturer un seul compte Antigravity.
-3. **Définir des limites de RPM par connexion** sur la page de modification du fournisseur Antigravity (Tableau de bord → Fournisseurs → Antigravity → connexion → limite de débit). Une valeur de 30 à 60 RPM constitue une limite supérieure raisonnable pour une utilisation soutenue.
-4. **Utiliser un réseau en amont stable et contrôlé par l’opérateur**, et éviter de partager un même compte entre des utilisateurs ou des charges de travail sans rapport.
-5. **En cas de bannissement** : envoyer un recours via `support.google.com` → « Restore Workspace/Account access » en incluant le corps exact de la réponse `quota_exceeded` / `service disabled` envoyée par Google. Le rétablissement n’est pas garanti.
+1. Conservez le `ANTIGRAVITY_CREDITS=off` par défaut à moins que l'opérateur n'accepte explicitement le risque de crédit payé et de recouvrement de compte. `retry` envoie d'abord la requête normale et injecte des crédits au maximum une fois après un quota éligible 429 ; `always` injecte des crédits à la première demande.
+2. **Répartir la charge entre les fournisseurs via Auto-Combo** (`model: "auto"` ou `kr/glm/etc` -combo) au lieu de saturer un seul compte Antigravity.
+3. **Définir les limites RPM par connexion** dans la page d'édition du fournisseur Antigravity (Dashboard → Providers → Antigravity → connection → rate limit). 30 à 60 RPM est une limite supérieure défendable pour une utilisation prolongée.
+4. **Utiliser un réseau en amont stable et contrôlé par l'opérateur** et évitez de partager un compte entre des utilisateurs ou des charges de travail non liés.
+5. **Si interdit** : appel via `support.google.com` → "Restaurer l'accès Workspace/Account " avec le corps de réponse `quota_exceeded` / `service disabled` exact Google envoyé. La restauration n'est pas garantie.
 
-La documentation de référence des variables d’environnement décrit les conséquences de chaque mode de crédits sur le compte et les dépenses.
+La référence d'environnement documente les implications de compte et de dépenses de chaque mode de crédits.
 
-Points d’intervention :
+#### Pas seulement `=always`: routage Antigravity OAuth en général
+
+Les suspensions ne se limitent pas aux dépassements de crédit. Des rapports de novembre 2026 (#19223, #19266) décrivent plusieurs comptes Google suspendus lors du routage via les fournisseurs `antigravity` et `agy` (Antigravity CLI), avec :
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+Les deux fournisseurs s'authentifient avec la session OAuth du produit Antigravity, ce qui est le cas contre lequel l'avis de risque du tableau de bord (« Ce fournisseur utilise votre produit officiel session/OAuth, qui n'est pas autorisé pour une utilisation proxy/router ») prévient avant qu'une connexion ne soit ajoutée. Aucune des recommandations ci-dessus n’autorise cet usage ; ils ne font que réduire le trafic généré par un compte.
+
+**Interfaces API autorisées pour les modèles Gemini.** Google offre un accès programmatique à Gemini via son APIs, que OmniRoute prend en charge en tant que fournisseur de clé API ordinaire :
+
+| Identifiant du fournisseur | Nom du tableau de bord    | Informations d'identification                                                  |
+| -------------------------- | ------------------------- | ------------------------------------------------------------------------------ |
+| `gemini`                   | Gemini (Google AI Studio) | Clé Gemini API de Google AI Studio (niveau gratuit disponible)                 |
+| `vertex`                   | Sommet AI                 | Compte de service JSON, jeton d'accès OAuth ou clé Vertex Express API (Gemini) |
+
+Ces fournisseurs utilisent les informations d'identification des problèmes Google pour l'accès API, contrairement à la session du produit Antigravity. Ils ne rendent pas tous les usages conformes et ne suppriment pas les risques de mise en application : chacun est régi par ses propres modalités, que l'opérateur doit vérifier pour leur déploiement. Par exemple, les [conditions d'utilisation supplémentaires Gemini API](https://ai.google.dev/gemini-api/terms) autorisent uniquement les services payants lorsque les clients API sont mis à la disposition des utilisateurs de l'Espace économique européen, de la Suisse ou du Royaume-Uni, et que le contenu envoyé aux services non payés peut être utilisé pour améliorer les produits de Google. Vertex AI relève plutôt des conditions de Google Cloud ( [Conditions spécifiques au service](https://cloud.google.com/terms/service-terms) ). Les prix et les quotas suivent ces conditions API plutôt qu'un abonnement Antigravity.
+
+Les opérateurs qui souhaitent éviter les suspensions Antigravity décrites ci-dessus doivent acheminer le trafic Gemini via l'un de ces fournisseurs au lieu de `antigravity` / `agy`, après avoir vérifié que leur utilisation correspond aux conditions du fournisseur.
+
+Points de contact :
 
 - `open-sse/executors/antigravity.ts` — lit `process.env.ANTIGRAVITY_CREDITS`
-- `src/lib/oauth/providers/antigravity.ts` — gestion des identifiants
-- Rapport d’incident d’origine : discussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- `src/lib/oauth/providers/antigravity.ts` — accréditation plomberie
+- Rapport d'incident original : Discussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

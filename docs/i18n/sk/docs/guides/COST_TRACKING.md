@@ -43,9 +43,9 @@ Keďže toto číslo je odhad:
 
 Náklady pochádzajú zo zlúčenej cenovej tabuľky v [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) v tomto poradí priority (** najskôr najvyššie** ):
 
-1. **Používateľ prepíše** — ceny nastavené na dashboarde alebo cez `PATCH /api/pricing` (menný priestor `pricing` ).
+1. **Používateľ prepíše** ceny — nastavené na informačnom paneli alebo prostredníctvom `PATCH /api/pricing` (priestor názvov `pricing` ).
 2. **synchronizácia modelov.dev** ceny — získané zo `https://models.dev/api.json` (priestor názvov `models_dev_pricing` ).
-3. **synchronizácia LiteLLM** ceny — získané z verejného `model_prices_and_context_window.json` spoločnosti LiteLLM(priestor názvov `pricing_synced` ).
+3. **LiteLLM synchronizácia** ceny — získané z verejného `model_prices_and_context_window.json` spoločnosti LiteLLM(priestor názvov `pricing_synced` ).
 4. **Pevne zakódované predvolené hodnoty** sadzby — odoslané v [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
 Pre rovnaké provider/model hodnoty z vrstiev s vyššou prioritou prepíšu zodpovedajúce polia v nižších vrstvách; polia chýbajúce v hornej vrstve môžu stále pochádzať z nižšej vrstvy. Poradie je pevné, aj keď sú obe nezávislé synchronizačné úlohy spustené súčasne. `GET /api/pricing?includeSources=1` vráti `pricing` a `sourceMap`, ktorých označenia pre jednotlivé modely (`user`, `modelsDev`, `litellm`, `default`) identifikujú vrstvu s najvyššou prioritou obsahujúcu daný model.
@@ -58,7 +58,7 @@ Pre rovnaké provider/model hodnoty z vrstiev s vyššou prioritou prepíšu zod
 | `PRICING_SYNC_INTERVAL` | `86400`    | Interval synchronizácie v sekundách (denne).                                       |
 | `PRICING_SYNC_SOURCES`  | `litellm`  | Výber zdroja len pre túto synchronizáciu; momentálne je podporovaná iba `litellm`. |
 
-**synchronizácia modelov.dev** je oddelená od synchronizácie LiteLLM a je tiež predvolene vypnutá. Povoľte ho v Nastaveniach (synchronizácia modelov.dev) alebo použite tieto premenné:
+**synchronizácia modelov.dev** je oddelená od synchronizácie LiteLLM a je tiež predvolene vypnutá. Povoľte ju v Nastaveniach (synchronizácia modelov.dev) alebo použite tieto premenné:
 
 | Env var                    | Predvolené      | Účel                                                                                                                                   |
 | -------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
@@ -79,19 +79,41 @@ Cena sa počíta na žiadosť z počtu tokenov a sadzieb za milión tokenov v [`
 
 Všetky sadzby sú interpretované ako USD na 1 000 000 tokenov. Úroveň služieb „rýchla“/„priorita“ alebo „flex“ Codex uplatňuje násobiteľ nákladov (`getCodexFastCostMultiplier`) — napr. flex sa účtuje s 50 % zľavou na token, ktorá sa zobrazí ako** flexibilné úspory** v prístrojovej doske.
 
-Názvy modelov sa najskôr normalizujú (predpony cesty poskytovateľa ako `openai/` alebo `accounts/fireworks/models/` sú odstránené), takže historické riadky stále zodpovedajú cene.
+Názvy modelov sa najskôr normalizujú (predpony cesty poskytovateľa, ako napríklad `openai/` alebo `accounts/fireworks/models/` sú odstránené), takže historické riadky stále zodpovedajú cene.
 
 ### Ako sa zaznamenávajú výdavky
 
-- Náklady na žiadosť sa vypočítajú po odozve a zaznamenajú sa, aby sa klientovi nikdy nezvýšila latencia. Spotreba zdieľanej kvóty je naplánovaná pri ďalšom zaškrtnutí slučky udalostí cez [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Výdavky na kľúč API sa ukladajú do vyrovnávacej pamäte a vyprázdnia v dávkach pomocou [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (predvolený interval vyprázdnenia 60 s, vyrovnávacia pamäť 1 000 záznamov). Laditeľné cez:
+- Cena za žiadosť sa vypočíta po dokončení žiadosti. Spotreba zdieľanej kvóty je naplánovaná pri ďalšom zaškrtnutí slučky udalostí prostredníctvom [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Výdavky kľúčov API sa ukladajú do vyrovnávacej pamäte a vyprázdnia v dávkach pomocou [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (predvolený interval vyprázdnenia 60 s, vyrovnávacia pamäť 1 000 záznamov). Laditeľné cez:
 
   | Env var                             | Predvolené | Účel                                                               |
   | ----------------------------------- | ---------- | ------------------------------------------------------------------ |
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`    | Interval splachovania v milisekundách.                             |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`     | Maximálny počet záznamov vo vyrovnávacej pamäti pred vyprázdnením. |
 
-Údaje o nákladoch na prístrojovej doske sú** nie** čítať z uloženej sumy v dolároch za riadok — sa prepočítavajú za chodu z počtu tokenov a aktuálnej cenovej tabuľky pri každom spustení analytického koncového bodu. To znamená, že oprava nesprávnej ceny (a opätovná synchronizácia) spätne aktualizuje historické odhady nákladov.
+Náklady uprednostňujú presný poplatok nahlásený poskytovateľom (`provider_cost_usd`), potom snímku požiadavky podľa katalógovej ceny (`calculated_cost_usd`), potom precenenie tokenu z aktuálneho katalógu. Uložené náklady sa znova neúčtujú prostredníctvom ich počtu tokenov. Staršie riadky obsahujúce iba token sa stále menia, keď sa zmení ich katalógová cena.
+
+### OCR a vloženia
+
+- Úspešné požiadavky `/v1/ocr` používajú upstream `usage_info.pages_processed`, nie požadovaný rozsah stránok alebo počet vrátených objektov stránok. Odhad je strán × `ocr_cost_per_page` (absolútne USD/page,** nie** USD/million).
+- Žiadosti s anotáciami dokumentu alebo ohraničenia vyžadujú samostatnú tarifu `ocr_cost_per_annotated_page`. Bez nej zostávajú náklady neznáme; obyčajná tarifa OCR nie je v tichosti nahradená.
+- LiteLLM sync mapuje svoje pole `annotation_cost_per_page` v smere toku do `ocr_cost_per_annotated_page`, pričom zachová absolútnu hodnotu USD/page a záznamy len s anotáciami, vrátane explicitnej nuly. Dodané kanonické pole má prednosť; neplatné hodnoty aliasov sa ignorujú. Prepisy cien pre používateľov si zachovávajú svoju normálnu prioritu. Pozrite si [cenové kľúče LiteLLM od OCR](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Použitie OCR ukladá počet stránok, jednotkovú cenu, vypočítanú cenu USD, kľúč API a vybrané pripojenie. Stránky nie sú nikdy reprezentované ako tokeny. Záznamy hovorov obsahujú fakturačné metadáta, nie dokument URLs, PDF bajty ani extrahovaný text.
+- Úspešné požiadavky `/v1/embeddings` zaznamenajú jeden riadok použitia na fyzickú dávku vrátane samostatných dávok dokončených v tej istej milisekunde. Poplatky nahlásené poskytovateľom majú prednosť pred symbolickými odhadmi; kombinované obaly neplatia poplatok.
+- Tieto poplatky zahŕňajú históriu používania, analýzu nákladov, okná provider/account, limity výdavkov na kľúče API, knihu nákladov na požiadavky a súhrny denného používania. Kľúče bez protokolu zachovávajú numerické účtovanie bez zachovania zdrojového textu.
+- Chýba použitie alebo tarify** neznámy** , nie je zadarmo: hlavička nákladov na odozvu je vynechaná a existujúca politika neoceneného používania sa vzťahuje na obmedzené kľúče API. Explicitne nakonfigurované nulové sadzby zostávajú v platnosti s nulovými nákladmi.
+
+Toto je len forwardové účtovníctvo. Staré volania OCR/embedding, ktoré nikdy nezapísali históriu používania, nemožno z tejto migrácie zrekonštruovať. Katalógové odhady sú odhady USD, nie faktúra, a nezahŕňajú prevod meny, dane ani zľavy.
+
+### Reč a obrázky
+
+- Úspešné pokusy `/v1/audio/transcriptions`, `/v1/audio/speech` a generovanie obrázkov zdieľajú numerické účtovanie. Priame a kombinované hovory nesú kláves API volajúceho a zvolené spojenie; kombinovaný obal nikdy nepridá druhý debet.
+- Poskytovateľom nahlásená USD víťazí nad katalógovým odhadom vrátane explicitného nulového poplatku. OpenRouterJSON `usage.cost` sa normalizuje na `cost_usd`. V opačnom prípade merané tokeny používajú ceny tokenov, sekundy prepisu používajú ceny za sekundu, hlasový vstup používa počet znakov Unicode a obrázky s pevnou cenou používajú skutočne vrátené číslo, nie požadované `n`.
+- Binárne OpenRouter TTS nemá telo použitia JSON. Po dokončení zvuku alebo zrušení volajúceho sa OmniRoute spýta na svoju generáciu ID na** rovnaký** nakonfigurovaný pôvod OpenRouter. Žiadosť EU sa nikdy nevráti späť na globálny pôvod. Toto je ohraničené vyhľadávanie len na čítanie; syntéza sa pre účtovníctvo neopakuje. Fakturačné záznamy sa môžu objaviť po dokončení zvuku: opakované vyhľadávanie prebieha na pozadí až približne 52 sekúnd, vrátane uzávierok siete.
+- Počas tohto vyhľadávania má zvuková odpoveď `X-OmniRoute-Cost-Status: pending` a žiadnu hlavičku nákladov na odpoveď. Jeho konečný poplatok sa objaví v histórii používania, analytike a hlavnej knihe po vyrovnaní. Ak metadáta nie sú k dispozícii, použije sa konfigurovaná snímka tarify; inak cena zostáva neznáma.
+- Počty sekúnd, znakov a obrázkov majú samostatné polia fakturačných jednotiek, nikdy nie falošné počty tokenov. Účtovníctvo zachováva iba číselné použitie, nie text reči, prepisy alebo bajty obrázkov. Existujúce výnimky týkajúce sa neocenených obrázkov sú nezmenené: skutočne chýbajúca tarifa za obrázok nezablokuje obmedzený kľúč a v odpovedi sa vynechá hlavička ceny namiesto toho, aby sa hovor vyhlásil za bezplatný. Zlyhanie obchodu s cenami si stále uchováva dôkazy o používaní pre neúspešné vynútenie.
+
+Žiadny historický poplatok speech/image nie je vynájdený ani zasypaný. Účtovanie poskytovateľa zostáva referenčným pre faktúry a hovory, ktorých poplatok nebol nahlásený.
 
 ---
 

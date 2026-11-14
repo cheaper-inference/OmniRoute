@@ -184,7 +184,7 @@ src/
 | `radar/`                                 | Radar-Free-Model-Katalog-Client: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — `docs/frameworks/RADAR.md`                                                                                                                                                     |
 | `display/`                               | UI -Formatierungshilfen (Kosten, Latenz usw.)                                                                                                                                                                                                                                                                                |
 | `embeddings/`                            | Helfer des Einbettungsdienstes                                                                                                                                                                                                                                                                                               |
-| `env/`                                   | Env-Variablenanalyse, + -Validierung                                                                                                                                                                                                                                                                                         |
+| `env/`                                   | Env-Variablenparsing, + -Validierung                                                                                                                                                                                                                                                                                         |
 | `evals/`                                 | Eval-Framework (Suites, Runner, Runtime) — siehe `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                                  |
 | `guardrails/`                            | PII Masker, sofortige Injektion, Vision-Brücke — siehe `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                         |
 | `jobs/`                                  | Hintergrundjobs (Cron-ähnlich)                                                                                                                                                                                                                                                                                               |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dashboard-Komponente API: Adapter über `packages/ui-kit` — siehe `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: Von den Bildschirmen verwendete Symbolnamen → Lucide-Komponenten (`<Icon>`)               |
-| `constants/providers.ts`         | **381 Anbieter** mit Zod -Validierung (Quelle der Wahrheit)                                           |
+| `constants/providers.ts`         | **394 Anbieter** mit Zod -Validierung (Quelle der Wahrheit)                                           |
 | `constants/cliTools.ts`          | Externe CLI Tool-Registrierung                                                                        |
-| `constants/routingStrategies.ts` | **20 Routing-Strategien** mit Prioritäten                                                             |
+| `constants/routingStrategies.ts` | **22 Routing-Strategien** mit Prioritäten                                                             |
 | `constants/publicApiRoutes.ts`   | Routen, die eine Bearer-Authentifizierung (vs. Management-Authentifizierung) erfordern                |
 | `constants/upstreamHeaders.ts`   | Header-Denylist für Upstream-Anfragen                                                                 |
 | `validation/schemas.ts`          | ~ 80 Zod -Schemata (Single Source of Truth für API Verträge)                                          |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — Arbeitsbereich der Streaming-Engine
+## `open-sse/` — Streaming Engine-Arbeitsbereich
 
-Separater npm-Workspace (`@omniroute/open-sse`). Verarbeitet Anfragen und führt Anbieter aus.
+Separater NPM-Arbeitsbereich (`@omniroute/open-sse`). Verarbeitet die Ausführung der Anforderungsverarbeitung durch + -Anbieter.
 
 ```
 open-sse/
-├── handlers/            # 16 Dateien (12 Handler + 4 Hilfsmodule): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search usw.
-├── executors/           # 150 Executor-Module (Klassen, die BaseExecutor erweitern, sowie anbieterspezifische Hilfsmodule)
-├── translator/          # Formatkonverter (9 für Anfragen, 9 für Antworten, 9 Hilfsmodule)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ Dienstmodule (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM usw.)
-├── mcp-server/          # MCP-Server (110 Tools, 3 Transportarten, 33 Scopes)
-├── config/              # Anbieter-/Modellregister, Header-Konfiguration, Modellaliase
-├── utils/               # TLS-Client, Proxy-Fetch/Dispatcher, Netzwerk-Hilfsmodule
-├── index.ts             # Einstiegspunkt des Workspaces
-├── package.json         # Workspace-Manifest
-├── tsconfig.json        # TS-Konfiguration des Workspaces
-└── types.d.ts           # Typdeklarationen des Workspaces
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Pfad                        | Zweck                                                                             |
-| --------------------------- | --------------------------------------------------------------------------------- |
-| `server.ts`                 | Lebenszyklus des MCP-Servers (stdio- und HTTP-Transporte)                         |
-| `httpTransport.ts`          | HTTP-Streamable- und SSE-Transporte (`/api/mcp/sse`, `/api/mcp/stream`)           |
-| `audit.ts`                  | Audit-Protokollierung in der Tabelle `mcp_tool_audit`                             |
-| `scopeEnforcement.ts`       | Tool-spezifische Scope-Validierung                                                |
-| `runtimeHeartbeat.ts`       | Zustands-Heartbeat in `DATA_DIR/runtime/mcp-heartbeat.json`                       |
-| `descriptionCompressor.ts`  | Komprimiert Metadaten von Tool-Beschreibungen, um Kontext einzusparen             |
-| `schemas/tools.ts`          | 36 grundlegende Tool-Definitionen + Scopes                                        |
-| `tools/advancedTools.ts`    | Implementierungen erweiterter Tools                                               |
-| `tools/memoryTools.ts`      | 3 Speicher-Tools (Suchen/Hinzufügen/Löschen)                                      |
-| `tools/skillTools.ts`       | 4 Skill-Tools (Auflisten/Aktivieren/Ausführen/Ausführungen)                       |
-| `tools/compressionTools.ts` | 5 Komprimierungs-Tools                                                            |
-| `README.md`                 | Interne README des MCP-Servers (querverlinkt aus `docs/frameworks/MCP-SERVER.md`) |
+| Weg                         | Zweck                                                                                |
+| --------------------------- | ------------------------------------------------------------------------------------ |
+| `server.ts`                 | Lebenszyklus MCP Servers (STDIO + HTTP -Transporte)                                  |
+| `httpTransport.ts`          | HTTP Streambare + SSE -Transporte (`/api/mcp/sse`, `/api/mcp/stream`)                |
+| `audit.ts`                  | Audit-Protokollierung in der `mcp_tool_audit` Tabelle                                |
+| `scopeEnforcement.ts`       | Validierung des Umfangs pro Tool                                                     |
+| `runtimeHeartbeat.ts`       | Gesundheitsherzschlag an `DATA_DIR/runtime/mcp-heartbeat.json`                       |
+| `descriptionCompressor.ts`  | Komprimieren Sie die Metadaten der Werkzeugbeschreibung, um den Kontext zu speichern |
+| `schemas/tools.ts`          | 36 Basis-Tool-Definitionen + Bereiche                                                |
+| `tools/advancedTools.ts`    | Erweiterte Tool-Implementierungen                                                    |
+| `tools/memoryTools.ts`      | 3 Speichertools (search/add/clear)                                                   |
+| `tools/skillTools.ts`       | 4 Fertigkeitswerkzeuge (list/enable/execute/executions)                              |
+| `tools/compressionTools.ts` | 5 Komprimierungswerkzeuge                                                            |
+| `README.md`                 | Interner MCP Server README (vernetzt von `docs/frameworks/MCP-SERVER.md`)            |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Externe CLI -Integrationen + Interne OmniRoute CLI                                            |
 | `I18N.md`                   | i18n-Architektur, Hinzufügen einer Sprache, 67 Gebietsschemas                                 |
 | `UNINSTALL.md`              | Saubere Deinstallationsschritte                                                               |
-| `PROVIDER_REFERENCE.md`     | **Automatisch generiert** Katalog von 381 Anbietern (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automatisch generiert** Katalog von 394 Anbietern (regen: `npm run gen:provider-reference`) |
 
 ### Tiefgehende Einblicke in das Subsystem
 
@@ -429,7 +429,7 @@ open-sse/
 | `GUARDRAILS.md`                            | PII -Masker, sofortige Injektion, Sichtbrücke                                        |
 | `COMPLIANCE.md`                            | Audit-Protokoll, Aufbewahrung, noLog -Opt-out                                        |
 | `WEBHOOKS.md`                              | HMAC-signierte Webhook-Zustellung                                                    |
-| `REASONING_REPLAY.md`                      | Hybrider memory/SQLite Cache für `reasoning_content`                                 |
+| `REASONING_REPLAY.md`                      | Hybrider memory/SQLite -Cache für `reasoning_content`                                |
 | `AUTHZ_GUIDE.md`                           | Autorisierungspipeline (`classify` → `policies` → `enforce`)                         |
 | `RESILIENCE_GUIDE.md`                      | Leistungsschalter + Abklingzeit + -Modellsperre                                      |
 | `docs/security/STEALTH_GUIDE.md` (nur Git) | TLS -Fingerabdruck (JA3/JA4), Claude -Code CCH, MITM Zertifikat                      |

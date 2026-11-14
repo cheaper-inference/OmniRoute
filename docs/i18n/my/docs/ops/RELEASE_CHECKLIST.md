@@ -84,211 +84,207 @@ unit shard များ၊ integration၊ vitest၊ lint/typecheck၊ docs-sync�
 Test သီးသန့် diff များ (`tests/` အောက်ရှိ file အားလုံးဖြစ်ပြီး `tests/e2e/` အောက်တွင် တစ်ခုမျှမရှိခြင်း) သည် မည်သည့် label မလိုဘဲ E2E
 matrix ကို အလိုအလျောက် ကျော်သည်။
 
-## အသေးစိတ် စစ်ဆေးရန်စာရင်း
+## အသေးစိတ်စစ်ဆေးစာရင်း
 
-### ဖြန့်ချိမှုမတိုင်မီ
+### အကြိုလွှတ်
 
-- [ ] ဤဖြန့်ချိမှုအတွက် ရည်ရွယ်ထားသော PR အားလုံးကို `release/vX.Y.0` သို့ ပေါင်းစည်းပြီးဖြစ်သည်
-- [ ] ဤဗားရှင်းအတွက် ဖွင့်ထားဆဲ Linear/issue အချက်များအားလုံးကို ပိတ်ပြီးဖြစ်သည် သို့မဟုတ် နောက် milestone သို့ ရွှေ့ထားသည်
-- [ ] `release/vX.Y.0` branch တွင် CI အောင်မြင်နေသည်
-- [ ] ကုဒ်ထဲတွင် `TODO(release)` marker မရှိပါ- `grep -r "TODO(release)" src/ open-sse/`
-- [ ] Docker base image သည် နောက်ဆုံးအခြေအနေဖြစ်သည် (လက်ရှိ `node:24.15.0-trixie-slim`)
+- [ ] ဤထုတ်ဝေမှုအတွက် ပစ်မှတ်ထားသည့် PRs အားလုံးကို `release/vX.Y.0` သို့ ပေါင်းထားသည်။
+- [ ] ဤဗားရှင်းအတွက် ဖွင့်ထားသော Linear/issue ပစ္စည်းများအားလုံးကို ပိတ်ထားသည် သို့မဟုတ် နောက်မှတ်တိုင်သို့ တွန်းပို့ထားသည်။
+- [ ] `release/vX.Y.0` အကိုင်းအခက်ပေါ်တွင်CI အစိမ်းရောင်
+- [ ] ကုဒ်တွင် `TODO(release)` အမှတ်အသားများ မရှိပါ- `grep -r "TODO(release)" src/ open-sse/`
+- [ ] Docker အခြေခံပုံသည် နောက်ဆုံးပေါ် ပုံဖြစ်သည် (လက်ရှိ `node:24.15.0-trixie-slim`)
 
 ### ဗားရှင်းနှင့် ပြောင်းလဲမှုမှတ်တမ်း
 
-- [ ] `/version-bump-cc <patch|minor|major>` ကို run ပါ (Claude Code skill)
-  - `package.json`, `electron/package.json` တို့၏ ဗားရှင်းကို မြှင့်တင်သည်
-  - နောက်ဆုံး tag မှစ၍ git commit များအပေါ် အခြေခံပြီး `CHANGELOG.md` ကို ပြန်လည်ဖန်တီးသည်
-  - README.md badge များကို အပ်ဒိတ်လုပ်သည်
-- [ ] CHANGELOG.md ကို ကိုယ်တိုင်ပြန်လည်သုံးသပ်ပြီး လိုအပ်ပါက commit message များကို ရှင်းလင်းပြင်ဆင်ပါ
-- [ ] `CHANGELOG.md` ထဲရှိ နောက်ဆုံး semver အပိုင်းသည် `package.json` ဗားရှင်းနှင့် တူညီကြောင်း သေချာပါစေ
-- [ ] လာမည့်လုပ်ဆောင်ချက်များအတွက် `## [Unreleased]` ကို changelog ၏ ပထမအပိုင်းအဖြစ် ဆက်လက်ထားရှိပါ
-- [ ] `docs/openapi.yaml` ကို အပ်ဒိတ်လုပ်ပါ → `info.version` သည် `package.json` ဗားရှင်းနှင့် တူညီရမည်
+- [ ] `/version-bump-cc <patch|minor|major>` (Claude ကုဒ်ကျွမ်းကျင်မှု) ကိုဖွင့်ပါ
+  - အဖုအထစ် `package.json`, `electron/package.json`
+  - နောက်ဆုံးတဂ်ကတည်းက git commits မှ `CHANGELOG.md` ပြန်ထုတ်သည်။
+  - README.md တံဆိပ်များကို အပ်ဒိတ်လုပ်ခြင်း။
+- [ ] CHANGELOG.md ကိုယ်တိုင်သုံးသပ်ပြီး လိုအပ်ပါက ကွန်မန့်မက်ဆေ့ချ်များကို ရှင်းလင်းပါ။
+- [ ] `CHANGELOG.md` ရှိ နောက်ဆုံး semver ကဏ္ဍသည် `package.json` ဗားရှင်းနှင့် တူညီကြောင်း သေချာပါစေ။
+- [ ] လာမည့်အလုပ်အတွက် `## [Unreleased]` ပထမဆုံး changelog အပိုင်းအဖြစ် ထားပါ။
+- [ ] အပ်ဒိတ် `docs/openapi.yaml` → `info.version` `package.json` ဗားရှင်းနှင့် ညီရပါမည်။
 
 ### ကုဒ်အရည်အသွေး
 
-- [ ] `npm run lint` — error 0 ခု (warning များသည် ယခင်ကတည်းက ရှိပြီးသားဖြစ်သည်)
-- [ ] `npm run typecheck:core` — ပြဿနာမရှိ
-- [ ] `npm run typecheck:noimplicit:core` — ပြဿနာမရှိ (တင်းကျပ်သောစစ်ဆေးမှု)
-- [ ] `npm run check:cycles:ratchet` — သတ်မှတ်ထားသော `metrics.cycles` အမြင့်ဆုံးကန့်သတ်ချက်အတွင်း ရှိသည် (`check:cycles` သာ run ပါက cycle တစ်ခုခုရှိသည်နှင့် exit code 1 ဖြင့် ထွက်မည်၊ #15281)
-- [ ] `npm run check:any-budget:t11` — သတ်မှတ် budget အတွင်း ရှိသည်
-- [ ] `npm run check:route-validation:t06` — ပြဿနာမရှိ
-- [ ] `npm run check:node-runtime` — ပံ့ပိုးထားသော runtime အနိမ့်ဆုံးကန့်သတ်ချက်နှင့် ကိုက်ညီသည် (`src/shared/utils/nodeRuntimeSupport.ts` ရှိ `SUPPORTED_NODE_RANGE` အရ `>=22.22.2 <23`, `>=24.0.0 <27`; `package.json` ရှိ `engines` နှင့် ကိုက်ညီသည်)
+- [ ] `npm run lint` — 0 အမှားများ (သတိပေးချက်များသည် နဂိုရှိပြီးသား)
+- [ ] `npm run typecheck:core` — သန့်
+- [ ] `npm run typecheck:noimplicit:core` — သန့်ရှင်းမှု (တင်းကျပ်)၊
+- [ ] အေးခဲနေသော `metrics.cycles` မျက်နှာကျက်အတွင်း`npm run check:cycles:ratchet` — ( `check:cycles` 1 ကို လွတ်ထွက်သွားသည်၊ #15281)
+- [ ] ဘတ်ဂျက်အတွင်း`npm run check:any-budget:t11` —
+- [ ] `npm run check:route-validation:t06` — သန့်
+- [ ] `npm run check:node-runtime` — ပံ့ပိုးထားသော runtime floor met (`>=22.22.2 <23`, `>=24.0.0 <27`, per `SUPPORTED_NODE_RANGE` in `src/shared/utils/nodeRuntimeSupport.ts`; `package.json` `engines` နှင့် aligned )
 
-### စမ်းသပ်ခြင်း
+### စမ်းသပ်ခြင်း။
 
-- [ ] `npm run test:unit` — အောင်မြင်သည်
-- [ ] `npm run test:vitest` — အောင်မြင်သည် (MCP server, autoCombo, cache)
-- [ ] `npm run test:coverage` — 60/60/60/60 သတ်မှတ်ချက် ပြည့်မီသည် (statements/lines/functions/branches)
-- [ ] `npm run test:integration` — အောင်မြင်သည် (ပြောင်းလဲမှုများက DB / handler များကို ထိခိုက်ပါက)
-- [ ] `npm run test:combo:matrix` — အောင်မြင်သည် (combo strategy matrix: အများပြည်သူသုံး routing strategy 19 ခုလုံး၏ ရွေးချယ်ဆုံးဖြတ်ချက်များကို တစ်သမတ်တည်းဖြစ်ကြောင်း သက်သေပြသည်; combo routing၊ strategy resolution သို့မဟုတ် fallback logic ကို ပြင်ဆင်သည့်အခါ run ပါ)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **ရွေးချယ်နိုင်/ကိုယ်တိုင်လုပ်ဆောင်ရန်** (gate ဖြင့် ကန့်သတ်ထားသော upstream အစစ် smoke test; VPS `root@192.168.0.15` မှ read-only DB snapshot ကို ရယူအသုံးပြုသည်; provider အစစ်များကို ခေါ်ယူသဖြင့် credit ကုန်ကျသည်; CI တွင် မည်သည့်အခါမျှ မ run ပါ; gate မရှိပါက ပြဿနာမဖြစ်စေဘဲ ကျော်သွားသည်)
-- [ ] `npm run test:combo:live:vps` — **ရွေးချယ်နိုင်/ကိုယ်တိုင်လုပ်ဆောင်ရန်** (Phase-3 VPS live smoke: ရိုးရိုး Node ESM မှတစ်ဆင့် live `.15` server ကို စမ်းသပ်သည့် HTTP scenario 7 ခု; `ssh root@192.168.0.15` လိုအပ်သည်; `__live_test__*` combo များကိုသာ ဖန်တီး/ဖျက်ပစ်သည်; provider အစစ်များကို ခေါ်ယူသည်; CI တွင် မည်သည့်အခါမျှ မ run ပါ)
-- [ ] `npm run test:e2e` — အောင်မြင်သည် (UI ပြောင်းလဲမှုများ)
-- [ ] `npm run test:protocols:e2e` — အောင်မြင်သည် (MCP/A2A ပြောင်းလဲမှုများ)
-- [ ] `npm run test:ecosystem` — အောင်မြင်သည်
+- [ ] `npm run test:unit` — ကျော်ဖြတ်
+- [ ] `npm run test:vitest` — pass (MCP server၊ autoCombo၊ cache)
+- [ ] `npm run test:coverage` — ဂိတ် 60/60/60/60 ကျေနပ်မှု (statements/lines/functions/branches)
+- [ ] `npm run test:integration` — pass (ပြောင်းလဲပါက DB / handlers တို့ထိပါ)
+- [ ] `npm run test:combo:matrix` — pass (combo နည်းဗျူဟာ matrix- အများသူငှာ လမ်းကြောင်းသတ်မှတ်ခြင်း မဟာဗျူဟာ 22 ခုစလုံး၏ ရွေးချယ်မှု ဆုံးဖြတ်ချက်များကို တိကျစွာ သက်သေပြသည်၊ ပေါင်းစပ်လမ်းကြောင်း လမ်းကြောင်း၊ ဗျူဟာ ပြတ်သားမှု သို့မဟုတ် နောက်ပြန်ဆုတ်ခြင်း ယုတ္တိဗေဒတို့ကို ထိသောအခါတွင် လုပ်ဆောင်ပါ)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (ရေစီးကြောင်းအတိုင်း မီးခိုးများကို ပိတ်ထားသည်၊ VPS `root@192.168.0.15` မှ ဖတ်သာမြင်သာသော DB လျှပ်တစ်ပြက်ဓာတ်ပုံကို ရင်းမြစ်သည်၊ အစစ်အမှန် ဝန်ဆောင်မှုပေးသူများ၊ ကုန်ကျစရိတ်ခရက်ဒစ်များထိသည်၊ CI တွင် ဘယ်တော့မှ မလည်ပတ်ပါ၊ ဂိတ်မပါဘဲ သန့်ရှင်းစွာ ကျော်သွားသည်)
+- [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS တိုက်ရိုက်မီးခိုး - ရိုးရိုး Node ESM မှတစ်ဆင့် တိုက်ရိုက် `.15` ဆာဗာကို ဆန့်ကျင်သည့် 7 HTTP မြင်ကွင်းများ ; `ssh root@192.168.0.15` လိုအပ်သည်၊ creates/deletes သာလျှင် `__live_test__*` combos ၊ အစစ်အမှန်ဝန်ဆောင်မှုပေးသူများကို ထိမှန်သည် ၊ CI တွင် ဘယ်သောအခါမှ မလည်ပတ်ပါ )
+- [ ] `npm run test:e2e` — pass (UI အပြောင်းအလဲများ)
+- [ ] `npm run test:protocols:e2e` — pass (MCP/A2A အပြောင်းအလဲများ)
+- [ ] `npm run test:ecosystem` — ကျော်ဖြတ်
 
-### Hook များ (Husky ဖြင့် အတည်ပြုထားသည်)
+### ချိတ်များ (Husky အတည်ပြုထားသည်)
 
-Husky hook များသည် `.husky/` တွင် ရှိပြီး git လုပ်ဆောင်မှုများ ပြုလုပ်သည့်အခါ အလိုအလျောက် run သည်။
+Husky ချိတ်များသည် `.husky/` တွင်နေထိုင်ပြီး git လုပ်ဆောင်ချက်များတွင် အလိုအလျောက်လုပ်ဆောင်သည်။
 
-- **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** မြန်ဆန်ပြီး တစ်သမတ်တည်းရလဒ်ပေးသော gate များ — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (2026-06-13 တွင် အသက်သွင်းခဲ့သည်)။ `test:unit` ကို တမင်ချန်လှပ်ထားသည် (နှေးကွေးသောကြောင့်ဖြစ်ပြီး CI `test-unit` job က စစ်ဆေးပေးသည်)။
-  - ဖြန့်ချိရေး branch များကို push မလုပ်မီ `npm run test:unit` ကို ကိုယ်တိုင် run ပါ။
+- **ကြိုတင်ကတိပြုခြင်း-** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
+- **ကြိုတင်တွန်းအားပေးခြင်း-** အမြန်အဆုံးအဖြတ်ပေးသည့်ဂိတ်များ — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (အသက်သွင်းပြီး 2026-06-13)။ `test:unit` (နှေးကွေးသော၊ CI `test-unit` အလုပ်) ဖြင့် ရည်ရွယ်ချက်ရှိရှိ ဖယ်ထုတ်ထားသည်။
+  - အကိုင်းအခက်များကို မတွန်းမီ `npm run test:unit` ကိုယ်တိုင်လုပ်ဆောင်ပါ။
 
-Hook တစ်ခု မအောင်မြင်ပါက အရင်းခံပြဿနာကို ပြင်ဆင်ပါ၊ `--no-verify` ဖြင့် မကျော်ပါနှင့်။
+ချိတ်တစ်ခု အဆင်မပြေပါက- အရင်းခံပြဿနာကို ဖြေရှင်းပါ၊ `--no-verify` ကို မကျော်ဖြတ်ပါနှင့်။
 
-### သတ်မှတ်ပုံစံအတိုင်း Commit များ
+### သမားရိုးကျ ကော်မရှင်များ
 
-ဖြန့်ချိမှုတွင် ပါဝင်မည့် commit အားလုံးသည် `type(scope): subject` ပုံစံကို လိုက်နာရမည်။
+ကန့်သတ်ထားသော ကတိကဝတ်များအားလုံးကို `type(scope): subject` ဖော်မတ်အတိုင်း လိုက်နာရပါမည်။
 
-**အသုံးပြုနိုင်သော type များ:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
+**မှန်ကန်သောအမျိုးအစားများ-** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**အသုံးပြုနိုင်သော scope များ:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**မှန်ကန်သော နယ်ပယ်များ-** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `domain` `authz` `translator`
 
-နောက်ပြန်လိုက်ဖက်မှုကို ပျက်စေသော ပြောင်းလဲမှုများအတွက် `BREAKING CHANGE:` footer သို့မဟုတ် scope နောက်တွင် `!` ထည့်ပါ (ဥပမာ `feat(api)!: drop /v0`)။
+အပြောင်းအလဲများ- နယ်ပယ်ပြီးနောက် `BREAKING CHANGE:` အောက်ခြေမှတ်စု သို့မဟုတ် `!` ထည့်ပါ (ဥပမာ `feat(api)!: drop /v0`)။
 
-### စာရွက်စာတမ်းများ
+### စာတမ်းပြုစုခြင်း။
 
-- [ ] `npm run check:docs-sync` အောင်မြင်သည် (pre-commit က အလိုအလျောက် run သည်)
-- [ ] `npm run check:docs-all` အောင်မြင်သည် (အားလုံးကို လွှမ်းခြုံသည့် စစ်ဆေးမှု- docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` သည် exit code 0 ဖြင့် ထွက်သည် — ကုဒ် ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env သတ်မှတ်ချက်သည် မပျက်မစီး ရှိနေသည်
-- [ ] `npm run check:doc-links` သည် exit code 0 ဖြင့် ထွက်သည် — ပြန်လည်ဖွဲ့စည်းပြီးနောက် အတွင်းပိုင်း markdown ရည်ညွှန်းချက်များ မပျက်နေပါ
-- [ ] storage/runtime ကွဲလွဲမှုများအတွက် `docs/architecture/ARCHITECTURE.md` ကို ပြန်လည်သုံးသပ်ပြီးဖြစ်သည်
-- [ ] env var နှင့် လုပ်ငန်းလည်ပတ်မှုဆိုင်ရာ ကွဲလွဲမှုများအတွက် `docs/guides/TROUBLESHOOTING.md` ကို ပြန်လည်သုံးသပ်ပြီးဖြစ်သည်
-- [ ] `.env.example` ပြောင်းလဲထားပါက `docs/reference/ENVIRONMENT.md` ကို အပ်ဒိတ်လုပ်ထားသည်
-- [ ] feature အသစ်တွင် UI ပါရှိပါက `docs/guides/USER_GUIDE.md` တွင် ၎င်းကို ဖော်ပြထားသည်
-- [ ] feature အသစ်တွင် API ပါရှိပါက `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` ကို အပ်ဒိတ်လုပ်ထားသည်
-- [ ] feature အသစ်သည် module တစ်ခုဖြစ်ပါက သီးခြား `docs/<MODULE>.md` ရှိသည်
-- [ ] နောက်ပြန်လိုက်ဖက်မှုကို ပျက်စေသော ပြောင်းလဲမှုဖြစ်ပါက `docs/guides/TROUBLESHOOTING.md` တွင် migration မှတ်ချက် ပါရှိသည်
+- [ ] `npm run check:docs-sync` ဖြတ်သန်းမှုများ (ကြိုတင်ကတိကဝတ်ဖြင့် အလိုအလျောက်လုပ်ဆောင်သည်)
+- [ ] `npm run check:docs-all` ကျော်သွားခြင်း (ထီး- docs-sync + docs-counts + env-doc-sync + ကန့်ကွက်ထားသော-ဗားရှင်း + doc-links)
+- [ ] `npm run check:env-doc-sync` ထွက်သည် 0 — ကုဒ် ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env စာချုပ်သည် နဂိုအတိုင်းဖြစ်သည်
+- [ ] `npm run check:doc-links` ပြန်လည်ဖွဲ့စည်းပြီးနောက် 0 — မှ ထွက်သည်
+- [ ] `docs/architecture/ARCHITECTURE.md` storage/runtime drift အတွက် ပြန်လည်သုံးသပ်ထားသည်။
+- [ ] `docs/guides/TROUBLESHOOTING.md` env var နှင့် operational drift အတွက် ပြန်လည်သုံးသပ်ထားသည်။
+- [ ] `.env.example` ပြောင်းလျှင် `docs/reference/ENVIRONMENT.md` အပ်ဒိတ်လုပ်ပါ။
+- [ ] အင်္ဂါရပ်အသစ်တွင် UI ရှိလျှင် `docs/guides/USER_GUIDE.md` ၎င်းကို ဖော်ပြသည်။
+- [ ] အင်္ဂါရပ်အသစ်တွင် API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` အပ်ဒိတ်လုပ်ပါ။
+- [ ] အင်္ဂါရပ်အသစ်သည် မော်ဂျူးတစ်ခုဖြစ်ပါက၊ သီးခြား `docs/<MODULE>.md` ရှိနေပါသည်။
+- [ ] ပြောင်းလဲသွားပါက `docs/guides/TROUBLESHOOTING.md` migration note ရှိသည်။
 
 ### i18n
 
-- [ ] `npm run i18n:check` သည် exit code 0 ဖြင့် ထွက်သည် — ဘာသာပြန်အခြေအနေ (`.i18n-state.json`) သည် မူရင်းစာရွက်စာတမ်းများနှင့် ထပ်တူဖြစ်သည် (strict mode တွင် ကွဲလွဲနေသော မူရင်းများမရှိပါ; နောက်ဆုံးမိနစ် စာရွက်စာတမ်းပြင်ဆင်မှုများအတွက် warn-mode သတိပေးချက်ကို လက်ခံနိုင်သော်လည်း tag မလုပ်မီ 0 ဖြစ်သင့်သည်)
-- [ ] `npm run i18n:check-ui-coverage` သည် exit code 0 ဖြင့် ထွက်သည် — UI locale တိုင်းသည် 80% coverage အနိမ့်ဆုံးသတ်မှတ်ချက်နှင့် ညီမျှသည် သို့မဟုတ် ကျော်လွန်သည်
-- [ ] `npm run i18n:sync-ui:dry` သည် ပစ်မှတ် locale 66 ခုလုံးတွင် ပျောက်ဆုံးနေသော key 0 ခုရှိကြောင်း ဖော်ပြသည် (`en` မူရင်းမှလွဲ၍ locale တိုင်း)
-- [ ] မူရင်းအင်္ဂလိပ်စာရွက်စာတမ်းများ ပြောင်းလဲထားပါက tag မလုပ်မီ `npm run i18n:run` ကို run ပါ (`.env` တွင် `OMNIROUTE_TRANSLATION_API_KEY` လိုအပ်သည်)
-- [ ] အသေးစား ဘာသာပြန်ပံ့ပိုးမှုများကို နောက်ဖြန့်ချိမှုသို့ ရွှေ့ဆိုင်းနိုင်သည် (CHANGELOG တွင် မှတ်တမ်းတင်ပါ)
+- [ ] `npm run i18n:check` သည် 0 — ဘာသာပြန်ဆိုမှုအခြေအနေ (`.i18n-state.json`) ကို အရင်းအမြစ် docs နှင့် ထပ်တူပြု၍ (တင်းကျပ်သောမုဒ်တွင် လွင့်မျောနေသောရင်းမြစ်များမရှိပါ၊ သတိပေးမုဒ်အကြံပေးချက်သည် နောက်ဆုံးမိနစ် doc ထိတွေ့မှုများအတွက် လက်ခံနိုင်သော်လည်း တဂ်မတင်မီ 0 ဖြစ်သင့်သည်)
+- [ ] `npm run i18n:check-ui-coverage` 80% လွှမ်းခြုံမှုကြမ်းပြင်တွင် သို့မဟုတ် UI နေရာတိုင်းတွင် 0 — မှ ထွက်သည်။
+- [ ] `npm run i18n:sync-ui:dry` သည် ပစ်မှတ်နေရာ ၆၆ ခုလုံးတွင် ပျောက်ဆုံးနေသောသော့များ ( `en` အရင်းအမြစ်မှလွဲ၍ နေရာတိုင်း)
+- [ ] မူရင်းအင်္ဂလိပ်စာရွက်စာတမ်းများ ပြောင်းလဲပါက `.env` မတင်မီ `npm run i18n:run` ( `OMNIROUTE_TRANSLATION_API_KEY` လိုအပ်သည်) ကိုဖွင့်ပါ။
+- [ ] အသေးအဖွဲ ( CHANGELOG တွင် ပုဒ်မရှိပါက နောက်လာမည့်ထုတ်ဝေမှုသို့ ရွှေ့ဆိုင်းနိုင်သည်)၊
 
-### Database Migration များ
+### ဒေတာဘေ့စ် ပြောင်းရွှေ့မှုများ
 
-- [ ] `src/lib/db/migrations/` တွင် ဖိုင်အသစ်များ ရှိပါက-
-  - [ ] migration တစ်ခုစီသည် idempotent ဖြစ်သည် (`CREATE TABLE IF NOT EXISTS` စသည်)
-  - [ ] migration များကို transaction များဖြင့် ပတ်ထားသည်
-  - [ ] အစီအစဉ်နံပါတ်များ မှန်ကန်သည် (အစီအစဉ်တွင် နံပါတ်လွတ်မရှိပါ)
-- [ ] အသစ်တပ်ဆင်မှုတွင် စမ်းသပ်ပါ- `~/.omniroute/omniroute.db` ကို ဖျက်ပြီး `npm run dev` ကို run ပါ
-- [ ] ရှိပြီးသားတပ်ဆင်မှုတွင် စမ်းသပ်ပါ- DB ကို backup လုပ်ပါ၊ migration ကို run ပြီး schema ကို အတည်ပြုပါ
-- [ ] migration က table များကို ပြန်လည်ရေးသားပါက WAL ဖိုင်များ (`-wal`, `-shm`) ကို မှန်ကန်စွာ ကိုင်တွယ်ထားသည်
+- [ ] `src/lib/db/migrations/` တွင် ဖိုင်အသစ်များရှိပါက-
+  - [ ] ရွှေ့ပြောင်းမှုတစ်ခုစီသည် အရည်အချင်းမရှိပါ (`CREATE TABLE IF NOT EXISTS`, etc.)
+  - [ ] လွှဲပြောင်းမှုများတွင် အရောင်းအ၀ယ်များ ပါဝင်သည်။
+  - [ ] မှန်ကန်စွာ နံပါတ်တပ်ပါ (အစီအစဥ်တွင် ကွာဟမှုမရှိပါ)
+- [ ] အသစ်ထည့်သွင်းခြင်းတွင် စမ်းသပ်ပါ- `~/.omniroute/omniroute.db` ဖျက်ပြီး `npm run dev` ကိုဖွင့်ပါ။
+- [ ] လက်ရှိထည့်သွင်းမှုကို စမ်းသပ်ပါ- DB အရန်ကူးခြင်း၊ ရွှေ့ပြောင်းခြင်းကို လုပ်ဆောင်ပါ၊ ဇယားကို အတည်ပြုပါ။
+- [ ] WAL ဖိုင်များ (`-wal`, `-shm`) သည် ရွှေ့ပြောင်းခြင်းဇယားများကို ပြန်လည်ရေးသားပါက မှန်ကန်စွာကိုင်တွယ်သည်။
 
-### ပံ့ပိုးသူ ကတ်တလောက် (Zod ဖြင့် အတည်ပြုထားသည်)
+### ဝန်ဆောင်မှုပေးသူ ကတ်တလောက် (Zod-validated)
 
-- [ ] `src/shared/constants/providers.ts` ရှိ Zod schema သည် load လုပ်ချိန်တွင် မှန်ကန်သည်
-  - [ ] ပံ့ပိုးသူအားလုံးတွင် လိုအပ်သော field များ (`id`, `label`, `kind` စသည်) ရှိသည်
-  - [ ] အခမဲ့ပံ့ပိုးသူအသစ်များအတွက် `freeNote` ထည့်သွင်းထားသည်
-  - [ ] OAuth ပံ့ပိုးသူများ၏ `oauthConfig` ကို `src/lib/oauth/constants/oauth.ts` တွင် စာရင်းသွင်းထားသည်
-- [ ] ပံ့ပိုးသူအသစ်ထည့်ထားပါက သက်ဆိုင်ရာ executor ကို `open-sse/executors/` တွင် ထည့်ထားသည်
-- [ ] OpenAI format မဟုတ်ပါက translator ကို `open-sse/translator/` တွင် ထည့်ထားသည်
-- [ ] Model များကို `open-sse/config/providerRegistry.ts` တွင် စာရင်းသွင်းထားသည်
-- [ ] `tests/unit/` ရှိ unit test များက ပံ့ပိုးသူအမျိုးအစားခွဲခြားခြင်းနှင့် routing ကို လွှမ်းခြုံထားသည်
+- [ ] `src/shared/constants/providers.ts` Zod schema သည် load time တွင်မှန်ကန်သည်။
+  - [ ] ပံ့ပိုးပေးသူအားလုံးတွင် လိုအပ်သော အကွက်များ (`id`၊ `label`၊ `kind` စသည်ဖြင့် )
+  - [ ] `freeNote` အခမဲ့ပေးဆောင်သူအသစ်များအတွက်ပေးထားသည်။
+  - [ ] OAuth ဝန်ဆောင်မှုပေးသူများသည် `oauthConfig` တွင် `src/lib/oauth/constants/oauth.ts` တွင် စာရင်းသွင်းထားသည်။
+- [ ] ပံ့ပိုးသူအသစ်ထပ်ထည့်ပါက- `open-sse/executors/` တွင် သက်ဆိုင်သော executor
+- [ ] OpenAI ဖော်မတ်မဟုတ်ပါက `open-sse/translator/` တွင် ဘာသာပြန်သူ
+- [ ] `open-sse/config/providerRegistry.ts` တွင်မှတ်ပုံတင်ထားသောမော်ဒယ်များ
+- [ ] `tests/unit/` ကာဗာပံ့ပိုးပေးသူ အမျိုးအစားခွဲခြင်းနှင့် လမ်းကြောင်းသတ်မှတ်ခြင်းရှိ ယူနစ်စစ်ဆေးမှုများ
 
-### Desktop (Electron)
+### ဒက်စ်တော့ (Electron)
 
-`electron/` ပြောင်းလဲထားပါက-
+`electron/` ပြောင်းလဲသွားပါက-
 
-- [ ] `npm run electron:smoke:packaged` အောင်မြင်သည်
-- [ ] `:win`, `:mac`, `:linux` တို့အနက် အနည်းဆုံးတစ်ခုအတွက် build ကို စမ်းသပ်ထားသည်
-- [ ] Code signing cert များ သက်တမ်းမကုန်သေးပါ (signing ပြုလုပ်ပါက)
-- [ ] `electron/package.json` version သည် root `package.json` နှင့် ကိုက်ညီသည်
-- [ ] `stable` သို့ release လုပ်ပါက auto-update channel pointer ကို အပ်ဒိတ်လုပ်ထားသည်
+- [ ] `npm run electron:smoke:packaged` ဖြတ်သန်းသည်။
+- [ ] `:win`, `:mac`, `:linux` အနည်းဆုံးတစ်ခုအတွက် စမ်းသပ်တည်ဆောက်ထားသည်။
+- [ ] ကုဒ်လက်မှတ်ထိုးခြင်းလက်မှတ်များသည် သက်တမ်းမကုန်သေးပါ (လက်မှတ်ထိုးလျှင်)
+- [ ] `electron/package.json` ဗားရှင်းသည် root `package.json` နှင့်ကိုက်ညီသည်။
+- [ ] `stable` ကို ထုတ်လိုက်လျှင် အလိုအလျောက် အပ်ဒိတ်လုပ်ထားသော ချန်နယ်ညွှန်ပြချက်ကို အပ်ဒိတ်လုပ်ပါ။
 
-### Build ဖွဲ့စည်းပုံ
+### Layout တည်ဆောက်ပါ။
 
-Repository သည် သီးခြား output directory သုံးခုကို အသုံးပြုသည် — ၎င်းတို့ကို မည်သည့်အခါမျှ မရောထွေးပါနှင့်-
+repository သည် ကွဲပြားသော output directory သုံးခု — အသုံးပြု၍ ၎င်းတို့ကို ဘယ်တော့မှ မရောနှောပါ။
 
-| Directory | ရည်ရွယ်ချက်                                                           | Track လုပ်ထားသလား       |
-| --------- | --------------------------------------------------------------------- | ----------------------- |
-| `src/`    | Application source (TypeScript / TSX)                                 | လုပ်ထားသည်              |
-| `.build/` | Build ကြားခံဖိုင်များ — `next build` output (`distDir`)               | မလုပ်ထားပါ (gitignored) |
-| `dist/`   | ဖြန့်ချိနိုင်သော npm bundle — `assembleStandalone` ဖြင့် စုစည်းထားသည် | မလုပ်ထားပါ (gitignored) |
+| အဘိဓာန်   | ရည်ရွယ်ချက်                                                           | ခြေရာခံမလား။ |
+| --------- | --------------------------------------------------------------------- | ------------ |
+| `src/`    | လျှောက်လွှာအရင်းအမြစ် (TypeScript / TSX)                              | ဟုတ်ကဲ့      |
+| `.build/` | အလယ်အလတ်များ — `next build` အထွက် (`distDir`) တည်ဆောက်ပါ              | မရှိပါ။      |
+| `dist/`   | ပို့ဆောင်နိုင်သော npm အတွဲ — `assembleStandalone` ဖြင့် စုစည်းထားသည်။ | မရှိပါ။      |
 
-> **Operator မှတ်ချက်:** remote VPS image directory သည် `/usr/lib/node_modules/omniroute/app/` အတိုင်း ဆက်လက်ရှိနေသည်။
-> **Repository အတွင်းရှိ** build output သာ ပြောင်းရွှေ့ထားသည် (`app/` → `dist/`)။ Deploy skill များသည်
-> `dist/` အတွင်းရှိ အကြောင်းအရာများကို remote `app/` directory သို့ rsync လုပ်ပေးသည် — VPS path များ ပြောင်းလဲရန် မလိုအပ်ပါ။
+> **အော်ပရေတာမှတ်ချက်-** အဝေးထိန်း VPS ရုပ်ပုံလမ်းညွှန်သည် `/usr/lib/node_modules/omniroute/app/` ကျန်ရှိသည်။ သာ** in-repo** build output ကိုရွှေ့သည် (`app/` → `dist/`) ။ ကျွမ်းကျင်မှုများ rsync `dist/` အကြောင်းအရာများကို အဝေးထိန်း `app/` dir — တွင် VPS လမ်းကြောင်းပြောင်းလဲမှုများ လိုအပ်ပါသည်။
 
-**တစ်ကြိမ်တည်း build လုပ်သည့် flow-**
+**တစ်ခုတည်းတည်ဆောက်မှု စီးဆင်းမှု-**
 
 ```
 npm run build:release
-  └─ rm -rf .build dist          (ရှင်းလင်းသည်)
-  └─ next build → .build/next/   (ကြားခံဖိုင်များ)
-  └─ assembleStandalone          (standalone + static + public + natives ကို dist/ သို့ ကူးယူသည်)
-  └─ writes dist/BUILD_SHA       (HEAD sentinel ကို ရေးသားသည်)
+  └─ rm -rf .build dist          (clean)
+  └─ next build → .build/next/   (intermediates)
+  └─ assembleStandalone          (copies standalone + static + public + natives → dist/)
+  └─ writes dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-Deploy လုပ်ရန် `npm run build` ကို run ပြီးနောက် `npm run build:cli` ကို သီးခြား ထပ်မံ run မလုပ်ပါနှင့် —
-တစ်ခုတည်းသော command ဖြင့် clean rebuild + sentinel ပြုလုပ်ပေးသည့် `npm run build:release` ကို အသုံးပြုပါ။
+NOT `npm run build` ဖြင့် run ပါ နောက်တွင် — ကို deploy အတွက် သီးခြား `npm run build:cli` ဖြင့် `npm run build:release` အသုံးပြု၍ command တစ်ခုတွင် clean rebuild + sentinel ကို လုပ်ဆောင်ပေးသည်။
 
-### Artifact အတည်ပြုခြင်း
+### Artifact Validation
 
-- [ ] `npm run build:release` အောင်မြင်ပြီး `dist/BUILD_SHA` == `git rev-parse --short HEAD` ဖြစ်သည်
-- [ ] `npm run check:pack-artifact` သည် သန့်ရှင်းသည် — `app.__qa_backup`, `scripts/scratch`, `package-lock.json` သို့မဟုတ် အခြား local အကြွင်းအကျန်များ မရှိပါ
-- [ ] Build ပြီးနောက် `dist/server.js` ရှိသည်
-- [ ] ရွေးချယ်နိုင်သော local packaged-runtime smoke test- `npm run dev:candidate -- build` ပြီးနောက် `npm run dev:candidate -- validate` သည် packed tarball ကို သီးခြား `DATA_DIR` ပေါ်တွင် စတင်ပြီး `/api/health` + `/v1/models` ကို စစ်ဆေးသည် ([ပါဝင်ကူညီမှု Golden Path](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) ကို ကြည့်ပါ)
+- [ ] `npm run build:release` အောင်မြင်ပြီး `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] `npm run check:pack-artifact` သန့်ရှင်းသော — no `app.__qa_backup`၊ `scripts/scratch`၊ `package-lock.json` သို့မဟုတ် အခြားဒေသခံအကြွင်းအကျန်များ
+- [ ] တည်ဆောက်ပြီးနောက်`dist/server.js` တည်ရှိသည်။
+- [ ] ရွေးချယ်နိုင်သော ဒေသန္တရထုပ်ပိုးထားသော-ပြေးချိန်မီးခိုး- `npm run dev:candidate -- build` သည် သီးခြား `DATA_DIR` တွင် ထုပ်ပိုးထားသော တာဘောကို စတင်ပြီးနောက် `npm run dev:candidate -- validate` သည် `/api/health` + `/v1/models` ( [ပံ့ပိုးကူညီမှုရွှေလမ်းကို](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) ကြည့်ပါ)
 
-### Tagging နှင့် Release
+### တဂ်ခြင်းနှင့် ဖြန့်ချိခြင်း။
 
-- [ ] `/generate-release-cc` (Claude Code skill) ကို run ပါ-
-  - `vX.Y.Z` tag ကို ဖန်တီးသည်
-  - Tag နှင့် branch ကို push လုပ်သည်
-  - Changelog body ဖြင့် GitHub Release ကို ဖွင့်သည်
-  - Electron installer များကို ပူးတွဲသည် (build လုပ်ထားပါက)
-- [ ] သို့မဟုတ် ကိုယ်တိုင်လုပ်ဆောင်ပါ-
+- [ ] `/generate-release-cc` (Claude ကုဒ်ကျွမ်းကျင်မှု) ကို run ။
+  - tag `vX.Y.Z` ဖန်တီးသည်။
+  - တက်ဂ်နှင့် အကိုင်းအခက်ကို တွန်းပို့သည်။
+  - changelog ကိုယ်ထည်ဖြင့် GitHub ဖြန့်ချိမှုကို ဖွင့်သည်။
+  - Electron installers များကို ပူးတွဲပါ (တည်ဆောက်ပါက)
+- [ ] သို့မဟုတ် ကိုယ်တိုင်-
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
   git push origin vX.Y.Z
   gh release create vX.Y.Z --notes-from-tag
   ```
 
-### Deploy
+### ချထားပေးပါ။
 
-Deploy skill များသည် ပေါ့ပါးသော rsync flow ကို အသုံးပြုသည် — `npm pack` မလုပ်သကဲ့သို့ `npm i -g` လည်း မလုပ်ပါ-
+ကျွမ်းကျင်မှုများကို အသုံးချပြီး light rsync flow — no `npm pack`, no `npm i -g` ကိုအသုံးပြုပါ။
 
-- [ ] ပစ်မှတ်နှင့် ကိုက်ညီသော deploy skill ကို အသုံးပြုပါ-
-  - `/deploy-vps-local-cc` — local VPS (192.168.0.15)
+- [ ] ပစ်မှတ်နှင့်ကိုက်ညီသော စွမ်းရည်ကို အသုံးပြုပါ-
+  - `/deploy-vps-local-cc` — ပြည်တွင်း VPS (192.168.0.15)
   - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
-  - `/deploy-vps-both-cc` — နှစ်ခုလုံး
-- [ ] Deploy မလုပ်မီ `dist/BUILD_SHA` == `git rev-parse --short HEAD` ဖြစ်ကြောင်း အတည်ပြုပါ
-- [ ] `node_modules` အမှန်တကယ်ရှိသော နေရာတွင် build ကို run ရမည် (ပင်မ checkout သို့မဟုတ် `npm ci` လုပ်ထားသော worktree — symlink လုပ်ထားသော worktree မဖြစ်ရ)
-- [ ] Deploy လုပ်ထားသော instance ကို smoke test လုပ်ပါ-
-  - `/dashboard/health` ကို ဖွင့်ပြီး version string သည် release နှင့် ကိုက်ညီကြောင်း စစ်ဆေးပါ
-  - သိရှိထားသော ပံ့ပိုးသူတစ်ခုကို အသုံးပြု၍ `/v1/chat/completions` request တစ်ခု run ပါ
-  - `/api/monitoring/health` က `CLOSED` circuit breaker များကို ပြန်ပေးကြောင်း အတည်ပြုပါ
-  - MCP transport များ တုံ့ပြန်ကြောင်း အတည်ပြုပါ (`/mcp` HTTP၊ `/mcp-sse` SSE)
+  - `/deploy-vps-both-cc` — နှစ်မျိုးလုံး
+- [ ] အသုံးမပြုမီ `dist/BUILD_SHA` == `git rev-parse --short HEAD` ကို အတည်ပြုပါ။
+- [ ] Build သည် `node_modules` အစစ်အမှန်ဖြစ်သည့်နေရာတွင် အလုပ်လုပ်ရမည် (ပင်မငွေပေးချေမှု သို့မဟုတ် `npm ci`'d worktree — NOT a symlinked worktree)
+- [ ] မီးခိုးစမ်းသပ်မှု ဖြန့်ကျက်ထားသော ဥပမာ-
+  - `/dashboard/health` → check version string matches ကိုဖွင့်ပါ။
+  - လူသိများသော ဝန်ဆောင်မှုပေးသူထံ `/v1/chat/completions` တောင်းဆိုချက်ကို လုပ်ဆောင်ပါ။
+  - `/api/monitoring/health` `CLOSED` circuit breakers များကို ပြန်၍အတည်ပြုပါ။
+  - MCP ပို့ဆောင်မှုများ တုံ့ပြန်မှုကို အတည်ပြုပါ (`/mcp` HTTP, `/mcp-sse` SSE)
 
-### Release ပြီးနောက်
+### လွှတ်လွန်ခြင်း။
 
-- [ ] `/capture-release-evidences-cc` (Claude Code skill) ကို run ပါ
-  - Feature အသစ်များ၏ WebP screenshot/recording များကို ရိုက်ကူးသိမ်းဆည်းသည်
-  - Release note / blog post တွင် ပူးတွဲသည်
-- [ ] Release ကြေညာချက်ဖြင့် GitHub Discussions / Discord ကို အပ်ဒိတ်လုပ်ပါ
-- [ ] နောက် version အတွက် milestone ကို ဖွင့်ပါ
-- [ ] အရေးကြီးပါက discussion ကို pin လုပ်ပါ သို့မဟုတ် in-app banner အတွက် `news.json` တွင် ပို့စ်တင်ပါ
+- [ ] `/capture-release-evidences-cc` (Claude ကုဒ်ကျွမ်းကျင်မှု) ကိုဖွင့်ပါ
+  - အင်္ဂါရပ်အသစ်များ၏ WebP screenshots/recordings ကိုဖမ်းယူသည်။
+  - မှတ်စုများ / ဘလော့ဂ်ပို့စ်ကို ထုတ်ပြန်ရန် ပူးတွဲပါ
+- [ ] ထုတ်ပြန်ကြေငြာချက်နှင့်အတူ GitHub Discussions / Discord ကို အပ်ဒိတ်လုပ်ပါ။
+- [ ] နောက်ဗားရှင်းအတွက် မှတ်တိုင်ကိုဖွင့်ပါ။
+- [ ] အရေးကြီးပါက- အက်ပ်အတွင်းနဖူးစည်းအတွက် ဆွေးနွေးမှုကို ပင်ထိုးပါ သို့မဟုတ် `news.json` တွင် ပို့စ်တင်ပါ။
 
-### Radar အများပြည်သူသို့ စတင်မိတ်ဆက်ခြင်း gate
+### ရေဒါအများပြည်သူ-လွှတ်တင်ရေးဂိတ်
 
-Radar ကြေညာချက်ကို ရည်ရွယ်ချက်ရှိရှိ `active: false` ဖြင့် commit လုပ်ထားသည်။ အောက်ပါအချက်တိုင်းအတွက် အထောက်အထားရှိပြီးမှသာ
-သီးခြားပြောင်းလဲမှုတစ်ခုအနေဖြင့် activate လုပ်ရမည်-
+Radar ကြေငြာချက်ကို `active: false` ဖြင့် ရည်ရွယ်ချက်ရှိရှိ ကတိပြုပါသည်။ အောက်ပါအရာတိုင်းကို သက်သေပြပြီးနောက် အသက်သွင်းခြင်းသည် သီးခြားပြောင်းလဲမှုဖြစ်သည်-
 
-- [ ] အဆင့်လိုက် Radar PR အားလုံးကို merge လုပ်ပြီး release-tip CI သည် green ဖြစ်သည်
-- [ ] `RADAR_ENABLED` ကို မူလအတိုင်း ပိတ်ထားလျက် OSS Radar route များကို deploy နှင့် smoke test လုပ်ပါ
-- [ ] သတ်မှတ်ထားသော Radar host တွင် `GET /planos`, `/termos`, `/privacidade`, နှင့် `/reembolso` ကို smoke test လုပ်ပါ
-- [ ] Operator ၏ ကိုယ်ရေးအထောက်အထား/ဆက်သွယ်ရန်အချက်အလက်/လိပ်စာနှင့် ပိုင်ရှင်အတည်ပြုထားသော ဥပဒေရေးရာသုံးသပ်ချက်ကို private service တွင် မှတ်တမ်းတင်ပါ
-- [ ] Stripe Checkout နှင့် signed webhook ကို test mode ဖြင့်သာ စမ်းသပ်အသုံးပြုပါ
-- [ ] အတည်ပြုထားသော ပေးပို့သူ/domain ဖြင့် encrypted transactional-email ပေးပို့မှုတစ်ခုကို စမ်းသပ်ပါ
-- [ ] Backup restore နှင့် ကြီးကြပ်ထားပြီး budget ကန့်သတ်ထားသော research run တစ်ခုကို အောင်မြင်ကြောင်း သက်သေပြပါ
-- [ ] အလှူငွေအထောက်အထားကို လက်မခံမီ BRL/PIX သုံးသပ်ရေးမူဝါဒကို အတည်ပြုပါ
-- [ ] အထက်ပါ gate များ အောင်မြင်ပြီးမှသာ public Checkout ကို ဖွင့်ပါ၊ ထို့နောက် `news.json` ID အသစ်ကို activate လုပ်ပါ
-- [ ] Home banner သည် localized copy ကို အသုံးပြုပြီး အဟောင်း ID ကို ပယ်ထားပြီးနောက် ID အသစ် ပြန်ပေါ်လာကြောင်း အတည်ပြုပါ
+- [ ] ပေါင်းစည်းထားသော Radar PRs အားလုံးကို ပေါင်းစည်းထားပြီး ထွက်ရှိသည့်ထိပ်ဖျား CI သည် အစိမ်းရောင်ဖြစ်သည်။
+- [ ] `RADAR_ENABLED` ဖြင့် OSS Radar လမ်းကြောင်းများကို ပုံသေဖြင့် ဖြန့်ကျက်ပြီး ဆေးလိပ်သောက်ပါ။
+- [ ] အမည်ရှိသော Radar host တွင် `GET /planos`, `/termos`, `/privacidade` နှင့် `/reembolso` မီးခိုးများ
+- [ ] သီးသန့်ဝန်ဆောင်မှုတွင် အော်ပရေတာ identity/contact/address နှင့် ပိုင်ရှင်ခွင့်ပြုထားသော တရားဝင်ပြန်လည်သုံးသပ်ချက်ကို မှတ်တမ်းတင်ပါ။
+- [ ] စမ်းသပ်မုဒ်တွင်သာ Stripe Checkout နှင့် လက်မှတ်ထိုးထားသော webhook ကို လေ့ကျင့်ပါ။
+- [ ] အတည်ပြုထားသော sender/domain ဖြင့် ကုဒ်ဝှက်ထားသော ငွေပေးငွေယူ-အီးမေးလ်ပေးပို့မှုတစ်ခုကို လေ့ကျင့်ပါ။
+- [ ] မိတ္တူပြန်လည်ရယူခြင်းနှင့် ကြီးကြပ်ထားသော ဘတ်ဂျက်ပါသော သုတေသနလုပ်ငန်းတစ်ခုအား သက်သေပြပါ။
+- [ ] လှူဒါန်းမှုအထောက်အထားများကို လက်မခံမီ BRL/PIX ပြန်လည်သုံးသပ်ခြင်းမူဝါဒကို အတည်ပြုပါ။
+- [ ] ရှေ့ဂိတ်များပြီးမှသာ အများသူငှာ Checkout ကိုဖွင့်ပါ၊ ထို့နောက် `news.json` ID အသစ်ကို စတင်ပါ။
+- [ ] မူလနဖူးစည်းသည် ဒေသန္တရမိတ္တူကို အသုံးပြုကြောင်း အတည်ပြုပြီး ID အဟောင်းကို ပယ်လိုက်ပြီးနောက် ID အသစ်တစ်ခု ပြန်ပေါ်လာသည်
 
 ## Embedded Services smoke (v3.8.4+)
 

@@ -196,53 +196,48 @@ Prioritet (od najvišeg ka najnižem):
 
 ---
 
-## Integracija u procesni tok
+## Интеграција цевовода
 
-### PRE kuka (`open-sse/handlers/chatCore.ts`)
+### PRE кука (`open-sse/handlers/chatCore.ts`)
 
-Pokreće se pre izvršavača nadređenog servisa, nakon provera autentifikacije i pravila:
+Покреће се пре упстреам извршиоца, након провере аутентификације и смерница:
 
 ```
 resolveComboTargets / handleSingleModel
   → enforceQuotaShare(apiKeyId, connectionId, provider, estimatedCost)
-      → getQuotaStore().peek() za svaku dimenziju
+      → getQuotaStore().peek() per dimension
       → fairShare.decideFairShare()
-      → ako se blokira → vrati 429 (buildErrorBody, strogo pravilo br. 12)
-      → ako se dozvoli + smanji prioritet → postavi quotaSoftPenalty=true za kandidata
+      → if block → return 429 (buildErrorBody, Hard Rule #12)
+      → if allow + deprioritize → set quotaSoftPenalty=true on candidate
   → executor.execute()
 ```
 
-**Propuštanje u slučaju greške**: ako `enforceQuotaShare` izazove izuzetak, zahtev se propušta
-uz zapis `pino.warn`. Time se sprečava da greška u mehanizmu kvota blokira celokupan
-saobraćaj.
+**Фаил-опен** : ако `enforceQuotaShare` избаци, захтев је дозвољен кроз `pino.warn` дневник. Ово спречава грешку у систему квоте да блокира сав саобраћај.
 
-### POST kuka (beleženje potrošnje)
+### POST кука (рекордна потрошња)
 
-Nakon uspešnog odgovora:
+Након успешног одговора:
 
 ```
-izvršavač vraća uspeh
+executor returns success
   → spendRecorder.recordConsumption(apiKeyId, connectionId, provider, actualCost)
-      → getQuotaStore().consume() za svaku dimenziju
-      → propuštanje u slučaju greške: greške se beleže kao pino.warn i nikada se ne prosleđuju klijentu
+      → getQuotaStore().consume() per dimension
+      → fail-open: errors logged as pino.warn, never propagated to client
 ```
 
-**Napomena o odstupanju**: ako `consume` ne uspe nakon odgovora, klizni brojač prikazuje manju potrošnju od stvarne.
-Signal zasićenja od pružaoca (npr. `anthropic-ratelimit-unified-5h-utilization`)
-ispravlja globalnu procenu pri sledećem zahtevu.
+**Дрифт ноте** : ако `consume` не успе након одговора, бројач котрљања се смањује. Сигнал засићења од провајдера (нпр. `anthropic-ratelimit-unified-5h-utilization`) исправља глобалну процену на следећи захтев.
 
-### Blago smanjenje prioriteta kombinacije (`open-sse/services/combo.ts`)
+### Комбинована мека казна (`open-sse/services/combo.ts`)
 
-Kada je `decision.deprioritize === true`:
+Када `decision.deprioritize === true`:
 
 ```ts
 if (candidate.quotaSoftPenalty) {
-  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // podrazumevano 0.7
+  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // default 0.7
 }
 ```
 
-Kazneni faktor se primenjuje nakon svih ostalih faktora bodovanja. On smanjuje verovatnoću da automatska kombinacija
-izabere zasićeni ključ, bez njegovog strogog blokiranja.
+Казна се примењује након свих осталих фактора за бодовање. Смањује вероватноћу аутоматског комбиновања одабира засићеног кључа без његовог тешког блокирања.
 
 ---
 
@@ -279,15 +274,15 @@ Hook-ови странице:
 
 ## Променљиве окружења
 
-| Променљива                         | Подразумевано | Опис                                                                |
-| ---------------------------------- | ------------- | ------------------------------------------------------------------- |
-| `QUOTA_STORE_DRIVER`               | `sqlite`      | Драјвер који се користи: `sqlite` или `redis`                       |
-| `QUOTA_STORE_REDIS_URL`            | _(празно)_    | Redis URL, нпр. `redis://localhost:6379`                            |
-| `QUOTA_SATURATION_THRESHOLD`       | `0.5`         | 0..1; `>= праг` активира строги режим                               |
-| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`         | 0..1; множилац комбинованог резултата за меку политику              |
-| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`          | Број дана пре него што GC уклони старе `quota_consumption` сегменте |
+| Променљива                         | Подразумевано | Опис                                                             |
+| ---------------------------------- | ------------- | ---------------------------------------------------------------- |
+| `QUOTA_STORE_DRIVER`               | `sqlite`      | Драјвер који треба користити: `sqlite` или `redis`               |
+| `QUOTA_STORE_REDIS_URL`            | _(празно)_    | Redis URL, нпр `redis://localhost:6379`                          |
+| `QUOTA_SATURATION_THRESHOLD`       | `0.5`         | 0..1; `>= threshold` активира строги режим                       |
+| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`         | 0..1; множитељ за комбиновани резултат меке политике             |
+| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`          | Неколико дана пре него GC уклони старе `quota_consumption` канте |
 
-Подешавања базе података (`quotaStore.*`) имају предност над променљивама окружења.
+DB подешавања (`quotaStore.*`) замењују енв варс.
 
 ---
 

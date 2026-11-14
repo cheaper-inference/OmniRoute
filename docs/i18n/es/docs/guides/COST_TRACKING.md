@@ -85,7 +85,7 @@ Los nombres de los modelos se normalizan primero (los prefijos de ruta del prove
 
 ### Cómo se registra el gasto
 
-- El costo por solicitud se calcula después de la respuesta y se registra automáticamente para que nunca agregue latencia al cliente. El consumo de cuota compartida se programa en el siguiente ciclo de eventos a través de [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- El costo por solicitud se calcula al finalizar la solicitud. El consumo de cuota compartida se programa en el siguiente ciclo de eventos a través de [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
 - El gasto de claves API se almacena en búfer y se vacía en lotes mediante [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (intervalo de descarga predeterminado de 60 segundos, búfer de 1000 entradas). Sintonizable vía:
 
   | var.env                             | Por defecto | Objetivo                                                      |
@@ -93,7 +93,29 @@ Los nombres de los modelos se normalizan primero (los prefijos de ruta del prove
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`     | Intervalo de descarga en milisegundos.                        |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`      | Máximo de entradas almacenadas en el búfer antes del vaciado. |
 
-Las cifras de costos del tablero son** no** se leen de una cantidad en dólares almacenada por fila — se vuelven a calcular sobre la marcha a partir de los recuentos de tokens y la tabla de precios actual cada vez que se ejecuta el punto final de análisis. Eso significa corregir un precio incorrecto (y volver a sincronizar) las estimaciones de costos históricas actualizadas de manera retroactiva.
+Los costos prefieren un cargo exacto informado por el proveedor (`provider_cost_usd`), luego una instantánea de la solicitud con precio de catálogo (`calculated_cost_usd`) y luego un cambio de precio simbólico del catálogo actual. Los costos almacenados no se vuelven a cobrar a través de sus recuentos de tokens. Las filas de tokens heredados aún cambian cuando cambia el precio de su catálogo.
+
+### OCR e incrustaciones
+
+- Las solicitudes `/v1/ocr` exitosas utilizan `usage_info.pages_processed` ascendente, no el rango de páginas solicitado o la cantidad de objetos de página devueltos. La estimación es páginas × `ocr_cost_per_page` ( USD/page absoluto,** no** USD/million).
+- Las solicitudes con anotaciones en documentos o cuadros delimitadores requieren una tarifa `ocr_cost_per_annotated_page` separada. Sin él, el costo sigue siendo desconocido; la tarifa OCR ordinaria no se sustituye silenciosamente.
+- LiteLLM sync asigna su campo `annotation_cost_per_page` ascendente a `ocr_cost_per_annotated_page`, conservando el valor USD/page absoluto y las entradas de solo anotaciones, incluido el cero explícito. Un campo canónico proporcionado tiene prioridad; Los valores de alias no válidos se ignoran. Las anulaciones de precios de usuario conservan su prioridad normal. Consulte [las claves de precios OCR de LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- El uso OCR almacena el recuento de páginas, el precio unitario, el costo USD calculado, la clave API y la conexión seleccionada. Las páginas nunca se representan como tokens. Los registros de llamadas contienen metadatos de facturación, no documentos URLs, PDF bytes ni texto extraído.
+- Las solicitudes `/v1/embeddings` exitosas registran una fila de uso por lote físico, incluidos lotes separados completados en el mismo milisegundo. Los cargos informados por el proveedor tienen prioridad sobre las estimaciones simbólicas; Los envoltorios combinados no añaden ningún cargo.
+- El historial de uso, el análisis de costos, las ventanas provider/account, los límites de gasto de claves API, el libro de contabilidad de costos de solicitudes y los resúmenes de uso diario incluyen estos cargos. Las claves sin registro conservan la contabilidad numérica sin conservar el texto fuente.
+- El uso o las tarifas faltantes son** desconocido** , no gratuito: se omite el encabezado del costo de respuesta y la política de uso sin precio existente se aplica a claves API limitadas. Las tarifas cero configuradas explícitamente siguen siendo un uso válido de costo cero.
+
+Esta es una contabilidad sólo hacia adelante. Las llamadas antiguas OCR/embedding que nunca escribieron el historial de uso no se pueden reconstruir a partir de esta migración. Las estimaciones del catálogo son estimaciones USD, no una factura, y no incluyen conversión de moneda, impuestos ni descuentos.
+
+### Discurso e imágenes
+
+- Los intentos exitosos `/v1/audio/transcriptions`, `/v1/audio/speech` y de generación de imágenes comparten la contabilidad numérica. Las llamadas directas y combinadas llevan la clave API de la persona que llama y la conexión seleccionada; un contenedor combinado nunca agrega un segundo débito.
+- USD informado por el proveedor supera una estimación del catálogo, incluido un cargo cero explícito. OpenRouterJSON de `usage.cost` está normalizado a `cost_usd`. De lo contrario, los tokens medidos usan precios de tokens, los segundos de transcripción usan precios por segundo, la entrada de voz usa recuentos de caracteres Unicode y las imágenes de precio fijo usan el número realmente devuelto, no el `n` solicitado.
+- El binario OpenRouter TTS no tiene cuerpo de uso JSON. Una vez que se completa el audio o la persona que llama lo cancela, OmniRoute consulta su generación ID en el** mismo** origen OpenRouter configurado. Una solicitud EU nunca vuelve al origen global. Esta es una búsqueda limitada y de sólo lectura; La síntesis no se vuelve a intentar para la contabilidad. Los registros de facturación pueden aparecer una vez finalizado el audio: los reintentos de búsqueda se ejecutan en segundo plano durante un máximo de 52 segundos, incluidas las fechas límite de la red.
+- Durante esa búsqueda, la respuesta de audio tiene `X-OmniRoute-Cost-Status: pending` y ningún encabezado de costo de respuesta. Su cargo final aparece en el historial de uso, los análisis y el libro mayor de claves después de la conciliación. Si los metadatos no están disponibles, se utiliza una instantánea de tarifas configurada; de lo contrario, el coste sigue siendo desconocido.
+- Los recuentos de segundos, caracteres e imágenes tienen campos de unidades de facturación separados, nunca recuentos de tokens falsos. La contabilidad retiene únicamente el uso numérico, no el texto hablado, las transcripciones ni los bytes de imágenes. Las exenciones existentes de imágenes sin precio no cambian: una tarifa de imagen realmente faltante no bloquea nuevamente una clave limitada y la respuesta omite el encabezado del costo en lugar de declarar la llamada gratuita. Una falla en el almacén de precios aún conserva evidencia de uso para la aplicación de medidas cerradas por fallas.
+
+No se inventa ni se repone ningún cargo histórico speech/image. La facturación del proveedor sigue siendo la referencia para las facturas y las llamadas cuyo cargo no fue reportado.
 
 ---
 

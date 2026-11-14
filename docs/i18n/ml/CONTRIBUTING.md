@@ -294,72 +294,72 @@ npm run test:combo:live:vps:failover     # യഥാർത്ഥ ക്രോസ
 
 ---
 
-## പ്രോജക്റ്റ് ഘടന
+## പദ്ധതി ഘടന
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # ഡാഷ്ബോർഡ് പേജുകൾ (23 വിഭാഗങ്ങൾ)
-│   ├── api/                # API റൂട്ടുകൾ (51 ഡയറക്ടറികൾ)
-│   └── login/              # ഓതന്റിക്കേഷൻ പേജുകൾ (.tsx)
-├── domain/                 # പോളിസി എൻജിൻ (policyEngine, comboResolver, costRules തുടങ്ങിയവ)
-├── lib/                    # പ്രധാന ബിസിനസ് ലോജിക് (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 പ്രോട്ടോക്കോൾ സെർവർ
-│   ├── acp/                # Agent Communication Protocol രജിസ്ട്രി
-│   ├── compliance/         # കംപ്ലയൻസ് പോളിസി എൻജിൻ
-│   ├── db/                 # SQLite ഡൊമെയ്ൻ മൊഡ്യൂളുകൾ + 130 മൈഗ്രേഷനുകൾ
-│   ├── memory/             # സ്ഥിരമായ സംഭാഷണ മെമ്മറി
-│   ├── oauth/              # OAuth പ്രൊവൈഡറുകൾ, സേവനങ്ങൾ, യൂട്ടിലിറ്റികൾ
-│   ├── skills/             # വിപുലീകരിക്കാവുന്ന സ്കിൽ ഫ്രെയിംവർക്ക്
-│   ├── usage/              # ഉപയോഗ ട്രാക്കിങ്ങും ചെലവ് കണക്കാക്കലും
-│   └── localDb.ts          # റീ-എക്സ്പോർട്ട് ലെയർ മാത്രം — ഇവിടെ ഒരിക്കലും ലോജിക് ചേർക്കരുത്
-├── middleware/              # റിക്വസ്റ്റ് മിഡിൽവെയർ (promptInjectionGuard)
-├── mitm/                   # MITM പ്രോക്സി (സർട്ടിഫിക്കറ്റ്, DNS, ടാർഗെറ്റ് റൂട്ടിങ്)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React കംപോണന്റുകൾ (.tsx)
-│   ├── constants/          # പ്രൊവൈഡർ നിർവചനങ്ങൾ (329), MCP സ്കോപ്പുകൾ, 20 റൂട്ടിങ് തന്ത്രങ്ങൾ
-│   ├── utils/              # സർക്യൂട്ട് ബ്രേക്കർ, സാനിറ്റൈസർ, ഓതന്റിക്കേഷൻ ഹെൽപ്പറുകൾ
-│   └── validation/         # Zod v4 സ്കീമകൾ
-└── sse/                    # SSE പ്രോക്സി പൈപ്പ്ലൈൻ
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse വർക്ക്സ്പേസ്
-├── executors/              # 150 എക്സിക്യൂട്ടർ മൊഡ്യൂളുകൾ (എക്സിക്യൂട്ടർ ക്ലാസുകൾ + ഓരോ പ്രൊവൈഡറിനുമുള്ള ഹെൽപ്പറുകൾ)
-├── handlers/               # 11 റിക്വസ്റ്റ് ഹാൻഡ്ലറുകൾ (ചാറ്റ്, റെസ്പോൺസുകൾ, എംബെഡ്ഡിങ്ങുകൾ, ചിത്രങ്ങൾ തുടങ്ങിയവ)
-├── mcp-server/             # MCP സെർവർ (110 വ്യത്യസ്ത ടൂളുകൾ, 3 ട്രാൻസ്പോർട്ടുകൾ, 33 സ്കോപ്പുകൾ)
-├── services/               # 178 ടോപ്പ്-ലെവൽ സേവനങ്ങൾ (combo, autoCombo, rateLimitManager തുടങ്ങിയവ)
-├── translator/             # ഫോർമാറ്റ് ട്രാൻസ്ലേറ്ററുകൾ (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API ട്രാൻസ്ഫോർമർ
-└── utils/                  # 22 യൂട്ടിലിറ്റി മൊഡ്യൂളുകൾ (സ്ട്രീം, TLS, പ്രോക്സി, ലോഗിങ്)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron ഡെസ്ക്ടോപ്പ് ആപ്പ് (ക്രോസ്-പ്ലാറ്റ്ഫോം)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js ടെസ്റ്റ് റണ്ണർ (1,574 ടെസ്റ്റ് ഫയലുകൾ)
-├── integration/            # ഇന്റഗ്രേഷൻ ടെസ്റ്റുകൾ
-├── e2e/                    # Playwright ടെസ്റ്റുകൾ
-├── security/               # സുരക്ഷാ ടെസ്റ്റുകൾ
-├── translator/             # ട്രാൻസ്ലേറ്ററിനായുള്ള പ്രത്യേക ടെസ്റ്റുകൾ
-└── load/                   # ലോഡ് ടെസ്റ്റുകൾ
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # ആർക്കിടെക്ചർ തീരുമാന രേഖകൾ
-├── architecture/            # സിസ്റ്റം ആർക്കിടെക്ചറും പ്രതിരോധശേഷിയും
-├── comparison/              # OmniRoute-ഉം ബദലുകളും തമ്മിലുള്ള താരതമ്യം
-├── compression/             # കംപ്രഷൻ ഗൈഡുകളും നിയമങ്ങളും
-├── dev/                     # ഡെവലപ്മെന്റ് ഗൈഡുകൾ
-├── diagrams/                # ആർക്കിടെക്ചർ ഡയഗ്രാമുകൾ
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # ഉപയോക്തൃ ഗൈഡ്, Docker, സജ്ജീകരണം, ട്രബിൾഷൂട്ടിങ്
-├── i18n/                    # അന്തർദേശീയവൽക്കരിച്ച README പരിഭാഷകൾ
-├── marketing/               # മാർക്കറ്റിങ് സാമഗ്രികൾ
-├── ops/                     # വിന്യാസം, പ്രോക്സി, കവറേജ്, റിലീസുകൾ
-├── providers/               # പ്രൊവൈഡർ-നിർദ്ദിഷ്ട ഡോക്യുമെന്റേഷൻ
-├── reference/               # API റഫറൻസ്, എൻവയോൺമെന്റ് വേരിയബിളുകൾ, CLI ടൂളുകൾ, സൗജന്യ ടയറുകൾ
-├── releases/                # റിലീസ് കുറിപ്പുകൾ
-├── routing/                 # ഓട്ടോ-കോംബോ എൻജിൻ, റീസണിങ് റീപ്ലേ
-├── screenshots/             # ഡാഷ്ബോർഡ് സ്ക്രീൻഷോട്ടുകൾ
-├── security/                # ഗാർഡ്റെയിലുകൾ, കംപ്ലയൻസ്, സ്റ്റെൽത്ത്, ടോക്കണുകൾ
-└── specs/                   # ഡിസൈൻ സ്പെസിഫിക്കേഷനുകൾ
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

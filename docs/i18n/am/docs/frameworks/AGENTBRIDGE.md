@@ -16,11 +16,11 @@ AgentBridge የOmniRoute MITM (Man-in-the-Middle) ፕሮክሲ ሲሆን፣ ከI
 
 ### AgentBridge ምንድን ነው?
 
-IDE ወኪል (ለምሳሌ፣ GitHub Copilot፣ Cursor፣ Claude Code) የ API ጥሪ ሲያደርግ፣ በቀጥታ ወደ ላይኛው AI አቅራቢ (OpenAI፣ Anthropic፣ ወዘተ) ይገናኛል። AgentBridge ያንን ግንኙነት በ TLS ደረጃ — ምንም አይነት የወኪል ውቅረት መቀየር ሳያስፈልገው — ያጠለፈ እና ጥያቄውን በ OmniRoute በኩል ይጽፋል።
+IDE ወኪል (ለምሳሌ፣ GitHub Copilot፣ Cursor፣ Claude Code) የ API ጥሪ ሲያደርግ፣ በቀጥታ ወደ ላይኛው AI አቅራቢ (OpenAI፣ Anthropic፣ ወዘተ) ይገናኛል። AgentBridge ያንን ግንኙነት በ TLS ደረጃ — ምንም አይነት የወኪል ውቅር መቀየር ሳያስፈልገው — ጠልፎ በ OmniRoute በኩል ጥያቄውን እንደገና ይጽፋል።
 
 ይህ ማለት የሚከተሉትን ማድረግ ይችላሉ:
 
-- **ማንኛውንም ወኪል ወደ ማንኛውም አገልግሎት አቅራቢ ያዙሩ** Copilot ማውራት OpenAI? ወደ Anthropic Claude, Gemini, ወይም ወደ ማንኛውም የ OmniRoute 381 አቅራቢዎች አዙረው።
+- **ማንኛውንም ወኪል ወደ ማንኛውም አገልግሎት አቅራቢ ያዙሩ** Copilot ማውራት OpenAI? ወደ Anthropic Claude፣ Gemini፣ ወይም ወደ OmniRoute 394 አቅራቢዎች አዙረው።
 - **የሞዴል ካርታዎችን ተግብር** : `gemini-3-flash` → `claude-sonnet-4.7` በግልፅ በተቆጣጣሪው ደረጃ።
 - **ሁሉንም የወኪል ትራፊክ ይከታተሉ** እያንዳንዱ የተጠለፈ ጥያቄ [ለትራፊክ ተቆጣጣሪው](./TRAFFIC_INSPECTOR.md) ታትሟል።
 - **OmniRoute የመቋቋም ችሎታን ይተግብሩ** ለ IDE ወኪል ትራፊክም የኮምቦ ማዘዋወር፣ ወረዳ መግቻ፣ ውድቀት እና የወጪ መከታተያ ስራ።
@@ -37,7 +37,7 @@ IDE ወኪል (ለምሳሌ፣ GitHub Copilot፣ Cursor፣ Claude Code) የ API 
 | Zed ኢንዱስትሪዎች   |   —    |   ✓   |   —    |             ✓             |
 | Claude ኮድ      |   —    |   —   |   ✓    |             ✓             |
 | ኮድ ክፈት         |   —    |   —   |   ✓    |             ✓             |
-| ትሬ             |   —    |   —   |   —    |         🔍 መመርመር          |
+| ትሪ             |   —    |   —   |   —    |         🔍 መመርመር          |
 | ዳሽቦርድ UI       |   ✓    |   ✗   |   ✗    |             ✓             |
 | የትራፊክ መርማሪ     |   ✗    |   ✗   |   ✓    |             ✓             |
 | OmniRoute ማዞሪያ |   ✗    |   ✗   |   ✗    |             ✓             |
@@ -542,26 +542,26 @@ AgentBridge ጥያቄዎቹን ቢያቋርጥም ሁሉም ጥያቄዎች ካ�
 
 ---
 
-## §8 የወደፊት ዕቅድ
+## §8 የመንገድ ካርታ
 
-### የTrae ምርመራ
+### የትራክ ምርመራ
 
-Trae በአንጻራዊነት አዲስ የAI ኮድ ማጎልበቻ ረዳት ነው። ማስተናገጃ ከመተግበርዎ በፊት፦
+ትሬ በአንጻራዊ አዲስ AI ኮድ ረዳት ነው። ተቆጣጣሪን ከመተግበሩ በፊት;
 
-1. በVS Code / JetBrains የመተግበሪያ ገበያዎች ውስጥ ወይም ራሱን የቻለ መተግበሪያ ከሆነ ባይነሪውን/ቅጥያውን ይለዩ
-2. የAPI አስተናጋጆችን እና የመግቢያ ነጥቦችን ቅርጽ ለማወቅ ትራፊኩን በmitmproxy ይቅረጹ
-3. የማረጋገጫ ዘዴውን ይወስኑ
-4. በTOS እና በAPI ተገኝነት ላይ በመመርኮዝ ለመቀጠል/ላለመቀጠል ይገምግሙ
+1. binary/extension በ VS ኮድ / JetBrains የገበያ ቦታዎች ወይም እንደ ገለልተኛ መተግበሪያ ይለዩ
+2. API አስተናጋጆችን እና የመጨረሻ ነጥብ ቅርጾችን ለማግኘት ትራፊክን በmitmproxy ይያዙ
+3. የማረጋገጫ ዘዴን ይወስኑ
+4. በ TOS እና API መገኘት ላይ በመመስረት go/no-go ይገምግሙ
 
-ምርመራው እስኪጠናቀቅ ድረስ፣ በዳሽቦርዱ ውስጥ ያለው የTrae ካርድ የ"በምርመራ ላይ" ባጅ ከ"የአዋጭነት ሪፖርት ያድርጉ" አገናኝ ጋር ያሳያል። `src/mitm/handlers/trae.ts` ላይ ያለው የማስተናገጃ አጽም የተዋቀረ `ገና አልተተገበረም` ስህተት ይጥላል።
+ምርመራው እስኪጠናቀቅ ድረስ፣ በዳሽቦርዱ ውስጥ ያለው ትሬይ ካርዱ "የሪፖርት አዋጭነት" አገናኝ ያለው "የምርመራ" ባጅ ያሳያል። `src/mitm/handlers/trae.ts` ላይ ያለው ተቆጣጣሪው የተዋቀረ `Not yet implemented` ስህተትን ይጥላል።
 
-### በወረፋ ላይ ያሉ ወኪሎች (MITM ያስፈልጋል — ብጁ base URL ድጋፍ የለም)
+### የኋላ ሎግ ወኪሎች (MITM ያስፈልጋል — ምንም ብጁ መሠረት URL ድጋፍ የለም)
 
-የሚከተሉት መሳሪያዎች አሁን ባሉት ስሪቶቻቸው ብጁ base URL አይደግፉም፤ ይህም MITMን ብቸኛው የመጥለፍ መንገድ ያደርገዋል። የአዋጭነት ግምገማ በመጠባበቅ ላይ ነው፦
+የሚከተሉት መሳሪያዎች ብጁ ቤዝ URLs አሁን ባለው ሥሪታቸው አይደግፉም ፣ ይህም MITM ብቸኛው የመጥለፍ መንገድ ያደርገዋል። የአዋጭነት ግምገማ በመጠባበቅ ላይ ነው፡-
 
 - **Windsurf** (Codeium/Cognition)
-- **Amp** (Sourcegraph)
-- **Amazon Q / Kiro CLI** (AWS Bedrock — ከKiro IDE የተለየ)
-- **Cowork** (Anthropic desktop)
+- **አምፕ** (ምንጭ)
+- **Amazon ጥ / Kiro CLI** (AWS Bedrock — ከ Kiro IDE የተለየ)
+- **አብሮ መስራት** (Anthropic ዴስክቶፕ)
 
-ማስታወሻ፦ GitHub Copilot CLI ≥v1.0.19 `COPILOT_PROVIDER_BASE_URL`ን ይደግፋል — ለዚያ መሳሪያ MITMን ከመጠቀም ይልቅ ቀጥተኛ ውቅረትን ይጠቀሙ።
+ማስታወሻ GitHub Copilot CLI ≥ v1.0.19 ለዚያ መሳሪያ MITM ከማለት ይልቅ `COPILOT_PROVIDER_BASE_URL` — ን ይደግፋል።

@@ -28,56 +28,52 @@ bleiben, bis das Fenster zurückgesetzt wird. Die Engine verhindert dies durch:
 
 ---
 
-## Algorithmus: Arbeitserhaltendes Fair Sharing
+## Algorithmus: Fair-Share Work-Conserving
 
-Implementiert in `src/lib/quota/fairShare.ts`.
+In `src/lib/quota/fairShare.ts` implementiert.
 
 ### Modi
 
-| Bedingung                                  | Modus         | Verhalten                                                                                       |
-| ------------------------------------------ | ------------- | ----------------------------------------------------------------------------------------------- |
-| `globalUsedPercent < saturationThreshold`  | **Großzügig** | Schlüssel darf bis zum globalen Limit abzüglich des Gesamtverbrauchs zusätzliche Anteile nutzen |
-| `globalUsedPercent >= saturationThreshold` | **Strikt**    | Individuellen fairen Anteil strikt durchsetzen                                                  |
+| Zustand                                    | Modus         | Verhalten                                                                                           |
+| ------------------------------------------ | ------------- | --------------------------------------------------------------------------------------------------- |
+| `globalUsedPercent < saturationThreshold`  | **Großzügig** | Der Schlüssel kann bis zum globalen Limit abzüglich der verbrauchten Gesamtsumme ausgeliehen werden |
+| `globalUsedPercent >= saturationThreshold` | **Strikt**    | Setzen Sie den individuellen fairen Anteil strikt durch                                             |
 
-Der Standardwert für `saturationThreshold` ist `0.5` (Umgebungsvariable `QUOTA_SATURATION_THRESHOLD`).
+Standard- `saturationThreshold = 0.5` (env `QUOTA_SATURATION_THRESHOLD`).
 
 ### Entscheidung pro Dimension
 
-Für jede aktive Dimension im Pool berechnet die Engine:
+Für jede aktive Dimension im Pool berechnet die Engine Folgendes:
 
 ```
 fairShareAllowed = poolLimit × (allocationWeight / 100)
-consumed        = aktueller rollierender Wert für diesen Schlüssel (aus QuotaStore.peek)
+consumed        = current rolling value for this key (from QuotaStore.peek)
 remaining       = fairShareAllowed - consumed
 ```
 
-Dann gilt:
+Dann:
 
-- **`policy = hard`**: Wenn `consumed > fairShareAllowed` und der Modus strikt ist → **blockieren**.
-- **`policy = soft`**: Wenn `consumed > fairShareAllowed` und der Modus strikt ist → **benachteiligen** (in der Kombination niedriger priorisieren; niemals hart blockieren).
-- **`policy = burst`**: Zulassen, solange globaler Spielraum vorhanden ist, unabhängig vom fairen Anteil.
+- **`policy = hard`** : wenn `consumed > fairShareAllowed` und Modus strikt → sind** Block** .
+- **`policy = soft`** : wenn `consumed > fairShareAllowed` und Modus strikt → sind** bestrafen** (in Kombinationen herabsetzen; niemals hart blockieren).
+- **`policy = burst`** : Zulassen, solange globaler Spielraum vorhanden ist, unabhängig vom fairen Anteil.
 
-### Absolute Obergrenze
+### Cap absolut
 
-`capValue` + `capUnit` einer Zuweisung bilden eine harte Obergrenze, unabhängig von Modus oder
-Richtlinie. Jede Dimension, für die `consumed >= capValue` gilt, **blockiert** die Anfrage immer.
+`capValue` + `capUnit` für eine Zuteilung ist eine feste Obergrenze, unabhängig von Modus oder Richtlinie. Jede Dimension, in der immer `consumed >= capValue`** Blöcke** die Anfrage.
 
 ### Mehrdimensionale Prüfung
 
-Eine Anfrage wird blockiert, wenn **irgendeine** Dimension im Pool sie blockieren würde. Die Dimensionen
-sind unabhängig voneinander — die Ausschöpfung von 5h% wirkt sich nicht auf die Dimension weekly% aus.
+Eine Anfrage wird blockiert, wenn** beliebig** Dimension im Pool würde es blockieren. Die Dimensionen sind unabhängig — eine 5-Stunden-%-Erschöpfung keinen Einfluss auf die wöchentliche %-Dimension hat.
 
-### Nutzung ungenutzter Anteile
+### Ausleihen
 
-Im großzügigen Modus kann ein Schlüssel, dessen Zuweisung nicht vollständig genutzt wurde,
-Überschüsse aus den nicht genutzten Anteilen anderer Schlüssel verwenden. Die Formel lautet:
+Im großzügigen Modus kann ein Schlüssel, dessen Zuteilung nicht ausreichend genutzt wird, Überschüsse aus den nicht zugewiesenen Anteilen anderer Schlüssel verwenden. Die Formel lautet:
 
 ```
 maxAllowed = globalLimit - consumedByOtherKeys
 ```
 
-wobei `consumedByOtherKeys = consumedTotal - consumedByThisKey` gilt. Die globale Obergrenze
-(`limit` des Pools für diese Dimension) ist stets die harte Obergrenze.
+wo `consumedByOtherKeys = consumedTotal - consumedByThisKey`. Das globale Teto (Pool `limit` für diese Dimension) ist immer die harte Obergrenze.
 
 ---
 
@@ -198,51 +194,46 @@ Priorität (von der höchsten zur niedrigsten):
 
 ## Pipeline-Integration
 
-### PRE-Hook (`open-sse/handlers/chatCore.ts`)
+### PRE Haken (`open-sse/handlers/chatCore.ts`)
 
-Wird nach Authentifizierungs- und Richtlinienprüfungen, aber vor dem Upstream-Executor ausgeführt:
+Wird vor dem Upstream-Executor nach Authentifizierungs- und Richtlinienprüfungen ausgeführt:
 
 ```
 resolveComboTargets / handleSingleModel
   → enforceQuotaShare(apiKeyId, connectionId, provider, estimatedCost)
-      → getQuotaStore().peek() pro Dimension
+      → getQuotaStore().peek() per dimension
       → fairShare.decideFairShare()
-      → falls blockieren → 429 zurückgeben (buildErrorBody, feste Regel Nr. 12)
-      → falls zulassen + depriorisieren → quotaSoftPenalty=true für Kandidaten setzen
+      → if block → return 429 (buildErrorBody, Hard Rule #12)
+      → if allow + deprioritize → set quotaSoftPenalty=true on candidate
   → executor.execute()
 ```
 
-**Fail-open**: Wenn `enforceQuotaShare` eine Ausnahme auslöst, wird die Anfrage zugelassen
-und eine `pino.warn`-Meldung protokolliert. Dadurch wird verhindert, dass ein Fehler in der Kontingent-Engine den gesamten
-Datenverkehr blockiert.
+**Fail-open** : Wenn `enforceQuotaShare` einen Fehler auslöst, wird die Anfrage mit einem `pino.warn` Protokoll durchgelassen. Dadurch wird verhindert, dass ein Kontingent-Engine-Fehler den gesamten Datenverkehr blockiert.
 
-### POST-Hook (Verbrauch erfassen)
+### POST -Hook (Rekordverbrauch)
 
-Nach einer erfolgreichen Antwort:
+Nach erfolgreicher Antwort:
 
 ```
-Executor gibt Erfolg zurück
+executor returns success
   → spendRecorder.recordConsumption(apiKeyId, connectionId, provider, actualCost)
-      → getQuotaStore().consume() pro Dimension
-      → Fail-open: Fehler werden als pino.warn protokolliert und niemals an den Client weitergegeben
+      → getQuotaStore().consume() per dimension
+      → fail-open: errors logged as pino.warn, never propagated to client
 ```
 
-**Abweichungshinweis**: Wenn `consume` nach der Antwort fehlschlägt, erfasst der rollierende Zähler zu wenig.
-Das Sättigungssignal des Anbieters (z. B. `anthropic-ratelimit-unified-5h-utilization`)
-korrigiert die globale Schätzung bei der nächsten Anfrage.
+**Driftnotiz** : Wenn `consume` nach der Antwort fehlschlägt, zählt der fortlaufende Zähler zu wenig. Das Sättigungssignal vom Anbieter (z. B. `anthropic-ratelimit-unified-5h-utilization`) korrigiert die globale Schätzung bei der nächsten Anfrage.
 
-### Sanfte Combo-Abwertung (`open-sse/services/combo.ts`)
+### Kombinierte weiche Strafe (`open-sse/services/combo.ts`)
 
 Wenn `decision.deprioritize === true`:
 
 ```ts
 if (candidate.quotaSoftPenalty) {
-  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // Standardwert 0.7
+  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // default 0.7
 }
 ```
 
-Die Abwertung wird nach allen anderen Bewertungsfaktoren angewendet. Sie verringert die Wahrscheinlichkeit,
-dass die automatische Combo einen ausgelasteten Schlüssel auswählt, ohne ihn vollständig zu blockieren.
+Die Strafe wird nach allen anderen Wertungsfaktoren verhängt. Es verringert die Wahrscheinlichkeit der automatischen Kombination, einen gesättigten Schlüssel auszuwählen, ohne ihn hart zu blockieren.
 
 ---
 
@@ -279,15 +270,15 @@ Die Hooks der Seite:
 
 ## Umgebungsvariablen
 
-| Variable                           | Standardwert | Beschreibung                                                        |
-| ---------------------------------- | ------------ | ------------------------------------------------------------------- |
-| `QUOTA_STORE_DRIVER`               | `sqlite`     | Zu verwendender Treiber: `sqlite` oder `redis`                      |
-| `QUOTA_STORE_REDIS_URL`            | _(leer)_     | Redis-URL, z. B. `redis://localhost:6379`                           |
-| `QUOTA_SATURATION_THRESHOLD`       | `0.5`        | 0..1; `>= Schwellenwert` aktiviert den strikten Modus               |
-| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`        | 0..1; Multiplikator für den Kombinationswert der weichen Richtlinie |
-| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`         | Tage, bevor die GC alte `quota_consumption`-Buckets entfernt        |
+| Variable                           | Standard | Beschreibung                                            |
+| ---------------------------------- | -------- | ------------------------------------------------------- |
+| `QUOTA_STORE_DRIVER`               | `sqlite` | Zu verwendender Treiber: `sqlite` oder `redis`          |
+| `QUOTA_STORE_REDIS_URL`            | _(leer)_ | Redis URL, z. B. `redis://localhost:6379`               |
+| `QUOTA_SATURATION_THRESHOLD`       | `0.5`    | 0..1; `>= threshold` aktiviert den strikten Modus       |
+| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`    | 0..1; Multiplikator für den Soft-Policy-Combo-Score     |
+| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`     | Tage bevor GC alte `quota_consumption` Buckets entfernt |
 
-DB-Einstellungen (`quotaStore.*`) überschreiben Umgebungsvariablen.
+DB Einstellungen (`quotaStore.*`) überschreiben Env-Variablen.
 
 ---
 

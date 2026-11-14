@@ -119,35 +119,10 @@ ignorando la barra finale; pertanto `http://localhost:3000` e
 `http://localhost:3000/` sono equivalenti. Lo stesso CSV può essere impostato a
 runtime in **Dashboard → Security → CORS Allowed Origins** senza riavviare.
 
-## Chiavi API e sessioni basate su cookie
+## Chiavi API e sessioni di cookie
 
-- **Bearer / `x-api-key` (la superficie di inferenza `/v1/*`):** i browser non
-  allegano mai automaticamente queste credenziali. CORS non rappresenta una
-  barriera significativa in questo caso: la barriera è la chiave API. Per questo
-  motivo, tale superficie è intenzionalmente permissiva, così i client browser ed
-  Electron possono leggere le risposte a cui hanno già diritto.
-  La restituzione permissiva dell'origine segue la chiave convalidata, non la semplice
-  presenza dell'header: quando `REQUIRE_API_KEY=false` serve una richiesta in forma
-  anonima, la sua risposta di successo mantiene l'allowlist fail-closed. I rifiuti di
-  autenticazione (401) restano leggibili, così i client possono segnalare una chiave
-  revocata o digitata male (#5242): il 401 emesso dalla pipeline stessa mantiene la
-  restituzione dell'origine, e una route che rifiuta direttamente la chiave dopo che la
-  pipeline l'ha servita come anonima (`/v1/models` e `/v1beta/models` con
-  l'autenticazione di gestione configurata, le route con ambito proprietario
-  `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` e le route dei candidati
-  auto-combo) aggiunge la restituzione dell'origine a quel 401 tramite
-  `credentialRejectionHeaders()`. La restituzione dipende dal fatto che la richiesta
-  contenga un header di credenziali (`Authorization`, `x-api-key`, `x-goog-api-key` o il
-  cookie `auth_token`), non da quale di essi la route abbia verificato, e non è mai
-  accompagnata da `Access-Control-Allow-Credentials`; il corpo è un involucro di errore
-  fisso. Le route di gestione sotto `/api/v1/` protette da `requireManagementAuth()`
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) non aggiungono la restituzione
-  dell'origine: con `REQUIRE_API_KEY=false` i loro 401/403 non sono leggibili
-  cross-origin.
-- **Sessione basata su cookie (la dashboard):** è protetta dall'impostazione
-  predefinita fail-closed **e** dall'assenza di `Access-Control-Allow-Credentials`
-  nel percorso condiviso. Non includere le origini di gestione/dashboard in alcuna
-  configurazione permissiva: devono rimanere rigorosamente fail-closed.
+- **Portatore/ `x-api-key` (la superficie di inferenza `/v1/*` ):** i browser non li allegano mai automaticamente. CORS non è una barriera significativa qui — la chiave API è la barriera — motivo per cui quella superficie è intenzionalmente permissiva in modo che il browser e i client Electron possano leggere le risposte a cui hanno già diritto. L'eco rilassato segue la chiave convalidata, non la semplice presenza dell'intestazione: quando `REQUIRE_API_KEY=false` serve una richiesta in modo anonimo, la sua risposta positiva mantiene la lista consentita con chiusura fallita. I rifiuti di autenticazione (401) rimangono leggibili in modo che i client possano far emergere una chiave revocata o digitata in modo errato (#5242): il 401 della pipeline conserva l'eco e un percorso che rifiuta la chiave stessa dopo che la pipeline l'ha resa anonima (`/v1/models` e `/v1beta/models` con l'autenticazione di gestione configurata, le rotte candidate `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` con ambito proprietario e auto-combo) aggiunge l'eco a quel 401 tramite `credentialRejectionHeaders()`. L'eco viene digitato sulla richiesta che trasporta un'intestazione della credenziale (`Authorization`, `x-api-key`, `x-goog-api-key` o il cookie `auth_token` ), non su quale di essi è stato controllato il percorso e non è mai accoppiato con `Access-Control-Allow-Credentials`; il corpo è una busta di errore fissa. Le rotte di gestione sotto `/api/v1/` sorvegliate da `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) non aggiungono l'eco: con `REQUIRE_API_KEY=false` il loro 401/403 non è leggibile cross-origin.
+- **Cookie di sessione (la dashboard):** protetto dal default fail-closed** E** dall’assenza di `Access-Control-Allow-Credentials` sul percorso condiviso. Mantenere le origini management/dashboard fuori da qualsiasi configurazione permissiva; devono rimanere esattamente in fail-close.
 
 ## Handshake WebSocket (`/v1/responses`, `/v1/ws`)
 

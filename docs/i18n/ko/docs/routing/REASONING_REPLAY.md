@@ -24,19 +24,21 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 캡처는 `open-sse/handlers/chatCore.ts` (두 개의 사이트, 두 개의 `cacheReasoningFromAssistantMessage` 호출 사이트)에서 발생합니다. 재생은 스키마 강제 변환 후 디스패치 전에 `open-sse/translator/index.ts` 에서 발생합니다.
+
+도구 호출 항목은 요청 범위의 다이제스트 및 도구 호출 ID인 `buildToolCallCacheKey()` 아래에 저장되므로 다른 API 키 또는 세션에서 사용하는 동일한 ID는 항목을 선택하지 않습니다. 범위는 `buildReasoningCacheScope()` 에서 나옵니다: API 키 ID와 요청에 세션 키가 있는 경우 세션 키입니다. 따라서 `tool_call_id` 열과 대시보드에는 해당 항목에 대한 이 다이제스트가 표시됩니다.
 
 일반(툴 호출이 아닌) 어시스턴트 턴은 다르게 입력됩니다. `buildAssistantMessageCacheKey()` 세션 범위와 해당 턴까지 정규화된 OpenAI 형식 기록을 소화합니다. 왜냐하면 DeepSeek `tools` 존재하면 _모든_ 이전 턴의 추론을 요구하기 때문입니다. Responses-API 대상(예: `/responses` 로 라우팅된 `opencode-go/deepseek-v4-flash`)의 경우 업스트림 본문은 `messages` 아닌 `input` 전달하므로 `translateRequest()` (`open-sse/translator/index.ts`)는 콜백 옵션을 통해 소화한 피벗 기록을 보고하고 캡처 사이트는 동일한 기록을 소화합니다. 응답 재생 패스는 모든 소스 형식에 대해 OpenAI 피벗에서 실행되므로 Anthropic 메시지 클라이언트(Claude → OpenAI → 응답)도 재생됩니다.
 

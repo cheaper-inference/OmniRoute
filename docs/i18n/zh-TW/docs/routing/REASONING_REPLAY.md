@@ -24,19 +24,21 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 捕獲發生在`open-sse/handlers/chatCore.ts` （兩個站點，兩個`cacheReasoningFromAssistantMessage`呼叫站點）。重播發生在`open-sse/translator/index.ts`模式強制之後但分派之前。
+
+工具呼叫條目儲存在`buildToolCallCacheKey()`下，它是請求範圍和工具呼叫 id 的摘要，因此另一個API金鑰或會話使用的相同 id 不會選擇該條目。範圍來自`buildReasoningCacheScope()`： API金鑰 ID，加上請求有會話金鑰時的會話金鑰。因此， `tool_call_id`列和儀表板顯示這些條目的摘要。
 
 普通（非工具呼叫）協助輪次的鍵控方式不同： `buildAssistantMessageCacheKey()`消化會話範圍加上該輪次之前的規範化 OpenAI 格式記錄，因為一旦`tools`存在， DeepSeek就需要對_每個_先前輪次進行推理。對於 Responses-API 目標（例如`opencode-go/deepseek-v4-flash`，路由到`/responses`），上游主體攜帶`input`，而不是`messages`，因此`translateRequest()` (`open-sse/translator/index.ts`) 報告它通過回調選項消化的樞軸轉錄本，並且捕獲站點消化相同的轉錄本。對於每種來源格式，回應重播過程都在OpenAI樞軸上運行，因此Anthropic訊息用戶端（Claude → OpenAI →回應）也會重播。
 

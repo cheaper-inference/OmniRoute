@@ -64,67 +64,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## የሚመከሩ የምርት አካባቢ ማስተካከያዎች
+## የሚመከር የምርት ማስተካከያ
 
-### 1. የግንኙነት ፑል / የደንበኛ አማራጮች (የioredis `Redis` constructor)
+### 1. የግንኙነት ገንዳ / የደንበኛ አማራጮች (ioredis `Redis` ግንበኛ)
 
-አሁን ያለው ኮድ ያለምንም ብጁ አማራጮች አንድ `new Redis(url)` ይፈጥራል። ለምርት
-ባለብዙ-ቅጂ ማሰማራቶች፣ በኮዱ ውስጥ የደንበኛ ፋብሪካ ያስተላልፉ ወይም `getRedisClient()`ን ይጠቅልሉ፦
+የአሁኑ ኮድ ምንም ብጁ አማራጮች የሌሉበት ነጠላ `new Redis(url)` ይፈጥራል። ለምርት ባለብዙ-ብዜት ማሰማራቶች የደንበኛ ፋብሪካን በኮዱ ውስጥ ማለፍ ወይም `getRedisClient()` መጠቅለል፡-
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // የድጋሚ ሙከራ ገደብ የለም፤ retryStrategy እንዲወስን ይተዉት
-  enableReadyCheck: true, // ጥሪዎችን ከመቀበሉ በፊት አገልጋዩ ዝግጁ መሆኑን ያረጋግጡ
-  lazyConnect: true, // ሲፈጠር አይገናኝ፤ የመጀመሪያውን ጥሪ ይጠብቅ
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // ከ10 ድጋሚ ሙከራዎች በኋላ ይተዉ → በኋላ እንደገና ይገናኙ
-    return Math.min(times * 200, 5000); // 200ms፣ 400ms፣ …፣ ከፍተኛው 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // በአንድ ጊዜ የሚከናወኑ ትዕዛዞችን ወደ አንድ የTCP ጽሑፍ ያጣምሩ
-  keepAlive: 10000, // በየ10s የTCP keep-alive
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**ቁልፍ የምርጫ ሚዛኖች፦**
+**ቁልፍ ግብይቶች፡-**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — ጊዜያዊ የRedis ዳግም መጀመሮች እያንዳንዱን
-  ጥያቄ ወዲያውኑ እንዳያከሽፉ ለምርት አካባቢ ይመረጣል። በ`checkRateLimit()` ውስጥ ያለው
-  የማህደረ ትውስታ አማራጭ የብልሽት መንገዱን ይሸፍናል።
-- `lazyConnect: true` — አገልጋዩ ግንኙነቶችን መቀበል ከመጀመሩ በፊት Redis ሥራ ላይ
-  መሆኑ የሚፈልግ የጅምር ጥገኝነትን ያስወግዳል።
-- `enableAutoPipelining: true` — በአንድ ጊዜ ለሚከናወኑ የፍጥነት-ገደብ ፍተሻዎች የደርሶ-መልስ
-  ጉዞዎችን ይቀንሳል፤ በአንድ ግንኙነት ከ50 RPS በላይ ጠቃሚ ነው።
+- `maxRetriesPerRequest: null` + `retryStrategy` — ለማምረት ተመራጭ ነው ስለዚህ ጊዜያዊ Redis ዳግም መጀመር እያንዳንዱን ጥያቄ ወዲያውኑ አያመልጥም። በ `checkRateLimit()` ውስጥ ያለው የማህደረ ትውስታ ውድቀት የውድቀቱን መንገድ ይይዛል።
+- `lazyConnect: true` — አገልጋዩ ግንኙነቶችን መቀበል ከመጀመሩ በፊት በ Redis ላይ ከመነሳት የመነሻ ጥገኝነትን ያስወግዳል።
+- `enableAutoPipelining: true` — ለተመሳሳይ መጠን ገደብ ፍተሻዎች የዙር ጉዞዎችን ይቀንሳል። በአንድ ግንኙነት ላይ በ > 50 RPS ጠቃሚ።
 
-### 2. የRedis አገልጋይ ውቅር (`redis.conf`)
+### 2. Redis የአገልጋይ ውቅር (`redis.conf`)
 
 ```
-# ማህደረ ትውስታ
-maxmemory 80%                        # ለOS ገጽ መሸጎጫ ቦታ ይተዉ
-maxmemory-policy allkeys-lru         # በጫና ጊዜ የቆዩ የማረጋገጫ መሸጎጫ ግቤቶችን ያስወጡ
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# ዘላቂነት (አማራጭ — OmniRoute ያለዚህም ብልሽትን የሚቋቋም ነው)
-save 300 1                           # ≥1 ቁልፍ ከተቀየረ ቢያንስ በየ5 ደቂቃው snapshot ያድርጉ
-appendonly no                        # AOF አያስፈልግም፤ ውሂቡ እንደገና ሊፈጠር ይችላል
-appendfsync no                       # የfsync ተጨማሪ ወጪ የለም (RDB በቂ ነው)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# አውታረ መረብ
-timeout 0                            # በሥራ-ፈትነት ምክንያት ግንኙነት አይቋረጥ
-tcp-keepalive 300                    # የ5 ደቂቃ keep-alive
-tcp-backlog 511                      # ለድንገተኛ ከፍተኛ ጭነት የግንኙነት backlog
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# አፈጻጸም
-hz 10                                # ነባሪ፤ ለመዘግየት-ስሱ አጠቃቀም 100
-activedefrag yes                     # fragmentation >10% ሲሆን በራስ-ሰር ያጠጋጉ
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**የ`maxmemory-policy allkeys-lru` የምርጫ ሚዛን፦** የማረጋገጫ መሸጎጫ ግቤቶች በማህደረ ትውስታ
-ጫና ጊዜ ሊወገዱ ይችላሉ። ይህ ደህንነቱ የተጠበቀ ነው — `setCachedApiKey` በማይገኝበት ጊዜ ሁልጊዜ
-እንደገና ይሞላዋል፣ እና የSQLite አማራጭ ባለሥልጣን ምንጭ ነው። የፍጥነት-ገዳቢው Lua script በንድፍ
-ለአጭር ጊዜ የሚኖሩ ትናንሽ ቁልፎችን ይፈጥራል።
+**`maxmemory-policy allkeys-lru` ግብይት፡-** የማረጋገጫ መሸጎጫ ግቤቶች በማህደረ ትውስታ ግፊት ሊባረሩ ይችላሉ። ይህ ደህንነቱ የተጠበቀ — `setCachedApiKey` ሁልጊዜ በ miss ላይ እንደገና ይሞላል፣ እና የ SQLite ውድቀት ስልጣን ነው። ተመን-ገደብ Lua ስክሪፕት በንድፍ ለአጭር ጊዜ የሚቆዩ ትናንሽ ቁልፎችን ይፈጥራል።
 
-### 3. የDocker Compose ቅንብሮች
+### 3. Docker ቅንብሮችን ጻፍ
 
-የምርት compose (`docker-compose.prod.yml`) `redis:8.6.2-alpine`ን ይጠቀማል። የሚከተለውን ያክሉ፦
+ፕሮድ አዘጋጅ (`docker-compose.prod.yml`) `redis:8.6.2-alpine` ይጠቀማል። አክል፡
 
 ```yaml
 redis:
@@ -149,35 +141,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. የባለብዙ-ኢንስታንስ / ማስፋፊያ ግምቶች
+### 4. ባለብዙ-አብነት / ልኬት ግምት
 
-**ለሁሉም ቅጂዎች አንድ Redis** — የፍጥነት-ገዳቢው Lua script በአንድ
-ባለሥልጣን የቁልፍ ክፍተት ላይ ይመረኮዛል። ከቅጂዎች ጀርባ ያሉ በርካታ የRedis ኢንስታንሶች atomicityን
-ያሳጣሉ እና በጀቱን በእጥፍ ያሳድጋሉ። ለሁሉም የመተግበሪያ ቅጂዎች አንድ Redis (ወይም failover ያለው
-Redis Sentinel cluster) ይጠቀሙ።
+**ነጠላ Redis ለሁሉም ቅጂዎች** — የዋጋ-ገደብ Lua ስክሪፕት በአንድ ባለ ስልጣን ቁልፍ ቦታ ላይ ይወሰናል። ከቅጂዎች በስተጀርባ ያሉ ብዙ Redis ምሳሌዎች ንፁህነትን ያጣሉ እና በጀቱን በእጥፍ ይጨምራሉ። ለሁሉም የመተግበሪያ ቅጂዎች ነጠላ Redis (ወይም Redis Sentinel cluster with failover) ይጠቀሙ።
 
-**የግንኙነት ብዛት፦** እያንዳንዱ የመተግበሪያ ቅጂ ወደ Redis **2 የTCP ግንኙነቶችን** ይከፍታል
-(የፍጥነት ገዳቢ ደንበኛ + የኮታ ማከማቻ ደንበኛ)። በ10 ቅጂዎች → 20 ግንኙነቶች፣ ይህም
-ከነባሪ የRedis ኢንስታንስ 10k የግንኙነት ጣሪያ በጣም በታች ነው።
+**የግንኙነት ብዛት፡-** እያንዳንዱ መተግበሪያ ቅጂ ይከፈታል።** 2 TCP ግንኙነቶች** ወደ Redis (ተመን ገዥ ደንበኛ + የኮታ መደብር ደንበኛ)። በ10 ድግግሞሽ → 20 ግንኙነቶች፣ በነባሪ Redis ምሳሌ 10k የግንኙነት ጣሪያ ውስጥ።
 
 ### 5. ክትትል
 
-በጤና-ፍተሻ endpoint በኩል ያጋልጡ፦
+በጤና ፍተሻ የመጨረሻ ነጥብ በኩል አጋልጥ፡
 
 ```typescript
-// src/app/api/monitoring/health/route.ts አስቀድሞ የrateLimiter ፋንክሽኖችን ይጠራል
-// ለRedis የተወሰኑ ፍተሻዎችን ያክሉ፦
-//   1. የPING መዘግየትን በioredis .ping()
-//   2. የማህደረ ትውስታ አጠቃቀምን በINFO memory
-//   3. የግንኙነት ብዛትን በINFO clients
-//   4. የmaxmemory-policy የስኬት መጠንን (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-መከታተል ያለባቸው ቁልፍ መለኪያዎች፦
+የሚመለከቱት ቁልፍ መለኪያዎች፡-
 
-- **በሰከንድ የሚወገዱ ቁልፎች** — ያለማቋረጥ ከዜሮ በላይ ከሆነ፣ `maxmemory`ን ይጨምሩ
-- **የታገዱ ደንበኞች** — ከዜሮ በላይ መሆን ዘገምተኛ Lua scripts ወይም ከፍተኛ ፉክክርን ያመለክታል
-- **ውድቅ የተደረጉ ግንኙነቶች** — የግንኙነት ገደቡ ላይ ተደርሷል፤ በ20 ግንኙነቶች ይህ አልፎ አልፎ ብቻ ይከሰታል
+- **የተባረሩ ቁልፎች / ሰከንድ** — በቋሚነት ዜሮ ካልሆነ፣ `maxmemory` ይጨምሩ
+- **የታገዱ ደንበኞች** — ዜሮ ያልሆኑ ቀርፋፋ የሉአ ጽሑፎችን ወይም ከፍተኛ ሙግትን ይጠቁማል
+- **ውድቅ የተደረጉ ግንኙነቶች** — ግንኙነት ገደብ መታ; አልፎ አልፎ በ 20 ግንኙነቶች
+
+### 6. Redis-ተኳሃኝ አገልጋዮች
+
+እዚህ ጥቅም ላይ የሚውለው ማንኛውም አገልጋይ የ Lua ስክሪፕቶችን ማሄድ አለበት፡ የዋጋ ገደብ አንድ `EVAL` ነው። ሉአ በሌለበት አገልጋይ ላይ `checkRateLimit()` `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` ይመዘግባል እና በየሂደቱ ይቆጥራል፣ ስለዚህ እያንዳንዱ ቅጂ በራሱ ገደቡን ያስፈጽማል። የመርጦ መግባቱ የጋራ ክፍለ-ጊዜ-ግንኙነት ማከማቻ (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) እንዲሁም ፒኖችን በ `EVAL` ያነብባል እና ያዘምናል፤ ያለ Lua `[SESSION_AFFINITY] Redis error; falling back to SQLite.` ይመዘግባል እና እያንዳንዱ ቅጂ የራሱን ፒን ይይዛል። ሌሎቹ የሥራ ጫናዎች ግልጽ ትዕዛዞችን (`SET ... EX`፣ `GET`፣ `DEL`፣ `MGET`፣ `EXPIRE`፣ `INCRBYFLOAT`፣ hashes and sets) ይጠቀማሉ፣ እና የትርጉም መሸጎጫ Redis ጀርባ ምንም `FT.*` ትዕዛዞችን አይልክም።
+
+የተፈተነ በ OmniRoute 3.8.52 KiviDB 1.2.0 ከሉአ ምስሉ (`kividb/kividb:v1.2.0-lua`) ጋር። የፍጥነት ቆጣቢው (የሁለተኛ ሂደት ቆጣሪዎችን ማጋራትን ጨምሮ)፣ የዋስትና መሸጎጫ፣ የኮታ ማከማቻ፣ የማሞቅ ሰርክ ሰሪ፣ የትርጉም መሸጎጫ መደብር እና በቻት ተቆጣጣሪው በኩል `/v1/chat/completions` ጥያቄ በ Redis 8.10.3 ላይ ከሚያልፉት 19 ቼኮች 18ቱን አልፏል። የሚለየው: `INCRBYFLOAT` `0.1 + 0.2` እንደ `0.30000000000000004` ያከማቻል Redis የሚያከማችበት `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) )። የኮታ ማከማቻው ሁለቱንም በ `parseFloat` ይተነትናል፣ ነገር ግን ሁለቱ ቁጥሮች በመጨረሻዎቹ አሃዞች ይለያያሉ፣ ስለዚህ በኮታ ወሰን ላይ በትክክል የሚወድቅ ንፅፅር በተለየ መንገድ ሊወጣ ይችላል። የክፍለ-ጊዜው ተዛማጅነት ያለው መደብር የዚያ ሩጫ አካል አልነበረም። ( [ማዋቀር](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md) ፣ [ውጤቶች](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 

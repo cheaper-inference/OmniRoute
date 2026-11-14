@@ -196,53 +196,48 @@ Redoslijed prioriteta (od najvišeg prema najnižem):
 
 ---
 
-## Integracija u cjevovod
+## Integracija cjevovoda
 
 ### PRE kuka (`open-sse/handlers/chatCore.ts`)
 
-Izvršava se prije nadređenog izvršitelja, nakon provjera autentifikacije i pravila:
+Pokreće se prije uzvodnog izvršitelja, nakon provjere autentifikacije i pravila:
 
 ```
 resolveComboTargets / handleSingleModel
   → enforceQuotaShare(apiKeyId, connectionId, provider, estimatedCost)
-      → getQuotaStore().peek() za svaku dimenziju
+      → getQuotaStore().peek() per dimension
       → fairShare.decideFairShare()
-      → ako je blokirano → vrati 429 (buildErrorBody, strogo pravilo br. 12)
-      → ako je dopušteno + smanji prioritet → postavi quotaSoftPenalty=true na kandidatu
+      → if block → return 429 (buildErrorBody, Hard Rule #12)
+      → if allow + deprioritize → set quotaSoftPenalty=true on candidate
   → executor.execute()
 ```
 
-**Propuštanje u slučaju pogreške**: ako `enforceQuotaShare` izazove iznimku, zahtjev se propušta
-uz zapis `pino.warn`. Time se sprječava da pogreška mehanizma kvota blokira sav
-promet.
+**Otvoreno bez greške** : ako `enforceQuotaShare` izbaci, zahtjev je dopušten kroz `pino.warn` dnevnik. Ovo sprječava pogrešku motora kvota da blokira sav promet.
 
-### POST kuka (bilježenje potrošnje)
+### POST kuka (rekordna potrošnja)
 
 Nakon uspješnog odgovora:
 
 ```
-izvršitelj vraća uspjeh
+executor returns success
   → spendRecorder.recordConsumption(apiKeyId, connectionId, provider, actualCost)
-      → getQuotaStore().consume() za svaku dimenziju
-      → propuštanje u slučaju pogreške: pogreške se bilježe kao pino.warn i nikada se ne prosljeđuju klijentu
+      → getQuotaStore().consume() per dimension
+      → fail-open: errors logged as pino.warn, never propagated to client
 ```
 
-**Napomena o odstupanju**: ako `consume` ne uspije nakon odgovora, klizni brojač prikazuje premalu vrijednost.
-Signal zasićenja pružatelja (npr. `anthropic-ratelimit-unified-5h-utilization`)
-ispravlja globalnu procjenu pri sljedećem zahtjevu.
+**Bilješka o driftu** : ako `consume` ne odgovori nakon odgovora, valjani brojač broji manje. Signal zasićenja od pružatelja (npr. `anthropic-ratelimit-unified-5h-utilization`) ispravlja globalnu procjenu na sljedećem zahtjevu.
 
-### Blaga penalizacija kombinacije (`open-sse/services/combo.ts`)
+### Kombinirana blaga kazna (`open-sse/services/combo.ts`)
 
-Kada je `decision.deprioritize === true`:
+Kada `decision.deprioritize === true`:
 
 ```ts
 if (candidate.quotaSoftPenalty) {
-  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // zadano 0.7
+  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // default 0.7
 }
 ```
 
-Penalizacija se primjenjuje nakon svih ostalih čimbenika bodovanja. Smanjuje vjerojatnost
-da automatska kombinacija odabere zasićeni ključ bez njegova potpunog blokiranja.
+Kazna se primjenjuje nakon svih ostalih faktora bodovanja. Smanjuje vjerojatnost automatskog kombiniranja odabira zasićenog ključa bez njegovog teškog blokiranja.
 
 ---
 

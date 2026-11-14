@@ -24,19 +24,21 @@ Tačiau tipiški klientai (Cursor, Cline, Roo Code, OpenAI SDK) pašalina `reaso
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Užfiksuojama `open-sse/handlers/chatCore.ts` (dviejose vietose, dviejose `cacheReasoningFromAssistantMessage` skambučių vietose). Pakartojimas vyksta `open-sse/translator/index.ts` po schemos prievartos, bet prieš išsiuntimą.
+
+Įrankio iškvietimo įrašai saugomi `buildToolCallCacheKey()`, užklausos apimties santrauka ir įrankio iškvietimo ID, todėl tas pats ID, kurį naudoja kitas API raktas arba sesija, įrašo nepasirenka. Taikymo sritis gaunama iš `buildReasoningCacheScope()`: API rakto ID ir seanso raktas, kai užklausoje toks yra. Todėl stulpelyje `tool_call_id` ir prietaisų skydelyje rodoma ši tų įrašų santrauka.
 
 Paprasti (neįrankio iškvietimo) asistento posūkiai įvedami skirtingai: `buildAssistantMessageCacheKey()` apdoroja seanso apimtį ir normalizuotą OpenAI formato nuorašą iki tos eilės, nes DeepSeek reikalauja _kiekvieno_ ankstesnio posūkio argumentavimo, kai yra `tools`. Atsakymų API tikslais (pvz., `opencode-go/deepseek-v4-flash`, nukreiptas į `/responses`) prieš srovę esančiame korpuse yra `input`, o ne `messages`, todėl `translateRequest()` (`open-sse/translator/index.ts`) praneša apie sukimosi nuorašą, suskaidytą per iškvietimo parinktį, o fiksavimo svetainės suvirškina tą patį nuorašą. Atsakymų pakartojimo leidimas veikia OpenAI suvestinėje kiekviename šaltinio formate, todėl Anthropic Messages klientai (Claude → OpenAI → atsakymai) taip pat atkuriami iš naujo.
 

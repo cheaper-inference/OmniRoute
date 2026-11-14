@@ -11,22 +11,24 @@ OmniRoute, platform olaylarında HTTP webhook'larını tetikleyebilir. Bunları 
 
 Dağıtıcı, her teslimatı HMAC-SHA256 ile imzalar, geçici hatalarda yeniden dener, her webhook için teslimat durumunu izler ve sürekli başarısız olan uç noktaları otomatik olarak devre dışı bırakır.
 
-## Desteklenen Olaylar
+## Desteklenen Etkinlikler
 
-`WebhookEvent` türü (`src/lib/webhooks/eventDescriptions.ts`; `src/lib/webhookDispatcher.ts` tarafından kullanılır) şu anda tam olarak dört olayı modellemektedir:
+`WebhookEvent` türü (`src/lib/webhooks/eventDescriptions.ts`, `src/lib/webhookDispatcher.ts` tarafından tüketilir) şu anda sekiz olayı modellemektedir:
 
-| Olay                | Tetiklenme koşulu                                                                             |
-| ------------------- | --------------------------------------------------------------------------------------------- |
-| `request.completed` | Proxy üzerinden geçirilen bir istek başarıyla tamamlanır                                      |
-| `request.failed`    | Proxy üzerinden geçirilen bir istek tüm yeniden denemelerden/yedeklerden sonra başarısız olur |
-| `quota.exceeded`    | Bir API anahtarı bütçe/kota eşiğini aşar                                                      |
-| `test.ping`         | Test uç noktası tarafından kullanılan sentetik olay                                           |
+| Etkinlik                  | Ne zaman ateşlenir                                                                                                                |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Proxy'li istek başarıyla tamamlandı                                                                                               |
+| `request.failed`          | Tüm retries/fallback sonra proxy'li bir istek başarısız olur                                                                      |
+| `quota.exceeded`          | Bir API anahtarı budget/quota eşiğini geçiyor                                                                                     |
+| `proxy.set_aside`         | Tekrarlanan retlerden sonra bir vekil havuzu üyesi kenara alınır (yalnızca geçiş)                                                 |
+| `proxy.pool.exhausted`    | Proxy havuzu kapsamının her üyesi bir kenara bırakılır                                                                            |
+| `provider.reset_redeemed` | Banka sıfırlamalarının otomatik olarak uygulanması, sıfırlama kredisi veya Claude haftalık oturum sıfırlaması ile sonuçlandırıldı |
+| `provider.exhausted`      | Bir sağlayıcının her hesabı soğuyor (sağlayıcı başına en fazla 10 dakikada bir)                                                   |
+| `test.ping`               | Test uç noktası tarafından kullanılan sentetik olay                                                                               |
 
-Abonelikler, her olayı almak için `"*"` sabit değerini kabul eder. `events` içindeki bilinmeyen olay adları, dağıtım sırasında yok sayılır.
+Abonelikler, her etkinliği almak için gerçek `"*"` kabul eder. `events` bilinmeyen olay adları dağıtım sırasında göz ardı edilir.
 
-> Not: Dağıtıcı API'sinin bağlantıları yapılmıştır, ancak `test.ping` dışındaki
-> bazı olayların üretim çağrı noktaları hâlâ eklenme aşamasındadır. Sürümünüzde
-> dağıtıcıyı hangi yolların çağırdığını görmek için `grep dispatchEvent` komutunu kullanın.
+> Not: dağıtıcı API kabloludur, ancak `test.ping` olmayan bazı olaylar için üretim çağrısı siteleri hala bağlantı halindedir. Sürümünüzde şu anda hangi yolların dağıtıcıyı çağırdığını görmek için `grep dispatchEvent` kontrol edin.
 
 ## Mimari
 
@@ -124,22 +126,20 @@ Tür meta verileri (Slack / Discord / Telegram / özel yük dönüştürücüler
 
 Tüm uç noktalar yönetim kimlik doğrulaması (`requireManagementAuth`) gerektirir.
 
-| Uç nokta                        | Yöntem | Açıklama                                     |
-| ------------------------------- | ------ | -------------------------------------------- |
-| `/api/webhooks`                 | GET    | Webhook'ları listele (sırlar maskelenir)     |
-| `/api/webhooks`                 | POST   | Webhook oluştur                              |
-| `/api/webhooks/[id]`            | GET    | Webhook ayrıntısı (tam sır)                  |
-| `/api/webhooks/[id]`            | PUT    | Alanları güncelle                            |
-| `/api/webhooks/[id]`            | DELETE | Kaldır                                       |
-| `/api/webhooks/[id]/test`       | POST   | Bir `test.ping` tetikle (yeniden deneme yok) |
-| `/api/webhooks/[id]/deliveries` | GET    | Bir webhook için son teslimat denemeleri     |
-| `/api/webhooks/validate-url`    | POST   | Ön URL doğrulaması (SSRF koruması)           |
+| Uç nokta                        | Yöntem | Tanım                                                   |
+| ------------------------------- | ------ | ------------------------------------------------------- |
+| `/api/webhooks`                 | GET    | Web kancalarını listeleme (gizli sırlar maskelenmiştir) |
+| `/api/webhooks`                 | POST   | Web kancası oluştur                                     |
+| `/api/webhooks/[id]`            | GET    | Web kancası ayrıntısı (tam gizli)                       |
+| `/api/webhooks/[id]`            | PUT    | Alanları güncelle                                       |
+| `/api/webhooks/[id]`            | DELETE | Kaldırmak                                               |
+| `/api/webhooks/[id]/test`       | POST   | Bir `test.ping` ateşleyin (yeniden deneme yok)          |
+| `/api/webhooks/[id]/deliveries` | GET    | Bir webhook için son teslim denemeleri                  |
+| `/api/webhooks/validate-url`    | POST   | Uçuş öncesi URL doğrulaması (SSRF guard)                |
 
-`GET /api/webhooks`, listeleme sayfalarında sızıntıyı önlemek için sırrı
-`<ilk 10 karakter>...` biçiminde maskeler. Sırra gerçekten ihtiyacınız olduğunda
-`[id]` GET isteğini kullanın.
+`GET /api/webhooks` listeleme sayfalarına sızmayı önlemek için `<first 10 chars>...` sırrını maskeler. Sırra gerçekten ihtiyacınız olduğunda `[id]` GET kullanın.
 
-### Webhook oluşturma
+### Web kancası oluştur
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -153,18 +153,16 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-`secret` belirtilmezse sunucu bir `whsec_<hex>` sırrı oluşturur ve bunu yanıtta
-döndürür.
+`secret` atlanırsa, sunucu bir `whsec_<hex>` sırrı oluşturur ve bunu yanıtta döndürür.
 
-### Webhook'u test etme
+### Web kancasını test edin
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-`{ delivered, status, error }` döndürür. Yeniden deneme yapılmaz; bu, alıcının
-yükü ve imzayı kabul ettiğini hızlıca doğrulamak için kullanışlıdır.
+`{ delivered, status, error }` döndürür. Alıcının yükü ve imzayı kabul ettiğini hızlı bir şekilde doğrulamak için hiçbir yeniden deneme —.
 
 ## Kontrol Paneli
 

@@ -24,19 +24,21 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Yaworan ṣẹlẹ ni `open-sse/handlers/chatCore.ts` (ojula meji, ni awọn aaye ipe `cacheReasoningFromAssistantMessage` meji). Sisisẹsẹhin ṣẹlẹ ni `open-sse/translator/index.ts` lẹhin ifipabanilopo ero ṣugbọn ṣaaju fifiranṣẹ.
+
+Awọn titẹ sii ipe irin-iṣẹ ti wa ni ipamọ labẹ `buildToolCallCacheKey()`, idawọle ti aaye ibeere ati id ipe irinṣẹ, nitorina id kanna ti a lo nipasẹ bọtini API miiran tabi igba ko yan titẹ sii. Iwọn naa wa lati `buildReasoningCacheScope()`: id bọtini API, pẹlu bọtini igba nigbati ibeere ba ni ọkan. Oju-iwe `tool_call_id` ati dasibodu nitorinaa ṣe afihan idalẹnu yii fun awọn titẹ sii wọnyẹn.
 
 Itele (ti kii ṣe ipe-ipe) oluranlọwọ ti wa ni ṣiṣafihan lọtọtọ: `buildAssistantMessageCacheKey()` ṣe aropin ipari igba pẹlu itọka iwe kika OpenAI-to deede titi di titan yẹn, nitori DeepSeek nilo ero ti _every_ saju titan ni kete ti `tools` ba wa. Fun Awọn ibi-idahun-API (fun apẹẹrẹ `opencode-go/deepseek-v4-flash`, routed si `/responses`) ara ti o wa ni oke n gbe `input`, kii ṣe `messages`, nitorina `translateRequest()` (`open-sse/translator/index.ts`) ṣe ijabọ tiransikiripiti pivot ti o digested nipasẹ aṣayan ipe pada ati awọn aaye ti o yaworan n gba iwe-kikọsilẹ kanna naa. Awọn Idahun Sisisẹsẹhin n ṣiṣẹ lori pivot OpenAI fun gbogbo ọna kika orisun, nitorinaa awọn alabara Awọn ifiranṣẹ Anthropic (Awọn idahun Claude → OpenAI → ) tun tun ṣe.
 

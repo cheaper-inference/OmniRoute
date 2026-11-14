@@ -184,53 +184,48 @@ Precedenza (dalla più alta alla più bassa):
 
 ---
 
-## Integrazione nella pipeline
+## Integrazione della pipeline
 
-### Hook PRE (`open-sse/handlers/chatCore.ts`)
+### gancio PRE (`open-sse/handlers/chatCore.ts`)
 
-Viene eseguito prima dell'esecutore upstream, dopo i controlli di autenticazione e delle policy:
+Viene eseguito prima dell'esecutore upstream, dopo i controlli di autenticazione e policy:
 
 ```
 resolveComboTargets / handleSingleModel
   → enforceQuotaShare(apiKeyId, connectionId, provider, estimatedCost)
-      → getQuotaStore().peek() per dimensione
+      → getQuotaStore().peek() per dimension
       → fairShare.decideFairShare()
-      → se bloccata → restituisce 429 (buildErrorBody, regola rigida n. 12)
-      → se consentita + deprioritizzata → imposta quotaSoftPenalty=true sul candidato
+      → if block → return 429 (buildErrorBody, Hard Rule #12)
+      → if allow + deprioritize → set quotaSoftPenalty=true on candidate
   → executor.execute()
 ```
 
-**Fail-open**: se `enforceQuotaShare` genera un'eccezione, la richiesta viene consentita
-con un log `pino.warn`. Ciò impedisce che un bug del motore delle quote blocchi tutto
-il traffico.
+**Fail-open** : se `enforceQuotaShare` genera un'eccezione, la richiesta viene consentita con un log `pino.warn`. Ciò impedisce a un bug del motore di quota di bloccare tutto il traffico.
 
-### Hook POST (registrazione del consumo)
+### gancio POST (consumo record)
 
-Dopo una risposta riuscita:
+Dopo una risposta positiva:
 
 ```
-l'esecutore restituisce un esito positivo
+executor returns success
   → spendRecorder.recordConsumption(apiKeyId, connectionId, provider, actualCost)
-      → getQuotaStore().consume() per dimensione
-      → fail-open: gli errori vengono registrati come pino.warn e non vengono mai propagati al client
+      → getQuotaStore().consume() per dimension
+      → fail-open: errors logged as pino.warn, never propagated to client
 ```
 
-**Nota sulla deriva**: se `consume` non riesce dopo la risposta, il contatore mobile sottostima il consumo.
-Il segnale di saturazione del provider (ad es. `anthropic-ratelimit-unified-5h-utilization`)
-corregge la stima globale alla richiesta successiva.
+**Nota di deriva** : se `consume` fallisce dopo la risposta, il contatore che rotola sottoconta. Il segnale di saturazione del provider (ad esempio `anthropic-ratelimit-unified-5h-utilization`) corregge la stima globale alla richiesta successiva.
 
-### Penalità soft della combinazione (`open-sse/services/combo.ts`)
+### Penalità morbida combinata (`open-sse/services/combo.ts`)
 
 Quando `decision.deprioritize === true`:
 
 ```ts
 if (candidate.quotaSoftPenalty) {
-  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // valore predefinito: 0,7
+  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // default 0.7
 }
 ```
 
-La penalità viene applicata dopo tutti gli altri fattori di punteggio. Riduce la probabilità
-che la combinazione automatica selezioni una chiave satura, senza bloccarla in modo rigido.
+La penalità viene applicata dopo tutti gli altri fattori di punteggio. Riduce la probabilità di combo automatica di selezionare un tasto saturo senza bloccarlo.
 
 ---
 

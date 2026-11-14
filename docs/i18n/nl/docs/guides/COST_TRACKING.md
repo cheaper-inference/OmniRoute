@@ -86,7 +86,7 @@ Modelnamen worden eerst genormaliseerd (providerpadvoorvoegsels zoals `openai/` 
 
 ### Hoe de uitgaven worden geregistreerd
 
-- De kosten per verzoek worden berekend na de respons en geregistreerde ‘fire-and-forget’-procedures, zodat er nooit latentie voor de client ontstaat. Het verbruik van gedeelde quota wordt gepland bij de volgende event-loop tick via [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- De kosten per aanvraag worden berekend bij voltooiing van de aanvraag. Het verbruik van gedeelde quota wordt gepland bij de volgende event-loop tick via [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
 - De uitgaven voor API-sleutels worden in batches gebufferd en leeggemaakt door de [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (standaard spoelinterval van 60 seconden, buffer voor 1.000 invoer). Afstembaar via:
 
   | Env var                             | Standaard | Doel                                           |
@@ -94,7 +94,29 @@ Modelnamen worden eerst genormaliseerd (providerpadvoorvoegsels zoals `openai/` 
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`   | Spoelinterval in milliseconden.                |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`    | Max. gebufferde invoeren vóór het doorspoelen. |
 
-De kostencijfers van het dashboard zijn** niet** gelezen uit een opgeslagen dollarbedrag per rij — worden ze telkens opnieuw berekend op basis van tokenaantallen en de huidige prijstabel elke keer dat het analyse-eindpunt wordt uitgevoerd. Dat betekent dat het corrigeren van een verkeerde prijs (en het opnieuw synchroniseren) de historische kostenramingen met terugwerkende kracht bijwerkt.
+De kosten geven de voorkeur aan een exacte, door de provider gerapporteerde toeslag (`provider_cost_usd`), dan aan een momentopname van een verzoek met catalogusprijs (`calculated_cost_usd`), en vervolgens aan een tokenherziening van de huidige catalogus. Opgeslagen kosten worden niet opnieuw in rekening gebracht via hun tokentellingen. Verouderde rijen met alleen tokens veranderen nog steeds wanneer hun catalogusprijs verandert.
+
+### OCR en inbedding
+
+- Succesvolle `/v1/ocr` -aanvragen gebruiken upstream `usage_info.pages_processed` en niet het aangevraagde paginabereik of het aantal geretourneerde pagina-objecten. De schatting is pagina's × `ocr_cost_per_page` (absoluut USD/page,** niet** USD/million).
+- Voor aanvragen met document- of bounding box-annotaties geldt een apart `ocr_cost_per_annotated_page` tarief. Zonder dit blijven de kosten onbekend; het gewone OCR tarief wordt niet stilzwijgend vervangen.
+- LiteLLM sync wijst het stroomopwaartse `annotation_cost_per_page` veld toe aan `ocr_cost_per_annotated_page`, waarbij de absolute USD/page waarde en alleen annotatie-items behouden blijven, inclusief expliciete nul. Een opgegeven canoniek veld heeft voorrang; ongeldige aliaswaarden worden genegeerd. Overschrijvingen van gebruikersprijzen behouden hun normale prioriteit. Zie [de OCR -prijssleutels van LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- OCR -gebruik slaat het aantal pagina's, de eenheidsprijs, de berekende USD kosten, API sleutel en de geselecteerde verbinding op. Pagina's worden nooit weergegeven als tokens. Oproeplogboeken bevatten factureringsmetagegevens, geen document URLs, PDF bytes of geëxtraheerde tekst.
+- Succesvolle `/v1/embeddings` verzoeken registreren één gebruiksrij per fysieke batch, inclusief afzonderlijke batches die in dezelfde milliseconde worden voltooid. Door de aanbieder gerapporteerde kosten hebben voorrang op tokenschattingen; combo-wrappers brengen geen kosten met zich mee.
+- Gebruiksgeschiedenis, kostenanalyses, provider/account vensters, bestedingslimieten voor API-sleutels, het grootboek van aanvraagkosten en dagelijkse gebruiksoverzichten omvatten deze kosten. Sleutels zonder logboek behouden de numerieke boekhouding zonder de brontekst te behouden.
+- Ontbrekend gebruik of tarieven zijn dat wel** onbekend** , niet gratis: de responskostenheader is weggelaten en het bestaande beleid voor ongeprijsd gebruik is van toepassing op beperkte API sleutels. Expliciet geconfigureerde nultarieven blijven geldig nulkostengebruik.
+
+Dit is alleen voorwaartse boekhouding. Oude OCR/embedding -oproepen die nooit gebruiksgeschiedenis hebben geschreven, kunnen op basis van deze migratie niet worden gereconstrueerd. Catalogusschattingen zijn USD -schattingen, geen factuur, en omvatten geen valutaomrekening, belasting of kortingen.
+
+### Spraak en beelden
+
+- Succesvolle `/v1/audio/transcriptions`, `/v1/audio/speech` en beeldgeneratiepogingen delen numerieke boekhouding. Directe en combo-oproepen dragen de API sleutel van de beller en de geselecteerde verbinding; een combo-wrapper voegt nooit een tweede afschrijving toe.
+- Door de aanbieder gerapporteerde USD wint het van een catalogusschatting, inclusief een expliciet nultarief. OpenRouter's JSON `usage.cost` is genormaliseerd naar `cost_usd`. Anders gebruiken gemeten tokens tokenprijzen, gebruiken transcriptieseconden prijzen per seconde, gebruikt spraakinvoer Unicode-tekentellingen en gebruiken afbeeldingen met een vaste prijs het daadwerkelijk geretourneerde aantal, niet de gevraagde `n`.
+- Binaire OpenRouter TTS heeft geen JSON gebruikstekst. Nadat de audio is voltooid of de beller annuleert, ondervraagt OmniRoute de generatie ID op het** dezelfde** geconfigureerde OpenRouter oorsprong. Een EU verzoek valt nooit terug op de mondiale oorsprong. Dit is een begrensde, alleen-lezen zoekopdracht; De synthese wordt niet opnieuw geprobeerd voor de boekhouding. Factureringsgegevens kunnen verschijnen nadat de audio is afgelopen: nieuwe zoekpogingen worden maximaal ongeveer 52 seconden op de achtergrond uitgevoerd, inclusief netwerkdeadlines.
+- Tijdens die zoekopdracht heeft het audioantwoord `X-OmniRoute-Cost-Status: pending` en geen responskostenheader. De uiteindelijke kosten verschijnen na afstemming in de gebruiksgeschiedenis, analyses en het grootboek. Als metagegevens niet beschikbaar zijn, wordt een geconfigureerde tariefmomentopname gebruikt; anders blijven de kosten onbekend.
+- Het aantal seconden, tekens en afbeeldingen heeft afzonderlijke velden voor de factureringseenheden, en nooit valse tokens. De boekhouding behoudt alleen numeriek gebruik, geen spraaktekst, transcripties of afbeeldingsbytes. De bestaande vrijstellingen voor ongeprijsde afbeeldingen zijn ongewijzigd: een werkelijk ontbrekend afbeeldingstarief vergrendelt niet opnieuw een beperkte sleutel, en het antwoord laat de kostenkop weg in plaats van het gesprek gratis te verklaren. Bij een mislukte prijsopslag blijft er nog steeds gebruiksbewijs aanwezig voor het afdwingen van een mislukte sluiting.
+
+Er wordt geen historische speech/image heffing uitgevonden of aangevuld. De facturering aan de provider blijft de referentie voor facturen en voor oproepen waarvan de kosten niet zijn gerapporteerd.
 
 ---
 

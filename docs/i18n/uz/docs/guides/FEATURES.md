@@ -57,28 +57,19 @@ OpenRouter ulanishlari Kengaytirilgan sozlamalarda har bir ulanish uchun alohida
 
 ---
 
-## 🎨 Kombinatsiyalar
+## 🎨 Combos
 
-19 ta ommaviy strategiya bilan model yoʻnaltirish kombinatsiyalarini yarating: priority, weighted, round-robin, context-relay, fill-first, p2c (ikkita variant quvvati), random, least-used, cost-optimized, reset-aware, reset-window, headroom, strict-random, auto, lkgp (oxirgi maʼlum yaxshi provayder), context-optimized, cache-optimized, **fusion** (modellar paneliga parallel ravishda soʻrov yuborib, soʻng hakam modeli orqali yagona javobni sintez qilish) va **pipeline**. Har bir kombinatsiya avtomatik zaxira mexanizmi yordamida bir nechta modelni zanjirlaydi hamda tezkor andozalar va tayyorlik tekshiruvlarini oʻz ichiga oladi.
+22 ta ommaviy strategiyadan iborat marshrutlash modellarini yarating: ustuvorlik, vaznli, davra-robin, kontekst-rele, birinchi to‘ldirish, p2c (ikkita variantning quvvati), tasodifiy, eng kam ishlatiladigan, xarajat optimallashtirilgan, qayta o‘rnatish, qayta o‘rnatish-oyna, muddati tugashi-birinchi, bo‘sh joy, kvota-og‘irligi, avtonom vaznlilik (oxirgi-malum-yaxshi-provayder), kontekst optimallashtirilgan, kesh-optimallashtirilgan,** sintez** (modellar paneliga parallel ravishda havola qiling, so'ngra sudya orqali bitta javobni sintez qiling),** quvur liniyasi** , va** jev** (sizning reytingingiz bo'yicha TypeSafe Jevga kirish). Har bir kombinatsiya bir nechta modellarni avtomatik qaytarish bilan birlashtiradi va tezkor shablonlarni va tayyorlikni tekshirishni o'z ichiga oladi.
 
-Kombinatsiyalardagi soʻnggi yaxshilanishlar:
+So'nggi kombinatsiya yaxshilanishlari:
 
-- **Tuzilmaviy kombinatsiya konstruktori** — provayder, model va aniq hisob/ulanishni tanlash orqali har bir qadamni yarating
-- **Provayderni takroran ishlatishni qoʻllab-quvvatlash** — `(provider, model, connection)` korteji noyob boʻlsa, ayni provayderdan bitta kombinatsiyada bir necha marta foydalaning
-- **Kombinatsiya maqsadlari holati** — tahlil va holat interfeyslari endi barcha maʼlumotlarni model satrlariga birlashtirish oʻrniga, alohida kombinatsiya maqsadlari/qadamlarini farqlaydi
-- **Kompozit darajalarni tartiblash** — `defaultTier -> fallbackTier` endi yuqori darajadagi kombinatsiya qadamlari uchun bajarilish va zaxiraga oʻtish tartibiga taʼsir qiladi
-- **Tizim prompti andozalari** — kombinatsiyaning `system_message` maydoni server tomonidagi
-  `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` va `{{FINGERPRINT}}`
-  oʻrinbosarlarini qoʻllab-quvvatlaydi; ular joʻnatishdan bevosita oldin amalda yoʻnaltirilgan maqsad asosida kengaytiriladi.
-  Faqat ruxsat etilgan roʻyxatdagilar qoʻllanadi va rekursiv kengaytirish bajarilmaydi; nomaʼlum oʻrinbosarlar oʻz holicha qoladi; boʻsh qiymatlar
-  boʻsh qiymatga kengaytiriladi; mijozning tizim promptlari hech qachon qayta yozilmaydi. `{{FINGERPRINT}}`
-  faqat biriktirilgan yoki avtomatik almashtiriladigan fingerprint’ga ega, fingerprint asosidagi bepul provayderlar uchun qiymatga ega boʻladi — boshqa holatlarda (masalan,
-  bitta fingerprint’li ulanishlar, fp asosida ishlamaydigan provayderlar) u boʻsh qiymatga kengaytiriladi. Kengaytirish
-  standart joʻnatish sikli, round-robin va biriktirilgan kontekst keshi sessiyalarini qamrab oladi;
-  fusion, chaos, pipeline va ichki execute strategiyalari hozircha
-  oʻrinbosarlarni kengaytirmaydi.
+- **Strukturaviy kombo quruvchi** — provayder, model va aniq account/connection tanlash orqali har bir qadamni yarating
+- **Takroriy provayder yordami** — `(provider, model, connection)` korteji yagona bo'lsa, bir xil provayderni bir kombinatsiyada ko'p marta qayta ishlating
+- **Kombo maqsadli sog'liq** — analytics va sog'liq sirtlari endi hamma narsani model qatorlariga yig'ish o'rniga individual kombinatsiyalangan targets/steps ajratib turadi
+- **Kompozit darajali buyurtma** — `defaultTier -> fallbackTier` endi yuqori darajadagi kombinatsiyalangan qadamlar uchun ish vaqti execution/fallback tartibiga ta'sir qiladi
+- **Tizim so'rovi shablonlar** — combo `system_message` server tomonidagi `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` va `{{FINGERPRINT}}` to'ldiruvchilarni qo'llab-quvvatlaydi, jo'natishdan oldin haqiqatda yo'naltirilgan maqsaddan kengaytirilgan. Ruxsat etilgan va rekursiv bo'lmagan; noma'lum to'ldiruvchilar tom ma'noda qoladi; bo'sh qiymatlar bo'shgacha kengayadi; mijoz tizimi takliflari hech qachon qayta yozilmaydi. `{{FINGERPRINT}}` faqat barmoq iziga asoslangan bepul provayderlar uchun hal qilinadi, barmoq izi mahkamlangan yoki avtomatik aylantiriladi — u boshqa joyda boʻsh holga qadar kengayadi (masalan, bitta barmoq izi ulanishlari, fp boʻlmagan provayderlar). Kengaytirish standart jo'natish siklini, aylanma robin va mahkamlangan kontekst-kesh seanslarini qamrab oladi; termoyadroviy, betartiblik, quvur liniyasi va ichki o'rnatish strategiyalari hali to'ldiruvchilarni kengaytirmaydi.
 
-![Kombinatsiyalar boshqaruv paneli](../screenshots/02-combos.png)
+![Combos Dashboard](../screenshots/02-combos.png)
 
 ---
 
@@ -209,13 +200,13 @@ Provayder sahifasidagi modellar ro‘yxati endi quyidagilarni o‘z ichiga oladi
 
 ---
 
-## 🔧 OAuth muhitini tiklash _(v3.6.1+)_
+## 🔧 OAuth Env Repair _(v3.6.1 +)_
 
-OAuth provayderlari uchun yo‘qolgan muhit o‘zgaruvchilarini qayta tiklaydigan va buzilgan autentifikatsiya holatini tuzatadigan bir bosishli “Muhitni tiklash” amali. Unga `Boshqaruv paneli → Provayderlar → [OAuth provayderi] → Muhitni tiklash` orqali kirish mumkin. Quyidagilarni avtomatik aniqlaydi va tuzatadi:
+Yo'qolgan muhit o'zgaruvchilarini tiklaydigan va buzilgan autentlik holatini tuzatuvchi OAuth provayderlari uchun bir marta bosish bilan "Env repair" amali. `Dashboard → Providers → [OAuth Provider] → Repair env` dan kirish mumkin. Avtomatik ravishda aniqlaydi va tuzatadi:
 
-- Yetishmayotgan OAuth mijoz hisob ma’lumotlari
-- Buzilgan muhit fayli yozuvlari
-- Zaxira nusxasi yo‘lini tozalash
+- OAuth mijoz hisob ma'lumotlari etishmayapti
+- Buzilgan env fayl yozuvlari
+- Zaxira yo'lni tozalash
 
 ---
 
@@ -315,14 +306,14 @@ Konfiguratsiya toʻplami `src/lib/sync/bundle.ts` tomonidan yaratiladi. Isteʼmo
 
 ---
 
-## 🛡️ Xavfsiz tashqi yuklash va SSRF himoyasi _(v3.6.6+)_
+## 🛡️ Safe Outbound Fetch va SSRF Guard _(v3.6.6 +)_
 
-Endi barcha provayderni tekshirish va modellarni aniqlash chaqiruvlari ikki qatlamli tashqi himoya orqali amalga oshiriladi:
+Barcha provayderni tekshirish va modelni aniqlash qo'ng'iroqlari endi ikki qavatli chiqish qo'riqchisidan o'tadi:
 
-1. **URL himoyasi** (`src/shared/network/outboundUrlGuard.ts`) — Soket ochilishidan oldin xususiy/loopback/link-local IP diapazonlarini bloklaydi.
-2. **Xavfsiz yuklash oʻrami** (`src/shared/network/safeOutboundFetch.ts`) — URL himoyasini qoʻllaydi, kutish vaqtlarini meʼyorlashtiradi va vaqtinchalik xatolarda eksponensial kechikish bilan qayta urinadi.
+1. **URL qo'riqchisi** (`src/shared/network/outboundUrlGuard.ts`) — Maqsadning xost nomini yoki IP literalini avval yozilganidek tekshiradi; faqat ochiq rejimda xavfsiz yuklash paketi ham nomni hal qiladi va shaxsiy javoblarni rad etadi. Odatiy bo'lib, u bulutli metama'lumotlarning so'nggi nuqtalarini — barcha 169.254.0.0/16 va ma'lum metadata xost nomlarini bloklaydi; `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` shaxsiy va orqaga qaytish xostlarini ham bloklaydi; `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` (yoki eski `OUTBOUND_SSRF_GUARD_ENABLED=false`) cheklarni o'chiradi. Bayroqning asboblar panelini almashtirishdan saqlangan qiymat uning o'zgaruvchisidan ustun turadi va o'rnatilgan mahalliy provayderlar kalitni tekshirish vaqtida himoyani o'tkazib yuboradilar. `docs/reference/ENVIRONMENT.md` qarang.
+2. **Xavfsiz o'ram** (`src/shared/network/safeOutboundFetch.ts`) — URL himoyasini qo'llaydi, kutish vaqtini normallashtiradi va eksponensial orqaga qaytish bilan vaqtinchalik xatolarni qaytadan sinab ko'radi.
 
-Himoya buzilishlari HTTP 422 (`URL_GUARD_BLOCKED`) sifatida koʻrsatiladi va `providerAudit.ts` orqali muvofiqlik audit jurnaliga yoziladi.
+Guard qoidabuzarliklari `URL_GUARD_BLOCKED` — HTTP 503 orqali `getSafeOutboundFetchErrorStatus` (model-kashf qilish marshrutida 400) — va haqiqiy SSRF bloklari tekshirish paytida audit jurnaliga `provider.validation.ssrf_blocked` hodisalari sifatida yoziladi.
 
 ---
 

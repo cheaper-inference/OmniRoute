@@ -56,6 +56,53 @@ Oto jak działa Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` drukuje kr�
 
 ---
 
+## Atrybucja użycia: sesje i projekty
+
+OmniRoute grupuje żądania każdego klucza API** sesje agentów** i zapisuje które** projekt** pracowała każda sesja (tabela `agent_sessions` ), dzięki czemu można raportować wykorzystanie i koszty w podziale na członka zespołu, projekt i sesję.
+
+Co jest rejestrowane bez żadnej konfiguracji klienta:
+
+| Pole    | Źródło                                                                                                                                                    |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sesja   | nagłówek `x-claude-code-session-id` (ta sama wartość co `metadata.user_id.session_id`), stabilny na sesję                                                 |
+| Projekt | Kod `Primary working directory:` linii Claude wysyła komunikat otoczenia; foldery worktree w `.claude/worktrees/` są rozpoznawane jako nazwa repozytorium |
+| Oddział | `Current branch:` z git status Claude Code wysyłany z pierwszą wiadomością                                                                                |
+| Klient  | `user-agent` (`claude-cli/<version>`)                                                                                                                     |
+
+Codex (`<environment_context><cwd>`) i OpenCode (`x-opencode-session`) są rozpoznawane w ten sam sposób. Klucze z** brak dziennika** włączone zachowywanie tylko pól projektu dostarczonych z nagłówka i identyfikatora sesji; nic odczytanego z podpowiedzi (ścieżka, gałąź) nie jest przechowywane.
+
+### Wyraźne nazwanie projektu (zalecane)
+
+Katalog roboczy różni się na różnych komputerach, więc to samo repozytorium może pojawiać się pod różnymi ścieżkami. Zamiast tego wyślij projekt jawnie: Claude Code dodaje wszystkie nagłówki wymienione w `ANTHROPIC_CUSTOM_HEADERS` do każdego żądania modelu, a OmniRoute czyta dwa z nich:
+
+| Chodnikowiec               | Wartość                                                      |
+| -------------------------- | ------------------------------------------------------------ |
+| `x-omniroute-project`      | Nazwa projektu, np `omniroute`                               |
+| `x-omniroute-project-repo` | Znormalizowany pilot, np `github.com/diegosouzapw/OmniRoute` |
+
+Obydwa są czytane wyłącznie w celu przypisania; nigdy nie są one przekazywane do dostawcy wyższego szczebla.
+
+`ANTHROPIC_CUSTOM_HEADERS` jest odczytywany raz przy uruchomieniu, a pliki ustawień przechowują wartości dosłowne, więc należy je obliczyć po uruchomieniu kodu Claude. Dodaj to do `~/.zshrc` lub `~/.bashrc` i kontynuuj uruchamianie `claude` z folderu projektu:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+Wyrażenie `sed` usuwa wszelkie poświadczenia osadzone w zdalnym URL. IDE uruchamiają kod Claude bez twojej powłoki, więc ich sesje wracają do katalogu roboczego.
+
+---
+
 ## Aliasy wykrywania — pokazywanie modeli innych niż Claude w selektorze `/model`
 
 Wykrywanie modeli bramy w Claude Code wyświetla tylko identyfikatory zaczynające się od `claude` lub `anthropic`, więc przy ustawieniu `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` natywny selektor `/model` pokazuje zazwyczaj **tylko** modele Claude/Anthropic z OmniRoute — `kimi/kimi-k2.6` czy `glm/glm-5.2` nigdy się w nim nie pojawią, mimo że routing do nich działa bez problemu.

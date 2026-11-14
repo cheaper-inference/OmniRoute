@@ -14,23 +14,24 @@ Dispatcher-komponenten signerer hver levering med HMAC-SHA256, prøver på nytt 
 feil, sporer leveringsstatusen for hver webhook og deaktiverer automatisk endepunkter som
 fortsetter å feile.
 
-## Støttede hendelser
+## Støttede arrangementer
 
-Typen `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, brukt av `src/lib/webhookDispatcher.ts`) modellerer for øyeblikket nøyaktig fire hendelser:
+`WebhookEvent` typen (`src/lib/webhooks/eventDescriptions.ts`, konsumert av `src/lib/webhookDispatcher.ts`) modellerer for tiden åtte hendelser:
 
-| Hendelse            | Utløses når                                                                 |
-| ------------------- | --------------------------------------------------------------------------- |
-| `request.completed` | En videresendt forespørsel fullføres uten feil                              |
-| `request.failed`    | En videresendt forespørsel mislykkes etter alle nye forsøk/reserveløsninger |
-| `quota.exceeded`    | En API-nøkkel overskrider en budsjett-/kvoteterskel                         |
-| `test.ping`         | Syntetisk hendelse som brukes av testendepunktet                            |
+| Hendelse                  | Fyrer når                                                                                           |
+| ------------------------- | --------------------------------------------------------------------------------------------------- |
+| `request.completed`       | En proxy-forespørsel fullføres                                                                      |
+| `request.failed`          | En proxy-forespørsel mislykkes tross alt retries/fallback                                           |
+| `quota.exceeded`          | En API -tast krysser en budget/quota terskel                                                        |
+| `proxy.set_aside`         | Et medlem av proxy-poolen settes til side etter gjentatte avslag (kun overgang)                     |
+| `proxy.pool.exhausted`    | Hvert medlem av en proxy pool-omfang er satt til side                                               |
+| `provider.reset_redeemed` | Auto-apply banked resets innløste en tilbakestilt kreditt eller Claude ukentlig økt tilbakestilling |
+| `provider.exhausted`      | Hver konto til en leverandør avkjøles (maks én gang per leverandør hvert 10. minutt)                |
+| `test.ping`               | Syntetisk hendelse brukt av testendepunktet                                                         |
 
-Abonnementer godtar den bokstavelige verdien `"*"` for å motta alle hendelser. Ukjente
-hendelsesnavn i `events` ignoreres ved utsendelse.
+Abonnementer godtar den bokstavelige `"*"` for å motta hver begivenhet. Ukjente hendelsesnavn i `events` ignoreres ved utsendelsestidspunktet.
 
-> Merk: Dispatcher-API-et er koblet opp, men produksjonskallestedene for noen av
-> hendelsene som ikke er `test.ping`, er fortsatt under innføring. Sjekk `grep dispatchEvent` for å se
-> hvilke kodebaner som for øyeblikket kaller dispatcher-komponenten i din utgivelse.
+> Merk: dispatcher API er kablet, men produksjonsanropssteder for noen av ikke-`test.ping` -hendelsene lander fortsatt. Sjekk `grep dispatchEvent` for å se hvilke stier som for øyeblikket påkaller avsenderen i utgivelsen din.
 
 ## Arkitektur
 
@@ -124,25 +125,24 @@ Leveringshistorikken lagres i den dedikerte tabellen `webhook_deliveries`
 til de aggregerte tellerne i `webhooks`-raden. Metadata om type (Slack / Discord /
 Telegram / egendefinerte payload-transformatorer) ble lagt til av `070_webhooks_kind_metadata.sql`.
 
-## REST-API
+## REST API
 
-Alle endepunkter krever administrasjonsautentisering (`requireManagementAuth`).
+Alle endepunkter krever administrasjonsgodkjenning (`requireManagementAuth`).
 
-| Endepunkt                       | Metode | Beskrivelse                                  |
-| ------------------------------- | ------ | -------------------------------------------- |
-| `/api/webhooks`                 | GET    | Vis webhooks (hemmeligheter maskert)         |
-| `/api/webhooks`                 | POST   | Opprett webhook                              |
-| `/api/webhooks/[id]`            | GET    | Webhook-detaljer (full hemmelighet)          |
-| `/api/webhooks/[id]`            | PUT    | Oppdater felter                              |
-| `/api/webhooks/[id]`            | DELETE | Fjern                                        |
-| `/api/webhooks/[id]/test`       | POST   | Utløs en `test.ping` (ingen nye forsøk)      |
-| `/api/webhooks/[id]/deliveries` | GET    | Nylige leveringsforsøk for én webhook        |
-| `/api/webhooks/validate-url`    | POST   | Forhåndsvalidering av URL (SSRF-beskyttelse) |
+| Endepunkt                       | Metode | Beskrivelse                            |
+| ------------------------------- | ------ | -------------------------------------- |
+| `/api/webhooks`                 | GET    | Liste webhooks (hemmeligheter maskert) |
+| `/api/webhooks`                 | POST   | Lag webhook                            |
+| `/api/webhooks/[id]`            | GET    | Webhook-detalj (full hemmelighet)      |
+| `/api/webhooks/[id]`            | PUT    | Oppdater felt                          |
+| `/api/webhooks/[id]`            | DELETE | Fjerne                                 |
+| `/api/webhooks/[id]/test`       | POST   | Avfyr en `test.ping` (ingen forsøk)    |
+| `/api/webhooks/[id]/deliveries` | GET    | Nylige leveringsforsøk for én webhook  |
+| `/api/webhooks/validate-url`    | POST   | URL -validering før fly (SSRF vakt)    |
 
-`GET /api/webhooks` maskerer hemmeligheten som `<første 10 tegn>...` for å unngå lekkasje
-på listesider. Bruk GET-forespørselen for `[id]` når du faktisk trenger hemmeligheten.
+`GET /api/webhooks` maskerer hemmeligheten til `<first 10 chars>...` for å unngå lekkasje på oppføringssider. Bruk `[id]` GET når du faktisk trenger hemmeligheten.
 
-### Opprett webhook
+### Lag webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -156,8 +156,7 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Hvis `secret` utelates, genererer serveren en `whsec_<hex>`-hemmelighet og returnerer
-den i responsen.
+Hvis `secret` utelates, genererer serveren en `whsec_<hex>` hemmelighet og returnerer den i svaret.
 
 ### Test webhook
 
@@ -166,8 +165,7 @@ curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Returnerer `{ delivered, status, error }`. Ingen nye forsøk utføres — nyttig for
-raskt å kontrollere at mottakeren godtar payloaden og signaturen.
+Returnerer `{ delivered, status, error }`. Ingen gjenforsøk er forsøkt — for raskt å validere at mottakeren aksepterer nyttelasten og signaturen.
 
 ## Kontrollpanel
 

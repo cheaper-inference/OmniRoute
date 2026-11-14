@@ -4,46 +4,45 @@
 
 ---
 
-Layunin na paghahambing ng mga feature vs mga sikat na open-source AI router.
+Paghahambing ng tampok na layunin kumpara sa mga sikat na open-source AI router.
 
-> **Metodolohiya**: Mga pampublikong repo na sinuri noong 2026-Q2. Mga bersyon ayon sa nakalista.
-> Mag-sumite ng mga pagwawasto sa pamamagitan ng PR — gusto naming maging tama ito.
+> **Pamamaraan** : Mga pampublikong repo na na-audit 2026-Q2. Mga bersyon tulad ng nakalista. Magsumite ng mga pagwawasto sa pamamagitan ng PR — gusto naming maging tumpak ito.
 
-| Feature                                               |                 OmniRoute 3.8                  |    LiteLLM 1.x    | OpenRouter (SaaS) |   Portkey    |
-| ----------------------------------------------------- | :--------------------------------------------: | :---------------: | :---------------: | :----------: |
-| **Mga Provider**                                      |                    **329**                     |       ~100        |        ~50        |     ~30      |
-| **Mga entry sa catalog na libre/walang-auth**         |                    **155**                     |        n/a        |    passthrough    |     n/a      |
-| **Maaaring i-self-host**                              |                       ✅                       |        ✅         |        ❌         | ⚠ may bayad  |
-| **Mga entry sa OAuth catalog**                        |                     **23**                     |      bahagya      |        ❌         |      ❌      |
-| **Mga auto-fallback combo**                           |               **20 estratehiya**               | batay sa priority |   batay sa tier   | may timbang  |
-| **Fusion (parallel panel + judge synthesis)**         |                       ✅                       |        ❌         |        ❌         |      ❌      |
-| **Tier 1/2/3 fallback (subscription→mura→libre)**     |                    ✅ + UI                     |     manu-mano     |        n/a        |  manu-mano   |
-| **Pag-compress ng token**                             | stack ng 12 engine (RTK + Caveman + LLMLingua) |       wala        |       wala        |     wala     |
-| **Multimodal generation (speech/musika/video)**       |                       ✅                       |        ❌         |    passthrough    |      ❌      |
-| **Built-in na MCP server**                            |            ✅ 110 tools, 33 scopes             |        ❌         |        ❌         |      ❌      |
-| **A2A protocol**                                      |                  ✅ 6 skills                   |        ❌         |        ❌         |      ❌      |
-| **Memorya (FTS5 + vector)**                           |                       ✅                       |        ❌         |        ❌         |      ❌      |
-| **Guardrails (PII, injection, vision)**               |                       ✅                       |      bahagya      |        ❌         | ✅ may bayad |
-| **Mga cloud agent integration**                       |          Codex, Cursor, Devin, Jules           |        ❌         |        ❌         |      ❌      |
-| **Circuit breaker bawat provider**                    |           ✅ 3-state, lazy recovery            |       basic       |        ❌         |      ✅      |
-| **TLS fingerprint stealth (JA3/JA4)**                 |                   ✅ wreq-js                   |        ❌         |        ❌         |      ❌      |
-| **Eval framework**                                    |                  ✅ built-in                   |        ❌         |        ❌         | ⚠ may bayad  |
-| **MITM proxy (hinaharang ang Cursor/Antigravity)**    |               ✅ cross-platform                |        ❌         |        ❌         |      ❌      |
-| **CLI na may system tray (walang Electron)**          |                       ✅                       |        ❌         |        n/a        |     n/a      |
-| **CLI machine-ID auto-auth**                          |                       ✅                       |        ❌         |        n/a        |     n/a      |
-| **Dashboard**                                         |                   Next.js 16                   |       basic       |    proprietary    | proprietary  |
-| **i18n**                                              |                 **67 locales**                 |        ❌         |        ❌         |      ⚠       |
-| **Mga pampublikong agent skill (SKILL.md)**           |                     ✅ 45                      |        ❌         |        ❌         |      ❌      |
-| **Suporta sa tunnel (Cloudflared, Tailscale, Ngrok)** |                       ✅                       |        ❌         |        n/a        |     n/a      |
-| **Lisensya**                                          |                      MIT                       |        MIT        |    proprietary    | proprietary  |
+| Tampok                                                     |                OmniRoute 3.8                |       LiteLLM 1.x       | OpenRouter (SaaS) |   Portkey    |
+| ---------------------------------------------------------- | :-----------------------------------------: | :---------------------: | :---------------: | :----------: |
+| **Mga tagapagbigay**                                       |                   **329**                   |          ~100           |        ~50        |     ~30      |
+| **Free/no-auth catalog entry**                             |                   **155**                   |           n/a           |    passthrough    |     n/a      |
+| **Self-hostable**                                          |                     ✅                      |           ✅            |        ❌         |  nagbayad ⚠  |
+| **OAuth catalog entry**                                    |                   **23**                    |        bahagyang        |        ❌         |      ❌      |
+| **Auto-fallback na mga combo**                             |             **22 estratehiya**              | nakabatay sa priyoridad |  batay sa antas   |  natimbang   |
+| **Fusion (parallel panel + judge synthesis)**              |                     ✅                      |           ❌            |        ❌         |      ❌      |
+| **Tier 1/2/3 fallback (libre ang subscription → cheap →)** |                   ✅ + UI                   |         manwal          |        n/a        |    manwal    |
+| **Pag-compress ng token**                                  | 12-engine stack (RTK + Caveman + LLMLingua) |          wala           |       wala        |     wala     |
+| **Multimodal na henerasyon (speech/music/video)**          |                     ✅                      |           ❌            |    passthrough    |      ❌      |
+| **Built-in na MCP server**                                 |           ✅ 110 tool, 33 saklaw            |           ❌            |        ❌         |      ❌      |
+| **A2A protocol**                                           |               ✅ 6 kasanayan                |           ❌            |        ❌         |      ❌      |
+| **Memorya (FTS5 + vector)**                                |                     ✅                      |           ❌            |        ❌         |      ❌      |
+| **Mga guardrail (PII, injection, vision)**                 |                     ✅                      |        bahagyang        |        ❌         | nagbayad ✅  |
+| **Mga pagsasama ng cloud agent**                           |         Codex, Cursor, Devin, Jules         |           ❌            |        ❌         |      ❌      |
+| **Circuit breaker bawat provider**                         |        ✅ 3-estado, tamad na pagbawi        |          basic          |        ❌         |      ✅      |
+| **TLS fingerprint stealth (JA3/JA4)**                      |                 ✅ wreq-js                  |           ❌            |        ❌         |      ❌      |
+| **Eval framework**                                         |                 ✅ built-in                 |           ❌            |        ❌         |  nagbayad ⚠  |
+| **MITM proxy (hinarang ang Cursor/Antigravity)**           |              ✅ cross-platform              |           ❌            |        ❌         |      ❌      |
+| **CLI na may system tray (walang Electron)**               |                     ✅                      |           ❌            |        n/a        |     n/a      |
+| **CLI machine-ID auto-auth**                               |                     ✅                      |           ❌            |        n/a        |     n/a      |
+| **Dashboard**                                              |                 Next.js 16                  |          basic          |   pagmamay-ari    | pagmamay-ari |
+| **i18n**                                                   |                **67 lokal**                 |           ❌            |        ❌         |      ⚠       |
+| **Mga kasanayan sa pampublikong ahente (SKILL.md)**        |                    ✅ 45                    |           ❌            |        ❌         |      ❌      |
+| **Suporta sa tunnel (Cloudflared, Tailscale, Ngrok)**      |                     ✅                      |           ❌            |        n/a        |     n/a      |
+| **Lisensya**                                               |                     MIT                     |           MIT           |   pagmamay-ari    | pagmamay-ari |
 
 ## Kailan pipiliin ang OmniRoute
 
-- Self-host ka at gusto mo** maximum na saklaw ng provider** (381 provider, 155 free/no-auth catalog entries)
+- Self-host ka at gusto mo** maximum na saklaw ng provider** (394 provider, 155 free/no-auth catalog entry)
 - Kailangan mo ng isang** built-in na MCP server** (LLM tool, memorya, mga kasanayang nakalantad bilang mga tool)
 - kailangan mo**A2A protocol** para sa mga daloy ng trabaho ng ahente sa ahente
 - gusto mo** fingerprint stealth** (JA3/JA4) upang maiwasan ang pagtuklas ng upstream CAPTCHAs
-- kailangan mo** mga tampok ng enterprise** (mga guardrail, evals, audit trail) na walang SaaS bill
+- kailangan mo** mga tampok ng negosyo** (mga guardrail, eval, audit trail) na walang SaaS bill
 
 ## Kailan pipiliin ang LiteLLM
 

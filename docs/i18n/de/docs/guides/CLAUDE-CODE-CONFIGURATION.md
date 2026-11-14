@@ -49,6 +49,53 @@ So funktioniert Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` gibt anstel
 
 ---
 
+## Nutzungszuordnung: Sitzungen und Projekte
+
+OmniRoute gruppiert die Anforderungen jedes API Schlüssels in** Agentensitzungen** und zeichnet welche auf** Projekt** Jede Sitzung, an der gearbeitet wurde (`agent_sessions` Tabelle), sodass Nutzung und Kosten pro Teammitglied, pro Projekt und pro Sitzung gemeldet werden können.
+
+Was ohne Client-Setup aufgezeichnet wird:
+
+| Feld    | Quelle                                                                                                                                                                         |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Sitzung | `x-claude-code-session-id` Header (gleicher Wert wie `metadata.user_id.session_id`), pro Sitzung stabil                                                                        |
+| Projekt | Der `Primary working directory:` Zeilen Claude Code sendet in seiner Umgebungsnachricht; Arbeitsbaumordner unter `.claude/worktrees/` werden in den Repository-Namen aufgelöst |
+| Zweig   | `Current branch:` aus dem Git-Status Claude Code sendet mit der ersten Nachricht                                                                                               |
+| Kunde   | `user-agent` (`claude-cli/<version>`)                                                                                                                                          |
+
+Codex (`<environment_context><cwd>`) und OpenCode (`x-opencode-session`) werden auf die gleiche Weise erkannt. Schlüssel mit** kein Protokoll** aktiviert, behält nur die Sitzungs-ID und die im Header bereitgestellten Projektfelder bei; Es wird nichts gespeichert, was aus der Eingabeaufforderung gelesen wurde (Pfad, Zweig).
+
+### Das Projekt explizit benennen (empfohlen)
+
+Das Arbeitsverzeichnis unterscheidet sich zwischen den Computern, sodass dasselbe Repository unter unterschiedlichen Pfaden angezeigt werden kann. Senden Sie stattdessen das Projekt explizit: Claude Code fügt jeder Modellanforderung alle in `ANTHROPIC_CUSTOM_HEADERS` aufgeführten Header hinzu, und OmniRoute liest zwei davon:
+
+| Kopfzeile                  | Wert                                                                   |
+| -------------------------- | ---------------------------------------------------------------------- |
+| `x-omniroute-project`      | Projektname, z. B. `omniroute`                                         |
+| `x-omniroute-project-repo` | Normalisierte Fernbedienung, z. B. `github.com/diegosouzapw/OmniRoute` |
+
+Beide werden nur zur Quellenangabe gelesen; Sie werden niemals an den Upstream-Provider weitergeleitet.
+
+`ANTHROPIC_CUSTOM_HEADERS` wird einmal beim Start gelesen und Einstellungsdateien speichern Literalwerte. Berechnen Sie sie also, wenn Claude -Code gestartet wird. Fügen Sie dies zu `~/.zshrc` oder `~/.bashrc` hinzu und starten Sie `claude` weiterhin aus dem Projektordner:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+Der `sed` Ausdruck entfernt alle im Remote- URL eingebetteten Anmeldeinformationen. IDE Erweiterungen starten Claude Code ohne Ihre Shell, sodass ihre Sitzungen auf das Arbeitsverzeichnis zurückgreifen.
+
+---
+
 ## Discovery-Aliase — Nicht-Claude-Modelle in der `/model`-Auswahl sichtbar machen
 
 Die Gateway-Modellerkennung von Claude Code listet nur IDs auf, die mit `claude`

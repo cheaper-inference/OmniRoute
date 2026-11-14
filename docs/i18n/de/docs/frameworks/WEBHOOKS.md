@@ -11,22 +11,24 @@ OmniRoute kann bei Plattformereignissen HTTP-Webhooks auslösen. Verwenden Sie d
 
 Der Dispatcher signiert jede Zustellung mit HMAC-SHA256, wiederholt Zustellversuche bei vorübergehenden Fehlern, überwacht den Zustellungsstatus jedes Webhooks und deaktiviert Endpunkte automatisch, wenn diese wiederholt fehlschlagen.
 
-## Unterstützte Ereignisse
+## Unterstützte Veranstaltungen
 
-Der Typ `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, verwendet von `src/lib/webhookDispatcher.ts`) bildet derzeit genau vier Ereignisse ab:
+Der `WebhookEvent` Typ (`src/lib/webhooks/eventDescriptions.ts`, verbraucht von `src/lib/webhookDispatcher.ts`) modelliert derzeit acht Ereignisse:
 
-| Ereignis            | Wird ausgelöst, wenn                                                                  |
-| ------------------- | ------------------------------------------------------------------------------------- |
-| `request.completed` | Eine weitergeleitete Anfrage erfolgreich abgeschlossen wird                           |
-| `request.failed`    | Eine weitergeleitete Anfrage nach allen Wiederholungs-/Fallback-Versuchen fehlschlägt |
-| `quota.exceeded`    | Ein API-Schlüssel einen Budget-/Kontingentschwellenwert überschreitet                 |
-| `test.ping`         | Ein synthetisches Ereignis vom Testendpunkt verwendet wird                            |
+| Ereignis                  | Wird ausgelöst, wenn                                                                                           |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Eine Proxy-Anfrage wird erfolgreich abgeschlossen                                                              |
+| `request.failed`          | Eine Proxy-Anfrage schlägt schließlich fehl, retries/fallback                                                  |
+| `quota.exceeded`          | Ein API -Schlüssel überschreitet einen budget/quota -Schwellenwert                                             |
+| `proxy.set_aside`         | Ein Mitglied des Proxy-Pools wird nach wiederholter Ablehnung außer Dienst gestellt (nur Übergang).            |
+| `proxy.pool.exhausted`    | Jedes Mitglied eines Proxy-Pool-Bereichs wird beiseite gelegt                                                  |
+| `provider.reset_redeemed` | Automatisch angewendete Bank-Resets lösen ein Reset-Guthaben oder den wöchentlichen Claude -Sitzungs-Reset ein |
+| `provider.exhausted`      | Jeder Account eines Anbieters wird abgekühlt (höchstens einmal pro Anbieter alle 10 Minuten)                   |
+| `test.ping`               | Synthetisches Ereignis, das vom Testendpunkt verwendet wird                                                    |
 
-Abonnements akzeptieren das Literal `"*"`, um jedes Ereignis zu empfangen. Unbekannte Ereignisnamen in `events` werden beim Dispatch ignoriert.
+Abonnements akzeptieren das wörtliche `"*"`, um jedes Ereignis zu erhalten. Unbekannte Ereignisnamen in `events` werden zum Versandzeitpunkt ignoriert.
 
-> Hinweis: Die Dispatcher-API ist angebunden, aber die Produktionsaufrufe für einige der
-> Ereignisse außer `test.ping` werden noch implementiert. Prüfen Sie mit `grep dispatchEvent`,
-> welche Pfade den Dispatcher in Ihrer Version derzeit aufrufen.
+> Hinweis: Der Dispatcher API ist verkabelt, aber Produktionsanrufstandorte für einige der Nicht-`test.ping` Ereignisse landen immer noch. Überprüfen Sie `grep dispatchEvent` um zu sehen, welche Pfade derzeit den Dispatcher in Ihrer Version aufrufen.
 
 ## Architektur
 
@@ -119,24 +121,22 @@ Der Zustellungsverlauf wird zusätzlich zu den aggregierten Zählern in der
 Metadaten zum Typ (Slack-/Discord-/Telegram-/benutzerdefinierte Payload-Transformer)
 wurden durch `070_webhooks_kind_metadata.sql` hinzugefügt.
 
-## REST-API
+## REST API
 
-Alle Endpunkte erfordern eine Verwaltungs-Authentifizierung (`requireManagementAuth`).
+Alle Endpunkte erfordern eine Verwaltungsauthentifizierung (`requireManagementAuth`).
 
-| Endpunkt                        | Methode | Beschreibung                                       |
-| ------------------------------- | ------- | -------------------------------------------------- |
-| `/api/webhooks`                 | GET     | Webhooks auflisten (Secrets maskiert)              |
-| `/api/webhooks`                 | POST    | Webhook erstellen                                  |
-| `/api/webhooks/[id]`            | GET     | Webhook-Details (vollständiges Secret)             |
-| `/api/webhooks/[id]`            | PUT     | Felder aktualisieren                               |
-| `/api/webhooks/[id]`            | DELETE  | Entfernen                                          |
-| `/api/webhooks/[id]/test`       | POST    | `test.ping` auslösen (keine Wiederholungsversuche) |
-| `/api/webhooks/[id]/deliveries` | GET     | Letzte Zustellungsversuche für einen Webhook       |
-| `/api/webhooks/validate-url`    | POST    | Vorabvalidierung der URL (SSRF-Schutz)             |
+| Endpunkt                        | Verfahren | Beschreibung                                             |
+| ------------------------------- | --------- | -------------------------------------------------------- |
+| `/api/webhooks`                 | GET       | Webhooks auflisten (Geheimnisse maskiert)                |
+| `/api/webhooks`                 | POST      | Webhook erstellen                                        |
+| `/api/webhooks/[id]`            | GET       | Webhook-Details (vollständiges Geheimnis)                |
+| `/api/webhooks/[id]`            | PUT       | Felder aktualisieren                                     |
+| `/api/webhooks/[id]`            | DELETE    | Entfernen                                                |
+| `/api/webhooks/[id]/test`       | POST      | Einen `test.ping` auslösen (keine Wiederholungsversuche) |
+| `/api/webhooks/[id]/deliveries` | GET       | Letzte Zustellungsversuche für einen Webhook             |
+| `/api/webhooks/validate-url`    | POST      | URL -Validierung vor dem Flug (SSRF Guard)               |
 
-`GET /api/webhooks` maskiert das Secret als `<erste 10 Zeichen>...`, um eine
-Offenlegung auf Übersichtsseiten zu vermeiden. Verwenden Sie den GET-Endpunkt
-`[id]`, wenn Sie das Secret tatsächlich benötigen.
+`GET /api/webhooks` maskiert das Geheimnis gegenüber `<first 10 chars>...`, um ein Durchsickern auf Listing-Seiten zu verhindern. Verwenden Sie `[id]` GET wenn Sie das Geheimnis tatsächlich benötigen.
 
 ### Webhook erstellen
 
@@ -148,23 +148,20 @@ curl -X POST http://localhost:20128/api/webhooks \
     "url": "https://hooks.slack.com/services/...",
     "secret": "whsec_my_shared_secret",
     "events": ["quota.exceeded", "request.failed"],
-    "description": "Slack-Benachrichtigungen"
+    "description": "Slack alerts"
   }'
 ```
 
-Wenn `secret` ausgelassen wird, generiert der Server ein Secret im Format
-`whsec_<hex>` und gibt es in der Antwort zurück.
+Wenn `secret` weggelassen wird, generiert der Server ein `whsec_<hex>` Geheimnis und gibt es in der Antwort zurück.
 
-### Webhook testen
+### Testen Sie den Webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Gibt `{ delivered, status, error }` zurück. Es werden keine Wiederholungsversuche
-durchgeführt — dies ist nützlich, um schnell zu prüfen, ob der Empfänger die
-Payload und die Signatur akzeptiert.
+Gibt `{ delivered, status, error }` zurück. Es werden keine Wiederholungsversuche unternommen — ist nützlich, um schnell zu überprüfen, ob der Empfänger die Nutzdaten und die Signatur akzeptiert.
 
 ## Dashboard
 

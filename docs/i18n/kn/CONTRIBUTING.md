@@ -296,67 +296,67 @@ production build ಇವು CI ಯ ಜವಾಬ್ದಾರಿಯಾಗಿವೆ 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಪುಟಗಳು (23 ವಿಭಾಗಗಳು)
-│   ├── api/                # API ಮಾರ್ಗಗಳು (51 ಡೈರೆಕ್ಟರಿಗಳು)
-│   └── login/              # ದೃಢೀಕರಣ ಪುಟಗಳು (.tsx)
-├── domain/                 # ನೀತಿ ಎಂಜಿನ್ (policyEngine, comboResolver, costRules, ಇತ್ಯಾದಿ)
-├── lib/                    # ಪ್ರಧಾನ ವ್ಯವಹಾರ ತರ್ಕ (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 ಪ್ರೋಟೋಕಾಲ್ ಸರ್ವರ್
-│   ├── acp/                # Agent Communication Protocol ರಿಜಿಸ್ಟ್ರಿ
-│   ├── compliance/         # ಅನುಸರಣೆ ನೀತಿ ಎಂಜಿನ್
-│   ├── db/                 # SQLite ಡೊಮೇನ್ ಮಾಡ್ಯೂಲ್ಗಳು + 130 ಮೈಗ್ರೇಶನ್ಗಳು
-│   ├── memory/             # ನಿರಂತರ ಸಂಭಾಷಣಾ ಸ್ಮರಣೆ
-│   ├── oauth/              # OAuth ಪೂರೈಕೆದಾರರು, ಸೇವೆಗಳು ಮತ್ತು ಉಪಯುಕ್ತತೆಗಳು
-│   ├── skills/             # ವಿಸ್ತರಿಸಬಹುದಾದ ಕೌಶಲ್ಯ ಫ್ರೇಮ್ವರ್ಕ್
-│   ├── usage/              # ಬಳಕೆಯ ಟ್ರ್ಯಾಕಿಂಗ್ ಮತ್ತು ವೆಚ್ಚದ ಲೆಕ್ಕಾಚಾರ
-│   └── localDb.ts          # ಮರು-ರಫ್ತು ಪದರ ಮಾತ್ರ — ಇಲ್ಲಿ ಎಂದಿಗೂ ತರ್ಕವನ್ನು ಸೇರಿಸಬೇಡಿ
-├── middleware/              # ವಿನಂತಿ ಮಿಡಲ್ವೇರ್ (promptInjectionGuard)
-├── mitm/                   # MITM ಪ್ರಾಕ್ಸಿ (ಪ್ರಮಾಣಪತ್ರ, DNS, ಗುರಿ ರೂಟಿಂಗ್)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React ಕಾಂಪೊನೆಂಟ್ಗಳು (.tsx)
-│   ├── constants/          # ಪೂರೈಕೆದಾರ ವ್ಯಾಖ್ಯಾನಗಳು (329), MCP ಸ್ಕೋಪ್ಗಳು, 20 ರೂಟಿಂಗ್ ತಂತ್ರಗಳು
-│   ├── utils/              # ಸರ್ಕ್ಯೂಟ್ ಬ್ರೇಕರ್, ಸ್ಯಾನಿಟೈಸರ್, ದೃಢೀಕರಣ ಸಹಾಯಕಗಳು
-│   └── validation/         # Zod v4 ಸ್ಕೀಮಾಗಳು
-└── sse/                    # SSE ಪ್ರಾಕ್ಸಿ ಪೈಪ್ಲೈನ್
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse ವರ್ಕ್ಸ್ಪೇಸ್
-├── executors/              # 150 ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮಾಡ್ಯೂಲ್ಗಳು (ಎಕ್ಸಿಕ್ಯೂಟರ್ ಕ್ಲಾಸ್ಗಳು + ಪ್ರತಿ ಪೂರೈಕೆದಾರರ ಸಹಾಯಕಗಳು)
-├── handlers/               # 11 ವಿನಂತಿ ಹ್ಯಾಂಡ್ಲರ್ಗಳು (ಚಾಟ್, ಪ್ರತಿಕ್ರಿಯೆಗಳು, ಎಂಬೆಡಿಂಗ್ಗಳು, ಚಿತ್ರಗಳು, ಇತ್ಯಾದಿ)
-├── mcp-server/             # MCP ಸರ್ವರ್ (110 ವಿಶಿಷ್ಟ ಪರಿಕರಗಳು, 3 ಟ್ರಾನ್ಸ್ಪೋರ್ಟ್ಗಳು, 33 ಸ್ಕೋಪ್ಗಳು)
-├── services/               # 178 ಉನ್ನತ-ಮಟ್ಟದ ಸೇವೆಗಳು (combo, autoCombo, rateLimitManager, ಇತ್ಯಾದಿ)
-├── translator/             # ಸ್ವರೂಪ ಅನುವಾದಕಗಳು (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API ಟ್ರಾನ್ಸ್ಫಾರ್ಮರ್
-└── utils/                  # 22 ಉಪಯುಕ್ತತಾ ಮಾಡ್ಯೂಲ್ಗಳು (ಸ್ಟ್ರೀಮ್, TLS, ಪ್ರಾಕ್ಸಿ, ಲಾಗಿಂಗ್)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron ಡೆಸ್ಕ್ಟಾಪ್ ಆ್ಯಪ್ (ಬಹು-ಪ್ಲಾಟ್ಫಾರ್ಮ್)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js ಪರೀಕ್ಷಾ ರನ್ನರ್ (1,574 ಪರೀಕ್ಷಾ ಫೈಲ್ಗಳು)
-├── integration/            # ಏಕೀಕರಣ ಪರೀಕ್ಷೆಗಳು
-├── e2e/                    # Playwright ಪರೀಕ್ಷೆಗಳು
-├── security/               # ಭದ್ರತಾ ಪರೀಕ್ಷೆಗಳು
-├── translator/             # ಅನುವಾದಕ-ನಿರ್ದಿಷ್ಟ ಪರೀಕ್ಷೆಗಳು
-└── load/                   # ಲೋಡ್ ಪರೀಕ್ಷೆಗಳು
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # ಆರ್ಕಿಟೆಕ್ಚರ್ ನಿರ್ಧಾರ ದಾಖಲೆಗಳು
-├── architecture/            # ಸಿಸ್ಟಂ ಆರ್ಕಿಟೆಕ್ಚರ್ ಮತ್ತು ಸ್ಥಿತಿಸ್ಥಾಪಕತೆ
-├── comparison/              # OmniRoute ಮತ್ತು ಪರ್ಯಾಯಗಳ ಹೋಲಿಕೆ
-├── compression/             # ಸಂಕೋಚನ ಮಾರ್ಗದರ್ಶಿಗಳು ಮತ್ತು ನಿಯಮಗಳು
-├── dev/                     # ಅಭಿವೃದ್ಧಿ ಮಾರ್ಗದರ್ಶಿಗಳು
-├── diagrams/                # ಆರ್ಕಿಟೆಕ್ಚರ್ ರೇಖಾಚಿತ್ರಗಳು
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # ಬಳಕೆದಾರ ಮಾರ್ಗದರ್ಶಿ, Docker, ಸೆಟಪ್, ಸಮಸ್ಯೆ ನಿವಾರಣೆ
-├── i18n/                    # ಅಂತರರಾಷ್ಟ್ರೀಕರಿಸಿದ README ಅನುವಾದಗಳು
-├── marketing/               # ಮಾರುಕಟ್ಟೆ ಸಾಮಗ್ರಿಗಳು
-├── ops/                     # ನಿಯೋಜನೆ, ಪ್ರಾಕ್ಸಿ, ವ್ಯಾಪ್ತಿ, ಬಿಡುಗಡೆಗಳು
-├── providers/               # ಪೂರೈಕೆದಾರ-ನಿರ್ದಿಷ್ಟ ದಸ್ತಾವೇಜುಗಳು
-├── reference/               # API ಉಲ್ಲೇಖ, ಪರಿಸರ ವೇರಿಯಬಲ್ಗಳು, CLI ಪರಿಕರಗಳು, ಉಚಿತ ಹಂತಗಳು
-├── releases/                # ಬಿಡುಗಡೆ ಟಿಪ್ಪಣಿಗಳು
-├── routing/                 # ಸ್ವಯಂ-ಕಾಂಬೊ ಎಂಜಿನ್, ತಾರ್ಕಿಕ ಮರುಚಾಲನೆ
-├── screenshots/             # ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಸ್ಕ್ರೀನ್ಶಾಟ್ಗಳು
-├── security/                # ರಕ್ಷಣಾ ಮಿತಿಗಳು, ಅನುಸರಣೆ, ಅದೃಶ್ಯತೆ, ಟೋಕನ್ಗಳು
-└── specs/                   # ವಿನ್ಯಾಸ ನಿರ್ದಿಷ್ಟತೆಗಳು
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

@@ -40,32 +40,32 @@ Studio ar trim cilnēm, kas apvieno meklēšanu tīmeklī, tīmekļa satura izg�
 
 Pārveido esošo `SearchForm` + `ResultsPanel` + `RerankPanel` par cilni:
 
-- Vaicājums → rezultāti (virsraksts, URL, fragments, atbilstības vērtējums).
+- Vaicājiet → rezultātus (nosaukums, URL, fragments, atbilstības rādītājs).
 - Pakalpojumu sniedzēja metadati konfigurācijas rūtī (izmaksas, kvota, statuss).
-- Pārkārtošanas sadaļa: izvēlieties pārkārtošanas modeli, mainiet rezultātu secību, parādiet `positionDelta`.
-- Tukšais stāvoklis ar aicinājumu uz darbību, ja nav konfigurēts neviens meklēšanas pakalpojumu sniedzējs.
+- Pārkārtošanas sadaļa: izvēlieties pārkārtošanas modeli, pārkārtojiet rezultātus, parādiet `positionDelta`.
+- Tukšs stāvoklis ar CTA ja nav konfigurēts neviens meklēšanas nodrošinātājs.
 - Meklēšanas vēsture, izmantojot `SearchHistory.tsx`.
-- Izsauc `POST /v1/search` (esošais galapunkts, bez izmaiņām).
+- Izsauc `POST /v1/search` (esošs galapunkts, bez izmaiņām).
 
-### Satura izgūšanas cilne
+### Nokasīt Tab
 
-Jauna cilne satura izgūšanai no URL, izmantojot `POST /v1/web/fetch` (izveidots 05. plānā):
+Jauna cilne satura izvilkšanai no URL, izmantojot `POST /v1/web/fetch` (izveidota 05. plānā):
 
-- Ievade: URL + pilnas lapas pārslēgs + formāta atlasītājs (markdown / teksts / HTML).
-- Iesniegšana → izgūšana → `ScrapeResult.tsx` atveidošana.
-- `ScrapeResult` atveido markdown priekšskatījumu un neapstrādātā satura pārslēgu.
-- Ierobežojums: ja atbildes pamatteksts pārsniedz **256 KB**, lietotāja saskarnē tiek parādīts `(saīsināts, skatīt neapstrādāto saturu)`, un neapstrādātais saturs tiek atvērts Monaco modālajā logā (D21).
-- Metadatu panelis: pakalpojumu sniedzējs (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latentums, izmaksas, atbildes lielums, saišu skaits.
+- Ievade: URL + pilnas lapas pārslēgšanas + formāta atlasītājs (atzīme / teksts / HTML).
+- Iesniegt → fetch → render `ScrapeResult.tsx`.
+- `ScrapeResult` atveido atzīmes priekšskatījuma + neapstrādātu pārslēgšanu.
+- Vāciņš: ja atbildes korpuss >** 256 KB** , UI parāda `(truncated, view raw)` un tiek atvērts neapstrādātā veidā Monako modālā (D21).
+- Metadatu panelis: nodrošinātājs (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search/keenable-search), latentums, maksa, atbildes lielums, saišu skaits.
 - Izmanto `useScrapeFetch.ts` āķi.
 
-### Salīdzināšanas cilne
+### Salīdzināt cilni
 
-Izpilda vienu un to pašu vaicājumu/URL paralēli līdz pat **4 pakalpojumu sniedzējiem** (D22):
+Vada to pašu query/URL pāri līdz** 4 pakalpojumu sniedzēji paralēli** (D22):
 
-- Katram pakalpojumu sniedzējam blakus izvietotas kolonnas.
-- Rādītāji: latentums, izmaksas, rezultātu skaits, atbildes lielums.
-- URL pārklāšanās aprēķins meklēšanai (kopīgo URL skaits salīdzinājumā ar sākotnējo rezultātu).
-- Katram pakalpojumu sniedzējam izsauc `POST /v1/search` (meklēšana) vai `POST /v1/web/fetch` (satura izgūšana).
+- Blakus slejas katram nodrošinātājam.
+- Metrika: latentums, izmaksas, rezultātu skaits, atbildes lielums.
+- URL pārklāšanās aprēķins meklēšanai (kopīgoto URLs skaits salīdzinājumā ar sākotnējo rezultātu).
+- Izsauc `POST /v1/search` (meklēšana) vai `POST /v1/web/fetch` (skrāpēšana) katram pakalpojumu sniedzējam.
 
 ---
 
@@ -100,13 +100,13 @@ Izpilda vienu un to pašu vaicājumu/URL paralēli līdz pat **4 pakalpojumu sni
 
 ## Pakalpojumu sniedzēju katalogs
 
-`ProviderCatalog.tsx` parāda pilnu pakalpojumu sniedzēju sarakstu no `GET /api/search/providers`
-(F4 paplašināts, iekļaujot arī izgūšanas pakalpojumu sniedzējus):
+`ProviderCatalog.tsx` atklāj pilnu pakalpojumu sniedzēju sarakstu no `GET /api/search/providers` (paplašināts F4, lai iekļautu izneses nodrošinātājus):
 
-| `kind` | `"search"` (20 pakalpojumu sniedzēji) vai `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (24 pakalpojumu sniedzēji) vai `"fetch"` (firecrawl, Jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, paralēlā meklēšana, Keenable-search) |
 
-Statuss tiek **noteikts pieprasījuma izpildes laikā**, pārbaudot, vai pastāv akreditācijas dati un vai
-visām atslēgām pašlaik ir nogaidīšanas periods.
+Statuss ir** atvasināts pēc pieprasījuma laika** pārbaudot, vai pastāv akreditācijas dati un vai visas atslēgas pašlaik ir atdzisušas.
+
+`codex-search` (Codex Web Search) nav savas atslēgas: tā atkārtoti izmanto pievienoto Codex (ChatGPT) kontu, tāpēc katra meklēšana tērē ChatGPT abonēšanas kvotu un aizņem apmēram 10–40 s. Tas darbojas, kad pieprasījums to nosauc; automātiskai atlasei ir nepieciešams `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` līdzekļa karodziņš (pēc noklusējuma izslēgts).
 
 ---
 
@@ -120,16 +120,16 @@ API atslēgas vietturis vienmēr ir `$OMNIROUTE_API_KEY` (D11, koplietots ar Pla
 
 ## Aizmugursistēmas izmaiņas
 
-Šai funkcijai bija nepieciešama tikai viena aizmugursistēmas izmaiņa:
+Šim līdzeklim bija nepieciešamas tikai vienas aizmugursistēmas izmaiņas:
 
-### Paplašināts `GET /api/search/providers`
+### Pagarināts `GET /api/search/providers`
 
-`src/app/api/search/providers/route.ts` tika paplašināts, lai:
+`src/app/api/search/providers/route.ts` tika paplašināts līdz:
 
-- Masīvā iekļautu visus ielādes nodrošinātājus (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`).
-- Katram vienumam pievienotu `kind: "search" | "fetch"`.
-- Pievienotu `status: "configured" | "missing" | "rate_limited"`, kas iegūts no pašreizējā akreditācijas datu stāvokļa.
-- Saglabātu atpakaļsaderību — esošie lauki (`id`, `name` utt.) paliek nemainīti.
+- Iekļaujiet masīvā visus ieneses nodrošinātājus (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`, `keenable-search`).
+- Pievienojiet `kind: "search" | "fetch"` katram vienumam.
+- Pievienojiet `status: "configured" | "missing" | "rate_limited"` kas iegūts no reāllaika akreditācijas stāvokļa.
+- Saglabājiet atpakaļejošo saderību — nemainoties esošajiem laukiem (`id`, `name` utt.).
 
 ---
 

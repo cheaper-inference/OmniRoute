@@ -24,19 +24,21 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
-Η λήψη γίνεται σε `open-sse/handlers/chatCore.ts` (δύο τοποθεσίες, στις δύο τοποθεσίες κλήσης `cacheReasoningFromAssistantMessage` ). Η επανάληψη πραγματοποιείται στο `open-sse/translator/index.ts` μετά από εξαναγκασμό σχήματος αλλά πριν από την αποστολή.
+Η λήψη γίνεται σε `open-sse/handlers/chatCore.ts` (δύο τοποθεσίες, στις δύο τοποθεσίες κλήσης `cacheReasoningFromAssistantMessage` ). Η επανάληψη γίνεται στο `open-sse/translator/index.ts` μετά από εξαναγκασμό σχήματος αλλά πριν από την αποστολή.
+
+Οι καταχωρήσεις κλήσης εργαλείου αποθηκεύονται στο `buildToolCallCacheKey()`, μια σύνοψη του εύρους αιτήματος και του αναγνωριστικού κλήσης εργαλείου, επομένως το ίδιο αναγνωριστικό που χρησιμοποιείται από άλλο κλειδί ή περίοδο λειτουργίας API δεν επιλέγει την καταχώρηση. Το εύρος προέρχεται από `buildReasoningCacheScope()`: το αναγνωριστικό κλειδιού API, συν το κλειδί συνεδρίας όταν το αίτημα έχει ένα. Επομένως, η στήλη `tool_call_id` και ο πίνακας εργαλείων εμφανίζουν αυτήν τη σύνοψη για αυτές τις καταχωρίσεις.
 
 Οι απλές στροφές βοηθού (χωρίς εργαλειακή κλήση) πληκτρολογούνται διαφορετικά: `buildAssistantMessageCacheKey()` αφομοιώνει το εύρος της περιόδου λειτουργίας συν την κανονικοποιημένη μεταγραφή σε μορφή OpenAI μέχρι εκείνη τη στροφή, επειδή DeepSeek απαιτεί τη συλλογιστική της _κάθε_ προηγούμενης στροφής όταν υπάρχει `tools`. Για τους στόχους Responses-API (για παράδειγμα `opencode-go/deepseek-v4-flash`, δρομολογημένο σε `/responses`) το upstream body φέρει `input`, όχι `messages`, επομένως `translateRequest()` (`open-sse/translator/index.ts`) αναφέρει τη συγκεντρωτική μεταγραφή που αφομοιώθηκε μέσω μιας επιλογής επανάκλησης και οι ιστότοποι λήψης χωνεύουν την ίδια μεταγραφή. Το πάσο επανάληψης Responses εκτελείται στον άξονα OpenAI για κάθε μορφή πηγής, επομένως οι πελάτες μηνυμάτων Anthropic (Claude → OpenAI → Responses) αναπαράγονται επίσης.
 

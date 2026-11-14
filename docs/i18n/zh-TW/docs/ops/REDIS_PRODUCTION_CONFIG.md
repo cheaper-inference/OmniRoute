@@ -54,59 +54,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## 建議的正式環境調校
+## 建議的生產調整
 
-### 1. 連線池／用戶端選項（ioredis `Redis` 建構函式）
+### 1.連接池/客戶端選項（ioredis `Redis`建構子）
 
-目前的程式碼建立單一 `new Redis(url)`，且未指定任何自訂選項。對於正式環境的多副本部署，請在程式碼中傳入用戶端工廠函式，或包裝 `getRedisClient()`：
+目前程式碼建立一個沒有自訂選項的`new Redis(url)` 。對於生產多副本部署，請在程式碼中傳遞客戶端工廠或包裝`getRedisClient()`：
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // 不限制重試次數；由 retryStrategy 決定
-  enableReadyCheck: true, // 接受呼叫前確認伺服器已就緒
-  lazyConnect: true, // 建構時不連線；等待第一次呼叫
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // 重試 10 次後放棄 → 稍後重新連線
-    return Math.min(times * 200, 5000); // 200ms、400ms、…，上限 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // 將並行命令合併為一次 TCP 寫入
-  keepAlive: 10000, // 每 10s 執行一次 TCP keep-alive
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**主要權衡：**
+**關鍵權衡：**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — 建議用於正式環境，避免 Redis 暫時重新啟動時立即導致所有請求失敗。`checkRateLimit()` 中的記憶體內備援會承接失敗路徑。
-- `lazyConnect: true` — 避免伺服器在開始接受連線前，於啟動階段依賴 Redis 必須已經上線。
-- `enableAutoPipelining: true` — 減少並行速率限制檢查的往返次數；單一連線超過 50 RPS 時特別有益。
+- `maxRetriesPerRequest: null` + `retryStrategy` —是生產的首選，因此短暫的Redis重新啟動不會立即使每個請求失敗。 `checkRateLimit()`中的記憶體回退吸收了故障路徑。
+- `lazyConnect: true` —避免了在伺服器開始接受連線之前啟動對Redis依賴。
+- `enableAutoPipelining: true` —減少並發速率限制檢查的往返次數；在單一連線上> 50 RPS是有益的。
 
-### 2. Redis 伺服器設定（`redis.conf`）
+### Redis伺服器配置（`redis.conf`）
 
 ```
-# 記憶體
-maxmemory 80%                        # 為作業系統頁面快取保留空間
-maxmemory-policy allkeys-lru         # 在記憶體壓力下淘汰過期未用的驗證快取項目
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# 持久化（選用 — OmniRoute 即使不使用持久化也可安全應對當機）
-save 300 1                           # 若至少有 1 個鍵變更，則至少每 5 分鐘建立一次快照
-appendonly no                        # 不需要 AOF；資料可重新產生
-appendfsync no                       # 無 fsync 額外負擔（RDB 已足夠）
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# 網路
-timeout 0                            # 不因閒置而中斷連線
-tcp-keepalive 300                    # 5 分鐘 keep-alive
-tcp-backlog 511                      # 因應突發負載的連線待處理佇列
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# 效能
-hz 10                                # 預設值；對延遲敏感時使用 100
-activedefrag yes                     # 碎片率 >10% 時自動重組
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**`maxmemory-policy allkeys-lru` 的權衡：** 在記憶體壓力下，驗證快取項目可能被淘汰。這是安全的 — `setCachedApiKey` 總會在快取未命中時重新填入資料，而 SQLite 備援則是權威資料來源。速率限制器的 Lua 指令碼會建立體積小且依設計存續時間很短的鍵。
+**`maxmemory-policy allkeys-lru`的權衡：**在記憶體壓力下，身份驗證快取條目可能會被逐出。這是安全的— `setCachedApiKey`總是在未命中時重新填充，並且SQLite後備是權威的。速率限制器 Lua 腳本創建的小鍵在設計上是短暫的。
 
-### 3. Docker Compose 設定
+### Docker撰寫設置
 
-正式環境的 compose（`docker-compose.prod.yml`）使用 `redis:8.6.2-alpine`。請新增：
+產品組合 (`docker-compose.prod.yml`) 使用`redis:8.6.2-alpine`。添加：
 
 ```yaml
 redis:
@@ -131,30 +131,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. 多執行個體／擴展考量
+### 4. 多實例/擴展注意事項
 
-**所有副本共用單一 Redis** — 速率限制器的 Lua 指令碼依賴單一權威鍵空間。若各副本使用多個 Redis 執行個體，將失去原子性，並使配額加倍。所有應用程式副本都應使用單一 Redis（或具備容錯移轉功能的 Redis Sentinel 叢集）。
+**所有副本的單一Redis** —速率限制器 Lua 腳本依賴單一權威金鑰空間。副本背後的多個Redis實例將失去原子性並使預算加倍。對所有應用程式副本使用單一Redis （或具有故障轉移功能的Redis Sentinel 叢集）。
 
-**連線數：** 每個應用程式副本會開啟 **2 個 TCP 連線**至 Redis（速率限制器用戶端 + 配額儲存區用戶端）。10 個副本 → 20 個連線，遠低於預設 Redis 執行個體的 10k 連線上限。
+**連接數：**每個應用程式副本打開**2 個TCP連接**到Redis （速率限制器客戶端+配額儲存客戶端）。在 10 個副本→中，有 20 個連接，完全在預設Redis實例的 10k 連接上限之內。
 
 ### 5. 監控
 
 透過健康檢查端點公開：
 
 ```typescript
-// src/app/api/monitoring/health/route.ts 已呼叫速率限制器函式
-// 新增 Redis 專用檢查：
-//   1. 透過 ioredis .ping() 檢查 PING 延遲
-//   2. 透過 INFO memory 檢查記憶體用量
-//   3. 透過 INFO clients 檢查連線數
-//   4. maxmemory-policy 的命中率（evicted_keys / keyspace_hits）
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-應關注的主要指標：
+需要關注的關鍵指標：
 
-- **每秒淘汰的鍵數** — 若持續不為零，請提高 `maxmemory`
-- **遭封鎖的用戶端** — 非零表示 Lua 指令碼執行緩慢或競爭情況嚴重
-- **遭拒絕的連線** — 已達連線上限；僅有 20 個連線時很少發生
+- **驅逐鍵/秒**—如果始終不為零，則增加`maxmemory`
+- **被阻止的客戶**—非零表示 Lua 腳本緩慢或爭用較多
+- **拒絕連線**—連接限制命中；罕見，連接數為 20
+
+### 6.Redis相容伺服器
+
+這裡使用的任何伺服器都必須執行 Lua 腳本：速率限制器是`EVAL`。在沒有 Lua 的伺服器上， `checkRateLimit()`記錄`[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting`並按進程進行計數，因此每個副本都會自行實施限制。選擇加入共用會話關聯儲存 (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) 也可以使用`EVAL`讀取和更新 pin；如果沒有 Lua，它會記錄`[SESSION_AFFINITY] Redis error; falling back to SQLite.`並且每個副本都保留自己的引腳。其他工作負載使用普通指令（`SET ... EX`、 `GET`、 `DEL`、 `MGET`、 `EXPIRE`、 `INCRBYFLOAT`、雜湊和集合），且語意快取的Redis後端不傳送`FT.*`指令。
+
+使用OmniRoute 3.8.52 進行測試： KiviDB 1.2.0 及其 Lua 映像 (`kividb/kividb:v1.2.0-lua`)。速率限制器（包括共享計數器的第二個進程）、身份驗證快取、配額儲存、預熱斷路器、語義快取儲存以及透過聊天處理程序的`/v1/chat/completions`請求通過了Redis 8.10.3 上通過的 19 項檢查中的 18 項。不同之處在於： `INCRBYFLOAT`將`0.1 + 0.2`儲存為`0.30000000000000004` ，其中Redis儲存`0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) )。配額儲存使用`parseFloat`解析這兩個數字，但兩個數字的最後一位數字不同，因此恰好落在配額邊界上的比較可能會產生不同的結果。會話關聯儲存不是該運行的一部分。 （[設置](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md)，[結果](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat)）
 
 ---
 

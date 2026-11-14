@@ -279,15 +279,15 @@ if (candidate.quotaSoftPenalty) {
 
 ## გარემოს ცვლადები
 
-| ცვლადი                             | ნაგულისხმევი | აღწერა                                                                       |
-| ---------------------------------- | ------------ | ---------------------------------------------------------------------------- |
-| `QUOTA_STORE_DRIVER`               | `sqlite`     | გამოსაყენებელი დრაივერი: `sqlite` ან `redis`                                 |
-| `QUOTA_STORE_REDIS_URL`            | _(ცარიელი)_  | Redis-ის URL, მაგ. `redis://localhost:6379`                                  |
-| `QUOTA_SATURATION_THRESHOLD`       | `0.5`        | 0..1; `>= ზღვარი` ააქტიურებს მკაცრ რეჟიმს                                    |
-| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`        | 0..1; მულტიპლიკატორი რბილი პოლიტიკის კომბინირებული ქულისთვის                 |
-| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`         | დღეების რაოდენობა, რომლის შემდეგაც GC ძველ `quota_consumption` კალათებს შლის |
+| ცვლადი                             | ნაგულისხმევი | აღწერა                                                       |
+| ---------------------------------- | ------------ | ------------------------------------------------------------ |
+| `QUOTA_STORE_DRIVER`               | `sqlite`     | გამოსაყენებელი დრაივერი: `sqlite` ან `redis`                 |
+| `QUOTA_STORE_REDIS_URL`            | _(ცარიელი)_  | Redis URL, მაგ `redis://localhost:6379`                      |
+| `QUOTA_SATURATION_THRESHOLD`       | `0.5`        | 0..1; `>= threshold` ააქტიურებს მკაცრ რეჟიმს                 |
+| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`        | 0..1; მულტიპლიკატორი რბილი პოლიტიკის კომბინირებული ქულისთვის |
+| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`         | დღით ადრე GC ამოიღებს ძველ `quota_consumption` თაიგულებს     |
 
-DB-ის პარამეტრები (`quotaStore.*`) გარემოს ცვლადებს გადაფარავს.
+DB პარამეტრები (`quotaStore.*`) უგულებელყოფს env vars.
 
 ---
 

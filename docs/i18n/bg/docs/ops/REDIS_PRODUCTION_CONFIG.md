@@ -54,59 +54,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Препоръчителни настройки за продукционна среда
+## Препоръчителна производствена настройка
 
-### 1. Опции за пула от връзки / клиента (конструкторът `Redis` на ioredis)
+### 1. Пул за връзки/Опции на клиента (конструктор ioredis `Redis` )
 
-Текущият код създава един `new Redis(url)` без персонализирани опции. За продукционни внедрявания с множество реплики подайте фабрика за клиенти в кода или обвийте `getRedisClient()`:
+Текущият код създава единична `new Redis(url)` без персонализирани опции. За производствени внедрявания с множество реплики, предайте клиентска фабрика в кода или обвийте `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // без ограничение на повторните опити; нека retryStrategy решава
-  enableReadyCheck: true, // проверка дали сървърът е готов, преди да приема заявки
-  lazyConnect: true, // без свързване при създаване; изчакване на първата заявка
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // отказ след 10 опита → повторно свързване по-късно
-    return Math.min(times * 200, 5000); // 200ms, 400ms, …, максимално 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // обединяване на паралелни команди в един TCP запис
-  keepAlive: 10000, // TCP keep-alive на всеки 10s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**Основни компромиси:**
+**Ключови компромиси:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — предпочитан вариант за продукционна среда, така че временните рестартирания на Redis да не водят веднага до неуспех на всяка заявка. Резервният механизъм в паметта в `checkRateLimit()` поема обработката при неуспех.
-- `lazyConnect: true` — предотвратява зависимостта при стартиране Redis да работи, преди сървърът да започне да приема връзки.
-- `enableAutoPipelining: true` — намалява броя на двупосочните обмени при паралелни проверки на ограниченията на честотата; полезно при >50 RPS през една връзка.
+- `maxRetriesPerRequest: null` + `retryStrategy` — предпочитан за производство, така че преходните рестартирания Redis да не провалят веднага всяка заявка. Резервният в паметта в `checkRateLimit()` абсорбира пътя на повредата.
+- `lazyConnect: true` — избягва зависимостта при стартиране на Redis, преди сървърът да започне да приема връзки.
+- `enableAutoPipelining: true` — намалява двупосочните пътувания за едновременни проверки на ограничение на скоростта; изгодно при > 50 RPS на една връзка.
 
-### 2. Конфигурация на Redis сървъра (`redis.conf`)
+### 2. Конфигурация на Redis сървър (`redis.conf`)
 
 ```
-# Памет
-maxmemory 80%                        # оставяне на място за кеша на страниците на ОС
-maxmemory-policy allkeys-lru         # премахване на неактуални записи от кеша за удостоверяване при недостиг на памет
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Устойчиво съхранение (по избор — OmniRoute е устойчив на сривове и без него)
-save 300 1                           # моментна снимка поне на всеки 5 мин, ако е променен ≥1 ключ
-appendonly no                        # AOF не е необходим; данните могат да бъдат генерирани отново
-appendfsync no                       # без допълнително натоварване от fsync (RDB е достатъчен)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Мрежа
-timeout 0                            # без прекъсване на неактивни връзки
-tcp-keepalive 300                    # keep-alive на всеки 5 мин
-tcp-backlog 511                      # опашка от връзки при пиково натоварване
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Производителност
-hz 10                                # стойност по подразбиране; 100 при чувствителност към латентност
-activedefrag yes                     # автоматична дефрагментация при фрагментация >10%
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Компромис при `maxmemory-policy allkeys-lru`:** Записите от кеша за удостоверяване може да бъдат премахнати при недостиг на памет. Това е безопасно — `setCachedApiKey` винаги попълва кеша отново при липса, а резервният механизъм със SQLite е авторитетният източник. Lua скриптът за ограничаване на честотата създава малки ключове, които по проект са краткотрайни.
+**Компромис за `maxmemory-policy allkeys-lru`:** Записите в кеша за удостоверяване може да бъдат извадени при натиск на паметта. Това е безопасно — `setCachedApiKey` винаги се попълва отново при пропускане и резервният SQLite е авторитетен. Скриптът Lua за ограничаване на скоростта създава малки ключове, които са краткотрайни по дизайн.
 
-### 3. Настройки на Docker Compose
+### 3. Docker Compose Settings
 
-Продукционната Compose конфигурация (`docker-compose.prod.yml`) използва `redis:8.6.2-alpine`. Добавете:
+Продуктът compose (`docker-compose.prod.yml`) използва `redis:8.6.2-alpine`. добавете:
 
 ```yaml
 redis:
@@ -131,30 +131,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Съображения при множество инстанции / мащабиране
+### 4. Съображения за множество инстанции/мащабиране
 
-**Един Redis за всички реплики** — Lua скриптът за ограничаване на честотата зависи от едно авторитетно пространство от ключове. Използването на множество Redis инстанции зад репликите би премахнало атомарността и би удвоило бюджета. Използвайте един Redis (или Redis Sentinel клъстер с превключване при отказ) за всички реплики на приложението.
+**Единична Redis за всички реплики** — Lua скриптът за ограничаване на скоростта зависи от едно единствено авторитетно ключово пространство. Няколко Redis инстанции зад реплики биха загубили атомарност и биха удвоили бюджета. Използвайте един Redis (или Redis Sentinel клъстер с отказ) за всички реплики на приложения.
 
-**Брой връзки:** Всяка реплика на приложението отваря **2 TCP връзки** към Redis (клиент за ограничаване на честотата + клиент за хранилището на квоти). При 10 реплики → 20 връзки, което е значително под стандартния лимит от 10k връзки на една Redis инстанция.
+**Брой връзки:** Всяка реплика на приложение се отваря** 2 TCP връзки** към Redis (клиент за ограничаване на скоростта + клиент за съхранение на квоти). При 10 реплики → 20 връзки, доста в рамките на тавана от 10k връзки на Redis екземпляр по подразбиране.
 
-### 5. Наблюдение
+### 5. Мониторинг
 
-Предоставете следното чрез крайната точка за проверка на състоянието:
+Разкриване чрез крайна точка за проверка на здравето:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts вече извиква функциите на rateLimiter
-// Добавете специфични за Redis проверки:
-//   1. Латентност на PING чрез ioredis .ping()
-//   2. Използване на паметта чрез INFO memory
-//   3. Брой връзки чрез INFO clients
-//   4. Процент попадения за maxmemory-policy (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
 Ключови показатели за наблюдение:
 
-- **Премахнати ключове / сек** — ако стойността постоянно е различна от нула, увеличете `maxmemory`
-- **Блокирани клиенти** — стойност, различна от нула, предполага бавни Lua скриптове или висока конкуренция за ресурси
-- **Отхвърлени връзки** — достигнат е лимитът на връзките; рядко при 20 връзки
+- **Изгонени ключове/сек** — ако постоянно не е нула, увеличете `maxmemory`
+- **Блокирани клиенти** — не-нула предполага бавни Lua скриптове или голямо съревнование
+- **Отхвърлени връзки** — ограничение за връзка; рядко при 20 връзки
+
+### 6. Съвместими с Redis сървъри
+
+Всеки сървър, използван тук, трябва да изпълнява Lua скриптове: ограничителят на скоростта е един `EVAL`. На сървър без Lua, `checkRateLimit()` регистрира `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` и брои за процес, така че всяка реплика налага ограничението сама. Споделеното хранилище за афинитет на сесия за включване (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) също чете и актуализира пинове с `EVAL`; без Lua регистрира `[SESSION_AFFINITY] Redis error; falling back to SQLite.` и всяка реплика запазва свои собствени пинове. Другите работни натоварвания използват обикновени команди (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, хешове и набори), а Redis бекендът на семантичния кеш не изпраща `FT.*` команди.
+
+Тествано с OmniRoute 3.8.52: KiviDB 1.2.0 с неговия Lua образ (`kividb/kividb:v1.2.0-lua`). Ограничителят на скоростта (включително втори процес, споделящ броячите), кешът за удостоверяване, съхранението на квотите, прекъсвачът на веригата за загряване, съхраняването на семантичния кеш и `/v1/chat/completions` заявката през манипулатора на чат преминаха 18 от 19-те проверки, които преминават през Redis 8.10.3. Този, който се различава: `INCRBYFLOAT` съхранява `0.1 + 0.2` като `0.30000000000000004` където Redis съхранява `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Хранилището за квота анализира и двете с `parseFloat`, но двете числа се различават в последните цифри, така че сравнение, което попада точно на границата на квотата, може да излезе различно. Хранилището за афинитет на сесия не беше част от това изпълнение. ( [настройка](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [резултати](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 

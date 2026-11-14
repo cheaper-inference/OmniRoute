@@ -154,7 +154,7 @@ src/
 | `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Страница на таблото за управление на Traffic Inspector — DevTools разделена, 7 подробни раздела, 4 превключвателя на режима на заснемане, запис на сесия, оцветяване на контекста. i18n PT-BR + EN. Вижте `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                          |
 | `app/(dashboard)/dashboard/activity/`                                        | Страница с канал за активност (група B): `page.tsx` (сървър) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — вижте `docs/architecture/MONITORING_SECTIONS.md`                                                                                                        |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | Страница за споделяне на квота (група B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                      |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Страница за конфигурация на плана на доставчика (група B): `page.tsx` + `ProviderPlanConfigClient.tsx` — размери на квота за отмяна на връзка                                                                                                                                                                              |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Конфигурационна страница на план на доставчик (група B): `page.tsx` + `ProviderPlanConfigClient.tsx` — размери на квота за отмяна на връзка                                                                                                                                                                                |
 | `app/docs/`                                                                  | Вграден преглед на документация (изобразява `docs/*.md`)                                                                                                                                                                                                                                                                   |
 | `app/landing/`                                                               | Маркетингова целева страница                                                                                                                                                                                                                                                                                               |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | Страници, свързани с удостоверяване                                                                                                                                                                                                                                                                                        |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | `components/`                    | Компонент на таблото API: адаптери над `packages/ui-kit` — вижте `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: имена на икони, използвани от екраните → Lucide компоненти (`<Icon>`)                     |
-| `constants/providers.ts`         | **381 доставчици** със Zod валидиране (източник на истината)                                          |
+| `constants/providers.ts`         | **394 доставчици** със Zod валидиране (източник на истината)                                          |
 | `constants/cliTools.ts`          | Външен регистър CLI инструменти                                                                       |
-| `constants/routingStrategies.ts` | **20 стратегии за маршрутизиране** с приоритети                                                       |
+| `constants/routingStrategies.ts` | **22 стратегии за маршрутизиране** с приоритети                                                       |
 | `constants/publicApiRoutes.ts`   | Маршрути, които изискват удостоверяване на носител (срещу управление).                                |
 | `constants/upstreamHeaders.ts`   | Списък за отказ на заглавки за заявки нагоре по веригата                                              |
 | `validation/schemas.ts`          | ~ 80 Zod схеми (единствен източник на истина за API договори)                                         |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — Работно пространство на стрийминг системата
+## `open-sse/` — Работно пространство на Streaming Engine
 
-Отделно npm работно пространство (`@omniroute/open-sse`). Обработва заявките и изпълнението от доставчиците.
+Отделно работно пространство на npm (`@omniroute/open-sse`). Управлява изпълнението на доставчика + за обработка на заявки.
 
 ```
 open-sse/
-├── handlers/            # 16 файла (12 обработчика + 4 помощни модула): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search и др.
-├── executors/           # 150 модула за изпълнение (класове, разширяващи BaseExecutor, + помощни модули за отделните доставчици)
-├── translator/          # Конвертори на формати (9 за заявки, 9 за отговори, 9 помощни)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ модула за услуги (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM и др.)
-├── mcp-server/          # MCP сървър (110 инструмента, 3 транспорта, 33 обхвата)
-├── config/              # Регистри на доставчици/модели, конфигурация на заглавки, псевдоними на модели
-├── utils/               # TLS клиент, proxy fetch/dispatcher, помощни модули за мрежата
-├── index.ts             # Входна точка на работното пространство
-├── package.json         # Манифест на работното пространство
-├── tsconfig.json        # TS конфигурация на работното пространство
-└── types.d.ts           # Декларации на типовете за работното пространство
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Път                         | Предназначение                                                                  |
-| --------------------------- | ------------------------------------------------------------------------------- |
-| `server.ts`                 | Жизнен цикъл на MCP сървъра (stdio + HTTP транспорти)                           |
-| `httpTransport.ts`          | HTTP Streamable + SSE транспорти (`/api/mcp/sse`, `/api/mcp/stream`)            |
-| `audit.ts`                  | Журнал за одит в таблицата `mcp_tool_audit`                                     |
-| `scopeEnforcement.ts`       | Проверка на обхвата за всеки инструмент                                         |
-| `runtimeHeartbeat.ts`       | Сигнал за работоспособност към `DATA_DIR/runtime/mcp-heartbeat.json`            |
-| `descriptionCompressor.ts`  | Компресира метаданните на описанията на инструментите за пестене на контекст    |
-| `schemas/tools.ts`          | 36 дефиниции на базови инструменти + обхвати                                    |
-| `tools/advancedTools.ts`    | Реализации на разширени инструменти                                             |
-| `tools/memoryTools.ts`      | 3 инструмента за памет (търсене/добавяне/изчистване)                            |
-| `tools/skillTools.ts`       | 4 инструмента за умения (списък/активиране/изпълнение/изпълнения)               |
-| `tools/compressionTools.ts` | 5 инструмента за компресиране                                                   |
-| `README.md`                 | Вътрешен README за MCP сървъра (с препратка от `docs/frameworks/MCP-SERVER.md`) |
+| Пътека                      | Цел                                                                                |
+| --------------------------- | ---------------------------------------------------------------------------------- |
+| `server.ts`                 | жизнен цикъл на MCP сървър (stdio + HTTP транспортира)                             |
+| `httpTransport.ts`          | HTTP Поточно предаване + SSE (`/api/mcp/sse`, `/api/mcp/stream`)                   |
+| `audit.ts`                  | Регистриране на одит в `mcp_tool_audit` таблица                                    |
+| `scopeEnforcement.ts`       | Валидиране на обхвата на всеки инструмент                                          |
+| `runtimeHeartbeat.ts`       | Здравословен сърдечен ритъм до `DATA_DIR/runtime/mcp-heartbeat.json`               |
+| `descriptionCompressor.ts`  | Компресирайте метаданните за описание на инструмента, за да запазите контекста     |
+| `schemas/tools.ts`          | 36 основни дефиниции на инструменти + scopes                                       |
+| `tools/advancedTools.ts`    | Усъвършенствани реализации на инструменти                                          |
+| `tools/memoryTools.ts`      | 3 инструмента за памет (search/add/clear)                                          |
+| `tools/skillTools.ts`       | 4 инструмента за умения (list/enable/execute/executions)                           |
+| `tools/compressionTools.ts` | 5 инструмента за компресиране                                                      |
+| `README.md`                 | Вътрешен MCP сървър README (кръстосано свързан от `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Външни CLI интеграции + Вътрешни OmniRoute CLI                                                 |
 | `I18N.md`                   | i18n архитектура, добавяне на език, 67 локализации                                             |
 | `UNINSTALL.md`              | Чисти стъпки за деинсталиране                                                                  |
-| `PROVIDER_REFERENCE.md`     | **Автоматично генерирано** каталог от 381 доставчици (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Автоматично генерирано** каталог от 394 доставчици (regen: `npm run gen:provider-reference`) |
 
 ### Подсистема за дълбоки гмуркания
 
@@ -460,11 +460,11 @@ open-sse/
 
 ### Поддиректории
 
-| Поддиректория         | Цел                                                                                                                                                                                                |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Локализирани преводи на документи (41 езика)                                                                                                                                                       |
-| `docs/screenshots/`   | Графични активи за ръководства                                                                                                                                                                     |
-| `_tasks/superpowers/` | Plans/specs от суперсили (`writing-plans`/`brainstorming`) + изследвания — изолирано репо с отделни версии, игнорирано от основното дърво. Вижте CLAUDE.md → „Артефакти за планиране и проучване“. |
+| Поддиректория         | Цел                                                                                                                                                                                               |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Локализирани преводи на документи (41 езика)                                                                                                                                                      |
+| `docs/screenshots/`   | Графични активи за ръководства                                                                                                                                                                    |
+| `_tasks/superpowers/` | Plans/specs от суперсили (`writing-plans`/`brainstorming`) + изследване — изолирано, отделно версияно репо, игнорирано от главното дърво. Вижте CLAUDE.md → „Артефакти за планиране и проучване“. |
 
 ---
 

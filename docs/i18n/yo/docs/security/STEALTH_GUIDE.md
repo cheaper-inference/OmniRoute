@@ -135,41 +135,63 @@ Fún àwọn relay Anthropic ti ẹni-kẹta tí wọ́n gba ìrìn-àjò “Cla
 
 ---
 
-## Ìfarapamọ́ Antigravity
+## Antigravity Lilọ ni ifura
 
-Àwọn ìbéèrè Antigravity máa ń pa ọ̀rọ̀ olùpè mọ́ báìtì-fún-báìtì. OmniRoute kì í fi àwọn àkíyèsí aláìní ìbú sínú àwọn prompt tàbí tún orúkọ àwọn irinṣẹ́ ṣe/fi irinṣẹ́ kún wọn láti fara wé oníbàárà IDE kan.
+awọn ibeere Antigravity ṣe itọju ọrọ olupe baiti-fun-baiti. OmniRoute ko fi ohun kikọ silẹ iwọn odo sinu awọn itọsi tabi awọn irinṣẹ rename/inject lati ṣe afarawe alabara IDE.
 
 ### `antigravityHeaderScrub.ts`
 
-Ó máa ń yọ àwọn àmì Stainless SDK (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) kúrò kí ó tó darí ìbéèrè náà síwájú.
+Awọn ami ami SDK Alagbara (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) ṣaaju gbigbe siwaju.
 
-### ⚠️ Ewu: `ANTIGRAVITY_CREDITS=always` (ibi tí ìfòfindè àkọọ́lẹ̀ ti wọ́pọ̀)
+### Ewu ⚠️ : `ANTIGRAVITY_CREDITS=always` (awọn aaye gbigbona ti gbesele akọọlẹ)
 
-`ANTIGRAVITY_CREDITS=always` (tí `open-sse/executors/antigravity.ts` ń lò) máa ń darí **gbogbo** ìbéèrè gba Antigravity AI Credit Overages (kírẹ́díìtì Google tí a sanwó fún) dípò jíjẹ́ kí quota ipele-ọ̀fẹ́ Google dí àwọn nǹkan dúró. A ṣàkọsílẹ̀ èyí gẹ́gẹ́ bí ẹ̀ya kan, ṣùgbọ́n ó jẹ́ **ìròyìn ìrúfin ToS kan ṣoṣo tó wọ́pọ̀ jù lọ tí a ń rí** — a ti fòfin de ọ̀pọ̀ àkọọ́lẹ̀ Google Ultra pẹ̀lú `403 / "service disabled for ToS violation" / insufficient_quota` lẹ́yìn tí wọ́n ṣiṣẹ́ fún wákàtí díẹ̀ pẹ̀lú `=always`.
+`ANTIGRAVITY_CREDITS=always` (ti o jẹ nipasẹ `open-sse/executors/antigravity.ts`) awọn ipa-ọna** gbogbo** ìbéèrè nipasẹ Antigravity AI Kirẹditi Overages (sanwo Google kirediti) dipo ti jijeki Google's free-ọfẹ kotu ẹnu ibode. Eyi jẹ akọsilẹ bi ẹya, ṣugbọn o jẹ** awọn nikan wọpọ ToS- ṣẹ Iroyin a wo** — ọpọ awọn akọọlẹ Google Ultra ti ni idinamọ pẹlu `403 / "service disabled for ToS violation" / insufficient_quota` lẹhin ṣiṣe fun awọn wakati diẹ pẹlu `=always`.
 
-Ìmúṣẹ upstream wà ní **ẹ̀gbẹ́ Google**, kì í ṣe ohun tí OmniRoute lè dènà. Orúkọ env var àti àwọn àkọsílẹ̀ tó wà tẹ́lẹ̀ mú kí ó dà bí ìṣàkóso tí kò léwu láti tàn; ṣùgbọ́n kò rí bẹ́ẹ̀.
+Imudani ti oke wa ni titan** ẹgbẹ Google** , kii ṣe ohunkohun ti OmniRoute le ṣe idiwọ. Orukọ env var ati awọn docs ti o wa tẹlẹ jẹ ki o dun bi bọtini ailewu lati yi pada; kii ṣe bẹ.
 
-**Ìdí tí èyí fi ń fa ìṣàwárí ìlòkulò lọ́nà tó le ju lílo ipele-ọ̀fẹ́-nìkan lọ:**
+**Kini idi ti eyi fa wiwa ilokulo diẹ sii ni ibinu ju lilo ipele-ọfẹ lọ:**
 
-- Ìnáwó aládàáṣiṣẹ́ tó ń bá a lọ lórí àkọọ́lẹ̀ Google kan ṣoṣo máa ń fa àmì tó yàtọ̀ sí lílu-quota-ìpele-ọ̀fẹ́-tí-ó-sì-dúró.
-- Àwọn overage kírẹ́díìtì kò ní òpin oṣuwọn, nítorí náà oníbàárà tí a ṣètò ní àìtọ́ lè ná ọ̀pọ̀ ọgọ́rùn-ún USD láàárín ìṣẹ́jú díẹ̀, kí ó sì dà bí àtúntà kọ́kọ́rọ́ API tàbí ìrìn-àjò bot.
-- Ọ̀pọ̀ aṣàmúlò OmniRoute tí wọ́n ń lo àwọn kírẹ́díìtì overage ní àkókò kan náà láti IP ìta kan náà máa ń mú àmì náà le sí i.
+- Awọn inawo adaṣe adaṣe iduroṣinṣin lori awọn asia akọọlẹ Google ẹyọkan ti o yatọ ju ipele-ọfẹ deba ipin ati awọn iduro.
+- Awọn iwọn kirẹditi ko ni orule oṣuwọn, nitorinaa alabara ti ko ni atunto le sun nipasẹ ọpọlọpọ awọn ọgọrun USD ni awọn iṣẹju ati dabi atunlo bọtini API tabi ijabọ bot.
+- Ọpọ awọn olumulo OmniRoute lilu awọn kirediti overage ni afiwe lati inu IP ita kanna ti o ṣajọpọ ifihan agbara naa.
 
-**Ìlànà tí a ṣeduro:**
+**Iduro ti a ṣeduro:**
 
-1. Jẹ́ kí àìyípadà `ANTIGRAVITY_CREDITS=off` wà bí olùdarí kò bá gba ewu kírẹ́díìtì tí a sanwó fún àti ìmúṣẹ lórí àkọọ́lẹ̀ ní kedere. `retry` máa ń kọ́kọ́ fi ìbéèrè deede ránṣẹ́, ó sì máa ń fi kírẹ́díìtì kún un ní ẹ̀ẹ̀kan péré lẹ́yìn quota 429 tó yẹ; `always` máa ń fi kírẹ́díìtì kún ìbéèrè àkọ́kọ́.
-2. **Pín ẹrù káàkiri àwọn olùpèsè nípasẹ̀ Auto-Combo** (`model: "auto"` tàbí `kr/glm/etc`-combo) dípò fífi ẹrù kún àkọọ́lẹ̀ Antigravity kan ṣoṣo dé òpin.
-3. **Ṣètò àwọn òpin RPM fún àsopọ̀ kọ̀ọ̀kan** ní ojú-ìwé àtúnṣe olùpèsè Antigravity (Dashboard → Providers → Antigravity → àsopọ̀ → òpin oṣuwọn). 30–60 RPM jẹ́ òpin òkè tó ṣeé dáàbò bo fún lílo tó ń bá a lọ.
-4. **Lo nẹ́tíwọ́ọ̀kì upstream tó dúró ṣinṣin, tí olùdarí ń ṣàkóso** kí o sì yẹra fún pípín àkọọ́lẹ̀ kan láàárín àwọn aṣàmúlò tàbí ẹrù iṣẹ́ tí kò ní ìbáṣepọ̀.
-5. **Tí a bá fòfin de ọ́**: fi ẹ̀bẹ̀ ránṣẹ́ nípasẹ̀ `support.google.com` → “Restore Workspace/Account access” pẹ̀lú ara ìdáhùn `quota_exceeded` / `service disabled` gangan tí Google fi ránṣẹ́. Kò sí ìdánilójú pé a ó mú un padà.
+1. Jeki `ANTIGRAVITY_CREDITS=off` aiyipada ayafi ti oniṣẹ gba ni gbangba-kirẹditi isanwo ati eewu imuṣiṣẹ akọọlẹ. `retry` fi ibeere deede ranṣẹ ni akọkọ ati ki o fun awọn kirẹditi ni pupọ julọ ni ẹẹkan lẹhin ipin ti o yẹ 429; `always` injects kirediti lori akọkọ ìbéèrè.
+2. **Tan fifuye kọja awọn olupese nipasẹ Auto-Combo** (`model: "auto"` tabi `kr/glm/etc` -combo) dipo ti saturating kan nikan Antigravity iroyin.
+3. **Ṣeto fun-asopọmọra RPM ifilelẹ** ninu oju-iwe satunkọ olupese Antigravity (Dasibodu → Awọn olupese → Antigravity → asopọ → opin oṣuwọn). 30–60 RPM jẹ agbeja oke fun lilo idaduro.
+4. **Lo iduroṣinṣin, nẹtiwọọki oke ti oniṣẹ iṣakoso** ati yago fun pinpin akọọlẹ kan kọja awọn olumulo ti ko ni ibatan tabi awọn ẹru iṣẹ.
+5. **Ti o ba ti gbesele** : afilọ nipasẹ `support.google.com` → "Mu pada Workspace/Account wiwọle" pẹlu awọn gangan `quota_exceeded` / `service disabled` esi body Google rán. Atunṣe ko ni iṣeduro.
 
-Ìtọ́kasí environment ṣàkọsílẹ̀ àwọn ipa tí ìpo kírẹ́díìtì kọ̀ọ̀kan ní lórí àkọọ́lẹ̀ àti ìnáwó.
+Itọkasi ayika ṣe iwe akọọlẹ naa ati inawo awọn ipa ti ipo kirẹditi kọọkan.
 
-Àwọn ibi ìfọwọ́kan:
+#### Ko nikan `=always`: Antigravity OAuth afisona ni apapọ
 
-- `open-sse/executors/antigravity.ts` — ń ka `process.env.ANTIGRAVITY_CREDITS`
-- `src/lib/oauth/providers/antigravity.ts` — ìṣètò credential
-- Ìròyìn ìṣẹ̀lẹ̀ àkọ́kọ́: Ìjíròrò [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+Awọn idaduro ko ni opin si awọn iwọn kirẹditi. Awọn ijabọ ni Oṣu kọkanla ọdun 2026 (#19223, #19266) ṣapejuwe ọpọlọpọ awọn akọọlẹ Google ti daduro lakoko lilọ nipasẹ awọn olupese `antigravity` ati `agy` (Antigravity CLI), pẹlu:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+Awọn olupese mejeeji jẹri pẹlu akoko Antigravity ọja OAuth, eyiti o jẹ ọran akiyesi eewu dasibodu (“Olupese yii nlo ọja osise rẹ session/OAuth, eyiti ko fun ni aṣẹ fun lilo proxy/router ”) kilo nipa ṣaaju ki o to ṣafikun asopọ. Ko si ọkan ninu awọn iṣeduro ti o wa loke ti o jẹ ki lilo naa fun ni aṣẹ; wọn nikan dinku iye ijabọ ti akọọlẹ kan gbejade.
+
+**Awọn atọkun API ti a fun ni aṣẹ fun awọn awoṣe Gemini.** Google nfunni ni iraye si eto si Gemini nipasẹ APIs rẹ, eyiti OmniRoute ṣe atilẹyin bi awọn olupese API-bọtini lasan:
+
+| ID olupese | Orukọ Dasibodu            | Ijẹrisi                                                                       |
+| ---------- | ------------------------- | ----------------------------------------------------------------------------- |
+| `gemini`   | Gemini (Google AI Studio) | bọtini Gemini API lati ile isise Google AI (ipele ọfẹ wa)                     |
+| `vertex`   | Vertex AI                 | Iwe akọọlẹ iṣẹ JSON, ami wiwọle OAuth tabi bọtini API Vertex Express (Gemini) |
+
+Awọn olupese wọnyi lo awọn ọran Google awọn iwe-ẹri fun iraye si API, ko dabi igba ọja Antigravity. Wọn ko ṣe gbogbo lilo ni ifaramọ tabi yọkuro ewu ti imuse: ọkọọkan ni ijọba nipasẹ awọn ofin tirẹ, eyiti oniṣẹ ni lati ṣayẹwo fun imuṣiṣẹ wọn. Fun apẹẹrẹ, Awọn [ofin Iṣẹ Afikun Gemini API](https://ai.google.dev/gemini-api/terms) gba Awọn iṣẹ isanwo laaye nigbati awọn alabara API ba wa fun awọn olumulo ni Agbegbe Economic European, Switzerland tabi United Kingdom, ati pe akoonu ti a firanṣẹ si Awọn iṣẹ Aisanwo le ṣee lo lati mu ilọsiwaju awọn ọja Google. Vertex AI ṣubu labẹ awọn ọrọ awọsanma Google dipo ( [Awọn ofin Pataki Iṣẹ](https://cloud.google.com/terms/service-terms) ). Ifowoleri ati awọn idiyele tẹle awọn ofin API wọnyẹn ju ṣiṣe alabapin Antigravity lọ.
+
+Awọn oniṣẹ ti o fẹ yago fun awọn idaduro Antigravity ti a ṣalaye loke yẹ ki o da ọna gbigbe Gemini nipasẹ ọkan ninu awọn olupese wọnyi dipo `antigravity` / `agy`, lẹhin ṣiṣe ayẹwo pe lilo wọn baamu awọn ofin olupese.
+
+Awọn aaye ifọwọkan:
+
+- `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS`
+- `src/lib/oauth/providers/antigravity.ts` — ẹrí Plumbing
+- Iroyin iṣẹlẹ atilẹba: ijiroro [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

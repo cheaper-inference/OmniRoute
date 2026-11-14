@@ -36,36 +36,36 @@ Studio med tre flikar som förenar webbsökning, webbskrapning och jämförelse 
 
 ## Flikar
 
-### Sökflik
+### Sökfliken
 
-Vidareutvecklar befintliga `SearchForm` + `ResultsPanel` + `RerankPanel` till en flik:
+Utvecklar den befintliga `SearchForm` + `ResultsPanel` + `RerankPanel` till en flik:
 
 - Fråga → resultat (titel, URL, utdrag, relevanspoäng).
-- Leverantörsmetadata i konfigurationspanelen (kostnad, kvot, status).
-- Omrankningssektion: välj en omrankningsmodell, ordna om resultaten, visa `positionDelta`.
-- Tomt läge med uppmaning till åtgärd när inga sökleverantörer är konfigurerade.
+- Leverantörsmetadata i konfigurationsfönstret (kostnad, kvot, status).
+- Rangordna om sektionen: välj en omrankningsmodell, ordna om resultaten, visa `positionDelta`.
+- Tomt tillstånd med CTA när inga sökleverantörer är konfigurerade.
 - Sökhistorik via `SearchHistory.tsx`.
 - Anropar `POST /v1/search` (befintlig slutpunkt, inga ändringar).
 
-### Skrapningsflik
+### Skrapa Tab
 
 Ny flik för att extrahera innehåll från en URL via `POST /v1/web/fetch` (skapad i plan 05):
 
-- Inmatning: URL + växling för hela sidan + formatväljare (markdown/text/HTML).
-- Skicka → hämta → rendera `ScrapeResult.tsx`.
-- `ScrapeResult` renderar en förhandsvisning av markdown + växling till rådata.
-- Gräns: om svarskroppen är större än **256 kB** visar gränssnittet `(truncated, view raw)` och öppnar rådata i en Monaco-modal (D21).
-- Metadatapanel: leverantör (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latens, kostnad, svarsstorlek, antal länkar.
-- Använder hooken `useScrapeFetch.ts`.
+- Inmatning: URL + helsides växla + -formatväljare (markdown / text / HTML).
+- Skicka → fetch → render `ScrapeResult.tsx`.
+- `ScrapeResult` renderar markdown förhandsvisning + raw växla.
+- Cap: if response body >** 256 KB** , UI visar `(truncated, view raw)` och öppnar rå i en Monaco-modal (D21).
+- Metadatapanel: leverantör (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search/keenable-search), latens, kostnad, svarsstorlek, antal länkar.
+- Använder `useScrapeFetch.ts` krok.
 
-### Jämförelseflik
+### Jämför Tab
 
-Kör samma fråga/URL parallellt hos upp till **4 leverantörer** (D22):
+Kör samma query/URL över upp till** 4 leverantörer parallellt** (D22):
 
-- Kolumner sida vid sida för varje leverantör.
-- Mätvärden: latens, kostnad, antal resultat, svarsstorlek.
-- Beräkning av URL-överlappning för sökning (antalet gemensamma URL:er jämfört med det ursprungliga resultatet).
-- Anropar `POST /v1/search` (sökning) eller `POST /v1/web/fetch` (skrapning) för varje leverantör.
+- Sida vid sida kolumner per leverantör.
+- Mätvärden: latens, kostnad, resultatantal, svarsstorlek.
+- URL -överlappsberäkning för sökning (antal delade URLs vs initialt resultat).
+- Ringer `POST /v1/search` (sökning) eller `POST /v1/web/fetch` (skrapa) per leverantör.
 
 ---
 
@@ -100,13 +100,13 @@ Kör samma fråga/URL parallellt hos upp till **4 leverantörer** (D22):
 
 ## Leverantörskatalog
 
-`ProviderCatalog.tsx` visar hela leverantörslistan från `GET /api/search/providers`
-(utökad i F4 för att inkludera hämtningsleverantörer):
+`ProviderCatalog.tsx` exponerar hela leverantörslistan från `GET /api/search/providers` (utökad i F4 för att inkludera hämtningsleverantörer):
 
-| `kind` | `"search"` (20 leverantörer) eller `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (24 leverantörer) eller `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallell-search, keenable-search) |
 
-Statusen **fastställs vid tidpunkten för begäran** genom att kontrollera om autentiseringsuppgifter finns och om
-alla nycklar för närvarande har en nedkylningsperiod.
+Status är** härleds på begäran** genom att kontrollera om autentiseringsuppgifter finns och om alla nycklar för närvarande är i nedkylning.
+
+`codex-search` (Codex Web Search) har ingen egen nyckel: den återanvänder ett anslutet Codex (ChatGPT)-konto, så varje sökning spenderar ChatGPT prenumerationskvot och tar cirka 10–40 s. Den körs när en begäran namnger den; automatiskt val behöver `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` -funktionsflaggan (av som standard).
 
 ---
 
@@ -118,18 +118,18 @@ Platshållaren för API-nyckeln är alltid `$OMNIROUTE_API_KEY` (D11, delas med 
 
 ---
 
-## Backendändringar
+## Backend ändringar
 
-Endast en backendändring behövdes för den här funktionen:
+Endast en backend-ändring behövdes för den här funktionen:
 
-### Utökad `GET /api/search/providers`
+### Förlängd `GET /api/search/providers`
 
-`src/app/api/search/providers/route.ts` utökades för att:
+`src/app/api/search/providers/route.ts` utökades till:
 
-- Inkludera alla hämtningsleverantörer (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) i arrayen.
-- Lägga till `kind: "search" | "fetch"` för varje objekt.
-- Lägga till `status: "configured" | "missing" | "rate_limited"` härledd från aktuell autentiseringsuppgiftsstatus.
-- Bibehålla bakåtkompatibilitet – befintliga fält (`id`, `name` osv.) är oförändrade.
+- Inkludera alla hämtningsleverantörer (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`, `keenable-search`) i arrayen.
+- Lägg till `kind: "search" | "fetch"` till varje objekt.
+- Lägg till `status: "configured" | "missing" | "rate_limited"` härledd från levande legitimationsstatus.
+- Behåll bakåtkompatibiliteten — befintliga fält (`id`, `name`, etc.) oförändrad.
 
 ---
 

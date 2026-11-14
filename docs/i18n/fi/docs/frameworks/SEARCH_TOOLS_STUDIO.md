@@ -38,34 +38,34 @@ kolmen välilehden Studioksi, joka yhdistää verkkohaun, verkkosisällön poimi
 
 ### Haku-välilehti
 
-Kehittää nykyisestä `SearchForm` + `ResultsPanel` + `RerankPanel` -kokonaisuudesta välilehden:
+Muuntaa olemassa olevan `SearchForm` + `ResultsPanel` + `RerankPanel` välilehdeksi:
 
-- Kysely → tulokset (otsikko, URL, katkelma, relevanssipisteet).
-- Palveluntarjoajan metatiedot Config-paneelissa (kustannus, kiintiö, tila).
-- Uudelleenjärjestelyosio: valitse uudelleenjärjestelymalli, järjestä tulokset uudelleen, näytä `positionDelta`.
-- Tyhjä tila ja toimintakehote, kun hakupalveluntarjoajia ei ole määritetty.
-- Hakuhistoria `SearchHistory.tsx`-komponentin kautta.
-- Kutsuu `POST /v1/search` -rajapintaa (nykyinen päätepiste, ei muutoksia).
+- Kysely → tuloksia (otsikko, URL, katkelma, osuvuuspisteet).
+- Palveluntarjoajan metatiedot Config-ruudussa (hinta, kiintiö, tila).
+- Rerank-osio: valitse uudelleensijoitusmalli, järjestele tulokset uudelleen, näytä `positionDelta`.
+- Tyhjä tila ja CTA, kun hakupalveluita ei ole määritetty.
+- Hakuhistoria `SearchHistory.tsx` kautta.
+- Kutsuu `POST /v1/search` (olemassa oleva päätepiste, ei muutoksia).
 
-### Sivun poiminta -välilehti
+### Raaputa välilehti
 
-Uusi välilehti sisällön poimimiseen URL-osoitteesta `POST /v1/web/fetch` -rajapinnan kautta (luotu suunnitelmassa 05):
+Uusi välilehti sisällön poimimiseen URL sta `POST /v1/web/fetch` kautta (luotu suunnitelmassa 05):
 
-- Syöte: URL + koko sivun valintakytkin + muodon valitsin (markdown / teksti / HTML).
-- Lähetä → nouda → hahmonna `ScrapeResult.tsx`.
-- `ScrapeResult` näyttää markdown-esikatselun ja raakamuodon valintakytkimen.
-- Rajoitus: jos vastauksen runko on yli **256 KB**, käyttöliittymä näyttää tekstin `(katkaistu, näytä raakamuoto)` ja avaa raakamuodon Monaco-modaali-ikkunassa (D21).
-- Metatietopaneeli: palveluntarjoaja (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), viive, kustannus, vastauksen koko, linkkien määrä.
-- Käyttää `useScrapeFetch.ts`-hookia.
+- Syöttö: URL + koko sivun vaihto + -muodon valitsin (markdown / teksti / HTML).
+- Lähetä → fetch → render `ScrapeResult.tsx`.
+- `ScrapeResult` renderöi markdown-esikatselun + raw -valitsimen.
+- Korkki: jos vastausrunko >** 256 KB** , UI näyttää `(truncated, view raw)` ja avautuu raakana Monacon modaalissa (D21).
+- Metatietopaneeli: toimittaja (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search/keenable-search), viive, hinta, vastauksen koko, linkkien määrä.
+- Käyttää `useScrapeFetch.ts` koukkua.
 
-### Vertailu-välilehti
+### Vertaa Tab
 
-Suorittaa saman kyselyn/URL-osoitteen enintään **4 palveluntarjoajalla rinnakkain** (D22):
+Kulkee samaa query/URL poikki asti** 4 palveluntarjoajaa rinnakkain** (D22):
 
-- Rinnakkaiset sarakkeet palveluntarjoajittain.
-- Mittarit: viive, kustannus, tulosten määrä, vastauksen koko.
-- URL-päällekkäisyyden laskenta haulle (jaettujen URL-osoitteiden määrä suhteessa alkuperäiseen tulokseen).
-- Kutsuu palveluntarjoajakohtaisesti `POST /v1/search` -rajapintaa (haku) tai `POST /v1/web/fetch` -rajapintaa (sivun poiminta).
+- Vierekkäiset sarakkeet tarjoajakohtaisesti.
+- Mittarit: viive, hinta, tulosten määrä, vastauksen koko.
+- URL -päällekkäisyyslaskenta haulle (jaetun URLs n määrä vs. alkuperäinen tulos).
+- Kutsuu `POST /v1/search` (haku) tai `POST /v1/web/fetch` (scrape) palveluntarjoajaa kohti.
 
 ---
 
@@ -98,15 +98,15 @@ Suorittaa saman kyselyn/URL-osoitteen enintään **4 palveluntarjoajalla rinnakk
 
 ---
 
-## Palveluntarjoajaluettelo
+## Palveluntarjoajan katalogi
 
-`ProviderCatalog.tsx` näyttää täydellisen palveluntarjoajaluettelon rajapinnasta `GET /api/search/providers`
-(laajennettu F4:ssä sisältämään noutopalveluntarjoajat):
+`ProviderCatalog.tsx` paljastaa täyden palveluntarjoajien luettelon `GET /api/search/providers` stä (laajennettu F4:ssä sisältämään hakupalveluntarjoajat):
 
-| `kind` | `"search"` (20 palveluntarjoajaa) tai `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (24 palveluntarjoajaa) tai `"fetch"` (firecrawl, jina-lukija, tavily-haku, tinyfish, ketterä haku, anysearch-search, rinnakkaishaku, haettavissa oleva haku) |
 
-Tila **määritetään pyyntöhetkellä** tarkistamalla, ovatko tunnistetiedot olemassa ja ovatko
-kaikki avaimet parhaillaan jäähdytysajalla.
+Tilanne on** johdettu pyynnöstä** tarkistamalla, ovatko tunnistetiedot olemassa ja ovatko kaikki avaimet jäähtymässä.
+
+`codex-search` (Codex Web Search) ei ole omaa avainta: se käyttää uudelleen yhdistettyä Codex (ChatGPT) -tiliä, joten jokainen haku kuluttaa ChatGPT -tilauskiintiön ja kestää noin 10–40 sekuntia. Se suoritetaan, kun pyyntö nimeää sen; automaattinen valinta vaatii `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` -ominaisuuslipun (oletusarvoisesti pois päältä).
 
 ---
 
@@ -120,16 +120,16 @@ API-avaimen paikkamerkki on aina `$OMNIROUTE_API_KEY` (D11, yhteinen Playground 
 
 ## Taustajärjestelmän muutokset
 
-Tätä ominaisuutta varten tarvittiin vain yksi taustajärjestelmän muutos:
+Tätä ominaisuutta varten tarvittiin vain yksi taustamuutos:
 
-### Laajennettu `GET /api/search/providers`
+### Pidennetty `GET /api/search/providers`
 
-Tiedostoa `src/app/api/search/providers/route.ts` laajennettiin seuraavasti:
+`src/app/api/search/providers/route.ts` laajennettiin koskemaan:
 
-- Taulukkoon sisällytettiin kaikki noutopalveluntarjoajat (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`).
-- Jokaiseen kohteeseen lisättiin `kind: "search" | "fetch"`.
-- Lisättiin `status: "configured" | "missing" | "rate_limited"`, joka johdetaan tunnistetietojen ajantasaisesta tilasta.
-- Säilytettiin taaksepäin yhteensopivuus — nykyiset kentät (`id`, `name` jne.) pysyivät muuttumattomina.
+- Sisällytä kaikki haun tarjoajat (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`, `keenable-search`) taulukkoon.
+- Lisää `kind: "search" | "fetch"` jokaiseen tuotteeseen.
+- Lisää reaaliaikaisesta kirjautumistilasta johdettu `status: "configured" | "missing" | "rate_limited"`.
+- Säilytä taaksepäin yhteensopivuus — olemassa olevat kentät (`id`, `name` jne.) ennallaan.
 
 ---
 

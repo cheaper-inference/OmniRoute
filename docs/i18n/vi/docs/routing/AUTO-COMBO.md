@@ -209,36 +209,38 @@ Hai lỗi thường gặp:
 
 Xem [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) và [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) để biết sự nhầm lẫn ban đầu mà tài liệu này đề cập.
 
-## Cách thức hoạt động (Auto-Combo được lưu bền vững)
+## Cách thức hoạt động (Tự động kết hợp liên tục)
 
-Auto-Combo Engine tự động chọn nhà cung cấp/mô hình tốt nhất cho mỗi yêu cầu bằng **hàm tính điểm gồm 16 yếu tố** (được định nghĩa trong `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Tổng các trọng số mặc định bằng `1.0`; các trọng số tùy chỉnh được chuẩn hóa lại bằng `normalizeScoringWeights()`. Hai trong số mười sáu yếu tố — `cacheAffinity` và `resetWindowAffinity` — có trọng số mặc định là `0`; `reliability` có trọng số `0` trong `DEFAULT_WEIGHTS` nhưng là `0.03` trong các gói chung và `0.04` trong `reliability-first`, còn `quality` có trọng số `0.02` trong các gói (`0.03` trong `quality-first`): chúng vẫn được tính toán cho mọi ứng viên, và `cacheAffinity` kiểm soát việc loại bỏ trùng lặp bộ nhớ đệm prompt bên ngoài điểm số, vì vậy các yếu tố có trọng số mặc định bằng 0 đơn giản là không tham gia biểu quyết theo mặc định, trong khi các gói thì có.
+Công cụ Tự động Kết hợp tự động chọn provider/model tốt nhất cho mỗi yêu cầu bằng cách sử dụng** Chức năng chấm điểm 16 yếu tố** (được định nghĩa trong `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Tổng trọng số mặc định là `1.0`; trọng số tùy chỉnh được chuẩn hóa lại bởi `normalizeScoringWeights()`. Hai trong số mười sáu — `cacheAffinity` và `resetWindowAffinity` — có trọng số mặc định là `0`; `reliability` mang `0` trong `DEFAULT_WEIGHTS` nhưng `0.03` trong các gói chung và `0.04` trong `reliability-first` và `quality` mang `0.02` trong các gói (`0.03` trong `quality-first`): chúng vẫn được tính toán cho mọi ứng cử viên và cổng `cacheAffinity` loại bỏ trùng lặp bộ đệm nhắc nhở bên ngoài điểm số, vì vậy các yếu tố mặc định bằng 0 đơn giản là không bỏ phiếu theo mặc định trong khi các gói thì có.
 
-![Cách tính điểm 16 yếu tố của Auto-Combo](../diagrams/exported/auto-combo-scoring.svg)
+![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
-> Nguồn: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (tạo lại bằng `npm run docs:render-diagrams`). Tên tệp mang tính lịch sử; nguồn và sơ đồ được kết xuất hiển thị đầy đủ cả 16 yếu tố được khai báo trong `DEFAULT_WEIGHTS`.
+> Nguồn: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (tái tạo qua `npm run docs:render-diagrams`). Tên tệp mang tính lịch sử; sơ đồ nguồn và kết xuất hiển thị tất cả 16 yếu tố được khai báo trong `DEFAULT_WEIGHTS`.
 
-| Yếu tố                | Trọng số mặc định | Mô tả                                                                                                                                                                                                                                              |
-| :-------------------- | :---------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quota`               | 0.1429            | Hạn mức còn lại / dư địa giới hạn tốc độ [0..1]                                                                                                                                                                                                    |
-| `health`              | 0.1605            | Điểm trạng thái từ bộ ngắt mạch (CLOSED=1.0, HALF_OPEN=0.5, OPEN=0.0)                                                                                                                                                                              |
-| `costInv`             | 0.1429            | Chi phí **kết hợp** nghịch đảo (60% giá token đầu vào + 40% giá token đầu ra, đã chuẩn hóa) — rẻ hơn = điểm cao hơn                                                                                                                                |
-| `latencyInv`          | 0.1143            | Độ trễ p95 nghịch đảo được chuẩn hóa theo nhóm — nhanh hơn = điểm cao hơn                                                                                                                                                                          |
-| `taskFit`             | 0.0762            | Mức độ phù hợp với loại tác vụ (lập trình, đánh giá, lập kế hoạch, phân tích, gỡ lỗi, tài liệu)                                                                                                                                                    |
-| `stability`           | 0.0476            | Độ ổn định dựa trên phương sai từ độ lệch chuẩn của độ trễ — ứng viên có thời gian phản hồi dao động sẽ nhận điểm thấp hơn                                                                                                                         |
-| `tierPriority`        | 0.0476            | Mức độ ưu tiên của hạng tài khoản — Ultra=1.0, Pro=0.67, Standard=0.33, Free=0.0                                                                                                                                                                   |
-| `tierAffinity`        | 0.0476            | Mức độ tương thích giữa hạng của ứng viên và hạng được manifest đề xuất                                                                                                                                                                            |
-| `specificityMatch`    | 0.0476            | Mức độ khớp giữa tính đặc thù của yêu cầu (gợi ý từ manifest) và hạng mô hình                                                                                                                                                                      |
-| `contextAffinity`     | 0.0476            | Mức độ tương thích giữa nhu cầu về cửa sổ ngữ cảnh của yêu cầu và cửa sổ ngữ cảnh của mô hình                                                                                                                                                      |
-| `sessionAvailability` | 0.0476            | Mức độ sẵn sàng của phiên OAuth thuộc kết nối ứng viên đối với phiên này (`getOAuthSessionAvailability()`; các kết nối không dùng OAuth nhận điểm 1.0)                                                                                             |
-| `connectionDensity`   | 0.0476            | Phân bổ tải trên các kết nối của cùng một nhà cung cấp (chống tập trung)                                                                                                                                                                           |
-| `cacheAffinity`       | 0.00              | Mức độ tương thích theo rendezvous hash hướng đến kết nối có nhiều khả năng đã chứa tiền tố bộ nhớ đệm prompt của yêu cầu này nhất (`open-sse/services/combo/promptCacheAffinity.ts`); bị vô hiệu hóa theo mặc định (#8008)                        |
-| `resetWindowAffinity` | 0.00              | Thiên về các kết nối có khoảng thời gian đặt lại hạn mức thuận lợi (bị vô hiệu hóa theo mặc định)                                                                                                                                                  |
-| `quality`             | 0.03              | Tín hiệu chất lượng đầu ra dựa trên phản hồi từ trình theo dõi chất lượng sự kiện định tuyến; các ứng viên không có dữ liệu quan sát nhận giá trị trung lập 0.5                                                                                    |
-| `reliability`         | 0.00              | Tỷ lệ thành công quan sát được, `1 - failureRate`, từ lịch sử sử dụng trong 24 giờ với ngưỡng tối thiểu mười mẫu (nếu không thì dùng số liệu thời gian thực); các ứng viên không có dữ liệu quan sát được coi là 1.0. Bị vô hiệu hóa theo mặc định |
+| Nhân tố               | Trọng lượng mặc định | Sự miêu tả                                                                                                                                                                                                           |
+| :-------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `quota`               | 0.1429               | Hạn ngạch còn lại/khoảng trống giới hạn tỷ lệ [0..1]                                                                                                                                                                 |
+| `health`              | 0.1605               | Điểm sức khỏe từ bộ ngắt mạch (CLOSED= 1.0, HALF_OPEN= 0.5, OPEN= 0.0)                                                                                                                                               |
+| `costInv`             | 0.1429               | nghịch đảo** pha trộn** chi phí (60% đầu vào + 40% giá token đầu ra, chuẩn hóa) — rẻ hơn = điểm cao hơn                                                                                                              |
+| `latencyInv`          | 0.1143               | Độ trễ p95 nghịch đảo được chuẩn hóa để gộp — nhanh hơn = điểm cao hơn                                                                                                                                               |
+| `taskFit`             | 0.0762               | Phù hợp với loại nhiệm vụ (mã hóa, đánh giá, lập kế hoạch, phân tích, gỡ lỗi, tài liệu)                                                                                                                              |
+| `stability`           | 0.0476               | Độ ổn định dựa trên phương sai so với độ lệch chuẩn độ trễ — một ứng viên có thời gian phản hồi dao động có điểm thấp hơn                                                                                            |
+| `tierPriority`        | 0.0476               | Ưu tiên cấp tài khoản — Ultra = 1.0, Pro = 0,67,= tiêu chuẩn 0,33,= miễn phí 0,0                                                                                                                                     |
+| `tierAffinity`        | 0.0476               | Mối quan hệ giữa cấp độ của ứng viên và cấp độ được đề xuất trong bảng kê khai                                                                                                                                       |
+| `specificityMatch`    | 0.0476               | Sự trùng khớp giữa tính đặc hiệu của yêu cầu (gợi ý tệp kê khai) và cấp mô hình                                                                                                                                      |
+| `contextAffinity`     | 0.0476               | Mối quan hệ giữa nhu cầu cửa sổ ngữ cảnh của yêu cầu và cửa sổ ngữ cảnh của mô hình                                                                                                                                  |
+| `sessionAvailability` | 0.0476               | Phiên OAuth có sẵn của kết nối ứng cử viên cho phiên này (`getOAuthSessionAvailability()`; điểm kết nối không phải OAuth 1.0)                                                                                        |
+| `connectionDensity`   | 0.0476               | Trải tải trên các kết nối của cùng một nhà cung cấp (chống tập trung)                                                                                                                                                |
+| `cacheAffinity`       | 0.00                 | Mối quan hệ băm Rendezvous đối với kết nối có nhiều khả năng nhất đã giữ tiền tố bộ đệm nhắc nhở của yêu cầu này (`open-sse/services/combo/promptCacheAffinity.ts`); bị tắt theo mặc định (#8008)                    |
+| `resetWindowAffinity` | 0.00                 | Xu hướng kết nối có cửa sổ đặt lại hạn ngạch thuận lợi (bị tắt theo mặc định)                                                                                                                                        |
+| `quality`             | 0.03                 | Tín hiệu chất lượng đầu ra dựa trên phản hồi từ trình theo dõi chất lượng sự kiện định tuyến; ứng viên không có quan sát nhận được điểm trung lập 0,5                                                                |
+| `reliability`         | 0.00                 | Tỷ lệ thành công được quan sát, `1 - failureRate`, từ lịch sử sử dụng trong 24 giờ sau sàn mười mẫu (nếu không thì chỉ số thời gian thực); những ứng cử viên không có quan sát được đọc là 1,0. Bị tắt theo mặc định |
 
-`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+Trình theo dõi `quality` trong bộ nhớ (`open-sse/services/routing/quality.ts`) trống sau khi khởi động lại nguội, vì vậy mọi ứng viên đều đạt được `0.5` trung tính cho đến khi quan sát đầu tiên hạ cánh.
 
-**Tổng:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` như được khai báo trong `DEFAULT_WEIGHTS`; các trọng số do người dùng cấu hình được `normalizeScoringWeights()` chuẩn hóa lại thành một phân phối trước khi tính điểm.
+> **Hạn ngạch không thể đọc được (#15347).** Khi nhà cung cấp có trình tìm nạp hạn ngạch nhưng nó trả về không có gì có thể đọc được (tìm nạp không thành công, thiếu thông tin xác thực, sử dụng chỉ thông báo hoặc ảnh chụp nhanh không đúng định dạng không có `windows` có thể phân tích cú pháp và không có giới hạn `percentUsed`, bao gồm `percentUsed: null`), ứng viên sẽ ghi điểm `0` trên trục `quota` và điểm cuối cùng của nó được nhân với `UNREADABLE_QUOTA_SOFT_DEPRIORITIZE_FACTOR` (0,5, `autoStrategy.ts`), mẫu hình phạt mềm tương tự như hình phạt trạng thái kết nối. Việc đọc sử dụng không thành công là bằng chứng về phép đo từ xa chứ không phải nhà cung cấp, do đó, nó được xếp hạng hoàn toàn thấp hơn bất kỳ số liệu đọc thực nào, bao gồm cả số liệu -used 100% đã được xác nhận, nhưng không bao giờ bị chặn cứng hoặc bị loại bỏ. Nhà cung cấp không có giới hạn báo cáo `unlimited: true` và đạt điểm theo hạn ngạch đầy đủ; một nhà cung cấp không có trình tìm nạp hạn ngạch đã đăng ký thì hoàn toàn không có nguồn đo từ xa và giữ giá trị mặc định là `100`.
+
+**Tổng:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` như được khai báo trong `DEFAULT_WEIGHTS`; trọng số do người dùng định cấu hình được chuẩn hóa lại thành phân phối theo `normalizeScoringWeights()` trước khi tính điểm.
 
 ## Các gói chế độ
 
@@ -302,30 +304,32 @@ giá trị đã phân giải được truyền vào các đầu vào `config.mod
 
 ## Tất cả các chiến lược định tuyến
 
-Hỗ trợ công cụ kết hợp của OmniRoute** 20 chiến lược định tuyến** (được khai báo trong `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Bản thân công cụ Auto Combo được hiển thị theo chiến lược `auto` ; những cái khác có sẵn cho các combo liên tục.
+Hỗ trợ công cụ kết hợp của OmniRoute** 22 chiến lược định tuyến** (được khai báo trong `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Bản thân công cụ Auto Combo được hiển thị theo chiến lược `auto` ; những cái khác có sẵn cho các combo liên tục.
 
-| Chiến lược          | Sự miêu tả                                                                                                                                                                                                                         |
-| :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | Danh sách đặt hàng mục tiêu đầu tiên với mức độ ưu tiên rõ ràng                                                                                                                                                                    |
-| `weighted`          | Trọng số ngẫu nhiên theo trọng lượng mỗi mục tiêu                                                                                                                                                                                  |
-| `round-robin`       | Duyệt qua các mục tiêu theo thứ tự (theo đợt; xem bên dưới)                                                                                                                                                                        |
-| `context-relay`     | Phân bổ bối cảnh cho các mục tiêu (cuộc trò chuyện dài)                                                                                                                                                                            |
-| `fill-first`        | Điền vào hạn ngạch của từng mục tiêu trước khi chuyển sang mục tiêu tiếp theo                                                                                                                                                      |
-| `p2c`               | cân bằng tải ngẫu nhiên Power-of-2-choices                                                                                                                                                                                         |
-| `random`            | Lựa chọn ngẫu nhiên thống nhất                                                                                                                                                                                                     |
-| `least-used`        | Chọn mục tiêu có tải hiện tại thấp nhất                                                                                                                                                                                            |
-| `cost-optimized`    | Giảm thiểu $ cho mỗi yêu cầu theo giá danh mục                                                                                                                                                                                     |
-| `reset-aware` ⭐    | Ưu tiên theo thời gian đặt lại hạn ngạch — cửa sổ đặt lại ngắn được xếp hạng cao hơn                                                                                                                                               |
-| `reset-window`      | Ưu tiên các mục tiêu có thời hạn hạn ngạch được đặt lại sớm nhất                                                                                                                                                                   |
-| `headroom`          | Chọn mục tiêu có khoảng trống hạn ngạch còn lại nhiều nhất                                                                                                                                                                         |
-| `quota-weighted`    | Bỏ qua các tài khoản đã cạn kiệt, sau đó chọn trong số những tài khoản còn lại theo tỷ lệ hạn ngạch còn lại chia cho tải trong chuyến bay; các cuộc trò chuyện hiện có vẫn được ghim                                               |
-| `strict-random`     | Ngẫu nhiên mà không trùng lặp lặp lại                                                                                                                                                                                              |
-| `auto`              | Sử dụng tính điểm Tự động kết hợp (16 yếu tố) —** khuyến khích**                                                                                                                                                                   |
-| `lkgp`              | Đường dẫn tốt được biết đến lần cuối (ghim vào nhà cung cấp thành công cuối cùng, sau đó quay lại các quy tắc)                                                                                                                     |
-| `context-optimized` | Chọn mục tiêu phù hợp nhất với kích thước bối cảnh hiện tại                                                                                                                                                                        |
-| `cache-optimized`   | Sắp xếp lại các mục tiêu theo mối quan hệ bộ nhớ đệm nhắc nhở — kết nối có khả năng giữ tiền tố được lưu trong bộ nhớ cache của yêu cầu này cao nhất được thử trước tiên (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | Phân phát song song một nhóm người mẫu, sau đó tổng hợp một câu trả lời thông qua giám khảo (xem bên dưới)                                                                                                                         |
-| `pipeline`          | Chạy các mục tiêu một cách tuần tự, xâu chuỗi đầu ra của từng bước thành đầu vào của bước tiếp theo; chỉ có câu trả lời cuối cùng được trả lại (#6396)                                                                             |
+| Chiến lược          | Sự miêu tả                                                                                                                                                                                                                                            |
+| :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | Danh sách đặt hàng mục tiêu đầu tiên với mức độ ưu tiên rõ ràng                                                                                                                                                                                       |
+| `weighted`          | Trọng số ngẫu nhiên theo trọng lượng mỗi mục tiêu                                                                                                                                                                                                     |
+| `round-robin`       | Duyệt qua các mục tiêu theo thứ tự (theo đợt; xem bên dưới)                                                                                                                                                                                           |
+| `context-relay`     | Phân bổ bối cảnh cho các mục tiêu (cuộc trò chuyện dài)                                                                                                                                                                                               |
+| `fill-first`        | Điền vào hạn ngạch của từng mục tiêu trước khi chuyển sang mục tiêu tiếp theo                                                                                                                                                                         |
+| `p2c`               | cân bằng tải ngẫu nhiên Power-of-2-choices                                                                                                                                                                                                            |
+| `random`            | Lựa chọn ngẫu nhiên thống nhất                                                                                                                                                                                                                        |
+| `least-used`        | Chọn mục tiêu có tải hiện tại thấp nhất                                                                                                                                                                                                               |
+| `cost-optimized`    | Giảm thiểu $ cho mỗi yêu cầu theo giá danh mục                                                                                                                                                                                                        |
+| `reset-aware` ⭐    | Ưu tiên theo thời gian đặt lại hạn ngạch — cửa sổ đặt lại ngắn được xếp hạng cao hơn                                                                                                                                                                  |
+| `reset-window`      | Ưu tiên các mục tiêu có thời hạn hạn ngạch được đặt lại sớm nhất                                                                                                                                                                                      |
+| `expiry-first`      | Chi tiêu tài khoản có hạn ngạch sẽ hết hạn chưa được sử dụng trước — phần còn lại cao nhất với thời hạn đặt lại gần nhất sẽ được ưu tiên                                                                                                              |
+| `headroom`          | Chọn mục tiêu có khoảng trống hạn ngạch còn lại nhiều nhất                                                                                                                                                                                            |
+| `quota-weighted`    | Bỏ qua các tài khoản đã hết, sau đó chọn trong số các tài khoản còn lại theo tỷ lệ hạn ngạch còn lại chia cho tải trong chuyến bay; các cuộc trò chuyện hiện có vẫn được ghim                                                                         |
+| `strict-random`     | Ngẫu nhiên mà không trùng lặp lặp lại                                                                                                                                                                                                                 |
+| `auto`              | Sử dụng tính điểm Tự động kết hợp (16 yếu tố) —** khuyến khích**                                                                                                                                                                                      |
+| `lkgp`              | Đường dẫn tốt được biết đến lần cuối (ghim vào nhà cung cấp thành công cuối cùng, sau đó quay lại các quy tắc)                                                                                                                                        |
+| `context-optimized` | Chọn mục tiêu phù hợp nhất với kích thước bối cảnh hiện tại                                                                                                                                                                                           |
+| `cache-optimized`   | Sắp xếp lại các mục tiêu theo mối quan hệ bộ nhớ đệm nhắc nhở — kết nối có khả năng giữ tiền tố được lưu trong bộ nhớ cache của yêu cầu này cao nhất sẽ được thử trước tiên (`open-sse/services/combo/promptCacheAffinity.ts`, #8008)                 |
+| `fusion` 🧬         | Phân phát song song một nhóm người mẫu, sau đó tổng hợp một câu trả lời thông qua giám khảo (xem bên dưới)                                                                                                                                            |
+| `pipeline`          | Chạy các mục tiêu một cách tuần tự, xâu chuỗi đầu ra của từng bước thành đầu vào của bước tiếp theo; chỉ có câu trả lời cuối cùng được trả lại (#6396)                                                                                                |
+| `jev`               | Danh sách ưu tiên do người dùng xếp hạng; TypeSafe Jev thừa nhận mục nào chạy theo yêu cầu này. Người chiến thắng đầu tiên, các mục tiêu được thừa nhận khác giữ trật tự người dùng. Mở cửa theo yêu cầu của người dùng khi Jev không có sẵn (#15276) |
 
 ⭐ = Mới trong v3.8.0 · 🧬 = Mới trong v3.8.36
 
@@ -335,7 +339,7 @@ Hỗ trợ công cụ kết hợp của OmniRoute** 20 chiến lược định t
 
 - Mỗi yêu cầu rút ra** một** bước có xác suất `weight / totalWeight`; các bước còn lại được sắp xếp theo trọng số giảm dần làm chuỗi dự phòng cho yêu cầu đó.
 - Một bước có trọng số là `0` (hoặc thiếu) là** không bao giờ vẽ** trong khi bất kỳ bước nào khác có trọng số > 0 — thì nó chỉ có thể đóng vai trò dự phòng sau khi bước rút ra không thành công. Chỉ khi** tất cả** trọng số là 0 thì việc lựa chọn có trở nên thống nhất hay không.
-- Các bước có mục tiêu là tất cả các bước không có sẵn của nhà cung cấp — ngắt mạch `OPEN`, thời gian hồi chiêu kết nối, khóa mô hình — đều bị xóa khỏi lượt rút thăm trước khi nó xảy ra (`open-sse/services/combo/targetResolution.ts`), vì vậy, một bước lành mạnh có thể tạm thời giành được mọi yêu cầu.
+- Các bước có mục tiêu là tất cả các bước không có sẵn của nhà cung cấp — ngắt mạch `OPEN`, thời gian hồi chiêu kết nối, khóa mô hình — sẽ bị xóa khỏi lượt rút thăm trước khi nó xảy ra (`open-sse/services/combo/targetResolution.ts`), vì vậy, một bước lành mạnh duy nhất có thể tạm thời giành được mọi yêu cầu.
 - `stickyWeightedLimit` (cấu hình kết hợp, tắt `1` = mặc định) ghim bước đã vẽ để đạt được nhiều thành công liên tiếp trước khi vẽ lại.
 
 Để xoay vòng nghiêm ngặt, hãy sử dụng `round-robin`; trọng số bằng nhau trên `weighted` cho — thống kê không cân bằng — nghiêm ngặt.
@@ -344,9 +348,23 @@ Hỗ trợ công cụ kết hợp của OmniRoute** 20 chiến lược định t
 
 Một tổ hợp `pipeline` có ít nhất hai mô hình có thể chọn tham gia định tuyến planner/executor bằng `config.agenticOrchestration.enabled`. Mục tiêu đầu tiên sở hữu kế hoạch và câu trả lời cuối cùng; mục tiêu thứ hai phát ra các lệnh gọi công cụ gốc của máy khách. OmniRoute phát hiện các phần tiếp theo của kết quả công cụ từ giao thức yêu cầu, hỏi người lập kế hoạch xem có cần một vòng công cụ khác hay không và tự động chuyển người thực thi hoặc người lập kế hoạch thành bước cuối cùng đối mặt với khách hàng.
 
-Khi tiếp tục kết quả công cụ, OmniRoute cũng dừng thực thi khi hai vòng hoàn thành liên tiếp lặp lại cùng một lệnh gọi công cụ với kết quả không thay đổi hoặc khi mọi kết quả được đánh dấu rõ ràng trong hai vòng liên tiếp đều không thành công. Kết quả đã thay đổi cho phép các cuộc gọi lặp lại (ví dụ: bỏ phiếu). Trình bảo vệ đặt lại theo yêu cầu mới của người dùng, nhóm các cuộc gọi song song thành một vòng và hỗ trợ lịch sử Anthropic, Hoàn thành trò chuyện, Phản hồi và Gemini. Người lập kế hoạch nhận được lý do và có câu trả lời cuối cùng ngay cả khi yêu cầu một vòng công cụ khác.
+`config.agenticOrchestration.contextCompaction` tùy chọn áp dụng ngân sách tải trọng riêng trước mỗi lần gửi người lập kế hoạch hoặc người thực thi. Kích hoạt nó một cách rõ ràng:
 
-Các mô hình bổ sung sau mục tiêu thứ hai được yêu cầu sao lưu người thực thi. Phản hồi HTTP không thành công hoặc ngoại lệ vận chuyển sẽ chuyển sang người thực thi tiếp theo, mang theo cùng một quyết định của người lập kế hoạch và các công cụ gốc nhưng lời nhắc bước của chính người thực thi đó và giải quyết kết nối. Phản hồi thành công đầu tiên được trả về không thay đổi, bao gồm cả phát trực tuyến SSE ; không thể thử lại lỗi sau khi bắt đầu phát trực tiếp thành công tại đây. Nếu tất cả người thi hành đều thất bại, lỗi cuối cùng sẽ được trả về. Khách hàng hủy bỏ việc dừng gửi đi.
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Đây là ngân sách ký tự JSON được tuần tự hóa do nhà điều hành lựa chọn, không phải cửa sổ ngữ cảnh mã thông báo hoặc giới hạn ngược dòng được đảm bảo. Mô hình chính xác IDs ghi đè mặc định. Trên ngưỡng, quá trình nén sẽ loại bỏ các định nghĩa công cụ giống hệt nhau, cắt bớt bằng chứng công cụ quá khổ bằng một bản tóm tắt và loại bỏ các nhóm lịch sử hoàn chỉnh cũ theo tỷ lệ mục tiêu. Nó giữ lại các hướng dẫn system/developer, yêu cầu mới nhất của người dùng, vòng công cụ cuối cùng bao gồm calls/results song song và hướng dẫn định tuyến hàng đầu của Gemini. Hướng dẫn cấp cao nhất và cài đặt công cụ được giữ nguyên. Một điểm đánh dấu thiếu sót ghi lại lịch sử đã xóa; đây là sự cắt xén mang tính quyết định, không phải là một bản tóm tắt ngữ nghĩa. Nếu bối cảnh được ghim vẫn vượt quá ngân sách, yêu cầu sẽ trả về 413 trước khi liên hệ với mô hình. Khi nén bị vô hiệu hóa hoặc dưới ngưỡng, yêu cầu sẽ không thay đổi.
+
+Khi tiếp tục kết quả công cụ, OmniRoute cũng dừng thực thi khi hai vòng hoàn thành liên tiếp lặp lại cùng một lệnh gọi công cụ với kết quả không thay đổi hoặc khi mọi kết quả được đánh dấu rõ ràng trong hai vòng liên tiếp đều không thành công. Kết quả đã thay đổi cho phép các cuộc gọi lặp lại (ví dụ: bỏ phiếu). Trình bảo vệ đặt lại theo yêu cầu mới của người dùng, nhóm các cuộc gọi song song thành một vòng và hỗ trợ lịch sử Anthropic, Hoàn thành trò chuyện, Phản hồi và Gemini. Người lập kế hoạch nhận được lý do và sở hữu câu trả lời cuối cùng ngay cả khi họ yêu cầu một vòng công cụ khác.
+
+Các mô hình bổ sung sau mục tiêu thứ hai được yêu cầu sao lưu người thực thi. Phản hồi HTTP không thành công hoặc ngoại lệ vận chuyển sẽ chuyển sang người thực thi tiếp theo, mang theo cùng một quyết định của người lập kế hoạch và các công cụ gốc nhưng lời nhắc bước của chính người thực thi đó và giải quyết kết nối. Phản hồi thành công đầu tiên được trả về không thay đổi, bao gồm cả phát trực tuyến SSE ; không thể thử lại lỗi sau khi bắt đầu phát trực tiếp thành công tại đây. Nếu tất cả người thực thi đều thất bại, lỗi cuối cùng sẽ được trả về. Khách hàng hủy bỏ việc dừng gửi đi.
 
 ```json
 {
@@ -365,10 +383,10 @@ Người thực thi có thể phát ra nhiều lệnh gọi độc lập trong m
 Vòng tròn được thực hiện theo đợt, không phải một yêu cầu mỗi bước:
 
 - `stickyRoundRobinLimit` (cấu hình kết hợp, sau đó `comboStickyRoundRobinLimit`, sau đó `settings.stickyRoundRobinLimit`, mặc định** 3** ) giữ nguyên mục tiêu cho nhiều thành công liên tiếp trước khi quay. Đặt ghi đè kết hợp thành `1` để xoay vòng một yêu cầu. Trình chỉnh sửa kết hợp hiển thị giá trị hiệu quả và giá trị đó đến từ lớp nào.
-- `connectionAwareExpansion` (cấu hình kết hợp, sau đó cài đặt, mặc định** SAI** ) mở rộng từng bước cấp nhà cung cấp thành mục tiêu cho mỗi tài khoản trước khi xoay vòng. Các chiến lược nhóm B (ưu tiên, có trọng số, quay vòng, ngẫu nhiên, p2c, ít được sử dụng nhất, tối ưu hóa chi phí, lkgp, điền trước, ngẫu nhiên nghiêm ngặt, tối ưu hóa theo ngữ cảnh, tối ưu hóa bộ nhớ đệm, chuyển tiếp ngữ cảnh, tổng hợp, quy trình) duy trì chế độ xem ở cấp nhà cung cấp cho đến khi tính năng này được bật. Trình chỉnh sửa kết hợp hiển thị tính năng kế thừa/bật/tắt; kế thừa sử dụng mặc định chung (tắt).
+- `connectionAwareExpansion` (cấu hình kết hợp, sau đó cài đặt, mặc định** SAI** ) mở rộng từng bước cấp nhà cung cấp thành mục tiêu cho mỗi tài khoản trước khi xoay vòng. Các chiến lược nhóm B (ưu tiên, có trọng số, quay vòng, ngẫu nhiên, p2c, ít được sử dụng nhất, tối ưu hóa chi phí, lkgp, điền trước, ngẫu nhiên nghiêm ngặt, tối ưu hóa theo ngữ cảnh, tối ưu hóa bộ đệm, chuyển tiếp ngữ cảnh, hợp nhất, đường ống, jev) duy trì chế độ xem ở cấp nhà cung cấp cho đến khi tính năng này được bật. Trình chỉnh sửa kết hợp hiển thị tính năng kế thừa/bật/tắt; kế thừa sử dụng mặc định chung (tắt).
 - Định tuyến cục bộ bộ đệm nhắc nhở (`promptCacheAffinityEnabled`, mặc định** ĐÚNG VẬY** ) sắp xếp lại các kết nối được ghim để các khóa bộ đệm phù hợp vẫn ở trên một tài khoản. Nó được ưu tiên hơn so với luân chuyển vòng tròn và có trọng số trên các bước được ghim trên mỗi tài khoản. Tắt nó trong Cài đặt mặc định → Combo nếu bạn cần xoay vòng nghiêm ngặt. Không có ghi đè cho mỗi combo.
 
-Để xoay vòng nhiều tài khoản trên một mô hình, hãy ưu tiên** một bước tài khoản động** (trống `connectionId`, toàn bộ nhóm) với giới hạn cố định `1`, không phải ba `connectionId` s được ghim. Các bước được ghim cộng với mối quan hệ thu gọn vào cùng một tài khoản ngay cả khi bộ đếm RR tiến lên.
+Để xoay vòng nhiều tài khoản trên một mô hình, hãy ưu tiên** một bước tài khoản động** (trống `connectionId`, toàn bộ nhóm) với giới hạn dính `1`, không phải ba `connectionId` s được ghim. Các bước được ghim cộng với mối quan hệ thu gọn vào cùng một tài khoản ngay cả khi bộ đếm RR tiến lên.
 
 ## Chiến lược Fusion
 
@@ -834,47 +852,41 @@ chiến lược tổ hợp `priority` và sắp xếp các nhà cung cấp theo 
 
 Xem [`docs/guides/TIERS.md`](../guides/TIERS.md) để biết định nghĩa các bậc và cách phân loại nhà cung cấp.
 
-## Kiểm thử & độ bao phủ
+## Kiểm tra & Bảo hiểm
 
-### Ma trận quyết định định tuyến tất định (`npm run test:combo:matrix`)
+### Ma trận quyết định định tuyến xác định (`npm run test:combo:matrix`)
 
-`tests/integration/combo-matrix/*.test.ts` xác minh **quyết định** định tuyến của toàn bộ 19
-chiến lược công khai từ đầu đến cuối thông qua pipeline combo thực với một upstream mô phỏng.
-Phạm vi bao phủ bao gồm:
+`tests/integration/combo-matrix/*.test.ts` chứng minh việc định tuyến** phán quyết** trong số tất cả 21 chiến lược công khai từ đầu đến cuối thông qua quy trình kết hợp thực sự với thượng nguồn được mô phỏng. Bảo hiểm bao gồm:
 
-- Toàn bộ 19 chiến lược `ROUTING_STRATEGY_VALUES` (ordered, weighted, cost, context, fusion, …).
-- `quota-share` (nội bộ) từ đầu đến cuối: tính công bằng DRR + hạ mức ưu tiên khi bão hòa thông qua
-  điểm nối `selectQuotaShareTarget` thực (`registerQuotaFetcher` / `setLKGP` /
-  `__setHeadroomSaturationFetcherForTests`).
-- Độ bao phủ chuyển giao toàn cục của `context-relay` trên mọi số lượng đích.
+- Tất cả 21 chiến lược `ROUTING_STRATEGY_VALUES` (được đặt hàng, có trọng số, chi phí, bối cảnh, sự kết hợp,…).
+- `quota-share` (nội bộ) từ đầu đến cuối: DRR công bằng + khử độ bão hòa thông qua đường nối `selectQuotaShareTarget` thực (`registerQuotaFetcher` / `setLKGP` / `__setHeadroomSaturationFetcherForTests`).
+- phạm vi bao phủ chuyển giao phổ quát `context-relay` trên mọi số lượng mục tiêu.
 
-Bộ kiểm thử này chạy trong CI (tác vụ `test:integration`) với `--test-concurrency=1` và
-`--test-force-exit`, do đó có tính tất định và không yêu cầu thông tin xác thực thực tế.
+Bộ phần mềm này chạy trong CI (công việc `test:integration` ) với `--test-concurrency=1` và `--test-force-exit` nên nó mang tính quyết định và không yêu cầu thông tin xác thực trực tiếp.
 
-### Kiểm thử nhanh trực tiếp có điều kiện (KHÔNG chạy trong CI — nhà cung cấp thực)
+### Có cổng khói trực tiếp (NOT trong CI — nhà cung cấp thực sự)
 
-| Lệnh                                   | Chức năng                                                                                                   |
-| :------------------------------------- | :---------------------------------------------------------------------------------------------------------- |
-| `npm run test:combo:live`              | Định tuyến thực trong tiến trình với `RUN_COMBO_LIVE=1`; tạo snapshot của cơ sở dữ liệu OmniRoute trực tiếp |
-| `npm run test:combo:live:vps`          | Các lệnh gọi HTTP đến máy chủ OmniRoute trực tiếp (đặt `COMBO_LIVE_BASE_URL`)                               |
-| `npm run test:combo:live:vps:failover` | Tương tự, với các kịch bản chuyển đổi dự phòng có chủ đích                                                  |
+| Yêu cầu                                | Nó làm gì                                                                                     |
+| :------------------------------------- | :-------------------------------------------------------------------------------------------- |
+| `npm run test:combo:live`              | Định tuyến thực trong quá trình với `RUN_COMBO_LIVE=1`; chụp nhanh một OmniRoute DB trực tiếp |
+| `npm run test:combo:live:vps`          | HTTP gọi tới máy chủ OmniRoute trực tiếp (đặt `COMBO_LIVE_BASE_URL`)                          |
+| `npm run test:combo:live:vps:failover` | Tương tự, với các kịch bản chuyển đổi dự phòng có chủ ý                                       |
 
-Các kiểm thử nhanh này thực thi đường truyền thực tế (combo → nhà cung cấp → completion). Chúng được
-chủ ý loại khỏi CI vì yêu cầu thông tin xác thực thực tế và quyền truy cập VPS.
+Các thử nghiệm khói này thực hiện đường dẫn dây thực (hoàn thành kết hợp → nhà cung cấp → ). Chúng bị cố tình loại trừ khỏi CI vì chúng yêu cầu thông tin xác thực trực tiếp và quyền truy cập VPS.
 
 ---
 
-## Tệp
+## Tập tin
 
-| Tệp                                                       | Mục đích                                                                                                                                   |
-| :-------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------- |
-| `open-sse/services/autoCombo/scoring.ts`                  | Hàm chấm điểm 16 yếu tố, `DEFAULT_WEIGHTS`, chuẩn hóa nhóm                                                                                 |
-| `open-sse/services/autoCombo/taskFitness.ts`              | Tra cứu độ phù hợp giữa mô hình × tác vụ                                                                                                   |
-| `open-sse/services/autoCombo/engine.ts`                   | Logic lựa chọn, bandit, giới hạn ngân sách                                                                                                 |
-| `open-sse/services/autoCombo/selfHealing.ts`              | Loại trừ, thăm dò, chế độ sự cố                                                                                                            |
-| `open-sse/services/autoCombo/modePacks.ts`                | 6 hồ sơ trọng số (phát hành nhanh, tiết kiệm chi phí, ưu tiên chất lượng, thân thiện với ngoại tuyến, ưu tiên độ tin cậy, chế độ hỗn loạn) |
-| `open-sse/services/autoCombo/autoPrefix.ts`               | Trình phân tích tiền tố `auto/` + 6 biến thể                                                                                               |
-| `open-sse/services/autoCombo/virtualFactory.ts`           | Tạo `AutoComboConfig` trong bộ nhớ từ các kết nối đang hoạt động                                                                           |
-| `open-sse/services/autoCombo/providerRegistryAccessor.ts` | Hook kiểm thử để mô phỏng sổ đăng ký nhà cung cấp                                                                                          |
-| `src/shared/constants/routingStrategies.ts`               | `ROUTING_STRATEGY_VALUES` (20 chiến lược)                                                                                                  |
-| `src/sse/handlers/chat.ts`                                | Tích hợp: đoản mạch tiền tố tự động                                                                                                        |
+| Tài liệu                                                  | Mục đích                                                                                                                                                 |
+| :-------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `open-sse/services/autoCombo/scoring.ts`                  | Hàm chấm điểm 16 yếu tố, `DEFAULT_WEIGHTS`, chỉ tiêu nhóm                                                                                                |
+| `open-sse/services/autoCombo/taskFitness.ts`              | Tra cứu thể chất nhiệm vụ mô hình ×                                                                                                                      |
+| `open-sse/services/autoCombo/engine.ts`                   | Logic lựa chọn, kẻ cướp, giới hạn ngân sách                                                                                                              |
+| `open-sse/services/autoCombo/selfHealing.ts`              | Loại trừ, thăm dò, chế độ sự cố                                                                                                                          |
+| `open-sse/services/autoCombo/modePacks.ts`                | 6 cấu hình trọng lượng (giao hàng nhanh, tiết kiệm chi phí, chất lượng là trên hết, thân thiện với ngoại tuyến, độ tin cậy là trên hết, chế độ hỗn loạn) |
+| `open-sse/services/autoCombo/autoPrefix.ts`               | trình phân tích cú pháp tiền tố `auto/` + 6 biến thể                                                                                                     |
+| `open-sse/services/autoCombo/virtualFactory.ts`           | Xây dựng `AutoComboConfig` trong bộ nhớ từ các kết nối trực tiếp                                                                                         |
+| `open-sse/services/autoCombo/providerRegistryAccessor.ts` | Móc thử nghiệm để đăng ký nhà cung cấp mô phỏng                                                                                                          |
+| `src/shared/constants/routingStrategies.ts`               | `ROUTING_STRATEGY_VALUES` (22 chiến lược)                                                                                                                |
+| `src/sse/handlers/chat.ts`                                | Tích hợp: ngắn mạch tiền tố tự động                                                                                                                      |

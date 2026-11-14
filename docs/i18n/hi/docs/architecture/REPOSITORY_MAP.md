@@ -147,7 +147,7 @@ src/
 | `app/api/tools/traffic-inspector/`                                           | ट्रैफिक इंस्पेक्टर REST + WS API — 16 + मार्ग (अनुरोध, सत्र, होस्ट, कैप्चर-मोड, निर्यात, डब्ल्यूएस)। LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/TRAFFIC_INSPECTOR.md §8` देखें।                                                                                                                                   |
 | `app/a2a/`                                                                   | A2A JSON-RPC 2.0 प्रवेश बिंदु (`POST /a2a`)                                                                                                                                                                                                                                                                         |
 | `app/.well-known/agent.json/`                                                | A2A एजेंट कार्ड (खोज)                                                                                                                                                                                                                                                                                               |
-| `app/(dashboard)/dashboard/`                                                 | डैशबोर्ड UI पृष्ठ (50 + अनुभाग, ~ 118 page.tsx फ़ाइलें: प्रदाता, कॉम्बो, सेटिंग्स, मेमोरी, कौशल, वेबहुक, इवैल्स, ऑडिट, बैच, कैश, लागत, स्वास्थ्य, सिस्टम, गतिविधि, आदि)                                                                                                                                             |
+| `app/(dashboard)/dashboard/`                                                 | डैशबोर्ड UI पेज (50 + अनुभाग, ~ 118 page.tsx फ़ाइलें: प्रदाता, कॉम्बो, सेटिंग्स, मेमोरी, कौशल, वेबहुक, इवैल्स, ऑडिट, बैच, कैश, लागत, स्वास्थ्य, सिस्टम, गतिविधि, आदि)                                                                                                                                               |
 | `app/(dashboard)/dashboard/search-tools/`                                    | खोज उपकरण स्टूडियो UI (3 टैब: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — देखें `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                         |
 | `app/(dashboard)/dashboard/memory/`                                          | मेमोरी स्टूडियो (योजना 21): `page.tsx` (3-टैब शेल), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
 | `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge डैशबोर्ड पेज — सर्वर कार्ड, 9 एजेंट कार्ड, सेटअप विज़ार्ड, मॉडल मैपिंग, बाईपास सूची। i18n पीटी-बीआर + EN। `docs/frameworks/AGENTBRIDGE.md` देखें।                                                                                                                                                       |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------- |
 | `components/`                    | डैशबोर्ड घटक API: `packages/ui-kit` — एडाप्टर `docs/architecture/DESIGN_SYSTEM.md` देखें |
 | `constants/iconMap.ts`           | `ICON_MAP`: स्क्रीन द्वारा उपयोग किए जाने वाले आइकन नाम → ल्यूसिड घटक (`<Icon>`)         |
-| `constants/providers.ts`         | **381 प्रदाता** Zod सत्यापन के साथ (सच्चाई का स्रोत)                                     |
+| `constants/providers.ts`         | **394 प्रदाता** Zod सत्यापन के साथ (सच्चाई का स्रोत)                                     |
 | `constants/cliTools.ts`          | बाहरी CLI टूल रजिस्ट्री                                                                  |
-| `constants/routingStrategies.ts` | **20 रूटिंग रणनीतियाँ** प्राथमिकताओं के साथ                                              |
+| `constants/routingStrategies.ts` | **22 रूटिंग रणनीतियाँ** प्राथमिकताओं के साथ                                              |
 | `constants/publicApiRoutes.ts`   | वे रूट जिनके लिए बियरर (बनाम प्रबंधन) प्रमाणीकरण की आवश्यकता होती है                     |
 | `constants/upstreamHeaders.ts`   | अपस्ट्रीम अनुरोधों के लिए हेडर अस्वीकरण सूची                                             |
 | `validation/schemas.ts`          | ~ 80 Zod स्कीमा ( API अनुबंधों के लिए सत्य का एकल स्रोत)                                 |
@@ -260,40 +260,40 @@ src/
 
 ## `open-sse/` — स्ट्रीमिंग इंजन कार्यक्षेत्र
 
-अलग npm कार्यक्षेत्र (`@omniroute/open-sse`)। अनुरोध प्रोसेसिंग + प्रदाता निष्पादन संभालता है।
+अलग एनपीएम कार्यक्षेत्र (`@omniroute/open-sse`)। अनुरोध प्रसंस्करण + प्रदाता निष्पादन को संभालता है।
 
 ```
 open-sse/
-├── handlers/            # 16 फ़ाइलें (12 हैंडलर + 4 सहायक): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search आदि।
-├── executors/           # 150 निष्पादक मॉड्यूल (BaseExecutor को विस्तारित करने वाली क्लास + प्रत्येक प्रदाता के लिए सहायक)
-├── translator/          # प्रारूप कन्वर्टर (9 अनुरोध, 9 प्रतिक्रिया, 9 सहायक)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ सेवा मॉड्यूल (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM आदि)
-├── mcp-server/          # MCP सर्वर (110 टूल, 3 ट्रांसपोर्ट, 33 स्कोप)
-├── config/              # प्रदाता/मॉडल रजिस्ट्री, हेडर कॉन्फ़िगरेशन, मॉडल उपनाम
-├── utils/               # TLS क्लाइंट, प्रॉक्सी फ़ेच/डिस्पैचर, नेटवर्क सहायक
-├── index.ts             # कार्यक्षेत्र प्रवेश-बिंदु
-├── package.json         # कार्यक्षेत्र मैनिफ़ेस्ट
-├── tsconfig.json        # कार्यक्षेत्र TS कॉन्फ़िगरेशन
-└── types.d.ts           # कार्यक्षेत्र प्रकार घोषणाएँ
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| पथ                          | उद्देश्य                                                                         |
-| --------------------------- | -------------------------------------------------------------------------------- |
-| `server.ts`                 | MCP सर्वर जीवनचक्र (stdio + HTTP ट्रांसपोर्ट)                                    |
-| `httpTransport.ts`          | HTTP Streamable + SSE ट्रांसपोर्ट (`/api/mcp/sse`, `/api/mcp/stream`)            |
-| `audit.ts`                  | `mcp_tool_audit` तालिका में ऑडिट लॉगिंग                                          |
-| `scopeEnforcement.ts`       | प्रत्येक टूल के लिए स्कोप सत्यापन                                                |
-| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json` में स्वास्थ्य हार्टबीट                     |
-| `descriptionCompressor.ts`  | कॉन्टेक्स्ट बचाने के लिए टूल विवरण मेटाडेटा को संपीड़ित करता है                  |
-| `schemas/tools.ts`          | 36 मूल टूल परिभाषाएँ + स्कोप                                                     |
-| `tools/advancedTools.ts`    | उन्नत टूल कार्यान्वयन                                                            |
-| `tools/memoryTools.ts`      | 3 मेमोरी टूल (खोजें/जोड़ें/साफ़ करें)                                            |
-| `tools/skillTools.ts`       | 4 कौशल टूल (सूची/सक्षम करें/निष्पादित करें/निष्पादन)                             |
-| `tools/compressionTools.ts` | 5 संपीड़न टूल                                                                    |
-| `README.md`                 | आंतरिक MCP सर्वर README (`docs/frameworks/MCP-SERVER.md` से क्रॉस-लिंक किया गया) |
+| पथ                          | उद्देश्य                                                                      |
+| --------------------------- | ----------------------------------------------------------------------------- |
+| `server.ts`                 | MCP सर्वर जीवनचक्र (stdio + HTTP ट्रांसपोर्ट)                                 |
+| `httpTransport.ts`          | HTTP स्ट्रीम करने योग्य + SSE ट्रांसपोर्ट (`/api/mcp/sse`, `/api/mcp/stream`) |
+| `audit.ts`                  | `mcp_tool_audit` तालिका में ऑडिट लॉगिंग                                       |
+| `scopeEnforcement.ts`       | प्रति-टूल स्कोप सत्यापन                                                       |
+| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json` को स्वास्थ्य दिल की धड़कन               |
+| `descriptionCompressor.ts`  | संदर्भ को सहेजने के लिए टूल विवरण मेटाडेटा को संपीड़ित करें                   |
+| `schemas/tools.ts`          | 36 आधार उपकरण परिभाषाएँ + स्कोप                                               |
+| `tools/advancedTools.ts`    | उन्नत उपकरण कार्यान्वयन                                                       |
+| `tools/memoryTools.ts`      | 3 मेमोरी टूल (search/add/clear)                                               |
+| `tools/skillTools.ts`       | 4 कौशल उपकरण (list/enable/execute/executions)                                 |
+| `tools/compressionTools.ts` | 5 संपीड़न उपकरण                                                               |
+| `README.md`                 | आंतरिक MCP सर्वर README ( `docs/frameworks/MCP-SERVER.md` से क्रॉस-लिंक्ड)    |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | बाहरी CLI एकीकरण + आंतरिक OmniRoute CLI                                           |
 | `I18N.md`                   | i18n आर्किटेक्चर, एक भाषा, 67 स्थान जोड़ना                                        |
 | `UNINSTALL.md`              | अनइंस्टॉल चरण साफ़ करें                                                           |
-| `PROVIDER_REFERENCE.md`     | **स्वतः उत्पन्न** 381 प्रदाताओं की सूची (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **स्वतः उत्पन्न** 394 प्रदाताओं की सूची (regen: `npm run gen:provider-reference`) |
 
 ### सबसिस्टम गहराई से गोता लगाता है
 
@@ -463,7 +463,7 @@ open-sse/
 | उपदिर                 | उद्देश्य                                                                                                                                                                                 |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `docs/i18n/`          | स्थानीयकृत दस्तावेज़ अनुवाद (41 स्थान)                                                                                                                                                   |
-| `docs/screenshots/`   | गाइडों के लिए छवि परिसंपत्तियाँ                                                                                                                                                          |
+| `docs/screenshots/`   | मार्गदर्शकों के लिए छवि संपत्ति                                                                                                                                                          |
 | `_tasks/superpowers/` | महाशक्तियों सेPlans/specs (`writing-plans`/`brainstorming`) + अनुसंधान — पृथक, अलग-अलग-संस्करणित रेपो, मुख्य वृक्ष द्वारा gitignored। CLAUDE.md → "योजना एवं अनुसंधान कलाकृतियाँ" देखें। |
 
 ---

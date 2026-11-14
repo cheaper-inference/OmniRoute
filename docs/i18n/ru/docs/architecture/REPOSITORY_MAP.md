@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Компонент информационной панели API: адаптеры поверх `packages/ui-kit` — см. `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: имена значков, используемые на экранах. → Компоненты Lucide (`<Icon>`)                                |
-| `constants/providers.ts`         | **381 провайдер** с проверкой Zod (источник истины)                                                               |
+| `constants/providers.ts`         | **394 провайдера** с проверкой Zod (источник истины)                                                              |
 | `constants/cliTools.ts`          | Внешний реестр инструментов CLI                                                                                   |
-| `constants/routingStrategies.ts` | **20 стратегий маршрутизации** с приоритетами                                                                     |
+| `constants/routingStrategies.ts` | **22 стратегии маршрутизации** с приоритетами                                                                     |
 | `constants/publicApiRoutes.ts`   | Маршруты, требующие аутентификации носителя (или управления)                                                      |
 | `constants/upstreamHeaders.ts`   | Список запрещенных заголовков для восходящих запросов                                                             |
 | `validation/schemas.ts`          | ~ 80 схем Zod (единый источник достоверных данных для контрактов API )                                            |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — Рабочее пространство потокового движка
+## `open-sse/` Рабочая область — Streaming Engine
 
-Отдельное рабочее пространство npm (`@omniroute/open-sse`). Обрабатывает запросы и выполняет вызовы провайдеров.
+Отдельное рабочее пространство npm (`@omniroute/open-sse`). Управляет обработкой запросов, выполнением поставщика +.
 
 ```
 open-sse/
-├── handlers/            # 16 файлов (12 обработчиков + 4 вспомогательных модуля): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search и т. д.
-├── executors/           # 150 модулей-исполнителей (классы, расширяющие BaseExecutor, и вспомогательные модули для отдельных провайдеров)
-├── translator/          # Конвертеры форматов (9 для запросов, 9 для ответов, 9 вспомогательных)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ сервисных модулей (combo, accountFallback, autoCombo, reasoningCache, скрытый режим claude code/chatgpt, modelDeprecation, taskAwareRouter, workflowFSM и т. д.)
-├── mcp-server/          # MCP-сервер (110 инструментов, 3 транспорта, 33 области доступа)
-├── config/              # Реестры провайдеров/моделей, конфигурация заголовков, псевдонимы моделей
-├── utils/               # TLS-клиент, получение данных/диспетчер через прокси, вспомогательные сетевые модули
-├── index.ts             # Точка входа рабочего пространства
-├── package.json         # Манифест рабочего пространства
-├── tsconfig.json        # Конфигурация TS рабочего пространства
-└── types.d.ts           # Объявления типов рабочего пространства
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Путь                        | Назначение                                                                                |
-| --------------------------- | ----------------------------------------------------------------------------------------- |
-| `server.ts`                 | Жизненный цикл MCP-сервера (транспорты stdio + HTTP)                                      |
-| `httpTransport.ts`          | Потоковый HTTP + SSE-транспорты (`/api/mcp/sse`, `/api/mcp/stream`)                       |
-| `audit.ts`                  | Журналирование аудита в таблицу `mcp_tool_audit`                                          |
-| `scopeEnforcement.ts`       | Проверка областей доступа для каждого инструмента                                         |
-| `runtimeHeartbeat.ts`       | Отправка сигнала работоспособности в `DATA_DIR/runtime/mcp-heartbeat.json`                |
-| `descriptionCompressor.ts`  | Сжатие метаданных описаний инструментов для экономии контекста                            |
-| `schemas/tools.ts`          | 36 базовых определений инструментов + области доступа                                     |
-| `tools/advancedTools.ts`    | Реализации расширенных инструментов                                                       |
-| `tools/memoryTools.ts`      | 3 инструмента памяти (поиск/добавление/очистка)                                           |
-| `tools/skillTools.ts`       | 4 инструмента навыков (список/включение/выполнение/выполнения)                            |
-| `tools/compressionTools.ts` | 5 инструментов сжатия                                                                     |
-| `README.md`                 | Внутренний README MCP-сервера (с перекрёстной ссылкой из `docs/frameworks/MCP-SERVER.md`) |
+| Путь                        | Цель                                                                                 |
+| --------------------------- | ------------------------------------------------------------------------------------ |
+| `server.ts`                 | Жизненный цикл сервера MCP (транспорты stdio + HTTP )                                |
+| `httpTransport.ts`          | HTTP Потоковые транспорты + SSE (`/api/mcp/sse`, `/api/mcp/stream`)                  |
+| `audit.ts`                  | Ведение журнала аудита в таблице `mcp_tool_audit`                                    |
+| `scopeEnforcement.ts`       | Проверка объема для каждого инструмента                                              |
+| `runtimeHeartbeat.ts`       | Сердцебиение здоровья в `DATA_DIR/runtime/mcp-heartbeat.json`                        |
+| `descriptionCompressor.ts`  | Сжатие метаданных описания инструмента для сохранения контекста                      |
+| `schemas/tools.ts`          | 36 определений базовых инструментов области +                                        |
+| `tools/advancedTools.ts`    | Расширенные реализации инструментов                                                  |
+| `tools/memoryTools.ts`      | 3 инструмента памяти (search/add/clear)                                              |
+| `tools/skillTools.ts`       | 4 инструмента навыков (list/enable/execute/executions)                               |
+| `tools/compressionTools.ts` | 5 инструментов сжатия                                                                |
+| `README.md`                 | Внутренний сервер MCP README (перекрестная ссылка с `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -395,24 +395,24 @@ open-sse/
 
 ### Руководства высшего уровня
 
-| Док                         | Цель                                                                                                  |
-| --------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Высокоуровневая архитектура, карта подсистем, поверхность информационной панели                       |
-| `CODEBASE_DOCUMENTATION.md` | Инженерная справка: каталоги, модули, соглашения                                                      |
-| `FEATURES.md`               | Матрица функций с основными моментами версии 3.8                                                      |
-| `USER_GUIDE.md`             | Руководство конечного пользователя (настройка, модели, комбинации, CLIs, аудио и т. д.)               |
-| `API_REFERENCE.md`          | Ссылка на конечную точку API с моделью аутентификации                                                 |
-| `openapi.yaml`              | спецификация OpenAPI 3.0 (121 путь)                                                                   |
-| `SETUP_GUIDE.md`            | Методы установки (npm, npx, Docker, Electron, Termux, исходный код)                                   |
-| `ENVIRONMENT.md`            | Все переменные окружения (задокументировано ~ 800, ~ 3050 строк `.env.example`)                       |
-| `TROUBLESHOOTING.md`        | Распространенные ошибки Известные проблемы + v3.8.0                                                   |
-| `RELEASE_CHECKLIST.md`      | Полный поток релизов (навыки, хаски, обычные коммиты, развертывание)                                  |
-| `COVERAGE_PLAN.md`          | Цели покрытия и текущее состояние                                                                     |
-| `FREE_TIERS.md`             | Курируемые поставщики бесплатного уровня (48 + бесплатно + 11 OAuth)                                  |
-| `CLI-TOOLS.md`              | Внешняя интеграция CLI + Внутренняя OmniRoute CLI                                                     |
-| `I18N.md`                   | i18n архитектура, добавление языка, 67 локалей                                                        |
-| `UNINSTALL.md`              | Чистые шаги удаления                                                                                  |
-| `PROVIDER_REFERENCE.md`     | **Автоматически генерируется** каталог 381 провайдера (регенерация: `npm run gen:provider-reference`) |
+| Док                         | Цель                                                                                                   |
+| --------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `ARCHITECTURE.md`           | Высокоуровневая архитектура, карта подсистем, поверхность приборной панели                             |
+| `CODEBASE_DOCUMENTATION.md` | Инженерная справка: каталоги, модули, соглашения                                                       |
+| `FEATURES.md`               | Матрица функций с основными моментами версии 3.8                                                       |
+| `USER_GUIDE.md`             | Руководство конечного пользователя (настройка, модели, комбинации, CLIs, аудио и т. д.)                |
+| `API_REFERENCE.md`          | Ссылка на конечную точку API с моделью аутентификации                                                  |
+| `openapi.yaml`              | спецификация OpenAPI 3.0 (121 путь)                                                                    |
+| `SETUP_GUIDE.md`            | Методы установки (npm, npx, Docker, Electron, Termux, исходный код)                                    |
+| `ENVIRONMENT.md`            | Все переменные окружения (задокументировано ~ 800, ~ 3050 строк `.env.example`)                        |
+| `TROUBLESHOOTING.md`        | Распространенные ошибки Известные проблемы + v3.8.0                                                    |
+| `RELEASE_CHECKLIST.md`      | Полный поток релизов (навыки, хаски, обычные коммиты, развертывание)                                   |
+| `COVERAGE_PLAN.md`          | Цели покрытия и текущее состояние                                                                      |
+| `FREE_TIERS.md`             | Курируемые поставщики бесплатного уровня (48 + бесплатно + 11 OAuth)                                   |
+| `CLI-TOOLS.md`              | Внешняя интеграция CLI + Внутренняя OmniRoute CLI                                                      |
+| `I18N.md`                   | i18n архитектура, добавление языка, 67 локалей                                                         |
+| `UNINSTALL.md`              | Чистые шаги удаления                                                                                   |
+| `PROVIDER_REFERENCE.md`     | **Автоматически генерируется** каталог 394 провайдеров (регенерация: `npm run gen:provider-reference`) |
 
 ### Подробное описание подсистемы
 
@@ -433,14 +433,14 @@ open-sse/
 | `AUTHZ_GUIDE.md`                              | Конвейер авторизации (`classify` → `policies` → `enforce`)                                 |
 | `RESILIENCE_GUIDE.md`                         | Автоматический выключатель, время восстановления + блокировка модели +                     |
 | `docs/security/STEALTH_GUIDE.md` (только git) | Снятие отпечатков пальцев TLS (JA3/JA4), код CCHClaude, сертификат MITM                    |
-| `AUTO-COMBO.md`                               | Механизм Auto Combo (16-факторная оценка, 6 пакетов режимов, виртуальная фабрика)          |
+| `AUTO-COMBO.md`                               | Движок Auto Combo (16-факторная оценка, 6 пакетов режимов, виртуальная фабрика)            |
 
 ### Сжатие
 
 | Док                             | Цель                                            |
 | ------------------------------- | ----------------------------------------------- |
 | `COMPRESSION_GUIDE.md`          | Обзор режимов сжатия: дорожная карта +          |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK engine, договор о реестре         |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK engine, контракт на реестр        |
 | `COMPRESSION_RULES_FORMAT.md`   | Схема JSON пакета правил Caveman                |
 | `COMPRESSION_LANGUAGE_PACKS.md` | Инвентаризация пакетов правил для каждого языка |
 | `RTK_COMPRESSION.md`            | Декларативный конвейер RTK (56 фильтров)        |

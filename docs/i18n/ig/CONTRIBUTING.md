@@ -294,72 +294,72 @@ Lee `open-sse/utils/stream.ts` na `open-sse/utils/streamHandler.ts` maka ihe at�
 
 ---
 
-## Ọdịdị Projek
+## Ọdịdị Project
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Peeji dashboard (ngalaba 23)
-│   ├── api/                # Ụzọ API (ndekọ 51)
-│   └── login/              # Peeji njirimara (.tsx)
-├── domain/                 # Injin amụma (policyEngine, comboResolver, costRules, wdg.)
-├── lib/                    # Ọrụ azụmahịa ndị bụ isi (.ts)
-│   ├── a2a/                # Sava protokol Agent-to-Agent v0.3
-│   ├── acp/                # Ndebanye aha Agent Communication Protocol
-│   ├── compliance/         # Injin amụma nrubeisi
-│   ├── db/                 # Modul ngalaba SQLite + mbugharị 130
-│   ├── memory/             # Ebe nchekwa mkparịta ụka na-adịgide adịgide
-│   ├── oauth/              # Ndị na-eweta OAuth, ọrụ, na ngwa enyemaka
-│   ├── skills/             # Usoro nka enwere ike ịgbatị
-│   ├── usage/              # Nsochi ojiji na mgbakọ ọnụahịa
-│   └── localDb.ts          # Naanị oyi akwa mbupụgharị — etinyela mgbagha ebe a
-├── middleware/              # Middleware arịrịọ (promptInjectionGuard)
-├── mitm/                   # Proxy MITM (asambodo, DNS, ntụgharị ebe a na-aga)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # Komponentị React (.tsx)
-│   ├── constants/          # Nkọwa ndị na-eweta (329), oke MCP, atụmatụ ntụgharị 20
-│   ├── utils/              # Circuit breaker, sanitizer, ndị enyemaka njirimara
-│   └── validation/         # Schema Zod v4
-└── sse/                    # Usoro proxy SSE
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # Ebe ọrụ @omniroute/open-sse
-├── executors/              # Modul executor 150 (klaasị executor + ndị enyemaka maka onye na-eweta ọ bụla)
-├── handlers/               # Ndị njikwa arịrịọ 11 (nkata, nzaghachi, embeddings, onyonyo, wdg.)
-├── mcp-server/             # Sava MCP (ngwaọrụ pụrụ iche 110, ụzọ mbufe 3, oke 33)
-├── services/               # Ọrụ ọkwa kachasị elu 178 (combo, autoCombo, rateLimitManager, wdg.)
-├── translator/             # Ndị ntụgharị usoro (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Ihe mgbanwe Responses API
-└── utils/                  # Modul enyemaka 22 (stream, TLS, proxy, ndekọ)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Ngwa desktọpụ Electron (na-arụ ọrụ n'elu nyiwe dị iche iche)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Onye na-agba ule Node.js (faịlụ ule 1,574)
-├── integration/            # Ule njikọta
-├── e2e/                    # Ule Playwright
-├── security/               # Ule nchekwa
-├── translator/             # Ule ndị metụtara onye ntụgharị kpọmkwem
-└── load/                   # Ule ibu
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Ndekọ Mkpebi Nhazi
-├── architecture/            # Nhazi sistemụ na ike iguzogide nsogbu
-├── comparison/              # OmniRoute tụnyere nhọrọ ndị ọzọ
-├── compression/             # Ntuziaka na iwu mkpakọ
-├── dev/                     # Ntuziaka mmepe
-├── diagrams/                # Eserese nhazi
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # Ntuziaka onye ọrụ, Docker, nhazi, idozi nsogbu
-├── i18n/                    # Ntụgharị README e mere maka asụsụ mba ụwa
-├── marketing/               # Ihe mgbasa ozi ahịa
-├── ops/                     # Mbugharị, proxy, mkpuchi, mwepụta
-├── providers/               # Akwụkwọ metụtara ndị na-eweta kpọmkwem
-├── reference/               # Nrụtụaka API, mgbanwe gburugburu, ngwa CLI, ọkwa efu
-├── releases/                # Ihe edeturu gbasara mwepụta
-├── routing/                 # Injin auto-combo, mmegharị ntụgharị uche
-├── screenshots/             # Nseta ihuenyo dashboard
-├── security/                # Ihe mgbochi, nrubeisi, izochi onwe, token
-└── specs/                   # Nkọwapụta nhazi
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

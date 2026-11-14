@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `components/`                    | ଡ୍ୟାସବୋର୍ଡ ଉପାଦାନ API: `packages/ui-kit` ଉପରେ ଆଡାପ୍ଟରଗୁଡ଼ିକ — ଦେଖନ୍ତୁ `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ସ୍କ୍ରିନ୍ ଦ୍ୱାରା ବ୍ୟବହୃତ ଆଇକନ୍ ନାମ → ଲୁସିଡ୍ ଉପାଦାନଗୁଡିକ (`<Icon>`)                              |
-| `constants/providers.ts`         | **381 ପ୍ରଦାନକାରୀ।** Zod valid ଧତା ସହିତ (ସତ୍ୟର ଉତ୍ସ)                                                        |
+| `constants/providers.ts`         | **394 ପ୍ରଦାନକାରୀ।** Zod valid ଧତା ସହିତ (ସତ୍ୟର ଉତ୍ସ)                                                        |
 | `constants/cliTools.ts`          | ବାହ୍ୟ CLI ଉପକରଣ ରେଜିଷ୍ଟ୍ରି।                                                                                |
-| `constants/routingStrategies.ts` | **20 ରାଉଟିଙ୍ଗ୍ ରଣନୀତି।** ପ୍ରାଥମିକତା ସହିତ।                                                                  |
+| `constants/routingStrategies.ts` | **22 ରାଉଟିଙ୍ଗ୍ ରଣନୀତି।** ପ୍ରାଥମିକତା ସହିତ।                                                                  |
 | `constants/publicApiRoutes.ts`   | ମାର୍ଗଗୁଡିକ ଯାହା ବିୟର (ବନାମ ପରିଚାଳନା) auth ଆବଶ୍ୟକ କରେ।                                                      |
 | `constants/upstreamHeaders.ts`   | ଅପଷ୍ଟ୍ରିମ ଅନୁରୋଧ ପାଇଁ ହେଡର୍ ଅସ୍ୱୀକାର ତାଲିକା।                                                               |
 | `validation/schemas.ts`          | ~ 80 Zod ସ୍କିମା ( API ଚୁକ୍ତି ପାଇଁ ସତ୍ୟର ଏକକ ଉତ୍ସ)                                                          |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — ଷ୍ଟ୍ରିମିଂ ଇଞ୍ଜିନ୍ ୱର୍କସ୍ପେସ୍
+## `open-sse/` — ଷ୍ଟ୍ରିମିଂ ଇଞ୍ଜିନ୍ କାର୍ଯ୍ୟକ୍ଷେତ୍ର।
 
-ପୃଥକ npm ୱର୍କସ୍ପେସ୍ (`@omniroute/open-sse`)। ଅନୁରୋଧ ପ୍ରକ୍ରିୟାକରଣ + ପ୍ରଦାତା ନିଷ୍ପାଦନ ପରିଚାଳନା କରେ।
+ପୃଥକ npm କାର୍ଯ୍ୟକ୍ଷେତ୍ର (`@omniroute/open-sse`)। + ପ୍ରଦାନକାରୀ ନିଷ୍ପାଦନ ପ୍ରକ୍ରିୟାକରଣ ଅନୁରୋଧକୁ ନିୟନ୍ତ୍ରଣ କରିଥାଏ।
 
 ```
 open-sse/
-├── handlers/            # 16ଟି ଫାଇଲ୍ (12ଟି ହ୍ୟାଣ୍ଡଲର୍ + 4ଟି ହେଲ୍ପର୍): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, ଇତ୍ୟାଦି।
-├── executors/           # 150ଟି ଏକ୍ଜିକ୍ୟୁଟର୍ ମଡ୍ୟୁଲ୍ (BaseExecutorକୁ ବିସ୍ତାର କରୁଥିବା କ୍ଲାସ୍ + ପ୍ରତ୍ୟେକ ପ୍ରଦାତା ପାଇଁ ହେଲ୍ପର୍)
-├── translator/          # ଫର୍ମାଟ୍ କନଭର୍ଟର୍ (9ଟି ଅନୁରୋଧ, 9ଟି ପ୍ରତିକ୍ରିୟା, 9ଟି ହେଲ୍ପର୍)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ଟି ସେବା ମଡ୍ୟୁଲ୍ (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, ଇତ୍ୟାଦି)
-├── mcp-server/          # MCP ସର୍ଭର୍ (110ଟି ଟୁଲ୍, 3ଟି ଟ୍ରାନ୍ସପୋର୍ଟ, 33ଟି ସ୍କୋପ୍)
-├── config/              # ପ୍ରଦାତା/ମଡେଲ୍ ରେଜିଷ୍ଟ୍ରି, ହେଡର୍ କନଫିଗ୍, ମଡେଲ୍ ଉପନାମ
-├── utils/               # TLS କ୍ଲାଏଣ୍ଟ, ପ୍ରକ୍ସି fetch/dispatcher, ନେଟୱର୍କ ହେଲ୍ପର୍
-├── index.ts             # ୱର୍କସ୍ପେସ୍ ପ୍ରବେଶ ବିନ୍ଦୁ
-├── package.json         # ୱର୍କସ୍ପେସ୍ ମାନିଫେଷ୍ଟ
-├── tsconfig.json        # ୱର୍କସ୍ପେସ୍ TS କନଫିଗ୍
-└── types.d.ts           # ୱର୍କସ୍ପେସ୍ ଟାଇପ୍ ଘୋଷଣାଗୁଡ଼ିକ
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| ପଥ                          | ଉଦ୍ଦେଶ୍ୟ                                                                               |
-| --------------------------- | -------------------------------------------------------------------------------------- |
-| `server.ts`                 | MCP ସର୍ଭର୍ ଜୀବନଚକ୍ର (stdio + HTTP ଟ୍ରାନ୍ସପୋର୍ଟ)                                        |
-| `httpTransport.ts`          | HTTP Streamable + SSE ଟ୍ରାନ୍ସପୋର୍ଟ (`/api/mcp/sse`, `/api/mcp/stream`)                 |
-| `audit.ts`                  | `mcp_tool_audit` ଟେବୁଲ୍ରେ ଅଡିଟ୍ ଲଗିଂ                                                   |
-| `scopeEnforcement.ts`       | ପ୍ରତ୍ୟେକ ଟୁଲ୍ ପାଇଁ ସ୍କୋପ୍ ବୈଧତା ଯାଞ୍ଚ                                                  |
-| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json`କୁ ସ୍ୱାସ୍ଥ୍ୟ ହାର୍ଟବିଟ୍                            |
-| `descriptionCompressor.ts`  | କନ୍ଟେକ୍ସ୍ଟ ସଞ୍ଚୟ କରିବା ପାଇଁ ଟୁଲ୍ ବର୍ଣ୍ଣନା ମେଟାଡାଟାକୁ ସଙ୍କୁଚିତ କରେ                      |
-| `schemas/tools.ts`          | 36ଟି ମୂଳ ଟୁଲ୍ ସଂଜ୍ଞା + ସ୍କୋପ୍                                                          |
-| `tools/advancedTools.ts`    | ଉନ୍ନତ ଟୁଲ୍ କାର୍ଯ୍ୟାନ୍ୱୟନ                                                               |
-| `tools/memoryTools.ts`      | 3ଟି ମେମୋରି ଟୁଲ୍ (ସନ୍ଧାନ/ଯୋଗ/ସଫା)                                                       |
-| `tools/skillTools.ts`       | 4ଟି ସ୍କିଲ୍ ଟୁଲ୍ (ତାଲିକା/ସକ୍ଷମ/ନିଷ୍ପାଦନ/ନିଷ୍ପାଦନଗୁଡ଼ିକ)                                 |
-| `tools/compressionTools.ts` | 5ଟି କମ୍ପ୍ରେସନ୍ ଟୁଲ୍                                                                    |
-| `README.md`                 | ଆଭ୍ୟନ୍ତରୀଣ MCP ସର୍ଭର୍ README (`docs/frameworks/MCP-SERVER.md`ରୁ କ୍ରସ୍-ଲିଙ୍କ୍ କରାଯାଇଛି) |
+| ପଥ                          | ଉଦ୍ଦେଶ୍ୟ                                                                       |
+| --------------------------- | ------------------------------------------------------------------------------ |
+| `server.ts`                 | MCP ସର୍ଭର ଜୀବନଚକ୍ର (stdio + HTTP ପରିବହନ)                                       |
+| `httpTransport.ts`          | HTTP ଷ୍ଟ୍ରିମେବଲ୍ + SSE ପରିବହନ (`/api/mcp/sse`, `/api/mcp/stream`)              |
+| `audit.ts`                  | `mcp_tool_audit` ଟେବୁଲରେ ଲଗିଂ ଅଡିଟ୍ କରନ୍ତୁ।                                    |
+| `scopeEnforcement.ts`       | ପ୍ରତି ଉପକରଣ ପରିସର ବ valid ଧତା।                                                 |
+| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json` ରୁ ସ୍ୱାସ୍ଥ୍ୟ ହୃଦସ୍ପନ୍ଦନ।                 |
+| `descriptionCompressor.ts`  | ପ୍ରସଙ୍ଗ ସଂରକ୍ଷଣ କରିବାକୁ ଉପକରଣ ବର୍ଣ୍ଣନା ମେଟାଡାଟାକୁ ସଙ୍କୋଚନ କରନ୍ତୁ।              |
+| `schemas/tools.ts`          | 36 ବେସ୍ ଟୁଲ୍ ସଂଜ୍ଞା + ସ୍କୋପ୍।                                                  |
+| `tools/advancedTools.ts`    | ଉନ୍ନତ ସାଧନ ପ୍ରୟୋଗ।                                                             |
+| `tools/memoryTools.ts`      | 3 ସ୍ମୃତି ଉପକରଣ (search/add/clear)                                              |
+| `tools/skillTools.ts`       | 4 ଦକ୍ଷତା ଉପକରଣ (list/enable/execute/executions)                                |
+| `tools/compressionTools.ts` | 5 ସଙ୍କୋଚନ ଉପକରଣ।                                                               |
+| `README.md`                 | ଆଭ୍ୟନ୍ତରୀଣ MCP ସର୍ଭର README ( `docs/frameworks/MCP-SERVER.md` ରୁ କ୍ରସ୍-ଲିଙ୍କ୍) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | ବାହ୍ୟ CLI ସଂଯୋଗ + ଆଭ୍ୟନ୍ତରୀଣ OmniRoute CLI                                           |
 | `I18N.md`                   | i18n ସ୍ଥାପତ୍ୟ, ଏକ ଭାଷା ଯୋଡି, 67 ଲୋକାଲ୍।                                              |
 | `UNINSTALL.md`              | ଅଣସଂସ୍ଥାପନ ପଦକ୍ଷେପଗୁଡିକ ସଫା କରନ୍ତୁ।                                                  |
-| `PROVIDER_REFERENCE.md`     | **ଅଟୋ-ଜେନେରେଟ୍।** 381 ପ୍ରଦାନକାରୀଙ୍କ ତାଲିକା (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **ଅଟୋ-ଜେନେରେଟ୍।** 394 ପ୍ରଦାନକାରୀଙ୍କ ତାଲିକା (regen: `npm run gen:provider-reference`) |
 
 ### ସବ୍ ସିଷ୍ଟମ୍ ଗଭୀର-ଡାଇଭ୍।
 

@@ -14,23 +14,24 @@ Dispetcher har bir yetkazib berishni HMAC-SHA256 bilan imzolaydi, vaqtinchalik
 nosozliklarda qayta urinadi, har bir vebhuk bo‘yicha yetkazib berish holatini kuzatadi va
 muntazam ravishda muvaffaqiyatsiz bo‘layotgan endpointlarni avtomatik tarzda o‘chiradi.
 
-## Qo‘llab-quvvatlanadigan hodisalar
+## Qo'llab-quvvatlanadigan voqealar
 
-`WebhookEvent` turi (`src/lib/webhooks/eventDescriptions.ts`, `src/lib/webhookDispatcher.ts` tomonidan foydalaniladi) hozirda aynan to‘rtta hodisani modellashtiradi:
+`WebhookEvent` turi (`src/lib/webhooks/eventDescriptions.ts`, `src/lib/webhookDispatcher.ts` tomonidan iste'mol qilinadi) hozirda sakkizta hodisani modellashtiradi:
 
-| Hodisa              | Qachon ishga tushadi                                                                                       |
-| ------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `request.completed` | Proksi orqali yuborilgan so‘rov muvaffaqiyatli yakunlanadi                                                 |
-| `request.failed`    | Proksi orqali yuborilgan so‘rov barcha qayta urinishlar/zaxira variantlardan keyin muvaffaqiyatsiz tugaydi |
-| `quota.exceeded`    | API kaliti budjet/kvota chegarasidan oshadi                                                                |
-| `test.ping`         | Test endpointi tomonidan ishlatiladigan sun’iy hodisa                                                      |
+| Tadbir                    | Qachon yonadi                                                                                                |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `request.completed`       | Proksi-so'rov muvaffaqiyatli yakunlandi                                                                      |
+| `request.failed`          | Proksi-so'rov barcha retries/fallback dan keyin bajarilmaydi                                                 |
+| `quota.exceeded`          | API kaliti budget/quota chegarasini kesib o'tadi                                                             |
+| `proxy.set_aside`         | Proksi-pul a'zosi qayta-qayta rad etilgandan so'ng ajratiladi (faqat o'tish)                                 |
+| `proxy.pool.exhausted`    | Proksi-server doirasining har bir a'zosi ajratilgan                                                          |
+| `provider.reset_redeemed` | Avtomatik qoʻllash bank oʻtkazmalari qayta tiklangan kredit yoki Claude haftalik sessiyasi asliga qaytarildi |
+| `provider.exhausted`      | Provayderning har bir hisobi sovib bormoqda (har bir provayder uchun har 10 daqiqada kamida bir marta)       |
+| `test.ping`               | Sinovning oxirgi nuqtasi tomonidan ishlatiladigan sintetik hodisa                                            |
 
-Obunalar barcha hodisalarni qabul qilish uchun literal `"*"` qiymatini qabul qiladi. `events` ichidagi noma’lum hodisa
-nomlari yuborish vaqtida e’tiborga olinmaydi.
+Obunalar har bir voqeani qabul qilish uchun tom ma'noda `"*"` qabul qiladi. `events` noma'lum hodisa nomlari jo'natish vaqtida e'tiborga olinmaydi.
 
-> Eslatma: dispetcher API’si ulangan, ammo `test.ping` bo‘lmagan ayrim
-> hodisalar uchun ishlab chiqarish muhitidagi chaqiruv joylari hali ham qo‘shilmoqda. Relizingizda
-> qaysi yo‘llar hozirda dispetcherni chaqirishini ko‘rish uchun `grep dispatchEvent` buyrug‘ini tekshiring.
+> Eslatma: dispetcher API simli, lekin `test.ping` bo'lmagan ba'zi hodisalar uchun ishlab chiqarish qo'ng'iroqlari saytlari hali ham qo'nishda. Relizingizdagi dispetcherni hozirda qaysi yo'llar chaqirayotganini ko'rish uchun `grep dispatchEvent` tekshiring.
 
 ## Arxitektura
 
@@ -124,24 +125,22 @@ Yetkazib berish tarixi maxsus `webhook_deliveries` jadvalida saqlanadi
 
 ## REST API
 
-Barcha so‘nggi nuqtalar boshqaruv autentifikatsiyasini (`requireManagementAuth`) talab qiladi.
+Barcha so'nggi nuqtalar boshqaruv authini (`requireManagementAuth`) talab qiladi.
 
-| So‘nggi nuqta                   | Usul   | Tavsif                                                  |
-| ------------------------------- | ------ | ------------------------------------------------------- |
-| `/api/webhooks`                 | GET    | Webhook’larni ro‘yxatlash (sirlar niqoblangan)          |
-| `/api/webhooks`                 | POST   | Webhook yaratish                                        |
-| `/api/webhooks/[id]`            | GET    | Webhook tafsilotlari (to‘liq sir)                       |
-| `/api/webhooks/[id]`            | PUT    | Maydonlarni yangilash                                   |
-| `/api/webhooks/[id]`            | DELETE | Olib tashlash                                           |
-| `/api/webhooks/[id]/test`       | POST   | `test.ping` yuborish (qayta urinishlarsiz)              |
-| `/api/webhooks/[id]/deliveries` | GET    | Bitta webhook uchun so‘nggi yetkazib berish urinishlari |
-| `/api/webhooks/validate-url`    | POST   | URL’ni oldindan tekshirish (SSRF himoyasi)              |
+| Yakuniy nuqta                   | Usul   | Tavsif                                                |
+| ------------------------------- | ------ | ----------------------------------------------------- |
+| `/api/webhooks`                 | GET    | Veb-huklarni ro'yxatlash (maskalangan sirlar)         |
+| `/api/webhooks`                 | POST   | Webhook yarating                                      |
+| `/api/webhooks/[id]`            | GET    | Webhuk tafsilotlari (to'liq maxfiy)                   |
+| `/api/webhooks/[id]`            | PUT    | Maydonlarni yangilash                                 |
+| `/api/webhooks/[id]`            | DELETE | O'chirish                                             |
+| `/api/webhooks/[id]/test`       | POST   | `test.ping` yoqish (qayta urinishlarsiz)              |
+| `/api/webhooks/[id]/deliveries` | GET    | Bitta vebhuk uchun oxirgi yetkazib berish urinishlari |
+| `/api/webhooks/validate-url`    | POST   | Parvoz oldidan URL tekshiruvi (SSRF guard)            |
 
-`GET /api/webhooks` ro‘yxat sahifalarida sir oshkor bo‘lishining oldini olish uchun uni
-`<birinchi 10 ta belgi>...` ko‘rinishida niqoblaydi. Sir haqiqatan kerak bo‘lsa,
-`[id]` GET so‘rovidan foydalaning.
+`GET /api/webhooks` ro'yxat sahifalarida sizib chiqmaslik uchun `<first 10 chars>...` sirini maskalaydi. Sizga sir kerak bo'lganda `[id]` GET foydalaning.
 
-### Webhook yaratish
+### Webhook yarating
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -155,18 +154,16 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Agar `secret` berilmasa, server `whsec_<hex>` sirini yaratadi va uni javobda
-qaytaradi.
+Agar `secret` o'tkazib yuborilsa, server `whsec_<hex>` sirini yaratadi va uni javobda qaytaradi.
 
-### Webhook’ni sinash
+### Sinov vebhuk
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-`{ delivered, status, error }` qaytaradi. Qayta urinishlar amalga oshirilmaydi — bu
-qabul qiluvchi foydali yuk va imzoni qabul qilishini tezda tekshirish uchun qulay.
+`{ delivered, status, error }` qaytaradi. Qayta urinishlar amalga oshirilmaydi — Qabul qiluvchining foydali yuk va imzoni qabul qilishini tezda tekshirish uchun foydalidir.
 
 ## Boshqaruv paneli
 

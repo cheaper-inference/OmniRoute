@@ -117,32 +117,10 @@ Izvori se uspoređuju bez obzira na velika i mala slova, a završna kosa crta se
 može se postaviti tijekom izvođenja u **Nadzorna ploča → Sigurnost → Dopušteni CORS izvori** bez
 ponovnog pokretanja.
 
-## API ključevi u odnosu na sesije s kolačićima
+## API ključevi vs sesije kolačića
 
-- **Bearer / `x-api-key` (sučelje za zaključivanje `/v1/*`):** preglednici ih nikada ne prilažu
-  automatski. CORS ovdje nije značajna prepreka — prepreka je API ključ
-  — zbog čega je to sučelje namjerno permisivno kako bi preglednički i
-  Electron klijenti mogli čitati odgovore na koje već imaju pravo. Ublaženo vraćanje
-  izvorišta ovisi o potvrđenom ključu, a ne o pukoj prisutnosti zaglavlja: kada
-  `REQUIRE_API_KEY=false` anonimno posluži zahtjev, njegov uspješan odgovor zadržava popis
-  dopuštenih izvorišta koji je zadano zatvoren. Odbijanja autentifikacije (401) ostaju
-  čitljiva kako bi klijenti mogli prikazati opozvani ili pogrešno upisani ključ (#5242):
-  vlastiti 401 cjevovoda zadržava vraćanje izvorišta, a ruta koja sama odbije ključ nakon
-  što ga je cjevovod poslužio kao anoniman (`/v1/models` i `/v1beta/models` uz
-  konfiguriranu upravljačku autentifikaciju, rute ograničene na vlasnika `/v1/files`,
-  `/v1/batches`, `/v1/media`, `/v1/session-leases` te rute kandidata za auto-combo) dodaje
-  vraćanje izvorišta tom 401 putem `credentialRejectionHeaders()`. Vraćanje izvorišta
-  određuje se prema tome sadrži li zahtjev zaglavlje s vjerodajnicama (`Authorization`,
-  `x-api-key`, `x-goog-api-key` ili kolačić `auth_token`), a ne prema tome koje je od njih
-  ruta provjerila, i nikada se ne kombinira s `Access-Control-Allow-Credentials`; tijelo
-  je fiksna omotnica pogreške. Upravljačke rute pod `/api/v1/` zaštićene s
-  `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`) ne dodaju
-  vraćanje izvorišta: uz `REQUIRE_API_KEY=false` njihovi 401/403 nisu čitljivi iz drugih
-  izvorišta.
-- **Sesija s kolačićem (nadzorna ploča):** zaštićena je zadanim ponašanjem koje odbija pristup u slučaju pogreške **i**
-  izostankom zaglavlja `Access-Control-Allow-Credentials` na zajedničkoj putanji. Ne uključujte
-  izvore za upravljanje/nadzornu ploču ni u jednu permisivnu konfiguraciju; za njih se mora i dalje
-  strogo primjenjivati odbijanje pristupa u slučaju pogreške.
+- **Nositelj / `x-api-key` ( `/v1/*` inferencijska površina):** preglednici ih nikad ne prilažu automatski. CORS ovdje nije značajna prepreka — ključ API je prepreka — zbog čega je ta površina namjerno permisivna tako da preglednik i Electron klijenti mogu čitati odgovore na koje već imaju pravo. Opušteni odjek slijedi potvrđeni ključ, a ne puko prisustvo zaglavlja: kada `REQUIRE_API_KEY=false` anonimno posluži zahtjev, njegov uspješan odgovor zadržava popis dopuštenih koji nije uspio zatvoren. Odbijanja autentifikacije (401) ostaju čitljiva tako da klijenti mogu otkriti opozvani ili pogrešno upisani ključ (#5242): vlastiti 401 cjevovoda čuva odjek i ruta koja odbija sam ključ nakon što ga je cjevovod poslužio kao anoniman (`/v1/models` i `/v1beta/models` s konfiguriranom autentifikacijom upravljanja, `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` i kandidat za auto-kombinaciju s dometom vlasnika routes) dodaje echo tom 401 putem `credentialRejectionHeaders()`. Odjek je ključan prema zahtjevu koji nosi zaglavlje vjerodajnice (`Authorization`, `x-api-key`, `x-goog-api-key` ili `auth_token` kolačić), a ne na kojem je od njih ruta provjerila, i nikada nije uparen sa `Access-Control-Allow-Credentials`; tijelo je fiksna omotnica pogreške. Rute upravljanja pod `/api/v1/` koje čuva `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) ne dodaju eho: sa `REQUIRE_API_KEY=false` njihov 401/403 nije čitljiv unakrsnog porijekla.
+- **Sesija kolačića (nadzorna ploča):** zaštićen fail-closed defaultom** i** odsutnošću `Access-Control-Allow-Credentials` na zajedničkom putu. Držite management/dashboard podrijetla izvan bilo koje dopuštene konfiguracije; moraju ostati točno zatvorene.
 
 ## WebSocket rukovanja (`/v1/responses`, `/v1/ws`)
 

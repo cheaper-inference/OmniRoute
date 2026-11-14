@@ -54,7 +54,7 @@ Ugyanazon provider/model esetén a magasabb prioritású rétegekből származó
 | Env var                 | Alapértelmezett | Cél                                                                                     |
 | ----------------------- | --------------- | --------------------------------------------------------------------------------------- |
 | `PRICING_SYNC_ENABLED`  | `false`         | A háttér LiteLLM árszinkronizálásának engedélyezése.                                    |
-| `PRICING_SYNC_INTERVAL` | `86400`         | Szinkronizálási intervallum másodpercben (naponta).                                     |
+| `PRICING_SYNC_INTERVAL` | `86400`         | Szinkronizálási idő másodpercben (naponta).                                             |
 | `PRICING_SYNC_SOURCES`  | `litellm`       | Forrás kiválasztása csak ehhez a szinkronizáláshoz; jelenleg csak `litellm` támogatott. |
 
 **model.dev szinkron** elkülönül a LiteLLM sync-től, és alapértelmezés szerint le is van tiltva. Engedélyezze a Beállításokban (models.dev sync), vagy használja az alábbi változókat:
@@ -64,7 +64,7 @@ Ugyanazon provider/model esetén a magasabb prioritású rétegekből származó
 | `MODELS_DEV_SYNC_ENABLED`  | _(unset)_       | Az Unset a Beállítások kapcsolót követi; `1/true/on/yes` bekapcsol, `0/false/off/no` pedig kikapcsol (még akkor is, ha a Beállítások engedélyezi). |
 | `MODELS_DEV_SYNC_INTERVAL` | `86400`         | Az alapértelmezett models.dev szinkronizálási időköz másodpercben (naponta).                                                                       |
 
-`PRICING_SYNC_SOURCES` igen** nem** model.dev engedélyezése; csak a LiteLLM szinkronizálást vezérli. A felhasználói felülírás törlése nem törli egyik szinkronizált névteret sem; a következő elérhető árréteg lép hatályba. Ár nélküli modellek esetén ellenőrizze mind a szinkronizálási beállításokat, mind a `sourceMap` mielőtt manuális felülírást adna hozzá.
+`PRICING_SYNC_SOURCES` igen** nem** model.dev engedélyezése; csak a LiteLLM szinkronizálást vezérli. A felhasználói felülírás törlése nem törli a szinkronizált névteret sem; a következő elérhető árréteg lép hatályba. Ár nélküli modellek esetén ellenőrizze mind a szinkronizálási beállításokat, mind a `sourceMap` mielőtt manuális felülírást adna hozzá.
 
 ### A költségképlet
 
@@ -82,7 +82,7 @@ A modellnevek először normalizálódnak (a szolgáltató elérési útjának e
 
 ### Hogyan történik a költés rögzítése
 
-- A kérésenkénti költséget a válasz után számítják ki, és rögzítik a tűz és felejtsd el, így soha nem növeli a várakozási időt az ügyfél számára. A megosztott kvóta felhasználása a következő eseményhurok tickre van ütemezve [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) segítségével.
+- A kérésenkénti költséget a kérés teljesítésekor számítjuk ki. A megosztott kvóta felhasználása a következő eseményhurok tickre van ütemezve [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) segítségével.
 - Az API-kulcs kiadásait a [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) puffereli és kötegekben üríti ki (alapértelmezett 60 másodperces öblítési időköz, 1000 bejegyzéses puffer). Hangolható:
 
   | Env var                             | Alapértelmezett | Cél                                            |
@@ -90,7 +90,29 @@ A modellnevek először normalizálódnak (a szolgáltató elérési útjának e
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`         | Öblítési intervallum ezredmásodpercben.        |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`          | Maximális pufferelt bejegyzések öblítés előtt. |
 
-A műszerfal költségadatai a következők** nem** soronként tárolt dolláros — összegből olvassa ki, a rendszer menet közben újraszámítja a tokenszámból és az aktuális ártáblázatból minden alkalommal, amikor az analitikai végpont fut. Ez azt jelenti, hogy a rossz ár kijavítása (és az újraszinkronizálás) visszamenőleg frissíti a múltbeli költségbecsléseket.
+A költségek előnyben részesítik a pontos szolgáltató által bejelentett díjat (`provider_cost_usd`), majd egy katalógusáras kérés pillanatképet (`calculated_cost_usd`), majd a token átárazást az aktuális katalógusból. A tárolt költségeket nem terheljük újra a tokenszámuk alapján. A csak jogkivonattal rendelkező régi sorok továbbra is változnak, ha katalógusáraik módosulnak.
+
+### OCR és beágyazások
+
+- A sikeres `/v1/ocr` kérések az upstream `usage_info.pages_processed` használják, nem a kért oldaltartományt vagy a visszaadott oldalobjektumok számát. A becslés oldalak × `ocr_cost_per_page` (abszolút USD/page,** nem** USD/million).
+- A dokumentum- vagy határolódoboz-jelöléssel ellátott kérésekhez külön `ocr_cost_per_annotated_page` tarifa szükséges. Enélkül a költségek ismeretlenek maradnak; a rendes OCR tarifát nem csendben helyettesítik.
+- LiteLLM sync az upstream `annotation_cost_per_page` mezőjét leképezi `ocr_cost_per_annotated_page` mezőre, megtartva az abszolút USD/page értéket és a csak megjegyzéseket tartalmazó bejegyzéseket, beleértve az explicit nullát is. A megadott kanonikus mező élvez elsőbbséget; az érvénytelen alias értékeket figyelmen kívül hagyja. A felhasználói árfelülírások megtartják normál prioritásukat. Tekintse meg [LiteLLMOCR árazási kulcsait](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- OCR használat tárolja az oldalak számát, az egységárat, a számított USD költséget, API kulcsot és a kiválasztott kapcsolatot. Az oldalak soha nem jelennek meg tokenekként. A hívásnaplók számlázási metaadatokat tartalmaznak, nem URLs dokumentumot, PDF bájtokat vagy kivont szöveget.
+- A sikeres `/v1/embeddings` kérések fizikai kötegenként egy használati sort rögzítenek, beleértve az ugyanazon ezredmásodperc alatt elkészült különálló kötegeket is. A szolgáltató által jelentett díjak elsőbbséget élveznek a jelképes becslésekkel szemben; a kombinált burkolók nem adnak díjat.
+- A használati előzmények, a költségelemzés, provider/account ablakok, az API-kulcs kiadási korlátai, a kérelem-költségkönyv és a napi használati összesítések tartalmazzák ezeket a költségeket. A naplózás nélküli kulcsok megtartják a numerikus elszámolást a forrásszöveg megőrzése nélkül.
+- Hiányzó használat vagy tarifák vannak** ismeretlen** , nem ingyenes: a válaszköltség fejléc kimaradt, és a korlátozott API kulcsokra a meglévő árazatlan használati szabályzat vonatkozik. A kifejezetten konfigurált nulla díjak továbbra is érvényesek nulla költségű használatban.
+
+Ez csak előremutató könyvelés. A régi OCR/embedding -hívások, amelyek soha nem írtak használati előzményeket, nem rekonstruálhatók ebből az áttelepítésből. A katalógus becslései USD becslések, nem számlák, és nem tartalmazzák a valutaváltást, az adókat vagy a kedvezményeket.
+
+### Beszéd és képek
+
+- A sikeres `/v1/audio/transcriptions`, `/v1/audio/speech` és képgenerálási kísérletek megosztják a numerikus elszámolást. A közvetlen és kombinált hívások a hívó API gombját és a kiválasztott kapcsolatot hordozzák; a kombinált burkoló soha nem ad hozzá második terhelést.
+- A szolgáltató által jelentett USD nyeri a katalógus becslését, beleértve az explicit nulla díjat. OpenRouterJSON `usage.cost` `cost_usd`- re normalizálva van . Ellenkező esetben a mért tokenek tokenárakat, az átírási másodpercek a másodpercenkénti árat, a beszédbevitel Unicode karakterszámokat, az átalányáras képek pedig a ténylegesen visszaadott számot használják, nem a kért `n`.
+- A bináris OpenRouter TTS nincs JSON használati törzse. Miután a hang befejeződött vagy a hívó megszakítja, OmniRoute lekérdezi ID generálását a** azonos** konfigurált OpenRouter eredet. A EU kérés soha nem esik vissza a globális eredetre. Ez egy korlátozott, csak olvasható keresés; a szintézist nem próbálják újra elszámolni. A számlázási rekordok a hang befejezése után jelenhetnek meg: a keresési újrapróbálkozások a háttérben futnak körülbelül 52 másodpercig, beleértve a hálózati határidőket is.
+- A keresés során az audioválasz `X-OmniRoute-Cost-Status: pending` rendelkezik, és nincs válaszköltség fejléc. Végső terhelése az egyeztetés után megjelenik a használati előzményekben, az analitikában és a kulcskönyvben. Ha a metaadatok nem állnak rendelkezésre, a rendszer egy konfigurált tarifa-pillanatképet használ; ellenkező esetben a költségek ismeretlenek maradnak.
+- A másodpercek, a karakterek és a képek számának külön számlázási egységmezője van, soha nem hamis tokenszám. A könyvelés csak a numerikus felhasználást tartja meg, a beszédszöveget, az átiratokat vagy a képbájtokat nem. A meglévő árazatlan képmentességek változatlanok: a valóban hiányzó képtarifa nem zár újonnan egy korlátozott kulcsot, és a válasz elhagyja a költségfejlécet, ahelyett, hogy a hívást ingyenesnek nyilvánítaná. Az árképzési bolt meghibásodása továbbra is megőrzi a használati bizonyítékot a hibamentes végrehajtáshoz.
+
+Semmilyen történelmi speech/image -töltést nem találnak ki vagy töltenek vissza. A szolgáltató számlázása marad a referencia a számlák és a nem jelentett hívások esetében.
 
 ---
 

@@ -154,8 +154,8 @@ src/
 | `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Stran nadzorne plošče Traffic Inspector razdeljena — DevTools, 7 zavihkov s podrobnostmi, 4 preklopi načina zajema, snemalnik seje, barvanje konteksta. i18n PT-BR + EN. Glej `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                      |
 | `app/(dashboard)/dashboard/activity/`                                        | Stran z virom dejavnosti (skupina B): `page.tsx` (strežnik) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — glej `docs/architecture/MONITORING_SECTIONS.md`                                                                                                          |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | Stran za deljenje kvot (skupina B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                            |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Konfiguracijska stran načrta ponudnika (skupina B): `page.tsx` + `ProviderPlanConfigClient.tsx` — razsežnosti kvote na preglasitev povezave                                                                                                                                                                                |
-| `app/docs/`                                                                  | Vdelan pregledovalnik dokumentacije (upodobi `docs/*.md`)                                                                                                                                                                                                                                                                  |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Konfiguracijska stran načrta ponudnika (skupina B): `page.tsx` + `ProviderPlanConfigClient.tsx` — dimenzije kvote na preglasitev povezave                                                                                                                                                                                  |
+| `app/docs/`                                                                  | Vdelan pregledovalnik dokumentacije (upodablja `docs/*.md`)                                                                                                                                                                                                                                                                |
 | `app/landing/`                                                               | Tržna ciljna stran                                                                                                                                                                                                                                                                                                         |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | Strani, povezane z avtorizacijo                                                                                                                                                                                                                                                                                            |
 | `app/{400,401,403,408,429,500,502,503}/`                                     | strani HTTP                                                                                                                                                                                                                                                                                                                |
@@ -226,7 +226,7 @@ src/
 | `tagRouter.ts`         | Usmerjanje na podlagi oznak                          |
 | `comboResolver.ts`     | Kombinirana ločljivost (uporablja kombinirani motor) |
 | `modelAvailability.ts` | Preverjanje razpoložljivosti po modelu               |
-| `assessment/`          | Ocena modela (1. faza RFC-AUTO-ASSESSMENT )          |
+| `assessment/`          | Ocena modela (1. faza RFC-AUTO-ACESSMENT )           |
 
 ### `src/server/`
 
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Komponenta nadzorne plošče API: adapterji preko `packages/ui-kit` — glejte `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: imena ikon, ki jih uporabljajo komponente → Lucide (`<Icon>`)                                       |
-| `constants/providers.ts`         | **381 ponudnikov** z Zod validacijo (vir resnice)                                                               |
+| `constants/providers.ts`         | **394 ponudnikov** z Zod validacijo (vir resnice)                                                               |
 | `constants/cliTools.ts`          | Zunanji register orodja CLI                                                                                     |
-| `constants/routingStrategies.ts` | **20 strategij usmerjanja** s prioritetami                                                                      |
+| `constants/routingStrategies.ts` | **22 strategij usmerjanja** s prioritetami                                                                      |
 | `constants/publicApiRoutes.ts`   | Poti, ki zahtevajo overitev nosilca (v primerjavi z upravljanjem).                                              |
 | `constants/upstreamHeaders.ts`   | Seznam zavrnjenih naslovov za zahteve navzgor                                                                   |
 | `validation/schemas.ts`          | ~ 80 Zod (en sam vir resnice za pogodbe API )                                                                   |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — Delovni prostor pretočnega mehanizma
+## `open-sse/` — Streaming Engine Workspace
 
-Ločen delovni prostor npm (`@omniroute/open-sse`). Upravlja obdelavo zahtev in izvajanje ponudnikov.
+Ločen delovni prostor npm (`@omniroute/open-sse`). Ukvarja se z izvajanjem ponudnika + za obdelavo zahtev.
 
 ```
 open-sse/
-├── handlers/            # 16 datotek (12 obdelovalnikov + 4 pomožne datoteke): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search itd.
-├── executors/           # 150 izvajalnih modulov (razredi, ki razširjajo BaseExecutor, in pomožne datoteke za posamezne ponudnike)
-├── translator/          # Pretvorniki formatov (9 za zahteve, 9 za odgovore, 9 pomožnih)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ storitvenih modulov (combo, accountFallback, autoCombo, reasoningCache, prikriti način claude code/chatgpt, modelDeprecation, taskAwareRouter, workflowFSM itd.)
-├── mcp-server/          # Strežnik MCP (110 orodij, 3 transporti, 33 obsegov)
-├── config/              # Registri ponudnikov/modelov, konfiguracija glav, vzdevki modelov
-├── utils/               # Odjemalec TLS, pridobivanje/razpošiljanje prek posredniškega strežnika, omrežni pripomočki
-├── index.ts             # Vstopna točka delovnega prostora
-├── package.json         # Manifest delovnega prostora
-├── tsconfig.json        # Konfiguracija TS delovnega prostora
-└── types.d.ts           # Deklaracije tipov delovnega prostora
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Pot                         | Namen                                                                                |
-| --------------------------- | ------------------------------------------------------------------------------------ |
-| `server.ts`                 | Življenjski cikel strežnika MCP (transporta stdio + HTTP)                            |
-| `httpTransport.ts`          | Transporti HTTP Streamable + SSE (`/api/mcp/sse`, `/api/mcp/stream`)                 |
-| `audit.ts`                  | Beleženje revizij v tabelo `mcp_tool_audit`                                          |
-| `scopeEnforcement.ts`       | Preverjanje obsega za posamezno orodje                                               |
-| `runtimeHeartbeat.ts`       | Signal zdravja v `DATA_DIR/runtime/mcp-heartbeat.json`                               |
-| `descriptionCompressor.ts`  | Stiskanje metapodatkov opisov orodij za prihranek konteksta                          |
-| `schemas/tools.ts`          | 36 osnovnih definicij orodij + obsegi                                                |
-| `tools/advancedTools.ts`    | Implementacije naprednih orodij                                                      |
-| `tools/memoryTools.ts`      | 3 pomnilniška orodja (iskanje/dodajanje/brisanje)                                    |
-| `tools/skillTools.ts`       | 4 orodja za veščine (seznam/omogočanje/izvajanje/izvedbe)                            |
-| `tools/compressionTools.ts` | 5 orodij za stiskanje                                                                |
-| `README.md`                 | Interni README strežnika MCP (navzkrižno povezan iz `docs/frameworks/MCP-SERVER.md`) |
+| Pot                         | Namen                                                                               |
+| --------------------------- | ----------------------------------------------------------------------------------- |
+| `server.ts`                 | življenjski cikel strežnika MCP (stdio + HTTP prenaša)                              |
+| `httpTransport.ts`          | HTTP Pretočni + SSE transporti (`/api/mcp/sse`, `/api/mcp/stream`)                  |
+| `audit.ts`                  | Revizijsko beleženje v tabelo `mcp_tool_audit`                                      |
+| `scopeEnforcement.ts`       | Preverjanje obsega posameznega orodja                                               |
+| `runtimeHeartbeat.ts`       | Zdrav srčni utrip do `DATA_DIR/runtime/mcp-heartbeat.json`                          |
+| `descriptionCompressor.ts`  | Stisnite metapodatke opisa orodja, da shranite kontekst                             |
+| `schemas/tools.ts`          | 36 definicij osnovnih orodij + scopes                                               |
+| `tools/advancedTools.ts`    | Napredne izvedbe orodij                                                             |
+| `tools/memoryTools.ts`      | 3 pomnilniška orodja (search/add/clear)                                             |
+| `tools/skillTools.ts`       | 4 orodja za spretnosti (list/enable/execute/executions)                             |
+| `tools/compressionTools.ts` | 5 orodij za stiskanje                                                               |
+| `README.md`                 | Notranji strežnik MCP README (navzkrižno povezan z `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Zunanje integracije CLI + Notranji OmniRoute CLI                                          |
 | `I18N.md`                   | arhitektura i18n, dodajanje jezika, 67 krajev                                             |
 | `UNINSTALL.md`              | Koraki čiste odstranitve                                                                  |
-| `PROVIDER_REFERENCE.md`     | **Samodejno ustvarjeno** katalog 381 ponudnikov (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Samodejno ustvarjeno** katalog 394 ponudnikov (regen: `npm run gen:provider-reference`) |
 
 ### Podsistem globokih potopov
 

@@ -14,23 +14,24 @@ Dispečer podepisuje každé doručení pomocí HMAC-SHA256, při přechodných
 selháních opakuje pokusy, sleduje stav doručování jednotlivých webhooků a automaticky zakazuje koncové body,
 které opakovaně selhávají.
 
-## Podporované události
+## Podporované akce
 
-Typ `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, používaný v `src/lib/webhookDispatcher.ts`) aktuálně modeluje přesně čtyři události:
+Typ `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, spotřebováno `src/lib/webhookDispatcher.ts`) aktuálně modeluje osm událostí:
 
-| Událost             | Spustí se, když                                                    |
-| ------------------- | ------------------------------------------------------------------ |
-| `request.completed` | Proxyovaný požadavek je úspěšně dokončen                           |
-| `request.failed`    | Proxyovaný požadavek selže po všech opakováních/záložních pokusech |
-| `quota.exceeded`    | Klíč API překročí limit rozpočtu/kvóty                             |
-| `test.ping`         | Syntetická událost používaná testovacím koncovým bodem             |
+| Událost                   | Požáry, když                                                                                                     |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Požadavek přes proxy byl úspěšně dokončen                                                                        |
+| `request.failed`          | Požadavek přes proxy selže po všech retries/fallback                                                             |
+| `quota.exceeded`          | Klíč API překračuje práh budget/quota                                                                            |
+| `proxy.set_aside`         | Člen skupiny proxy je po opakovaných odmítnutích vyřazen (pouze přechod)                                         |
+| `proxy.pool.exhausted`    | Každý člen oboru proxy fondu je vyčleněn                                                                         |
+| `provider.reset_redeemed` | Při automatickém použití bankovaných resetů byl uplatněn resetovací kredit nebo resetování týdenní relace Claude |
+| `provider.exhausted`      | Každý účet poskytovatele se ochlazuje (maximálně jednou za poskytovatele každých 10 minut)                       |
+| `test.ping`               | Syntetická událost používaná koncovým bodem testu                                                                |
 
-Odběry přijímají literál `"*"` pro příjem všech událostí. Neznámé názvy
-událostí v `events` jsou při odesílání ignorovány.
+Předplatná přijímají doslovné `"*"`, aby obdrželi každou událost. Neznámé názvy událostí v `events` jsou v době odeslání ignorovány.
 
-> Poznámka: API dispečeru je zapojeno, ale produkční místa volání pro některé
-> události jiné než `test.ping` se stále dokončují. Pomocí `grep dispatchEvent` ověřte,
-> které cesty aktuálně ve vaší verzi dispečer volají.
+> Poznámka: Dispečer API je připojen, ale produkční volací místa pro některé události mimo `test.ping` stále přistávají. Zkontrolujte `grep dispatchEvent`, abyste viděli, které cesty aktuálně vyvolávají dispečera ve vašem vydání.
 
 ## Architektura
 
@@ -126,24 +127,22 @@ Telegram / vlastní transformátory datové části) byla přidána migrací `07
 
 ## REST API
 
-Všechny koncové body vyžadují ověření pro správu (`requireManagementAuth`).
+Všechny koncové body vyžadují ověření správy (`requireManagementAuth`).
 
-| Koncový bod                     | Metoda | Popis                                         |
-| ------------------------------- | ------ | --------------------------------------------- |
-| `/api/webhooks`                 | GET    | Výpis webhooků (tajné klíče jsou maskovány)   |
-| `/api/webhooks`                 | POST   | Vytvoření webhooku                            |
-| `/api/webhooks/[id]`            | GET    | Podrobnosti webhooku (úplný tajný klíč)       |
-| `/api/webhooks/[id]`            | PUT    | Aktualizace polí                              |
-| `/api/webhooks/[id]`            | DELETE | Odstranění                                    |
-| `/api/webhooks/[id]/test`       | POST   | Odeslání události `test.ping` (bez opakování) |
-| `/api/webhooks/[id]/deliveries` | GET    | Nedávné pokusy o doručení pro jeden webhook   |
-| `/api/webhooks/validate-url`    | POST   | Předběžná validace URL (ochrana proti SSRF)   |
+| Koncový bod                     | Metoda | Popis                                       |
+| ------------------------------- | ------ | ------------------------------------------- |
+| `/api/webhooks`                 | GET    | Seznam webhooků (tajemství maskované)       |
+| `/api/webhooks`                 | POST   | Vytvořte webhook                            |
+| `/api/webhooks/[id]`            | GET    | Detail webhooku (úplné tajemství)           |
+| `/api/webhooks/[id]`            | PUT    | Aktualizujte pole                           |
+| `/api/webhooks/[id]`            | DELETE | Odstranit                                   |
+| `/api/webhooks/[id]/test`       | POST   | Vystřelit `test.ping` (žádné opakování)     |
+| `/api/webhooks/[id]/deliveries` | GET    | Nedávné pokusy o doručení pro jeden webhook |
+| `/api/webhooks/validate-url`    | POST   | Předletová validace URL (SSRF stráž)        |
 
-`GET /api/webhooks` maskuje tajný klíč na `<prvních 10 znaků>...`, aby se zabránilo jeho
-úniku na stránkách s výpisy. Pokud tajný klíč skutečně potřebujete, použijte požadavek
-GET na `[id]`.
+`GET /api/webhooks` maskuje tajemství `<first 10 chars>...`, aby se zabránilo úniku na stránkách seznamu. Použijte `[id]` GET když skutečně potřebujete tajemství.
 
-### Vytvoření webhooku
+### Vytvořte webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -153,22 +152,20 @@ curl -X POST http://localhost:20128/api/webhooks \
     "url": "https://hooks.slack.com/services/...",
     "secret": "whsec_my_shared_secret",
     "events": ["quota.exceeded", "request.failed"],
-    "description": "Upozornění Slack"
+    "description": "Slack alerts"
   }'
 ```
 
-Pokud je `secret` vynechán, server vygeneruje tajný klíč `whsec_<hex>` a vrátí
-jej v odpovědi.
+Pokud je `secret` vynecháno, server vygeneruje tajný klíč `whsec_<hex>` a vrátí jej v odpovědi.
 
-### Test webhooku
+### Testovací webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Vrací `{ delivered, status, error }`. Neprovádějí se žádné opakované pokusy — to je užitečné
-pro rychlé ověření, že příjemce přijímá datovou část a podpis.
+Vrátí `{ delivered, status, error }`. Nepokouší se o žádné opakování — užitečné pro rychlé ověření, že přijímač přijímá užitečné zatížení a podpis.
 
 ## Řídicí panel
 

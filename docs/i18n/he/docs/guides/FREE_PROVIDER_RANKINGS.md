@@ -13,15 +13,15 @@
 
 ## מה זה
 
-OmniRoute רושמת 381 ספקים, כולל 155 רישומי קטלוג מסומנים**free/no-auth** (No-auth, free-tier OAuth, או free-tier API key — עיין [במדריך השכבות החינמיות](../getting-started/FREE-TIERS-GUIDE.md) [ובמדריך המלא של Free Tiers](../reference/FREE_TIERS.md) ). המלכוד: ספקי חינם משתנים מאוד באיכות הדגם. ספק ללא אישור המשרת מודל גבול הוא הרבה יותר שימושי מאשר ספק המשרת מודל קטן מדור קודם.
+OmniRoute רושמת 394 ספקים, כולל 155 רשומות קטלוג מסומנות**free/no-auth** (No-auth, free-tier OAuth, או free-tier API key — עיין [במדריך השכבות החינמיות](../getting-started/FREE-TIERS-GUIDE.md) [ובמדריך המלא של Free Tiers](../reference/FREE_TIERS.md) ). המלכוד: ספקי חינם משתנים מאוד באיכות הדגם. ספק ללא אישור המשרת מודל גבול הוא הרבה יותר שימושי מאשר ספק המשרת מודל קטן מדור קודם.
 
-**דירוגי ספקים בחינם** תשובות"** איזה ספק חינמי נותן לי את הדגם הטוב ביותר?** "על ידי הצטרפות לקטלוג של כל ספק חינמי עם** ציוני איכות ממקור המונים** מה** טבלת הישגים של Arena AI** (העדפה אנושית ELO, אותו רעיון מאחורי זירת הצ'אטבוט LMArena ). הספקים מדורגים אז לפי החוזק שלהם** הדגם החינמי הטוב ביותר** .
+**דירוגי ספקים בחינם** תשובות"** איזה ספק חינמי נותן לי את הדגם הטוב ביותר?** "על ידי הצטרפות לקטלוג של כל ספק חינמי עם** ציוני איכות ממקור המונים** מה** טבלת הישגים של Arena AI** (העדפה אנושית ELO, אותו רעיון מאחורי זירת הצ'אטבוט LMArena ). לאחר מכן הספקים מדורגים לפי החוזק שלהם** הדגם החינמי הטוב ביותר** .
 
 הדירוג מחושב משלושה מקורות אמיתיים:
 
-1. הספק החינמי מפרט — `NOAUTH_PROVIDERS`, בתוספת ערכי `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` המסומנים ב- `hasFree` (`src/shared/constants/providers.ts`).
+1. הספק החינמי מפרט — `NOAUTH_PROVIDERS`, בתוספת ערכים של `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` המסומנים ב- `hasFree` (`src/shared/constants/providers.ts`).
 2. קטלוג הדגמים של כל ספק ממרשם הספקים (`open-sse/config/providerRegistry.ts`).
-3. ציוני התאמה למשימות שנגזרו מ-ELO המאוחסנים בטבלת `model_intelligence` DB על ידי מנוע הסנכרון Arena ELO (`src/lib/arenaEloSync.ts`).
+3. ציוני התאמה למשימה שנגזרו מ-ELO המאוחסנים בטבלת `model_intelligence` DB על ידי מנוע הסנכרון Arena ELO (`src/lib/arenaEloSync.ts`).
 
 היגיון ההצטרפות חי ב- `src/lib/freeProviderRankings.ts`.
 

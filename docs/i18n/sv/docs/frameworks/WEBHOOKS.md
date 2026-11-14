@@ -14,23 +14,24 @@ Dispatcher-komponenten signerar varje leverans med HMAC-SHA256, försöker igen 
 fel, spårar leveransstatus per webhook och inaktiverar automatiskt slutpunkter som
 fortsätter att misslyckas.
 
-## Händelser som stöds
+## Events som stöds
 
-Typen `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, som används av `src/lib/webhookDispatcher.ts`) modellerar för närvarande exakt fyra händelser:
+`WebhookEvent` typen (`src/lib/webhooks/eventDescriptions.ts`, konsumerad av `src/lib/webhookDispatcher.ts`) modellerar för närvarande åtta händelser:
 
-| Händelse            | Utlöses när                                                  |
-| ------------------- | ------------------------------------------------------------ |
-| `request.completed` | En proxad begäran slutförs framgångsrikt                     |
-| `request.failed`    | En proxad begäran misslyckas efter alla omförsök/reservvägar |
-| `quota.exceeded`    | En API-nyckel passerar ett budget-/kvottröskelvärde          |
-| `test.ping`         | Syntetisk händelse som används av testslutpunkten            |
+| Händelse                  | Bränder när                                                                                                                   |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | En fullmaktsbegäran slutförs framgångsrikt                                                                                    |
+| `request.failed`          | En fullmaktsbegäran misslyckas trots allt retries/fallback                                                                    |
+| `quota.exceeded`          | En API -nyckel passerar en budget/quota -tröskel                                                                              |
+| `proxy.set_aside`         | En proxypoolmedlem sätts åt sidan efter upprepade avslag (endast övergång)                                                    |
+| `proxy.pool.exhausted`    | Varje medlem i en proxypool omfattning avsätts                                                                                |
+| `provider.reset_redeemed` | Automatisk applicering av bankåterställningar löste in en återställningskredit eller återställning av Claude veckovis session |
+| `provider.exhausted`      | Varje konto hos en leverantör kyls ner (högst en gång per leverantör var tionde minut)                                        |
+| `test.ping`               | Syntetisk händelse som används av testets slutpunkt                                                                           |
 
-Prenumerationer accepterar literalen `"*"` för att ta emot alla händelser. Okända
-händelsenamn i `events` ignoreras vid distribution.
+Prenumerationer accepterar den bokstavliga `"*"` för att ta emot varje evenemang. Okända händelsenamn i `events` ignoreras vid avsändning.
 
-> Obs! Dispatcher-API:t är inkopplat, men produktionsanrop för vissa av
-> händelserna som inte är `test.ping` håller fortfarande på att införas. Kontrollera `grep dispatchEvent` för att se
-> vilka kodvägar som för närvarande anropar dispatcher-komponenten i din version.
+> Obs: avsändaren API är ansluten, men produktionsanropsplatser för några av icke-`test.ping` -händelserna landar fortfarande. Kontrollera `grep dispatchEvent` för att se vilka sökvägar som för närvarande anropar avsändaren i din version.
 
 ## Arkitektur
 
@@ -126,21 +127,20 @@ Telegram / anpassade nyttolasttransformerare) lades till av `070_webhooks_kind_m
 
 ## REST API
 
-Alla slutpunkter kräver hanteringsautentisering (`requireManagementAuth`).
+Alla slutpunkter kräver hanteringsbehörighet (`requireManagementAuth`).
 
-| Slutpunkt                       | Metod  | Beskrivning                              |
-| ------------------------------- | ------ | ---------------------------------------- |
-| `/api/webhooks`                 | GET    | Lista webhooks (hemligheter maskerade)   |
-| `/api/webhooks`                 | POST   | Skapa webhook                            |
-| `/api/webhooks/[id]`            | GET    | Webhook-detaljer (fullständig hemlighet) |
-| `/api/webhooks/[id]`            | PUT    | Uppdatera fält                           |
-| `/api/webhooks/[id]`            | DELETE | Ta bort                                  |
-| `/api/webhooks/[id]/test`       | POST   | Skicka en `test.ping` (inga återförsök)  |
-| `/api/webhooks/[id]/deliveries` | GET    | Senaste leveransförsöken för en webhook  |
-| `/api/webhooks/validate-url`    | POST   | Förhandsvalidering av URL (SSRF-skydd)   |
+| Slutpunkt                       | Metod  | Beskrivning                                |
+| ------------------------------- | ------ | ------------------------------------------ |
+| `/api/webhooks`                 | GET    | Lista webhooks (hemligheter maskerade)     |
+| `/api/webhooks`                 | POST   | Skapa webhook                              |
+| `/api/webhooks/[id]`            | GET    | Webhook-detalj (fullständig hemlighet)     |
+| `/api/webhooks/[id]`            | PUT    | Uppdatera fält                             |
+| `/api/webhooks/[id]`            | DELETE | Ta bort                                    |
+| `/api/webhooks/[id]/test`       | POST   | Avfyra en `test.ping` (inga försök igen)   |
+| `/api/webhooks/[id]/deliveries` | GET    | Senaste leveransförsök för en webhook      |
+| `/api/webhooks/validate-url`    | POST   | URL -validering före flygning (SSRF guard) |
 
-`GET /api/webhooks` maskerar hemligheten till `<de första 10 tecknen>...` för att undvika läckage
-på listsidor. Använd GET för `[id]` när du faktiskt behöver hemligheten.
+`GET /api/webhooks` maskerar hemligheten till `<first 10 chars>...` för att undvika läckage på listningssidor. Använd `[id]` GET när du verkligen behöver hemligheten.
 
 ### Skapa webhook
 
@@ -156,8 +156,7 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Om `secret` utelämnas genererar servern en `whsec_<hex>`-hemlighet och returnerar
-den i svaret.
+Om `secret` utelämnas genererar servern en `whsec_<hex>` hemlighet och returnerar den i svaret.
 
 ### Testa webhook
 
@@ -166,8 +165,7 @@ curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Returnerar `{ delivered, status, error }`. Inga återförsök görs – användbart för
-att snabbt verifiera att mottagaren accepterar nyttolasten och signaturen.
+Returnerar `{ delivered, status, error }`. Inga återförsök görs — användbara för att snabbt validera att mottagaren accepterar nyttolasten och signaturen.
 
 ## Instrumentpanel
 
