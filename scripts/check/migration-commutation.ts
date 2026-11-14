@@ -21,7 +21,9 @@
 //
 // Usage (cwd = repository root):
 //   node --import tsx/esm scripts/check/migration-commutation.ts \
-//     --base-dir <dir> --head-dir <dir> [--must-not-apply <file.sql>]... [--json]
+//     --base-dir <dir> --head-dir <dir> [--must-not-apply <file.sql>]... [--merged-base] [--json]
+// --merged-base: the base is a release tag (Release-Green), so the compared files are already
+// merged on the branch and the hints say "fix forward with a new migration", never "rename".
 // --must-not-apply (repeatable) names a file of --head-dir, by file name, that the second boot
 // of the upgraded path must NOT apply: the gate passes the target of each rename covered by
 // RENAMED_MIGRATION_COMPATIBILITY, whose ledger row the runner has to move instead of running
@@ -328,11 +330,17 @@ export function diffSchemas(upgraded: NormalizedSchema, fresh: NormalizedSchema)
   return differences;
 }
 
-type CliOptions = { baseDir: string; headDir: string; json: boolean; mustNotApply: string[] };
+type CliOptions = {
+  baseDir: string;
+  headDir: string;
+  json: boolean;
+  mustNotApply: string[];
+  mergedBase: boolean;
+};
 
 const USAGE =
   "uso: migration-commutation.ts --base-dir <dir> --head-dir <dir> " +
-  "[--must-not-apply <arquivo.sql>]... [--json]";
+  "[--must-not-apply <arquivo.sql>]... [--merged-base] [--json]";
 
 /**
  * A bare migration file name the runner loads: no directory part, `<digits>_<name>.sql` (the
@@ -345,12 +353,15 @@ export function parseArgs(argv: readonly string[]): CliOptions {
   let baseDir: string | undefined;
   let headDir: string | undefined;
   let json = false;
+  let mergedBase = false;
   const mustNotApply: string[] = [];
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     const [flag, inlineValue] = arg.includes("=") ? arg.split(/=(.*)/s, 2) : [arg, undefined];
     if (flag === "--json" && inlineValue === undefined) {
       json = true;
+    } else if (flag === "--merged-base" && inlineValue === undefined) {
+      mergedBase = true;
     } else if (flag === "--must-not-apply") {
       const value = inlineValue ?? argv[++index];
       if (!value || !SQL_FILE_NAME.test(value)) {
@@ -380,6 +391,7 @@ export function parseArgs(argv: readonly string[]): CliOptions {
     headDir: path.resolve(headDir),
     json,
     mustNotApply,
+    mergedBase,
   };
 }
 
@@ -697,9 +709,9 @@ export async function checkCommutation(
 }
 
 /**
- * Printed when EVERY difference is a PR migration that fails on both paths. The exact phrase
- * "não aplica em nenhum dos dois caminhos" is a contract with scripts/check/
- * check-migration-numbering.mjs, which looks for it in the output; keep it on one line.
+ * Printed when EVERY difference is a PR migration that fails on both paths. For human readers
+ * only (pinned by tests/unit/db/migration-commutation.test.ts and the gate's e2e tests): the
+ * gate keys on contract C1 (NOT_APPLIED_AFTER_BASE_PHRASE), which is always printed with it.
  */
 export const BROKEN_ON_BOTH_PATHS_PHRASE = "não aplica em nenhum dos dois caminhos";
 
@@ -721,17 +733,29 @@ const CASE_BULLETS =
   "      carimbo novo em que ela comute; nunca o mesmo carimbo com outro nome.";
 
 /**
+ * --merged-base (the gate compares with a release tag, as Release-Green does): every compared
+ * file is already merged on the branch and already ran on real databases, so renaming or
+ * editing it is not a fix. Only a new migration is.
+ */
+const MERGED_FIX_FORWARD =
+  "    · a base é uma tag de release e os arquivos comparados já estão mesclados na branch →\n" +
+  "      não renomeie nem edite: corrija para frente com uma migration nova\n" +
+  "      (`npm run db:new-migration -- <descrição>`) que leve os dois caminhos ao mesmo schema.";
+
+const caseBullets = (mergedBase: boolean): string =>
+  mergedBase ? MERGED_FIX_FORWARD : CASE_BULLETS;
+
+/**
  * Neutral on purpose: the gate runs this check for out-of-order migrations, for merged
  * migrations that were edited and for renames covered by the compatibility map, and prints the
  * hint of the actual case right below. It never says "regere o nome": the gate's tests assert
  * that a rename or an edit is not told to regenerate the name. Printed only when both paths
  * produced a schema and they differ.
  */
-const HOW_TO_FIX =
+const HOW_TO_FIX_HEAD =
   "  → aplicadas depois da base (banco já instalado), as migrations comparadas dão um schema\n" +
   "    diferente do de uma instalação nova, que aplica tudo na ordem dos nomes. A correção\n" +
-  "    depende do caso (pelo gate, o caso vem indicado logo abaixo):\n" +
-  CASE_BULLETS;
+  "    depende do caso (pelo gate, o caso vem indicado logo abaixo):\n";
 
 /**
  * A PR migration failed on the upgraded path. That path already applies the PR's migrations
@@ -739,9 +763,11 @@ const HOW_TO_FIX =
  * same and fail too) — unless the migration depends on another migration of the same PR with
  * a larger stamp, which a new stamp puts first.
  */
-const HOW_TO_FIX_FAILED_UPGRADED =
+const HOW_TO_FIX_FAILED_UPGRADED_HEAD =
   `  → a migration do PR ${NOT_APPLIED_AFTER_BASE_PHRASE}, que é a ordem\n` +
-  "    de um banco já instalado (um carimbo novo sozinho não muda isso):\n" +
+  "    de um banco já instalado (um carimbo novo sozinho não muda isso):\n";
+
+const HOW_TO_FIX_FAILED_UPGRADED_PR =
   "    corrija o SQL contra o schema atual da base;\n" +
   "    se ela depende de outra migration do PR com carimbo maior, dê a ela um carimbo novo com\n" +
   "    `npm run db:new-migration -- <descrição>`.";
@@ -753,12 +779,11 @@ const BROKEN_ON_BOTH_PATHS_LINE = `  → a migration do PR ${BROKEN_ON_BOTH_PATH
  * migration needs something that comes after it, or it collides with something an earlier
  * stamp already created (the failing file can then be a base one, not the PR's).
  */
-const HOW_TO_FIX_FAILED_FRESH_ONLY =
+const HOW_TO_FIX_FAILED_FRESH_ONLY_HEAD =
   "  → tudo aplica no banco atualizado, mas uma instalação nova, que aplica tudo na ordem dos\n" +
   "    nomes, falha: a ordem muda o resultado (a migration que falhou depende de algo que vem\n" +
   "    depois dela, ou colide com algo que uma migration de carimbo menor já criou). A correção\n" +
-  "    depende do caso (pelo gate, o caso vem indicado logo abaixo):\n" +
-  CASE_BULLETS;
+  "    depende do caso (pelo gate, o caso vem indicado logo abaixo):\n";
 
 const HOW_TO_FIX_REAPPLIED =
   "  → bancos que já aplicaram essa migration com o nome antigo vão rodá-la outra vez. O runner\n" +
@@ -766,8 +791,15 @@ const HOW_TO_FIX_REAPPLIED =
   "    RENAMED_MIGRATION_COMPATIBILITY com carimbo diferente do antigo (no mesmo carimbo ele\n" +
   "    apaga a linha antiga e reaplica o arquivo). Mantenha o nome antigo ou corrija a entrada.";
 
-/** The hints for a non-empty list of differences, most specific first. */
-export function howToFix(differences: readonly Difference[]): string[] {
+/**
+ * The hints for a non-empty list of differences, most specific first. `mergedBase` (the base is
+ * a release tag) turns every "rename / new stamp / restore" fix into "fix forward".
+ */
+export function howToFix(
+  differences: readonly Difference[],
+  options: { mergedBase?: boolean } = {}
+): string[] {
+  const mergedBase = options.mergedBase === true;
   const hints: string[] = [];
   if (differences.some((difference) => difference.kind === "reapplied")) {
     hints.push(HOW_TO_FIX_REAPPLIED);
@@ -775,16 +807,19 @@ export function howToFix(differences: readonly Difference[]): string[] {
   const failures = differences.filter((difference) => difference.kind === "migration");
   if (failsOnUpgradedPath(failures)) {
     if (allFailOnBothPaths(failures)) hints.push(BROKEN_ON_BOTH_PATHS_LINE);
-    hints.push(HOW_TO_FIX_FAILED_UPGRADED);
+    hints.push(
+      HOW_TO_FIX_FAILED_UPGRADED_HEAD +
+        (mergedBase ? MERGED_FIX_FORWARD : HOW_TO_FIX_FAILED_UPGRADED_PR)
+    );
   } else if (failures.length > 0) {
-    hints.push(HOW_TO_FIX_FAILED_FRESH_ONLY);
+    hints.push(HOW_TO_FIX_FAILED_FRESH_ONLY_HEAD + caseBullets(mergedBase));
   }
   if (
     differences.some(
       (difference) => difference.kind !== "migration" && difference.kind !== "reapplied"
     )
   ) {
-    hints.push(HOW_TO_FIX);
+    hints.push(HOW_TO_FIX_HEAD + caseBullets(mergedBase));
   }
   return hints;
 }
@@ -814,7 +849,9 @@ async function main(): Promise<number> {
         console.error(`  - ${difference.message}`);
         if (difference.note) console.error(`    ℹ ${difference.note}`);
       }
-      for (const hint of howToFix(result.differences)) console.error(hint);
+      for (const hint of howToFix(result.differences, { mergedBase: options.mergedBase })) {
+        console.error(hint);
+      }
     }
     return result.equal ? 0 : 1;
   } catch (error) {

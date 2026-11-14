@@ -1028,3 +1028,33 @@ describe("migration-commutation normalizer (pure)", () => {
     );
   });
 });
+
+// V3-2 of the final review: against a release tag (--merged-base) every compared file is already
+// merged on the branch, so no hint may say "new stamp", "delete the PR's old file" or "restore".
+describe("migration-commutation hints (pure)", () => {
+  test("--merged-base turns every rename / new-stamp hint into fix forward", async () => {
+    const { howToFix, parseArgs } = await import("../../../scripts/check/migration-commutation.ts");
+    const schema = [{ kind: "column", name: "x", table: "t", onlyIn: "upgraded", message: "m" }];
+    const freshOnly = [{ kind: "migration", name: "a.sql", failedIn: "fresh", message: "m" }];
+    const upgraded = [{ kind: "migration", name: "a.sql", failedIn: "upgraded", message: "m" }];
+    for (const differences of [schema, freshOnly, upgraded] as never[]) {
+      const pr = howToFix(differences).join("\n");
+      const merged = howToFix(differences, { mergedBase: true }).join("\n");
+      assert.match(merged, /corrija para frente com uma migration nova/);
+      assert.doesNotMatch(merged, /dê a ela um carimbo novo/);
+      assert.doesNotMatch(merged, /apague o\s+arquivo antigo do PR/);
+      assert.doesNotMatch(merged, /devolva o conteúdo da base/);
+      assert.doesNotMatch(pr, /corrija para frente/);
+    }
+    // C1 stays in tag mode: the gate keys on it to title the failure.
+    assert.match(
+      howToFix(upgraded as never, { mergedBase: true }).join("\n"),
+      /não aplica depois de todas as migrations da base/
+    );
+    assert.equal(parseArgs(["--base-dir", "a", "--head-dir", "b"]).mergedBase, false);
+    assert.equal(
+      parseArgs(["--base-dir", "a", "--head-dir", "b", "--merged-base"]).mergedBase,
+      true
+    );
+  });
+});

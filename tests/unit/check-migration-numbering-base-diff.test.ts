@@ -29,7 +29,11 @@ import path from "node:path";
 const ROOT = path.resolve(import.meta.dirname, "../..");
 const GATE = path.join(ROOT, "scripts/check/check-migration-numbering.mjs");
 const LIB = path.join(ROOT, "scripts/check/lib/migrationBaseDiff.mjs");
-const REAL_DIR = path.join(ROOT, "src/lib/db/migrations");
+// The guard in tests/unit/db/migration-version-ordering.test.ts re-runs this file against a
+// copy of the real directory that already holds a timestamped migration.
+const REAL_DIR = path.resolve(
+  process.env.OMNIROUTE_TEST_MIGRATIONS_SOURCE_DIR || path.join(ROOT, "src/lib/db/migrations")
+);
 const MIG = "src/lib/db/migrations";
 
 // Past stamps on the cut-over day: always valid (>= cut-over, never in the future).
@@ -160,7 +164,16 @@ test("pure: a base without any date-named migration never yields out-of-order fi
 
 // --- End-to-end against a throwaway git repository ----------------------------------------
 
-const realNames = () => fs.readdirSync(REAL_DIR).filter((f) => f.endsWith(".sql"));
+/**
+ * The real legacy (NNN_) migrations only. The synthetic stamps below (20261113000xxx) must stay
+ * the newest of every synthetic base: a real timestamped migration is always dated later, and
+ * copying it in would turn "newer than the base" into "out of order" (V2-1 of the final review).
+ */
+const realNames = () =>
+  fs
+    .readdirSync(REAL_DIR)
+    .filter((f) => f.endsWith(".sql"))
+    .filter((f) => /^\d{3}_/.test(f));
 
 /** Environment for the gate: no inherited CI/GitHub/base variables from the test runner. */
 function cleanEnv(extra: Record<string, string> = {}): NodeJS.ProcessEnv {
@@ -797,8 +810,11 @@ function makeSelfContainedRepo(): { dir: string; mig: string; gatePath: string }
     "package.json",
     "tsconfig.json",
   ]) {
+    // dereference: a symlinked directory under ROOT is copied as real files. Copied as a link,
+    // the writes below (constants.ts) would land in the linked checkout instead of the copy.
     fs.cpSync(path.join(ROOT, rel), path.join(dir, rel), {
       recursive: true,
+      dereference: true,
       filter: (source) => !skipped.has(source),
     });
   }
@@ -1317,6 +1333,66 @@ test("e2e: --base-latest-tag compares like --base (a removal since the tag fails
   assert.equal(r.status, 1, r.stdout);
   assert.match(r.stderr, /já mesclada não pode ser apagada/);
   assert.match(r.stdout, /\(tag v2\.0\.0\)/);
+});
+
+// V3-3 of the final review: the Enterprise repository never receives the CE tags, only its own
+// vX.Y.Z-ee.N ones. Pure vX.Y.Z tags still win whenever there is one.
+test("e2e: --base-latest-tag falls back to the highest vX.Y.Z-ee.N tag (Enterprise)", () => {
+  const { dir } = makeRepo();
+  git(dir, ["tag", "v3.8.53-ee.2"]);
+  const ee = commitFile(dir, "20261113000200_ee_one.sql", "SELECT 1;\n");
+  git(dir, ["tag", "v3.8.54-ee.1"]);
+  commitFile(dir, "20261113000300_ee_two.sql", "SELECT 1;\n");
+  git(dir, ["tag", "v3.8.54-ee.1-rc"]); // not a release tag
+  const r = gate(dir, ["--base-latest-tag"]);
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(
+    r.stdout,
+    new RegExp(`comparação com a base ${ee.slice(0, 12)} \\(tag v3\\.8\\.54-ee\\.1\\)`)
+  );
+
+  const pure = commitFile(dir, "20261113000400_pure.sql", "SELECT 1;\n");
+  git(dir, ["tag", "v1.0.0"]);
+  const withPure = gate(dir, ["--base-latest-tag"]);
+  assert.equal(withPure.status, 0, withPure.stderr);
+  assert.match(
+    withPure.stdout,
+    new RegExp(`comparação com a base ${pure.slice(0, 12)} \\(tag v1\\.0\\.0\\)`)
+  );
+});
+
+// V3-2 of the final review: against a release tag every file since the tag is already merged
+// on the branch, so "regenerate the name, renaming is safe" would be wrong advice.
+test("e2e: --base-latest-tag tells a divergence to fix forward, never to rename", () => {
+  const { dir } = makeRepo();
+  git(dir, ["tag", "v1.0.0"]);
+  // Merged after the tag with a stamp older than the newest file in the tag: out of order.
+  commitFile(dir, "20261113000050_merged_older.sql", "SELECT 1;\n");
+  const record = path.join(tmpRoot, `record-tag-mode-${repoCounter}.json`);
+  const r = gate(dir, ["--base-latest-tag"], {
+    FAKE_EXIT: "1",
+    FAKE_OUTPUT: "tabela t: coluna x só existe no caminho atualizado",
+    FAKE_RECORD: record,
+  });
+  assert.equal(r.status, 1, r.stdout);
+  assert.match(r.stderr, /comparação com a tag v1\.0\.0: esses arquivos já estão mesclados/);
+  assert.match(r.stderr, /corrija para frente com uma migration nova/);
+  assert.doesNotMatch(r.stderr, /renomear é seguro/);
+  assert.doesNotMatch(r.stderr, /regere o nome/);
+  const seen = JSON.parse(fs.readFileSync(record, "utf-8")) as { argv: string[] };
+  assert.ok(seen.argv.includes("--merged-base"), `argv: ${seen.argv.join(" ")}`);
+
+  // A PR base keeps the PR advice and does not pass --merged-base.
+  const prRecord = path.join(tmpRoot, `record-pr-mode-${repoCounter}.json`);
+  const pr = gate(dir, ["--base", "v1.0.0"], {
+    FAKE_EXIT: "1",
+    FAKE_OUTPUT: "tabela t: coluna x só existe no caminho atualizado",
+    FAKE_RECORD: prRecord,
+  });
+  assert.equal(pr.status, 1, pr.stdout);
+  assert.match(pr.stderr, /regere o nome com npm run db:new-migration/);
+  const prSeen = JSON.parse(fs.readFileSync(prRecord, "utf-8")) as { argv: string[] };
+  assert.equal(prSeen.argv.includes("--merged-base"), false);
 });
 
 test("e2e: --base-latest-tag without any release tag fails closed", () => {

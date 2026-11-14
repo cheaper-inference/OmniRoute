@@ -487,12 +487,21 @@ function compareWithBase({ argvBase, baseLatestTag, regularNames, staticProblems
   // relocates their ledger row through the RENAMED_MIGRATION_COMPATIBILITY entry. Each rename
   // target goes in --must-not-apply (C2): the checker fails if the real runner applies it
   // again on the upgraded database, which also catches an entry the text parser misread.
+  // Against a release tag (Release-Green) every file since the tag is already merged on the
+  // branch: renaming or editing it is not a fix there, only a new migration is.
+  const mergedBase = base.kind === "tag";
+  const fixForward =
+    `    → comparação com a ${base.label}: esses arquivos já estão mesclados na branch ` +
+    `(homologação, Docker :next e o sync do Enterprise já os rodaram), então não renomeie nem ` +
+    `edite: corrija para frente com uma migration nova (npm run db:new-migration) que leve ` +
+    `banco atualizado e instalação nova ao mesmo schema`;
   const result = runCommutationCheck({
     cwd,
     baseFiles,
     migrationsDir: MIGRATIONS_DIR,
     headNames: regularNames,
     mustNotApply: [...renamedTargets],
+    mergedBase,
     env,
   });
   if (result.status !== "error" && result.output.includes(APPLIED_AGAIN_PHRASE)) {
@@ -529,26 +538,30 @@ function compareWithBase({ argvBase, baseLatestTag, regularNames, staticProblems
     problems.push(
       `  ✗ migration do PR não aplica (${scope}):\n` +
         indent(result.output) +
-        `\n    → corrija o SQL contra o schema atual da base; se ela depende de outra migration ` +
-        `do PR com carimbo maior, regere o nome com npm run db:new-migration`
+        (mergedBase
+          ? `\n${fixForward}`
+          : `\n    → corrija o SQL contra o schema atual da base; se ela depende de outra ` +
+            `migration do PR com carimbo maior, regere o nome com npm run db:new-migration`)
     );
   } else if (result.status === "different") {
     const hints = [];
-    if (outOfOrder.length > 0) {
+    if (mergedBase) {
+      hints.push(fixForward);
+    } else if (outOfOrder.length > 0) {
       hints.push(
         `    → fora de ordem (${outOfOrder.join(", ")}; carimbo ≤ ${baseMaxTimestamp}, o ` +
           `maior da base): regere o nome com npm run db:new-migration (renomear é seguro: o ` +
           `arquivo ainda não foi mesclado)`
       );
     }
-    if (modified.length > 0) {
+    if (!mergedBase && modified.length > 0) {
       hints.push(
         `    → editadas (${modified.join(", ")}): bancos atualizados não reaplicam a migration ` +
           `editada (ela já está no ledger); devolva o conteúdo da base e faça a mudança numa ` +
           `migration nova (npm run db:new-migration)`
       );
     }
-    if (renamed.length > 0) {
+    if (!mergedBase && renamed.length > 0) {
       hints.push(
         `    → renomeadas (${renamedList}): a renomeação muda a posição da migration em ` +
           `instalações novas, mas não em bancos atualizados (o runner só move a linha do ` +

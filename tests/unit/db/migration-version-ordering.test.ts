@@ -268,6 +268,10 @@ test("compareMigrationFiles orders a mixed legacy/timestamp listing numerically"
 
 const GUARDED_TEST_FILES = [
   "tests/unit/check-migration-numbering.test.ts",
+  // V2-1 of the final review: both failed once a real timestamped migration existed (a fixed
+  // clock in the generator test, real stamps copied into the synthetic bases of the gate test).
+  "tests/unit/check-migration-numbering-base-diff.test.ts",
+  "tests/unit/new-migration-generator.test.ts",
   "tests/unit/db/migration-timestamp-runner.test.ts",
   "tests/unit/db/migration-version-ordering.test.ts",
   "tests/unit/db/migrations-fresh-database.test.ts",

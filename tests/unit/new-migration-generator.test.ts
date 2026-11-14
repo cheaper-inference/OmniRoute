@@ -40,6 +40,30 @@ function realSqlFiles(): string[] {
   return fs.readdirSync(REAL_MIGRATIONS_DIR).filter((f) => f.endsWith(".sql"));
 }
 
+// The guard in tests/unit/db/migration-version-ordering.test.ts re-runs this file against a
+// copy of the real directory that already holds a timestamped migration.
+const SOURCE_MIGRATIONS_DIR = path.resolve(
+  process.env.OMNIROUTE_TEST_MIGRATIONS_SOURCE_DIR || REAL_MIGRATIONS_DIR
+);
+
+function sourceSqlFiles(): string[] {
+  return fs.readdirSync(SOURCE_MIGRATIONS_DIR).filter((f) => f.endsWith(".sql"));
+}
+
+/**
+ * NOW, or one second after the newest real timestamped migration when that is later. Every
+ * real migration is dated after NOW, so a fixed clock would call it "in the future" (V2-1 of
+ * the final review); the generated names must also stay newer than the real ones.
+ */
+function nowAfterRealMigrations(): string {
+  const newest = sourceSqlFiles()
+    .map((f) => /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})_/.exec(f))
+    .filter((m): m is RegExpExecArray => m !== null)
+    .map((m) => Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]))
+    .reduce((max, t) => Math.max(max, t), Number.NEGATIVE_INFINITY);
+  return new Date(Math.max(Date.parse(NOW), newest + 1000)).toISOString();
+}
+
 test("creates <timestamp>_<description>.sql with the header and prints its path", () => {
   const dir = freshDir();
   const r = run(["add_usage_index", "--dir", dir, "--now", NOW]);
@@ -150,10 +174,11 @@ test("without --dir the default target is the repo's migrations dir, independent
 
 test("the generated name passes the numbering gate next to the real migrations", () => {
   const dir = freshDir();
-  const r = run(["add usage index", "--dir", dir, "--now", NOW]);
+  const now = nowAfterRealMigrations();
+  const r = run(["add usage index", "--dir", dir, "--now", now]);
   assert.equal(r.status, 0, r.stderr);
   const generated = path.basename(r.stdout.trim());
-  const second = run(["add usage index", "--dir", dir, "--now", NOW]);
+  const second = run(["add usage index", "--dir", dir, "--now", now]);
   const generatedSecond = path.basename(second.stdout.trim());
 
   const result = (
@@ -169,8 +194,8 @@ test("the generated name passes the numbering gate next to the real migrations",
       missingLegacyTop: string[];
       timestampCount: number;
     }
-  )([...realSqlFiles(), generated, generatedSecond], new Set(), new Set(["026", "055", "121"]), {
-    now: new Date(NOW),
+  )([...sourceSqlFiles(), generated, generatedSecond], new Set(), new Set(["026", "055", "121"]), {
+    now: new Date(now),
   });
   assert.deepEqual(result.badNames, []);
   assert.deepEqual(result.duplicates, []);

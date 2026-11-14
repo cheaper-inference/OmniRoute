@@ -59,6 +59,12 @@ export const COMPAT_CONSTANTS_REL_PATH = "src/lib/db/migrationRunner/constants.t
  */
 export const RELEASE_TAG_RE = /^v(\d+)\.(\d+)\.(\d+)$/;
 
+/**
+ * Tag de release do repositório Enterprise (`v3.8.54-ee.1`): ele nunca recebe as tags do CE,
+ * então --base-latest-tag cai para ela quando não há nenhuma `vX.Y.Z` pura no histórico.
+ */
+export const ENTERPRISE_RELEASE_TAG_RE = /^v(\d+)\.(\d+)\.(\d+)-ee\.(\d+)$/;
+
 const TIMESTAMP_PREFIX_RE = /^(\d{14})_(.+)\.sql$/;
 const LEGACY_PREFIX_RE = /^(\d{3})_(.+)\.sql$/;
 const MIGRATION_NAME_RE = /^(\d+)_(.+)\.sql$/;
@@ -482,14 +488,14 @@ function tokenizeSqlForDml(sql) {
  * @param {string[]} tags
  * @returns {string[]}
  */
-export function sortReleaseTagsDescending(tags) {
+export function sortReleaseTagsDescending(tags, pattern = RELEASE_TAG_RE) {
   const parsed = [];
   for (const tag of tags) {
-    const match = tag.match(RELEASE_TAG_RE);
-    if (match) parsed.push({ tag, parts: match.slice(1, 4).map(Number) });
+    const match = tag.match(pattern);
+    if (match) parsed.push({ tag, parts: match.slice(1).map(Number) });
   }
   parsed.sort((a, b) => {
-    for (let k = 0; k < 3; k++) {
+    for (let k = 0; k < a.parts.length; k++) {
       if (a.parts[k] !== b.parts[k]) return b.parts[k] - a.parts[k];
     }
     return 0;
@@ -564,7 +570,10 @@ export function listReleaseTags(cwd, options = {}) {
   if (options.mergedInto) args.push("--merged", options.mergedInto);
   const r = git(cwd, args);
   if (r.status !== 0) throw new Error(`git tag falhou: ${r.stderr.trim()}`);
-  return sortReleaseTagsDescending(r.stdout.split("\n").map((line) => line.trim()));
+  return sortReleaseTagsDescending(
+    r.stdout.split("\n").map((line) => line.trim()),
+    options.pattern ?? RELEASE_TAG_RE
+  );
 }
 
 /**
@@ -604,6 +613,10 @@ export function resolveBaseRef({ cwd, cliBase, latestTag = false, env }) {
     let tags;
     try {
       tags = listReleaseTags(cwd, { mergedInto: "HEAD" });
+      // The Enterprise repository only carries its own vX.Y.Z-ee.N tags.
+      if (tags.length === 0) {
+        tags = listReleaseTags(cwd, { mergedInto: "HEAD", pattern: ENTERPRISE_RELEASE_TAG_RE });
+      }
     } catch (err) {
       return { status: "error", message: `--base-latest-tag: ${err.message}` };
     }
@@ -611,14 +624,16 @@ export function resolveBaseRef({ cwd, cliBase, latestTag = false, env }) {
       return {
         status: "error",
         message:
-          "--base-latest-tag: nenhuma tag de release (vX.Y.Z) no histórico do HEAD, então não " +
-          "há com o que comparar. Rode git fetch --tags (no CI: actions/checkout com " +
-          "fetch-depth: 0).",
+          "--base-latest-tag: nenhuma tag de release (vX.Y.Z, ou vX.Y.Z-ee.N no Enterprise) no " +
+          "histórico do HEAD, então não há com o que comparar. Rode git fetch --tags (no CI: " +
+          "actions/checkout com fetch-depth: 0).",
       };
     }
     const sha = revParseCommit(cwd, tags[0]);
     if (!sha) return { status: "error", message: `--base-latest-tag: tag ${tags[0]} ilegível` };
-    return { status: "resolved", sha, label: `tag ${tags[0]}` };
+    // kind "tag": every file between the tag and HEAD is already merged on the branch, so the
+    // hints must say "fix forward", never "rename" (V3-2 of the final review).
+    return { status: "resolved", sha, label: `tag ${tags[0]}`, kind: "tag" };
   }
 
   const explicit = cliBase || env.MIGRATION_BASE_REF || null;
@@ -754,6 +769,8 @@ export const APPLIED_AGAIN_PHRASE = "aplicada de novo no banco atualizado";
 /**
  * Roda o verificador de comutação (contrato em scripts/check/migration-commutation.ts):
  * base-dir = migrations da base extraídas do git; head-dir = cópia do diretório do disco.
+ * `mergedBase` (base = tag de release) vira `--merged-base`: as dicas do verificador dizem
+ * "corrija para frente", nunca "renomeie".
  * Cada nome de `mustNotApply` vira um `--must-not-apply <arquivo.sql>`: o alvo de uma
  * renomeação coberta não pode ser aplicado no banco atualizado (o runner só move a linha do
  * ledger), e o verificador confere isso pelo comportamento do runner real, não pelo texto
@@ -761,7 +778,8 @@ export const APPLIED_AGAIN_PHRASE = "aplicada de novo no banco atualizado";
  * Exit 0 = schemas iguais, 1 = divergem, outro = erro de infraestrutura.
  *
  * @param {{ cwd: string, baseFiles: Map<string, string>, migrationsDir: string,
- *   headNames: string[], mustNotApply?: string[], env: Record<string, string | undefined> }} input
+ *   headNames: string[], mustNotApply?: string[], mergedBase?: boolean,
+ *   env: Record<string, string | undefined> }} input
  * @returns {{ status: "equal" | "different" | "error", output: string }}
  */
 export function runCommutationCheck({
@@ -770,6 +788,7 @@ export function runCommutationCheck({
   migrationsDir,
   headNames,
   mustNotApply = [],
+  mergedBase = false,
   env,
 }) {
   const script = env.MIGRATION_COMMUTATION_SCRIPT || DEFAULT_COMMUTATION_SCRIPT;
@@ -798,6 +817,7 @@ export function runCommutationCheck({
     }
     const args = ["--import", tsxLoader, script, "--base-dir", baseDir, "--head-dir", headDir];
     for (const name of [...new Set(mustNotApply)].sort()) args.push("--must-not-apply", name);
+    if (mergedBase) args.push("--merged-base");
     const r = spawnSync(process.execPath, args, {
       cwd: GATE_REPO_ROOT,
       env,
