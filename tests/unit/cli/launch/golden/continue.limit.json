@@ -1,0 +1,59 @@
+{
+  "argv": [
+    "--config",
+    "${TMP}/config.yaml"
+  ],
+  "cleanup": {
+    "removeTempDir": true,
+    "revokeSession": true
+  },
+  "env": {
+    "set": {
+      "CONTINUE_GLOBAL_DIR": "${TMP}/home",
+      "CONTINUE_METRICS_ENABLED": "0",
+      "OMNIROUTE_API_KEY": "${TOKEN}"
+    },
+    "unset": []
+  },
+  "modelList": {
+    "injected": 20,
+    "strategy": "inject",
+    "viewHash": "173c544a35b61a6615f7a43316dcdeec0ae1c0058415b7e8f9633b4cbc5ef07e"
+  },
+  "needsTempDir": true,
+  "notes": [],
+  "planVersion": 1,
+  "postExitChecks": [],
+  "preflight": [
+    {
+      "kind": "node-version",
+      "range": ">=20",
+      "why": "Continue CLI needs Node 20+ (docs; engines says >=18)"
+    }
+  ],
+  "secretSites": [
+    {
+      "key": "OMNIROUTE_API_KEY",
+      "kind": "env"
+    }
+  ],
+  "teardown": [],
+  "tempFiles": [
+    {
+      "contents": "name: \"OmniRoute Launch\"\nversion: \"1.0.0\"\nschema: v1\nmodels:\n  - name: syn/model-00\n    provider: openai\n    model: syn/model-00\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 100000\n      maxTokens: 8000\n  - name: syn/model-01\n    provider: openai\n    model: syn/model-01\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 100000\n      maxTokens: 8000\n  - name: syn/model-02\n    provider: openai\n    model: syn/model-02\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 100000\n      maxTokens: 8000\n  - name: syn/model-03\n    provider: openai\n    model: syn/model-03\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 100000\n      maxTokens: 8000\n  - name: syn/model-04\n    provider: openai\n    model: syn/model-04\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 100000\n      maxTokens: 8000\n  - name: syn/model-05\n    provider: openai\n    model: syn/model-05\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 100000\n      maxTokens: 8000\n  - name: syn/model-06\n    provider: openai\n    model: syn/model-06\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 100000\n      maxTokens: 8000\n  - name: syn/model-07\n    provider: openai\n    model: syn/model-07\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 100000\n      maxTokens: 8000\n  - name: syn/model-08\n    provider: openai\n    model: syn/model-08\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 100000\n      maxTokens: 8000\n  - name: syn/model-09\n    provider: openai\n    model: syn/model-09\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 100000\n      maxTokens: 8000\n  - name: syn/model-10\n    provider: openai\n    model: syn/model-10\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 100000\n      maxTokens: 8000\n  - name: syn/model-11\n    provider: openai\n    model: syn/model-11\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 100000\n      maxTokens: 8000\n  - name: syn/model-12\n    provider: openai\n    model: syn/model-12\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 100000\n      maxTokens: 8000\n  - name: syn/model-13\n    provider: openai\n    model: syn/model-13\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 100000\n      maxTokens: 8000\n  - name: syn/model-14\n    provider: openai\n    model: syn/model-14\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 100000\n      maxTokens: 8000\n  - name: syn/model-15\n    provider: openai\n    model: syn/model-15\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 100000\n      maxTokens: 8000\n  - name: syn/model-16\n    provider: openai\n    model: syn/model-16\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 100000\n      maxTokens: 8000\n  - name: syn/model-17\n    provider: openai\n    model: syn/model-17\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 100000\n      maxTokens: 8000\n  - name: syn/model-18\n    provider: openai\n    model: syn/model-18\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 100000\n      maxTokens: 8000\n  - name: syn/model-19\n    provider: openai\n    model: syn/model-19\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 100000\n      maxTokens: 8000\n",
+      "format": "yaml",
+      "mode": 384,
+      "path": "config.yaml",
+      "root": "tmp"
+    },
+    {
+      "contents": "{\"autoUpdateCli\":false}",
+      "format": "json",
+      "mode": 384,
+      "path": "home/index/globalContext.json",
+      "root": "tmp"
+    }
+  ],
+  "tool": "continue",
+  "warnings": []
+}

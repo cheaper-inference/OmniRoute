@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "ModelNotFound",
+    "hint": "Claude Code needs chat models with tool calling and at least 32000 context tokens.",
+    "message": "No OmniRoute model fits Claude Code (view claude-code)"
+  }
+}

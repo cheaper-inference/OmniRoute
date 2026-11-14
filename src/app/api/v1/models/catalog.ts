@@ -95,6 +95,13 @@ import {
   syntheticVariantListingIds,
 } from "./catalogResponse";
 import {
+  forgetLaunchSessionForRequest,
+  launchAnonymousRemoteRejection,
+  LaunchSessionChangedError,
+  launchViewFromKeyMetadata,
+} from "./catalogLaunchView";
+import { catalogMetadataLookup } from "./catalogResponse";
+import {
   isNoAuthProviderBlocked,
   isNoAuthProviderKey,
   isNoAuthRawProviderPrefix,
@@ -228,6 +235,9 @@ function resolveCombosOnly(
   return settings?.exposeCombosOnly === true && options.ignoreExposeCombosOnly !== true;
 }
 
+/** Requests already retried once after LaunchSessionChangedError (never retried twice). */
+const launchRetriedRequests = new WeakSet<Request>();
+
 /**
  * Build unified OpenAI-compatible model catalog response.
  * Reused by `/api/v1/models` and `/api/v1` to avoid semantic drift (T09).
@@ -259,6 +269,11 @@ export async function getUnifiedModelsResponse(
       ...diagnosticHeaders,
     });
     if (authRejection) return authRejection;
+    const launchRejection = launchAnonymousRemoteRejection(request, {
+      ...corsHeaders,
+      ...diagnosticHeaders,
+    });
+    if (launchRejection) return launchRejection;
   } catch {
     // Fall through to full builder on auth-check failure; core handles errors.
   }
@@ -292,6 +307,15 @@ export async function getUnifiedModelsResponse(
       }
     );
   } catch (err) {
+    // A launch session changed (revoked, expired, re-viewed) while a build keyed on its
+    // parent's entry ran: that build was discarded. Retry once from the top, so the auth
+    // gate sees the current session (a revoked token gets its 401) and any joiner (the
+    // parent, another session) gets a clean build instead of a 500.
+    if (err instanceof LaunchSessionChangedError && !launchRetriedRequests.has(request)) {
+      launchRetriedRequests.add(request);
+      forgetLaunchSessionForRequest(request);
+      return getUnifiedModelsResponse(request, corsHeaders, options);
+    }
     // Hard rule #12: never put a raw err.message/err.stack in a response body.
     // Route it through the shared sanitizer instead — same status/type/code as
     // before, minus the stack-trace/path leak.
@@ -378,6 +402,11 @@ async function buildUnifiedModelsResponseCore(
       ...diagnosticHeaders,
     });
     if (authRejection) return authRejection;
+    const launchRejection = launchAnonymousRemoteRejection(request, {
+      ...corsHeaders,
+      ...diagnosticHeaders,
+    });
+    if (launchRejection) return launchRejection;
 
     // #9147: yield after auth check before DB initialization prologue
     await yieldCatalogBuildTurn();
@@ -960,6 +989,8 @@ async function buildUnifiedModelsResponseCore(
       isSyntheticVariantHidden,
       hideNoThinkVariants: settings.hideNoThinkVariants === true,
       allowCcDiscoveryAliases: earlyKeyMeta?.allowCcDiscoveryAliases !== false,
+      // Launch-session server view (`olx_` bearer); null for every other caller.
+      launchView: launchViewFromKeyMetadata(earlyKeyMeta),
       blockedProviders: settings.blockedProviders,
       // Per-entry `pricing`: a combo is priced as its first visible target.
       pricing: {
@@ -2325,7 +2356,9 @@ async function buildUnifiedModelsResponseCore(
       if (registryFallback) return registryFallback;
 
       const modelId =
-        model.root || (typeof model.id === "string" ? model.id.split("/").pop() : undefined);
+        catalogMetadataLookup(model)?.model ||
+        model.root ||
+        (typeof model.id === "string" ? model.id.split("/").pop() : undefined);
       return modelId
         ? getTokenLimit(canonicalId, modelId, capabilityResolutionSnapshot)
         : getTokenLimit(canonicalId, null, capabilityResolutionSnapshot);

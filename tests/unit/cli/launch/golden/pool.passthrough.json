@@ -1,0 +1,43 @@
+{
+  "argv": [
+    "-m",
+    "anthropic/claude-sonnet-4-6",
+    "-p",
+    "reply OK"
+  ],
+  "cleanup": {
+    "removeTempDir": true,
+    "revokeSession": true
+  },
+  "env": {
+    "set": {
+      "POOLSIDE_API_KEY": "${TOKEN}",
+      "POOLSIDE_STANDALONE_BASE_URL": "http://127.0.0.1:20128/v1",
+      "POOLSIDE_STANDALONE_CONTEXT_LENGTH": "200000",
+      "POOLSIDE_STANDALONE_MODEL": "anthropic/claude-sonnet-4-6"
+    },
+    "unset": []
+  },
+  "modelList": {
+    "injected": 0,
+    "strategy": "server-view",
+    "viewHash": "7f4f4066aebfbb84189d2f7f8adeb0a75a997acf4cbeb61c10b01800b593bba3"
+  },
+  "needsTempDir": false,
+  "notes": [
+    "Pool still loads ~/.config/poolside/settings.yaml (permissions, hooks, MCP) and project .poolside/settings.yaml."
+  ],
+  "planVersion": 1,
+  "postExitChecks": [],
+  "preflight": [],
+  "secretSites": [
+    {
+      "key": "POOLSIDE_API_KEY",
+      "kind": "env"
+    }
+  ],
+  "teardown": [],
+  "tempFiles": [],
+  "tool": "pool",
+  "warnings": []
+}

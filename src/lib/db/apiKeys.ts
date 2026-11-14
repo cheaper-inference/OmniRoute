@@ -28,6 +28,14 @@ import { getProviderAlias, resolveProviderId } from "@/shared/constants/provider
 import { evaluateModelAccess } from "@/domain/modelAccessPolicy";
 import { isSelfLoopBearer, selfLoopKeyOverrides } from "./apiKeys/selfLoopKey";
 import {
+  isLaunchSessionToken,
+  LAUNCH_ANONYMOUS_API_KEY_ID,
+  launchParentCredentialFingerprint,
+  launchSessionMetadata,
+  resolveLaunchSessionToken,
+} from "./launchSessions";
+import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
+import {
   backfillApiKeySecretsAtRest,
   decryptApiKeySecret,
   encryptApiKeySecret,
@@ -155,6 +163,8 @@ interface ApiKeyMetadata {
   allowCcDiscoveryAliases: boolean;
   catalogScope: "all" | "combos" | "models";
   forcedModel: string | null;
+  /** Set only for an `olx_` launch-session bearer (the rest is the parent key's metadata). */
+  launchSession?: import("./launchSessions").LaunchSessionIdentity;
 }
 
 interface ApiKeyRow extends JsonRecord {
@@ -1489,9 +1499,14 @@ export async function validateApiKey(
   if (!key || typeof key !== "string") return false;
 
   if (isConfiguredEnvApiKey(key) || isSelfLoopBearer(key)) return true;
+  if (isLaunchSessionToken(key)) return validateLaunchSessionKey(key, options);
 
+  return validateApiKeyHash(await hashKey(key), options);
+}
+
+/** The lifecycle-gated lookup behind validateApiKey, by stored key hash. */
+async function validateApiKeyHash(hashedKey: string, options: ApiKeyLookupOptions = {}) {
   const now = Date.now();
-  const hashedKey = await hashKey(key);
   const cacheKey = hashedKey;
 
   const cached = options.bypassCache ? undefined : _keyValidationCache.get(cacheKey);
@@ -1569,6 +1584,108 @@ export async function validateApiKey(
   return true;
 }
 
+/** Stored key hash of a DB-backed parent key, or null when the row is gone. */
+function launchParentKeyHash(parentKeyId: string): string | null {
+  const db = getDbInstance() as ApiKeysDbLike;
+  getPreparedStatements(db);
+  const row = db.prepare<JsonRecord>("SELECT key_hash FROM api_keys WHERE id = ?").get(parentKeyId);
+  const hash = row?.key_hash;
+  return typeof hash === "string" && hash !== "" ? hash : null;
+}
+
+function configuredEnvApiKey(): string | null {
+  return process.env.OMNIROUTE_API_KEY || process.env.ROUTER_API_KEY || null;
+}
+
+/** Same parent secret as at mint: a regenerated key or changed env key kills the session. */
+function launchParentCredentialMatches(
+  session: { parentCredentialHash: string | null },
+  currentHash: string | null
+): boolean {
+  return Boolean(
+    currentHash &&
+    session.parentCredentialHash &&
+    timingSafeCompare(currentHash, session.parentCredentialHash)
+  );
+}
+
+/**
+ * The anonymous launch posture: REQUIRE_API_KEY off and NO credential surface at all (no API
+ * key, password, OIDC or INITIAL_PASSWORD), the same condition that opens `/v1/models` to
+ * loopback (`hasNoCredentialSurface`, catalogRequest.ts). Re-checked on every use, so creating
+ * a key or a password ends every anonymous session. Fails closed.
+ */
+export async function isLaunchAnonymousPostureOpen(): Promise<boolean> {
+  if (isRequireApiKeyEnabled()) return false;
+  if (process.env.INITIAL_PASSWORD) return false;
+  try {
+    if (getApiKeysCount() > 0) return false;
+    const [{ getSettings }, { hasConfiguredOidc, hasConfiguredPassword }] = await Promise.all([
+      import("./settings"),
+      import("@/shared/utils/credentialSurface"),
+    ]);
+    const settings = (await getSettings()) as Record<string, unknown>;
+    return !hasConfiguredPassword(settings) && !hasConfiguredOidc(settings);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * An `olx_` session is valid while the session itself is active AND its parent still is, with
+ * the same secret it was minted from: a revoked, expired, banned, deleted or regenerated parent
+ * key kills every session minted from it. An anonymous session (no parent) only lives in the
+ * anonymous posture (isLaunchAnonymousPostureOpen). The session row is read on every call (no
+ * cache), so a DELETE takes effect on the next request.
+ */
+async function validateLaunchSessionKey(
+  key: string,
+  options: ApiKeyLookupOptions
+): Promise<boolean> {
+  const session = resolveLaunchSessionToken(key);
+  if (!session) return false;
+  return (await resolveLaunchParent(session, options)) !== null;
+}
+
+/** The parent's stored key hash ("" marker for the env key / anonymous), or null if invalid. */
+async function resolveLaunchParent(
+  session: NonNullable<ReturnType<typeof resolveLaunchSessionToken>>,
+  options: ApiKeyLookupOptions
+): Promise<{ kind: "anonymous" } | { kind: "env" } | { kind: "key"; hash: string } | null> {
+  if (session.parentKeyId === null) {
+    return (await isLaunchAnonymousPostureOpen()) ? { kind: "anonymous" } : null;
+  }
+  if (session.parentKeyId === SYNTHETIC_ENV_API_KEY_ID) {
+    const envKey = configuredEnvApiKey();
+    const current = envKey ? launchParentCredentialFingerprint(envKey) : null;
+    return launchParentCredentialMatches(session, current) ? { kind: "env" } : null;
+  }
+  const parentHash = launchParentKeyHash(session.parentKeyId);
+  if (!launchParentCredentialMatches(session, parentHash)) return null;
+  return (await validateApiKeyHash(parentHash as string, options))
+    ? { kind: "key", hash: parentHash as string }
+    : null;
+}
+
+async function getLaunchSessionKeyMetadata(
+  key: string,
+  options: ApiKeyLookupOptions
+): Promise<ApiKeyMetadata | null> {
+  const session = resolveLaunchSessionToken(key);
+  if (!session) return null;
+  const parentRef = await resolveLaunchParent(session, options);
+  if (!parentRef) return null;
+  let parent: ApiKeyMetadata | null;
+  if (parentRef.kind === "anonymous") {
+    parent = { ...syntheticEnvKeyMetadata(), id: LAUNCH_ANONYMOUS_API_KEY_ID, name: "Launch" };
+  } else if (parentRef.kind === "env") {
+    parent = syntheticEnvKeyMetadata();
+  } else {
+    parent = await getApiKeyMetadataByHash(parentRef.hash, options);
+  }
+  return parent ? launchSessionMetadata(parent, session) : null;
+}
+
 /**
  * Get API key metadata with caching for performance
  */
@@ -1578,81 +1695,92 @@ export async function getApiKeyMetadata(
 ): Promise<ApiKeyMetadata | null> {
   if (!key || typeof key !== "string") return null;
 
-  const now = Date.now();
-
   // persistent env-var key support (persistent passthrough keys) (#1350)
   if (isConfiguredEnvApiKey(key) || isSelfLoopBearer(key)) {
-    // ─── Env-key management-scope bypass ──────────────────────────────────
-    // The deployment-time env key (`OMNIROUTE_API_KEY` / `ROUTER_API_KEY`)
-    // is granted the "manage" scope unconditionally. This is intentional:
-    //
-    //   1. The env key never exists in the SQLite `api_keys` table, so the
-    //      DB-backed scopes column does not apply. We synthesize the
-    //      metadata record here.
-    //   2. The operator who set the env var is presumed to be the deployment
-    //      owner; rotating (or unsetting) the env var is the only way to
-    //      rotate this privilege. There is no UI to change it.
-    //   3. Management API access via the env key still passes through
-    //      `requireManagementAuth` → `hasManageScope`, so policy decisions
-    //      remain centralised in `src/server/authz/*`.
-    //   4. Requests authenticated by the env key are tagged with
-    //      `id: "env-key"` for downstream audit-log emitters, making it
-    //      possible to distinguish env-key activity from user-created keys
-    //      that happen to also hold "manage".
-    //
-    // DO NOT remove "manage" from this list — that would break the
-    // deployment-time bootstrap path that operators rely on for headless
-    // / CI / first-boot scenarios. If you need to disable env-key access,
-    // unset the env var instead.
-    return {
-      id: SYNTHETIC_ENV_API_KEY_ID,
-      name: "Environment Key",
-      machineId: "server-env",
-      modelAccessMode: "all",
-      allowedModels: [],
-      blockedModels: [],
-      allowedCombos: [ALL_COMBOS_ACCESS_RULE],
-      allowedConnections: [],
-      preferredConnections: [],
-      allowedQuotas: [],
-      noLog: false,
-      autoResolve: true,
-      isActive: true,
-      accessSchedule: null,
-      rateLimits: null,
-      maxRequestsPerDay: null,
-      maxRequestsPerMinute: null,
-      throttleDelayMs: null,
-      maxSessions: 0,
-      revokedAt: null,
-      expiresAt: null,
-      ipAllowlist: [],
-      isBanned: false,
-      keyHash: null,
-      scopes: ["manage"],
-      proxyId: null,
-      allowedEndpoints: [],
-      streamDefaultMode: "legacy",
-      codexServiceMode: "inherit",
-      cacheDefaultMode: "legacy",
-      disableNonPublicModels: false,
-      allowUsageCommand: false,
-      usageLimitEnabled: false,
-      dailyUsageLimitUsd: null,
-      weeklyUsageLimitUsd: null,
-      fiveHourUsageLimitUsd: null,
-      chaosModeEnabled: false,
-      compressionEnabled: true,
-      allowAutoCombos: true,
-      allowCcDiscoveryAliases: true,
-      catalogScope: "all",
-      forcedModel: null,
-      ...selfLoopKeyOverrides(key),
-    };
+    return { ...syntheticEnvKeyMetadata(), ...selfLoopKeyOverrides(key) };
   }
 
-  // Check cache first
-  const hashedKey = await hashKey(key);
+  // `olx_` launch-session bearer: the parent key's metadata, narrowed (architecture 3.3).
+  if (isLaunchSessionToken(key)) return getLaunchSessionKeyMetadata(key, options);
+
+  return getApiKeyMetadataByHash(await hashKey(key), options);
+}
+
+function syntheticEnvKeyMetadata(): ApiKeyMetadata {
+  // ─── Env-key management-scope bypass ──────────────────────────────────
+  // The deployment-time env key (`OMNIROUTE_API_KEY` / `ROUTER_API_KEY`)
+  // is granted the "manage" scope unconditionally. This is intentional:
+  //
+  //   1. The env key never exists in the SQLite `api_keys` table, so the
+  //      DB-backed scopes column does not apply. We synthesize the
+  //      metadata record here.
+  //   2. The operator who set the env var is presumed to be the deployment
+  //      owner; rotating (or unsetting) the env var is the only way to
+  //      rotate this privilege. There is no UI to change it.
+  //   3. Management API access via the env key still passes through
+  //      `requireManagementAuth` → `hasManageScope`, so policy decisions
+  //      remain centralised in `src/server/authz/*`.
+  //   4. Requests authenticated by the env key are tagged with
+  //      `id: "env-key"` for downstream audit-log emitters, making it
+  //      possible to distinguish env-key activity from user-created keys
+  //      that happen to also hold "manage".
+  //
+  // DO NOT remove "manage" from this list — that would break the
+  // deployment-time bootstrap path that operators rely on for headless
+  // / CI / first-boot scenarios. If you need to disable env-key access,
+  // unset the env var instead.
+  return {
+    id: SYNTHETIC_ENV_API_KEY_ID,
+    name: "Environment Key",
+    machineId: "server-env",
+    modelAccessMode: "all",
+    allowedModels: [],
+    blockedModels: [],
+    allowedCombos: [ALL_COMBOS_ACCESS_RULE],
+    allowedConnections: [],
+    preferredConnections: [],
+    allowedQuotas: [],
+    noLog: false,
+    autoResolve: true,
+    isActive: true,
+    accessSchedule: null,
+    rateLimits: null,
+    maxRequestsPerDay: null,
+    maxRequestsPerMinute: null,
+    throttleDelayMs: null,
+    maxSessions: 0,
+    revokedAt: null,
+    expiresAt: null,
+    ipAllowlist: [],
+    isBanned: false,
+    keyHash: null,
+    scopes: ["manage"],
+    proxyId: null,
+    allowedEndpoints: [],
+    streamDefaultMode: "legacy",
+    codexServiceMode: "inherit",
+    cacheDefaultMode: "legacy",
+    disableNonPublicModels: false,
+    allowUsageCommand: false,
+    usageLimitEnabled: false,
+    dailyUsageLimitUsd: null,
+    weeklyUsageLimitUsd: null,
+    fiveHourUsageLimitUsd: null,
+    chaosModeEnabled: false,
+    compressionEnabled: true,
+    allowAutoCombos: true,
+    allowCcDiscoveryAliases: true,
+    catalogScope: "all",
+    forcedModel: null,
+  };
+}
+
+/** The metadata lookup behind getApiKeyMetadata, by stored key hash. */
+async function getApiKeyMetadataByHash(
+  hashedKey: string,
+  options: ApiKeyLookupOptions = {}
+): Promise<ApiKeyMetadata | null> {
+  const now = Date.now();
   const cached = options.bypassCache ? undefined : _keyMetadataCache.get(hashedKey);
   if (cached && now - cached.timestamp < CACHE_TTL) {
     return cached.value;

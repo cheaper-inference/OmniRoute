@@ -10,6 +10,7 @@
 
 import {
   appendNoThinkingVariants,
+  isNoThinkingAlias,
   stripNoThinkingAlias,
 } from "@omniroute/open-sse/utils/noThinkingAlias";
 import { appendClaudeEffortVariants } from "@omniroute/open-sse/utils/claudeEffortVariants";
@@ -53,6 +54,12 @@ import {
 import { extractApiKey } from "@/sse/services/auth";
 import { maybeOmitCatalogModelName, withCatalogDisplayName } from "./catalogHelpers";
 import { applyCatalogPage, catalogJsonResponse, parseCatalogPage } from "./catalogPagination";
+import {
+  applyLaunchView,
+  isCodexShapedLaunchView,
+  launchViewFromKeyMetadata,
+  type CatalogLaunchView,
+} from "./catalogLaunchView";
 import { isCodexModelCatalogClient } from "./catalogRequest";
 import {
   attachCatalogPricing,
@@ -220,6 +227,8 @@ export async function applyCatalogPostFilters(
     /** Combo targets and node prefixes for the per-entry `pricing` object. */
     pricing?: CatalogPricingContext;
     allowCcDiscoveryAliases?: boolean;
+    /** Launch-session server view: applied last, so it only narrows authorized rows. */
+    launchView?: CatalogLaunchView | null;
   }
 ): Promise<Array<Record<string, any>>> {
   const yieldTurn = (): Promise<void> => new Promise((resolve) => setImmediate(resolve));
@@ -300,7 +309,9 @@ export async function applyCatalogPostFilters(
   // both mirror passes exactly as before; on mirrors claude/ effort variants, drops
   // mirrors that cannot resolve, and checks gateways against what they will receive.
   const mirrorRefinements = isCatalogMirrorRefinementsEnabled();
-  if (ctx.allowCcDiscoveryAliases !== false) {
+  // A launch view lists raw ids the launcher already selected; claude/ mirrors are never
+  // added to it, so the mirror pass is skipped (the intersect below would drop them anyway).
+  if (ctx.allowCcDiscoveryAliases !== false && !ctx.launchView) {
     finalModels = appendCcMirrorsWhenEnabled(
       finalModels,
       mirrorRefinements,
@@ -371,6 +382,9 @@ export async function applyCatalogPostFilters(
   // pair survives. Independent of MODELS_CATALOG_PREFIX_MODE; runs as the final guard.
   finalModels = dedupeExactCatalogIds(finalModels);
 
+  // Launch view LAST: intersect(authorized rows, view ids) in view order. Only ever drops.
+  if (ctx.launchView) finalModels = applyLaunchView(finalModels, ctx.launchView);
+
   return finalModels;
 }
 
@@ -400,6 +414,62 @@ export async function filterUnauthorizedFunctionalGatewayMirrors(
 }
 
 /**
+ * A `no-think/<provider>/<model>` variant keeps the `no-think/` prefix in its `root`, so
+ * metadata lookups by root missed and the row lost its real `context_length` /
+ * `max_output_tokens`. Look the variant up by the model it routes to; every other row keeps
+ * the default lookup (undefined).
+ */
+export function catalogMetadataLookup(
+  model: Record<string, unknown>
+): { model: string } | undefined {
+  const root = typeof model.root === "string" ? model.root : "";
+  if (!isNoThinkingAlias(root)) return undefined;
+  const stripped = stripNoThinkingAlias(root);
+  return stripped ? { model: stripped } : undefined;
+}
+
+const TOKEN_LIMIT_FIELDS = ["context_length", "max_input_tokens", "max_output_tokens"] as const;
+
+/**
+ * Fills ONLY the missing token limits of a `no-think/` variant from the model it routes to.
+ * Nothing else is copied: pricing, names and capabilities keep their own per-row rules (a
+ * credit-metered provider must not gain per-token prices this way).
+ */
+function withRoutedModelTokenLimits<T extends Record<string, unknown>>(
+  entry: T,
+  model: Record<string, unknown>,
+  snapshot: Parameters<typeof enrichCatalogModelEntry>[2]
+): T {
+  const lookup = catalogMetadataLookup(model);
+  if (!lookup) return entry;
+  const routed = enrichCatalogModelEntry(model, lookup, snapshot) as Record<string, unknown>;
+  let next: Record<string, unknown> | null = null;
+  for (const field of TOKEN_LIMIT_FIELDS) {
+    const value = routed[field];
+    if (typeof entry[field] === "number" || typeof value !== "number" || !(value > 0)) continue;
+    next ??= { ...entry };
+    next[field] = value;
+  }
+  return (next ?? entry) as T;
+}
+
+/**
+ * An unknown limit is ABSENT, never 0 (or negative / NaN). Clients such as crush and hermes
+ * treat a 0 window as real and reject the model. Returns the same object when nothing is wrong.
+ */
+export function withoutNonPositiveTokenLimits<T extends Record<string, unknown>>(model: T): T {
+  const bad = TOKEN_LIMIT_FIELDS.filter(
+    (field) =>
+      field in model &&
+      !(typeof model[field] === "number" && Number.isFinite(model[field]) && model[field] > 0)
+  );
+  if (bad.length === 0) return model;
+  const copy: Record<string, unknown> = { ...model };
+  for (const field of bad) delete copy[field];
+  return copy as T;
+}
+
+/**
  * Enrich the selected models and serialise the catalog response.
  *
  * Shared by the full build and by the quota-exclusive short-circuit so both emit a
@@ -415,9 +485,11 @@ export async function finalizeCatalogResponse(
   enrichmentSnapshot?: CatalogEnrichmentSnapshot
 ): Promise<Response> {
   const apiKey = extractApiKey(request);
+  let launchView: CatalogLaunchView | null = null;
   if (apiKey) {
     const { getApiKeyMetadata, isModelAllowedForKey } = await import("@/lib/db/apiKeys");
     const keyMeta = await getApiKeyMetadata(apiKey);
+    launchView = launchViewFromKeyMetadata(keyMeta);
     if (keyMeta && keyMeta.id !== "env-key" && !keyMeta.allowedQuotas?.length) {
       finalModels = await filterUnauthorizedFunctionalGatewayMirrors(
         finalModels,
@@ -447,10 +519,12 @@ export async function finalizeCatalogResponse(
     if (model.owned_by === "combo") {
       listedModel = maybeOmitCatalogModelName(model, includeModelNames);
     } else {
-      const entry = enrichCatalogModelEntry(model, undefined, {
-        ...enrichmentSnapshot,
-        capabilityResolutionSnapshot,
-      });
+      const snapshot = { ...enrichmentSnapshot, capabilityResolutionSnapshot };
+      const entry = withRoutedModelTokenLimits(
+        enrichCatalogModelEntry(model, undefined, snapshot),
+        model,
+        snapshot
+      );
       const fallbackContextLength = getContextFallback(entry);
       listedModel = fallbackContextLength
         ? { ...entry, context_length: fallbackContextLength }
@@ -459,7 +533,7 @@ export async function finalizeCatalogResponse(
       listedModel = withCatalogDisplayName(listedModel);
       listedModel = maybeOmitCatalogModelName(listedModel, includeModelNames);
     }
-    enriched.push(listedModel);
+    enriched.push(withoutNonPositiveTokenLimits(listedModel));
     catEnrichCount++;
     if (catEnrichCount % catYIELD_EVERY === 0) {
       await yieldTurn();
@@ -468,7 +542,10 @@ export async function finalizeCatalogResponse(
   await yieldTurn();
   const enrichedModels = disambiguateCatalogModelNames(enriched);
   await yieldTurn();
-  const orderedModels = sortCatalogModelsProviderGrouped(enrichedModels);
+  // A launch view is served in view order (applyCatalogPostFilters already ordered it).
+  const orderedModels = launchView
+    ? enrichedModels
+    : sortCatalogModelsProviderGrouped(enrichedModels);
   await yieldTurn();
   // Codex CLI compatibility: its model-catalog refresh (codex_models_manager) does
   // GET /v1/models?client_version=<v> and decodes a JSON object with a TOP-LEVEL
@@ -484,6 +561,8 @@ export async function finalizeCatalogResponse(
   // empty/foreign `base_instructions` would drop codex's agent prompt to nothing and
   // break its agent behavior (verified empirically against codex 0.137). An empty array
   // keeps codex on its built-in model info — same inference as today, minus the error.
+  // A launch session whose view has `serve.shape: "codex"` gets this envelope without any
+  // codex header; an openai-shape view never gains it from the view.
   const page = parseCatalogPage(request);
   const paged = applyCatalogPage(orderedModels, page);
   const responseBody: Record<string, unknown> = {
@@ -494,7 +573,7 @@ export async function finalizeCatalogResponse(
     responseBody.has_more = paged.hasMore;
     if (paged.lastId) responseBody.last_id = paged.lastId;
   }
-  if (isCodexModelCatalogClient(request)) {
+  if (isCodexModelCatalogClient(request) || isCodexShapedLaunchView(launchView)) {
     responseBody.models = [];
   }
 

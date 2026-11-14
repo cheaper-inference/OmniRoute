@@ -1,5 +1,5 @@
 /**
- * omniroute fcc-claude — FCC (Free-Claude-Code) style launcher, ported from the
+ * omniroute fcc-claude - FCC (Free-Claude-Code) style launcher, ported from the
  * "plan one" PoC.
  *
  * Features:
@@ -14,15 +14,15 @@
  *   omniroute fcc-claude --fallback models.json "help me fix a bug"
  */
 
-import { spawn } from "node:child_process";
+import { spawn as nodeSpawn } from "node:child_process";
 import { existsSync, readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { t } from "../i18n.mjs";
 import { resolveDataDir } from "../data-dir.mjs";
 import { resolveActiveContext } from "../contexts.mjs";
-import { quoteShellArgsForSpawn } from "../utils/winShellArgs.mjs";
 import {
   buildClaudeEnv,
+  executeLegacyLaunch,
   fetchModelContextWindow,
   resolveClaudeSpawn,
   resolveLaunchTarget,
@@ -30,7 +30,7 @@ import {
 } from "./launch.mjs";
 
 // Own subdirectory under the shared OmniRoute data dir (honours the DATA_DIR env
-// override, same as every other CLI command — see bin/cli/data-dir.mjs) rather
+// override, same as every other CLI command - see bin/cli/data-dir.mjs) rather
 // than a standalone ~/.omni-fcc-poc directory.
 function getFccDataDir() {
   return join(resolveDataDir(), "fcc-claude");
@@ -330,27 +330,27 @@ export async function runFccClaude(opts = {}, claudeArgs = []) {
 
   console.error(`[fcc-claude] launching ${command} → ${baseUrl}`);
 
-  const child = spawn(command, quoteShellArgsForSpawn(claudeArgs, process.platform, shell), {
-    env,
-    stdio: "inherit",
+  // Spawn + signal forwarding through the launch core executor (executeLegacyLaunch). The
+  // legacy exit contract is kept: process.exit with the child's code, 127 when claude is
+  // missing and, unlike `omniroute launch`, also 127 for any other spawn failure.
+  let spawnFailed = false;
+  const trackingSpawn = (cmd, args, spawnOptions) => {
+    const child = nodeSpawn(cmd, args, spawnOptions);
+    child.once("error", () => {
+      if (child.pid === undefined) spawnFailed = true;
+    });
+    return child;
+  };
+  const code = await executeLegacyLaunch({
+    command,
     shell,
-    ...(process.platform === "win32" ? { windowsHide: true } : {}),
+    args: claudeArgs,
+    env,
+    notFoundMessage: `"${command}" not found. Install with: npm install -g @anthropic-ai/claude-code`,
+    signalTimeoutMs: opts.signalTimeoutMs,
+    spawn: trackingSpawn,
   });
-
-  child.on("error", (err) => {
-    if (err.code === "ENOENT") {
-      console.error(
-        `"${command}" not found. Install with: npm install -g @anthropic-ai/claude-code`
-      );
-    } else {
-      console.error(String(err.message || err));
-    }
-    process.exit(127);
-  });
-
-  child.on("exit", (code) => {
-    process.exit(code ?? 0);
-  });
+  process.exit(spawnFailed ? 127 : code);
 }
 
 export function registerFccClaude(program) {

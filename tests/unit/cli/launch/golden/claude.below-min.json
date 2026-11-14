@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "ToolVersionTooOld",
+    "hint": "Update with `claude update` or reinstall: curl -fsSL https://claude.ai/install.sh | bash",
+    "message": "Claude Code 2.1.81 is too old for omnirouter launch (needs 2.1.83+, 2.1.242+ recommended)"
+  }
+}

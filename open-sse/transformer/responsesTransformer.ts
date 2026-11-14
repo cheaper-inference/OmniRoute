@@ -14,6 +14,7 @@ import * as path from "path";
 import { plaintextCollaborationFields } from "../translator/response/openai-responses/collaborationPlaintextMarker.ts";
 import { finalizeResponsesTerminalStatus } from "../translator/helpers/responsesTerminalStatus.ts";
 import { normalizeResponsesContextUsage } from "../utils/normalizeResponsesContextUsage.ts";
+import { sanitizeErrorMessage } from "../utils/error.ts";
 
 // #10223: threshold for detecting corrupted request_id fields. Normal
 // request IDs are <100 chars. DeepSeek's SSE encoder bug produces 200+
@@ -61,8 +62,54 @@ function usageRecord(value: unknown): UsageRecord {
     : {};
 }
 
+// Codex deserializes usage counts as i64, so a float (even `5.0`), a numeric
+// string, a non-finite value or a negative count must never reach the client.
+// Non-negative finite numbers and numeric strings become integers; anything else
+// is treated as unknown.
 function usageNumber(value: unknown): number | undefined {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+  const number =
+    typeof value === "number"
+      ? value
+      : typeof value === "string" && value.trim() !== ""
+        ? Number(value)
+        : Number.NaN;
+  return Number.isFinite(number) && number >= 0 ? Math.round(number) : undefined;
+}
+
+/** Deep copy of a usage object with every numeric leaf a non-negative integer. */
+function integerUsageLeaves(value: unknown): unknown {
+  if (typeof value === "number" || (typeof value === "string" && /^\s*-?[\d.]/.test(value))) {
+    return usageNumber(value);
+  }
+  if (Array.isArray(value)) return value.map(integerUsageLeaves);
+  if (typeof value !== "object" || value === null) return value;
+  const out: UsageRecord = {};
+  for (const [key, inner] of Object.entries(value)) {
+    const cleaned = integerUsageLeaves(inner);
+    if (cleaned !== undefined) out[key] = cleaned;
+  }
+  return out;
+}
+
+/**
+ * Final Responses usage for a terminal event: an object Codex can deserialize
+ * (integer input/output/total, integer cached/reasoning details) or null.
+ */
+function terminalResponsesUsage(usage: UsageRecord | null): UsageRecord | null {
+  if (!usage) return null;
+  const safe = integerUsageLeaves(normalizeResponsesContextUsage(usage)) as UsageRecord;
+  for (const key of ["input_tokens", "output_tokens", "total_tokens"]) {
+    if (typeof safe[key] !== "number") return null;
+  }
+  for (const [detailsKey, countKey] of [
+    ["input_tokens_details", "cached_tokens"],
+    ["output_tokens_details", "reasoning_tokens"],
+  ]) {
+    const details = safe[detailsKey];
+    if (details === undefined) continue;
+    if (typeof usageRecord(details)[countKey] !== "number") delete safe[detailsKey];
+  }
+  return safe;
 }
 
 function usageDetails(record: UsageRecord, ...keys: string[]): UsageRecord {
@@ -76,9 +123,25 @@ function usageDetails(record: UsageRecord, ...keys: string[]): UsageRecord {
 /** Normalize Chat Completions and Responses usage into the Responses API shape. */
 function normalizeResponsesUsage(previous: unknown, raw: unknown): UsageRecord | null {
   const source = usageRecord(raw);
-  if (Object.keys(source).length === 0) return usageRecord(previous);
-
   const before = usageRecord(previous);
+  const keepPrevious = Object.keys(before).length > 0 ? before : null;
+  if (Object.keys(source).length === 0) return keepPrevious;
+  // a usage object with no readable token count (details only, NaN, garbage)
+  // must not turn into fabricated zeros; keep what we had, or null.
+  const sourceHasCounts = [
+    source.input_tokens,
+    source.prompt_tokens,
+    source.inputTokens,
+    source.promptTokens,
+    source.output_tokens,
+    source.completion_tokens,
+    source.outputTokens,
+    source.completionTokens,
+    source.total_tokens,
+    source.totalTokens,
+  ].some((value) => usageNumber(value) !== undefined);
+  if (!sourceHasCounts && !keepPrevious) return null;
+
   const beforeInputDetails = usageDetails(before, "input_tokens_details", "prompt_tokens_details");
   const beforeOutputDetails = usageDetails(
     before,
@@ -261,6 +324,9 @@ export function createResponsesApiTransformStream(
     buffer: "",
     completedSent: false,
     usage: null,
+    // set from an upstream `error` field or finish_reason "error"; the single
+    // terminal event then becomes response.failed instead of response.completed.
+    upstreamError: null as unknown,
     finishReason: null as string | null,
     keepaliveTimer: null,
     // #6906: true once a finish_reason chunk closed all output items but deferred
@@ -628,12 +694,31 @@ export function createResponsesApiTransformStream(
         output,
       };
 
-      if (state.usage) {
-        // Keep aggregation in upstream units; only emitted Responses usage includes cache writes.
-        response.usage = normalizeResponsesContextUsage(state.usage);
-      }
+      // Keep aggregation in upstream units; only emitted Responses usage includes cache writes.
+      // always present on the terminal event, as a Codex-safe object or null.
+      response.usage = terminalResponsesUsage(state.usage);
 
-      const eventType = finalizeResponsesTerminalStatus(response, state.finishReason);
+      const hasUpstreamError = state.upstreamError !== null;
+      const eventType = finalizeResponsesTerminalStatus(
+        response,
+        state.finishReason,
+        hasUpstreamError
+      );
+      if (eventType === "response.failed") {
+        const upstream = usageRecord(state.upstreamError);
+        const code = upstream.code ?? upstream.type;
+        response.status = "failed";
+        response.error = {
+          code:
+            (typeof code === "string" && code.trim() !== "") || typeof code === "number"
+              ? String(code)
+              : "upstream_error",
+          message:
+            sanitizeErrorMessage(
+              typeof state.upstreamError === "string" ? state.upstreamError : upstream.message
+            ) || "Upstream stream failed",
+        };
+      }
       emit(controller, eventType, {
         type: eventType,
         response,
@@ -711,7 +796,16 @@ export function createResponsesApiTransformStream(
             state.usage = normalizeResponsesUsage(state.usage, parsed.usage);
           }
 
+          if (parsed.error && !state.completedSent) {
+            state.upstreamError = parsed.error;
+          }
+
           if (!parsed.choices?.length) {
+            // an error-only chunk ends the response now, as one response.failed.
+            if (state.upstreamError !== null && !state.completedSent) {
+              sendCompleted(controller);
+              continue;
+            }
             // #6906: trailing usage-only chunk after finish_reason already deferred
             // completion — send it now with the usage just captured above.
             if (state.awaitingTrailingUsage && !state.completedSent) {
@@ -978,10 +1072,14 @@ export function createResponsesApiTransformStream(
             for (const i in state.msgItemAdded) closeMessage(controller, i);
             closeReasoning(controller);
             for (const i in state.funcCallIds) closeToolCall(controller, i);
-            if (state.usage) {
+            if (choice.finish_reason === "error" && state.upstreamError === null) {
+              state.upstreamError = { code: "upstream_error" };
+            }
+            if (state.usage || state.upstreamError !== null) {
               // Usage already captured — either it arrived in this same chunk, or an
               // earlier usage-bearing chunk already populated state.usage. Either way
-              // there is nothing left to wait for, so complete right away.
+              // there is nothing left to wait for, so complete right away. An upstream
+              // error has nothing left to wait for either (one response.failed).
               sendCompleted(controller);
             } else {
               // #6906: defer response.completed — a trailing usage-only chunk may
@@ -991,6 +1089,7 @@ export function createResponsesApiTransformStream(
               // [DONE] and keeps the connection open must not hold the client until
               // the stall watchdog fires, so a short timer completes the response.
               state.awaitingTrailingUsage = true;
+              clearCompletionTimer();
               state.completionTimer = setTimeout(() => {
                 state.completionTimer = null;
                 try {

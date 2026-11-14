@@ -1,0 +1,32 @@
+{
+  "$comment": "Launch quality gates (docs/qa/LAUNCH-QA.md). Scope = include globs minus exclude globs, resolved at run time against git ls-files plus untracked files (scripts/quality/launch-scope.mjs); test files are always excluded.",
+  "limits": {
+    "cyclomatic": 10,
+    "cognitive": 15,
+    "halsteadDifficulty": 30,
+    "fileLinesMax": 499,
+    "crap": 25,
+    "deadCode": 0,
+    "duplicates": 0,
+    "anyUnknown": 0
+  },
+  "coverageTests": [
+    "tests/unit/cli/launch/**/*.test.ts",
+    "tests/unit/shared/launch-view-select.test.ts",
+    "tests/unit/api/launch-*.test.ts",
+    "tests/unit/catalog-launch-view.test.ts",
+    "tests/unit/db/launch-sessions.test.ts"
+  ],
+  "scope": {
+    "include": [
+      "bin/cli/launch/**/*.{mjs,ts}",
+      "bin/omnirouter.mjs",
+      "src/app/api/launch/**/*.ts",
+      "src/shared/launch/**/*.ts",
+      "src/shared/validation/launchView.ts",
+      "src/lib/db/launchSessions.ts",
+      "src/app/api/v1/models/catalogLaunchView.ts"
+    ],
+    "exclude": ["bin/cli/launch/assets/**"]
+  }
+}
