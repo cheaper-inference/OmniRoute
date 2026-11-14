@@ -26,6 +26,7 @@ import {
   createSSETransformStreamWithLogger,
 } from "../../utils/stream.ts";
 import * as streamFailure from "../../utils/streamFailureFinalization.ts";
+import { isCustomJsonProviderData } from "../../utils/customJson.ts";
 import { ensureStreamReadiness } from "../../utils/streamReadiness.ts";
 import { resolveStreamReadinessTimeout } from "../../utils/streamReadinessPolicy.ts";
 import { maybeFallbackAfterReadiness } from "./streamReadinessFallback.ts";
@@ -160,6 +161,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     traceId,
     translatedBody,
     videoBridgeObserved,
+    piiTokensMinted,
   } = deps;
   let providerResponse, finalBody, effectiveServiceTier;
   providerResponse = deps.providerResponse;
@@ -321,7 +323,10 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   if (stream && providerResponse.ok && providerResponse.body) {
     let flushEmptyRetryArmed = false;
     try {
-      flushEmptyRetryArmed = isRegisteredFeatureFlagEnabled("FLUSH_EMPTY_RETRY_ENABLED");
+      // A custom JSON business call may already have taken effect: an empty reply is final.
+      flushEmptyRetryArmed =
+        isRegisteredFeatureFlagEnabled("FLUSH_EMPTY_RETRY_ENABLED") &&
+        !isCustomJsonProviderData(credentials?.providerSpecificData);
     } catch {
       flushEmptyRetryArmed = false;
     }
@@ -640,6 +645,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
         memoryOwnerId,
         memorySettings,
         videoBridgeObserved,
+        piiTokensMinted,
         pipelineSessionId,
         requestBody: body as Record<string, unknown>,
         responseBody: (streamResponseBody ?? null) as Record<string, unknown> | null,
@@ -661,6 +667,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       streamUsage,
       log,
       videoTranscriptSensitive: videoBridgeObserved,
+      piiTokensMinted,
     });
 
     // Plugin onStreamComplete hook — fire-and-forget, fail-open (#9571)

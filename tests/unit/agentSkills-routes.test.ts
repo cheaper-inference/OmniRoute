@@ -31,6 +31,7 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET = process.env.API_KEY_SECRET ?? "agentskills-routes-test-secret";
 
 // Import DB first (order matters — sets DATA_DIR before localDb loads)
+const { createManagementSessionHeaders } = await import("../helpers/managementSession.ts");
 const core = await import("../../src/lib/db/core.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 
@@ -49,6 +50,11 @@ async function resetStorage() {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   delete process.env.INITIAL_PASSWORD;
+}
+
+// /api/agent-skills/generate requires management auth even when login is off.
+async function sessionHeaders(): Promise<Record<string, string>> {
+  return Object.fromEntries(await createManagementSessionHeaders());
 }
 
 function makeRequest(
@@ -328,9 +334,14 @@ test("POST /api/agent-skills/generate — 400 when body is invalid (non-boolean 
   // Disable auth for this test by not setting INITIAL_PASSWORD
   delete process.env.INITIAL_PASSWORD;
 
-  const req = makeRequest("POST", "http://localhost/api/agent-skills/generate", {
-    dryRun: "yes", // invalid — must be boolean
-  });
+  const req = makeRequest(
+    "POST",
+    "http://localhost/api/agent-skills/generate",
+    {
+      dryRun: "yes", // invalid — must be boolean
+    },
+    await sessionHeaders()
+  );
   const res = await generateRoute.POST(req);
 
   // Should be 400 (body validation fails) or 503 (generator not yet available)
@@ -354,10 +365,15 @@ test("POST /api/agent-skills/generate — 503 when generator module unavailable 
   // Disable auth for this test
   delete process.env.INITIAL_PASSWORD;
 
-  const req = makeRequest("POST", "http://localhost/api/agent-skills/generate", {
-    dryRun: true,
-    prune: false,
-  });
+  const req = makeRequest(
+    "POST",
+    "http://localhost/api/agent-skills/generate",
+    {
+      dryRun: true,
+      prune: false,
+    },
+    await sessionHeaders()
+  );
   const res = await generateRoute.POST(req);
 
   // If generator.ts doesn't exist (F3 not merged), expect 503.
@@ -389,7 +405,7 @@ test("POST /api/agent-skills/generate — 400 when request body is not JSON", as
 
   const req = new Request("http://localhost/api/agent-skills/generate", {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", ...(await sessionHeaders()) },
     body: "not valid json {{{",
   });
   const res = await generateRoute.POST(req);

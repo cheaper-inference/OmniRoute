@@ -397,7 +397,8 @@ export default function ReasoningCacheTab() {
         ) : (
           <Table
             className="text-sm"
-            containerClassName="max-h-96 overflow-y-auto"
+            maxHeight="24rem"
+            scrollLabel={t("reasoningRecentEntries")}
             scrollbarLabel={t("reasoningRecentEntries")}
           >
             <TableHeader className="sticky top-0 z-10 bg-surface">

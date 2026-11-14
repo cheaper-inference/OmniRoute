@@ -1,0 +1,1 @@
+- Accept a caller-supplied SearXNG `provider_options.baseUrl` only for public hosts, on every hop and DNS answer; loopback and LAN instances are configured on the stored connection.
