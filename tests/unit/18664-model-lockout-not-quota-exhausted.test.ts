@@ -96,3 +96,38 @@ test("quota exhaustion is still reported when every lockout outlasts the earlies
   assert.equal(result.retryAfter, weeklyReset);
   assert.equal(String(result.lastError).includes("exhausted their quota"), true);
 });
+
+test("a short lockout on the account excluded by the fallback loop is reported as a model cooldown", async () => {
+  // The fallback loop records a short lockout on the healthy account, then retries with
+  // that account excluded. It is filtered as "excluded", not "modelLocked", yet its
+  // lockout is what blocks the request, not the other account's quota reset.
+  const exhausted = await seedClaude("claude-18664-exhausted-excl");
+  const healthy = await seedClaude("claude-18664-healthy-excl");
+  const weeklyReset = new Date(Date.now() + 60 * 60 * 60_000).toISOString();
+  exhaustWeekly(exhausted.id, weeklyReset);
+  fallback.lockModel("claude", healthy.id, MODEL, "server_error", 5_000);
+
+  const result = await auth.getProviderCredentials("claude", healthy.id, null, MODEL);
+
+  assert.equal(result.allRateLimited, true);
+  assert.equal(result.cooldownScope, "model");
+  assert.equal(String(result.lastError ?? "").includes("exhausted their quota"), false);
+  const retryMs = new Date(result.retryAfter).getTime() - Date.now();
+  assert.ok(
+    retryMs > 0 && retryMs <= 5_000,
+    `retryAfter should be the excluded account's lockout end, got ${retryMs}ms`
+  );
+});
+
+test("an excluded account without a lockout does not shorten the quota-exhaustion reset", async () => {
+  const exhausted = await seedClaude("claude-18664-exhausted-nolock");
+  const tried = await seedClaude("claude-18664-tried-nolock");
+  const weeklyReset = new Date(Date.now() + 10 * 60_000).toISOString();
+  exhaustWeekly(exhausted.id, weeklyReset);
+
+  const result = await auth.getProviderCredentials("claude", tried.id, null, MODEL);
+
+  assert.equal(result.allRateLimited, true);
+  assert.equal(result.retryAfter, weeklyReset);
+  assert.equal(String(result.lastError).includes("exhausted their quota"), true);
+});
