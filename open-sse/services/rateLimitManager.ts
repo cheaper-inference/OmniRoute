@@ -22,6 +22,7 @@ import {
 import { getAntigravityQuotaFamily } from "./antigravityQuotaFamily.ts";
 import { getCodexRateLimitKey } from "../executors/codex.ts";
 import { awaitProviderDefaultSlot, setProviderQuotaOverrides } from "./providerDefaultRateLimit.ts";
+import { RollingRpmGate } from "./rollingRpmGate.ts";
 import {
   DEFAULT_RESILIENCE_SETTINGS,
   resolveResilienceSettings,
@@ -649,7 +650,7 @@ function getLimiter(provider, connectionId, model = null) {
  * @param {AbortSignal} signal - Optional abort signal to cancel waiting
  * @returns {Promise<unknown>} Result of fn()
  */
-export async function withRateLimit(
+async function withBottleneckLimit(
   provider,
   connectionId,
   model,
@@ -902,6 +903,89 @@ export async function withRateLimit(
   }
 }
 
+// Opt-in (OMNIROUTE_ROLLING_RPM_GATE): hold a per-connection `rpm` override to an exact
+// trailing 60 s window. Bottleneck's reservoir refills in one burst every minute, so it
+// can pass up to 2x rpm across a window edge. The gate sits in front of it, so the two
+// together admit no more than the gate alone does. Default off: no behaviour change.
+let rollingRpmGate: RollingRpmGate | null = null;
+
+function rollingRpmGateEnabled(): boolean {
+  return /^(1|true|yes|on)$/i.test((process.env.OMNIROUTE_ROLLING_RPM_GATE ?? "").trim());
+}
+
+function getRollingRpmGate(): RollingRpmGate {
+  rollingRpmGate ??= new RollingRpmGate({
+    getGlobalRpm: () => null, // Bottleneck's default rpm is per limiter, not process-wide
+    getProviderWindow: () => undefined, // provider defaults use awaitProviderDefaultSlot
+    getConnectionRpm: (connectionId) => connectionRateLimitOverrides.get(connectionId)?.rpm,
+    getLimiterKey,
+    createQueueTimeoutError: (provider, model, maxWaitMs) =>
+      markLocalRateLimitError(
+        new Error(
+          `Request exceeded queue budget maxWaitMs=${maxWaitMs}ms waiting for a rolling rpm slot for ${provider}/${model ?? ""}`
+        ),
+        LEGACY_RATE_LIMIT_QUEUE_TIMEOUT_CODE
+      ),
+  });
+  return rollingRpmGate;
+}
+
+export async function withRateLimit(
+  provider,
+  connectionId,
+  model,
+  fn,
+  signal = null,
+  remainingBudgetMs = undefined,
+  correlationId = undefined,
+  opts = undefined
+) {
+  if (!rollingRpmGateEnabled() || !enabledConnections.has(connectionId)) {
+    return withBottleneckLimit(
+      provider,
+      connectionId,
+      model,
+      fn,
+      signal,
+      remainingBudgetMs,
+      correlationId,
+      opts
+    );
+  }
+  const hasBudget = typeof remainingBudgetMs === "number" && Number.isFinite(remainingBudgetMs);
+  const maxWaitMs = hasBudget
+    ? remainingBudgetMs
+    : resolveRequestQueueMaxWaitMs(provider, undefined, connectionId ?? undefined);
+  const startedAt = Date.now();
+  const lease = await getRollingRpmGate().acquire(
+    provider,
+    connectionId,
+    model ?? null,
+    signal,
+    maxWaitMs,
+    startedAt
+  );
+  let dispatched = false;
+  try {
+    return await withBottleneckLimit(
+      provider,
+      connectionId,
+      model,
+      (s) => {
+        dispatched = true;
+        return fn(s);
+      },
+      signal,
+      hasBudget ? remainingBudgetMs - (Date.now() - startedAt) : remainingBudgetMs,
+      correlationId,
+      opts
+    );
+  } finally {
+    // A slot is held for a call that never reached the upstream: give it back.
+    if (!dispatched) lease?.release();
+  }
+}
+
 /**
  * Update rate limiter based on API response headers.
  * Called after every successful or failed response from a provider.
@@ -1138,6 +1222,7 @@ export async function __resetRateLimitManagerForTests() {
   preservedReplacementSettings.clear();
   limiterFactory = defaultLimiterFactory;
   limiterWatchdog.reset();
+  rollingRpmGate = null;
   shutdownHandlersRegistered = false;
 
   for (const key of [...learnedLimits.keys()]) {

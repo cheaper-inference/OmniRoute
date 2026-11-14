@@ -27,6 +27,7 @@ import { assertCommonChatGptWebProviderAvailable } from "@/shared/constants/chat
 import { getUpstreamProxyConfigCached } from "./comboContextCache.ts";
 import type { FallbackBackend } from "@/lib/db/upstreamProxy";
 import { wrapExecutorWithCliproxyapiModelMapping } from "./cliproxyModelMapping.ts";
+import { wrapExecutorWithConnectionModelMapping } from "../../services/connectionModelMapping.ts";
 import {
   resolveDedicatedCliproxyapiApiKey,
   wrapExecutorWithCliproxyapiCredentials,
@@ -57,7 +58,11 @@ export function createExecutorResolver(
       log,
       credentials?.providerSpecificData ?? null
     );
-    return validationFence ? validationFence(executor) : executor;
+    const mapped = wrapExecutorWithConnectionModelMapping(
+      executor,
+      credentials?.providerSpecificData
+    );
+    return validationFence ? validationFence(mapped) : mapped;
   };
 }
 

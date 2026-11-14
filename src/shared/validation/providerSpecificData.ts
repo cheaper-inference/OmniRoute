@@ -4,6 +4,7 @@ import {
   isOpenRouterPresetValue,
 } from "@/shared/constants/openRouterPreset";
 import { isValidGitHubCreditLimit } from "@omniroute/open-sse/services/githubCreditLimit.ts";
+import { hasUnsafeModelIdSyntax } from "@omniroute/open-sse/utils/modelIdSafety.ts";
 
 function isHttpUrl(value: string): boolean {
   try {
@@ -38,6 +39,31 @@ function validatePositiveNumberField(value: unknown, key: string, ctx: z.Refinem
 
 // #6880 — per-connection prompt-cache capability override, extracted so
 // validateProviderSpecificData() stays under the complexity gate.
+// Per-connection model mapping: exact ids or trailing-star patterns -> a safe upstream model id.
+// Split out so validateProviderSpecificData() stays under the complexity gate.
+function validateModelMappingBlock(value: unknown, ctx: z.RefinementCtx): void {
+  const fail = (message: string, extra: Array<string | number> = []) =>
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `providerSpecificData.modelMapping ${message}`,
+      path: ["modelMapping", ...extra],
+    });
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    fail("must be an object of model id -> upstream model id");
+    return;
+  }
+  const entries = Object.entries(value as Record<string, unknown>);
+  if (entries.length > 100) fail("supports at most 100 entries");
+  for (const [key, target] of entries) {
+    if (key.length === 0 || key.length > 200) fail("keys must be 1-200 characters", [key]);
+    if (typeof target !== "string" || target.trim() === "" || target.length > 200) {
+      fail("targets must be non-empty strings up to 200 characters", [key]);
+    } else if (hasUnsafeModelIdSyntax(target.trim())) {
+      fail("targets must not contain path or query syntax", [key]);
+    }
+  }
+}
+
 function validatePeakHourProtectionBlock(value: unknown, ctx: z.RefinementCtx): void {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     ctx.addIssue({
@@ -344,6 +370,11 @@ export function validateProviderSpecificData(
   const peakHourProtection = data.peakHourProtection;
   if (peakHourProtection !== undefined && peakHourProtection !== null) {
     validatePeakHourProtectionBlock(peakHourProtection, ctx);
+  }
+
+  const modelMapping = data.modelMapping;
+  if (modelMapping !== undefined && modelMapping !== null) {
+    validateModelMappingBlock(modelMapping, ctx);
   }
 
   const autoFetchModels = data.autoFetchModels;

@@ -1,0 +1,1 @@
+- **feat(routing):** Opt-in `PROVIDER_MAX_ACTIVE_ACCOUNTS` (for example `claude=2`) keeps only the first N usable accounts of a provider active and holds the rest as reserves, for vendors that ban an address when many accounts are used at once.

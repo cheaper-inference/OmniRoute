@@ -817,7 +817,14 @@
       "tests/unit/muse-policy-account-marking.test.ts",
       "tests/unit/muse-refresh-review-regressions.test.ts",
       "tests/unit/stream-lifecycle-timer-cleanup-18669.test.ts",
-      "tests/unit/auth-selection-skips-full-account.test.ts"
+      "tests/unit/auth-selection-skips-full-account.test.ts",
+      "tests/unit/quota-sticky-only.test.ts",
+      "tests/unit/provider-max-active-accounts.test.ts",
+      "tests/unit/failure-window-penalty.test.ts",
+      "tests/unit/tier-spillover.test.ts",
+      "tests/unit/oauth-session-cap.test.ts",
+      "tests/unit/connection-model-mapping.test.ts",
+      "tests/unit/monthly-quota-text-cooldown.test.ts"
     ],
     "nodeArgs": [
       "--import",

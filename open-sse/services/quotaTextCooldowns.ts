@@ -123,8 +123,21 @@ export function buildSubscriptionQuotaFallback(
 // ollama-specific), so any other provider using the same wording benefits.
 const WEEKLY_QUOTA_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
 
+// Opt-in (QUOTA_MONTHLY_TEXT_COOLDOWN=1): named monthly cap wording ("monthly quota limit
+// exceeded", "monthly usage limit reached") gets the same long cooldown as the weekly cap.
+// A bare "monthly" is not a marker; it must sit next to quota/usage/limit wording.
+function isMonthlyCapText(lower: string): boolean {
+  return (
+    process.env.QUOTA_MONTHLY_TEXT_COOLDOWN === "1" &&
+    /\bmonthly\b[^.]{0,40}\b(?:quota|usage|limit)\b[^.]{0,40}\b(?:exceeded|reached|exhausted|used up)\b/.test(
+      lower
+    )
+  );
+}
+
 export function isWeeklyUsageLimitText(lower: string): boolean {
   return (
+    isMonthlyCapText(lower) ||
     lower.includes("weekly usage limit") ||
     lower.includes("weekly limit reached") ||
     lower.includes("reached your weekly") ||

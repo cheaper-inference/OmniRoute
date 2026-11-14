@@ -65,6 +65,12 @@ import {
 } from "@/lib/db/providers/lazyConnectionView";
 import { buildConnectionConcurrencyFields } from "./connectionConcurrencyFields.ts"; // #13700
 import { getConnectionErrorPenalty, getConnectionRecencyPenalty } from "./p2cScoreTerms.ts";
+import {
+  isFailureWindowPenaltyEnabled,
+  recordWindowedFailure,
+  sortByFailureWindow,
+} from "./failureWindowPenalty.ts";
+import { isTierSpilloverEnabled, pickTierSpillover } from "./tierSpillover.ts";
 import { getP2CLatencyPenalties } from "@omniroute/open-sse/services/connectionLatencyTracker.ts";
 import {
   getCachedClaudeQuotaScopeDecision as readClaudeScope,
@@ -191,6 +197,9 @@ import {
 } from "./connectionModelInventory";
 import { isCatalogFreeModel } from "@/shared/utils/freeModels";
 import { getSessionAffinityStore } from "@/lib/db/sessionAccountAffinity";
+import { applyStickyOnly } from "./quotaStickyOnly";
+import { applyMaxActiveAccounts } from "./maxActiveAccounts";
+import { applyOAuthSessionCap } from "./oauthSessionCap";
 import {
   applySessionAffinityPin,
   formatSessionKeyForLog,
@@ -1884,7 +1893,20 @@ export async function getProviderCredentials(
       };
     }
 
-    const subscriptionFirst = holdBackCodexCreditOnlyAccounts(provider, withQuota, requestedModel);
+    const subscriptionFirst = holdBackCodexCreditOnlyAccounts(
+      provider,
+      applyMaxActiveAccounts(
+        applyStickyOnly(
+          withQuota,
+          provider,
+          options.sessionKey,
+          sessionAffinityTtlMs,
+          affinityRecord
+        ),
+        provider
+      ),
+      requestedModel
+    );
     const policyValidLeaseCandidates = options._leaseCandidateIds
       ? subscriptionFirst.filter((candidate) => options._leaseCandidateIds!.includes(candidate.id))
       : subscriptionFirst;
@@ -1908,7 +1930,7 @@ export async function getProviderCredentials(
         : null;
     }
 
-    const allOrderedConnections = [...leasePolicy.connections].sort((a, b) => {
+    const sessionOrderedConnections = [...leasePolicy.connections].sort((a, b) => {
       if (a.authType !== "oauth" || b.authType !== "oauth") return 0;
       const priorityDelta = (a.priority || 999) - (b.priority || 999);
       if (priorityDelta !== 0) return priorityDelta;
@@ -1917,6 +1939,10 @@ export async function getProviderCredentials(
         getOAuthSessionAvailability(a.id, options.sessionKey)
       );
     });
+    // Opt-in: accounts with recent attributable failures sort behind healthy ones (no cooldown).
+    const allOrderedConnections = isFailureWindowPenaltyEnabled()
+      ? sortByFailureWindow(sessionOrderedConnections, requestedModel)
+      : sessionOrderedConnections;
 
     const providerStrategyOverrides = (settings.providerStrategies || {}) as Record<
       string,
@@ -2163,6 +2189,12 @@ export async function getProviderCredentials(
     } else {
       // Default: fill-first (already sorted by priority in getProviderConnections)
       connection = orderedConnections[0];
+      if (isTierSpilloverEnabled()) {
+        connection =
+          pickTierSpillover(orderedConnections, (c) =>
+            getConnectionQuotaHeadroomPercent(provider, c, requestedModel)
+          ) ?? connection;
+      }
     }
 
     if (
@@ -2190,6 +2222,7 @@ export async function getProviderCredentials(
             getOAuthSessionAvailability(candidate.id, options.sessionKey) > selectedAvailability
         );
       if (moreAvailablePeer) connection = moreAvailablePeer;
+      connection = applyOAuthSessionCap(connection, orderedConnections, options.sessionKey);
     }
 
     let exclusiveLease: ExclusiveConnectionLease | undefined;
@@ -2895,6 +2928,12 @@ export async function markAccountUnavailable(
         `[T-PROBE] ${connectionId.slice(0, 8)} ${provider ?? ""} failure ${status} recorded — connection stays in the pool`
       );
       return { shouldFallback: true, cooldownMs: 0 };
+    }
+
+    // Opt-in windowed failure penalty: count attributable server failures only. Quota, rate
+    // limit, credential and capacity (503/529) outcomes have their own cooldown paths.
+    if (status >= 500 && status !== 503 && status !== 529) {
+      recordWindowedFailure(connectionId, model);
     }
 
     // Native M365 mixes model licences/budgets and per-account throttling. Honor

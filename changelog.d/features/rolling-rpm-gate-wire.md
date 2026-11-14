@@ -1,0 +1,1 @@
+- **feat(resilience):** opt-in `OMNIROUTE_ROLLING_RPM_GATE=true` holds a connection `rpm` override to an exact trailing 60 s window, so no burst passes at a window edge (off by default).
