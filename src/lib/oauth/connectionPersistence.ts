@@ -175,6 +175,8 @@ export function buildOAuthTokenUpdate(
     lastErrorType: null,
     lastErrorSource: null,
     errorCode: null,
+    rateLimitedUntil: null,
+    backoffLevel: 0,
   };
 }
 

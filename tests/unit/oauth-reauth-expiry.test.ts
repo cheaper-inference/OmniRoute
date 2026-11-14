@@ -82,3 +82,34 @@ test("reauth with unknown expiry clears the previous token clock", async () => {
   assert.equal(after!.expiresAt ?? null, null);
   assert.equal(after!.tokenExpiresAt ?? null, null);
 });
+
+test("reauth clears rateLimitedUntil and backoffLevel when renewing credentials (#20067)", async () => {
+  const futureCooldown = new Date(Date.now() + 86400_000).toISOString();
+  const connection = await db.createProviderConnection({
+    provider: "claude",
+    authType: "oauth",
+    isActive: true,
+    testStatus: "active",
+    accessToken: "old-access",
+    refreshToken: "old-refresh",
+    rateLimitedUntil: futureCooldown,
+    backoffLevel: 3,
+    lastError: "Weekly quota exceeded",
+    lastErrorType: "quota_exhausted",
+    errorCode: "429",
+  });
+  await persistence.persistOAuthConnection(
+    "claude",
+    {
+      accessToken: "new-access",
+      refreshToken: "new-refresh",
+      expiresIn: 3600,
+    },
+    connection.id
+  );
+  const reauthed = await db.getProviderConnectionById(connection.id);
+  assert.equal(reauthed!.rateLimitedUntil ?? null, null);
+  assert.equal(reauthed!.backoffLevel ?? 0, 0);
+  assert.equal(reauthed!.lastError ?? null, null);
+  assert.equal(reauthed!.errorCode ?? null, null);
+});
