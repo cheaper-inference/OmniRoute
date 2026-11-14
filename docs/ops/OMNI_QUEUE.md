@@ -265,9 +265,13 @@ change takes effect when it is merged there.
 
 Every job of `.github/workflows/omni-queue.yml` is skipped unless the repository variable
 OMNI_QUEUE_ENABLED is exactly `true` (Settings → Secrets and variables → Actions → Variables).
-Setting it to anything else stops the queue at the next event: nothing new is composed, and a
-candidate already in flight simply stops being followed (nothing lands). Forks never inherit
-repository variables.
+Setting it to anything else stops new ticks from being admitted: nothing new is composed, and a
+candidate still waiting on its CI stops being followed. It is not an immediate stop: the variable
+is read only when a job starts, so a tick already running (and possibly one already pending)
+finishes and can still land a green candidate. To stop at once, pause the base first
+(`npm run queue -- pause <base>`) or, after flipping the variable, cancel the in-progress and
+pending `omni-queue` runs in the Actions tab; then confirm with `npm run queue -- history` and the
+base tip that nothing landed after the cut. Forks never inherit repository variables.
 
 The workflow and the orchestrator must exist on the **default branch**: `schedule`,
 `workflow_run` and `pull_request_target` always run the default branch's copy of the workflow.
@@ -463,7 +467,8 @@ failure turns out to be flaky and the tip will not move soon, resume by hand:
 
 **Pause and resume.** `npm run queue -- pause <base> --reason "<text>"` freezes one base (reason
 `manual`): its ticks do nothing, and a candidate in flight is picked up again after
-`npm run queue -- resume <base>`. To stop everything at once, use the kill switch.
+`npm run queue -- resume <base>`. To stop every base, use the kill switch, and cancel any
+running `omni-queue` run (see [Kill switch](#kill-switch)).
 
 **Recomposition when the base moves.** A `land-rejected` event means the base advanced between
 composition and landing (a manual merge, a sync-back, a hotfix). Nothing is lost: the next tick
@@ -472,8 +477,10 @@ something else merges into a managed base; route those merges through the label 
 
 **Tree divergence (`squash-api` only).** The base tree after the squash merges differs from the
 candidate tree. The queue pauses with reason `tree-divergence` and opens an issue. Compare the
-two trees (`git diff <candidateSha> <base>`), fix the base by PR if needed, then resume. Prefer
-`merge-ff`, which cannot diverge.
+two trees (`git diff <candidateSha> <base>`), fix the base by PR if needed, close the
+`🛑 omni-queue tree divergence: <base>` issue, then resume (`npm run queue -- resume <base>`).
+While that issue is open, every `squash-api` landing pauses the base again. Prefer `merge-ff`,
+which cannot diverge.
 
 **Infra failure or timeout.** One retry under a new ref (`-r1`); a second failure pauses the base
 with reason `infra`. Check the Actions status page and the candidate's run, then resume. A
@@ -518,8 +525,10 @@ shadow mode on the real repository. In order:
 6. Update the merge skills and `AGENTS.md` (agent-instruction surfaces: each change needs the
    owner's explicit approval).
 
-Rollback: set OMNI_QUEUE_ENABLED to `false` (immediate; nothing in flight lands), re-enable the
-Mergify queue rules, and, if non-admin pushes must be allowed again, delete the
+Rollback: set OMNI_QUEUE_ENABLED to `false`. That stops new ticks only: cancel the in-progress and
+pending `omni-queue` runs in the Actions tab (or wait for them to end), and check with
+`npm run queue -- history` and each base tip that nothing landed after the cut before declaring
+the rollback done (see [Kill switch](#kill-switch)). Then re-enable the Mergify queue rules, and, if non-admin pushes must be allowed again, delete the
 `omni-queue release protection: <base>` rulesets in Settings → Rules → Rulesets. Remove the App
 from the bypass actors of "Require PR on default branch" (or restore its branch condition). Leftover
 `omni-queue/**` candidate branches can be deleted once nothing is in flight; the
