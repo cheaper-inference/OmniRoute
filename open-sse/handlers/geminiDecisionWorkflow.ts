@@ -119,7 +119,7 @@ type AttemptResult =
   | { kind: "stop" };
 
 type AttemptContext = {
-  body: GeminiDecisionsBody;
+  body: GeminiDecisionPayload;
   selected: unknown;
   state: FailureState;
   tried: Set<string>;
