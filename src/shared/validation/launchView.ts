@@ -109,8 +109,4 @@ export const launchSessionPatchSchema = z
     message: "body must contain heartbeat or view",
   });
 
-export type ViewSelectSpecInput = z.infer<typeof viewSelectSpecSchema>;
-export type ServerViewPresentationInput = z.infer<typeof serverViewPresentationSchema>;
-export type ModelListSpecInput = z.infer<typeof modelListSpecSchema>;
 export type LaunchSessionViewInput = z.infer<typeof launchSessionViewSchema>;
-export type LaunchSessionPatchInput = z.infer<typeof launchSessionPatchSchema>;

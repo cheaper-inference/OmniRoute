@@ -18,6 +18,8 @@ import { randomBytes } from "node:crypto";
 import { opaqueTokenFingerprint } from "@omniroute/open-sse/utils/opaqueTokenFingerprint.ts";
 import { timingSafeCompare } from "@/shared/utils/timingSafeCompare";
 
+import type { LaunchSessionViewInput } from "@/shared/validation/launchView";
+
 import { getDbInstance } from "./core";
 
 export const LAUNCH_TOKEN_PREFIX = "olx_";
@@ -35,12 +37,15 @@ const TOKEN_PATTERN = /^olx_([a-z2-7]{26})_([a-z2-7]{52})$/;
 const SESSION_ID_PATTERN = /^[a-z2-7]{26}$/;
 const BASE32_ALPHABET = "abcdefghijklmnopqrstuvwxyz234567";
 
-export interface LaunchSessionView {
-  hash: string;
-  ids: string[];
-  serve?: { prefix?: string; mode?: "replace" | "mirror"; shape?: "openai" | "codex" };
-  spec?: Record<string, unknown>;
-}
+export type LaunchSessionView = LaunchSessionViewInput;
+
+/** A JSON-serializable value (what the spec / policy / attribution columns hold). */
+export type JsonValue =
+  string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+export type JsonRecord = Record<string, JsonValue>;
+
+/** Loosely typed caller input (HTTP credentials, query values) validated at runtime. */
+type LooseInput = string | number | boolean | bigint | null | undefined | object;
 
 export interface LaunchSessionRecord {
   id: string;
@@ -52,9 +57,9 @@ export interface LaunchSessionRecord {
   sessionTag: string;
   agentSessionId: string | null;
   view: LaunchSessionView | null;
-  spec: Record<string, unknown> | null;
-  policy: Record<string, unknown> | null;
-  attribution: Record<string, unknown> | null;
+  spec: JsonRecord | null;
+  policy: JsonRecord | null;
+  attribution: JsonRecord | null;
   preset: string | null;
   ttlSeconds: number;
   createdAt: string;
@@ -70,15 +75,34 @@ export interface CreateLaunchSessionInput {
   toolId: string;
   sessionTag?: string | null;
   view?: LaunchSessionView | null;
-  spec?: Record<string, unknown> | null;
-  policy?: Record<string, unknown> | null;
-  attribution?: Record<string, unknown> | null;
+  spec?: JsonRecord | null;
+  policy?: JsonRecord | null;
+  attribution?: JsonRecord | null;
   preset?: string | null;
   ttlSeconds?: number | null;
   now?: number;
 }
 
-type Row = Record<string, unknown>;
+interface LaunchSessionRow {
+  id: string;
+  secret_hash: string | null;
+  parent_key_id: string | null;
+  parent_credential_hash: string | null;
+  tool_id: string;
+  session_tag: string;
+  agent_session_id: string | null;
+  view_json: string | null;
+  spec_json: string | null;
+  policy_json: string | null;
+  attribution_json: string | null;
+  preset: string | null;
+  ttl_seconds: number | null;
+  created_at: string;
+  expires_at: string;
+  last_seen_at: string;
+  revoked_at: string | null;
+}
+type Row = LaunchSessionRow;
 
 function base32(bytes: Buffer): string {
   let bits = 0;
@@ -87,13 +111,27 @@ function base32(bytes: Buffer): string {
   for (const byte of bytes) {
     value = (value << 8) | byte;
     bits += 8;
-    while (bits >= 5) {
-      out += BASE32_ALPHABET[(value >>> (bits - 5)) & 31];
-      bits -= 5;
-    }
+    const drained = drainBase32(value, bits);
+    out += drained.chars;
+    bits = drained.bits;
   }
-  if (bits > 0) out += BASE32_ALPHABET[(value << (5 - bits)) & 31];
-  return out;
+  return out + base32Tail(value, bits);
+}
+
+/** Emits every full 5-bit group buffered in `value`; returns the chars and the leftover bit count. */
+function drainBase32(value: number, bitCount: number): { chars: string; bits: number } {
+  let chars = "";
+  let bits = bitCount;
+  while (bits >= 5) {
+    chars += BASE32_ALPHABET[(value >>> (bits - 5)) & 31];
+    bits -= 5;
+  }
+  return { chars, bits };
+}
+
+/** The final partial group, zero-padded on the right. */
+function base32Tail(value: number, bits: number): string {
+  return bits > 0 ? BASE32_ALPHABET[(value << (5 - bits)) & 31] : "";
 }
 
 function fingerprint(token: string): string {
@@ -108,17 +146,17 @@ export function launchParentCredentialFingerprint(credential: string): string {
   return fingerprint(credential);
 }
 
-export function isLaunchSessionToken(value: unknown): value is string {
+export function isLaunchSessionToken(value: LooseInput): value is string {
   return typeof value === "string" && value.startsWith(LAUNCH_TOKEN_PREFIX);
 }
 
-export function isLaunchSessionId(value: unknown): value is string {
+export function isLaunchSessionId(value: LooseInput): value is string {
   return typeof value === "string" && SESSION_ID_PATTERN.test(value);
 }
 
 /** Splits a well-formed token; anything else (wrong length, alphabet, prefix) is null. */
 export function parseLaunchSessionToken(
-  token: unknown
+  token: LooseInput
 ): { sessionId: string; secret: string } | null {
   if (typeof token !== "string") return null;
   const match = TOKEN_PATTERN.exec(token);
@@ -129,7 +167,7 @@ export function defaultLaunchSessionTag(toolId: string, sessionId: string): stri
   return `launch:${toolId}:${sessionId}`;
 }
 
-export function clampLaunchSessionTtl(ttlSeconds: unknown): number {
+export function clampLaunchSessionTtl(ttlSeconds: LooseInput): number {
   if (typeof ttlSeconds !== "number" || !Number.isFinite(ttlSeconds)) {
     return LAUNCH_SESSION_DEFAULT_TTL_SECONDS;
   }
@@ -139,7 +177,7 @@ export function clampLaunchSessionTtl(ttlSeconds: unknown): number {
   );
 }
 
-function parseJson<T>(value: unknown): T | null {
+function parseJson<T>(value: LooseInput): T | null {
   if (typeof value !== "string" || value === "") return null;
   try {
     return JSON.parse(value) as T;
@@ -148,11 +186,11 @@ function parseJson<T>(value: unknown): T | null {
   }
 }
 
-function jsonOrNull(value: unknown): string | null {
+function jsonOrNull(value: LooseInput): string | null {
   return value === undefined || value === null ? null : JSON.stringify(value);
 }
 
-function text(value: unknown): string | null {
+function text(value: LooseInput): string | null {
   return typeof value === "string" ? value : null;
 }
 
@@ -165,9 +203,9 @@ function toRecord(row: Row): LaunchSessionRecord {
     sessionTag: String(row.session_tag),
     agentSessionId: text(row.agent_session_id),
     view: parseJson<LaunchSessionView>(row.view_json),
-    spec: parseJson<Record<string, unknown>>(row.spec_json),
-    policy: parseJson<Record<string, unknown>>(row.policy_json),
-    attribution: parseJson<Record<string, unknown>>(row.attribution_json),
+    spec: parseJson<JsonRecord>(row.spec_json),
+    policy: parseJson<JsonRecord>(row.policy_json),
+    attribution: parseJson<JsonRecord>(row.attribution_json),
     preset: text(row.preset),
     ttlSeconds: Number(row.ttl_seconds ?? LAUNCH_SESSION_DEFAULT_TTL_SECONDS),
     createdAt: String(row.created_at),
@@ -243,11 +281,11 @@ export function getLaunchSession(id: string): LaunchSessionRecord | null {
 }
 
 /**
- * The active session a token belongs to, or null for a malformed, unknown, revoked or expired
+ * The active session a token belongs to, or null for a malformed, missing, revoked or expired
  * token. The stored fingerprint is compared in constant time.
  */
 export function resolveLaunchSessionToken(
-  token: unknown,
+  token: LooseInput,
   now: number = Date.now()
 ): LaunchSessionRecord | null {
   const parsed = parseLaunchSessionToken(token);
@@ -355,7 +393,7 @@ export interface LaunchSessionIdentity {
   sessionTag: string;
   parentKeyId: string | null;
   view: LaunchSessionView | null;
-  policy: Record<string, unknown> | null;
+  policy: JsonRecord | null;
 }
 
 export function launchSessionScopes(parentScopes: readonly string[] | null | undefined): string[] {
