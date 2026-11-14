@@ -50,6 +50,12 @@ test("catalog normalization: context, capabilities object, kinds, labels, type",
     normalizeCatalog([{ id: "" }, null, { id: "a" }]).map((r: LaunchModelRow) => r.id),
     ["a"]
   );
+  const [mirror, plain] = normalizeCatalog([
+    { id: "cheaperinference/x", parent: "cinf/x", owned_by: "cheaperinference" },
+    { id: "cinf/x", parent: null },
+  ]);
+  assert.equal(mirror.parent, "cinf/x", "the catalog parent passes through");
+  assert.equal("parent" in plain, false, "a null parent is not set");
 });
 
 test("computeView = the shared selector with the protocol default; preferences reorder", () => {
