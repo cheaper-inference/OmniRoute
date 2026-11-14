@@ -13,7 +13,7 @@ npm run quality:launch                          # table plus one line per violat
 npm run quality:launch -- --json report.json    # same data, also written as JSON
 ```
 
-Runner: `scripts/quality/launch-quality.mjs`. Limits and the scope list:
+Runner: `scripts/quality/launch-quality.mjs`. Limits and the scope globs:
 `config/quality/launch-gates.json`. A full run takes about 40 seconds (most of it is the
 coverage run for CRAP). Output: a summary table (gate, limit, violations, worst value), then
 one line per violation in the form `file:line function value`, sorted worst first.
@@ -26,7 +26,7 @@ one line per violation in the form `file:line function value`, sorted worst firs
 | Cognitive complexity  | <= 15       | per function                                           | `eslint-plugin-sonarjs` `cognitive-complexity`               |
 | Halstead difficulty   | <= 30       | per function                                           | `scripts/quality/launch-halstead.mjs` (TypeScript API)       |
 | File length           | < 500 lines | per file                                               | ESLint core `max-lines` (max 499, blanks and comments count) |
-| CRAP                  | <= 25       | per function                                           | ESLint `complexity` plus `c8` statement coverage             |
+| CRAP                  | <= 25       | per function                                           | ESLint `complexity` plus V8 statement coverage (see below)   |
 | Dead code             | 0           | unused files, unused exports                           | `scripts/quality/launch-scans.mjs` (TypeScript parser)       |
 | Duplicate code        | 0           | clones inside the scope                                | `jscpd`, default thresholds                                  |
 | `any` / `unknown`     | 0           | TS keywords, JSDoc `{any}`, `{*}`, `{unknown}` in .mjs | `scripts/quality/launch-scans.mjs` (TypeScript AST)          |
@@ -70,21 +70,42 @@ CRAP = cc^2 * (1 - coverage)^3 + cc, per function, where:
 1. cc is the ESLint `complexity` value of the function (the runner lints the scope a second
    time with `complexity` at max 0, so every function gets a value).
 2. coverage is the statement coverage of that function from the launch unit tests, in [0, 1].
-   `c8` runs the tests below with the json reporter into a temporary directory under
-   `$TMPDIR`; the runner takes the statements whose start line is inside the function span,
-   minus the inner lines of nested functions, and divides hit by total. A file never loaded by
-   the tests has coverage 0; a function with no statements counts as covered.
+   The runner takes the statements (one per source line) whose start line is inside the
+   function span, minus the inner lines of nested functions, and divides hit by total. A file
+   never loaded by the tests has coverage 0; a function with no statements counts as covered.
 
 Coverage tests (`coverageTests` in `config/quality/launch-gates.json`):
 `tests/unit/cli/launch/**/*.test.ts`, `tests/unit/shared/launch-view-select.test.ts`,
 `tests/unit/api/launch-*.test.ts`, `tests/unit/catalog-launch-view.test.ts`,
-`tests/unit/db/launch-sessions.test.ts`. Equivalent command:
+`tests/unit/db/launch-sessions.test.ts`.
 
-```bash
-npx c8 --reporter=json --report-dir "$TMPDIR/cov" --exclude='tests/**' node \
-  --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts \
-  --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit <coverage tests>
-```
+How coverage is collected (`runCoverage` and `convertRawCoverage` in
+`scripts/quality/launch-quality.mjs`), and why it does not use `c8` directly:
+
+1. The tests run with `NODE_V8_COVERAGE` pointing at a temporary directory under `$TMPDIR`,
+   with the usual `--import tsx/esm` plus `scripts/quality/launch-coverage-hooks.mjs`. That
+   synchronous load hook wraps tsx and serves every scope file untransformed: `.mjs` files as
+   the bytes on disk (Node runs them natively) and `.ts` files through Node's native type
+   stripping (`stripTypeScriptTypes`, mode `strip`, which blanks type syntax and keeps every
+   offset). A `.ts` file strip mode cannot run falls back to tsx. Module resolution
+   (`@/` aliases, extensionless specifiers) stays with tsx.
+2. The raw V8 data is converted to istanbul one script per process at a time, with
+   `v8-to-istanbul` and that process's own source map (when a script was transformed), and
+   only then merged line by line with `istanbul-lib-coverage` (both are the libraries `c8`
+   itself uses).
+
+Why: tsx rewrites every dynamic `import()` by appending a `.then(...)` interop wrapper, so V8
+offsets after it no longer match the file. `c8` merges the raw V8 byte ranges of all
+processes first and remaps the result through one source map per file, but launch tests also
+spawn child processes that load the same files natively, without that shift. The merged
+ranges then belong to no single text, and per function coverage in files with lazy imports
+was wrong in both directions (for example `selectView` callbacks at 0% that every view test
+runs, and `launchViewCacheKeySuffix` at 100% with its `catch` never taken). Serving the files
+untransformed makes the test processes exact, and converting per process keeps any remaining
+transformed load (a child that imports tsx itself) from mixing with native ones. The
+regression test `tests/unit/quality/launch-coverage.test.ts` drives a fixture with a lazy
+`import()` above a fully exercised function (plus a native child that loads it): it reads
+100% here and 60% through plain `c8`.
 
 ### Dead code
 
@@ -117,18 +138,27 @@ inline casts) for `any`, `*` and `unknown`, including inside `Object<string, any
 
 ## Scope
 
-Production files the launch work created, listed in `config/quality/launch-gates.json`
-(`scope`, 66 files). Resolved with:
+The scope is not a fixed list. `scope` in `config/quality/launch-gates.json` holds include
+globs and an exclude list, and `scripts/quality/launch-scope.mjs` resolves them on every run
+against `git ls-files` plus untracked, non-ignored files (`git ls-files --cached --others
+--exclude-standard`, kept to files that exist). Modules created later, for example by
+splitting a large file into `bin/cli/launch/command/*.mjs` or `bin/cli/launch/core/plan/**`,
+are measured by every gate without editing the config. The run prints the resolved file count
+on its first line (`launch scope: N files`), and the JSON report carries `scopeCount` and the
+resolved `scope`.
 
-```bash
-git diff --name-only --diff-filter=A 82f60e5ef6..dbdc1d572c
-```
+- include: `bin/cli/launch/**/*.{mjs,ts}` (this covers `contract.d.ts`), `bin/omnirouter.mjs`,
+  `src/app/api/launch/**/*.ts`, `src/shared/launch/**/*.ts`,
+  `src/shared/validation/launchView.ts`, `src/lib/db/launchSessions.ts`,
+  `src/app/api/v1/models/catalogLaunchView.ts`.
+- exclude: `bin/cli/launch/assets/**`, and always every test file (anything under a `test/`,
+  `tests/` or `__tests__/` directory, or named `*.test.*` / `*.spec.*`).
 
-kept to `.mjs`, `.ts` and `.d.ts` under `bin/cli/launch/**`, `bin/omnirouter.mjs`,
-`src/app/api/launch/**`, `src/shared/launch/**`, `src/shared/validation/launchView.ts`,
-`src/lib/db/launchSessions.ts` and `src/app/api/v1/models/catalogLaunchView.ts`, excluding
-`bin/cli/launch/assets/**` and tests. Upstream files the launch work only edited are out of
-scope.
+The dead code scan treats the whole resolved set as the scope: a new module nobody imports is
+an unused file, and its exports must be imported by another file. On the baseline commit the
+globs resolve to the same 66 files as the earlier fixed list (the launch files created in
+`git diff --name-only --diff-filter=A 82f60e5ef6..dbdc1d572c`). Upstream files the launch work
+only edited are out of scope.
 
 ## Baseline results
 

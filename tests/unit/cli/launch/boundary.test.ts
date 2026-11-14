@@ -1,7 +1,8 @@
 // Boundary test: adapter purity and the contract.mjs re-export boundary rules.
 // Static scan of bin/cli/launch/adapters/*.mjs, the shared adapter helpers in
-// bin/cli/launch/adapters/_shared/*.mjs and bin/cli/launch/contract.mjs, plus runtime invariants on
-// every adapter found (vacuous until adapters exist).
+// bin/cli/launch/adapters/_shared/*.mjs, bin/cli/launch/contract.mjs and its sibling modules
+// bin/cli/launch/contract/*.mjs, plus runtime invariants on every adapter found (vacuous until
+// adapters exist).
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -20,6 +21,7 @@ const LAUNCH_DIR = join(ROOT, "bin/cli/launch");
 const ADAPTERS_DIR = join(LAUNCH_DIR, "adapters");
 const SHARED_DIR = join(ADAPTERS_DIR, "_shared");
 const CONTRACT_FILE = join(LAUNCH_DIR, "contract.mjs");
+const CONTRACT_PARTS_DIR = join(LAUNCH_DIR, "contract");
 
 /** Number of launcher adapters; bump together with a new adapters/<id>.mjs. */
 const REGISTRY_SIZE = 19;
@@ -41,6 +43,11 @@ const CONTRACT_ALLOWED_IMPORTS = new Set([
   "../utils/claudeWindowEnv.mjs",
   "../../../src/shared/launch/viewSelect.ts",
 ]);
+
+/** contract.mjs may also re-export its own split-out parts, `./contract/<name>.mjs`. */
+const CONTRACT_PART_IMPORT = /^\.\/contract\/[a-z][a-z0-9-]*\.mjs$/;
+/** A contract part may import only other parts, `./<name>.mjs`. */
+const CONTRACT_PART_SIBLING = /^\.\/[a-z][a-z0-9-]*\.mjs$/;
 
 /**
  * Replace comments with spaces and string/template contents with "x", keeping specifiers of
@@ -126,8 +133,20 @@ export function adapterViolations(
 /** Violations of the re-export rule in contract.mjs: only the documented re-exports. */
 export function contractViolations(source: string): string[] {
   return listImports(source)
-    .filter((spec) => !CONTRACT_ALLOWED_IMPORTS.has(spec))
+    .filter((spec) => !CONTRACT_ALLOWED_IMPORTS.has(spec) && !CONTRACT_PART_IMPORT.test(spec))
     .map((spec) => `contract.mjs: undocumented import ${JSON.stringify(spec)}`);
+}
+
+/**
+ * Violations in one contract part (bin/cli/launch/contract/<name>.mjs): the adapter purity rule
+ * (no fetch, process, eval), and imports limited to sibling parts.
+ */
+export function contractPartViolations(source: string, file = "contract/part.mjs"): string[] {
+  const purity = adapterViolations(source, file).filter((p) => !p.includes("forbidden import"));
+  const imports = listImports(source)
+    .filter((spec) => !CONTRACT_PART_SIBLING.test(spec))
+    .map((spec) => `${file}: forbidden import ${JSON.stringify(spec)} (only ./<part>.mjs)`);
+  return [...imports, ...purity];
 }
 
 function adapterFiles(dir: string): string[] {
@@ -192,7 +211,9 @@ test("the import rules accept only the documented specifiers", () => {
 test("contract.mjs imports nothing beyond the documented exceptions", () => {
   const source = readFileSync(CONTRACT_FILE, "utf8");
   assert.deepEqual(contractViolations(source), []);
-  const imports = listImports(source).sort();
+  const imports = listImports(source)
+    .filter((spec) => !CONTRACT_PART_IMPORT.test(spec))
+    .sort();
   assert.deepEqual(imports, [...CONTRACT_ALLOWED_IMPORTS].sort());
   for (const spec of CONTRACT_ALLOWED_IMPORTS) {
     assert.ok(source.includes(spec), `exception ${spec} is documented in the header`);
@@ -252,12 +273,34 @@ test("the directory scan catches a forbidden import in a temp adapters dir", () 
   }
 });
 
+test("contract parts import only sibling parts, are pure, and are all re-exported", () => {
+  const parts = adapterFiles(CONTRACT_PARTS_DIR);
+  const problems = parts.flatMap((file) =>
+    contractPartViolations(readFileSync(file, "utf8"), relative(ROOT, file))
+  );
+  assert.deepEqual(problems, []);
+  const reexported = listImports(readFileSync(CONTRACT_FILE, "utf8"))
+    .filter((spec) => CONTRACT_PART_IMPORT.test(spec))
+    .sort();
+  const onDisk = parts.map((file) => `./contract/${relative(CONTRACT_PARTS_DIR, file)}`).sort();
+  assert.deepEqual(reexported, onDisk);
+});
+
+test("contract part scanner rejects outside imports and impure code", () => {
+  assert.deepEqual(contractPartViolations(`import { x } from "./errors.mjs";`), []);
+  assert.match(contractPartViolations(`import fs from "node:fs";`)[0], /forbidden import/);
+  assert.match(contractPartViolations(`import { y } from "../core/plan.mjs";`)[0], /forbidden/);
+  assert.match(contractPartViolations(`const e = process.env.X;`)[0], /process/);
+});
+
 test("contract scanner rejects an undocumented import", () => {
   assert.deepEqual(
     contractViolations(`export { claudeWindowEnv } from "../utils/claudeWindowEnv.mjs";`),
     []
   );
   assert.match(contractViolations(`import fs from "node:fs";`)[0], /undocumented import/);
+  assert.deepEqual(contractViolations(`export { json } from "./contract/json.mjs";`), []);
+  assert.match(contractViolations(`export * from "./contract/../core/x.mjs";`)[0], /undocumented/);
 });
 
 test("adapters/index.mjs and adapters/all.mjs import only sibling adapters (./<id>.mjs)", () => {

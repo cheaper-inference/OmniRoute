@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * Launch quality scans over the scope in config/quality/launch-gates.json.
+ * Launch quality scans over the scope resolved from config/quality/launch-gates.json
+ * (scripts/quality/launch-scope.mjs).
  *
  * - runDeadCode: a TypeScript-parser based reference scan (knip was not used: it cannot be scoped
  *   to a file subset with "exports used only by tests count as used" plus lazy adapter loading
@@ -23,6 +24,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
+import { resolveScope } from "./launch-scope.mjs";
 
 const SCAN_DIRS = ["bin", "src", "open-sse", "tests", "scripts", "electron"];
 const SOURCE_EXT = /\.(?:ts|tsx|mts|cts|js|mjs|cjs)$/;
@@ -401,7 +403,8 @@ async function main() {
   const gates = JSON.parse(
     fs.readFileSync(path.join(root, "config/quality/launch-gates.json"), "utf8")
   );
-  const files = gates.scope;
+  const files = resolveScope(gates, root);
+  console.log(`launch scope: ${files.length} files`);
   for (const [name, fn] of [
     ["dead-code", runDeadCode],
     ["duplicates", runDuplicates],

@@ -39,6 +39,29 @@ const ROOT_VALUE_OPTIONS = new Set([
 const ROOT_BOOLEAN_OPTIONS = new Set(["-q", "--quiet", "--no-color"]);
 /** `--output` choices; an invalid value makes the root print its full help, so no fast path. */
 const OUTPUT_CHOICES = ["table", "json", "jsonl", "csv"];
+/** Commands the launch fast path serves. */
+const FAST_PATH_COMMANDS = new Set(["launch", "gateway"]);
+
+/** False only for an `--output` value outside its choices. */
+function rootValueOk(name, value) {
+  return name !== "--output" || OUTPUT_CHOICES.includes(value);
+}
+
+/**
+ * Number of argv words the root option at `args[i]` takes (1 or 2), or 0 when `args[i]` is
+ * not a root option `createProgram()` accepts with a valid value.
+ */
+function rootOptionWidth(args, i) {
+  const arg = args[i];
+  if (ROOT_BOOLEAN_OPTIONS.has(arg)) return 1;
+  const eq = arg.indexOf("=");
+  if (arg.startsWith("--") && eq > 2) {
+    const name = arg.slice(0, eq);
+    return ROOT_VALUE_OPTIONS.has(name) && rootValueOk(name, arg.slice(eq + 1)) ? 1 : 0;
+  }
+  if (!ROOT_VALUE_OPTIONS.has(arg) || i + 1 >= args.length) return 0;
+  return rootValueOk(arg, args[i + 1]) ? 2 : 0;
+}
 
 /**
  * The command the launch fast path serves for this argv ("launch" or "gateway"), or null to
@@ -50,23 +73,11 @@ const OUTPUT_CHOICES = ["table", "json", "jsonl", "csv"];
  */
 export function launchFastPathCommand(argv) {
   const args = argv.slice(2);
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i];
-    if (ROOT_BOOLEAN_OPTIONS.has(arg)) continue;
-    const eq = arg.indexOf("=");
-    if (arg.startsWith("--") && eq > 2) {
-      const name = arg.slice(0, eq);
-      if (!ROOT_VALUE_OPTIONS.has(name)) return null;
-      if (name === "--output" && !OUTPUT_CHOICES.includes(arg.slice(eq + 1))) return null;
-      continue;
-    }
-    if (ROOT_VALUE_OPTIONS.has(arg)) {
-      if (i + 1 >= args.length) return null;
-      const value = args[++i];
-      if (arg === "--output" && !OUTPUT_CHOICES.includes(value)) return null;
-      continue;
-    }
-    return arg === "launch" || arg === "gateway" ? arg : null;
+  let i = 0;
+  while (i < args.length) {
+    const width = rootOptionWidth(args, i);
+    if (width === 0) return FAST_PATH_COMMANDS.has(args[i]) ? args[i] : null;
+    i += width;
   }
   return null;
 }

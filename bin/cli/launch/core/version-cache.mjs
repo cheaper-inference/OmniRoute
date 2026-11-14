@@ -7,9 +7,9 @@ import { join } from "node:path";
 
 import { readJson, writeJsonAtomic } from "./state.mjs";
 
-export const VERSION_CACHE_FILE = "version-cache.json";
-export const VERSION_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
-export const VERSION_CACHE_MAX_ENTRIES = 64;
+const VERSION_CACHE_FILE = "version-cache.json";
+const VERSION_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const VERSION_CACHE_MAX_ENTRIES = 64;
 
 /** Cache key for a binary + gate, or null when it must not be cached. */
 export function versionCacheKey(bin, gate, deps = {}) {

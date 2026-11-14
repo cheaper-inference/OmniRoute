@@ -85,7 +85,7 @@ export interface PassthroughRule {
   /** Other spellings of the same option, e.g. ["-m"] for "--model". */
   aliases?: string[];
   /** Rule applies only when the flag's value starts with one of these, e.g. codex
-   *  `-c model_provider=`. Absent = any value. */
+   *  `-c model_provider=`. Absent = no constraint on the value. */
   valuePrefixes?: string[];
   /** Flag takes a value (default true). Boolean flags like "--bare" set false. */
   takesValue?: boolean;
@@ -137,11 +137,28 @@ export interface LaunchAdapter {
   modelWarnings?(model: LaunchModelRow, ctx: LaunchContext): string[];
   diagnose?(ctx: LaunchContext): PreflightCheck[];
   planExec?(ctx: LaunchContext, prompt: string): LaunchPlan;
-  statusLine?(ctx: LaunchContext): Record<string, unknown> | null;
+  statusLine?(ctx: LaunchContext): JsonObject | null;
   /** Reserved, not called in v1. */
   persist?: never;
   restore?: never;
 }
+
+// ---------- shared value types ----------
+
+export type JsonPrimitive = string | number | boolean | null;
+export type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
+export type JsonObject = { [key: string]: JsonValue };
+/** Input accepted by the serializers: JSON plus `undefined` (dropped inside objects), arrays may be readonly. */
+export type SerializableValue =
+  | JsonPrimitive
+  | undefined
+  | ReadonlyArray<SerializableValue>
+  | { readonly [key: string]: SerializableValue };
+/** TOML scalars, arrays and tables of those. */
+export type TomlValue =
+  string | number | boolean | ReadonlyArray<TomlValue> | { readonly [key: string]: TomlValue };
+/** Anything a catch clause or a loosely typed caller may hand over. */
+export type Thrown = Error | JsonPrimitive | undefined | object;
 
 // ---------- what core hands the adapter ----------
 
@@ -152,11 +169,11 @@ export interface LaunchSettings {
   summary: boolean;
   privateMode: boolean;
   /** Reserved, parsed only to reject with "not yet supported" in v1. */
-  budget?: unknown;
-  mode?: unknown;
-  compression?: unknown;
-  mcp?: unknown;
-  exec?: unknown;
+  budget?: JsonValue;
+  mode?: JsonValue;
+  compression?: JsonValue;
+  mcp?: JsonValue;
+  exec?: JsonValue;
 }
 
 export interface LaunchContextUtil {
@@ -168,9 +185,9 @@ export interface LaunchContextUtil {
   /** `key=value` TOML assignment (codex -c). */
   toml(key: string, v: string | number | boolean): string;
   /** Canonical JSON, sorted keys. */
-  json(v: unknown, options?: { indent?: number }): string;
+  json(v: SerializableValue, options?: { indent?: number }): string;
   /** Safe block YAML. */
-  yaml(v: unknown): string;
+  yaml(v: SerializableValue): string;
 }
 
 export interface LaunchContext {
@@ -209,7 +226,7 @@ export interface LaunchContext {
   /** argv after `--`, with every mergeJson flag removed by core. */
   readonly passthroughArgs: ReadonlyArray<string>;
   /** Parsed values of mergeJson flags, keyed by flag. */
-  readonly passthroughJson: Readonly<Record<string, unknown>>;
+  readonly passthroughJson: Readonly<Record<string, JsonValue>>;
   readonly settings: LaunchSettings;
   readonly util: LaunchContextUtil;
 }
@@ -300,7 +317,7 @@ export interface LaunchPlan {
   postExitChecks: PostExitCheck[];
   /** injected = number of view rows written into tool config (0 for server-view). */
   modelList: { strategy: ModelListStrategy; viewHash: string; injected: number };
-  mcp?: unknown;
+  mcp?: JsonValue;
   cleanup: { removeTempDir: boolean; revokeSession: boolean };
 }
 
@@ -329,7 +346,7 @@ export type LaunchErrorCode =
   | "BudgetExceeded";
 
 export declare class LaunchError extends Error {
-  constructor(code: LaunchErrorCode, message: string, options?: { hint?: string; cause?: unknown });
+  constructor(code: LaunchErrorCode, message: string, options?: { hint?: string; cause?: Thrown });
   readonly code: LaunchErrorCode;
   readonly hint?: string;
   readonly exitCode: number | null;
@@ -363,21 +380,24 @@ export declare const PLATFORMS: ReadonlyArray<Platform>;
 export declare const EXIT_CODES: Readonly<Record<LaunchErrorCode, number | null>>;
 export declare const ERROR_CODES: Readonly<{ [K in LaunchErrorCode]: K }>;
 export declare const ADAPTER_ERROR_CODES: ReadonlyArray<LaunchErrorCode>;
-export declare function isLaunchError(value: unknown): value is LaunchError;
+export declare function isLaunchError(value: Thrown): value is LaunchError;
 export declare function stripTrailingSlash(value: string): string;
 export declare function ensureV1(rootUrl: string): string;
 export declare function tempPath(name: string): string;
 export declare function statePath(name: string): string;
-export declare function json(value: unknown, options?: { indent?: number }): string;
+export declare function json(value: SerializableValue, options?: { indent?: number }): string;
 export declare function tomlString(value: string): string;
 export declare function tomlKey(key: string | string[]): string;
-export declare function tomlValue(value: unknown): string;
-export declare function toml(key: string | string[], value: unknown): string;
+export declare function tomlValue(value: TomlValue): string;
+export declare function toml(key: string | string[], value: TomlValue): string;
 export declare const tomlAssign: typeof toml;
-export declare function yaml(value: unknown): string;
+export declare function yaml(value: SerializableValue): string;
 export declare function dotenv(entries: Record<string, string | undefined>): string;
-export declare function isValidEnvKey(key: unknown): boolean;
-export declare function deepMerge<T = unknown>(base: unknown, override: unknown): T;
+export declare function isValidEnvKey(key: Thrown): boolean;
+export declare function deepMerge<T = JsonValue>(
+  base: SerializableValue,
+  override: SerializableValue
+): T;
 export declare function deepFreeze<T>(value: T): T;
 export declare function findFlag(
   args: ReadonlyArray<string>,

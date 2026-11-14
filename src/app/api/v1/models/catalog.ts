@@ -93,7 +93,12 @@ import {
   finalizeCatalogResponse,
   syntheticVariantListingIds,
 } from "./catalogResponse";
-import { launchAnonymousRemoteRejection, launchViewFromKeyMetadata } from "./catalogLaunchView";
+import {
+  forgetLaunchSessionForRequest,
+  launchAnonymousRemoteRejection,
+  LaunchSessionChangedError,
+  launchViewFromKeyMetadata,
+} from "./catalogLaunchView";
 import { catalogMetadataLookup } from "./catalogResponse";
 import {
   isNoAuthProviderBlocked,
@@ -229,6 +234,9 @@ function resolveCombosOnly(
   return settings?.exposeCombosOnly === true && options.ignoreExposeCombosOnly !== true;
 }
 
+/** Requests already retried once after LaunchSessionChangedError (never retried twice). */
+const launchRetriedRequests = new WeakSet<Request>();
+
 /**
  * Build unified OpenAI-compatible model catalog response.
  * Reused by `/api/v1/models` and `/api/v1` to avoid semantic drift (T09).
@@ -298,6 +306,15 @@ export async function getUnifiedModelsResponse(
       }
     );
   } catch (err) {
+    // A launch session changed (revoked, expired, re-viewed) while a build keyed on its
+    // parent's entry ran: that build was discarded. Retry once from the top, so the auth
+    // gate sees the current session (a revoked token gets its 401) and any joiner (the
+    // parent, another session) gets a clean build instead of a 500.
+    if (err instanceof LaunchSessionChangedError && !launchRetriedRequests.has(request)) {
+      launchRetriedRequests.add(request);
+      forgetLaunchSessionForRequest(request);
+      return getUnifiedModelsResponse(request, corsHeaders, options);
+    }
     // Hard rule #12: never put a raw err.message/err.stack in a response body.
     // Route it through the shared sanitizer instead — same status/type/code as
     // before, minus the stack-trace/path leak.

@@ -59,7 +59,7 @@ function failingFilter(row, spec) {
  * @param {import("../contract.d.ts").ViewSelectSpec} spec
  * @param {ReadonlyArray<string>} providers
  */
-export function connectedViewSpec(spec, providers) {
+function connectedViewSpec(spec, providers) {
   return { ...spec, filter: { ...(spec.filter || {}), providers: [...providers], auto: false } };
 }
 
@@ -70,6 +70,58 @@ function isMirrorOf(row, id) {
   if (typeof parent !== "string" || parent === "" || parent === row.id) return false;
   const noThink = row.id.startsWith("no-think/") && !parent.startsWith("no-think/");
   return (noThink ? `no-think/${parent}` : parent) === id;
+}
+
+/** Rows of `rows` (null-safe) whose id is `pin`. */
+function pinRowsOf(rows, pin) {
+  return (rows || []).filter((row) => row && row.id === pin);
+}
+
+/** The `limit` left for the non-pin rows once the pin takes its slot (undefined = no limit). */
+function restLimit(limit) {
+  const max = typeof limit === "number" ? Math.max(1, Math.floor(limit)) : Infinity;
+  return Number.isFinite(max) ? max - 1 : undefined;
+}
+
+/**
+ * The view with the pin first, or null when the pin does not pass the adapter view (`base`).
+ * @param {ReadonlyArray<import("../contract.d.ts").ViewCatalogRow>} rows
+ * @param {{ base: import("../contract.d.ts").ViewSelectSpec, spec: import("../contract.d.ts").ViewSelectSpec, prefs: import("../contract.d.ts").ViewPreferences, pin: string }} ctx
+ */
+function pinnedSelection(rows, ctx) {
+  const { base, spec, prefs, pin } = ctx;
+  // The pin alone, so a pinned mirror is not dropped for its parent being in the view.
+  const unlimited = selectView(pinRowsOf(rows, pin), { ...base, limit: undefined }, prefs);
+  const index = unlimited.ids.indexOf(pin);
+  if (index < 0) return null;
+  // The pin and its mirrors leave the rest, so a mirror of the pin never fills its slot.
+  const others = (rows || []).filter((row) => row && row.id !== pin && !isMirrorOf(row, pin));
+  const rest = selectView(others, { ...spec, limit: restLimit(spec.limit) }, prefs);
+  const ids = [pin, ...rest.ids];
+  return { ids, rows: [unlimited.rows[index], ...rest.rows], hash: viewHash(ids) };
+}
+
+/** Throws `ModelUnsuitable` when the pin is in the catalog but fails an adapter view filter. */
+function assertPinSuitable(rows, adapter, base, pin) {
+  const raw = (rows || []).find((row) => row && row.id === pin);
+  if (!raw) return;
+  const failed = failingFilter(raw, base);
+  if (!failed) return;
+  const where = `the ${adapter.id} launch view (${base.name})`;
+  throw new LaunchError(
+    "ModelUnsuitable",
+    `model ${pin} does not fit ${where}: it fails the ${failed} filter`
+  );
+}
+
+/** `selection` with the explicit `--model` pin kept (see computeView). */
+function applyPin(selection, rows, adapter, ctx) {
+  const { pin } = ctx;
+  if (!pin || selection.ids.includes(pin)) return selection;
+  const pinned = pinnedSelection(rows, ctx);
+  if (pinned) return pinned;
+  assertPinSuitable(rows, adapter, ctx.base, pin);
+  return selection;
 }
 
 /**
@@ -93,34 +145,8 @@ function isMirrorOf(row, id) {
 export function computeView(rows, adapter, prefs = {}, options = {}) {
   const base = effectiveViewSpec(adapter);
   const spec = options.providers ? connectedViewSpec(base, options.providers) : base;
-  let selection = selectView(rows, spec, prefs);
-  const pin = options.pin;
-  if (pin && !selection.ids.includes(pin)) {
-    // The pin alone, so a pinned mirror is not dropped for its parent being in the view.
-    const pinRows = (rows || []).filter((row) => row && row.id === pin);
-    const unlimited = selectView(pinRows, { ...base, limit: undefined }, prefs);
-    const index = unlimited.ids.indexOf(pin);
-    if (index >= 0) {
-      const limit = typeof spec.limit === "number" ? Math.max(1, Math.floor(spec.limit)) : Infinity;
-      // The pin and its mirrors leave the rest, so a mirror of the pin never fills its slot.
-      const rest = selectView(
-        (rows || []).filter((row) => row && row.id !== pin && !isMirrorOf(row, pin)),
-        { ...spec, limit: Number.isFinite(limit) ? limit - 1 : undefined },
-        prefs
-      );
-      const ids = [pin, ...rest.ids];
-      selection = { ids, rows: [unlimited.rows[index], ...rest.rows], hash: viewHash(ids) };
-    } else {
-      const raw = (rows || []).find((row) => row && row.id === pin);
-      const failed = raw ? failingFilter(raw, base) : null;
-      if (raw && failed) {
-        throw new LaunchError(
-          "ModelUnsuitable",
-          `model ${pin} does not fit the ${adapter.id} launch view (${base.name}): it fails the ${failed} filter`
-        );
-      }
-    }
-  }
+  const ctx = { base, spec, prefs, pin: options.pin };
+  const selection = applyPin(selectView(rows, spec, prefs), rows, adapter, ctx);
   const view = deepFreeze({ name: spec.name, hash: selection.hash, rows: selection.rows });
   return { view, ids: selection.ids };
 }
