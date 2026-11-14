@@ -62,6 +62,7 @@ import {
   DASHBOARD_LABEL,
   DASHBOARD_TITLE_PREFIX,
   FREEZE_LABEL,
+  RESUME_EXPECT_PREFIX,
   appendEvent,
   baseCheckRef,
   baseRedTitle,
@@ -526,6 +527,17 @@ class Tick {
       this.note(`paused manually: ${detail}`);
     } else if (this.action === "resume") {
       if (!this.s.paused) return this.note("resume: the queue was not paused");
+      const reason = String(this.reason ?? "");
+      if (reason.startsWith(RESUME_EXPECT_PREFIX)) {
+        // A resume from the CLI names the pause it saw (contracts.RESUME_EXPECT_PREFIX).
+        const expected = reason.slice(RESUME_EXPECT_PREFIX.length);
+        if (this.s.paused.since !== expected) {
+          return this.note(
+            `resume ignored: it targeted the pause of ${expected}, ` +
+              `the queue is paused (${this.s.paused.reason}) since ${this.s.paused.since}`
+          );
+        }
+      }
       const previous = this.s.paused.reason;
       this.s.paused = null;
       this.event("resumed", { detail: `manual resume (was ${previous})` });

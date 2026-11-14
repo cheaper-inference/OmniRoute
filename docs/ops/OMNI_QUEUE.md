@@ -296,6 +296,13 @@ after that confirmation. It exits `1` when the run ends any other way without ap
 (for example `skipped` while the kill switch is off), or after 20 minutes without confirmation; in
 that case check `npm run queue -- status --base <base>` and the `omni-queue` runs before retrying.
 
+A `resume` names the pause it saw (`expect-pause:<since>` in the dispatch reason), and the tick
+clears only that pause. On a base that is not paused the CLI sends nothing. So a resume that
+waited behind a running tick never clears a pause recorded later (a safety pause), and sending the
+same request twice is harmless. When the targeted pause is gone but the base was paused again, the
+CLI says so and leaves it paused. A resume dispatched by hand in the Actions tab, with no reason,
+clears whatever pause is there.
+
 The CLI evaluates eligibility with the local config file (`config/merge-queue/config.json`, or the
 file in OMNI_QUEUE_CONFIG, an override for the sandbox and the tests that the workflow never sets),
 so `status` shows the mode of your checkout, not necessarily the one on the default branch. `--repo <owner/repo>` points it at another repository (default: `gh repo view`).

@@ -28,6 +28,7 @@ import { promisify } from "node:util";
 import { DEFAULT_CONFIG_PATH, isManagedBase, loadConfig } from "./config.mjs";
 import {
   FREEZE_LABEL,
+  RESUME_EXPECT_PREFIX,
   STATE_BRANCH,
   sanitizeTitle,
   stateFilePath,
@@ -355,18 +356,31 @@ async function cmdDispatch(ctx, action) {
   const repo = (await gh.request("GET", `/repos/${gh.owner}/${gh.repo}`)).data;
   const ref = repo?.default_branch;
   if (!ref) throw new Error("could not read the default branch of the repository");
-  const reason = action === "pause" ? (flags.reason ?? "paused from the CLI") : "";
-  const inputs = { base, action, reason };
   const listRuns = () =>
     gh.listWorkflowFileRuns(QUEUE_WORKFLOW, { branch: ref, event: "workflow_dispatch" });
-  // Watermarks taken BEFORE the dispatch, from GitHub's own data (no local clock): the newest
-  // "paused" event, and the dispatch runs that already exist (none of them is ours).
-  const pausedBefore = lastEventAt(await loadState(gh, base), "paused");
+  // Watermarks taken BEFORE the dispatch, from GitHub's own data (no local clock): the state,
+  // and the dispatch runs that already exist (none of them is ours).
+  const before = await loadState(gh, base);
+  if (action === "resume" && !before?.paused) {
+    // Nothing is sent: a resume left pending in the tick's concurrency group would clear a
+    // pause recorded later, such as a safety pause.
+    out(`${base} is not paused: nothing to resume`);
+    return 0;
+  }
+  const pausedBefore = lastEventAt(before, "paused");
+  // A resume names the pause it saw, and the tick clears only that one. This also makes a
+  // second dispatch of the same request harmless.
+  const target = action === "resume" ? before.paused.since : null;
+  const reason =
+    action === "pause"
+      ? (flags.reason ?? "paused from the CLI")
+      : `${RESUME_EXPECT_PREFIX}${target}`;
+  const inputs = { base, action, reason };
   const known = new Set((await listRuns()).map((run) => run.id));
   const applied = (state) =>
     action === "pause"
       ? Boolean(state?.paused) && lastEventAt(state, "paused") > pausedBefore
-      : !state?.paused;
+      : !state?.paused || state.paused.since !== target;
   await gh.dispatchWorkflow(QUEUE_WORKFLOW, ref, inputs);
   out(
     `${action} requested for ${base} (workflow ${QUEUE_WORKFLOW} on ${ref}); waiting for a tick to apply it`
@@ -376,8 +390,16 @@ async function cmdDispatch(ctx, action) {
     await ctx.sleep(ctx.confirmIntervalMs);
     // Runs first, then the state: a run already seen completed has saved whatever it saved.
     const runs = (await listRuns()).filter((run) => !known.has(run.id));
-    if (applied(await loadState(gh, base))) {
-      out(`${action} applied to ${base}`);
+    const state = await loadState(gh, base);
+    if (applied(state)) {
+      if (action === "resume" && state?.paused) {
+        out(
+          `the pause this resume targeted is gone, but ${base} was paused again ` +
+            `(${state.paused.reason}, since ${state.paused.since}) and stays paused`
+        );
+      } else {
+        out(`${action} applied to ${base}`);
+      }
       return 0;
     }
     const ours = runs.sort((a, b) => b.id - a.id)[0];

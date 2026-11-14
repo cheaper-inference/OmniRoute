@@ -385,6 +385,13 @@ export function candidateRef(base, batchId, candidateSha) {
   return `${CANDIDATE_PREFIX}${sanitizeBase(base)}/${batchId}-${candidateSha.slice(0, 12)}`;
 }
 
+/**
+ * Reason prefix of a `resume` sent by the CLI: `expect-pause:<paused.since>`. The tick clears the
+ * pause only while it is still the one the operator saw, so a resume that waited in the tick's
+ * concurrency group cannot clear a newer (safety) pause.
+ */
+export const RESUME_EXPECT_PREFIX = "expect-pause:";
+
 /** Batch id for a sequence number: (42) → "b42"; with an infra retry: (42, 1) → "b42-r1". */
 export function batchIdFor(seq, retry = 0) {
   if (!isCount(seq)) throw new Error(`invalid batch sequence: ${seq}`);

@@ -63,8 +63,13 @@ async function applyAction(gh, fake, { base, action, reason }) {
     s.paused = { reason: "manual", since: at, baseSha: null, detail, issue: null };
     s.history = [...s.history, { at, type: "paused", detail }];
   } else if (action === "resume" && s.paused) {
-    s.history = [...s.history, { at, type: "resumed", detail: `manual resume` }];
-    s.paused = null;
+    const expected = String(reason ?? "").startsWith("expect-pause:")
+      ? String(reason).slice("expect-pause:".length)
+      : null;
+    if (expected === null || s.paused.since === expected) {
+      s.history = [...s.history, { at, type: "resumed", detail: `manual resume` }];
+      s.paused = null;
+    }
   }
   writeState(fake, s);
 }
@@ -310,6 +315,9 @@ test("pause and resume dispatch omni-queue.yml on the default branch", async (t)
   assert.equal(await run(["pause", BASE, "--reason", "deploy window"]), 0);
   assert.equal(await run(["resume", BASE]), 0);
   assert.equal(await run(["pause", BASE]), 0);
+  // A resume names the pause it saw (`expect-pause:<since>`), so the tick clears only that one.
+  const resumeReason = fake.dispatches[1].inputs.reason;
+  assert.match(resumeReason, /^expect-pause:\d{4}-\d{2}-\d{2}T[\d:.]+Z$/);
   assert.deepEqual(fake.dispatches, [
     {
       workflow: "omni-queue.yml",
@@ -319,7 +327,7 @@ test("pause and resume dispatch omni-queue.yml on the default branch", async (t)
     {
       workflow: "omni-queue.yml",
       ref: "release/v3.8.54",
-      inputs: { base: BASE, action: "resume", reason: "" },
+      inputs: { base: BASE, action: "resume", reason: resumeReason },
     },
     {
       workflow: "omni-queue.yml",
@@ -428,6 +436,44 @@ test("resume waits until the pause is cleared", async (t) => {
   assert.equal(await run(["resume", BASE], confirm), 0, lines.err.join("\n"));
   assert.equal(polls, 2);
   assert.equal(lines.out.at(-1), `resume applied to ${BASE}`);
+});
+
+test("resume on a base that is not paused dispatches nothing", async (t) => {
+  // A resume left pending in the tick's concurrency group would later clear a pause recorded
+  // after the operator looked (a safety pause): with nothing to resume, nothing is sent.
+  const { run, lines, fake } = await setup(t);
+  assert.equal(await run(["resume", BASE]), 0, lines.err.join("\n"));
+  assert.deepEqual(fake.dispatches, []);
+  assert.match(lines.out.at(-1), /is not paused: nothing to resume/);
+});
+
+test("a resume names the pause it saw and never claims a newer pause was cleared", async (t) => {
+  const { run, lines, fake, gh } = await setup(t);
+  await applyAction(gh, fake, { base: BASE, action: "pause", reason: "x" });
+  const seen = JSON.parse((await gh.getFileContent(stateFilePath(BASE), STATE_BRANCH)).content)
+    .paused.since;
+  let polls = 0;
+  const sleep = async () => {
+    polls += 1;
+    if (polls === 1) {
+      // Meanwhile a tick lifted that pause and recorded a newer one.
+      await applyAction(gh, fake, { base: BASE, action: "resume" });
+      await applyAction(gh, fake, { base: BASE, action: "pause", reason: "safety" });
+      // The resume that was pending runs now: it must not touch the newer pause.
+      await applyAction(gh, fake, fake.dispatches[0].inputs);
+    }
+  };
+  const confirm = { sleep, confirmTimeoutMs: 10_000, confirmIntervalMs: 1000 };
+  assert.equal(await run(["resume", BASE], confirm), 0, lines.err.join("\n"));
+  assert.deepEqual(fake.dispatches[0].inputs, {
+    base: BASE,
+    action: "resume",
+    reason: `expect-pause:${seen}`,
+  });
+  const state = JSON.parse((await gh.getFileContent(stateFilePath(BASE), STATE_BRANCH)).content);
+  assert.equal(state.paused.detail, "safety", "the newer pause stays");
+  assert.match(lines.out.at(-1), /paused again/);
+  assert.doesNotMatch(lines.out.join("\n"), /resume applied/);
 });
 
 test("API failure during dispatch → exit 1", async (t) => {

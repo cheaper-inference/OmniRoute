@@ -1868,3 +1868,25 @@ test("a tick that changes the state still loses the compare-and-swap to a concur
   assert.deepEqual(nums(state.inFlight.prs), [1]);
   assert.ok(types(state).includes("error"), "the concurrent writer's event survived");
 });
+
+test("a resume that names a pause clears only that pause", async () => {
+  // The CLI sends `expect-pause:<since>` with a resume. A resume that waited in the tick's
+  // concurrency group must not clear a newer pause (a safety pause recorded meanwhile).
+  const h = createHarness();
+  await h.tick({ action: "pause", reason: "first" });
+  const first = (await h.state()).paused.since;
+  await h.tick({ action: "resume", reason: `expect-pause:${first}` });
+  assert.equal((await h.state()).paused, null, "the pause it named is cleared");
+
+  h.clock.advance(1);
+  await h.tick({ action: "pause", reason: "second" });
+  const second = (await h.state()).paused.since;
+  assert.notEqual(second, first);
+  await h.tick({ action: "resume", reason: `expect-pause:${first}` });
+  const state = await h.state();
+  assert.equal(state.paused?.since, second, "a stale resume leaves the newer pause alone");
+  assert.equal(state.history.at(-1).type, "paused", "and records no resumed event");
+
+  await h.tick({ action: "resume" });
+  assert.equal((await h.state()).paused, null, "a resume without a target still clears any pause");
+});
