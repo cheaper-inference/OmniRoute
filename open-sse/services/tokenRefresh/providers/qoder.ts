@@ -3,11 +3,18 @@
 // provenance notes (ported idea from KooshaPari's PR #7338, redone on tip).
 import { PROVIDERS, OAUTH_ENDPOINTS } from "../../../config/constants.ts";
 import { runWithProxyContext } from "../../../utils/proxyFetch.ts";
-import { buildFormParams, extractOAuthErrorCode } from "../shared.ts";
+import { buildFormParams, extractOAuthErrorCode, readRefreshErrorBody } from "../shared.ts";
 import { getQoderMachineId } from "../../../utils/qoderDevice.ts";
 
 const QODER_DEVICE_DEFAULT_EXPIRES_IN = 2592000;
-const QODER_DEVICE_UNRECOVERABLE_STATUSES = new Set([400, 401, 403, 404, 410]);
+/**
+ * Last-resort status codes when the body carries no OAuth error code. Kept
+ * deliberately narrow: a 404 is a mistyped `QODER_DEVICE_REFRESH_URL`, a 403 is
+ * usually a WAF/proxy block and a 400 is a `machine_id` mismatch (the resolver
+ * falls back to an in-memory UUID when it cannot persist, so the id can change
+ * after a restart) — none of them prove the refresh token was revoked.
+ */
+const QODER_DEVICE_UNRECOVERABLE_STATUSES = new Set([401, 410]);
 
 function toQoderDeviceCredentials(json, previousRefreshToken) {
   const nested = json?.data;
@@ -20,11 +27,23 @@ function toQoderDeviceCredentials(json, previousRefreshToken) {
 }
 
 async function handleQoderDeviceRefreshFailure(response, log) {
-  const errorText = await response.text();
+  // Read once and classify: the status alone does not prove the token is dead.
+  const { rawText, code } = await readRefreshErrorBody(response).catch(() => ({
+    rawText: "",
+    code: null,
+  }));
   log?.error?.("TOKEN_REFRESH", "Failed to refresh Qoder device token", {
     status: response.status,
-    error: errorText,
+    error: rawText,
+    oauthErrorCode: code,
   });
+  // A parsed revocation code is authoritative regardless of the status.
+  if (code) {
+    return { error: "unrecoverable_refresh_error", code };
+  }
+  // Without a code, only a status that cannot mean anything else counts, so a
+  // misconfigured URL / WAF block / machine-id mismatch retries instead of
+  // forcing a re-sign-in.
   if (QODER_DEVICE_UNRECOVERABLE_STATUSES.has(response.status)) {
     return { error: "unrecoverable_refresh_error", code: "invalid_grant" };
   }
@@ -54,6 +73,12 @@ async function refreshQoderDeviceToken(refreshToken, log, proxyConfig) {
     if (!response.ok) return handleQoderDeviceRefreshFailure(response, log);
 
     const credentials = toQoderDeviceCredentials(await response.json(), refreshToken);
+    if (!credentials.accessToken) {
+      // A 200 without a token (`{ success: false }`) must not overwrite a
+      // working access token with `undefined` in the caller's credential store.
+      log?.error?.("TOKEN_REFRESH", "Qoder device refresh response has no access token");
+      return null;
+    }
     log?.info?.("TOKEN_REFRESH", "Successfully refreshed Qoder device token", {
       hasNewAccessToken: !!credentials.accessToken,
       hasNewRefreshToken: !!credentials.refreshToken,

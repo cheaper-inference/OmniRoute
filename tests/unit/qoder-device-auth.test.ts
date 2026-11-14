@@ -176,6 +176,49 @@ test("qoder token refresh: refreshes native device token (drt-*)", async () => {
   }
 });
 
+test("qoder token refresh: a 200 without an access token does not clobber the stored token", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () =>
+    jsonResponse({
+      success: false,
+      data: { refresh_token: "drt-new-refresh-token" },
+    })) as typeof fetch;
+
+  try {
+    const refreshed = await refreshQoderToken("drt-old-refresh-token", console);
+    assert.equal(refreshed, null);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("qoder token refresh: 403/404 without an OAuth code stays retryable", async () => {
+  const originalFetch = globalThis.fetch;
+
+  try {
+    for (const status of [403, 404, 400]) {
+      globalThis.fetch = (async () => textResponse("<html>blocked</html>", status)) as typeof fetch;
+      const refreshed = await refreshQoderToken("drt-old-refresh-token", console);
+      assert.equal(refreshed, null, `status ${status} must not mark the credential unrecoverable`);
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("qoder token refresh: a body-level invalid_grant is unrecoverable even on 403", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () => jsonResponse({ error: "invalid_grant" }, 403)) as typeof fetch;
+
+  try {
+    const refreshed = await refreshQoderToken("drt-old-refresh-token", console);
+    assert.equal(refreshed.error, "unrecoverable_refresh_error");
+    assert.equal(refreshed.code, "invalid_grant");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("qoder device machineId: resolves consistently and respects env override", () => {
   resetQoderMachineIdCache();
   const originalEnv = process.env.QODER_MACHINE_ID;
