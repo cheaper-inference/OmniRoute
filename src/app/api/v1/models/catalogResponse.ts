@@ -56,6 +56,7 @@ import { maybeOmitCatalogModelName, withCatalogDisplayName } from "./catalogHelp
 import { applyCatalogPage, catalogJsonResponse, parseCatalogPage } from "./catalogPagination";
 import {
   applyLaunchView,
+  isCodexShapedLaunchView,
   launchViewFromKeyMetadata,
   type CatalogLaunchView,
 } from "./catalogLaunchView";
@@ -560,6 +561,8 @@ export async function finalizeCatalogResponse(
   // empty/foreign `base_instructions` would drop codex's agent prompt to nothing and
   // break its agent behavior (verified empirically against codex 0.137). An empty array
   // keeps codex on its built-in model info — same inference as today, minus the error.
+  // A launch session whose view has `serve.shape: "codex"` gets this envelope without any
+  // codex header (architecture 2.3); an openai-shape view never gains it from the view.
   const page = parseCatalogPage(request);
   const paged = applyCatalogPage(orderedModels, page);
   const responseBody: Record<string, unknown> = {
@@ -570,7 +573,7 @@ export async function finalizeCatalogResponse(
     responseBody.has_more = paged.hasMore;
     if (paged.lastId) responseBody.last_id = paged.lastId;
   }
-  if (isCodexModelCatalogClient(request)) {
+  if (isCodexModelCatalogClient(request) || isCodexShapedLaunchView(launchView)) {
     responseBody.models = [];
   }
 
