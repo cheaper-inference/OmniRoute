@@ -423,11 +423,22 @@ async function handleNvidiaTtsSpeech(providerConfig, body, modelId, token) {
 
 /**
  * Handle HuggingFace Inference TTS
- * POST {baseUrl}/{model_id} with { inputs: text } → audio binary
+ *
+ * The hf-inference provider serves no text-to-speech model. The catalog models (Orpheus,
+ * Chatterbox, Kokoro) are served by other providers on the Hugging Face router, so they go
+ * to the deepinfra route: POST {router}/deepinfra/v1/openai/audio/speech with
+ * { model, input } (and voice / response_format when the caller sets them) → audio binary.
+ * Same route shape as the official Hugging Face client. A model id outside the catalog (a
+ * custom id) keeps the hf-inference route: POST {baseUrl}/{model_id} with { inputs: text }.
  */
+const HF_ROUTER_TTS_PROVIDER = "deepinfra";
+
 async function handleHuggingFaceTtsSpeech(providerConfig, body, modelId, token) {
   if (!isValidPathSegment(modelId)) {
     return errorResponse(400, "Invalid model ID");
+  }
+  if (providerConfig.models.some((m) => m.id === modelId)) {
+    return handleHuggingFaceRouterProviderSpeech(providerConfig, body, modelId, token);
   }
   const url = `${providerConfig.baseUrl}/${modelId}`;
 
@@ -445,6 +456,28 @@ async function handleHuggingFaceTtsSpeech(providerConfig, body, modelId, token) 
   }
 
   return audioStreamResponse(res, "audio/wav");
+}
+
+async function handleHuggingFaceRouterProviderSpeech(providerConfig, body, modelId, token) {
+  const routerOrigin = new URL(providerConfig.baseUrl).origin;
+  const payload: Record<string, unknown> = { model: modelId, input: body.input };
+  if (body.voice) payload.voice = body.voice;
+  if (body.response_format) payload.response_format = body.response_format;
+
+  const res = await fetch(`${routerOrigin}/${HF_ROUTER_TTS_PROVIDER}/v1/openai/audio/speech`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...buildAuthHeaders(providerConfig, token),
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    return upstreamErrorResponse(res, await res.text());
+  }
+
+  return audioStreamResponse(res);
 }
 
 /**

@@ -56,7 +56,25 @@ test("HuggingFace transcription posts to the router host, not the retired api-in
 test("HuggingFace speech posts to the router host, not the retired api-inference host", async () => {
   const { captured, restore } = stubFetch();
   try {
-    const response = await handleAudioSpeech({
+    // A custom id (not in the catalog) keeps the hf-inference path.
+    const custom = await handleAudioSpeech({
+      body: {
+        model: "huggingface/facebook/mms-tts-eng",
+        input: "hf text",
+      },
+      credentials: { apiKey: "hf-key" },
+    });
+
+    assert.equal(custom.status, 200);
+    assert.equal(
+      captured.url,
+      "https://router.huggingface.co/hf-inference/models/facebook/mms-tts-eng"
+    );
+    assert.ok(!captured.url!.includes("api-inference.huggingface.co"));
+
+    // A catalog model goes to the provider the Hub maps it to, on the same router host
+    // (route shape: tests/unit/huggingface-tts-router-provider.test.ts).
+    const catalog = await handleAudioSpeech({
       body: {
         model: "huggingface/hexgrad/Kokoro-82M",
         input: "hf text",
@@ -64,11 +82,8 @@ test("HuggingFace speech posts to the router host, not the retired api-inference
       credentials: { apiKey: "hf-key" },
     });
 
-    assert.equal(response.status, 200);
-    assert.equal(
-      captured.url,
-      "https://router.huggingface.co/hf-inference/models/hexgrad/Kokoro-82M"
-    );
+    assert.equal(catalog.status, 200);
+    assert.equal(captured.url, "https://router.huggingface.co/deepinfra/v1/openai/audio/speech");
     assert.ok(!captured.url!.includes("api-inference.huggingface.co"));
   } finally {
     restore();
