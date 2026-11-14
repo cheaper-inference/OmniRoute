@@ -1,1 +1,0 @@
-- **fix(quota):** an exhausted quota window with no future reset time no longer pauses an account once its sample is older than 2 hours. A paused account stops getting fresh quota headers, so one stale sample used to keep it paused forever.

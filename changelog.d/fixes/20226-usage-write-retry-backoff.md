@@ -1,0 +1,1 @@
+- **fix(usage):** A usage row whose write meets a locked database (for example a second writer process on the same file) is now retried on a backoff for about 31 seconds before it is dropped, not once after one second, so a billed request no longer ends with no usage row. ([#20226](https://github.com/cheaper-inference/OmniRoute/pull/20226))
