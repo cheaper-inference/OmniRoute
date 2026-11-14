@@ -3,6 +3,10 @@ import { buildConnectedProviders } from "./connectedProviders";
 
 export const dynamic = "force-dynamic";
 
+type ConnectionRow = Parameters<
+  typeof import("@/lib/db/providers/lazyConnectionView").createLazyConnectionView
+>[0];
+
 /**
  * `GET /api/launch/providers`: the providers with an active stored credential (API key or OAuth
  * connection) and every id prefix the `/v1/models` catalog uses for their rows, so the launch
@@ -23,14 +27,8 @@ export async function GET(request: Request) {
       getCachedProviderNodes(),
       getSettings(),
     ]);
-    const connections = (rows as Record<string, unknown>[]).map(createLazyConnectionView);
-    return launchJson(
-      buildConnectedProviders(
-        connections,
-        nodes,
-        (settings as Record<string, unknown>)?.blockedProviders
-      )
-    );
+    const connections = (rows as ConnectionRow[]).map(createLazyConnectionView);
+    return launchJson(buildConnectedProviders(connections, nodes, settings?.blockedProviders));
   } catch {
     return launchError(500, "Could not list connected providers", "internal_error");
   }

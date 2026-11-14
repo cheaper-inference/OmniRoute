@@ -1,4 +1,8 @@
-import { listAgentSessions, getAgentSessionRecentUsage } from "@/lib/db/agentSessions";
+import {
+  listAgentSessions,
+  getAgentSessionRecentUsage,
+  type AgentSessionRecord,
+} from "@/lib/db/agentSessions";
 import { getCostBySessionTag } from "@/lib/db/costLedger";
 import { getDbInstance } from "@/lib/db/core";
 import {
@@ -46,8 +50,12 @@ function countModels(
     .sort((a, b) => b.requests - a.requests || a.id.localeCompare(b.id));
 }
 
-export function buildLaunchUsageSummary(session: LaunchSessionRecord): LaunchUsageSummary {
-  const db = getDbInstance();
+type Db = ReturnType<typeof getDbInstance>;
+type AgentSession = AgentSessionRecord | null;
+type CostRow = ReturnType<typeof getCostBySessionTag>[number];
+
+/** The session's agent_sessions row (one launch = one row), linked back onto the session. */
+function findAgentSession(db: Db, session: LaunchSessionRecord): AgentSession {
   const { sessions } = listAgentSessions(db as never, {
     apiKeyId: usageKeyId(session),
     clientSessionId: session.id,
@@ -57,14 +65,55 @@ export function buildLaunchUsageSummary(session: LaunchSessionRecord): LaunchUsa
   if (agent && agent.id !== session.agentSessionId) {
     setLaunchSessionAgentSessionId(session.id, agent.id);
   }
+  return agent;
+}
 
-  const costRows = getCostBySessionTag(session.sessionTag);
-  let models = countModels(costRows.map((row) => row.model));
-  if (models.length === 0 && agent) {
-    models = countModels(
-      getAgentSessionRecentUsage(db as never, agent.id, 100).map((r) => r.model)
-    );
+/** Per-model counts from the cost ledger, else from the agent session's recent usage. */
+function resolveModels(db: Db, costRows: CostRow[], agent: AgentSession) {
+  const models = countModels(costRows.map((row) => row.model));
+  if (models.length > 0 || !agent) return models;
+  return countModels(getAgentSessionRecentUsage(db as never, agent.id, 100).map((r) => r.model));
+}
+
+const orZero = (value: number | null | undefined) => value ?? 0;
+
+function agentTotals(agent: AgentSession) {
+  if (!agent) {
+    return {
+      requests: 0,
+      errors: 0,
+      inputTokens: 0,
+      outputTokens: 0,
+      cacheReadTokens: 0,
+      cacheCreationTokens: 0,
+      reasoningTokens: 0,
+      unpricedRequests: 0,
+    };
   }
+  const { tokens } = agent;
+  return {
+    requests: orZero(agent.requestCount),
+    errors: orZero(agent.errorCount),
+    inputTokens: orZero(tokens.input),
+    outputTokens: orZero(tokens.output),
+    cacheReadTokens: orZero(tokens.cacheRead),
+    cacheCreationTokens: orZero(tokens.cacheCreation),
+    reasoningTokens: orZero(tokens.reasoning),
+    unpricedRequests: orZero(agent.unpricedCount),
+  };
+}
+
+/** The agent session's cost, else the ledger sum; undefined (omitted) when neither exists. */
+function resolveCostUsd(agent: AgentSession, costRows: CostRow[]): number | undefined {
+  if (agent) return agent.costUsd;
+  if (costRows.length === 0) return undefined;
+  return costRows.reduce((sum, row) => sum + row.amountUsd, 0);
+}
+
+export function buildLaunchUsageSummary(session: LaunchSessionRecord): LaunchUsageSummary {
+  const db = getDbInstance();
+  const agent = findAgentSession(db, session);
+  const costRows = getCostBySessionTag(session.sessionTag);
 
   const summary: LaunchUsageSummary = {
     sessionId: session.id,
@@ -72,22 +121,13 @@ export function buildLaunchUsageSummary(session: LaunchSessionRecord): LaunchUsa
     sessionTag: session.sessionTag,
     agentSessionId: agent?.id ?? null,
     startedAt: session.createdAt,
-    requests: agent?.requestCount ?? 0,
-    errors: agent?.errorCount ?? 0,
-    inputTokens: agent?.tokens.input ?? 0,
-    outputTokens: agent?.tokens.output ?? 0,
-    cacheReadTokens: agent?.tokens.cacheRead ?? 0,
-    cacheCreationTokens: agent?.tokens.cacheCreation ?? 0,
-    reasoningTokens: agent?.tokens.reasoning ?? 0,
-    unpricedRequests: agent?.unpricedCount ?? 0,
-    models,
+    ...agentTotals(agent),
+    models: resolveModels(db, costRows, agent),
     // Not tracked per session yet; reported as 0 rather than omitted so the shape is stable.
     fallbacks: 0,
   };
-  if (agent) summary.costUsd = agent.costUsd;
-  else if (costRows.length > 0) {
-    summary.costUsd = costRows.reduce((sum, row) => sum + row.amountUsd, 0);
-  }
+  const costUsd = resolveCostUsd(agent, costRows);
+  if (costUsd !== undefined) summary.costUsd = costUsd;
   if (session.revokedAt) summary.endedAt = session.revokedAt;
   return summary;
 }
