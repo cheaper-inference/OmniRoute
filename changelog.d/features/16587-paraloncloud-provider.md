@@ -1,0 +1,1 @@
+- **feat(providers):** ParalonCloud (`paraloncloud`) now accepts any model id its live `/v1/models` catalog returns (`passthroughModels`), seeds its offline models with the catalog's context lengths, records its native `/v1/responses` endpoint and shows key/base-URL hints in the dashboard ([#16587](https://github.com/cheaper-inference/OmniRoute/pull/16587)) — thanks @robertjitaru

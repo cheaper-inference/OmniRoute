@@ -13,6 +13,8 @@ const { getEmbeddingProvider, getEmbeddingDimension, parseEmbeddingModel } =
 const { isNamedOpenAIStyleProvider } =
   await import("../../src/app/api/providers/[id]/models/discovery/providerSets.ts");
 const { DefaultExecutor, getExecutor } = await import("../../open-sse/executors/index.ts");
+const { isValidModel } = await import("../../src/shared/constants/models.ts");
+const { AGGREGATOR_PROVIDER_IDS } = await import("../../src/shared/constants/providers.ts");
 
 const PARALON_API = "https://paraloncloud.com/v1";
 
@@ -72,4 +74,33 @@ test("paraloncloud resolves in the embedding registry", () => {
     provider: "paraloncloud",
     model: "multilingual-e5-small",
   });
+});
+
+// #16587 (robertjitaru): the ParalonCloud catalog follows the GPUs online on the network, so
+// any model id the live /v1/models list returns must be accepted (passthrough), and the
+// offline seed carries the context lengths the catalog reports.
+test("paraloncloud accepts any model the live catalog returns (passthrough)", () => {
+  assert.equal(providerRegistry.paraloncloud.passthroughModels, true);
+  assert.equal(APIKEY_PROVIDERS.paraloncloud.passthroughModels, true);
+  assert.equal(isValidModel("paraloncloud", "future/live-catalog-model"), true);
+  assert.equal(isValidModel("paralon", "future/live-catalog-model"), true);
+  assert.match(APIKEY_PROVIDERS.paraloncloud.authHint, /prlc_/);
+  assert.match(APIKEY_PROVIDERS.paraloncloud.apiHint, /live model list/);
+});
+
+test("paraloncloud seeds carry context lengths and the Responses endpoint", () => {
+  const entry = providerRegistry.paraloncloud;
+  assert.equal(entry.responsesBaseUrl, `${PARALON_API}/responses`);
+  assert.deepEqual(
+    entry.models.map((m: { id: string; contextLength?: number }) => [m.id, m.contextLength]),
+    [
+      ["qwen3.8-27b", 131072],
+      ["qwen3-3b", 32768],
+    ]
+  );
+});
+
+test("paraloncloud is not listed as an aggregator", () => {
+  // It serves its own models on its own GPU network; it does not route to other APIs.
+  assert.equal(AGGREGATOR_PROVIDER_IDS.has("paraloncloud"), false);
 });
