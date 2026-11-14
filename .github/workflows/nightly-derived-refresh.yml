@@ -18,11 +18,12 @@ name: Nightly derived refresh
 # read is never overwritten; and an open PR whose branch tip was pushed by someone else (a hand
 # fix) is left alone until it is merged or closed.
 #
-# Secret DERIVED_REFRESH_PR_TOKEN: fine-grained token on this repository (Contents and Pull
-# requests: write). This repository does not let GITHUB_TOKEN create PRs, and a branch pushed or
-# a PR opened with GITHUB_TOKEN does not trigger CI, so the refresh PR would sit without checks.
-# Without the secret the branch is still pushed (with GITHUB_TOKEN) and the run summary says to
-# open the PR by hand.
+# PR token: DERIVED_REFRESH_PR_TOKEN when set (fine-grained token on this repository, Contents
+# and Pull requests: write), else I18N_REFRESH_TOKEN — the robot token the i18n mirror refresh
+# already opens its PR with (same scopes, same purpose; owner decision 2026-11-13). This repository
+# does not let GITHUB_TOKEN create PRs, and a branch pushed or a PR opened with GITHUB_TOKEN
+# does not trigger CI, so the refresh PR would sit without checks. With neither secret the branch
+# is still pushed (with GITHUB_TOKEN) and the run summary says to open the PR by hand.
 #
 # Secrets and event values reach the scripts only through `env:`.
 
@@ -113,8 +114,8 @@ jobs:
       - name: Commit, push and open or update the refresh PR
         if: steps.base.outputs.skip == 'false'
         env:
-          GH_TOKEN: ${{ secrets.DERIVED_REFRESH_PR_TOKEN || github.token }}
-          HAS_PR_TOKEN: ${{ secrets.DERIVED_REFRESH_PR_TOKEN != '' }}
+          GH_TOKEN: ${{ secrets.DERIVED_REFRESH_PR_TOKEN || secrets.I18N_REFRESH_TOKEN || github.token }}
+          HAS_PR_TOKEN: ${{ secrets.DERIVED_REFRESH_PR_TOKEN != '' || secrets.I18N_REFRESH_TOKEN != '' }}
           BASE: ${{ steps.base.outputs.branch }}
           BASE_RED_ISSUE: ${{ steps.base.outputs.red }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -168,7 +169,7 @@ jobs:
           if [ "$HAS_PR_TOKEN" != "true" ]; then
             {
               echo "\`$REFRESH_BRANCH\` is pushed with ${COUNT} refreshed file(s), but no PR was opened:"
-              echo "the \`DERIVED_REFRESH_PR_TOKEN\` secret isn't set. Open it from that branch against \`$BASE\`."
+              echo "neither \`DERIVED_REFRESH_PR_TOKEN\` nor \`I18N_REFRESH_TOKEN\` is set. Open it from that branch against \`$BASE\`."
             } >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
