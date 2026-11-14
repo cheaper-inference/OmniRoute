@@ -947,11 +947,11 @@ export default function CustomModelsSection({
                     />
                   )}
                   <Button
-                    variant="ghost"
+                    variant="destructive-ghost"
                     size="icon-sm"
                     icon="delete"
                     onClick={() => handleRemove(model.id!)}
-                    className="size-6 min-h-6 rounded text-error hover:bg-error-bg"
+                    className="size-6 min-h-6 rounded"
                     title={t("removeCustomModel")}
                     aria-label={t("removeCustomModel")}
                   />

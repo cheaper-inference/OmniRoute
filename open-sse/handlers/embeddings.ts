@@ -22,7 +22,7 @@ import { stripStaleEncodingHeaders } from "../utils/upstreamResponseHeaders.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
 import { stripTrailingSlashes } from "../utils/urlSanitize.ts";
 import { FETCH_TIMEOUT_MS } from "../config/constants.ts";
-import { fetchRemoteImage } from "@/shared/network/remoteImageFetch";
+import { fetchRemoteImage } from "../utils/remoteMediaFetch.ts";
 import {
   hasStructuredEmbeddingInput,
   normalizeClovaEmbeddingV2Response,

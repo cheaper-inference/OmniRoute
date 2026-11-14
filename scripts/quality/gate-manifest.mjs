@@ -4,7 +4,8 @@ import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { CHANGE_DOMAINS } from "./classify-pr-changes.mjs";
 
-const VALIDATION_ALIAS = /^(check(?::|$)|test(?::|$)|quality:|lint(?::|$)|typecheck:)/;
+const VALIDATION_ALIAS =
+  /^(check(?::|$)|test(?::|$)|quality:|lint(?::|$)|typecheck:|audit:|i18n:check)/;
 const DISPOSITIONS = new Set(["separately-invoked", "maintenance"]);
 const isRecord = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
 
