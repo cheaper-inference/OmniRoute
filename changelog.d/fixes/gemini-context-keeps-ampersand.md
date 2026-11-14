@@ -1,0 +1,1 @@
+- **fix(gemini):** A tool result replayed to Gemini as `<previous_tool_result_context>` text keeps `&` as it is (`a && b` is no longer sent as `a &amp;&amp; b`). The tag breakout guard is unchanged: `<` and `>` in the result are still escaped, so a result cannot close or reopen the block.
