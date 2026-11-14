@@ -249,14 +249,15 @@ it.each([false, true])(
 it("shows Kimi in the provider filter while preserving the moonshot filter value", async () => {
   fixture(false, false, ["moonshot", "kimi-coding"]);
   mount("en");
-  const select = await screen.findByRole("combobox", { name: "Filter quota providers" });
-  expect(within(select).getByRole("option", { name: "Kimi", exact: true })).toHaveValue("moonshot");
-  expect(within(select).getByRole("option", { name: "Kimi Coding", exact: true })).toHaveValue(
-    "kimi-coding"
-  );
+  fireEvent.click(await screen.findByLabelText("Filter quota providers", { selector: "summary" }));
+  const filter = screen.getByRole("group", { name: "Filter quota providers" });
+  const kimi = within(filter).getByRole("checkbox", { name: "Kimi" });
+  const kimiCoding = within(filter).getByRole("checkbox", { name: "Kimi Coding" });
 
-  fireEvent.change(select, { target: { value: "moonshot" } });
+  fireEvent.click(kimi);
   await waitFor(() => expect(document.querySelectorAll("[data-account]")).toHaveLength(1));
-  expect(select).toHaveValue("moonshot");
+  expect(kimi).toBeChecked();
+  expect(kimiCoding).not.toBeChecked();
+  expect(localStorage.getItem("omniroute:limits:providerFilter")).toBe('["moonshot"]');
   expect(document.querySelector("[data-account]")).toHaveAttribute("data-account", "available");
 });
