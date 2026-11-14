@@ -178,6 +178,10 @@ adapter's `ONE_SHOT_SUBCOMMANDS`, that subcommand replaces the default interacti
 - gemini: with `-p` or `--prompt` the adapter adds `--skip-trust` unless you passed it.
 - crush: `-- run "<prompt>"` gets `--verbose` added, because crush 0.101.0 can exit with empty
   stdout without it.
+- codex: launched sessions pass `-c features.plugins=false`, because codex otherwise starts a
+  background clone of its plugin catalog that keeps running after the launch exits. This also
+  turns off codex plugins the user installed, for that session only; add
+  `-- -c features.plugins=true` to the launch to turn them back on.
 
 For preflight and teardown, see `openclaw.mjs` (a `node-version` preflight) and `hermes.mjs` (a
 `${TOOL} gateway stop` teardown). For `mergeJson` and a version-gated model picker, see
