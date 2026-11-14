@@ -26,6 +26,46 @@ export async function probeHealth(rootUrl, { timeoutMs = HEALTH_TIMEOUT_MS } = {
   }
 }
 
+/** Per-attempt timeouts for the patient probe: about 6 s in total before a port is "foreign". */
+export const HEALTH_RETRY_TIMEOUTS_MS = Object.freeze([1500, 2000, 2500]);
+const HEALTH_RETRY_BACKOFF_MS = 250;
+
+/**
+ * Health probe with retries, for a port that is listening but did not answer the first probe: a
+ * busy or cold gateway can take several seconds on /health (live smoke item 7). True on the
+ * first 2xx; false only when every attempt failed or answered non-2xx.
+ * @param {string} rootUrl
+ * @param {{ timeoutsMs?: number[], backoffMs?: number, probe?: typeof probeHealth }} [options]
+ */
+export async function probeHealthPatient(rootUrl, options = {}) {
+  const timeouts = options.timeoutsMs ?? HEALTH_RETRY_TIMEOUTS_MS;
+  const backoffMs = options.backoffMs ?? HEALTH_RETRY_BACKOFF_MS;
+  const probe = options.probe ?? probeHealth;
+  for (let i = 0; i < timeouts.length; i++) {
+    if (i > 0 && backoffMs > 0) await sleep(backoffMs * i);
+    if (await probe(rootUrl, { timeoutMs: timeouts[i] })) return true;
+  }
+  return false;
+}
+
+// Same bounded patterns as src/shared/utils/logRedaction.ts (redactSecrets), mirrored because this
+// module runs under bare node without tsx, plus launch session tokens (olx_...).
+const LOG_SECRET_PATTERNS = [
+  [/(authorization\s*[:=]\s*bearer\s+)[\w.\-]{6,}/gi, "$1[REDACTED]"],
+  [/\bbearer\s+[\w.\-]{12,}/gi, "Bearer [REDACTED]"],
+  [/((?:x-api-key|api[_-]?key)\s*[:=]\s*)[\w.\-]{6,}/gi, "$1[REDACTED]"],
+  [/(api\.telegram\.org\/bot)\d{6,}:[\w\-]{20,}/gi, "$1[REDACTED]"],
+  [/\bsk-[A-Za-z0-9_\-]{16,}/g, "sk-[REDACTED]"],
+  [/\bolx_[A-Za-z0-9_\-]{8,}/g, "olx_[REDACTED]"],
+];
+
+/** Scrub credentials from one log line before it reaches the terminal. */
+export function redactLogText(text) {
+  let out = String(text ?? "");
+  for (const [pattern, replacement] of LOG_SECRET_PATTERNS) out = out.replace(pattern, replacement);
+  return out;
+}
+
 /**
  * True when `pid` is running AND is not proven foreign (section 0.1: lease and owned-gateway
  * checks call classifyPidIdentity after isPidRunning, closing the pid-reuse hole). "unknown"

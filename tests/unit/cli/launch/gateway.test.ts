@@ -3,6 +3,7 @@ import { after, test } from "node:test";
 import type { TestContext } from "node:test";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
+import http from "node:http";
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -284,6 +285,62 @@ test("a non-OmniRoute process on the port yields PortInUse", async (t) => {
   );
   assert.equal(gatewayJson(dir), null);
   assert.equal(reaperPids(dir).length, 0);
+});
+
+test("a gateway whose /health answers after 2.5 s on the first call is healthy, not PortInUse", async (t) => {
+  const { dir, port, acquire } = await setup(t);
+  let calls = 0;
+  const server = http.createServer((req, res) => {
+    if (req.url !== "/api/monitoring/health") {
+      res.writeHead(404);
+      res.end();
+      return;
+    }
+    calls += 1;
+    const delay = calls === 1 ? 2500 : 0;
+    setTimeout(() => {
+      if (res.destroyed) return;
+      res.writeHead(200, { "content-type": "application/json" });
+      res.end(JSON.stringify({ status: "ok" }));
+    }, delay);
+  });
+  await new Promise<void>((resolve) => server.listen(port, "127.0.0.1", () => resolve()));
+  t.after(
+    () =>
+      new Promise<void>((resolve) => {
+        server.closeAllConnections?.();
+        server.close(() => resolve());
+      })
+  );
+  const handle = await acquire();
+  assert.equal(handle.owned, false, "an external healthy gateway is used, never started");
+  assert.ok(calls >= 2, "the probe was retried");
+  assert.equal(gatewayJson(dir), null);
+  assert.equal(reaperPids(dir).length, 0);
+});
+
+test("an auto-started gateway that exits at once fails fast with its log tail, redacted", async (t) => {
+  const { port, acquire } = await setup(t);
+  const script =
+    "console.error('Server not found at: /x/app/server.js key sk-abcdefghijklmnopqrstuv'); process.exit(1)";
+  const started = Date.now();
+  const err = await acquire({
+    flags: { startTimeoutMs: 60_000 },
+    overrides: { gatewayCommand: [process.execPath, "-e", script] },
+  }).then(
+    () => null,
+    (error: unknown) => error as { code?: string; message?: string; exitCode?: number }
+  );
+  const elapsed = Date.now() - started;
+  assert.ok(err, "acquire rejected");
+  assert.equal(err.code, "GatewayStartTimeout");
+  assert.equal(err.exitCode, 75);
+  assert.ok(elapsed < 5000, `failed in ${elapsed} ms`);
+  assert.match(err.message ?? "", /exited before it became ready on port \d+/);
+  assert.match(err.message ?? "", /Server not found at/);
+  assert.match(err.message ?? "", /sk-\[REDACTED\]/);
+  assert.ok(!(err.message ?? "").includes("abcdefghijklmnopqrstuv"), "secret redacted");
+  assert.equal(await healthy(port), false);
 });
 
 test("readiness timeout yields GatewayStartTimeout and the child is gone", async (t) => {

@@ -17,7 +17,7 @@
 // then, outside the lock, an owned gateway that is not ready yet is awaited (GatewayStartTimeout).
 
 import { spawn } from "node:child_process";
-import { closeSync, openSync, writeFileSync } from "node:fs";
+import { closeSync, openSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -34,6 +34,8 @@ import {
   isOurProcessAlive,
   localRootUrl,
   probeHealth,
+  probeHealthPatient,
+  redactLogText,
   stopPidGracefully,
   waitForPidExit,
 } from "./process.mjs";
@@ -92,6 +94,55 @@ function spawnReaper(stateDir, spec) {
   return child.pid;
 }
 
+const LOG_TAIL_LINES = 5;
+const LOG_TAIL_MAX_CHARS = 300;
+const EARLY_EXIT = Symbol("gateway exited early");
+
+/** The last few non-empty lines of the reaper/gateway log, redacted (empty when unreadable). */
+export function gatewayLogTail(stateDir, lines = LOG_TAIL_LINES) {
+  let text;
+  try {
+    const raw = readFileSync(statePaths(stateDir).log);
+    text = raw.subarray(Math.max(0, raw.length - 16 * 1024)).toString("utf8");
+  } catch {
+    return [];
+  }
+  return text
+    .split(/\r?\n/)
+    .map((line) => line.trimEnd())
+    .filter((line) => line.trim() !== "")
+    .slice(-lines)
+    .map((line) => {
+      const clean = redactLogText(line);
+      return clean.length > LOG_TAIL_MAX_CHARS ? `${clean.slice(0, LOG_TAIL_MAX_CHARS)}...` : clean;
+    });
+}
+
+/**
+ * Wait for readiness, but stop as soon as the gateway is gone: the reaper removes gateway.json
+ * for its generation and exits when its child dies (live smoke item 9, a missing server.js exits
+ * at once). Returns "ready", "timeout" or "exited".
+ */
+async function waitReadyOrExit(port, timeoutMs, { stateDir, generation, reaperPid, alive }) {
+  const gone = () => {
+    const g = readGatewayRecord(stateDir);
+    if (!g || g.generation !== generation) return true;
+    const pid = g.reaperPid ?? reaperPid;
+    return Number.isInteger(pid) && pid > 0 && !alive(pid);
+  };
+  try {
+    const ready = await waitForServer(port, timeoutMs, {
+      onOutcome: (outcome) => {
+        if (outcome !== "ready" && gone()) throw EARLY_EXIT;
+      },
+    });
+    return ready ? "ready" : "timeout";
+  } catch (error) {
+    if (error !== EARLY_EXIT) throw error;
+    return (await probeHealth(localRootUrl(port))) ? "ready" : "exited";
+  }
+}
+
 /** Ask a reaper to stop its gateway (SIGTERM, it cleans up) and wait for it to go. */
 export async function stopReaper(
   pid,
@@ -122,7 +173,7 @@ export async function stopReaper(
  * @param {{noStart?:boolean, keepGateway?:boolean, startTimeoutMs?:number}} o.flags
  * @param {(msg:string)=>void} o.log
  * @param {object} [o.overrides] test seams: gatewayCommand, graceMs, scanMs, leaseStaleMs,
- *   heartbeatMs, lockTimeoutMs, classifyPidIdentity
+ *   heartbeatMs, lockTimeoutMs, classifyPidIdentity, healthRetry ({timeoutsMs, backoffMs})
  * @param {{toolId?:string|null, sessionId?:string|null}} [o.leaseInfo]
  */
 export async function acquireLocal({ stateDir, port, flags, log, overrides = {}, leaseInfo = {} }) {
@@ -138,9 +189,15 @@ export async function acquireLocal({ stateDir, port, flags, log, overrides = {},
     let decision;
     try {
       pruneLeases(stateDir, { staleMs });
-      const healthy = await probeHealth(rootUrl);
+      let healthy = await probeHealth(rootUrl);
       let g = readGatewayRecord(stateDir);
       const reaperAlive = Boolean(g) && alive(g.reaperPid);
+      const starting = g && (g.state === "starting" || g.state === "ready") && reaperAlive;
+      if (!healthy && !starting && !(await probePortFree(port))) {
+        // Something listens but /health did not answer in time: a busy or cold gateway can take
+        // seconds (live smoke item 7). Retry before calling the port foreign (PortInUse).
+        healthy = await probeHealthPatient(rootUrl, overrides.healthRetry);
+      }
 
       if (g && g.port !== port && reaperAlive && g.state !== "kept") {
         if (healthy) {
@@ -260,8 +317,24 @@ export async function acquireLocal({ stateDir, port, flags, log, overrides = {},
 
     const handle = leaseHandle({ baseUrl: rootUrl, owned: decision.owned, lease: decision.lease });
     if (decision.owned && decision.wait) {
-      const ready = await waitForServer(port, startTimeoutMs);
-      if (!ready) {
+      const outcome = await waitReadyOrExit(port, startTimeoutMs, {
+        stateDir,
+        generation: decision.generation,
+        reaperPid: decision.reaperPid,
+        alive,
+      });
+      if (outcome === "exited") {
+        decision.lease.release();
+        const tail = gatewayLogTail(stateDir);
+        const lines =
+          tail.length > 0 ? `; last log lines:\n${tail.map((l) => `  | ${l}`).join("\n")}` : "";
+        throw new LaunchError(
+          "GatewayStartTimeout",
+          `The gateway exited before it became ready on port ${port}${lines}`,
+          { hint: `See ${statePaths(stateDir).log}` }
+        );
+      }
+      if (outcome !== "ready") {
         decision.lease.release();
         // Only the launcher that spawned this gateway stops it on a timeout; a joiner must not
         // kill a gateway other live sessions may be using (the reaper's own start timeout and

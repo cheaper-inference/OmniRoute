@@ -540,3 +540,38 @@ test("tempDirs escaping their root fail before spawn and remove tmp", async () =
   assert.equal(spawned, 0);
   assert.deepEqual(await readdir(root), []);
 });
+
+test("the child PWD is the spawn cwd, not the parent's forwarded PWD (smoke item 12)", async () => {
+  const work = await tempDir("pwd");
+  const seen: Array<{ cwd?: string; pwd?: string }> = [];
+  const fakeSpawn = (
+    _c: string,
+    _a: string[],
+    options: { env: Record<string, string>; cwd?: string }
+  ) => {
+    seen.push({ cwd: options.cwd, pwd: options.env.PWD });
+    const child = new EventEmitter() as EventEmitter & { pid?: number; kill: () => void };
+    child.pid = 4243;
+    child.kill = () => {};
+    setImmediate(() => child.emit("close", 0, null));
+    return child;
+  };
+  const stale = { PATH: process.env.PATH, PWD: "/somewhere/stale" };
+  await executePlan(
+    makePlan({ needsTempDir: false }) as never,
+    baseOpts({ baseEnv: stale, cwd: work, platform: "linux", spawn: fakeSpawn })
+  );
+  const tmpRun = await executePlan(
+    makePlan({ cwd: "${TMP}", cleanup: { removeTempDir: false, revokeSession: true } }) as never,
+    baseOpts({ baseEnv: stale, cwd: work, platform: "linux", tmpRoot: work, spawn: fakeSpawn })
+  );
+  await executePlan(
+    makePlan({ needsTempDir: false }) as never,
+    baseOpts({ baseEnv: stale, platform: "linux", spawn: fakeSpawn })
+  );
+  assert.deepEqual(seen[0], { cwd: work, pwd: path.resolve(work) });
+  assert.equal(seen[1].cwd, tmpRun.tmpDir);
+  assert.equal(seen[1].pwd, path.resolve(tmpRun.tmpDir!));
+  assert.equal(seen[2].cwd, undefined);
+  assert.equal(seen[2].pwd, process.cwd(), "no cwd: the child inherits ours, so PWD names it");
+});

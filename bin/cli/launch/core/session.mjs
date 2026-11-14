@@ -14,6 +14,22 @@ import { httpError } from "./errors.mjs";
 
 export const DEFAULT_SESSION_TTL_SEC = 900;
 export const HEARTBEAT_INTERVAL_MS = 60000;
+export const USAGE_TIMEOUT_MS = 5000;
+export const USAGE_ATTEMPTS = 2;
+
+/** Short reason for the one-line "usage summary unavailable (<reason>)" notice. */
+export function usageFailureReason(error) {
+  const cause = error?.cause;
+  if (cause?.name === "TimeoutError" || cause?.name === "AbortError") return "timed out";
+  const http = /HTTP (\d{3})/.exec(String(error?.message ?? ""));
+  if (http) return `HTTP ${http[1]}`;
+  if (error?.code === "GatewayUnreachable") {
+    return /invalid JSON/.test(String(error?.message))
+      ? "invalid response"
+      : "gateway not reachable";
+  }
+  return "error";
+}
 
 function bearer(token) {
   return token ? { authorization: `Bearer ${token}` } : {};
@@ -121,13 +137,29 @@ export function createSessionClient(options) {
         what: "launch session revoke",
       });
     },
-    /** LaunchUsageSummary (12.3), short timeout: cosmetic. */
-    async usage(session, { timeoutMs: usageTimeout = 1500 } = {}) {
-      return call("GET", `${sessionPath(session.sessionId)}/usage`, {
-        token: session.token,
-        what: "launch session usage",
-        timeout: usageTimeout,
-      });
+    /**
+     * LaunchUsageSummary (12.3). 5 s per attempt and one retry: a busy dev gateway needs more than
+     * the spec's 1.5 s (live smoke item 8). Throws the last error when both attempts fail.
+     */
+    async usage(
+      session,
+      { timeoutMs: usageTimeout = USAGE_TIMEOUT_MS, attempts = USAGE_ATTEMPTS } = {}
+    ) {
+      let lastError;
+      for (let attempt = 0; attempt < Math.max(1, attempts); attempt++) {
+        try {
+          return await call("GET", `${sessionPath(session.sessionId)}/usage`, {
+            token: session.token,
+            what: "launch session usage",
+            timeout: usageTimeout,
+          });
+        } catch (error) {
+          lastError = error;
+          // A refused token will not be accepted on a retry.
+          if (error?.code === "AuthFailed") break;
+        }
+      }
+      throw lastError;
     },
   };
 }

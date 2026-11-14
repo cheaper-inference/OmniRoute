@@ -4,7 +4,7 @@
 import { spawn as nodeSpawn } from "node:child_process";
 import { readFileSync } from "node:fs";
 import os from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
@@ -359,6 +359,11 @@ export async function executePlan(plan, opts = {}) {
     } catch {}
   }
 
+  // The child's PWD must name the directory it is spawned in: opencode and kilo resolve their
+  // project dir from PWD, so a forwarded parent PWD sends tool writes elsewhere (smoke item 12).
+  const spawnCwd = s.cwd ?? cwd;
+  if (platform !== "win32" || "PWD" in env) env.PWD = resolve(spawnCwd ?? process.cwd());
+
   let outcome;
   try {
     outcome = await runChild(
@@ -368,7 +373,7 @@ export async function executePlan(plan, opts = {}) {
         env,
         stdio,
         shell: shell || undefined,
-        cwd: s.cwd ?? cwd,
+        cwd: spawnCwd,
         ...(platform === "win32" ? { windowsHide: true } : {}),
       },
       { spawn, signalSource, signalTimeoutMs, onSpawn, warnings }

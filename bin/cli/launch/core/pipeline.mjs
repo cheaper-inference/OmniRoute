@@ -37,6 +37,7 @@ import {
   startHeartbeat,
   DEFAULT_SESSION_TTL_SEC,
   HEARTBEAT_INTERVAL_MS,
+  usageFailureReason,
 } from "./session.mjs";
 import {
   launchRoot,
@@ -296,7 +297,7 @@ export async function runLaunch(toolId, flags = {}, deps = {}) {
         }
       );
     }
-    const { view } = computeView(rows, adapter, prefs);
+    const { view } = computeView(rows, adapter, prefs, { pin: flagModel });
     if (view.rows.length === 0) {
       throw new LaunchError("NoProviders", `no catalog model fits ${tool} (view ${view.name})`, {
         hint: "connect a provider with tool calling and enough context, see `omniroute setup`",
@@ -417,8 +418,13 @@ export async function runLaunch(toolId, flags = {}, deps = {}) {
               await bus.emit({ type: "session.summary", summary });
               if (!jsonMode) stderr.write(summaryText(tool, summary));
             }
-          } catch {
-            // cosmetic: silent downgrade (12.9)
+          } catch (error) {
+            // Cosmetic, but never silently dropped (live smoke item 8): one stderr line.
+            if (!jsonMode) {
+              stderr.write(
+                `omnirouter: usage summary unavailable (${usageFailureReason(error)})\n`
+              );
+            }
           }
         }
         await revoke();
@@ -485,7 +491,7 @@ async function previewLaunch(s) {
       warn(`catalog not read: ${catalogError.message}`);
     }
   }
-  const { view } = computeView(rows, adapter, s.prefs);
+  const { view } = computeView(rows, adapter, s.prefs, { pin: s.flagModel });
   let model;
   if (view.rows.length > 0) {
     model = (await pickModel({ ...s.pickInput(view), interactive: false })).model;
