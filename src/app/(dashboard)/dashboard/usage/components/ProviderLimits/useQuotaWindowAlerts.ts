@@ -37,6 +37,8 @@ export const RESET_CREDIT_LIST_INTERVAL_MS = 60 * 60 * 1000;
 const RESET_CREDIT_WAKE_INTERVAL_MS = 5 * 60 * 1000;
 const REQUEST_TIMEOUT_MS = 8000;
 const QUOTA_ALERT_LATCH_URL = "/api/settings/quota-alert-latch";
+/** Bounded retry for the latch read: a dedupe-cache miss must not silence alerts for a session. */
+const LATCH_READ_ATTEMPTS = 3;
 
 interface AlertConnection {
   id: string;
@@ -54,14 +56,35 @@ interface UseQuotaWindowAlertsOptions {
 }
 
 /**
- * `latch` stays null until the opt-in is confirmed and the persisted latch is read. Any
- * failed read therefore keeps the alerts silent instead of re-toasting everything.
+ * `latch` stays null until the opt-in is confirmed, so a failed settings read keeps the alerts
+ * silent (the operator never opted in as far as we know).
+ *
+ * The latch read is different: the operator DID opt in, so a failed read must not silence the
+ * alerts for the whole session. It is retried, and after the last attempt it degrades to an empty
+ * latch — the worst case is a single repeat toast, versus alerts that silently never fire
+ * (#18631 review).
  */
 function useQuotaAlertOptIn(): QuotaAlertLatch | null {
   const [latch, setLatch] = useState<QuotaAlertLatch | null>(null);
 
   useEffect(() => {
     let alive = true;
+    const readLatch = async (): Promise<QuotaAlertLatch> => {
+      for (let attempt = 0; attempt < LATCH_READ_ATTEMPTS; attempt += 1) {
+        try {
+          const response = await fetchWithTimeout(QUOTA_ALERT_LATCH_URL, {
+            timeoutMs: REQUEST_TIMEOUT_MS,
+          });
+          if (!response.ok) continue;
+          const data = await response.json();
+          return data?.latch && typeof data.latch === "object" ? data.latch : {};
+        } catch {
+          /* try again: the latch is a dedupe cache, not a gate */
+        }
+      }
+      return {};
+    };
+
     const load = async () => {
       try {
         const settingsResponse = await fetchWithTimeout("/api/settings", {
@@ -70,11 +93,8 @@ function useQuotaAlertOptIn(): QuotaAlertLatch | null {
         const settings = settingsResponse.ok ? await settingsResponse.json() : null;
         if (settings?.codexQuotaAlerts?.enabled !== true) return;
 
-        const latchResponse = await fetchWithTimeout(QUOTA_ALERT_LATCH_URL, {
-          timeoutMs: REQUEST_TIMEOUT_MS,
-        });
-        const data = latchResponse.ok ? await latchResponse.json() : null;
-        if (alive && data?.latch && typeof data.latch === "object") setLatch(data.latch);
+        const persisted = await readLatch();
+        if (alive) setLatch(persisted);
       } catch {
         /* keep the default: alerts stay off */
       }

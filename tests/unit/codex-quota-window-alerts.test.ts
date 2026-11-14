@@ -103,6 +103,33 @@ test("ignores quotas without a reported percentage", () => {
   assert.deepEqual(found, []);
 });
 
+test("a null or blank remainingPercentage is not read as an exhausted window", () => {
+  // `Number(null)`, `Number("")` and `Number("  ")` are all 0, which used to fire and
+  // latch a false critical alert (#18631 review).
+  for (const value of [null, "", "   "]) {
+    const seen = {};
+    const found = alerts.collectQuotaWindowAlerts(
+      snapshot([quota({ name: "session", remainingPercentage: value })]),
+      seen
+    );
+
+    assert.deepEqual(found, [], `remainingPercentage=${JSON.stringify(value)} must stay silent`);
+    assert.deepEqual(seen, {}, `remainingPercentage=${JSON.stringify(value)} must not latch`);
+  }
+});
+
+test("a numeric string remainingPercentage is still honoured", () => {
+  // Some providers serialize the percentage; that is a real value, unlike a blank string.
+  const found = alerts.collectQuotaWindowAlerts(
+    snapshot([quota({ name: "session", remainingPercentage: "12" })]),
+    {}
+  );
+
+  assert.equal(found.length, 1);
+  assert.equal(found[0].severity, "critical");
+  assert.equal(found[0].remainingPercentage, 12);
+});
+
 test("treats a stale-after-reset window as recovered", () => {
   const found = alerts.collectQuotaWindowAlerts(
     snapshot([quota({ remainingPercentage: 0, staleAfterReset: true })]),

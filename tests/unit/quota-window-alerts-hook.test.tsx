@@ -230,18 +230,38 @@ it("lists at most once per interval, and new snapshots do not list again", async
   expect(listCalls()).toBe(2);
 });
 
-it("stays silent when the latch cannot be read, rather than re-toasting everything", async () => {
+it("retries a failed latch read instead of muting the alerts for the session", async () => {
+  let latchReads = 0;
   vi.stubGlobal(
     "fetch",
-    vi.fn(async (input: string) =>
-      String(input) === "/api/settings"
-        ? Response.json({ codexQuotaAlerts: { enabled: true } })
-        : new Response("down", { status: 500 })
-    )
+    vi.fn(async (input: string) => {
+      const url = String(input);
+      if (url === "/api/settings") return Response.json({ codexQuotaAlerts: { enabled: true } });
+      if (url === LATCH_URL) {
+        latchReads += 1;
+        // First read fails, later ones succeed: the opt-in must survive one blip.
+        return latchReads === 1 ? new Response("down", { status: 500 }) : Response.json({ latch: {} });
+      }
+      return Response.json({ credits: [] });
+    })
   );
 
-  mount(codexSnapshot(95));
+  mount(codexSnapshot(90));
   await flush();
 
+  expect(latchReads).toBeGreaterThan(1);
+  expect(toasts()).toHaveLength(1);
+});
+
+it("stays silent when the opt-in itself cannot be confirmed", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () => new Response("down", { status: 500 }))
+  );
+
+  mount(codexSnapshot(90));
+  await flush();
+
+  // Without a confirmed opt-in nothing is read, toasted or written.
   expect(toasts()).toEqual([]);
 });

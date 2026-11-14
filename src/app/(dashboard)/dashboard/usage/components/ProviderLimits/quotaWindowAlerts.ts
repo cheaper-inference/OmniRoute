@@ -87,9 +87,16 @@ function alertableRemainingPercent(quota: QuotaLike): number | null {
   if (quota.unlimited === true) return null;
   if (quota.staleAfterReset === true) return null;
 
-  if (quota.remainingPercentage !== undefined && quota.remainingPercentage !== null) {
-    const reported = Number(quota.remainingPercentage);
+  // Only a real number (or a non-blank numeric string) is a reported percentage.
+  // `Number(null)`, `Number("")` and `Number("  ")` are all 0, which would read as a
+  // fully exhausted window and latch a false critical alert (#18631 review).
+  const reported = quota.remainingPercentage;
+  if (typeof reported === "number") {
     return Number.isFinite(reported) ? reported : null;
+  }
+  if (typeof reported === "string" && reported.trim() !== "") {
+    const parsed = Number(reported);
+    return Number.isFinite(parsed) ? parsed : null;
   }
 
   const total = Number(quota.total);
