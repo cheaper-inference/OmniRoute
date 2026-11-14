@@ -594,7 +594,8 @@ async function phaseReadme(ctx) {
     text.split("\n").some((line) => I18N_GUIDE_ROW_RE.exec(line)?.[1] === code);
   const edits = [
     [
-      "README.md",
+      // The fork keeps a short root README; the upstream language block lives here.
+      "docs/ORIGINAL_README.md",
       (t) =>
         t.includes(`href="docs/i18n/${code}/README.md"`)
           ? t

@@ -18,7 +18,8 @@ import i18nConfig from "../../config/i18n.json" with { type: "json" };
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const docsExcluded = new Set(i18nConfig.docsExcluded ?? ["en"]);
-const readme = readFileSync(path.join(ROOT, "README.md"), "utf8");
+// The fork keeps a short root README; the upstream one (language block) lives in docs/.
+const readme = readFileSync(path.join(ROOT, "docs", "ORIGINAL_README.md"), "utf8");
 const docsIndex = readFileSync(path.join(ROOT, "docs", "i18n", "README.md"), "utf8");
 
 for (const { code } of i18nConfig.locales) {

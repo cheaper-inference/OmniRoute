@@ -212,7 +212,8 @@ test("flagFileFor rejects anything that is not a regional-indicator pair unless 
 });
 
 test("flagFileFor reproduces the README flag file of every configured locale (legacy `sw` needs flagFile)", () => {
-  const readme = readRepo("README.md");
+  // The fork keeps a short root README; the upstream language block lives in docs/.
+  const readme = readRepo("docs/ORIGINAL_README.md");
   // Pre-existing README drift, exactly what the flagFile override is for: Kiswahili
   // uses tz.svg although its emoji is 🇰🇪.
   const overrides: Record<string, string> = { sw: "tz.svg" };
@@ -274,11 +275,11 @@ test("insertReadmeFlagLink rejects a duplicate link and a README without the lan
   assert.throws(() => insertReadmeFlagLink("# no block\n", el, 44), /language block not found/);
 });
 
-test("insertReadmeFlagLink on the real README adds exactly one line right before the block's </div>", () => {
+test("insertReadmeFlagLink on docs/ORIGINAL_README.md adds exactly one line right before the block's </div>", () => {
   const config = realConfig();
   const total = config.locales.length;
   const entry: LocaleEntry = { ...el, code: sentinelCode(config) };
-  const before = readRepo("README.md").split("\n");
+  const before = readRepo("docs/ORIGINAL_README.md").split("\n");
   const after = insertReadmeFlagLink(before.join("\n"), entry, total + 1).split("\n");
   assert.equal(after.length, before.length + 1);
 

@@ -37,6 +37,9 @@ const EXCLUDE_PREFIXES = [
   path.join(DOCS_ROOT, "i18n") + path.sep,
   path.join(DOCS_ROOT, "screenshots") + path.sep,
   path.join(DOCS_ROOT, "diagrams", "exported") + path.sep,
+  // Verbatim archive of the upstream root README: its links are relative to the repo root, not
+  // to docs/, so resolving them from here reports every one as broken.
+  path.join(DOCS_ROOT, "ORIGINAL_README.md"),
 ];
 
 function parseArgs(argv) {

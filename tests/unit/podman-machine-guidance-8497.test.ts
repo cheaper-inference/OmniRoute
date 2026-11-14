@@ -10,8 +10,9 @@ function read(relativePath: string): string {
   return readFileSync(join(repoRoot, relativePath), "utf8");
 }
 
-test("#8497 README limits podman unshare to a local Linux engine", () => {
-  const readme = read("README.md");
+test("#8497 docs/ORIGINAL_README.md limits podman unshare to a local Linux engine", () => {
+  // The fork keeps a short root README; the upstream Podman quick start lives in docs/.
+  const readme = read("docs/ORIGINAL_README.md");
   const podmanStart = readme.indexOf("**🦭 Podman**");
   const podmanEnd = readme.indexOf("**⚡ Faster / leaner install", podmanStart);
   const podmanQuickStart = readme.slice(podmanStart, podmanEnd);
