@@ -48,6 +48,7 @@ import {
 } from "@/shared/utils/fetchTimeout";
 import { sanitizeErrorMessage, sanitizeUpstreamDetails } from "../utils/error.ts";
 
+import { prepareImageOutputOptions } from "./imageGeneration/outputFormat.ts";
 import { handleSDWebUIImageGeneration } from "./imageGeneration/providers/sdWebUI.ts";
 import { handleHyperbolicImageGeneration } from "./imageGeneration/providers/hyperbolic.ts";
 import { handleHuggingFaceImageGeneration } from "./imageGeneration/providers/huggingface.ts";
@@ -1430,6 +1431,9 @@ async function handleOpenAIImageGeneration({
     Object.assign(upstreamBody, request.body);
   } else if (providerConfig.format !== "agnes-image") {
     // Pass optional parameters for ordinary OpenAI-compatible providers.
+    const output = prepareImageOutputOptions(body);
+    if ("error" in output) return { success: false, status: 400, error: output.error };
+    Object.assign(upstreamBody, output.options);
     if (body.n !== undefined) upstreamBody.n = body.n;
     if (body.size !== undefined) upstreamBody.size = body.size;
     if (body.quality !== undefined) upstreamBody.quality = body.quality;
@@ -1484,6 +1488,7 @@ async function handleOpenAIImageGeneration({
   const fetchOptions = longJobs
     ? { signal, timeoutMs: longJobs.resolveTimeoutMs(credentials?.providerSpecificData) }
     : { timeoutMs: getConfiguredTimeout() };
+  const outputFetchOptions = { ...fetchOptions, requestedOutputFormat: upstreamBody.output_format };
 
   // Try primary URL
   let result = await fetchImageEndpoint(
@@ -1492,7 +1497,7 @@ async function handleOpenAIImageGeneration({
     requestBody,
     provider,
     log,
-    fetchOptions
+    outputFetchOptions
   );
 
   // Fallback for providers with fallbackUrl (e.g., Nebius)
@@ -1510,7 +1515,7 @@ async function handleOpenAIImageGeneration({
       requestBody,
       provider,
       log,
-      fetchOptions
+      outputFetchOptions
     );
   }
 
