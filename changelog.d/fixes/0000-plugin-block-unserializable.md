@@ -1,1 +1,0 @@
-- **fix(plugins):** a plugin `onRequest` hook that blocks a request with a response JSON cannot serialize (a BigInt or a cycle) now still blocks with a 403, instead of letting the request through.

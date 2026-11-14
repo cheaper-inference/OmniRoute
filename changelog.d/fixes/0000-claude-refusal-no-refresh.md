@@ -1,1 +1,0 @@
-- **fix(sse):** a Claude OAuth 403 "Request not allowed" no longer triggers a token refresh and a second send; the refusal is about the request, not the token.
