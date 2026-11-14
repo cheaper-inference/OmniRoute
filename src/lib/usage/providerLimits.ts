@@ -1,5 +1,6 @@
 import { syncCodexQuotaObservation } from "@/lib/db/providers/codexAccountRecovery";
 import { syncCodexWorkspaceInfoIfNeeded } from "@/lib/usage/codexWorkspaceSync";
+import { syncCodexPlanFromUsage } from "@/lib/usage/codexPlanSync";
 import { isCompleteUsageReading } from "@/lib/usage/usageReading";
 import {
   captureCodexConnectionFence,
@@ -1212,6 +1213,14 @@ async function fetchLiveProviderLimitsWithOptions(
         connection.providerSpecificData
       );
       if (data) connection = { ...connection, providerSpecificData: data };
+      // The live usage response carries the current plan even when OAuth JWT
+      // metadata still says Free. Sync it before routing's paid-plan gate reads
+      // this connection again (on both manual and scheduled quota refresh).
+      connection = await syncCodexPlanFromUsage(
+        connection,
+        result.usage,
+        mergeConnectionProviderSpecificData
+      );
     }
     if (isRecord(result.usage.quotas)) {
       setQuotaCache(
