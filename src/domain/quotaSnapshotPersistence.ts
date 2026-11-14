@@ -103,6 +103,18 @@ function quotaWindowSnapshotIsCurrent(
   );
 }
 
+/** Interpretation-only snapshot metadata; the Codex owner epoch is opaque, never credentials. */
+function quotaSnapshotMetadata(
+  codexOwnerEpoch: string | null,
+  fractionReported: boolean
+): string | null {
+  if (!codexOwnerEpoch && fractionReported) return null;
+  return JSON.stringify({
+    ...(!fractionReported ? { fractionReported: false } : {}),
+    ...(codexOwnerEpoch ? { codexOwnerEpoch } : {}),
+  });
+}
+
 function persistOneQuotaWindow(
   connectionId: string,
   provider: string,
@@ -112,7 +124,8 @@ function persistOneQuotaWindow(
   quotas: Record<string, QuotaInfo>,
   prior: QuotaCacheEntry | null,
   retainedCodexWindows: Set<string>,
-  codexSnapshots: { current?: ReturnType<typeof getLatestQuotaSnapshotsForConnection> }
+  codexSnapshots: { current?: ReturnType<typeof getLatestQuotaSnapshotsForConnection> },
+  codexOwnerEpoch: string | null
 ): void {
   if (!quotaInfo || typeof quotaInfo !== "object") return;
   const normalized = quotas[windowKey];
@@ -165,7 +178,7 @@ function persistOneQuotaWindow(
       next_reset_at: normalized.resetAt,
       window_duration_ms: entry.windowDurationMs ?? null,
       // Persist only the interpretation, never the raw provider payload.
-      raw_data: fractionReported ? null : JSON.stringify({ fractionReported: false }),
+      raw_data: quotaSnapshotMetadata(codexOwnerEpoch, fractionReported),
     });
   } catch (error) {
     console.error("[quotaCache] Failed to save snapshot:", error);
@@ -179,7 +192,8 @@ export function persistQuotaWindowSnapshots(
   rawQuotas: Record<string, unknown>,
   quotas: Record<string, QuotaInfo>,
   prior: QuotaCacheEntry | null,
-  retainedCodexWindows: Set<string>
+  retainedCodexWindows: Set<string>,
+  codexOwnerEpoch: string | null = null
 ): void {
   const codexSnapshots: { current?: ReturnType<typeof getLatestQuotaSnapshotsForConnection> } = {};
   for (const [windowKey, quotaInfo] of Object.entries(rawQuotas)) {
@@ -192,7 +206,8 @@ export function persistQuotaWindowSnapshots(
       quotas,
       prior,
       retainedCodexWindows,
-      codexSnapshots
+      codexSnapshots,
+      codexOwnerEpoch
     );
   }
 }
