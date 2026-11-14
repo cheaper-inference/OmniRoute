@@ -9,6 +9,7 @@ import SystemPromptTab from "../components/SystemPromptTab";
 import ResponsesStatePolicyTab from "../components/ResponsesStatePolicyTab";
 import CodexFastTierTab from "../components/CodexFastTierTab";
 import CodexAutoPingTab from "../components/CodexAutoPingTab";
+import CodexQuotaAlertsTab from "../components/CodexQuotaAlertsTab";
 import BankedResetAutoApplyTab from "../components/BankedResetAutoApplyTab";
 import ClaudeFastModeTab from "../components/ClaudeFastModeTab";
 import MemorySkillsTab from "../components/MemorySkillsTab";
@@ -30,6 +31,7 @@ export default function SettingsAiPage() {
       <CodexFastTierTab />
       <ConnectionTestSettings />
       <CodexAutoPingTab />
+      <CodexQuotaAlertsTab />
       <BankedResetAutoApplyTab />
       <ClaudeFastModeTab />
       <MemorySkillsTab />
