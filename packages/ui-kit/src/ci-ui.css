@@ -383,6 +383,19 @@
     background: var(--ci-color-danger-bg);
   }
 
+  /* Quiet destructive action for table rows and lists (delete a key, revoke a token).
+     No fill or outline at rest; hover borrows the danger tint of the filled variant's hover. */
+  .ci-button--destructive-ghost {
+    color: var(--ci-button-danger-ghost-fg);
+    border-color: transparent;
+    background: transparent;
+  }
+
+  .ci-button--destructive-ghost:hover {
+    color: var(--ci-button-danger-ghost-fg);
+    background: var(--ci-color-danger-bg);
+  }
+
   /* Risky but reversible actions (force refresh, reset cooldowns, clear a cache).
      Hover fills with the warning ink, mirroring the destructive swap. */
   .ci-button--warning {
@@ -1403,6 +1416,12 @@
     border-radius: var(--ci-radius-surface);
     background: var(--ci-color-surface);
   }
+  /* Table makes an overflowing container focusable so the keyboard can scroll it. The inset
+     outline stays visible when a parent card clips its overflow. */
+  .ci-table-container:focus-visible {
+    outline: var(--ci-focus-ring-width) solid var(--ci-color-focus);
+    outline-offset: calc(-1 * var(--ci-focus-ring-width));
+  }
 
   .ci-table-scroll-area { width: 100%; min-width: 0; }
   .ci-table-scroll-area > .ci-table-container,
@@ -1628,6 +1647,7 @@
 
   .ci-stat--positive .ci-stat__value { color: var(--ci-color-success); }
   .ci-stat--critical .ci-stat__value { color: var(--ci-color-danger); }
+  .ci-stat--warning .ci-stat__value { color: var(--ci-color-warning); }
   .ci-stat__hint { margin-top: var(--ci-space-2); color: var(--ci-color-text-subtle); font-size: var(--ci-font-size-xs); font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-caption-leading); letter-spacing: var(--ci-type-caption-tracking); }
 
   .ci-progress { display: grid; gap: var(--ci-space-2); }
@@ -1638,12 +1658,29 @@
   .ci-progress__indicator[data-tone="success"] { background: var(--ci-color-success); }
   .ci-progress__indicator[data-tone="warning"] { background: var(--ci-color-warning); }
   .ci-progress__indicator[data-tone="danger"] { background: var(--ci-color-danger); }
+  .ci-progress__indicator[data-tone="info"] { background: var(--ci-color-info); }
   /* Stacked parts: square inner ends (the pill track clips the outer ones) and a 2px track-coloured seam.
      Every rendered part is non-zero and keeps at least 2px of its own colour; larger parts shrink to make room. */
   .ci-progress__track[data-segmented] { display: flex; }
   .ci-progress__segment { flex: 0 1 auto; min-width: 0.125rem; box-sizing: border-box; border-radius: 0; }
   .ci-progress__segment + .ci-progress__segment { min-width: 0.25rem; border-left: 0.125rem solid var(--ci-color-surface-muted); }
   .ci-progress[data-state="indeterminate"] .ci-progress__indicator { width: 40%; animation: ci-progress-indeterminate 1.4s var(--ci-ease-standard) infinite; }
+  /* Allocation bands: each band has its own track, sized by its capacity (inline flex-grow), and its own fill.
+     The 1px edge in the band ink shows the capacity on any surface; the fill shows the used part inside it. */
+  .ci-progress__bands { display: flex; align-items: flex-start; gap: var(--ci-space-1); width: 100%; }
+  .ci-progress__band { --ci-progress-band-ink: var(--ci-color-accent-ink); display: grid; flex: 1 1 0%; gap: var(--ci-space-1); min-width: 0.75rem; }
+  .ci-progress__band[data-tone="success"] { --ci-progress-band-ink: var(--ci-color-success); }
+  .ci-progress__band[data-tone="warning"] { --ci-progress-band-ink: var(--ci-color-warning); }
+  .ci-progress__band[data-tone="danger"] { --ci-progress-band-ink: var(--ci-color-danger); }
+  .ci-progress__band[data-tone="info"] { --ci-progress-band-ink: var(--ci-color-info); }
+  .ci-progress__band .ci-progress__track { box-sizing: border-box; height: 0.625rem; border: 1px solid var(--ci-progress-band-ink); }
+  .ci-progress__band .ci-progress__indicator { background: var(--ci-progress-band-ink); }
+  .ci-progress__band-legend { min-width: 0; overflow-wrap: anywhere; color: var(--ci-color-text-muted); font-size: var(--ci-font-size-xs); font-variant-numeric: tabular-nums; line-height: var(--ci-type-caption-leading); letter-spacing: var(--ci-type-caption-tracking); }
+  @media (forced-colors: active) {
+    .ci-progress__track { outline: 1px solid CanvasText; outline-offset: -1px; }
+    .ci-progress__band .ci-progress__track { outline: none; border-color: CanvasText; }
+    .ci-progress__track .ci-progress__indicator { forced-color-adjust: none; background: Highlight; }
+  }
 
   /* Data visualization */
   .ci-chart { --ci-chart-color: var(--ci-chart-1); position: relative; width: 100%; min-width: 0; margin: 0; color: var(--ci-color-text-muted); }
@@ -2924,6 +2961,7 @@
     .ci-chart[data-animate][data-visible] .ci-chart__bar rect { animation: none; }
     .ci-chart__line { transition: none !important; stroke-dashoffset: 0 !important; }
     .ci-chart__area { opacity: 1; transition: none; }
+    .ci-progress__indicator { transition: none; }
     .ci-progress[data-state="indeterminate"] .ci-progress__indicator { width: 100%; animation: none; opacity: 0.48; }
   }
 }
@@ -3199,22 +3237,30 @@
 /* Opt-in usage workspace foundations. Existing controls retain their defaults. */
 @layer components {
   .ci-button--assistant {
+    --assistant-edge-tint: var(--ci-color-accent);
     --assistant-center-tint: color-mix(in srgb, var(--ci-color-accent) 65%, var(--ci-neutral-0) 35%);
     color: var(--ci-color-accent-foreground);
     border-color: transparent;
     border-radius: var(--ci-radius-full);
     background: var(--ci-color-accent);
-    background-image: linear-gradient(120deg, var(--ci-color-accent) 0%, var(--assistant-center-tint) 50%, var(--ci-color-accent) 100%);
+    background-image: linear-gradient(120deg, var(--assistant-edge-tint) 0%, var(--assistant-center-tint) 50%, var(--assistant-edge-tint) 100%);
     background-origin: border-box;
     background-clip: border-box;
     background-repeat: no-repeat;
   }
-  .ci-button--assistant:hover {
-    --assistant-center-tint: color-mix(in srgb, var(--ci-color-accent) 70%, var(--ci-neutral-0) 30%);
-    background-image: linear-gradient(120deg, var(--ci-color-accent) 0%, var(--assistant-center-tint) 50%, var(--ci-color-accent) 100%);
+  .ci-button--assistant:not(:disabled):not([aria-disabled="true"]):hover {
+    --assistant-edge-tint: var(--ci-color-accent-hover);
+    --assistant-center-tint: color-mix(in srgb, var(--ci-color-accent-hover) 90%, var(--ci-neutral-0) 10%);
+    background-image: linear-gradient(120deg, var(--assistant-edge-tint) 0%, var(--assistant-center-tint) 50%, var(--assistant-edge-tint) 100%);
   }
-  .ci-button--assistant:active {
-    --assistant-center-tint: color-mix(in srgb, var(--ci-color-accent) 75%, var(--ci-neutral-0) 25%);
+  .ci-button--assistant:not(:disabled):not([aria-disabled="true"]):active {
+    --assistant-edge-tint: var(--ci-color-accent);
+    --assistant-center-tint: var(--ci-color-accent-hover);
+    background-image: linear-gradient(120deg, var(--assistant-edge-tint) 0%, var(--assistant-center-tint) 50%, var(--assistant-edge-tint) 100%);
+  }
+  .ci-button--assistant:is(:disabled, [aria-disabled="true"]):hover {
+    background: var(--ci-color-accent);
+    background-image: linear-gradient(120deg, var(--assistant-edge-tint) 0%, var(--assistant-center-tint) 50%, var(--assistant-edge-tint) 100%);
   }
 
   .ci-switch--size-sm { gap: var(--ci-space-2); }
@@ -3332,7 +3378,17 @@
 
 @media (forced-colors: active) {
   .ci-button--assistant, .ci-button--assistant:hover, .ci-button--assistant:active { color: ButtonText; border-color: ButtonText; background: ButtonFace; }
+  .ci-button--assistant:not(:disabled):not([aria-disabled="true"]):hover { color: HighlightText; border-color: Highlight; background: Highlight; }
+  /* Transparent edges vanish in forced colours, so the quiet destructive action gets a system outline. */
+  .ci-button--destructive-ghost { color: ButtonText; border-color: ButtonText; background: ButtonFace; }
+  .ci-button--destructive-ghost:not(:disabled):not([aria-disabled="true"]):hover { color: HighlightText; border-color: Highlight; background: Highlight; }
   .ci-docked-rail { border-color: CanvasText; box-shadow: none; }
+}
+
+/* Its own block after the component layers: the focusable Table container keeps a system-colour
+   ring in forced colours. */
+@media (forced-colors: active) {
+  .ci-table-container:focus-visible { outline-color: Highlight; }
 }
 
 @layer components {
@@ -3830,4 +3886,83 @@
 @layer components {
   .ci-sticky-region { min-width: 0; align-self: start; position: static; }
   .ci-sticky-region[data-sticky] { position: sticky; }
+}
+
+@layer components {
+  .ci-notification-card { border-radius: 12px; box-shadow: none; --notification-card-tone: var(--ci-color-warning); padding: 16px; width: 100%; min-width: 0; box-sizing: border-box; }
+  .ci-notification-card--tinted { background: linear-gradient(115deg, color-mix(in srgb, var(--notification-card-tone) 9%, var(--ci-color-surface)), color-mix(in srgb, var(--notification-card-tone) 2%, var(--ci-color-surface)) 78%); }
+  .ci-notification-card__header { display: grid; gap: 8px; }
+  .ci-notification-card__title { display: flex; align-items: flex-start; gap: 8px; color: var(--ci-color-heading); font-size: 16px; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; }
+  .ci-notification-card__icon { flex-shrink: 0; display: inline-flex; margin-top: 4px; }
+  .ci-notification-card__icon svg { width: 16px; height: 16px; }
+  .ci-notification-card__badges { display: flex; flex-wrap: wrap; gap: 8px; }
+  .ci-notification-card__message { font-size: 14px; line-height: 1.625; color: var(--ci-color-text-muted); overflow-wrap: anywhere; white-space: pre-wrap; }
+  .ci-notification-card__history { margin-top: 12px; font-size: 14px; }
+  .ci-notification-card__history summary { display: flex; align-items: center; gap: 6px; cursor: pointer; list-style: none; font-weight: 500; }
+  .ci-notification-card__history summary::-webkit-details-marker { display: none; }
+  .ci-notification-card__history summary svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .ci-notification-card__history[open] summary svg { transform: rotate(180deg); }
+  .ci-notification-card__history ol { list-style: none; margin: 12px 0 0; padding: 0 0 0 16px; border-left: 1px solid var(--ci-color-border-subtle); display: grid; gap: 16px; }
+  .ci-notification-card__update-heading { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
+  .ci-notification-card__update-heading time { font-size: 12px; color: var(--ci-color-text-muted); }
+  .ci-notification-card__footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--ci-color-border-subtle); }
+  .ci-notification-card__footer > time { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ci-color-text-muted); }
+  .ci-notification-card__footer > time svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .ci-notification-card__link { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; min-height: 24px; color: var(--ci-color-text); flex-shrink: 0; }
+  .ci-notification-card__link svg { width: 16px; height: 16px; }
+  .ci-notification-card__link:focus-visible, .ci-notification-card__history summary:focus-visible { outline: 2px solid var(--ci-color-focus-ring); outline-offset: 3px; border-radius: 4px; }
+}
+
+@layer components {
+  .ci-notification-category--models { --category-light: #6d28d9; --category-dark: #c4b5fd; --category-fill: #8b5cf6; }
+  .ci-notification-category--product { --category-light: #0f766e; --category-dark: #5eead4; --category-fill: #14b8a6; }
+  .ci-notification-category--announcement { --category-light: #be185d; --category-dark: #f9a8d4; --category-fill: #ec4899; }
+  .ci-notification-category--models, .ci-notification-category--product, .ci-notification-category--announcement {
+    color: var(--ci-scheme-dark, var(--category-light)) var(--ci-scheme-light, var(--category-dark));
+    background: color-mix(in srgb, var(--category-fill) 14%, var(--ci-color-surface));
+  }
+}
+
+@layer components {
+  .ci-notification-feed { container:notification-feed / inline-size; width:100%; max-width:1280px; min-width:0; color:var(--ci-color-text); }
+  .ci-notification-feed > .ci-tabs { display:grid; grid-template-columns:minmax(0,1fr); min-width:0; }
+  .ci-notification-feed__filters { display:flex; align-items:center; justify-content:space-between; gap:20px; border-bottom:1px solid var(--ci-color-border); }
+  .ci-tabs--underline .ci-notification-feed__tabs { min-width:0; overflow-x:auto; border:0; }
+  .ci-notification-feed__filters > .ci-switch { flex-shrink:0; }
+  .ci-tabs--underline .ci-notification-feed__tab { margin-bottom:0; gap:8px; white-space:nowrap; }
+  .ci-notification-feed__tab > svg { width:16px; height:16px; flex-shrink:0; }
+  .ci-notification-feed__tab[data-state="active"] .ci-notification-feed__count { background:#000; color:#fff; border-color:#000; }
+  [data-theme="dark"] .ci-notification-feed__tab[data-state="active"] .ci-notification-feed__count { background:#fff; color:#000; border-color:#fff; }
+  .ci-notification-feed__panel { margin-top:28px; min-width:0; }
+  .ci-notification-feed__list { border:1px solid var(--ci-color-border); border-radius:8px; overflow:hidden; min-width:0; }
+  .ci-notification-feed__list ul { list-style:none; padding:0; margin:0; }
+  .ci-notification-feed__group { margin:0; padding:10px 20px; font-size:12px; font-weight:500; color:var(--ci-color-text-muted); background:var(--ci-color-surface-muted); border-bottom:1px solid var(--ci-color-border); }
+  .ci-notification-feed__row { color:var(--ci-color-text); display:flex; align-items:flex-start; gap:16px; padding:20px; border-bottom:1px solid var(--ci-color-border); background:color-mix(in srgb,var(--category-fill) 3%,var(--ci-color-surface)); }
+  .ci-notification-feed__row.ci-notification-category--incident { --category-fill:#d69a32; }
+  .ci-notification-feed__row.ci-notification-category--maintenance { --category-fill:#5793d5; }
+  .ci-notification-feed__row[data-unread="true"] { background:color-mix(in srgb,var(--category-fill) 8%,var(--ci-color-surface)); }
+  .ci-notification-feed__list section:last-child > ul > li:last-child { border-bottom:0; }
+  .ci-notification-feed__marker { width:8px; flex-shrink:0; padding-top:13px; }
+  .ci-notification-feed__marker > span { display:block; width:6px; height:6px; border-radius:50%; background:var(--category-fill); }
+  .ci-notification-feed__icon { display:grid; place-items:center; flex-shrink:0; width:32px; height:32px; border-radius:6px; background:color-mix(in srgb,var(--category-fill) 14%,var(--ci-color-surface)); }
+  .ci-notification-feed__icon svg { width:16px; height:16px; }
+  .ci-notification-feed__body { min-width:0; flex:1; overflow-wrap:anywhere; }
+  .ci-notification-feed__body h3 { margin:0; font-size:14px; font-weight:600; line-height:24px; }
+  .ci-notification-feed__message { margin-top:4px; font-size:14px; line-height:24px; color:var(--ci-color-text-muted); overflow-wrap:anywhere; }
+  .ci-notification-feed__meta { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:10px; }
+  .ci-notification-feed__meta time { font-size:12px; color:var(--ci-color-text-muted); margin-left:4px; }
+  .ci-notification-feed__action { flex-shrink:0; display:grid; place-items:center; min-width:32px; min-height:32px; }
+  .ci-notification-feed__history { font-size:13px; }
+  .ci-notification-feed__history ol { margin-left:7px; gap:14px; }
+  .ci-notification-feed__empty { padding:32px; font-size:14px; color:var(--ci-color-text-muted); }
+  @container notification-feed (max-width:800px) {
+    .ci-notification-feed__filters { align-items:flex-start; flex-direction:column; gap:12px; padding-bottom:12px; }
+    .ci-tabs--underline .ci-notification-feed__tabs { display:flex; flex-wrap:wrap; width:100%; gap:6px; overflow:visible; padding:0; }
+    .ci-tabs--underline .ci-notification-feed__tab { flex:0 0 auto; justify-content:flex-start; padding:8px 10px; min-height:40px; font-size:12px; border:0; border-radius:999px; }
+    .ci-tabs--underline .ci-notification-feed__tab[data-state="active"] { background:var(--ci-color-control-active-bg); color:var(--ci-color-control-active-fg); border:0; }
+    .ci-notification-feed__tab[data-state="active"] .ci-notification-feed__count, [data-theme="dark"] .ci-notification-feed__tab[data-state="active"] .ci-notification-feed__count { background:#000; color:#fff; border-color:#000; }
+    .ci-notification-feed__row { padding:16px 12px; gap:10px; }
+    .ci-notification-feed__marker { display:none; }
+    .ci-notification-feed__meta time { width:100%; margin:0; }
+  }
 }

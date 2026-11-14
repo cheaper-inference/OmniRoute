@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "Vyrovnáva zostávajúcu kvótu oproti 5-hodinovým a týždenným resetom a potom sa v každom kole porovnáva s podobnými skóre",
     "quotaWeighted": "Vážené podľa kvóty",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Najskôr expirujúce",
+    "expiryFirstDesc": "Čerpá účet, ktorého kvóta by inak prepadla nevyužitá: ako prvý ide účet s najvyšším zostatkom a najbližším resetom.",
     "strictRandom": "Striktne náhodné",
     "strictRandomDesc": "Zamiešaný balíček — každý model sa použije raz a potom sa modely znova zamiešajú",
     "fusion": "Fúzia",
@@ -4033,6 +4035,11 @@
         "when": "Smerujete cez viacero účtov pomocou kvótovej telemetrie a rôznych resetovacích okien.",
         "avoid": "Telemetria kvóty nie je pre väčšinu účtov dostupná.",
         "example": "Uprednostnite 60 % týždenné resetovanie účtu zajtra pred 80 % resetovaním účtu neskôr."
+      },
+      "expiry-first": {
+        "when": "Smerujete cez účty, ktorých kvóty sa resetujú podľa rôznych plánov, a chcete minúť kvótu, ktorá by inak prepadla nevyužitá.",
+        "avoid": "Väčšina účtov nemá telemetriu kvót alebo potrebujete stabilné poradie, ktoré ignoruje načasovanie resetu.",
+        "example": "Uprednostnite účet s 80 % zostávajúcej kvóty a resetom o 39 minút pred účtom so 48 % a resetom o 9 hodín — kvóta tesne pred vypršaním sa minie skôr, než prepadne."
       },
       "strict-random": {
         "when": "Použite, keď chcete dokonale rovnomerné rozloženie — každý model sa použije raz, než sa niektorý použije znova.",
@@ -4249,6 +4256,13 @@
         "tip1": "Použite explicitné kroky účtu alebo smerovanie značiek účtu pre poskytovateľov s telemetriou kvót.",
         "tip2": "Vylaďte reláciu vs týždenné váhy, keď je krátkodobé vyčerpanie rizikovejšie.",
         "tip3": "Udržujte kravatu malú, aby sa ekvivalentné účty stále spravodlivo otáčali."
+      },
+      "expiry-first": {
+        "title": "Najskôr expirujúca kvóta",
+        "description": "Zoraďuje účty podľa tlaku na využitie: vysoká zostávajúca kvóta blízko termínu resetu ide prvá.",
+        "tip1": "Vyžaduje telemetriu kvót od poskytovateľa; účty bez nej si ponechajú uvedené poradie priority.",
+        "tip2": "Takmer rovnaké skóre sa striedajú v pásme zhody, takže podobné účty stále zdieľajú záťaž.",
+        "tip3": "Obmedzte poradie na kvótový kôš, z ktorého sa daný model skutočne účtuje."
       },
       "strict-random": {
         "title": "Distribúcia ako pri miešaní balíčka",
@@ -4481,7 +4495,7 @@
     "spend7d": "Spend7D",
     "avgCostPerRequest": "Avg Cost Per Request",
     "noCostDataDescription": "No Cost Data Description",
-    "spendToday": "Dnešné výdavky",
+    "spendToday": "Výdavky za 1 deň",
     "overviewLoadFailed": "Overview Load Failed",
     "overviewDescription": "Overview Description",
     "providerShare": "Podiel poskytovateľov",
@@ -5679,6 +5693,7 @@
     "usageTracking": "Sledovanie používania",
     "securityDesc": "Nastavte si heslo na ochranu svojho informačného panela alebo ho zatiaľ preskočte.",
     "securityDescSkipWarning": "⚠️ Bez hesla nebudete môcť počas nastavenia pridať poskytovateľov. Môžete ich pridať neskôr z ovládacieho panela po nastavení hesla.",
+    "passwordAlreadySet": "Heslo k ovládaciemu panelu je už nastavené. Neskôr ho môžete zmeniť v Nastaveniach.",
     "providerDesc": "Pripojte svojho prvého poskytovateľa AI. Neskôr môžete pridať ďalšie.",
     "providerRequiresPassword": "Ak chcete pridať poskytovateľov, musíte najprv nastaviť heslo. Vráťte sa ku kroku zabezpečenia a nastavte heslo alebo pridajte poskytovateľov neskôr z ovládacieho panela.",
     "apiKeyRequired": "API kľúč (povinné)",
@@ -6051,6 +6066,8 @@
     "importFromModels": "Importovať z /models",
     "modelsImported": "Počet importovaných modelov: {count}",
     "allModelsAlreadyImported": "Všetky modely sú už importované",
+    "providerPublishesNoModelList": "Tento poskytovateľ nezverejňuje zoznam modelov — jeho vstavaný katalóg je aktuálny",
+    "modelsNoLongerListed": "{count, plural, one {# model už poskytovateľ neuvádza} few {# modely už poskytovateľ neuvádza} other {# modelov už poskytovateľ neuvádza}}",
     "noNewModelsToImport": "Žiadne nové modely na import — všetky modely sú už v registri alebo v zozname vlastných modelov",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Objavenie modelu zlyhalo {time}",
@@ -6736,6 +6753,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Zástupný text súboru cookie Grok Web",
     "herokuBaseUrlHint": "Pomocný text pre základnú URL adresu Heroku",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Skryť e-mail",
     "imageProviders": "Poskytovatelia obrázkov",
     "videoProviders": "Generovanie videa",
@@ -7234,7 +7252,8 @@
       "kiro": "Bezplatná úroveň: 50 kreditov/mesiac (~25k – 100k tokenov). ⚠️ Podmienky používania (ToS) Kiro zakazujú používanie proxy/harness tretích strán.",
       "codex": "Pripojte OpenAI Codex pomocou existujúceho toku OAuth.",
       "qwen": "Pripojte Qwen Code pomocou existujúceho toku OAuth.",
-      "github-models": "Vytvorte si GitHub PAT s rozsahom 'models: read' na adrese github.com/settings/tokens"
+      "github-models": "Vytvorte si GitHub PAT s rozsahom 'models: read' na adrese github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} akceptuje ID modelu natívneho poskytovateľa. Importujte z /models alebo pridajte vlastné ID pre smerovanie.",
     "bedrockModelsDescription": "Modely Amazon Bedrock sú vymedzené podľa regiónu AWS. Importovať z /models alebo pridať ID modelu Bedrock povolené vo vybranom regióne.",
@@ -8092,6 +8111,8 @@
     "resetAwareDesc": "Uprednostňujte účty so zdravou zostávajúcou kvótou a bližšími resetmi",
     "quotaWeighted": "Vážené podľa kvóty",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Najskôr expirujúce",
+    "expiryFirstDesc": "Čerpá účet, ktorého kvóta by inak prepadla nevyužitá: ako prvý ide účet s najvyšším zostatkom a najbližším resetom.",
     "strictRandom": "Prísne náhodné",
     "strictRandomDesc": "Zamiešaný balíček — každý účet sa použije raz pred opätovným zamiešaním",
     "stickyLimit": "Limit viazanosti",
@@ -8804,6 +8825,8 @@
     "retentionUsageHistory": "História používania (dni)",
     "retentionMemoryEntries": "Záznamy pamäte (dni)",
     "retentionXpAuditLog": "Auditný log XP (dni)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Uložiť nastavenia uchovávania",
     "storageAutoVacuumMode": "Režim automatického vysávania",
     "storageScheduledVacuum": "Plánované vysávanie",
@@ -10254,7 +10277,11 @@
     "mappingInvalidJson": "Neplatný formát JSON.",
     "mappingMustBeObject": "Mapovanie musí byť objekt JSON, nie pole alebo primitívna hodnota.",
     "mappingValueMustBeString": "Hodnota pre kľúč „{key}“ musí byť reťazec.",
-    "save": "Uložiť"
+    "save": "Uložiť",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Mechanizmus Caveman",
@@ -10639,6 +10666,7 @@
     "grokAutoTopUpMonth": "mesiac",
     "grokAdditionalCredits": "Ďalšie kredity",
     "kiloAccountBalance": "Zostatok na účte",
+    "kiloPassBandUsage": "{used} z {total}",
     "kiloPassBonus": "Dostupný bonus",
     "kiloPassMeterLabel": "Ukazovateľ využitia Kilo Pass",
     "kiloPassPaid": "Zaplatené",
@@ -12866,6 +12894,8 @@
     },
     "attempts": "pokusy",
     "detail": {
+      "tabOverview": "Prehľad",
+      "tabPayloads": "Dáta požiadaviek",
       "omittedHttpAttempts": "{count} odoslaní HTTP nebolo uchovaných",
       "noHttpResponse": "Nebola zaznamenaná žiadna odpoveď HTTP",
       "transportError": "Chyba prenosu",

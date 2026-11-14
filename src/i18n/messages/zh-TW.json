@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "平衡剩餘配額與 5 小時和每週重置，然後對相似分數進行迴圈賽",
     "quotaWeighted": "配額加權",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "臨期優先",
+    "expiryFirstDesc": "優先消耗即將過期作廢的配額：剩餘最多且重置最近的帳號先出隊。",
     "strictRandom": "嚴格隨機",
     "strictRandomDesc": "洗牌池模式：每個模型使用一次後再重新洗牌",
     "fusion": "融合",
@@ -4033,6 +4035,11 @@
         "when": "您可以使用配額遙測和不同的重置視窗跨多個帳戶進行路由。",
         "avoid": "大多數帳戶無法使用配額遙測。",
         "example": "寧願明天每週重置 60% 的帳戶，也不願稍後重置 80% 的帳戶。"
+      },
+      "expiry-first": {
+        "when": "在多個重置時間不同的帳號間路由，且希望優先用掉即將過期作廢的配額。",
+        "avoid": "大多數帳號缺少配額遙測，或需要與重置時間無關的穩定順序。",
+        "example": "優先選擇 39 分鐘後重置、剩餘 80% 的帳號，而非 9 小時後重置、剩餘 48% 的帳號——臨期配額先用掉。"
       },
       "strict-random": {
         "when": "適用於希望實現絕對均勻分配的場景，每個模型在重複前都會恰好使用一次。",
@@ -4249,6 +4256,13 @@
         "tip1": "對具有配額遙測的提供者使用顯式帳戶步驟或帳戶標籤路由。",
         "tip2": "當短期疲勞風險更大時，調整訓練次數與每週重量。",
         "tip3": "保持領帶較小，這樣等值帳戶仍然可以公平地輪換。"
+      },
+      "expiry-first": {
+        "title": "臨期配額優先",
+        "description": "按回收壓力排序帳號：剩餘配額多且臨近重置的帳號優先。",
+        "tip1": "依賴提供者配額遙測；無遙測的帳號保持列表中的優先級順序。",
+        "tip2": "相近得分在並列帶內輪換，同檔帳號仍能分攤負載。",
+        "tip3": "把排序限定在每個模型實際計費的配額桶上。"
       },
       "strict-random": {
         "title": "洗牌池分配",
@@ -4481,7 +4495,7 @@
     "spend7d": "7 天支出",
     "avgCostPerRequest": "平均每次請求成本",
     "noCostDataDescription": "發起請求後，成本資料會顯示在這裡。",
-    "spendToday": "今日支出",
+    "spendToday": "1 天支出",
     "overviewLoadFailed": "載入成本概覽失敗",
     "overviewDescription": "按提供者、模型和時間段彙總成本。",
     "providerShare": "提供者佔比",
@@ -5679,6 +5693,7 @@
     "usageTracking": "使用情況追蹤",
     "securityDesc": "設定密碼以保護您的儀表板，或暫時跳過。",
     "securityDescSkipWarning": "⚠️ 若未設定密碼，您將無法在設定期間新增提供者。您可以稍後在設定密碼後，從儀表板新增提供者。",
+    "passwordAlreadySet": "已設定儀表板密碼。你可以稍後在設定中變更。",
     "providerDesc": "連線你的第一個 AI 提供者。你之後還可以繼續新增。",
     "providerRequiresPassword": "您必須先設定密碼才能新增提供者。請返回安全性步驟並設定密碼，或稍後從儀表板新增提供者。",
     "apiKeyRequired": "API 金鑰（必填）",
@@ -6051,6 +6066,8 @@
     "importFromModels": "從 /models 匯入",
     "modelsImported": "已匯入 {count} 個模型",
     "allModelsAlreadyImported": "所有模型已匯入",
+    "providerPublishesNoModelList": "此提供者不發佈模型清單 — 其內建目錄已為最新",
+    "modelsNoLongerListed": "{count, plural, one {# 個模型已不再由提供者列出} other {# 個模型已不再由提供者列出}}",
     "noNewModelsToImport": "沒有新模型可匯入 — 所有模型已在登錄檔或自定義模型列表中",
     "localCatalogFallbackStatus": "無法取得提供者的模型清單——正在顯示內建目錄",
     "discoveryDegradedStatus": "模型探索失敗 {time}",
@@ -6727,6 +6744,7 @@
     "antigravityProjectIdPlaceholder": "我的 GCP 專案 ID",
     "grokWebCookiePlaceholder": "Grok Web Cookie",
     "herokuBaseUrlHint": "Heroku 部署的 Base URL。",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "隱藏郵箱",
     "imageProviders": "影像 Provider",
     "videoProviders": "影片生成",
@@ -7225,7 +7243,8 @@
       "kiro": "免費方案：每月 50 額度（約 2.5 萬至 10 萬 tokens）。⚠️ Kiro 服務條款禁止第三方代理/轉接使用。",
       "codex": "使用現有的 OAuth 流程連線 OpenAI Codex。",
       "qwen": "使用現有的 OAuth 流程連線 Qwen Code。",
-      "github-models": "在 github.com/settings/tokens 建立具有 'models: read' 範圍的 GitHub PAT"
+      "github-models": "在 github.com/settings/tokens 建立具有 'models: read' 範圍的 GitHub PAT",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} 接受提供者本機模型 ID。從 /models 匯入或新增用於路由的自定義 ID。",
     "bedrockModelsDescription": "Amazon Bedrock 模型的範圍按 AWS 區域劃分。從 /models 匯入或新增在所選區域中啟用的基岩模型 ID。",
@@ -8092,6 +8111,8 @@
     "resetAwareDesc": "優先選擇剩餘配額正常且重置時間較近的帳戶",
     "quotaWeighted": "配額加權",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "臨期優先",
+    "expiryFirstDesc": "優先消耗即將過期作廢的配額：剩餘最多且重置最近的帳號先出隊。",
     "strictRandom": "嚴格隨機",
     "strictRandomDesc": "洗牌池模式：每個帳戶使用一次後再重新洗牌",
     "stickyLimit": "粘性限制",
@@ -8804,6 +8825,8 @@
     "retentionUsageHistory": "使用歷史（天）",
     "retentionMemoryEntries": "記憶體條目（天）",
     "retentionXpAuditLog": "XP 稽核記錄（天數）",
+    "mediaStoreMaxMb": "媒體儲存大小上限（MiB）",
+    "mediaStoreMaxMbHint": "已儲存的生成媒體的總大小。先刪除最舊的檔案。設定環境變數 MEDIA_STORE_MAX_MB 時以它為準。預設 2048。",
     "saveRetentionSettings": "儲存保留設定",
     "storageAutoVacuumMode": "自動真空模式",
     "storageScheduledVacuum": "預定真空",
@@ -10254,7 +10277,11 @@
     "mappingInvalidJson": "無效的 JSON。",
     "mappingMustBeObject": "對應必須是 JSON 物件，而非陣列或基本型別值。",
     "mappingValueMustBeString": "金鑰「{key}」的值必須是字串。",
-    "save": "儲存"
+    "save": "儲存",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman 引擎",
@@ -10639,6 +10666,7 @@
     "grokAutoTopUpMonth": "月份",
     "grokAdditionalCredits": "額外的致謝",
     "kiloAccountBalance": "帳戶餘額",
+    "kiloPassBandUsage": "{total} 中的 {used}",
     "kiloPassBonus": "可用獎勵",
     "kiloPassMeterLabel": "Kilo Pass 用量儀表",
     "kiloPassPaid": "已付費",
@@ -12866,6 +12894,8 @@
     },
     "attempts": "嘗試次數",
     "detail": {
+      "tabOverview": "概述",
+      "tabPayloads": "Payload",
       "omittedHttpAttempts": "未保留 {count} 次 HTTP 傳送",
       "noHttpResponse": "未觀察到 HTTP 回應",
       "transportError": "傳輸錯誤",

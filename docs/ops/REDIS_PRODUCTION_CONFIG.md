@@ -1,7 +1,7 @@
 ---
 title: "Redis Production Configuration Guide"
 version: 3.8.50
-lastUpdated: 2026-08-06
+lastUpdated: 2026-11-05
 ---
 
 # Redis Production Configuration Guide
@@ -12,12 +12,12 @@ Redis is an **optional, soft dependency** in OmniRoute — the application degra
 fallbacks) when Redis is unavailable. In production, tuning Redis reduces latency for four distinct
 workloads:
 
-| Workload | Driver | Client Factory | Key Pattern |
-|---|---|---|---|
-| Rate limiting | `rateLimiter.ts` | `getRedisClient()` — lazy `ioredis` singleton | `<prefix>rl:*` Lua‑atomic rate limit windows |
-| Auth cache | `apiKeys.ts` | Reuses `rateLimiter`'s client | `<prefix>auth:api_key:<sha256>` with TTL |
-| Quota store | `redisQuotaStore.ts` | Separate `getRedisClient(url)` singleton | `<prefix>quota:*` configurable per-instance |
-| Warmup circuit breaker | `redisCircuitBreakerStore.ts` | Separate client in `circuitBreakerFactory.ts` | `<prefix>warmup:cb:<connectionId>` |
+| Workload               | Driver                        | Client Factory                                | Key Pattern                                  |
+| ---------------------- | ----------------------------- | --------------------------------------------- | -------------------------------------------- |
+| Rate limiting          | `rateLimiter.ts`              | `getRedisClient()` — lazy `ioredis` singleton | `<prefix>rl:*` Lua‑atomic rate limit windows |
+| Auth cache             | `apiKeys.ts`                  | Reuses `rateLimiter`'s client                 | `<prefix>auth:api_key:<sha256>` with TTL     |
+| Quota store            | `redisQuotaStore.ts`          | Separate `getRedisClient(url)` singleton      | `<prefix>quota:*` configurable per-instance  |
+| Warmup circuit breaker | `redisCircuitBreakerStore.ts` | Separate client in `circuitBreakerFactory.ts` | `<prefix>warmup:cb:<connectionId>`           |
 
 All four workloads share one namespace prefix so OmniRoute can co-exist with other apps on a
 single Redis instance (e.g. `127.0.0.1:6379`). See [Key Namespacing](#key-namespacing).
@@ -26,18 +26,18 @@ single Redis instance (e.g. `127.0.0.1:6379`). See [Key Namespacing](#key-namesp
 
 ## Current Configuration (Code Defaults)
 
-| Setting | Value | Where |
-|---|---|---|
-| `REDIS_URL` env var | `redis://redis:6379` (compose), optional | `rateLimiter.ts:5`, `.env.example` |
-| `REDIS_KEY_PREFIX` env var | `omniroute:` (default) | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
-| `QUOTA_STORE_REDIS_URL` env var | separate, can differ from `REDIS_URL` | `quota/storeFactory.ts` |
-| `QUOTA_STORE_DRIVER` | `"sqlite"` (default), `"redis"` optional | `quota/storeFactory.ts` |
-| ioredis `maxRetriesPerRequest` | `3` | `rateLimiter.ts` client creation |
-| `enableReadyCheck` | not set (ioredis default: `true`) | — |
-| `lazyConnect` | not set (ioredis default: `false`) | — |
-| `retryStrategy` | not set (ioredis default: 200ms base, exponential) | — |
-| TLS / password / DB index | **not configured** | — |
-| Sentinel / Cluster | **not configured** — standalone single-node only | — |
+| Setting                         | Value                                              | Where                                                                                 |
+| ------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `REDIS_URL` env var             | `redis://redis:6379` (compose), optional           | `rateLimiter.ts:5`, `.env.example`                                                    |
+| `REDIS_KEY_PREFIX` env var      | `omniroute:` (default)                             | `rateLimiter.ts`, `redisQuotaStore.ts`, `redisCircuitBreakerStore.ts`, `.env.example` |
+| `QUOTA_STORE_REDIS_URL` env var | separate, can differ from `REDIS_URL`              | `quota/storeFactory.ts`                                                               |
+| `QUOTA_STORE_DRIVER`            | `"sqlite"` (default), `"redis"` optional           | `quota/storeFactory.ts`                                                               |
+| ioredis `maxRetriesPerRequest`  | `3`                                                | `rateLimiter.ts` client creation                                                      |
+| `enableReadyCheck`              | not set (ioredis default: `true`)                  | —                                                                                     |
+| `lazyConnect`                   | not set (ioredis default: `false`)                 | —                                                                                     |
+| `retryStrategy`                 | not set (ioredis default: 200ms base, exponential) | —                                                                                     |
+| TLS / password / DB index       | **not configured**                                 | —                                                                                     |
+| Sentinel / Cluster              | **not configured** — standalone single-node only   | —                                                                                     |
 
 ---
 
@@ -76,19 +76,20 @@ multi‑replica deployments, pass a client factory in the code or wrap `getRedis
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null,   // no retry limit; let retryStrategy decide
-  enableReadyCheck: true,       // verify server is ready before accepting calls
-  lazyConnect: true,            // don't connect on construction; wait for first call
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null;       // give up after 10 retries → reconnect later
+    if (times > 10) return null; // give up after 10 retries → reconnect later
     return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true,   // coalesce concurrent commands into one TCP write
-  keepAlive: 10000,             // TCP keep‑alive every 10s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
 **Key trade-offs:**
+
 - `maxRetriesPerRequest: null` + `retryStrategy` — preferred for production so transient
   Redis restarts don't immediately fail every request. The in-memory fallback in
   `checkRateLimit()` absorbs the failure path.
@@ -131,13 +132,18 @@ The prod compose (`docker-compose.prod.yml`) uses `redis:8.6.2-alpine`. Add:
 ```yaml
 redis:
   image: redis:8.6.2-alpine
-  command: [
-    "redis-server",
-    "--maxmemory", "512mb",
-    "--maxmemory-policy", "allkeys-lru",
-    "--activedefrag", "yes",
-    "--save", "300 1",
-  ]
+  command:
+    [
+      "redis-server",
+      "--maxmemory",
+      "512mb",
+      "--maxmemory-policy",
+      "allkeys-lru",
+      "--activedefrag",
+      "yes",
+      "--save",
+      "300 1",
+    ]
   healthcheck:
     test: ["CMD", "redis-cli", "ping"]
     interval: 10s
@@ -171,9 +177,33 @@ Expose via health-check endpoint:
 ```
 
 Key metrics to watch:
+
 - **Evicted keys / sec** — if persistently non-zero, increase `maxmemory`
 - **Blocked clients** — non-zero suggests slow Lua scripts or high contention
 - **Rejected connections** — connection limit hit; rare at 20 connections
+
+### 6. Redis-Compatible Servers
+
+Any server used here must run Lua scripts: the rate limiter is one `EVAL`. On a server
+without Lua, `checkRateLimit()` logs `[RATE_LIMITER] Redis eval failed, falling back to
+in-memory rate limiting` and counts per process, so each replica enforces the limit on its
+own. The opt-in shared session-affinity store (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`)
+also reads and updates pins with `EVAL`; without Lua it logs `[SESSION_AFFINITY] Redis
+error; falling back to SQLite.` and each replica keeps its own pins. The other workloads use
+plain commands (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, hashes and
+sets), and the semantic cache's Redis backend sends no `FT.*` commands.
+
+Tested with OmniRoute 3.8.52: KiviDB 1.2.0 with its Lua image (`kividb/kividb:v1.2.0-lua`).
+The rate limiter (including a second process sharing the counters), auth cache, quota store,
+warmup circuit breaker, semantic cache store, and a `/v1/chat/completions` request through
+the chat handler passed 18 of the 19 checks that pass on Redis 8.10.3. The one that differs:
+`INCRBYFLOAT` stores `0.1 + 0.2` as `0.30000000000000004` where Redis stores `0.3`
+([kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387)). The quota store parses
+both with `parseFloat`, but the two numbers differ in the last digits, so a comparison that
+falls exactly on a quota boundary can come out differently. The session-affinity store was
+not part of that run.
+([setup](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md),
+[results](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat))
 
 ---
 
@@ -196,13 +226,13 @@ flowchart LR
 
 ## References
 
-| File | Purpose |
-|---|---|
-| `src/shared/utils/rateLimiter.ts` | Primary Redis client, Lua rate-limit script, in-memory fallback |
-| `src/lib/db/apiKeys.ts` | Auth cache — Redis→SQLite fallback |
-| `src/lib/quota/redisQuotaStore.ts` | Separate Redis client for optional quota store |
-| `src/lib/quota/storeFactory.ts` | Switches between `sqlite` and `redis` quota drivers |
-| `docker-compose.prod.yml` | Prod Redis container (image `redis:8.6.2-alpine`) |
-| `.env.example` | Redis env vars documentation |
-| `src/app/api/local/redis/` | API routes for dev container orchestration |
-| `bin/cli/commands/redis.mjs` | CLI commands for dev container orchestration |
+| File                               | Purpose                                                         |
+| ---------------------------------- | --------------------------------------------------------------- |
+| `src/shared/utils/rateLimiter.ts`  | Primary Redis client, Lua rate-limit script, in-memory fallback |
+| `src/lib/db/apiKeys.ts`            | Auth cache — Redis→SQLite fallback                              |
+| `src/lib/quota/redisQuotaStore.ts` | Separate Redis client for optional quota store                  |
+| `src/lib/quota/storeFactory.ts`    | Switches between `sqlite` and `redis` quota drivers             |
+| `docker-compose.prod.yml`          | Prod Redis container (image `redis:8.6.2-alpine`)               |
+| `.env.example`                     | Redis env vars documentation                                    |
+| `src/app/api/local/redis/`         | API routes for dev container orchestration                      |
+| `bin/cli/commands/redis.mjs`       | CLI commands for dev container orchestration                    |

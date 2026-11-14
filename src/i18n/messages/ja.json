@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "残りの割り当てと 5 時間および毎週のリセットのバランスをとり、同様のスコアをラウンドロビンします。",
     "quotaWeighted": "クォータ加重",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "期限切れ優先",
+    "expiryFirstDesc": "放置すると未使用のまま失効するクォータを持つアカウントから消費します。残量が最も多く、リセットが最も近いアカウントが優先されます。",
     "strictRandom": "厳密ランダム",
     "strictRandomDesc": "シャッフルデッキ方式 — 再シャッフルする前に各モデルを1回ずつ使用します",
     "fusion": "フュージョン",
@@ -4033,6 +4035,11 @@
         "when": "クォータ テレメトリとさまざまなリセット ウィンドウを使用して、複数のアカウント間でルーティングします。",
         "avoid": "クォータ テレメトリは、ほとんどのアカウントでは利用できません。",
         "example": "後で 80% のアカウントをリセットするよりも、明日に毎週 60% のアカウントをリセットすることを優先します。"
+      },
+      "expiry-first": {
+        "when": "クォータのリセット周期が異なる複数のアカウント間でルーティングし、放置すると未使用のまま失効するクォータを使い切りたい場合。",
+        "avoid": "ほとんどのアカウントでクォータ テレメトリがない場合、またはリセットのタイミングを無視した安定した順序が必要な場合。",
+        "example": "9 時間後にリセットされる残り 48% のアカウントより、39 分後にリセットされる残り 80% のアカウントを優先します — 失効間近のクォータは無駄になる前に消費されます。"
       },
       "strict-random": {
         "when": "完全に均等に分散したい場合に使用します。各モデルを1回ずつ使用してから繰り返します。",
@@ -4249,6 +4256,13 @@
         "tip1": "クォータ テレメトリを備えたプロバイダーには、明示的なアカウント ステップまたはアカウント タグ ルーティングを使用します。",
         "tip2": "短期的な疲労の危険性が高い場合は、セッションと毎週の体重を調整してください。",
         "tip3": "タイバンドを小さく保ち、同等のアカウントが引き続き公平にローテーションできるようにします。"
+      },
+      "expiry-first": {
+        "title": "失効間近のクォータを優先",
+        "description": "消化の緊急度でアカウントをランク付けします。リセット期限が近く、残りクォータが多いアカウントが優先されます。",
+        "tip1": "プロバイダーのクォータ テレメトリが必要です。テレメトリのないアカウントは、一覧の優先順位を維持します。",
+        "tip2": "ほぼ同点のスコアはタイバンド内でローテーションされるため、同等のアカウント間で引き続き負荷が分散されます。",
+        "tip3": "ランキングは、各モデルが実際に課金されるクォータ バケットに限定してください。"
       },
       "strict-random": {
         "title": "シャッフルデッキ分散",
@@ -4481,7 +4495,7 @@
     "spend7d": "Spend7D",
     "avgCostPerRequest": "Avg Cost Per Request",
     "noCostDataDescription": "No Cost Data Description",
-    "spendToday": "本日の支出",
+    "spendToday": "1日分の支出",
     "overviewLoadFailed": "Overview Load Failed",
     "overviewDescription": "Overview Description",
     "providerShare": "プロバイダー別シェア",
@@ -5679,6 +5693,7 @@
     "usageTracking": "使用状況の追跡",
     "securityDesc": "ダッシュボードを保護するためにパスワードを設定するか、今はスキップしてください。",
     "securityDescSkipWarning": "⚠️ パスワードを設定しない場合、セットアップ中にプロバイダーを追加できません。パスワードを設定した後、ダッシュボードから追加できます。",
+    "passwordAlreadySet": "ダッシュボードのパスワードは既に設定されています。後から設定で変更できます。",
     "providerDesc": "初めての AI プロバイダーに接続します。後でさらに追加することもできます。",
     "providerRequiresPassword": "プロバイダーを追加するには、まずパスワードを設定する必要があります。セキュリティの手順に戻ってパスワードを設定するか、後でダッシュボードからプロバイダーを追加してください。",
     "apiKeyRequired": "APIキー(必須)",
@@ -6051,6 +6066,8 @@
     "importFromModels": "/models からインポート",
     "modelsImported": "{count}件のモデルをインポートしました",
     "allModelsAlreadyImported": "すべてのモデルは既にインポート済みです",
+    "providerPublishesNoModelList": "このプロバイダーはモデル一覧を公開していません — 組み込みカタログは最新です",
+    "modelsNoLongerListed": "{count, plural, other {# 件のモデル}}がプロバイダーの一覧に掲載されなくなりました",
     "noNewModelsToImport": "インポートする新しいモデルはありません — すべてのモデルは既にレジストリまたはカスタムモデルリストにあります",
     "localCatalogFallbackStatus": "プロバイダーのモデル一覧を取得できませんでした — 組み込みカタログを表示しています",
     "discoveryDegradedStatus": "モデル検出に失敗しました {time}",
@@ -6727,6 +6744,7 @@
     "antigravityProjectIdPlaceholder": "私のgcpプロジェクトID",
     "grokWebCookiePlaceholder": "Grok Web Cookie のプレースホルダー",
     "herokuBaseUrlHint": "Heroku ベース URL のヒント",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "メールアドレスを非表示",
     "imageProviders": "画像プロバイダー",
     "videoProviders": "ビデオ生成",
@@ -7225,7 +7243,8 @@
       "kiro": "無料枠: 50クレジット/月（約25K〜100Kトークン）。⚠️ Kiroの利用規約（ToS）は、サードパーティのプロキシやハーネスの使用を禁止しています。",
       "codex": "既存のOAuthフローを使用してOpenAI Codexに接続します。",
       "qwen": "既存のOAuthフローを使用してQwen Codeに接続します。",
-      "github-models": "github.com/settings/tokens で 'models: read' スコープを持つGitHub PATを作成"
+      "github-models": "github.com/settings/tokens で 'models: read' スコープを持つGitHub PATを作成",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} は、プロバイダーネイティブのモデル ID を受け入れます。 /models からインポートするか、ルーティング用のカスタム ID を追加します。",
     "bedrockModelsDescription": "Amazon Bedrock モデルは、AWS リージョンによって範囲が定められています。 /models からインポートするか、選択したリージョンで有効になっている Bedrock モデル ID を追加します。",
@@ -8092,6 +8111,8 @@
     "resetAwareDesc": "残りのクォータが健全でリセットに近いアカウントを優先する",
     "quotaWeighted": "クォータ加重",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "期限切れ優先",
+    "expiryFirstDesc": "放置すると未使用のまま失効するクォータを持つアカウントから消費します。残量が最も多く、リセットが最も近いアカウントが優先されます。",
     "strictRandom": "完全ランダム",
     "strictRandomDesc": "シャッフルデッキ方式 — 再シャッフルする前に各アカウントを1回ずつ使用します",
     "stickyLimit": "スティッキー制限",
@@ -8804,6 +8825,8 @@
     "retentionUsageHistory": "利用履歴（日）",
     "retentionMemoryEntries": "メモリエントリ (日)",
     "retentionXpAuditLog": "XP監査ログ (日)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "保持設定を保存",
     "storageAutoVacuumMode": "自動真空モード",
     "storageScheduledVacuum": "スケジュールされたバキューム",
@@ -10254,7 +10277,11 @@
     "mappingInvalidJson": "無効なJSONです。",
     "mappingMustBeObject": "マッピングは配列やプリミティブ値ではなく、JSONオブジェクトである必要があります。",
     "mappingValueMustBeString": "キー“{key}”の値は文字列である必要があります。",
-    "save": "保存"
+    "save": "保存",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -10639,6 +10666,7 @@
     "grokAutoTopUpMonth": "月",
     "grokAdditionalCredits": "追加のクレジット",
     "kiloAccountBalance": "口座残高",
+    "kiloPassBandUsage": "{total} 中 {used}",
     "kiloPassBonus": "利用可能なボーナス",
     "kiloPassMeterLabel": "Kilo Pass 使用量メーター",
     "kiloPassPaid": "支払い済み",
@@ -12866,6 +12894,8 @@
     },
     "attempts": "試行回数",
     "detail": {
+      "tabOverview": "概要",
+      "tabPayloads": "ペイロード",
       "omittedHttpAttempts": "{count} 件の HTTP 送信は保持されていません",
       "noHttpResponse": "HTTP 応答は確認されていません",
       "transportError": "トランスポートエラー",

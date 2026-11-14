@@ -1204,6 +1204,13 @@ app.whenReady().then(async () => {
   // Fix #15: Set up CSP before any content loads
   setupContentSecurityPolicy();
 
+  // Creator credit in the native About panel ("About OmniRoute" in the macOS app menu).
+  // `credits` is read on macOS/Windows, `authors` on Linux.
+  app.setAboutPanelOptions({
+    credits: "Created by Diego Souza (https://github.com/diegosouzapw)",
+    authors: ["Diego Souza (https://github.com/diegosouzapw)"],
+  });
+
   // Headless mode check: supports running without any UI windows or tray icons
   const isHeadless =
     process.argv.includes("--headless") ||
