@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { buildChecks } from "../../scripts/check/check-docs-counts-sync.mjs";
+import { loadFactsSnapshot } from "../../scripts/release/facts.mjs";
 
 type Check = {
   label?: string;
@@ -12,6 +13,18 @@ type Check = {
   files?: string[];
   validate?: (content: string, claim?: string) => { ok: boolean; detail: string };
 };
+
+// Built once from the committed facts snapshot (docs/reference/derived-facts.json). The entries
+// asserted here are content invariants that do not depend on any fact value, and the snapshot
+// keeps the test off the tsx subprocess that collecting live facts starts on every call. That
+// live collection is exercised once, by "the release refresh closes the cycle" in
+// check-docs-counts-sync.test.ts.
+const facts = loadFactsSnapshot();
+assert.ok(
+  facts,
+  "docs/reference/derived-facts.json is missing — run npm run release:refresh-derived"
+);
+const checks = buildChecks({ facts }) as Check[];
 
 /** Escape a value that is interpolated into a RegExp source. */
 function escapeRegExp(value: string): string {
@@ -23,9 +36,7 @@ describe("ToS caution heading count", () => {
     const txt = readFileSync(join(process.cwd(), "docs/reference/FREE_TIERS.md"), "utf8");
     const heading = txt.split("\n").find((line) => /^#+ .*Caution/.test(line));
     assert.ok(heading, "FREE_TIERS.md must keep its Caution heading");
-    const tos = (buildChecks() as Check[]).find((c) =>
-      String(c.docKey ?? "").includes("ToS caution")
-    );
+    const tos = checks.find((c) => String(c.docKey ?? "").includes("ToS caution"));
     // The backslashes must survive the TEMPLATE LITERAL to reach the regex.
     // Written as `\(\s*…` they did not: JS resolves `\(` to "(" and `\s` to the
     // LETTER "s" before RegExp ever sees them, so the pattern compiled to
@@ -46,7 +57,6 @@ describe("ToS caution heading count", () => {
     assert.equal(pattern.test("### Caution — clauses worth checking ( 16 )"), true);
   });
   it("buildChecks exposes a soft ToS entry on FREE_TIERS.md with requireClaim", () => {
-    const checks = buildChecks() as Check[];
     const tos = checks.find(
       (c) =>
         String(c.docKey ?? "").includes("ToS caution") ||

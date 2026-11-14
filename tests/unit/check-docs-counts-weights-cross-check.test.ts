@@ -2,6 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { buildChecks } from "../../scripts/check/check-docs-counts-sync.mjs";
+import { loadFactsSnapshot } from "../../scripts/release/facts.mjs";
 
 type Check = {
   label?: string;
@@ -12,6 +13,18 @@ type Check = {
   validate?: (content: string, claim?: string) => { ok: boolean; detail: string };
 };
 
+// Built once from the committed facts snapshot (docs/reference/derived-facts.json). The entries
+// asserted here are content invariants that do not depend on any fact value, and the snapshot
+// keeps the test off the tsx subprocess that collecting live facts starts on every call. That
+// live collection is exercised once, by "the release refresh closes the cycle" in
+// check-docs-counts-sync.test.ts.
+const facts = loadFactsSnapshot();
+assert.ok(
+  facts,
+  "docs/reference/derived-facts.json is missing — run npm run release:refresh-derived"
+);
+const checks = buildChecks({ facts }) as Check[];
+
 describe("routing weights cross-check (soft)", () => {
   it("scoring.ts DEFAULT_WEIGHTS and intelligentRouting.ts DEFAULT_INTELLIGENT_WEIGHTS exist", () => {
     assert.match(readFileSync("open-sse/services/autoCombo/scoring.ts", "utf8"), /DEFAULT_WEIGHTS/);
@@ -21,7 +34,6 @@ describe("routing weights cross-check (soft)", () => {
     );
   });
   it("buildChecks exposes a soft INTELLIGENT keys vs DEFAULT entry", () => {
-    const checks = buildChecks() as Check[];
     const w = checks.find(
       (c) =>
         String(c.docKey ?? "").includes("INTELLIGENT vs DEFAULT") ||
@@ -36,7 +48,6 @@ describe("routing weights cross-check (soft)", () => {
     assert.match(txt, /DEFAULT_INTELLIGENT_WEIGHTS/);
   });
   it("no MIN_USAGE gate exists (documented as not gated separately)", () => {
-    const checks = buildChecks() as Check[];
     const m = checks.find(
       (c) =>
         String(c.docKey ?? "").includes("MIN_USAGE") || String(c.label ?? "").includes("MIN_USAGE")

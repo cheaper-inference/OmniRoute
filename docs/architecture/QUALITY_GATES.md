@@ -228,7 +228,7 @@ Runs on every PR to `main`. Blocks merge on failure.
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
 | `check:docs-all`               | Meta-gate that runs the 6 sub-gates below sequentially                                                                                            | Yes                        |
 | ↳ `check:docs-sync`            | CHANGELOG / OpenAPI / llm.txt version consistency                                                                                                 | Yes                        |
-| ↳ `check:docs-counts`          | Counts in prose (provider count, migration count, etc.) are within the ratchet window of the real counts                                          | Yes                        |
+| ↳ `check:docs-counts`          | Counts in prose (provider count, migration count, etc.). Two modes: `pr` on feature PRs, `release` elsewhere — see "Derived values" below         | Yes                        |
 | ↳ `check:env-doc-sync`         | Every env var in `.env.example` is documented in a docs table, and vice versa                                                                     | Yes                        |
 | ↳ `check:deprecated-versions`  | No deprecated version strings in docs                                                                                                             | Yes                        |
 | ↳ `check:doc-links`            | Internal markdown links in docs resolve to real files (`[text]`/`(path)` form)                                                                    | Yes                        |
@@ -249,9 +249,94 @@ outlining step keeps every outlined string in the file as invisible `<text>`. Th
 `free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`, `cli-terminal.svg`,
 `tier-cascade.svg`, plus `public/images/tier-flow-dark.svg` and `tier-flow-light.svg`; the
 free-forever, catalog-entry, recurring-pool and scoring-factors claims also read
-`promise-pillars.svg`, `free-tier-budget.svg` and `strategies-grid.svg`. `free-tier-budget.svg`
-draws its figures from the live catalog loader, so a change to `FREE_MODEL_BUDGETS` or to a
-provider display name reds CI until that file is regenerated.
+`promise-pillars.svg`, `free-tier-budget.svg` and `strategies-grid.svg`. The counts these
+generators draw (provider total, MCP tools, routing strategies, free-forever providers, …) come
+from the facts snapshot `docs/reference/derived-facts.json` through `scripts/docs/readmeFacts.mjs`,
+not from literals, so regenerating a diagram on any branch reproduces the committed file.
+`free-tier-budget.svg` draws its rows from the same snapshot (`code.freeTierBudget`, the catalog
+summary the facts probe records), so a change to `FREE_MODEL_BUDGETS` reaches the card at the
+next refresh instead of turning CI red.
+
+### Derived values: the `pr` and `release` gate modes
+
+A feature PR never writes a value that depends on the state of its base: provider, migration,
+MCP-tool and strategy counts, the README SVG numbers, the facts snapshot. One step recomputes all
+of them, `npm run release:refresh-derived`, run by the release and by the nightly
+derived-refresh PR. So **between releases the base is behind the live code by design**, and a
+gate or test that compared the tree with the live code would be red on every PR after a sibling
+added a provider. The gates that judge derived values therefore run in one of two modes,
+resolved by `scripts/check/lib/gateMode.mjs` (first match wins):
+
+1. `--mode=pr|release` on the command line;
+2. the `OMNIROUTE_GATE_MODE` environment variable (`pr` or `release`);
+3. automatic, from the GitHub Actions event: a `pull_request` whose head is not `release/v*`,
+   a `merge_group`, or a push to `omni-queue/**` → `pr`; everything else (push, schedule,
+   dispatch, the release PR `release/v* → main`, any local run) → `release`.
+
+What `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) fails in each mode:
+
+| Mode      | Fails                                                                                                                                                                                                                                                                                                                                                                                                 | Needs the live facts |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| `release` | Every check, strict equality against the facts collected from the tree (the behaviour the gate always had): a stale count, version, coverage floor or SVG number is a STRICT drift                                                                                                                                                                                                                    | Yes                  |
+| `pr`      | Only what the change did, diffed against the PR base with the same claim extractors: (1) a managed value that did not exist in the base for that check and file ("PR edited a managed number — restore the line to the base text"); (2) a required claim the base carried and the head lost. Content invariants that need no facts run as in release mode; release-only checks are listed and skipped | No                   |
+
+In `pr` mode the writer branches may edit managed values: `chore/derived-*` (the nightly refresh
+PR), `release/v*`, and the translation waves `docs/i18n-*` and `chore/i18n-*`
+(`scripts/check/lib/derivedClaimsDiff.mjs`). Queue batches (`merge_group`, Mergify drafts,
+`omni-queue/**`) are not judged again: they sum PRs the gate already judged one by one.
+
+Exit codes: `0` clean · `1` STRICT drift (or soft drift with `--strict`) or a managed-value
+violation · `2` infrastructure — the code facts could not be collected (the tsx probe failed or
+timed out; the timeout is `OMNIROUTE_FACTS_TIMEOUT_MS`, default 600000 ms) or, in CI, the PR diff
+base could not be resolved. An exit 2 is never a documentation divergence: re-run the job or fix
+the environment.
+
+Where each mode runs:
+
+| Where                                                                                               | Mode                                                                                                                                                                                           |
+| --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Feature PR — `ci.yml` job `docs-sync-strict`, `quality.yml` step "Docs accuracy"                    | `pr` (automatic); the job passes the base as `BASE_SHA` and checks out with `fetch-depth: 2`                                                                                                   |
+| `merge_group`, `omni-queue/**` candidates, the merge train's full gate list                         | `pr`                                                                                                                                                                                           |
+| Release PR (`release/v* → main`), pushes, scheduled and manual runs                                 | `release`                                                                                                                                                                                      |
+| Release-Green (`scripts/quality/validate-release-green.mjs`)                                        | HARD items run with `OMNIROUTE_GATE_MODE=pr` ("did the base break?"); the DRIFT item `derived-refresh` runs `npm run release:refresh-derived -- --check` (strict view, never opens a base-red) |
+| Release (`/generate-release` phases 0a and 1; the skill wiring is a separate owner-approved change) | `npm run release:refresh-derived` writes the derived files; the release PR's own checks then run in `release` mode                                                                             |
+| `nightly-derived-refresh.yml` (daily, highest `release/vX.Y.Z`, skipped under release-freeze)       | `npm run release:refresh-derived -- --profile=nightly`; on a diff it keeps ONE PR open from `chore/derived-refresh`; never merges                                                              |
+
+The commands behind it:
+
+- `npm run facts` prints every derived number as JSON (`scripts/release/facts.mjs`).
+  `--key=code.mcpTools` prints one value, `--snapshot` reads the committed snapshot instead of
+  the live tree. Exit 2 when the facts cannot be collected.
+- `npm run release:refresh-derived` (`scripts/release/refresh-derived.mjs`) recomputes the derived
+  files in one pass, in this order (step ids for `--only=`): `provider-reference`
+  (`docs/reference/PROVIDER_REFERENCE.md`), `facts` (the snapshot), `numbers` (the counts gate's
+  rewrite plan applied to the docs, then carried to their `docs/i18n/` mirrors),
+  `readme-diagrams`, `skills` (generated `SKILL.md`), `e2e-timings` (skipped until the tree
+  ships `syncE2eTimings`), `ui-keys` (prunes keys `en.json` dropped and, with
+  `--rewritten-since=<ref>` — default `origin/main` — re-queues English values rewritten since
+  the last release) and `llm-mirrors`. The
+  `changelog` step is opt-in (`--with-changelog`, release profile only). `--profile=nightly`
+  never touches a version claim. With `-- --check` it writes nothing and exits 1 when any file
+  would change or a managed value needs a manual edit (listing both); exit 2 on an
+  infrastructure failure. `--json` prints the result as JSON.
+- `docs/reference/derived-facts.json` is the snapshot of the facts the last refresh used. Only
+  the refresh writes it. The README SVG generators read it, and PR-time unit tests compare the
+  committed docs and generated files with it — never with the live code. The suite's single
+  live comparison is "the release refresh closes the cycle" in
+  `tests/unit/check-docs-counts-sync.test.ts`: with the live facts, the refresh's rewrite plan
+  applied in memory leaves no STRICT drift it does not report, and re-planning changes nothing.
+
+To reproduce locally (a local run defaults to `release`):
+
+```bash
+npm run check:docs-counts                                       # release: strict, live facts
+node scripts/check/check-docs-counts-sync.mjs --mode=pr          # what a feature PR is judged on
+OMNIROUTE_GATE_MODE=pr BASE_REF="origin/release/v$(node -p "require('./package.json').version")" npm run check:docs-counts
+npm run release:refresh-derived -- --check                       # what the release would rewrite
+```
+
+Without a resolvable base (no `BASE_SHA`/`BASE_REF`, no local `origin/release/v<version>`) a local
+`pr` run prints a warning and skips the diff instead of failing.
 
 ### Job: `i18n-ui-coverage`
 

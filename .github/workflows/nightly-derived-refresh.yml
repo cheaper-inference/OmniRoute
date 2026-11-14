@@ -1,0 +1,216 @@
+name: Nightly derived refresh
+
+# Plan "derived numbers and texts resolved only at release" (2026-11-13). A feature PR never
+# writes a value that depends on the state of its base — provider / migration / MCP-tool counts,
+# the version claims, the README SVG numbers, the facts snapshot (docs/reference/
+# derived-facts.json). `npm run release:refresh-derived` recomputes all of them in one pass; the
+# release runs it, and between releases this workflow runs it once a day on the highest
+# release/vX.Y.Z and keeps ONE pull request open with the result, so the docs never fall more
+# than a day behind the code. The counts gate lets this PR edit managed numbers because
+# `chore/derived-*` is a writer branch (scripts/check/lib/derivedClaimsDiff.mjs).
+#
+# It never merges, and it skips a branch under release-freeze (Hard Rule #21): during a release
+# the captain runs the refresh in the release itself.
+#
+# Branch chore/derived-refresh belongs to this robot, the same mechanism as the UI Kit upstream
+# watch (scripts/ci/ui-kit-sync-pr.sh): every run rebuilds it as ONE commit on top of the release
+# tip and pushes with --force-with-lease pinned to the SHA it read, so a commit pushed after that
+# read is never overwritten; and an open PR whose branch tip was pushed by someone else (a hand
+# fix) is left alone until it is merged or closed.
+#
+# PR token: DERIVED_REFRESH_PR_TOKEN when set (fine-grained token on this repository, Contents
+# and Pull requests: write), else I18N_REFRESH_TOKEN — the robot token the i18n mirror refresh
+# already opens its PR with (same scopes, same purpose; owner decision 2026-11-13). This repository
+# does not let GITHUB_TOKEN create PRs, and a branch pushed or a PR opened with GITHUB_TOKEN
+# does not trigger CI, so the refresh PR would sit without checks. With neither secret the branch
+# is still pushed (with GITHUB_TOKEN) and the run summary says to open the PR by hand.
+#
+# Secrets and event values reach the scripts only through `env:`.
+
+on:
+  schedule:
+    - cron: "37 1 * * *" # 01:37 UTC daily, a slot no other workflow uses
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly-derived-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    name: Refresh derived numbers on the active release branch
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write # push chore/derived-refresh when no PR token is configured
+      pull-requests: write # find, update and retarget the refresh PR
+      issues: read # release-freeze and base-red lookups
+    env:
+      REFRESH_BRANCH: chore/derived-refresh
+      BOT_NAME: github-actions[bot]
+      BOT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+    steps:
+      - name: Resolve the active release branch and the release freeze
+        id: base
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          BASE=$(gh api "repos/$GITHUB_REPOSITORY/branches" --paginate --jq '.[].name' \
+            | grep -E '^release/v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
+          [ -n "$BASE" ] || { echo "no release/vX.Y.Z branch" >&2; exit 1; }
+          # A freeze issue is titled "🔒 release-freeze: vX.Y.Z in progress"; v3.8.5 must not
+          # match v3.8.52, and a freeze that names no version freezes everything.
+          VER_RE=$(printf '%s' "${BASE#release/}" | sed 's/\./\\./g')
+          FROZEN=""
+          while IFS=$'\t' read -r NUM TITLE; do
+            [ -n "$NUM" ] || continue
+            if printf '%s' "$TITLE" | grep -qE "(^|[^0-9.])${VER_RE}([^0-9]|$)" \
+              || ! printf '%s' "$TITLE" | grep -qE 'v[0-9]+\.[0-9]+\.[0-9]+'; then
+              FROZEN="#$NUM"
+            fi
+          done < <(gh issue list --repo "$GITHUB_REPOSITORY" --label release-freeze --state open \
+            --json number,title --jq '.[] | "\(.number)\t\(.title)"')
+          RED=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+            --search "Release branch not green: $BASE in:title" --json number --jq '.[0].number // empty')
+          {
+            echo "branch=$BASE"
+            echo "skip=$([ -n "$FROZEN" ] && echo true || echo false)"
+            echo "red=$RED"
+          } >> "$GITHUB_OUTPUT"
+          if [ -n "$FROZEN" ]; then
+            echo "::notice::$BASE is under release-freeze ($FROZEN) — the release refreshes it."
+            echo "Skipped: \`$BASE\` is under release-freeze ($FROZEN)." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Target branch: \`$BASE\` (base-red: ${RED:-none})" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.base.outputs.skip == 'false'
+        with:
+          ref: ${{ steps.base.outputs.branch }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        if: steps.base.outputs.skip == 'false'
+        with:
+          package-manager-cache: false
+          node-version: "24"
+
+      - uses: ./.github/actions/npm-ci-retry
+        if: steps.base.outputs.skip == 'false'
+        with:
+          cache: false
+
+      - name: Refresh derived numbers
+        if: steps.base.outputs.skip == 'false'
+        run: npm run release:refresh-derived -- --profile=nightly
+
+      - name: Commit, push and open or update the refresh PR
+        if: steps.base.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.DERIVED_REFRESH_PR_TOKEN || secrets.I18N_REFRESH_TOKEN || github.token }}
+          HAS_PR_TOKEN: ${{ secrets.DERIVED_REFRESH_PR_TOKEN != '' || secrets.I18N_REFRESH_TOKEN != '' }}
+          BASE: ${{ steps.base.outputs.branch }}
+          BASE_RED_ISSUE: ${{ steps.base.outputs.red }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          TITLE="chore(docs): refresh derived numbers on ${BASE}"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Every derived number on \`$BASE\` already matches the live code." >> "$GITHUB_STEP_SUMMARY"
+            # A refresh PR left open from an earlier run now carries values the base no longer
+            # needs (the code moved back, or the release refreshed itself): close it so it cannot
+            # be merged by mistake. A tip pushed by someone else is only reported.
+            STALE=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$REFRESH_BRANCH" --state open \
+              --json number --jq '.[0].number // empty')
+            if [ -n "$STALE" ]; then
+              git fetch -q --depth=1 origin "$REFRESH_BRANCH"
+              if [ "$(git log -1 --format=%ae FETCH_HEAD)" = "$BOT_EMAIL" ]; then
+                gh pr close "$STALE" --repo "$GITHUB_REPOSITORY" \
+                  --comment "Closed by the nightly derived refresh: \`$BASE\` already matches the live code (${RUN_URL})." > /dev/null
+                echo "Closed the stale refresh PR #$STALE." >> "$GITHUB_STEP_SUMMARY"
+              else
+                echo "Refresh PR #$STALE is no longer needed but has commits pushed by hand; left open." >> "$GITHUB_STEP_SUMMARY"
+              fi
+            fi
+            exit 0
+          fi
+          CHANGED=$(git diff --cached --name-only)
+          COUNT=$(printf '%s\n' "$CHANGED" | wc -l | tr -d ' ')
+
+          gh auth setup-git
+          OPEN_PR=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$REFRESH_BRANCH" --state open \
+            --json number,baseRefName --jq '.[0] | select(.) | "\(.number) \(.baseRefName)"')
+          REMOTE_SHA=$(git ls-remote --heads origin "$REFRESH_BRANCH" | cut -f1)
+          if [ -n "$OPEN_PR" ] && [ -n "$REMOTE_SHA" ]; then
+            git fetch -q --depth=1 origin "$REFRESH_BRANCH"
+            if [ "$(git log -1 --format=%ae FETCH_HEAD)" != "$BOT_EMAIL" ]; then
+              echo "PR #${OPEN_PR%% *} has commits pushed by hand; not overwriting them." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+          fi
+
+          # CI bot commit: the bot identity is the author, no Co-Authored-By trailer.
+          git switch -q -c "$REFRESH_BRANCH"
+          git -c user.name="$BOT_NAME" -c user.email="$BOT_EMAIL" commit -q -m "$TITLE" \
+            -m "npm run release:refresh-derived -- --profile=nightly on ${BASE}: ${COUNT} file(s)." \
+            -m "Run: ${RUN_URL}"
+          # One commit on top of the release tip, every run. The lease refuses to overwrite a
+          # commit somebody pushed to the branch after REMOTE_SHA was read.
+          git push -q --force-with-lease="${REFRESH_BRANCH}:${REMOTE_SHA}" origin "HEAD:refs/heads/${REFRESH_BRANCH}"
+
+          if [ "$HAS_PR_TOKEN" != "true" ]; then
+            {
+              echo "\`$REFRESH_BRANCH\` is pushed with ${COUNT} refreshed file(s), but no PR was opened:"
+              echo "neither \`DERIVED_REFRESH_PR_TOKEN\` nor \`I18N_REFRESH_TOKEN\` is set. Open it from that branch against \`$BASE\`."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          {
+            if [ -n "${BASE_RED_ISSUE:-}" ]; then printf '⚠️ base-red inherited: #%s\n\n' "$BASE_RED_ISSUE"; fi
+            echo "## Summary"
+            echo
+            echo "Nightly refresh of the derived numbers on \`$BASE\`: \`npm run release:refresh-derived -- --profile=nightly\` recomputed the provider, migration and MCP-tool counts, the version claims, the README SVG numbers and the facts snapshot from the live code (${RUN_URL})."
+            echo
+            echo "Feature PRs no longer write these values; this PR (and the release itself) does. The branch \`$REFRESH_BRANCH\` is rebuilt from \`$BASE\` on every run, so a later run replaces this commit."
+            echo
+            echo "## Files (${COUNT})"
+            echo
+            # shellcheck disable=SC2016 # the backticks are Markdown code spans, not substitutions
+            printf '%s\n' "$CHANGED" | head -200 | sed 's/^/- `/; s/$/`/'
+            echo
+            echo "## Before merge"
+            echo
+            echo "- [ ] CI is green, or every red check is inherited from the base."
+            echo "- [ ] The diff only touches derived numbers (no prose rewrites)."
+            # Agent-instruction surfaces are never merged without the owner's explicit approval
+            # (AGENTS.md → Review focus), even when the diff is digits only.
+            if printf '%s\n' "$CHANGED" | grep -qE '(^|/)(AGENTS|CLAUDE|GEMINI)\.md$|(^|/)llm\.txt$|^skills/.*/SKILL\.md$'; then
+              echo "- [ ] **Agent-instruction surface touched** (AGENTS.md / llm.txt / SKILL.md): needs the owner's explicit approval before merge."
+            fi
+          } > "$RUNNER_TEMP/pr-body.md"
+
+          if [ -z "$OPEN_PR" ]; then
+            URL=$(gh pr create --repo "$GITHUB_REPOSITORY" --base "$BASE" --head "$REFRESH_BRANCH" \
+              --title "$TITLE" --body-file "$RUNNER_TEMP/pr-body.md")
+            echo "Opened $URL" >> "$GITHUB_STEP_SUMMARY"
+          else
+            NUM="${OPEN_PR%% *}"
+            OLD_BASE="${OPEN_PR#* }"
+            gh pr edit "$NUM" --repo "$GITHUB_REPOSITORY" --base "$BASE" --title "$TITLE" \
+              --body-file "$RUNNER_TEMP/pr-body.md" > /dev/null
+            if [ "$OLD_BASE" != "$BASE" ]; then
+              # `gh pr edit --base` can fail silently: verify the retarget (Hard Rule #21).
+              NEW_BASE=$(gh pr view "$NUM" --repo "$GITHUB_REPOSITORY" --json baseRefName --jq .baseRefName)
+              [ "$NEW_BASE" = "$BASE" ] || { echo "::error::retarget of #$NUM to $BASE did not apply"; exit 1; }
+            fi
+            echo "Updated #$NUM" >> "$GITHUB_STEP_SUMMARY"
+          fi

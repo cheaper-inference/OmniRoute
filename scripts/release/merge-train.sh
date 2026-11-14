@@ -70,14 +70,14 @@ STATIC_GATES=(
   "node scripts/check/check-complexity.mjs"
   "node scripts/check/check-cognitive-complexity.mjs"
   "env CHANGELOG_BASE_REF=${CHANGELOG_BASE_REF_Q} node scripts/check/check-changelog-integrity.mjs"
-  # i18n contract (2026-09-22): the train is where en.json keys without catalogs and docs
-  # without mirrors slipped into the release tip three times in 48 h despite the PR CI —
-  # each combined tree must carry every en key in all 65 catalogs (UI + CLI), keep the
-  # real-translation ratio, and bring the mirrors of every doc it edits (section-level:
-  # `npm run i18n:run -- --files=<doc>`; UI keys: `npm run i18n:translate-new-keys`).
-  "npm run i18n:check-keys"
-  "npm run i18n:check-keys:cli"
-  "npm run i18n:check-ratio"
+  # i18n contract (2026-09-22, revised 2026-11-14 by plan "derived numbers resolved only at
+  # release"): feature PRs add keys to en.json only; the other catalogs are completed by the
+  # release refresh (`npm run release:refresh-derived`, step ui-keys) or a translation wave.
+  # The train therefore runs these gates in pr mode: each catalog the boarded PRs changed is
+  # still judged against the merge base, but a key that exists only in en.json is not a red.
+  "env OMNIROUTE_GATE_MODE=pr npm run i18n:check-keys"
+  "env OMNIROUTE_GATE_MODE=pr npm run i18n:check-keys:cli"
+  "env OMNIROUTE_GATE_MODE=pr npm run i18n:check-ratio"
   # Docs mirrors are advisory on the train since 2026-10-28 (same policy as the PR CI step in
   # ci.yml): a doc PR boards without its 66 mirrors and the post-merge `npm run i18n:run`
   # batch refreshes them. `--warn` still prints every drifted source in the train log; the
@@ -107,7 +107,12 @@ STATIC_GATES=(
 FULL_ONLY_GATES=(
   "npm run check:agent-skills-sync"       # ~76s  — generated SKILL.md out of date
   "npm run check:route-guard-membership"  # ~46s  — new local-only route left unclassified
-  "npm run check:docs-counts"             # ~164s — README/AGENTS/llm.txt counts vs code
+  # Derived numbers are refreshed at release (plan 2026-11-13). Each boarded PR's own CI already
+  # judged the managed values it wrote (pr mode), and the detached train cannot tell a writer
+  # branch (the nightly refresh PR, a translation wave) from a feature, so the train runs the
+  # gate as a batch: content invariants only. The strict counts-vs-code verdict is
+  # `release:refresh-derived --check`.
+  "env OMNIROUTE_GATE_MODE=pr OMNIROUTE_GATE_BATCH=1 npm run check:docs-counts" # ~10s
   "npm run check:dashboard-typecheck"     # minutes — TS errors under the dashboard tsconfig
 )
 # Full mode: the box-speed runner (same coverage as the two CI shards combined —

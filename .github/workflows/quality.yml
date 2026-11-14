@@ -104,6 +104,10 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          # Depth 2: on a pull_request the checkout is GitHub's merge commit, and its first
+          # parent is the base the PR was merged onto. check:docs-counts (inside check:docs-all)
+          # runs in `pr` mode on feature PRs and diffs the managed numbers against that base.
+          fetch-depth: 2
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
@@ -115,7 +119,15 @@ jobs:
           cache: ${{ github.event_name == 'pull_request' }}
       # One walk of src/app/api for openapi-routes + docs-symbols (both still fail independently).
       - run: npm run check:api-docs-refs
+      # Plan 2026-11-13 (derived numbers are written at release): on a feature PR the counts gate
+      # judges only the managed numbers the PR itself edited (diff against BASE_SHA, or the merge
+      # commit's first parent when the base moved), never a base that is behind the live code by
+      # design. Push and dispatch on main or release/v* keep the strict release comparison; a
+      # dispatch on a feature branch runs in pr mode (no PR to diff: content invariants only).
       - name: Docs accuracy (fabricated-docs + i18n mirrors, strict)
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          OMNIROUTE_GATE_MODE: ${{ github.event_name == 'workflow_dispatch' && github.ref_name != 'main' && !startsWith(github.ref_name, 'release/v') && 'pr' || '' }}
         run: npm run check:docs-all
 
   fast-gates:

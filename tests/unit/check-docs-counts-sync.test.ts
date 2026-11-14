@@ -9,7 +9,21 @@ import {
   tallyDrift,
   readProviderTotal,
   countLocales,
+  runCountsGate,
+  buildChecks,
 } from "../../scripts/check/check-docs-counts-sync.mjs";
+import { loadFactsSnapshot, readPackageVersion } from "../../scripts/release/facts.mjs";
+
+type Facts = Record<string, unknown> & { code?: Record<string, unknown> };
+type GateResult = {
+  mode: string;
+  exitCode: number;
+  strict: number;
+  soft: number;
+  infra: unknown;
+  lines: string[];
+};
+const runGate = runCountsGate as (opts: { mode: string; facts?: Facts }) => GateResult;
 
 // Explicit types for the .mjs exports — keep the test at 0 no-explicit-any warnings.
 const parse = parseProviderTotal as (text: string) => number;
@@ -94,11 +108,88 @@ test("countLocales reads a real, positive locale count from config/i18n.json", (
   assert.ok(locales() >= 40, "i18n config should define at least 40 locales");
 });
 
-// --- live gate smoke -----------------------------------------------------------------
+// --- gate smoke (deterministic) -------------------------------------------------------
+// Derived numbers are refreshed only by `npm run release:refresh-derived` (plan 2026-11-13), so
+// between releases the tree trails the live code BY DESIGN. The old smoke ("the gate exits 0
+// against the repo", which collected the live facts) would be red on the base after every
+// provider/migration/tool PR. It is split into what each part actually proves:
+//   1. the committed tree is consistent with the facts the last refresh recorded
+//      (docs/reference/derived-facts.json) — release mode, snapshot facts;
+//   2. the CLI entry point works in pr mode (no tsx, no facts) and exits 0 on a clean diff;
+//   3. "the release refresh closes the cycle" (below): with the LIVE facts, the refresh's
+//      rewrite plan leaves no STRICT drift it does not report, and it is a fixed point.
 
-test("the gate exits 0 against the current (synced) repo state", () => {
-  // Throws if exit code is non-zero; current docs are synced so this must pass.
-  assert.doesNotThrow(() => execFileSync("node", [GATE], { encoding: "utf8", stdio: "pipe" }));
+const snapshotFacts = loadFactsSnapshot() as Facts | null;
+assert.ok(
+  snapshotFacts,
+  "docs/reference/derived-facts.json is missing — run npm run release:refresh-derived"
+);
+// The product version is rewritten in prose by bump-version-claims together with package.json
+// (cycle cut), not by the derived refresh, so the tree is judged against package.json for it —
+// the same authority the version gate has always used.
+const treeFacts: Facts = { ...snapshotFacts, version: readPackageVersion() };
+
+type ScopedCheck = Parameters<typeof tally>[0][number] & {
+  scope: "derived" | "invariant" | "release-only";
+};
+const snapshotRoot = path.resolve(here, "../..");
+const readCommitted = (rel: string) => {
+  try {
+    return readFileSync(path.join(snapshotRoot, rel), "utf8");
+  } catch {
+    return null;
+  }
+};
+
+test("release mode accepts the committed tree under the snapshot facts", () => {
+  // The snapshot governs the derived claims and the content invariants. Release-only checks
+  // compare a file with the LIVE code by definition (the provider reference total against the
+  // provider modules, mode-pack names, the manifest's free tier): between refreshes a feature PR
+  // may legitimately move the code or regenerate PROVIDER_REFERENCE.md, so judging those against
+  // the snapshot would red the base. They are covered by "the release refresh closes the cycle"
+  // below (live facts) and by the release-mode run of `release:refresh-derived --check`.
+  const checks = (buildChecks({ facts: treeFacts }) as ScopedCheck[]).filter(
+    (c) => c.scope !== "release-only"
+  );
+  const judged = new Set(checks.map((c) => c.label));
+  for (const label of [
+    "Provider count",
+    "Provider count (secondary docs and skills)",
+    "DB migrations count",
+    "MCP tools (live code)",
+    "SVG canonical numbers (live code)",
+  ]) {
+    assert.ok(judged.has(label), `the snapshot run no longer judges "${label}"`);
+  }
+  assert.ok(checks.length >= 20, `only ${checks.length} checks judged against the snapshot`);
+  const r = tally(checks, readCommitted);
+  assert.equal(
+    r.strict,
+    0,
+    `the tree drifts from derived-facts.json (STRICT ${r.strict}):\n${r.lines.join("\n")}`
+  );
+});
+
+test("release mode with the snapshot facts runs end to end through the CLI entry point", () => {
+  const r = runGate({ mode: "release", facts: treeFacts });
+  assert.equal(r.mode, "release");
+  assert.ok(r.lines[0].startsWith("Docs counts sync report — mode=release"));
+  assert.equal(r.infra, null);
+});
+
+test("release mode with the snapshot facts still catches a stale managed number", () => {
+  // Same run, one fact moved: proves the snapshot run above is not vacuously green.
+  const moved = { ...treeFacts, migrations: Number(treeFacts.migrations) + 1 };
+  const r = runGate({ mode: "release", facts: moved });
+  assert.equal(r.exitCode, 1);
+  assert.ok(r.strict > 0);
+});
+
+test("the gate CLI exits 0 in pr mode on a change that touches no managed value", () => {
+  const env = { ...process.env, BASE_SHA: "HEAD", GITHUB_ACTIONS: "" };
+  delete env.OMNIROUTE_GATE_MODE;
+  const out = execFileSync("node", [GATE, "--mode=pr"], { encoding: "utf8", stdio: "pipe", env });
+  assert.match(out.split("\n")[0], /^Docs counts sync report — mode=pr \(flag: --mode=pr\)/);
 });
 
 // --- Free-tier headline gate ------------------------------------------------
@@ -258,7 +349,7 @@ const makeRefValidator = makeProviderReferenceValidator as (
   expected: number
 ) => (content: string) => { ok: boolean; detail: string };
 const makePkgValidator = makePackageDescriptionValidator as (
-  expected: number
+  expected?: number
 ) => (content: string) => { ok: boolean; detail: string };
 const checkSvg = checkSvgCanonicalNumbers as (
   content: string,
@@ -278,14 +369,37 @@ test("provider-reference validator accepts the live total and rejects a stale do
   assert.equal(v("# Provider Reference\n\nNo total marker.").ok, false);
 });
 
-test("package.json description validator catches a stale provider count", () => {
-  const v = makePkgValidator(338);
-  assert.equal(v(JSON.stringify({ description: "Unified AI router with 338 providers" })).ok, true);
+test("package.json description validator rejects any exact provider count", () => {
+  // The description is count-free since 2026-11-13: a number there made every
+  // provider PR conflict on that one line. The guard keeps the number from coming back.
+  const v = makePkgValidator();
+  const desc = (d: string) => v(JSON.stringify({ description: d }));
+  assert.equal(desc("Unified AI router with hundreds of providers, auto fallback").ok, true);
+  for (const stale of [
+    "Unified AI router with 393 providers",
+    "Unified AI router with 390+ providers",
+    "Unified AI router with 1,000 providers",
+    "Unified AI router with 160+ AI providers",
+    "Unified AI router with 393 LLM Providers",
+  ]) {
+    const r = desc(stale);
+    assert.equal(r.ok, false, `an exact provider count must be a red: ${stale}`);
+    assert.match(r.detail, /exact provider count/);
+  }
+  // Even the live total is rejected — the semantic is "no count", not "the right count".
   assert.equal(
-    v(JSON.stringify({ description: "Unified AI router with 291 providers" })).ok,
+    makePkgValidator(393)(JSON.stringify({ description: "with 393 providers" })).ok,
     false
   );
+  assert.equal(v(JSON.stringify({ description: "" })).ok, false);
+  assert.equal(v(JSON.stringify({ name: "omniroute" })).ok, false);
   assert.equal(v("not json at all {").ok, false);
+});
+
+test("the shipped package.json description carries no exact provider count", () => {
+  const pkg = readFileSync(path.resolve(here, "../../package.json"), "utf8");
+  const r = makePkgValidator()(pkg);
+  assert.equal(r.ok, true, r.detail);
 });
 
 test("migrations claim validator accepts the real count and rejects stale styles", () => {
@@ -554,22 +668,20 @@ test("a reworded or deleted sentence fails, instead of passing as absent", () =>
   assert.equal(trainingRequired("13 entries carry a prompt-training disclosure.").ok, true);
 });
 
-test("the live page actually satisfies both required gates", () => {
+test("the committed page satisfies both required gates", () => {
   // A unit test on synthetic strings proves the validator; this one proves the
   // document. Without it, the two could drift apart and both stay green.
-  // The expected counts come from the catalog itself rather than a literal: the
-  // page tracks the live flags, so a hard-coded number goes stale the moment a
-  // batch of rows lands (it did, at 5, when the 39 xKiro rows were added).
-  const catalog = readFileSync(
-    path.resolve(here, "../../open-sse/config/freeModelCatalog.data.ts"),
-    "utf8"
-  );
-  const countFlag = (flag: string): number =>
-    catalog.split("\n").filter((l) => l.includes(`${flag}: true`)).length;
-  const hardStop = countFlag("hardStopGuaranteed");
-  const training = countFlag("trainsOnPrompts");
-  assert.ok(hardStop > 0, "catalog should carry at least one hardStopGuaranteed row");
-  assert.ok(training > 0, "catalog should carry at least one trainsOnPrompts row");
+  // The expected counts come from the facts snapshot rather than a literal: the
+  // page states a DERIVED number that the release refresh rewrites from the catalog
+  // flags and records in docs/reference/derived-facts.json in the same pass. Between
+  // releases the catalog moves ahead of the page by design, so the page is judged
+  // against the snapshot; the page-vs-live-catalog comparison is release mode's
+  // ("the release refresh closes the cycle", below).
+  const code = (snapshotFacts as Facts).code as { hardStop: number; trainsOnPrompts: number };
+  const hardStop = code.hardStop;
+  const training = code.trainsOnPrompts;
+  assert.ok(hardStop > 0, "snapshot should record at least one hardStopGuaranteed row");
+  assert.ok(training > 0, "snapshot should record at least one trainsOnPrompts row");
 
   const page = readFileSync(path.resolve(here, "../../docs/reference/FREE_TIERS.md"), "utf8");
   assert.equal(makeValidator(hardStop, { ...HARD_STOP_CLAIM, requireClaim: true })(page).ok, true);
@@ -637,6 +749,139 @@ test("gate skips when readCodeFacts fails (actual 0 fallback)", () => {
 
 test("buildChecks contains a free-tier gate", async () => {
   const { buildChecks } = await import("../../scripts/check/check-docs-counts-sync.mjs");
-  const checks = (buildChecks as () => { label: string }[])();
+  const checks = (buildChecks as (o: { facts: Facts }) => { label: string }[])({
+    facts: treeFacts,
+  });
   assert.ok(checks.some((c) => c.label.includes("free-tier")));
+});
+
+// --- The release refresh closes the cycle ------------------------------------------------
+// The one place this suite reads the LIVE code facts (one tsx probe per file, not one per
+// buildChecks() call). It proves the property every snapshot-based test above relies on: the
+// release refresh can always bring the tree back to the live code. Concretely, with the live
+// facts, the refresh's rewrite plan (`planDerivedRewrites`) applied in memory leaves no STRICT
+// drift in release mode that the plan does not itself report as `manual`, and re-planning the
+// rewritten tree changes nothing (the plan is a fixed point). It never compares the committed
+// tree with the live code directly, so it cannot go red because the base moved ahead of the
+// last refresh.
+import {
+  planDerivedRewrites,
+  buildChecks as buildGateChecks,
+} from "../../scripts/check/check-docs-counts-sync.mjs";
+import { collectFacts } from "../../scripts/release/facts.mjs";
+
+type Plan = {
+  files: {
+    path: string;
+    before: string;
+    after: string;
+    changes: { label: string; to: string }[];
+  }[];
+  manual: { path: string; label: string; detail: string }[];
+};
+type GateCheck = {
+  label: string;
+  actual: unknown;
+  docKey: string;
+  strict: boolean;
+  files: string[];
+  validate?: (content: string) => { ok: boolean; detail: string };
+};
+const plan = planDerivedRewrites as (o: {
+  facts: Facts;
+  readFile: (p: string) => string | null;
+}) => Plan;
+const checksFor = buildGateChecks as (o: { facts: Facts }) => GateCheck[];
+
+const repoRoot = path.resolve(here, "../..");
+const readTree = (rel: string): string | null => {
+  try {
+    return readFileSync(path.join(repoRoot, rel), "utf8");
+  } catch {
+    return null;
+  }
+};
+
+/** STRICT failures of the release view over `read`, one entry per (check, file). */
+function strictFailures(facts: Facts, read: (p: string) => string | null) {
+  const out: { path: string; label: string; detail: string }[] = [];
+  for (const check of checksFor({ facts })) {
+    if (!check.strict) continue;
+    for (const file of check.files) {
+      const r = tallyDrift([{ ...check, files: [file] } as never], read);
+      if (r.strict > 0) out.push({ path: file, label: check.label, detail: r.lines.join(" ") });
+    }
+  }
+  return out;
+}
+
+/** Applies a plan in memory and checks that it closes every STRICT drift it does not report. */
+function assertPlanClosesTheCycle(facts: Facts, what: string) {
+  const first = plan({ facts, readFile: readTree });
+  const rewritten = new Map(first.files.map((f) => [f.path, f.after]));
+  for (const f of first.files) {
+    assert.equal(f.before, readTree(f.path), `${what}: plan.before of ${f.path} is not the tree`);
+    assert.notEqual(f.after, f.before, `${what}: ${f.path} is listed with no change`);
+  }
+  const read = (p: string) => (rewritten.has(p) ? (rewritten.get(p) as string) : readTree(p));
+
+  const reported = (x: { path: string; label: string }) =>
+    first.manual.some((m) => m.label === x.label && (m.path === x.path || m.path === ""));
+  const unreported = strictFailures(facts, read).filter((x) => !reported(x));
+  assert.deepEqual(
+    unreported,
+    [],
+    `${what}: STRICT drift left after the planned rewrite and not reported as manual`
+  );
+
+  const second = plan({ facts, readFile: read });
+  assert.deepEqual(
+    second.files.map((f) => f.path),
+    [],
+    `${what}: re-planning the rewritten tree must change nothing`
+  );
+  return first;
+}
+
+test("the release refresh closes the cycle with the live facts", () => {
+  const { facts, error } = collectFacts() as { facts: Facts | null; error: unknown };
+  assert.equal(error, null, `live facts could not be collected: ${JSON.stringify(error)}`);
+  assert.ok(facts);
+  assertPlanClosesTheCycle(facts, "live facts");
+});
+
+test("the release refresh closes the cycle when every managed count moved", () => {
+  // Deterministic counterpart: the tree agrees with the snapshot, so moving the counts in the
+  // snapshot is exactly "the code moved ahead since the last refresh". The plan must then
+  // rewrite those numbers (not just report them) and leave nothing unreported behind.
+  const code = (treeFacts.code ?? {}) as Record<string, unknown>;
+  const bump = (v: unknown, by: number) => Number(v) + by;
+  const moved: Facts = {
+    ...treeFacts,
+    providers: bump(treeFacts.providers, 5),
+    providerReferenceTotal: bump(treeFacts.providerReferenceTotal, 5),
+    migrations: bump(treeFacts.migrations, 2),
+    code: {
+      ...code,
+      providers: bump(code.providers, 5),
+      mcpTools: bump(code.mcpTools, 1),
+      mcpScopes: bump(code.mcpScopes, 1),
+    },
+  };
+  const result = assertPlanClosesTheCycle(moved, "moved facts");
+  const writes = (to: unknown) =>
+    result.files.some((f) => f.changes.some((c) => c.to.includes(String(to))));
+  for (const [what, to] of [
+    ["provider count", moved.providers],
+    ["migration count", moved.migrations],
+    ["MCP tool count", (moved.code as Record<string, unknown>).mcpTools],
+  ] as const) {
+    assert.ok(writes(to), `the plan never writes the new ${what} (${to})`);
+  }
+  // README.md keeps the exact counts (owner decision 2026-11-13); AGENTS.md and llm.txt lose
+  // them in phase 2, so they are not pinned here.
+  assert.ok(
+    result.files.some((f) => f.path === "README.md"),
+    "the plan does not rewrite README.md although its provider/migration counts moved"
+  );
 });
