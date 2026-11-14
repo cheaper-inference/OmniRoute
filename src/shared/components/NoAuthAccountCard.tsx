@@ -787,10 +787,10 @@ export default function NoAuthAccountCard({
                     <Icon name="shield" size={16} fill={configured} />
                   </Button>
                   <Button
-                    variant="ghost"
+                    variant="destructive-ghost"
                     size="icon-sm"
                     onClick={() => handleRemoveAccount(id)}
-                    className="size-6 shrink-0 text-text-muted opacity-0 hover:bg-error/10 hover:text-error group-hover:opacity-100 focus-visible:opacity-100"
+                    className="size-6 shrink-0 opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
                     aria-label={t("removeAccount")}
                   >
                     <Icon name="delete" size={16} />
@@ -827,6 +827,7 @@ export default function NoAuthAccountCard({
             {/* #5217 (Gap 1): pick a pre-saved Proxy Pool entry by reference,
                 or fall back to a one-off custom proxy. */}
             <SegmentedControl
+              semantics="radio"
               aria-label={t("configureProxy")}
               size="sm"
               className="w-full"

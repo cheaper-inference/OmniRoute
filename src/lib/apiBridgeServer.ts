@@ -116,6 +116,8 @@ function proxyRequest(req: IncomingMessage, res: ServerResponse, dashboardPort: 
       }
 
       res.writeHead(targetRes.statusCode || 502, targetRes.headers);
+      // pipe() never ends the client on an upstream error; destroy it so the client fails fast.
+      targetRes.on("error", () => res.destroy());
       targetRes.pipe(res);
     }
   );

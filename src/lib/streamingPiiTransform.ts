@@ -19,6 +19,7 @@ export interface PiiTransformOptions {
   windowSize?: number;
 }
 
+/** Sanitize streamed PII while preserving independent tails for each block or choice. */
 export function createPiiSseTransform(options?: PiiTransformOptions): TransformStream {
   const choiceBuffers = new Map<string, TextBuffers>();
 
@@ -97,9 +98,11 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
     return toEmit;
   };
 
+  /** Finalize only the closing Claude block; other blocks may still extend a PII match. */
   const onFlush = (lastJson: any, isJsonStream = false, lastContentJson: any = null): any => {
-    // Force final redaction on all buffers
+    const closingKey = `${typeof lastJson?.index === "number" ? lastJson.index : 0}_0`;
     for (const [index, buffers] of choiceBuffers.entries()) {
+      if (lastJson?.type === "content_block_stop" && index !== closingKey) continue;
       for (const key of Object.keys(buffers)) {
         const field = key as BufferedField;
         if (buffers[field]) {
@@ -145,8 +148,8 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
     }
 
     // 1. Claude format: one correctly typed delta per held-back field, per content block.
-    // Every stop signal (and the end of the stream) drains every block still holding a
-    // tail, in block order. A trailing `ping` is still a Claude stream.
+    // A block stop drains that block only; message termination and EOF drain all tails.
+    // A trailing `ping` is still a Claude stream.
     if (
       typeof lastJson.type === "string" &&
       (lastJson.type.startsWith("message") ||
@@ -182,10 +185,8 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
           buffers.partialJson = "";
         }
       };
-      // Blocks stream one after another, so draining every block that still holds a
-      // tail is exact for the block being closed and also covers a block whose
-      // content_block_stop never arrived.
       const entries = Array.from(choiceBuffers.entries())
+        .filter(([key]) => lastJson.type !== "content_block_stop" || key === closingKey)
         .map(([key, buffers]) => [parseInt(key.split("_")[0] || "0", 10), buffers] as const)
         .sort((a, b) => a[0] - b[0]);
       for (const [index, buffers] of entries) drainBlock(index, buffers);

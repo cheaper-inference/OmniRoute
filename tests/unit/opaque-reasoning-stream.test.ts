@@ -288,7 +288,9 @@ test("credential/PII redaction remains active across opaque records and in suppo
       .map(frame)
       .join("") + "data: [DONE]\n\n";
   const output = await run(input, "pipeline", 1);
-  const maskedText = redactCredentials(sanitizePII(SECRET).text).text;
+  // The release masks complete credentials before generic PII (#19566).
+  const maskedText = sanitizePII(redactCredentials(SECRET).text).text;
+  assert.equal(maskedText, "[REDACTED:openai]");
   assert.equal(text(output, "content"), "mail [EMAIL_REDACTED] key " + maskedText + " end");
   assert.equal(text(output, "reasoning"), "reason " + maskedText);
   assert.deepEqual(JSON.parse(tools(output).get(0)!.arguments), {

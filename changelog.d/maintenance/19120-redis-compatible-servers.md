@@ -1,0 +1,1 @@
+- **docs(redis):** Note which Redis features OmniRoute needs from a Redis-compatible server, and the Lua requirement of the rate limiter ([#19120](https://github.com/cheaper-inference/OmniRoute/pull/19120))

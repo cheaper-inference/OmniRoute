@@ -15,7 +15,7 @@
 
 **ساختهشده توسط [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — هرگز کدنویسی را متوقف نکنید. هر ابزار هوش مصنوعی → 388 ارائهدهنده — 150+ مورد رایگان — از طریق یک نقطه پایانی. Claude Code، Codex، Cursor، Cline، Copilot و Antigravity به Claude / GPT / Gemini رایگان با بازگشت خودکار. فشردهسازی ترکیبی RTK + Caveman بین 15 تا 95٪ از توکنها (~89٪ میانگین) صرفهجویی میکند — هرگز به محدودیتها نرسید. 388 ارائهدهنده هوش مصنوعی · 150+ سطح رایگان · ~1.62B توکن رایگان در ماه · 20 راهبرد مسیریابی · شروع با 0 دلار."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — هرگز کدنویسی را متوقف نکنید. هر ابزار هوش مصنوعی → 389 ارائهدهنده — 150+ مورد رایگان — از طریق یک نقطه پایانی. Claude Code، Codex، Cursor، Cline، Copilot و Antigravity به Claude / GPT / Gemini رایگان با بازگشت خودکار. فشردهسازی ترکیبی RTK + Caveman بین 15 تا 95٪ از توکنها (~89٪ میانگین) صرفهجویی میکند — هرگز به محدودیتها نرسید. 389 ارائهدهنده هوش مصنوعی · 150+ سطح رایگان · ~1.62B توکن رایگان در ماه · 20 راهبرد مسیریابی · شروع با 0 دلار."/>
 
 </div>
 
@@ -45,7 +45,7 @@
 
 </h3>
 
-[![ستارهها](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
+[![ستارهها](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=flat&logo=github&logoColor=white&label=Stars&color=e5ac82&labelColor=20211c)](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 [![رتبه سابقه ستارهها](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
@@ -54,14 +54,14 @@
 
 **👋 مدیر پروژه را دنبال کنید — ارائهدهندگان جدید، انتشارها و نکات را زودتر از همه دریافت کنید:**
 
-[![دیهگو را در LinkedIn دنبال کنید](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![@diegosouzapw را در GitHub دنبال کنید](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![دیهگو را در LinkedIn دنبال کنید](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white&color=e5ac82&labelColor=20211c)](https://www.linkedin.com/in/diegosouzapw/)
+[![@diegosouzapw را در GitHub دنبال کنید](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=e5ac82&labelColor=20211c)](https://github.com/diegosouzapw)
 
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![وبسایت](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white&color=e5ac82&labelColor=20211c)](https://discord.gg/U47eFqAXCn)
+[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&color=e5ac82&labelColor=20211c)](https://t.me/omnirouteOficial)
+[![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
+[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
+[![وبسایت](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white&color=e5ac82&labelColor=20211c)](https://omniroute.online)
 
 **پرسشها، نکات مربوط به ارائهدهندگان، نقشه راه و پشتیبانی → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 جهانی](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 برزیل](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [پرتال](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
@@ -73,7 +73,7 @@
 
 |                              |         v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
 | ---------------------------- | :---------------------: | :---------: | :-------------------: |
-| 🌐 ارائهدهندگان              |           352           |   **358**   |          388          |
+| 🌐 ارائهدهندگان              |           352           |   **358**   |          389          |
 | 🧠 شناسههای یکتای مدل گفتوگو |          1320           |  **1374**   |         1491          |
 | 🖼️ پل چندوجهی                | 🆕 بینایی + صوت + ویدئو |      ✓      |           ✓           |
 | 📡 کاتالوگ رایگان رادار      |       🆕 اختیاری        |      ✓      |           ✓           |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ قابلیتها</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 ترکیبها</a></td>
-    <td align="center"><a href="#-388-ai-providers--153-catalog-marked-free">🌐 ارائهدهندگان</a></td>
+    <td align="center"><a href="#-389-ai-providers--153-catalog-marked-free">🌐 ارائهدهندگان</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI و MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="وعده — یک نقطه پایانی و 388 ارائهدهنده. زمانی که یک هدف سالم دیگر در دسترس باشد، بازگشت خودکار مسیریابی را ادامه میدهد. شش ستون: بازگشتپذیری پایدار در میان 388 ارائهدهنده · صرفهجویی حداکثر 95٪ در توکن برای بارهای کاری واجد شرایط · شروع با هزینه 0 دلار، با بیش از 150 سطح رایگان و 52 ارائهدهنده رایگان دائمیِ تکرارشونده/بدون کلید · 39 یکپارچهسازی CLI/عامل از طریق یک پیکربندی · سازگاری با OpenAI، Claude، Gemini و Responses API در /v1 · کنترلهای تولیدی شامل قطعکنندههای مدار، پنهانسازی TLS، 110 ابزار MCP، A2A، حافظه، محافظها، ارزیابیها و بیش از 56,000 اعلان تست ایستا در بیش از 7,800 فایل تست تحت رهگیری."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="وعده — یک نقطه پایانی و 389 ارائهدهنده. زمانی که یک هدف سالم دیگر در دسترس باشد، بازگشت خودکار مسیریابی را ادامه میدهد. شش ستون: بازگشتپذیری پایدار در میان 389 ارائهدهنده · صرفهجویی حداکثر 95٪ در توکن برای بارهای کاری واجد شرایط · شروع با هزینه 0 دلار، با بیش از 150 سطح رایگان و 52 ارائهدهنده رایگان دائمیِ تکرارشونده/بدون کلید · 39 یکپارچهسازی CLI/عامل از طریق یک پیکربندی · سازگاری با OpenAI، Claude، Gemini و Responses API در /v1 · کنترلهای تولیدی شامل قطعکنندههای مدار، پنهانسازی TLS، 110 ابزار MCP، A2A، حافظه، محافظها، ارزیابیها و بیش از 56,000 اعلان تست ایستا در بیش از 7,800 فایل تست تحت رهگیری."/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="چه چیزی OmniRoute را متمایز میکند — تصویری بهروز از قابلیتها در مقایسه با 9router، OpenRouter، CLIProxyAPI و LiteLLM در ۱۳ قابلیت. OmniRoute: 388 ارائهدهنده، بیش از 150 سطح رایگان داخلی، 20 راهبرد مسیریابی، فشردهسازی توکن با 12 موتور، سرور MCP داخلی با 110 ابزار، پروتکل عامل A2A، حافظه پایدار، محافظها، عاملهای ابری، پنهانسازی اثرانگشت TLS، Desktop/Termux/PWA و 67 زبان محلی رابط کاربری i18n. OmniRoute تحت مجوز MIT است و میتوان آن را روی زیرساخت شخصی میزبانی کرد. قابلیتها و تعدادهای مربوط به رقبا ممکن است تغییر کنند؛ روششناسی پیوندشده را ببینید."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="چه چیزی OmniRoute را متمایز میکند — تصویری بهروز از قابلیتها در مقایسه با 9router، OpenRouter، CLIProxyAPI و LiteLLM در ۱۳ قابلیت. OmniRoute: 389 ارائهدهنده، بیش از 150 سطح رایگان داخلی، 20 راهبرد مسیریابی، فشردهسازی توکن با 12 موتور، سرور MCP داخلی با 110 ابزار، پروتکل عامل A2A، حافظه پایدار، محافظها، عاملهای ابری، پنهانسازی اثرانگشت TLS، Desktop/Termux/PWA و 67 زبان محلی رابط کاربری i18n. OmniRoute تحت مجوز MIT است و میتوان آن را روی زیرساخت شخصی میزبانی کرد. قابلیتها و تعدادهای مربوط به رقبا ممکن است تغییر کنند؛ روششناسی پیوندشده را ببینید."/>
 
 <sub>📊 روششناسی کامل و جزئیات هر قابلیت در مقایسه با 9router، OpenRouter، CLIProxyAPI و LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -689,11 +689,11 @@ omniroute configure codex          # همچنین: claude opencode qwen aider go
 
 <div align="center">
 
-## 🌐 388 ارائهدهندهٔ هوش مصنوعی — 153 مورد علامتگذاریشده بهعنوان رایگان در کاتالوگ
+## 🌐 389 ارائهدهندهٔ هوش مصنوعی — 153 مورد علامتگذاریشده بهعنوان رایگان در کاتالوگ
 
 </div>
 
-> **388 ارائهدهندهٔ ثبتشده** در مجموعههای مرجع گفتوگو، رسانه، جستوجو، محلی، عامل ابری و سیستم؛ از جمله **153 ارائهدهنده که متادیتای شناسایی `hasFree: true` را دارند**. رجیستری مدلهای گفتوگو شامل **239 ارائهدهنده / 3,059 جفت متمایز ارائهدهنده-مدل / 1,475 شناسهٔ خام مدل** است؛ کاتالوگ جداگانهٔ بودجهٔ رایگان نیز دارای **471 ردیف برای هر مدل**، **34 استخر تکرارشونده** و **52 ارائهدهندهٔ رایگان همیشگیِ تکرارشونده/بدون کلید** است. اینها عمداً مخرجهای متفاوتی هستند؛ تعریفها و محاسبات حذف تکرار بر اساس استخر در [مرجع ارائهدهندگان](docs/reference/PROVIDER_REFERENCE.md) و [سطوح رایگان](docs/reference/FREE_TIERS.md) قرار دارند.
+> **389 ارائهدهندهٔ ثبتشده** در مجموعههای مرجع گفتوگو، رسانه، جستوجو، محلی، عامل ابری و سیستم؛ از جمله **153 ارائهدهنده که متادیتای شناسایی `hasFree: true` را دارند**. رجیستری مدلهای گفتوگو شامل **239 ارائهدهنده / 3,059 جفت متمایز ارائهدهنده-مدل / 1,475 شناسهٔ خام مدل** است؛ کاتالوگ جداگانهٔ بودجهٔ رایگان نیز دارای **471 ردیف برای هر مدل**، **34 استخر تکرارشونده** و **52 ارائهدهندهٔ رایگان همیشگیِ تکرارشونده/بدون کلید** است. اینها عمداً مخرجهای متفاوتی هستند؛ تعریفها و محاسبات حذف تکرار بر اساس استخر در [مرجع ارائهدهندگان](docs/reference/PROVIDER_REFERENCE.md) و [سطوح رایگان](docs/reference/FREE_TIERS.md) قرار دارند.
 
 <div align="center">
 
@@ -1295,7 +1295,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 نیز از آن 
   <tr><td nowrap><b>زمان اجرا</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>زبان</b></td><td>TypeScript 6.0 — <b>۱۰۰٪ TypeScript</b> در سراسر <code>src/</code> و <code>open-sse/</code> (بدون <code>any</code> در هسته از نسخهٔ v2.0)</td></tr>
   <tr><td nowrap><b>چارچوب</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>پایگاه داده</b></td><td>better-sqlite3 (SQLite، ثبت رویداد WAL) + LowDB (JSON قدیمی) — ۱۴۷ ماژول دامنه، ۲۳۳ مهاجرت</td></tr>
+  <tr><td nowrap><b>پایگاه داده</b></td><td>better-sqlite3 (SQLite، ثبت رویداد WAL) + LowDB (JSON قدیمی) — ۱۴۷ ماژول دامنه، ۲۳۸ مهاجرت</td></tr>
   <tr><td nowrap><b>حافظه</b></td><td>جستوجوی تماممتن SQLite FTS5 + embeddingهای برداری کوانتیزهشده با int8، زوال نوعدار</td></tr>
   <tr><td nowrap><b>طرحوارهها</b></td><td>Zod 4 — اعتبارسنجی ورودی/خروجی ابزار MCP + قراردادهای API</td></tr>
   <tr><td nowrap><b>پروتکلها</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

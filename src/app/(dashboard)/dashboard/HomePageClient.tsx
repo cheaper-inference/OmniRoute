@@ -10,7 +10,7 @@ import { WorkflowGuide } from "@omniroute/ui-kit/workflow-guide";
 import EmptyState from "@/shared/components/EmptyState";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
-import { CardSkeleton, Button, Modal } from "@/shared/components";
+import { CardSkeleton, Button, GuardedAction, Modal } from "@/shared/components";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { AI_PROVIDERS, NOAUTH_PROVIDERS, OAUTH_PROVIDERS } from "@/shared/constants/providers";
 import {
@@ -830,7 +830,7 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
             <div role="status" className="flex items-center gap-3 mb-5">
               <Spinner decorative size="md" className="text-primary" />
               <div>
-                <h3 className="text-lg font-bold">
+                <h3 className="text-lg font-semibold">
                   {updatePhase === "done"
                     ? t("updateCompleteTitle")
                     : updatePhase === "failed"
@@ -1025,15 +1025,19 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
                   )}
                 </div>
               ) : (
-                <Button
+                <GuardedAction
                   size="sm"
-                  onClick={versionInfo.autoUpdateSupported ? handleUpdate : undefined}
-                  disabled={updating || !versionInfo.autoUpdateSupported}
+                  onClick={handleUpdate}
+                  disabled={updating}
+                  reason={
+                    versionInfo.autoUpdateSupported
+                      ? undefined
+                      : versionInfo.autoUpdateError || t("manualUpdateRequired")
+                  }
                   className="ml-4 shrink-0 font-semibold"
-                  title={versionInfo.autoUpdateError || ""}
                 >
                   {versionInfo.autoUpdateSupported ? t("updateNow") : t("manualUpdate")}
-                </Button>
+                </GuardedAction>
               )}
             </div>
 

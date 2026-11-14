@@ -1025,25 +1025,25 @@ export default function EvalsTab() {
           <span className="text-xs text-text-muted uppercase font-semibold tracking-wide">
             {t("statsSuites")}
           </span>
-          <div className="text-2xl font-bold mt-1 text-chart-3">{suites.length}</div>
+          <div className="text-2xl font-semibold mt-1 text-chart-3">{suites.length}</div>
         </Card>
         <Card className="px-4 py-3 text-center">
           <span className="text-xs text-text-muted uppercase font-semibold tracking-wide">
             {t("statsTestCases")}
           </span>
-          <div className="text-2xl font-bold mt-1 text-info">{totalCases}</div>
+          <div className="text-2xl font-semibold mt-1 text-info">{totalCases}</div>
         </Card>
         <Card className="px-4 py-3 text-center">
           <span className="text-xs text-text-muted uppercase font-semibold tracking-wide">
             {t("statsModels")}
           </span>
-          <div className="text-2xl font-bold mt-1 text-success">{uniqueModels.length}</div>
+          <div className="text-2xl font-semibold mt-1 text-success">{uniqueModels.length}</div>
         </Card>
         <Card className="px-4 py-3 text-center">
           <span className="text-xs text-text-muted uppercase font-semibold tracking-wide">
             {t("statsCoverage")}
           </span>
-          <div className="text-2xl font-bold mt-1 text-warning">
+          <div className="text-2xl font-semibold mt-1 text-warning">
             {t("statsStrategiesCount", { count: STRATEGIES.length })}
           </div>
         </Card>
@@ -1131,25 +1131,27 @@ export default function EvalsTab() {
               <p className="text-xs uppercase tracking-wide text-text-muted">
                 {t("scorecardSuites")}
               </p>
-              <p className="text-2xl font-bold text-chart-3 mt-1">{scorecard.suites}</p>
+              <p className="text-2xl font-semibold text-chart-3 mt-1">{scorecard.suites}</p>
             </Card>
             <Card className="px-4 py-3">
               <p className="text-xs uppercase tracking-wide text-text-muted">
                 {t("scorecardCases")}
               </p>
-              <p className="text-2xl font-bold text-info mt-1">{scorecard.totalCases}</p>
+              <p className="text-2xl font-semibold text-info mt-1">{scorecard.totalCases}</p>
             </Card>
             <Card className="px-4 py-3">
               <p className="text-xs uppercase tracking-wide text-text-muted">
                 {t("scorecardPassed")}
               </p>
-              <p className="text-2xl font-bold text-success mt-1">{scorecard.totalPassed}</p>
+              <p className="text-2xl font-semibold text-success mt-1">{scorecard.totalPassed}</p>
             </Card>
             <Card className="px-4 py-3">
               <p className="text-xs uppercase tracking-wide text-text-muted">
                 {t("scorecardPassRate")}
               </p>
-              <p className="text-2xl font-bold text-warning mt-1">{scorecard.overallPassRate}%</p>
+              <p className="text-2xl font-semibold text-warning mt-1">
+                {scorecard.overallPassRate}%
+              </p>
             </Card>
           </div>
 
@@ -1203,21 +1205,21 @@ export default function EvalsTab() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
               <div className="flex flex-col items-center text-center p-4 rounded-lg bg-chart-3/5 border border-chart-3/10">
                 <div className="w-10 h-10 rounded-full bg-chart-3/20 flex items-center justify-center mb-3">
-                  <span className="text-lg font-bold text-chart-3">1</span>
+                  <span className="text-lg font-semibold text-chart-3">1</span>
                 </div>
                 <h4 className="text-sm font-semibold text-text-main mb-1">{t("define")}</h4>
                 <p className="text-xs text-text-muted">{t("defineStepDescription")}</p>
               </div>
               <div className="flex flex-col items-center text-center p-4 rounded-lg bg-info/5 border border-info/10">
                 <div className="w-10 h-10 rounded-full bg-info/20 flex items-center justify-center mb-3">
-                  <span className="text-lg font-bold text-info">2</span>
+                  <span className="text-lg font-semibold text-info">2</span>
                 </div>
                 <h4 className="text-sm font-semibold text-text-main mb-1">{t("run")}</h4>
                 <p className="text-xs text-text-muted">{t("runStepDescription")}</p>
               </div>
               <div className="flex flex-col items-center text-center p-4 rounded-lg bg-success/5 border border-success/10">
                 <div className="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center mb-3">
-                  <span className="text-lg font-bold text-success">3</span>
+                  <span className="text-lg font-semibold text-success">3</span>
                 </div>
                 <h4 className="text-sm font-semibold text-text-main mb-1">{t("evaluate")}</h4>
                 <p className="text-xs text-text-muted">{t("evaluateStepDescription")}</p>
@@ -1261,6 +1263,8 @@ export default function EvalsTab() {
         </div>
 
         <DataTable
+          label={t("recentRunsTitle")}
+          framed={false}
           columns={HISTORY_COLUMNS.map((column) => ({
             key: column.key,
             label: t(column.labelKey),
@@ -1405,7 +1409,9 @@ export default function EvalsTab() {
           {null}
         </FilterBar>
 
-        <div className="flex flex-col gap-3 mt-4">
+        {/* Suites are sections of this card, split by hairlines like the kit plain accordion:
+            the Card is the only frame (#19620). */}
+        <div className="mt-4 flex flex-col divide-y divide-border">
           {filteredSuites.map((suite) => {
             const isExpanded = expanded === suite.id;
             const isRunning = running === suite.id;
@@ -1424,7 +1430,7 @@ export default function EvalsTab() {
               liveResult?.runs?.[0]?.summary.passRate ?? suiteHistory[0]?.summary.passRate;
 
             return (
-              <div key={suite.id} className="border border-border/30 rounded-lg overflow-hidden">
+              <div key={suite.id}>
                 <div
                   className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 cursor-pointer hover:bg-surface/30 transition-colors"
                   onClick={() => setExpanded(isExpanded ? null : suite.id)}
@@ -1571,7 +1577,7 @@ export default function EvalsTab() {
                             </h4>
                             <p className="text-xs text-text-muted">{t("targetComparisonHint")}</p>
                           </div>
-                          <span className="text-lg font-bold text-primary">
+                          <span className="text-lg font-semibold text-primary">
                             {liveResult.scorecard.overallPassRate}%
                           </span>
                         </div>
@@ -1623,7 +1629,7 @@ export default function EvalsTab() {
 
                             <div className="flex items-center gap-4 mb-4 p-3 rounded-lg bg-surface/30 border border-border/20">
                               <div className="flex items-center gap-2">
-                                <span className="text-lg font-bold text-success">
+                                <span className="text-lg font-semibold text-success">
                                   {run.summary.passRate}%
                                 </span>
                                 <span className="text-xs text-text-muted">{t("passRate")}</span>
@@ -1780,6 +1786,8 @@ export default function EvalsTab() {
                       </span>
                     </div>
                     <DataTable
+                      label={t("testCasesCount", { count: (suite.cases || []).length })}
+                      framed={false}
                       columns={[
                         { key: "name", label: t("columnCase") },
                         { key: "model", label: t("columnModel") },
@@ -1880,7 +1888,7 @@ const HeroSection = memo(function HeroSection({
             <Icon name="science" size={28} />
           </div>
           <div className="flex-1">
-            <h2 className="text-xl font-bold text-text-main mb-1">{t("modelEvals")}</h2>
+            <h2 className="text-xl font-semibold text-text-main mb-1">{t("modelEvals")}</h2>
             <p className="text-sm text-text-muted leading-relaxed max-w-2xl">
               {t("evalsHeroDescription")}
             </p>

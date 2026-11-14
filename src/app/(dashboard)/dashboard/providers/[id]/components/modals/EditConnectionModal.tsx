@@ -1467,6 +1467,7 @@ export default function EditConnectionModal({
         {isGlm && (
           <div className="flex flex-col gap-3">
             <Select
+              native
               label={t("apiRegionLabel")}
               hint={t("apiRegionHint")}
               value={formData.apiRegion}
@@ -1541,12 +1542,7 @@ export default function EditConnectionModal({
                 </span>
               </p>
               {extraApiKeys.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setExtraApiKeys([])}
-                  className="text-error hover:text-error"
-                >
+                <Button variant="destructive-ghost" size="sm" onClick={() => setExtraApiKeys([])}>
                   {t("deleteAllExtraApiKeys")}
                 </Button>
               )}
@@ -1601,11 +1597,10 @@ export default function EditConnectionModal({
                           </span>
                         )}
                         <Button
-                          variant="ghost"
+                          variant="destructive-ghost"
                           size="icon-sm"
                           icon="close"
                           onClick={() => setExtraApiKeys(extraApiKeys.filter((_, i) => i !== idx))}
-                          className="text-error hover:text-error"
                           title={t("removeThisKey")}
                           aria-label={t("removeThisKey")}
                         />

@@ -84,6 +84,7 @@ export default function ConnectionsTable({
   return (
     <>
       <DataTable
+        label={t("title")}
         columns={columns}
         data={connections as unknown as DataTableRow[]}
         selectedId={effectiveSelectedId ?? undefined}

@@ -1,0 +1,1 @@
+- **fix(providers):** Ollama Cloud leaves the free-tier catalog after its free plan ended on 2026-11-09, so it no longer counts as free or free-forever ([#19512](https://github.com/cheaper-inference/OmniRoute/pull/19512), closes [#19334](https://github.com/cheaper-inference/OmniRoute/issues/19334)) — thanks @rafacpti23

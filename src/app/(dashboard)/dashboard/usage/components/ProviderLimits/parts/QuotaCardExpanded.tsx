@@ -167,6 +167,8 @@ interface Props {
   onShowQuota?: (quota: any) => void;
   /** Read-time decode-speed stats from the usage API (`speed` payload). */
   speed?: unknown;
+  /** Shared card clock (epoch ms) driving every "Resets in" countdown. */
+  now?: number;
   /** Cursor only: per-model tokens + billed cost rows (`raw.modelUsage`); absent → no table. */
   cursorModelUsage?: unknown;
 }
@@ -177,6 +179,7 @@ function QuotaDetailRow({
   onHideQuota,
   onOpenResetCredits,
   loadingResetCredits = false,
+  now,
 }: {
   q: any;
   /** Collapsed Kilo Pass display row; present only on kilocode provider cards. */
@@ -184,6 +187,8 @@ function QuotaDetailRow({
   onHideQuota?: (quota: any) => void;
   onOpenResetCredits?: () => void;
   loadingResetCredits?: boolean;
+  /** Shared card clock (epoch ms) so the countdown recomputes on ticks and refreshes. */
+  now?: number;
 }) {
   const t = useTranslations("usage");
   const canHide = typeof onHideQuota === "function" && !q.isCredits && !q.isResetCredits;
@@ -225,7 +230,7 @@ function QuotaDetailRow({
             onOpenResetCredits?.();
           }}
           aria-label={translateUsageOrFallback(t, "viewResetCredits", "View reset credits")}
-          className="h-6 min-h-6 shrink-0 gap-1 px-1.5 text-[12px] font-bold leading-none tabular-nums"
+          className="h-6 min-h-6 shrink-0 gap-1 px-1.5 text-[12px] font-semibold leading-none tabular-nums"
           style={{ color: colors.text }}
         >
           {loadingResetCredits && <Spinner decorative size="xs" />}
@@ -256,7 +261,7 @@ function QuotaDetailRow({
           </span>
         </span>
         <span
-          className="inline-flex h-6 shrink-0 items-center text-[12px] font-bold leading-none tabular-nums"
+          className="inline-flex h-6 shrink-0 items-center text-[12px] font-semibold leading-none tabular-nums"
           style={{ color: colors.text }}
         >
           {sym}
@@ -269,7 +274,7 @@ function QuotaDetailRow({
   const pctRaw = getQuotaRemainingPercentage(q);
   const pct = Math.round(pctRaw);
   const colors = getBarColor(pct);
-  const cd = formatCountdown(q.resetAt);
+  const cd = formatCountdown(q.resetAt, now);
   const label = q.displayName || formatQuotaLabel(q.name);
   const usedNum = Number(q.used || 0);
   const totalNum = Number(q.total || 0);
@@ -280,7 +285,7 @@ function QuotaDetailRow({
       <div className="flex items-center justify-between gap-2">
         <span className="text-[12px] font-medium text-text-main truncate">{label}</span>
         <span
-          className="text-[12px] font-bold tabular-nums shrink-0"
+          className="text-[12px] font-semibold tabular-nums shrink-0"
           style={{ color: colors.text }}
         >
           {q.unlimited ? "∞" : translateUsageOrFallback(t, "percentLeft", `${pct}% left`, { pct })}
@@ -354,6 +359,7 @@ export default function QuotaCardExpanded({
   onShowQuota,
   speed,
   cursorModelUsage,
+  now,
 }: Props) {
   const t = useTranslations("usage");
   const tr = (key: string, fallback: string, values?: UsageTranslationValues) =>
@@ -404,7 +410,7 @@ export default function QuotaCardExpanded({
         </div>
       ) : (providerId === "antigravity" || providerId === "agy") &&
         resolvedAntigravityGroups.length > 0 ? (
-        <AntigravityQuotaGroups groups={resolvedAntigravityGroups} />
+        <AntigravityQuotaGroups groups={resolvedAntigravityGroups} now={now} />
       ) : quotas.length === 0 && message ? (
         <div className="text-[11px] text-text-muted italic" title={message}>
           {message}
@@ -421,6 +427,7 @@ export default function QuotaCardExpanded({
               onHideQuota={onHideQuota}
               onOpenResetCredits={q.isResetCredits ? onOpenResetCredits : undefined}
               loadingResetCredits={loadingResetCredits}
+              now={now}
             />
           ))}
         </div>

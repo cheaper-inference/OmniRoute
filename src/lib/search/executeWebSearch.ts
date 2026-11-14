@@ -1,6 +1,7 @@
 import { getSettings } from "@/lib/db/settings";
 import { isProviderBlockedByIdOrAlias } from "@/shared/utils/noAuthProviders";
 import { getProviderCredentials } from "@/sse/services/auth";
+import { searchKeyLockModel } from "@omniroute/open-sse/handlers/search/borrowedKeyLock.ts";
 import { isCredentialDiagnosticSentinel } from "@/sse/services/credentialSentinel";
 import { isModelLocked } from "@omniroute/open-sse/services/accountFallback.ts";
 import { orderAutoSearchFallbacks } from "@/lib/search/codexSearchAutoFallback";
@@ -81,7 +82,12 @@ async function resolveSearchCredentials(providerId: string) {
     return creds;
   }
   for (const fallbackId of getSearchCredentialFallbacks(providerId)) {
-    const fallback = await getProviderCredentials(fallbackId).catch(() => null);
+    const fallback = await getProviderCredentials(
+      fallbackId,
+      null,
+      null,
+      searchKeyLockModel(providerId)
+    ).catch(() => null);
     if (fallback && !isCredentialDiagnosticSentinel(fallback)) {
       if (
         providerId === "codex-search" &&
