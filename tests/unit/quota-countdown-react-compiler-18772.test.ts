@@ -49,6 +49,20 @@ test("#18772 static: compiled QuotaDetailRow does not memoize formatCountdown(q.
   );
 });
 
+test("#18772 parent refresh actions update the clock used by inline quota summaries", () => {
+  const src = fs.readFileSync(path.join(limitsDir, "index.tsx"), "utf8");
+  const refreshProviderStart = src.indexOf("const refreshProvider = useCallback(");
+  const refreshAllStart = src.indexOf("const refreshAll = useCallback(");
+  const refreshingAllRefStart = src.indexOf("const refreshingAllRef =", refreshProviderStart);
+  const refreshAllEffectStart = src.indexOf("\n  useEffect(", refreshAllStart);
+  const refreshProvider = src.slice(refreshProviderStart, refreshingAllRefStart);
+  const refreshAll = src.slice(refreshAllStart, refreshAllEffectStart);
+
+  assert.match(src, /formatCountdown\(q\.resetAt, clockNow\)/);
+  assert.ok(refreshProvider.includes("refreshClock()"), "single-provider refresh updates clock");
+  assert.ok(refreshAll.includes("refreshClock()"), "refresh-all action updates clock");
+});
+
 test("#18772 behavior: countdown row keeps showing the stale value after a refresh re-render", async () => {
   const { JSDOM } = require("jsdom");
   const dom = new JSDOM("<!doctype html><div id='root'></div>");
