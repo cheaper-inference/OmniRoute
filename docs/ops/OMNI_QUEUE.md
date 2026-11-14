@@ -232,9 +232,17 @@ npm run queue -- history [--base <branch>] [--limit <n>]
 `add` only applies the label: the approval is recorded by the `approval` job, under the identity
 of whoever ran the command. It counts only if that login is in `approvers`.
 
+`pause` and `resume` dispatch the workflow and then wait until the base's state document shows
+the action applied (a new `paused` event, or no pause left). The dispatched run waits in the
+tick's concurrency group behind any running tick, and a newer tick can replace it there (it ends
+`cancelled`); the CLI then dispatches again. The command prints `pause applied to <base>` only
+after that confirmation. It exits `1` when the run ends any other way without applying the action
+(for example `skipped` while the kill switch is off), or after 20 minutes without confirmation; in
+that case check `npm run queue -- status --base <base>` and the `omni-queue` runs before retrying.
+
 The CLI evaluates eligibility with the local config file (`config/merge-queue/config.json`, or the
-file in OMNI_QUEUE_CONFIG), so `status` shows the mode of your checkout, not necessarily the one on
-the default branch. `--repo <owner/repo>` points it at another repository (default: `gh repo view`).
+file in OMNI_QUEUE_CONFIG, an override for the sandbox and the tests that the workflow never sets),
+so `status` shows the mode of your checkout, not necessarily the one on the default branch. `--repo <owner/repo>` points it at another repository (default: `gh repo view`).
 
 The same `pause`, `resume` and `dry-run` actions are available from the Actions tab: workflow
 `omni-queue` → "Run workflow" → inputs `base`, `action`, `reason`. `dry-run` observes and decides,

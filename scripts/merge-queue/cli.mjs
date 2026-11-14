@@ -11,16 +11,21 @@
 //   global: --repo <owner/repo>  (default: `gh repo view`)
 //
 // Token: `gh auth token` (execFile, never a shell). Reads state from contracts.STATE_BRANCH via
-// the Contents API; never writes state (the workflow is the single writer). Without --base,
+// the Contents API; never writes state (the workflow is the single writer). pause/resume wait
+// until the state shows the action applied: a dispatched run waits in the tick's concurrency
+// group, where a newer tick can replace (cancel) it, so a cancelled run is dispatched again and
+// the command fails after a timeout instead of claiming success. Config: config/merge-queue/
+// config.json, or the file in OMNI_QUEUE_CONFIG (sandbox/tests, like tick.mjs). Without --base,
 // status/history cover every managed base with labeled PRs OR a state document (a paused base
 // with nothing labeled is exactly when the owner needs to see it).
 //
 // Exit codes: 0 success · 1 runtime/API error (or a partial failure of add/remove) · 2 usage.
 
 import { execFile } from "node:child_process";
+import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
-import { isManagedBase, loadConfig } from "./config.mjs";
+import { DEFAULT_CONFIG_PATH, isManagedBase, loadConfig } from "./config.mjs";
 import {
   FREEZE_LABEL,
   STATE_BRANCH,
@@ -31,6 +36,11 @@ import {
 import { createGitHubClient } from "./github.mjs";
 
 export const QUEUE_WORKFLOW = "omni-queue.yml";
+
+/** pause/resume confirmation: a pending dispatch may wait behind a running tick (≤ 30 min). */
+const CONFIRM_TIMEOUT_MS = 20 * 60_000;
+const CONFIRM_INTERVAL_MS = 10_000;
+const defaultSleep = (ms) => new Promise((done) => setTimeout(done, ms));
 
 export const USAGE = [
   "usage: npm run queue -- <command> [options]",
@@ -330,19 +340,70 @@ async function cmdLabel(ctx, add) {
   return failed ? 1 : 0;
 }
 
+/** Newest time (ms) of a history event of `type` in `state`; -Infinity when there is none. */
+function lastEventAt(state, type) {
+  let last = -Infinity;
+  for (const e of state?.history ?? [])
+    if (e.type === type) last = Math.max(last, Date.parse(e.at));
+  return last;
+}
+
 async function cmdDispatch(ctx, action) {
-  const { gh, config, positionals, flags, out } = ctx;
+  const { gh, config, positionals, flags, out, err } = ctx;
   if (positionals.length !== 1) throw new UsageError(`${action} expects exactly one base`);
   const base = requireManagedBase(config, positionals[0]);
   const repo = (await gh.request("GET", `/repos/${gh.owner}/${gh.repo}`)).data;
   const ref = repo?.default_branch;
   if (!ref) throw new Error("could not read the default branch of the repository");
   const reason = action === "pause" ? (flags.reason ?? "paused from the CLI") : "";
-  await gh.dispatchWorkflow(QUEUE_WORKFLOW, ref, { base, action, reason });
+  const inputs = { base, action, reason };
+  const listRuns = () =>
+    gh.listWorkflowFileRuns(QUEUE_WORKFLOW, { branch: ref, event: "workflow_dispatch" });
+  // Watermarks taken BEFORE the dispatch, from GitHub's own data (no local clock): the newest
+  // "paused" event, and the dispatch runs that already exist (none of them is ours).
+  const pausedBefore = lastEventAt(await loadState(gh, base), "paused");
+  const known = new Set((await listRuns()).map((run) => run.id));
+  const applied = (state) =>
+    action === "pause"
+      ? Boolean(state?.paused) && lastEventAt(state, "paused") > pausedBefore
+      : !state?.paused;
+  await gh.dispatchWorkflow(QUEUE_WORKFLOW, ref, inputs);
   out(
-    `${action} requested for ${base} (workflow ${QUEUE_WORKFLOW} on ${ref}); the next tick applies it`
+    `${action} requested for ${base} (workflow ${QUEUE_WORKFLOW} on ${ref}); waiting for a tick to apply it`
   );
-  return 0;
+  const polls = Math.max(1, Math.ceil(ctx.confirmTimeoutMs / ctx.confirmIntervalMs));
+  for (let i = 0; i < polls; i++) {
+    await ctx.sleep(ctx.confirmIntervalMs);
+    // Runs first, then the state: a run already seen completed has saved whatever it saved.
+    const runs = (await listRuns()).filter((run) => !known.has(run.id));
+    if (applied(await loadState(gh, base))) {
+      out(`${action} applied to ${base}`);
+      return 0;
+    }
+    const ours = runs.sort((a, b) => b.id - a.id)[0];
+    if (ours?.status !== "completed") continue;
+    for (const run of runs) known.add(run.id);
+    if (ours.conclusion === "cancelled") {
+      // Replaced while pending in the omni-queue-tick group by a newer (argument-less) tick.
+      err(
+        `warning: run ${ours.id} of ${QUEUE_WORKFLOW} was cancelled before applying the ` +
+          `${action} (a newer tick replaced it); dispatching again`
+      );
+      await gh.dispatchWorkflow(QUEUE_WORKFLOW, ref, inputs);
+    } else if (ours.conclusion !== "success") {
+      err(
+        `error: run ${ours.id} of ${QUEUE_WORKFLOW} ended ${ours.conclusion} without applying ` +
+          `the ${action} (${ours.htmlUrl}); check the run (is OMNI_QUEUE_ENABLED true?), then retry`
+      );
+      return 1;
+    }
+  }
+  err(
+    `error: ${action} of ${base} not confirmed within ${Math.round(ctx.confirmTimeoutMs / 1000)}s; ` +
+      `it may still be pending behind a running tick: check \`npm run queue -- status --base ` +
+      `${base}\` and the ${QUEUE_WORKFLOW} runs in the Actions tab before retrying`
+  );
+  return 1;
 }
 
 function prGreenState(checkRuns, name) {
@@ -420,15 +481,19 @@ async function cmdWhy(ctx) {
  * @param {string[]} argv   arguments after `cli.mjs`
  * @param {{gh?: object, out?: (line: string) => void, err?: (line: string) => void,
  *          config?: object, now?: () => string, exec?: (cmd: string, args: string[])
- *          => Promise<{stdout: string}>, apiUrl?: string, eligibility?: object}} [deps]
+ *          => Promise<{stdout: string}>, apiUrl?: string, eligibility?: object,
+ *          env?: Record<string, string|undefined>, sleep?: (ms: number) => Promise<void>,
+ *          confirmTimeoutMs?: number, confirmIntervalMs?: number}} [deps]
  *   injected in tests: gh (API client), exec (replaces `gh` the binary), apiUrl (client base),
- *   eligibility (replaces ./eligibility.mjs)
+ *   eligibility (replaces ./eligibility.mjs), env (replaces process.env), sleep and the
+ *   confirmation timeout/interval of pause/resume
  * @returns {Promise<number>} exit code
  */
 export async function runCli(argv, deps = {}) {
   const out = deps.out ?? ((line) => process.stdout.write(`${line}\n`));
   const err = deps.err ?? ((line) => process.stderr.write(`${line}\n`));
   const now = deps.now ?? (() => new Date().toISOString());
+  const env = deps.env ?? process.env;
   let parsed;
   try {
     parsed = parseArgs(argv);
@@ -456,9 +521,23 @@ export async function runCli(argv, deps = {}) {
     return 2;
   }
   try {
-    const config = deps.config ?? loadConfig();
+    const config =
+      deps.config ??
+      loadConfig(env.OMNI_QUEUE_CONFIG ? resolve(env.OMNI_QUEUE_CONFIG) : DEFAULT_CONFIG_PATH);
     const gh = deps.gh ?? (await buildClient(flags, deps));
-    const ctx = { gh, config, flags, positionals, out, err, now, eligibility: deps.eligibility };
+    const ctx = {
+      gh,
+      config,
+      flags,
+      positionals,
+      out,
+      err,
+      now,
+      eligibility: deps.eligibility,
+      sleep: deps.sleep ?? defaultSleep,
+      confirmTimeoutMs: deps.confirmTimeoutMs ?? CONFIRM_TIMEOUT_MS,
+      confirmIntervalMs: deps.confirmIntervalMs ?? CONFIRM_INTERVAL_MS,
+    };
     switch (command) {
       case "status":
         if (positionals.length) throw new UsageError("status takes no positional arguments");
