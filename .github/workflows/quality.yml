@@ -255,7 +255,9 @@ jobs:
           # #8522: base-relative file-size mode on PR events — inherited drift (base
           # already over frozen cap) must not red an innocent PR. Unset on
           # workflow_dispatch (no PR base) → absolute comparison.
-          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          # omni-queue/** candidates: the candidate base, so every base-relative gate below
+          # judges the batch like a PR (a drifted base must not red every candidate).
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha || needs.changes.outputs.candidateBase }}
           # Other checks may use this local ref; OpenAPI reads immutable event commits.
           BASE_REF: ${{ github.base_ref && format('origin/{0}', github.base_ref) || '' }}
         run: |
@@ -326,8 +328,8 @@ jobs:
           echo "::endgroup::"
           # #10134: TS7 zero-new-diagnostics ratchet — folded into this non-fail-fast
           # loop (never a separate blocking step) so an earlier red gate cannot abort
-          # the job and mask it (#8542 mechanism). PR-only: the base-relative
-          # comparison needs the PR base SHA (empty on workflow_dispatch).
+          # the job and mask it (#8542 mechanism). PRs and omni-queue candidates only:
+          # the base-relative comparison needs a base SHA (empty on workflow_dispatch).
           if [ -n "${PR_BASE_SHA:-}" ]; then
             echo "::group::check:ts7-diagnostics-ratchet"
             npm run check:ts7-diagnostics-ratchet -- --base-ref "$PR_BASE_SHA" || failed+=("ts7-diagnostics-ratchet")

@@ -185,9 +185,11 @@ jobs:
       # open-sse → src edge ceiling (metrics.boundaryOpenSseToSrc). On PRs it is base-relative
       # like check:file-size (#8522): max(ceiling, edges on the PR base), so drift other merges
       # added after the seed does not red an innocent PR. push → main stays absolute.
+      # omni-queue/** candidates are judged like a PR, against the candidate base: the absolute
+      # ceiling would red every candidate of a base that drifted, and blame the batch for it.
       - name: Boundary ratchet (open-sse → src)
         env:
-          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha || needs.changes.outputs.candidateBase }}
         run: |
           if [ -n "${PR_BASE_SHA:-}" ]; then
             npm run check:boundary:ratchet -- --base-ref "$PR_BASE_SHA"
@@ -563,15 +565,19 @@ jobs:
       # and every mirror PR collided on `.i18n-state.json`. Mirrors are refreshed in a batch
       # `npm run i18n:run` after merge; the push run below, the nightly Release-Green and the
       # release cut keep the strict verdict, so stale mirrors still cannot ship in a release.
-      - name: Base checkout for the i18n drift baseline (PR only)
-        if: ${{ github.event_name == 'pull_request' }}
+      #
+      # omni-queue/** candidates take the pull-request path, against the candidate base: the
+      # strict verdict fails on drift the base already carries, which would red every candidate
+      # and blame the batch. The strict run stays on main, merge_group and workflow_dispatch.
+      - name: Base checkout for the i18n drift baseline (PR / omni-queue candidate)
+        if: ${{ github.event_name == 'pull_request' || startsWith(github.ref, 'refs/heads/omni-queue/') }}
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ github.event.pull_request.base.sha }}
+          ref: ${{ github.event.pull_request.base.sha || needs.changes.outputs.candidateBase }}
           path: .i18n-base
           persist-credentials: false
-      - name: i18n docs drift (PR — advisory, mirrors are refreshed after merge)
-        if: ${{ github.event_name == 'pull_request' }}
+      - name: i18n docs drift (PR / omni-queue candidate — advisory, mirrors are refreshed after merge)
+        if: ${{ github.event_name == 'pull_request' || startsWith(github.ref, 'refs/heads/omni-queue/') }}
         run: |
           set -euo pipefail
           node scripts/i18n/check-translation-drift.mjs --root .i18n-base --json --warn > /tmp/i18n-base-drift.json
@@ -580,7 +586,7 @@ jobs:
             echo "::notice title=i18n mirrors pending::This PR changes English docs whose 66 mirrors are now stale. Nothing to do here: the mirrors are refreshed in the post-merge i18n batch."
           fi
       - name: i18n docs drift (sources changed since their translation)
-        if: ${{ github.event_name != 'pull_request' }}
+        if: ${{ github.event_name != 'pull_request' && !startsWith(github.ref, 'refs/heads/omni-queue/') }}
         run: node scripts/i18n/check-translation-drift.mjs
 
   docs-lint:

@@ -98,6 +98,12 @@ App token.
   merge commit of its own; it lands with the batch and is reported as merged with it.
 - **CI profile**: `ci.yml` and `quality.yml` treat a push to `omni-queue/**` like a `merge_group`
   event (full profile, hosted runners). Deploy and publish workflows never run on that prefix.
+- **Never stricter than a pull request**: the gates that are base-relative on a pull request
+  (`check:file-size`, `check:complexity-ratchets`, `check:dead-code`, `check:boundary`,
+  `check:ts7-diagnostics-ratchet`) compare a candidate with its base (`--base-ref` = the
+  candidate base), and the i18n docs drift check is advisory against that base, as it is on a
+  pull request. Drift the base picked up mid-cycle therefore never reds a candidate; the absolute
+  and strict verdicts stay on `main`, `merge_group` and Release-Green.
 - **AI attribution over the whole range**: with `merge-ff` the contributors' own commits land
   unchanged, so `ci.yml` runs `check:ai-attribution` over `<candidate base>..<candidate>` (Hard
   Rule #16), not only over the PR metadata.

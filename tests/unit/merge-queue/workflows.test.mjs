@@ -1380,3 +1380,135 @@ test("ci.yml: the candidate range is checked for AI attribution (merge-ff keeps 
   // The checkout carries the full history the range needs.
   assert.equal(lint.steps[0].with["fetch-depth"], 0);
 });
+
+// ───────────────────────────── candidate profile: base-relative gates ─────────────────────────────
+//
+// A gate that is base-relative (or advisory) on a pull request must judge a candidate the same
+// way, against the candidate base: in its absolute / strict mode, drift the base picked up
+// mid-cycle reds EVERY candidate and the queue blames innocent pull requests.
+
+const PR_BASE_SHA = "f".repeat(40);
+const withChanges = (ctx) => ({ ...ctx, needs: { changes: { outputs: ctx.__outputs.changes } } });
+
+/** The event contexts a base-relative step must tell apart. `base` = the SHA it must receive. */
+function baseRelativeContexts() {
+  const pr = prContext("fix/x");
+  pr.github.event.pull_request.base.sha = PR_BASE_SHA;
+  return [
+    { name: "candidate push", ctx: pushContext(CANDIDATE_REF), base: BASE_SHA },
+    { name: "pull request", ctx: pr, base: PR_BASE_SHA },
+    { name: "push to main", ctx: pushContext("refs/heads/main"), base: "" },
+    {
+      name: "merge_group",
+      ctx: pushContext("refs/heads/gh-readonly-queue/x", { eventName: "merge_group" }),
+      base: "",
+    },
+    {
+      name: "workflow_dispatch",
+      ctx: pushContext("refs/heads/release/v3.8.54", { eventName: "workflow_dispatch" }),
+      base: "",
+    },
+  ].map((c) => ({ ...c, ctx: withChanges(c.ctx) }));
+}
+
+/** `npm run <script> [-- args…]` invocations of one step, as script → args after `--`. */
+function npmRuns(npmArgs) {
+  const runs = new Map();
+  let current = null;
+  for (const arg of npmArgs ?? []) {
+    if (arg === "run") current = null;
+    else if (current === null) runs.set(arg, (current = []));
+    else current.push(arg);
+  }
+  return runs;
+}
+
+/** The job receives the candidate base and has it in its clone (full history, like a PR). */
+function assertBaseAvailable(job, where) {
+  assert.ok([job.needs].flat().includes("changes"), `${where} receives the candidate base`);
+  const checkout = job.steps.find((s) => String(s.uses ?? "").startsWith("actions/checkout@"));
+  assert.equal(checkout.with["fetch-depth"], 0, `${where}: the base must be in the clone`);
+}
+
+test("ci.yml: the boundary ratchet is base-relative on a candidate, absolute on main", (t) => {
+  const lint = loadWorkflow("ci.yml").jobs.lint;
+  assertBaseAvailable(lint, "lint");
+  const step = lint.steps.find((s) => s.name === "Boundary ratchet (open-sse → src)");
+  assert.ok(step, "boundary ratchet step");
+  for (const { name, ctx, base } of baseRelativeContexts()) {
+    const sha = String(render(step.env.PR_BASE_SHA, ctx) ?? "");
+    assert.equal(sha, base, `PR_BASE_SHA on ${name}`);
+    const res = runStep(t, step, { PR_BASE_SHA: sha });
+    assert.equal(res.code, 0, res.stderr);
+    assert.deepEqual(
+      res.npmArgs,
+      base
+        ? ["run", "check:boundary:ratchet", "--", "--base-ref", base]
+        : ["run", "check:boundary:ratchet"],
+      name
+    );
+  }
+});
+
+test("quality.yml: file-size, new-code, boundary and TS7 gates compare a candidate with its base", (t) => {
+  const fast = loadWorkflow("quality.yml").jobs["fast-gates"];
+  assertBaseAvailable(fast, "fast-gates");
+  const step = fast.steps.find((s) => s.name === "Quality gates (all, non-fail-fast)");
+  assert.ok(step, "quality gates step");
+  for (const { name, ctx, base } of baseRelativeContexts()) {
+    const sha = String(render(step.env.PR_BASE_SHA, ctx) ?? "");
+    assert.equal(sha, base, `PR_BASE_SHA on ${name}`);
+    const res = runStep(t, step, { PR_BASE_SHA: sha });
+    assert.equal(res.code, 0, res.stderr);
+    const runs = npmRuns(res.npmArgs);
+    const relative = base ? ["--", "--base-ref", base] : [];
+    for (const gate of ["file-size", "complexity-ratchets", "dead-code"]) {
+      assert.deepEqual(runs.get(`check:${gate}`), relative, `${gate} on ${name}`);
+    }
+    assert.deepEqual(
+      runs.get("check:boundary"),
+      base ? ["--", "--ratchet", "--base-ref", base] : ["--", "--ratchet"],
+      `boundary on ${name}`
+    );
+    // The TS7 ratchet has no absolute mode: without a base it does not run at all.
+    assert.deepEqual(
+      runs.get("check:ts7-diagnostics-ratchet"),
+      base ? relative : undefined,
+      `ts7-diagnostics-ratchet on ${name}`
+    );
+    // Controls: gates without a base-relative mode are called the same way everywhere.
+    assert.deepEqual(runs.get("check:deps"), [], name);
+    assert.deepEqual(runs.get("check:cycles"), ["--", "--ratchet"], name);
+  }
+});
+
+test("ci.yml: i18n docs drift is advisory against the candidate base, strict on main", () => {
+  const job = loadWorkflow("ci.yml").jobs["docs-sync-strict"];
+  assert.ok([job.needs].flat().includes("changes"), "docs-sync-strict receives the candidate base");
+  const one = (pick, what) => {
+    const found = job.steps.filter(pick);
+    assert.equal(found.length, 1, `exactly one ${what} step`);
+    return found[0];
+  };
+  const baseCheckout = one((s) => s.with?.path === ".i18n-base", "base checkout");
+  const advisory = one((s) => String(s.run ?? "").includes("--base-report"), "advisory drift");
+  const strict = one(
+    (s) => s.run === "node scripts/i18n/check-translation-drift.mjs",
+    "strict drift"
+  );
+  assert.match(baseCheckout.uses, /^actions\/checkout@/);
+  assert.equal(baseCheckout.with["persist-credentials"], false);
+  // Both invocations of the advisory comparison are warn-only: it can never red the job.
+  const driftCalls = advisory.run.split("\n").filter((l) => l.includes("check-translation-drift"));
+  assert.equal(driftCalls.length, 2);
+  for (const call of driftCalls) assert.match(call, / --warn( |$)/);
+  assert.match(driftCalls[0], /--root \.i18n-base /);
+  for (const { name, ctx, base } of baseRelativeContexts()) {
+    const relative = base !== "";
+    assert.equal(condition(baseCheckout.if, ctx), relative, `base checkout on ${name}`);
+    assert.equal(condition(advisory.if, ctx), relative, `advisory drift on ${name}`);
+    assert.equal(condition(strict.if, ctx), !relative, `strict drift on ${name}`);
+    // The base tree of the comparison is the PR base on a PR, the candidate base on a candidate.
+    if (relative) assert.equal(render(baseCheckout.with.ref, ctx), base, `base ref on ${name}`);
+  }
+});
