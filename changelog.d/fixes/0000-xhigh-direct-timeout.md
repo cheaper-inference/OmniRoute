@@ -1,1 +1,0 @@
-- **fix(sse):** Give `xhigh` reasoning requests the same 180-second direct response-start floor as `high` and `max`, while preserving caller deadlines and operator overrides.
