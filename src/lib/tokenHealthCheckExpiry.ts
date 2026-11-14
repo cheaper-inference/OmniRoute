@@ -4,6 +4,7 @@
  * re-exported from there, so existing imports keep working.
  */
 import { parseTokenExpiryMs } from "@omniroute/open-sse/utils/tokenExpiry.ts";
+import { hasDevinAuth1Credential } from "@omniroute/open-sse/services/tokenRefresh/providers/devinDesktop.ts";
 
 // The parser lives in the engine (open-sse → src boundary ratchet); re-exported so existing
 // imports from this module keep working.
@@ -36,13 +37,15 @@ export function getEffectiveTokenExpiryMs(conn: any): number {
  * providerSpecificData and renew without the password. A connection created by
  * plain `import_token` carries no auth1 and genuinely cannot be renewed (#8228) —
  * so the sweep must not force it to `no_refresh_token`.
+ *
+ * The predicate itself lives next to the refresh implementation so the sweep, the
+ * executor and the refresh gate cannot drift apart.
  */
-function hasConditionalRefreshCredential(conn: Record<string, any>): boolean {
+export function hasConditionalRefreshCredential(conn: Record<string, any>): boolean {
   if (conn.provider !== "devin-desktop") return false;
   const data = conn.providerSpecificData;
   if (!data || typeof data !== "object") return false;
-  const auth1 = (data as Record<string, unknown>).devinAuth1Token;
-  return typeof auth1 === "string" && auth1.startsWith("auth1_");
+  return hasDevinAuth1Credential(data as Record<string, unknown>);
 }
 
 function issuesRefreshLessLongLivedTokens(provider: unknown): boolean {

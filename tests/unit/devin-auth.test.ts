@@ -101,6 +101,29 @@ test("truncateToken never echoes a full credential", () => {
   assert.equal(truncateToken("short", 10), "short");
 });
 
+test("describeToken never exposes any part of the credential", () => {
+  const full = "auth1_abcdefghijklmnopqrstuvwxyz";
+  const described = devinAuth.describeToken(full);
+  assert.equal(described.includes("auth1"), false);
+  assert.equal(described.includes("abcdefghij"), false);
+  assert.match(described, /^sha256:[0-9a-f]{16}$/);
+  // Same credential → same reference, so logs stay correlatable.
+  assert.equal(devinAuth.describeToken(full), described);
+  // A different credential must not collide.
+  assert.notEqual(devinAuth.describeToken("auth1_other_credential"), described);
+});
+
+test("describeToken is safe for short credentials, which a prefix would expose whole", () => {
+  // A token shorter than a truncation window would be echoed in full by a
+  // prefix-based helper; the fingerprint never reproduces the input.
+  for (const short of ["auth1_x", "abc", "12345678"]) {
+    const described = devinAuth.describeToken(short);
+    assert.equal(described.includes(short), false, `leaked ${short}`);
+    assert.match(described, /^sha256:[0-9a-f]{16}$/);
+  }
+  assert.equal(devinAuth.describeToken(""), "");
+});
+
 // ---------------------------------------------------------------------------
 // Endpoints
 // ---------------------------------------------------------------------------

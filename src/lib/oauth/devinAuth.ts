@@ -177,6 +177,11 @@ export function findSubslice(haystack: Uint8Array, needle: Uint8Array): number {
 /**
  * Shorten a credential for logs. Mirrors the Rust `truncate`: a token shorter
  * than `max` is returned whole, anything longer loses its tail entirely.
+ *
+ * @deprecated Leaks credential material — a token of `max` characters or fewer
+ * is echoed in full and a longer one still exposes its first `max` characters
+ * (CWE-532). Use `opaqueTokenFingerprint()` from
+ * `open-sse/utils/opaqueTokenFingerprint.ts` for any log reference.
  */
 export function truncateToken(value: string, max = 20): string {
   if (value.length <= max) return value;

@@ -11,8 +11,8 @@ import {
   encodeProtoString,
   findSubslice,
   protoString,
-  truncateToken,
 } from "../devinAuth";
+import { opaqueTokenFingerprint } from "@omniroute/open-sse/utils/opaqueTokenFingerprint.ts";
 
 /**
  * Devin Auth login for Windsurf / Devin Desktop.
@@ -372,8 +372,14 @@ export const devinAuth = {
     };
   },
 
-  /** Log-safe label for a credential. Never returns the full value. */
+  /**
+   * Log-safe label for a credential. Never returns any part of the value — only
+   * a one-way fingerprint — so it cannot expose a short token whole or the
+   * prefix of a longer one (CWE-532).
+   */
   describeToken(token: string): string {
-    return truncateToken(token ?? "");
+    const value = token ?? "";
+    if (!value) return "";
+    return `sha256:${opaqueTokenFingerprint(value, { length: 16 })}`;
   },
 };

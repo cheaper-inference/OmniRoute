@@ -815,6 +815,10 @@ function LegacyOAuthModal({
     if (startKey) {
       setShowPasteToken(PASTE_FIRST_PROVIDERS.has(provider));
       setPasteToken("");
+      // devin-desktop's password form is a mode, not the default: a reopen must
+      // start on the paste form again instead of re-rendering the last panel.
+      setPasswordMode(false);
+      setLoginPassword("");
       setGrokBrowserMode(false);
       setAuthData(null);
       setCallbackUrl("");
@@ -1251,8 +1255,11 @@ function LegacyOAuthModal({
           </div>
         )}
 
-        {/* OAuth flow steps — hidden when paste-token mode is active */}
-        {(!supportsTokenPaste || !showPasteToken) && (
+        {/* OAuth flow steps — hidden when paste-token mode is active, and while the
+            devin-desktop password form owns the panel: showing "Waiting for
+            browser authorization" underneath an email+password form would
+            describe a flow the user did not start. */}
+        {(!supportsTokenPaste || !showPasteToken) && !passwordMode && (
           <>
             {/* GitHub Copilot: policy-ambiguous disclosure before device-code flow */}
             {provider === "github" && step === "copilot-policy" && (

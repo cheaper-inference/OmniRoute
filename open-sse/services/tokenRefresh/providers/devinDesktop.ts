@@ -7,7 +7,27 @@
 // implemented once in src/lib/oauth/services/devinAuth.ts, so this provider
 // delegates to it rather than duplicating the protobuf RPCs.
 import { devinAuth } from "../../../../src/lib/oauth/services/devinAuth.ts";
+import { opaqueTokenFingerprint } from "../../../utils/opaqueTokenFingerprint.ts";
 import type { RefreshLogger } from "../shared.ts";
+
+/**
+ * True when this connection carries the long-lived `auth1_…` credential that a
+ * Devin Auth password login stores. Such a connection refreshes without an OAuth
+ * refresh_token; an `import_token` connection has no auth1 and cannot refresh.
+ */
+export function hasDevinAuth1Credential(
+  providerSpecificData: Record<string, unknown> | null | undefined
+): boolean {
+  return devinAuth1From(providerSpecificData) !== null;
+}
+
+/** The stored `auth1_…` credential, or null when this connection has none. */
+export function devinAuth1From(
+  providerSpecificData: Record<string, unknown> | null | undefined
+): string | null {
+  const auth1 = providerSpecificData?.devinAuth1Token;
+  return typeof auth1 === "string" && auth1.startsWith("auth1_") ? auth1 : null;
+}
 
 /**
  * Refresh a Devin Desktop connection from its stored auth1 token.
@@ -21,8 +41,8 @@ export async function refreshDevinDesktopToken(
   providerSpecificData: Record<string, unknown> | null | undefined,
   log?: RefreshLogger
 ): Promise<{ accessToken: string; providerSpecificData?: Record<string, unknown> } | null> {
-  const auth1 = providerSpecificData?.devinAuth1Token;
-  if (typeof auth1 !== "string" || !auth1.startsWith("auth1_")) {
+  const auth1 = devinAuth1From(providerSpecificData);
+  if (!auth1) {
     return null;
   }
 
@@ -41,7 +61,11 @@ export async function refreshDevinDesktopToken(
   } catch (error) {
     log?.error?.("TOKEN_REFRESH", "Devin Desktop auth1 refresh failed", {
       code: error?.code ? String(error.code) : "unknown",
-      token: devinAuth.describeToken(auth1),
+      // Never log any part of the credential: `describeToken` returns short
+      // tokens whole and the first 20 chars of longer ones, which is enough of
+      // an `auth1_…` value to be a CWE-532 leak. A one-way fingerprint still
+      // correlates the same credential across log lines.
+      token: opaqueTokenFingerprint(auth1, { length: 16 }),
     });
     return null;
   }

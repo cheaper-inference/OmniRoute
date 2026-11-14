@@ -91,8 +91,11 @@ test("the refresh never logs the auth1 token in full", async () => {
   try {
     await refreshDevinDesktopToken({ devinAuth1Token: AUTH1 }, log);
     assert.equal(logged.length, 1);
+    // No substring of the credential may appear — not the full value, not a prefix.
     assert.equal(logged[0].includes(AUTH1), false);
-    assert.equal(logged[0].includes("auth1_stored"), true);
+    assert.equal(logged[0].includes("auth1_stored"), false);
+    assert.equal(logged[0].includes("auth1_"), false);
+    assert.equal(logged[0].includes(AUTH1.slice(0, 20)), false);
   } finally {
     stub.restore();
   }
