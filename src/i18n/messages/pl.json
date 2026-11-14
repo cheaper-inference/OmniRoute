@@ -10666,6 +10666,7 @@
     "grokAutoTopUpMonth": "miesiąc",
     "grokAdditionalCredits": "Dodatkowe Kredyty",
     "kiloAccountBalance": "Saldo konta",
+    "kiloPassBandUsage": "{used} z {total}",
     "kiloPassBonus": "Dostępny bonus",
     "kiloPassMeterLabel": "Miernik zużycia Kilo Pass",
     "kiloPassPaid": "Opłacone",

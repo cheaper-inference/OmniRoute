@@ -10666,6 +10666,7 @@
     "grokAutoTopUpMonth": "மாதம்",
     "grokAdditionalCredits": "கூடுதல் நிதிகள்",
     "kiloAccountBalance": "கணக்கு இருப்பு",
+    "kiloPassBandUsage": "{total} இல் {used}",
     "kiloPassBonus": "கிடைக்கும் போனஸ்",
     "kiloPassMeterLabel": "Kilo Pass பயன்பாட்டு மீட்டர்",
     "kiloPassPaid": "செலுத்தப்பட்டது",

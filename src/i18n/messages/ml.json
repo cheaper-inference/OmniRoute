@@ -10666,6 +10666,7 @@
     "grokAutoTopUpMonth": "മാസം",
     "grokAdditionalCredits": "അധിക ക്രെഡിറ്റുകൾ",
     "kiloAccountBalance": "അക്കൗണ്ട് ബാലൻസ്",
+    "kiloPassBandUsage": "{total}-ൽ {used}",
     "kiloPassBonus": "ലഭ്യമായ ബോണസ്",
     "kiloPassMeterLabel": "Kilo Pass ഉപയോഗ മീറ്റർ",
     "kiloPassPaid": "പണമടച്ചത്",

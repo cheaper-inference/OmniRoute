@@ -10666,6 +10666,7 @@
     "grokAutoTopUpMonth": "kuu",
     "grokAdditionalCredits": "Lisakrediidid",
     "kiloAccountBalance": "Konto saldo",
+    "kiloPassBandUsage": "{used} summast {total}",
     "kiloPassBonus": "Saadaolev boonus",
     "kiloPassMeterLabel": "Kilo Passi kasutusmõõdik",
     "kiloPassPaid": "Makstud",

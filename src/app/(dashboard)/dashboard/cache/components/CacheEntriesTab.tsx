@@ -182,10 +182,9 @@ export default function CacheEntriesTab() {
                 </TableCell>
                 <TableCell>
                   <Button
-                    variant="ghost"
+                    variant="destructive-ghost"
                     size="icon"
                     icon="delete"
-                    className="text-error"
                     aria-label={tc("delete")}
                     title={tc("delete")}
                     onClick={() => handleDelete(entry.signature)}

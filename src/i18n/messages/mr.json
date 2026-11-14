@@ -10666,6 +10666,7 @@
     "grokAutoTopUpMonth": "महिना",
     "grokAdditionalCredits": "अतिरिक्त श्रेय",
     "kiloAccountBalance": "खाते शिल्लक",
+    "kiloPassBandUsage": "{total} पैकी {used}",
     "kiloPassBonus": "उपलब्ध बोनस",
     "kiloPassMeterLabel": "Kilo Pass वापर मीटर",
     "kiloPassPaid": "भरलेले",
