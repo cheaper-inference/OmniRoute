@@ -35,7 +35,7 @@ export async function PATCH(request: Request, context: RouteContext) {
   const parsed = await parseLaunchBody(request, launchSessionPatchSchema, (patch) =>
     serveError(patch.view?.serve)
   );
-  if (!parsed.ok) return parsed.response;
+  if (parsed.ok === false) return parsed.response;
 
   const session = await applySessionPatch(id, existing, parsed.data);
   if (!session) return notFound();

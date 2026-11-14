@@ -19,7 +19,7 @@ export async function POST(request: Request) {
   }
 
   const parsed = await parseLaunchBody(request, launchMintSchema, mintBodyError);
-  if (!parsed.ok) return parsed.response;
+  if (parsed.ok === false) return parsed.response;
 
   const { createLaunchSession, purgeLaunchSessions } = await import("@/lib/db/launchSessions");
   try {
