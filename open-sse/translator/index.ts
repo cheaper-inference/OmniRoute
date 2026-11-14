@@ -40,6 +40,7 @@ import { normalizeRoles, resolvePreserveDeveloperRole } from "../services/roleNo
 import { hoistLeadingSystemMessage } from "./helpers/strictSystemHoist.ts";
 import { ensurePoeUserTurnHasText } from "./helpers/poeImageOnlyUserTurn.ts";
 import { acceptsInlineToolAdditions, hoistToolAdditions } from "./helpers/claudeDeferredTools.ts";
+import { ownMessages } from "./helpers/callerMessages.ts";
 import { isStrictResponsesToolHistoryEnabled } from "./helpers/responsesToolHistory.ts";
 import {
   buildAssistantMessageCacheKey,
@@ -406,9 +407,8 @@ export function translateRequest(
   const hoistDeferredTools =
     sourceFormat === FORMATS.CLAUDE &&
     !(targetFormat === FORMATS.CLAUDE && acceptsInlineToolAdditions(provider));
-  let result = normalizeReasoningRequest(
-    hoistDeferredTools ? hoistToolAdditions(body) : body,
-    provider
+  let result = ownMessages(
+    normalizeReasoningRequest(hoistDeferredTools ? hoistToolAdditions(body) : body, provider)
   );
   const use9CharId = options?.normalizeToolCallId === true;
   const preserveDeveloperRole = options?.preserveDeveloperRole;
