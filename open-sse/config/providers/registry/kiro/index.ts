@@ -6,7 +6,9 @@ export const kiroProvider: RegistryEntry = {
   alias: "kr",
   format: "kiro",
   executor: "kiro",
-  baseUrl: "https://codewhisperer.us-east-1.amazonaws.com/generateAssistantResponse",
+  // Declarative default — KiroExecutor builds its own region-resolved URL; kept in sync
+  // with kiroRuntimeHost (regional Amazon Q host since #19607).
+  baseUrl: "https://q.us-east-1.amazonaws.com/generateAssistantResponse",
   authType: "oauth",
   authHeader: "bearer",
   defaultContextLength: 200000,

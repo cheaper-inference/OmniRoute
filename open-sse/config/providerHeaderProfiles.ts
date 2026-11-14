@@ -443,8 +443,23 @@ export function resetCodeBuddyCnVersionCache(): void {
   codeBuddyVersionInFlight = null;
 }
 
-export const KIRO_SDK_USER_AGENT = "AWS-SDK-JS/3.0.0 kiro-ide/1.0.0";
-export const KIRO_AMZ_USER_AGENT = "aws-sdk-js/3.0.0 kiro-ide/1.0.0";
+// Kiro enforces a client-version floor since 2026-11-09 (kirodotdev/Kiro#11335):
+// clients older than CLI 1.28.2 / IDE 0.11.133 get
+// 403 "This version of Kiro is no longer supported" on every inference call
+// (#19607). The gate accepts the IDE-shaped fingerprint, not a bare CLI version
+// (live A/B: q.eu-central-1 + kiro-cli/3.1.0 → 403, + KiroIDE-1.4.121-<machineId>
+// → 200). The executor overrides these per connection; this fallback keeps
+// registry/static callers above the gate without a connection context.
+// This module is reachable from client bundles (the dashboard imports provider
+// configs), so it must stay free of Node-only imports — kiroIdentity.ts pulls in
+// node:crypto and would break the webpack client build. The per-connection
+// fingerprint lives there and is applied by KiroExecutor.buildHeaders(); these
+// literals are only the connection-less fallback for static registry callers.
+const KIRO_FALLBACK_MACHINE_ID = "0000000000000000000000000000000000000000000000000000000000000000";
+export const KIRO_SDK_USER_AGENT =
+  "aws-sdk-js/1.0.0 ua/2.1 os/windows#10.0.26200 lang/js md/nodejs#22.21.1 " +
+  `api/codewhispererstreaming#1.0.0 m/E KiroIDE-1.4.121-${KIRO_FALLBACK_MACHINE_ID}`;
+export const KIRO_AMZ_USER_AGENT = `aws-sdk-js/1.0.0 KiroIDE-1.4.121-${KIRO_FALLBACK_MACHINE_ID}`;
 export const KIRO_STREAMING_TARGET =
   "AmazonCodeWhispererStreamingService.GenerateAssistantResponse";
 

@@ -10,6 +10,7 @@ import { PROVIDERS } from "../config/constants.ts";
 import { getRegistryEntry } from "../config/providerRegistry.ts";
 import { v4 as uuidv4 } from "uuid";
 import { refreshKiroToken } from "../services/tokenRefresh.ts";
+import { buildKiroServiceUserAgent } from "../services/kiroIdentity.ts";
 import {
   isExternalIdpAuthMethod,
   KIRO_EXTERNAL_IDP_TOKEN_TYPE_HEADER,
@@ -325,9 +326,12 @@ const KIRO_ENDPOINT_FALLBACK_STATUSES = new Set([401, 403, 404]);
  * Verified live (2026-09-10): the identical access token + request body gets
  *   400 {"message":"profileArn is required for this request.","reason":null}
  * from `runtime.us-east-1.kiro.dev`, and a normal streaming
- * `generateAssistantResponse` from `codewhisperer.us-east-1.amazonaws.com` —
+ * `generateAssistantResponse` from the regional Amazon Q host —
  * confirmed both against a live Builder ID kiro-cli session and against the
  * production accounts that were surfacing this 400 to end users.
+ * (2026-11-10, #19607: the fallback host is `q.us-east-1.amazonaws.com`;
+ * `codewhisperer.us-east-1.amazonaws.com` was retired with Kiro's client-version
+ * enforcement, kirodotdev/Kiro#11335.)
  *
  * A plain 400 is deliberately excluded from KIRO_ENDPOINT_FALLBACK_STATUSES
  * above (a malformed request body cannot be fixed by resending it to another
@@ -372,6 +376,17 @@ export class KiroExecutor extends BaseExecutor {
     super(providerId, PROVIDERS[providerId] || PROVIDERS.kiro);
   }
 
+  /**
+   * Build the upstream request headers for a Kiro inference call.
+   *
+   * Adds the per-connection IDE fingerprint Kiro's client-version gate expects
+   * (#19607) on top of the static registry headers, then the bearer token plus the
+   * auth-method-specific token-type labels (API key / external IdP).
+   * @param credentials - connection credentials, including providerSpecificData
+   * @param stream - whether the request is a streaming call (streaming uses the
+   *   event-stream Accept header from the registry config)
+   * @returns the merged header map sent to the Amazon Q / gateway endpoint
+   */
   buildHeaders(credentials: ProviderCredentials, stream = true) {
     void stream;
     const headers = {
@@ -390,6 +405,13 @@ export class KiroExecutor extends BaseExecutor {
     const token = isApiKey
       ? credentials.apiKey || credentials.accessToken
       : credentials.accessToken;
+
+    // Kiro's 2026-11-09 gate accepts the IDE-shaped fingerprint, not a bare CLI
+    // version (live A/B: q.eu-central-1 + kiro-cli/3.1.0 → 403, + KiroIDE-1.4.121
+    // → 200). Derive it per connection so each account keeps a stable machine id.
+    const identity = buildKiroServiceUserAgent(credentials.providerSpecificData, token);
+    headers["User-Agent"] = identity.userAgent;
+    headers["X-Amz-User-Agent"] = identity.amzUserAgent;
 
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
@@ -458,22 +480,24 @@ export class KiroExecutor extends BaseExecutor {
       typeof credentials.providerSpecificData?.authMethod === "string"
         ? credentials.providerSpecificData.authMethod
         : undefined;
-    // Long-lived API keys only work on the regional Amazon Q host (q.<region>), including
-    // us-east-1 where codewhisperer.us-east-1 rejects API-key payloads with
-    // REQUEST_BODY_INVALID. One persisted region, no surface rotation.
+    // All auth methods ride the regional Amazon Q host (q.<region>) — us-east-1 included
+    // since the legacy codewhisperer host was retired (#19607). API keys additionally
+    // normalize their region through the Q profile-region allowlist. One persisted
+    // region, no surface rotation.
     const runtimeHost =
       authMethod === "api_key" ? kiroApiKeyRuntimeHost(region) : kiroRuntimeHost(region);
     const regionalUrl = `${runtimeHost}/generateAssistantResponse`;
 
-    // The Kiro IDE's own branded gateway (runtime.*.kiro.dev) only exists for
-    // us-east-1 and only accepts Kiro OIDC/social tokens — it rejects
-    // TokenType=API_KEY and external-IdP/IdC SSO tokens outright (403 "bearer
-    // token invalid"), so those auth methods go straight to the region-resolved
-    // CodeWhisperer/Amazon Q surface. For everything else, try the branded gateway
-    // first — it is the surface the native Kiro IDE itself talks to — and fall
-    // back to the raw AWS host on an auth/profile-shaped failure.
-    const isCodeWhispererOnly =
-      authMethod === "api_key" || authMethod === "idc" || isExternalIdpAuthMethod(authMethod);
+    // The branded us-east-1 gateway still authenticates SSO-issued
+    // builder-id/IdC tokens, so those ride it first with the regional Q host as
+    // fallback. It is not the only working surface after the 2026-11-09 gate
+    // (#19607): q.<region> also accepts IdC tokens when the request carries the
+    // IDE-shaped fingerprint (live A/B 2026-11-10: q.eu-central-1 +
+    // kiro-cli/3.1.0 → 403, + KiroIDE-1.4.121 → 200). buildHeaders() emits that
+    // per-connection fingerprint, which keeps eu-central-1 IdC profiles working
+    // without a gateway. API keys and external-IdP org tokens remain
+    // gateway-ineligible: it rejects TokenType=API_KEY and org-IdP tokens.
+    const isCodeWhispererOnly = authMethod === "api_key" || isExternalIdpAuthMethod(authMethod);
     const candidateUrls =
       region === "us-east-1" && !isCodeWhispererOnly
         ? ["https://runtime.us-east-1.kiro.dev/generateAssistantResponse", regionalUrl]
@@ -483,7 +507,7 @@ export class KiroExecutor extends BaseExecutor {
     mergeUpstreamExtraHeaders(headers, upstreamExtraHeaders);
     const transformedBody = await this.transformRequest(model, body, stream, credentials);
 
-    // Branded gateway first, raw CodeWhisperer host on an auth/profile-shaped failure.
+    // Branded gateway first, regional Amazon Q host on an auth/profile-shaped failure.
     // Shared with the one-shot tool_call repair retry so it takes the same path.
     const send = async (payload: unknown, sendSignal: AbortSignal | null | undefined) => {
       let res!: Response;
