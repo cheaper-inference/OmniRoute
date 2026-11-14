@@ -186,6 +186,11 @@ function normalizeNestedSubObjects(
   }
 }
 
+/**
+ * Return a sanitized copy of a connection's `providerSpecificData` for storage: malformed
+ * request-default fields and non-boolean flags such as `nativeJsonSchema` are dropped, and an
+ * empty record yields `undefined`.
+ */
 export function normalizeProviderSpecificData(
   provider: string | null | undefined,
   value: unknown
@@ -242,6 +247,10 @@ export function normalizeProviderSpecificData(
     typeof normalized.preserveEncryptedReasoning !== "boolean"
   ) {
     delete normalized.preserveEncryptedReasoning;
+  }
+
+  if ("nativeJsonSchema" in normalized && typeof normalized.nativeJsonSchema !== "boolean") {
+    delete normalized.nativeJsonSchema;
   }
 
   if ("blockExtraUsage" in normalized && typeof normalized.blockExtraUsage !== "boolean") {
