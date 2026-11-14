@@ -102,6 +102,33 @@ export function deriveAntigravitySessionId(accountKey?: string | null): string |
   return hash.toString();
 }
 
+/**
+ * Upstream Cloud Code session for one conversation on one account. Stable across turns
+ * of that conversation (prompt-cache reuse) yet distinct between conversations running in
+ * parallel on the same account, which otherwise share and evict one session cache.
+ *
+ * @param credentials - Connection credentials; their account key scopes the session.
+ * @param conversationKey - Resolved conversation id (or session-affinity key); when empty,
+ *   the account-derived session from {@link getAntigravitySessionId} is returned unchanged.
+ * @returns The `request.sessionId` to send in the Cloud Code envelope.
+ */
+export function getAntigravityConversationSessionId(
+  credentials?: AntigravityCredentialsLike | null,
+  conversationKey?: string | null
+): string {
+  const conversation = toNonEmptyString(conversationKey);
+  const account = getAntigravityAccountKey(credentials);
+  if (!conversation) return getAntigravitySessionId(credentials);
+  return (
+    deriveAntigravitySessionId(`${account ?? ""}\x1f${conversation}`) ||
+    getAntigravitySessionId(credentials)
+  );
+}
+
+/**
+ * Account-scoped Cloud Code session id: an explicit fallback wins, else a stable hash of the
+ * account key, else a random id when no account is known.
+ */
 export function getAntigravitySessionId(
   credentials?: AntigravityCredentialsLike | null,
   fallback?: unknown
