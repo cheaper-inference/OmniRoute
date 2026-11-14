@@ -151,6 +151,26 @@ async function applyMessageFieldRecovery(
   return fetchFn(url, { ...fetchOptions, body: retryBody });
 }
 
+/**
+ * Re-strip every field an earlier 400 in this execute() already rejected from a freshly
+ * built body (re-run of the same URL, fallback URL). Idempotent; messages are rebuilt, not
+ * mutated, because combo fallback reuses the caller's message objects.
+ */
+export function reapplyStrippedFields(body: unknown, strippedFields: Set<string>): void {
+  if (strippedFields.size === 0 || !body || typeof body !== "object") return;
+  const record = body as Record<string, unknown>;
+  const msgFields = [...strippedFields].filter((f) => f.startsWith("messages.*."));
+  for (const f of strippedFields) if (!f.startsWith("messages.*.")) delete record[f];
+  if (msgFields.length > 0 && Array.isArray(record.messages)) {
+    record.messages = record.messages.map((m) => {
+      if (!m || typeof m !== "object") return m;
+      const copy = { ...(m as Record<string, unknown>) };
+      for (const f of msgFields) delete copy[f.slice("messages.*.".length)];
+      return copy;
+    });
+  }
+}
+
 /** Returns the response to use going forward (the retry's when one was issued). */
 export async function applyFieldDowngradeRecovery(params: FieldDowngradeParams): Promise<Response> {
   const { url, fetchOptions, fetchFn, serializeBody, strippedFields, log } = params;
