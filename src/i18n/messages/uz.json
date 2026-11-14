@@ -7453,7 +7453,11 @@
     "chatgptConnectorLabel": "ChatGPT o‘zlashtirilgan konnektor",
     "doctorChecking": "Holat tekshirilmoqda…",
     "doctorCheck": "Doctor holatini tekshirish",
-    "fallbackRetryBackendTitle": "Zaxira takrorlash orqali backend"
+    "fallbackRetryBackendTitle": "Zaxira takrorlash orqali backend",
+    "museConsoleSessionLabel": "Muse Code console session",
+    "museConsoleSessionHint": "Required for live 5h/weekly quota. In the Muse developer console, open DevTools > Application > Cookies > dev.meta.ai > llama_dev_sess and copy the cookie VALUE, not the whole Cookie header. Sensitive: expires in about a year. Leave blank to keep the stored session.",
+    "museTeamIdLabel": "Muse Code team id (optional)",
+    "museTeamIdHint": "Optional. Set it only if the console quota is team-scoped. Leave blank to keep the stored team id."
   },
   "settings": {
     "proxyTraffic": {
