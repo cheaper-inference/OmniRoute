@@ -117,12 +117,18 @@ export async function POST(request: Request) {
 /** Mini App path: the initData HMAC proves origin; the allowlist decides who is served. */
 async function handleMiniAppRequest(initData: string, body: Record<string, unknown>) {
   const botToken = getTelegramBotToken();
-  if (!verifyInitData(initData, botToken)) {
-    return NextResponse.json({ ok: false, error: "Invalid initData signature" }, { status: 401 });
-  }
   const message = typeof body.message === "string" ? body.message : "";
   if (!message.trim()) {
     return NextResponse.json({ ok: false, error: "message is required" }, { status: 400 });
+  }
+
+  // Opt-in (#19833): the Mini App reuses one initData for the whole session, so keying the replay
+  // cache on (hash, message) would 401 a user who sends the same short message twice.
+  const antiReplay = process.env.TELEGRAM_INITDATA_ANTI_REPLAY === "true";
+  const parsed = parseInitData(initData);
+  const replayKey = `${parsed.hash ?? ""}:${message}`;
+  if (!verifyInitData(initData, botToken, undefined, { antiReplay, replayKey })) {
+    return NextResponse.json({ ok: false, error: "Invalid initData signature" }, { status: 401 });
   }
   // Resolve the Telegram user id from the verified initData for key mapping.
   const telegramUserId = extractInitDataUserId(initData);
