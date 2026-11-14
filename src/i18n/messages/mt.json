@@ -10675,6 +10675,7 @@
     "grokAutoTopUpMonth": "xahar",
     "grokAdditionalCredits": "Krediti Addizzjonali",
     "kiloAccountBalance": "Bilanċ tal-Kont",
+    "kiloPassBandUsage": "{used} minn {total}",
     "kiloPassBonus": "Bonus disponibbli",
     "kiloPassMeterLabel": "Miter tal-użu ta’ Kilo Pass",
     "kiloPassPaid": "Imħallas",

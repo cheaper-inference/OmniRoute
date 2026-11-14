@@ -10675,6 +10675,7 @@
     "grokAutoTopUpMonth": "月份",
     "grokAdditionalCredits": "額外的致謝",
     "kiloAccountBalance": "帳戶餘額",
+    "kiloPassBandUsage": "{total} 中的 {used}",
     "kiloPassBonus": "可用獎勵",
     "kiloPassMeterLabel": "Kilo Pass 用量儀表",
     "kiloPassPaid": "已付費",

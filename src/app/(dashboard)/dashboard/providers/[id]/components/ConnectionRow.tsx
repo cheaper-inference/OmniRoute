@@ -895,11 +895,11 @@ export default function ConnectionRow({
               aria-label={t("proxyConfig")}
             />
             <Button
-              variant="ghost"
+              variant="destructive-ghost"
               size="icon-sm"
               icon="delete"
               onClick={onDelete}
-              className="size-7 min-h-7 rounded hover:bg-error/10 text-error"
+              className="size-7 min-h-7 rounded"
               title={t("delete")}
               aria-label={t("delete")}
             />

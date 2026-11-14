@@ -10675,6 +10675,7 @@
     "grokAutoTopUpMonth": "ọnwa",
     "grokAdditionalCredits": "Kredit ndị ọzọ",
     "kiloAccountBalance": "Ego fọdụrụ n'akaụntụ",
+    "kiloPassBandUsage": "{used} n'ime {total}",
     "kiloPassBonus": "Ego mgbakwunye dị",
     "kiloPassMeterLabel": "Ihe nlele ojiji Kilo Pass",
     "kiloPassPaid": "Akwụgoro",

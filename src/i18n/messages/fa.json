@@ -10675,6 +10675,7 @@
     "grokAutoTopUpMonth": "ماه",
     "grokAdditionalCredits": "اعتبارات اضافی",
     "kiloAccountBalance": "موجودی حساب",
+    "kiloPassBandUsage": "{used} از {total}",
     "kiloPassBonus": "پاداش موجود",
     "kiloPassMeterLabel": "نشانگر مصرف Kilo Pass",
     "kiloPassPaid": "پرداخت‌شده",

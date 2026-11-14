@@ -10675,6 +10675,7 @@
     "grokAutoTopUpMonth": "měsíc",
     "grokAdditionalCredits": "Další kredity",
     "kiloAccountBalance": "Zůstatek na účtu",
+    "kiloPassBandUsage": "{used} z {total}",
     "kiloPassBonus": "Dostupný bonus",
     "kiloPassMeterLabel": "Ukazatel využití Kilo Pass",
     "kiloPassPaid": "Zaplaceno",

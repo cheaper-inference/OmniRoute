@@ -10675,6 +10675,7 @@
     "grokAutoTopUpMonth": "月",
     "grokAdditionalCredits": "追加のクレジット",
     "kiloAccountBalance": "口座残高",
+    "kiloPassBandUsage": "{total} 中 {used}",
     "kiloPassBonus": "利用可能なボーナス",
     "kiloPassMeterLabel": "Kilo Pass 使用量メーター",
     "kiloPassPaid": "支払い済み",

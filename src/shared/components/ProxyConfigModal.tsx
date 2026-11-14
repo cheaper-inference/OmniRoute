@@ -739,11 +739,10 @@ export default function ProxyConfigModal({
               {hasOwnProxy && (
                 <Button
                   size="sm"
-                  variant="ghost"
+                  variant="destructive-ghost"
                   icon="delete"
                   onClick={handleClear}
                   disabled={saving}
-                  className="!text-error hover:!bg-error/10"
                 >
                   {t("clear")}
                 </Button>

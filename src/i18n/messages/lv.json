@@ -10675,6 +10675,7 @@
     "grokAutoTopUpMonth": "mēnesī",
     "grokAdditionalCredits": "Papildu kredīti",
     "kiloAccountBalance": "Konta bilance",
+    "kiloPassBandUsage": "{used} no {total}",
     "kiloPassBonus": "Pieejamais bonuss",
     "kiloPassMeterLabel": "Kilo Pass lietojuma indikators",
     "kiloPassPaid": "Apmaksāts",

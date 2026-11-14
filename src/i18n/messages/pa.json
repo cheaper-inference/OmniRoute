@@ -10675,6 +10675,7 @@
     "grokAutoTopUpMonth": "ਮਹੀਨਾ",
     "grokAdditionalCredits": "ਵਾਧੂ ਕ੍ਰੈਡਿਟ",
     "kiloAccountBalance": "ਖਾਤਾ ਬਕਾਇਆ",
+    "kiloPassBandUsage": "{total} ਵਿੱਚੋਂ {used}",
     "kiloPassBonus": "ਉਪਲਬਧ ਬੋਨਸ",
     "kiloPassMeterLabel": "Kilo Pass ਵਰਤੋਂ ਮੀਟਰ",
     "kiloPassPaid": "ਭੁਗਤਾਨ ਕੀਤਾ",

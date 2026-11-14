@@ -10675,6 +10675,7 @@
     "grokAutoTopUpMonth": "ខែ",
     "grokAdditionalCredits": "ក្រេឌីតបន្ថែម",
     "kiloAccountBalance": "សមតុល្យគណនី",
+    "kiloPassBandUsage": "{used} ក្នុងចំណោម {total}",
     "kiloPassBonus": "ប្រាក់រង្វាន់ដែលអាចប្រើបាន",
     "kiloPassMeterLabel": "រង្វាស់ការប្រើប្រាស់ Kilo Pass",
     "kiloPassPaid": "បានបង់ប្រាក់",

@@ -10675,6 +10675,7 @@
     "grokAutoTopUpMonth": "මාසය",
     "grokAdditionalCredits": "අතිරේක බැර",
     "kiloAccountBalance": "ගිණුම් ශේෂය",
+    "kiloPassBandUsage": "{total} න් {used}",
     "kiloPassBonus": "ලබා ගත හැකි ප්රසාද දීමනාව",
     "kiloPassMeterLabel": "Kilo Pass භාවිත මීටරය",
     "kiloPassPaid": "ගෙවූ",

@@ -10675,6 +10675,7 @@
     "grokAutoTopUpMonth": "mí",
     "grokAdditionalCredits": "Creidmheasanna Breise",
     "kiloAccountBalance": "Iarmhéid an Chuntais",
+    "kiloPassBandUsage": "{used} as {total}",
     "kiloPassBonus": "Bónas atá ar fáil",
     "kiloPassMeterLabel": "Méadar úsáide Kilo Pass",
     "kiloPassPaid": "Íoctha",

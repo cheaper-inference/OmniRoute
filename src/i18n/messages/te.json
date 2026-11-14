@@ -10675,6 +10675,7 @@
     "grokAutoTopUpMonth": "మాసం",
     "grokAdditionalCredits": "అదనపు క్రెడిట్స్",
     "kiloAccountBalance": "ఖాతా బ్యాలెన్స్",
+    "kiloPassBandUsage": "{total} లో {used}",
     "kiloPassBonus": "అందుబాటులో ఉన్న బోనస్",
     "kiloPassMeterLabel": "Kilo Pass వినియోగ మీటర్",
     "kiloPassPaid": "చెల్లించినది",

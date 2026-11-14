@@ -10675,6 +10675,7 @@
     "grokAutoTopUpMonth": "mwezi",
     "grokAdditionalCredits": "Mikopo Ya Ziada",
     "kiloAccountBalance": "Salio la Akaunti",
+    "kiloPassBandUsage": "{used} kati ya {total}",
     "kiloPassBonus": "Bonasi inayopatikana",
     "kiloPassMeterLabel": "Kipimo cha matumizi ya Kilo Pass",
     "kiloPassPaid": "Imelipwa",

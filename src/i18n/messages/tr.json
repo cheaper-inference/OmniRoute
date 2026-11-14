@@ -10675,6 +10675,7 @@
     "grokAutoTopUpMonth": "ay",
     "grokAdditionalCredits": "Ekstra Krediler",
     "kiloAccountBalance": "Hesap Bakiyesi",
+    "kiloPassBandUsage": "{total} içinden {used}",
     "kiloPassBonus": "Kullanılabilir bonus",
     "kiloPassMeterLabel": "Kilo Pass kullanım sayacı",
     "kiloPassPaid": "Ödenen",

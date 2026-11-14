@@ -10675,6 +10675,7 @@
     "grokAutoTopUpMonth": "μήνα",
     "grokAdditionalCredits": "Πρόσθετες πιστώσεις",
     "kiloAccountBalance": "Υπόλοιπο λογαριασμού",
+    "kiloPassBandUsage": "{used} από {total}",
     "kiloPassBonus": "Διαθέσιμο μπόνους",
     "kiloPassMeterLabel": "Μετρητής χρήσης Kilo Pass",
     "kiloPassPaid": "Πληρωμένο",

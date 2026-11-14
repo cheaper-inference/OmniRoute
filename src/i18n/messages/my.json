@@ -10675,6 +10675,7 @@
     "grokAutoTopUpMonth": "လ",
     "grokAdditionalCredits": "အပိုခရက်ဒစ်များ",
     "kiloAccountBalance": "အကောင့်လက်ကျန်",
+    "kiloPassBandUsage": "{total} အနက် {used}",
     "kiloPassBonus": "ရရှိနိုင်သော အပိုဆု",
     "kiloPassMeterLabel": "Kilo Pass အသုံးပြုမှုတိုင်းတာကိရိယာ",
     "kiloPassPaid": "ငွေပေးချေပြီး",
