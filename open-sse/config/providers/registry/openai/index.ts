@@ -20,6 +20,16 @@ export const openaiProvider: RegistryEntry = {
       ...GPT_5_6_API_CAPABILITIES,
       unsupportedParams: ["temperature", "top_p", "top_logprobs", "logprobs"],
     },
+    // https://developers.openai.com/api/docs/models/gpt-6.1-terra
+    {
+      id: "gpt-6.1-terra",
+      name: "GPT-6.1 Terra",
+      ...GPT_5_6_API_CAPABILITIES,
+      // Unlike Sol/Astra, Terra accepts sampling with reasoning.effort="none".
+      // The effort-aware GPT sampling guard strips these fields only with
+      // active reasoning; static unsupportedParams would strip them always.
+      supportedThinkingEfforts: ["none", "low", "medium", "high", "xhigh", "max"],
+    },
     // Astra shares the public GPT-5.6 limits; tool calling requires Responses.
     // https://developers.openai.com/api/docs/guides/latest-model
     {

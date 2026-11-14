@@ -57,7 +57,7 @@ export function imageUrlToText(value: unknown): string {
 }
 
 const CODEX_MAX_EFFORT_MODEL_PATTERN =
-  /^(?:gpt-5\.6-(?:sol|terra|luna)|gpt-6(?:\.1)?-(?:astra|sol|luna))(?:-(?:none|low|medium|high|xhigh|max|ultra))?$/;
+  /^(?:gpt-5\.6-(?:sol|terra|luna)|gpt-6(?:\.1)?-(?:astra|sol|terra|luna))(?:-(?:none|low|medium|high|xhigh|max|ultra))?$/;
 const KIRO_GPT_5_6_MODEL_PATTERN =
   /^(?:kiro|kr)\/gpt-5\.6-(?:sol|terra|luna)(?:-(?:none|low|medium|high|xhigh|max))?$/;
 const KIRO_OPUS_5_5_MODEL_PATTERN = /^(?:kiro|kr)\/claude-opus-5(?:\.|-)5(?:-thinking)?$/;

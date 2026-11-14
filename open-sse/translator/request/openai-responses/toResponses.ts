@@ -49,7 +49,7 @@ const RESPONSES_REASONING_ENCRYPTED_CONTENT_INCLUDE = "reasoning.encrypted_conte
 // include on this path. This compatibility policy makes no claim about the cause
 // or resolution of upstream safety rejections.
 const CODEX_MODEL_PATTERN =
-  /^(?:(?:codex|cx)\/)?(?:gpt-6(?:\.1)?-(?:astra|sol|luna)|gpt-5\.6-(?:sol|terra|luna))(?:-(?:none|low|medium|high|xhigh|max|ultra))?$/;
+  /^(?:(?:codex|cx)\/)?(?:gpt-6(?:\.1)?-(?:astra|sol|terra|luna)|gpt-5\.6-(?:sol|terra|luna))(?:-(?:none|low|medium|high|xhigh|max|ultra))?$/;
 function isCodexModel(model: unknown): boolean {
   if (typeof model !== "string") return false;
   return CODEX_MODEL_PATTERN.test(model.trim().toLowerCase());

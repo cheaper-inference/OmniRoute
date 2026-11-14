@@ -83,6 +83,23 @@ export const codexProvider: RegistryEntry = {
     },
     { id: "gpt-6.1-sol-medium", name: "GPT 6.1 Sol (Medium)", ...GPT_5_6_CODEX_CAPABILITIES },
     { id: "gpt-6.1-sol-low", name: "GPT 6.1 Sol (Low)", ...GPT_5_6_CODEX_CAPABILITIES },
+    { id: "gpt-6.1-terra", name: "GPT 6.1 Terra", ...GPT_5_6_CODEX_CAPABILITIES },
+    { id: "gpt-6.1-terra-ultra", name: "GPT 6.1 Terra (Ultra)", ...GPT_5_6_CODEX_CAPABILITIES },
+    { id: "gpt-6.1-terra-max", name: "GPT 6.1 Terra (Max)", ...GPT_5_6_CODEX_CAPABILITIES },
+    {
+      id: "gpt-6.1-terra-xhigh",
+      name: "GPT 6.1 Terra (xHigh)",
+      ...GPT_5_6_CODEX_CAPABILITIES,
+      timeoutMs: 1200000,
+    },
+    {
+      id: "gpt-6.1-terra-high",
+      name: "GPT 6.1 Terra (High)",
+      ...GPT_5_6_CODEX_CAPABILITIES,
+      timeoutMs: 1200000,
+    },
+    { id: "gpt-6.1-terra-medium", name: "GPT 6.1 Terra (Medium)", ...GPT_5_6_CODEX_CAPABILITIES },
+    { id: "gpt-6.1-terra-low", name: "GPT 6.1 Terra (Low)", ...GPT_5_6_CODEX_CAPABILITIES },
     { id: "gpt-6-luna", name: "GPT 6 Luna", ...GPT_5_6_CODEX_CAPABILITIES },
     { id: "gpt-6-luna-max", name: "GPT 6 Luna (Max)", ...GPT_5_6_CODEX_CAPABILITIES },
     {

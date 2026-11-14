@@ -14,6 +14,7 @@ import { openaiToOpenAIResponsesRequest } from "../../open-sse/translator/reques
 // the 128k default, corrupting combo context windows).
 const EXPECTED_MODELS = [
   "gpt-6.1-sol",
+  "gpt-6.1-terra",
   "gpt-6-astra",
   "gpt-6-sol",
   "gpt-6-luna",

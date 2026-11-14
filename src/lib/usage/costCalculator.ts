@@ -173,6 +173,10 @@ export async function resolvePricingRow(provider: string, model: string) {
   return null;
 }
 
+function getGpt6FastMultiplier(modelKey: string, compactModelKey: string): number {
+  return modelKey === "gpt-6.1-terra" || compactModelKey === "gpt61terra" ? 2 : 2.5;
+}
+
 export function getCodexFastCostMultiplier(
   provider: string | null | undefined,
   model: string | null | undefined,
@@ -194,12 +198,13 @@ export function getCodexFastCostMultiplier(
     splitCodexReasoningSuffix(normalizeModelName(String(model || "")).toLowerCase()).baseModel
   );
   const compactModelKey = modelKey.replace(/-/g, "");
-  // Codex GPT-6 Fast is 2.5x Standard (https://developers.openai.com/codex/pricing).
+  // GPT-6 family members share one Fast tier, with the Terra exception.
+  // https://learn.chatgpt.com/docs/pricing#token-rates
   if (
-    /^gpt-6(?:\.1)?-(?:astra|sol|luna)$/.test(modelKey) ||
-    /^gpt6(?:\.1)?(?:astra|sol|luna)$/.test(compactModelKey)
+    /^gpt-6(?:\.1)?-(?:astra|sol|terra|luna)$/.test(modelKey) ||
+    /^gpt6(?:\.1)?(?:astra|sol|terra|luna)$/.test(compactModelKey)
   ) {
-    return 2.5;
+    return getGpt6FastMultiplier(modelKey, compactModelKey);
   }
   if (
     /^gpt-5\.6-(?:sol|terra|luna)$/.test(modelKey) ||
