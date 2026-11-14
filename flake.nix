@@ -1,5 +1,5 @@
 {
-  description = "OmniRoute - Unified AI router with 160+ providers";
+  description = "OmniRoute - Unified AI router with hundreds of providers";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";

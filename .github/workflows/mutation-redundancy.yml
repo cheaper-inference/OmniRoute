@@ -3,7 +3,7 @@ name: Mutation Redundancy (disableBail, on-demand)
 # (nightly-mutation.yml) bails on the first kill, so `killedBy` lists only the FIRST
 # killer — 🟠 redundant is understated and 🟢 unique overstated (see the caveat in
 # scripts/quality/mutation-radiography.mjs). This workflow re-runs the SAME combo +
-# chatCore leaf batches with stryker.disablebail.json (disableBail:true, incremental:false)
+# chatCore leaf batches with stryker.disablebail.mjs (disableBail:true, incremental:false)
 # so `killedBy` lists EVERY killer. Feed the uploaded reports to
 # `node scripts/quality/mutation-radiography.mjs --candidates mutation-nobail-*/mutation.json`
 # to get the accurate R1 prune-candidate list (🔴 empty ∪ 🟠 redundant) for human review.
@@ -54,7 +54,7 @@ jobs:
       - name: Run Stryker (disableBail)
         env:
           BATCH_MUTATE: ${{ matrix.batch.mutate }}
-        run: npx stryker run --config-file stryker.disablebail.json --mutate "$BATCH_MUTATE"
+        run: npx stryker run --config-file stryker.disablebail.mjs --mutate "$BATCH_MUTATE"
       - name: Upload mutation report
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7

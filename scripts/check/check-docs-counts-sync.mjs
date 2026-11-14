@@ -22,9 +22,10 @@
 // the doc's `Total providers` against the live provider modules (the same collections
 // the generator reads), so a hand-stale doc is a red, not a silently propagated total.
 // Fix by running `npm run gen:provider-reference`. Additional STRICT coverage added in
-// the 2026-08-12 hardening: llm.txt + package.json description (providers), migration
-// count (README/AGENTS/llm.txt), and canonical numbers inside the README SVG diagrams
-// (providers / MCP tools / routing strategies / free-tier pools).
+// the 2026-08-12 hardening: llm.txt (providers), migration count (README/AGENTS/llm.txt),
+// and canonical numbers inside the README SVG diagrams (providers / MCP tools / routing
+// strategies / free-tier pools). The package.json description must stay count-free
+// (2026-11-13): a STRICT guard rejects an exact provider count there.
 
 import fs from "node:fs";
 import { spawnSync as _spawnSync } from "node:child_process";
@@ -661,8 +662,14 @@ export function makeProviderReferenceValidator(expected) {
   };
 }
 
-// PURE: the npm package description must carry the live provider count.
-export function makePackageDescriptionValidator(expected) {
+// PURE: the npm package description must NOT carry an exact provider count. The
+// count changes with almost every provider PR, so a number here made every such PR
+// conflict on this one line (25 open PRs on 2026-11-13). The description stays
+// count-free ("hundreds of providers"); this guard keeps a number from coming back.
+// `_expected` is accepted for call-site compatibility and ignored.
+const PACKAGE_DESCRIPTION_PROVIDER_COUNT = /\b\d[\d,.]*\+?\s+(?:AI\s+|LLM\s+)?providers?\b/i;
+
+export function makePackageDescriptionValidator(_expected) {
   return (content) => {
     let desc = "";
     try {
@@ -670,12 +677,16 @@ export function makePackageDescriptionValidator(expected) {
     } catch {
       return { ok: false, detail: "package.json could not be parsed" };
     }
-    if (desc.includes(String(expected)))
-      return { ok: true, detail: `description mentions the live provider count ${expected}` };
-    return {
-      ok: false,
-      detail: `description does not mention the live provider count ${expected}: "${desc}"`,
-    };
+    if (!desc.trim()) return { ok: false, detail: "package.json has an empty description" };
+    const hit = desc.match(PACKAGE_DESCRIPTION_PROVIDER_COUNT);
+    if (hit)
+      return {
+        ok: false,
+        detail:
+          `description carries an exact provider count ("${hit[0]}") — keep it count-free ` +
+          `(e.g. "hundreds of providers"); the number is release-derived: "${desc}"`,
+      };
+    return { ok: true, detail: "description carries no exact provider count" };
   };
 }
 
@@ -767,12 +778,12 @@ export function buildChecks() {
       validate: makeProviderCountValidator(readProviderTotal()),
     },
     {
-      label: "Provider count (package.json description)",
-      actual: readProviderTotal(),
+      label: "No exact provider count (package.json description)",
+      actual: "count-free",
       docKey: "providers",
       strict: true,
       files: ["package.json"],
-      validate: makePackageDescriptionValidator(readProviderTotal()),
+      validate: makePackageDescriptionValidator(),
     },
     {
       label: "DB migrations count",
