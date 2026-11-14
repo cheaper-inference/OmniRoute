@@ -101,6 +101,10 @@ App token.
 - **AI attribution over the whole range**: with `merge-ff` the contributors' own commits land
   unchanged, so `ci.yml` runs `check:ai-attribution` over `<candidate base>..<candidate>` (Hard
   Rule #16), not only over the PR metadata.
+- **Release numbers**: `npm run release:reconcile` maps each landed commit to its PR through the
+  `Omni-Queue-PR` trailer, writes one changelog bullet per PR, and counts a PR landed by the queue
+  as one commit in "Release by the numbers" and in the Top 25 ranking, so `merge-ff` cycles stay
+  comparable with squash-only ones (`landingUnits` in `scripts/release/reconcile-changelog.mjs`).
 
 ### Landing modes (`landing.mode`)
 

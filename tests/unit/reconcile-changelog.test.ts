@@ -14,6 +14,7 @@ const {
   versionSectionRange,
   otherSectionsText,
   rankAuthors,
+  renderSection,
   reconcile,
 } = mod;
 
@@ -273,6 +274,62 @@ test("rankAuthors: consolidates display-name drift by PR login, excludes bots", 
   assert.deepEqual(top[0], ["Webman (@jonlwheat2-gif)", 3]);
   assert.deepEqual(top[1], ["solo", 1]);
   assert.equal("dependabot[bot]" in counts, false);
+});
+
+// merge-ff (omni-queue) keeps every contributor commit; a squash leaves one per PR.
+const queueRow = (pr: number, authorName: string, prAuthor: string) => ({
+  authorName,
+  prAuthor,
+  queue: { pr, author: prAuthor, title: `t${pr}`, mergeSha: "m", subjectPr: null },
+});
+
+test("rankAuthors: a PR landed by omni-queue counts once, however many commits it brought", () => {
+  const rows = [
+    queueRow(34, "Alice", "alice"),
+    queueRow(34, "Alice", "alice"),
+    queueRow(34, "Alice", "alice"),
+    { authorName: "Bob", prAuthor: "bob" },
+    { authorName: "Bob", prAuthor: "bob" },
+    { authorName: "Bob", prAuthor: "bob" },
+    queueRow(35, "Alice", "alice"),
+  ];
+  const { top, counts } = rankAuthors(rows);
+  assert.deepEqual(top[0], ["Bob (@bob)", 3], "three squash commits");
+  assert.deepEqual(top[1], ["Alice (@alice)", 2], "two queue PRs, four commits");
+  assert.equal(counts.alice, 2);
+});
+
+test("renderSection: commits in the cycle count a queue PR once and name the queue PRs", () => {
+  const base = {
+    version: "9.9.9",
+    today: "2026-11-14",
+    baseTip: "aaa",
+    headTip: "bbb",
+    all: { features: [], fixes: [], maintenance: [] },
+    prNumbers: new Set<number>(),
+  };
+  const squashRows = [
+    { authorName: "Bob", prAuthor: "bob" },
+    { authorName: "Bob", prAuthor: "bob" },
+  ];
+  const plain = renderSection({ ...base, rows: squashRows, ranking: rankAuthors(squashRows) });
+  assert.match(plain, /\| 📝 Commits in the cycle \| \*\*2\*\* \|/);
+  assert.doesNotMatch(plain, /omni-queue/, "squash-only cycles render exactly as before");
+
+  const rows = [
+    ...squashRows,
+    queueRow(34, "Alice", "alice"),
+    queueRow(34, "Alice", "alice"),
+    queueRow(34, "Alice", "alice"),
+  ];
+  const out = renderSection({ ...base, rows, ranking: rankAuthors(rows) });
+  assert.match(out, /5 non-merge commits/, "the scope line stays literal");
+  assert.match(
+    out,
+    /\| 📝 Commits in the cycle \(a PR landed by omni-queue counts once\) \| \*\*3\*\* \|/
+  );
+  assert.match(out, /\| 🚦 Pull requests landed by omni-queue \| \*\*1\*\* \|/);
+  assert.match(out, /A PR landed by omni-queue counts as one commit\./);
 });
 
 test("reconcile: folds fragments under the version section, credits by fragment origin, drops shipped twins, generates the rest", () => {
