@@ -182,9 +182,31 @@ export function parseStreamIntoSegments(joined: string): StreamSegment[] {
   return segments;
 }
 
+// A "copied" flag that resets itself after a short delay. The reset timer is cleared on unmount:
+// left running, it fired after the component (and, in tests, jsdom) was gone (#19329).
+function useTransientFlag(resetMs = 2000) {
+  const [active, setActive] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (timerRef.current !== null) clearTimeout(timerRef.current);
+    },
+    []
+  );
+  const trigger = () => {
+    setActive(true);
+    if (timerRef.current !== null) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      timerRef.current = null;
+      setActive(false);
+    }, resetMs);
+  };
+  return [active, trigger] as const;
+}
+
 function StreamSection({ title, sectionId, json, onCopy }) {
   const t = useTranslations("requestLogger.detail");
-  const [copied, setCopied] = useState(false);
+  const [copied, flashCopied] = useTransientFlag();
   const [open, setOpen] = useState(true);
   const [autoscroll, setAutoscroll] = useState(() => {
     try {
@@ -212,10 +234,7 @@ function StreamSection({ title, sectionId, json, onCopy }) {
 
   const handleCopy = async () => {
     const success = await onCopy();
-    if (success !== false) {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
+    if (success !== false) flashCopied();
   };
 
   useEffect(() => {
@@ -412,18 +431,13 @@ export function RequestLoggerDetailPanel({
 
   const [unblocking, setUnblocking] = useState(false);
   const [cleared, setCleared] = useState(false);
-  const [copiedAll, setCopiedAll] = useState(false);
-  const copyAllLifetime = useRef({
-    active: false,
-    timer: null as ReturnType<typeof setTimeout> | null,
-  });
-
+  const [copiedAll, flashCopiedAll] = useTransientFlag();
+  const copyAllLifetime = useRef({ active: false });
   useEffect(() => {
-    const lifetime = { active: true, timer: null as ReturnType<typeof setTimeout> | null };
+    const lifetime = { active: true };
     copyAllLifetime.current = lifetime;
     return () => {
       lifetime.active = false;
-      if (lifetime.timer !== null) clearTimeout(lifetime.timer);
     };
   }, []);
 
@@ -548,14 +562,7 @@ export function RequestLoggerDetailPanel({
     if (!text) return;
     const lifetime = copyAllLifetime.current;
     const success = await onCopy(text);
-    if (success !== false && lifetime.active) {
-      setCopiedAll(true);
-      if (lifetime.timer !== null) clearTimeout(lifetime.timer);
-      lifetime.timer = setTimeout(() => {
-        lifetime.timer = null;
-        setCopiedAll(false);
-      }, 2000);
-    }
+    if (success !== false && lifetime.active) flashCopiedAll();
   };
   const detailIssue =
     detail?.detailState === "missing"

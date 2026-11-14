@@ -59,12 +59,15 @@ export function storeSemanticCacheResponse(
     usage?: UsageLike;
     log?: LoggerLike;
     videoTranscriptSensitive?: boolean;
+    /** Reversible PII vault minted tokens: a cached copy would replay unresolvable tokens. */
+    piiTokensMinted?: boolean;
   },
   deps: SemanticCacheStoreDeps = DEFAULT_DEPS
 ): void {
   if (
     args.provider === "muse-code" ||
     args.videoTranscriptSensitive ||
+    args.piiTokensMinted ||
     !args.enabled ||
     !deps.isCacheableForWrite(args.body, args.headers) ||
     (deps.isTruncatedCompletion ?? defaultIsTruncatedCompletion)(args.translatedResponse) ||

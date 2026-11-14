@@ -525,7 +525,6 @@ describe("useModelImportHandlers — no-auth listing import", () => {
       expect(hook.get().importProgress.importedCount).toBe(1);
     }
   );
-
   it("reads the provider's listing and preserves a discovered per-model targetFormat", async () => {
     const setTimeoutSpy = vi.spyOn(globalThis, "setTimeout");
     const hook = renderHook(noAuthParams());

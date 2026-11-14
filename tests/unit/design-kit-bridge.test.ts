@@ -370,11 +370,11 @@ test("every flow surface expresses state with --orch-status-* tokens; categorica
   // Combo live studio: active/error provider pills + the run outcome tri-state.
   assert.ok(combo.includes("FLOW_EDGE_COLORS.active"), "combo active pill uses the flow palette");
   assert.ok(combo.includes("FLOW_EDGE_COLORS.error"), "combo error pill uses the flow palette");
-  // The run outcome is a kit Stat; its tone carries the kit status token (the kit Stat has no
-  // warning tone, so a running run stays neutral).
+  // The run outcome is a kit Stat; its tone carries the kit status token. Kit 0.0.115 added the
+  // Stat warning tone for a pending/running state (kit #189), so a running run uses it.
   assert.match(combo, /succeeded: "positive"/, "combo succeeded = positive (success) tone");
   assert.match(combo, /exhausted: "critical"/, "combo exhausted = critical (error) tone");
-  assert.match(combo, /running: "default"/, "combo running = neutral tone");
+  assert.match(combo, /running: "warning"/, "combo running = warning (in progress) tone");
   assert.ok(!combo.includes('"#ef4444"'), "combo studio hardcodes no error hex");
   assert.ok(!combo.includes('"#f59e0b"'), "combo studio hardcodes no warning hex");
 
