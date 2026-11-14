@@ -454,6 +454,10 @@ export function resolveRequestedModel(
       };
     }
   }
+  const deepSeekEffort = /^deepseek-v41-flash-1017-(medium|max)$/.exec(normalized)?.[1];
+  if (deepSeekEffort) {
+    return { modelId: normalized, parameters: [{ id: "reasoning_effort", value: deepSeekEffort }] };
+  }
   const oneMillionContext = resolveCursorContextModel(normalized);
   if (oneMillionContext) return oneMillionContext;
   // Live catalog is authoritative for exact ids (flattened effort variants).
@@ -576,11 +580,23 @@ export function encodeAgentRunRequest(input: AgentRunInput): Buffer {
   const isSyntheticCursorGrok = input.modelId.startsWith("cursor-grok-4.7-");
   const isFast = resolvedParameters.some((p) => p.id === "fast" && p.value === "true");
   const useStandardGrok = isGrok47 && isSyntheticCursorGrok && !isFast;
-  const parameters = useStandardGrok
+  const useComposerStandard =
+    modelId === "composer-2.5" && normalizeCursorModelId(input.modelId) === modelId;
+  const useSonnetMedium =
+    modelId === "claude-sonnet-5-5" &&
+    resolvedParameters.some(({ id, value }) => id === "effort" && value === "medium");
+  const haikuEffort =
+    modelId === "claude-haiku-5-5" &&
+    CURSOR_EFFORT_SUFFIXES.some((effort) => effort === input.reasoningEffort)
+      ? input.reasoningEffort
+      : undefined;
+  const parameters = useStandardGrok || useSonnetMedium
     ? resolvedParameters.map((parameter) =>
         parameter.id === "effort" ? { ...parameter, id: "reasoning_effort" } : parameter
       )
-    : resolvedParameters;
+    : [...resolvedParameters];
+  if (useComposerStandard) parameters.push({ id: "fast", value: "false" });
+  if (haikuEffort) parameters.push({ id: "reasoning_effort", value: haikuEffort });
 
   // UserMessage { text, message_id, selected_context, mode=1 }.
   // selected_context is normally an empty placeholder (required by the server
@@ -661,7 +677,9 @@ export function encodeAgentRunRequest(input: AgentRunInput): Buffer {
   const agentRunRequest = [
     conversationState,
     action,
-    ...(useStandardGrok ? [] : [modelDetails]),
+    ...(useStandardGrok || useComposerStandard || useSonnetMedium || haikuEffort
+      ? []
+      : [modelDetails]),
     mcpToolsBlock,
     encodeString(ARR_CONVERSATION_ID, conversationId),
     requestedModel,
