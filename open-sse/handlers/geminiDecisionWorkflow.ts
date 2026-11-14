@@ -8,7 +8,6 @@ import {
 } from "./geminiDecisions.ts";
 import type { GeminiDecisionTransportResult, GeminiDecisionPayload } from "./geminiDecisions.ts";
 
-const PROVIDER = "gemini";
 const MAX_UPSTREAM_ATTEMPTS = 4;
 const TOTAL_DEADLINE_MS = 45_000;
 const RETRYABLE_STATUS = new Set([401, 402, 403, 408, 429, 500, 502, 503, 504]);
