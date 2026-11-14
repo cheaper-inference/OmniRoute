@@ -9,9 +9,10 @@ import {
   defineAdapter,
   ensureV1,
   findFlag,
-  findTokenSites,
   injectRows,
 } from "../contract.mjs";
+import { injectModelList, withTokenSites } from "./_shared/inject.mjs";
+import { compareDotted } from "./_shared/semver.mjs";
 
 const PROVIDER = "omniroute";
 /** Tool-literal key placeholder, kept as-is by core (only ${TMP}/${STATE}/${TOKEN} expand). */
@@ -43,19 +44,6 @@ const ALWAYS_UNSET = [
   "OPENCLAW_WORKSPACE_DIR",
   "OPENCLAW_AGENT_DIR",
 ];
-
-/** Numeric dotted-version compare: -1, 0, 1. Non-numeric parts count as 0. */
-function compareVersions(a, b) {
-  const pa = String(a).split(".");
-  const pb = String(b).split(".");
-  const len = Math.max(pa.length, pb.length);
-  for (let i = 0; i < len; i++) {
-    const x = Number.parseInt(pa[i] ?? "0", 10) || 0;
-    const y = Number.parseInt(pb[i] ?? "0", 10) || 0;
-    if (x !== y) return x < y ? -1 : 1;
-  }
-  return 0;
-}
 
 function knownContext(row) {
   const value = row?.contextTokens;
@@ -89,7 +77,7 @@ function modelEntry(row) {
 function checkVersion(ctx, warnings) {
   const version = ctx.tool?.version;
   if (typeof version !== "string" || version === "") return;
-  if (compareVersions(version, MIN_VERSION) < 0) {
+  if (compareDotted(version, MIN_VERSION) < 0) {
     throw new LaunchError(
       "ToolVersionTooOld",
       `OpenClaw ${version} is older than ${MIN_VERSION}, the first release line with tui --local ` +
@@ -97,7 +85,7 @@ function checkVersion(ctx, warnings) {
       { hint: "Upgrade with: npm install -g openclaw@latest --allow-scripts=openclaw" }
     );
   }
-  if (compareVersions(version, RECOMMENDED_VERSION) < 0) {
+  if (compareDotted(version, RECOMMENDED_VERSION) < 0) {
     warnings.push(
       `OpenClaw ${version} is older than ${RECOMMENDED_VERSION}, the version this recipe was ` +
         "verified with; upgrade with npm install -g openclaw@latest if the launch fails."
@@ -260,32 +248,32 @@ function plan(ctx) {
       `${PROVIDER}/<id>.`
   );
 
-  const result = createPlan("openclaw", {
-    argv: buildArgv(ctx.passthroughArgs),
-    env: { set, unset: inheritedUnset(ctx.baseEnv, new Set(Object.keys(set))) },
-    tempFiles: [
-      {
-        path: "openclaw.json",
-        contents: `${ctx.util.json(config, { indent: 2 })}\n`,
-        mode: 0o600,
-        format: "json",
-      },
-    ],
-    notes,
-    warnings,
-    preflight: [
-      {
-        kind: "node-version",
-        range: ">=24.16.0 <25 || >=26.1.0",
-        why:
-          "openclaw refuses other Node versions (node:sqlite NUL truncation) and may install a " +
-          "private Node under ~/.openclaw when run on an older one",
-      },
-    ],
-    modelList: { strategy: "inject", viewHash: ctx.view.hash, injected: rows.length },
-  });
-  result.secretSites = findTokenSites(result);
-  return result;
+  return withTokenSites(
+    createPlan("openclaw", {
+      argv: buildArgv(ctx.passthroughArgs),
+      env: { set, unset: inheritedUnset(ctx.baseEnv, new Set(Object.keys(set))) },
+      tempFiles: [
+        {
+          path: "openclaw.json",
+          contents: `${ctx.util.json(config, { indent: 2 })}\n`,
+          mode: 0o600,
+          format: "json",
+        },
+      ],
+      notes,
+      warnings,
+      preflight: [
+        {
+          kind: "node-version",
+          range: ">=24.16.0 <25 || >=26.1.0",
+          why:
+            "openclaw refuses other Node versions (node:sqlite NUL truncation) and may install a " +
+            "private Node under ~/.openclaw when run on an older one",
+        },
+      ],
+      modelList: injectModelList(ctx, rows.length),
+    })
+  );
 }
 
 export default defineAdapter({

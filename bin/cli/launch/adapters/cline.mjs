@@ -10,6 +10,7 @@ import {
   findTokenSites,
   injectRows,
 } from "../contract.mjs";
+import { isSemverBelow, parseSemverPrefix } from "./_shared/semver.mjs";
 
 const MIN_VERSION = "3.0.67";
 const PROVIDER_ID = "omniroute";
@@ -18,22 +19,6 @@ const DEFAULT_CONTEXT = 128000;
 const DEFAULT_MAX_TOKENS = 16384;
 // plan() must be pure, so the ISO timestamp Cline's schema requires is a fixed value.
 const UPDATED_AT = "1970-01-01T00:00:00.000Z";
-
-function parseSemver(value) {
-  const match = /^(\d+)\.(\d+)\.(\d+)/.exec(String(value ?? ""));
-  return match ? [Number(match[1]), Number(match[2]), Number(match[3])] : null;
-}
-
-/** True when `version` is a parseable semver strictly below `min`. */
-function isBelow(version, min) {
-  const a = parseSemver(version);
-  const b = parseSemver(min);
-  if (!a || !b) return false;
-  for (let i = 0; i < 3; i++) {
-    if (a[i] !== b[i]) return a[i] < b[i];
-  }
-  return false;
-}
 
 function realHomePath(ctx, ...parts) {
   const sep = ctx.platform === "win32" ? "\\" : "/";
@@ -101,7 +86,7 @@ export default defineAdapter({
   plan(ctx) {
     const warnings = [];
     const version = ctx.tool.version;
-    if (version !== undefined && isBelow(version, MIN_VERSION)) {
+    if (version !== undefined && isSemverBelow(version, MIN_VERSION, parseSemverPrefix)) {
       throw new LaunchError(
         "ToolVersionTooOld",
         `Cline ${version} is older than ${MIN_VERSION}; custom providers fail at run time there.`,

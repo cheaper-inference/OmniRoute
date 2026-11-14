@@ -18,7 +18,9 @@
 // - Anthropic route and the declarative custom provider are not used.
 // - Non-isolated mode (keeping the user's goose config) is not offered in v1.
 
-import { LaunchError, createPlan, defineAdapter, findTokenSites } from "../contract.mjs";
+import { LaunchError, createPlan, defineAdapter } from "../contract.mjs";
+import { withTokenSites } from "./_shared/inject.mjs";
+import { compareSemver, parseSemver } from "./_shared/semver.mjs";
 
 const MIN_VERSION = "1.59.0";
 const MIN_CONTEXT_TOKENS = 32000;
@@ -51,20 +53,106 @@ const SCRUB_PREFIXES = ["ANTHROPIC_", "GOOSE_TOOLSHIM", "GOOSE_LEAD"];
 const RESPONSES_ID = /(?:^|[-/])(?:o\d+(?:$|-)|gpt-(?:5|6)(?:$|[-.]))/i;
 const EFFORT_SUFFIX = /-(?:none|low|medium|high|xhigh)$/i;
 
-function parseSemver(text) {
-  const match = /(\d+)\.(\d+)\.(\d+)/.exec(String(text ?? ""));
-  return match ? [Number(match[1]), Number(match[2]), Number(match[3])] : null;
-}
-
 /** -1 / 0 / 1, or null when either side is not a semver. */
-function compareSemver(a, b) {
+function compareVersions(a, b) {
   const left = parseSemver(a);
   const right = parseSemver(b);
-  if (!left || !right) return null;
-  for (let i = 0; i < 3; i += 1) {
-    if (left[i] !== right[i]) return left[i] < right[i] ? -1 : 1;
+  return left && right ? compareSemver(left, right) : null;
+}
+
+/** The view must have rows and a model must be chosen. */
+function requireModel(ctx) {
+  const rows = ctx.view?.rows ?? [];
+  if (rows.length === 0) {
+    throw new LaunchError("ModelNotFound", "No models in the goose launch view.", {
+      hint: "Connect a provider with tool-capable chat models (omniroute providers), then retry.",
+    });
   }
-  return 0;
+  if (!ctx.model) {
+    throw new LaunchError("ModelRequired", "goose needs a model to launch.", {
+      hint: "Pass --model <id> or pick one from the launch picker.",
+    });
+  }
+  return ctx.model;
+}
+
+function assertVersion(version) {
+  if (!version) return;
+  const cmp = compareVersions(version, MIN_VERSION);
+  if (cmp !== null && cmp < 0) {
+    throw new LaunchError(
+      "ToolVersionTooOld",
+      `goose ${version} is older than the minimum ${MIN_VERSION}.`,
+      { hint: "Run `goose update` or reinstall goose, then retry." }
+    );
+  }
+}
+
+/** The model's positive numeric context window, else undefined. */
+function knownContext(model) {
+  const value = model.contextTokens;
+  return typeof value === "number" && value > 0 ? value : undefined;
+}
+
+function assertContext(model, context) {
+  if (context !== undefined && context < MIN_CONTEXT_TOKENS) {
+    throw new LaunchError(
+      "ModelUnsuitable",
+      `${model.id} has a ${context} token window, below the ${MIN_CONTEXT_TOKENS} goose needs.`,
+      { hint: "Choose a model with a larger context window." }
+    );
+  }
+}
+
+function gooseEnv(ctx, model, context) {
+  const env = {
+    GOOSE_PATH_ROOT: "${TMP}",
+    GOOSE_DISABLE_KEYRING: "1",
+    GOOSE_TELEMETRY_OFF: "1",
+    GOOSE_PROVIDER: "openai",
+    GOOSE_MODEL: model.id,
+    OPENAI_BASE_URL: ctx.util.ensureV1(ctx.gateway.rootUrl),
+    // Leading slash is deliberate: a custom path containing chat/completions turns the
+    // automatic /v1/responses routing of gpt-5* and o* ids off.
+    OPENAI_BASE_PATH: "/v1/chat/completions",
+    OPENAI_API_KEY: ctx.auth.token,
+  };
+  if (context !== undefined) env.GOOSE_CONTEXT_LIMIT = String(context);
+  return env;
+}
+
+function modelWarnings(model, context) {
+  const warnings = [];
+  if (context === undefined) {
+    warnings.push(
+      `Context window of ${model.id} is unknown: goose falls back to its own default (128000).`
+    );
+  }
+  if (RESPONSES_ID.test(model.id) && EFFORT_SUFFIX.test(model.id)) {
+    warnings.push(
+      `goose strips a trailing reasoning suffix from ${model.id} and sends it as reasoning_effort.`
+    );
+  }
+  return warnings;
+}
+
+/** Scrubbed keys plus inherited scrub-prefixed ones, minus what we set, sorted. */
+function unsetKeys(baseEnv, env) {
+  const unset = new Set(SCRUB_KEYS);
+  for (const key of Object.keys(baseEnv ?? {})) {
+    if (SCRUB_PREFIXES.some((prefix) => key.startsWith(prefix))) unset.add(key);
+  }
+  for (const key of Object.keys(env)) unset.delete(key);
+  if (!("GOOSE_CONTEXT_LIMIT" in env)) unset.add("GOOSE_CONTEXT_LIMIT");
+  return [...unset].sort();
+}
+
+/**
+ * Always an explicit subcommand: bare `goose` without a config.yaml starts `configure`.
+ * Passthrough starting with a one-shot subcommand replaces the default `session`.
+ */
+function gooseArgv(args) {
+  return ONE_SHOT_SUBCOMMANDS.includes(args[0]) ? [...args] : ["session", ...args];
 }
 
 export default defineAdapter({
@@ -119,91 +207,22 @@ export default defineAdapter({
   },
 
   plan(ctx) {
-    const rows = ctx.view?.rows ?? [];
-    if (rows.length === 0) {
-      throw new LaunchError("ModelNotFound", "No models in the goose launch view.", {
-        hint: "Connect a provider with tool-capable chat models (omniroute providers), then retry.",
-      });
-    }
-    const model = ctx.model;
-    if (!model) {
-      throw new LaunchError("ModelRequired", "goose needs a model to launch.", {
-        hint: "Pass --model <id> or pick one from the launch picker.",
-      });
-    }
+    const model = requireModel(ctx);
+    assertVersion(ctx.tool?.version);
+    const context = knownContext(model);
+    assertContext(model, context);
 
-    const warnings = [];
-    const version = ctx.tool?.version;
-    if (version) {
-      const cmp = compareSemver(version, MIN_VERSION);
-      if (cmp !== null && cmp < 0) {
-        throw new LaunchError(
-          "ToolVersionTooOld",
-          `goose ${version} is older than the minimum ${MIN_VERSION}.`,
-          { hint: "Run `goose update` or reinstall goose, then retry." }
-        );
-      }
-    }
-
-    if (
-      typeof model.contextTokens === "number" &&
-      model.contextTokens > 0 &&
-      model.contextTokens < MIN_CONTEXT_TOKENS
-    ) {
-      throw new LaunchError(
-        "ModelUnsuitable",
-        `${model.id} has a ${model.contextTokens} token window, below the ${MIN_CONTEXT_TOKENS} goose needs.`,
-        { hint: "Choose a model with a larger context window." }
-      );
-    }
-
-    const env = {
-      GOOSE_PATH_ROOT: "${TMP}",
-      GOOSE_DISABLE_KEYRING: "1",
-      GOOSE_TELEMETRY_OFF: "1",
-      GOOSE_PROVIDER: "openai",
-      GOOSE_MODEL: model.id,
-      OPENAI_BASE_URL: ctx.util.ensureV1(ctx.gateway.rootUrl),
-      // Leading slash is deliberate: a custom path containing chat/completions turns the
-      // automatic /v1/responses routing of gpt-5* and o* ids off.
-      OPENAI_BASE_PATH: "/v1/chat/completions",
-      OPENAI_API_KEY: ctx.auth.token,
-    };
-    if (typeof model.contextTokens === "number" && model.contextTokens > 0) {
-      env.GOOSE_CONTEXT_LIMIT = String(model.contextTokens);
-    } else {
-      warnings.push(
-        `Context window of ${model.id} is unknown: goose falls back to its own default (128000).`
-      );
-    }
-
-    if (RESPONSES_ID.test(model.id) && EFFORT_SUFFIX.test(model.id)) {
-      warnings.push(
-        `goose strips a trailing reasoning suffix from ${model.id} and sends it as reasoning_effort.`
-      );
-    }
-
-    const unset = new Set(SCRUB_KEYS);
-    for (const key of Object.keys(ctx.baseEnv ?? {})) {
-      if (SCRUB_PREFIXES.some((prefix) => key.startsWith(prefix))) unset.add(key);
-    }
-    for (const key of Object.keys(env)) unset.delete(key);
-    if (!("GOOSE_CONTEXT_LIMIT" in env)) unset.add("GOOSE_CONTEXT_LIMIT");
-
-    const plan = createPlan("goose", {
-      // Always an explicit subcommand: bare `goose` without a config.yaml starts `configure`.
-      // Passthrough starting with a one-shot subcommand replaces the default `session`.
-      argv: ONE_SHOT_SUBCOMMANDS.includes(ctx.passthroughArgs[0])
-        ? [...ctx.passthroughArgs]
-        : ["session", ...ctx.passthroughArgs],
-      env: { set: env, unset: [...unset].sort() },
-      warnings,
-      notes: [
-        "goose runs with GOOSE_PATH_ROOT in the temp dir: your goose config, sessions and keyring are untouched.",
-      ],
-      modelList: { strategy: "server-view", viewHash: ctx.view.hash, injected: 0 },
-    });
-    plan.secretSites = findTokenSites(plan);
-    return plan;
+    const env = gooseEnv(ctx, model, context);
+    return withTokenSites(
+      createPlan("goose", {
+        argv: gooseArgv(ctx.passthroughArgs),
+        env: { set: env, unset: unsetKeys(ctx.baseEnv, env) },
+        warnings: modelWarnings(model, context),
+        notes: [
+          "goose runs with GOOSE_PATH_ROOT in the temp dir: your goose config, sessions and keyring are untouched.",
+        ],
+        modelList: { strategy: "server-view", viewHash: ctx.view.hash, injected: 0 },
+      })
+    );
   },
 });

@@ -11,14 +11,14 @@ import {
   assetRef,
   createPlan,
   defineAdapter,
-  findTokenSites,
   injectRows,
   rowLabel,
   tomlKey,
 } from "../contract.mjs";
+import { KEY_ENV, withTokenSites } from "./_shared/inject.mjs";
+import { gateStatus } from "./_shared/semver.mjs";
 
 const PROVIDER_ID = "omniroute";
-const KEY_ENV = "OMNIROUTE_API_KEY";
 const CATALOG_FILE = "model.json";
 const BASE_INSTRUCTIONS_ASSET = "codex/base-instructions.txt";
 /** Codex has no context default we trust for unknown rows (the value is the one ollama uses). */
@@ -93,16 +93,21 @@ const PASSTHROUGH = [
   },
 ];
 
-function parseSemver(text) {
-  const match = /(\d+)\.(\d+)\.(\d+)/.exec(String(text ?? ""));
-  return match ? [Number(match[1]), Number(match[2]), Number(match[3])] : null;
+function longValueHit(arg, name) {
+  if (!name.startsWith("--") || !arg.startsWith(`${name}=`)) return null;
+  return { flag: name, value: arg.slice(name.length + 1) };
 }
 
-function semverLess(a, b) {
-  for (let i = 0; i < 3; i++) {
-    if (a[i] !== b[i]) return a[i] < b[i];
-  }
-  return false;
+function shortValueHit(arg, name) {
+  if (!/^-[A-Za-z]$/.test(name) || !arg.startsWith(name)) return null;
+  return { flag: name, value: arg.slice(name.length) };
+}
+
+/** The hit of flag `name` on `arg` (`next` is the following argv entry), or null. */
+function nameHit(arg, next, name, takesValue) {
+  if (arg === name) return { flag: name, value: takesValue ? next : undefined };
+  if (!takesValue) return null;
+  return longValueHit(arg, name) ?? shortValueHit(arg, name);
 }
 
 /** Every value given to `rule` in argv (`-c v`, `-cv`, `--config v`, `--config=v`), until `--`. */
@@ -114,13 +119,8 @@ function ruleHits(args, rule) {
     const arg = String(args[i]);
     if (arg === "--") break;
     for (const name of names) {
-      if (arg === name) {
-        hits.push({ flag: name, value: takesValue ? args[i + 1] : undefined });
-      } else if (takesValue && name.startsWith("--") && arg.startsWith(`${name}=`)) {
-        hits.push({ flag: name, value: arg.slice(name.length + 1) });
-      } else if (takesValue && /^-[A-Za-z]$/.test(name) && arg.startsWith(name)) {
-        hits.push({ flag: name, value: arg.slice(name.length) });
-      }
+      const hit = nameHit(arg, args[i + 1], name, takesValue);
+      if (hit) hits.push(hit);
     }
   }
   return hits;
@@ -141,6 +141,26 @@ function assertPassthrough(args) {
   }
 }
 
+const CONFIG_FLAGS = ["-c", "--config"];
+const CONFIG_EQUALS = "--config=";
+
+/** The value glued to a `--config=v` or `-cv` arg, else undefined. */
+function inlineConfigValue(arg) {
+  if (arg.startsWith(CONFIG_EQUALS)) return arg.slice(CONFIG_EQUALS.length);
+  if (arg.startsWith("-c") && arg.length > 2) return arg.slice(2);
+  return undefined;
+}
+
+/** How args[i] splits: a `config` value or a `rest` arg, and the `next` index to read. */
+function splitStep(args, i) {
+  const arg = String(args[i]);
+  if (CONFIG_FLAGS.includes(arg) && i + 1 < args.length) {
+    return { config: String(args[i + 1]), next: i + 2 };
+  }
+  const inline = inlineConfigValue(arg);
+  return inline === undefined ? { rest: arg, next: i + 1 } : { config: inline, next: i + 1 };
+}
+
 /**
  * Split user args into their `-c` / `--config` values and everything else (until `--`).
  *
@@ -153,22 +173,14 @@ function assertPassthrough(args) {
 function splitConfigArgs(args) {
   const config = [];
   const rest = [];
-  for (let i = 0; i < args.length; i++) {
-    const arg = String(args[i]);
-    if (arg === "--") {
-      rest.push(...args.slice(i));
-      break;
-    }
-    if ((arg === "-c" || arg === "--config") && i + 1 < args.length) {
-      config.push(String(args[++i]));
-    } else if (arg.startsWith("--config=")) {
-      config.push(arg.slice("--config=".length));
-    } else if (arg.startsWith("-c") && arg.length > 2) {
-      config.push(arg.slice(2));
-    } else {
-      rest.push(arg);
-    }
+  let i = 0;
+  while (i < args.length && String(args[i]) !== "--") {
+    const step = splitStep(args, i);
+    if (step.config === undefined) rest.push(step.rest);
+    else config.push(step.config);
+    i = step.next;
   }
+  rest.push(...args.slice(i));
   return { config, rest };
 }
 
@@ -235,22 +247,138 @@ function codexConfigPath(ctx) {
 }
 
 function versionChecks(ctx) {
-  const version = parseSemver(ctx.tool.version);
-  if (!version) return [];
-  if (semverLess(version, parseSemver(VERSION_GATE.min))) {
+  const status = gateStatus(ctx.tool.version, VERSION_GATE);
+  if (status === "too-old") {
     throw new LaunchError(
       "ToolVersionTooOld",
       `Codex ${ctx.tool.version} is too old; omnirouter launch needs ${VERSION_GATE.min} or newer`,
       { hint: "Upgrade with `codex update` or `npm install -g @openai/codex`" }
     );
   }
-  if (semverLess(version, parseSemver(VERSION_GATE.recommended))) {
+  if (status === "behind") {
     return [
       `Codex ${ctx.tool.version} is older than ${VERSION_GATE.recommended}, the version this ` +
         "launch recipe was verified on; upgrade with `codex update` if Codex rejects a setting",
     ];
   }
   return [];
+}
+
+/** The chosen model and its known context; throws on an empty view, no model or a short context. */
+function requireModel(ctx) {
+  if (ctx.view.rows.length === 0) {
+    throw new LaunchError("ModelNotFound", "No OmniRoute model fits Codex (the view is empty)", {
+      hint: "Codex needs a Responses-capable model with tool calling; run `omniroute setup`",
+    });
+  }
+  const model = ctx.model;
+  if (!model) {
+    throw new LaunchError("ModelRequired", "Codex needs a model", {
+      hint: "Pass `--model <id>` (see `omnirouter models`)",
+    });
+  }
+  const context = knownContext(model);
+  if (context !== undefined && context < MIN_CONTEXT_TOKENS) {
+    throw new LaunchError(
+      "ModelUnsuitable",
+      `${model.id} has a ${context}-token context; Codex needs at least ${MIN_CONTEXT_TOKENS}`
+    );
+  }
+  return { model, context };
+}
+
+/** Warnings about how Codex will see the chosen model. */
+function modelWarnings(model, context, rows) {
+  const warnings = [];
+  if (!rows.some((row) => row.id === model.id)) {
+    warnings.push(
+      `${model.id} is not in the Codex view; Codex uses fallback metadata and hides it in /model`
+    );
+  }
+  if (context === undefined) {
+    warnings.push(
+      `${model.id} has no known context window; Codex is told ${FALLBACK_CONTEXT_WINDOW} tokens`
+    );
+  }
+  return warnings;
+}
+
+const PROVIDER_KEY = `model_providers.${PROVIDER_ID}`;
+
+/** The launcher's root `-c` override values, in argv order. */
+function rootOverrides(ctx, modelId) {
+  const t = ctx.util.toml;
+  return [
+    t("model_provider", PROVIDER_ID),
+    t(`${PROVIDER_KEY}.name`, "OmniRoute"),
+    t(`${PROVIDER_KEY}.base_url`, ctx.util.ensureV1(ctx.gateway.rootUrl)),
+    t(`${PROVIDER_KEY}.wire_api`, "responses"),
+    t(`${PROVIDER_KEY}.env_key`, KEY_ENV),
+    t(`${PROVIDER_KEY}.requires_openai_auth`, false),
+    catalogArg(ctx),
+    t("service_tier", "default"),
+    t("check_for_update_on_startup", false),
+    t("analytics.enabled", false),
+    t("feedback.enabled", false),
+    // `-c model=` instead of `-m`: root `-c` overrides reach every subcommand (exec, resume),
+    // which was verified live; root `-m` is not guaranteed to.
+    t("model", modelId),
+  ];
+}
+
+/** Full argv: launcher overrides, the user's hoisted `-c` values, profile, then the rest. */
+function codexArgv(ctx, modelId, notes) {
+  const user = splitConfigArgs(ctx.passthroughArgs);
+  const overrides = [...rootOverrides(ctx, modelId), ...user.config];
+  const argv = overrides.flatMap((value) => ["-c", value]);
+  if (user.config.length > 0) {
+    notes.push("Your -c options are passed at the Codex root, after the launcher's");
+  }
+  if (ctx.profile) {
+    argv.push("--profile", ctx.profile);
+    notes.push(`Codex profile ${ctx.profile} is layered below the launcher -c overrides`);
+  }
+  argv.push(...user.rest);
+  return argv;
+}
+
+/** Codex rejects an empty env_key value: never export an empty key. */
+function launchKey(auth) {
+  const token = typeof auth.token === "string" ? auth.token.trim() : "";
+  return token || auth.sentinel;
+}
+
+function preflight() {
+  return [
+    {
+      kind: "tool-version",
+      min: VERSION_GATE.min,
+      why: "Codex below 0.134.0 is untested with the -c provider and model_catalog_json recipe",
+    },
+  ];
+}
+
+function postExitChecks(ctx) {
+  return [
+    {
+      kind: "file-unchanged",
+      path: codexConfigPath(ctx),
+      message:
+        "Codex changed its config.toml during the session (project trust or a /model " +
+        "choice); OmniRoute did not edit it. Check that its model setting still suits " +
+        "plain `codex`",
+    },
+  ];
+}
+
+function catalogTempFile(ctx, rows) {
+  return {
+    path: CATALOG_FILE,
+    root: "state",
+    contents: catalogContents(ctx, rows),
+    mode: 0o600,
+    format: "json",
+  };
 }
 
 export default defineAdapter({
@@ -302,24 +430,7 @@ export default defineAdapter({
   },
 
   plan(ctx) {
-    if (ctx.view.rows.length === 0) {
-      throw new LaunchError("ModelNotFound", "No OmniRoute model fits Codex (the view is empty)", {
-        hint: "Codex needs a Responses-capable model with tool calling; run `omniroute setup`",
-      });
-    }
-    const model = ctx.model;
-    if (!model) {
-      throw new LaunchError("ModelRequired", "Codex needs a model", {
-        hint: "Pass `--model <id>` (see `omnirouter models`)",
-      });
-    }
-    const context = knownContext(model);
-    if (context !== undefined && context < MIN_CONTEXT_TOKENS) {
-      throw new LaunchError(
-        "ModelUnsuitable",
-        `${model.id} has a ${context}-token context; Codex needs at least ${MIN_CONTEXT_TOKENS}`
-      );
-    }
+    const { model, context } = requireModel(ctx);
     assertPassthrough(ctx.passthroughArgs);
     const warnings = versionChecks(ctx);
 
@@ -327,96 +438,23 @@ export default defineAdapter({
     const notes = [
       `Codex model catalog: ${rows.length} OmniRoute model(s) in ${ctx.util.statePath(CATALOG_FILE)}`,
     ];
-    if (!rows.some((row) => row.id === model.id)) {
-      warnings.push(
-        `${model.id} is not in the Codex view; Codex uses fallback metadata and hides it in /model`
-      );
-    }
-    if (context === undefined) {
-      warnings.push(
-        `${model.id} has no known context window; Codex is told ${FALLBACK_CONTEXT_WINDOW} tokens`
-      );
-    }
+    warnings.push(...modelWarnings(model, context, rows));
+    const argv = codexArgv(ctx, model.id, notes);
 
-    const t = ctx.util.toml;
-    const argv = [
-      "-c",
-      t("model_provider", PROVIDER_ID),
-      "-c",
-      t(`model_providers.${PROVIDER_ID}.name`, "OmniRoute"),
-      "-c",
-      t(`model_providers.${PROVIDER_ID}.base_url`, ctx.util.ensureV1(ctx.gateway.rootUrl)),
-      "-c",
-      t(`model_providers.${PROVIDER_ID}.wire_api`, "responses"),
-      "-c",
-      t(`model_providers.${PROVIDER_ID}.env_key`, KEY_ENV),
-      "-c",
-      t(`model_providers.${PROVIDER_ID}.requires_openai_auth`, false),
-      "-c",
-      catalogArg(ctx),
-      "-c",
-      t("service_tier", "default"),
-      "-c",
-      t("check_for_update_on_startup", false),
-      "-c",
-      t("analytics.enabled", false),
-      "-c",
-      t("feedback.enabled", false),
-      // `-c model=` instead of `-m`: root `-c` overrides reach every subcommand (exec, resume),
-      // which was verified live; root `-m` is not guaranteed to.
-      "-c",
-      t("model", model.id),
-    ];
-    const user = splitConfigArgs(ctx.passthroughArgs);
-    for (const value of user.config) argv.push("-c", value);
-    if (user.config.length > 0) {
-      notes.push("Your -c options are passed at the Codex root, after the launcher's");
-    }
-    if (ctx.profile) {
-      argv.push("--profile", ctx.profile);
-      notes.push(`Codex profile ${ctx.profile} is layered below the launcher -c overrides`);
-    }
-    argv.push(...user.rest);
-
-    // Codex rejects an empty env_key value: never export an empty key.
-    const token = typeof ctx.auth.token === "string" ? ctx.auth.token.trim() : "";
-    const plan = createPlan("codex", {
-      argv,
-      env: {
-        set: { [KEY_ENV]: token || ctx.auth.sentinel },
-        unset: STRIPPED_ENV_KEYS,
-      },
-      tempFiles: [
-        {
-          path: CATALOG_FILE,
-          root: "state",
-          contents: catalogContents(ctx, rows),
-          mode: 0o600,
-          format: "json",
+    return withTokenSites(
+      createPlan("codex", {
+        argv,
+        env: {
+          set: { [KEY_ENV]: launchKey(ctx.auth) },
+          unset: STRIPPED_ENV_KEYS,
         },
-      ],
-      notes,
-      warnings,
-      preflight: [
-        {
-          kind: "tool-version",
-          min: VERSION_GATE.min,
-          why: "Codex below 0.134.0 is untested with the -c provider and model_catalog_json recipe",
-        },
-      ],
-      postExitChecks: [
-        {
-          kind: "file-unchanged",
-          path: codexConfigPath(ctx),
-          message:
-            "Codex changed its config.toml during the session (project trust or a /model " +
-            "choice); OmniRoute did not edit it. Check that its model setting still suits " +
-            "plain `codex`",
-        },
-      ],
-      modelList: { strategy: "both", viewHash: ctx.view.hash, injected: rows.length },
-    });
-    plan.secretSites = findTokenSites(plan);
-    return plan;
+        tempFiles: [catalogTempFile(ctx, rows)],
+        notes,
+        warnings,
+        preflight: preflight(),
+        postExitChecks: postExitChecks(ctx),
+        modelList: { strategy: "both", viewHash: ctx.view.hash, injected: rows.length },
+      })
+    );
   },
 });

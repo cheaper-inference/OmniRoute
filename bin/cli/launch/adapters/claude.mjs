@@ -20,13 +20,14 @@ import {
   claudeWindowEnv,
   createPlan,
   defineAdapter,
-  findTokenSites,
   injectRows,
   json,
   rowLabel,
   stripTrailingSlash,
   tempPath,
 } from "../contract.mjs";
+import { injectModelList, withTokenSites } from "./_shared/inject.mjs";
+import { parseSemverPrefix, semverLess } from "./_shared/semver.mjs";
 
 const MIN_VERSION = "2.1.83";
 const RECOMMENDED_VERSION = "2.1.242";
@@ -63,26 +64,19 @@ const MANAGED_SETTINGS = {
 const KNOWN_CLAUDE_MODEL = /^claude-(?:opus|sonnet|haiku|fable)-[a-z0-9.-]+$/;
 const PROFILE_NAME = /^[A-Za-z0-9_][A-Za-z0-9._-]*$/;
 
-function parseSemver(value) {
-  const match = /^(\d+)\.(\d+)\.(\d+)/.exec(String(value ?? "").trim());
-  return match ? [Number(match[1]), Number(match[2]), Number(match[3])] : null;
-}
-
-function semverLess(a, b) {
-  for (let i = 0; i < 3; i++) {
-    if (a[i] !== b[i]) return a[i] < b[i];
-  }
-  return false;
+/** Claude's version parse: anchored at the start, after trimming surrounding whitespace. */
+function parseVersion(value) {
+  return parseSemverPrefix(String(value ?? "").trim());
 }
 
 /** Feature booleans: core's resolution first, else derived from the probed version. */
 function resolveFeatures(ctx) {
   const resolved = ctx.tool.features || {};
-  const version = parseSemver(ctx.tool.version);
+  const version = parseVersion(ctx.tool.version);
   const out = {};
   for (const [name, first] of Object.entries(FEATURES)) {
     if (typeof resolved[name] === "boolean") out[name] = resolved[name];
-    else out[name] = version ? !semverLess(version, parseSemver(first)) : true;
+    else out[name] = version ? !semverLess(version, parseVersion(first)) : true;
   }
   return { features: out, version };
 }
@@ -160,137 +154,156 @@ function toToolModelId(catalogId) {
   return String(catalogId);
 }
 
-function plan(ctx) {
-  const { features, version } = resolveFeatures(ctx);
-  if (version && semverLess(version, parseSemver(MIN_VERSION))) {
-    throw new LaunchError(
-      "ToolVersionTooOld",
-      `Claude Code ${ctx.tool.version} is too old for omnirouter launch (needs ${MIN_VERSION}+, ` +
-        `${RECOMMENDED_VERSION}+ recommended)`,
-      {
-        hint: "Update with `claude update` or reinstall: curl -fsSL https://claude.ai/install.sh | bash",
-      }
-    );
-  }
-  if (ctx.view.rows.length === 0) {
-    throw new LaunchError(
-      "ModelNotFound",
-      `No OmniRoute model fits Claude Code (view ${ctx.view.name})`,
-      {
-        hint: `Claude Code needs chat models with tool calling and at least ${MIN_CONTEXT_TOKENS} context tokens.`,
-      }
-    );
-  }
-  const model = ctx.model;
-  if (
-    model &&
-    typeof model.contextTokens === "number" &&
-    model.contextTokens > 0 &&
-    model.contextTokens < MIN_CONTEXT_TOKENS
-  ) {
-    throw new LaunchError(
-      "ModelUnsuitable",
-      `${model.id} has a ${model.contextTokens} token context; Claude Code needs at least ${MIN_CONTEXT_TOKENS}`,
-      { hint: "Pick a model with a larger context window (omnirouter launch claude --model <id>)." }
-    );
-  }
+function assertVersion(ctx, version) {
+  if (!version || !semverLess(version, parseVersion(MIN_VERSION))) return;
+  throw new LaunchError(
+    "ToolVersionTooOld",
+    `Claude Code ${ctx.tool.version} is too old for omnirouter launch (needs ${MIN_VERSION}+, ` +
+      `${RECOMMENDED_VERSION}+ recommended)`,
+    {
+      hint: "Update with `claude update` or reinstall: curl -fsSL https://claude.ai/install.sh | bash",
+    }
+  );
+}
 
-  const base = ctx.baseEnv;
-  const isUnset = (key) => base[key] === undefined || base[key] === "";
-  const warnings = [];
-  const notes = [];
-  const set = {
+function assertViewHasRows(ctx) {
+  if (ctx.view.rows.length > 0) return;
+  throw new LaunchError(
+    "ModelNotFound",
+    `No OmniRoute model fits Claude Code (view ${ctx.view.name})`,
+    {
+      hint: `Claude Code needs chat models with tool calling and at least ${MIN_CONTEXT_TOKENS} context tokens.`,
+    }
+  );
+}
+
+/** True when the model's context is known and below the Claude Code floor. */
+function contextTooSmall(model) {
+  const tokens = model?.contextTokens;
+  return typeof tokens === "number" && tokens > 0 && tokens < MIN_CONTEXT_TOKENS;
+}
+
+function assertModelFits(model) {
+  if (!contextTooSmall(model)) return;
+  throw new LaunchError(
+    "ModelUnsuitable",
+    `${model.id} has a ${model.contextTokens} token context; Claude Code needs at least ${MIN_CONTEXT_TOKENS}`,
+    { hint: "Pick a model with a larger context window (omnirouter launch claude --model <id>)." }
+  );
+}
+
+/** Env keys every launch pins to the chosen model. */
+const MODEL_ENV_KEYS = [
+  "ANTHROPIC_DEFAULT_OPUS_MODEL",
+  "ANTHROPIC_DEFAULT_SONNET_MODEL",
+  "ANTHROPIC_DEFAULT_HAIKU_MODEL",
+  "ANTHROPIC_DEFAULT_FABLE_MODEL",
+  "CLAUDE_CODE_SUBAGENT_MODEL",
+];
+
+/** Env set on every launch regardless of the base env. */
+const FIXED_ENV = {
+  CLAUDE_CODE_ATTRIBUTION_HEADER: "0",
+  DISABLE_ERROR_REPORTING: "1",
+  DISABLE_FEEDBACK_COMMAND: "1",
+  CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY: "1",
+};
+
+/** Env added in private mode. */
+const PRIVATE_ENV = {
+  DISABLE_TELEMETRY: "1",
+  CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
+};
+
+function routingEnv(ctx) {
+  return {
     ANTHROPIC_BASE_URL: stripTrailingSlash(ctx.gateway.rootUrl),
     ANTHROPIC_AUTH_TOKEN: ctx.auth.source === "none" ? ctx.auth.sentinel : ctx.auth.token,
     ANTHROPIC_API_KEY: "",
     CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST: "1",
   };
+}
 
-  const modelId = model ? toToolModelId(model.id) : undefined;
-  if (modelId) {
-    for (const key of [
-      "ANTHROPIC_DEFAULT_OPUS_MODEL",
-      "ANTHROPIC_DEFAULT_SONNET_MODEL",
-      "ANTHROPIC_DEFAULT_HAIKU_MODEL",
-      "ANTHROPIC_DEFAULT_FABLE_MODEL",
-      "CLAUDE_CODE_SUBAGENT_MODEL",
-    ]) {
-      set[key] = modelId;
-    }
-  }
+function isUnsetIn(base, key) {
+  return base[key] === undefined || base[key] === "";
+}
 
-  // Window env exactly as claudeWindowEnv (no window claims at or above 200k
-  // until catalog windows are trusted). Each only when the user has not set it.
-  const windowEnv = claudeWindowEnv(model?.contextTokens);
-  for (const [key, value] of Object.entries(windowEnv)) {
-    if (isUnset(key)) set[key] = value;
-  }
+/** The max output env value for the model, or undefined when it has no usable limit. */
+function maxOutputValue(model) {
   const maxOutput = model?.maxOutputTokens;
-  if (typeof maxOutput === "number" && maxOutput > 0 && isUnset("CLAUDE_CODE_MAX_OUTPUT_TOKENS")) {
-    set.CLAUDE_CODE_MAX_OUTPUT_TOKENS = String(Math.min(Math.floor(maxOutput), MAX_OUTPUT_CAP));
-  }
-  if (isUnset("CLAUDE_CODE_AUTO_MODE_SERVER")) set.CLAUDE_CODE_AUTO_MODE_SERVER = "0";
-  set.CLAUDE_CODE_ATTRIBUTION_HEADER = "0";
-  set.DISABLE_ERROR_REPORTING = "1";
-  set.DISABLE_FEEDBACK_COMMAND = "1";
-  set.CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY = "1";
-  if (ctx.settings.privateMode) {
-    set.DISABLE_TELEMETRY = "1";
-    set.CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = "1";
-  }
+  if (typeof maxOutput !== "number" || maxOutput <= 0) return undefined;
+  return String(Math.min(Math.floor(maxOutput), MAX_OUTPUT_CAP));
+}
 
-  const config = configDir(ctx);
-  if (config.setEnv) set.CLAUDE_CONFIG_DIR = config.dir;
+/** Window env exactly as claudeWindowEnv (no window claims at or above 200k until catalog
+ *  windows are trusted), plus the output cap. Each only when the user has not set it. */
+function applyLimitEnv(set, base, model) {
+  for (const [key, value] of Object.entries(claudeWindowEnv(model?.contextTokens))) {
+    if (isUnsetIn(base, key)) set[key] = value;
+  }
+  const maxOutput = maxOutputValue(model);
+  if (maxOutput !== undefined && isUnsetIn(base, "CLAUDE_CODE_MAX_OUTPUT_TOKENS")) {
+    set.CLAUDE_CODE_MAX_OUTPUT_TOKENS = maxOutput;
+  }
+}
 
-  // Model list: full picker file, or the one-row fallback.
-  const user = userSettings(ctx);
-  const tempFiles = [];
-  let injected = 0;
-  if (features.modelPicker) {
-    const rows = injectRows(ctx, INJECT_LIMIT);
-    const settings = { ...(user || {}) };
-    settings.modelPicker = {
-      replaceBuiltInOptions: true,
-      options: rows.map((row) => pickerOption(row, features)),
-    };
-    settings.skipWebFetchPreflight = true;
-    tempFiles.push({
-      path: SETTINGS_FILE,
-      contents: `${json(settings, { indent: 2 })}\n`,
-      mode: 0o600,
-      format: "json",
-    });
-    injected = rows.length;
-    if (ctx.view.rows.length > rows.length) {
-      notes.push(
-        `Picker shows the first ${rows.length} of ${ctx.view.rows.length} OmniRoute models.`
-      );
-    }
-  } else {
-    if (model && features.customModelOption) {
-      set.ANTHROPIC_CUSTOM_MODEL_OPTION = modelId;
-      set.ANTHROPIC_CUSTOM_MODEL_OPTION_NAME = rowLabel(model);
-      set.ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION = rowDescription(model);
-      injected = 1;
-    }
-    warnings.push(
-      `Claude Code < ${RECOMMENDED_VERSION}: picker shows one OmniRoute model; upgrade for the full list`
+function buildEnv(ctx, model, modelId) {
+  const base = ctx.baseEnv;
+  const set = routingEnv(ctx);
+  if (modelId) {
+    for (const key of MODEL_ENV_KEYS) set[key] = modelId;
+  }
+  applyLimitEnv(set, base, model);
+  if (isUnsetIn(base, "CLAUDE_CODE_AUTO_MODE_SERVER")) set.CLAUDE_CODE_AUTO_MODE_SERVER = "0";
+  Object.assign(set, FIXED_ENV);
+  if (ctx.settings.privateMode) Object.assign(set, PRIVATE_ENV);
+  return set;
+}
+
+function settingsTempFile(settings) {
+  return {
+    path: SETTINGS_FILE,
+    contents: `${json(settings, { indent: 2 })}\n`,
+    mode: 0o600,
+    format: "json",
+  };
+}
+
+/** 2.1.242+: the full picker file, merged over the user's --settings. */
+function pickerModelList(ctx, { features, user, notes }) {
+  const rows = injectRows(ctx, INJECT_LIMIT);
+  const settings = { ...(user || {}) };
+  settings.modelPicker = {
+    replaceBuiltInOptions: true,
+    options: rows.map((row) => pickerOption(row, features)),
+  };
+  settings.skipWebFetchPreflight = true;
+  if (ctx.view.rows.length > rows.length) {
+    notes.push(
+      `Picker shows the first ${rows.length} of ${ctx.view.rows.length} OmniRoute models.`
     );
-    if (user) {
-      tempFiles.push({
-        path: SETTINGS_FILE,
-        contents: `${json(user, { indent: 2 })}\n`,
-        mode: 0o600,
-        format: "json",
-      });
-    }
   }
-  if (!version) {
-    warnings.push("Could not read the Claude Code version; assuming a current release.");
-  }
+  return { tempFiles: [settingsTempFile(settings)], injected: rows.length };
+}
 
-  // Every ANTHROPIC_* from the base env we do not set, every provider selector, and discovery
-  // (our picker file is the list; discovery would also write ~/.claude/cache).
+/** Older releases: one ANTHROPIC_CUSTOM_MODEL_OPTION row plus a warning. */
+function fallbackModelList({ features, user, model, modelId, set, warnings }) {
+  let injected = 0;
+  if (model && features.customModelOption) {
+    set.ANTHROPIC_CUSTOM_MODEL_OPTION = modelId;
+    set.ANTHROPIC_CUSTOM_MODEL_OPTION_NAME = rowLabel(model);
+    set.ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION = rowDescription(model);
+    injected = 1;
+  }
+  warnings.push(
+    `Claude Code < ${RECOMMENDED_VERSION}: picker shows one OmniRoute model; upgrade for the full list`
+  );
+  return { tempFiles: user ? [settingsTempFile(user)] : [], injected };
+}
+
+/** Every ANTHROPIC_* from the base env we do not set, every provider selector, and discovery
+ *  (our picker file is the list; discovery would also write ~/.claude/cache). */
+function unsetKeys(base, set) {
   const unset = new Set(PROVIDER_SELECTORS);
   for (const key of Object.keys(base)) {
     if (key.startsWith("ANTHROPIC_") && !(key in set)) unset.add(key);
@@ -299,51 +312,81 @@ function plan(ctx) {
     unset.add("CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY");
   }
   for (const key of Object.keys(set)) unset.delete(key);
+  return [...unset].sort();
+}
 
+function buildArgv(ctx, tempFiles, modelId) {
   const argv = [];
   if (tempFiles.length > 0) argv.push("--settings", tempPath(SETTINGS_FILE));
   if (modelId) argv.push("--model", modelId);
   argv.push(...ctx.passthroughArgs);
+  return argv;
+}
 
-  const settingsJson = joinPath(ctx.platform, config.dir, "settings.json");
+function modelNote(modelId, settingsJson) {
   if (modelId) {
-    notes.push(
-      `Press s in /model to switch for this launch only; Enter saves the model to ${settingsJson}.`
-    );
-  } else {
-    notes.push(
-      "No model chosen: Claude Code starts on its default; pick an OmniRoute model in /model."
-    );
+    return `Press s in /model to switch for this launch only; Enter saves the model to ${settingsJson}.`;
+  }
+  return "No model chosen: Claude Code starts on its default; pick an OmniRoute model in /model.";
+}
+
+function managedSettingsPreflight(platform) {
+  return {
+    kind: "file-json-key",
+    path: MANAGED_SETTINGS[platform],
+    key: "availableModels",
+    why: "A managed availableModels allowlist still filters the OmniRoute picker rows.",
+    severity: "warn",
+  };
+}
+
+function savedModelCheck(settingsJson) {
+  return {
+    kind: "json-key-unchanged",
+    path: settingsJson,
+    key: "model",
+    message: `Claude Code saved a default model in ${settingsJson} during this launch (/model + Enter).`,
+    revertHint: `Restore the previous "model" value in ${settingsJson}, or run /model in a plain claude session.`,
+  };
+}
+
+function plan(ctx) {
+  const { features, version } = resolveFeatures(ctx);
+  assertVersion(ctx, version);
+  assertViewHasRows(ctx);
+  const model = ctx.model;
+  assertModelFits(model);
+
+  const warnings = [];
+  const notes = [];
+  const modelId = model ? toToolModelId(model.id) : undefined;
+  const set = buildEnv(ctx, model, modelId);
+  const config = configDir(ctx);
+  if (config.setEnv) set.CLAUDE_CONFIG_DIR = config.dir;
+
+  // Model list: full picker file, or the one-row fallback.
+  const listCtx = { features, user: userSettings(ctx), model, modelId, set, notes, warnings };
+  const { tempFiles, injected } = features.modelPicker
+    ? pickerModelList(ctx, listCtx)
+    : fallbackModelList(listCtx);
+  if (!version) {
+    warnings.push("Could not read the Claude Code version; assuming a current release.");
   }
 
+  const settingsJson = joinPath(ctx.platform, config.dir, "settings.json");
+  notes.push(modelNote(modelId, settingsJson));
+
   const result = createPlan("claude", {
-    argv,
-    env: { set, unset: [...unset].sort() },
+    argv: buildArgv(ctx, tempFiles, modelId),
+    env: { set, unset: unsetKeys(ctx.baseEnv, set) },
     tempFiles,
     notes,
     warnings,
-    preflight: [
-      {
-        kind: "file-json-key",
-        path: MANAGED_SETTINGS[ctx.platform],
-        key: "availableModels",
-        why: "A managed availableModels allowlist still filters the OmniRoute picker rows.",
-        severity: "warn",
-      },
-    ],
-    postExitChecks: [
-      {
-        kind: "json-key-unchanged",
-        path: settingsJson,
-        key: "model",
-        message: `Claude Code saved a default model in ${settingsJson} during this launch (/model + Enter).`,
-        revertHint: `Restore the previous "model" value in ${settingsJson}, or run /model in a plain claude session.`,
-      },
-    ],
-    modelList: { strategy: "inject", viewHash: ctx.view.hash, injected },
+    preflight: [managedSettingsPreflight(ctx.platform)],
+    postExitChecks: [savedModelCheck(settingsJson)],
+    modelList: injectModelList(ctx, injected),
   });
-  result.secretSites = findTokenSites(result);
-  return result;
+  return withTokenSites(result);
 }
 
 export default defineAdapter({

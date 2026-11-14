@@ -7,16 +7,15 @@
 // fields. There is no /v1/models discovery for custom providers, so the
 // strategy is "inject".
 
+import { createPlan, defineAdapter, ensureV1, findFlag, injectRows } from "../contract.mjs";
+import { fitConfigToBudget, injectModelList, withTokenSites } from "./_shared/inject.mjs";
 import {
-  LaunchError,
-  createPlan,
-  defineAdapter,
-  ensureV1,
-  findFlag,
-  findTokenSites,
-  injectRows,
-  rowLabel,
-} from "../contract.mjs";
+  foreignModelWarning,
+  openCodeOptions,
+  openCodeV1Head,
+  openCodeV1Provider,
+} from "./_shared/opencode-config.mjs";
+import { gatedToolModel, toolChatModelList } from "./_shared/pi-capabilities.mjs";
 
 const DISPLAY_NAME = "Kilo Code CLI";
 const MIN_CONTEXT_TOKENS = 32000;
@@ -39,159 +38,80 @@ const INSTALL = {
   url: "https://kilo.ai/docs/cli",
 };
 
-// Inline, not a regex literal with quotes: digits-dot-digits-dot-digits, first match.
-const VERSION_PATTERN = /(\d+)\.(\d+)\.(\d+)/;
+const MODEL_GATE = {
+  displayName: DISPLAY_NAME,
+  min: MIN_VERSION,
+  hint: INSTALL.commands.any[0],
+  minContext: MIN_CONTEXT_TOKENS,
+};
 
-function parseVersion(text) {
-  const match = VERSION_PATTERN.exec(String(text ?? ""));
-  if (!match) return null;
-  return [Number(match[1]), Number(match[2]), Number(match[3])];
+/**
+ * The serialized KILO_CONFIG_CONTENT. Plain JSON.stringify, not the contract's `json()` helper:
+ * `json()` sorts object keys, which would scramble the `models` map out of view order. The
+ * invariant checked by checkPlanInvariants/boundary.test.ts requires the injected ids to equal
+ * ctx.view ids (cut by injectLimit) IN VIEW ORDER, so this map must preserve insertion order.
+ */
+function buildConfig(model, rows, options, dropEnabledProviders) {
+  const config = openCodeV1Head("https://app.kilo.ai/config.json", model.id);
+  if (!dropEnabledProviders) config.enabled_providers = ["omniroute"];
+  config.experimental = { openTelemetry: false };
+  config.provider = openCodeV1Provider(options, rows);
+  return JSON.stringify(config);
 }
 
-function compareVersions(a, b) {
-  for (let i = 0; i < 3; i++) {
-    if (a[i] !== b[i]) return a[i] - b[i];
-  }
-  return 0;
-}
-
-function plan(ctx) {
-  const warnings = [];
-  const notes = [];
-
-  // 3a. Version gate.
-  const parsed = parseVersion(ctx.tool.version);
-  if (parsed) {
-    const min = parseVersion(MIN_VERSION);
-    if (compareVersions(parsed, min) < 0) {
-      throw new LaunchError(
-        "ToolVersionTooOld",
-        `${DISPLAY_NAME} ${ctx.tool.version} is older than the minimum ${MIN_VERSION}`,
-        { hint: INSTALL.commands.any[0] }
-      );
-    }
-  }
-
-  // 3b. Empty view.
-  if (ctx.view.rows.length === 0) {
-    throw new LaunchError(
-      "ModelNotFound",
-      `No OmniRoute model matches the ${DISPLAY_NAME} view (tool-capable chat models, ` +
-        `context >= 32000)`,
-      { hint: "Check `omnirouter models` or relax the view" }
-    );
-  }
-
-  // 3c. Model.
-  const model = ctx.model ?? ctx.view.rows[0];
-  if (!ctx.model) {
-    notes.push(`No model chosen: defaulting to ${model.id}`);
-  }
-  if (typeof model.contextTokens === "number" && model.contextTokens < MIN_CONTEXT_TOKENS) {
-    throw new LaunchError(
-      "ModelUnsuitable",
-      `${model.id} has a ${model.contextTokens}-token context; ${DISPLAY_NAME} needs at ` +
-        `least ${MIN_CONTEXT_TOKENS}`
-    );
-  }
-
-  // Auth ({env:...} resolves only in trusted sources, so the real
-  // token lives in OMNIROUTE_API_KEY and the config carries only the {env:...} reference).
-  const keyless = ctx.auth.source === "none";
-  const options = { baseURL: ensureV1(ctx.gateway.rootUrl) };
-  if (!keyless) options.apiKey = "{env:OMNIROUTE_API_KEY}";
-
+/** Warnings from the passthrough args; true when the user's --model is not an OmniRoute one. */
+function checkPassthrough(args, warnings) {
   // User's own --model / -m to kilo itself.
-  const userModelFlag = findFlag(ctx.passthroughArgs, ["--model", "-m"]);
-  const skipOurModel = userModelFlag !== null;
-  let dropEnabledProviders = false;
-  if (
-    userModelFlag &&
-    typeof userModelFlag.value === "string" &&
-    !userModelFlag.value.startsWith("omniroute/")
-  ) {
-    dropEnabledProviders = true;
-    warnings.push(
-      `--model ${userModelFlag.value} is not an OmniRoute model; that provider is not ` +
-        `routed through OmniRoute`
-    );
-  }
-
+  const warning = foreignModelWarning(findFlag(args, ["--model", "-m"]));
+  if (warning !== null) warnings.push(warning);
   // `kilo attach <url>` points at a server that never sees our env. The
   // `--attach` flag form is warned by core from the passthrough rule, so only the subcommand here.
-  if (ctx.passthroughArgs[0] === "attach") {
-    warnings.push(ATTACH_WARNING);
-  }
+  if (args[0] === "attach") warnings.push(ATTACH_WARNING);
+  return warning !== null;
+}
 
-  const buildConfig = (list) => {
-    const models = {};
-    for (const row of list) {
-      const context = row.contextTokens ?? 128000;
-      const output = row.maxOutputTokens ?? Math.min(32000, context);
-      models[row.id] = { name: rowLabel(row), tool_call: true, limit: { context, output } };
-    }
-    const config = {
-      $schema: "https://app.kilo.ai/config.json",
-      share: "disabled",
-      autoupdate: false,
-      model: `omniroute/${model.id}`,
-      small_model: `omniroute/${model.id}`,
-    };
-    if (!dropEnabledProviders) config.enabled_providers = ["omniroute"];
-    config.experimental = { openTelemetry: false };
-    config.provider = {
-      omniroute: {
-        npm: "@ai-sdk/openai-compatible",
-        name: "OmniRoute",
-        options,
-        models,
-      },
-    };
-    return JSON.stringify(config);
-  };
-
-  // Over-budget guard: drop rows from the END (the injected ids stay a prefix of the view, in
-  // view order) until the config fits; the chosen model is never dropped.
-  let rows = injectRows(ctx, INJECT_LIMIT);
-  const minKeep = Math.max(1, rows.findIndex((row) => row.id === model.id) + 1);
-  const fullCount = rows.length;
-  let configContent = buildConfig(rows);
-  while (Buffer.byteLength(configContent) > CONFIG_BYTE_BUDGET && rows.length > minKeep) {
-    rows = rows.slice(0, rows.length - 1);
-    configContent = buildConfig(rows);
-  }
-  if (rows.length < fullCount) {
-    warnings.push(
-      `Dropped ${fullCount - rows.length} of ${fullCount} models from the injected list: the ` +
-        `config would exceed ${CONFIG_BYTE_BUDGET} bytes (the env var limit is 131072)`
-    );
-  }
-
-  const argv = skipOurModel
-    ? [...ctx.passthroughArgs]
-    : ["--model", `omniroute/${model.id}`, ...ctx.passthroughArgs];
-
+function buildEnv(configContent, ctx, keyless) {
   const envSet = {
-    // Built with plain JSON.stringify, not the contract's `json()` helper: `json()` sorts
-    // object keys, which would scramble the `models` map out of view order. The invariant
-    // checked by checkPlanInvariants/boundary.test.ts requires the injected ids to equal
-    // ctx.view ids (cut by injectLimit) IN VIEW ORDER, so this map must preserve insertion
-    // order verbatim.
     KILO_CONFIG_CONTENT: configContent,
     KILO_NO_DAEMON: "1",
     KILO_DISABLE_AUTOUPDATE: "1",
     KILO_TELEMETRY_LEVEL: "off",
   };
   if (!keyless) envSet.OMNIROUTE_API_KEY = ctx.auth.token;
+  return envSet;
+}
 
-  const built = createPlan("kilo", {
-    argv,
-    env: { set: envSet, unset: ["KILO_API_KEY", "KILO_PROVIDER"] },
-    notes,
+function plan(ctx) {
+  const warnings = [];
+  const notes = [];
+  const model = gatedToolModel(ctx, MODEL_GATE, notes);
+
+  // Auth ({env:...} resolves only in trusted sources, so the real
+  // token lives in OMNIROUTE_API_KEY and the config carries only the {env:...} reference).
+  const keyless = ctx.auth.source === "none";
+  const options = openCodeOptions(ensureV1(ctx.gateway.rootUrl), keyless);
+  const args = ctx.passthroughArgs;
+  const dropEnabledProviders = checkPassthrough(args, warnings);
+
+  const { rows, content } = fitConfigToBudget(injectRows(ctx, INJECT_LIMIT), {
+    modelId: model.id,
+    budget: CONFIG_BYTE_BUDGET,
+    build: (list) => buildConfig(model, list, options, dropEnabledProviders),
     warnings,
-    modelList: { strategy: "inject", viewHash: ctx.view.hash, injected: rows.length },
   });
-  return { ...built, secretSites: findTokenSites(built) };
+
+  const skipOurModel = findFlag(args, ["--model", "-m"]) !== null;
+  const argv = skipOurModel ? [...args] : ["--model", `omniroute/${model.id}`, ...args];
+
+  return withTokenSites(
+    createPlan("kilo", {
+      argv,
+      env: { set: buildEnv(content, ctx, keyless), unset: ["KILO_API_KEY", "KILO_PROVIDER"] },
+      notes,
+      warnings,
+      modelList: injectModelList(ctx, rows.length),
+    })
+  );
 }
 
 export default defineAdapter({
@@ -206,22 +126,7 @@ export default defineAdapter({
     platforms: ["darwin", "linux", "win32"],
     minContextTokens: MIN_CONTEXT_TOKENS,
     tier: "supported",
-    modelList: {
-      strategy: "inject",
-      view: {
-        name: "kilo",
-        filter: {
-          protocols: ["openai-chat"],
-          kinds: ["chat"],
-          capabilities: ["tools"],
-          minContextTokens: MIN_CONTEXT_TOKENS,
-        },
-        order: "preferences",
-        limit: INJECT_LIMIT,
-        spread: "provider",
-      },
-      injectLimit: INJECT_LIMIT,
-    },
+    modelList: toolChatModelList("kilo", MIN_CONTEXT_TOKENS, INJECT_LIMIT),
     versionGate: { args: ["--version"], min: MIN_VERSION },
     install: INSTALL,
     passthrough: [{ flag: "--attach", action: "warn", message: ATTACH_WARNING }],
