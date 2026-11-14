@@ -727,12 +727,15 @@ function emitToolCallAdded(state, emit, idx, outputIndex, terminal = false) {
 // message opened or relocated after the call's first delta used to shift the
 // close-time index away from the added-time index (clients keying items by
 // output_index see the identity change mid-flight). Also never land on an
-// index a message item already holds.
+// index a message item or an earlier tool call already holds.
 function allocateToolOutputIndex(state, tcIdx) {
   if (!state.funcOutputIndex) state.funcOutputIndex = {};
   if (state.funcOutputIndex[tcIdx] === undefined) {
     let candidate = toolCallOutputIndexBase(state) + resolveLocalToolCallIndex(state, tcIdx);
-    while (state.msgItemAdded[candidate]) candidate += 1;
+    const allocatedToolIndexes = state.funcAllocatedOutputIndexes || {};
+    while (state.msgItemAdded[candidate] || allocatedToolIndexes[candidate] !== undefined) {
+      candidate += 1;
+    }
     state.funcOutputIndex[tcIdx] = candidate;
   }
   return state.funcOutputIndex[tcIdx];

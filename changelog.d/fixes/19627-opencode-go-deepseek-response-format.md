@@ -1,0 +1,1 @@
+- **fix(sse):** Structured-output requests (`response_format`) to OpenCode Go deepseek models no longer fail with an unclassifiable 400; the field is dropped for that model family on that relay. ([#19627](https://github.com/cheaper-inference/OmniRoute/pull/19627))
