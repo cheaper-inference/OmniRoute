@@ -15,6 +15,7 @@ export interface ModelPricing {
 export const KNOWN_MODEL_PRICING: Record<string, ModelPricing> = {
   "gpt-4o": { inputCostPer1M: 2.5, outputCostPer1M: 10.0, isFree: false },
   "gpt-4o-mini": { inputCostPer1M: 0.15, outputCostPer1M: 0.6, isFree: false },
+  "claude-fable-5-2": { inputCostPer1M: 8.0, outputCostPer1M: 40.0, isFree: false },
   "claude-fable-5-1": { inputCostPer1M: 10.0, outputCostPer1M: 50.0, isFree: false },
   "claude-fable-5": { inputCostPer1M: 15.0, outputCostPer1M: 75.0, isFree: false },
   "claude-opus-5-5": { inputCostPer1M: 4.0, outputCostPer1M: 20.0, isFree: false },

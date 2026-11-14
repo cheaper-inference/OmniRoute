@@ -4,6 +4,7 @@
  */
 import {
   GPT_6_ASTRA_PRICING,
+  CLAUDE_FABLE_5_2_PRICING,
   CLAUDE_FABLE_5_1_PRICING,
   CLAUDE_HAIKU_5_PRICING,
   CLAUDE_OPUS_5_5_PRICING,
@@ -137,6 +138,7 @@ const GPT_6_LUNA_CODEX_PRICING = {
 
 export const DEFAULT_PRICING_OAUTH = {
   cc: {
+    "claude-fable-5-2": CLAUDE_FABLE_5_2_PRICING,
     "claude-fable-5-1": CLAUDE_FABLE_5_1_PRICING,
     "claude-fable-5": {
       input: 10.0,

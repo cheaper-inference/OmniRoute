@@ -101,6 +101,15 @@ export const CLAUDE_FABLE_5_PRICING = {
   cache_creation: 15.0,
 };
 
+// https://docs.anthropic.com/en/docs/about-claude/pricing
+export const CLAUDE_FABLE_5_2_PRICING = {
+  input: 8.0,
+  output: 40.0,
+  cached: 0.2,
+  reasoning: 40.0,
+  cache_creation: 10.0,
+};
+
 export const CLAUDE_FABLE_5_1_PRICING = {
   input: 10.0,
   output: 50.0,
