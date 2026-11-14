@@ -629,6 +629,26 @@ export async function registerNodejs(): Promise<void> {
     console.warn("[STARTUP] Could not clear stale crash cooldowns (non-fatal):", msg);
   }
 
+  // Restore in-memory model lockouts from the persisted snapshot, then keep it
+  // refreshed. Lockout maps are module state — without this, every restart
+  // wiped them and the first request after boot re-entered each still-cooling
+  // target once (wasted upstream call, escalation reset to failureCount 1).
+  // Connection-level cooldowns already survive via DB rate_limited_until
+  // (#3625); this is the model-level counterpart. Non-fatal: a failed restore
+  // only costs the one re-hit the old behavior already paid.
+  try {
+    const { restoreModelLockoutsFromDb, startModelLockoutSnapshotInterval } =
+      await import("@/sse/services/modelLockoutPersistence");
+    const restored = restoreModelLockoutsFromDb();
+    if (restored > 0) {
+      console.log(`[STARTUP] Restored ${restored} model lockout(s) from persisted state`);
+    }
+    startModelLockoutSnapshotInterval();
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn("[STARTUP] Could not restore model lockouts (non-fatal):", msg);
+  }
+
   await scanComboModelNameCollisionsAtBoot();
   try {
     const { warnProviderPrefixCollisionsAtBoot } =

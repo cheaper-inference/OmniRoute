@@ -1154,6 +1154,53 @@ export function clearAllModelLockouts(): void {
 }
 
 /**
+ * Restart-persistence accessors (DB I/O lives in
+ * src/sse/services/modelLockoutPersistence.ts): expose the module-private
+ * maps' contents for snapshot/restore without leaking the maps themselves.
+ * Keys are opaque composite strings and are passed through verbatim.
+ */
+export function exportModelLockoutStateForPersistence(): {
+  lockouts: Array<[string, ModelLockoutEntry]>;
+  failures: Array<[string, ModelFailureState]>;
+} {
+  return {
+    lockouts: [...modelLockouts.entries()],
+    failures: [...modelFailureState.entries()],
+  };
+}
+
+/**
+ * Re-arm lockouts after a restart (entries come from a snapshot taken before
+ * the process exited). Already-expired lockouts are dropped — they are dead
+ * weight the 15s cleanup timer would delete anyway. Failure state is kept
+ * only while still inside its escalation window (`resetAfterMs` plus the
+ * last cooldown since `lastFailureAt`), mirroring the `withinWindow` check in
+ * recordModelLockoutFailure, so escalation continues instead of resetting
+ * to 1 while stale counts from long-closed windows are not resurrected.
+ *
+ * @returns number of still-active lockouts re-armed
+ */
+export function restoreModelLockoutStateForPersistence(
+  lockouts: Array<[string, ModelLockoutEntry]>,
+  failures: Array<[string, ModelFailureState]>,
+  now: number = Date.now()
+): number {
+  if (lockouts.length === 0 && failures.length === 0) return 0;
+  ensureCleanupTimer();
+  let restored = 0;
+  for (const [key, entry] of lockouts) {
+    if (entry.until <= now) continue; // expired — nothing to re-arm
+    modelLockouts.set(key, entry);
+    restored++;
+  }
+  for (const [key, state] of failures) {
+    if (now - state.lastFailureAt > state.resetAfterMs + (state.lastCooldownMs ?? 0)) continue;
+    modelFailureState.set(key, state);
+  }
+  return restored;
+}
+
+/**
  * Check if a specific model on a specific account is locked
  * @returns {boolean}
  */
