@@ -10666,6 +10666,7 @@
     "grokAutoTopUpMonth": "tháng",
     "grokAdditionalCredits": "Tín dụng bổ sung",
     "kiloAccountBalance": "Số dư tài khoản",
+    "kiloPassBandUsage": "{used} trên {total}",
     "kiloPassBonus": "Bonus khả dụng",
     "kiloPassMeterLabel": "Đồng hồ mức sử dụng Kilo Pass",
     "kiloPassPaid": "Đã thanh toán",

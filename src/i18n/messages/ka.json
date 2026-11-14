@@ -10666,6 +10666,7 @@
     "grokAutoTopUpMonth": "თვე",
     "grokAdditionalCredits": "დამატებითი კრედიტები",
     "kiloAccountBalance": "ანგარიშის ბალანსი",
+    "kiloPassBandUsage": "{used} / {total}",
     "kiloPassBonus": "ხელმისაწვდომი ბონუსი",
     "kiloPassMeterLabel": "Kilo Pass-ის გამოყენების მაჩვენებელი",
     "kiloPassPaid": "გადახდილია",

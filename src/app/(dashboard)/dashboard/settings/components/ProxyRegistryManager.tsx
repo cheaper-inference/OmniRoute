@@ -870,10 +870,9 @@ export default function ProxyRegistryManager({
                         </Button>
                         <Button
                           size="sm"
-                          variant="ghost"
+                          variant="destructive-ghost"
                           icon="delete"
                           onClick={() => void handleDelete(item.id)}
-                          className="text-error"
                         >
                           {t("delete")}
                         </Button>

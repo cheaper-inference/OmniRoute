@@ -10666,6 +10666,7 @@
     "grokAutoTopUpMonth": "hónap",
     "grokAdditionalCredits": "További Kiadások",
     "kiloAccountBalance": "Számlaegyenleg",
+    "kiloPassBandUsage": "{used} / {total}",
     "kiloPassBonus": "Elérhető bónusz",
     "kiloPassMeterLabel": "Kilo Pass használatjelző",
     "kiloPassPaid": "Kifizetve",

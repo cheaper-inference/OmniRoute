@@ -10666,6 +10666,7 @@
     "grokAutoTopUpMonth": "ወር",
     "grokAdditionalCredits": "ተጨማሪ ክሬዲቶች",
     "kiloAccountBalance": "የመለያ ቀሪ ሂሳብ",
+    "kiloPassBandUsage": "{used} ከ {total}",
     "kiloPassBonus": "የሚገኝ ጉርሻ",
     "kiloPassMeterLabel": "የKilo Pass አጠቃቀም መለኪያ",
     "kiloPassPaid": "የተከፈለ",
