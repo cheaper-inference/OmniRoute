@@ -615,10 +615,18 @@ export async function checkConnection(conn: any) {
     return;
   }
   if (!conn.isActive) {
-    // #P0: allow expired connections with retry budget remaining to pass
-    // through so transient OAuth failures can self-heal instead of being
-    // permanently skipped. Exhausted retries stay terminal.
-    if (!(conn.testStatus === "expired" && getExpiredRetryCount(conn) < EXPIRED_RETRY_MAX)) {
+    // Inactive connections (e.g. disabled due to quota exhaustion, operator pause,
+    // or rate limit cooldown) must still keep their OAuth credentials refreshed as long as they
+    // have a usable refresh token and are not permanently banned. Otherwise, resting accounts
+    // lose their OAuth session and fail with `invalid_grant` (Refresh token consumed) when reactivated.
+    const isMaintainableOAuth =
+      conn.authType === "oauth" &&
+      Boolean(conn.refreshToken) &&
+      conn.testStatus !== "banned";
+    const isRetryableExpired =
+      conn.testStatus === "expired" && getExpiredRetryCount(conn) < EXPIRED_RETRY_MAX;
+
+    if (!isMaintainableOAuth && !isRetryableExpired) {
       return;
     }
   }
