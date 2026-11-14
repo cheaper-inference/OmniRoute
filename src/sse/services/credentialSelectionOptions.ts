@@ -14,6 +14,8 @@ export interface CredentialSelectionOptions {
   forcedConnectionId?: string | null;
   /** API-key-scoped ordered preference. Only ranks connections that survived eligibility gates. */
   preferredConnectionIds?: string[] | null;
+  /** Original requested model including bare vs provider-qualified form, for health routing. */
+  originalRequestedModelStr?: string | null;
   /** The pin was chosen by the operator for this request (x-omniroute-connection), not derived by a combo. */
   explicitConnectionPin?: boolean;
   excludeConnectionIds?: string[] | null;

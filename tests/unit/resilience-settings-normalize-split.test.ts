@@ -99,6 +99,7 @@ describe("resilience/settings normalize split-guard", () => {
   it("host exposes DEFAULT_RESILIENCE_SETTINGS with the full section set", () => {
     const keys = Object.keys(DEFAULT_RESILIENCE_SETTINGS).sort();
     assert.deepEqual(keys, [
+      "antigravityAdaptiveHealth",
       "antigravityTimingTelemetry",
       "comboCooldownWait",
       "connectionCooldown",

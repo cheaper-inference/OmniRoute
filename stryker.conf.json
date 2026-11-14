@@ -54,6 +54,7 @@
       "tests/unit/upstream-response-decoded-byte-cap.test.ts",
       "tests/unit/vision-bridge-model-lockout-18268.test.ts",
       "tests/unit/antigravity-headers-budget.test.ts",
+      "tests/unit/antigravity-health-hot-settings.test.ts",
       "tests/unit/internal-upstream-start-timeout.test.ts",
       "tests/unit/preferred-account-failover-upstream.test.ts",
       "tests/unit/preferred-account-hot-settings.test.ts",

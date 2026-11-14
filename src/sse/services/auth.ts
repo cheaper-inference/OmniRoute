@@ -141,6 +141,10 @@ import {
 } from "@omniroute/open-sse/config/providerErrorRules.ts";
 import { preflightQuota } from "@omniroute/open-sse/services/quotaPreflight.ts";
 import { resolveResilienceSettings } from "@/lib/resilience/settings";
+import {
+  antigravityHealth,
+  isAntigravityAdaptiveHealthEnabled,
+} from "@omniroute/open-sse/services/antigravityHealth.ts";
 import { resolveModelLockoutSettings } from "@/lib/resilience/modelLockoutSettings";
 import {
   buildMixedAvailabilityError,
@@ -180,6 +184,7 @@ import {
   WEB_COOKIE_PROVIDERS,
 } from "@/shared/constants/providers";
 import { isModelExcludedByConnection } from "@/domain/connectionModelRules";
+import { resolveBareModelToConnectionDefault } from "@omniroute/open-sse/services/model.ts";
 import {
   filterCodexPlanEligible,
   isCodexPaidOnlyModel,
@@ -889,6 +894,7 @@ async function materializeConnection(
     requestedModel?: string | null;
     selectedByApiKeyPreference?: boolean;
     preferredFallbackAvailable?: boolean;
+    antigravityHealthFallback?: boolean;
   } = {}
 ) {
   const providerSpecificData = await hydrateConnectionProviderSpecificData(connection);
@@ -1908,7 +1914,42 @@ export async function getProviderCredentials(
         : null;
     }
 
-    const allOrderedConnections = [...leasePolicy.connections].sort((a, b) => {
+    // Advisory account/model health comes after key scopes, quota and lease
+    // eligibility. Preserve pinned exclusive leases and upstream's preferred
+    // account/session-affinity selection by filtering BEFORE ordering.
+    const healthEnabled = Boolean(
+      requestedModel &&
+      isAntigravityAdaptiveHealthEnabled(
+        provider,
+        resolveResilienceSettings(settings).antigravityAdaptiveHealth.enabled
+      )
+    );
+    const healthModelFor = (candidate: ProviderConnectionView): string =>
+      resolveBareModelToConnectionDefault(
+        options.originalRequestedModelStr,
+        requestedModel,
+        candidate.defaultModel
+      ) ||
+      requestedModel ||
+      "";
+    const healthCandidates =
+      healthEnabled && requestedModel && !leasePolicy.activeLease
+        ? antigravityHealth.candidates(
+            leasePolicy.connections,
+            healthModelFor,
+            Boolean(forcedConnectionId)
+          )
+        : leasePolicy.connections;
+    if (healthCandidates.length === 0) {
+      return {
+        allRateLimited: true,
+        retryAfter: new Date(Date.now() + 1000).toISOString(),
+        retryAfterHuman: "1s",
+        lastError: "Antigravity recovery probe already in flight",
+        lastErrorCode: 503,
+      };
+    }
+    const allOrderedConnections = [...healthCandidates].sort((a, b) => {
       if (a.authType !== "oauth" || b.authType !== "oauth") return 0;
       const priorityDelta = (a.priority || 999) - (b.priority || 999);
       if (priorityDelta !== 0) return priorityDelta;
@@ -2209,6 +2250,11 @@ export async function getProviderCredentials(
           selectedByApiKeyPreference,
           preferredFallbackAvailable,
           ...probeStamp,
+          antigravityHealthFallback: Boolean(
+            healthEnabled &&
+            requestedModel &&
+            antigravityHealth.remainingCooldownMs(connection.id, healthModelFor(connection)) > 0
+          ),
         });
       }
       let claim = mutateExclusiveConnectionLease(
@@ -2259,6 +2305,11 @@ export async function getProviderCredentials(
       requestedModel,
       selectedByApiKeyPreference,
       preferredFallbackAvailable,
+      antigravityHealthFallback: Boolean(
+        healthEnabled &&
+        requestedModel &&
+        antigravityHealth.remainingCooldownMs(connection.id, healthModelFor(connection)) > 0
+      ),
     });
   } finally {
     selectionLock?.release();
