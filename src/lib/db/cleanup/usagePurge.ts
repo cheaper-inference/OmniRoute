@@ -99,6 +99,25 @@ export async function deleteFromTableBeforeInBatches(
   }
 }
 
+// Only a usage_history purge records the day it reached (see usagePurgedBefore.ts).
+function purgeRecorder(table: string): (day: string) => void {
+  return table === "usage_history" ? recordUsagePurgedBefore : () => {};
+}
+
+// The delete and the recorded day commit together: a stop between them would let a late row replace the day.
+function deleteAndRecord(
+  db: ReturnType<typeof getDbInstance>,
+  remove: { run: (day: string) => { changes: number | bigint } },
+  record: (day: string) => void,
+  reached: string
+): number {
+  return db.transaction(() => {
+    const changes = Number(remove.run(reached).changes);
+    record(reached);
+    return changes;
+  })();
+}
+
 /**
  * Delete rows with `column < cutoffDate` (YYYY-MM-DD), one whole UTC day per
  * statement, oldest day first, yielding between statements.
@@ -123,7 +142,7 @@ export async function deleteWholeDaysBefore(
   const db = getDbInstance();
   const oldest = db.prepare(`SELECT MIN(${column}) AS t FROM ${table} WHERE ${column} < ?`);
   const remove = db.prepare(`DELETE FROM ${table} WHERE ${column} < ?`);
-  const record = table === "usage_history" ? recordUsagePurgedBefore : () => {};
+  const record = purgeRecorder(table);
   let deleted = 0;
 
   while (true) {
@@ -140,12 +159,7 @@ export async function deleteWholeDaysBefore(
       ? new Date(dayStart + 86_400_000).toISOString().slice(0, 10)
       : cutoffDate;
     const reached = nextDay < cutoffDate ? nextDay : cutoffDate;
-    // The delete and the recorded day commit together: a stop between them would let a late row replace the day.
-    const batch = db.transaction(() => {
-      const changes = remove.run(reached).changes;
-      record(reached);
-      return changes;
-    })();
+    const batch = deleteAndRecord(db, remove, record, reached);
     deleted += batch;
     if (progress) progress.deleted += batch;
     await yieldToEventLoop();
