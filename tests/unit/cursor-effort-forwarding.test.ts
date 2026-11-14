@@ -46,7 +46,13 @@ test("an effort encoded in the model ID wins over an explicit conflicting effort
     requestedModel(
       encodeAgentRunRequest({ modelId: "grok-4.7-low", userText: "hi", reasoningEffort: "high" })
     ),
-    { modelId: "grok-4.7", parameters: [{ id: "effort", value: "low" }] }
+    {
+      modelId: "grok-4.7",
+      parameters: [
+        { id: "reasoning_effort", value: "low" },
+        { id: "fast", value: "false" },
+      ],
+    }
   );
 });
 
@@ -120,6 +126,12 @@ test("custom grok effort aliases do not masquerade as upstream live model ids", 
     requestedModel(
       encodeAgentRunRequest({ modelId: "grok-4.7-low", userText: "hi", liveCatalogIds: ids })
     ),
-    { modelId: "grok-4.7", parameters: [{ id: "effort", value: "low" }] }
+    {
+      modelId: "grok-4.7",
+      parameters: [
+        { id: "reasoning_effort", value: "low" },
+        { id: "fast", value: "false" },
+      ],
+    }
   );
 });

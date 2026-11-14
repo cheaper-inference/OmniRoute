@@ -384,9 +384,18 @@ function resolveGrokRequestedModel(
 
   const effortSplit = splitCursorEffortSuffix(id, prefix, "effort");
   if (effortSplit) {
+    const parameters = [...effortSplit.parameters, ...extraParams];
+    // Cursor may default Grok 4.7 to Fast. A standard effort alias must opt
+    // out explicitly; only an alias with the -fast suffix should enable it.
+    if (
+      /^(?:cursor-)?grok-4\.7$/.test(effortSplit.modelId) &&
+      extraParams.length === 0
+    ) {
+      parameters.push({ id: "fast", value: "false" });
+    }
     return {
       modelId: effortSplit.modelId,
-      parameters: [...effortSplit.parameters, ...extraParams],
+      parameters,
     };
   }
   if (extraParams.length > 0) {
@@ -571,8 +580,14 @@ export function encodeAgentRunRequest(input: AgentRunInput): Buffer {
     input.reasoningEffort
   );
 
-  // Cursor records this variant as Fast when the legacy model envelope is also set.
-  const useStandardGrok = modelId === "grok-4.7" && input.modelId === "cursor-grok-4.7-high-256k";
+  // Cursor can classify Grok 4.7 as Fast when the legacy ModelDetails envelope
+  // accompanies an effort variant. Use RequestedModel alone for every Grok 4.7
+  // effort tier; keep an explicit -fast choice in its fast=true parameter.
+  const normalizedInputModelId = normalizeCursorModelId(input.modelId);
+  const useStandardGrok =
+    /^(?:cursor-)?grok-4\.7-(?:low|medium|high|xhigh|max)(?:-fast)?(?:-256k)?$/.test(
+      normalizedInputModelId
+    ) && resolvedParameters.some((parameter) => parameter.id === "effort");
   const parameters = useStandardGrok
     ? resolvedParameters.map((parameter) =>
         parameter.id === "effort" ? { ...parameter, id: "reasoning_effort" } : parameter
