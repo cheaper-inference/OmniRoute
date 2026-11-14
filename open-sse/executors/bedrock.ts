@@ -1,16 +1,26 @@
-// @ts-nocheck
 import {
   BedrockRuntimeClient,
   ConverseCommand,
   ConverseStreamCommand,
+  type ConverseStreamCommandInput,
+  type InferenceConfiguration,
+  type Message,
+  type SystemContentBlock,
+  type ToolConfiguration,
 } from "@aws-sdk/client-bedrock-runtime";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
 import { BaseExecutor } from "./base.ts";
 import { PROVIDERS } from "../config/constants.ts";
 import { buildBedrockNativeConverseUrl, resolveBedrockRegion } from "../config/bedrock.ts";
 import * as prl from "../utils/providerRequestLogging.ts";
 import { appendToolCallArgumentDelta } from "../utils/toolCallArguments.ts";
+import { normalizeClaudeAdaptiveThinking } from "../services/claudeAdaptiveThinking.ts";
+import {
+  claudeModelSupportsThinking,
+  claudeThinkingFromOpenAIRequest,
+} from "../translator/request/openai-to-claude/thinkingConfig.ts";
+import { fitThinkingToMaxTokens } from "../translator/request/openai-to-claude/thinkingBudget.ts";
 
 const encoder = new TextEncoder();
 
@@ -43,6 +53,28 @@ function stripDataUrlPrefix(value) {
 
 function decodeBase64(value) {
   return Uint8Array.from(Buffer.from(value, "base64"));
+}
+
+// Converse prompt caching works only at explicit `cachePoint` blocks, and only on
+// model families that support it; other models reject the block.
+const BEDROCK_CACHE_POINT_MODEL = /anthropic\.claude|amazon\.nova/i;
+const BEDROCK_CLAUDE_MODEL = /anthropic\.claude/i;
+// Converse accepts at most 4 cache points per request.
+const BEDROCK_MAX_CACHE_POINTS = 4;
+
+function cachePointFor(cacheControl) {
+  if (!cacheControl || typeof cacheControl !== "object") return null;
+  const ttl = cacheControl.ttl;
+  return { cachePoint: { type: "default", ...(ttl === "5m" || ttl === "1h" ? { ttl } : {}) } };
+}
+
+function isCachePointBlock(block) {
+  return Boolean(block?.cachePoint);
+}
+
+function firstPartCacheControl(content) {
+  if (!Array.isArray(content)) return undefined;
+  return content.map((part) => asRecord(part).cache_control).find(Boolean);
 }
 
 function normalizeRole(role) {
@@ -110,22 +142,30 @@ function createToolUseIdNormalizer(messages) {
   };
 }
 
-function textBlocksFromContent(content, options = {}) {
+function textBlocksFromContent(
+  content: unknown,
+  options: {
+    normalizeId?: (id: string) => string;
+    skipToolUseIds?: ReadonlySet<unknown>;
+    answeredToolUseIds?: ReadonlySet<unknown>;
+    cachePoints?: boolean;
+  } = {}
+) {
   if (typeof content === "string") return content.trim() ? [{ text: content }] : [];
   if (!Array.isArray(content)) return [];
 
   const normalizeId = options.normalizeId || normalizeToolUseId;
   const blocks = [];
-  for (const part of content) {
+  const pushPart = (part) => {
     if (typeof part === "string") {
       if (part.trim()) blocks.push({ text: part });
-      continue;
+      return;
     }
     const p = asRecord(part);
     const type = typeof p.type === "string" ? p.type : "";
     if ((type === "text" || type === "input_text") && typeof p.text === "string") {
       if (p.text.trim()) blocks.push({ text: p.text });
-      continue;
+      return;
     }
     if (type === "image_url" || type === "input_image") {
       const url = typeof p.image_url === "string" ? p.image_url : p.image_url?.url || p.image_url;
@@ -135,13 +175,13 @@ function textBlocksFromContent(content, options = {}) {
           image: { format: image.format, source: { bytes: decodeBase64(image.data) } },
         });
       }
-      continue;
+      return;
     }
     if (type === "tool_use" && typeof p.id === "string" && typeof p.name === "string") {
       const rawId = normalizeId(p.id);
-      if (!rawId) continue;
-      if (options.skipToolUseIds?.has(rawId)) continue;
-      if (!options.answeredToolUseIds?.has(rawId)) continue;
+      if (!rawId) return;
+      if (options.skipToolUseIds?.has(rawId)) return;
+      if (!options.answeredToolUseIds?.has(rawId)) return;
       blocks.push({
         toolUse: {
           toolUseId: rawId,
@@ -149,11 +189,11 @@ function textBlocksFromContent(content, options = {}) {
           input: asRecord(p.input),
         },
       });
-      continue;
+      return;
     }
     if (type === "tool_result" && typeof p.tool_use_id === "string") {
       const toolUseId = normalizeId(p.tool_use_id);
-      if (!toolUseId) continue;
+      if (!toolUseId) return;
       blocks.push({
         toolResult: {
           toolUseId,
@@ -162,12 +202,20 @@ function textBlocksFromContent(content, options = {}) {
         },
       });
     }
-  }
+  };
 
+  for (const part of content) {
+    const before = blocks.length;
+    pushPart(part);
+    // A cache_control marker becomes a Converse cache point right after the block
+    // it marks; a part that produced no block has nothing to mark.
+    const cachePoint = options.cachePoints ? cachePointFor(asRecord(part).cache_control) : null;
+    if (cachePoint && blocks.length > before) blocks.push(cachePoint);
+  }
   return blocks;
 }
 
-function systemBlocksFromOpenAI(messages) {
+function systemBlocksFromOpenAI(messages, cachePoints = false) {
   const blocks = [];
   for (const message of messages) {
     const role = message?.role;
@@ -176,7 +224,14 @@ function systemBlocksFromOpenAI(messages) {
       .map((block) => (typeof block.text === "string" ? block.text : ""))
       .filter(Boolean)
       .join("\n");
-    if (text.trim()) blocks.push({ text });
+    if (!text.trim()) continue;
+    blocks.push({ text });
+    // The parts of one system message are joined into a single block, so a marker
+    // on any of them caches through the end of that message.
+    const cachePoint = cachePoints
+      ? cachePointFor(message.cache_control || firstPartCacheControl(message.content))
+      : null;
+    if (cachePoint) blocks.push(cachePoint);
   }
   return blocks;
 }
@@ -319,7 +374,37 @@ function sanitizeBedrockToolPairs(messages) {
   return normalized;
 }
 
-function messagesFromOpenAI(messages) {
+// A cache point must follow the block it marks. Dropping a tool block (pairing
+// sanitizer) can leave one leading a turn or doubled up; remove those.
+function dropStrayCachePoints(messages) {
+  for (const message of messages) {
+    if (!Array.isArray(message?.content)) continue;
+    message.content = message.content.filter(
+      (block, i, all) => !isCachePointBlock(block) || (i > 0 && !isCachePointBlock(all[i - 1]))
+    );
+    ensureNonEmptyContent(message);
+  }
+  return messages;
+}
+
+// Keep the LAST cache points: later ones cover a longer prefix (the same rule as
+// enforceCacheControlBlockLimit for the Claude path).
+function enforceCachePointLimit(system, messages) {
+  const lists = [system, ...messages.map((message) => message.content)];
+  let total = lists.reduce((sum, list) => sum + list.filter(isCachePointBlock).length, 0);
+  for (const list of lists) {
+    for (let i = 0; i < list.length && total > BEDROCK_MAX_CACHE_POINTS;) {
+      if (isCachePointBlock(list[i])) {
+        list.splice(i, 1);
+        total--;
+      } else {
+        i++;
+      }
+    }
+  }
+}
+
+function messagesFromOpenAI(messages, cachePoints = false) {
   const converted = [];
   const pendingToolUseIds = new Set();
   const normalizeId = createToolUseIdNormalizer(messages);
@@ -333,27 +418,33 @@ function messagesFromOpenAI(messages) {
       const toolUseId = normalizeId(message.tool_call_id) || `toolu_${randomUUID()}`;
       pendingToolUseIds.delete(toolUseId);
       answeredToolUseIds.add(toolUseId);
-      converted.push({
-        role: "user",
-        content: [
-          {
-            toolResult: {
-              toolUseId,
-              content: toolResultContentFromMessage(message),
-              status: "success",
-            },
+      const content: Record<string, unknown>[] = [
+        {
+          toolResult: {
+            toolUseId,
+            content: toolResultContentFromMessage(message),
+            status: "success",
           },
-        ],
-      });
+        },
+      ];
+      // Converse has no cache point inside a tool result; it goes right after it.
+      const cachePoint = cachePoints
+        ? cachePointFor(message.cache_control || firstPartCacheControl(message.content))
+        : null;
+      if (cachePoint) content.push(cachePoint);
+      converted.push({ role: "user", content });
       continue;
     }
 
     const toolCalls = Array.isArray(message.tool_calls) ? message.tool_calls : [];
-    const toolCallIds = new Set(toolCalls.map((call) => normalizeId(call?.id)).filter(Boolean));
+    const toolCallIds: Set<string> = new Set(
+      toolCalls.map((call) => normalizeId(call?.id)).filter((id): id is string => Boolean(id))
+    );
     const content = textBlocksFromContent(message.content, {
       skipToolUseIds: toolCallIds,
       answeredToolUseIds,
       normalizeId,
+      cachePoints,
     });
     for (const call of toolCalls) {
       const fn = asRecord(call.function);
@@ -388,10 +479,10 @@ function messagesFromOpenAI(messages) {
     converted.push({ role: "user", content: [{ text: " " }] });
   }
 
-  return sanitizeBedrockToolPairs(converted);
+  return dropStrayCachePoints(sanitizeBedrockToolPairs(converted));
 }
 
-function toolConfigFromOpenAI(tools, toolChoice) {
+function toolConfigFromOpenAI(tools, toolChoice): ToolConfiguration | undefined {
   if (!Array.isArray(tools) || tools.length === 0) return undefined;
   const bedrockTools = [];
   for (const tool of tools) {
@@ -409,7 +500,10 @@ function toolConfigFromOpenAI(tools, toolChoice) {
   }
   if (bedrockTools.length === 0) return undefined;
 
-  const config = { tools: bedrockTools };
+  const config: {
+    tools: typeof bedrockTools;
+    toolChoice?: ToolConfiguration["toolChoice"];
+  } = { tools: bedrockTools };
   if (toolChoice === "required") config.toolChoice = { any: {} };
   else if (toolChoice === "auto") config.toolChoice = { auto: {} };
   else if (toolChoice && typeof toolChoice === "object") {
@@ -420,10 +514,67 @@ function toolConfigFromOpenAI(tools, toolChoice) {
   return config;
 }
 
+// A Bedrock id wraps the Claude id in a region, a provider and a version
+// (us.anthropic.claude-sonnet-4-5-20250929-v1:0); the model specs know the inner one.
+function claudeSpecId(model) {
+  return String(model)
+    .replace(/^.*anthropic\./i, "")
+    .replace(/-v\d+(?::.*)?$/i, "");
+}
+
+function lastAssistantUsesTool(messages) {
+  const assistant = messages.filter((message) => message.role === "assistant").at(-1);
+  return Boolean(assistant?.content.some(getToolUseIdFromBlock));
+}
+
+// Adaptive thinking omits the thinking text by default, so a client that asked for
+// reasoning would get an empty reasoning_content; ask for the summarized display.
+function withThinkingDisplay(thinking) {
+  return thinking.type === "adaptive" && !thinking.display
+    ? { ...thinking, display: "summarized" }
+    : thinking;
+}
+
+// Claude on Bedrock takes extended thinking in additionalModelRequestFields, in the
+// same shape as the Anthropic Messages API, so reuse the OpenAI to Claude mapping.
+// Anything left out here is a request Claude would reject, and it goes out without
+// thinking: a model the specs do not list as thinking-capable (a caller can still set
+// additionalModelRequestFields), and a tool_choice that forces tool use.
+function claudeThinkingFields(model, request, inferenceConfig, payload) {
+  if (!BEDROCK_CLAUDE_MODEL.test(String(model))) return null;
+  const specId = claudeSpecId(model);
+  if (!claudeModelSupportsThinking(specId)) return null;
+  const toolChoice = payload.toolConfig?.toolChoice;
+  if (toolChoice && !toolChoice.auto) return null;
+
+  const mapped = claudeThinkingFromOpenAIRequest(request, specId);
+  if (!mapped.thinking || mapped.thinking.type === "disabled") return null;
+  const { thinking } = normalizeClaudeAdaptiveThinking({ thinking: mapped.thinking }, specId);
+  // Manual thinking needs the signed block that preceded the tool_use of the turn in
+  // progress, and a Converse request has none to send back (#5945).
+  if (thinking.type === "enabled" && lastAssistantUsesTool(payload.messages)) return null;
+
+  const fitted = fitThinkingToMaxTokens(
+    specId,
+    Number(inferenceConfig.maxTokens) || 0,
+    thinking,
+    "bedrock"
+  );
+  if (!fitted.thinking) return null;
+  if (fitted.thinking.budget_tokens) inferenceConfig.maxTokens = fitted.maxTokens;
+  // Claude rejects a non-default temperature or a low top_p while thinking is on.
+  delete inferenceConfig.temperature;
+  delete inferenceConfig.topP;
+  return {
+    thinking: withThinkingDisplay(fitted.thinking),
+    ...(mapped.effort ? { output_config: { effort: mapped.effort } } : {}),
+  };
+}
+
 export function openAIToBedrockConverse(model, body) {
   const request = asRecord(body);
   const messages = Array.isArray(request.messages) ? request.messages : [];
-  const inferenceConfig = {};
+  const inferenceConfig: Record<string, unknown> = {};
 
   const maxTokens = request.max_tokens ?? request.max_completion_tokens;
   if (typeof maxTokens === "number") inferenceConfig.maxTokens = Math.max(1, Math.floor(maxTokens));
@@ -433,21 +584,40 @@ export function openAIToBedrockConverse(model, body) {
   else if (typeof request.stop === "string" && request.stop)
     inferenceConfig.stopSequences = [request.stop];
 
-  const payload = {
+  const cachePoints = BEDROCK_CACHE_POINT_MODEL.test(String(model));
+
+  // A concrete shape, not a Record: the result is handed to ConverseCommand, whose
+  // input type requires modelId.
+  const payload: {
+    modelId: string;
+    messages: Message[];
+    system?: SystemContentBlock[];
+    inferenceConfig?: InferenceConfiguration;
+    toolConfig?: ToolConfiguration;
+    additionalModelRequestFields?: ConverseStreamCommandInput["additionalModelRequestFields"];
+  } = {
     modelId: model,
-    messages: messagesFromOpenAI(messages),
+    messages: messagesFromOpenAI(messages, cachePoints),
   };
 
-  const system = systemBlocksFromOpenAI(messages);
+  const system = systemBlocksFromOpenAI(messages, cachePoints);
+  if (cachePoints) enforceCachePointLimit(system, payload.messages);
   if (system.length > 0) payload.system = system;
-  if (Object.keys(inferenceConfig).length > 0) payload.inferenceConfig = inferenceConfig;
 
   const toolConfig = toolConfigFromOpenAI(request.tools, request.tool_choice);
   if (toolConfig) payload.toolConfig = toolConfig;
 
   if (request.additionalModelRequestFields !== undefined) {
     payload.additionalModelRequestFields = request.additionalModelRequestFields;
+  } else {
+    const thinkingFields = claudeThinkingFields(model, request, inferenceConfig, payload);
+    if (thinkingFields) {
+      payload.additionalModelRequestFields =
+        thinkingFields as ConverseStreamCommandInput["additionalModelRequestFields"];
+    }
   }
+
+  if (Object.keys(inferenceConfig).length > 0) payload.inferenceConfig = inferenceConfig;
 
   return payload;
 }
@@ -508,7 +678,7 @@ function contentBlocksToOpenAIMessage(blocks) {
     }
   }
 
-  const message = { role: "assistant", content: text.join("") };
+  const message: Record<string, unknown> = { role: "assistant", content: text.join("") };
   if (reasoning.length > 0) message.reasoning_content = reasoning.join("");
   if (toolCalls.length > 0) {
     message.content = message.content || null;
@@ -544,7 +714,7 @@ function done() {
 }
 
 function openAIChunk(model, delta, finishReason = null, usage = undefined) {
-  const chunk = {
+  const chunk: Record<string, unknown> = {
     id: `chatcmpl-bedrock-${model}`,
     object: "chat.completion.chunk",
     created: Math.floor(Date.now() / 1000),
@@ -740,8 +910,32 @@ function createOpenAIStreamFromBedrock(stream, model) {
   });
 }
 
+// The executor consumes only these fields; injected clients need not supply SDK
+// metadata or a message role that the OpenAI response converter does not read.
+interface BedrockClientOutput {
+  output?: { message?: { content?: unknown[] } };
+  stopReason?: string;
+  usage?: unknown;
+  stream?: AsyncIterable<unknown>;
+}
+
+const MAX_BEDROCK_CLIENTS = 32;
+
+interface BedrockClientLike {
+  send: (
+    command: ConverseCommand | ConverseStreamCommand,
+    options?: { abortSignal?: AbortSignal }
+  ) => Promise<BedrockClientOutput>;
+  destroy?: () => void;
+}
+
 export class BedrockExecutor extends BaseExecutor {
-  constructor(clientFactory = null) {
+  // Tests inject a stub, so this names only the method the executor calls rather
+  // than the SDK client class.
+  private readonly clientFactory: ((credentials: unknown) => BedrockClientLike) | null;
+  private readonly clients = new Map<string, BedrockClientLike>();
+
+  constructor(clientFactory: ((credentials: unknown) => BedrockClientLike) | null = null) {
     super("bedrock", PROVIDERS.bedrock || { format: "openai" });
     this.clientFactory = clientFactory;
   }
@@ -761,17 +955,32 @@ export class BedrockExecutor extends BaseExecutor {
     };
   }
 
-  createClient(credentials) {
-    if (this.clientFactory) return this.clientFactory(credentials);
+  createClient(credentials): BedrockClientLike {
     const region = resolveBedrockRegion(credentials?.providerSpecificData);
     const customUserAgent = getCustomUserAgent(credentials?.providerSpecificData);
-    return new BedrockRuntimeClient({
-      region,
-      token: { token: credentials.apiKey },
-      authSchemePreference: ["httpBearerAuth"],
-      maxAttempts: 1,
-      ...(customUserAgent ? { customUserAgent } : {}),
-    });
+    const keyFingerprint = createHash("sha256").update(credentials.apiKey).digest("hex");
+    const cacheKey = JSON.stringify([region, customUserAgent, keyFingerprint]);
+    const cached = this.clients.get(cacheKey);
+    if (cached) return cached;
+
+    const client = this.clientFactory
+      ? this.clientFactory(credentials)
+      : new BedrockRuntimeClient({
+          region,
+          token: { token: credentials.apiKey },
+          authSchemePreference: ["httpBearerAuth"],
+          maxAttempts: 1,
+          ...(customUserAgent ? { customUserAgent } : {}),
+        });
+    if (this.clients.size >= MAX_BEDROCK_CLIENTS) {
+      const oldestKey = this.clients.keys().next().value;
+      if (oldestKey !== undefined) {
+        this.clients.get(oldestKey)?.destroy?.();
+        this.clients.delete(oldestKey);
+      }
+    }
+    this.clients.set(cacheKey, client);
+    return client;
   }
 
   async execute({ model, body, stream, credentials, signal, log }) {

@@ -6,6 +6,7 @@ import { PROVIDER_COLORS as CHART_PROVIDER_COLORS } from "@/shared/components/an
 import SegmentedControl from "@/shared/components/SegmentedControl";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
 import { getAccountDisplayName } from "@/lib/display/names";
 import dynamic from "next/dynamic";
@@ -207,6 +208,8 @@ export default function ProviderUtilizationTab() {
         action={
           <div className="flex items-center gap-4">
             <SegmentedControl
+              semantics="radio"
+              aria-label={t("providerUtilizationTitle")}
               size="sm"
               value={aggregateBy}
               onChange={(next) => setAggregateBy(next as typeof aggregateBy)}
@@ -225,8 +228,11 @@ export default function ProviderUtilizationTab() {
         className="overflow-hidden"
       >
         {loading && !hasData ? (
-          <div className="flex min-h-80 items-center justify-center text-sm text-text-muted">
-            <Icon name="progress_activity" size={18} className="mr-2 animate-spin" />
+          <div
+            role="status"
+            className="flex min-h-80 items-center justify-center text-sm text-text-muted"
+          >
+            <Spinner decorative size="sm" className="mr-2" />
             {t("providerUtilizationLoading")}
           </div>
         ) : error ? (
@@ -336,7 +342,7 @@ export default function ProviderUtilizationTab() {
 
                     <div className="flex items-end justify-between gap-3">
                       <div>
-                        <p className="text-3xl font-bold text-text-main">
+                        <p className="text-3xl font-semibold text-text-main">
                           {point.remainingPct.toFixed(point.remainingPct < 10 ? 1 : 0)}%
                         </p>
                         <p className="mt-1 text-xs text-text-muted">

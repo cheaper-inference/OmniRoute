@@ -33,7 +33,7 @@ export function buildProxyTypes(socks5Enabled: boolean) {
     : ALL_PROXY_TYPES.filter((type) => type.value !== "socks5");
 }
 
-type ProxyConfigLevel = "global" | "provider" | "combo" | "key";
+export type ProxyConfigLevel = "global" | "provider" | "combo" | "key";
 
 type ProxyRegistryItem = {
   id: string;
@@ -587,6 +587,7 @@ export default function ProxyConfigModal({
           {/* Proxy Type Selector */}
           <Field label={t("source")}>
             <SegmentedControl
+              semantics="radio"
               aria-label={t("source")}
               value={mode}
               onChange={(next) => setMode(next as typeof mode)}
@@ -616,6 +617,7 @@ export default function ProxyConfigModal({
             <>
               <Field label={t("proxyType")}>
                 <SegmentedControl
+                  semantics="radio"
                   aria-label={t("proxyType")}
                   className="w-full"
                   value={proxyType}
@@ -737,11 +739,10 @@ export default function ProxyConfigModal({
               {hasOwnProxy && (
                 <Button
                   size="sm"
-                  variant="ghost"
+                  variant="destructive-ghost"
                   icon="delete"
                   onClick={handleClear}
                   disabled={saving}
-                  className="!text-error hover:!bg-error/10"
                 >
                   {t("clear")}
                 </Button>

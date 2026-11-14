@@ -11,6 +11,7 @@ const policy = JSON.parse(
 );
 const ready = {
   "github.event_name": "pull_request",
+  "github.event.action": "synchronize",
   "github.event.pull_request.draft": false,
   "github.head_ref": "fix/example",
   "github.event.pull_request.user.id": 1,
@@ -19,6 +20,7 @@ const ready = {
   "github.event.repository.id": 1157102282,
   "github.event.pull_request.head.repo.id": 1157102282,
   "github.event.pull_request.base.repo.id": 1157102282,
+  "needs.changes.result": "success",
   "needs.changes.outputs.code": "true",
   "needs.changes.outputs.docs": "true",
   "needs.changes.outputs.i18n": "true",
@@ -26,6 +28,13 @@ const ready = {
   "needs.lint.result": "success",
   "needs.test-unit.result": "success",
 };
+// The one event that skips the matrix: a description edit on a Mergify queue draft.
+const QUEUE_DRAFT_EDIT =
+  "github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id";
+const ADMISSION_REQUESTED =
+  "github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success'";
+const ADMISSION_IF = `\${{ always() && !(${QUEUE_DRAFT_EDIT}) && (${ADMISSION_REQUESTED}) }}`;
+
 const queue = {
   ...ready,
   "github.event.pull_request.draft": true,
@@ -179,5 +188,74 @@ test("ready PRs run the fast lane, skip the full matrix, and classification stil
   ])
     assert.equal(condition(workflow.jobs[id].if, docsOnly), false, id);
   assert.equal(condition(workflow.jobs["docs-sync-strict"].if, docsOnly), true);
-  assert.equal(workflow.jobs["admission-verdict"].if, "${{ always() }}");
+  assert.equal(workflow.jobs["admission-verdict"].if, ADMISSION_IF);
 });
+
+// 2026-11-03: Mergify (its queue summary) and the Blacksmith app (its footer) edit a queue
+// draft's description ~4 times in its first 30 s. In the shared concurrency group each edit
+// cancelled the candidate's real run, and Mergify dequeued the PR on the cancelled checks
+// ("checks interrupted"). An edit run now gets its own group and runs nothing heavy.
+function editRunValues(expression) {
+  const values = { ...queue, "github.event.action": "edited" };
+  for (const key of String(expression).match(/(?:github|needs)\.[\w.-]+/g) ?? []) {
+    // `changes` is skipped, so every job it gates is skipped and exposes no outputs.
+    if (key.startsWith("needs.")) values[key] = key.endsWith(".result") ? "skipped" : "";
+    else if (!Object.hasOwn(values, key)) values[key] = "";
+  }
+  return values;
+}
+
+for (const name of ["ci.yml", "quality.yml"]) {
+  const wf = load(
+    readFileSync(new URL(`../../.github/workflows/${name}`, import.meta.url), "utf8")
+  );
+
+  test(`${name}: a queue-draft description edit gets its own concurrency group`, () => {
+    assert.equal(
+      wf.concurrency.group,
+      `\${{ github.workflow }}-\${{ github.ref }}\${{ (${QUEUE_DRAFT_EDIT}) && format('-queue-edit-{0}', github.run_id) || '' }}`
+    );
+    assert.equal(wf.concurrency["cancel-in-progress"], true);
+  });
+
+  test(`${name}: a queue-draft description edit runs no gate and no matrix`, () => {
+    const changes = wf.jobs.changes.if;
+    assert.equal(condition(changes, editRunValues(changes)), false, "changes");
+    // Jobs without always()/cancelled() inherit success() and skip with `changes`; the rest
+    // must opt out themselves. merge-integrity has no needs: it keeps running so the latest
+    // "Merge integrity" check on the draft stays a success.
+    for (const [id, job] of Object.entries(wf.jobs)) {
+      // Repository variables at their worst case: switched on.
+      const guard = String(job.if ?? "").replace(/vars\.\w+/g, "'true'");
+      if (!/always\(\)|cancelled\(\)/.test(guard)) continue;
+      assert.equal(condition(guard, editRunValues(guard)), false, `${name}:${id}`);
+    }
+    if (name === "quality.yml") {
+      const guard = wf.jobs["merge-integrity"].if;
+      assert.equal(condition(guard, editRunValues(guard)), true, "merge-integrity keeps running");
+    }
+  });
+
+  test(`${name}: queue edits and unrequested drafts keep distinct check names`, () => {
+    // 2026-11-04: the edit run's skipped "Gate / CI" was the latest check of that name on draft
+    // #18962, and Mergify dequeued #18961 on it before the real run reported.
+    const checkName = name === "ci.yml" ? "Gate / CI" : "Gate / Quality";
+    assert.equal(
+      wf.jobs["admission-verdict"].name,
+      `\${{ (${QUEUE_DRAFT_EDIT}) && '${checkName} (queue-draft edit)' || (${ADMISSION_REQUESTED}) && '${checkName}' || 'Admission not requested / ${name === "ci.yml" ? "CI" : "Quality"}' }}`
+    );
+  });
+
+  test(`${name}: everything else still runs the gate and the classifier`, () => {
+    for (const values of [
+      ready,
+      queue,
+      { ...ready, "github.event.action": "edited" },
+      { ...queue, "github.event.action": "synchronize" },
+    ]) {
+      const v = jobValues({ ...editRunValues(""), ...values });
+      assert.equal(condition(wf.jobs.changes.if, v), true);
+      assert.equal(condition(wf.jobs["admission-verdict"].if, v), true);
+    }
+  });
+}

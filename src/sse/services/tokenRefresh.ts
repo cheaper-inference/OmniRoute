@@ -1,8 +1,21 @@
 // Re-export from open-sse with local logger
 import * as log from "../utils/logger";
 import * as passive from "@omniroute/open-sse/services/tokenRefresh/passiveCodex.ts";
+import { stripTrailingSlashes } from "@omniroute/open-sse/utils/urlSanitize.ts";
+import { isTransientRefreshError } from "@omniroute/open-sse/services/tokenRefresh/transientError.ts";
 import { registerCredentialRefresher } from "@omniroute/open-sse/utils/registeredCredentialRefresher.ts";
+import { registerCodexRefreshPersistence } from "@omniroute/open-sse/services/codexAccount/refreshPersistence.ts";
 import { updateProviderConnection } from "@/lib/db/providers";
+import {
+  captureCodexConnectionFence,
+  captureCodexConnectionOwnerFence,
+  adoptCodexConnectionFence,
+  runWithCodexConnectionFence,
+  getCodexOperationFence,
+  isCodexConnectionFenceCurrent,
+  StaleCodexOperationError,
+  type CodexConnectionFence,
+} from "@/lib/db/codexConnectionFences";
 import { parseTokenExpiryMs } from "@/lib/tokenHealthCheckExpiry";
 import { resolveProxyForConnection } from "@/lib/db/settings";
 import { resolveProxyForProvider, hasBlockingProxyAssignment } from "@/lib/db/proxies";
@@ -146,7 +159,7 @@ export function resolveCopilotTokenBaseUrl(
   if (provider !== "ghe-copilot") return undefined;
   const gheUrl = credentials?.providerSpecificData?.gheUrl;
   if (typeof gheUrl === "string" && gheUrl.trim().length > 0) {
-    return `${gheUrl.trim().replace(/\/+$/, "")}/api/v3`;
+    return `${stripTrailingSlashes(gheUrl.trim())}/api/v3`;
   }
   return undefined;
 }
@@ -172,10 +185,95 @@ export const refreshTokenByProvider = async (provider: string, credentials: any)
 export const formatProviderCredentials = (provider: string, credentials: any) =>
   _formatProviderCredentials(provider, credentials, log);
 
-export const getAllAccessTokens = (userInfo: any) => _getAllAccessTokens(userInfo, log);
+export const getAllAccessTokens = (userInfo: any) =>
+  _getAllAccessTokens(userInfo, log, {
+    // Per-connection proxy parity with the single-connection refresh path
+    // (#13470): a connection with an assigned proxy pool must not egress its
+    // refresh directly. Resolution failure fails closed (the connection
+    // counts as failed, never refreshed on a direct connection).
+    resolveProxy: (provider: string, connectionId: string | null) =>
+      resolveProxyForCredentials(provider, { connectionId: connectionId ?? undefined }),
+    // Rotated tokens are persisted by the caller (open-sse stays free of
+    // `@/lib/db` imports); the write is atomic with the refresh inside the
+    // per-connection mutex.
+    onPersist: (connectionId: string, result: any) =>
+      updateProviderCredentials(connectionId, result),
+  });
+
+// A shared refresh result can be reused only with the exact durable version its
+// successful write committed. Weak keys do not extend the token object's lifetime.
+const committedCodexRefreshes = new WeakMap<object, CodexConnectionFence>();
+
+/** Reuse a shared rotation only while its committed owner/version is still current. */
+export function adoptCommittedCodexRefresh(
+  result: object,
+  expected: CodexConnectionFence | null
+): CodexConnectionFence | null {
+  const committed = committedCodexRefreshes.get(result);
+  if (!expected || !committed) return null;
+  if (
+    committed.connectionId !== expected.connectionId ||
+    committed.ownerEpoch !== expected.ownerEpoch ||
+    !isCodexConnectionFenceCurrent(committed)
+  ) {
+    throw new StaleCodexOperationError();
+  }
+  return committed;
+}
+
+/** Called inside getAccessToken's connection mutex, before its result reaches waiters. */
+export async function persistCodexRefresh(
+  result: Record<string, unknown>,
+  expected: CodexConnectionFence
+): Promise<void> {
+  if (adoptCommittedCodexRefresh(result, expected)) return;
+  const applied = await runWithCodexConnectionFence(expected, () =>
+    updateProviderCredentials(expected.connectionId, result, (committed) => {
+      committedCodexRefreshes.set(result, committed);
+    })
+  );
+  if (!applied) throw new StaleCodexOperationError();
+}
+
+function preserveNewerRefreshFailure(
+  updates: Record<string, unknown>,
+  fence: CodexConnectionFence | null
+): void {
+  if (!fence || isCodexConnectionFenceCurrent(fence, true)) return;
+  // A valid rotation persists only tokens; never clear a newer health state.
+  for (const key of [
+    "testStatus",
+    "isActive",
+    "lastError",
+    "lastErrorAt",
+    "lastErrorType",
+    "lastErrorSource",
+    "errorCode",
+  ])
+    delete updates[key];
+}
+
+function applyRefreshedExpiry(updates: Record<string, any>, newCredentials: any) {
+  if (newCredentials.expiresIn) {
+    const expiresAt = new Date(Date.now() + newCredentials.expiresIn * 1000).toISOString();
+    updates.expiresAt = expiresAt;
+    updates.tokenExpiresAt = expiresAt;
+    updates.expiresIn = newCredentials.expiresIn;
+  } else if (newCredentials.expiresAt) {
+    updates.expiresAt = newCredentials.expiresAt;
+    updates.tokenExpiresAt = newCredentials.expiresAt;
+  } else if (newCredentials.accessToken && newCredentials.expiresAt === null) {
+    updates.expiresAt = null;
+    updates.tokenExpiresAt = null;
+  }
+}
 
 // Local-specific: Update credentials in localDb
-export async function updateProviderCredentials(connectionId: string, newCredentials: any) {
+export async function updateProviderCredentials(
+  connectionId: string,
+  newCredentials: any,
+  onCodexFenceCommitted?: (fence: CodexConnectionFence) => void
+) {
   try {
     const updates: Record<string, any> = {};
 
@@ -203,15 +301,7 @@ export async function updateProviderCredentials(connectionId: string, newCredent
     if (newCredentials.refreshToken) {
       updates.refreshToken = newCredentials.refreshToken;
     }
-    if (newCredentials.expiresIn) {
-      const expiresAt = new Date(Date.now() + newCredentials.expiresIn * 1000).toISOString();
-      updates.expiresAt = expiresAt;
-      updates.tokenExpiresAt = expiresAt;
-      updates.expiresIn = newCredentials.expiresIn;
-    } else if (newCredentials.expiresAt) {
-      updates.expiresAt = newCredentials.expiresAt;
-      updates.tokenExpiresAt = newCredentials.expiresAt;
-    }
+    applyRefreshedExpiry(updates, newCredentials);
     if (newCredentials.providerSpecificData) {
       updates.providerSpecificData = newCredentials.providerSpecificData;
     }
@@ -236,11 +326,12 @@ export async function updateProviderCredentials(connectionId: string, newCredent
     // catalog-relevant state, so those updates keep the default invalidation.
     const catalogRelevant =
       updates.isActive !== undefined || updates.providerSpecificData !== undefined;
-    const result = await updateProviderConnection(
-      connectionId,
-      updates,
-      catalogRelevant ? undefined : { skipModelCatalog: true }
-    );
+    const fence = getCodexOperationFence(connectionId);
+    preserveNewerRefreshFailure(updates, fence);
+    const result = await updateProviderConnection(connectionId, updates, {
+      ...(catalogRelevant ? {} : { skipModelCatalog: true }),
+      ...(fence ? { expectedCodexFence: fence, onCodexFenceCommitted } : {}),
+    });
     log.info("TOKEN_REFRESH", "Credentials updated in localDb", {
       connectionId,
       success: !!result,
@@ -255,8 +346,144 @@ export async function updateProviderCredentials(connectionId: string, newCredent
   }
 }
 
+// A transient Muse remint failure says nothing about the credential: keep it, as a null refresh does.
+function keepsMuseCredentialsAfterRefreshError(provider: string, error: unknown) {
+  return provider === "muse-code" && isTransientRefreshError(error);
+}
+
+function resolveExpiryWithoutAbsolute(newCredentials: any, currentExpiresAt: unknown) {
+  if (newCredentials.expiresIn) {
+    return new Date(Date.now() + newCredentials.expiresIn * 1000).toISOString();
+  }
+  return newCredentials.expiresAt === null ? null : currentExpiresAt;
+}
+
 // Local-specific: Check and refresh token proactively
 export async function checkAndRefreshToken(provider: string, credentials: any) {
+  const fence =
+    provider === "codex"
+      ? (passive.isPassiveCodex(provider)
+          ? captureCodexConnectionOwnerFence
+          : captureCodexConnectionFence)(credentials)
+      : null;
+  return runWithCodexConnectionFence(fence, () => checkAndRefreshTokenInner(provider, credentials));
+}
+function validateRefreshedCodexFence(
+  fence: CodexConnectionFence | null,
+  credentials: Record<string, unknown>
+): void {
+  if (!fence) return;
+  if (!isCodexConnectionFenceCurrent(fence)) throw new StaleCodexOperationError();
+  // A mutex/cache hit can bypass persistence. Never hand another owner's token to a waiter.
+  captureCodexConnectionFence(credentials);
+}
+
+function adoptProactiveRefresh(
+  provider: string,
+  fence: CodexConnectionFence | null,
+  credentials: Record<string, unknown>,
+  refreshed: Record<string, unknown>,
+  adoptCommitted: (result: object) => boolean
+): CodexConnectionFence | null {
+  if (!passive.isPassiveCodex(provider)) {
+    adoptCommitted(refreshed);
+    return fence;
+  }
+  return adoptCodexConnectionFence(fence, credentials, { ...credentials, ...refreshed });
+}
+
+function createRefreshPersistCallback(
+  connectionId: string | undefined,
+  getFence: () => CodexConnectionFence | null,
+  adoptCommittedRefresh: (result: object) => boolean
+) {
+  if (!connectionId) return undefined;
+  return async (result: Record<string, unknown>) => {
+    if (adoptCommittedRefresh(result)) return;
+    const fence = getFence();
+    if (fence) {
+      await persistCodexRefresh(result, fence);
+      adoptCommittedRefresh(result);
+      return;
+    }
+    const applied = await updateProviderCredentials(connectionId, result);
+    if (!applied && getCodexOperationFence(connectionId)) throw new StaleCodexOperationError();
+  };
+}
+
+function mergeProactiveRefreshCredentials(
+  credentials: Record<string, unknown>,
+  refreshed: Record<string, unknown> & { expiresIn?: number },
+  isPassive: boolean
+): Record<string, unknown> {
+  return {
+    ...credentials,
+    ...(isPassive ? refreshed : {}),
+    accessToken: refreshed.accessToken,
+    refreshToken: refreshed.refreshToken || credentials.refreshToken,
+    expiresAt: refreshed.expiresAt
+      ? refreshed.expiresAt
+      : resolveExpiryWithoutAbsolute(refreshed, credentials.expiresAt),
+  };
+}
+
+async function refreshExpiringCopilotToken(
+  provider: string,
+  credentials: {
+    connectionId: string;
+    accessToken: string;
+    copilotToken?: string;
+    providerSpecificData?: Record<string, unknown> & { copilotTokenExpiresAt?: number };
+  }
+): Promise<void> {
+  // GitHub and GHE share expiry semantics, but use their own token endpoint hosts.
+  if (
+    (provider === "github" || provider === "ghe-copilot") &&
+    credentials.providerSpecificData?.copilotTokenExpiresAt
+  ) {
+    const copilotExpiresAt = credentials.providerSpecificData.copilotTokenExpiresAt * 1000;
+    const now = Date.now();
+
+    if (copilotExpiresAt - now < TOKEN_EXPIRY_BUFFER_MS) {
+      log.info("TOKEN_REFRESH", "Copilot token expiring soon, refreshing proactively", {
+        provider,
+        expiresIn: Math.round((copilotExpiresAt - now) / 1000),
+      });
+
+      const copilotToken = await refreshCopilotToken(
+        credentials.accessToken,
+        credentials,
+        resolveCopilotTokenBaseUrl(provider, credentials)
+      );
+      if (copilotToken?.token) {
+        await updateProviderCredentials(credentials.connectionId, {
+          providerSpecificData: {
+            ...credentials.providerSpecificData,
+            copilotToken: copilotToken.token,
+            copilotTokenExpiresAt: copilotToken.expiresAt,
+          },
+        });
+
+        credentials.providerSpecificData = {
+          ...credentials.providerSpecificData,
+          copilotToken: copilotToken.token,
+          copilotTokenExpiresAt: copilotToken.expiresAt,
+        };
+        // Sync to top-level so buildHeaders() picks up the fresh token.
+        credentials.copilotToken = copilotToken.token;
+      }
+    }
+  }
+}
+
+async function checkAndRefreshTokenInner(provider: string, credentials: any) {
+  let resultFence = getCodexOperationFence(String(credentials.connectionId || ""));
+  const adoptCommittedRefresh = (result: object): boolean => {
+    const committed = adoptCommittedCodexRefresh(result, resultFence);
+    if (!committed) return false;
+    resultFence = committed;
+    return true;
+  };
   let updatedCredentials = { ...credentials };
 
   // Check regular token expiry. Use the provider-specific lead time so rotating-
@@ -284,83 +511,52 @@ export async function checkAndRefreshToken(provider: string, credentials: any) {
       // race where a concurrent request reads stale DB credentials before the write
       // and re-uses a rotated refresh token (refresh_token_reused on Codex/OpenAI).
       // The separate withConnectionRefreshMutex wrapper is no longer needed here.
-      const persistCallback = connectionId
-        ? async (result: any) => {
-            await updateProviderCredentials(connectionId, result);
-          }
-        : undefined;
+      const persistCallback = createRefreshPersistCallback(
+        connectionId,
+        () => resultFence,
+        adoptCommittedRefresh
+      );
 
-      const newCredentials = await getAccessToken(provider, updatedCredentials, persistCallback);
+      let newCredentials;
+      try {
+        newCredentials = await getAccessToken(provider, updatedCredentials, persistCallback);
+      } catch (error) {
+        if (!keepsMuseCredentialsAfterRefreshError(provider, error)) throw error;
+        return { ...credentials };
+      }
 
       if (newCredentials && newCredentials.accessToken) {
+        const adoptedFence = adoptProactiveRefresh(
+          provider,
+          resultFence,
+          updatedCredentials,
+          newCredentials,
+          adoptCommittedRefresh
+        );
+        if (passive.isPassiveCodex(provider)) resultFence = adoptedFence;
         // For the no-connectionId path (no mutex, no onPersist), persist here as before.
         if (!connectionId) {
           await updateProviderCredentials(updatedCredentials.connectionId, newCredentials);
         }
 
-        updatedCredentials = {
-          ...updatedCredentials,
-          ...(passive.isPassiveCodex(provider) ? newCredentials : {}),
-          accessToken: newCredentials.accessToken,
-          refreshToken: newCredentials.refreshToken || updatedCredentials.refreshToken,
-          expiresAt: newCredentials.expiresAt
-            ? newCredentials.expiresAt
-            : newCredentials.expiresIn
-              ? new Date(Date.now() + newCredentials.expiresIn * 1000).toISOString()
-              : updatedCredentials.expiresAt,
-        };
+        updatedCredentials = mergeProactiveRefreshCredentials(
+          updatedCredentials,
+          newCredentials,
+          passive.isPassiveCodex(provider)
+        );
       }
     }
   }
 
-  // Check GitHub/GHE Copilot token expiry. Both github.com Copilot and GHE
-  // Copilot (device-code flow against an enterprise host) issue a short-lived
-  // sub-token separate from the OAuth access token, stored the same way in
-  // providerSpecificData.copilotTokenExpiresAt — only the token endpoint host
-  // differs (resolveCopilotTokenBaseUrl picks it via providerSpecificData.gheUrl).
-  if (
-    (provider === "github" || provider === "ghe-copilot") &&
-    updatedCredentials.providerSpecificData?.copilotTokenExpiresAt
-  ) {
-    const copilotExpiresAt = updatedCredentials.providerSpecificData.copilotTokenExpiresAt * 1000;
-    const now = Date.now();
-
-    if (copilotExpiresAt - now < TOKEN_EXPIRY_BUFFER_MS) {
-      log.info("TOKEN_REFRESH", "Copilot token expiring soon, refreshing proactively", {
-        provider,
-        expiresIn: Math.round((copilotExpiresAt - now) / 1000),
-      });
-
-      const copilotToken = await refreshCopilotToken(
-        updatedCredentials.accessToken,
-        updatedCredentials,
-        resolveCopilotTokenBaseUrl(provider, updatedCredentials)
-      );
-      if (copilotToken?.token) {
-        await updateProviderCredentials(updatedCredentials.connectionId, {
-          providerSpecificData: {
-            ...updatedCredentials.providerSpecificData,
-            copilotToken: copilotToken.token,
-            copilotTokenExpiresAt: copilotToken.expiresAt,
-          },
-        });
-
-        updatedCredentials.providerSpecificData = {
-          ...updatedCredentials.providerSpecificData,
-          copilotToken: copilotToken.token,
-          copilotTokenExpiresAt: copilotToken.expiresAt,
-        };
-        // Sync to top-level so buildHeaders() picks up the fresh token
-        updatedCredentials.copilotToken = copilotToken.token;
-      }
-    }
-  }
-
+  await refreshExpiringCopilotToken(provider, updatedCredentials);
+  validateRefreshedCodexFence(resultFence, updatedCredentials);
   return updatedCredentials;
 }
 
 // Local-specific: Refresh GitHub and Copilot tokens together
 registerCredentialRefresher(checkAndRefreshToken);
+// The engine persists and adopts fenced Codex rotations through this seam (no open-sse -> src import).
+registerCodexRefreshPersistence({ adoptCommittedCodexRefresh, persistCodexRefresh });
 
 export async function refreshGitHubAndCopilotTokens(credentials: any) {
   const newGitHubCredentials = await refreshGitHubToken(credentials.refreshToken, credentials);

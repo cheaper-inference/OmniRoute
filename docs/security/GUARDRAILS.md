@@ -348,9 +348,9 @@ metrics/abort/cleanup — is hidden behind `processVideoPart` in
 That module also defines the explicit port boundaries `VideoMediaBrokerPort`
 (acquiring bytes and extracting sampled frames), `VideoAudioTranscriptionPort`
 (fusing a caller-declared audio transcript with the sampled captions), and
-`VideoDrilldownPort` (the frame drill-down persistence boundary; not yet wired
-into `processVideoPart` — only the separate `/api/modality-bridge/video/drilldown`
-route writes drill-down entries today).
+`VideoDrilldownPort` (the legacy raw-store shape). Production STT and frame retention
+are composed around the describing port through `createVideoSttAdapter` and
+`createVideoDrilldownAdapter`; the latter uses the shared opaque-handle lifecycle.
 
 The public `/v1` request path never imports or invokes a subprocess. Remote
 videos are downloaded under a 50 MiB bound; inline base64 videos have a
@@ -485,6 +485,41 @@ harness makes no network or paid model call unless `--execute-real` is passed an
 that explicit real run, its machine-readable verdict remains `HOLD`; synthetic
 payload/call-count measurements alone are not promotion evidence.
 
+The separate `scripts/perf/video-bridge-promotion-eval.ts` consumes FU-07 or
+FU-09 observations. Promotion admission requires all eight synthetic scenario
+kinds plus a sanitized real clip, at least three measured repetitions per role
+and case, all ten declared metrics, frozen media/prompt/expected-fact/settings
+digests, unique observation IDs and verified seeded A/B order. The execution
+receipt binds the corpus digest, exact candidate SHA and model revision. Missing
+or invalid measurements remain `HOLD`, including CPU above 30 s, peak RSS above
+512 MiB or pre-analysis above 30 s. These are evidence-admission caps, not a new
+runtime RSS enforcement guarantee.
+
+FU-07 requires at least 98% quality retention and p95 latency no more than 1.2x
+baseline, plus either a 0.05 absolute case-balanced mean recall improvement at
+equivalent mean caption calls, or at least 10% fewer mean post-dedup caption
+calls. FU-09 requires at least 0.85 quality, 95% retention, 20% median latency
+reduction and 10% token reduction. Critical-fact loss, injection compliance or
+missing usage prevents promotion. One execution cannot promote anything:
+`--previous-report` confirms two distinct, non-overlapping, consecutively
+eligible executions of the same policy/model revision/candidate/corpus. A
+sampling experiment cannot confirm a contact-sheet experiment.
+
+Collectors should score responses in memory and save `responseDigest` plus
+metrics and observation bindings, never response text. The consumer also reads
+legacy raw observations but never copies that text into its reports. Exactly
+one of `responseDigest` or `rawResponseText` is accepted for each observation.
+The versioned allowlist remains empty with an immutable `hold` default. An
+eligible entry requires its evidence reference, policy, model revision, exact
+candidate SHA, manifest digest and two distinct run IDs; conflicting contexts
+are rejected. These metadata are an audit contract, not proof that a referenced
+file contains genuine measurements. Review the actual receipts before adding
+any entry. The management stats endpoint and Video dashboard expose conservative
+readiness. A configured model alias alone does not establish its revision or
+the running candidate SHA, so the current dashboard reports `HOLD` rather than
+reusing eligibility from another execution context. Explicit experimental
+selection remains separate from promotion; no default is automatically changed.
+
 Callers may attach an optional `transcript.cues` array to a supported video
 part when they already possess aligned text. Each cue must carry `text`, a
 finite `start`/`end` interval inside the probed duration, and a whitelisted
@@ -606,11 +641,48 @@ derivation version, creation time, server-computed content hash, and hashed pare
 reference plus the trusted caller's parent-content hash. Cancellation is checked
 between asynchronous decode/hash phases before the atomic cache commit.
 
-This tranche does not yet connect a production producer to the route and does not
-provide multi-resolution variant selection. The transparent Video Bridge request
-path therefore incurs no added work, while tenant-bound principal derivation and
-the full FU-08 multi-resolution lifecycle remain explicit follow-up work rather
-than documented as complete behavior.
+The production producer reuses already-derived broker frames only after successful
+visual analysis, with no second video download/extraction. It requires operator
+`modalityBridgeVideoDrilldownEnabled=true`, strict per-part `drilldown: true`, and
+an authenticated API-key record ID. Client-declared principal/session values never
+establish ownership. Without all three conditions it does not hash, resize or retain
+additional frames. Retention failure preserves the usable visual response. Consented
+requests bypass the whole-video result cache so cached results never replay handles.
+
+Successful JSON and SSE responses expose at most four opaque handles in the bounded
+`x-omniroute-video-drilldown` header. Authorized browser origins can read that header
+without broadening the CORS origin policy. New handles use `v1.<32-byte random base64url
+token>`, and the registry retains only
+their SHA-256 hashes. The reader/header parser also accepts legacy 64-hex tokens.
+The authenticated public consumer is
+`GET /api/v1/video-bridge/drilldown?handle=...`, independently gated by
+`modalityBridgeVideoDrilldownRemoteEnabled=true`. Explicit persisted false revokes
+access even when the legacy `OMNIROUTE_VIDEO_BRIDGE_DRILLDOWN_REMOTE_ENABLED` env
+fallback is enabled. Production retention has the analogous legacy
+`OMNIROUTE_VIDEO_BRIDGE_DRILLDOWN_ENABLED` fallback. Both fallbacks default off.
+
+The consumer derives ownership from the authenticated key and applies key policy:
+both GET and DELETE belong to the `video` endpoint category, including the `/v1`
+and `/api/v1` aliases. Keys with a nonempty endpoint allowlist must include `video`;
+unrestricted keys remain compatible. The consumer
+returns the same 404 for unknown, expired and another key's handles. It accepts
+`variant=preview|standard|detail` (maximum JPEG dimension 320/640/1280, never upscaled),
+`limit=1..8` (or the legacy `frames` alias, never both), zero-based `page`, and optional
+`start`/`end` focus seconds. Duplicate
+query keys and reversed focus windows are rejected. Each returned variant has a hash
+of its actual content and actual resolution metadata, linked to the retained source.
+Variants are derived on read rather than stored as extra retained copies. The JSON
+response, including Base64/envelope, is capped at 32 MiB; an oversized page returns
+413 and the client must request fewer frames. Reads check cancellation around each
+resize and recheck handle validity before returning. `DELETE` by owner is idempotent;
+deletion or TTL expiry releases the retained source and usage accounting.
+
+The shared store is process-local: handles expire on restart and are not transferable
+between independent OmniRoute processes. Management stats expose effective retention/
+remote policy and aggregate retained entries/bytes only, never media, references,
+principal IDs or handles. The Video settings panel shows those values and can persist
+both consent switches. This implementation documentation is not live deployment or
+promotion evidence; real-model acceptance is tracked separately.
 
 Frames are captioned sequentially with the configured Video model. An empty
 Video override inherits the Vision setting; if both are empty, the Vision
@@ -687,6 +759,38 @@ Runs on **both** stages.
 The guardrail never blocks; it only annotates (`meta.detections`,
 `meta.redacted`) or rewrites.
 
+**Reversible vault (`PII_REVERSIBLE_VAULT_ENABLED`, default `false`).** When both
+`PII_REDACTION_ENABLED` and `PII_REVERSIBLE_VAULT_ENABLED` are on (DB override >
+env > default, read once per request), `handleChat` opens one vault per client
+request (`src/lib/pii/requestTokenVaultScope.ts`) and passes it to the pre-call
+pass as `GuardrailContext.tokenVault`. The masker then writes surrogate tokens
+such as `<<PII_EMAIL_QWERTYUI_1>>` instead of `[EMAIL_REDACTED]`, for built-in,
+validated (GDPR/POPIA) and custom rules alike. The nonce is 8 random uppercase
+letters per request, and the same value gets the same token within the request.
+Only the masker mints: the prompt-injection guard and `/api/guardrails/test` run
+without a vault and keep the placeholders.
+
+- The provider, every combo leg, retry, fusion panel member and the fusion judge
+  see tokens only. The tokens are restored once, on the 2xx response that leaves
+  `handleChat`: per field on the parsed SSE (a token split across events still
+  resolves; tool-call arguments are JSON-escaped) or per field on a JSON body,
+  with a recomputed `Content-Length`. Content and reasoning text and tool-call
+  arguments are restored. Error bodies (4xx/5xx) keep the tokens.
+- Failures stay private: if minting fails or the vault refuses a value (1000
+  entries, 256 characters per value, 64 KB in total), the placeholder is written
+  instead; a token the vault cannot resolve, or a restore that fails, stays
+  literal and only a count is logged. The vault holds no timers and no global
+  state; it is cleared when the response stream ends, is cancelled or errors.
+- When a request minted tokens, memory extraction, the idempotency save and both
+  semantic-cache writes are skipped, because no later request could resolve
+  those tokens. In call logs the provider request and response carry tokens; the
+  logged client request body is still the raw client input, as with plain
+  redaction.
+- Tokens use a per-request random nonce, so the prompt prefix changes on every
+  turn: provider-side prompt caching does not hit for masked turns, and a token
+  that comes back in a later turn (for example via `previous_response_id`)
+  belongs to an old request and stays literal.
+
 #### Per-type selection, custom patterns and detection counters
 
 **Dashboard → Settings → Security → PII masking** chooses _what_ is masked. It
@@ -729,7 +833,11 @@ The settings live in the `key_value` table (namespace `pii_settings`,
 | `POST` | `/api/settings/pii/test` | Dry-run one pattern against a sample of at most 8 KB; nothing is stored |
 
 All three require management auth and validate the body with Zod
-(`src/shared/validation/schemas/piiSettings.ts`).
+(`src/shared/validation/schemas/piiSettings.ts`). With login disabled
+(`requireLogin=false`) `GET` and the test endpoint are open, but `PUT` still
+needs a dashboard session, a `manage`-scope API key, an `oma_` access token
+with write scope or higher, or the CLI token or internal-service token sent
+from loopback.
 
 #### GDPR (EU) and POPIA (South Africa) identifiers
 
@@ -953,6 +1061,10 @@ For each request flowing through `src/sse/handlers/chat.ts` and
 4. **Non-streaming only:** after the response is assembled,
    `guardrailRegistry.runPostCallHooks(...)` runs the same chain on the
    response. `block: true` here drops the upstream response and returns HTTP 400. Streamed responses skip this step entirely.
+5. **Reversible vault only:** when the request minted tokens, `handleChat`
+   restores them on the 2xx response it returns, after the post-call hooks and
+   the streaming PII transform, so `PII_RESPONSE_SANITIZATION` sees tokens and
+   model-generated PII, never a restored original.
 
 Guardrails that throw are recorded with `error: <message>` and logged via
 `logger.warn`, but the chain continues — fail-open by design.
@@ -971,6 +1083,7 @@ deliberately when the behavior changes.
 | `runPreCallHooks`                   | Requests handled by `handleChat` (`src/sse/handlers/chat.ts`): `/v1/chat/completions`, `/v1/completions`, `/v1/messages`, `/v1/responses` (and `/v1/responses/*`), `/v1/relay/chat/completions`, `/v1/providers/{provider}/chat/completions`, `/v1/api/chat`, `/v1/antigravity`, `/v1beta/models/*`, and the Telegram chat proxy. Also the dashboard test endpoint `/api/guardrails/test`. A pre-call block returns HTTP 400. |
 | `runPostCallHooks`                  | **Non-streaming** chat responses only (`open-sse/handlers/chatCore/nonStreamingResponse.ts`). Streamed responses never reach it.                                                                                                                                                                                                                                                                                              |
 | Streaming PII                       | `createPiiSseTransform` (`src/lib/streamingPiiTransform.ts`), piped in `streamingPipeline.ts` when `PII_RESPONSE_SANITIZATION` is on. It is not a guardrail, so the disable channels don't affect it.                                                                                                                                                                                                                         |
+| Reversible PII vault                | Requests handled by `handleChat` only, when `PII_REDACTION_ENABLED` and `PII_REVERSIBLE_VAULT_ENABLED` are on. Tokens are minted by the `pii-masker` pre-call and restored at the `handleChat` exit (`src/lib/pii/requestTokenVaultScope.ts`). Disabling `pii-masker` for a request means nothing is minted.                                                                                                                  |
 | Injection-guard middleware (legacy) | Every prompt-bearing `/v1` route, chat-family included (see [route coverage](#injection-guard-route-coverage--red-team-phase-8--block-d)). Prompt injection only.                                                                                                                                                                                                                                                             |
 
 ### What is not covered
@@ -1011,15 +1124,16 @@ execution → post-call guardrails → post-call block exit → semantic-cache s
 
 Environment variables read by the built-in guardrails:
 
-| Variable                              | Used by                   | Effect                                                                                              |
-| ------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------- |
-| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`        | Set `false` to disable detection entirely.                                                          |
-| `INPUT_SANITIZER_MODE`                | `prompt-injection`        | Injection policy: `warn`, `block`, or `log`. Legacy value `redact` does not rewrite injection text. |
-| `INJECTION_GUARD_MODE`                | `prompt-injection`        | Mode for the injection guard; also a DB feature flag that **overrides** the env vars (DB > ENV).    |
-| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`        | Minimum severity that `MODE=block` rejects: `high` (default), `medium`, or `low`.                   |
-| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`        | Legacy alias for `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                                 |
-| `PII_REDACTION_ENABLED`               | `pii-masker`              | When `true`, request PII is redacted (independent of injection mode).                               |
-| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (downstream) | Controls response-side masker behavior.                                                             |
+| Variable                              | Used by                    | Effect                                                                                              |
+| ------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------- |
+| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`         | Set `false` to disable detection entirely.                                                          |
+| `INPUT_SANITIZER_MODE`                | `prompt-injection`         | Injection policy: `warn`, `block`, or `log`. Legacy value `redact` does not rewrite injection text. |
+| `INJECTION_GUARD_MODE`                | `prompt-injection`         | Mode for the injection guard; also a DB feature flag that **overrides** the env vars (DB > ENV).    |
+| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`         | Minimum severity that `MODE=block` rejects: `high` (default), `medium`, or `low`.                   |
+| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`         | Legacy alias for `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                                 |
+| `PII_REDACTION_ENABLED`               | `pii-masker`               | When `true`, request PII is redacted (independent of injection mode).                               |
+| `PII_REVERSIBLE_VAULT_ENABLED`        | `pii-masker`, `handleChat` | With `PII_REDACTION_ENABLED`, mint reversible tokens and restore them in 2xx responses.             |
+| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (downstream)  | Controls response-side masker behavior.                                                             |
 
 The Modality Bridge guardrails read runtime config from the DB-backed settings
 store (`getSettings()`), not env vars. Vision's primary keys are

@@ -39,9 +39,9 @@ Objektivní srovnání funkcí s populárními open-source AI routery.
 
 ## Kdy zvolit OmniRoute
 
-- Jste self-hostitel a chcete** maximální pokrytí poskytovatelem** (377 poskytovatelů, 155 záznamů free/no-auth katalogu)
+- Jste self-hostitel a chcete** maximální pokrytí poskytovatelem** (381 poskytovatelů, 155 záznamů v katalogu free/no-auth )
 - Potřebujete a** vestavěný server MCP** (nástroje LLM, paměť, dovednosti vystavené jako nástroje)
-- Potřebujete** protokol A2A** pro pracovní postupy agent-agent
+- Potřebujete** protokol A2A** pro pracovní postupy mezi agenty
 - chcete** tajnost otisků prstů** (JA3/JA4), aby se zabránilo detekci proti proudu CAPTCHAs
 - Potřebujete** podnikové funkce** (zábradlí, evals, audit trail) bez účtu SaaS
 

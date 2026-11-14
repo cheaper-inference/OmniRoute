@@ -27,24 +27,25 @@ omniroute launch --profile glm52  # OmniRoute orqali glm/glm-5.2’dan foydalana
 
 ## Claude Code shlyuzga qanday ulanadi
 
-Claude Code **Anthropic Messages API** bilan ishlaydi va muhit o‘zgaruvchilari
-orqali maxsus endpoint’ga yo‘naltiriladi (unda `--base-url` bayrog‘i mavjud emas):
+Claude Code bu haqda gapiradi**Anthropic Xabarlar API** va atrof-muhit o'zgaruvchilari bilan maxsus so'nggi nuqtaga ishora qilinadi (uning `--base-url` bayrog'i yo'q):
 
-| O‘zgaruvchi                                  | Maqsadi                                                                                                                   |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Shlyuzning ildiz URL manzili (Claude Code `/v1/messages`ni qo‘shadi). **`/v1` suffiksisiz.**                              |
-| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` sifatida yuboriladi — OmniRoute kirish tokeni / API kalitingizdan foydalaning                   |
-| `ANTHROPIC_API_KEY`                          | Muqobil variant: `x-api-key` sifatida yuboriladi. Ikkalasi ham o‘rnatilgan bo‘lsa, `ANTHROPIC_AUTH_TOKEN` ustunlik qiladi |
-| `ANTHROPIC_MODEL`                            | Muayyan modelni majburan tanlaydi (`/model` tanlagichining standart qiymatini bekor qiladi)                               |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → ichki `/model` tanlagichi `/v1/models`dan `claude*`/`anthropic*` modellarini ko‘rsatadi                             |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Har bir javob uchun chiqish tokenlarini cheklaydi (masalan, `65536`)                                                      |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Avtomatik ixchamlash uchun token chegarasi                                                                                |
+| O'zgaruvchan                                 | Maqsad                                                                                                                  |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Shlyuz ildizi URL (Claude kodi `/v1/messages` ga qo'shiladi).** `/v1` qo‘shimchasi yo‘q.**                              |
+| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` — sifatida yuborilgan OmniRoute kirish tokeni/ API kalitingizdan foydalaning                  |
+| `ANTHROPIC_API_KEY`                          | Muqobil: `x-api-key` sifatida yuborilgan. Agar ikkalasi ham o'rnatilgan bo'lsa, `ANTHROPIC_AUTH_TOKEN` g'alaba qozonadi |
+| `ANTHROPIC_MODEL`                            | Muayyan modelni majburlash (standart `/model` tanlagichini bekor qiladi)                                                |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → mahalliy `/model` tanlovchisi `/v1/models` dan `claude*`/`anthropic*` modellarini ro‘yxatga oladi                 |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Har bir javob uchun chiqish tokenlari (masalan, `65536`)                                                                |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Avtomatik siqishni uchun token chegarasi                                                                                |
 
-> Muhit o‘zgaruvchilari **ishga tushirish vaqtida faqat bir marta** o‘qiladi — ularni o‘zgartirgandan so‘ng Claude Code’ni qayta ishga tushiring.
+> Env varslari o'qiladi** ishga tushirilganda bir marta** — ularni o'zgartirgandan so'ng Claude kodini qayta ishga tushiring.
 
-`omniroute launch` bularning barchasini siz uchun sozlaydi: u asosiy URL + tokenni
-faol kontekstdan aniqlaydi (shuning uchun `omniroute connect <vps>`, undan so‘ng
-`omniroute launch` darhol ishlaydi), server holatini tekshiradi va `claude`ni ishga tushiradi.
+Ruxsat etilgan qator o'rniga aylanadigan hisob ma'lumotlari uchun `~/.claude/settings.json` -da `apiKeyHelper` joriy hisob ma'lumotlarini stdout-ga chop etadigan buyruqqa o'rnating. Claude Code o'z chiqishini sukut bo'yicha besh daqiqa davomida keshlaydi (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` buni bekor qiladi) va qiymatni `Authorization: Bearer` va `x-api-key` ga yuboradi. Skript hisob ma'lumotlarini chop etishi kerak va boshqa hech narsa — banner bilan birga v2.1.227 + da yordamchini bajara olmaydi.
+
+Entra ID SSO shunday ishlaydi: `scripts/cli/omniroute-sso.mjs token` API kaliti o‘rniga OmniRoute tasdiqlaydigan qisqa muddatli Entra kirish tokenini chop etadi. [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) ga qarang.
+
+`omniroute launch` bularning barchasini siz uchun o‘rnatadi: u asosiy URL + tokenini faol kontekstdan hal qiladi (shuning uchun `omniroute connect <vps>` keyin `omniroute launch` ishlaydi), serverning sog‘lig‘ini tekshiradi va `claude` bajaradi.
 
 ---
 

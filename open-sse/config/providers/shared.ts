@@ -6,7 +6,10 @@
  * is auto-generated from this registry.
  */
 
-import { ANTIGRAVITY_RUNTIME_BASE_URLS } from "../antigravityUpstream.ts";
+import {
+  ANTIGRAVITY_GENERATION_BASE_URLS,
+  ANTIGRAVITY_RUNTIME_BASE_URLS,
+} from "../antigravityUpstream.ts";
 import { ANTIGRAVITY_PUBLIC_MODELS } from "../antigravityModelAliases.ts";
 import { AGY_PUBLIC_MODELS } from "../agyModels.ts";
 import {
@@ -54,6 +57,11 @@ export interface RegistryModel {
    * public name differs from the ID sent to the upstream service.
    */
   liveCatalogIds?: readonly string[];
+  /**
+   * Reachable only as `<provider>/<id>`: a bare id never infers this provider. For route labels
+   * that reuse a generic word or another vendor's model name.
+   */
+  requiresProviderPrefix?: boolean;
   toolCalling?: boolean;
   supportsReasoning?: boolean;
   /**
@@ -809,6 +817,9 @@ export const CHAT_OPENAI_COMPAT_MODELS: Record<string, RegistryModel[]> = {
     "deepseek-ai/DeepSeek-R1",
     "Qwen/Qwen2.5-72B-Instruct",
   ]),
+  hetzner: buildModels(["Qwen/Qwen3.6-35B-A3B-FP8"]),
+  cerebrium: buildModels(["meta-llama/Meta-Llama-3.1-8B-Instruct"]),
+  grokified: buildModels(["grok-4.6", "grok-4.3", "grok-build-0.1"]),
   nanogpt: buildModels(["chatgpt-4o-latest", "claude-3.5-sonnet", "gpt-4o-mini"]),
   // Seed catalog mirrors apmix.ai/models (2026-09-25). The catalog is
   // plan-scoped per key — live discovery via GET https://api.apmix.ai/v1/models
@@ -897,6 +908,7 @@ export function mapStainlessArch() {
 // ── Registry ──────────────────────────────────────────────────────────────
 
 export {
+  ANTIGRAVITY_GENERATION_BASE_URLS,
   ANTIGRAVITY_RUNTIME_BASE_URLS,
   ANTIGRAVITY_PUBLIC_MODELS,
   AGY_PUBLIC_MODELS,

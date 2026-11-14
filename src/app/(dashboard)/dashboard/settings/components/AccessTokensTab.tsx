@@ -185,6 +185,7 @@ export default function AccessTokensTab() {
             onChange={(e) => setName(e.target.value)}
           />
           <Select
+            native
             label={t("accessTokensColScope")}
             value={scope}
             onChange={(e) => setScope(e.target.value)}
@@ -227,7 +228,11 @@ export default function AccessTokensTab() {
             variant="surface"
             showLineNumbers={false}
             filename={newSecretMeta.name || t("accessTokensTitle")}
-            language={scopeLabels[newSecretMeta.scope] || newSecretMeta.scope}
+            // A token has no programming language: the scope goes in the metadata slot and
+            // the code region is named by the token itself (not "<scope> code").
+            language={null}
+            metadata={scopeLabels[newSecretMeta.scope] || newSecretMeta.scope}
+            codeLabel={newSecretMeta.name || t("accessTokensTitle")}
             code={newSecret ?? ""}
             copyLabel={t("accessTokensCopy")}
             copiedLabel={t("accessTokensCopied")}

@@ -17,6 +17,7 @@ import {
 } from "./utils";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import Card from "@/shared/components/Card";
 import Select from "@/shared/components/Select";
 import { CardSkeleton } from "@/shared/components/Loading";
@@ -46,6 +47,7 @@ import {
   useSaveQuotaWindowThresholds,
 } from "./useConfirmedAvailabilityChange";
 import { useCachedQuotaPolling } from "./useCachedQuotaPolling";
+import { useQuotaClock } from "./useQuotaClock";
 import { useAutomaticQuotaRequests } from "./useAutomaticQuotaRequests";
 import CodexResetCreditsModal from "./CodexResetCreditsModal";
 import { useVisibleQuotaData } from "./useVisibleQuotaData";
@@ -219,10 +221,23 @@ function FilterChip({
   );
 }
 
+/**
+ * SIWC exposes usage management in ChatGPT settings, not a quota polling API; automatic
+ * requests also wait until a live request is allowed.
+ */
+function skipsQuotaFetch(
+  provider: string,
+  automatic: boolean | undefined,
+  canRequestLive: () => boolean
+): boolean {
+  return provider === "chatgpt" || (automatic === true && !canRequestLive());
+}
+
 export default function ProviderLimits({
   showFilters = true,
   autoRefreshInterval = 0,
 }: ProviderLimitsProps) {
+  const clockNow = useQuotaClock();
   const t = useTranslations("usage");
   const tr = useCallback(
     (key: string, fallback: string, values?: UsageTranslationValues) =>
@@ -306,17 +321,19 @@ export default function ProviderLimits({
     };
   }, []);
 
-  const fetchConnections = useCallback(async () => {
+  const fetchConnections = useCallback(async (signal?: AbortSignal) => {
     try {
       const list = await fetchDashboardConnections(PROVIDER_LIMITS_FETCH_TIMEOUT_MS, {
         method: "GET",
         cache: "no-store",
+        signal,
       });
+      if (signal?.aborted) return null;
       setAuthRequired(false);
       setConnections(list);
       return list;
     } catch (error) {
-      setAuthRequired(error instanceof ConnectionsAuthError);
+      if (!signal?.aborted) setAuthRequired(error instanceof ConnectionsAuthError);
       return null;
     }
   }, []);
@@ -395,12 +412,13 @@ export default function ProviderLimits({
     []
   );
 
-  const fetchCachedProviderLimits = useCallback(async () => {
+  const fetchCachedProviderLimits = useCallback(async (signal?: AbortSignal) => {
     try {
       const response = await fetchWithTimeout("/api/usage/provider-limits", {
         timeoutMs: PROVIDER_LIMITS_FETCH_TIMEOUT_MS,
         method: "GET",
         cache: "no-store",
+        signal,
       });
       if (!response.ok) throw new Error("Failed");
       const data = await response.json();
@@ -417,7 +435,7 @@ export default function ProviderLimits({
       provider: string,
       options: { force?: boolean; automatic?: boolean } = {}
     ) => {
-      if (options.automatic && !canRequestLive()) return;
+      if (skipsQuotaFetch(provider, options.automatic, canRequestLive)) return;
       const force = options?.force === true;
       const now = Date.now();
       const lastFetch = lastFetchTimeRef.current[connectionId] || 0;
@@ -566,7 +584,7 @@ export default function ProviderLimits({
       connections.filter(
         (conn) =>
           isProviderQuotaVisible(conn) &&
-          supportsProviderQuota(conn.provider, conn) &&
+          (conn.provider === "chatgpt" || supportsProviderQuota(conn.provider, conn)) &&
           (conn.authType === "oauth" || conn.authType === "apikey")
       ),
     [connections]
@@ -795,7 +813,7 @@ export default function ProviderLimits({
           const pct = q.unlimited
             ? 100
             : Math.round(q.remainingPercentage ?? calculatePercentage(q.used, q.total));
-          const cd = formatCountdown(q.resetAt);
+          const cd = formatCountdown(q.resetAt, clockNow);
           const tone = getQuotaToneClasses(pct);
           return (
             <span
@@ -868,11 +886,11 @@ export default function ProviderLimits({
               autoRefreshIntervalMs > 0 ? tr("autoRefreshing", "Auto-refreshing") : t("refreshAll")
             }
           >
-            <Icon
-              name={autoRefreshIntervalMs > 0 ? "schedule" : "refresh"}
-              size={16}
-              className={refreshingAll ? "animate-spin" : undefined}
-            />
+            {refreshingAll ? (
+              <Spinner decorative size="sm" />
+            ) : (
+              <Icon name={autoRefreshIntervalMs > 0 ? "schedule" : "refresh"} size={16} />
+            )}
             {refreshingAll
               ? tr("refreshing", "Refreshing")
               : autoRefreshIntervalMs > 0

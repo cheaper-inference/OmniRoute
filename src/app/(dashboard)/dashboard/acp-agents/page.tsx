@@ -5,6 +5,7 @@ import Link from "next/link";
 import { buttonVariants } from "@omniroute/ui-kit/button";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { Card, Button, Input } from "@/shared/components";
 import Badge from "@/shared/components/Badge";
 import ProviderIcon from "@/shared/components/ProviderIcon";
@@ -151,7 +152,7 @@ export default function AgentsPage() {
   if (loading) {
     return (
       <div role="status" className="flex flex-col items-center justify-center min-h-[400px] gap-3">
-        <Icon name="progress_activity" size={32} className="animate-spin text-primary" />
+        <Spinner decorative size="lg" className="text-primary" />
         <p className="text-sm text-text-muted">{t("scanning")}</p>
       </div>
     );
@@ -178,19 +179,19 @@ export default function AgentsPage() {
       {summary && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Card padding="sm" className="text-center">
-            <div className="text-2xl font-bold text-primary">{summary.installed}</div>
+            <div className="text-2xl font-semibold text-primary">{summary.installed}</div>
             <div className="text-xs text-text-muted mt-1">{t("installed")}</div>
           </Card>
           <Card padding="sm" className="text-center">
-            <div className="text-2xl font-bold text-text-muted">{summary.notFound}</div>
+            <div className="text-2xl font-semibold text-text-muted">{summary.notFound}</div>
             <div className="text-xs text-text-muted mt-1">{t("notFound")}</div>
           </Card>
           <Card padding="sm" className="text-center">
-            <div className="text-2xl font-bold">{summary.builtIn}</div>
+            <div className="text-2xl font-semibold">{summary.builtIn}</div>
             <div className="text-xs text-text-muted mt-1">{t("builtIn")}</div>
           </Card>
           <Card padding="sm" className="text-center">
-            <div className="text-2xl font-bold text-warning">{summary.custom}</div>
+            <div className="text-2xl font-semibold text-warning">{summary.custom}</div>
             <div className="text-xs text-text-muted mt-1">{t("custom")}</div>
           </Card>
         </div>
@@ -300,10 +301,10 @@ export default function AgentsPage() {
               </div>
               {agent.isCustom && (
                 <Button
-                  variant="ghost"
+                  variant="destructive-ghost"
                   size="sm"
                   onClick={() => handleRemoveAgent(agent.id)}
-                  className="gap-0.5 text-xs text-error hover:bg-error/10 hover:text-error"
+                  className="gap-0.5 text-xs"
                   title={t("remove")}
                 >
                   <Icon name="delete" size={14} />

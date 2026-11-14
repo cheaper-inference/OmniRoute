@@ -11,6 +11,7 @@ import { randomUUID } from "crypto";
  *   and xquik-search (direct X API search — explicit or credentialed fallback)
  *   and anysearch-search (free public web search — fallback-only)
  *   and parallel-search (Parallel Search API — web only)
+ *   and keenable-search (Keenable: keyless by default, optional key; fallback-only)
  *
  * Request format:
  * {
@@ -22,7 +23,7 @@ import { randomUUID } from "crypto";
  */
 
 export { resolveSearchBaseUrl, SearchBaseUrlOverrideError } from "./search/baseUrl.ts";
-import { resolveSearchBaseUrl } from "./search/baseUrl.ts";
+import { resolveSearchBaseUrl, searchBaseUrlGuard } from "./search/baseUrl.ts";
 import type { SearchUsage } from "./search/reportedCost.ts";
 import {
   getSearchProvider,
@@ -39,6 +40,8 @@ import * as xquikSearch from "./search/xquikSearch.ts";
 import * as anysearchSearch from "./search/anysearchSearch.ts";
 import * as kimiSearch from "./search/kimiSearch.ts";
 import * as parallelSearch from "./search/parallelSearch.ts";
+import * as keenableSearch from "./search/keenableSearch.ts";
+import { executeCodexSearch } from "./search/codexSearch.ts";
 import { freeWebSearch } from "../services/freeWebSearch.ts";
 import { saveCallLog } from "@/lib/usageDb";
 import { safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
@@ -152,12 +155,26 @@ function clampSearchTimeoutMs(
   return Math.min(MAX_SEARCH_TIMEOUT_MS, Math.max(floor, Math.floor(override)));
 }
 
-function resolveGlobalTimeoutMs(override?: number): number {
-  return clampSearchTimeoutMs(override, DEFAULT_GLOBAL_TIMEOUT_MS, MIN_SEARCH_TIMEOUT_MS);
+function resolveGlobalTimeoutMs(override?: number, provider?: string, alternate?: string): number {
+  // An explicit operator budget still wins, including values below Codex's 60s.
+  const fallback =
+    provider === "codex-search" || alternate === "codex-search"
+      ? getSearchProvider("codex-search")!.timeoutMs
+      : DEFAULT_GLOBAL_TIMEOUT_MS;
+  return clampSearchTimeoutMs(override, fallback, MIN_SEARCH_TIMEOUT_MS);
 }
 
 // Non-retriable HTTP status codes — fail immediately, don't try alternate
 const NON_RETRIABLE = new Set([400, 401, 403, 404]);
+
+/**
+ * Only auto-select passes an alternate, so this never applies to a provider requested by name.
+ * A self-hosted engine's 4xx describes that instance (its JSON output left off, a wrong path),
+ * not the request, so the keyed failover still has a chance of answering it.
+ */
+function isFailoverStatus(primary: SearchProviderConfig, status: number | undefined): boolean {
+  return primary.primaryWhenConfigured === true || !NON_RETRIABLE.has(status || 0);
+}
 
 // ── Input Sanitization ──────────────────────────────────────────────────
 
@@ -778,6 +795,7 @@ const requestBuilders: Record<string, SearchRequestBuilder> = {
   "xquik-search": xquikSearch.buildXquikSearchRequest,
   "anysearch-search": anysearchSearch.buildAnysearchSearchRequest,
   "parallel-search": parallelSearch.buildParallelSearchRequest,
+  "keenable-search": keenableSearch.buildKeenableSearchRequest,
 };
 
 function buildRequest(
@@ -855,6 +873,8 @@ function normalizeExaResponse(
         text_format: "text",
         provider_raw: compactProviderRaw({
           id: item.id,
+          // The snippet only shows the first highlight; keep all of them next to their scores.
+          highlights: item.highlights,
           highlight_scores: item.highlightScores,
           summary: item.summary,
           subpages: item.subpages,
@@ -1410,6 +1430,7 @@ const responseNormalizers: Record<string, SearchResponseNormalizer> = {
   "xquik-search": (data) => xquikSearch.normalizeXquikSearchResponse(data, makeResult),
   "anysearch-search": (data) => anysearchSearch.normalizeAnysearchSearchResponse(data, makeResult),
   "parallel-search": (data) => parallelSearch.normalizeParallelSearchResponse(data, makeResult),
+  "keenable-search": (data) => keenableSearch.normalizeKeenableSearchResponse(data, makeResult),
 };
 
 function normalizeResponse(
@@ -1494,7 +1515,7 @@ export async function handleSearch(options: SearchHandlerOptions): Promise<Searc
     providerTimeoutsMs,
   } = options;
   const startTime = Date.now();
-  const globalTimeoutMs = resolveGlobalTimeoutMs(timeoutMs);
+  const globalTimeoutMs = resolveGlobalTimeoutMs(timeoutMs, providerId, alternateProvider);
   const providerTimeoutOverride = clampSearchTimeoutMs(providerTimeoutsMs?.[providerId], 0, 1);
 
   // 1. Sanitize input
@@ -1618,7 +1639,7 @@ export async function handleSearch(options: SearchHandlerOptions): Promise<Searc
   if (
     alternateConfig &&
     alternateCredentials &&
-    !NON_RETRIABLE.has(result.status || 0) &&
+    isFailoverStatus(primaryConfig, result.status) &&
     Date.now() - startTime < globalTimeoutMs
   ) {
     if (log) {
@@ -1773,6 +1794,15 @@ async function tryProvider(
 
   const { query, searchType, maxResults } = params;
 
+  if (config.id === "codex-search") {
+    return executeCodexSearch(
+      config,
+      { ...params, token, providerSpecificData },
+      { connectionId, apiKeyId, globalStartTime, globalTimeoutMs },
+      makeResult
+    );
+  }
+
   if (config.id === "duckduckgo-free") {
     return tryDuckDuckGoFreeProvider(
       config,
@@ -1828,6 +1858,7 @@ async function tryProvider(
     config,
     url,
     init,
+    guard: searchBaseUrlGuard(config, { ...params, providerSpecificData }),
     controller,
     timer,
     query,

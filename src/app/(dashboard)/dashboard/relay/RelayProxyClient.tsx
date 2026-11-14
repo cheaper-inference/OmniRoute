@@ -9,6 +9,7 @@ import Button from "@/shared/components/Button";
 import EmptyState from "@/shared/components/EmptyState";
 import Input from "@/shared/components/Input";
 import { useNotificationStore } from "@/store/notificationStore";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useDisplayBaseUrl } from "@/shared/hooks";
 
 interface RelayToken {
@@ -34,6 +35,7 @@ export default function RelayProxyClient() {
   const [newTokenData, setNewTokenData] = useState<{ rawToken: string; name: string } | null>(null);
   const [form, setForm] = useState({ name: "", description: "", maxRpm: "60", maxRpd: "10000" });
   const addNotification = useNotificationStore((s) => s.addNotification);
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
 
   const fetchTokens = useCallback(async () => {
     setLoading(true);
@@ -96,7 +98,7 @@ export default function RelayProxyClient() {
   };
 
   const deleteToken = async (id: string) => {
-    if (!confirm(t("deleteConfirm"))) return;
+    if (!(await requestConfirm(t("deleteConfirm")))) return;
     try {
       await fetch(`/api/relay/tokens/${id}`, { method: "DELETE" });
       addNotification({ type: "success", message: t("deleted") });
@@ -242,9 +244,8 @@ export default function RelayProxyClient() {
                       {token.enabled ? t("disable") : t("enable")}
                     </Button>
                     <Button
-                      variant="ghost"
+                      variant="destructive-ghost"
                       size="sm"
-                      className="text-error"
                       onClick={() => deleteToken(token.id)}
                     >
                       {t("delete")}
@@ -256,6 +257,7 @@ export default function RelayProxyClient() {
           )}
         </div>
       </Card>
+      {confirmDialog}
     </div>
   );
 }

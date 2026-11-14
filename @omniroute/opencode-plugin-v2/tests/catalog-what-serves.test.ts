@@ -480,7 +480,7 @@ describe("usage memory option", () => {
         [
           "nova-3",
           {
-            name: "Nova 3 (Transcription)",
+            name: "Deepgram - Nova 3 (Transcription)",
             providerAlias: "deepgram",
             providerCanonical: "deepgram",
             providerDisplayName: "Deepgram",
@@ -498,7 +498,9 @@ describe("usage memory option", () => {
       );
       const restored = collected.entries.get("omniroute/dg/nova-3");
       assert.ok(restored);
-      assert.match(JSON.stringify(restored), /Deepgram/);
+      assert.equal(restored?.cost.input, 1);
+      assert.equal(restored?.cost.output, 2);
+      assert.equal(restored?.name, "Deepgram - Nova 3 (Transcription)");
     });
   });
 });
@@ -976,5 +978,98 @@ describe("freshness window in days", () => {
       assert.ok(collected.entries.has("omniroute/win/old"));
       assert.ok(collected.entries.has("omniroute/win/older"));
     });
+  });
+});
+
+describe("disambiguation stays unique across groups", () => {
+  it("keeps a route-renamed name from colliding with another group's kept name", async () => {
+    const raw = await entriesThroughReader([
+      { id: "a/m", owned_by: "a", context_length: 1000 },
+      { id: "b/m", owned_by: "b", context_length: 1000 },
+      { id: "c/keep", owned_by: "c", context_length: 1000 },
+    ]);
+    const enrichment = new Map([
+      ["a/m", { name: "X" }],
+      ["b/m", { name: "X" }],
+      ["c/keep", { name: "X (a)" }],
+    ]);
+    const collected = await collectCatalog(
+      { ...baseOpts, enrichment },
+      { fetcher: async () => raw, combosFetcher: async () => [] }
+    );
+    const names = [
+      collected.entries.get("omniroute/a/m")?.name,
+      collected.entries.get("omniroute/b/m")?.name,
+      collected.entries.get("omniroute/c/keep")?.name,
+    ];
+    for (const name of names) assert.ok(name, "every entry keeps a published name");
+    assert.equal(
+      new Set(names).size,
+      3,
+      `no two entries publish the same name: ${JSON.stringify(names)}`
+    );
+  });
+});
+
+describe("master auto router is pinned outside the per-owner cap (#19016)", () => {
+  // Rows as GET /v1/models serves the built-in auto combos: owned_by "combo",
+  // no release_date, bare `auto` with the lowest context_length.
+  function autoRows(): Array<Record<string, unknown>> {
+    const variants = Array.from({ length: 20 }, (_v, i) => ({
+      id: `auto/variant-${i}`,
+      object: "model",
+      owned_by: "combo",
+      context_length: 128000 + i,
+    }));
+    return [{ id: "auto", object: "model", owned_by: "combo", context_length: 32000 }, ...variants];
+  }
+
+  async function keysFor(opts: Record<string, unknown>): Promise<string[]> {
+    const result = await collectCatalog(
+      { ...baseOpts, ...opts } as never,
+      { fetcher: async () => autoRows() as never, combosFetcher: async () => [] } as never
+    );
+    return [...result.entries.keys()];
+  }
+
+  it("publishes the bare auto row while auto/* variants stay capped", async () => {
+    const keys = await keysFor({});
+    assert.ok(keys.includes("omniroute/auto"), "bare auto must be published");
+    const variants = keys.filter((k) => k.startsWith("omniroute/auto/"));
+    assert.equal(variants.length, 10, "auto/* variants keep the per-owner cap");
+  });
+
+  it("does not let the pinned auto consume a showcase slot", async () => {
+    const keys = await keysFor({ showcasePerOwner: 3 });
+    assert.ok(keys.includes("omniroute/auto"));
+    assert.equal(keys.filter((k) => k.startsWith("omniroute/auto/")).length, 3);
+  });
+
+  it("hiddenModels still wins over the pin", async () => {
+    assert.ok(!(await keysFor({ hiddenModels: ["auto"] })).includes("omniroute/auto"));
+  });
+
+  it("combos:false still drops it", async () => {
+    assert.ok(!(await keysFor({ combos: false })).includes("omniroute/auto"));
+  });
+
+  it("an exact visibleModels pin still publishes it", async () => {
+    assert.ok((await keysFor({ visibleModels: ["auto"] })).includes("omniroute/auto"));
+  });
+
+  it("a capability preset still drops it", async () => {
+    assert.ok(!(await keysFor({ visionOnly: true })).includes("omniroute/auto"));
+  });
+
+  it("only the combo-owned bare auto is pinned", async () => {
+    const rows = [
+      ...autoRows(),
+      { id: "auto", object: "model", owned_by: "other", context_length: 1 },
+    ];
+    const result = await collectCatalog(
+      baseOpts as never,
+      { fetcher: async () => rows as never, combosFetcher: async () => [] } as never
+    );
+    assert.ok(result.entries.has("omniroute/auto"));
   });
 });

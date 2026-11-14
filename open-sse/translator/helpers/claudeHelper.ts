@@ -1,10 +1,93 @@
 // Claude helper functions for translator
 import { DEFAULT_THINKING_CLAUDE_SIGNATURE } from "../../config/defaultThinkingSignature.ts";
-import { lookupReasoning, recordReplay } from "../../services/reasoningCache.ts";
+import {
+  buildToolCallCacheKey,
+  lookupReasoning,
+  recordReplay,
+} from "../../services/reasoningCache.ts";
 import { getModelTargetFormat } from "../../config/providerModels.ts";
 import { NON_ANTHROPIC_THINKING_PLACEHOLDER } from "../../utils/reasoningPlaceholder.ts";
 import { sanitizeToolId } from "./schemaCoercion.ts";
 import { isRestoredClaudeThinkingBlock } from "../../services/claudeThinkingStore.ts";
+import { getThinkingReplayOverride } from "./thinkingReplayMode.ts";
+import { isRegisteredFeatureFlagEnabled } from "../../utils/registeredFeatureFlag.ts";
+
+/**
+ * The DEFAULT blob is a real encrypted thought from an unrelated
+ * session; Claude decrypts it as its own reasoning. Drop every thinking-ish block Anthropic
+ * never issued (no signature/data, or the blob itself) instead of replaying the blob.
+ * Docs (build-with-claude/thinking, "Thinking with tool use"): adaptive mode needs no
+ * thinking block on any assistant turn; manual mode needs one on the final assistant
+ * turn, so when that turn has none, thinking is disabled for this request.
+ */
+function isReplayableValue(value: unknown): boolean {
+  return (
+    typeof value === "string" && value.length > 0 && value !== DEFAULT_THINKING_CLAUDE_SIGNATURE
+  );
+}
+
+function isThinkingLike(block: ClaudeContentBlock | null | undefined): boolean {
+  return block?.type === "thinking" || block?.type === "redacted_thinking";
+}
+
+/**
+ * A thinking-ish block Anthropic cannot have issued: no signature/data, or the blob itself.
+ * On historical turns a `thinking` block with empty text and a signature ("signed-empty",
+ * the #15534 shape relayed by non-Anthropic legs) is foreign as well, unless OmniRoute
+ * restored it from claudeThinkingStore.
+ */
+function isUnsignedAnthropicThinking(block: ClaudeContentBlock, historical = false): boolean {
+  if (!block || typeof block !== "object") return false;
+  if (block.type === "redacted_thinking") return !isReplayableValue(block.data);
+  if (block.type !== "thinking") return false;
+  if (!isReplayableValue(block.signature)) return true;
+  const signedEmpty = historical && !block.thinking && !isRestoredClaudeThinkingBlock(block);
+  return signedEmpty;
+}
+
+function lastAssistantIndex(messages: ClaudeMessage[]): number {
+  for (let k = messages.length - 1; k >= 0; k--) {
+    if (messages[k]?.role === "assistant") return k;
+  }
+  return -1;
+}
+
+function dropClearThinkingEdits(body: ClaudeRequestBody): void {
+  const cm = body.context_management as { edits?: Array<{ type?: unknown }> } | undefined;
+  if (!cm || !Array.isArray(cm.edits)) return;
+  const edits = cm.edits.filter((e) => !String(e?.type || "").startsWith("clear_thinking"));
+  if (edits.length) body.context_management = { ...cm, edits };
+  else delete body.context_management;
+}
+
+export function disableManualThinkingWithoutFinalBlock(body: ClaudeRequestBody): void {
+  const messages = body.messages;
+  if (!Array.isArray(messages) || body.thinking?.type !== "enabled") return;
+  if (messages[messages.length - 1]?.role !== "user") return;
+  const content = messages[lastAssistantIndex(messages)]?.content;
+  const blocks = Array.isArray(content) ? content : [];
+  const hasToolUse = blocks.some((b) => b?.type === "tool_use");
+  if (!hasToolUse || blocks.some(isThinkingLike)) return;
+  delete body.thinking;
+  dropClearThinkingEdits(body);
+}
+
+function dropUnsignedAnthropicThinking(body: ClaudeRequestBody): void {
+  const messages = body.messages;
+  if (!Array.isArray(messages)) return;
+  const latest = lastAssistantIndex(messages);
+  for (let k = messages.length - 1; k >= 0; k--) {
+    const msg = messages[k];
+    if (!msg || msg.role !== "assistant" || !Array.isArray(msg.content)) continue;
+    const historical = k !== latest;
+    const unsigned = (b: ClaudeContentBlock) => isUnsignedAnthropicThinking(b, historical);
+    if (!msg.content.some(unsigned)) continue;
+    const kept = msg.content.filter((b) => !unsigned(b));
+    if (kept.length) msg.content = kept;
+    else messages.splice(k, 1);
+  }
+  disableManualThinkingWithoutFinalBlock(body);
+}
 
 export { NON_ANTHROPIC_THINKING_PLACEHOLDER } from "../../utils/reasoningPlaceholder.ts";
 
@@ -47,7 +130,7 @@ type ClaudeTool = {
   [key: string]: unknown;
 };
 
-type ClaudeRequestBody = {
+export type ClaudeRequestBody = {
   system?: Array<Record<string, unknown> & { cache_control?: unknown }>;
   messages?: ClaudeMessage[];
   tools?: ClaudeTool[];
@@ -395,6 +478,24 @@ export function createDefaultClaudeCacheControl(provider?: string | null): {
     : { type: "ephemeral", ttl: "1h" };
 }
 
+export const CLAUDE_CACHE_TAIL_TTL_1H_FLAG = "CLAUDE_CACHE_TAIL_TTL_1H";
+
+/**
+ * Cache marker for the conversation tail (second-to-last user turn and last
+ * assistant turn). Defaults to the 5m TTL (no ttl field), so cost and wire shape
+ * stay as before. With the opt-in CLAUDE_CACHE_TAIL_TTL_1H flag the tail takes the
+ * same TTL as system/tools: 1h, or 5m on Vertex. A 1h write costs 2x input vs
+ * 1.25x for 5m, but survives pauses longer than five minutes.
+ */
+export function createClaudeTailCacheControl(provider?: string | null): {
+  type: string;
+  ttl?: string;
+} {
+  return isRegisteredFeatureFlagEnabled(CLAUDE_CACHE_TAIL_TTL_1H_FLAG)
+    ? createDefaultClaudeCacheControl(provider)
+    : { type: "ephemeral" };
+}
+
 /** True when the body carries at least one cache_control marker anywhere
  * (system blocks, message content blocks, or tools). Used to decide whether
  * preserve-mode has anything to preserve. */
@@ -421,6 +522,70 @@ function bodyHasAnyCacheControl(body: ClaudeRequestBody): boolean {
   return false;
 }
 
+/** Marks the last block Anthropic accepts a breakpoint on, walking back from the
+ * tail: it rejects `cache_control` on thinking, redacted_thinking and blank text
+ * blocks, which would turn a working request into a 400. */
+function markLastCacheableBlock(
+  blocks: ClaudeContentBlock[],
+  cacheControl: { type: string; ttl?: string }
+): boolean {
+  for (let i = blocks.length - 1; i >= 0; i--) {
+    const block = blocks[i];
+    if (isThinkingLike(block) || !isNonEmptyClaudeBlock(block)) continue;
+    block.cache_control = { ...cacheControl };
+    return true;
+  }
+  return false;
+}
+
+/** Prompt-cache rescue for the pure claude→claude passthrough branch
+ * (chatCore passthrough-trust): marker-less Anthropic-format clients (e.g.
+ * Cursor) ship zero cache breakpoints through passthrough, re-billing the full
+ * prefix every turn. Injects breakpoints ONLY when the body carries none
+ * anywhere — a client that manages its own markers (Claude Code) is returned
+ * byte-untouched. Placement mirrors the standard heuristic:
+ *   - system tail: provider default TTL (system prompt changes rarely)
+ *   - second-to-last user turn + last assistant turn: conversation-tail TTL on
+ *     the stable rolling prefix (the last user turn stays unmarked — it is the
+ *     working set and would invalidate on every turn).
+ * Mutates in place and returns the same body reference. */
+export function ensurePassthroughCacheBreakpoints(
+  body: ClaudeRequestBody,
+  provider?: string | null
+): ClaudeRequestBody {
+  // Client already manages its cache markers — must stay byte-untouched.
+  if (bodyHasAnyCacheControl(body)) return body;
+
+  // Normalize string content to block arrays up front so markers attach to
+  // blocks and the passthrough body keeps one consistent shape.
+  const messages = Array.isArray(body.messages) ? body.messages : [];
+  for (const msg of messages) {
+    ensureMessageContentArray(msg);
+  }
+
+  if (Array.isArray(body.system)) {
+    markLastCacheableBlock(body.system, createDefaultClaudeCacheControl(provider));
+  }
+
+  const tailCacheControl = createClaudeTailCacheControl(provider);
+  const userTurnIndices: number[] = [];
+  for (let i = 0; i < messages.length; i++) {
+    if (messages[i]?.role === "user") userTurnIndices.push(i);
+  }
+
+  if (userTurnIndices.length >= 2) {
+    const secondToLastUser = messages[userTurnIndices[userTurnIndices.length - 2]];
+    markLastCacheableBlock(ensureMessageContentArray(secondToLastUser), tailCacheControl);
+  }
+  // A thinking-only turn has nothing to mark, so take the closest earlier assistant turn.
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i]?.role !== "assistant") continue;
+    if (markLastCacheableBlock(ensureMessageContentArray(messages[i]), tailCacheControl)) break;
+  }
+
+  return body;
+}
+
 // Prepare request for Claude format endpoints
 // - Cleanup cache_control (unless preserveCacheControl=true for passthrough)
 // - Filter empty messages
@@ -431,7 +596,7 @@ export function prepareClaudeRequest(
   provider: string | null = null,
   preserveCacheControl = false,
   model: string | null = null,
-  opts: { fallbackToHeuristicWhenNoMarkers?: boolean } = {}
+  opts: { fallbackToHeuristicWhenNoMarkers?: boolean; reasoningCacheScope?: string | null } = {}
 ): ClaudeRequestBody {
   // 0. Strip Anthropic `output_config` for providers that reject it on their
   // Claude-compatible endpoints (MiniMax). Must run before any downstream
@@ -460,6 +625,7 @@ export function prepareClaudeRequest(
   const isVertexClaudeProvider = provider === "vertex" || provider === "vertex-partner";
   const supportsPromptCaching =
     provider === "claude" ||
+    provider === "anthropic" ||
     isVertexClaudeProvider ||
     provider?.startsWith?.("anthropic-compatible-");
   // Vertex's documented default is a five-minute ephemeral cache. Omitting ttl is
@@ -482,6 +648,16 @@ export function prepareClaudeRequest(
   const modelTargetsClaude =
     !!provider && !!model && getModelTargetFormat(provider, model) === "claude";
   const supportsRedactedThinking = !isKimiCoding && (supportsPromptCaching || modelTargetsClaude);
+
+  // Per-node thinking-replay declaration (modelCompatOverrides entry field
+  // `thinkingReplay`) overrides the provider-prefix assumption:
+  //   "none" → synthesize nothing & leave replayed thinking blocks untouched
+  //   "text" → force the plain-text branch (upstream needs non-empty thinking text)
+  const thinkingReplayOverride = getThinkingReplayOverride(provider, model);
+  const redactedAllowed =
+    supportsRedactedThinking &&
+    thinkingReplayOverride !== "text" &&
+    thinkingReplayOverride !== "none";
 
   const systemBlocks = body.system;
   if (systemBlocks && Array.isArray(systemBlocks) && !preserveCacheControl) {
@@ -599,6 +775,7 @@ export function prepareClaudeRequest(
     // - cache the second-to-last user turn for conversation reuse
     // - cache the last assistant turn so the next user turn can reuse it
     // Skip in passthrough mode to preserve client's cache_control markers
+    const tailCacheTtl = createClaudeTailCacheControl(provider).ttl;
     if (!preserveCacheControl && supportsPromptCaching) {
       const userMessageIndexes = filtered.reduce<number[]>((indexes, msg, index) => {
         if (msg?.role === "user") indexes.push(index);
@@ -607,7 +784,7 @@ export function prepareClaudeRequest(
       const secondToLastUserIndex =
         userMessageIndexes.length >= 2 ? userMessageIndexes[userMessageIndexes.length - 2] : -1;
       if (secondToLastUserIndex >= 0) {
-        markMessageCacheControl(filtered[secondToLastUserIndex]);
+        markMessageCacheControl(filtered[secondToLastUserIndex], tailCacheTtl);
       }
     }
 
@@ -652,7 +829,7 @@ export function prepareClaudeRequest(
           !preserveCacheControl &&
           supportsPromptCaching &&
           !lastAssistantProcessed &&
-          markMessageCacheControl(msg)
+          markMessageCacheControl(msg, tailCacheTtl)
         ) {
           lastAssistantProcessed = true;
         }
@@ -709,8 +886,8 @@ export function prepareClaudeRequest(
         );
         if (
           latestHasExistingThinking &&
-          supportsRedactedThinking &&
-          latestHasGenuineThinkingSignature
+          (redactedAllowed || thinkingReplayOverride === "none") &&
+          (thinkingReplayOverride === "none" || latestHasGenuineThinkingSignature)
         ) {
           // Anthropic: skip all thinking-block rewrites entirely — the
           // blocks must remain verbatim (type, thinking, signature, data).
@@ -726,7 +903,7 @@ export function prepareClaudeRequest(
         // Anthropic-shape (the same value is reused across formats — see
         // claude-to-openai.ts:63 where openai tool_call.id = claude tool_use.id).
         const toolUseIds: string[] = [];
-        if (!supportsRedactedThinking) {
+        if (!redactedAllowed && thinkingReplayOverride !== "none") {
           for (const block of content) {
             if (block.type === "tool_use" && typeof block.id === "string") {
               toolUseIds.push(block.id);
@@ -765,11 +942,12 @@ export function prepareClaudeRequest(
               }
               delete block.data;
               delete block.signature;
-            } else if (supportsRedactedThinking) {
-              block.type = "redacted_thinking";
-              block.data = DEFAULT_THINKING_CLAUDE_SIGNATURE;
-              delete block.thinking;
-              delete block.signature;
+            } else if (thinkingReplayOverride === "none") {
+              // declared no-precursor — leave the replayed block exactly as
+              // the client sent it
+            } else if (redactedAllowed) {
+              // Keep verbatim: genuine signed blocks (e.g. restored by claudeThinkingStore)
+              // must reach Anthropic unchanged; unsigned ones are dropped after this pass.
             } else {
               const existing =
                 typeof block.thinking === "string" && block.thinking.length > 0
@@ -784,7 +962,9 @@ export function prepareClaudeRequest(
                 if (!text) {
                   const pairedToolUseId = toolUseIds[thinkingBlockIdx];
                   if (pairedToolUseId) {
-                    const cached = lookupReasoning(pairedToolUseId);
+                    const cached = lookupReasoning(
+                      buildToolCallCacheKey(opts.reasoningCacheScope, pairedToolUseId)
+                    );
                     if (cached) {
                       text = cached;
                       recordReplay();
@@ -812,11 +992,10 @@ export function prepareClaudeRequest(
         // assistant turn's content[] needs a thinking block in front of any
         // tool_use. Use the same provider-aware shape selection as above.
         if (thinkingEnabled && !hasThinking && hasToolUse) {
-          if (supportsRedactedThinking) {
-            content.unshift({
-              type: "redacted_thinking",
-              data: DEFAULT_THINKING_CLAUDE_SIGNATURE,
-            });
+          if (thinkingReplayOverride === "none") {
+            // declared no-precursor — synthesize nothing
+          } else if (redactedAllowed) {
+            // Inject nothing (see dropUnsignedAnthropicThinking below).
           } else if (isKimiCoding) {
             content.unshift({
               type: "thinking",
@@ -826,7 +1005,9 @@ export function prepareClaudeRequest(
             let text = "";
             const firstToolUseId = toolUseIds[0];
             if (firstToolUseId) {
-              const cached = lookupReasoning(firstToolUseId);
+              const cached = lookupReasoning(
+                buildToolCallCacheKey(opts.reasoningCacheScope, firstToolUseId)
+              );
               if (cached) {
                 text = cached;
                 recordReplay();
@@ -841,6 +1022,8 @@ export function prepareClaudeRequest(
       }
     }
   }
+
+  if (redactedAllowed) dropUnsignedAnthropicThinking(body);
 
   // 3. Tools: remove all cache_control, add only to the last non-deferred tool
   // Tools with defer_loading=true cannot have cache_control (API rejects it)

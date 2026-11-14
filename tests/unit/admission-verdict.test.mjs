@@ -319,8 +319,15 @@ for (const profile of ["ci", "quality"]) {
         .sort(),
       ids
     );
-    assert.equal(verdict.name, policy.profiles[profile].checkName);
-    assert.equal(verdict.if, "${{ always() }}");
+    // Requested candidates keep the required name; unrequested drafts get no PASS receipt.
+    const checkName = policy.profiles[profile].checkName;
+    const unrequestedName = `Admission not requested / ${profile === "ci" ? "CI" : "Quality"}`;
+    assert.ok(verdict.name.endsWith(`&& '${checkName}' || '${unrequestedName}' }}`), verdict.name);
+    // Classification failure still reaches always(); queue description edits remain excluded.
+    assert.match(
+      verdict.if,
+      /^\$\{\{ always\(\) && !\(github\.event_name == 'pull_request' && github\.event\.action == 'edited' && github\.event\.pull_request\.user\.login == 'mergify\[bot\]' && /
+    );
     assert.deepEqual(workflow.on.pull_request.branches, ["main", "release/**"]);
     // Push runs only for main since 2026-10-18: each change already ran the matrix on its
     // PR and Release-Green validates the merged combination on release/** (the per-push

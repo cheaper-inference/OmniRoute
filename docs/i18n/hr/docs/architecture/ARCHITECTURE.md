@@ -12,15 +12,15 @@ _Posljednje ažurirano: 2026-06-28_
 
 ## Izvršni sažetak
 
-OmniRoute je lokalni AI pristupnik za usmjeravanje i nadzorna ploča izgrađena na Next.js. Omogućuje jednu OpenAI-kompatibilnu krajnju točku (`/v1/*`) i usmjerava promet preko višestrukih uzvodnih pružatelja usluga s prijevodom, zamjenom, osvježavanjem tokena i praćenjem upotrebe.
+OmniRoute je lokalni AI pristupnik za usmjeravanje i nadzorna ploča izgrađena na Next.js. Omogućuje jednu OpenAI-kompatibilnu krajnju točku (`/v1/*`) i usmjerava promet preko više uzvodnih pružatelja usluga s prijevodom, zamjenskim korištenjem, osvježavanjem tokena i praćenjem upotrebe.
 
 Osnovne mogućnosti:
 
-- OpenAI-kompatibilna API površina za CLI/tools (377 pružatelja usluga, 156 izvršnih modula)
+- OpenAI-kompatibilna API površina za CLI/tools (381 pružatelj, 159 izvršnih modula)
 - Request/response prijevod preko formata pružatelja usluga
 - Rezervni kombinirani model (slijed više modela)
 - Strukturirani kombinirani koraci (`provider + model + connection`) s redoslijedom vremena izvođenja prema `compositeTiers`
-- Zamjena na razini računa (više računa po pružatelju)
+- Zamjena na razini računa (više računa po davatelju)
 - Odabir P2C računa s obzirom na kvotu u glavnoj stazi za chat
 - OAuth + API-ključ upravljanje vezom pružatelja (27 modula OAuth pružatelja)
 - Generiranje ugradnje putem `/v1/embeddings` (18 pružatelja)
@@ -49,8 +49,8 @@ Osnovne mogućnosti:
 - Predmemorija deduplikacije zahtjeva temeljena na potpisu
 - Sloj domene: pravila troškova, rezervna politika, politika zaključavanja
 - Context Relay: sažeci prijenosa sesije za kontinuitet rotacije računa
-- Postojanost stanja domene (SQLite predmemorija pisanja za pomoćne mogućnosti, proračune, zaključavanja, prekidače strujnog kruga)
-- Motor pravila za centraliziranu procjenu zahtjeva (zaključavanje → proračun → rezervni)
+- Postojanost stanja domene (SQLite predmemorija za upisivanje za rezerve, proračune, zaključavanja, prekidače)
+- Motor pravila za centraliziranu evaluaciju zahtjeva (zaključavanje → proračun → rezervni)
 - Zatražite telemetriju s p50/p95/p99 agregacijom latencije
 - Telemetrija kombiniranog cilja i povijesno zdravlje kombiniranog cilja putem `combo_execution_key` / `combo_step_id`
 - Korelacija ID (X-Request-Id) za praćenje od kraja do kraja
@@ -416,7 +416,7 @@ Za izradu skupa pravila i podešavanje praga, pogledajte [`docs/security/GUARDRA
 - Connection/model pravilo spajanje: `src/domain/connectionModelRules.ts`
 - Snimke dostupnosti modela: `src/domain/modelAvailability.ts`
 - Praćenje isteka pružatelja: `src/domain/providerExpiration.ts`
-- Kvota predmemorije: `src/domain/quotaCache.ts`
+- Predmemorija kvota: `src/domain/quotaCache.ts`. Pružatelji dodaju i uklanjaju prozore kvota (OpenAI je izbacio 5-satni Codex prozor za neke planove), tako da je očitavanje korištenja davateljeva adaptera potvrđeno kao dovršeno (`quotasComplete`, vidi `src/lib/usage/usageReading.ts`) cijeli je skup prozora računa: prozor koji je bio poznat ranije, ali ga nema u njemu je povučen, u predmemoriju, u `quota_snapshots` ponovno pokretanje hidrira (dodani zapis o povlačenju), u postojanom Codex stanje kvote i u Claude-ovim spremnicima zasićenja. Djelomični dokazi (zaglavlja odgovora, zastarjele kopije) samo ažuriraju prozore koje nose.
 - Stanje razgradnje: `src/domain/degradation.ts`
 - Revizija konfiguracije: `src/domain/configAudit.ts`
 - graditelj metapodataka odgovora OmniRoute : `src/domain/omnirouteResponseMeta.ts`

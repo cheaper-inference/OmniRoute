@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
@@ -17,11 +18,11 @@ import { Modal, Button } from "@/shared/components";
 
 const markdownComponents: Components = {
   h1({ children }) {
-    return <h1 className="mb-4 text-xl font-bold text-text-main">{children}</h1>;
+    return <h1 className="mb-4 text-xl font-semibold text-text-main">{children}</h1>;
   },
   h2({ children }) {
     return (
-      <h2 className="mt-6 mb-3 flex items-center gap-2 text-base font-bold text-text-main first:mt-0">
+      <h2 className="mt-6 mb-3 flex items-center gap-2 text-base font-semibold text-text-main first:mt-0">
         <Icon name="terminal" size={16} className="text-primary" />
         {children}
       </h2>
@@ -170,8 +171,8 @@ export default function CodexCliGuideModal({ isOpen, onClose }: CodexCliGuideMod
     <Modal isOpen={isOpen} title={text("codexCliGuideTitle", "Codex CLI Guide")} onClose={onClose}>
       <div className="max-h-[70vh] overflow-y-auto pr-1">
         {loading && (
-          <div className="flex flex-col items-center justify-center py-16 gap-3">
-            <Icon name="sync" size={28} className="animate-spin text-text-muted/50" />
+          <div role="status" className="flex flex-col items-center justify-center py-16 gap-3">
+            <Spinner decorative size="md" className="text-text-muted/50" />
             <p className="text-sm text-text-muted">
               {text("codexCliGuideLoading", "Loading guide...")}
             </p>

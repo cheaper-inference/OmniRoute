@@ -16,8 +16,10 @@ import { isPassiveCodex, resolvePassiveCodex } from "./tokenRefresh/passiveCodex
 import { PROVIDERS } from "../config/constants.ts";
 import { getCodexAuthIdentityHeaders } from "../config/codexClient.ts";
 import { runWithProxyContext } from "../utils/proxyFetch.ts";
-import { serializeRefresh } from "./refreshSerializer.ts";
+import { sanitizeErrorMessage } from "../utils/errorSanitization.ts";
+import { serializeRefresh, rotationGroupFor } from "./refreshSerializer.ts";
 import { parseTokenExpiryMs } from "@/lib/tokenHealthCheckExpiry";
+import { preservesRefreshTokenOnUnrecoverable } from "./refreshTokenPreservation.ts";
 import {
   extractOAuthErrorCode,
   isUnrecoverableRefreshError,
@@ -60,12 +62,15 @@ import {
 } from "./antigravityProjectBootstrap.ts";
 import { persistDiscoveredAntigravityProjectId } from "./antigravityProjectPersist.ts";
 import { refreshCodexToken } from "./tokenRefresh/providers/codex.ts";
+import { refreshChatGptToken } from "./tokenRefresh/providers/chatgpt.ts";
 import { refreshCursorToken } from "./tokenRefresh/providers/cursor.ts";
 import { refreshOpenferenceToken } from "./tokenRefresh/providers/openference.ts";
+import { refreshRenderhourToken } from "./tokenRefresh/providers/renderhour.ts";
 import { refreshKiroToken } from "./tokenRefresh/providers/kiro.ts";
 import { refreshQoderToken } from "./tokenRefresh/providers/qoder.ts";
 import { refreshGitHubToken } from "./tokenRefresh/providers/github.ts";
 import { refreshCopilotToken } from "./tokenRefresh/providers/copilot.ts";
+import { refreshM365Token } from "./tokenRefresh/providers/m365.ts";
 
 export {
   refreshCodebuddyCnToken,
@@ -78,6 +83,7 @@ export {
   refreshCodexToken,
   refreshCursorToken,
   refreshOpenferenceToken,
+  refreshRenderhourToken,
   refreshKiroToken,
   refreshQoderToken,
   refreshGitHubToken,
@@ -118,6 +124,7 @@ export const TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000;
 // Providers with non-rotating tokens (Google, Anthropic) or where multi-
 // account is naturally isolated keep longer lead times.
 export const REFRESH_LEAD_MS: Record<string, number> = {
+  chatgpt: 60_000, // Official SIWC local SDK refresh window.
   // Rotating refresh tokens — minimize refresh frequency to avoid the
   // "refresh-invalidates-siblings" cascade documented for OpenAI Auth0.
   codex: 5 * 60 * 1000, // 5 minutes
@@ -214,6 +221,11 @@ export function setRefreshMutexMaxMsForTest(ms: number | null) {
   refreshMutexMaxMs = typeof ms === "number" ? ms : REFRESH_MUTEX_MAX_MS_DEFAULT;
 }
 
+// Cap for the grouped refresh wave (getAllAccessTokens): keeps one OAuth token
+// endpoint from seeing hundreds of parallel refreshes, same order as the quota
+// fetch caps in combo strategies.
+const BULK_TOKEN_REFRESH_CONCURRENCY = 8;
+
 // Token Rotation Map (codex-multi-auth pattern) lives in
 // ./tokenRefresh/rotationMap.ts — see that leaf for the in-memory rotation
 // cache + getRefreshCacheKey. Imported above and re-exported for tests.
@@ -250,6 +262,7 @@ export function getActiveOnPersist(): RefreshPersistFn | undefined {
 
 export function refreshAccessToken(provider, token, creds, log, proxy: unknown = null) {
   if (isPassiveCodex(provider)) return resolvePassiveCodex(creds);
+  if (provider === "copilot-m365-web") return refreshM365Token(token, creds, log, proxy);
   return refreshActiveAccessToken(provider, token, creds, log, proxy);
 }
 
@@ -305,7 +318,8 @@ async function refreshActiveAccessToken(
       const errorText = await response.text();
       log?.error?.("TOKEN_REFRESH", `Failed to refresh token for ${provider}`, {
         status: response.status,
-        error: errorText,
+        // The OAuth server can echo the refresh token or client secret back in its error body.
+        error: sanitizeErrorMessage(errorText),
       });
       const code = extractOAuthErrorCode(errorText);
       if (code === "invalid_grant" || code === "invalid_request") {
@@ -396,10 +410,16 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
         try {
           const discovered = await ensureAntigravityProjectAssigned(result.accessToken, fetch);
           if (isUsableAntigravityProjectId(discovered)) {
-            result.projectId = discovered;
-            result.providerSpecificData = {
+            // The refresh result type declares only the token fields; the antigravity
+            // recovery adds these two alongside them.
+            const recovery = result as {
+              projectId?: string;
+              providerSpecificData?: Record<string, unknown>;
+            };
+            recovery.projectId = discovered;
+            recovery.providerSpecificData = {
               ...(credentials.providerSpecificData || {}),
-              ...(result.providerSpecificData || {}),
+              ...(recovery.providerSpecificData || {}),
               projectId: discovered,
             };
             if (credentials.connectionId) {
@@ -423,11 +443,17 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
       return result;
     }
 
+    case "copilot-m365-web":
+      return await refreshM365Token(credentials.refreshToken, credentials, log, proxyConfig);
+
     case "claude":
       return await refreshClaudeOAuthToken(credentials.refreshToken, log, proxyConfig);
 
     case "codex":
       return await refreshCodexToken(credentials.refreshToken, log, proxyConfig);
+
+    case "chatgpt":
+      return await refreshChatGptToken(credentials, proxyConfig);
 
     case "cursor":
       if (!credentials.refreshToken) {
@@ -437,6 +463,8 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
 
     case "openference":
       return await refreshOpenferenceToken(credentials.refreshToken, log, proxyConfig);
+    case "renderhour":
+      return await refreshRenderhourToken(credentials.refreshToken, log, proxyConfig);
 
     case "qoder":
       return await refreshQoderToken(credentials.refreshToken, log, proxyConfig);
@@ -515,12 +543,15 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
  */
 export function supportsTokenRefresh(provider) {
   const explicitlySupported = new Set([
+    "chatgpt",
+    "copilot-m365-web",
     "gemini",
     "antigravity",
     "agy",
     "claude",
     "codex",
     "openference",
+    "renderhour",
     "qoder",
     "github",
     "kiro",
@@ -618,9 +649,11 @@ export async function getAccessToken(
         log,
         proxyConfig
       );
+      // The refresh helpers return one of nine shapes; name the token once.
+      const token = result as { accessToken?: string } | null;
       // Invoke onPersist INSIDE the mutex so [network call + DB write] are one atomic step.
       // This prevents a concurrent waiter from reading stale credentials before the DB is updated.
-      if (result?.accessToken && effectiveOnPersist) {
+      if (token?.accessToken && effectiveOnPersist) {
         // #4038: skip the persist if a concurrent writer already rotated this row past the
         // refresh_token we presented (compare-and-swap) — overwriting would revert it.
         if (await casGuardShouldSkipPersist(log)) {
@@ -675,7 +708,9 @@ export async function getAccessToken(
   // resolve the promise to all waiters with the refreshed credentials.
   const refreshPromise = _getAccessTokenWithStalenessCheck(provider, credentials, log, proxyConfig)
     .then(async (result) => {
-      if (result?.accessToken && effectiveOnPersist) {
+      // The refresh helpers return one of nine shapes; name the token once.
+      const token = result as { accessToken?: string } | null;
+      if (token?.accessToken && effectiveOnPersist) {
         // #4038: same compare-and-swap guard as Layer 1 — skip the persist if a concurrent
         // writer already rotated this row past the refresh_token we presented.
         if (await casGuardShouldSkipPersist(log)) {
@@ -691,7 +726,7 @@ export async function getAccessToken(
           );
           throw persistErr;
         }
-      } else if (result?.accessToken && !effectiveOnPersist) {
+      } else if (token?.accessToken && !effectiveOnPersist) {
         log?.warn?.(
           "TOKEN_REFRESH",
           `Layer 2 refresh succeeded for ${provider} without onPersist — DB row will not be updated with rotated token. Callers should pass connectionId for Layer 1 atomicity.`
@@ -720,6 +755,42 @@ async function _getAccessTokenWithStalenessCheck(provider, credentials, log, pro
     () => _refreshWithFreshCredentials(provider, credentials, log, proxyConfig),
     log
   );
+}
+
+// Refresh tokens the server rejected as dead, keyed by hash (never the token itself). A re-login
+// brings a new token with a new hash, so it is tried at once with no reset hook. In memory only;
+// entries expire so a server or config problem that was fixed later is retried.
+const REJECTED_REFRESH_TTL_MS = 30 * 60 * 1000;
+const REJECTED_REFRESH_MAX = 500;
+// Only codes that say the token itself is dead. invalid_request, unauthorized_client and
+// access_denied can come from our own client settings, so they stay retryable.
+const REJECTED_TOKEN_CODES = new Set([
+  "invalid_grant",
+  "refresh_token_reused",
+  "invalid_token",
+  "expired_token",
+  "token_expired",
+]);
+const rejectedRefreshTokens = new Map<string, { result: object; until: number }>();
+
+function skipRejectedRefresh(key: string, provider: string, log) {
+  const hit = rejectedRefreshTokens.get(key);
+  if (!hit || hit.until <= Date.now()) return null;
+  log?.info?.("TOKEN_REFRESH", `Skipping refresh for ${provider}: refresh token was rejected`);
+  return { ...hit.result };
+}
+
+function rememberRejectedRefresh(key: string, provider: string, result) {
+  const reason = result?.code ?? result?.error;
+  if (!isUnrecoverableRefreshError(result) || !REJECTED_TOKEN_CODES.has(reason)) return;
+  // Claude and Kimi Coding keep the token on purpose: their invalid_grant can be a race or a
+  // provider mistake, and the health check retries it within a bounded budget.
+  if (preservesRefreshTokenOnUnrecoverable(provider)) return;
+  rejectedRefreshTokens.delete(key);
+  if (rejectedRefreshTokens.size >= REJECTED_REFRESH_MAX) {
+    rejectedRefreshTokens.delete(rejectedRefreshTokens.keys().next().value);
+  }
+  rejectedRefreshTokens.set(key, { result, until: Date.now() + REJECTED_REFRESH_TTL_MS });
 }
 
 async function _refreshWithFreshCredentials(provider, credentials, log, proxyConfig) {
@@ -752,10 +823,17 @@ async function _refreshWithFreshCredentials(provider, credentials, log, proxyCon
               accessToken: dbConnection.accessToken,
               refreshToken: dbConnection.refreshToken,
               expiresAt: dbConnection.expiresAt,
+              ...(provider === "chatgpt"
+                ? { providerSpecificData: dbConnection.providerSpecificData }
+                : {}),
             };
           }
           credentials.refreshToken = dbConnection.refreshToken;
           credentials.accessToken = dbConnection.accessToken;
+          if (provider === "chatgpt") {
+            credentials.expiresAt = dbConnection.expiresAt;
+            credentials.providerSpecificData = dbConnection.providerSpecificData;
+          }
         }
       }
     } catch (e) {
@@ -766,8 +844,14 @@ async function _refreshWithFreshCredentials(provider, credentials, log, proxyCon
     }
   }
 
+  // The server already rejected this exact refresh token as dead; do not present it again.
+  const rejectedKey = getRefreshCacheKey(provider, credentials.refreshToken);
+  const skipped = skipRejectedRefresh(rejectedKey, provider, log);
+  if (skipped) return skipped;
+
   const oldRefreshToken = credentials.refreshToken;
   const result = await _getAccessTokenInternal(provider, credentials, log, proxyConfig);
+  rememberRejectedRefresh(rejectedKey, provider, result);
 
   if (
     result &&
@@ -848,28 +932,183 @@ export function formatProviderCredentials(provider, credentials, log) {
   }
 }
 
+/** Connection id when usable (a non-empty string), else null. */
+function bulkConnectionId(connection) {
+  return typeof connection.connectionId === "string" && connection.connectionId
+    ? connection.connectionId
+    : null;
+}
+
+/** Result map key: per connection when it has an id, else by provider. */
+function bulkConnectionKey(connection) {
+  const connectionId = bulkConnectionId(connection);
+  return connectionId ? `${connection.provider}:${connectionId}` : connection.provider;
+}
+
+/**
+ * Resolve the proxy for one grouped connection, fail-closed: a connection
+ * with a proxy policy must not egress its refresh on a direct connection
+ * (#13470). A failed resolution is logged and returned as `null` plus an
+ * error marker, so the caller counts the connection as failed rather than
+ * refreshing it directly.
+ */
+async function resolveBulkProxy(opts, provider, connectionId, key, log) {
+  if (!opts?.resolveProxy) return { proxy: null, failed: false };
+  try {
+    return { proxy: (await opts.resolveProxy(provider, connectionId)) ?? null, failed: false };
+  } catch (proxyErr) {
+    log?.error?.(
+      "TOKEN_REFRESH",
+      `Bulk refresh: proxy resolution failed for ${key}: ${
+        proxyErr instanceof Error ? proxyErr.message : String(proxyErr)
+      }`
+    );
+    return { proxy: null, failed: true };
+  }
+}
+
+/**
+ * Refresh one grouped-connection credential and store the token in `results`
+ * under its bulk key. A usable result carries an access token; error markers
+ * and failures leave the pre-seeded null in place. The proxy and the rotated-
+ * token persist callback are supplied by the caller (`opts`); without them the
+ * connection refreshes exactly as before (no proxy, no row write) — open-sse
+ * stays free of `@/lib/db` imports.
+ */
+async function refreshBulkConnection(connection, results, log, opts) {
+  const key = bulkConnectionKey(connection);
+  const connectionId = bulkConnectionId(connection);
+
+  const { proxy, failed: proxyFailed } = await resolveBulkProxy(
+    opts,
+    connection.provider,
+    connectionId,
+    key,
+    log
+  );
+  if (proxyFailed) return;
+
+  const onPersist =
+    connectionId && opts?.onPersist
+      ? async (refreshResult) => {
+          await opts.onPersist(connectionId, refreshResult);
+        }
+      : undefined;
+
+  try {
+    const token = await getAccessToken(
+      connection.provider,
+      {
+        connectionId: connectionId || undefined,
+        refreshToken: connection.refreshToken,
+        accessToken: connection.accessToken || null,
+        expiresAt: connection.expiresAt,
+        providerSpecificData: connection.providerSpecificData,
+      },
+      log,
+      proxy,
+      onPersist
+    );
+    if (token && typeof token === "object" && token.accessToken) {
+      results[key] = token;
+    }
+  } catch {
+    results[key] = null;
+  }
+}
+
+/**
+ * Rotation group of `connection`, or null when its provider does not rotate.
+ */
+function bulkRotationGroup(connection) {
+  return rotationGroupFor(connection.provider);
+}
+
+/**
+ * Next unclaimed eligible index whose rotation group (when rotating) is not
+ * held by another in-flight refresh, else -1. A rotating provider only starts
+ * when no sibling of its group is in flight, so the wave itself enforces
+ * one-at-a-time per group and the serializer's settle gap is never paid — a
+ * sibling enters the lane only after the previous one has fully left it.
+ * Non-rotating providers draw freely from the pool.
+ */
+function pickBulkConnection(eligible, claimed, inFlightGroups) {
+  for (let i = 0; i < eligible.length; i++) {
+    if (claimed.has(i)) continue;
+    const group = bulkRotationGroup(eligible[i]);
+    if (group && inFlightGroups.has(group)) continue;
+    return i;
+  }
+  return -1;
+}
+
 /**
  * Get all access tokens for a user
+ *
+ * Refreshes the user's active connections in a bounded wave (up to
+ * BULK_TOKEN_REFRESH_CONCURRENCY in flight, one at a time per rotation group)
+ * instead of serially. Results are keyed per connection
+ * (`provider:connectionId`) when the connection has an id, otherwise by
+ * provider; failed connections are present with a `null` value so callers can
+ * tell "refreshed" from "failed" without guessing. `opts.resolveProxy` and
+ * `opts.onPersist` are optional per-connection hooks supplied by the caller.
  */
-export async function getAllAccessTokens(userInfo, log) {
+export async function getAllAccessTokens(userInfo, log, opts) {
   const results = {};
+  const connections = userInfo?.connections;
+  if (connections && Array.isArray(connections)) {
+    const eligible = connections.filter((connection) => connection.isActive && connection.provider);
 
-  if (userInfo.connections && Array.isArray(userInfo.connections)) {
-    for (const connection of userInfo.connections) {
-      if (connection.isActive && connection.provider) {
-        const token = await getAccessToken(
-          connection.provider,
-          {
-            refreshToken: connection.refreshToken,
-          },
-          log
-        );
+    // Pre-seed so a failed connection is present with null (entry order preserved).
+    for (const connection of eligible) {
+      results[bulkConnectionKey(connection)] = null;
+    }
 
-        if (token) {
-          results[connection.provider] = token;
+    const claimed = new Set();
+    const inFlightGroups = new Set();
+    // Slots parked because every unclaimed connection is behind a held
+    // rotation group; woken when an in-flight refresh releases its group.
+    let parkedSlots: Array<() => void> = [];
+    const wakeParkedSlots = () => {
+      const wake = parkedSlots;
+      parkedSlots = [];
+      for (const resolve of wake) resolve();
+    };
+    const worker = async () => {
+      while (claimed.size < eligible.length) {
+        const i = pickBulkConnection(eligible, claimed, inFlightGroups);
+        if (i < 0) {
+          // Every unclaimed connection is behind a held rotation group — park
+          // until an in-flight sibling finishes (no busy re-polling: a sibling
+          // refresh can hold its lane for seconds). A held group implies an
+          // in-flight refresh whose `finally` wakes this slot.
+          await new Promise<void>((resolve) => parkedSlots.push(resolve));
+          continue;
+        }
+        claimed.add(i);
+        const connection = eligible[i];
+        const group = bulkRotationGroup(connection);
+        if (group) {
+          // Held from claim to completion: another wave slot may not claim a
+          // sibling of a group that is currently refreshing.
+          inFlightGroups.add(group);
+        }
+        try {
+          await refreshBulkConnection(connection, results, log, opts);
+        } finally {
+          if (group) {
+            inFlightGroups.delete(group);
+            wakeParkedSlots();
+          }
         }
       }
-    }
+    };
+
+    await Promise.all(
+      Array.from({ length: Math.min(BULK_TOKEN_REFRESH_CONCURRENCY, eligible.length) }, () =>
+        worker()
+      )
+    );
   }
 
   return results;

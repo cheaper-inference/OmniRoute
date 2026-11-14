@@ -34,6 +34,17 @@ test("typecheck gates execute the local compiler without shims, including specia
       for (const directory of ["node_modules/typescript/bin", "config/quality", "open-sse"]) {
         fs.mkdirSync(path.join(root, directory), { recursive: true });
       }
+      // The gate parses the tsconfig through the compiler's own reader, so the
+      // compiler boundary this fixture controls has to include that module.
+      fs.writeFileSync(
+        path.join(root, "node_modules/typescript/package.json"),
+        '{"name":"typescript"}\n'
+      );
+      fs.writeFileSync(
+        path.join(root, "node_modules/typescript/index.js"),
+        "module.exports = { readConfigFile: () => ({ config: {} }), sys: { readFile: () => '' }, " +
+          "flattenDiagnosticMessageText: (m) => String(m) };\n"
+      );
       fs.writeFileSync(
         path.join(
           root,
@@ -47,7 +58,10 @@ test("typecheck gates execute the local compiler without shims, including specia
       );
       fs.writeFileSync(
         path.join(root, "node_modules/typescript/bin/tsc"),
-        'process.stdout.write("src/example.ts(1,1): error TS2339: Missing property.\\n"); process.exit(2);\n'
+        'if (process.argv.includes("--listFilesOnly")) {' +
+          ' process.stdout.write("src/example.ts\\n"); process.exit(0);' +
+          "}" +
+          'process.stdout.write("src/example.ts(1,1): error TS2339: Missing property.\\n"); process.exit(2);\n'
       );
       const result = spawnSync(process.execPath, [path.join(ROOT, rel)], {
         cwd: root,

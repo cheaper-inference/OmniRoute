@@ -8,6 +8,7 @@
  *
  * #9239
  */
+import type { PrepareFalInput } from "../handlers/fal/compatibility.ts";
 import { getComboByName, getCombos } from "@/lib/db/combos";
 import { resolveComboTargets } from "@omniroute/open-sse/services/combo.ts";
 import { getImageModelEntry, parseImageModel } from "@omniroute/open-sse/config/imageRegistry.ts";
@@ -16,6 +17,7 @@ import {
   clearRecoveredProviderState,
 } from "@/sse/services/auth";
 import { isAllRateLimitedCredentials } from "@/app/api/v1/_shared/rateLimit";
+import { imageQuotaPreflightOptions } from "@/sse/services/imageQuotaSelectionPolicy";
 import {
   isKeyScopeBlockedCredentials,
   scopeComboTargetsForKey,
@@ -24,8 +26,10 @@ import {
 import { handleImageGeneration } from "@omniroute/open-sse/handlers/imageGeneration.ts";
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
 import { generateRequestId } from "@/shared/utils/requestId";
-import { calculateModalCost } from "@/lib/usage/costCalculator";
-import { runImageRequestWithAccounting } from "@/lib/usage/imageRequestAccounting";
+import {
+  imageRequestBill,
+  runImageRequestWithAccounting,
+} from "@/lib/usage/imageRequestAccounting";
 import { toJsonErrorPayload } from "@/shared/utils/upstreamError";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
@@ -35,6 +39,8 @@ import {
   narrowMediaConnectionScope,
   pinnedConnectionIds,
 } from "./mediaComboFallback.ts";
+import { projectComboForEndpoint } from "./combo/endpointCapabilities.ts";
+import { orderCapabilityTargets } from "./combo/capabilityTargetOrder.ts";
 
 /**
  * Caller-facing shape of handleImageGeneration(). The handler is untyped and
@@ -214,7 +220,8 @@ function resolveImageTargetCredentials(
     provider,
     null,
     narrowMediaConnectionScope(allowedConnections, pinnedConnectionIds(target)),
-    parseImageModel(target.modelStr).model
+    parseImageModel(target.modelStr).model,
+    imageQuotaPreflightOptions(provider)
   );
 }
 
@@ -230,13 +237,15 @@ async function resolveImageComboTargets(comboName: string, keyScope: ComboKeySco
   }
 
   const allCombos = await getCombos();
-  const targets = resolveComboTargets(combo as never, allCombos as never);
+  const projected = projectComboForEndpoint(combo as never, allCombos as never, "images");
+  const targets = resolveComboTargets(projected.combo as never, projected.allCombos as never);
   if (!targets || targets.length === 0) {
+    const message =
+      Array.isArray(combo.models) && combo.models.length > 0
+        ? `No images-capable targets in combo "${comboName}"`
+        : `Combo "${comboName}" has no usable targets`;
     return {
-      response: errorResponse(
-        HTTP_STATUS.BAD_REQUEST,
-        `Combo "${comboName}" has no usable targets`
-      ),
+      response: errorResponse(HTTP_STATUS.BAD_REQUEST, message),
     };
   }
 
@@ -257,7 +266,16 @@ async function resolveImageComboTargets(comboName: string, keyScope: ComboKeySco
       ),
     };
   }
-  return { targets: scoped.targets, allowedConnections: scoped.allowedConnections };
+  return {
+    targets: orderCapabilityTargets({
+      comboName,
+      endpoint: "images",
+      strategy: projected.combo.strategy,
+      targets: scoped.targets,
+    }),
+    allowedConnections: scoped.allowedConnections,
+    strategy: projected.combo.strategy || "priority",
+  };
 }
 
 /**
@@ -273,6 +291,7 @@ export async function executeImageCombo(
   comboName: string,
   body: Record<string, unknown>,
   auth: {
+    prepareFalInput?: PrepareFalInput | null;
     request: Request;
     policy: { apiKeyInfo?: { id?: string; name?: string } | null };
     /** GHSA-3w2r: the caller key's scope; omitted = unrestricted (unchanged). */
@@ -284,7 +303,7 @@ export async function executeImageCombo(
   // 1–2. Resolve combo targets, filtered to images-capable ones the key may use
   const resolved = await resolveImageComboTargets(comboName, auth.keyScope);
   if ("response" in resolved) return resolved.response;
-  const { targets: imageTargets, allowedConnections } = resolved;
+  const { targets: imageTargets, allowedConnections, strategy } = resolved;
 
   // 3. Iterate targets in priority order (first healthy target wins).
   //    The skip / terminal classification lives in the shared runImageComboTargets
@@ -303,10 +322,11 @@ export async function executeImageCombo(
           apiKeyInfo: auth.policy?.apiKeyInfo,
           credentials,
           startTime,
-          comboStrategy: "priority",
+          comboStrategy: strategy,
         },
         () =>
           handleImageGeneration({
+            prepareFalInput: auth.prepareFalInput,
             body: { ...body, model: target.modelStr },
             credentials,
             log,
@@ -331,9 +351,8 @@ export async function executeImageCombo(
     // handleImageGeneration() already returns the public OpenAI images payload
     // ({ created, data: [...] }); count the images at that level (#12268).
     const payload = run.data as { created?: number; data?: unknown[] } | unknown[];
-    const images = Array.isArray(payload) ? payload : payload?.data;
-    const n = Math.max(Number(body.n) || 1, images?.length || 0);
-    const costUsd = await calculateModalCost("image", selectedProvider, selectedModel, { n });
+    const bill = imageRequestBill(payload);
+    const costUsd = bill?.costUsd ?? null;
 
     const headers = new Headers({ "Content-Type": "application/json" });
     attachOmniRouteMetaHeaders(headers, {
@@ -341,10 +360,12 @@ export async function executeImageCombo(
       model: selectedModel,
       costUsd,
       latencyMs: Date.now() - startTime,
-      requestId: generateRequestId(),
-      strategy: "priority",
+      requestId: bill?.requestId || generateRequestId(),
+      strategy,
       fallbackAttempts: run.fallbackCount,
     });
+    if (costUsd === null) headers.delete("X-OmniRoute-Response-Cost");
+    headers.set("X-OmniRoute-Cost-Status", costUsd === null ? "unknown" : "known");
 
     // Return the handler payload unchanged so the combo path matches the
     // direct-model path byte-for-byte; re-wrap only if a handler ever yields

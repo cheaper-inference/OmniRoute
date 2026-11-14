@@ -387,8 +387,8 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
           variant="critical"
           icon={<Icon name="error" size={16} />}
           description={loadError}
-          // Cleared only by a successful reload; the kit Alert has no non-dismissible mode.
-          className="[&>.ci-alert__dismiss]:hidden"
+          // Cleared only by a successful reload.
+          dismissible={false}
         />
       )}
 
@@ -396,7 +396,7 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
       <Alert
         variant="info"
         icon={<Icon name="info" size={16} />}
-        className="[&>.ci-alert__dismiss]:hidden"
+        dismissible={false}
         description={
           <span data-testid="panel-pointer-notice">
             {t("panelPointerPrefix")}{" "}

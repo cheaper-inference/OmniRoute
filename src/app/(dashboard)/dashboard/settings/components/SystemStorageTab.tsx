@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Card, Button, Badge, Checkbox, ConfirmModal, Input, Select } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import DatabaseBackupRetentionCard from "./DatabaseBackupRetentionCard";
 import ProviderTransferPanel from "./ProviderTransferPanel";
 import {
@@ -823,8 +824,8 @@ export default function SystemStorageTab() {
     return (
       <div className="flex flex-col gap-2 mt-3">
         {backupsLoading ? (
-          <div className="flex items-center justify-center py-6 text-text-muted">
-            <Icon name="progress_activity" size={20} className="animate-spin mr-2" />
+          <div role="status" className="flex items-center justify-center py-6 text-text-muted">
+            <Spinner decorative size="sm" className="mr-2" />
             {t("loadingBackups")}
           </div>
         ) : backups.length === 0 ? (
@@ -966,6 +967,24 @@ export default function SystemStorageTab() {
               }
             />
           ))}
+        </div>
+        <div className="mt-4 max-w-sm">
+          <Input
+            label={t("mediaStoreMaxMb")}
+            type="number"
+            min="1"
+            value={dbSettings.retention.mediaStoreMaxMb}
+            hint={t("mediaStoreMaxMbHint")}
+            onChange={(e) =>
+              setDbSettings({
+                ...dbSettings,
+                retention: {
+                  ...dbSettings.retention,
+                  mediaStoreMaxMb: parseInt(e.target.value) || 2048,
+                },
+              })
+            }
+          />
         </div>
         <div className="mt-3">
           <Button
@@ -1198,12 +1217,17 @@ export default function SystemStorageTab() {
 
   return (
     <Card>
-      <div className="flex items-center gap-3 mb-4">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-control bg-bg-subtle text-text-muted">
+      {/* Phones: icon, title and badge share the first row and the description gets the
+          full card width below them. From sm: the icon and badge span both rows. */}
+      <div className="mb-4 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 sm:gap-y-0">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-control bg-bg-subtle text-text-muted sm:row-span-2">
           <Icon name="database" size={20} />
         </span>
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold">{t("systemStorage")}</h3>
+        <h3 className="text-lg font-semibold">{t("systemStorage")}</h3>
+        <Badge variant="success" size="sm" className="col-start-3 row-start-1 sm:row-span-2">
+          {storageHealth.driver || "json"}
+        </Badge>
+        <div className="col-span-3 sm:col-span-1 sm:col-start-2">
           <p className="text-xs text-text-muted">{t("allDataLocal")}</p>
           <p className="text-xs text-text-muted mt-1">
             Database backups are stored on this server in the db_backups folder under its data
@@ -1214,9 +1238,6 @@ export default function SystemStorageTab() {
             and can upload credentials to a configured remote destination.
           </p>
         </div>
-        <Badge variant="success" size="sm">
-          {storageHealth.driver || "json"}
-        </Badge>
       </div>
 
       <div className="grid grid-cols-1 gap-3 mb-4">

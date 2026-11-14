@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import type { PoolAllocation } from "@/lib/quota/dimensions";
 import type { PoolUsageSnapshot } from "@/lib/quota/types";
 import { getSeriesColor } from "@/shared/components/analytics/chartColors";
+import type { JSX } from "react";
 
 export interface StackedAllocationBarProps {
   allocations: PoolAllocation[];
@@ -39,7 +40,7 @@ export default function StackedAllocationBar({
 
   return (
     <div className="mb-3">
-      <h4 className="text-[10px] uppercase tracking-wide font-bold text-text-muted mb-1.5">
+      <h4 className="text-[10px] uppercase tracking-wide font-semibold text-text-muted mb-1.5">
         {t("stackedBarTitle")}
       </h4>
 

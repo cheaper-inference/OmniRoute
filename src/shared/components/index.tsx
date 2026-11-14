@@ -1,5 +1,6 @@
 // Shared Components - Export all
 export { default as Button } from "./Button";
+export { default as GuardedAction } from "./GuardedAction";
 export { default as Icon } from "./Icon";
 export { default as Input } from "./Input";
 export { default as Select } from "./Select";
@@ -8,10 +9,11 @@ export { default as Textarea } from "./Textarea";
 export { default as Card } from "./Card";
 export { default as Collapsible } from "./Collapsible";
 export { default as Modal, ConfirmModal, TALL_MODAL_PROPS } from "./Modal";
-export { default as Loading, Spinner, PageLoading, Skeleton, CardSkeleton } from "./Loading";
+export { Spinner, PageLoading, Skeleton, CardSkeleton } from "./Loading";
 export { default as Avatar } from "./Avatar";
 export { default as Badge } from "./Badge";
 export { default as Toggle } from "./Toggle";
+export { FileInput, FileDropZone } from "./FileInput";
 export { default as ThemeToggle } from "./ThemeToggle";
 export { ThemeProvider } from "./ThemeProvider";
 export { default as Sidebar } from "./Sidebar";
@@ -32,7 +34,7 @@ export { default as KiroOAuthWrapper } from "./KiroOAuthWrapper";
 export { default as KiroSocialOAuthModal } from "./KiroSocialOAuthModal";
 export { default as CursorAuthModal } from "./CursorAuthModal";
 export { default as TraeAuthModal } from "./TraeAuthModal";
-export { default as SegmentedControl } from "./SegmentedControl";
+export { default as SegmentedControl, SegmentedPanel, SegmentedTabs } from "./SegmentedControl";
 export { default as FilterPills } from "./FilterPills";
 export { default as ActionBar } from "./ActionBar";
 export { default as ReorderControl } from "./ReorderControl";

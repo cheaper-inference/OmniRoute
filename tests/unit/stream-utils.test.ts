@@ -254,6 +254,7 @@ test("createSSEStream passthrough converts textual tool-call content into struct
       provider: "antigravity",
       model: "antigravity/gemini-3.7-flash-low",
       body: {
+        tools: [{ type: "function", function: { name: "terminal" } }],
         messages: [{ role: "user", content: "inspect db" }],
       },
       onComplete(payload) {
@@ -312,7 +313,10 @@ test("createSSEStream passthrough converts split textual tool-call content at co
       sourceFormat: FORMATS.OPENAI,
       provider: "antigravity",
       model: "antigravity/gemini-3.7-flash-low",
-      body: { messages: [{ role: "user", content: "inspect db" }] },
+      body: {
+        messages: [{ role: "user", content: "inspect db" }],
+        tools: [{ type: "function", function: { name: "terminal" } }],
+      },
       onComplete(payload) {
         onCompletePayload = payload;
       },
@@ -375,7 +379,10 @@ test("createSSEStream passthrough handles textual tool-call content split inside
       sourceFormat: FORMATS.OPENAI,
       provider: "antigravity",
       model: "antigravity/gemini-3.7-flash-low",
-      body: { messages: [{ role: "user", content: "inspect db" }] },
+      body: {
+        messages: [{ role: "user", content: "inspect db" }],
+        tools: [{ type: "function", function: { name: "terminal" } }],
+      },
       onComplete(payload) {
         onCompletePayload = payload;
       },
@@ -436,7 +443,10 @@ test("createSSEStream passthrough buffers fragmented textual tool-call JSON befo
       sourceFormat: FORMATS.OPENAI,
       provider: "omniroute",
       model: "MainAgent",
-      body: { messages: [{ role: "user", content: "inspect" }] },
+      body: {
+        messages: [{ role: "user", content: "inspect" }],
+        tools: [{ type: "function", function: { name: "terminal" } }],
+      },
       onComplete(payload) {
         onCompletePayload = payload;
       },
@@ -487,7 +497,10 @@ test("createSSEStream passthrough suppresses trailing prose plus textual tool ca
       sourceFormat: FORMATS.OPENAI,
       provider: "omniroute",
       model: "MainAgent",
-      body: { messages: [{ role: "user", content: "inspect static files" }] },
+      body: {
+        messages: [{ role: "user", content: "inspect static files" }],
+        tools: [{ type: "function", function: { name: "terminal" } }],
+      },
       onComplete(payload) {
         onCompletePayload = payload;
       },
@@ -1058,11 +1071,10 @@ Arguments: {"command":"systemctl status omniroute"}`;
   assert.doesNotMatch(text, /Arguments:/);
   assert.match(text, /response.output_item.added/);
   assert.match(text, /response.function_call_arguments.done/);
-  // 5 synthesized function-call events (from the textual tool-call conversion)
-  // + 1 for the terminal response.completed itself, now also pushed so
-  // previous_response_id continuation can recover a real id/output for a
-  // passthrough Responses-API reply (see responsesContinuationStore.ts).
-  assert.equal(onCompletePayload.clientPayload._eventCount, 6);
+  // 3 synthesized function-call lifecycle events plus the terminal snapshot's
+  // existing collector entries. The raw textual delta is no longer collected/
+  // forwarded a second time after successful conversion.
+  assert.equal(onCompletePayload.clientPayload._eventCount, 5);
   assert.equal(onCompletePayload.responseBody.choices[0].finish_reason, "tool_calls");
   assert.equal(onCompletePayload.responseBody.choices[0].message.content, null);
   assert.equal(
@@ -1111,6 +1123,92 @@ test("createSSEStream passthrough preserves Responses API events and completion 
   assert.match(text, /response.completed/);
   assert.equal(onCompletePayload.responseBody.usage.total_tokens, 5);
   assert.equal(onCompletePayload.providerPayload.summary.object, "response");
+});
+
+// Found live with Mistral's native /v1/responses (provider format "openai-responses"): a
+// Responses-API client is forwarded in PASSTHROUGH mode via createPassthroughStreamWithLogger,
+// which passes clientResponseFormat but never sourceFormat. The provider collector and the
+// passthrough onComplete summary were keyed on sourceFormat (undefined), so "Provider Response"
+// collapsed to `{ object: "chat.completion", content: null }` while the client panel and the raw
+// stream chunks carried the full function call. The earlier passthrough test above passes
+// sourceFormat explicitly, which the real caller never does.
+test("createPassthroughStreamWithLogger: Responses passthrough providerPayload summary keeps the Responses output", async () => {
+  let onCompletePayload = null;
+  const response = {
+    id: "resp_mistral_1",
+    object: "response",
+    model: "labs-leanstral-1-5",
+    status: "in_progress",
+    output: [],
+  };
+  const item = {
+    type: "function_call",
+    id: "fc_1",
+    call_id: "call_1",
+    name: "message",
+    arguments: '{"action":"send","message":"hej"}',
+    status: "completed",
+  };
+  const sse = (event, data) =>
+    `event: ${event}\ndata: ${JSON.stringify({ type: event, ...data })}\n\n`;
+  const text = await readWithTransform(
+    [
+      sse("response.created", { response }),
+      sse("response.output_item.added", {
+        output_index: 0,
+        item: { ...item, arguments: "", status: "in_progress" },
+      }),
+      sse("response.function_call_arguments.delta", {
+        output_index: 0,
+        item_id: "fc_1",
+        delta: '{"action":"send",',
+      }),
+      sse("response.function_call_arguments.delta", {
+        output_index: 0,
+        item_id: "fc_1",
+        delta: '"message":"hej"}',
+      }),
+      sse("response.function_call_arguments.done", {
+        output_index: 0,
+        item_id: "fc_1",
+        arguments: item.arguments,
+      }),
+      sse("response.output_item.done", { output_index: 0, item }),
+      sse("response.completed", {
+        response: {
+          ...response,
+          status: "completed",
+          output: [item],
+          usage: { input_tokens: 10, output_tokens: 4, total_tokens: 14 },
+        },
+      }),
+    ],
+    createPassthroughStreamWithLogger(
+      "mistral",
+      null,
+      null,
+      "labs-leanstral-1-5",
+      null,
+      { input: "hi", stream: true },
+      (payload) => {
+        onCompletePayload = payload;
+      },
+      null,
+      null,
+      FORMATS.OPENAI_RESPONSES
+    )
+  );
+
+  assert.match(text, /response.completed/);
+  assert.ok(onCompletePayload, "onComplete must fire");
+  const providerSummary = onCompletePayload.providerPayload.summary;
+  // The bug's exact symptom was an empty chat.completion here.
+  assert.equal(providerSummary.object, "response");
+  assert.equal(providerSummary.output?.[0]?.type, "function_call");
+  assert.equal(providerSummary.output?.[0]?.name, "message");
+  assert.equal(providerSummary.output?.[0]?.arguments, item.arguments);
+  // Provider and client panels describe the same passthrough response.
+  assert.deepEqual(providerSummary.output, onCompletePayload.clientPayload.summary.output);
 });
 
 // Real bug found live (dashboard log id 1786032832181-1c6275, #9315 follow-up):
@@ -2569,7 +2667,10 @@ test("createSSEStream passthrough does not swallow false positive textual tool c
       sourceFormat: FORMATS.OPENAI,
       provider: "omniroute",
       model: "MainAgent",
-      body: { messages: [{ role: "user", content: "inspect status" }] },
+      body: {
+        messages: [{ role: "user", content: "inspect status" }],
+        tools: [{ type: "function", function: { name: "terminal" } }],
+      },
       onComplete(payload) {
         onCompletePayload = payload;
       },

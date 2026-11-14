@@ -13,26 +13,28 @@ export default function LandingPage() {
   const t = useTranslations("landing");
   const router = useRouter();
   return (
-    <div className="relative text-white font-sans overflow-x-hidden antialiased selection:bg-[#E54D5E] selection:text-white">
+    // Follows the active palette (Editions or Classic, light or dark) through the kit tokens; the
+    // kit's own ::selection colours apply.
+    <div className="relative text-text-main font-sans overflow-x-hidden antialiased">
       {/* Animated Background */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-[#0B0E14]">
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-bg">
         {/* Grid pattern */}
         <div
           className="absolute inset-0 opacity-[0.06]"
           style={{
-            backgroundImage: `linear-gradient(to right, #E54D5E 1px, transparent 1px), linear-gradient(to bottom, #E54D5E 1px, transparent 1px)`,
+            backgroundImage: `linear-gradient(to right, var(--color-primary) 1px, transparent 1px), linear-gradient(to bottom, var(--color-primary) 1px, transparent 1px)`,
             backgroundSize: "50px 50px",
           }}
         ></div>
 
         {/* Animated gradient orbs */}
-        <div className="absolute top-0 left-1/4 w-[700px] h-[700px] bg-[#E54D5E]/12 rounded-full blur-[130px] animate-blob"></div>
+        <div className="absolute top-0 left-1/4 w-[700px] h-[700px] bg-primary/12 rounded-full blur-[130px] animate-blob"></div>
         <div
-          className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[130px] animate-blob"
+          className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-chart-3/10 rounded-full blur-[130px] animate-blob"
           style={{ animationDelay: "2s", animationDuration: "22s" }}
         ></div>
         <div
-          className="absolute bottom-0 left-1/2 w-[650px] h-[650px] bg-blue-500/8 rounded-full blur-[130px] animate-blob"
+          className="absolute bottom-0 left-1/2 w-[650px] h-[650px] bg-chart-2/8 rounded-full blur-[130px] animate-blob"
           style={{ animationDelay: "4s", animationDuration: "25s" }}
         ></div>
 
@@ -41,7 +43,7 @@ export default function LandingPage() {
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(circle at center, transparent 0%, rgba(11, 14, 20, 0.4) 100%)",
+              "radial-gradient(circle at center, transparent 0%, color-mix(in srgb, var(--color-bg) 40%, transparent) 100%)",
           }}
         ></div>
       </div>
@@ -64,24 +66,24 @@ export default function LandingPage() {
 
           {/* CTA Section */}
           <section className="py-24 sm:py-32 px-4 sm:px-6 relative overflow-hidden">
-            <div className="absolute inset-0 bg-linear-to-t from-[#E54D5E]/5 to-transparent pointer-events-none"></div>
+            <div className="absolute inset-0 bg-linear-to-t from-primary/5 to-transparent pointer-events-none"></div>
             <div className="max-w-4xl mx-auto text-center relative z-10">
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-6 break-words">
                 {t("ctaTitle")}
               </h2>
-              <p className="text-lg sm:text-xl text-gray-400 mb-10 max-w-2xl mx-auto break-words">
+              <p className="text-lg sm:text-xl text-text-muted mb-10 max-w-2xl mx-auto break-words">
                 {t("ctaDescription")}
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button
                   onClick={() => router.push("/dashboard")}
-                  className="w-full sm:w-auto h-14 px-10 rounded-lg bg-[#E54D5E] hover:bg-[#C93D4E] text-white text-lg font-bold transition-all shadow-[0_0_20px_rgba(229,77,94,0.5)]"
+                  className="w-full sm:w-auto h-14 px-10 rounded-lg bg-primary hover:bg-primary-hover text-accent-foreground text-lg font-semibold transition-all shadow-[0_0_20px_color-mix(in_srgb,var(--color-primary)_50%,transparent)]"
                 >
                   {t("startFree")}
                 </button>
                 <button
                   onClick={() => router.push("/docs")}
-                  className="w-full sm:w-auto h-14 px-10 rounded-lg border border-[#2D333B] hover:bg-[#111520] text-white text-lg font-bold transition-all"
+                  className="w-full sm:w-auto h-14 px-10 rounded-lg border border-border hover:bg-surface text-text-main text-lg font-semibold transition-all"
                 >
                   {t("readDocumentation")}
                 </button>

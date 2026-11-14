@@ -18,7 +18,15 @@ import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
 import { evaluateResponseValidation, type ResponseValidationConfig } from "./responseValidation.ts";
 import { getReasoningTokens } from "../../../src/lib/usage/tokenAccounting.ts";
 import { REASONING_BUFFER_MIN_TRIGGER } from "../reasoningTokenBuffer.ts";
+import { isDeliberateEmptyResponsesTerminal } from "../../translator/helpers/responsesTerminalStatus.ts";
 import type { ComboRetryAfter } from "./types.ts";
+import {
+  classifyPreContentReadFailure,
+  safeStreamReadMessage,
+  hasTransportReplayBoundary,
+  hasObservedTransportReplayVeto,
+  isStreamingUpstreamError,
+} from "./preContentTransportFailure.ts";
 
 /**
  * #12659: below this actual `completion_tokens` count, a reasoning-truncated
@@ -90,6 +98,18 @@ export function toRetryAfterDisplayValue(value: ComboRetryAfter): string | Date 
 const EXHAUSTION_MARKER_PATTERN =
   /\b(insufficient\s+credit|insufficient\s+balance|quota\s+exceeded|out\s+of\s+credits?|credit\s+exhausted)\b/i;
 
+// Issue #19278: some providers (observed: Pollinations) go further — the billing
+// error IS the assistant content of an otherwise clean 200 completion ("The
+// account behind this API key doesn't have enough credits"). The envelope check
+// above cannot see it. This pattern is deliberately NARROWER than the envelope
+// one: billing-action phrases only ("enough credits", "top up", "purchase
+// credits"), never generic terms like "quota" or "insufficient credits" that
+// also appear in legitimate explanatory prose (the #6427 control case must keep
+// passing). It is additionally gated on absent/zero completion_tokens, so real
+// generated prose — which always carries usage — cannot trip it.
+const CONTENT_EXHAUSTION_PATTERN =
+  /\b(enough\s+credits?|not\s+enough\s+credits?|please\s+top\s+up|top\s+up\s+to\s+continue|purchase\s+(more\s+)?credits?|add\s+credits?\s+to\s+continue|credit\s+balance\s+(is\s+)?(too\s+low|exhausted|empty)|recharge\s+(your|the)\s+account|out\s+of\s+funds)\b/i;
+
 /**
  * Collect the small set of top-level "error envelope" strings a 200 response may
  * carry alongside (or instead of) a normal completion: the OpenAI-shape `error`
@@ -112,6 +132,28 @@ function extractEnvelopeErrorText(json: Record<string, unknown>): string | null 
   if (typeof json.message === "string") parts.push(json.message);
   if (typeof json.detail === "string") parts.push(json.detail);
   return parts.length > 0 ? parts.join(" ") : null;
+}
+
+/**
+ * Issue #19278: extract the assistant text of `choices[0]` for the content-level
+ * exhaustion scan — string `content` verbatim, or the joined `text` parts of a
+ * multimodal content array. Returns "" for any other shape; the caller treats
+ * "" as "nothing to scan".
+ */
+function extractFirstChoiceText(json: Record<string, unknown>): string {
+  const choices = json.choices;
+  if (!Array.isArray(choices) || choices.length === 0) return "";
+  const firstChoice = choices[0];
+  if (!isRecord(firstChoice)) return "";
+  const message = isRecord(firstChoice.message) ? firstChoice.message : null;
+  const content = message?.content;
+  if (typeof content === "string") return content;
+  if (Array.isArray(content)) {
+    return content
+      .map((part) => (isRecord(part) && typeof part.text === "string" ? part.text : ""))
+      .join(" ");
+  }
+  return "";
 }
 
 /** Mutable lifecycle flags threaded through {@link applySseLifecycleEvent}. */
@@ -254,31 +296,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
 
-/**
- * Whether an `error` field carries a real failure signal. A key-presence check
- * (`!= null`) false-positives on benign values some backends emit on every
- * chunk (`{}`, `""`, `false`, `0`) — e.g. tool-call turns where a chunk with
- * real tool_calls content also carries `"error": {}`. Only substantive values
- * are treated as upstream failures.
- */
-function isSubstantiveError(value: unknown): boolean {
-  if (value === null || value === undefined) return false;
-  if (typeof value === "string") return value.trim().length > 0;
-  if (typeof value === "object" && !Array.isArray(value)) {
-    return Object.keys(value as Record<string, unknown>).length > 0;
-  }
-  return value === true;
-}
-
-function isStreamingUpstreamError(parsed: unknown, eventType: string): boolean {
-  if (eventType === "response.failed" || eventType === "error") return true;
-  if (!isRecord(parsed)) return false;
-  if (isSubstantiveError(parsed.error)) return true;
-
-  const nestedResponse = isRecord(parsed.response) ? parsed.response : null;
-  return nestedResponse?.status === "failed" && nestedResponse.error != null;
-}
-
 export interface StreamingUpstreamFailure {
   status: number;
   type?: string;
@@ -292,6 +309,8 @@ export interface StreamingUpstreamFailure {
    * only when EMPTY_STREAM_SIBLING_RECOVERY_ENABLED is on; `code` keeps the wire value.
    */
   emptyContent?: boolean;
+  /** In-process transport read failure, never inferred from an upstream SSE payload. */
+  transportReadFailure?: boolean;
 }
 
 export interface ResponseQualityResult {
@@ -365,7 +384,8 @@ export async function validateResponseQuality(
   log: { warn?: (...args: unknown[]) => void },
   responseValidation?: ResponseValidationConfig | null,
   signal?: AbortSignal | null,
-  trustedEmptyTurn: boolean | (() => boolean) = false
+  trustedEmptyTurn: boolean | (() => boolean) = false,
+  preContentTransportRecovery = false
 ): Promise<ResponseQualityResult> {
   const permitsEmptyTurn = () =>
     typeof trustedEmptyTurn === "function" ? trustedEmptyTurn() : trustedEmptyTurn;
@@ -391,6 +411,18 @@ export async function validateResponseQuality(
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder("utf-8");
+    const cancelPeekReader = (reason?: unknown) => {
+      try {
+        void reader.cancel(reason).catch(() => {});
+      } catch {
+        /* best effort */
+      }
+      try {
+        reader.releaseLock();
+      } catch {
+        /* already released */
+      }
+    };
 
     // Raw Uint8Array chunks accumulated so far — used to replay the prefix
     // in the returned clonedResponse.
@@ -444,6 +476,7 @@ export async function validateResponseQuality(
     let sawStructuredSSE = false;
     let upstreamFailure: StreamingUpstreamFailure | null = null;
     let sawTerminator = false;
+    let transportReplayBoundary = false;
     // Set when the streaming peek loop hits an "outcome === content" verdict
     // (a content_block_* event observed). Guards the catch-block failover
     // check below so a stream that already produced content before an error
@@ -526,6 +559,8 @@ export async function validateResponseQuality(
         const eventType =
           (typeof parsed.type === "string" ? parsed.type : null) || pendingEventType || "";
         pendingEventType = "";
+        if (preContentTransportRecovery && hasTransportReplayBoundary(parsed, eventType))
+          transportReplayBoundary = true;
 
         if (isStreamingUpstreamError(parsed, eventType)) {
           upstreamFailure = classifyStreamingUpstreamFailure(parsed) ?? upstreamFailure;
@@ -557,6 +592,7 @@ export async function validateResponseQuality(
       // Snapshot the prefix so mutations after this point don't affect it.
       const prefix = bufferedChunks.slice();
       let prefixIdx = 0;
+      let replayCancelled = false;
       const stream = new ReadableStream<Uint8Array>({
         async pull(controller) {
           // 1. Drain the buffered prefix one chunk at a time.
@@ -567,15 +603,26 @@ export async function validateResponseQuality(
           // 2. Forward the remainder from the original reader.
           try {
             const { done, value } = await readerToForward.read();
+            if (replayCancelled) return;
             if (done) {
+              if (preContentTransportRecovery) cancelPeekReader();
               controller.close();
             } else {
               controller.enqueue(value);
             }
           } catch {
-            controller.close();
+            if (preContentTransportRecovery) cancelPeekReader();
+            if (!replayCancelled) controller.close();
           }
         },
+        ...(preContentTransportRecovery
+          ? {
+              cancel(reason: unknown) {
+                replayCancelled = true;
+                cancelPeekReader(reason);
+              },
+            }
+          : {}),
       });
       return new Response(stream, {
         status: response.status,
@@ -607,7 +654,8 @@ export async function validateResponseQuality(
         const next = await readOrAbort();
         if (next === null) {
           // Same as the error path: never await cancel() on a tee branch.
-          reader.cancel(signal?.reason).catch(() => {});
+          if (preContentTransportRecovery) cancelPeekReader(signal?.reason);
+          else reader.cancel(signal?.reason).catch(() => {});
           return { valid: true };
         }
         const { done, value } = next;
@@ -737,7 +785,8 @@ export async function validateResponseQuality(
         if (outcome === "error") {
           // Do not await cancellation of a Response.clone() tee branch: the
           // promise may remain pending until the client-facing branch drains.
-          reader.cancel().catch(() => {});
+          if (preContentTransportRecovery) cancelPeekReader();
+          else reader.cancel().catch(() => {});
           const reason = describeStreamingFailure(upstreamFailure);
           log.warn?.(
             "COMBO",
@@ -776,14 +825,61 @@ export async function validateResponseQuality(
       // or corrupted (e.g. "Invalid state: The ReadableStream is locked").
       // Broad match: Chrome/V8 throws "body used already", Firefox throws
       // "ReadableStream is locked", etc.
-      const errMsg = streamErr instanceof Error ? streamErr.message : String(streamErr);
+      const errMsg = preContentTransportRecovery
+        ? safeStreamReadMessage(streamErr)
+        : streamErr instanceof Error
+          ? streamErr.message
+          : String(streamErr);
+      if (preContentTransportRecovery) cancelPeekReader();
+      let lockedTypeError = false;
+      if (preContentTransportRecovery) {
+        try {
+          lockedTypeError = streamErr instanceof TypeError;
+        } catch {
+          /* malformed error */
+        }
+      } else lockedTypeError = streamErr instanceof TypeError;
       if (
-        streamErr instanceof TypeError &&
+        lockedTypeError &&
         (errMsg.includes("locked") ||
           errMsg.includes("disturbed") ||
           errMsg.includes("used already"))
       ) {
         return { valid: false, reason: "stream locked or disturbed" };
+      }
+      if (preContentTransportRecovery) {
+        const disposition = classifyPreContentReadFailure(streamErr);
+        if (signal?.aborted || disposition?.kind === "abort") return { valid: true };
+        if (disposition?.kind === "transport") {
+          if (
+            anyContentFound ||
+            sse.hasContentBlock ||
+            sawTerminator ||
+            transportReplayBoundary ||
+            hasObservedTransportReplayVeto(response)
+          )
+            return { valid: true };
+          const message = "Upstream stream transport failed before usable output";
+          const reason = `${message} (${disposition.code})`;
+          try {
+            log.warn?.("COMBO", reason);
+          } catch {
+            /* diagnostics cannot replace the failure */
+          }
+          return {
+            valid: false,
+            reason,
+            upstreamFailure: {
+              status: 502,
+              type: "stream_error",
+              code: "stream_terminated",
+              message,
+              requestScoped: false,
+              retryable: true,
+              transportReadFailure: true,
+            },
+          };
+        }
       }
       // Cursor empty-turn and stream-timeout read errors are hop failures.
       // Any other pre-content read error still passes through; broadening this
@@ -885,12 +981,29 @@ export async function validateResponseQuality(
       return { valid: false, reason: `upstream exhaustion marker in 200 body: ${snippet}` };
     }
   }
+  {
+    // Issue #19278: masked 200 whose billing failure lives inside the assistant
+    // content itself. The narrow CONTENT_EXHAUSTION_PATTERN plus the zero/absent
+    // completion_tokens gate keeps the #6427 anti-false-positive contract —
+    // prose that merely discusses quota/credits always carries real usage.
+    const usage = isRecord(json.usage) ? json.usage : null;
+    const completionTokens =
+      typeof usage?.completion_tokens === "number" ? (usage.completion_tokens as number) : 0;
+    const contentText = extractFirstChoiceText(json);
+    if (completionTokens <= 0 && contentText && CONTENT_EXHAUSTION_PATTERN.test(contentText)) {
+      const snippet = contentText.length > 80 ? `${contentText.slice(0, 80)}…` : contentText;
+      return {
+        valid: false,
+        reason: `upstream exhaustion marker in assistant content: ${snippet}`,
+      };
+    }
+  }
 
   const choices = json?.choices;
   if (json?.object === "response") {
     if (
       !responsesApiOutputHasContent(json.output) &&
-      !(json.status === "completed" && permitsEmptyTurn())
+      !(isDeliberateEmptyResponsesTerminal(json) && permitsEmptyTurn())
     )
       return { valid: false, reason: "empty_choices" };
     const status = typeof json.status === "string" ? json.status : "";
@@ -971,9 +1084,12 @@ export async function validateResponseQuality(
     // same case the Claude shape exempts as stop_reason "max_tokens" (#12968).
     // A thinking model that spends the whole budget before any visible token
     // is a valid response, not a reason to fail the combo target over.
+    // "content_filter" with native trust is a translated Claude refusal: the model
+    // declined, so the next target would only be asked to answer what it refused.
     if (
       firstChoice?.finish_reason === "length" ||
-      (firstChoice?.finish_reason === "stop" && permitsEmptyTurn())
+      ((firstChoice?.finish_reason === "stop" || firstChoice?.finish_reason === "content_filter") &&
+        permitsEmptyTurn())
     ) {
       return {
         valid: true,

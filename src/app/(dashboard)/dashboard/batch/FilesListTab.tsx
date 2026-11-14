@@ -12,8 +12,9 @@ import {
   TableRow,
 } from "@omniroute/ui-kit/table";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import Badge from "@/shared/components/Badge";
-import Button from "@/shared/components/Button";
+import GuardedAction from "@/shared/components/GuardedAction";
 import Card from "@/shared/components/Card";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
@@ -209,7 +210,7 @@ export default function FilesListTab({
               <TableRow>
                 <TableCell colSpan={8} className="py-10 text-center text-text-muted">
                   <div role="status" className="flex items-center justify-center gap-2">
-                    <Icon name="progress_activity" size={20} className="animate-spin text-accent" />
+                    <Spinner decorative size="sm" className="text-accent" />
                     {t("loading")}
                   </div>
                 </TableCell>
@@ -322,27 +323,23 @@ export default function FilesListTab({
                           <Icon name="download" size={16} />
                         </a>
                         {/* Delete button */}
-                        <Button
-                          variant="ghost"
+                        <GuardedAction
+                          variant="destructive-ghost"
                           size="icon-sm"
                           onClick={(e) => {
                             e.stopPropagation();
                             void handleDeleteFile(file);
                           }}
-                          disabled={!canDelete || deletingId === file.id}
-                          title={
-                            canDelete ? t("filesListDelete") : t("batchFileInUseByActiveBatch")
-                          }
-                          aria-label={
-                            canDelete ? t("filesListDelete") : t("batchFileInUseByActiveBatch")
-                          }
-                          className="text-text-muted hover:text-error"
+                          disabled={deletingId === file.id}
+                          reason={canDelete ? undefined : t("batchFileInUseByActiveBatch")}
+                          title={t("filesListDelete")}
+                          aria-label={t("filesListDelete")}
                         >
                           <Icon
                             name={deletingId === file.id ? "hourglass_empty" : "delete"}
                             size={16}
                           />
-                        </Button>
+                        </GuardedAction>
                       </div>
                     </TableCell>
                   </TableRow>

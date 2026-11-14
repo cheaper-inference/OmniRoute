@@ -118,39 +118,39 @@ Adgang via: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ---
 
-## 📖 Opsætning af udbydere
+## 📖 Konfiguration af udbydere
 
-Hvis du vil massetilføje forbindelser med API-nøgler fra en CSV- eller JSON-fil, skal du bruge **Kontrolpanel → Udbydere → Importér fra fil**. Kolonnerne er positionsbestemte (`provider,name,apiKey,baseUrl,priority`); `provider` skal allerede eksistere som en administreret udbyder eller en kompatibel node. Se [Importér udbydere fra en CSV- eller JSON-fil](../providers/CSV-IMPORT.md).
+Hvis du vil tilføje API-nøgleforbindelser fra en CSV- eller JSON-fil i bulk, skal du bruge **Dashboard → Providers → Import from file**. Kolonnerne er positionsbestemte (`provider,name,apiKey,baseUrl,priority`); `provider` skal allerede findes som en administreret udbyder eller en kompatibel node. Se [Importér udbydere fra en CSV- eller JSON-fil](../providers/CSV-IMPORT.md).
 
 ### 🔐 Abonnementsudbydere
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Kontrolpanel → Udbydere → Tilslut Claude Code
-→ OAuth-login → Automatisk opdatering af token
-→ Sporing af 5-timerskvote og ugentlig kvote
+Dashboard → Providers → Connect Claude Code
+→ OAuth-login → Automatisk tokenfornyelse
+→ Sporing af 5-timers- og ugentlig kvote
 
-Modeller:
+Models:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
 ```
 
-**Pro-tip:** Brug Opus til komplekse opgaver og Sonnet, når hastighed er vigtig. OmniRoute sporer kvoten for hver model!
+**Pro-tip:** Brug Opus til komplekse opgaver og Sonnet for hastighed. OmniRoute sporer kvoten pr. model!
 
-Ingen browser på OmniRoute-værten? Kør `claude setup-token` et hvilket som helst sted, hvor Claude Code er logget ind, og indsæt det etårige token på fanen **Setup Token**. Se [Claude Code med et setup-token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Har OmniRoute-værten ingen browser? Kør `claude setup-token` et sted, hvor du er logget ind på Claude Code, og indsæt det ét år gyldige token i fanen **Setup Token**. Se [Claude Code med et setup-token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Ruter, der er kompatible med Claude og Claude Code, bevarer tænkeindsatsen `max` for Opus- og Sonnet-modeller. Haiku-modeller accepterer ikke indsatsniveauet `max`, så OmniRoute nedgraderer denne anmodning til et højt tænkebudget, før den sendes videre til upstream-udbyderen.
+Claude- og Claude Code-kompatible ruter bevarer `max`-tænkningsniveauet for Opus- og Sonnet-modeller. Haiku-modeller accepterer ikke `max`-niveauet, så OmniRoute nedgraderer denne anmodning til et højt tænkningsbudget, før den sendes videre.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Kontrolpanel → Udbydere → Tilslut Codex
+Dashboard → Providers → Connect Codex
 → OAuth-login (port 1455)
-→ Nulstilling hver 5. time og ugentligt
+→ 5-timers- og ugentlig nulstilling
 
-Modeller:
+Models:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -160,11 +160,11 @@ Modeller:
 #### GitHub Copilot
 
 ```bash
-Kontrolpanel → Udbydere → Tilslut GitHub
+Dashboard → Providers → Connect GitHub
 → OAuth via GitHub
 → Månedlig nulstilling (den 1. i måneden)
 
-Modeller:
+Models:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -172,57 +172,59 @@ Modeller:
   gh/gemini-3.1-pro-preview
 ```
 
+**AI-kreditter (tokenbaseret fakturering).** Når GitHub rapporterer `credits_used` for kontoen, viser kortet med udbydergrænser en række med **AI-kreditter** og de kreditter, der er forbrugt i den aktuelle faktureringsperiode, også på organisationstariffer med ubegrænset brug.
+
+**Lokal grænse for AI-kreditter.** Redigér en GitHub-forbindelse, og angiv **Grænse for AI-kreditter pr. faktureringsperiode** (`providerSpecificData.githubCreditLimit`). Et tomt felt deaktiverer den; `0` springer altid forbindelsen over. Når den seneste brugsaflæsning er lig med eller over grænsen, springes denne forbindelse over ved kontovalg, og routingen falder tilbage til dine andre forbindelser, på samme måde som ved en afskæring i henhold til en kvotepolitik. Kontrollen læser de brugsdata, som den periodiske kvoteopdatering allerede indsamler — den kalder aldrig GitHub under behandlingen af forespørgslen — og den fejler åbent: En manglende eller forældet aflæsning (ældre end 15 minutter eller fra en faktureringsperiode, der allerede er blevet nulstillet) blokerer ikke forbindelsen. Dette er en lokal sikkerhedsforanstaltning, **ikke en garanteret forbrugsgrænse**: Forsinkelser i GitHubs rapportering, opdateringsintervallet, forespørgsler under behandling og forbrug uden for OmniRoute kan overskride den. Brug GitHubs egne forbrugsbegrænsninger, hvis du har brug for et hårdt loft.
+
 ### 💰 Billige udbydere
 
-#### GLM-4.7 (Daglig nulstilling, $0.6/1M)
+#### GLM-4.7 (daglig nulstilling, $0.6/1M)
 
 1. Tilmeld dig: [Zhipu AI](https://open.bigmodel.cn)
 2. Hent en API-nøgle fra Coding Plan
-3. Kontrolpanel → Tilføj API-nøgle: Udbyder: `glm`, API-nøgle: `your-key`
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**Brug:** `glm/glm-4.7` — **Pro-tip:** Coding Plan giver 3× kvote til 1/7 af prisen! Nulstilles dagligt kl. 10.00.
+**Brug:** `glm/glm-4.7` — **Pro-tip:** Coding Plan giver 3× så stor kvote til 1/7 af prisen! Nulstilles dagligt kl. 10.00.
 
-#### MiniMax M2.1 (Nulstilling hver 5. time, $0.20/1M)
+#### MiniMax M2.1 (5-timers nulstilling, $0.20/1M)
 
 1. Tilmeld dig: [MiniMax](https://www.minimax.io)
-2. Hent en API-nøgle → Kontrolpanel → Tilføj API-nøgle
+2. Hent en API-nøgle → Dashboard → Add API Key
 
 **Brug:** `minimax/MiniMax-M2.1` — **Pro-tip:** Den billigste mulighed til lang kontekst (1M tokens)!
 
 #### Kimi K2 ($9/måned fast pris)
 
 1. Abonnér: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Hent en API-nøgle → Kontrolpanel → Tilføj API-nøgle
+2. Hent en API-nøgle → Dashboard → Add API Key
 
 **Brug:** `kimi/kimi-k2.5` — **Pro-tip:** Fast pris på $9/måned for 10M tokens = en effektiv pris på $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Tilmeld dig: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Opret en Qianfan API-nøgle → Kontrolpanel → Tilføj API-nøgle: Udbyder: `qianfan`
+2. Opret en Qianfan API-nøgle → Dashboard → Add API Key: Provider: `qianfan`
 
-**Brug:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` eller et andet Qianfan-model-id, der er kompatibelt med OpenAI.
+**Brug:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` eller et andet Qianfan OpenAI-kompatibelt model-id.
 
 ### 🆓 GRATIS udbydere
 
-Gratis udbydere uden godkendelse har en kontakt ud for **Ingen godkendelse påkrævet** på deres udbyderside.
-Hvis den slås fra, deaktiveres udbyderen, den fjernes fra de konfigurerede og kompakte visninger under Udbydere, og
-dens modeller fjernes fra `/v1/models`.
+Udbydere uden godkendelse og med gratis adgang har en kontakt ved siden af **Ingen godkendelse påkrævet** på deres udbyderside. Hvis den slås fra, deaktiveres udbyderen, den fjernes fra visningerne med konfigurerede/kompakte udbydere, og dens modeller fjernes fra `/v1/models`.
 
 #### Qoder (9 GRATIS modeller)
 
 ```bash
-Kontrolpanel → Tilslut Qoder → OAuth-login → Adgangen er underlagt udbyderens aktuelle begrænsninger
+Dashboard → Connect Qoder → OAuth-login → Adgang afhænger af de aktuelle udbydergrænser
 
-Modeller: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude GRATIS)
+#### Kiro (GRATIS Claude)
 
 ```bash
-Kontrolpanel → Tilslut Kiro → AWS Builder ID eller Google/GitHub → ~50 kreditter/måned
+Dashboard → Connect Kiro → AWS Builder ID eller Google/GitHub → ~50 kreditter/måned
 
-Modeller: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
 
 ---
@@ -335,49 +337,49 @@ Model: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Implementering
+## 🚀 -implementering
 
-### Global npm-installation (anbefalet)
+### Global npm installation (anbefales)
 
 ```bash
 npm install -g omniroute
 
-# Opret konfigurationsmappe
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Opret .env-fil (se .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Start serveren
+# Start server
 omniroute
-# Eller med en brugerdefineret port:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI'en indlæser automatisk `.env` fra `~/.omniroute/.env` eller `./.env`.
+CLI indlæser automatisk `.env` fra `~/.omniroute/.env` eller `./.env`. En `./.env` i arbejdsbiblioteket kan kun angive en kort tilladelsesliste med nøgler (porte, `REQUIRE_API_KEY`, lokalitet og farveindstillinger); læg alt andet i `~/.omniroute/.env`. Se [CLI lanceringskontrakter](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Systembakketilstand
+### Bakketilstand
 
-Start OmniRoute i systembakken:
+Start OmniRoute i proceslinjen:
 
 ```bash
 omniroute serve --tray
 ```
 
-Kommandoen afsluttes, når serveren og systembakkeikonet er klar.
+Kommandoen vender tilbage, når serveren og bakken er klar.
 
 Serveren fortsætter uden terminalen.
 
-Systembakketilstand understøtter macOS, Windows og grafiske Linux-sessioner. Systembakketilstand åbner ikke instrumentpanelet automatisk.
+Bakketilstand understøtter macOS, Windows og grafiske Linux sessioner. Bakketilstand åbner ikke instrumentbrættet automatisk.
 
-Brug systembakkemenuen til disse handlinger:
+Brug bakkemenuen til disse handlinger:
 
-- Åbn instrumentpanelet.
+- Åbn instrumentbrættet.
 - Åbn `/dashboard/logs`.
-- Skift automatisk start.
+- Skift autostart.
 - Stop OmniRoute.
 
-Kombiner ikke `--tray` med disse indstillinger:
+Kombiner ikke `--tray` med disse muligheder:
 
 - `--daemon`
 - `--log`
@@ -385,62 +387,62 @@ Kombiner ikke `--tray` med disse indstillinger:
 
 Disse tilstande kræver forskelligt procesejerskab.
 
-Aktivér opstart ved næste login på maskinen:
+Aktiver opstart ved næste maskinlogin:
 
 ```bash
 omniroute autostart enable
 ```
 
-Automatisk start bruger systembakketilstand på macOS, Windows og i grafiske Linux-sessioner. Linux uden grafisk brugerflade anvender den eksisterende systemd-brugertjeneste.
+Autostart bruger bakketilstand på macOS, Windows, og grafiske Linux sessioner. Headless Linux bruger den eksisterende systemd-brugertjeneste.
 
-Deaktivér opstart ved login:
+Deaktiver opstart ved login:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Afinstallation
+### Afinstallerer
 
-Når du ikke længere har brug for OmniRoute, tilbyder vi to hurtige scripts til en ren fjernelse:
+Når du ikke længere har brug for OmniRoute, leverer vi to hurtige scripts til en ren fjernelse:
 
-| Kommando                 | Handling                                                                                     |
-| ------------------------ | -------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Fjerner systemappen, men **beholder din database og dine konfigurationer** i `~/.omniroute`. |
-| `npm run uninstall:full` | Fjerner appen OG **sletter alle konfigurationer, nøgler og databaser permanent**.            |
+| Kommando                 | Handling                                                                            |
+| ------------------------ | ----------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Fjerner systemappen men** beholder din DB og konfigurationer** i `~/.omniroute`.    |
+| `npm run uninstall:full` | Fjerner appen AND permanent** sletter alle konfigurationer, nøgler og databaser** . |
 
-> Bemærk: For at køre disse kommandoer skal du navigere til OmniRoute-projektmappen (hvis du har klonet den) og køre dem. Hvis den er installeret globalt, kan du alternativt blot køre `npm uninstall -g omniroute`.
+> Bemærk: For at køre disse kommandoer skal du navigere til OmniRoute -projektmappen (hvis du har klonet den) og køre dem. Alternativt, hvis den er globalt installeret, kan du blot køre `npm uninstall -g omniroute`.
 
-### VPS-implementering
+### VPS -implementering
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
-export JWT_SECRET="din-sikre-hemmelighed-skift-denne"
-export INITIAL_PASSWORD="din-adgangskode"
+export JWT_SECRET="your-secure-secret-change-this"
+export INITIAL_PASSWORD="your-password"
 export DATA_DIR="/var/lib/omniroute"
 export PORT="20128"
 export HOSTNAME="0.0.0.0"
 export NODE_ENV="production"
 export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
-export API_KEY_SECRET="endpoint-proxy-api-nøglehemmelighed"
+export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Eller: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2-implementering (lavt hukommelsesforbrug)
+### PM2 -implementering (lav hukommelse)
 
-For servere med begrænset RAM skal du bruge indstillingen for hukommelsesgrænse:
+For servere med begrænset RAM skal du bruge muligheden for hukommelsesbegrænsning:
 
 ```bash
-# Med en grænse på 512 MB (standard)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Eller med en brugerdefineret hukommelsesgrænse
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Eller ved hjælp af ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -456,8 +458,8 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         OMNIROUTE_MEMORY_MB: "512",
-        JWT_SECRET: "din-hemmelighed",
-        INITIAL_PASSWORD: "din-adgangskode",
+        JWT_SECRET: "your-secret",
+        INITIAL_PASSWORD: "your-password",
       },
       node_args: "--max-old-space-size=512",
       max_memory_restart: "300M",
@@ -469,30 +471,30 @@ module.exports = {
 ### Docker
 
 ```bash
-# Byg image (standard = runner-cli med codex/claude/droid forudinstalleret)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Portabel tilstand (anbefalet)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-For værtsintegreret tilstand med CLI-binære filer henvises til Docker-afsnittet i hoveddokumentationen.
+For værtsintegreret tilstand med CLI binære filer, se Docker afsnittet i hoveddokumenterne.
 
-### Void Linux (xbps-src)
+### Ugyldig Linux (xbps-src)
 
-Void Linux-brugere kan pakke og installere OmniRoute direkte ved hjælp af krydskompileringsframeworket `xbps-src`. Dette automatiserer den selvstændige Node.js-build sammen med de nødvendige native `better-sqlite3`-bindinger.
+Void Linux brugere kan pakke og installere OmniRoute indbygget ved hjælp af `xbps-src` -krydskompileringsrammerne. Dette automatiserer Node.js standalone build sammen med de nødvendige `better-sqlite3` native bindinger.
 
 <details>
-<summary><b>Vis xbps-src-skabelon</b></summary>
+<summary><b>Se xbps-src skabelon</b></summary>
 
 ```bash
-# Skabelonfil for 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Universel AI-gateway med intelligent routing til flere LLM-udbydere"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
@@ -507,7 +509,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Bestem mål-CPU-arkitekturen for node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -516,29 +518,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Installer alle afhængigheder – spring scripts over
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Byg den selvstændige Next.js-pakke
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Kopiér statiske aktiver til den selvstændige pakke
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Kompilér den native better-sqlite3-binding
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Placér den kompilerede binding i den selvstændige pakke
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Fjern arkitekturspecifikke sharp-pakker
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Kopiér pino-kørselsafhængigheder, som Next.js' statiske analyse udelod:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -552,7 +554,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Undgå, at tomme Next.js-app-routermapper fjernes af efterinstallations-hooket
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -580,30 +582,30 @@ post_install() {
 
 ### Miljøvariabler
 
-| Variabel                                | Standardværdi                        | Beskrivelse                                                                                                                                             |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Hemmelighed til JWT-signering (**skal ændres i produktion**)                                                                                            |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Adgangskode til første login                                                                                                                            |
-| `DATA_DIR`                              | `~/.omniroute`                       | Datamappe (database, forbrug, logfiler)                                                                                                                 |
-| `PORT`                                  | frameworkets standardværdi           | Tjenesteport (`20128` i eksempler)                                                                                                                      |
-| `HOSTNAME`                              | frameworkets standardværdi           | Vært, der bindes til (Docker bruger som standard `0.0.0.0`)                                                                                             |
-| `NODE_ENV`                              | kørselstidens standardværdi          | Indstil til `production` ved implementering                                                                                                             |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Offentlig basis-URL, der vises i kontrolpanelet og eksponeres for serveren (erstatter det ældre `BASE_URL`)                                             |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Basis-URL for cloudsynkroniseringens slutpunkt (erstatter det ældre `CLOUD_URL`)                                                                        |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | HMAC-hemmelighed til genererede API-nøgler                                                                                                              |
-| `REQUIRE_API_KEY`                       | `false`                              | Kræv Bearer-API-nøgle på `/v1/*`                                                                                                                        |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Tillad godkendte kontrolpanelbrugere at få vist komplette gemte API-nøgleværdier efter behov                                                            |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Serverbaseret opdateringsinterval for cachelagrede data om udbydergrænser; opdateringsknapper i brugergrænsefladen udløser stadig manuel synkronisering |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Deaktiver automatiske SQLite-snapshots før skrivning/import/gendannelse; manuelle sikkerhedskopier fungerer stadig                                      |
-| `APP_LOG_TO_FILE`                       | `true`                               | Aktiverer lagring af applikations- og revisionslogfiler på disken                                                                                       |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Gennemtving `Secure`-attributten for godkendelsescookien (bag en HTTPS-reverse proxy)                                                                   |
-| `CLOUDFLARED_BIN`                       | ikke angivet                         | Brug en eksisterende `cloudflared`-binærfil i stedet for den administrerede download                                                                    |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Transportprotokol for administrerede Quick Tunnels (`http2`, `quic` eller `auto`)                                                                       |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js-heapgrænse i MB                                                                                                                                 |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Maksimalt antal poster i promptcachen                                                                                                                   |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Maksimalt antal poster i den semantiske cache                                                                                                           |
+| Variabel                                | Misligholdelse           | Beskrivelse                                                                                                                                                        |
+| --------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `JWT_SECRET`                            | _(automatisk genereret)_ | JWT -signeringshemmeligheden — blev automatisk genereret ved første kørsel og blev ved med at `server.env`; indstil det eksplicit, når databiblioteket er flygtigt |
+| `INITIAL_PASSWORD`                      | _(frakoblet)_            | Første login-adgangskode. npm/source installationer starter med `CHANGEME`: udskift det. Frakoblet: onboarding-guide                                               |
+| `DATA_DIR`                              | `~/.omniroute`           | Datamappe (db, forbrug, logfiler)                                                                                                                                  |
+| `PORT`                                  | rammestandard            | Serviceport (`20128` i eksempler)                                                                                                                                  |
+| `HOSTNAME`                              | rammestandard            | Bind vært (Docker er standard til `0.0.0.0`)                                                                                                                       |
+| `NODE_ENV`                              | runtime standard         | Indstil `production` til implementering                                                                                                                            |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | Offentlig base URL dukkede op til dashboardet og eksponeret for serveren (erstatter ældre `BASE_URL`)                                                              |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | Cloud sync slutpunkt base URL (erstatter ældre `CLOUD_URL`)                                                                                                        |
+| `API_KEY_SECRET`                        | _(automatisk genereret)_ | HMAC hemmelighed for genererede API nøgler — blev automatisk genereret ved første kørsel og blev ved med at `server.env`                                           |
+| `REQUIRE_API_KEY`                       | `false`                  | Gennemtving bærer API nøgle på `/v1/*`                                                                                                                             |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | Tillad autentificerede dashboardbrugere at afsløre fulde lagrede API nøgleværdier efter behov                                                                      |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | Server-side opdateringskadence for cachelagrede Provider Limits-data; UI refresh-knapper udløser stadig manuel synkronisering                                      |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | Deaktiver automatiske SQLite snapshots før writes/import/restore; manuelle sikkerhedskopier fungerer stadig                                                        |
+| `APP_LOG_TO_FILE`                       | `true`                   | Aktiverer program- og revisionslogoutput til disk                                                                                                                  |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | Tving `Secure` auth-cookie (bag HTTPS omvendt proxy)                                                                                                               |
+| `CLOUDFLARED_BIN`                       | deaktiveret              | Brug en eksisterende `cloudflared` binær i stedet for administreret download                                                                                       |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Transport til administrerede hurtige tunneler (`http2`, `quic` eller `auto`)                                                                                       |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | Node.js heap grænse i MB                                                                                                                                           |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Maks. prompt-cache-indgange                                                                                                                                        |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | Maksimal semantisk cache-indgange                                                                                                                                  |
 
-Se [README](../README.md) for den komplette oversigt over miljøvariabler.
+For den fulde reference til miljøvariablen, se [README](../README.md).
 
 ---
 
@@ -612,17 +614,17 @@ Se [README](../README.md) for den komplette oversigt over miljøvariabler.
 <details>
 <summary><b>Se alle tilgængelige modeller</b></summary>
 
-> Listen nedenfor er udvalgt fra `open-sse/config/providerRegistry.ts` for v3.8.0. Cloud-kataloger (Gemini, OpenRouter osv.) synkroniseres dynamisk — for at se hele live-kataloget åbn **Dashboard → Udbydere → [udbyder] → Tilgængelige modeller** eller kald `GET /api/models/catalog`.
+> Listen nedenfor er kurateret fra `open-sse/config/providerRegistry.ts` for v3.8.0. Skymodelkataloger (Gemini, OpenRouter osv.) synkroniseres dynamisk — åbn **Dashboard → Providers → [provider] → Available Models**, eller kald `GET /api/models/catalog`, for at se det fulde aktuelle katalog.
 >
-> Hvis en udbyders indbyggede liste er kommet ud af trit, kan du bruge **Importér fra /models** på den pågældende side (eller aktivere **Automatisk synkronisering**) for at hente det aktuelle upstream-katalog. Dette blev verificeret i v3.8.50 for LLM7.io (`gemini-3.1-flash-lite`) og UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonym adgang til Pollinations forblev begrænset fra upstreams side under samme testrunde.
+> Hvis en providers indbyggede liste er forældet, skal du bruge **Import from /models** på den pågældende side (eller aktivere **Auto-Sync**) for at hente det aktuelle upstream-katalog. Dette blev verificeret i v3.8.50 for LLM7.io (`gemini-3.1-flash-lite`) og UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonym adgang til Pollinations var fortsat begrænset af upstream under samme testrunde.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort-niveauer: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ niveauer for indsats: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — GRATIS OAuth: Brug live-kataloget, der vises under **Dashboard → Udbydere → Kiro → Tilgængelige modeller**. Tilgængeligheden afhænger af kontoen og abonnementet.
+**Kiro (`kr/`)** — GRATIS OAuth: brug det aktuelle katalog, der vises under **Dashboard → Providers → Kiro → Available Models**. Tilgængeligheden afhænger af kontoen og abonnementet.
 
 **Qoder (`if/`)** — GRATIS OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -630,17 +632,17 @@ Se [README](../README.md) for den komplette oversigt over miljøvariabler.
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/md. fast pris eller pr. brug: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/md. fast pris eller efter forbrug: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API-nøgle: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Ultra-hurtig: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Ultrahurtig: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok-nativ: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Indbygget Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU-hostet: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Hostet i EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Søgeunderstøttet: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Søgeforstærket: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Open source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (gratis), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
@@ -648,19 +650,19 @@ Se [README](../README.md) for den komplette oversigt over miljøvariabler.
 
 **Cerebras (`cerebras/`)** — Wafer-skala: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG-fokuseret: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Fokuseret på RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Enterprise: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Til virksomheder: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Synkroniseres live pr. API-nøgle fra Google — ingen statisk liste. Tilføj en nøgle under **Dashboard → Udbydere**, og brug derefter **Tilgængelige modeller** til at importere det aktuelle katalog (f.eks. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Synkroniseres løbende pr. API-nøgle fra Google — ingen statisk liste. Tilslut en nøgle under **Dashboard → Providers**, og brug derefter **Available Models** til at importere det aktuelle katalog (f.eks. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Andre kompatible udbydere** (udvalgte): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (passthrough-katalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Hver enkelt vedligeholder sin egen modelliste i `providerRegistry.ts` og kan autosynkroniseres, når udbyderen eksponerer et `/models`-endpoint.
+**Andre kompatible udbydere** (udvalgte): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (viderestillet katalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Hver af dem vedligeholder sin egen modelliste i `providerRegistry.ts` og kan synkroniseres automatisk, når udbyderen stiller et `/models`-slutpunkt til rådighed.
 
-**Bemærkning om model-ID'er:** OmniRoute bruger udbyder-native ID'er (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Nogle ID'er indeholder versioner med punktummer, fordi det er sådan, upstream-API'et forventer dem. Hvis en model ikke er anført ovenfor, kør `omniroute models --search <term>` eller kald `GET /api/models/catalog` for at bekræfte tilgængeligheden.
+**Bemærkning om model-ID'er:** OmniRoute bruger udbydernes oprindelige ID'er (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Nogle ID'er indeholder versioner med punktummer, fordi det er sådan, upstream-API'en forventer dem. Hvis en model ikke er angivet ovenfor, skal du køre `omniroute models --search <term>` eller kalde `GET /api/models/catalog` for at bekræfte tilgængeligheden.
 
 </details>
 

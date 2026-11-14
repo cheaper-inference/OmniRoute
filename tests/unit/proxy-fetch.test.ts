@@ -124,7 +124,7 @@ test("proxy fetch uses TLS fingerprint transport when enabled and available", as
       HTTP_PROXY: undefined,
       HTTPS_PROXY: undefined,
       ALL_PROXY: undefined,
-      NO_PROXY: undefined,
+      NO_PROXY: "omniroute.example.test",
     },
     async () => {
       setTlsAvailable(true);

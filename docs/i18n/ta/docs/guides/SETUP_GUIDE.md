@@ -193,39 +193,39 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 
 ## நெறிமுறை அமைப்பு (MCP + A2A)
 
-### MCP அமைப்பு (Model Context Protocol)
+### MCP அமைப்பு (மாதிரி சூழல் நெறிமுறை)
 
-stdio பயன்முறையில் MCP போக்குவரத்தைத் தொடங்கவும்:
+MCP போக்குவரத்தை stdio முறையில் தொடங்கவும்:
 
 ```bash
 omniroute --mcp
 ```
 
-பரிந்துரைக்கப்படும் சரிபார்ப்பு ஓட்டம்:
+பரிந்துரைக்கப்பட்ட சரிபார்ப்பு ஓட்டம்:
 
 ```bash
-# 1. MCP சேவையகத்தைத் தொடங்கவும்
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. உங்கள் MCP கிளையண்டிலிருந்து, அழைக்கவும்:
-omniroute_get_health        # கணினி நலநிலையைத் திருப்பித் தர வேண்டும்
-omniroute_list_combos       # செயலில் உள்ள combos-ஐத் திருப்பித் தர வேண்டும்
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. அல்லது முழுமையான E2E தொகுப்பை இயக்கவும்:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP கிளையண்ட் உள்ளமைவு
+#### MCP கிளையண்ட் கட்டமைப்பு
 
-**Claude Code:**
+**Claude குறியீடு:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-உங்கள் MCP அமைப்புகளில் சேர்க்கவும்:
+உங்கள் MCP அமைப்புகளில் சேர்க்கவும் (stdio, விசையுடன், அழைப்பவருக்கு முதன்மை இருக்கும்):
 
 ```json
 {
@@ -233,23 +233,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**முழுமையான MCP ஆவணம்:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 கருவிகள், IDE உள்ளமைவுகள், Python/TS/Go கிளையண்டுகள்.
+அல்லது, `mcpTransport` `streamable-http` இருக்கும் போது (அதை `/dashboard/mcp` அல்லது `omniroute mcp enable --transport streamable-http` உடன் அமைக்கவும்), கிளையண்டின் ரிமோட் MCP சர்வர் உள்ளீட்டை `http://localhost:20128/api/mcp/stream` இல் சுட்டிக்காட்டவும்.
 
-### A2A அமைப்பு (Agent-to-Agent Protocol)
+விசை `Authorization: Bearer <api-key>` ஆகப் பயணிக்கிறது (ரிமோட் ஹோஸ்ட்களுக்கான [MCP சர்வர் → ரிமோட் அணுகலைப்](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) பார்க்கவும்; ஒரு ரிமோட் கீக்கு `mcp:connect` மற்றும் அதன் read/write ஸ்கோப்கள் தேவை).
 
-Agent Card-ஐச் சரிபார்க்கவும்:
+**முழு MCP ஆவணங்கள்:** [MCP சர்வர் README](../../open-sse/mcp-server/README.md) — 110 கருவிகள், IDE configs, Python/TS/Go கிளையண்டுகள். சுருக்க CCR/dedup கருவிகளுக்கான ஆபரேட்டர் குறிப்பு (குறிப்பான்கள், முன்நிபந்தனைகள், ஒரு கருவிக்கான நோக்கங்கள், மீட்டெடுப்பு பேஜினேஷன், கண்டறிதல்): [சுருக்க இயந்திரங்கள் → முன்நிபந்தனைகள் / ஆபரேட்டர் வழிகாட்டி](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A அமைப்பு (ஏஜெண்ட்-டு-ஏஜென்ட் புரோட்டோகால்)
+
+முகவர் அட்டையைச் சரிபார்க்கவும்:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-ஒரு பணியை அனுப்பவும்:
+பணியை அனுப்பவும்:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -257,7 +264,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**முழுமையான A2A ஆவணம்:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, திறன்கள், ஸ்ட்ரீமிங், பணி வாழ்க்கைச் சுழற்சி.
+**முழு A2A ஆவணங்கள்:** [A2A சர்வர் README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, திறன்கள், ஸ்ட்ரீமிங், பணி வாழ்க்கை சுழற்சி.
 
 ---
 
@@ -316,12 +323,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (xbps-src) வார்ப்புரு
+## வெற்றிடமான Linux (xbps-src) டெம்ப்ளேட்
 
-Void Linux பயனர்கள், `xbps-src`-ஐப் பயன்படுத்தி இயல்பான தொகுப்பை உருவாக்கலாம். இந்தத் துண்டை `srcpkgs/omniroute/template` எனச் சேமிக்கவும்:
+வெற்றிடமான Linux பயனர்களுக்கு, நீங்கள் `xbps-src` பயன்படுத்தி ஒரு சொந்த தொகுப்பை உருவாக்கலாம். இந்த தொகுதியை `srcpkgs/omniroute/template` ஆக சேமிக்கவும்:
 
 ```bash
-# 'omniroute'-க்கான வார்ப்புருக் கோப்பு
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -332,7 +339,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# ஒவ்வொரு வெளியீட்டிற்கும் checksum-ஐப் பின்வருமாறு மீண்டும் உருவாக்கவும்:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

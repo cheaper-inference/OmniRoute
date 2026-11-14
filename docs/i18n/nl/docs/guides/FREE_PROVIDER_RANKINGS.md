@@ -13,13 +13,13 @@
 
 ## Wat het is
 
-OmniRoute registreert 377 aanbieders, waarvan 155 gemarkeerde catalogusitems**free/no-auth** (no-auth, free-tier OAuth of free-tier API key - zie de [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) en de volledige [Free Tiers directory](../reference/FREE_TIERS.md) ). Het addertje onder het gras: gratis aanbieders variëren enorm in modelkwaliteit. Een aanbieder zonder authenticatie die een grensmodel bedient, is veel nuttiger dan een aanbieder die een klein, oud model bedient.
+OmniRoute registreert 381 aanbieders, waarvan 155 gemarkeerde catalogusitems**free/no-auth** (no-auth, free-tier OAuth of free-tier API key — zie de [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) en de volledige [Free Tiers directory](../reference/FREE_TIERS.md) ). Het addertje onder het gras: gratis aanbieders variëren enorm in modelkwaliteit. Een aanbieder zonder authenticatie die een grensmodel bedient, is veel nuttiger dan een aanbieder die een klein, oud model bedient.
 
-**Gratis ranglijsten van aanbieders** antwoorden "** welke gratis aanbieder geeft mij het beste model?** " door lid te worden van de catalogus van elke gratis aanbieder** crowdsourced kwaliteitsscores** van de** Arena AI -klassement** (human-preference ELO, hetzelfde idee achter de LMArena chatbot-arena). Aanbieders worden vervolgens gerangschikt op basis van de kracht van hun** beste gratis model** .
+**Gratis ranglijsten van aanbieders** antwoorden "** welke gratis aanbieder geeft mij het beste model?** " door lid te worden van de catalogus van elke gratis aanbieder** crowdsourced kwaliteitsscores** van de** Arena AI -klassement** (menselijke voorkeur ELO, hetzelfde idee achter de LMArena chatbot-arena). Aanbieders worden vervolgens gerangschikt op basis van de kracht van hun** beste gratis model** .
 
 De ranglijst wordt berekend op basis van drie echte bronnen:
 
-1. De lijsten met gratis aanbieders — `NOAUTH_PROVIDERS`, plus `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` -vermeldingen met de vlag `hasFree` (`src/shared/constants/providers.ts`).
+1. De gratis provider vermeldt — `NOAUTH_PROVIDERS`, plus `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` vermeldingen met de vlag `hasFree` (`src/shared/constants/providers.ts`).
 2. De modelcatalogus van elke provider uit het providerregister (`open-sse/config/providerRegistry.ts`).
 3. Van ELO afgeleide taakfitscores opgeslagen in de `model_intelligence` DB tabel door de Arena ELO synchronisatie-engine (`src/lib/arenaEloSync.ts`).
 

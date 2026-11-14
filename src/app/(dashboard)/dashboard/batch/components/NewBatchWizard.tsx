@@ -2,9 +2,9 @@
 
 import { useEffect, useReducer } from "react";
 import { useTranslations } from "next-intl";
-import Icon from "@/shared/components/Icon";
 import Button from "@/shared/components/Button";
 import Modal from "@/shared/components/Modal";
+import ModalWizard, { MODAL_WIZARD_BODY_CLASS } from "@/shared/components/ModalWizard";
 import DestinationStep from "./wizard/DestinationStep";
 import InputStep from "./wizard/InputStep";
 import JsonlValidationStep from "./wizard/JsonlValidationStep";
@@ -100,49 +100,14 @@ function isStep3Valid(state: WizardState): boolean {
   return state.validation !== null && state.validation.ok;
 }
 
-// ── Stepper indicator ─────────────────────────────────────────────────────────
+// ── Steps ─────────────────────────────────────────────────────────────────────
 
-const STEPS = [1, 2, 3, 4] as const;
-const STEP_LABELS: Record<number, string> = {
-  1: "wizardStep1Destination",
-  2: "wizardStep2Input",
-  3: "wizardStep3Validate",
-  4: "wizardStep4Cost",
-};
-
-function StepIndicator({
-  current,
-  t,
-}: {
-  current: 1 | 2 | 3 | 4;
-  t: ReturnType<typeof useTranslations<"common">>;
-}) {
-  return (
-    <div className="flex items-center gap-1 sm:gap-2">
-      {STEPS.map((s) => {
-        const isDone = s < current;
-        const isCurrent = s === current;
-        return (
-          <div key={s} className="flex items-center gap-1 sm:gap-2">
-            <div
-              aria-current={isCurrent ? "step" : undefined}
-              className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium transition-colors
-                ${isDone ? "bg-success text-white" : isCurrent ? "bg-accent text-accent-foreground" : "bg-border text-text-muted"}`}
-            >
-              {isDone ? <Icon name="check" size={14} /> : s}
-            </div>
-            <span
-              className={`hidden sm:inline text-xs ${isCurrent ? "text-text-main" : "text-text-muted"}`}
-            >
-              {t(STEP_LABELS[s] as Parameters<typeof t>[0])}
-            </span>
-            {s < 4 && <div className={`w-6 h-px ${isDone ? "bg-success" : "bg-border"}`} />}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
+const STEPS = [
+  { id: "destination", titleKey: "wizardStep1Destination" },
+  { id: "input", titleKey: "wizardStep2Input" },
+  { id: "validate", titleKey: "wizardStep3Validate" },
+  { id: "cost", titleKey: "wizardStep4Cost" },
+] as const;
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -162,28 +127,28 @@ export default function NewBatchWizard({
   const t = useTranslations("common");
   const [state, dispatch] = useReducer(reducer, initialState);
 
+  // ── Next button state ───────────────────────────────────────────────────────
+
+  const canGoNext =
+    (state.step === 1 && isStep1Valid(state)) ||
+    (state.step === 2 && isStep2Valid(state)) ||
+    (state.step === 3 && isStep3Valid(state));
+
   // Escape is the Modal adapter's (kit Dialog; ignored while creating, see `requestClose`);
   // Enter advances to the next step when allowed (A-5).
-  // Skip Enter when focus is inside form controls so it doesn't interfere with typing.
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if (state.creating) return;
-      if (e.key === "Enter") {
-        const tag = (e.target as HTMLElement | null)?.tagName;
-        // Skip form controls (typing) AND buttons — a focused button (Next/Back/Cancel/
-        // Create) already activates natively on Enter; firing the global Next click too
-        // would double-dispatch and conflict with Back/Cancel. Only advance when focus is
-        // on a non-interactive element (the modal body).
-        if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || tag === "BUTTON") return;
-        const nextBtn = document.querySelector<HTMLButtonElement>(
-          'button[data-wizard-next="true"]'
-        );
-        if (nextBtn && !nextBtn.disabled) nextBtn.click();
-      }
+      if (e.key !== "Enter" || state.creating || !canGoNext) return;
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      // Skip form controls (typing) AND buttons — a focused button (Next/Back/Cancel/Create)
+      // already activates natively on Enter; advancing here too would double-dispatch and
+      // conflict with Back/Cancel. Only advance when focus is on a non-interactive element.
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || tag === "BUTTON") return;
+      dispatch({ type: "SET_STEP", step: (state.step + 1) as 1 | 2 | 3 | 4 });
     }
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [onClose, state.creating]);
+  }, [canGoNext, state.creating, state.step]);
 
   // ── Navigation ──────────────────────────────────────────────────────────────
 
@@ -256,13 +221,6 @@ export default function NewBatchWizard({
     }
   }
 
-  // ── Next button state ───────────────────────────────────────────────────────
-
-  const canGoNext =
-    (state.step === 1 && isStep1Valid(state)) ||
-    (state.step === 2 && isStep2Valid(state)) ||
-    (state.step === 3 && isStep3Valid(state));
-
   // ── Step content ────────────────────────────────────────────────────────────
 
   const stepContent = (() => {
@@ -311,6 +269,9 @@ export default function NewBatchWizard({
     if (!state.creating) onClose();
   };
 
+  const steps = STEPS.map((step) => ({ id: step.id, title: t(step.titleKey) }));
+  const activeStep = state.step - 1;
+
   return (
     <Modal
       isOpen
@@ -320,35 +281,28 @@ export default function NewBatchWizard({
       size="full"
       className="sm:max-w-3xl"
       title={t("wizardTitle")}
-      bodyClassName="px-4 sm:px-6 py-6 max-h-[calc(90vh-200px)] overflow-y-auto"
-      footer={
-        <div className="flex w-full items-center justify-between">
+      bodyClassName={MODAL_WIZARD_BODY_CLASS}
+    >
+      <ModalWizard
+        steps={steps}
+        activeStep={activeStep}
+        completedSteps={STEPS.slice(0, activeStep).map((step) => step.id)}
+        title={steps[activeStep].title}
+        busy={state.creating}
+        onBack={handleBack}
+        allowBack={state.step > 1}
+        onNext={handleNext}
+        showNext={state.step < 4}
+        nextBlocked={!canGoNext}
+        labels={{ progress: t("wizardTitle"), back: t("wizardBack"), next: t("wizardNext") }}
+        footerActions={
           <Button variant="ghost" onClick={requestClose} disabled={state.creating}>
             {t("wizardCancel")}
           </Button>
-
-          <div className="flex items-center gap-3">
-            {state.step > 1 && (
-              <Button variant="outline" onClick={handleBack} disabled={state.creating}>
-                {t("wizardBack")}
-              </Button>
-            )}
-
-            {state.step < 4 && (
-              <Button data-wizard-next="true" onClick={handleNext} disabled={!canGoNext}>
-                {t("wizardNext")}
-              </Button>
-            )}
-          </div>
-        </div>
-      }
-    >
-      {/* Step indicator — the kit Wizard hard-codes English labels, so the steps are built
-          from primitives (pendência: Wizard needs label props). */}
-      <div className="-mt-2 mb-6">
-        <StepIndicator current={state.step} t={t} />
-      </div>
-      {stepContent}
+        }
+      >
+        {stepContent}
+      </ModalWizard>
     </Modal>
   );
 }

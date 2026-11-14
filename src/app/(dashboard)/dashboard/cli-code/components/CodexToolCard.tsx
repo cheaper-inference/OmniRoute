@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { Card, Button, ModelSelectModal, ManualConfigModal } from "@/shared/components";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
@@ -445,8 +446,8 @@ openai_base_url = "${getEffectiveBaseUrl()}"
       {isExpanded && (
         <div className="mt-4 pt-4 border-t border-border flex flex-col gap-4">
           {checkingCodex && (
-            <div className="flex items-center gap-2 text-text-muted">
-              <Icon name="progress_activity" className="animate-spin" />
+            <div role="status" className="flex items-center gap-2 text-text-muted">
+              <Spinner decorative size="sm" />
               <span>{t("checkingCli", { tool: "Codex" })}</span>
             </div>
           )}
@@ -843,12 +844,11 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                             {activatingProfile === p.id ? "..." : t("activate")}
                           </Button>
                           <Button
-                            variant="ghost"
+                            variant="destructive-ghost"
                             size="icon-sm"
                             onClick={() => handleDeleteProfile(p.id)}
                             title={t("deleteProfile")}
                             aria-label={t("deleteProfile")}
-                            className="text-text-muted hover:text-error"
                           >
                             <Icon name="delete" size={14} />
                           </Button>

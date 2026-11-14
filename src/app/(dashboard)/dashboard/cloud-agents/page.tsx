@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useId } from "react";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { Card, Button, Input, Badge } from "@/shared/components";
 import Checkbox from "@/shared/components/Checkbox";
 import EmptyState from "@/shared/components/EmptyState";
@@ -392,7 +393,7 @@ export default function CloudAgentsPage() {
   if (loading) {
     return (
       <div role="status" className="flex flex-col items-center justify-center min-h-[400px] gap-3">
-        <Icon name="progress_activity" size={32} className="animate-spin text-primary" />
+        <Spinner decorative size="lg" className="text-primary" />
         <p className="text-sm text-text-muted">{t("loading")}</p>
       </div>
     );
@@ -751,10 +752,9 @@ export default function CloudAgentsPage() {
                       {t("cancel")}
                     </Button>
                     <Button
-                      variant="ghost"
+                      variant="destructive-ghost"
                       size="sm"
                       onClick={() => handleDeleteTask(selectedTask.id)}
-                      className="text-error hover:text-error"
                     >
                       <Icon name="delete" size={14} className="mr-1" />
                       {t("delete")}

@@ -24,6 +24,8 @@ interface VideoState {
   modalityBridgeVideoSamplingPolicy: VideoSamplingPolicy;
   modalityBridgeVideoMaxVideos: number;
   modalityBridgeVideoTimeout: number;
+  modalityBridgeVideoDrilldownEnabled: boolean;
+  modalityBridgeVideoDrilldownRemoteEnabled: boolean;
 }
 
 // Explicit UI states for the FFmpeg/ffprobe runtime probe (#11657):
@@ -52,8 +54,10 @@ function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
 }
 
-function fromApi(value: unknown): VideoState {
-  const runtime = resolveVideoBridgeRuntimeSettings(asRecord(value));
+function fromApi(value: unknown, stats?: unknown): VideoState {
+  const record = asRecord(value);
+  const policy = asRecord(asRecord(asRecord(stats).video).drilldown);
+  const runtime = resolveVideoBridgeRuntimeSettings(record);
   return {
     modalityBridgeVideoEnabled: runtime.enabled,
     modalityBridgeVideoAnalysisMode: runtime.analysisMode,
@@ -62,6 +66,14 @@ function fromApi(value: unknown): VideoState {
     modalityBridgeVideoSamplingPolicy: runtime.samplingPolicy,
     modalityBridgeVideoMaxVideos: runtime.maxVideos,
     modalityBridgeVideoTimeout: runtime.timeoutMs,
+    modalityBridgeVideoDrilldownEnabled:
+      typeof record.modalityBridgeVideoDrilldownEnabled === "boolean"
+        ? record.modalityBridgeVideoDrilldownEnabled
+        : policy.enabled === true,
+    modalityBridgeVideoDrilldownRemoteEnabled:
+      typeof record.modalityBridgeVideoDrilldownRemoteEnabled === "boolean"
+        ? record.modalityBridgeVideoDrilldownRemoteEnabled
+        : policy.remoteEnabled === true,
   };
 }
 
@@ -107,6 +119,7 @@ export default function ModalityBridgeVideoTab({
   const tRoot = useTranslations();
   const [settings, setSettings] = useState<VideoState | null>(null);
   const [runtime, setRuntime] = useState<RuntimeStatus>({ state: "unknown" });
+  const [promotion, setPromotion] = useState<Record<string, unknown>>({});
   const [errorState, setErrorState] = useState<"load" | "save" | null>(null);
   const persistedSettings = useRef<VideoState | null>(null);
   const isVisionModel = useCallback((model: ApiModel) => model.supportsVision === true, []);
@@ -125,13 +138,17 @@ export default function ModalityBridgeVideoTab({
         return response.json();
       }),
       runtimeStatusRequest,
+      fetch("/api/modality-bridge/stats")
+        .then((response) => (response.ok ? response.json() : null))
+        .catch(() => null),
     ])
-      .then(([settingsValue, runtimeValue]: [unknown, unknown]) => {
+      .then(([settingsValue, runtimeValue, statsValue]: [unknown, unknown, unknown]) => {
         if (cancelled) return;
-        const loadedSettings = fromApi(settingsValue);
+        const loadedSettings = fromApi(settingsValue, statsValue);
         persistedSettings.current = loadedSettings;
         setSettings(loadedSettings);
         setRuntime(parseRuntimeStatus(runtimeValue));
+        setPromotion(asRecord(asRecord(asRecord(statsValue).video).promotion));
         setErrorState(null);
       })
       .catch(() => {
@@ -169,6 +186,18 @@ export default function ModalityBridgeVideoTab({
 
   const setLocal = (patch: Partial<VideoState>) => {
     setSettings((previous) => (previous ? { ...previous, ...patch } : previous));
+  };
+  const promotionStatus = (policy: "segmentAware" | "contactSheet") => {
+    // A stale status from a different selected model must not survive a settings edit.
+    const value =
+      promotion.contextVerified === true && promotion.model === settings.modalityBridgeVideoModel
+        ? promotion[policy]
+        : "hold";
+    return value === "eligible"
+      ? t("modalityBridgeVideoPromotionEligible")
+      : value === "experimental"
+        ? t("modalityBridgeVideoPromotionExperimental")
+        : t("modalityBridgeVideoPromotionHold");
   };
   const commitNumber = (
     key:
@@ -241,6 +270,21 @@ export default function ModalityBridgeVideoTab({
           description={t("modalityBridgeVideoEnabledDesc")}
         />
 
+        <Toggle
+          checked={settings.modalityBridgeVideoDrilldownEnabled}
+          onChange={(checked) => void update({ modalityBridgeVideoDrilldownEnabled: checked })}
+          label={t("modalityBridgeVideoDrilldownEnabled")}
+          description={t("modalityBridgeVideoDrilldownEnabledDesc")}
+        />
+        <Toggle
+          checked={settings.modalityBridgeVideoDrilldownRemoteEnabled}
+          onChange={(checked) =>
+            void update({ modalityBridgeVideoDrilldownRemoteEnabled: checked })
+          }
+          label={t("modalityBridgeVideoDrilldownRemoteEnabled")}
+          description={t("modalityBridgeVideoDrilldownRemoteEnabledDesc")}
+        />
+
         <Select
           id="modality-bridge-video-analysis-mode"
           data-testid="modality-bridge-video-analysis-mode"
@@ -270,6 +314,19 @@ export default function ModalityBridgeVideoTab({
           onChange={(value) => void update({ modalityBridgeVideoModel: value })}
           className="text-sm"
         />
+
+        <div
+          data-testid="video-promotion-readiness"
+          className="rounded-control border border-border p-3 text-sm"
+          aria-live="polite"
+        >
+          <strong>{t("modalityBridgeVideoPromotionTitle")}</strong>
+          <div className="mt-1">segment_aware: {promotionStatus("segmentAware")}</div>
+          <div>contact_sheet: {promotionStatus("contactSheet")}</div>
+          <p className="mt-2 text-xs text-text-muted">
+            {t("modalityBridgeVideoPromotionContextRequired")}
+          </p>
+        </div>
 
         <Collapsible title={t("modalityBridgeAdvanced")} icon="tune">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">

@@ -84,19 +84,17 @@ const LIVE_TEXT_POLL_INTERVAL_MS = 1200;
 
 function ProviderBadge({ provider }: { provider: string | null }) {
   if (!provider) return <span className="text-text-muted text-[10px]">—</span>;
-  const style = (PROVIDER_COLORS as Record<string, { bg: string; text: string; label: string }>)[
-    provider
-  ];
+  const style = PROVIDER_COLORS[provider];
   if (!style) {
     return (
-      <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold bg-bg-subtle text-text-muted border border-border">
+      <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-semibold bg-bg-subtle text-text-muted border border-border">
         {provider}
       </span>
     );
   }
   return (
     <span
-      className="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold"
+      className="inline-block px-2 py-0.5 rounded-full text-[9px] font-semibold"
       style={{ backgroundColor: style.bg, color: style.text }}
     >
       {style.label}
@@ -109,8 +107,8 @@ function StatusBadge({ status }: { status: number | null }) {
   const style = getHttpStatusStyle(status);
   return (
     <span
-      className="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold"
-      style={{ backgroundColor: style.bg, color: style.text ?? "#fff" }}
+      className="inline-block px-2 py-0.5 rounded-full text-[9px] font-semibold"
+      style={{ backgroundColor: style.bg, color: style.text }}
     >
       {status}
     </span>
@@ -596,19 +594,8 @@ function ConversationsPageContent() {
       conversationNodes.length > 0 ? conversationNodes[conversationNodes.length - 1].seq : null;
   }, [conversationNodes]);
 
-  useEffect(() => {
-    if (!activeConversationId) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeConversation();
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-    // activeConversationId, not the whole activeConversation object: it
-    // gets resynced (new object reference) from the list poll while the
-    // modal stays open (see that effect's comment) — depending on the
-    // object here would rebind this listener on every poll tick for no
-    // reason.
-  }, [activeConversationId, closeConversation]);
+  // Escape is handled by the kit Modal (Radix Dialog); a document-level listener here would also
+  // close the drawer when Escape was meant for a nested menu or tooltip (#18076).
 
   // While the conversation is open, keep polling for turns that arrive
   // later (the request that opened it may not be the last one — OpenClaw

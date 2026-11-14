@@ -1,9 +1,14 @@
+import type {
+  HttpAttemptSelection,
+  HttpAttemptRejectionSlot,
+} from "../../utils/providerHttpAttempts.ts";
 /**
  * One provider send. Lifted out of handleChatCore. The body is the tip
  * implementation; the only change is that closed-over request state arrives
  * through deps.
  */
 import { markEmptyTurnExecution, inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
+import { noteUpstreamDispatch } from "../../utils/proxyFetch.ts";
 
 import type { BaseExecutor } from "../../executors/base.ts";
 import type { AgentGoalPolicy } from "../../utils/agentGoalPolicy.ts";
@@ -19,7 +24,10 @@ import {
   stripNextMiddlewareControlHeaders,
   stripStaleForwardingHeaders,
 } from "./responseHeaders.ts";
-import { readNonStreamingResponseBody } from "./nonStreamingResponseBody.ts";
+import {
+  readNonStreamingResponseBody,
+  readResponseTextWithinCap,
+} from "./nonStreamingResponseBody.ts";
 import { wrapReadableStreamWithFinalize } from "./streamFinalize.ts";
 import {
   normalizeExecutorResult,
@@ -35,6 +43,16 @@ import { HTTP_STATUS, STREAM_RECOVERY } from "../../config/constants.ts";
 import { parseRetryAfterMs } from "../../services/apiKeyRotator.ts";
 import { createRecoverableStream, makeContinuationBody } from "../../services/streamRecovery.ts";
 import { persistCodexChildQuotaResponse } from "../../services/codexAccount/index.ts";
+import {
+  captureCodexConnectionFence,
+  runWithCodexConnectionFence,
+  bindCodexResponseFence,
+  inheritCodexResponseFence,
+  isCodexConnectionFenceCurrent,
+  isCodexResponseCurrent,
+  runWithCodexResponseFence,
+  StaleCodexOperationError,
+} from "../../services/codexAccount/fences.ts";
 import { invalidateQuotaCacheOnStatus } from "../../services/genericQuotaFetcher.ts";
 import {
   isRateLimitEnabled,
@@ -66,6 +84,7 @@ import { injectSystemPromptPostTranslation } from "../../services/systemPrompt.t
 import type { ToolDisclosureConfig } from "../../utils/toolDisclosure.ts";
 
 export type ChatCoreExecutorResult = {
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   response: Response;
   url?: string;
   transport?: string;
@@ -140,6 +159,7 @@ export type ExecuteProviderRequestDeps = {
   settings: Record<string, unknown> | null | undefined;
   toolDisclosure?: ToolDisclosureConfig | null;
   skipUpstreamRetry: boolean;
+  requestUpstreamStartTimeoutMs?: number;
   stream: boolean;
   streamController: { signal: AbortSignal };
   targetFormat: string;
@@ -154,7 +174,8 @@ export type ExecuteProviderRequestDeps = {
 export async function executeProviderRequest(
   deps: ExecuteProviderRequestDeps,
   modelToCall: string = deps.effectiveModel,
-  allowDedup: boolean = false
+  allowDedup: boolean = false,
+  rejection?: HttpAttemptRejectionSlot
 ): Promise<ChatCoreExecutorResult> {
   const {
     agentGoalPolicy,
@@ -186,6 +207,7 @@ export async function executeProviderRequest(
     resilienceSettings,
     settings,
     skipUpstreamRetry,
+    requestUpstreamStartTimeoutMs,
     stream,
     streamController,
     targetFormat,
@@ -198,6 +220,28 @@ export async function executeProviderRequest(
     userAgent: _userAgent,
   } = deps;
   const body = rawBody;
+  const recordResponseKeyHealth = (
+    response: Response,
+    creds: Record<string, unknown>,
+    transport?: string,
+    failureDetail = ""
+  ) => {
+    if (!isCodexResponseCurrent(response, response.ok)) return;
+    runWithCodexResponseFence(
+      response,
+      () =>
+        recordKeyHealthStatus(
+          response.status,
+          creds,
+          transport,
+          failureDetail,
+          response.status === HTTP_STATUS.RATE_LIMITED
+            ? parseRetryAfterMs(response.headers.get("retry-after"))
+            : null
+        ),
+      response.ok
+    );
+  };
   const execute = async () => {
     // Upstream body preparation extracted to chatCore/upstreamBody.ts (#3501 — first internal
     // sub-slice of executeProviderRequest); produces the body sent upstream (payload rules +
@@ -250,6 +294,13 @@ export async function executeProviderRequest(
           const execCreds = getExecutionCredentials();
           const executionConnectionId = getExecutionConnectionId(execCreds);
           const attemptConnectionId = executionConnectionId || connectionId;
+          const ownerFence =
+            provider === "codex"
+              ? captureCodexConnectionFence(execCreds ?? {}, String(attemptConnectionId || ""))
+              : null;
+          const fencedCredentialsRefreshed: typeof onCredentialsRefreshed = onCredentialsRefreshed
+            ? (next) => runWithCodexConnectionFence(ownerFence, () => onCredentialsRefreshed(next))
+            : undefined;
           const accountSemaphoreMaxConcurrency = resolveAccountSemaphoreMaxConcurrency(
             execCreds,
             typeof attemptConnectionId === "string" && isRateLimitEnabled(attemptConnectionId)
@@ -332,16 +383,20 @@ export async function executeProviderRequest(
                   stage: "rate_limit_slot_acquired",
                 });
                 assertManagedLeaseFence(attemptConnectionId);
+                if (ownerFence && !isCodexConnectionFenceCurrent(ownerFence))
+                  throw new StaleCodexOperationError();
                 return executeWithUpstreamStartTimeout({
                   executor,
                   provider,
                   model: modelToCall,
                   connectionTimeoutMs: resolveConnectionTimeoutMs(execCreds?.providerSpecificData),
+                  requestTimeoutMs: requestUpstreamStartTimeoutMs,
                   signal: streamController.signal,
                   log,
                   execute: (signal) =>
-                    runWithCapture(providerRequestCapture, () =>
-                      executor.execute({
+                    runWithCapture(providerRequestCapture, () => {
+                      noteUpstreamDispatch();
+                      return executor.execute({
                         model: modelToCall,
                         body: bodyToSend,
                         stream: upstreamStream,
@@ -352,12 +407,12 @@ export async function executeProviderRequest(
                         upstreamExtraHeaders: buildUpstreamHeadersForExecute(modelToCall),
                         clientHeaders: getExecutorClientHeaders(),
                         clientResponseFormat,
-                        onCredentialsRefreshed,
+                        onCredentialsRefreshed: fencedCredentialsRefreshed,
                         skipUpstreamRetry,
                         contextEditing: { enabled: contextEditingEnabled },
                         correlationId,
-                      })
-                    ),
+                      });
+                    }),
                 });
               },
               streamController.signal,
@@ -369,7 +424,11 @@ export async function executeProviderRequest(
               }
             );
             const res = normalizeExecutorResult(rawExecutorResult);
-            res.response = markEmptyTurnExecution(res.response, res.url, execCreds);
+            bindCodexResponseFence(res.response, ownerFence);
+            res.response = inheritCodexResponseFence(
+              res.response,
+              markEmptyTurnExecution(res.response, res.url, execCreds)
+            );
             trace("post_executor", { status: res?.response?.status });
 
             // When a payload override rewrote body.model (custom-model alias →
@@ -391,12 +450,17 @@ export async function executeProviderRequest(
               !(await shouldIsolateProbeFailures())
             ) {
               try {
-                const persistedQuota = await persistCodexChildQuotaResponse({
-                  connectionId: String(attemptConnectionId),
-                  model: modelToCall || model || requestedModel || "",
-                  headers: normalizeHeaders(res.response.headers),
-                  status: res.response.status,
-                });
+                const persistedQuota = await runWithCodexConnectionFence(
+                  ownerFence,
+                  () =>
+                    persistCodexChildQuotaResponse({
+                      connectionId: String(attemptConnectionId),
+                      model: modelToCall || model || requestedModel || "",
+                      headers: normalizeHeaders(res.response.headers),
+                      status: res.response.status,
+                    }),
+                  res.response.status >= 200 && res.response.status < 300
+                );
                 if (persistedQuota) {
                   execCreds.providerSpecificData = persistedQuota.providerSpecificData;
                   if (persistedQuota.exhaustionLog) {
@@ -408,7 +472,11 @@ export async function executeProviderRequest(
                 log?.debug?.("CODEX", `Failed to persist codex quota state: ${errMessage}`);
               }
             }
-            if (attemptConnectionId && res.response.status === 429) {
+            if (
+              attemptConnectionId &&
+              res.response.status === 429 &&
+              (!ownerFence || isCodexConnectionFenceCurrent(ownerFence))
+            ) {
               // Dropped generic quota cache after 429 — bespoke fetchers drop their
               // own cache through the registry; the generic wrapper is the fallback.
               invalidateQuotaCacheOnStatus({
@@ -439,26 +507,14 @@ export async function executeProviderRequest(
             ) {
               const failureDetail = res.response.ok
                 ? ""
-                : await res.response
-                    .clone()
-                    .text()
-                    .catch(() => "");
-              recordKeyHealthStatus(
-                res.response.status,
-                execCreds,
-                res.transport,
-                failureDetail,
-                res.response.status === HTTP_STATUS.RATE_LIMITED
-                  ? parseRetryAfterMs(res.response.headers.get("retry-after"))
-                  : null
-              );
+                : await readResponseTextWithinCap(res.response.clone()).catch(() => "");
+              recordResponseKeyHealth(res.response, execCreds, res.transport, failureDetail);
             }
 
             if (isModelScope() && res.response.status === 429 && attempts < maxAttempts - 1) {
-              const bodyPeek = await res.response
-                .clone()
-                .text()
-                .catch(() => "");
+              const bodyPeek = await readResponseTextWithinCap(res.response.clone()).catch(
+                () => ""
+              );
               const normalizedHeaders = normalizeHeaders(res.response.headers);
               const decision = classifyModelScope429(bodyPeek, normalizedHeaders);
               if (decision.retryable) {
@@ -532,10 +588,12 @@ export async function executeProviderRequest(
                 // its 2xx stream, or null. Used both by the early-retry re-open (same body)
                 // and the mid-stream continuation (assistant-prefilled body).
                 const runUpstreamStream = async (
-                  body: unknown
+                  body: unknown,
+                  continuation = false
                 ): Promise<ReadableStream<Uint8Array> | null> => {
                   try {
                     assertManagedLeaseFence(attemptConnectionId);
+                    if (ownerFence && !isCodexConnectionFenceCurrent(ownerFence)) return null;
                     const retryRaw = await executeWithUpstreamStartTimeout({
                       executor,
                       provider,
@@ -543,11 +601,13 @@ export async function executeProviderRequest(
                       connectionTimeoutMs: resolveConnectionTimeoutMs(
                         execCreds?.providerSpecificData
                       ),
+                      requestTimeoutMs: requestUpstreamStartTimeoutMs,
                       signal: streamController.signal,
                       log,
                       execute: (signal) =>
-                        runWithCapture(providerRequestCapture, () =>
-                          executor.execute({
+                        runWithCapture(providerRequestCapture, () => {
+                          noteUpstreamDispatch();
+                          return executor.execute({
                             model: modelToCall,
                             body,
                             stream: upstreamStream,
@@ -558,17 +618,21 @@ export async function executeProviderRequest(
                             upstreamExtraHeaders: buildUpstreamHeadersForExecute(modelToCall),
                             clientHeaders: getExecutorClientHeaders(),
                             clientResponseFormat,
-                            onCredentialsRefreshed,
+                            onCredentialsRefreshed: fencedCredentialsRefreshed,
                             skipUpstreamRetry,
                             contextEditing: { enabled: contextEditingEnabled },
                             correlationId,
-                          })
-                        ),
+                          });
+                        }),
                     });
                     const retryRes = normalizeExecutorResult(retryRaw);
                     const retryOk =
                       retryRes.response.status >= 200 && retryRes.response.status < 300;
                     if (retryOk && retryRes.response.body) {
+                      if (res.upstreamHttpSelection)
+                        res.upstreamHttpSelection.current = continuation
+                          ? null
+                          : (retryRes.upstreamHttpSelection?.current ?? null);
                       return retryRes.response.body as ReadableStream<Uint8Array>;
                     }
                     await retryRes.response.body?.cancel().catch(() => {});
@@ -588,7 +652,7 @@ export async function executeProviderRequest(
                         assistantSoFar
                       );
                       return continuationBody
-                        ? runUpstreamStream(continuationBody)
+                        ? runUpstreamStream(continuationBody, true)
                         : Promise.resolve(null);
                     }
                   : undefined;
@@ -624,13 +688,16 @@ export async function executeProviderRequest(
               return {
                 ...res,
                 _executionCredentials: execCreds,
-                response: inheritEmptyTurnPolicy(
+                response: inheritCodexResponseFence(
                   res.response,
-                  new Response(clientBody, {
-                    status: res.response.status,
-                    statusText: res.response.statusText,
-                    headers: new Headers(normalizeHeaders(res.response.headers)),
-                  })
+                  inheritEmptyTurnPolicy(
+                    res.response,
+                    new Response(clientBody, {
+                      status: res.response.status,
+                      statusText: res.response.statusText,
+                      headers: new Headers(normalizeHeaders(res.response.headers)),
+                    })
+                  )
                 ),
               };
             }
@@ -674,25 +741,28 @@ export async function executeProviderRequest(
         );
       }
       const contentType = (responseHeaders.get("content-type") || "").toLowerCase();
-      const payload = await readNonStreamingResponseBody(
-        rawResult.response,
-        contentType,
-        upstreamStream
-      );
+      let payload: string;
+      try {
+        payload = await readNonStreamingResponseBody(
+          rawResult.response,
+          contentType,
+          upstreamStream
+        );
+      } catch (error) {
+        if (rejection) rejection.selection = rawResult.upstreamHttpSelection ?? null;
+        throw error;
+      }
       // Use the exact execution credential selected for this request. Model capability
       // failures stay in routing telemetry; authoritative success only recovers this key.
       if (
         rawResult._executionCredentials?.connectionId &&
         (rawResult._executionCredentials.apiKey || rawResult._executionCredentials.accessToken)
       ) {
-        recordKeyHealthStatus(
-          status,
+        recordResponseKeyHealth(
+          rawResult.response,
           rawResult._executionCredentials,
           rawResult.transport,
-          status >= 400 ? payload : "",
-          status === HTTP_STATUS.RATE_LIMITED
-            ? parseRetryAfterMs(responseHeaders.get("retry-after"))
-            : null
+          status >= 400 ? payload : ""
         );
       }
       releaseRawResultAccountSemaphore();
@@ -700,9 +770,12 @@ export async function executeProviderRequest(
 
       return {
         ...rawResult,
-        response: inheritEmptyTurnPolicy(
+        response: inheritCodexResponseFence(
           rawResult.response,
-          new Response(payload, { status, statusText, headers: responseHeaders })
+          inheritEmptyTurnPolicy(
+            rawResult.response,
+            new Response(payload, { status, statusText, headers: responseHeaders })
+          )
         ),
         _dedupSnapshot: {
           status,
@@ -726,7 +799,8 @@ export async function executeProviderRequest(
     if (dedupResult.wasDeduplicated) {
       log?.debug?.("DEDUP", `Joined in-flight request hash=${dedupHash}`);
     }
-    return materializeDeduplicatedExecutionResult(dedupResult.result);
+    const result = materializeDeduplicatedExecutionResult(dedupResult.result);
+    return dedupResult.wasDeduplicated ? { ...result, upstreamHttpSelection: null } : result;
   }
 
   return execute();

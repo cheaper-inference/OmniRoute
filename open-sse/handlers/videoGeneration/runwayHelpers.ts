@@ -1,3 +1,30 @@
+import {
+  UPSTREAM_MEDIA_LIMITS,
+  downloadUpstreamMedia,
+  upstreamMediaErrorText,
+} from "../../utils/remoteMediaFetch.ts";
+import { sanitizeErrorMessage } from "../../utils/error.ts";
+
+// Generated videos are fetched from URLs the provider returns, so they go through the
+// upstream-media policy (HTTPS, public hosts only, pinned when direct, bounded size and time).
+export async function downloadResultVideo(
+  url: string,
+  signal?: AbortSignal | null,
+  maxBytes: number = UPSTREAM_MEDIA_LIMITS.video.maxBytes
+) {
+  const { buffer } = await downloadUpstreamMedia(url, {
+    maxBytes,
+    timeoutMs: UPSTREAM_MEDIA_LIMITS.video.timeoutMs,
+    signal,
+  });
+  return buffer;
+}
+
+/** Client-facing text for a failed result-video download. */
+export function resultVideoErrorText(err: unknown): string {
+  return `Failed to download video: ${sanitizeErrorMessage(upstreamMediaErrorText(err))}`;
+}
+
 export function resolveRunwayPromptImage(body) {
   const directCandidates = [
     body.promptImage,
@@ -105,7 +132,7 @@ export function extractRunwayFailureMessage(task) {
   return null;
 }
 
-export async function normalizeRunwayVideoResult(task, body) {
+export async function normalizeRunwayVideoResult(task, body, signal: AbortSignal | null = null) {
   const urls = extractRunwayOutputUrls(task);
   if (urls.length === 0) {
     throw new Error(
@@ -114,12 +141,18 @@ export async function normalizeRunwayVideoResult(task, body) {
   }
   if (body.response_format === "url") return urls.map((url) => ({ url, format: "mp4" }));
 
+  // One byte budget for all outputs, so a task listing many URLs stays under the video cap.
+  let remainingBytes: number = UPSTREAM_MEDIA_LIMITS.video.maxBytes;
   const videos = [];
   for (const url of urls) {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`Runway output fetch failed (${response.status})`);
-    const arrayBuffer = await response.arrayBuffer();
-    videos.push({ b64_json: Buffer.from(arrayBuffer).toString("base64"), format: "mp4" });
+    let video: Buffer;
+    try {
+      video = await downloadResultVideo(url, signal, remainingBytes);
+    } catch (err) {
+      throw new Error(`Runway output fetch failed (${upstreamMediaErrorText(err)})`);
+    }
+    remainingBytes -= video.length;
+    videos.push({ b64_json: video.toString("base64"), format: "mp4" });
   }
   return videos;
 }

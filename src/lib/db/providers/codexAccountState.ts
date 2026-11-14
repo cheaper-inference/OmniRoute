@@ -1,7 +1,9 @@
+import { mergeCodexQuotaObservation } from "@/lib/providers/codexQuotaDisplay";
 import { backupDbFile } from "../backup";
 import { getDbInstance, rowToCamel } from "../core";
 import { invalidateDbCache } from "../readCache";
 import { toRecord } from "./columns";
+import { mayWriteCodexConnection } from "../codexConnectionFences";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -19,7 +21,7 @@ type CodexScopedQuotaPatch = {
   quotaState?: JsonRecord;
   exhaustedWindow?: "5h" | "7d" | null;
   rateLimitedUntil?: string | null;
-  rateLimitSource?: "fallback" | "quota_reset";
+  rateLimitSource?: "fallback" | "quota_reset" | "quota_preflight";
 };
 
 const CODEX_CHILD_COOLDOWN_KEYS = [
@@ -66,6 +68,7 @@ export function stripCodexChildCooldownsFromConnection(
 ): void {
   if (typeof id !== "string" || id.length === 0) return;
   const db = getDbInstance() as unknown as DbLike;
+  if (!mayWriteCodexConnection(id)) return;
   const alsoClearTopLevel = options?.alsoClearTopLevel === true;
   const candidate = db.prepare("SELECT provider FROM provider_connections WHERE id = ?").get(id);
   const isCodex = toRecord(candidate).provider === "codex";
@@ -73,6 +76,7 @@ export function stripCodexChildCooldownsFromConnection(
 
   backupDbFile("pre-write");
   const wrote = db.transaction(() => {
+    if (!mayWriteCodexConnection(id)) return false;
     const existing = db
       .prepare("SELECT provider, provider_specific_data FROM provider_connections WHERE id = ?")
       .get(id);
@@ -114,6 +118,21 @@ export function stripCodexChildCooldownsFromConnection(
   if (wrote) invalidateDbCache("connections", id, { skipModelCatalog: true });
 }
 
+function applyQuotaStatePatch(
+  previous: JsonRecord,
+  next: JsonRecord,
+  scope: "codex" | "spark",
+  quotaState: JsonRecord | undefined
+): boolean {
+  if (!quotaState) return true;
+  const byScope = toRecord(previous.codexQuotaStateByScope);
+  const merged = mergeCodexQuotaObservation(toRecord(byScope[scope]), quotaState);
+  if (!merged) return false;
+  next.codexQuotaStateByScope = { ...byScope, [scope]: merged };
+  next.codexQuotaState = { ...merged, scope, updatedAt: quotaState.observedAt };
+  return true;
+}
+
 /**
  * Atomically merge one virtual Codex child's quota evidence into its persisted parent.
  * The transaction reads the latest row so sibling child state cannot be lost.
@@ -129,6 +148,7 @@ export async function updateCodexScopedQuotaState(
 
   backupDbFile("pre-write");
   const persisted = db.transaction(() => {
+    if (!mayWriteCodexConnection(id)) return null;
     const existing = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
     if (!existing) return null;
 
@@ -137,17 +157,10 @@ export async function updateCodexScopedQuotaState(
     const providerSpecificData = toRecord(existingRecord.providerSpecificData);
     const nextProviderSpecificData: JsonRecord = { ...providerSpecificData };
 
-    if (patch.quotaState) {
-      const quotaByScope = toRecord(providerSpecificData.codexQuotaStateByScope);
-      nextProviderSpecificData.codexQuotaStateByScope = {
-        ...quotaByScope,
-        [scope]: patch.quotaState,
-      };
-      nextProviderSpecificData.codexQuotaState = {
-        ...patch.quotaState,
-        scope,
-        updatedAt: patch.quotaState.observedAt,
-      };
+    if (
+      !applyQuotaStatePatch(providerSpecificData, nextProviderSpecificData, scope, patch.quotaState)
+    ) {
+      return null;
     }
 
     if (patch.exhaustedWindow !== undefined) {
@@ -170,11 +183,14 @@ export async function updateCodexScopedQuotaState(
           typeof scopeCooldowns[scope] === "string"
             ? new Date(scopeCooldowns[scope] as string).getTime()
             : NaN;
+        // A local text quota preflight must not downgrade an existing upstream
+        // or legacy cooldown; only another preflight may replace a preflight.
         const existingIsAuthoritative =
-          sourceByScope[scope] === "quota_reset" &&
-          patch.rateLimitSource !== "quota_reset" &&
           Number.isFinite(existingCooldownMs) &&
-          existingCooldownMs > Date.now();
+          existingCooldownMs > Date.now() &&
+          ((sourceByScope[scope] === "quota_reset" && patch.rateLimitSource !== "quota_reset") ||
+            (patch.rateLimitSource === "quota_preflight" &&
+              sourceByScope[scope] !== "quota_preflight"));
         scopeCooldowns[scope] = existingIsAuthoritative
           ? scopeCooldowns[scope]
           : patch.rateLimitedUntil;
@@ -240,6 +256,7 @@ export function liftCodexScopeCooldownOnHeadroom(id: string, scope: "codex" | "s
 
   backupDbFile("pre-write");
   const wrote = db.transaction(() => {
+    if (!mayWriteCodexConnection(id)) return false;
     const existing = db
       .prepare("SELECT provider, provider_specific_data FROM provider_connections WHERE id = ?")
       .get(id);
@@ -309,10 +326,11 @@ export function liftCodexScopeCooldownOnHeadroom(id: string, scope: "codex" | "s
 export async function updateCodexScopeCooldown(
   id: string,
   scope: "codex" | "spark",
-  rateLimitedUntil: string
+  rateLimitedUntil: string,
+  source: "fallback" | "quota_preflight" = "fallback"
 ): Promise<JsonRecord | null> {
   return updateCodexScopedQuotaState(id, scope, {
     rateLimitedUntil,
-    rateLimitSource: "fallback",
+    rateLimitSource: source,
   });
 }

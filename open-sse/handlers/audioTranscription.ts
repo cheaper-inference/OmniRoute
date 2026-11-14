@@ -24,12 +24,25 @@ import {
   type AudioProvider,
 } from "../config/audioRegistry.ts";
 import { buildAuthHeaders } from "../config/registryUtils.ts";
+import { SafeOutboundFetchError, safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
+import { isSameOrigin } from "../utils/sameOrigin.ts";
 import { kieExecutor } from "../executors/kie.ts";
 import { vertexTranscribe } from "../executors/vertexMedia.ts";
+import {
+  GEMINI_LIVE_MAX_INPUT_BYTES,
+  geminiLiveTranscribe,
+} from "../executors/geminiLiveTranscribe.ts";
 import { errorResponse } from "../utils/error.ts";
 import { hasUnsafeModelIdSyntax } from "../utils/modelIdSafety.ts";
 import { isJsonObject } from "../utils/kieTask.ts";
 import { handleOpenRouterTranscription } from "./openrouterTranscription.ts";
+import {
+  buildCloudflareTranscriptionUrl,
+  cloudflareNova3ToVerboseJson,
+  readCloudflareEnvelopeError,
+  readCloudflareTranscript,
+  resolveCloudflareAccountId,
+} from "./cloudflareWorkersAiTranscription.ts";
 import { handleGrokTranscription } from "./grokMedia.ts";
 import { handleSyntxTranscription } from "./syntxAudio.ts";
 import {
@@ -41,6 +54,9 @@ import {
 type TranscriptionCredentials = {
   apiKey?: string;
   accessToken?: string;
+  /** Account-scoped providers (Cloudflare Workers AI) read their account id here. */
+  accountId?: string;
+  providerSpecificData?: Record<string, unknown> | null;
 };
 
 /**
@@ -247,6 +263,61 @@ async function handleDeepgramTranscription(
 }
 
 /**
+ * Handle Cloudflare Workers AI transcription (`@cf/deepgram/nova-3`): raw binary audio
+ * POSTed to the connection's account, Deepgram options as query params. The response
+ * mapping lives in cloudflareWorkersAiTranscription.ts.
+ */
+async function handleCloudflareWorkersAiTranscription(
+  providerConfig: AudioProvider,
+  file: Blob & { name?: unknown },
+  modelId: string,
+  token: string,
+  formData: FormData,
+  credentials?: TranscriptionCredentials | null
+) {
+  const accountId = resolveCloudflareAccountId(credentials);
+  if (!accountId) {
+    return audioErrorResponse(
+      400,
+      "Cloudflare Workers AI transcription requires an Account ID on the connection"
+    );
+  }
+
+  const url = buildCloudflareTranscriptionUrl(providerConfig.baseUrl, accountId, modelId);
+  url.searchParams.set("punctuate", "true");
+  const diarize = readDiarizationFlag(formData);
+  if (diarize) url.searchParams.set("diarize", "true");
+  const language = readFormString(formData, "language");
+  if (language) url.searchParams.set("language", language);
+
+  const res = await fetch(url.toString(), {
+    method: "POST",
+    headers: {
+      ...buildAuthHeaders(providerConfig, token),
+      "Content-Type": resolveAudioContentType(file),
+    },
+    body: await file.arrayBuffer(),
+  });
+  if (!res.ok) {
+    return upstreamErrorResponse(res, await res.text());
+  }
+
+  const data: unknown = await res.json();
+  const envelopeError = readCloudflareEnvelopeError(data);
+  if (envelopeError) {
+    const code = envelopeError.code === null ? "" : ` (code ${envelopeError.code})`;
+    return audioErrorResponse(502, `Cloudflare Workers AI transcription failed${code}`);
+  }
+
+  const verbose =
+    diarize || readFormString(formData, "response_format").toLowerCase() === "verbose_json";
+  const body = verbose
+    ? cloudflareNova3ToVerboseJson(data, language)
+    : { text: readCloudflareTranscript(data) };
+  return Response.json(body, { headers: { ...CORS_HEADERS } });
+}
+
+/**
  * Handle AssemblyAI transcription (async: upload file → submit → poll)
  */
 async function handleAssemblyAITranscription(providerConfig, file, modelId, token, formData) {
@@ -357,6 +428,12 @@ async function handleGladiaTranscription(providerConfig, file, modelId, token) {
   if (!resultUrl) {
     return errorResponse(502, "Gladia did not return a result_url");
   }
+  // The poll sends x-gladia-key, so only poll Gladia's own API origin. fetch() drops
+  // Authorization on a cross-origin redirect but keeps custom headers, so redirects are
+  // refused rather than followed.
+  if (!isSameOrigin(resultUrl, providerConfig.baseUrl)) {
+    return errorResponse(502, "Gladia returned a result_url outside its API origin");
+  }
 
   // Step 3: Poll for completion (max 120s)
   const maxWait = 120_000;
@@ -364,23 +441,62 @@ async function handleGladiaTranscription(providerConfig, file, modelId, token) {
 
   while (Date.now() - start < maxWait) {
     await new Promise((r) => setTimeout(r, 2000));
+    const polled = await pollGladiaResultOnce(resultUrl, authHeaders);
+    if (polled instanceof Response) return polled;
+    if (!polled) continue;
 
-    const pollRes = await fetch(resultUrl, { headers: authHeaders });
-    if (!pollRes.ok) continue;
-
-    const result = await pollRes.json();
-
-    if (result.status === "done") {
-      const text = result.result?.transcription?.full_transcript || "";
+    if (polled.status === "done") {
+      const text = polled.result?.transcription?.full_transcript || "";
       return Response.json({ text }, { headers: { ...CORS_HEADERS } });
     }
 
-    if (result.status === "error") {
-      return errorResponse(500, result.error_code || result.error || "Gladia transcription failed");
+    if (polled.status === "error") {
+      return errorResponse(500, polled.error_code || polled.error || "Gladia transcription failed");
     }
   }
 
   return errorResponse(504, "Gladia transcription timed out after 120s");
+}
+
+/**
+ * One Gladia result_url poll. Returns the JSON body on a successful HTTP response,
+ * an error Response when the URL redirects or resolves to a blocked address, or null
+ * when the attempt should be retried.
+ */
+type GladiaPollBody = {
+  status?: string;
+  error_code?: string;
+  error?: string;
+  result?: { transcription?: { full_transcript?: string } };
+};
+
+async function pollGladiaResultOnce(
+  resultUrl: string,
+  authHeaders: Record<string, string>
+): Promise<GladiaPollBody | Response | null> {
+  let pollRes: Response;
+  try {
+    pollRes = await safeOutboundFetch(resultUrl, {
+      headers: authHeaders,
+      guard: "public-only",
+      pinDns: true,
+      timeoutMs: 15_000,
+    });
+  } catch (err) {
+    const code = err instanceof SafeOutboundFetchError ? err.code : "";
+    if (code === "REDIRECT_BLOCKED") {
+      return errorResponse(502, "Gladia result_url answered with a redirect");
+    }
+    if (code === "URL_GUARD_BLOCKED") {
+      return errorResponse(502, "Gladia result_url resolves to a blocked address");
+    }
+    return null;
+  }
+  if (!pollRes.ok) {
+    await pollRes.body?.cancel().catch(() => {});
+    return null;
+  }
+  return (await pollRes.json()) as GladiaPollBody;
 }
 
 type SonioxToken = {
@@ -887,6 +1003,45 @@ async function handleSpeechmaticsTranscription(providerConfig, file, modelId, to
   return pollSpeechmaticsJob(`${baseUrl}/${jobId}`, authHeaders);
 }
 
+function optionalFormString(formData: FormData, key: string): string | undefined {
+  const value = formData.get(key);
+  return typeof value === "string" ? value : undefined;
+}
+
+/**
+ * Gemini Live (BidiGenerateContent WebSocket) file-mode transcription.
+ * Rejects oversized uploads before buffering them a second time.
+ */
+async function handleGeminiLiveTranscription(
+  providerConfig: AudioProvider,
+  file: Blob,
+  modelId: string | null,
+  credentials: TranscriptionCredentials | null | undefined,
+  formData: FormData,
+  signal?: AbortSignal | null
+): Promise<Response> {
+  if (file.size > GEMINI_LIVE_MAX_INPUT_BYTES) {
+    return errorResponse(413, "Audio file is too large for Gemini Live transcription");
+  }
+  try {
+    const text = await geminiLiveTranscribe(credentials ?? {}, {
+      model: modelId as string,
+      audioBuffer: Buffer.from(await file.arrayBuffer()),
+      prompt: optionalFormString(formData, "prompt"),
+      language: optionalFormString(formData, "language"),
+      baseUrl: providerConfig.baseUrl,
+      signal: signal ?? undefined,
+    });
+    return Response.json({ text }, { headers: { ...CORS_HEADERS } });
+  } catch (err) {
+    const error = err as { message?: string; status?: number };
+    return errorResponse(
+      typeof error?.status === "number" ? error.status : 500,
+      `Gemini Live transcription failed: ${error?.message || "unknown error"}`
+    );
+  }
+}
+
 function resolveTranscriptionToken(
   providerConfig: AudioProvider,
   credentials?: TranscriptionCredentials | null
@@ -909,6 +1064,7 @@ export async function handleAudioTranscription({
   resolvedProvider = null,
   resolvedModel = null,
   remoteMediaFetcher = null,
+  signal = null,
 }: {
   formData: FormData;
   credentials?: TranscriptionCredentials | null;
@@ -916,6 +1072,8 @@ export async function handleAudioTranscription({
   resolvedModel?: string | null;
   /** SSRF-hardened downloader for `url` input, injected by the API route. */
   remoteMediaFetcher?: RemoteMediaFetcher | null;
+  /** Client request abort signal; kills spawned helpers (Gemini Live ffmpeg) on disconnect. */
+  signal?: AbortSignal | null;
 }): Promise<Response> {
   const model = formData.get("model");
   if (typeof model !== "string" || !model) {
@@ -944,7 +1102,7 @@ export async function handleAudioTranscription({
   if (!providerConfig) {
     return errorResponse(
       400,
-      `No transcription provider found for model "${model}". Available: openai, openrouter, groq, deepgram, assemblyai, nvidia, huggingface, qwen, gladia, rev-ai, speechmatics`
+      `No transcription provider found for model "${model}". Available: openai, openrouter, groq, deepgram, assemblyai, nvidia, huggingface, qwen, gladia, rev-ai, speechmatics, gemini`
     );
   }
 
@@ -964,6 +1122,17 @@ export async function handleAudioTranscription({
   const file = resolvedFile.file;
 
   // Route to provider-specific handler
+  if (providerConfig.format === "gemini-live") {
+    return handleGeminiLiveTranscription(
+      providerConfig,
+      file,
+      modelId,
+      credentials,
+      formData,
+      signal
+    );
+  }
+
   if (providerConfig.format === "grok-stt") {
     return handleGrokTranscription(providerConfig, file, modelId, credentials, formData);
   }
@@ -996,6 +1165,17 @@ export async function handleAudioTranscription({
 
   if (providerConfig.format === "deepgram") {
     return handleDeepgramTranscription(providerConfig, file, modelId, token, formData);
+  }
+
+  if (providerConfig.format === "cloudflare-workers-ai") {
+    return handleCloudflareWorkersAiTranscription(
+      providerConfig,
+      file,
+      modelId as string,
+      token as string,
+      formData,
+      credentials
+    );
   }
 
   if (providerConfig.format === "assemblyai") {

@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  classifyAdaptiveResourcePressure,
+  classifyAdaptiveResourcePressureWithHistory,
   createResourcePressureTracker,
   resolveResourcePressureThresholds,
   type PressureReason,
@@ -88,6 +90,57 @@ describe("resource pressure threshold validation", () => {
 });
 
 describe("resource pressure policy", () => {
+  it("honors the explicit absolute heap threshold in the history-aware classifier", () => {
+    const thresholds = resolveResourcePressureThresholds({ heapAbsoluteThresholdMb: 200 });
+    const signals = baseSignals({
+      v8: { heapUsedBytes: 200 * MiB, heapLimitBytes: 1_000 * MiB },
+    });
+    const expected = { severity: "critical", reason: "v8_heap_absolute" };
+    assert.deepEqual(classifyAdaptiveResourcePressure(signals, thresholds), expected);
+    assert.deepEqual(classifyAdaptiveResourcePressureWithHistory(signals, thresholds), expected);
+  });
+
+  it("sustains absolute heap pressure until the existing recovery hysteresis clears", () => {
+    const tracker = createResourcePressureTracker({
+      ...fastThresholds,
+      heapAbsoluteThresholdMb: 200,
+    });
+    /**
+     * Builds a heap-only pressure sample with a fixed 1,000 MiB heap limit.
+     * @param heapUsedMb - Heap usage in MiB.
+     * @returns Resource signals with the requested heap usage and no cgroup or PSI data.
+     */
+    const sample = (heapUsedMb: number) =>
+      baseSignals({ v8: { heapUsedBytes: heapUsedMb * MiB, heapLimitBytes: 1_000 * MiB } });
+    assert.equal(tracker.observe(sample(201)).severity, "normal", "first sample is provisional");
+    assert.equal(tracker.observe(sample(201)).severity, "critical", "second sample is sustained");
+    assert.equal(tracker.getState().reason, "v8_heap_absolute");
+    assert.equal(tracker.observe(sample(180)).severity, "critical", "below fuse is not recovered");
+    assert.equal(tracker.observe(sample(140)).severity, "critical", "first clean recovery sample");
+    assert.equal(tracker.observe(sample(140)).severity, "normal", "second clean recovery sample");
+  });
+
+  it("keeps explicit null absolute-heap policy and ratio-based pressure independent", () => {
+    const thresholds = resolveResourcePressureThresholds({ heapAbsoluteThresholdMb: null });
+    const belowRatio = baseSignals({
+      v8: { heapUsedBytes: 201 * MiB, heapLimitBytes: 1_000 * MiB },
+    });
+    assert.deepEqual(classifyAdaptiveResourcePressureWithHistory(belowRatio, thresholds), {
+      severity: "normal",
+      reason: "none",
+    });
+    const tracker = createResourcePressureTracker({
+      ...fastThresholds,
+      heapAbsoluteThresholdMb: null,
+    });
+    const ratioCritical = baseSignals({
+      v8: { heapUsedBytes: 950 * MiB, heapLimitBytes: 1_000 * MiB },
+    });
+    tracker.observe(ratioCritical);
+    assert.equal(tracker.observe(ratioCritical).severity, "critical");
+    assert.equal(tracker.getState().reason, "v8_heap_ratio");
+  });
+
   it("does not let high then critical count as two critical samples", () => {
     const tracker = createResourcePressureTracker(fastThresholds);
     const high = baseSignals({
@@ -286,7 +339,7 @@ describe("resource pressure policy", () => {
     assert.equal(state.reason, "cgroup_high");
   });
 
-  it("reaches critical on the raw total charge with kernel throttling proof", () => {
+  it("reaches critical on a memory.high stall when anonymous memory dominates", () => {
     const tracker = createResourcePressureTracker(fastThresholds);
     const mk = (throttleHigh: number): ResourceSignals => ({
       ...baseSignals(),
@@ -294,7 +347,7 @@ describe("resource pressure policy", () => {
         currentBytes: 3_758_096_384,
         maxBytes: 5 * 1024 ** 3,
         highBytes: 3 * 1024 ** 3,
-        fileBytes: 3_221_225_472,
+        fileBytes: 500 * MiB,
         events: { low: 0, high: throttleHigh, max: 0, oom: 0, oom_kill: 0 },
       },
       psi: {
@@ -307,14 +360,155 @@ describe("resource pressure policy", () => {
         psiSource: "cgroup",
       },
     });
-    // Same raw total, but the kernel throttled (high counter rising across
-    // the window): the proof lets the guard reach critical on cgroup_high.
+    // The raw total is high and anonymous memory dominates; kernel throttling
+    // proof must still escalate to critical on cgroup_high.
     tracker.observe(mk(0));
     tracker.observe(mk(0));
     tracker.observe(mk(3));
     const state = tracker.observe(mk(5));
     assert.equal(state.severity, "critical");
     assert.equal(state.reason, "cgroup_high");
+  });
+
+  it("does not shed all traffic when memory.high only reclaims SQLite page cache", () => {
+    const tracker = createResourcePressureTracker({
+      ...fastThresholds,
+      sustainedSamplesRecovery: 1,
+    });
+    const sample = (
+      fileMb: number,
+      somePsi: number,
+      highEvents: number,
+      maxEvents = 0,
+      psiSource: "cgroup" | "host" = "cgroup"
+    ): ResourceSignals => ({
+      ...baseSignals(),
+      cgroup: {
+        currentBytes: 1_799 * MiB,
+        highBytes: 1_800 * MiB,
+        maxBytes: 2_300 * MiB,
+        fileBytes: fileMb * MiB,
+        events: { low: 0, high: highEvents, max: maxEvents, oom: 0, oom_kill: 0 },
+      },
+      psi: {
+        someAvg10: somePsi,
+        someAvg60: 0,
+        someAvg300: 0,
+        fullAvg10: somePsi,
+        fullAvg60: 0,
+        fullAvg300: 0,
+        psiSource,
+      },
+    });
+
+    // Reproduces the production incident: ~1 GiB file cache, ~790 MiB
+    // working set, 1800 MiB MemoryHigh and low local PSI. Reclaim increments
+    // memory.events.high, but that is not evidence of dangerous heap pressure.
+    tracker.observe(sample(1009, 0.36, 0));
+    tracker.observe(sample(1009, 0.36, 10));
+    assert.equal(tracker.observe(sample(1009, 0.36, 20)).severity, "high");
+
+    // Real 503s are still necessary when heap/anonymous charge dominates.
+    const anon = createResourcePressureTracker(fastThresholds);
+    anon.observe(sample(138, 4.26, 0));
+    anon.observe(sample(138, 4.26, 10));
+    assert.equal(anon.observe(sample(138, 4.26, 20)).severity, "critical");
+
+    // Sustained local PSI proves real stalls despite the page cache.
+    const stalled = createResourcePressureTracker(fastThresholds);
+    stalled.observe(sample(1009, 2, 0));
+    stalled.observe(sample(1009, 2, 10));
+    assert.equal(stalled.observe(sample(1009, 2, 20)).severity, "critical");
+
+    // Real memory.max events must never be hidden by the cache exception.
+    const maxed = createResourcePressureTracker(fastThresholds);
+    maxed.observe(sample(1009, 0.1, 0, 0));
+    maxed.observe(sample(1009, 0.1, 10, 1));
+    assert.equal(maxed.observe(sample(1009, 0.1, 20, 2)).severity, "critical");
+
+    // Without cgroup-local PSI we cannot prove that reclaim is cheap.
+    const host = createResourcePressureTracker(fastThresholds);
+    host.observe(sample(1009, 0, 0, 0, "host"));
+    host.observe(sample(1009, 0, 10, 0, "host"));
+    assert.equal(host.observe(sample(1009, 0, 20, 0, "host")).severity, "critical");
+  });
+
+  it("releases an old cgroup.high critical latch after low-stall cache reclaim", () => {
+    const tracker = createResourcePressureTracker({
+      ...fastThresholds,
+      sustainedSamplesRecovery: 1,
+    });
+    const make = (fileMb: number, psiAvg: number, highEvents: number): ResourceSignals => ({
+      ...baseSignals(),
+      cgroup: {
+        currentBytes: 1_799 * MiB,
+        highBytes: 1_800 * MiB,
+        maxBytes: 2_300 * MiB,
+        fileBytes: fileMb * MiB,
+        events: { low: 0, high: highEvents, max: 0, oom: 0, oom_kill: 0 },
+      },
+      psi: {
+        someAvg10: psiAvg,
+        someAvg60: 0,
+        someAvg300: 0,
+        fullAvg10: psiAvg,
+        fullAvg60: 0,
+        fullAvg300: 0,
+        psiSource: "cgroup",
+      },
+    });
+    tracker.observe(make(138, 4.26, 0));
+    tracker.observe(make(138, 4.26, 10));
+    assert.equal(tracker.observe(make(138, 4.26, 20)).severity, "critical");
+    // The raw charge is still > recoveryRatio * memory.high, but it is
+    // mostly reclaimable cache and the local stall has disappeared.
+    assert.equal(tracker.observe(make(1009, 0.36, 20)).severity, "normal");
+  });
+
+  it("keeps a critical memory.high latch when a new memory.max event arrives", () => {
+    const tracker = createResourcePressureTracker({
+      ...fastThresholds,
+      sustainedSamplesRecovery: 1,
+    });
+    const sample = (
+      currentMb: number,
+      fileMb: number,
+      highEvents: number,
+      maxEvents: number
+    ): ResourceSignals => ({
+      ...baseSignals(),
+      cgroup: {
+        currentBytes: currentMb * MiB,
+        highBytes: 1_800 * MiB,
+        maxBytes: 2_300 * MiB,
+        fileBytes: fileMb * MiB,
+        events: { low: 0, high: highEvents, max: maxEvents, oom: 0, oom_kill: 0 },
+      },
+      psi: {
+        someAvg10: 0,
+        someAvg60: 0,
+        someAvg300: 0,
+        fullAvg10: 0,
+        fullAvg60: 0,
+        fullAvg300: 0,
+        psiSource: "cgroup",
+      },
+    });
+
+    // First produce a genuine critical cgroup.high state.
+    tracker.observe(sample(1_710, 100, 0, 0));
+    tracker.observe(sample(1_710, 100, 1, 0));
+    assert.equal(tracker.observe(sample(1_710, 100, 2, 0)).severity, "critical");
+
+    // The new sample is high (85% of memory.high, below criticalRatio).
+    // Although its working set is tiny, memory.max incremented. It must
+    // not make the recovery test ignore total memory and clear the latch.
+    const withMaxEvent = tracker.observe(sample(1_530, 1_000, 2, 1));
+    assert.equal(withMaxEvent.severity, "critical");
+    assert.equal(withMaxEvent.reason, "cgroup_high");
+
+    // The next stable sample can recover once the max counter stops rising.
+    assert.equal(tracker.observe(sample(1_530, 1_000, 2, 1)).severity, "normal");
   });
 
   it("keeps snapshot state fields and bounded-cardinality values", () => {

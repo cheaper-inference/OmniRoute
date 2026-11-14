@@ -121,6 +121,7 @@ const keyLimitsSchedule: ApiKeyAccessData = {
   usageLimitEnabled: true,
   dailyUsageLimitUsd: 25.5,
   weeklyUsageLimitUsd: 150,
+  fiveHourUsageLimitUsd: 3,
 };
 
 const keyBehaviourToggles: ApiKeyAccessData = {
@@ -186,6 +187,7 @@ const unrestrictedState: ApiKeyAccessFormState = {
   usageLimitEnabled: false,
   dailyUsageLimitUsd: "",
   weeklyUsageLimitUsd: "",
+  fiveHourUsageLimitUsd: "",
   chaosModeEnabled: false,
   forcedModel: "",
 };
@@ -252,6 +254,7 @@ test("initial state matches the legacy modal: limits + schedule (USD limits beco
     usageLimitEnabled: true,
     dailyUsageLimitUsd: "25.5",
     weeklyUsageLimitUsd: "150",
+    fiveHourUsageLimitUsd: "3",
   });
 });
 
@@ -382,6 +385,7 @@ test("PATCH body matches the legacy handler: unrestricted key", () => {
     usageLimitEnabled: false,
     dailyUsageLimitUsd: null,
     weeklyUsageLimitUsd: null,
+    fiveHourUsageLimitUsd: null,
     chaosModeEnabled: false,
     forcedModel: null,
   });
@@ -423,6 +427,7 @@ test("PATCH body matches the legacy handler: restricted models + combos", () => 
     usageLimitEnabled: false,
     dailyUsageLimitUsd: null,
     weeklyUsageLimitUsd: null,
+    fiveHourUsageLimitUsd: null,
     chaosModeEnabled: false,
     forcedModel: null,
   });
@@ -463,6 +468,7 @@ test("PATCH body matches the legacy handler: connections restricted", () => {
     usageLimitEnabled: false,
     dailyUsageLimitUsd: null,
     weeklyUsageLimitUsd: null,
+    fiveHourUsageLimitUsd: null,
     chaosModeEnabled: false,
     forcedModel: null,
   });
@@ -512,6 +518,7 @@ test("PATCH body matches the legacy handler: limits + schedule", () => {
     usageLimitEnabled: true,
     dailyUsageLimitUsd: 25.5,
     weeklyUsageLimitUsd: 150,
+    fiveHourUsageLimitUsd: 3,
     chaosModeEnabled: false,
     forcedModel: null,
   });
@@ -552,6 +559,7 @@ test("PATCH body matches the legacy handler: behaviour toggles", () => {
     usageLimitEnabled: false,
     dailyUsageLimitUsd: null,
     weeklyUsageLimitUsd: null,
+    fiveHourUsageLimitUsd: null,
     chaosModeEnabled: true,
     forcedModel: null,
   });
@@ -613,6 +621,7 @@ test("PATCH body matches the legacy handler after edits (sanitize, clamp, filter
     usageLimitEnabled: true,
     dailyUsageLimitUsd: null,
     weeklyUsageLimitUsd: null,
+    fiveHourUsageLimitUsd: null,
     chaosModeEnabled: false,
     forcedModel: null,
   });

@@ -1,21 +1,131 @@
-import { BaseExecutor } from "./base.ts";
+import { BaseExecutor, type ExecuteInput, type ExecutorExecuteResult } from "./base.ts";
 import { PROVIDERS } from "../config/constants.ts";
 
-type CloudflareCredentials = {
+export type CloudflareProviderSpecificData = {
+  accountId?: string;
+  authType?: string;
+  email?: string;
+};
+
+export type CloudflareCredentials = {
   apiKey?: string;
   accessToken?: string;
   accountId?: string;
-  providerSpecificData?: {
-    accountId?: string;
-  } | null;
+  providerSpecificData?: CloudflareProviderSpecificData | null;
 } | null;
+
+export const CLOUDFLARE_ACCOUNT_ID_REQUIRED =
+  "Cloudflare Workers AI requires an Account ID. " +
+  "Add it in provider settings under 'Account ID'. " +
+  "Find it at: https://dash.cloudflare.com (right sidebar).";
+
+/** Share the executor's account selection with the read-only credential probe. */
+export function resolveCloudflareAccountBase(credentials: CloudflareCredentials) {
+  const accountId =
+    credentials?.providerSpecificData?.accountId ||
+    credentials?.accountId ||
+    process.env.CLOUDFLARE_ACCOUNT_ID;
+  return {
+    accountUrl: accountId
+      ? `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(accountId)}`
+      : null,
+  };
+}
+
+/** API tokens use Bearer; explicitly selected legacy Global API Keys need both headers. */
+export function buildCloudflareAuthHeaders(
+  credentials: CloudflareCredentials
+): Record<string, string> {
+  const key = credentials?.apiKey || credentials?.accessToken;
+  if (credentials?.providerSpecificData?.authType === "global") {
+    const email = credentials.providerSpecificData.email;
+    if (!email) throw new Error("Cloudflare Global API Key authentication requires an email.");
+    return { "X-Auth-Email": email, "X-Auth-Key": key || "" };
+  }
+  return { Authorization: `Bearer ${key}` };
+}
+
+/** True when the outgoing body turns thinking off (`none` effort or `enable_thinking: false`). */
+function requestsThinkingOff(body: unknown): boolean {
+  if (!body || typeof body !== "object") return false;
+  const b = body as Record<string, unknown>;
+  const kwargs = b.chat_template_kwargs as Record<string, unknown> | undefined;
+  return b.reasoning_effort === "none" || kwargs?.enable_thinking === false;
+}
+
+/**
+ * With thinking off, Workers AI returns qwen3-30b-a3b's whole answer in
+ * `reasoning_content`/`reasoning` with `content: null` (verified live 2026-11-05), so a
+ * client that reads `content` gets an empty reply. Move it back. Only called when the
+ * request turned thinking off: with thinking on, a reasoning-only message is a turn that
+ * stopped inside its chain of thought, and promoting it would pass that off as the answer.
+ * Returns null when no choice needed the fix.
+ */
+export function promoteReasoningOnlyAnswer(payload: unknown): Record<string, unknown> | null {
+  const record = payload as Record<string, unknown> | null;
+  if (!record || typeof record !== "object" || !Array.isArray(record.choices)) return null;
+  let changed = false;
+  const choices = (record.choices as unknown[]).map((choice) => {
+    const message = (choice as Record<string, unknown> | null)?.message as
+      Record<string, unknown> | undefined;
+    if (!message || (message.content !== null && message.content !== "")) return choice;
+    if (Array.isArray(message.tool_calls) && message.tool_calls.length > 0) return choice;
+    const answer = [message.reasoning_content, message.reasoning].find(
+      (value) => typeof value === "string" && value.length > 0
+    );
+    if (answer === undefined) return choice;
+    const next: Record<string, unknown> = { ...message, content: answer };
+    delete next.reasoning_content;
+    delete next.reasoning;
+    changed = true;
+    return { ...(choice as Record<string, unknown>), message: next };
+  });
+  return changed ? { ...record, choices } : null;
+}
+
+function promotedBody(text: string): string {
+  try {
+    const promoted = promoteReasoningOnlyAnswer(JSON.parse(text));
+    return promoted ? JSON.stringify(promoted) : text;
+  } catch {
+    return text; // Not JSON after all: the caller's parser reports it, not this rewrite.
+  }
+}
+
+/**
+ * The rewrite runs as the caller reads the body, not here: execute() is timed as
+ * response-start, and chatCore applies its body timeout and Content-Length cap to the read
+ * that follows. The upstream headers stay, so that cap still sees the declared size.
+ */
+function withPromotedAnswer(response: Response): Response {
+  const isJson = (response.headers.get("content-type") || "").includes("json");
+  if (!response.ok || !response.body || !isJson) return response;
+  const decoder = new TextDecoder();
+  let text = "";
+  const body = response.body.pipeThrough(
+    new TransformStream<Uint8Array, Uint8Array>({
+      transform(chunk) {
+        text += decoder.decode(chunk, { stream: true });
+      },
+      flush(controller) {
+        text += decoder.decode();
+        controller.enqueue(new TextEncoder().encode(promotedBody(text)));
+      },
+    })
+  );
+  return new Response(body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  });
+}
 
 /**
  * CloudflareAIExecutor — handles dynamic URL construction with accountId.
  * Cloudflare Workers AI uses the authenticated user's account ID in the URL.
  *
  * URL pattern: https://api.cloudflare.com/client/v4/accounts/{accountId}/ai/v1/chat/completions
- * Auth: Bearer <API Token>
+ * Auth: Bearer <API Token>, or X-Auth-Email + X-Auth-Key for a Global API Key
  * Docs: https://developers.cloudflare.com/workers-ai/
  *
  * Free tier: 10,000 Neurons/day = ~150 LLM responses or 500s Whisper audio
@@ -33,27 +143,15 @@ export class CloudflareAIExecutor extends BaseExecutor {
     _urlIndex = 0,
     credentials: CloudflareCredentials = null
   ): string {
-    // Account ID can be stored in providerSpecificData or at top level credentials
-    const accountId =
-      credentials?.providerSpecificData?.accountId ||
-      credentials?.accountId ||
-      process.env.CLOUDFLARE_ACCOUNT_ID;
-
-    if (!accountId) {
-      throw new Error(
-        "Cloudflare Workers AI requires an Account ID. " +
-          "Add it in provider settings under 'Account ID'. " +
-          "Find it at: https://dash.cloudflare.com (right sidebar)."
-      );
-    }
-
-    return `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/v1/chat/completions`;
+    const { accountUrl } = resolveCloudflareAccountBase(credentials);
+    if (!accountUrl) throw new Error(CLOUDFLARE_ACCOUNT_ID_REQUIRED);
+    return `${accountUrl}/ai/v1/chat/completions`;
   }
 
   buildHeaders(credentials: CloudflareCredentials, stream = true): Record<string, string> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${credentials.apiKey || credentials.accessToken}`,
+      ...buildCloudflareAuthHeaders(credentials),
     };
 
     if (stream) {
@@ -61,6 +159,18 @@ export class CloudflareAIExecutor extends BaseExecutor {
     }
 
     return headers;
+  }
+
+  /**
+   * @executorRecovery native
+   * @executorRecoveryReason Every request goes through the base recovery loop unchanged; only a successful non-streaming thinking-off reply is rewritten afterwards.
+   * @executorRecoveryTest tests/unit/cloudflare-ai-reasoning-only-content.test.ts
+   */
+  async execute(input: ExecuteInput): Promise<ExecutorExecuteResult> {
+    const result = await super.execute(input);
+    if (input.stream || result instanceof Response) return result;
+    if (!requestsThinkingOff(result.transformedBody ?? input.body)) return result;
+    return { ...result, response: withPromotedAnswer(result.response) };
   }
 
   transformRequest(

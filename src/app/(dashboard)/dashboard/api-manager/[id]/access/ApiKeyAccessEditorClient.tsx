@@ -4,7 +4,7 @@ import Icon from "@/shared/components/Icon";
 
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { buttonVariants } from "@omniroute/ui-kit/button";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
@@ -13,6 +13,7 @@ import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import { CardSkeleton } from "@/shared/components/Loading";
 import { useNotificationStore } from "@/store/notificationStore";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { getProviderDisplayName } from "@/lib/display/names";
 import { compareTr, matchesSearch } from "@/shared/utils/turkishText";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
@@ -80,7 +81,7 @@ function useAccessFormContext({
   const form = useApiKeyAccessForm(apiKey, t);
 
   const handleTabKeyDown = useAccessTabKeyboard(switchTab, tabListRef);
-  useAccessNavigationGuard(form.isDirty, t);
+  const navigationConfirmDialog = useAccessNavigationGuard(form.isDirty, t);
   const { permissionModels, filteredModelsByProvider } = useAccessModelGroups(
     allModels,
     searchModel,
@@ -112,6 +113,7 @@ function useAccessFormContext({
     setSearchModel,
     allCombos,
     allConnections,
+    navigationConfirmDialog,
   };
 }
 function useAccessTabKeyboard(
@@ -167,6 +169,8 @@ function isLeavingAccessPage(e: MouseEvent): boolean {
   return true;
 }
 function useAccessNavigationGuard(isDirty: boolean, t: ReturnType<typeof useTranslations>) {
+  const router = useRouter();
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   // Dirty navigation guard (browser close / reload)
   useEffect(() => {
     if (!isDirty) return;
@@ -183,14 +187,21 @@ function useAccessNavigationGuard(isDirty: boolean, t: ReturnType<typeof useTran
     if (!isDirty) return;
     const handleDocumentClick = (e: MouseEvent) => {
       if (!isLeavingAccessPage(e)) return;
-      if (!window.confirm(t("unsavedChangesWarning"))) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
+      const anchor = (e.target as Element).closest("a") as HTMLAnchorElement;
+      // The kit dialog is asynchronous: hold the navigation and follow the link only once
+      // the user confirms. Cancel leaves the user on the page with the edits intact.
+      e.preventDefault();
+      e.stopPropagation();
+      const destination = `${anchor.pathname}${anchor.search}${anchor.hash}`;
+      void requestConfirm(t("unsavedChangesWarning")).then((ok) => {
+        if (ok) router.push(destination);
+      });
     };
     document.addEventListener("click", handleDocumentClick, true);
     return () => document.removeEventListener("click", handleDocumentClick, true);
-  }, [isDirty, t]);
+  }, [isDirty, t, requestConfirm, router]);
+
+  return confirmDialog;
 }
 function useAccessModelGroups(
   allModels: Model[],
@@ -394,6 +405,7 @@ function AccessLimitsPanelPanelContent({ context }: { context: AccessFormContext
       setUsageLimitEnabled={form.setUsageLimitEnabled}
       setDailyUsageLimitUsd={form.setDailyUsageLimitUsd}
       setWeeklyUsageLimitUsd={form.setWeeklyUsageLimitUsd}
+      setFiveHourUsageLimitUsd={form.setFiveHourUsageLimitUsd}
       errors={form.tabErrors.limits}
     />
   );
@@ -471,7 +483,7 @@ function AccessTabBar({ context }: { context: AccessFormContext }) {
             {errorCount > 0 && " "}
             {errorCount > 0 && (
               <span
-                className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-error text-bg"
+                className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-semibold bg-error text-bg"
                 title={t("errorBadgeLabel", { count: errorCount })}
               >
                 <span aria-hidden="true">{errorCount}</span>
@@ -584,6 +596,7 @@ function ApiKeyAccessEditorForm(props: ApiKeyAccessEditorFormProps) {
         <AccessPanel context={context} />
       </Tabs>
       <AccessSaveBar context={context} />
+      {context.navigationConfirmDialog}
     </div>
   );
 }
@@ -829,7 +842,7 @@ export default function ApiKeyAccessEditorClient({ apiKeyId }: ApiKeyAccessEdito
           <Icon name="key_off" size={24} />
         </div>
         <div className="flex flex-col gap-1">
-          <h2 className="text-xl font-bold text-text-main">{t("keyNotFound")}</h2>
+          <h2 className="text-xl font-semibold text-text-main">{t("keyNotFound")}</h2>
           <p className="text-sm text-text-muted">{t("keyNotFoundDesc")}</p>
         </div>
         <Link href="/dashboard/api-manager" className={buttonVariants({ variant: "outline" })}>
@@ -848,7 +861,9 @@ export default function ApiKeyAccessEditorClient({ apiKeyId }: ApiKeyAccessEdito
           <Icon name="error" size={24} />
         </div>
         <div className="flex flex-col gap-1">
-          <h2 className="text-xl font-bold text-text-main">{fetchError || t("failedLoadKey")}</h2>
+          <h2 className="text-xl font-semibold text-text-main">
+            {fetchError || t("failedLoadKey")}
+          </h2>
         </div>
         <Link href="/dashboard/api-manager" className={buttonVariants({ variant: "outline" })}>
           <Icon name="arrow_back" size={16} />

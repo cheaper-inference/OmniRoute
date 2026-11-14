@@ -1,1 +1,0 @@
-- **fix(bootstrap):** inline comments after unquoted values in env files are now ignored, so annotating a variable no longer changes the value read at boot ([#18116](https://github.com/cheaper-inference/OmniRoute/pull/18116)) — thanks @maxmad64bis

@@ -1,4 +1,4 @@
-// README strategies grid (18 of the 20 combo routing strategies, one animated tile each) in the
+// README strategies grid (18 of the 22 combo routing strategies, one animated tile each) in the
 // Cheaper Inference UI Kit style (KEA-6307). The output is committed as
 // docs/diagrams/strategies-grid.svg; tests/unit/docs/readme-strategies-grid-svg.test.ts fails
 // when the committed file no longer matches this generator, so a stale picture cannot ship.
@@ -7,14 +7,14 @@
 //
 // Every tile is rendered from the TILES data below (name, caption, four target slots, the
 // request dots and their windows); STRATEGIES_GRID_COPY (derived from it) is both the drawn text
-// and the subset input for the embedded fonts. The "16-factor" claim stays in <text> because
+// and what the outlining step shapes. The "16-factor" claim stays in <text> because
 // scripts/check/check-docs-counts-sync.mjs reads it from the raw file. The grid shows 18 of the
-// 20 strategies by design — the README table next to it carries cache-optimized and
-// quota-weighted; do not add or remove tiles here.
+// 22 strategies by design — the README table next to it carries cache-optimized,
+// quota-weighted, expiry-first and jev; do not add or remove tiles here.
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { buildFontFaceCss } from "./readme-fonts.mjs";
-import { svgOpen, gridDefs, esc } from "./readme-diagram-theme.mjs";
+import { outlineSvg } from "./readme-outline.mjs";
+import { svgOpen, gridDefs, esc, afterKicker } from "./readme-diagram-theme.mjs";
 
 // Slot geometry inside a 173 × 158 tile: the request leaves (26,79), the four targets sit at
 // SLOT_Y; tracks end at the slot edge, dots stop just before it.
@@ -246,7 +246,7 @@ const TILES = [
 ];
 
 export const STRATEGIES_GRID_COPY = {
-  kicker: ["COMBO ROUTING · 18 OF 20 STRATEGY FLOWS"],
+  kicker: ["COMBO ROUTING · 18 OF 22 STRATEGY FLOWS"],
   legend: [
     "● request → ▮ targets — each tile animates the path its strategy takes · ",
     "green outline = the pick",
@@ -292,7 +292,7 @@ function tile(T, i) {
   const begin = n(0.22 * i);
   const dur = T.dur.toFixed(1);
   const parts = [];
-  // The one lime moment per tile: the request origin.
+  // The one accent moment per tile: the request origin.
   parts.push(
     `<circle cx="20" cy="79" r="4" class="accent stroke-ink" stroke-width="1.6"/><circle cx="20" cy="79" r="1.6" class="ink"/>`
   );
@@ -312,8 +312,8 @@ function tile(T, i) {
     if (tag) {
       parts.push(
         T.tagsInside
-          ? `<text x="${SLOT_X + 13}" y="${y + 3.5}" text-anchor="middle" class="mono-xs" style="fill:var(--ink)">${esc(tag)}</text>`
-          : `<text x="${SLOT_X + 31}" y="${y + 3}" class="mono-xs">${esc(tag)}</text>`
+          ? `<text x="${SLOT_X + 13}" y="${y + 3.5}" text-anchor="middle" class="label-xs" style="fill:var(--ink)">${esc(tag)}</text>`
+          : `<text x="${SLOT_X + 31}" y="${y + 3}" class="label-xs">${esc(tag)}</text>`
       );
     }
     if (T.check === k)
@@ -338,27 +338,21 @@ function tile(T, i) {
 
 export async function renderStrategiesGrid() {
   const C = STRATEGIES_GRID_COPY;
-  const { css } = await buildFontFaceCss({
-    ui: [...C.legend, ...C.captions].join(""),
-    mono: [...C.kicker, ...C.names, ...C.tags].join(""),
-  });
-
-  return (
+  return outlineSvg(
     svgOpen({
       viewBox: "0 0 1200 644",
       title:
-        "Animated examples for 18 of OmniRoute's 20 combo routing strategies. The cache-optimized and quota-weighted strategies are documented in the adjacent routing table.",
+        "Animated examples for 18 of OmniRoute's 22 combo routing strategies. The cache-optimized, quota-weighted, expiry-first and jev strategies are documented in the adjacent routing table.",
       desc: "Animated grid of 18 routing-strategy tiles; static tracks show each flow on the first frame while a small dot repeatedly travels the path each illustrated strategy takes. Light and dark follow the viewer's color scheme.",
-      fontFaceCss: css,
     }) +
-    gridDefs("sg-grid") +
-    `  <rect class="bg" x="0" y="0" width="1200" height="644"/>\n` +
-    `  <rect x="0" y="0" width="1200" height="644" fill="url(#sg-grid)"/>\n` +
-    `  <text x="40" y="52" class="kicker">${esc(C.kicker[0])}</text>\n` +
-    `  <line x1="430" y1="47" x2="1160" y2="47" class="rule" stroke-width="1"/>\n` +
-    `  <text x="40" y="80" class="body">${esc(C.legend[0])}<tspan style="fill:var(--ok)">${esc(C.legend[1])}</tspan></text>\n` +
-    TILES.map(tile).join("") +
-    "</svg>\n"
+      gridDefs("sg-grid") +
+      `  <rect class="bg" x="0" y="0" width="1200" height="644"/>\n` +
+      `  <rect x="0" y="0" width="1200" height="644" fill="url(#sg-grid)"/>\n` +
+      `  <text x="40" y="52" class="kicker">${esc(C.kicker[0])}</text>\n` +
+      `  <line x1="${afterKicker(40, C.kicker[0])}" y1="47" x2="1160" y2="47" class="rule" stroke-width="1"/>\n` +
+      `  <text x="40" y="80" class="body">${esc(C.legend[0])}<tspan style="fill:var(--ok)">${esc(C.legend[1])}</tspan></text>\n` +
+      TILES.map(tile).join("") +
+      "</svg>\n"
   );
 }
 

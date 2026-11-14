@@ -5,10 +5,11 @@ import {
   getTeam,
   getTeamBudgetWindowStart,
 } from "@/lib/db/teams";
-import { calculateCostDetailed } from "./costCalculator";
+import { computeCostFromPricing, resolvePricingRow } from "./costCalculator";
 import { buildErrorBody, sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { toNumber } from "@/shared/utils/numeric";
-import { parseShapeCounts } from "@/lib/usage/teamCostShapes";
+import { isAnthropicMessagesRequest } from "@/shared/utils/anthropicErrorEnvelope";
+import { parseShapeCounts, type TeamCostShape } from "@/lib/usage/teamCostShapes";
 
 export interface TeamUsageLimitStatus {
   teamId: string;
@@ -44,8 +45,44 @@ function roundUsd(value: number): number {
   return Math.round(value * 1_000_000) / 1_000_000;
 }
 
+type PricingMemo = Map<string, Promise<Record<string, unknown> | null>>;
+
+// The pricing row is resolved once per provider/model for one budget check, with the same
+// lookup chain as calculateCostDetailed (resolvePricingRow). The memo is local to the check,
+// so a price change shows in the next check.
+// A failed lookup reads as unpriced, so the budget check fails closed as it did before.
+async function priceShape(
+  memo: PricingMemo,
+  row: CostRow,
+  tokens: TeamCostShape
+): Promise<{ costUsd: number; priced: boolean }> {
+  const memoKey = `${row.provider}\n${row.model}`;
+  let lookup = memo.get(memoKey);
+  if (!lookup) {
+    lookup = resolvePricingRow(row.provider, row.model).catch((error) => {
+      console.error("Error calculating cost:", error);
+      return null;
+    });
+    memo.set(memoKey, lookup);
+  }
+  const pricing = await lookup;
+  if (!pricing) return { costUsd: 0, priced: false };
+  try {
+    const costUsd = computeCostFromPricing(pricing, tokens, {
+      provider: row.provider,
+      model: row.model,
+      serviceTier: row.serviceTier || "standard",
+    });
+    return { costUsd, priced: true };
+  } catch (error) {
+    console.error("Error calculating cost:", error);
+    return { costUsd: 0, priced: false };
+  }
+}
+
 async function calculateRows(
-  rows: CostRow[]
+  rows: CostRow[],
+  memo: PricingMemo
 ): Promise<{ estimatedListCostUsd: number; hasUnpricedUsage: boolean }> {
   let total = 0;
   let hasUnpricedUsage = false;
@@ -57,27 +94,18 @@ async function calculateRows(
     }
     const shapes = parseShapeCounts(row.tokenShapesJson, toNumber(row.requests));
     if (!shapes.length) {
-      const result = await calculateCostDetailed(
-        row.provider,
-        row.model,
-        {
-          input: toNumber(row.inputTokens),
-          output: toNumber(row.outputTokens),
-          cacheRead: toNumber(row.cacheReadTokens),
-          cacheCreation: toNumber(row.cacheCreationTokens),
-          reasoning: toNumber(row.reasoningTokens),
-        },
-        { provider: row.provider, model: row.model, serviceTier: row.serviceTier || "standard" }
-      );
+      const result = await priceShape(memo, row, {
+        input: toNumber(row.inputTokens),
+        output: toNumber(row.outputTokens),
+        cacheRead: toNumber(row.cacheReadTokens),
+        cacheCreation: toNumber(row.cacheCreationTokens),
+        reasoning: toNumber(row.reasoningTokens),
+      });
       total += result.costUsd;
       hasUnpricedUsage ||= !result.priced || Boolean(row.retained);
     } else {
       for (const { shape, count } of shapes) {
-        const result = await calculateCostDetailed(row.provider, row.model, shape, {
-          provider: row.provider,
-          model: row.model,
-          serviceTier: row.serviceTier || "standard",
-        });
+        const result = await priceShape(memo, row, shape);
         total += result.costUsd * count;
         hasUnpricedUsage ||= !result.priced;
       }
@@ -154,8 +182,9 @@ async function getCommittedTeamEstimatedListCostUsd(
       completeSummaryEndDateExclusive: resetDate,
     }) as CostRow[];
 
-  const raw = await calculateRows(rawRows);
-  const retained = await calculateRows(summaryRows);
+  const memo: PricingMemo = new Map();
+  const raw = await calculateRows(rawRows, memo);
+  const retained = await calculateRows(summaryRows, memo);
   return {
     estimatedListCostUsd: roundUsd(raw.estimatedListCostUsd + retained.estimatedListCostUsd),
     hasUnpricedUsage: raw.hasUnpricedUsage || retained.hasUnpricedUsage,
@@ -203,15 +232,6 @@ export async function getTeamUsageLimitStatusForTeam(
     hasUnpricedUsage: spend.hasUnpricedUsage,
     exceeded: spend.estimatedListCostUsd >= maxBudgetUsd || spend.hasUnpricedUsage,
   };
-}
-
-function isAnthropicMessagesRequest(request: Request): boolean {
-  if (request.headers.has("anthropic-version")) return true;
-  try {
-    return new URL(request.url).pathname.endsWith("/v1/messages");
-  } catch {
-    return false;
-  }
 }
 
 export async function buildTeamUsageLimitPolicyRejection(

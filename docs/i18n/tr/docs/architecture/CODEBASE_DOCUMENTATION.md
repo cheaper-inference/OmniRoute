@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -487,11 +487,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 üst düzey yürütücü modül (`*.ts` eksi `base.ts`, `index.ts` ve testler - `npm run check:docs-counts` ölçümlerinin sayısı). Her yürütücü sınıfı `BaseExecutor` (`base.ts`) doğrudan veya `DefaultExecutor` veya başka bir yürütücü aracılığıyla genişletir; geri kalan modüller sağlayıcı başına yardımcılardır (araç şemaları, fetch/TTS bağdaştırıcıları, tuhaf işleyiciler). Yürütücüler şunları içerir:
+159 üst düzey yürütücü modül (`*.ts` eksi `base.ts`, `index.ts` ve — sayımı `npm run check:docs-counts` ölçümlerini test eder). Her yürütücü sınıfı `BaseExecutor` (`base.ts`) doğrudan veya `DefaultExecutor` veya başka bir yürütücü aracılığıyla genişletir; geri kalan modüller sağlayıcı başına yardımcılardır (araç şemaları, fetch/TTS bağdaştırıcıları, tuhaf işleyiciler). Yürütücüler şunları içerir:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts` (paylaşılan kimlik yardımcısı) ve `index.ts` (kayıt defteri).
 
-> Not: Burada listelenmeyen sağlayıcılar, genel OpenAI uyumlu yürütücü kullanılarak `default.ts` tarafından sunulur. Sağlayıcı kataloğunun tamamı (377 sağlayıcı) `src/shared/constants/providers.ts` bulunmaktadır.
+> Not: Burada listelenmeyen sağlayıcılar, genel OpenAI uyumlu yürütücü kullanılarak `default.ts` tarafından sunulur. Sağlayıcı kataloğunun tamamı (381 sağlayıcı) `src/shared/constants/providers.ts` bulunmaktadır.
 
 ### 4.3 `open-sse/translator/`
 
@@ -529,16 +529,16 @@ Hub ve bağlı bileşen çevirisi (OpenAI hub'dır).
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 benzersiz araç** `server.ts` kablolu ( `schemas/tools.ts` + belleği, beceriler, GitHub becerileri, havuz, oyunlaştırma, eklenti, Notion, Obsidian, yerel derlem ve sıkıştırma modüllerinde 45 kanonik - `countUniqueMcpTools` tarafından sayılan birleşim).
+- **110 benzersiz araç** `server.ts` kablolu ( `schemas/tools.ts` + belleği, beceriler, GitHub becerileri, havuz, oyunlaştırma, eklenti, Notion, Obsidian, yerel derlem ve — birliği `countUniqueMcpTools` tarafından sayılan sıkıştırma modüllerinde 45 kanonik).
 - **3 taşıma** : stdio, HTTP Yayınlanabilir, SSE.
-- **33 kapsam** çalışma zamanında uygulanır - `src/shared/constants/mcpScopes.ts` temel liste, tam set, her araç modülü tarafından bildirilen kapsamların birleşimidir.
+- **33 kapsam** `src/shared/constants/mcpScopes.ts` — base list çalışma zamanında uygulanan tam set, her araç modülü tarafından bildirilen kapsamların birleşimidir.
 - Denetim tablosu: `mcp_tool_audit` ( `audit.ts` tarafından doldurulur).
 - Dosyalar: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts` ve ayrıca `__tests__/` altında testler.
 - Araç kataloğunun tamamı için [MCP-SERVER.md](../frameworks/MCP-SERVER.md) bakın.
 
 ### 4.7 `open-sse/config/`
 
-Sağlayıcı kayıtları (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), formata özel model kayıtları (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), kimlik yardımcıları (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, zqq , `cliFingerprints.ts` `defaultThinkingSignature.ts` `toolCloaking.ts`, kimlik bilgileri yardımcılar (`credentialLoader.ts`, `codexClient.ts`) ve bulut bağdaştırıcıları (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `petals.ts`, `oci.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
+Provider registries (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), per-format model registries (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), identity helpers (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`), credential helpers (`credentialLoader.ts`, `codexClient.ts`), and cloud adapters (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 

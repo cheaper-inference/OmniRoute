@@ -107,41 +107,42 @@ satu permukaan tanpa yang lain akan menggagalkan suite dan bukannya menyimpang s
 
 ---
 
-## 1. Katalog Kod CLI (27 alat)
+## 1. Katalog Kod CLI (28 alatan)
 
-Semua alat yang dipaparkan dalam `/dashboard/cli-code`. Alat dengan `baseUrlSupport: none` disambungkan melalui MITM atau panduan manual dan bukannya URL asas tersuai:
+Semua alatan yang muncul dalam `/dashboard/cli-code`. Mereka yang mempunyai `baseUrlSupport: none` disambungkan melalui MITM atau panduan manual dan bukannya URL asas tersuai :
 
-| id           | nama                         | vendor                     | sokongan URL asas | jenis konfigurasi | boleh dicetuskan ACP |
-| ------------ | ---------------------------- | -------------------------- | ----------------- | ----------------- | -------------------- |
-| claude       | Claude Code                  | Anthropic                  | full              | env               | true                 |
-| codex        | OpenAI Codex CLI             | OpenAI                     | full              | custom            | true                 |
-| zcode        | ZCode (Pelan Pengekodan GLM) | Z.ai                       | none              | custom            | false                |
-| cline        | Cline                        | OSS (dahulunya Claude Dev) | full              | custom            | true                 |
-| kilo         | Kilo Code                    | Kilo-Org                   | full              | custom            | false                |
-| roo          | Roo Code                     | Roo (OSS)                  | full              | guide             | false                |
-| continue     | Continue                     | continue.dev               | full              | guide             | false                |
-| aider        | Aider                        | OSS (P. Gauthier)          | full              | guide             | true                 |
-| forge        | ForgeCode                    | Antinomy HQ                | full              | custom            | true                 |
-| jcode        | jcode                        | 1jehuang (OSS)             | full              | custom            | false                |
-| deepseek-tui | DeepSeek TUI                 | Hunter Bown (OSS)          | full              | custom            | false                |
-| codewhale    | CodeWhale                    | Hmbown (OSS)               | full              | custom            | false                |
-| opencode     | OpenCode                     | Anomaly (dahulunya SST)    | full              | guide             | true                 |
-| droid        | Factory Droid                | Factory AI                 | partial           | guide             | false                |
-| copilot      | GitHub Copilot CLI           | GitHub/MS                  | full              | custom            | false                |
-| cursor-cli   | Cursor CLI                   | Anysphere                  | partial           | guide             | true                 |
-| smelt        | Smelt                        | leonardcser (OSS)          | full              | custom            | false                |
-| pi           | Pi (pi-coding-agent)         | M. Zechner (OSS)           | full              | custom            | false                |
-| grok-build   | Grok Build                   | xAI                        | full              | custom            | false                |
-| crush        | Crush                        | OSS (Charm)                | full              | custom            | false                |
-| qwen         | Qwen Code                    | Alibaba                    | full              | guide             | true                 |
-| zed          | Zed                          | Zed Industries             | full              | guide             | false                |
-| cursor       | Cursor                       | Anysphere                  | none              | guide             | false                |
-| antigravity  | Antigravity                  | Google                     | none              | mitm              | false                |
-| hermes       | Hermes                       | Nous Research              | none              | guide             | false                |
-| kiro         | Kiro AI                      | Amazon                     | none              | mitm              | false                |
-| custom       | CLI Tersuai                  | —                          | full              | custom-builder    | false                |
+| id            | nama                           | vendor                 | baseUrlSupport | configType      | acpSpawnable |
+| ------------- | ------------------------------ | ---------------------- | -------------- | --------------- | ------------ |
+| claude        | Kod Claude                     | Anthropic              | penuh          | env             | benar        |
+| codex         | OpenAI Codex CLI               | OpenAI                 | penuh          | adat            | benar        |
+| zcode         | ZCode ( Pelan Pengekodan GLM ) | Z.ai                   | tiada          | adat            | palsu        |
+| cline         | Cline                          | OSS (bekas Claude Dev) | penuh          | adat            | benar        |
+| sekilo        | Kod Kilo                       | Kilo-Org               | penuh          | adat            | palsu        |
+| roo           | Kod Roo                        | Roo (OSS)              | penuh          | panduan         | palsu        |
+| teruskan      | teruskan                       | teruskan.dev           | penuh          | panduan         | palsu        |
+| pembantu      | Penolong                       | OSS (P. Gauthier)      | penuh          | panduan         | benar        |
+| memalsukan    | ForgeCode                      | Antinomi HQ            | penuh          | adat            | benar        |
+| jcode         | jcode                          | 1jehuang (OSS)         | penuh          | adat            | palsu        |
+| deepseek-tui  | DeepSeek TUI                   | Hunter Bown (OSS)      | penuh          | adat            | palsu        |
+| paus kod      | CodeWhale                      | Hmbown (OSS)           | penuh          | adat            | palsu        |
+| kod terbuka   | OpenCode                       | Anomali (ex-SST)       | penuh          | panduan         | benar        |
+| droid         | Droid kilang                   | AI kilang              | separa         | panduan         | palsu        |
+| kopilot       | GitHub Copilot CLI             | GitHub/MS              | penuh          | adat            | palsu        |
+| kursor-cli    | Cursor CLI                     | Anysphere              | separa         | panduan         | benar        |
+| terbau        | terhidu                        | leonardcser (OSS)      | penuh          | adat            | palsu        |
+| pi            | Pi (ejen pengekodan pi)        | M. Zechner (OSS)       | penuh          | adat            | palsu        |
+| grok-build    | Grok Membina                   | xAI                    | penuh          | adat            | palsu        |
+| menghancurkan | Hancurkan                      | OSS (Pesona)           | penuh          | adat            | palsu        |
+| qwen          | Kod Qwen                       | Alibaba                | penuh          | panduan         | benar        |
+| openclaude    | OpenClaude                     | Gitlawb (OSS)          | penuh          | panduan         | palsu        |
+| zed           | Zed                            | Zed Industries         | penuh          | panduan         | palsu        |
+| kursor        | Cursor                         | Anysphere              | tiada          | panduan         | palsu        |
+| antigraviti   | Antigravity                    | Google                 | tiada          | mitm            | palsu        |
+| hermes        | Hermes                         | Penyelidikan Nous      | tiada          | panduan         | palsu        |
+| kiro          | Kiro AI                        | Amazon                 | tiada          | mitm            | palsu        |
+| adat          | CLI tersuai                    | —                      | penuh          | pembina tersuai | palsu        |
 
-Alat dengan `baseUrlSupport: "partial"` memaparkan lencana "⚠ URL Asas Separa" pada kad papan pemuka.
+Alat dengan `baseUrlSupport: "partial"` menunjukkan lencana "⚠ Base URL parcial" dalam kad papan pemuka.
 ---
 
 ## 2. Katalog Ejen CLI (11 alatan)
@@ -221,20 +222,20 @@ interface ToolBatchStatus {
 
 ## 6. Pengendali Tetapan untuk Alat Baharu
 
-Alat baharu dengan `configType: "custom"` mempunyai laluan API tetapan khusus:
+Alat baharu dengan `configType: "custom"` mempunyai tetapan khusus laluan API :
 
-| Laluan                                      | Alat                                                                   |
-| ------------------------------------------- | ---------------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                |
-| `POST /api/cli-tools/jcode-settings`        | jcode (flag --base-url)                                                |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, legasi)                                 |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, utama + penyegerakan legasi `~/.deepseek`) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                  |
-| `POST /api/cli-tools/pi-settings`           | Ejen pengekodan Pi                                                     |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                  |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + kekunci `.env` khusus)            |
+| Laluan                                      | alat                                                                    |
+| ------------------------------------------- | ----------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                 |
+| `POST /api/cli-tools/jcode-settings`        | jcode ( bendera --base-url )                                            |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, warisan)                                 |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, penyegerakan `~/.deepseek` warisan + utama) |
+| `POST /api/cli-tools/smelt-settings`        | terhidu                                                                 |
+| `POST /api/cli-tools/pi-settings`           | Ejen pengekodan pi (`~/.pi/agent/models.json`, `providers.omniroute`)   |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Bina (~/.grok/config.toml, `[model.omniroute]`)                    |
+| `POST /api/cli-tools/qwen-settings`         | Kod Qwen ( kunci `.env` khusus + `~/.qwen/settings.json` )              |
 
-Semua laluan menggunakan `sanitizeErrorMessage()` untuk respons ralat (Peraturan Tegas #12).
+Semua laluan menggunakan `sanitizeErrorMessage()` untuk respons ralat (Peraturan Keras #12).
 
 ---
 
@@ -293,11 +294,11 @@ Terjemahan penuh PT-BR dan EN disediakan. 39 lokal lain kembali kepada EN secara
 
 ## 9. Mula Pantas
 
-### Langkah 1 — Dapatkan Kunci API OmniRoute
+### Langkah 1 — Dapatkan Kunci OmniRoute API
 
-1. Buka `/dashboard/api-manager` → **Cipta Kunci API**
-2. Berikannya nama (cth. `cli-tools`) dan pilih semua kebenaran
-3. Salin kunci tersebut — anda memerlukannya untuk setiap CLI di bawah
+1. Buka `/dashboard/api-manager` →** Cipta Kunci API**
+2. Beri nama (cth `cli-tools`) dan pilih semua kebenaran
+3. Salin — kunci yang anda perlukan untuk setiap CLI di bawah
 
 > Kunci anda kelihatan seperti: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
@@ -305,7 +306,7 @@ Terjemahan penuh PT-BR dan EN disediakan. 39 lokal lain kembali kepada EN secara
 
 ### Langkah 2 — Pasang Alat CLI
 
-Semua alat berasaskan npm memerlukan Node.js 22.22.2+ atau 24.x:
+Semua alat berasaskan npm memerlukan Node.js 22.22.2 + atau 24.x:
 
 ```bash
 # Claude Code (Anthropic)
@@ -326,20 +327,20 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (boleh dilancarkan melalui `omniroute run gemini` → permukaan /v1beta)
+# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Berasaskan Rust
+cargo install smelt  # Rust-based
 
-# Ejen pengekodan Pi
-# lihat https://github.com/zechnerj/pi-coding-agent untuk pemasangan
+# Pi coding agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# lihat https://github.com/1jehuang/jcode untuk pemasangan
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
@@ -349,35 +350,34 @@ cargo install smelt  # Berasaskan Rust
 1. Pergi ke `http://localhost:20128/dashboard/cli-code`
 2. Cari alat anda dalam grid
 3. Klik kad untuk membuka halaman butiran alat
-4. Pilih kunci API dan URL asas anda
-5. Klik **Gunakan Konfigurasi** atau salin coretan konfigurasi manual
+4. Pilih kunci API anda dan URL asas
+5. klik** Gunakan Konfigurasi** atau salin coretan konfigurasi manual
 
 ---
 
-### Langkah 4 — Tetapkan Pemboleh Ubah Persekitaran Global
+### Langkah 4 — Tetapkan Pembolehubah Persekitaran Global
 
 ```bash
-# Titik Akhir Universal OmniRoute
+# OmniRoute Universal Endpoint
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI membaca GOOGLE_GEMINI_BASE_URL pada AKAR (SDK-nya menambahkan /v1beta/... sendiri)
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> Untuk **pelayan jauh**, gantikan `localhost:20128` dengan IP atau domain pelayan,
-> cth. `http://<your-server-ip>:20128`.
+> Untuk a** pelayan jauh** gantikan `localhost:20128` dengan pelayan IP atau domain, cth `http://<your-server-ip>:20128`.
 
 ---
 
-### Langkah 4 — Konfigurasikan Setiap Alat
+### Langkah 4 — Konfigurasi Setiap Alat
 
-#### Claude Code
+#### Kod Claude
 
 ```bash
-# Cipta ~/.claude/settings.json:
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -388,7 +388,7 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Gunakan akar get laluan Anthropic bersepadu untuk Claude Code. Jangan tambahkan `/v1` di sini.
+Gunakan akar get laluan Anthropic bersatu untuk Kod Claude. Jangan tambahkan `/v1` di sini.
 
 **Ujian:** `claude "say hello"`
 
@@ -396,10 +396,7 @@ Gunakan akar get laluan Anthropic bersepadu untuk Claude Code. Jangan tambahkan 
 
 #### OpenAI Codex
 
-Codex moden (v0.137+) hanya membaca `~/.codex/config.toml` — fail lama
-`config.yaml` adalah milik CLI npm legasi dan diabaikan tanpa sebarang pemberitahuan. Kunci API
-kekal dalam pemboleh ubah persekitaran `OMNIROUTE_API_KEY` (`env_key`), dan tidak pernah
-berada di dalam fail:
+Codex moden (v0.137 +) membaca `~/.codex/config.toml` sahaja — `config.yaml` lama kepunyaan npm CLI warisan dan diabaikan secara senyap. Kunci API kekal dalam pembolehubah persekitaran `OMNIROUTE_API_KEY` (`env_key`), tidak pernah berada di dalam fail:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -447,14 +444,44 @@ EOF
 
 **Ujian:** `opencode`
 
-> Gunakan `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
-> untuk menghantar varian pemikiran.
+> Gunakan `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` untuk menghantar varian pemikiran.
 
 ---
 
-#### Cline (CLI atau VS Code)
+#### Ejen Pengekodan Pi
 
-**Mod CLI:**
+Pasang pakej Ejen Pengekodan Pi rasmi dengan `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`. Pi membaca pembekal tersuai daripada `~/.pi/agent/models.json`; tetapkan `PI_CODING_AGENT_DIR` untuk mengalihkan keseluruhan direktori ejen. Papan pemuka mengikuti penggantian itu. Pi tidak menemui model daripada titik akhir tersuai, jadi OmniRoute menulis model yang dipilih dalam `models[]` menggunakan `openai-completions` API Pi dan titik akhir `/v1` yang serasi OpenAI OmniRoute.
+
+Dalam**CLI Alat → Pi** , pilih titik akhir, kunci API dan model, semak pratonton pembekal, kemudian gunakan. Pratonton ialah serpihan penyedia: gabungkan `providers.omniroute` ke dalam `models.json` sedia ada anda apabila mengkonfigurasi Pi secara manual supaya pembekal dan tetapan lain kekal utuh.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi memuatkan semula `models.json` apabila anda membuka `/model`. Uji laluan yang dikonfigurasikan dengan id pembekal dan id model yang anda pilih:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Rujukan: [Model Pi dan pembekal tersuai](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pembolehubah persekitaran Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [arahan pemasangan Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
+
+---
+
+#### Cline ( Kod CLI atau VS )
+
+**mod CLI :**
 
 ```bash
 mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
@@ -466,22 +493,21 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**Mod VS Code:**
-Tetapan sambungan Cline → Penyedia API: `OpenAI Compatible` → URL Asas: `http://localhost:20128/v1`
+**Mod kod VS :** tetapan sambungan Cline → API : `OpenAI Compatible` → Pangkalan URL: `http://localhost:20128/v1`
 
-Atau gunakan papan pemuka OmniRoute → **Alat CLI → Cline → Gunakan Konfigurasi**.
+Atau gunakan papan pemuka OmniRoute →**CLI Alat → Cline → Gunakan Konfigurasi** .
 
 ---
 
-#### KiloCode (CLI atau VS Code)
+#### KiloCode ( Kod CLI atau VS )
 
-**Mod CLI:**
+**mod CLI :**
 
 ```bash
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**Tetapan VS Code:**
+**Tetapan kod VS :**
 
 ```json
 {
@@ -490,11 +516,11 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-Atau gunakan papan pemuka OmniRoute → **Alat CLI → KiloCode → Gunakan Konfigurasi**.
+Atau gunakan papan pemuka OmniRoute →**CLI Alat → KiloCode → Gunakan Konfigurasi** .
 
 ---
 
-#### Continue (Sambungan VS Code)
+#### Teruskan ( Sambungan Kod VS )
 
 Edit `~/.continue/config.yaml`:
 
@@ -508,11 +534,11 @@ models:
     default: true
 ```
 
-Mulakan semula VS Code selepas mengedit.
+Mulakan semula Kod VS selepas mengedit.
 
 ---
 
-#### VS Code Insiders (`chatLanguageModels.json`)
+#### Orang Dalam Kod VS (`chatLanguageModels.json`)
 
 Gunakan ini apabila VS Code Insiders dikonfigurasikan untuk model titik akhir tersuai dan anda mahu OmniRoute berfungsi tanpa medan pengepala tersuai.
 
@@ -521,7 +547,7 @@ Gunakan ini apabila VS Code Insiders dikonfigurasikan untuk model titik akhir te
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**Contoh menggunakan alias OmniRoute bertoken:**
+**Contoh menggunakan alias OmniRoute token:**
 
 ```json
 [
@@ -545,27 +571,26 @@ Gunakan ini apabila VS Code Insiders dikonfigurasikan untuk model titik akhir te
 
 **Nota:**
 
-- Gantikan `sk-your-omniroute-key` dengan kunci API yang dicipta dalam OmniRoute.
-- Medan `url` hendaklah menghala ke `/api/v1/vscode/{token}/chat/completions`.
-- Medan `modelsUrl` hendaklah menghala ke `/api/v1/vscode/{token}/models`.
-- Utamakan aliran biasa `/v1` + pengepala Bearer apabila klien menyokong pengepala tersuai.
-- Token yang dibenamkan dalam URL ialah pilihan sandaran keserasian dan mungkin muncul dalam log editor atau sejarah proksi.
+- Gantikan `sk-your-omniroute-key` dengan kunci API yang dibuat dalam OmniRoute.
+- Medan `url` hendaklah menunjuk kepada `/api/v1/vscode/{token}/chat/completions`.
+- Medan `modelsUrl` hendaklah menunjuk kepada `/api/v1/vscode/{token}/models`.
+- Lebih suka aliran pengepala Pembawa `/v1` + biasa apabila pelanggan menyokong pengepala tersuai.
+- Token tertanam URL ialah sandaran keserasian dan mungkin muncul dalam log editor atau sejarah proksi.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# Log masuk ke akaun AWS/Kiro anda:
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# CLI menggunakan pengesahannya sendiri — OmniRoute tidak diperlukan sebagai bahagian belakang untuk Kiro CLI itu sendiri.
-# Gunakan kiro-cli bersama OmniRoute untuk alatan lain.
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-Untuk aplikasi desktop **Kiro IDE**, gunakan titik akhir MITM yang didedahkan oleh OmniRoute
-di bawah `/dashboard/cli-tools → Kiro`.
+Untuk**Kiro IDE** apl desktop, gunakan titik akhir MITM yang didedahkan oleh OmniRoute di bawah `/dashboard/cli-tools → Kiro`.
 
 ---
 

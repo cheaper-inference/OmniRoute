@@ -197,8 +197,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
   }, [rows, poolId, t]);
 
   // Dense inline editor rows: kit controls at a compact height.
-  const inputCls = "h-7 min-h-7 px-1.5 text-[11px]";
-  const selectCls = "ci-select-native--sm h-7 min-h-7 text-[11px]";
+  const inputCls = "h-8 min-h-8 px-1.5 text-xs";
 
   return (
     <div className="mt-2 pt-2 border-t border-border">
@@ -207,7 +206,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
         size="sm"
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
-        className="h-7 min-h-7 w-full justify-start gap-1 px-1 text-[10px] font-bold uppercase tracking-wide text-text-muted"
+        className="h-7 min-h-7 w-full justify-start gap-1 px-1 text-[10px] font-semibold uppercase tracking-wide text-text-muted"
       >
         <Icon
           name="chevron_right"
@@ -222,12 +221,12 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
 
       {open && (
         <div className="mt-1.5 flex flex-col gap-2">
-          <p className="text-[11px] text-text-muted leading-snug">{t("schedulesHint")}</p>
+          <p className="text-xs text-text-muted leading-snug">{t("schedulesHint")}</p>
 
           {!loaded ? (
-            <div className="text-[11px] text-text-muted italic">{t("loading")}</div>
+            <div className="text-xs text-text-muted italic">{t("loading")}</div>
           ) : rows.length === 0 ? (
-            <div className="text-[11px] text-text-muted italic">{t("schedulesEmpty")}</div>
+            <div className="text-xs text-text-muted italic">{t("schedulesEmpty")}</div>
           ) : (
             <div className="flex flex-col gap-2">
               {rows.map((row, index) => (
@@ -251,7 +250,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                         patchRow(index, { mode: e.target.value as DraftSchedule["mode"] })
                       }
                       aria-label={t("schedulesMode")}
-                      selectClassName={selectCls}
+                      nativeSize="xs"
                     >
                       <option value="allow">{t("schedulesModeAllow")}</option>
                       <option value="block">{t("schedulesModeBlock")}</option>
@@ -266,7 +265,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                           onClick={() => toggleDay(index, day)}
                           aria-pressed={row.days.includes(day)}
                           title={initial}
-                          className={`size-6 min-h-6 text-[10px] font-bold ${
+                          className={`size-6 min-h-6 text-[10px] font-semibold ${
                             row.days.includes(day) ? "text-primary" : "text-text-muted"
                           }`}
                         >
@@ -298,7 +297,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                     />
 
                     <Button
-                      variant="ghost"
+                      variant="destructive-ghost"
                       size="icon-sm"
                       onClick={() => {
                         setRows((prev) => prev.filter((_, i) => i !== index));
@@ -306,7 +305,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                       }}
                       title={t("schedulesRemove")}
                       aria-label={t("schedulesRemove")}
-                      className="ml-auto text-text-muted hover:bg-error/10 hover:text-error"
+                      className="ml-auto"
                     >
                       <Icon name="delete" size={14} />
                     </Button>
@@ -344,7 +343,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                           className="flex flex-wrap items-center gap-1.5 pl-3"
                         >
                           <Select
-                            selectClassName={selectCls}
+                            nativeSize="xs"
                             value={rule.window}
                             onChange={(e) =>
                               patchReserve(index, ruleIndex, {
@@ -418,7 +417,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                         inputClassName={`${inputCls} w-24`}
                       />
                       <Select
-                        selectClassName={selectCls}
+                        nativeSize="xs"
                         value={row.budgetUnit ?? ""}
                         disabled={row.budgetValue === undefined}
                         onChange={(e) =>
@@ -437,7 +436,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                         ))}
                       </Select>
                       <Select
-                        selectClassName={selectCls}
+                        nativeSize="xs"
                         value={row.budgetWindow}
                         disabled={row.budgetValue === undefined}
                         onChange={(e) =>

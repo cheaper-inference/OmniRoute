@@ -14,7 +14,7 @@ OmniRoute er en lokal AI rutinggateway og dashbord bygget på Next.js. Den gir e
 
 Kjernefunksjoner:
 
-- OpenAI-kompatibel API overflate for CLI/tools (377 leverandører, 156 eksekveringsmoduler)
+- OpenAI-kompatibel API overflate for CLI/tools (381 leverandører, 159 eksekveringsmoduler)
 - Request/response -oversettelse på tvers av leverandørformater
 - Modell combo fallback (multi-modell sekvens)
 - Strukturerte kombinasjonstrinn (`provider + model + connection`) med kjøretidsbestilling etter `compositeTiers`
@@ -72,7 +72,7 @@ Kjernefunksjoner:
 - Hybrid tokentelling ( `/messages/count_tokens` på leverandørsiden med estimert reserve)
 - Modellalias automatisk seeding (30 + kryssproxy-dialektnormaliseringer ved oppstart)
 - Sikker utgående henting med SSRF vakt, privat URL blokkering og konfigurerbart forsøk på nytt
-- Nedkjølingsbevisste chatteforsøk med konfigurerbare `requestRetry` og `maxRetryIntervalSec`
+- Nedkjølingsbevisste chat-forsøk på nytt med konfigurerbare `requestRetry` og `maxRetryIntervalSec`
 - Kjøretidsmiljøvalidering med Zod ved oppstart
 - Samsvarsrevisjon v2 med paginering, leverandør- CRUD hendelser og SSRF-blokkert valideringslogging
 
@@ -414,7 +414,7 @@ For regelsettforfatting og terskeljustering, se [`docs/security/GUARDRAILS.md`](
 - Connection/model regel snekker: `src/domain/connectionModelRules.ts`
 - Øyeblikksbilder av modelltilgjengelighet: `src/domain/modelAvailability.ts`
 - Leverandørens utløpssporing: `src/domain/providerExpiration.ts`
-- Kvotebuffer: `src/domain/quotaCache.ts`
+- Quota cache: `src/domain/quotaCache.ts`. Providers add and remove quota windows (OpenAI dropped the 5-hour Codex window for some plans), so a usage reading the provider's adapter attests as complete (`quotasComplete`, see `src/lib/usage/usageReading.ts`) is the account's full window set: a window known earlier but absent from it is retired, in the cache, in the `quota_snapshots` a restart rehydrates (an appended retirement record), in the persisted Codex quota state and in Claude's saturation buckets. Partial evidence (response headers, stale copies) only updates the windows it carries.
 - Nedbrytningstilstand: `src/domain/degradation.ts`
 - Konfigurasjonsrevisjon: `src/domain/configAudit.ts`
 - OmniRoute respons metadatabygger: `src/domain/omnirouteResponseMeta.ts`

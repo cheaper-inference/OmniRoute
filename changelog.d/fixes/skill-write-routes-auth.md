@@ -1,0 +1,1 @@
+- Require a dashboard session or a manage-scoped key on `/api/agent-skills/generate`, `/api/skills/marketplace/install` and `/api/skills/skillssh/install` even when login is disabled.

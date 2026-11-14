@@ -1,3 +1,4 @@
+import { CODEX_ULTRAFAST_MODEL_LABEL } from "@/lib/providers/codexServiceTierModels";
 // Pure, shared helpers for the provider-detail page and its extracted modals
 // (Issue #3501 strangler-fig decomposition, Phase 2). Leaf module — imports only
 // from @/shared, @/lib and colocated sibling modules that are themselves acyclic,
@@ -173,6 +174,8 @@ export function validationErrorMessage(error: unknown): string | null {
 export interface TestAllModelOutcome {
   status: "ok" | "error";
   isQuota?: boolean;
+  /** The runner never dispatched this probe: neither working nor broken. */
+  skipped?: boolean;
   shouldHide: boolean;
 }
 type TestAllEntryStatus = "ok" | "error" | "slow";
@@ -224,6 +227,7 @@ export function evaluateTestAllEntry(
     // so an evening Test All on a free-tier provider doesn't silently wipe the
     // catalog for the next day.
     ...(entry?.isQuota ? { isQuota: true } : {}),
+    ...(!ok && entry?.skipped ? { skipped: true } : {}),
     // Hide only persistent failures. Transient (rate-limited, timeout, quota) are
     // surfaced on the icon but kept visible so a single throttled batch test
     // does not silently wipe the catalog.
@@ -243,6 +247,50 @@ export function testAllResultsText(
   total: number
 ): string {
   return providerText(t, "testAllResults", "{ok} of {total} models working", { ok, total });
+}
+
+/**
+ * Running counts for a "Test all models" batch. Skipped probes (a web-session
+ * provider's models are never dispatched) are neither working nor failing.
+ */
+export interface TestAllTally {
+  ok: number;
+  error: number;
+  skipped: number;
+  /** The runner's reason for the first skipped probe, shown in the summary. */
+  skipReason?: string;
+}
+
+/** Count one model's Test All outcome; `reason` is the entry's error message. */
+export function recordTestAllOutcome(
+  tally: TestAllTally,
+  outcome: Pick<TestAllModelOutcome, "status" | "skipped">,
+  reason?: string
+): void {
+  if (outcome.skipped) {
+    tally.skipped++;
+    tally.skipReason ??= reason;
+  } else if (outcome.status === "ok") {
+    tally.ok++;
+  } else {
+    tally.error++;
+  }
+}
+
+/**
+ * The toast lines for a finished "Test all models" batch: the count covers only
+ * the models that were tested, then the runner's skip reason is shown, as the
+ * single-model test does.
+ */
+export function testAllSummaryMessages(
+  t: ProviderMessageTranslator,
+  tally: TestAllTally
+): string[] {
+  const { ok, error, skipped, skipReason } = tally;
+  const tested = ok + error;
+  const messages = tested > 0 || skipped === 0 ? [testAllResultsText(t, ok, tested)] : [];
+  if (skipped > 0 && skipReason) messages.push(skipReason);
+  return messages.length > 0 ? messages : [testAllResultsText(t, ok, tested)];
 }
 
 export function providerCountText(
@@ -276,6 +324,7 @@ export const CONFIGURABLE_BASE_URL_PROVIDERS = new Set([
   "xiaomi-mimo",
   "siliconflow",
   "heroku",
+  "cerebrium",
   "databricks",
   "snowflake",
   "searxng-search",
@@ -393,6 +442,8 @@ export function getProviderBaseUrlHint(
       return t ? t("xiaomiMimoBaseUrlHint") : undefined;
     case "heroku":
       return t ? t("herokuBaseUrlHint") : undefined;
+    case "cerebrium":
+      return t ? t("cerebriumBaseUrlHint") : undefined;
     case "databricks":
       return t ? t("databricksBaseUrlHint") : undefined;
     case "snowflake":
@@ -412,6 +463,7 @@ const BUILTIN_BASE_URL_PLACEHOLDER_EXAMPLES: Readonly<Record<string, string>> = 
   "azure-openai": "https://my-resource.openai.azure.com",
   siliconflow: "https://api.siliconflow.cn/v1",
   heroku: "https://us.inference.heroku.com",
+  cerebrium: "https://api.cerebrium.ai/v4/p-xxxxxxxx/my-app/run",
   databricks: "https://adb-1234567890123456.7.azuredatabricks.net/serving-endpoints",
   snowflake: "https://example-account.snowflakecomputing.com",
   "searxng-search": "http://localhost:8888/search",
@@ -600,11 +652,15 @@ export function isModelHiddenFn(
   return false;
 }
 
+/** Providers whose runtime normalizes tool call ids when no flag is set (mirrors getModelNormalizeToolCallId). */
+const NORMALIZE_TOOL_CALL_ID_DEFAULT_PROVIDERS = new Set(["mistral"]);
+
 export function effectiveNormalizeForProtocol(
   modelId: string,
   protocol: string,
   customMap: CompatModelMap,
-  overrideMap: CompatModelMap
+  overrideMap: CompatModelMap,
+  providerId?: string
 ): boolean {
   const c = customMap.get(modelId);
   const o = overrideMap.get(modelId);
@@ -613,7 +669,10 @@ export function effectiveNormalizeForProtocol(
     return Boolean(pc.normalizeToolCallId);
   }
   if (c?.normalizeToolCallId) return true;
-  return Boolean(o?.normalizeToolCallId);
+  const hasOwnFlag = (row: unknown) =>
+    Boolean(row) && Object.prototype.hasOwnProperty.call(row, "normalizeToolCallId");
+  if (hasOwnFlag(c) || hasOwnFlag(o)) return Boolean(o?.normalizeToolCallId);
+  return NORMALIZE_TOOL_CALL_ID_DEFAULT_PROVIDERS.has(providerId ?? "");
 }
 
 export function effectivePreserveForProtocol(
@@ -703,6 +762,7 @@ export const CODEX_ACCOUNT_SERVICE_TIER_VALUES: CodexServiceTier[] = [
   "default",
   "priority",
   "flex",
+  "ultrafast",
 ];
 
 export const CODEX_FINGERPRINT_MODE_VALUES = ["off", "device", "session", "full"] as const;
@@ -781,6 +841,7 @@ export function getCodexServiceTierLabel(
   if (value === "none") {
     return providerText(t, "codexServiceModeNone", "No global setting");
   }
+  if (value === "ultrafast") return CODEX_ULTRAFAST_MODEL_LABEL;
   if (value === "default") return providerText(t, "codexServiceTierDefault", "Default");
   if (value === "priority") return providerText(t, "codexServiceTierPriority", "Priority");
   return providerText(t, "codexServiceTierFlex", "Flex");

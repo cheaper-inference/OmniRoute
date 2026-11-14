@@ -20,6 +20,11 @@ import {
   GROK_BUILD_OAUTH_SCOPES,
   GROK_BUILD_TOKEN_URL,
 } from "@omniroute/open-sse/config/grokBuild.ts";
+import {
+  MINIMAX_CODE_AUDIENCE,
+  MINIMAX_CODE_SCOPE,
+  resolveMinimaxCodeAccountBase,
+} from "@omniroute/open-sse/config/minimaxCode.ts";
 import { resolvePublicCred } from "@omniroute/open-sse/utils/publicCreds.ts";
 import { CURSOR_AGENT_CLI_VERSION } from "@omniroute/open-sse/utils/cursorAgentCliVersionPin.ts";
 import { buildGitLabOAuthEndpoints, GITLAB_DUO_DEFAULT_BASE_URL } from "../gitlab";
@@ -203,6 +208,17 @@ export const OPENFERENCE_CONFIG = {
   callbackHost: "127.0.0.1",
 };
 
+// RenderHour OAuth Configuration (Authorization Code Flow with PKCE, public client).
+// A RenderHour subscription pays in plan credits; renderhour.com accepts a loopback
+// redirect on any port (RFC 8252 §7.3). No scopes: the token acts for the account.
+export const RENDERHOUR_CONFIG = {
+  clientId: resolvePublicCred("renderhour_id"),
+  authorizeUrl: "https://renderhour.com/oauth/authorize",
+  tokenUrl: "https://renderhour.com/api/oauth/token",
+  userinfoUrl: "https://renderhour.com/api/oauth/userinfo",
+  codeChallengeMethod: "S256",
+};
+
 // Muse Code (Meta) OAuth — RFC 8628 device grant + subscription key mint.
 // Public CLI client id (Muse Code CLI); PKCE is not used on this grant.
 export const MUSE_CODE_CONFIG = {
@@ -210,6 +226,36 @@ export const MUSE_CODE_CONFIG = {
   deviceCodeUrl: "https://auth.meta.com/oidc/device/authorization/",
   tokenUrl: "https://auth.meta.com/oidc/device/token/",
   mintUrl: "https://api.meta.ai/muse-code/key",
+};
+
+// MiniMax Code OAuth Configuration (Device Code Flow, RFC 8628 + S256-PKCE).
+//
+// The account host follows the region of the local MiniMax Code profile — the
+// same region the CLI and the gateway use — so a credential the dashboard
+// writes is refreshed by the host the CLI talks to.
+//
+// The public client id comes from resolvePublicCred() (never a literal): it is
+// the client the MiniMax Code CLI itself registers with.
+const MINIMAX_CODE_ACCOUNT_BASE = resolveMinimaxCodeAccountBase(process.env.MINIMAX_CODE_REGION);
+
+export interface MinimaxCodeOAuthConfig {
+  clientId: string;
+  scope: string;
+  audience: string;
+  accountBase: string;
+  deviceCodeUrl: string;
+  tokenUrl: string;
+  /** Test seam: the account call uses the global fetch when this is unset. */
+  fetchImpl?: typeof fetch;
+}
+
+export const MINIMAX_CODE_CONFIG: MinimaxCodeOAuthConfig = {
+  clientId: resolvePublicCred("minimax_id"),
+  scope: MINIMAX_CODE_SCOPE,
+  audience: MINIMAX_CODE_AUDIENCE,
+  accountBase: MINIMAX_CODE_ACCOUNT_BASE,
+  deviceCodeUrl: `${MINIMAX_CODE_ACCOUNT_BASE}/oauth2/device/code`,
+  tokenUrl: `${MINIMAX_CODE_ACCOUNT_BASE}/oauth2/token`,
 };
 
 // Kimi Coding OAuth Configuration (Device Code Flow)
@@ -224,6 +270,14 @@ export const KILOCODE_CONFIG = {
   apiBaseUrl: "https://api.kilo.ai",
   initiateUrl: "https://api.kilo.ai/api/device-auth/codes",
   pollUrlBase: "https://api.kilo.ai/api/device-auth/codes",
+};
+
+// MegaBrain OAuth Configuration (Kilo's device auth flow: MegaBrain's gateway is built on
+// Kilo's, so the endpoints and responses are the same as KILOCODE_CONFIG's).
+export const MEGABRAIN_CONFIG = {
+  apiBaseUrl: "https://api.getmegabrain.com",
+  initiateUrl: "https://api.getmegabrain.com/api/device-auth/codes",
+  pollUrlBase: "https://api.getmegabrain.com/api/device-auth/codes",
 };
 
 // Cline OAuth Configuration (Local Callback Flow via app.cline.bot)
@@ -489,6 +543,15 @@ export const DEVIN_DESKTOP_CONFIG = {
   inferenceUrl: "https://inference.codeium.com",
   ideName: "windsurf",
   defaultVersion: "3.6.27",
+  // Browser sign-in reuses the Devin CLI login: PKCE (S256) on app.devin.ai, then a JSON
+  // {code, code_verifier} exchange on api.devin.ai that returns a session token. The CLI
+  // registers this exact loopback redirect, so the port is fixed.
+  authorizeUrl: "https://app.devin.ai/auth/cli/continue",
+  tokenUrl: "https://api.devin.ai/auth/cli/token",
+  codeChallengeMethod: "S256",
+  callbackPort: 59653,
+  callbackPath: "/callback",
+  callbackHost: "127.0.0.1",
 };
 
 // Zed IDE credential import — no standard OAuth flow.
@@ -545,6 +608,7 @@ export const PROVIDERS = {
   AMAZON_Q: "amazon-q",
   CURSOR: "cursor",
   KILOCODE: "kilocode",
+  MEGABRAIN: "megabrain",
   CLINE: "cline",
   CLINEPASS: "clinepass",
   DEVIN_DESKTOP: "devin-desktop",
@@ -557,7 +621,10 @@ export const PROVIDERS = {
   GROK_CLI: "grok-cli",
   XAI_OAUTH: "xai-oauth",
   OPENFERENCE: "openference",
+  RENDERHOUR: "renderhour",
   ZED: "zed",
   ZED_HOSTED: "zed-hosted",
   MUSE_CODE: "muse-code",
+  MINIMAX_CODE: "minimax-code",
+  COPILOT_M365_WEB: "copilot-m365-web",
 };

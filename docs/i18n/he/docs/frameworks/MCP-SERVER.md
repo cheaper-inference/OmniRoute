@@ -8,37 +8,32 @@
 >
 > מקור האמת: `open-sse/mcp-server/server.ts` מחשב **110 כלים ייחודיים** באמצעות `countUniqueMcpTools()`:‏ 45 הגדרות קנוניות (כולל ששת כלי מחזור החיים של CCR, שלישיית agent-skills,‏ `omniroute_radar_catalog` ו-`omniroute_x_search`), בתוספת זיכרון (3), מיומנויות (4), מיומנויות GitHub‏ (3), pool‏ (6), משחוק (8), תוספים (8), Notion‏ (6), Obsidian‏ (22), מאגר מקומי (3) ושני כלי דחיסה המיועדים ל-RTK בלבד.
 
-## התקנה
+## הַתקָנָה
 
-OmniRoute MCP מובנה במערכת. הפעילו אותו באמצעות:
+OmniRoute MCP מובנה. התחל את זה עם:
 
 ```bash
 omniroute --mcp
 ```
 
-או באמצעות תעבורת open-sse:
+או באמצעות התחבורה הפתוחה:
 
 ```bash
-# תעבורה הניתנת להזרמה באמצעות HTTP (פורט 20130)
-omniroute --dev  # MCP מופעל אוטומטית בנקודת הקצה /mcp
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-תעבורות ה-HTTP‏ (`sse` / `streamable-http`, המוגשות בתוך אותו תהליך על ידי שרת לוח הבקרה)
-כבויות כברירת מחדל, ובעבר ניתן היה להפעיל או להשבית אותן רק מהדף `/dashboard/mcp`. החל מ-v3.8.51
-קיימת תמיכה מקבילה גם ב-CLI:
+העברות HTTP (`sse` / `streamable-http`, מוגשות בתהליך על ידי שרת לוח המחוונים) כבויות כברירת מחדל והיו ניתנים להחלפה בעבר רק מדף `/dashboard/mcp`. החל מגרסה 3.8.51 ל- CLI יש זוגיות:
 
 ```bash
-omniroute mcp status                                  # מצב הפעלה/חיבור, תעבורה ומספר כלים
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # מאפס הפעלות sse/streamable-http פעילות
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` שולחות בקשת PATCH לאותה הגדרת `mcpEnabled` (ובאופן אופציונלי גם `mcpTransport`)
-שלוח הבקרה משנה באמצעות `/api/settings`. הפקודה `mcp restart` קוראת אל `POST /api/mcp/restart`: היא מסיימת
-הפעלות `sse`/`streamable-http` פעילות, כדי שהבקשה הבאה תאותחל מחדש באופן נקי, מחזירה
-`409` אם MCP מושבת ו-`501` עבור תעבורת `stdio` (לקוחות stdio מנהלים את תהליך המשנה שלהם בעצמם —
-אין נקודת אחיזה בתוך התהליך שניתן להפעיל מחדש).
+`mcp enable`/`mcp disable` PATCH אותה הגדרת `mcpEnabled` (ואופציונלית `mcpTransport`) לוח המחוונים משתנה באמצעות `/api/settings`. `mcp restart` קורא ל- `POST /api/mcp/restart`: הוא מפרק הפעלות פעילות `sse`/`streamable-http` כך שהבקשה הבאה מאתחלת מחדש בצורה נקייה, מחזירה `409` אם MCP מושבתת, ו- `501` עבור ה- `stdio` transport (ללקוחות stdio יש את תת-התהליך משלהם — אין נקודת אחיזה בתהליך להפעלה מחדש).
 
 ## תעבורות
 
@@ -133,52 +128,40 @@ Cursor, Cline ולקוחות MCP תואמים.
 
 ## כלי דחיסה (13)
 
-| כלי                                 | הרשאות              | תיאור                                                                                                          |
-| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | הגדרות דחיסה, סיכום ניתוח ונתונים סטטיסטיים מודעי-מטמון (כולל מטא-נתוני `analytics.mcpDescriptionCompression`) |
-| `omniroute_compression_configure`   | `write:compression` | הגדרת מצב הדחיסה, סף, יחס יעד, שימור הנחיית המערכת ומתג דחיסת תיאורי MCP                                       |
-| `omniroute_set_compression_engine`  | `write:compression` | בחירת המנוע הפעיל (off/caveman/rtk/stacked) ועוצמת Caveman/RTK                                                 |
-| `omniroute_list_compression_combos` | `read:compression`  | הצגת שילובי דחיסה בעלי שם וצינורות העיבוד של המנועים שלהם                                                      |
-| `omniroute_compression_combo_stats` | `read:compression`  | ניתוחים המקובצים לפי שילוב דחיסה ומנוע                                                                         |
-| `omniroute_ccr_store`               | `write:compression` | אחסון תוכן מבודד לפי קורא במאגר CCR מוגבל בזיכרון והחזרת סמן יחד עם הפניית `ccr://`                            |
-| `omniroute_ccr_retrieve`            | `read:compression`  | אחזור תוכן CCR במלואו או במצבי התחלה, סוף, שורות, grep ונתונים סטטיסטיים                                       |
-| `omniroute_ccr_inspect`             | `read:compression`  | בדיקת מטא-נתוני CCR שבבעלות הקורא ללא החזרת התוכן                                                              |
-| `omniroute_ccr_list`                | `read:compression`  | הצגת מטא-נתונים מחולקים לעמודים עבור מקטעי CCR שבבעלות הקורא                                                   |
-| `omniroute_ccr_delete`              | `write:compression` | מחיקת מקטע CCR שבבעלות הקורא                                                                                   |
-| `omniroute_ccr_stats`               | `read:compression`  | דיווח על השימוש בזיכרון בהיקף הקורא, מוני מחזור חיים ומגבלות המאגר                                             |
-| `omniroute_rtk_discover`            | `read:compression`  | גילוי רעש חוזר בדגימות פלט RTK שנאספו בהסכמה                                                                   |
-| `omniroute_rtk_learn`               | `read:compression`  | יצירת טיוטת מסנן RTK הניתנת לסקירה מתוך דגימות שנאספו בהסכמה                                                   |
+| כְּלִי                              | היקפים              | תֵאוּר                                                                                                             |
+| :---------------------------------- | :------------------ | :----------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | הגדרות דחיסה, סיכום ניתוח ונתונים סטטיסטיים מודעים למטמון (כולל מטא נתונים `analytics.mcpDescriptionCompression` ) |
+| `omniroute_compression_configure`   | `write:compression` | הגדר מצב דחיסה, סף, יחס יעד, שימור בקשת מערכת, החלפת מצב דחיסה של תיאור MCP                                        |
+| `omniroute_set_compression_engine`  | `write:compression` | בחר את המנוע הפעיל (off/caveman/rtk/stacked) ואת עוצמת Caveman/RTK                                                 |
+| `omniroute_list_compression_combos` | `read:compression`  | רשימת שילובי דחיסה וצינורות המנוע שלהם                                                                             |
+| `omniroute_compression_combo_stats` | `read:compression`  | אנליטיקה מקובצת לפי שילוב דחיסה ומנוע                                                                              |
+| `omniroute_ccr_store`               | `write:compression` | אחסן תוכן מבודד מתקשר בחנות CCR התחום בזיכרון והחזר סמן פלוס הפניה ל- `ccr://`                                     |
+| `omniroute_ccr_retrieve`            | `read:compression`  | אחזר תוכן CCR במלואו או עם מצבי ראש, זנב, קווים, grep וסטטיסטיקה                                                   |
+| `omniroute_ccr_inspect`             | `read:compression`  | בדוק מטא נתונים CCR בבעלות המתקשר מבלי להחזיר תוכן                                                                 |
+| `omniroute_ccr_list`                | `read:compression`  | רשום מטא נתונים מעומדים עבור בלוקי CCR שבבעלות המתקשר                                                              |
+| `omniroute_ccr_delete`              | `write:compression` | מחק בלוק CCR שבבעלות המתקשר                                                                                        |
+| `omniroute_ccr_stats`               | `read:compression`  | דווח על שימוש בזיכרון בהיקף מתקשר, מוני מחזור חיים ומגבלות אחסון                                                   |
+| `omniroute_rtk_discover`            | `read:compression`  | גלה רעשים חוזרים בדגימות פלט RTK עם הסכמה                                                                          |
+| `omniroute_rtk_learn`               | `read:compression`  | צור טיוטת מסנן RTK הניתנת לבדיקה מדגימות הסכמה                                                                     |
 
-רשומות CCR נשמרות בזיכרון בלבד ונעלמות בעת הפעלה מחדש. כל מקטע מוגבל ל-2 MiB, כל
-זהות ראשית ל-16 MiB, והמאגר הגלובלי ל-64 MiB. כברירת מחדל, לרשומות מוגדר TTL של 24 שעות (לכל היותר
-שבעה ימים). אחזור MCP מלא מוגבל ל-256 KiB; מקטעים גדולים יותר נשארים זמינים באמצעות
-מצבי הטווח וה-grep. האחסון, האחזור, ההצגה, הבדיקה, המחיקה והנתונים הסטטיסטיים מבודדים לפי
-הזהות הראשית של מפתח ה-API המאומת. רשומות ביקורת מכילות גיבובים ומטא-נתוני גודל, ולעולם לא תוכן.
+ערכי CCR משתמשים בחנות דו-שכבתית: שכבת זיכרון חמה מגובה, בזמני ריצה מקומיים שאינם בענן, בשכבת SQLite עמידה (`ccr_blocks`, פועלת כברירת מחדל) כך שבלוק שורד פינוי או הפעלה מחדש עד שה- TTL שלו נגמר — למעט בלוקים מעל 512 KB ונשארים זמני ריצה של זיכרון בענן. כל בלוק מוגבל ל-2 MiB, כל עיקרון ל-16 MiB, והחנות העולמית ל-64 MiB. ברירת המחדל של ערכים הוא TTL של 24 שעות (מקסימום שבעה ימים). שליפה מלאה MCP מוגבלת ל-256 KiB; בלוקים גדולים יותר נשארים זמינים דרך מצבי הטווח ו-grep. אחסון, אחזור, רישום, בדיקה, מחיקה וסטטיסטיקה מבודדים על ידי מנהל מפתח ה-API המאומת. רשומות ביקורת מכילות גיבוב ומטא נתונים של גודל, אף פעם לא תוכן. פרטים הפונים למפעיל (שני הסמנים, דרישות מוקדמות ללקוח, `codemode:false`, היקפים לכל כלי, עימוד ומטריצת אבחון) מופיעים ב- [Compression Engines → Prerequisites / מדריך למפעיל](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` מדווח על דחיסת תיאורי MCP בנפרד תחת
-`analytics.mcpDescriptionCompression`. ערכים אלה הם אומדנים של גודל המטא-נתונים עבור תיאורי MCP
-הניתנים להצגה ברשימה (`tools`,‏ `prompts`,‏ `resources` ו-`resourceTemplates`); הם אינם אישורי שימוש
-של הספק ומסומנים באמצעות `source: "mcp_metadata_estimate"`.
+`omniroute_compression_status` מדווח על דחיסת תיאור MCP בנפרד תחת `analytics.mcpDescriptionCompression`. ערכים אלה הם אומדני גודל מטא נתונים עבור תיאורים הניתנים לרשימה של MCP (`tools`, `prompts`, `resources` ו- `resourceTemplates`); הן אינן קבלות על שימוש של ספק ומסומנות ב- `source: "mcp_metadata_estimate"`.
 
-### מסנן עץ הנגישות של MCP (v3.8.0)
+### מסנן עץ נגישות MCP (v3.8.0)
 
-בנפרד מכלי הדחיסה שלעיל, OmniRoute כולל מסנן שפועל לאחר הביצוע ודוחס את **תוצאות הכלים** של כלי
-דפדפן/נגישות של MCP לפני שהן מוחזרות לסוכן. מסנן זה אינו כלי בפני עצמו — הוא פועל באופן שקוף על כל
-תוצאת כלי שמכילה טקסט מפורט של עץ נגישות או תמונת מצב של דפדפן (≥2000 תווים).
+בנפרד מכלי הדחיסה שלמעלה, OmniRoute כולל מסנן לאחר ביצוע שדוחס את** תוצאות הכלים** של כלים MCP browser/accessibility לפני שהם מוחזרים לסוכן. מסנן זה אינו כשלעצמו כלי — הוא פועל בשקיפות על כל תוצאת כלי המכילה טקסט נגישות מילולי או טקסט תמונת דפדפן (≥ 2000 תווים).
 
-התנהגויות עיקריות:
+התנהגויות מפתח:
 
-- מכווץ ≥30 שורות אחאיות רצופות וחוזרות לסיכום הכולל התחלה + סוף
-- משמר עוגני `[ref=eXX]` הנדרשים על ידי Playwright/שימוש במחשב
-- מקצר באופן קשיח טקסט גדול מדי (>50,000 תווים) ומוסיף רמז לניווט
-- חיסכון צפוי: **60–80%** במטעני תמונות מצב של דפדפן
+- מכווץ ≥ 30 שורות אחים חוזרות ונשנות לסיכום זנב + בראש
+- שומר על עוגני `[ref=eXX]` הנדרשים ע"י Playwright/computer-use
+- טקסט גדול חתוך קשה (> 50,000 תווים) עם רמז לניווט
+- חיסכון צפוי:** 60-80%** על מטענים של תמונת מצב של דפדפן
 
-תצורה: `compression.mcpAccessibility` בהגדרות הגלובליות (מיגרציה 056).
-מימוש: `open-sse/services/compression/engines/mcpAccessibility/`.
-תיעוד מלא: [מנועי דחיסה — מסנן עץ הנגישות של MCP](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+תצורה: `compression.mcpAccessibility` בהגדרות גלובליות (הגירה 056). יישום: `open-sse/services/compression/engines/mcpAccessibility/`. מסמכים מלאים: [מנועי דחיסה — MCP מסנן עץ נגישות](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-ראו [מנועי דחיסה](../compression/COMPRESSION_ENGINES.md) ו-[דחיסת RTK](../compression/RTK_COMPRESSION.md) למידע על
-מודל הדחיסה בזמן ריצה שעליו מבוססים כלים אלה.
+ראה [מנועי דחיסה](../compression/COMPRESSION_ENGINES.md) [ודחיסה RTK](../compression/RTK_COMPRESSION.md) עבור מודל הדחיסה של זמן הריצה מאחורי כלים אלה.
 
 ## כלי 1Proxy‏ (3)
 
@@ -300,147 +283,119 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 
 ## אימות והיקפים
 
-קריאות כלי MCP קוראות מחרוזות היקף מהקורא. בדיקה זו היא אחת משלושה מרחבי שמות עצמאיים. עברה של בודק אחד אינה עברה של האחרים. הכללים מוגדרים ב-[שלושה מרחבי שמות היקף](#three-scope-namespaces). קטלוג הכלים הוא [היקפי כלי MCP](#mcp-tool-scopes).
+שיחות כלי MCP קראו מחרוזות היקף מהמתקשר. הסימון הזה הוא אחד משלושה מרחבי שמות עצמאיים. מעבר של בודק אחד אינו מעבר מהאחרים. הכללים הם [שלושה מרחבי שמות](#three-scope-namespaces). קטלוג הכלים הוא [MCP tool scopes](#mcp-tool-scopes).
 
-### שלושה מרחבי שמות היקף
+### שלושה מרחבי שמות בהיקף
 
-`manage` על מפתח API, `read:compression` על כלי MCP ו-`read` על אסימון גישה `oma_live_…` הם שלושה הרשאות שונות. קוראים ששולחים אסימון גישה `read` לנתיב ניהול שמשנה מקבלים HTTP 403
-`Access token scope 'read' is insufficient; 'write' required.`
-דרגה זו היא `scopeSatisfies`. היא אינה מתייעצת בטבלת ה-MCP, וגם מתאם ה-MCP אינו מתייעץ בה.
+`manage` על מפתח API, `read:compression` על כלי MCP ו- `read` על אסימון גישה `oma_live_…` הם שלושה מענקים שונים. מתקשרים ששולחים אסימון גישה של `read` למסלול ניהול משתנה מקבלים HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` הדרגה הזו היא `scopeSatisfies`. זה לא מתייעץ בטבלת MCP, וה- MCP matcher לא מתייעץ בו.
 
-| מרחב שמות          | אסימון                                                                      | בודק              | עברה מאפשרת                              |
-| :----------------- | :-------------------------------------------------------------------------- | :---------------- | :--------------------------------------- |
-| ניהול מפתחות API   | `api_keys.scopes`                                                           | `hasManageScope`  | REST ניהול עבור אותו מפתח Bearer         |
-| תוספתי למפתחות API | אותו מערך, מחרוזת מדויקת אחת                                                | העוזר שמוזכר להלן | רק אותה יכולת אחת                        |
-| היקפי כלי MCP      | אותו מערך, אחרת `_meta` של MCP (HTTP/SSE בלבד), אחרת `OMNIROUTE_MCP_SCOPES` | `scopeMatches`    | אותו כלי, לאחר שהאכיפה מופעלת            |
-| אסימון גישה        | `oma_live_…`                                                                | `scopeSatisfies`  | נתיב הניהול ששיטתו ונתיבו דורשים דרגה זו |
+| מרחב שמות        | תְעוּדָה                                                                 | בּוֹדֵק          | מעבר מאפשר                                |
+| :--------------- | :----------------------------------------------------------------------- | :--------------- | :---------------------------------------- |
+| ניהול מפתחות API | `api_keys.scopes`                                                        | `hasManageScope` | ניהול REST עבור מפתח הנושא הזה            |
+| תוסף מפתח API    | אותו מערך, מחרוזת אחת מדויקת                                             | העוזר ששמו למטה  | רק יכולת אחת                              |
+| היקפי כלי MCP    | אותו מערך, else MCP `_meta` (HTTP/SSE בלבד), else `OMNIROUTE_MCP_SCOPES` | `scopeMatches`   | הכלי הזה, ברגע שהאכיפה מופעלת             |
+| אסימון גישה      | `oma_live_…`                                                             | `scopeSatisfies` | מסלול הניהול ששיטתו ודרכו מחייבים דרגה זו |
 
-הנפקת כל אסימון מוגדרת ב-
-[אימות ניהול](../guides/MANAGEMENT-AUTH.md).
+טביעת כל אישור מכוסה [באימות ניהול](../guides/MANAGEMENT-AUTH.md).
 
-#### היקפי מפתחות API
+#### היקפי מפתח API
 
-מערך `api_keys.scopes` אחד מזין שתי משימות. הן משתמשות בפונקציות שונות.
+מערך `api_keys.scopes` אחד מזין שתי עבודות. הם משתמשים בפונקציות שונות.
 
-**REST ניהול.** `manage` ו-`admin` הם החברים ב-`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`).
-`hasManageScope` הוא מה שמורשה נתיבי ניהול עבור אותו מפתח. `admin` מסוגל לניהול באותם נתיבים. המילה `admin` כאן אינה דרגת אסימון גישה ואינה מתרחבת להיקפי כלי MCP.
+**הנהלת REST.** `manage` ו- `admin` הם האיברים של `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`). `hasManageScope` הוא מה שמאשר מסלולי ניהול עבור מפתח זה. `admin` הוא בעל יכולת ניהול במסלולים אלו. המילה `admin` כאן אינה דרגת אסימון הגישה והיא אינה מתרחבת לטווחי כלי MCP.
 
-**מחרוזות תוספתיות.** כל אחת מהן היא בדיקת חברות מדויקת, וכל אחת מהן נשארת מחוץ
-ל-`MANAGEMENT_API_KEY_SCOPES`.
+**מחרוזות תוספות.** כל אחד מהם הוא מבחן חברות מדויק, וכל אחד נשאר מחוץ `MANAGEMENT_API_KEY_SCOPES`.
 
-| היקף                           | עברה מאפשרת                                                                                                                                                    |
-| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | חריגת LOCAL_ONLY של `/api/mcp/` שאינה loopback בלבד (`hasMcpConnectOrManageScope`). מפתח עם `manage` או `admin` עדיין עובר את החריגה הזו.                      |
-| `self:usage`                   | `GET /api/v1/me/status` עבור מפתח זה (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` מוסיף היקף זה בעת היצירה (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | מכסות חשבון במעלה הזרם בתוך מטען הסטטוס הזה (`src/lib/usage/apiKeySelfService.ts`). נתיב הסטטוס עדיין דורש `self:usage`.                                       |
-| `policy:bypass-provider-quota` | קריאות ההסקה של מפתח זה דולגות את מדיניות מכסת הספק (`hasProviderQuotaBypassScope` ב-`src/sse/handlers/chat.ts`).                                              |
+| תְחוּם                         | מעבר מאפשר                                                                                                                                                        |
+| :----------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | ה- `/api/mcp/` LOCAL_ONLY ללא לולאה-בק ניתנת רק (`hasMcpConnectOrManageScope`). מפתח עם `manage` או `admin` עדיין מעביר את ה-carve-out הזה.                       |
+| `self:usage`                   | `GET /api/v1/me/status` עבור מפתח זה (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` מוסיף את ההיקף הזה ב-create (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | מכסות חשבונות במעלה הזרם בתוך מטען הסטטוס הזה (`src/lib/usage/apiKeySelfService.ts`). מסלול הסטטוס עדיין דורש `self:usage`.                                       |
+| `policy:bypass-provider-quota` | קריאות ההסקה של מפתח זה מדלגות על מדיניות מכסת הספקים (`hasProviderQuotaBypassScope` in `src/sse/handlers/chat.ts`).                                              |
 
-#### התאמה
+#### תוֹאֵם
 
-הקטלוג הוא הטבלה תחת [היקפי כלי MCP](#mcp-tool-scopes). אין
-להתייחס אל `MCP_SCOPE_LIST` ב-`src/shared/constants/mcpScopes.ts` כאל הקטלוג הזה:
-זו התת-קבוצה המוקלדת המקורית. כלים מאוחרים יותר מצהירים היקפים נוספים לצדה
-(`read:notion`, `read:skills`, `read:local-corpus`, ושאר הטבלה).
+הקטלוג הוא הטבלה תחת [היקפי כלי MCP](#mcp-tool-scopes). אל תתייחס ל- `MCP_SCOPE_LIST` ב- `src/shared/constants/mcpScopes.ts` כאל הקטלוג הזה: זוהי תת-הקבוצה המקורית שהוקלדה. כלים מאוחרים יותר מכריזים על היקפים נוספים לצדו (`read:notion`, `read:skills`, `read:local-corpus` ושאר הטבלה).
 
-`evaluateToolScopes` ב-`open-sse/mcp-server/scopeEnforcement.ts` מאפשר קריאה
-כאשר כל היקף נדרש תואם להיקף מוענק כלשהו:
+`evaluateToolScopes` ב- `open-sse/mcp-server/scopeEnforcement.ts` מאפשר קריאה כאשר כל היקף נדרש תואם היקף מוענק כלשהו:
 
-- `*` תואם לכל היקף נדרש.
-- היקף מוענק שמסתיים ב-`*` תואם להיקף נדרש שמתחיל בקידומת שלפני הכוכבית. `read:*` תואם ל-`read:compression`.
-- כל היקף מוענק אחר תואם רק למחרוזת הנדרשת הזהה.
+- `*` מתאים לכל היקף נדרש.
+- היקף מוענק שמסתיים ב- `*` תואם להיקף נדרש שמתחיל בקידומת שלפני הכוכב. `read:*` מתאים `read:compression`.
+- כל היקף מוענק אחר תואם רק את המחרוזת הנדרשת הזהה.
 
-מפתח שהיקפיו `["manage"]` נכשל ב-`scopeMatches` עבור `read:compression`.
-אותה קריאה נכשלת גם עבור `admin`, `mcp:connect`, `read`, ו-`write` כאשר אלה
-המחרוזות המוענקות היחידות. אין היררכיה בין היקפי כלי MCP מעבר ל-`*` בסוף.
+מפתח שהיקפים שלו הם `["manage"]` נכשל `scopeMatches` עבור `read:compression`. אותה קריאה נכשלת עבור `admin`, `mcp:connect`, `read` ו- `write` כאשר אלו המחרוזות היחידות המוענקות. אין היררכיה בין היקפי כלי MCP מעבר ל- `*` הנגרר.
 
-האכיפה כבויה אלא אם `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (ברירת מחדל
-`false`). כל עוד היא כבויה, `evaluateToolScopes` מאפשר את הקריאה ומדלג את
-הקטלוג. כאשר היא פעילה, HTTP משתמש ב-`api_keys.scopes` של מפתח ה-Bearer כ-`authInfo` (ראה [היקף HTTP לפי מפתח](#per-key-http-scope-binding-7895)).
-כאשר אין היקפי מפתח שנפתרים, קבוצת ההיקפים המוענקים עוברת ל-`_meta` של MCP (נכבד רק עבור קוראי HTTP/SSE, בתוך הקשר אימות HTTP; `_meta` של קורא stdio מתעלם ממנו משום שהלקוח שולט בו והוא אינו נושא זהות פר-קורא), ואז
-`OMNIROUTE_MCP_SCOPES`.
+האכיפה כבויה אלא אם כן `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (ברירת מחדל `false`). בזמן שהוא כבוי, `evaluateToolScopes` מאפשר את השיחה ומדלג על הקטלוג. בזמן שהוא פועל, HTTP משתמש `api_keys.scopes` של מפתח הנושא כ- `authInfo` (ראה [כריכת היקף HTTP לכל מפתח](#per-key-http-scope-binding-7895) ). כאשר אין טווחי מפתח נפתרים, הסט המוענק נופל ל- MCP `_meta` (מכובד רק עבור מתקשרי HTTP/SSE, בתוך הקשר אישור HTTP ; מתעלמים `_meta` של מתקשר סטdio מכיוון שהלקוח שולט בו והוא אינו נושא זהות לכל מתקשר), ואז `OMNIROUTE_MCP_SCOPES`.
 
 #### היקפי אסימון גישה
 
-אסימוני `oma_live_…` (`src/lib/accessTokens/scopes.ts`) נושאים `read`, `write`,
-או `admin`. `scopeSatisfies` הוא דרגה: `admin` מכסה את `write` ו-`read`, ו-`write`
-מכסה את `read`. היקפים לא ידועים אינם מכסים דבר.
+אסימוני `oma_live_…` (`src/lib/accessTokens/scopes.ts`) נושאים `read`, `write` או `admin`. `scopeSatisfies` הוא דרגה: `admin` מכסה `write` ו- `read`, ו- `write` מכסה `read`. היקפים לא ידועים אינם מכסים דבר.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) משווה את הדרגה
-הזו מול `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) משווה את הדירוג הזה עם `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
-- `GET`, `HEAD` ו-`OPTIONS` דורשים `read`.
+- `GET`, `HEAD` ו- `OPTIONS` דורשים `read`.
 - כל שיטה אחרת דורשת `write`.
-- נתיבים ב-`ADMIN_SCOPE_PREFIXES` דורשים `admin` לכל שיטה. `/api/mcp`
-  נמצא ברשימה זו, ולכן אפילו אסימון גישה בדרגת `write` עדיין אינו יכול
-  לקרוא את ממשק ה-HTTP של MCP.
-- נתיבים ב-`ADMIN_MUTATION_PREFIXES` דורשים `admin` רק עבור מוטציות.
-- נתיבים ב-`ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
-  `/api/settings/require-login`) דורשים `admin` רק עבור מוטציות, ורק באותו
-  נתיב מדויק — תת-נתיבים אחרים של `/api/settings/*` שומרים על `write`.
+- נתיבים ב- `ADMIN_SCOPE_PREFIXES` דורשים `admin` עבור כל שיטה. `/api/mcp` נמצא ברשימה הזו, אז אסימון גישה `write` עדיין לא יכול לקרוא למשטח MCP HTTP.
+- נתיבים ב- `ADMIN_MUTATION_PREFIXES` דורשים `admin` רק עבור מוטציות.
+- נתיבים ב- `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) דורשים `admin` רק עבור מוטציות, ורק בנתיב המדויק הזה — תתי-תתי `/api/settings/*` אחרים שומרים על `write`.
 
-`PATCH /api/keys/{id}` הוא מוטציה ואינו מופיע באותן רשימות admin, ולכן
-אסימון `read` מקבל 403
-`Access token scope 'read' is insufficient; 'write' required.`
-אסימון גישה בדרגת `write` או `admin` מספק את הנתיב הזה. JWT של לוח הבקרה,
-אסימון ה-machine-id של ה-CLI ב-loopback, ומפתח API עם `manage` או `admin`
-נכנסים לענפים אחרים ואינם מצומצמים לפי דירוג זה.
+`PATCH /api/keys/{id}` הוא מוטציה ואינו נמצא ברשימות המנהלים הללו, אז אסימון `read` מקבל 403 `Access token scope 'read' is insufficient; 'write' required.` אסימון גישה `write` או `admin` עונה על המסלול הזה. לוח מחוונים JWT, אסימון CLI machine-id עם loopback ומפתח API עם `manage` או `admin` לוקחים ענפים אחרים ואינם מצטמצמים בדרגה זו.
 
-אסימון גישה שעובר את `scopeSatisfies` עבור `/api/mcp` עבר רק את שער הניהול.
-קריאות לכלים עדיין מריצות `scopeMatches` מול היקפי מפתח ה-API. דירוג
-אסימון הגישה אינו קלט עבור `scopeMatches`.
+אסימון גישה שעובר `scopeSatisfies` עבור `/api/mcp` פינה את שער הניהול בלבד. קריאות לכלים עדיין פועלות `scopeMatches` מול היקפי מפתח API. דירוג אסימון הגישה אינו קלט ל- `scopeMatches`.
 
 ### היקפי כלי MCP
 
-אכיפת ההיקפים מרוכזת ב-`open-sse/mcp-server/scopeEnforcement.ts`.
-כל כלי דורש היקפים ספציפיים:
+האכיפה בהיקף מרוכזת `open-sse/mcp-server/scopeEnforcement.ts`. כל כלי דורש היקפים ספציפיים:
 
-| תחום                  | כלים                                                                                                                                                                        |
-| :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                           |
-| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                   |
-| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                      |
-| `read:quota`          | `check_quota`                                                                                                                                                               |
-| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                      |
-| `read:models`         | `list_models_catalog`                                                                                                                                                       |
-| `execute:completions` | `route_request`, `test_combo`                                                                                                                                               |
-| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                       |
-| `write:budget`        | `set_budget_guard`                                                                                                                                                          |
-| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                 |
-| `pricing:write`       | `sync_pricing`                                                                                                                                                              |
-| `read:cache`          | `cache_stats`                                                                                                                                                               |
-| `write:cache`         | `cache_flush`                                                                                                                                                               |
-| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                  |
-| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                           |
-| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                       |
-| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                            |
-| `write:notion`        | `notion_append_blocks`                                                                                                                                                      |
-| `read:memory`         | `memory_search`                                                                                                                                                             |
-| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                |
-| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                          |
-| `write:skills`        | `skills_enable`                                                                                                                                                             |
-| `execute:skills`      | `skills_execute`                                                                                                                                                            |
-| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                            |
-| `read:tools`          | `omniroute_tool_search`                                                                                                                                                     |
-| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                   |
-| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                            |
-| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                              |
-| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                          |
-| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                             |
-| `read:obsidian`       | 13 כלי קריאה — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | 9 כלי כתיבה — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                |
-| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                           |
+| תְחוּם                | כְּלֵי עֲבוֹדָה                                                                                                                                                               |
+| :-------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                             |
+| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                     |
+| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                        |
+| `read:quota`          | `check_quota`                                                                                                                                                                 |
+| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                        |
+| `read:models`         | `list_models_catalog`                                                                                                                                                         |
+| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                 |
+| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                         |
+| `write:budget`        | `set_budget_guard`                                                                                                                                                            |
+| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                   |
+| `pricing:write`       | `sync_pricing`                                                                                                                                                                |
+| `read:cache`          | `cache_stats`                                                                                                                                                                 |
+| `write:cache`         | `cache_flush`                                                                                                                                                                 |
+| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                    |
+| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                             |
+| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                         |
+| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                              |
+| `write:notion`        | `notion_append_blocks`                                                                                                                                                        |
+| `read:memory`         | `memory_search`                                                                                                                                                               |
+| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                  |
+| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                            |
+| `write:skills`        | `skills_enable`                                                                                                                                                               |
+| `execute:skills`      | `skills_execute`                                                                                                                                                              |
+| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                              |
+| `read:tools`          | `omniroute_tool_search`                                                                                                                                                       |
+| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                     |
+| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                              |
+| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                |
+| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                            |
+| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                               |
+| `read:obsidian`       | 13 כלים לקריאה — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
+| `write:obsidian`      | 9 כלי כתיבה — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                  |
+| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                             |
 
-טווחי כוכבית נתמכים: `read:*` מעניק את כל טווחי הקריאה, `*` מעניק גישה מלאה.
+היקף תווים כלליים נתמכים: `read:*` מעניק את כל היקפי הקריאה, `*` מעניק גישה מלאה.
 
-### `mcp:connect` — יכולת נתיב מצומצם (#7895)
+### `mcp:connect` — יכולת מסלול צר (#7895)
 
-גישה לשילוח HTTP/SSE של MCP (`/api/mcp/*`) מכל מקום שאינו loopback דורשת את חריגת ה-LOCAL_ONLY עבור `/api/mcp/` (ראו `docs/security/ROUTE_GUARD_TIERS.md`). בעבר חריגה זו קיבלה רק מפתח API בעל טווח `manage`/`admin` מלא — רחב מדי עבור קורא שצריך רק לדבר עם MCP. כעת `src/shared/constants/managementScopes.ts` מייצא את `MCP_CONNECT_SCOPE = "mcp:connect"`: טווח צר ונוסף (באותו דוגמה כמו `SELF_USAGE_SCOPE`) שמאשר רק את עקיפת `/api/mcp/` ב-`src/server/authz/policies/management.ts` — הוא אינו מעניק שום גישה אחרת לנתיבי ניהול ומוחקג במכוון מחוץ ל-`MANAGEMENT_API_KEY_SCOPES`. מפתח המחזיק `manage`/`admin` עדיין עובר את החריגה ללא שינוי; `mcp:connect` הוא חלופה ברמת הרשאה נמוכה יותר עבור קוראים מרוחקים הזקוקים ל-MCP בלבד, הנבדק באמצעות `hasMcpConnectOrManageScope()`.
+הגעה לטרנספורט HTTP/SSE MCP (`/api/mcp/*`) מ-non-loopback דורשת את `/api/mcp/` LOCAL_ONLY carve-out (ראה `docs/security/ROUTE_GUARD_TIERS.md`). היסטורית ה-Carve-out קיבל רק מפתח מלא `manage`/`admin` -scope API — רחב מדי עבור מתקשר שרק צריך לדבר MCP. `src/shared/constants/managementScopes.ts` מייצאת כעת `MCP_CONNECT_SCOPE = "mcp:connect"`: היקף צר מתוסף (תקדים זהה לזה של `SELF_USAGE_SCOPE`) שמאשר ONLY את ה- `/api/mcp/` עוקף ב- `src/server/authz/policies/management.ts` — הוא אינו מעניק גישה אחרת למסלול ניהול ונשמר בכוונה OUT של `MANAGEMENT_API_KEY_SCOPES`. מפתח המחזיק `manage`/`admin` עדיין מעביר את ה-carve-out ללא שינוי; `mcp:connect` היא אלטרנטיבה בעלת הרשאה נמוכה יותר עבור מתקשרים מרוחקים ל-MCP בלבד, שנבדקה באמצעות `hasMcpConnectOrManageScope()`.
 
-### מילוי טווחי HTTP לפי מפתח (#7895)
+### כריכת היקף HTTP לכל מפתח (#7895)
 
-מעל HTTP/SSE, קובץ `open-sse/mcp-server/httpTransport.ts` כעת פועל את `api_keys.scopes` האמיתיים של הקורא באמצעות `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) ומעביר אותם ל-`transport.handleRequest(req, { authInfo })` של SDK של MCP, כך ש-`extra.authInfo.scopes` המגיע לכל קריאת כלי משקף את טווחי מפתח ה-Bearer עצמו. ה-`resolveCallerScopeContext()` של `scopeEnforcement.ts` כבר נותן עדיפות ל-`authInfo` מעל גבי `_meta` והנפילה החלופית ל-`OMNIROUTE_MCP_SCOPES` מסביבה — שינוי זה רק ממלא את המקור הראשון, בעל העדיפות הגבוהה ביותר, שהיה ריק קודם לכן מעל HTTP. כאשר לא נמצא מפתח API (אין כותרת, מפתח שגוי), `authInfo` נשאר `undefined` והפתרון יורד לשרשרת `meta`/env הקיימת ללא שינוי. ל-stdio אין זהות לכל קורא (ראו `mcpCallerIdentity.ts`) והוא אינו מושפע ממילוי לפי מפתח — הוא מדלג על שלב ה-`_meta` (ה-`_meta` נחשב רק בתוך הקשר אימות HTTP, #15159) ונפתר ממפתח ה-`OMNIROUTE_MCP_SCOPES` בלבד.
+מעל HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` פותר כעת את `api_keys.scopes` האמיתי של המתקשר באמצעות `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) ומעביר אותו ל- `transport.handleRequest(req, { authInfo })` של MCP SDK, כך ש- `extra.authInfo.scopes` שמגיע לכל קריאת כלי משקף את ההיקפים של מפתח הנושא. `resolveCallerScopeContext()` של `scopeEnforcement.ts` כבר נתן עדיפות ל- `authInfo` על פני `_meta` ו- `OMNIROUTE_MCP_SCOPES` env fallback — זה מאכלס רק את המקור הראשון, בעל העדיפות הגבוהה ביותר, שלא הוזן בעבר על פני HTTP. כאשר שום מפתח API לא פותר (ללא כותרת, מפתח לא חוקי), `authInfo` נשאר `undefined` והרזולוציה עוברת לשרשרת `meta`/env הקיימת ללא שינוי. ל-stdio אין זהות לכל מתקשר (ראה `mcpCallerIdentity.ts`) והוא אינו מושפע מקשירת פר-מפתח — הוא מדלג על שלב `_meta` (`_meta` מכבד רק בהקשר של HTTP auth, #15159) ופותר ממפתח `OMNIROUTE_MCP_SCOPES` env בלבד.
 
-**אכיפת הטווחים נדחית לעולים על בעלי טווח צר מעל HTTP/SSE, בלי קשר ל-`OMNIROUTE_MCP_ENFORCE_SCOPES`.** ברירת המחדל של `OMNIROUTE_MCP_ENFORCE_SCOPES` ל-`false` בטוחה רק בזרימת local/stdio עם מפעיל יחיד, שבה אין זהות לכל קורא שניתן להגביל מולה. ה-`open-sse/mcp-server/server.ts::withScopeEnforcement()` מפעיל אכיפת טווחים לכל כלי ללא תנאי (`shouldForceScopeEnforcement()` ב-`scopeEnforcement.ts`) בכל פעם ש-`resolveCallerScopeContext()` פתר `source === "authInfo"` (כלומר כותרת HTTP Authorization אמיתית לפי מפתח, HTTP/SSE בלבד) וכן שמפתח זה אינו מחזיק טווח `manage`/`admin` מלא. פעולה זו סוגרת את הפער שבו מפתח המחזיק רק את טווח העקיפה הצר `mcp:connect` — שמתועד למעלה כמאשר דבר מלבד את חריגת ה-LOCAL_ONLY של `/api/mcp/` — היה יכול להפעיל כל כלי MCP לאחר שמפעיל הפעיל גישת MCP מרוחקת/לא-loopback, פשוט משום ש-`OMNIROUTE_MCP_ENFORCE_SCOPES` מגיע עם `false` כברירת מחדל. מפתח `manage`/`admin` מלא מעל HTTP, וכל קורא stdio/local, שומרים על ההתנהגות הקיימת המוגנת על ידי `OMNIROUTE_MCP_ENFORCE_SCOPES` ללא שינוי.
+**אכיפה נאלצת עבור מתקשרי HTTP/SSE בעלי טווח צר ללא קשר ל- `OMNIROUTE_MCP_ENFORCE_SCOPES`.** ברירת המחדל של `OMNIROUTE_MCP_ENFORCE_SCOPES` ל- `false` בטוחה רק עבור זרימת ה- local/stdio של מפעיל יחיד, שבה אין זהות לכל מתקשר שאפשר להסתפק בה. `open-sse/mcp-server/server.ts::withScopeEnforcement()` מפעילה את האכיפה של היקף לכלי ללא תנאי (`shouldForceScopeEnforcement()` in `scopeEnforcement.ts`) בכל פעם ש `resolveCallerScopeContext()` פתר `source === "authInfo"` (כלומר כותרת HTTP הרשאות אמיתית לכל מפתח, HTTP/SSE-only) AND המפתח הזה אינו מחזיק בהיקף `manage`/`admin` מלא. זה סוגר את הפער שבו מפתח שמחזיק ONLY את היקף ה- `mcp:connect` עוקף הצר — שתועד לעיל כמי שמאשר שום דבר מלבד `/api/mcp/` LOCAL_ONLY carve-out — יכול אחרת להפעיל כל כלי MCP ברגע שמפעיל איפשר גישת remote/non-loopback MCP, פשוט כי `OMNIROUTE_MCP_ENFORCE_SCOPES` שולח `false` כברירת מחדל. מקש `manage`/`admin` מלא מעל HTTP, וכל מתקשר stdio/local, שמור על התנהגות -gated `OMNIROUTE_MCP_ENFORCE_SCOPES` הקיימת ללא שינוי.
+
+---
 
 ## משתני סביבה
 

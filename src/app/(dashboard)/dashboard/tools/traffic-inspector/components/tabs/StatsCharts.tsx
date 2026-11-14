@@ -1,26 +1,13 @@
 "use client";
 
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  LineChart,
-  Line,
-} from "recharts";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 import { useTranslations } from "next-intl";
+import { chartTheme } from "@omniroute/ui-kit/chart-theme";
+import { LineChart } from "@omniroute/ui-kit/reporting-charts";
 import type { InterceptedRequest } from "@/mitm/inspector/types";
 
-// Tooltip on the theme surface (recharts defaults to a white box in both themes).
-const TOOLTIP_STYLE = {
-  background: "var(--color-surface)",
-  border: "1px solid var(--color-border)",
-  borderRadius: 8,
-  color: "var(--color-text-main)",
-  fontSize: 12,
-};
+const LATENCY_KEY = "ms";
+const formatLatency = (value: number) => `${value}ms`;
 
 interface StatsChartsProps {
   requests: InterceptedRequest[];
@@ -39,7 +26,11 @@ export default function StatsCharts({ requests }: StatsChartsProps) {
   const latencyData = requests
     .filter((r) => r.totalLatencyMs != null)
     .slice(-50)
-    .map((r, i) => ({ i, ms: r.totalLatencyMs }));
+    .map((r, i) => ({
+      id: String(i),
+      label: String(i + 1),
+      values: { [LATENCY_KEY]: r.totalLatencyMs },
+    }));
 
   return (
     <div className="h-full overflow-auto p-4 space-y-6">
@@ -47,10 +38,10 @@ export default function StatsCharts({ requests }: StatsChartsProps) {
         <h3 className="ci-eyebrow mb-3">{t("statsStatusDistribution")}</h3>
         <div style={{ height: 160 }}>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={statusData}>
-              <XAxis dataKey="name" tick={{ fontSize: 11, fill: "var(--color-text-muted)" }} />
-              <YAxis tick={{ fontSize: 11, fill: "var(--color-text-muted)" }} />
-              <Tooltip contentStyle={TOOLTIP_STYLE} />
+            <BarChart data={statusData} margin={chartTheme.margin}>
+              <XAxis {...chartTheme.xAxis} dataKey="name" interval={0} />
+              <YAxis {...chartTheme.yAxis} />
+              <Tooltip {...chartTheme.tooltip} cursor={{ fill: "var(--color-surface-2)" }} />
               <Bar dataKey="count" fill="var(--color-chart-1)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -60,41 +51,29 @@ export default function StatsCharts({ requests }: StatsChartsProps) {
       {latencyData.length > 1 && (
         <div>
           <h3 className="ci-eyebrow mb-3">{t("statsLatency")}</h3>
-          <div style={{ height: 160 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={latencyData}>
-                <XAxis dataKey="i" hide />
-                <YAxis tick={{ fontSize: 11, fill: "var(--color-text-muted)" }} unit="ms" />
-                <Tooltip
-                  contentStyle={TOOLTIP_STYLE}
-                  formatter={(v: unknown) => [`${String(v)}ms`, t("statsLatency")]}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="ms"
-                  stroke="var(--color-chart-2)"
-                  dot={false}
-                  strokeWidth={2}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+          <LineChart
+            ariaLabel={t("statsLatency")}
+            data={latencyData}
+            series={[{ key: LATENCY_KEY, label: t("statsLatency"), color: "var(--color-chart-2)" }]}
+            valueFormatter={formatLatency}
+            height={160}
+          />
         </div>
       )}
 
       <div className="grid grid-cols-3 gap-3 text-sm">
         <div className="rounded-control border border-border bg-bg-subtle p-3">
-          <div className="text-2xl font-bold text-text-main">{requests.length}</div>
+          <div className="text-2xl font-semibold text-text-main">{requests.length}</div>
           <div className="text-xs text-text-muted mt-1">{t("statsTotalRequests")}</div>
         </div>
         <div className="rounded-control border border-border bg-bg-subtle p-3">
-          <div className="text-2xl font-bold text-success">
+          <div className="text-2xl font-semibold text-success">
             {requests.filter((r) => typeof r.status === "number" && r.status < 400).length}
           </div>
           <div className="text-xs text-text-muted mt-1">{t("statsSuccessful")}</div>
         </div>
         <div className="rounded-control border border-border bg-bg-subtle p-3">
-          <div className="text-2xl font-bold text-error">
+          <div className="text-2xl font-semibold text-error">
             {
               requests.filter(
                 (r) => r.status === "error" || (typeof r.status === "number" && r.status >= 400)
