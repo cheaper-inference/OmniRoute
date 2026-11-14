@@ -50,3 +50,21 @@ test("parseModelMapInput detects invalid entries", () => {
   assert.ok(badJson.error);
   assert.equal(badJson.map, null);
 });
+
+test("formatModelMapInput round-trips model ids that contain a colon", () => {
+  // `provider:model` ids are common, and a plain `key: value` separator would re-parse
+  // `openai:gpt-4o: openai:gpt-4o-mini` as the key `openai` with the target `gpt-4o: openai:...`.
+  const map = {
+    "openai:gpt-4o": "openai:gpt-4o-mini",
+    "openrouter:qwen/qwen3": "anthropic:claude-3-5-sonnet",
+    "gpt-4o": "gpt-4o-mini",
+  };
+  const formatted = formatModelMapInput(map);
+  const parsed = parseModelMapInput(formatted);
+  assert.equal(parsed.error, null);
+  assert.deepEqual(parsed.map, map);
+});
+
+test("formatModelMapInput keeps the plain colon separator for colon-free ids", () => {
+  assert.equal(formatModelMapInput({ "gpt-4o": "gpt-4o-mini" }), "gpt-4o: gpt-4o-mini");
+});

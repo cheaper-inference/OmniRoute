@@ -9,12 +9,17 @@ export interface ParsedModelMap {
 
 /**
  * Format a Record<string, string> map into key-value lines for form editing.
+ *
+ * The default `key: value` separator is ambiguous once a model id contains a colon, which is
+ * common for provider-prefixed ids (`openai:gpt-4o`). Any such pair is written with `->` instead,
+ * which `parseModelMapInput` checks first and which never appears inside a model id, so the text
+ * this function returns always parses back to the map it came from.
  */
 export function formatModelMapInput(map: Record<string, string> | null | undefined): string {
   if (!map || typeof map !== "object" || Array.isArray(map)) return "";
   return Object.entries(map)
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([k, v]) => `${k}: ${v}`)
+    .map(([k, v]) => `${k}${k.includes(":") || v.includes(":") ? " -> " : ": "}${v}`)
     .join("\n");
 }
 

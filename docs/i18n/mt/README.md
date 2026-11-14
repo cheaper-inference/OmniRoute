@@ -1295,7 +1295,7 @@ Metriċi kanoniċi fl-2026-10-18: **1.976 vidjo uniku** · **20.220.289 darba ma
   <tr><td nowrap><b>Ambjent ta' eżekuzzjoni</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Lingwa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> f’<code>src/</code> u <code>open-sse/</code> (żero <code>any</code> fil-qalba minn v2.0)</td></tr>
   <tr><td nowrap><b>Qafas</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Bażi tad-dejta</b></td><td>better-sqlite3 (SQLite, ġurnalar WAL) + LowDB (JSON ta’ wirt) — 147-il modulu tad-dominju, 236-il migrazzjoni</td></tr>
+  <tr><td nowrap><b>Bażi tad-dejta</b></td><td>better-sqlite3 (SQLite, ġurnalar WAL) + LowDB (JSON ta’ wirt) — 147-il modulu tad-dominju, 238-il migrazzjoni</td></tr>
   <tr><td nowrap><b>Memorja</b></td><td>Test sħiħ b’SQLite FTS5 + embeddings vettorjali kwantizzati b’int8, tħassir ittajpjat</td></tr>
   <tr><td nowrap><b>Skemi</b></td><td>Zod 4 — validazzjoni tal-I/O tal-għodod MCP + kuntratti tal-API</td></tr>
   <tr><td nowrap><b>Protokolli</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

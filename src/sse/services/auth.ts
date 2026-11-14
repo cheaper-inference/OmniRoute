@@ -13,6 +13,7 @@ import {
 } from "./geminiProjectBlock.ts";
 import { isCooldownRetrySkipRefusalsEnabled } from "./cooldownAwareRetry.ts";
 import { isPerAccountCatalogProvider } from "./perAccountCatalogFilter.ts";
+import { resolveConnectionMappedModel } from "@omniroute/open-sse/services/connectionModelMap.ts";
 import { describeUpstreamFailure } from "@/shared/utils/upstreamError";
 import { isRequestScopedMisalignmentRefusal } from "@omniroute/open-sse/utils/providerSafety.ts";
 import { isMusePolicyRefusal } from "@omniroute/open-sse/services/musePolicyRefusal.ts";
@@ -1398,6 +1399,16 @@ export async function getProviderCredentials(
     let modelLockedCount = 0;
     let familyLockedCount = 0;
     const connectionFilterStatus = new Map<string, string>();
+    // A connection-level map rewrites the model this particular account is actually served, and
+    // every model-scoped gate below was recorded against the served id: the synced inventory lists
+    // the mapped target, and a lockout/quota window is written under the model that went upstream.
+    // Resolving per candidate lets an account that advertises the mapped target serve the alias,
+    // and keeps its lockout/quota readable instead of being missed under the alias. Candidates
+    // without a map resolve to the requested model, so their behaviour is unchanged.
+    const modelForConnection = (connection: ProviderConnectionView): string | null =>
+      requestedModel
+        ? resolveConnectionMappedModel(requestedModel, connection.modelMap)
+        : requestedModel;
     // #11089: multi-host self-hosted providers keep a per-connection synced
     // inventory. Without it, a request can be routed to a host that never had
     // the model, producing a spurious model-not-found instead of pinning to
@@ -1418,6 +1429,9 @@ export async function getProviderCredentials(
     }
     // Filter out unavailable accounts and excluded connection
     let availableConnections = connections.filter((c) => {
+      // Resolved once per candidate: every model-scoped gate below must agree on the id that
+      // will actually reach the wire.
+      const effectiveModel = modelForConnection(c);
       if (excludedConnectionIds.has(c.id)) {
         connectionFilterStatus.set(c.id, "excluded");
         return false;
@@ -1430,13 +1444,15 @@ export async function getProviderCredentials(
         connectionFilterStatus.set(c.id, "freePlan");
         return false;
       }
-      if (requestedModel && isModelExcludedByConnection(requestedModel, c.providerSpecificData)) {
+      if (requestedModel && isModelExcludedByConnection(effectiveModel, c.providerSpecificData)) {
         connectionFilterStatus.set(c.id, "modelExcluded");
         return false;
       }
       // Paid-only Codex models must never be sent to accounts with a recorded Free/Go plan.
-      // Filter before routing modes so even an explicit probe cannot select one.
-      if (!isConnectionPlanEligible(provider, c.providerSpecificData, requestedModel)) {
+      // Filter before routing modes so even an explicit probe cannot select one. A map decides
+      // which model is actually sent, so the gate reads the mapped target: a free account may
+      // serve an alias when its map resolves it to a free model.
+      if (!isConnectionPlanEligible(provider, c.providerSpecificData, effectiveModel)) {
         connectionFilterStatus.set(c.id, "codexPlanIneligible");
         return false;
       }
@@ -1446,7 +1462,7 @@ export async function getProviderCredentials(
           advertisedModelsByConnection.get(c.id)?.size === 0) ||
           !isRequestedModelAdvertised(
             c.provider,
-            requestedModel,
+            effectiveModel ?? requestedModel,
             advertisedModelsByConnection.get(c.id)
           ))
       ) {
@@ -1458,28 +1474,32 @@ export async function getProviderCredentials(
           connectionFilterStatus.set(c.id, "rateLimited");
           return false;
         }
-        if (isTerminalConnectionStatusForModel(c, provider, requestedModel)) {
+        const gateModel = effectiveModel ?? requestedModel;
+        if (isTerminalConnectionStatusForModel(c, provider, gateModel)) {
           connectionFilterStatus.set(c.id, "terminalStatus");
           return false;
         }
-        if (isCodexScopeUnavailable(c, requestedModel)) {
+        if (isCodexScopeUnavailable(c, gateModel)) {
           connectionFilterStatus.set(c.id, "codexScopeLimited");
           return false;
         }
-        // Per-model lockout: if this specific model/family is locked on this connection, skip it
+        // Per-model lockout: if this specific model/family is locked on this connection, skip it.
+        // A lockout is recorded under the model that actually reached the wire, so a mapped
+        // connection must be judged by its target — judging by the alias would miss the lock and
+        // send the same failing model to the same account again.
         if (
           requestedModel &&
-          (isModelLocked(provider, c.id, requestedModel) ||
+          (isModelLocked(provider, c.id, gateModel) ||
             isAlibabaModelFreeDrained(
               provider,
               c.providerSpecificData as Record<string, unknown>,
-              requestedModel
+              gateModel
             ))
         ) {
           connectionFilterStatus.set(c.id, "modelLocked");
           if (
             provider === "antigravity" &&
-            getQuotaScopeLabelForProvider(provider, requestedModel) === "family"
+            getQuotaScopeLabelForProvider(provider, gateModel) === "family"
           ) {
             familyLockedCount += 1;
           } else {
@@ -1724,7 +1744,13 @@ export async function getProviderCredentials(
 
     if (!bypassQuotaPolicy) {
       policyEligibleConnections = peakHourEligibleConnections.filter((connection) => {
-        const evaluation = evaluateQuotaLimitPolicy(provider, connection, requestedModel);
+        // Window usage is recorded per model scope, so the mapped target is what the policy
+        // sees. An unmapped connection resolves to the alias and behaves exactly as before.
+        const evaluation = evaluateQuotaLimitPolicy(
+          provider,
+          connection,
+          modelForConnection(connection)
+        );
         quotaResults.set(connection.id, { blocked: evaluation.blocked, exhausted: false });
         if (!evaluation.blocked) return true;
 
@@ -1800,7 +1826,7 @@ export async function getProviderCredentials(
       // exhaustion cannot veto them or penalize their candidate ranking.
       const exhausted = bypassQuotaPolicy
         ? false
-        : isQuotaExhaustedForRequest(c.id, provider, requestedModel, c.providerSpecificData);
+        : isQuotaExhaustedForRequest(c.id, provider, modelForConnection(c), c.providerSpecificData);
       if (bypassQuotaPolicy) {
         quotaResults.set(c.id, { blocked: false, exhausted: false });
       }
