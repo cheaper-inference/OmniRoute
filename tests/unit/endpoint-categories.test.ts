@@ -75,6 +75,18 @@ test("resolveEndpointCategory: maps /v1/rerank to 'rerank'", () => {
   assert.equal(resolveEndpointCategory("/v1/rerank"), "rerank");
 });
 
+test("resolveEndpointCategory: prevents read-only API keys from calling Gemini Decisions", () => {
+  for (const path of ["/v1/decisions", "/api/v1/decisions", "/v1/v1/decisions"]) {
+    assert.equal(
+      resolveEndpointCategory(resolveCanonicalEndpointPath(path)),
+      "decisions",
+      path
+    );
+  }
+  assert.equal(resolveEndpointCategory("/v1/decisions/other"), "decisions");
+  assert.equal(resolveEndpointCategory("/v1/systemone"), "decisions");
+});
+
 test("resolveEndpointCategory: maps /v1/models to 'models'", () => {
   assert.equal(resolveEndpointCategory("/v1/models"), "models");
 });
@@ -200,6 +212,6 @@ test("resolveEndpointCategory: maps /v1/systemone to 'decisions'", () => {
   assert.equal(resolveEndpointCategory("/v1/systemone"), "decisions");
 });
 
-test("resolveEndpointCategory: /v1/decisions is not a System One path (OpenAI wire contract)", () => {
-  assert.notEqual(resolveEndpointCategory("/v1/decisions"), "decisions");
+test("resolveEndpointCategory: native Gemini Decisions shares the endpoint access category, not the System One wire protocol", () => {
+  assert.equal(resolveEndpointCategory("/v1/decisions"), "decisions");
 });

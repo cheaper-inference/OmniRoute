@@ -228,6 +228,15 @@ export async function POST(request) {
             }
           }
 
+          // Direct Google Decisions are not Gemini generateContent requests.
+          // Preserve a configured self-hosted model with the same local alias.
+          if (
+            typeof parsedBody.model === "string" &&
+            ["gemini-decision-1", "gemini/gemini-decision-1"].includes(parsedBody.model.trim().toLowerCase())
+          ) {
+            return finishAdmission(errorResponse(400, "Gemini Decision 1 requires POST /v1/decisions"));
+          }
+
           try {
             assertCommonChatGptWebModelAvailable(parsedBody.model);
           } catch (error) {
