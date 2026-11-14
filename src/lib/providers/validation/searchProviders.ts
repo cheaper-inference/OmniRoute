@@ -120,10 +120,14 @@ export const SEARCH_VALIDATOR_CONFIGS: Record<
     if (!cx || typeof cx !== "string") {
       throw new Error("Programmable Search Engine ID (cx) is required");
     }
+    // Probe the address the search handler calls: a base URL saved on the connection
+    // (providerSpecificData.baseUrl) replaces the default, as resolveSearchBaseUrl does at runtime.
+    const baseUrl =
+      typeof providerSpecificData?.baseUrl === "string" && providerSpecificData.baseUrl.trim()
+        ? providerSpecificData.baseUrl.trim().replace(/\/+$/, "")
+        : "https://www.googleapis.com/customsearch/v1";
     return {
-      url: `https://www.googleapis.com/customsearch/v1?key=${encodeURIComponent(apiKey)}&cx=${encodeURIComponent(
-        cx
-      )}&q=test&num=1`,
+      url: `${baseUrl}?key=${encodeURIComponent(apiKey)}&cx=${encodeURIComponent(cx)}&q=test&num=1`,
       init: {
         method: "GET",
         headers: { Accept: "application/json" },

@@ -1,0 +1,1 @@
+- **fix(providers):** Google PSE key validation probes the base URL saved on the connection, so a connection that points at a compatible endpoint is checked against the host it uses ([#19639](https://github.com/cheaper-inference/OmniRoute/pull/19639)) — thanks @Specstreamai
