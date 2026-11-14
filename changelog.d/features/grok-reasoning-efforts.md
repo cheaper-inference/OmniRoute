@@ -1,0 +1,1 @@
+- **feat(cli-tools):** the Grok Build settings API accepts an optional `reasoningEfforts` list (and `reasoningEffort` default) and writes the effort picker into the managed config; unset means no change.

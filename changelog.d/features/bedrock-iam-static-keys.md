@@ -1,0 +1,1 @@
+- **feat(providers):** A Bedrock connection can use AWS IAM static keys: add `awsAccessKeyId` (and optional `awsSessionToken`) to the connection data and put the secret access key in the API key field. Requests and model discovery are then signed with SigV4. Connections without `awsAccessKeyId` keep the bearer API key path.

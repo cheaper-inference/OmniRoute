@@ -28,6 +28,10 @@ export interface GrokBuildApplyOptions {
   apiKey?: string | null;
   model: string;
   contextWindow?: number;
+  /** Efforts the routed target accepts. Sanitized to Grok rungs; none valid means no picker keys. */
+  reasoningEfforts?: string[];
+  /** Preferred default effort; falls back to medium, then high, then the first rung. */
+  reasoningEffort?: string;
   subagentModels?: Partial<Record<GrokSubagentType, { model: string; contextWindow?: number }>>;
 }
 
@@ -50,6 +54,19 @@ const MANAGED_MARKER = '# omniroute-managed = "true"';
 const LEGACY_DESCRIPTION = "Routed via OmniRoute gateway";
 const MODELS_SECTION = "models";
 const SUBAGENT_MODELS_SECTION = "subagents.models";
+
+const GROK_EFFORT_RUNGS = ["none", "minimal", "low", "medium", "high", "xhigh", "max"];
+
+/** Keep Grok's rungs only (drops `ultra` and unknown values), lowercase, no duplicates, caller order. */
+const sanitizeEfforts = (efforts: string[] | undefined): string[] => {
+  const kept = (efforts ?? []).map((e) => String(e).trim().toLowerCase());
+  return [...new Set(kept.filter((e) => GROK_EFFORT_RUNGS.includes(e)))];
+};
+
+const pickDefaultEffort = (rungs: string[], preferred?: string): string =>
+  [preferred?.trim().toLowerCase(), "medium", "high", rungs[0]].find(
+    (e): e is string => !!e && rungs.includes(e)
+  ) as string;
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const tomlString = (value: string): string => JSON.stringify(String(value));
@@ -124,6 +141,13 @@ const parseModelSection = (toml: string, slot: string): GrokModelConfig | null =
   };
 };
 
+/** `[[model.<slot>.reasoning_efforts]]` tables sit outside the slot's own section match. */
+const effortTablesRegExp = (slot: string): RegExp =>
+  new RegExp(
+    `^\\[\\[model\\.${escapeRegExp(slot)}\\.reasoning_efforts\\]\\][ \\t]*\\r?\\n(?:(?!\\[)[^\\r\\n]*\\r?\\n?)*`,
+    "gm"
+  );
+
 const buildModelSection = (options: {
   slot: string;
   model: string;
@@ -131,6 +155,8 @@ const buildModelSection = (options: {
   apiKey?: string | null;
   contextWindow?: number;
   name: string;
+  reasoningEfforts?: string[];
+  reasoningEffort?: string;
 }): string => {
   const lines = [
     `[model.${options.slot}]`,
@@ -145,6 +171,21 @@ const buildModelSection = (options: {
   if (Number.isSafeInteger(options.contextWindow) && Number(options.contextWindow) > 0) {
     lines.push(`context_window = ${Math.floor(Number(options.contextWindow))}`);
   }
+  const rungs = sanitizeEfforts(options.reasoningEfforts);
+  if (rungs.length === 0) return `${lines.join("\n")}\n`;
+  const chosen = pickDefaultEffort(rungs, options.reasoningEffort);
+  lines.push("supports_reasoning_effort = true", `reasoning_effort = ${tomlString(chosen)}`);
+  for (const rung of rungs) {
+    lines.push(
+      "",
+      `[[model.${options.slot}.reasoning_efforts]]`,
+      `id = ${tomlString(rung)}`,
+      `value = ${tomlString(rung)}`,
+      `label = ${tomlString(rung)}`,
+      `description = ${tomlString(`Reasoning effort: ${rung}`)}`,
+      `default = ${rung === chosen}`
+    );
+  }
   return `${lines.join("\n")}\n`;
 };
 
@@ -154,13 +195,17 @@ const upsertModelSection = (
 ): string => {
   const regexp = sectionRegExp(`model.${options.slot}`);
   const section = buildModelSection(options);
-  if (regexp.test(toml)) return toml.replace(regexp, section);
+  if (regexp.test(toml))
+    return toml.replace(effortTablesRegExp(options.slot), "").replace(regexp, section);
   const prefix = toml.length > 0 && !toml.endsWith("\n") ? `${toml}\n` : toml;
   return `${prefix}${prefix ? "\n" : ""}${section}`;
 };
 
 const removeModelSection = (toml: string, slot: string): string =>
-  toml.replace(sectionRegExp(`model.${slot}`), "").replace(/\n{3,}/g, "\n\n");
+  toml
+    .replace(effortTablesRegExp(slot), "")
+    .replace(sectionRegExp(`model.${slot}`), "")
+    .replace(/\n{3,}/g, "\n\n");
 
 const insertMarker = (toml: string, marker: string): string => {
   const mainSection = sectionRegExp(`model.${GROK_MAIN_MODEL_SLOT}`);
@@ -266,6 +311,8 @@ export function applyGrokBuildConfig(toml: string, options: GrokBuildApplyOption
     apiKey: options.apiKey,
     contextWindow: options.contextWindow,
     name: "OmniRoute",
+    reasoningEfforts: options.reasoningEfforts,
+    reasoningEffort: options.reasoningEffort,
   });
   next = setSectionString(next, MODELS_SECTION, "default", GROK_MAIN_MODEL_SLOT);
 

@@ -16,6 +16,7 @@
 
 import { errorResponse, unavailableResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
+import { getSearchCredentialFallbacks } from "@omniroute/open-sse/config/searchRegistry.ts";
 import {
   handleWebFetch,
   type WebFetchCredentials,
@@ -84,10 +85,15 @@ async function resolveCredentials(
   allowedConnections: string[] | null
 ): Promise<CredentialsLookup> {
   try {
-    const creds = withoutKeyScopeBlocked(
-      await getProviderCredentialsWithQuotaPreflight(providerId, null, allowedConnections)
-    );
-    return (creds as CredentialsLookup) ?? null;
+    // A search-only provider id (ollama-search) reuses the key of its parent
+    // provider, the same way /v1/search does.
+    for (const id of [providerId, ...getSearchCredentialFallbacks(providerId)]) {
+      const creds = withoutKeyScopeBlocked(
+        await getProviderCredentialsWithQuotaPreflight(id, null, allowedConnections)
+      );
+      if (creds) return creds as CredentialsLookup;
+    }
+    return null;
   } catch {
     return null;
   }

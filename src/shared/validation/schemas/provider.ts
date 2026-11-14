@@ -87,6 +87,22 @@ export const MAX_PROVIDER_CREDENTIAL_LENGTH = 100_000;
 // schema is imported by client-side dashboard code and must stay free of node:crypto.
 const ENCRYPTED_ENVELOPE_PREFIX = "enc:v1:";
 
+// Azure OpenAI has no built-in endpoint (the executor would build a URL on the wrong host),
+// so a connection without a base URL can never work. Refuse it at save.
+function requireAzureOpenAiBaseUrl(
+  data: { provider: string; providerSpecificData?: Record<string, unknown> },
+  ctx: z.RefinementCtx
+): void {
+  if (data.provider !== "azure-openai") return;
+  const baseUrl = data.providerSpecificData?.baseUrl;
+  if (typeof baseUrl === "string" && baseUrl.trim().length > 0) return;
+  ctx.addIssue({
+    code: z.ZodIssueCode.custom,
+    message: "Azure OpenAI resource endpoint (baseUrl) is required",
+    path: ["providerSpecificData", "baseUrl"],
+  });
+}
+
 export const createProviderSchema = z
   .object({
     provider: z.string().min(1).max(100),
@@ -130,6 +146,8 @@ export const createProviderSchema = z
         path: ["apiKey"],
       });
     }
+
+    requireAzureOpenAiBaseUrl(data, ctx);
 
     const cx =
       data.providerSpecificData && typeof data.providerSpecificData === "object"

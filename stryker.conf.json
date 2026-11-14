@@ -817,7 +817,11 @@
       "tests/unit/muse-policy-account-marking.test.ts",
       "tests/unit/muse-refresh-review-regressions.test.ts",
       "tests/unit/stream-lifecycle-timer-cleanup-18669.test.ts",
-      "tests/unit/auth-selection-skips-full-account.test.ts"
+      "tests/unit/auth-selection-skips-full-account.test.ts",
+      "tests/unit/bedrock-iam-static-keys.test.ts",
+      "tests/unit/moonshot-region-probe.test.ts",
+      "tests/unit/provider-required-fields.test.ts",
+      "tests/unit/ollama-real-tags.test.ts"
     ],
     "nodeArgs": [
       "--import",

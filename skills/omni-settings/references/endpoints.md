@@ -545,7 +545,7 @@ curl -X PUT http://localhost:20128/api/settings/cli-versions \
 
 List Ollama-compatible model tags
 
-Returns models in Ollama /api/tags format for Ollama client compatibility
+Returns models in Ollama /api/tags format for Ollama client compatibility. By default the list is a fixed two-model sample. With OMNIROUTE_OLLAMA_REAL_TAGS=1 it is the real model catalog (same builder and auth check as GET /v1/models); size and digest are empty because the catalog has none.
 
 ```bash
 curl http://localhost:20128/api/tags \
