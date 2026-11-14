@@ -4491,7 +4491,7 @@
     "decisionTestSkipped": "Nicht aufgerufen:",
     "decisionTestRefused": "Das Decision-Modell hat die Wahl verweigert.",
     "decisionTestUnusable": "Keine verwertbare Wahl; der Router fiele auf die Regeln zurück.",
-    "fallbackSummary": "{rate} % der Anfragen haben den Fallback genutzt, jede übersprang im Durchschnitt ~{skips} Ziele",
+    "jevAdmitted": "Zugelassen: noch nicht bewertet (Live-Jev braucht eine Benutzernachricht). Geeignet: {models}.",
     "jevAdmittedNone": "Zugelassen: keine — jedes Ziel ist vor Jev blockiert.",
     "jevHeld": "Gehalten: keine, bis Jev bei einer Live-Anfrage läuft (Wahrscheinlichkeitsuntergrenze und dominiert).",
     "jevBlocked": "Blockiert: {models}.",
