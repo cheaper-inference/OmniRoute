@@ -256,7 +256,11 @@ export default function FreeProviderRankingsPage() {
           {/* Full List */}
           {displayedRankings.length > 0 && (
             <Card>
-              <Table className="min-w-0" scrollbarLabel={t("title")}>
+              <Table
+                className="min-w-0"
+                scrollbarLabel={t("title")}
+                containerClassName="rounded-none border-0"
+              >
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-16">{t("colRank")}</TableHead>
