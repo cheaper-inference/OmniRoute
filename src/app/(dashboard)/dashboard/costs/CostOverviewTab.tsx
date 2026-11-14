@@ -1113,7 +1113,11 @@ function CostExplorerCard({
         </div>
       ) : (
         <>
-          <Table scrollbarLabel={t("costExplorerTitle")} className="min-w-205">
+          <Table
+            scrollbarLabel={t("costExplorerTitle")}
+            className="min-w-205"
+            containerClassName="rounded-none border-0"
+          >
             <TableHeader>
               <TableRow>
                 {columns.map((column) => (
@@ -1263,7 +1267,7 @@ function CostBreakdownTable({
       <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-4">
         {title}
       </h3>
-      <Table scrollbarLabel={title}>
+      <Table scrollbarLabel={title} containerClassName="rounded-none border-0">
         <TableHeader>
           <TableRow>
             {columns.map((column) => (

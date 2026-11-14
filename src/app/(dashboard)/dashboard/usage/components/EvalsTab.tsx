@@ -1263,6 +1263,7 @@ export default function EvalsTab() {
         </div>
 
         <DataTable
+          label={t("recentRunsTitle")}
           framed={false}
           columns={HISTORY_COLUMNS.map((column) => ({
             key: column.key,
@@ -1408,7 +1409,9 @@ export default function EvalsTab() {
           {null}
         </FilterBar>
 
-        <div className="flex flex-col gap-3 mt-4">
+        {/* Suites are sections of this card, split by hairlines like the kit plain accordion:
+            the Card is the only frame (#19620). */}
+        <div className="mt-4 flex flex-col divide-y divide-border">
           {filteredSuites.map((suite) => {
             const isExpanded = expanded === suite.id;
             const isRunning = running === suite.id;
@@ -1427,7 +1430,7 @@ export default function EvalsTab() {
               liveResult?.runs?.[0]?.summary.passRate ?? suiteHistory[0]?.summary.passRate;
 
             return (
-              <div key={suite.id} className="border border-border/30 rounded-lg overflow-hidden">
+              <div key={suite.id}>
                 <div
                   className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 cursor-pointer hover:bg-surface/30 transition-colors"
                   onClick={() => setExpanded(isExpanded ? null : suite.id)}
@@ -1783,6 +1786,8 @@ export default function EvalsTab() {
                       </span>
                     </div>
                     <DataTable
+                      label={t("testCasesCount", { count: (suite.cases || []).length })}
+                      framed={false}
                       columns={[
                         { key: "name", label: t("columnCase") },
                         { key: "model", label: t("columnModel") },

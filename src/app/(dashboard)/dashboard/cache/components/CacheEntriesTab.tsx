@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { DataTableShell } from "@omniroute/ui-kit/data-table-shell";
+import { TableLoadingRegion } from "@omniroute/ui-kit/table-loading";
 import {
   Table,
   TableBody,
@@ -95,28 +95,87 @@ export default function CacheEntriesTab() {
     return new Date(dateStr).toLocaleString();
   };
 
+  // The Semantic Cache card is the only frame (#19620): the kit loading region and a
+  // borderless Table, not a DataTableShell, whose own frame would draw a second border.
   return (
-    <DataTableShell
-      loading={loading}
-      loadingLabel={t("loading")}
-      filters={
-        <div className="flex w-full items-end gap-3">
-          <Input
-            type="text"
-            className="flex-1"
-            aria-label={t("searchEntries")}
-            placeholder={t("searchEntries")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && fetchEntries()}
-          />
-          <Button variant="secondary" size="sm" onClick={() => fetchEntries()}>
-            {t("search")}
-          </Button>
-        </div>
-      }
-      pagination={
-        pagination.totalPages > 1 ? (
+    <div>
+      {/* Same width as the kit toolbar filters (fit-content), so the search keeps its size. */}
+      <div className="mb-3 flex w-fit max-w-full items-end gap-3">
+        <Input
+          type="text"
+          className="flex-1"
+          aria-label={t("searchEntries")}
+          placeholder={t("searchEntries")}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && fetchEntries()}
+        />
+        <Button variant="secondary" size="sm" onClick={() => fetchEntries()}>
+          {t("search")}
+        </Button>
+      </div>
+      <TableLoadingRegion loading={loading} loadingLabel={t("loading")}>
+        {error ? (
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-error/30 bg-error-bg px-4 py-3">
+            <div className="text-sm text-error">{error}</div>
+            <Button variant="secondary" size="sm" onClick={() => fetchEntries(pagination.page)}>
+              {t("refresh")}
+            </Button>
+          </div>
+        ) : !loading && entries.length === 0 ? (
+          <div className="py-8 text-center text-sm text-text-muted">{t("noEntries")}</div>
+        ) : (
+          <Table
+            className="text-sm"
+            scrollbarLabel={t("entries")}
+            containerClassName="rounded-none border-0"
+          >
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("signature")}</TableHead>
+                <TableHead>{t("model")}</TableHead>
+                <TableHead>{t("hits")}</TableHead>
+                <TableHead>{t("tokensSaved")}</TableHead>
+                <TableHead>{t("created")}</TableHead>
+                <TableHead>{t("expires")}</TableHead>
+                <TableHead>{t("actions")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {entries.map((entry) => (
+                <TableRow key={entry.id}>
+                  <TableCell className="font-mono text-xs">
+                    {entry.signature.slice(0, 12)}...
+                  </TableCell>
+                  <TableCell>{entry.model}</TableCell>
+                  <TableCell className="tabular-nums">{entry.hit_count}</TableCell>
+                  <TableCell className="tabular-nums text-success">
+                    {(entry.tokens_saved ?? 0).toLocaleString()}
+                  </TableCell>
+                  <TableCell className="text-xs text-text-muted">
+                    {formatDate(entry.created_at)}
+                  </TableCell>
+                  <TableCell className="text-xs text-text-muted">
+                    {formatDate(entry.expires_at)}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="destructive-ghost"
+                      size="icon"
+                      icon="delete"
+                      aria-label={tc("delete")}
+                      title={tc("delete")}
+                      onClick={() => handleDelete(entry.signature)}
+                      disabled={deleting === entry.signature}
+                      loading={deleting === entry.signature}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+        {pagination.totalPages > 1 ? (
           <div className="flex items-center justify-center gap-2 py-3">
             <Button
               variant="secondary"
@@ -138,65 +197,8 @@ export default function CacheEntriesTab() {
               disabled={pagination.page >= pagination.totalPages}
             />
           </div>
-        ) : undefined
-      }
-    >
-      {error ? (
-        <div className="flex items-center justify-between gap-3 rounded-lg border border-error/30 bg-error-bg px-4 py-3">
-          <div className="text-sm text-error">{error}</div>
-          <Button variant="secondary" size="sm" onClick={() => fetchEntries(pagination.page)}>
-            {t("refresh")}
-          </Button>
-        </div>
-      ) : !loading && entries.length === 0 ? (
-        <div className="py-8 text-center text-sm text-text-muted">{t("noEntries")}</div>
-      ) : (
-        <Table className="text-sm" scrollbarLabel={t("entries")}>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t("signature")}</TableHead>
-              <TableHead>{t("model")}</TableHead>
-              <TableHead>{t("hits")}</TableHead>
-              <TableHead>{t("tokensSaved")}</TableHead>
-              <TableHead>{t("created")}</TableHead>
-              <TableHead>{t("expires")}</TableHead>
-              <TableHead>{t("actions")}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {entries.map((entry) => (
-              <TableRow key={entry.id}>
-                <TableCell className="font-mono text-xs">
-                  {entry.signature.slice(0, 12)}...
-                </TableCell>
-                <TableCell>{entry.model}</TableCell>
-                <TableCell className="tabular-nums">{entry.hit_count}</TableCell>
-                <TableCell className="tabular-nums text-success">
-                  {(entry.tokens_saved ?? 0).toLocaleString()}
-                </TableCell>
-                <TableCell className="text-xs text-text-muted">
-                  {formatDate(entry.created_at)}
-                </TableCell>
-                <TableCell className="text-xs text-text-muted">
-                  {formatDate(entry.expires_at)}
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant="destructive-ghost"
-                    size="icon"
-                    icon="delete"
-                    aria-label={tc("delete")}
-                    title={tc("delete")}
-                    onClick={() => handleDelete(entry.signature)}
-                    disabled={deleting === entry.signature}
-                    loading={deleting === entry.signature}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      )}
-    </DataTableShell>
+        ) : null}
+      </TableLoadingRegion>
+    </div>
   );
 }
