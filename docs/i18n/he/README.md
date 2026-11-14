@@ -15,7 +15,7 @@
 
 **נוצר על ידי [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — לעולם אל תפסיקו לתכנת. כל כלי AI → 384 ספקים — 150+ בחינם — דרך נקודת קצה אחת. Claude Code, Codex, Cursor, Cline, Copilot ו-Antigravity אל Claude / GPT / Gemini בחינם עם מעבר אוטומטי במקרה כשל. דחיסה משולבת של RTK + Caveman חוסכת 15–95% מהטוקנים (~89% בממוצע) — לעולם לא תגיעו למגבלות. 384 ספקי AI · 150+ מסלולים בחינם · ~1.62B טוקנים בחינם בחודש · 20 אסטרטגיות ניתוב · $0 כדי להתחיל."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — לעולם אל תפסיקו לתכנת. כל כלי AI → 389 ספקים — 150+ בחינם — דרך נקודת קצה אחת. Claude Code, Codex, Cursor, Cline, Copilot ו-Antigravity אל Claude / GPT / Gemini בחינם עם מעבר אוטומטי במקרה כשל. דחיסה משולבת של RTK + Caveman חוסכת 15–95% מהטוקנים (~89% בממוצע) — לעולם לא תגיעו למגבלות. 389 ספקי AI · 150+ מסלולים בחינם · ~1.62B טוקנים בחינם בחודש · 20 אסטרטגיות ניתוב · $0 כדי להתחיל."/>
 
 </div>
 
@@ -45,7 +45,7 @@
 
 </h3>
 
-[![כוכבים](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
+[![כוכבים](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=flat&logo=github&logoColor=white&label=Stars&color=e5ac82&labelColor=20211c)](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 [![דירוג היסטוריית הכוכבים](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
@@ -54,14 +54,14 @@
 
 **👋 עקבו אחר המתחזק — קבלו ראשונים ספקים חדשים, גרסאות וטיפים:**
 
-[![עקבו אחר Diego ב־LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![עקבו אחר @diegosouzapw ב־GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![עקבו אחר Diego ב־LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white&color=e5ac82&labelColor=20211c)](https://www.linkedin.com/in/diegosouzapw/)
+[![עקבו אחר @diegosouzapw ב־GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=e5ac82&labelColor=20211c)](https://github.com/diegosouzapw)
 
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp גלובלי](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp ברזיל](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![אתר](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white&color=e5ac82&labelColor=20211c)](https://discord.gg/U47eFqAXCn)
+[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&color=e5ac82&labelColor=20211c)](https://t.me/omnirouteOficial)
+[![WhatsApp גלובלי](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
+[![WhatsApp ברזיל](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
+[![אתר](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white&color=e5ac82&labelColor=20211c)](https://omniroute.online)
 
 **שאלות, טיפים על ספקים, מפת דרכים ותמיכה → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 גלובלי](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 ברזיל](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [פורטל](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
@@ -73,7 +73,7 @@
 
 |                             |        v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
 | --------------------------- | :--------------------: | :---------: | :-------------------: |
-| 🌐 ספקים                    |          352           |   **358**   |          384          |
+| 🌐 ספקים                    |          352           |   **358**   |          389          |
 | 🧠 מזהי מודלי צ'אט ייחודיים |          1320          |  **1374**   |         1491          |
 | 🖼️ גשר מודאליות             | 🆕 ראייה + שמע + וידאו |      ✓      |           ✓           |
 | 📡 קטלוג חינמי של Radar     |       🆕 opt-in        |      ✓      |           ✓           |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ תכונות</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 שילובים</a></td>
-    <td align="center"><a href="#-384-ai-providers--153-catalog-marked-free">🌐 ספקים</a></td>
+    <td align="center"><a href="#-389-ai-providers--153-catalog-marked-free">🌐 ספקים</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI ו-MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ההבטחה — נקודת קצה אחת ו־384 ספקים. מנגנון נסיגה אוטומטי ממשיך את הניתוב כל עוד יעד בריא אחר זמין. שישה עקרונות: נסיגה עמידה בין 384 ספקים · חיסכון של עד 95% באסימונים בעומסי עבודה מתאימים · התחלה בעלות של $0 עם יותר מ־150 שכבות חינמיות ו־52 ספקים חינמיים לתמיד, חוזרים או ללא מפתח · 39 אינטגרציות CLI/agent באמצעות תצורה אחת · תאימות ל־OpenAI, Claude, Gemini ול־Responses API ב־/v1 · בקרות ייצור הכוללות מפסקי זרם, הסוואת TLS, ‏MCP עם 110 כלים, A2A, זיכרון, מעקות בטיחות, הערכות ויותר מ־56,000 הצהרות בדיקה סטטיות על פני יותר מ־7,800 קובצי בדיקה במעקב."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ההבטחה — נקודת קצה אחת ו־389 ספקים. מנגנון נסיגה אוטומטי ממשיך את הניתוב כל עוד יעד בריא אחר זמין. שישה עקרונות: נסיגה עמידה בין 389 ספקים · חיסכון של עד 95% באסימונים בעומסי עבודה מתאימים · התחלה בעלות של $0 עם יותר מ־150 שכבות חינמיות ו־52 ספקים חינמיים לתמיד, חוזרים או ללא מפתח · 39 אינטגרציות CLI/agent באמצעות תצורה אחת · תאימות ל־OpenAI, Claude, Gemini ול־Responses API ב־/v1 · בקרות ייצור הכוללות מפסקי זרם, הסוואת TLS, ‏MCP עם 110 כלים, A2A, זיכרון, מעקות בטיחות, הערכות ויותר מ־56,000 הצהרות בדיקה סטטיות על פני יותר מ־7,800 קובצי בדיקה במעקב."/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="מה מבדיל את OmniRoute — תמונת מצב מתוארכת של תכונות בהשוואה ל־9router, OpenRouter, CLIProxyAPI ו־LiteLLM על פני 13 יכולות. OmniRoute: 384 ספקים, יותר מ־150 שכבות חינמיות מובנות, 20 אסטרטגיות ניתוב, דחיסת טוקנים באמצעות 12 מנועים, שרת MCP מובנה עם 110 כלים, פרוטוקול סוכנים A2A, זיכרון מתמשך, אמצעי הגנה, סוכני ענן, הסוואת טביעת אצבע של TLS, Desktop/Termux/PWA ו־67 אזורי שפה בממשק. OmniRoute מופץ ברישיון MIT וניתן לאירוח עצמי. היכולות והספירות של המתחרים עשויות להשתנות; למידע נוסף ראו את המתודולוגיה המקושרת."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="מה מבדיל את OmniRoute — תמונת מצב מתוארכת של תכונות בהשוואה ל־9router, OpenRouter, CLIProxyAPI ו־LiteLLM על פני 13 יכולות. OmniRoute: 389 ספקים, יותר מ־150 שכבות חינמיות מובנות, 20 אסטרטגיות ניתוב, דחיסת טוקנים באמצעות 12 מנועים, שרת MCP מובנה עם 110 כלים, פרוטוקול סוכנים A2A, זיכרון מתמשך, אמצעי הגנה, סוכני ענן, הסוואת טביעת אצבע של TLS, Desktop/Termux/PWA ו־67 אזורי שפה בממשק. OmniRoute מופץ ברישיון MIT וניתן לאירוח עצמי. היכולות והספירות של המתחרים עשויות להשתנות; למידע נוסף ראו את המתודולוגיה המקושרת."/>
 
 <sub>📊 המתודולוגיה המלאה ופירוט לפי תכונה בהשוואה ל־9router, OpenRouter, CLIProxyAPI ו־LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -605,7 +605,7 @@ Radar הוא שירות אופציונלי המבוסס על GET בלבד. לק�
 - **🖼️ נקודות קצה חדשות** — `/v1/ocr` (‏Mistral OCR) ו־`/v1/audio/translations` (בסגנון Whisper) משלימות את מעטפת המדיה. → [מדריך ה־API](docs/reference/API_REFERENCE.md)
 - **🎨 יצירת תמונות / וידאו / אודיו** — API אחד למדיה: xAI Grok Imagine ו־Novita AI video, ‏ComfyUI, ‏Magnific, ‏Adobe Firefly, ‏Segmind, וספקי דיבור כגון ElevenLabs. → [מדריך ה־API](docs/reference/API_REFERENCE.md)
 - **🌍 פריסה ותפעול** — `basePath` עבור reverse-proxy, זיהוי אוטומטי של שפת הדפדפן, מעקב אחר מכשירים לפי מפתח, אמון MITM ללא הרשאות root, ולוקליזציה ל־zh-TW. → [סביבה](docs/reference/ENVIRONMENT.md)
-- **🤝 ספקים וסוכנים נוספים** — סוכני ענן (Codex Cloud, Cursor, Devin, Jules), ‏Grok Build ‏(xAI) עם דפדפן וכניסה באמצעות OAuth, כרטיס רשמי ל־Ollama, ‏Claude Opus 5 ו־Sonnet 5, שותפות רשמית עם Kimi ‏(Code/Web/Moonshot), ‏Zed, ‏Requesty, ‏SenseNova, ‏Yuanbao, ‏Agnes AI… וקטלוג מעודכן של **384 ספקים**. → [ספקים](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 ספקים וסוכנים נוספים** — סוכני ענן (Codex Cloud, Cursor, Devin, Jules), ‏Grok Build ‏(xAI) עם דפדפן וכניסה באמצעות OAuth, כרטיס רשמי ל־Ollama, ‏Claude Opus 5 ו־Sonnet 5, שותפות רשמית עם Kimi ‏(Code/Web/Moonshot), ‏Zed, ‏Requesty, ‏SenseNova, ‏Yuanbao, ‏Agnes AI… וקטלוג מעודכן של **389 ספקים**. → [ספקים](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 שקיפות בניתוב** — כל תגובה כוללת כותרת `X-OmniRoute-Decision` המציינת את האסטרטגיה/הספק/השהיה ששירתו אותה, אסטרטגיית קומבו חדשה בשם `cache-optimized` וגורם `cacheAffinity` של Auto-Combo מנתבים בקשות חוזרות בחזרה לחיבור שמחזיק בקידומת שבמטמון, ונקודת קצה לקריאה בלבד `/v1/auto-combo/{channel}/candidates` חושפת את מאגר המועמדים החי של ערוץ `auto/*`. → [קומבו אוטומטי](docs/routing/AUTO-COMBO.md)
 - **⚡ ביצועים ותשתיות מקומיים** — Redis מקומי בלחיצה אחת, מפעילי פריסה לממסרים של Cloudflare Workers / Deno Deploy, ו־Bifrost ו־Mux כשירותים משובצים ומנוהלים. → [שירותים משובצים](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 גם כלול בחבילה** — מסגרת תוספים ושוק תוספים, מסגרות מיומנויות של Omni/Agent/GitHub, אינטגרציה עם כספת Obsidian (22 כלי MCP), ממשקי Batch ו־Files תואמי OpenAI, מטמון תגובות סמנטי, מנגנון משחק עם טבלאות מובילים, גילוי סוכני ACP (15 סוכנים מובנים), ייצוא מתוזמן של יומנים ל־BigQuery, הפצת עומסים מקבילית של מודלים מרובים באמצעות `auto/chaos`, גשר לבוט Telegram, מנהל גרסאות בתוך האפליקציה ודירוגי ספקים חינמיים של LMArena-ELO. → [תיעוד](docs/README.md)
@@ -688,11 +688,11 @@ omniroute configure codex          # גם: claude opencode qwen aider goose gemi
 
 <div align="center">
 
-## 🌐 384 ספקי AI — 153 מסומנים בקטלוג כחינמיים
+## 🌐 389 ספקי AI — 153 מסומנים בקטלוג כחינמיים
 
 </div>
 
-> **384 ספקים רשומים** באוספים הקנוניים של צ'אט, מדיה, חיפוש, מקומי, סוכני ענן ומערכת, כולל **153 ספקים עם מטא-נתוני גילוי `hasFree: true`**. רישום מודלי הצ'אט כולל **239 ספקים / 3,059 צמדי ספק-מודל ייחודיים / 1,475 מזהי מודלים גולמיים**; קטלוג התקציב החינמי הנפרד כולל **471 שורות לכל מודל**, **34 מאגרים חוזרים** ו-**52 ספקים חינמיים לתמיד, חוזרים/ללא מפתח**. אלה מכנים שונים בכוונה; ההגדרות והחישובים לאחר הסרת כפילויות ממאגרים נמצאים ב-[Reference לספקים](docs/reference/PROVIDER_REFERENCE.md) וב-[רמות חינמיות](docs/reference/FREE_TIERS.md).
+> **389 ספקים רשומים** באוספים הקנוניים של צ'אט, מדיה, חיפוש, מקומי, סוכני ענן ומערכת, כולל **153 ספקים עם מטא-נתוני גילוי `hasFree: true`**. רישום מודלי הצ'אט כולל **239 ספקים / 3,059 צמדי ספק-מודל ייחודיים / 1,475 מזהי מודלים גולמיים**; קטלוג התקציב החינמי הנפרד כולל **471 שורות לכל מודל**, **34 מאגרים חוזרים** ו-**52 ספקים חינמיים לתמיד, חוזרים/ללא מפתח**. אלה מכנים שונים בכוונה; ההגדרות והחישובים לאחר הסרת כפילויות ממאגרים נמצאים ב-[Reference לספקים](docs/reference/PROVIDER_REFERENCE.md) וב-[רמות חינמיות](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1294,7 +1294,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # גם CI=1 מדלג ע�
   <tr><td nowrap><b>סביבת ריצה</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>שפה</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> בכל <code>src/</code> ו-<code>open-sse/</code> (אפס מופעים של <code>any</code> בליבה מאז v2.0)</td></tr>
   <tr><td nowrap><b>תשתית</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>מסד נתונים</b></td><td>better-sqlite3 (SQLite, רישום WAL) + LowDB (JSON מדור קודם) — 147 מודולי תחום, 232 הגירות</td></tr>
+  <tr><td nowrap><b>מסד נתונים</b></td><td>better-sqlite3 (SQLite, רישום WAL) + LowDB (JSON מדור קודם) — 147 מודולי תחום, 238 הגירות</td></tr>
   <tr><td nowrap><b>זיכרון</b></td><td>חיפוש טקסט מלא באמצעות SQLite FTS5 + הטמעות וקטוריות שעברו קוונטיזציה ל-int8, דעיכה טיפוסית</td></tr>
   <tr><td nowrap><b>סכמות</b></td><td>Zod 4 — אימות קלט/פלט של כלי MCP + חוזי API</td></tr>
   <tr><td nowrap><b>פרוטוקולים</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

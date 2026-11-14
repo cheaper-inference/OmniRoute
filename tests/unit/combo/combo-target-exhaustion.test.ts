@@ -65,6 +65,40 @@ test("marks provider exhausted when the fallback result signals quota exhaustion
   assert.equal(s.transientRateLimitedProviders.size, 0);
 });
 
+for (const provider of ["tavily-search", "firecrawl"]) {
+  test(`${provider} quota exhaustion with an account pin leaves sibling accounts eligible`, () => {
+    const s = sets();
+    const result = applyComboTargetExhaustion(target({ provider, modelStr: `${provider}/web` }), {
+      ...baseOpts,
+      result: { status: 429 },
+      fallbackResult: { creditsExhausted: true },
+      sets: s,
+    });
+    assert.deepEqual([...s.exhaustedConnections], [`${provider}:conn-1`]);
+    assert.equal(s.exhaustedProviders.size, 0);
+    assert.deepEqual(result.durableExhaustion, {
+      scope: "connection",
+      provider,
+      connectionId: "conn-1",
+    });
+  });
+
+  test(`${provider} without an identifiable account retains provider-level exhaustion`, () => {
+    const s = sets();
+    applyComboTargetExhaustion(
+      target({ provider, modelStr: `${provider}/web`, connectionId: null }),
+      {
+        ...baseOpts,
+        result: { status: 429 },
+        fallbackResult: { creditsExhausted: true },
+        sets: s,
+      }
+    );
+    assert.deepEqual([...s.exhaustedProviders], [provider]);
+    assert.equal(s.exhaustedConnections.size, 0);
+  });
+}
+
 test("round-robin's allAccountsRateLimited term also marks the provider exhausted", () => {
   const s = sets();
   const { providerExhausted: exhausted } = applyComboTargetExhaustion(target(), {

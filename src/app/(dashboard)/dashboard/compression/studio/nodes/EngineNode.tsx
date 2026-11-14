@@ -141,7 +141,11 @@ export function EngineNode({ data }: NodeProps) {
       {/* Footer */}
       <div className="px-2.5 pb-2 pt-1 flex flex-col gap-0.5">
         {!skipped && (
-          <span className="text-[11px] font-bold" style={{ color }} data-testid="savings-percent">
+          <span
+            className="text-[11px] font-semibold"
+            style={{ color }}
+            data-testid="savings-percent"
+          >
             {`-${savings.toFixed(1)}%`}
           </span>
         )}

@@ -12,40 +12,19 @@
 //   • check-openapi-coverage.mjs — % de rotas reais documentadas (ratchet).
 // Nenhum dos dois compara DUAS versões da spec; este sim.
 //
-// Saída (stdout, KEY=VALUE para o coletor de métricas collect-metrics.mjs):
-//   openapiBreaking=N                          — número de breaking changes
-//   openapiBreaking=SKIP reason=binary-absent  — oasdiff não está no PATH
-//   openapiBreaking=SKIP reason=base-unresolved — a spec base não pôde ser lida
-//                                                 (arquivo não existia no base, ou
-//                                                  clone shallow sem o ref base)
-//
-// Por default é ADVISORY (sai 0 SEMPRE, mesmo com N>0). Passe --ratchet para
-// tornar BLOQUEANTE: lê metrics.openapiBreaking.value de
-// config/quality/quality-baseline.json, compara a contagem MEDIDA e SAI 1 SE — E
-// SOMENTE SE — a medida for MAIOR que o baseline (regressão real, direction:down).
-// Qualquer SKIP gracioso (oasdiff ausente do PATH, spec base não resolvível em
-// clone shallow, JSON inválido) SAI 0 MESMO com --ratchet — uma falha de MEDIÇÃO
-// nunca bloqueia, só uma regressão MEDIDA bloqueia (mesma trajetória de todo gate
-// neste repo: report → ratchet → block).
-//
-// Base ref:
-//   • CI passa BASE_REF=${{ github.base_ref }} (ex.: "release/vX.Y.Z").
-//   • Local: default derivado da versão do package.json (releaseBranchForVersion),
-//     ex.: package 3.8.29 → "origin/release/v3.8.29" — nunca fica stale entre ciclos.
-// A spec base é extraída com `git show <BASE_REF>:docs/openapi.yaml`.
-//
-// Uso:
-//   node scripts/check/check-openapi-breaking.mjs
-//   BASE_REF=origin/release/vX.Y.Z node scripts/check/check-openapi-breaking.mjs
-//   node scripts/check/check-openapi-breaking.mjs --json    # imprime JSON bruto do oasdiff
-//   node scripts/check/check-openapi-breaking.mjs --quiet   # suprime logs de diagnóstico
-//   node scripts/check/check-openapi-breaking.mjs --ratchet # falha (exit 1) numa regressão
+// A required (--ratchet) measurement fails closed: exit 1 is measured regression,
+// exit 2 is INCOMPLETE (missing tool/base/spec/report/baseline). Advisory mode
+// preserves SKIP/exit 0. GitHub event SHAs take precedence over local BASE_REF.
+// PR heads compare at merge-base; synthetic merges compare to their pinned base.
+// Local usage: BASE_REF=<commit-or-ref> node scripts/check/check-openapi-breaking.mjs
+// --json prints the scanner report but still enforces --ratchet.
 
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { execFileSync, spawnSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
+import { resolveOpenapiBaseline } from "./openapiBaseline.mjs";
 
 const ROOT = process.cwd();
 const QUIET = process.argv.includes("--quiet");
@@ -80,9 +59,8 @@ function readPackageVersion() {
   }
 }
 
-// CI sempre passa BASE_REF=${{ github.base_ref }} e vence; este default só vale
-// para runs locais. Derivado da versão para não re-driftar a cada release.
-const DEFAULT_BASE_REF = releaseBranchForVersion(readPackageVersion()) || "origin/release/v3.8.29";
+// Only local runs use this default; event SHAs are resolved independently.
+const DEFAULT_BASE_REF = releaseBranchForVersion(readPackageVersion());
 const BASELINE_PATH = path.join(ROOT, "config/quality/quality-baseline.json");
 
 // ---------------------------------------------------------------------------
@@ -158,8 +136,8 @@ export function parseOasdiffBreaking(oasdiffJson) {
  *
  * Uma medição ausente (current null/undefined) OU um baseline ausente
  * (baseline null/undefined) → { regressed:false, skipped:true }: sem uma das
- * duas pontas não há ratchet possível, então o caller trata como SKIP gracioso
- * (exit 0 mesmo com --ratchet). Uma falha de MEDIÇÃO nunca bloqueia.
+ * duas pontas não há ratchet possível. O caller exige medição completa no modo
+ * obrigatório (exit 2 com --ratchet).
  *
  * @param {object} args
  * @param {number|null} args.current  - Breaking changes medidos agora (null = sem medição).
@@ -176,7 +154,7 @@ export function evaluateOpenapiRatchet({ current, baseline }) {
 /**
  * Lê metrics.openapiBreaking.value do quality-baseline.json.
  * Retorna null se o arquivo ou a métrica estiverem ausentes/inválidos (sem
- * baseline não há ratchet possível — o caller trata como SKIP gracioso, exit 0).
+ * baseline não há ratchet possível — o caller trata como INCOMPLETE no modo obrigatório).
  *
  * @param {string} baselinePath
  * @returns {number|null}
@@ -190,7 +168,7 @@ export function readBaselineOpenapiValue(baselinePath = BASELINE_PATH) {
     return null;
   }
   const metric = baselineJson?.metrics?.openapiBreaking;
-  if (!metric || typeof metric.value !== "number") return null;
+  if (!metric || !Number.isSafeInteger(metric.value) || metric.value < 0) return null;
   return metric.value;
 }
 
@@ -240,7 +218,7 @@ export function findOasdiff() {
  * Extrai a spec base via `git show <BASE_REF>:<SPEC_REL>` para um arquivo temp.
  * Retorna o caminho do temp (chamador é responsável por limpar), ou null se a
  * spec não pôde ser resolvida (ref ausente em clone shallow, ou arquivo não
- * existia naquele ref). NUNCA lança — falha → null → SKIP gracioso.
+ * existia naquele ref). NUNCA lança — falha → null → medição indisponível.
  *
  * @param {string} baseRef
  * @returns {string|null} caminho do arquivo temp com a spec base, ou null.
@@ -278,53 +256,74 @@ export function resolveBaseSpec(baseRef) {
 // Main
 // ---------------------------------------------------------------------------
 
-function main() {
-  const baseRef = (process.env.BASE_REF || "").trim() || DEFAULT_BASE_REF;
+function incomplete(reason) {
+  console.log(`openapiBreaking=${RATCHET ? "INCOMPLETE" : "SKIP"} reason=${reason}`);
+  process.exitCode = RATCHET ? 2 : 0;
+}
 
+function main() {
   // 1) HEAD spec precisa existir (working tree).
   if (!fs.existsSync(SPEC_PATH)) {
-    console.log("openapiBreaking=SKIP reason=head-spec-absent");
+    incomplete("head-spec-absent");
     if (!QUIET) {
       process.stderr.write(`[openapi-breaking] SKIP — spec não encontrada: ${SPEC_PATH}\n`);
     }
-    process.exitCode = 0;
     return;
   }
 
   // 2) Binário oasdiff precisa estar no PATH.
   const oasdiffBin = findOasdiff();
   if (!oasdiffBin) {
-    console.log("openapiBreaking=SKIP reason=binary-absent");
+    incomplete("binary-absent");
     if (!QUIET) {
       process.stderr.write(
         "[openapi-breaking] SKIP — oasdiff não encontrado no PATH.\n" +
           "[openapi-breaking] Instale via: https://github.com/oasdiff/oasdiff\n" +
-          "[openapi-breaking] ADVISORY — este gate sai 0 (promove a bloqueante depois).\n"
+          "[openapi-breaking] Required measurements must complete before acceptance.\n"
       );
     }
-    process.exitCode = 0;
     return;
   }
 
-  // 3) Resolver a spec base (git show → temp). SKIP se não der.
+  let comparison;
+  try {
+    comparison = resolveOpenapiBaseline({ defaultRef: DEFAULT_BASE_REF });
+  } catch (error) {
+    incomplete("base-unresolved");
+    if (!QUIET) process.stderr.write(`[openapi-breaking] ${error.message}\n`);
+    return;
+  }
+  const baseRef = comparison.baseSha;
+  if (process.env.GITHUB_EVENT_NAME) {
+    const candidateTmp = resolveBaseSpec(comparison.candidateSha);
+    if (!candidateTmp) {
+      incomplete("candidate-spec-unresolved");
+      return;
+    }
+    try {
+      if (!fs.readFileSync(candidateTmp).equals(fs.readFileSync(SPEC_PATH))) {
+        incomplete("candidate-spec-mismatch");
+        return;
+      }
+    } finally {
+      fs.unlinkSync(candidateTmp);
+    }
+  }
+  if (!PRINT_JSON) {
+    console.log(
+      `openapiBaseSha=${baseRef} openapiCandidateSha=${comparison.candidateSha} source=${comparison.source}`
+    );
+  }
   const baseTmp = resolveBaseSpec(baseRef);
   if (!baseTmp) {
-    console.log(`openapiBreaking=SKIP reason=base-unresolved ref=${baseRef}`);
-    if (!QUIET) {
-      process.stderr.write(
-        `[openapi-breaking] SKIP — não consegui ler ${SPEC_REL} em '${baseRef}'.\n` +
-          "[openapi-breaking] Causas: clone shallow sem o ref base, arquivo novo (não existia no base),\n" +
-          "[openapi-breaking] ou ref inválido. Em CI use fetch-depth: 0 ou git fetch do base ref.\n"
-      );
-    }
-    process.exitCode = 0;
+    incomplete("base-spec-unresolved");
     return;
   }
 
   try {
     // 4) Rodar `oasdiff breaking --format json <baseTmp> <headSpec>`.
     //    oasdiff sai 0 por padrão mesmo com breaking changes (só com --fail-on
-    //    é que sai 1). Capturamos stdout independentemente do exit code.
+    //    é que sai 1). Qualquer erro de execução é medição incompleta.
     const args = ["breaking", "--format", "json", baseTmp, SPEC_PATH];
 
     if (!QUIET) {
@@ -342,45 +341,43 @@ function main() {
         timeout: 90_000,
       });
     } catch (err) {
-      // oasdiff PODE sair !=0 (ex.: com --fail-on em versões futuras, ou erro real).
-      // Capturamos stdout de qualquer jeito: se ele tem JSON parseável, é o resultado.
-      stdout = err.stdout ? String(err.stdout) : "";
-      const stderr = err.stderr ? String(err.stderr) : "";
-      if (!stdout.trim()) {
-        // Sem stdout = erro real do oasdiff (spec inválida, etc.). Advisory → SKIP.
-        console.log("openapiBreaking=SKIP reason=oasdiff-error");
-        if (!QUIET) {
-          process.stderr.write(`[openapi-breaking] SKIP — oasdiff falhou: ${err.message}\n`);
-          if (stderr) {
-            process.stderr.write(`[openapi-breaking] stderr: ${stderr.slice(0, 500)}\n`);
-          }
-        }
-        process.exitCode = 0;
-        return;
-      }
+      incomplete("oasdiff-error");
+      if (!QUIET) process.stderr.write(`[openapi-breaking] oasdiff failed: ${err.message}\n`);
+      return;
     }
 
     const trimmed = stdout.trim();
+    if (!trimmed) {
+      incomplete("invalid-report");
+      return;
+    }
     let parsed = [];
     if (trimmed && trimmed !== "null") {
       try {
         parsed = JSON.parse(trimmed);
       } catch (parseErr) {
-        // JSON inesperado — advisory, não derruba o build.
-        console.log("openapiBreaking=SKIP reason=parse-error");
+        // JSON inesperado não é uma medição válida.
+        incomplete("parse-error");
         if (!QUIET) {
           process.stderr.write(
             `[openapi-breaking] SKIP — JSON do oasdiff não parseável: ${parseErr.message}\n` +
               `[openapi-breaking] stdout (primeiros 500): ${trimmed.slice(0, 500)}\n`
           );
         }
-        process.exitCode = 0;
         return;
       }
     }
 
+    if (
+      !Array.isArray(parsed) ||
+      parsed.some((item) => !item || typeof item !== "object" || Array.isArray(item))
+    ) {
+      incomplete("invalid-report");
+      return;
+    }
     if (PRINT_JSON) {
       process.stdout.write(JSON.stringify(parsed, null, 2) + "\n");
+      applyRatchet(parseOasdiffBreaking(parsed).count);
       return;
     }
 
@@ -449,7 +446,7 @@ function main() {
 /**
  * Aplica o ratchet (direction:down) sobre a contagem medida vs o baseline.
  * Sem --ratchet: advisory (exit 0). Com --ratchet: exit 1 numa regressão real
- * (medida > baseline). Baseline ausente → SKIP gracioso (exit 0).
+ * (medida > baseline). Baseline ausente → INCOMPLETE (exit 2).
  *
  * @param {number} count - Contagem MEDIDA de breaking changes (medição bem-sucedida).
  */
@@ -466,12 +463,12 @@ function applyRatchet(count) {
   });
 
   if (skipped) {
+    incomplete("baseline-unresolved");
     if (!QUIET) {
       process.stderr.write(
-        "[openapi-breaking] baseline ausente (metrics.openapiBreaking) — SKIP gracioso, sai 0.\n"
+        "[openapi-breaking] baseline ausente (metrics.openapiBreaking) — medição INCOMPLETE, sai 2.\n"
       );
     }
-    process.exitCode = 0;
     return;
   }
 

@@ -59,6 +59,20 @@ export const LOCAL_PROVIDERS = {
     localDefault: "http://localhost:1234/v1",
     passthroughModels: true,
   },
+  "opencode-server": {
+    id: "opencode-server",
+    serviceKinds: ["llm"],
+    alias: "ocs",
+    name: "OpenCode CLI Server",
+    icon: "terminal",
+    color: "#F59E0B",
+    textIcon: "OC",
+    website: "https://opencode.ai/docs/server/",
+    authHint:
+      "No API key required. Uses the opencode CLI's own headless server (`opencode serve`), which holds the opencode credential and talks to the opencode upstream. Set the server URL in the provider settings and start the server from Providers > Services > OpenCode (loopback URLs only, binary from OPENCODE_SERVER_BIN or the usual install locations) or run `opencode serve` yourself; requests never start it.",
+    localDefault: "http://127.0.0.1:4096",
+    passthroughModels: false,
+  },
   vllm: {
     id: "vllm",
     serviceKinds: ["llm"],
@@ -139,8 +153,8 @@ export const LOCAL_PROVIDERS = {
     textIcon: "DM",
     website: "https://docs.docker.com/ai/model-runner/",
     authHint:
-      "API key optional. Configure the local Docker Model Runner OpenAI-compatible base URL (default: http://localhost:12434/v1).",
-    localDefault: "http://localhost:12434/v1",
+      "API key optional. Configure the local Docker Model Runner OpenAI-compatible base URL (default: http://localhost:12434/engines/v1).",
+    localDefault: "http://localhost:12434/engines/v1",
     passthroughModels: true,
   },
   xinference: {

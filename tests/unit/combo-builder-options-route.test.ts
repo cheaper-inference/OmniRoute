@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import type { ComboBuilderOptionsPayload } from "../../src/lib/combos/builderOptions.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-combo-builder-options-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -52,6 +53,43 @@ test.beforeEach(async () => {
 test.after(() => {
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+});
+
+test("search/fetch operations are selectable without LLM models and retain account choices", async () => {
+  const a = await seedConnection("serper-search", { name: "Serper A" });
+  const b = await seedConnection("serper-search", { name: "Serper B" });
+  await seedConnection("tavily-search");
+  await seedConnection("jina-reader");
+  // Older manual placeholders carry chat defaults; native operation metadata must win.
+  await modelsDb.addCustomModel("tavily-search", "web", "Tavily operations");
+  const response = await route.GET();
+  const body = (await response.json()) as ComboBuilderOptionsPayload;
+  assert.equal(response.status, 200);
+  const serper = body.providers.find((entry) => entry.providerId === "serper-search")!;
+  assert.equal(serper.models.length, 1);
+  assert.equal(serper.models[0].qualifiedModel, "serper-search/web");
+  assert.deepEqual(serper.models[0].supportedEndpoints, ["search"]);
+  assert.deepEqual(new Set(serper.connections.map((entry) => entry.id)), new Set([a.id, b.id]));
+  const tavily = body.providers.find((entry) => entry.providerId === "tavily-search")!;
+  assert.equal(tavily.models.length, 1);
+  assert.equal(tavily.models[0].qualifiedModel, "tavily-search/web");
+  assert.deepEqual(tavily.models[0].supportedEndpoints, ["search", "web-fetch"]);
+  const reader = body.providers.find((entry) => entry.providerId === "jina-reader")!;
+  assert.ok(
+    reader.models.some(
+      (entry) => entry.id === "fetch" && entry.supportedEndpoints?.includes("web-fetch")
+    )
+  );
+});
+
+test("hidden web operation targets stay hidden in combo builder options", async () => {
+  await seedConnection("serper-search");
+  modelsDb.mergeModelCompatOverride("serper-search", "web", { isHidden: true });
+  const body = (await (await route.GET()).json()) as ComboBuilderOptionsPayload;
+  assert.deepEqual(
+    body.providers.find((entry) => entry.providerId === "serper-search")!.models,
+    []
+  );
 });
 
 test("combo builder options route aggregates providers, connections, models and combo refs", async () => {

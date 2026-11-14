@@ -77,8 +77,19 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
 // ── large tables — count + shape + spot-checks (corruption guard) ─────────────
 
 describe("migrationRunner/constants — large-table integrity", () => {
-  it("RENAMED_MIGRATION_COMPATIBILITY has 87 well-formed entries", () => {
-    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 87);
+  it("RENAMED_MIGRATION_COMPATIBILITY has 107 well-formed entries", () => {
+    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 107);
+    assert.deepEqual(
+      RENAMED_MIGRATION_COMPATIBILITY.filter(
+        (entry) => entry.fromName === "usage_history_calculated_cost"
+      ),
+      ["228", "231", "233", "236"].map((fromVersion) => ({
+        fromVersion,
+        fromName: "usage_history_calculated_cost",
+        toVersion: "237",
+        toName: "usage_history_calculated_cost",
+      }))
+    );
     assert.deepEqual(
       RENAMED_MIGRATION_COMPATIBILITY.filter((entry) => entry.fromName === "agent_sessions"),
       ["190", "197", "198", "208", "214", "229", "230"].map((fromVersion) => ({
@@ -97,6 +108,15 @@ describe("migrationRunner/constants — large-table integrity", () => {
         fromName: "usage_history_agent_session_id",
         toVersion: "235",
         toName: "usage_history_agent_session_id",
+      }))
+    );
+    assert.deepEqual(
+      RENAMED_MIGRATION_COMPATIBILITY.filter((entry) => entry.fromName === "key_templates"),
+      ["228", "230", "231", "232", "234"].map((fromVersion) => ({
+        fromVersion,
+        fromName: "key_templates",
+        toVersion: "236",
+        toName: "key_templates",
       }))
     );
     assert.deepEqual(
@@ -287,6 +307,20 @@ describe("migrationRunner/constants — large-table integrity", () => {
         fromName: "team_cost_centers",
         toVersion: "215",
         toName: "team_cost_centers",
+      }))
+    );
+  });
+
+  it("rehomes the earlier 236/237 pending-detail index heads to 239 (#19573)", () => {
+    assert.deepEqual(
+      RENAMED_MIGRATION_COMPATIBILITY.filter(
+        (entry) => entry.fromName === "call_logs_pending_detail_index"
+      ),
+      ["236", "237"].map((fromVersion) => ({
+        fromVersion,
+        fromName: "call_logs_pending_detail_index",
+        toVersion: "239",
+        toName: "call_logs_pending_detail_index",
       }))
     );
   });

@@ -15,6 +15,7 @@ import {
   fetchAndSeedClaudeResetCreditUsage,
   forgetClaudeResetCreditCount,
 } from "@omniroute/open-sse/services/claudeResetCreditCount.ts";
+import { expireClaudeUsageCache } from "@omniroute/open-sse/services/usage/claude.ts";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
 
@@ -203,6 +204,8 @@ export async function consumeClaudeResetCredit(
     forgetClaudeResetCreditCount(connection.id);
 
     if (claim.result === "reset" || claim.result === "not_limited") {
+      // The quota just changed: the next read must not reuse the pre-claim usage.
+      expireClaudeUsageCache(token);
       return { outcome: "reset", usage: await refreshUsageAfterClaim(connectionId) };
     }
     if (claim.result === "already_used") {
