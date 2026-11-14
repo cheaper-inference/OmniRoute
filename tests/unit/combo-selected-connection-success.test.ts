@@ -16,12 +16,13 @@ const {
   clearAllModelLockouts,
   decayModelFailureCount,
 } = await import("../../open-sse/services/accountFallback.ts");
-const { recordProviderCooldown, isProviderInCooldown, recordProviderSuccess, clearCooldownState } =
+const { recordProviderCooldown, isProviderInCooldown, clearCooldownState } =
   await import("../../open-sse/services/providerCooldownTracker.ts");
 const { resolveResilienceSettings } = await import("../../src/lib/resilience/settings.ts");
 const core = await import("../../src/lib/db/core.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
+const sessionStickiness = await import("../../open-sse/services/combo/sessionStickiness.ts");
 
 const settings = resolveResilienceSettings({
   resilienceSettings: {
@@ -68,9 +69,96 @@ beforeEach(async () => {
   clearAllModelLockouts();
   clearCooldownState();
   settingsDb.clearAllLKGP();
+  sessionStickiness.clearAllStickyBindings();
+  sessionStickiness.__setStickinessHeadroomFetcherForTests(async () => undefined);
+  sessionStickiness.__setStickinessConnectionFetcherForTests(async () => ({
+    testStatus: "active",
+  }));
+  sessionStickiness.__setStickinessQuotaCheckerForTests(async () => false);
+});
+
+test.after(() => {
+  sessionStickiness.__setStickinessHeadroomFetcherForTests(null);
+  sessionStickiness.__setStickinessConnectionFetcherForTests(null);
+  sessionStickiness.__setStickinessQuotaCheckerForTests(null);
+  sessionStickiness.clearAllStickyBindings();
 });
 
 describe("combo selected connection success handling", () => {
+  test("Jev pins the dynamically selected model and connection on the next turn", async () => {
+    const comboName = "jev-dynamic-sticky-binding";
+    const firstConnection = await providersDb.createProviderConnection({
+      provider: "openai",
+      authType: "apikey",
+      name: "Jev dynamic sticky A",
+      apiKey: "sk-test-a",
+    });
+    const selectedConnection = await providersDb.createProviderConnection({
+      provider: "openai",
+      authType: "apikey",
+      name: "Jev dynamic sticky B",
+      apiKey: "sk-test-b",
+    });
+    const selectedConnectionId = String(selectedConnection.id);
+    const combo = {
+      name: comboName,
+      strategy: "jev",
+      models: ["openai/gpt-4.1-mini", "openai/gpt-4.1-nano"],
+      config: { maxRetries: 0, disableSessionStickiness: false },
+    };
+    const firstTurn = [{ role: "user", content: "Keep the same account across turns." }];
+    const selectedOnEachTurn: Array<{ connectionId: string | null; modelStr: string }> = [];
+    const logMessages: string[] = [];
+    const log = {
+      info: (_tag: string, message: string) => logMessages.push(message),
+      warn: (_tag: string, message: string) => logMessages.push(message),
+      error: (_tag: string, message: string) => logMessages.push(message),
+      debug: (_tag: string, message: string) => logMessages.push(message),
+    };
+
+    const dispatch = async (messages: Array<{ role: string; content: string }>) =>
+      handleComboChat({
+        body: { messages, stream: false },
+        combo,
+        isModelAvailable: async () => true,
+        log,
+        settings: null,
+        allCombos: null,
+        handleSingleModel: async (
+          _body: unknown,
+          modelStr: string,
+          target?: { connectionId?: string | null }
+        ) => {
+          selectedOnEachTurn.push({ connectionId: target?.connectionId ?? null, modelStr });
+          return new Response(JSON.stringify({ choices: [{ message: { content: "ok" } }] }), {
+            status: 200,
+            headers: {
+              "content-type": "application/json",
+              "X-OmniRoute-Selected-Connection-Id": selectedConnectionId,
+            },
+          });
+        },
+      });
+
+    const firstResult = await dispatch(firstTurn);
+    const secondResult = await dispatch([
+      ...firstTurn,
+      { role: "assistant", content: "ok" },
+      { role: "user", content: "Continue." },
+    ]);
+
+    assert.equal(firstResult.ok, true);
+    assert.equal(secondResult.ok, true);
+    assert.ok(firstConnection.id);
+    assert.equal(selectedOnEachTurn.length, 2);
+    assert.equal(selectedOnEachTurn[1]?.connectionId, selectedConnectionId);
+    assert.equal(selectedOnEachTurn[1]?.modelStr, selectedOnEachTurn[0]?.modelStr);
+    assert.ok(
+      logMessages.some((message) => message.includes("[jev] Skipping System One")),
+      "the continued turn must use its bound account without asking System One again"
+    );
+  });
+
   test("priority strategy correctly extracts dynamic connection ID from success response headers and decays lockout, resets provider cooldown, and updates LKGP", async () => {
     const comboName = "test-combo-priority";
     const modelStr = "openai/gpt-4";
