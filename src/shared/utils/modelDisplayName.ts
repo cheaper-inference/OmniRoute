@@ -46,6 +46,9 @@ const DASH_VERSION_BRANDS = new Set(["gpt"]);
 /** Release-date stamps at the end of ids ("claude-3-5-sonnet-20241022"). */
 const DATE_TOKEN = /^(19|20)\d{6}$/;
 
+/** ISO release-date stamps in snapshot ids ("gpt-5-2025-08-07", "gpt-4.1-2025-04-14"). */
+const ISO_DATE_PATTERN = /[-_](19|20)\d{2}[-_]\d{2}[-_]\d{2}(?=[-_]|$)/g;
+
 /** "v4.1" / "V2.6" — an explicit version marker. */
 const VERSION_MARKER = /^v\d+([.\d]*)$/i;
 
@@ -70,7 +73,9 @@ function leafOf(value: unknown): string {
  * release-date stamps instead of folding them into the version before them.
  */
 function tokenize(leaf: string): string[] {
-  const rawTokens = leaf.split(/[-_\s]+/).filter(Boolean);
+  const strippedLeaf = leaf.replace(ISO_DATE_PATTERN, "");
+  const effectiveLeaf = strippedLeaf.trim() ? strippedLeaf : leaf;
+  const rawTokens = effectiveLeaf.split(/[-_\s]+/).filter(Boolean);
   const tokens: string[] = [];
   for (let i = 0; i < rawTokens.length; i += 1) {
     const token = rawTokens[i];
