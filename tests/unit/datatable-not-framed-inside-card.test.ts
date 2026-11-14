@@ -14,8 +14,11 @@
 //     bordered sub-panel inside the card is a frame too, so it becomes a plain section.
 //
 // Conditionals, fragments and `.map()` callbacks between the two are looked through, because
-// they render no element. A table rendered by a child component in another file is not seen
-// here; those are covered by tests/unit/ui/single-frame-tables-in-card-19620.test.tsx.
+// they render no element. One level across files is covered too: when a parent writes
+// `<Card>…<Child />…</Card>` with `Child` imported from another dashboard file, that file's
+// tables (outside a Card of their own) are checked as if they sat in that card. The rendered
+// behaviour of the cases fixed this way is also pinned by
+// tests/unit/ui/single-frame-tables-in-card-19620.test.tsx.
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -103,11 +106,12 @@ function isMapCallback(node: ts.Node): boolean {
 }
 
 /**
- * Walks up from a table to the nearest enclosing <Card>, looking through expressions,
- * fragments and `.map()` callbacks. Returns the card and the elements in between, or null
- * when no card encloses the table in this JSX tree.
+ * Walks up from a JSX element, looking through expressions, fragments and `.map()` callbacks,
+ * collecting the elements on the way. Stops at the nearest <Card> (`card: true`) or at the
+ * enclosing function (`card: false`: the component's own root). Returns null for an element
+ * passed as a prop value, which is not a child.
  */
-function enclosingCard(node: JsxTag, sf: ts.SourceFile): { between: JsxTag[] } | null {
+function walkUp(node: JsxTag, sf: ts.SourceFile): { between: JsxTag[]; card: boolean } | null {
   const between: JsxTag[] = [];
   // An opening element's parent is its own JsxElement wrapper: start above it.
   let current: ts.Node | undefined = ts.isJsxOpeningElement(node)
@@ -115,40 +119,96 @@ function enclosingCard(node: JsxTag, sf: ts.SourceFile): { between: JsxTag[] } |
     : node.parent;
   while (current) {
     if (ts.isJsxElement(current)) {
-      if (CARD_TAGS.has(tagName(current.openingElement, sf))) return { between };
+      if (CARD_TAGS.has(tagName(current.openingElement, sf))) return { between, card: true };
       between.push(current.openingElement);
+    } else if (ts.isJsxAttribute(current)) {
+      return null;
     } else if (
       (ts.isFunctionLike(current) && !isMapCallback(current)) ||
-      ts.isSourceFile(current) ||
-      ts.isJsxAttribute(current) // a table passed as a prop value is not a child
+      ts.isSourceFile(current)
     ) {
-      return null;
+      return { between, card: false };
     }
     current = current.parent;
+  }
+  return { between, card: false };
+}
+
+/** Resolves a component import (`./X`, `../X`, `@/x/X`) to a scanned .tsx file, or null. */
+function resolveImport(fromFile: string, spec: string, files: Set<string>): string | null {
+  let base: string;
+  if (spec.startsWith("@/")) base = path.join(ROOT, "src", spec.slice(2));
+  else if (spec.startsWith(".")) base = path.resolve(path.dirname(fromFile), spec);
+  else return null;
+  for (const candidate of [base, `${base}.tsx`, path.join(base, "index.tsx")]) {
+    if (files.has(candidate)) return candidate;
   }
   return null;
 }
 
+/**
+ * Files whose component some parent renders inside a <Card> (one level: the parent writes
+ * `<Card>…<Child />…</Card>` with `Child` imported from that file). Their tables sit in that
+ * card even though the card is not in their own JSX tree.
+ */
+function findCardHostedFiles(files: string[]): Map<string, string> {
+  const scanned = new Set(files);
+  const hosted = new Map<string, string>();
+  for (const file of files) {
+    const text = fs.readFileSync(file, "utf8");
+    if (!/<Card\b/.test(text)) continue;
+    const sf = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+    const imports = new Map<string, string>();
+    for (const stmt of sf.statements) {
+      if (!ts.isImportDeclaration(stmt) || !stmt.importClause) continue;
+      const target = resolveImport(file, (stmt.moduleSpecifier as ts.StringLiteral).text, scanned);
+      if (!target) continue;
+      if (stmt.importClause.name) imports.set(stmt.importClause.name.text, target);
+      const named = stmt.importClause.namedBindings;
+      if (named && ts.isNamedImports(named)) {
+        for (const el of named.elements) imports.set(el.name.text, target);
+      }
+    }
+    const visit = (node: ts.Node) => {
+      if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
+        const target = imports.get(tagName(node, sf));
+        if (target && target !== file && walkUp(node, sf)?.card) {
+          hosted.set(
+            target,
+            `${path.relative(ROOT, file)}:${sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1}`
+          );
+        }
+      }
+      ts.forEachChild(node, visit);
+    };
+    visit(sf);
+  }
+  return hosted;
+}
+
 function findTablesFramedInsideCards(files: string[]): string[] {
+  const hosted = findCardHostedFiles(files);
   const violations: string[] = [];
   for (const file of files) {
     const text = fs.readFileSync(file, "utf8");
     if (!/<(DataTable(Shell)?|Table)\b/.test(text)) continue;
     const sf = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+    const host = hosted.get(file);
     const at = (node: ts.Node) =>
       `${path.relative(ROOT, file)}:${sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1}`;
+    const where = (card: boolean) => (card ? "<Card>" : `the <Card> of ${host}`);
     const visit = (node: ts.Node) => {
       if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
         const name = tagName(node, sf);
-        const card = TABLE_TAGS.has(name) ? enclosingCard(node, sf) : null;
-        if (card) {
+        const walk = TABLE_TAGS.has(name) ? walkUp(node, sf) : null;
+        if (walk && (walk.card || host)) {
           if (tableDrawsOwnFrame(node, name)) {
-            violations.push(`${at(node)} <${name}> inside <Card>`);
+            violations.push(`${at(node)} <${name}> inside ${where(walk.card)}`);
           }
-          for (const panel of card.between) {
+          for (const panel of walk.between) {
             if (hasClass(staticClassText(panel, "className"), "border")) {
               violations.push(
-                `${at(panel)} bordered <${tagName(panel, sf)}> around a table in <Card>`
+                `${at(panel)} bordered <${tagName(panel, sf)}> around a table in ${where(walk.card)}`
               );
             }
           }
@@ -219,6 +279,69 @@ test("the guard detects framed tables and bordered sub-panels in a card", () => 
     assert.deepEqual(lines, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], found.join("\n"));
     for (const i of [5, 6, 10]) assert.ok(found[i].includes("bordered <div>"), found[i]);
     for (const i of [8, 9, 11]) assert.ok(found[i].includes("<Table> inside <Card>"), found[i]);
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+test("the guard follows a child component rendered inside a parent's Card", () => {
+  const tmp = fs.mkdtempSync(path.join(ROOT, "tests/unit/.tmp-datatable-card-"));
+  try {
+    const write = (name: string, body: string) => {
+      const file = path.join(tmp, name);
+      fs.writeFileSync(file, body);
+      return file;
+    };
+    const parent = write(
+      "Parent.tsx",
+      [
+        `import Hosted from "./Hosted";`,
+        `import { Loose } from "./Loose";`,
+        `import Framed from "./Framed";`,
+        `export default function Parent() {`,
+        `  return (<><Card><div className="p-6"><Hosted /></div></Card><Loose /><Card><Framed /></Card></>);`,
+        `}`,
+        "",
+      ].join("\n")
+    );
+    // Rendered in the parent's Card: a bordered sub-panel and a bordered table are reported.
+    const hosted = write(
+      "Hosted.tsx",
+      [
+        `export default function Hosted() {`,
+        `  return (<div className="rounded-xl border border-border p-5"><Table scrollbarLabel="x" /></div>);`,
+        `}`,
+        "",
+      ].join("\n")
+    );
+    // Not inside any Card: its own frame is fine.
+    const loose = write(
+      "Loose.tsx",
+      [
+        `export function Loose() {`,
+        `  return (<div className="rounded-xl border p-5"><Table /></div>);`,
+        `}`,
+        "",
+      ].join("\n")
+    );
+    // In the parent's Card and already unframed.
+    const framed = write(
+      "Framed.tsx",
+      [
+        `export default function Framed() {`,
+        `  return (<section><Table containerClassName="rounded-none border-0" /></section>);`,
+        `}`,
+        "",
+      ].join("\n")
+    );
+    const found = findTablesFramedInsideCards([parent, hosted, loose, framed]);
+    assert.equal(found.length, 2, found.join("\n"));
+    assert.ok(
+      found.every((v) => v.includes("Hosted.tsx:2") && v.includes("Parent.tsx:5")),
+      found.join("\n")
+    );
+    assert.ok(found.some((v) => v.includes("<Table> inside the <Card> of")));
+    assert.ok(found.some((v) => v.includes("bordered <div> around a table in the <Card> of")));
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }

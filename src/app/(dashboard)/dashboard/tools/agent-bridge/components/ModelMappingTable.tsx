@@ -75,7 +75,12 @@ export function ModelMappingTable({ agentId, mappings, onSave }: ModelMappingTab
         </div>
       ) : (
         <>
-          <Table className="text-sm" scrollbarLabel={t("modelMappingsLabel")}>
+          {/* AgentCard's Card is the frame around this table (#19620). */}
+          <Table
+            className="text-sm"
+            scrollbarLabel={t("modelMappingsLabel")}
+            containerClassName="rounded-none border-0"
+          >
             <TableHeader>
               <TableRow>
                 <TableHead>{t("sourceModel") || "Source model (agent native)"}</TableHead>
