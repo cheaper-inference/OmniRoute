@@ -7,11 +7,14 @@ import { applyRuntimeSettings, type RuntimeReloadChange } from "./runtimeSetting
 
 const DEFAULT_POLL_INTERVAL_MS = 5_000;
 const MIN_POLL_INTERVAL_MS = 1_000;
+// Request-log writes touch the SQLite files many times per second; one reload per window is enough.
+const FS_WATCH_DEBOUNCE_MS = 250;
 
 let activeCheck: Promise<void> | null = null;
 let queuedSource: string | null = null;
 let pollTimer: ReturnType<typeof setInterval> | null = null;
 let sqliteWatcher: fs.FSWatcher | null = null;
+let fsWatchTimer: ReturnType<typeof setTimeout> | null = null;
 let hotReloadStarted = false;
 
 function getPollIntervalMs() {
@@ -80,7 +83,12 @@ function watchSqliteFile(pollEnabled: boolean) {
     sqliteWatcher = fs.watch(path.dirname(SQLITE_FILE), (_eventType, filename) => {
       const normalizedFilename = typeof filename === "string" ? filename : filename?.toString();
       if (isRelevantSqliteChange(normalizedFilename || null)) {
-        queueHotReloadCheck("hot-reload:fs-watch");
+        if (fsWatchTimer) return;
+        fsWatchTimer = setTimeout(() => {
+          fsWatchTimer = null;
+          queueHotReloadCheck("hot-reload:fs-watch");
+        }, FS_WATCH_DEBOUNCE_MS);
+        fsWatchTimer.unref?.();
       }
     });
   } catch (error) {
@@ -122,6 +130,8 @@ export function stopRuntimeConfigHotReloadForTests() {
   }
   sqliteWatcher?.close();
   sqliteWatcher = null;
+  if (fsWatchTimer) clearTimeout(fsWatchTimer);
+  fsWatchTimer = null;
   hotReloadStarted = false;
   queuedSource = null;
   activeCheck = null;

@@ -131,7 +131,11 @@ import { postOutputFailureReachesLockout } from "@omniroute/open-sse/services/ac
 import { isOpencodeFreeTierRefusalForProvider } from "@omniroute/open-sse/executors/opencodeGeoBlock.ts";
 import { isOpencodeFreeTierSkipped } from "@omniroute/open-sse/services/opencodeFreeTierSkip.ts";
 import { isLocalProvider } from "@omniroute/open-sse/config/providerRegistry.ts";
-import { COOLDOWN_MS, RateLimitReason } from "@omniroute/open-sse/config/constants.ts";
+import {
+  COOLDOWN_MS,
+  PROVIDER_PROFILES,
+  RateLimitReason,
+} from "@omniroute/open-sse/config/constants.ts";
 import * as oauthAuthBackoff from "./oauthAuthFailureBackoff.ts";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/errorSanitization.ts";
 import {
@@ -2840,8 +2844,24 @@ export async function markAccountUnavailable(
       return { shouldFallback: false, cooldownMs: 0, reason: "provider_model_unsupported" };
     }
 
-    const effectiveProviderProfile =
+    const baseProviderProfile =
       providerProfile || (provider ? await getRuntimeProviderProfile(provider) : null);
+    // A key on a loopback or private endpoint is benched for seconds at most (static
+    // PROVIDER_PROFILES.local ceiling): no backoff ladder, no Retry-After. One slow local
+    // generation must not park the key. The verdict follows the connection's own base URL.
+    const effectiveProviderProfile =
+      baseProviderProfile &&
+      isLocalProvider((conn?.providerSpecificData as { baseUrl?: string } | undefined)?.baseUrl)
+        ? {
+            ...baseProviderProfile,
+            useUpstreamRetryHints: false,
+            maxBackoffSteps: 0,
+            maxCooldownMs: Math.min(
+              baseProviderProfile.maxCooldownMs,
+              PROVIDER_PROFILES.local.rateLimitCooldown
+            ),
+          }
+        : baseProviderProfile;
     // #4530 follow-up: the combo.ts lockout sites forward the admin-configured
     // maxCooldownMs cap to recordModelLockoutFailure, but the markAccountUnavailable
     // lockout sites (per-model quota, grok-web 403, local 404) never did, so the cap

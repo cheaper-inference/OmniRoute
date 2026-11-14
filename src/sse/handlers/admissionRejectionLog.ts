@@ -10,7 +10,7 @@
  */
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
-import { saveCallLog } from "@/lib/usageDb";
+import { saveCallLog, saveRequestUsage } from "@/lib/usageDb";
 import { cloneLogPayload } from "@/lib/logPayloads";
 import { redactVideoTranscriptFieldsForLog } from "@/lib/guardrails/videoBridgeSnapshotRedaction";
 import * as log from "../utils/logger";
@@ -57,6 +57,23 @@ export async function logAdmissionRejection(
       correlationId: entry.correlationId,
       sessionTag: null,
     });
+    // A rejection that names an API key also counts against that key in usage_history
+    // (success:false), as recordRejectedRequestUsage does; the per-key usage report reads this
+    // table, so a key whose traffic is all rejected would otherwise show zero requests.
+    if (entry.apiKeyId) {
+      await saveRequestUsage({
+        provider: "-",
+        model: entry.model,
+        apiKeyId: entry.apiKeyId,
+        apiKeyName: entry.apiKeyName,
+        tokens: {},
+        serviceTier: "standard",
+        status: String(rejection.status),
+        success: false,
+        latencyMs: 0,
+        endpoint: entry.path,
+      });
+    }
   } catch {}
 }
 
