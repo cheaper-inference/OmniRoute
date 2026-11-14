@@ -124,11 +124,20 @@ test("nightly refresh: one robot branch, lease-protected push, ONE PR, never a m
   );
 });
 
-test("nightly refresh: the PR token is a dedicated secret with a documented GITHUB_TOKEN fallback", () => {
-  assert.equal(publish?.env?.GH_TOKEN, "${{ secrets.DERIVED_REFRESH_PR_TOKEN || github.token }}");
-  assert.equal(publish?.env?.HAS_PR_TOKEN, "${{ secrets.DERIVED_REFRESH_PR_TOKEN != '' }}");
+test("nightly refresh: the PR token is a robot secret (dedicated, else the i18n refresh one) with a documented GITHUB_TOKEN fallback", () => {
+  assert.equal(
+    publish?.env?.GH_TOKEN,
+    "${{ secrets.DERIVED_REFRESH_PR_TOKEN || secrets.I18N_REFRESH_TOKEN || github.token }}"
+  );
+  assert.equal(
+    publish?.env?.HAS_PR_TOKEN,
+    "${{ secrets.DERIVED_REFRESH_PR_TOKEN != '' || secrets.I18N_REFRESH_TOKEN != '' }}"
+  );
   assert.match(read(NIGHTLY), /does not trigger CI/);
-  assert.match(publish?.run ?? "", /DERIVED_REFRESH_PR_TOKEN\\` secret isn't set/);
+  assert.match(
+    publish?.run ?? "",
+    /neither \\`DERIVED_REFRESH_PR_TOKEN\\` nor \\`I18N_REFRESH_TOKEN\\` is set/
+  );
 });
 
 test("nightly refresh: no expression is interpolated into a run script", () => {
