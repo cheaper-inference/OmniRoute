@@ -1,0 +1,1 @@
+- **fix(sse):** Responses passthrough output backfill now preserves `"status": "completed"` on `function_call` items in `response.completed` instead of retaining the initial `"in_progress"` snapshot from `output_item.added`. ([#20066](https://github.com/cheaper-inference/OmniRoute/issues/20066))
