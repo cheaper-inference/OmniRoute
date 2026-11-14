@@ -193,4 +193,24 @@ The full per violation list is printed by `npm run quality:launch` and written b
 
 ## Results after fixes
 
-pending
+Measured on commit `9ab75bdd65` (2026-11-14): 0 violations across 103 files (the resolved
+scope, `scopeCount` 103).
+
+| Gate                  | Limit       | Baseline | Final |
+| --------------------- | ----------- | -------- | ----- |
+| Cyclomatic complexity | <= 10       | 72       | 0     |
+| Cognitive complexity  | <= 15       | 36       | 0     |
+| Halstead difficulty   | <= 30       | 59       | 0     |
+| File length           | < 500 lines | 3        | 0     |
+| CRAP                  | <= 25       | 17       | 0     |
+| Dead code             | 0           | 37       | 0     |
+| Duplicate code        | 0           | 21       | 0     |
+| `any` / `unknown`     | 0           | 54       | 0     |
+
+How it was reached: long functions were split into named helpers and decision tables; the
+large files were split into sibling modules behind the same entry files, so no importer
+changed; unused exports were removed; duplicated adapter code moved into
+`bin/cli/launch/adapters/_shared/`; `any` and `unknown` were replaced with concrete types;
+and new unit tests cover the branches that were uncovered. No limit was raised, no file was
+excluded and no eslint-disable comment was added. The gate scope is glob based, so new
+modules (the 37 files beyond the baseline 66) are always measured.
