@@ -162,3 +162,75 @@ test("parseDotsToolCalls: final parse keeps an unclosed block and a partial open
     assert.equal(result.holdback, "");
   }
 });
+
+test("parseDotsToolCalls: numeric schemas consume complete values without truncation", () => {
+  for (const [type, value, expected] of [
+    ["integer", "1e3", 1000],
+    ["number", "1e3", 1000],
+    ["string", "1e3", "1e3"],
+    ["integer", "1.5", "1.5"],
+    ["number", "1.5", 1.5],
+    ["integer", "42cats", "42cats"],
+    ["number", "42cats", "42cats"],
+    ["integer", "", ""],
+    ["number", " ", " "],
+    ["integer", "Infinity", "Infinity"],
+    ["number", "1e309", "1e309"],
+    ["integer", "9007199254740991", Number.MAX_SAFE_INTEGER],
+    ["integer", "9007199254740992", 9007199254740992],
+  ]) {
+    const tools = [{ name: "count", input_schema: { properties: { n: { type } } } }];
+    const block = `<dots_function_call><invoke name="count"><parameter name="n">${value}</parameter></invoke></dots_function_call>`;
+    const result = parseDotsToolCalls(block, { tools, final: true });
+    assert.deepEqual(
+      JSON.parse(result.toolCalls[0].function.arguments),
+      { n: expected },
+      `${type}: ${value}`
+    );
+  }
+});
+
+test("parseDotsToolCalls: references remain local to each tool schema in either order", () => {
+  const block = (name: string) =>
+    `<dots_function_call><invoke name="${name}"><parameter name="n">007</parameter></invoke></dots_function_call>`;
+  for (const key of ["$defs", "definitions"]) {
+    const stringTool = {
+      function: {
+        name: "string_tool",
+        parameters: {
+          $ref: `#/${key}/Input`,
+          [key]: {
+            Input: { properties: { n: { $ref: `#/${key}/Value` } } },
+            Value: { type: "string" },
+          },
+        },
+      },
+    };
+    const integerTool = {
+      name: "integer_tool",
+      input_schema: {
+        [key]: { Value: { type: "integer" } },
+        properties: { n: { $ref: `#/${key}/Value` } },
+      },
+    };
+    for (const tools of [
+      [stringTool, integerTool],
+      [integerTool, stringTool],
+    ]) {
+      const result = parseDotsToolCalls(block("string_tool") + block("integer_tool"), { tools });
+      assert.deepEqual(
+        result.toolCalls.map((call) => JSON.parse(call.function.arguments)),
+        [{ n: "007" }, { n: 7 }]
+      );
+      // Reusing declarations after another parse must not change their local refs.
+      const repeated = parseDotsToolCalls(block("string_tool"), { tools });
+      assert.deepEqual(JSON.parse(repeated.toolCalls[0].function.arguments), { n: "007" });
+    }
+  }
+  for (const schema of [undefined, { properties: { n: { $ref: "#/$defs/Missing" } } }]) {
+    const result = parseDotsToolCalls(block("fallback"), {
+      tools: [{ name: "fallback", input_schema: schema }],
+    });
+    assert.deepEqual(JSON.parse(result.toolCalls[0].function.arguments), { n: schema ? "007" : 7 });
+  }
+});
