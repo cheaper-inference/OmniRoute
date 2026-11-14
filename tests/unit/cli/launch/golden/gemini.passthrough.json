@@ -2,6 +2,7 @@
   "argv": [
     "-m",
     "anthropic/claude-sonnet-4-6",
+    "--skip-trust",
     "--sandbox",
     "-p",
     "hi"
@@ -39,7 +40,7 @@
   "needsTempDir": true,
   "notes": [
     "Non-Gemini model: google_web_search and web_fetch tools are disabled",
-    "Folder trust stays on: an untrusted folder will prompt (or fail headless); trust it in Gemini CLI first"
+    "Headless prompt: --skip-trust added so an untrusted folder does not exit 55"
   ],
   "planVersion": 1,
   "postExitChecks": [],

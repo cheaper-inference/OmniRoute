@@ -2,7 +2,7 @@ const expectation = {
   id: "gemini",
   mode: "headless",
   model: "gemini/gemini-2.5-pro",
-  args: ["--skip-trust", "-p", "reply with OK"],
+  args: ["-p", "reply with OK"],
   stdin: "ignore",
   env: {},
   realHome: [".gemini"],
@@ -11,7 +11,7 @@ const expectation = {
   expectStdout: "OMNI-SMOKE-OK",
   timeoutMs: 120000,
   notes:
-    "dossier tools/gemini.md section 7; --skip-trust needed headless in an untrusted sandbox cwd (else exit 55); observed key header authorization",
+    "dossier tools/gemini.md section 7; adapter adds --skip-trust for -p (untrusted cwd exits 55 otherwise); observed key header authorization",
 };
 
 export default expectation;
