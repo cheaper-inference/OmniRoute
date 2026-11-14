@@ -485,6 +485,66 @@
       "limitations": "Requires a registered NVIDIA account and API key. Prototyping/trial use only; no production entitlement, permanent availability, token allowance, guaranteed throughput or billing hard stop is established. Limits vary by model and traffic; trial terms may permit credits. Paid dedicated deployments are separate."
     },
     {
+      "provider": "gemini",
+      "catalogHash": "8f8dbe6fc79aa5f6d82fe1162a68f1c78d40ccb985a543ef0a7fbfc09ee1c583",
+      "sourceType": "public-page",
+      "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing",
+      "checkedAt": "2026-11-11",
+      "claim": "recurring-free-access",
+      "verifiedBy": "Bl0ck154 (public pricing documentation audit)",
+      "summary": "Official Gemini Developer API pricing identifies this exact model ID with no-charge input and output under the Standard Free Tier.",
+      "limitations": "Requires an eligible Google AI Studio / Gemini Developer API free-tier project. Regional and per-model availability, quotas and rate limits vary; free-tier content may be used by Google to improve its products. Paid tiers, grounding and other optional tools may cost money. Public pricing check only; no paid API call, account eligibility or monthly allowance verified.",
+      "modelId": "gemini-3.5-flash"
+    },
+    {
+      "provider": "gemini",
+      "catalogHash": "8f8dbe6fc79aa5f6d82fe1162a68f1c78d40ccb985a543ef0a7fbfc09ee1c583",
+      "sourceType": "public-page",
+      "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing",
+      "checkedAt": "2026-11-11",
+      "claim": "recurring-free-access",
+      "verifiedBy": "Bl0ck154 (public pricing documentation audit)",
+      "summary": "Official Gemini Developer API pricing identifies this exact model ID with no-charge input and output under the Standard Free Tier.",
+      "limitations": "Requires an eligible Google AI Studio / Gemini Developer API free-tier project. Regional and per-model availability, quotas and rate limits vary; free-tier content may be used by Google to improve its products. Paid tiers, grounding and other optional tools may cost money. Public pricing check only; no paid API call, account eligibility or monthly allowance verified.",
+      "modelId": "gemini-3.5-flash-lite"
+    },
+    {
+      "provider": "gemini",
+      "catalogHash": "8f8dbe6fc79aa5f6d82fe1162a68f1c78d40ccb985a543ef0a7fbfc09ee1c583",
+      "sourceType": "public-page",
+      "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing",
+      "checkedAt": "2026-11-11",
+      "claim": "recurring-free-access",
+      "verifiedBy": "Bl0ck154 (public pricing documentation audit)",
+      "summary": "Official Gemini Developer API pricing identifies this exact model ID with no-charge input and output under the Standard Free Tier.",
+      "limitations": "Requires an eligible Google AI Studio / Gemini Developer API free-tier project. Regional and per-model availability, quotas and rate limits vary; free-tier content may be used by Google to improve its products. Paid tiers, grounding and other optional tools may cost money. Public pricing check only; no paid API call, account eligibility or monthly allowance verified.",
+      "modelId": "gemini-3.6-flash"
+    },
+    {
+      "provider": "gemini",
+      "catalogHash": "8f8dbe6fc79aa5f6d82fe1162a68f1c78d40ccb985a543ef0a7fbfc09ee1c583",
+      "sourceType": "public-page",
+      "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing",
+      "checkedAt": "2026-11-11",
+      "claim": "recurring-free-access",
+      "verifiedBy": "Bl0ck154 (public pricing documentation audit)",
+      "summary": "Official Gemini Developer API pricing identifies this exact model ID with no-charge input and output under the Standard Free Tier.",
+      "limitations": "Requires an eligible Google AI Studio / Gemini Developer API free-tier project. Regional and per-model availability, quotas and rate limits vary; free-tier content may be used by Google to improve its products. Paid tiers, grounding and other optional tools may cost money. Public pricing check only; no paid API call, account eligibility or monthly allowance verified.",
+      "modelId": "gemini-3.7-flash"
+    },
+    {
+      "provider": "gemini",
+      "catalogHash": "8f8dbe6fc79aa5f6d82fe1162a68f1c78d40ccb985a543ef0a7fbfc09ee1c583",
+      "sourceType": "public-page",
+      "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing",
+      "checkedAt": "2026-11-11",
+      "claim": "recurring-free-access",
+      "verifiedBy": "Bl0ck154 (public pricing documentation audit)",
+      "summary": "Official Gemini Developer API pricing identifies this exact model ID with no-charge input and output under the Standard Free Tier.",
+      "limitations": "Requires an eligible Google AI Studio / Gemini Developer API free-tier project. Regional and per-model availability, quotas and rate limits vary; free-tier content may be used by Google to improve its products. Paid tiers, grounding and other optional tools may cost money. Public pricing check only; no paid API call, account eligibility or monthly allowance verified.",
+      "modelId": "gemini-3.8-flash"
+    },
+    {
       "provider": "nvidia",
       "modelId": "openai/gpt-oss-20b",
       "catalogHash": "530f96440a244cc6b680997519e2d5e99383e7cd5012d1171842d5da9ca52454",
