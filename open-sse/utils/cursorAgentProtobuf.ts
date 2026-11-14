@@ -384,9 +384,18 @@ function resolveGrokRequestedModel(
 
   const effortSplit = splitCursorEffortSuffix(id, prefix, "effort");
   if (effortSplit) {
+    const parameters = [...effortSplit.parameters, ...extraParams];
+    // Cursor may default Grok 4.7 to Fast. A standard effort alias must opt
+    // out explicitly; only an alias with the -fast suffix should enable it.
+    if (
+      /^(?:cursor-)?grok-4\\.7$/.test(effortSplit.modelId) &&
+      extraParams.length === 0
+    ) {
+      parameters.push({ id: "fast", value: "false" });
+    }
     return {
       modelId: effortSplit.modelId,
-      parameters: [...effortSplit.parameters, ...extraParams],
+      parameters,
     };
   }
   if (extraParams.length > 0) {
