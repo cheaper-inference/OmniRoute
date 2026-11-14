@@ -435,10 +435,19 @@ export function enforceCacheControlBlockLimit(
   body: ClaudeRequestBody,
   limit = MAX_CACHE_CONTROL_BLOCKS
 ): number {
-  const holders: Array<{ obj: Record<string, unknown> }> = [];
+  const marked = markedCacheControlBlocks(body);
+  if (marked.length <= limit) return 0;
+  const toRemove = marked.length - limit;
+  for (let i = 0; i < toRemove; i++) delete marked[i].cache_control;
+  return toRemove;
+}
+
+/** Blocks that carry a cache_control marker, in request order (system, tools, messages). */
+function markedCacheControlBlocks(body: ClaudeRequestBody): Array<Record<string, unknown>> {
+  const marked: Array<Record<string, unknown>> = [];
   const push = (block: unknown) => {
-    if (block && typeof block === "object" && "cache_control" in block) {
-      holders.push({ obj: block as Record<string, unknown> });
+    if (block && typeof block === "object" && (block as Record<string, unknown>).cache_control) {
+      marked.push(block as Record<string, unknown>);
     }
   };
   if (Array.isArray(body?.system)) body.system.forEach(push);
@@ -448,11 +457,21 @@ export function enforceCacheControlBlockLimit(
       if (Array.isArray(msg?.content)) msg.content.forEach(push);
     }
   }
-  const marked = holders.filter((h) => h.obj.cache_control !== undefined);
-  if (marked.length <= limit) return 0;
-  const toRemove = marked.length - limit;
-  for (let i = 0; i < toRemove; i++) delete marked[i].obj.cache_control;
-  return toRemove;
+  return marked;
+}
+
+/**
+ * A tool loop ends with the results of the last assistant turn's tool calls, after that
+ * turn's breakpoint, so they are billed as fresh input. When the 4-marker budget has room,
+ * mark the final user turn so the next request reads them from cache.
+ */
+function markFinalToolResults(body: ClaudeRequestBody, ttl?: string): void {
+  const last = body.messages?.[body.messages.length - 1];
+  if (last?.role !== "user" || !Array.isArray(last.content)) return;
+  if (!last.content.some((block) => block.type === "tool_result")) return;
+  if (last.content.some((block) => block.cache_control)) return;
+  if (markedCacheControlBlocks(body).length >= MAX_CACHE_CONTROL_BLOCKS) return;
+  markMessageCacheControl(last, ttl);
 }
 
 function markMessageCacheControl(msg: ClaudeMessage, ttl?: string): boolean {
@@ -1049,6 +1068,9 @@ export function prepareClaudeRequest(
   // the upstream API, not caching policy, so preserveCacheControl does not
   // exempt them (they were the 400 sources on claude 5.x since 2026-09-29).
   hoistToolResultCacheControl(body);
+  if (!preserveCacheControl && supportsPromptCaching) {
+    markFinalToolResults(body, createClaudeTailCacheControl(provider).ttl);
+  }
   if (supportsPromptCaching) {
     enforceCacheControlBlockLimit(body);
   }
