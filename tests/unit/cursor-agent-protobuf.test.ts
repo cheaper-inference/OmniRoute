@@ -366,6 +366,13 @@ test("encodeAgentRunRequest sends standard Grok 4.7 effort through RequestedMode
       ["fast", "false"],
     ],
   });
+  assert.deepEqual(decodeRequestedModel("cursor-grok-4.7-medium"), {
+    modelId: "cursor-grok-4.7",
+    parameters: [
+      ["reasoning_effort", "medium"],
+      ["fast", "false"],
+    ],
+  });
   assert.deepEqual(decodeRequestedModel("grok-4.7-medium-fast"), {
     modelId: "grok-4.7",
     parameters: [
