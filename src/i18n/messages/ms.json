@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Eksperimental",
     "modalityBridgeVideoPromotionEligible": "Layak",
-    "modalityBridgeVideoPromotionContextRequired": "Promosi memerlukan dua pelaksanaan kelayakan bebas untuk semakan model, dasar, korpus dan binaan yang tepat. Konteks yang belum disahkan kekal HOLD; pemilihan dasar eksperimental bukanlah suatu kelulusan."
+    "modalityBridgeVideoPromotionContextRequired": "Promosi memerlukan dua pelaksanaan kelayakan bebas untuk semakan model, dasar, korpus dan binaan yang tepat. Konteks yang belum disahkan kekal HOLD; pemilihan dasar eksperimental bukanlah suatu kelulusan.",
+    "proxyManagedCoresTab": "Teras terurus"
   },
   "contextRtk": {
     "title": "Enjin RTK",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Paparan cache"
   },
   "proxyConfigModal": {
+    "managedCore": "Teras proksi",
+    "managedSelectCore": "Pilih teras",
+    "managedSaveHint": "Semasa menyimpan, teras rasmi dimuat turun dan disahkan jika perlu, konfigurasi diperiksa, kemudian proksi ini diaktifkan. Menaip tidak memasang apa-apa.",
+    "errorSelectManagedCore": "Pilih sing-box atau Xray sebelum menyimpan terowong ini",
     "levelGlobal": "Global",
     "levelProvider": "Pembekal",
     "levelCombo": "Kombo",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Teras proksi terurus",
+    "description": "Tampalkan pautan terowong dalam medan hos proksi tersuai untuk menyimpan dan menetapkannya. Di sini anda juga boleh menyimpan takrif JSON asli bagi sambungan keluar tanpa mengubah sebarang penetapan.",
+    "saveHint": "Semasa menyimpan, teras rasmi disahkan jika perlu dan konfigurasi asli diperiksa sebelum pengaktifan. Sumber memerlukan penyulitan. Tiada pemasangan semasa pratonton, mula automatik atau perubahan proksi telus.",
+    "saveActivate": "Simpan dan aktifkan",
+    "core": "Teras",
+    "selectCore": "Pilih teras",
+    "name": "Nama",
+    "source": "Pautan sumber atau JSON asli bagi sambungan keluar",
+    "start": "Mulakan",
+    "stop": "Hentikan",
+    "loadError": "Tidak dapat memuatkan teras terurus",
+    "operationError": "Operasi teras terurus gagal",
+    "state": "{state, select, not_installed {Belum dipasang} stopped {Dihentikan} starting {Sedang bermula} running {Sedang berjalan} stopping {Sedang berhenti} error {Ralat} other {Tidak diketahui}}",
+    "binaryTitle": "Versi teras dan fail boleh laku tersuai",
+    "binaryHint": "Perubahan menjejaskan setiap proksi tersimpan yang menggunakan teras ini. Teras yang sedang berjalan hanya dimulakan semula selepas pengesahan. Arkib rasmi memerlukan ringkasan SHA-256 yang diterbitkan. Binari tersuai menggunakan ringkasan yang anda bekalkan secara berasingan.",
+    "distribution": "Edaran teras",
+    "checkUpdates": "Semak versi yang tersedia",
+    "noVerifiedReleases": "Tiada keluaran stabil dengan aset yang disahkan tersedia untuk platform ini.",
+    "version": "Versi",
+    "installVersion": "Pasang dan gunakan versi yang dipilih",
+    "customPath": "Laluan mutlak fail boleh laku pada pelayan OmniRoute",
+    "customHash": "SHA-256 fail boleh laku yang dijangka",
+    "customTrust": "Saya mempercayai fail boleh laku ini. Ia boleh menjalankan kod dengan kebenaran OmniRoute; padanan hash mengesahkan integriti, bukan keselamatan.",
+    "useCustom": "Import dan gunakan teras tersuai",
+    "subscriptionUrl": "URL langganan HTTPS",
+    "subscriptionHint": "Muatkan atau segarkan semula secara manual, pilih nod yang serasi, kemudian uji atau simpan. Ini tidak mendayakan penyegaran langganan automatik. Nod yang tidak disokong dilaporkan dan bukannya diubah secara senyap.",
+    "loadSubscription": "Muatkan atau segarkan semula langganan",
+    "skippedNodes": "Nod tidak disokong yang dilangkau: {count}",
+    "subscriptionNode": "Nod langganan",
+    "selectNode": "Pilih nod",
+    "fragmentEnable": "Dayakan pemecahan TLS ClientHello (Xray / Mahsa)",
+    "fragmentHint": "Hanya untuk TLS atau REALITY melalui TCP atau WebSocket. Panjang ialah 1–4096 bait; sela ialah 0–1000 milisaat. Gunakan satu nilai atau julat menaik. Ini tidak menjamin akses melepasi penapisan.",
+    "fragmentLength": "Panjang fragmen (bait)",
+    "fragmentInterval": "Sela fragmen (milisaat)",
+    "testHint": "Pengujian mungkin menyediakan teras yang dipilih dan menghubungi api.ipify.org melalui HTTPS menggunakan proksi sementara. Tiada apa-apa disimpan atau ditetapkan. Ia tidak menguji mana-mana penyedia AI.",
+    "testSource": "Uji sebelum menyimpan",
+    "testSuccess": "Ujian HTTPS berjaya. IP keluar: {ip}; kependaman: {ms} ms."
   }
 }

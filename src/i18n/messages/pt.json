@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Experimental",
     "modalityBridgeVideoPromotionEligible": "Elegível",
-    "modalityBridgeVideoPromotionContextRequired": "A promoção requer duas execuções de qualificação independentes para a revisão exata do modelo, a política, o corpus e a compilação. Um contexto não verificado permanece em HOLD; selecionar uma política experimental não constitui uma aprovação."
+    "modalityBridgeVideoPromotionContextRequired": "A promoção requer duas execuções de qualificação independentes para a revisão exata do modelo, a política, o corpus e a compilação. Um contexto não verificado permanece em HOLD; selecionar uma política experimental não constitui uma aprovação.",
+    "proxyManagedCoresTab": "Núcleos geridos"
   },
   "contextRtk": {
     "title": "Motor RTK",
@@ -12257,7 +12258,11 @@
     "errorClearSavedProxy": "Falha ao limpar o proxy guardado",
     "errorSaveProxy": "Falha ao guardar a configuração do proxy",
     "errorClearProxy": "Falha ao limpar a configuração do proxy",
-    "errorSocks5Hidden": "SOCKS5 está configurado, mas oculto porque NEXT_PUBLIC_ENABLE_SOCKS5_PROXY=false."
+    "errorSocks5Hidden": "SOCKS5 está configurado, mas oculto porque NEXT_PUBLIC_ENABLE_SOCKS5_PROXY=false.",
+    "managedCore": "Núcleo do proxy",
+    "managedSelectCore": "Selecione um núcleo",
+    "managedSaveHint": "Ao guardar, o núcleo oficial é descarregado e verificado, se necessário, a configuração é validada e o proxy é ativado. Escrever não instala nada.",
+    "errorSelectManagedCore": "Selecione sing-box ou Xray antes de guardar este túnel"
   },
   "oauthModal": {
     "title": "Conectar {providerName}",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Núcleos de proxy geridos",
+    "description": "Cole uma ligação de túnel no campo do anfitrião do proxy personalizado para o guardar e atribuir. Aqui também pode guardar uma definição de ligação de saída no formato JSON nativo sem alterar qualquer atribuição.",
+    "saveHint": "Ao guardar, o núcleo oficial é verificado, se necessário, e a configuração nativa é validada antes da ativação. As fontes exigem encriptação. Não há instalação durante a pré-visualização, arranque automático nem alterações ao proxy transparente.",
+    "saveActivate": "Guardar e ativar",
+    "core": "Núcleo",
+    "selectCore": "Selecione um núcleo",
+    "name": "Nome",
+    "source": "Ligação de origem ou ligação de saída no formato JSON nativo",
+    "start": "Iniciar",
+    "stop": "Parar",
+    "loadError": "Não foi possível carregar os núcleos geridos",
+    "operationError": "Falha na operação do núcleo gerido",
+    "state": "{state, select, not_installed {Não instalado} stopped {Parado} starting {A iniciar} running {Em execução} stopping {A parar} error {Erro} other {Desconhecido}}",
+    "binaryTitle": "Versão do núcleo e executável personalizado",
+    "binaryHint": "As alterações afetam todos os proxies guardados que usam este núcleo. Um núcleo em execução só reinicia após a validação. Os arquivos oficiais exigem um resumo SHA-256 publicado. Os binários personalizados usam separadamente o resumo fornecido por si.",
+    "distribution": "Distribuição do núcleo",
+    "checkUpdates": "Verificar versões disponíveis",
+    "noVerifiedReleases": "Não existe uma versão estável com um ficheiro verificado disponível para esta plataforma.",
+    "version": "Versão",
+    "installVersion": "Instalar e usar a versão selecionada",
+    "customPath": "Caminho absoluto do executável no servidor OmniRoute",
+    "customHash": "SHA-256 esperado do executável",
+    "customTrust": "Confio neste executável. Pode executar código com as permissões do OmniRoute; um hash correspondente verifica a integridade, não a segurança.",
+    "useCustom": "Importar e usar um núcleo personalizado",
+    "subscriptionUrl": "URL HTTPS da subscrição",
+    "subscriptionHint": "Carregue ou atualize manualmente, selecione um nó compatível e depois teste-o ou guarde-o. Isto não ativa a atualização automática da subscrição. Os nós não suportados são comunicados em vez de serem alterados silenciosamente.",
+    "loadSubscription": "Carregar ou atualizar a subscrição",
+    "skippedNodes": "Nós não suportados ignorados: {count}",
+    "subscriptionNode": "Nó da subscrição",
+    "selectNode": "Selecionar um nó",
+    "fragmentEnable": "Ativar a fragmentação de TLS ClientHello (Xray / Mahsa)",
+    "fragmentHint": "Apenas para TLS ou REALITY sobre TCP ou WebSocket. O comprimento é de 1–4096 bytes; o intervalo é de 0–1000 milissegundos. Use um valor único ou um intervalo crescente. Isto não garante o acesso através dos filtros.",
+    "fragmentLength": "Comprimento do fragmento (bytes)",
+    "fragmentInterval": "Intervalo de fragmentação (milissegundos)",
+    "testHint": "O teste pode preparar o núcleo selecionado e contacta api.ipify.org por HTTPS através de um proxy temporário. Nada é guardado ou atribuído. Não testa nenhum fornecedor de IA.",
+    "testSource": "Testar antes de guardar",
+    "testSuccess": "Teste HTTPS aprovado. IP de saída: {ip}; latência: {ms} ms."
   }
 }

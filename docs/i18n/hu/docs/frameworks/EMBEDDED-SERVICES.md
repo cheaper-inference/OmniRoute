@@ -45,18 +45,36 @@ Mind a nyolc ugyanazt a felügyeleti modellt követi:
 - OmniRoute `DATA_DIR/services/{name}/` alá telepíti őket ( OmniRoute saját `package.json` jétől elkülönítve)
 - OmniRoute előállítja és gyermekfolyamatként figyeli őket
 - OmniRoute egy efemer API kulcsot fecskendez be a gyermek környezetébe, és leállás nélkül forgatja (ha van)
-- Minden kezelési útvonal (`/api/services/*`) van**LOCAL_ONLY** — csak loopback-ről érhető el (17-es kemény szabály)
+- Minden kezelési útvonal (`/api/services/*`) van**LOCAL_ONLY** — csak visszahurkolásból érhető el ( #17 kemény szabály)
+
+### Felügyelt proxy magok
+
+Az Egyéni proxygazda mező a V2Ray forráshivatkozást is elfogadja. Válassza ki** énekesdoboz** vagy** Xray** kifejezetten, majd kattintson a Mentés gombra. A gépelés soha nem tölt le és nem indít magot. A Mentés ellenőrzi a hivatalos kiadási archívumot, ellenőrzi a natív konfigurációt, elindít egy különálló localhost SOCKS figyelőt, és csak ezután írja meg a proxy beállításjegyzék hozzárendelését. A sikertelen aktiválás visszaállítja a korábbi felügyelt konfigurációt és folyamatot. `STORAGE_ENCRYPTION_KEY` szükséges; a forráshivatkozások titkosítva vannak.
+
+A kezelt fájlok `DATA_DIR/services/managed-proxy/` alatt élnek, külön TPROXY től. Kiválasztott magonként egy saját folyamat van, legfeljebb 100 hallgató. Az automatikus indítás vagy a globális útválasztás alapértelmezett értéke nem módosul. A sikeres mentés csak ennek a felügyelt magnak az aktiválását jegyzi meg; Az alkalmazás indítása visszaállítja az engedélyezett mentett magokat a már ellenőrzött bináris használatával, soha nem boot-time letöltéssel. Az Explicit Stop törli az aktiválási jelzőt. A hiányzó vagy sérült bináris fájl újbóli mentését igényli. A rendszerleíró adatbázis törlése helyileg eltávolítja a forrást és a figyelőt; a szokásos végpont-szerkesztéseket a rendszer elutasítja a felügyelt soroknál, így a mentett forrás nem tud csendben eltávolodni az irányított figyelőtől.
+
+| Forrás formátuma                      | énekesdoboz                                                                     | Xray                                                                            |
+| ------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| VLESS, VMess, trójai, Shadowsocks URI | Támogatott átalakítás                                                           | Támogatott átalakítás                                                           |
+| Hysteria2/hy2, TUIC, AnyTLS URI       | Támogatott átalakítás                                                           | Elutasítva; kompatibilis magot használjon                                       |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade | Támogatott VLESS/VMess/Trojan számára                                           | Támogatott VLESS/VMess/Trojan számára                                           |
+| XHTTP URI közlekedés                  | Elutasítva                                                                      | Támogatott átalakítás                                                           |
+| Natív kimenő JSON                     | A kiválasztott mag engedélyezett proxyja protocols/options, natívan ellenőrizve | A kiválasztott mag engedélyezett proxyja protocols/options, natívan ellenőrizve |
+
+Az ismeretlen vezetékbeállítások, a nem biztonságos TLS jelzők, a külső beépülő modulok, a helyi fájlútvonal-beállítások és a nem támogatott kombinációk inkább elutasításra kerülnek, mint csendben. A natív objektumok kimenő definíciók, nem teljes mag konfigurációk; control/direct/bypass kimenő leveleket nem fogadunk el. Az 1.14-es sing-box WireGuard je végpontokat használ, ezért nem fogadják el natív kimenőként. Ez nem egy teljes formátumú konverter; SSR, legacy whole-base64 Shadowsocks hivatkozások, tetszőleges Clash objektumok és a táblázatból hiányzó szállítási változatok külön támogatott forrásformátumot igényelnek.
+
+`/api/services/managed-proxy` hitelesített és csak visszacsatolásos: GET a redaktált metaadatokat sorolja fel, POST elmenti `{core,name,sourceLink,id?,assignment?}`, PATCH elfogadja `{core,action:"start"|"stop"}`. A gazdagép megbízható peer-bélyegző folyamatának jelen kell lennie. A natív alapdiagnosztika le van tiltva, mert hitelesítő adatokat tartalmazhatnak; Az életciklus-események a meglévő strukturált alkalmazásfájl-naplózót használják forráshivatkozások vagy upstream hasznos terhelések nélkül. Támogatás céljából csak megtisztított alkalmazásnaplókat csatoljon. A hivatalos verziók az 1.14.3-as sing-boxhoz és a 26.3.27-es Xray-hez vannak rögzítve release-asset SHA-256 manifestekkel; a jövőbeni frissítésekhez a verzió és az összes ellenőrzött kivonat együttes módosítása szükséges.
 
 ### Kulcsfontosságú döntések (a tervezési tervből)
 
-| Döntés                                           | Érték                                                                                             |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| A műszerfal hozzáférése a 9Router natív UI jához | Fordított proxy a `/dashboard/providers/services/9router/embed/*`                                 |
-| Beépítési mechanizmus                            | `npm install {package}` `execFile` keresztül (nincs shell-interpoláció)                           |
-| Fogyasztási mód                                  | A szolgáltató `9router/{sub}/{model}` néven regisztrált az útválasztó motorban                    |
-| API kulcskezelés                                 | OmniRoute generál, titkosítja a nyugalmi állapotot (AES-256-GCM) és injektálja az env-n keresztül |
-| A műszerfal helye                                | `/dashboard/providers/services` (három lap)                                                       |
-| Automatikus indítás                              | Váltás szolgáltatásonként, alapértelmezett OFF                                                    |
+| Döntés                                               | Érték                                                                                      |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Az irányítópult hozzáférése a 9Router natív UI jához | Fordított proxy a `/dashboard/providers/services/9router/embed/*`                          |
+| Beépítési mechanizmus                                | `npm install {package}` `execFile` keresztül (nincs shell-interpoláció)                    |
+| Fogyasztási mód                                      | A szolgáltató `9router/{sub}/{model}` néven regisztrált az útválasztó motorban             |
+| API kulcskezelés                                     | OmniRoute nyugalmi állapotot generál, titkosít (AES-256-GCM) és env-n keresztül injektálja |
+| A műszerfal helye                                    | `/dashboard/providers/services` (három lap)                                                |
+| Automatikus indítás                                  | Váltás szolgáltatásonként, alapértelmezett OFF                                             |
 
 ---
 

@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Eksperimentāla",
     "modalityBridgeVideoPromotionEligible": "Atbilstoša",
-    "modalityBridgeVideoPromotionContextRequired": "Paaugstināšanai ir nepieciešamas divas neatkarīgas kvalificējošas izpildes tieši tai pašai modeļa versijai, politikai, korpusam un būvējumam. Nepārbaudīts konteksts saglabā statusu HOLD; eksperimentālas politikas atlase nav apstiprinājums."
+    "modalityBridgeVideoPromotionContextRequired": "Paaugstināšanai ir nepieciešamas divas neatkarīgas kvalificējošas izpildes tieši tai pašai modeļa versijai, politikai, korpusam un būvējumam. Nepārbaudīts konteksts saglabā statusu HOLD; eksperimentālas politikas atlase nav apstiprinājums.",
+    "proxyManagedCoresTab": "Pārvaldīti kodoli"
   },
   "contextRtk": {
     "title": "RTK dzinējs",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Kešatmiņas skats"
   },
   "proxyConfigModal": {
+    "managedCore": "Starpniekservera kodols",
+    "managedSelectCore": "Atlasiet kodolu",
+    "managedSaveHint": "Saglabājot, ja nepieciešams, tiek lejupielādēts un pārbaudīts oficiālais kodols, tiek pārbaudīta konfigurācija un pēc tam aktivizēts šis starpniekserveris. Teksta ievadīšana neko neinstalē.",
+    "errorSelectManagedCore": "Pirms šī tuneļa saglabāšanas atlasiet sing-box vai Xray",
     "levelGlobal": "Globālais",
     "levelProvider": "Pakalpojumu sniedzējs",
     "levelCombo": "Kombinācija",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Pārvaldīti starpniekservera kodoli",
+    "description": "Ielīmējiet tuneļa saiti pielāgotā starpniekservera resursdatora laukā, lai to saglabātu un piešķirtu. Šeit varat arī saglabāt izejošā savienojuma definīciju kodola sākotnējā JSON formātā, nemainot nevienu piešķīrumu.",
+    "saveHint": "Saglabājot, ja nepieciešams, tiek pārbaudīts oficiālais kodols, un pirms aktivizēšanas tiek pārbaudīta konfigurācija kodola sākotnējā formātā. Avotiem jābūt šifrētiem. Priekšskatījuma laikā nekas netiek instalēts, automātiskā palaišana netiek veikta un caurspīdīgā starpniekservera iestatījumi netiek mainīti.",
+    "saveActivate": "Saglabāt un aktivizēt",
+    "core": "Kodols",
+    "selectCore": "Atlasiet kodolu",
+    "name": "Nosaukums",
+    "source": "Avota saite vai izejošais savienojums kodola sākotnējā JSON formātā",
+    "start": "Palaist",
+    "stop": "Apturēt",
+    "loadError": "Neizdevās ielādēt pārvaldītos kodolus",
+    "operationError": "Pārvaldītā kodola darbība neizdevās",
+    "state": "{state, select, not_installed {Nav instalēts} stopped {Apturēts} starting {Tiek palaists} running {Darbojas} stopping {Tiek apturēts} error {Kļūda} other {Nezināms}}",
+    "binaryTitle": "Kodola versija un pielāgots izpildāmais fails",
+    "binaryHint": "Izmaiņas ietekmē visus saglabātos starpniekserverus, kas izmanto šo kodolu. Darbojošos kodolu restartē tikai pēc validācijas. Oficiālajiem arhīviem nepieciešama publicēta SHA-256 kontrolsumma. Pielāgotie binārie faili atsevišķi izmanto jūsu norādīto kontrolsummu.",
+    "distribution": "Kodola izplatījums",
+    "checkUpdates": "Pārbaudīt pieejamās versijas",
+    "noVerifiedReleases": "Šai platformai nav pieejams stabils laidiens ar verificētu failu.",
+    "version": "Versija",
+    "installVersion": "Instalēt un izmantot atlasīto versiju",
+    "customPath": "Izpildāmā faila absolūtais ceļš OmniRoute serverī",
+    "customHash": "Sagaidāmā izpildāmā faila SHA-256 kontrolsumma",
+    "customTrust": "Es uzticos šim izpildāmajam failam. Tas var izpildīt kodu ar OmniRoute atļaujām; atbilstoša jaucējvērtība apliecina integritāti, nevis drošumu.",
+    "useCustom": "Importēt un izmantot pielāgotu kodolu",
+    "subscriptionUrl": "Abonementa HTTPS URL",
+    "subscriptionHint": "Ielādējiet vai atsvaidziniet manuāli, atlasiet saderīgu mezglu un pēc tam pārbaudiet vai saglabājiet to. Tas neiespējo automātisku abonementa atsvaidzināšanu. Par neatbalstītiem mezgliem tiek ziņots, nevis tie tiek nemanāmi mainīti.",
+    "loadSubscription": "Ielādēt vai atsvaidzināt abonementu",
+    "skippedNodes": "Izlaistie neatbalstītie mezgli: {count}",
+    "subscriptionNode": "Abonementa mezgls",
+    "selectNode": "Atlasiet mezglu",
+    "fragmentEnable": "Iespējot TLS ClientHello fragmentēšanu (Xray / Mahsa)",
+    "fragmentHint": "Tikai TLS vai REALITY caur TCP vai WebSocket. Garums ir 1–4096 baiti; intervāls ir 0–1000 milisekundes. Izmantojiet vienu vērtību vai augošu diapazonu. Tas negarantē piekļuvi caur filtrēšanu.",
+    "fragmentLength": "Fragmenta garums (baitos)",
+    "fragmentInterval": "Fragmentu intervāls (milisekundēs)",
+    "testHint": "Pārbaude var sagatavot atlasīto kodolu un sazinās ar api.ipify.org caur HTTPS, izmantojot pagaidu starpniekserveri. Nekas netiek saglabāts vai piešķirts. Netiek pārbaudīts neviens AI pakalpojumu sniedzējs.",
+    "testSource": "Pārbaudīt pirms saglabāšanas",
+    "testSuccess": "HTTPS pārbaude veiksmīga. Izejas IP: {ip}; latentums: {ms} ms."
   }
 }

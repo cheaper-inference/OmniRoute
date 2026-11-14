@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Na gwaji",
     "modalityBridgeVideoPromotionEligible": "Ya cancanta",
-    "modalityBridgeVideoPromotionContextRequired": "Ɗaukakawa na buƙatar gudanawa biyu masu zaman kansu da suka cika sharuɗɗa don ainihin bita ta samfurin, manufa, kundin bayanai da gini. Mahallin da ba a tabbatar da shi ba zai ci gaba da kasancewa HOLD; zaɓin manufar gwaji ba amincewa ba ne."
+    "modalityBridgeVideoPromotionContextRequired": "Ɗaukakawa na buƙatar gudanawa biyu masu zaman kansu da suka cika sharuɗɗa don ainihin bita ta samfurin, manufa, kundin bayanai da gini. Mahallin da ba a tabbatar da shi ba zai ci gaba da kasancewa HOLD; zaɓin manufar gwaji ba amincewa ba ne.",
+    "proxyManagedCoresTab": "Jigogin da ake sarrafawa"
   },
   "contextRtk": {
     "title": "Injin RTK",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Duban ma'ajiyar wucin gadi"
   },
   "proxyConfigModal": {
+    "managedCore": "Jigon proksi",
+    "managedSelectCore": "Zaɓi jigo",
+    "managedSaveHint": "Adanawa tana sauke jigon hukuma tare da tabbatar da shi idan ana buƙata, tana duba tsarin, sannan tana kunna wannan proksi. Rubutu kaɗai ba ya girka komai.",
+    "errorSelectManagedCore": "Zaɓi sing-box ko Xray kafin adana wannan rami",
     "levelGlobal": "Na Gabaɗaya",
     "levelProvider": "Mai samarwa",
     "levelCombo": "Haɗin",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Jigogin proksi da ake sarrafawa",
+    "description": "Manna mahaɗin rami a filin mai masaukin proksi na musamman domin adanawa da sanya shi. A nan kuma za ka iya adana ma’anar JSON ta asali ta haɗin fita ba tare da canza wani rabon aiki ba.",
+    "saveHint": "Adanawa tana tabbatar da jigon hukuma idan ana buƙata, sannan tana duba tsarin asali kafin kunnawa. Dole a ɓoye bayanan tushe. Ba a girka komai yayin samfoti, ba a farawa ta atomatik, kuma ba a canza proksi mai wucewa kai tsaye.",
+    "saveActivate": "Adana kuma kunna",
+    "core": "Jigo",
+    "selectCore": "Zaɓi jigo",
+    "name": "Suna",
+    "source": "Mahaɗin tushe ko JSON na asali na haɗin fita",
+    "start": "Fara",
+    "stop": "Dakatar",
+    "loadError": "An kasa loda jigogin da ake sarrafawa",
+    "operationError": "Aikin jigon da ake sarrafawa ya gaza",
+    "state": "{state, select, not_installed {Ba a girka ba} stopped {An dakatar} starting {Ana farawa} running {Yana aiki} stopping {Ana dakatarwa} error {Kuskure} other {Ba a sani ba}}",
+    "binaryTitle": "Sigar jigo da fayil mai aiwatarwa na musamman",
+    "binaryHint": "Canje-canje suna shafar duk proksin da aka adana masu amfani da wannan jigo. Jigon da ke aiki zai sake farawa ne bayan tabbatarwa kawai. Rumbun fayilolin hukuma suna buƙatar ƙimar SHA-256 da aka wallafa. Fayilolin binari na musamman suna amfani da ƙimar da ka bayar dabam.",
+    "distribution": "Rarrabawar jigo",
+    "checkUpdates": "Duba sigogin da ake da su",
+    "noVerifiedReleases": "Babu tsayayyar siga mai fayil da aka tabbatar da shi don wannan dandali.",
+    "version": "Siga",
+    "installVersion": "Girka kuma yi amfani da sigar da aka zaɓa",
+    "customPath": "Cikakkiyar hanyar fayil mai aiwatarwa a sabar OmniRoute",
+    "customHash": "SHA-256 da ake tsammani na fayil mai aiwatarwa",
+    "customTrust": "Na amince da wannan fayil mai aiwatarwa. Zai iya gudanar da lamba da izinin OmniRoute; daidaituwar hash tana tabbatar da cewa fayil bai canza ba, ba cewa yana da aminci ba.",
+    "useCustom": "Shigo da jigo na musamman kuma yi amfani da shi",
+    "subscriptionUrl": "URL na HTTPS na biyan kuɗi",
+    "subscriptionHint": "Loda ko sabunta da hannu, zaɓi kumburi mai jituwa, sannan gwada ko adana shi. Wannan ba ya kunna sabunta biyan kuɗi ta atomatik. Ana ba da rahoton kumburin da ba a tallafa musu ba maimakon sauya su a ɓoye.",
+    "loadSubscription": "Loda ko sabunta biyan kuɗi",
+    "skippedNodes": "Kumburin da ba a tallafa musu ba da aka tsallake: {count}",
+    "subscriptionNode": "Kumburin biyan kuɗi",
+    "selectNode": "Zaɓi kumburi",
+    "fragmentEnable": "Kunna rarraba TLS ClientHello zuwa gutsuttsura (Xray / Mahsa)",
+    "fragmentHint": "Don TLS ko REALITY ta TCP ko WebSocket kawai. Tsawo yana tsakanin bait 1–4096; tazara tana tsakanin millisekondi 0–1000. Yi amfani da ƙima ɗaya ko zangon ƙima mai hawa. Wannan ba ya tabbatar da samun dama ta cikin tacewa.",
+    "fragmentLength": "Tsawon gutsure (bait)",
+    "fragmentInterval": "Tazarar gutsuttsura (millisekondi)",
+    "testHint": "Gwaji na iya shirya jigon da aka zaɓa kuma yana tuntuɓar api.ipify.org ta HTTPS ta proksi na ɗan lokaci. Ba a adana ko sanya komai. Ba ya gwada kowane mai ba da sabis na AI.",
+    "testSource": "Gwada kafin adanawa",
+    "testSuccess": "Gwajin HTTPS ya yi nasara. IP na fita: {ip}; jinkiri: {ms} ms."
   }
 }

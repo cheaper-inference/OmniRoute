@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Kokeellinen",
     "modalityBridgeVideoPromotionEligible": "Kelvollinen",
-    "modalityBridgeVideoPromotionContextRequired": "Ylennys edellyttää kahta toisistaan riippumatonta hyväksyttävää suoritusta täsmälleen samalla malliversiolla, käytännöllä, korpuksella ja koontiversiolla. Vahvistamaton konteksti pysyy HOLD-tilassa; kokeellisen käytännön valitseminen ei merkitse hyväksyntää."
+    "modalityBridgeVideoPromotionContextRequired": "Ylennys edellyttää kahta toisistaan riippumatonta hyväksyttävää suoritusta täsmälleen samalla malliversiolla, käytännöllä, korpuksella ja koontiversiolla. Vahvistamaton konteksti pysyy HOLD-tilassa; kokeellisen käytännön valitseminen ei merkitse hyväksyntää.",
+    "proxyManagedCoresTab": "Hallinnoidut ytimet"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Välimuistinäkymä"
   },
   "proxyConfigModal": {
+    "managedCore": "Välityspalvelimen ydin",
+    "managedSelectCore": "Valitse ydin",
+    "managedSaveHint": "Tallennettaessa virallinen ydin ladataan ja varmennetaan tarvittaessa, kokoonpano tarkistetaan ja sitten tämä välityspalvelin aktivoidaan. Tekstin kirjoittaminen ei asenna mitään.",
+    "errorSelectManagedCore": "Valitse sing-box tai Xray ennen tämän tunnelin tallentamista",
     "levelGlobal": "Maailmanlaajuinen",
     "levelProvider": "Palveluntarjoaja",
     "levelCombo": "Yhdistelmä",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Hallinnoidut välityspalvelinytimet",
+    "description": "Liitä tunnelilinkki mukautetun välityspalvelimen isäntäkenttään tallentaaksesi ja määrittääksesi sen käyttöön. Täällä voit myös tallentaa lähtevän yhteyden määrityksen ytimen omassa JSON-muodossa muuttamatta yhtään kohdistusta.",
+    "saveHint": "Tallennettaessa virallinen ydin varmennetaan tarvittaessa ja ytimen omassa muodossa oleva kokoonpano tarkistetaan ennen aktivointia. Lähteet edellyttävät salausta. Esikatselun aikana ei asenneta mitään, automaattista käynnistystä ei tehdä eikä läpinäkyvän välityspalvelimen asetuksia muuteta.",
+    "saveActivate": "Tallenna ja aktivoi",
+    "core": "Ydin",
+    "selectCore": "Valitse ydin",
+    "name": "Nimi",
+    "source": "Lähdelinkki tai lähtevä yhteys ytimen omassa JSON-muodossa",
+    "start": "Käynnistä",
+    "stop": "Pysäytä",
+    "loadError": "Hallinnoituja ytimiä ei voitu ladata",
+    "operationError": "Hallinnoidun ytimen toiminto epäonnistui",
+    "state": "{state, select, not_installed {Ei asennettu} stopped {Pysäytetty} starting {Käynnistyy} running {Käynnissä} stopping {Pysähtyy} error {Virhe} other {Tuntematon}}",
+    "binaryTitle": "Ytimen versio ja mukautettu suoritettava tiedosto",
+    "binaryHint": "Muutokset vaikuttavat kaikkiin tallennettuihin välityspalvelimiin, jotka käyttävät tätä ydintä. Käynnissä oleva ydin käynnistyy uudelleen vasta tarkistuksen jälkeen. Viralliset arkistot edellyttävät julkaistua SHA-256-tiivistettä. Mukautetut binaarit käyttävät erikseen antamaasi tiivistettä.",
+    "distribution": "Ytimen jakelu",
+    "checkUpdates": "Tarkista saatavilla olevat versiot",
+    "noVerifiedReleases": "Tälle alustalle ei ole saatavilla vakaata julkaisua, jossa on varmennettu tiedosto.",
+    "version": "Versio",
+    "installVersion": "Asenna ja käytä valittua versiota",
+    "customPath": "Suoritettavan tiedoston absoluuttinen polku OmniRoute-palvelimella",
+    "customHash": "Suoritettavan tiedoston odotettu SHA-256",
+    "customTrust": "Luotan tähän suoritettavaan tiedostoon. Se voi suorittaa koodia OmniRouten oikeuksilla; vastaava tiiviste varmistaa eheyden, ei turvallisuutta.",
+    "useCustom": "Tuo ja käytä mukautettua ydintä",
+    "subscriptionUrl": "Tilauksen HTTPS-URL",
+    "subscriptionHint": "Lataa tai päivitä käsin, valitse yhteensopiva solmu ja testaa tai tallenna se. Tämä ei ota käyttöön tilauksen automaattista päivitystä. Tukemattomista solmuista ilmoitetaan sen sijaan, että niitä muutettaisiin ilmoittamatta.",
+    "loadSubscription": "Lataa tai päivitä tilaus",
+    "skippedNodes": "Ohitetut tukemattomat solmut: {count}",
+    "subscriptionNode": "Tilauksen solmu",
+    "selectNode": "Valitse solmu",
+    "fragmentEnable": "Ota käyttöön TLS ClientHello -pirstominen (Xray / Mahsa)",
+    "fragmentHint": "Vain TLS:lle tai REALITYlle TCP:n tai WebSocketin kautta. Pituus on 1–4096 tavua; aikaväli on 0–1000 millisekuntia. Käytä yhtä arvoa tai nousevaa arvoväliä. Tämä ei takaa pääsyä suodatuksen läpi.",
+    "fragmentLength": "Palasen pituus (tavua)",
+    "fragmentInterval": "Palasten aikaväli (millisekuntia)",
+    "testHint": "Testi saattaa valmistella valitun ytimen ja ottaa yhteyden api.ipify.org-palveluun HTTPS:n kautta tilapäistä välityspalvelinta käyttäen. Mitään ei tallenneta tai määritetä käyttöön. Testi ei testaa mitään tekoälypalveluntarjoajaa.",
+    "testSource": "Testaa ennen tallennusta",
+    "testSuccess": "HTTPS-testi onnistui. Ulospäin näkyvä IP: {ip}; viive: {ms} ms."
   }
 }

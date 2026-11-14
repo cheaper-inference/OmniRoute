@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Sperimentali",
     "modalityBridgeVideoPromotionEligible": "Eliġibbli",
-    "modalityBridgeVideoPromotionContextRequired": "Il-promozzjoni teħtieġ żewġ eżekuzzjonijiet indipendenti li jikkwalifikaw għall-istess reviżjoni eżatta tal-mudell, politika, korpus u build. Kuntest mhux ivverifikat jibqa’ HOLD; l-għażla ta’ politika sperimentali ma tikkostitwixxix approvazzjoni."
+    "modalityBridgeVideoPromotionContextRequired": "Il-promozzjoni teħtieġ żewġ eżekuzzjonijiet indipendenti li jikkwalifikaw għall-istess reviżjoni eżatta tal-mudell, politika, korpus u build. Kuntest mhux ivverifikat jibqa’ HOLD; l-għażla ta’ politika sperimentali ma tikkostitwixxix approvazzjoni.",
+    "proxyManagedCoresTab": "Qlub ġestiti"
   },
   "contextRtk": {
     "title": "Magna RTK",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Dehra tal-cache"
   },
   "proxyConfigModal": {
+    "managedCore": "Qalba tal-proxy",
+    "managedSelectCore": "Agħżel qalba",
+    "managedSaveHint": "Meta tissejvja, il-qalba uffiċjali titniżżel u tiġi vverifikata jekk ikun meħtieġ, il-konfigurazzjoni tiġi ċċekkjata, u mbagħad dan il-proxy jiġi attivat. Ma jiġi installat xejn waqt li tittajpja.",
+    "errorSelectManagedCore": "Agħżel sing-box jew Xray qabel ma tissejvja din il-mina",
     "levelGlobal": "Globali",
     "levelProvider": "Fornitur",
     "levelCombo": "Kombinazzjoni",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Qlub tal-proxy ġestiti",
+    "description": "Waħħal rabta tal-mina fil-qasam tal-host tal-proxy personalizzat biex tissejvjaha u tassenjaha. Hawn tista’ wkoll tissejvja definizzjoni ta’ konnessjoni ħierġa fil-format JSON nattiv mingħajr ma tibdel xi assenjazzjoni.",
+    "saveHint": "Meta tissejvja, il-qalba uffiċjali tiġi vverifikata jekk ikun meħtieġ u l-konfigurazzjoni nattiva tiġi ċċekkjata qabel l-attivazzjoni. Is-sorsi jeħtieġu kriptaġġ. Ma ssirx installazzjoni waqt il-previżjoni, bidu awtomatiku jew bidliet fil-proxy trasparenti.",
+    "saveActivate": "Ssejvja u attiva",
+    "core": "Qalba",
+    "selectCore": "Agħżel qalba",
+    "name": "Isem",
+    "source": "Rabta tas-sors jew konnessjoni ħierġa fil-format JSON nattiv",
+    "start": "Ibda",
+    "stop": "Waqqaf",
+    "loadError": "Ma setgħux jitgħabbew il-qlub ġestiti",
+    "operationError": "L-operazzjoni fuq il-qalba ġestita falliet",
+    "state": "{state, select, not_installed {Mhix installata} stopped {Imwaqqfa} starting {Qed tibda} running {Qed taħdem} stopping {Qed tieqaf} error {Żball} other {Mhux magħruf}}",
+    "binaryTitle": "Verżjoni tal-qalba u fajl eżegwibbli personalizzat",
+    "binaryHint": "Il-bidliet jaffettwaw kull proxy salvat li juża din il-qalba. Qalba li qed taħdem terġa’ tibda biss wara l-validazzjoni. L-arkivji uffiċjali jeħtieġu somma SHA-256 ippubblikata. Fajls binarji personalizzati jużaw separatament is-somma li tipprovdi int.",
+    "distribution": "Distribuzzjoni tal-qalba",
+    "checkUpdates": "Iċċekkja l-verżjonijiet disponibbli",
+    "noVerifiedReleases": "M’hemm ebda rilaxx stabbli b’fajl ivverifikat disponibbli għal din il-pjattaforma.",
+    "version": "Verżjoni",
+    "installVersion": "Installa u uża l-verżjoni magħżula",
+    "customPath": "Passaġġ assolut tal-fajl eżegwibbli fuq is-server OmniRoute",
+    "customHash": "SHA-256 mistenni tal-fajl eżegwibbli",
+    "customTrust": "Nafda dan il-fajl eżegwibbli. Jista’ jħaddem kodiċi bil-permessi ta’ OmniRoute; hash li jaqbel jivverifika l-integrità, mhux is-sigurtà.",
+    "useCustom": "Importa u uża qalba personalizzata",
+    "subscriptionUrl": "URL HTTPS tal-abbonament",
+    "subscriptionHint": "Tagħbija jew aġġornament manwali, imbagħad agħżel nodu kompatibbli u ttestjah jew issejvjah. Dan ma jattivax aġġornament awtomatiku tal-abbonament. Nodi mhux appoġġjati jiġu rrappurtati minflok jinbidlu fis-skiet.",
+    "loadSubscription": "Tagħbija jew aġġornament tal-abbonament",
+    "skippedNodes": "Nodi mhux appoġġjati li nqabżu: {count}",
+    "subscriptionNode": "Nodu tal-abbonament",
+    "selectNode": "Agħżel nodu",
+    "fragmentEnable": "Attiva l-frammentazzjoni TLS ClientHello (Xray / Mahsa)",
+    "fragmentHint": "Għal TLS jew REALITY fuq TCP jew WebSocket biss. It-tul huwa 1–4096 bytes; l-intervall huwa 0–1000 millisekonda. Uża valur wieħed jew medda axxendenti. Dan ma jiggarantixxix aċċess minn ġo filtri.",
+    "fragmentLength": "Tul tal-framment (bytes)",
+    "fragmentInterval": "Intervall tal-frammenti (millisekondi)",
+    "testHint": "It-test jista’ jipprepara l-qalba magħżula u jikkuntattja api.ipify.org permezz ta’ HTTPS minn proxy temporanju. Xejn ma jiġi ssejvjat jew assenjat. Ma jittestja ebda fornitur tal-AI.",
+    "testSource": "Ittestja qabel issalva",
+    "testSuccess": "It-test HTTPS għadda. IP tal-ħruġ: {ip}; latenza: {ms} ms."
   }
 }

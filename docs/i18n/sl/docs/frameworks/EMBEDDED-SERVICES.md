@@ -45,14 +45,32 @@ Vseh osem sledi istemu modelu nadzora:
 - OmniRoute jih namesti pod `DATA_DIR/services/{name}/` (izolirano od OmniRoute-jevega lastnega `package.json`)
 - OmniRoute sproži in jih spremlja kot podrejene procese
 - OmniRoute vstavi efemerni ključ API v otrokovo okolje in ga zavrti brez izpadov (kjer je primerno)
-- Vse upravljavske poti (`/api/services/*`) so**LOCAL_ONLY** — dostopen samo iz povratne zanke (trdo pravilo št. 17)
+- Vse upravljavske poti (`/api/services/*`) so**LOCAL_ONLY** — dostopen le iz povratne zanke (trdo pravilo #17)
+
+### Upravljana proxy jedra
+
+Polje Custom proxy host sprejema tudi izvorno povezavo V2Ray. Izberite** pevska škatla** oz** Rentgen** izrecno, nato kliknite Shrani. Tipkanje nikoli ne prenese ali zažene jedra. Shranjevanje preveri uradni arhiv izdaje, potrdi izvorno konfiguracijo, zažene ločen poslušalec SOCKS lokalnega gostitelja in šele nato zapiše dodelitev registra proxy. Neuspela aktivacija obnovi prejšnjo upravljano konfiguracijo in proces. potreben je `STORAGE_ENCRYPTION_KEY` ; izvorne povezave so šifrirane.
+
+Upravljane datoteke živijo pod `DATA_DIR/services/managed-proxy/`, ločeno od TPROXY. Na izbrano jedro je en proces v lasti, do 100 poslušalcev. Privzeti samodejni zagon ali globalno usmerjanje se ne spremeni. Uspešno shranjevanje si zapomni aktivacijo samo za to upravljano jedro; zagon aplikacije obnovi omogočena shranjena jedra z uporabo že preverjene binarne datoteke, nikoli prenosa ob zagonu. Eksplicitna zaustavitev počisti to aktivacijsko zastavico. Manjkajoča ali poškodovana dvojiška datoteka zahteva ponovno shranjevanje vira. Brisanje registra odstrani izvor in poslušalca lokalno; navadna urejanja končne točke so zavrnjena za upravljane vrstice, tako da se shranjeni vir ne more tiho oddaljiti od svojega preusmerjenega poslušalca.
+
+| Izvorni format                          | pevska škatla                                                             | Rentgen                                                                   |
+| --------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| VLESS, VMess, trojanec, Shadowsocks URI | Podprta pretvorba                                                         | Podprta pretvorba                                                         |
+| Hysteria2/hy2, TUIC, AnyTLS URI         | Podprta pretvorba                                                         | Zavrnjeno; uporabite združljivo jedro                                     |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade   | Podprto za VLESS/VMess/Trojan                                             | Podprto za VLESS/VMess/Trojan                                             |
+| XHTTP URI transport                     | Zavrnjeno                                                                 | Podprta pretvorba                                                         |
+| Izvorni odhodni JSON                    | Dovoljen posredniški protocols/options izbranega jedra, izvorno preverjen | Dovoljen posredniški protocols/options izbranega jedra, izvorno preverjen |
+
+Možnosti neznanih žic, nevarne zastavice TLS, zunanji vtičniki, možnosti poti lokalnih datotek in nepodprte kombinacije so zavrnjene, namesto da bi jih tiho zavrgli. Izvorni objekti so izhodne definicije, ne konfiguracije celotnega jedra; control/direct/bypass odhodi niso sprejeti. WireGuard na sing-boxu 1.14 uporablja končne točke, zato ni sprejet kot izvorni izhodni. To ni pretvornik vseh formatov; SSR, podedovane povezave whole-base64 Shadowsocks, poljubni predmeti Clash in transportne različice, ki jih ni v tabeli, potrebujejo ločeno podprto izvorno obliko.
+
+`/api/services/managed-proxy` je overjen in uporablja samo povratno zanko: GET izpiše redigirane metapodatke, POST shrani `{core,name,sourceLink,id?,assignment?}`, PATCH sprejme `{core,action:"start"|"stop"}`. Prisoten mora biti gostiteljev zaupanja vreden cevovod enakovrednih žigov. Izvorna jedrna diagnostika je izključena, ker lahko vsebuje poverilnice; dogodki življenjskega cikla uporabljajo obstoječi zapisovalnik strukturiranih aplikacijskih datotek brez izvornih povezav ali uporabnih obremenitev navzgor. Za podporo priložite samo prečiščene dnevnike aplikacij. Uradne različice so pripete na sing-box 1.14.3 in Xray 26.3.27 z manifesti SHA-256 sredstva izdaje; prihodnje posodobitve zahtevajo spremembo različice in vseh preverjenih povzetkov skupaj.
 
 ### Ključne odločitve (iz projektnega načrta)
 
 | Odločitev                                         | Vrednost                                                                         |
 | ------------------------------------------------- | -------------------------------------------------------------------------------- |
 | Dostop do nadzorne plošče do izvornega UI 9Router | Povratni proxy pri `/dashboard/providers/services/9router/embed/*`               |
-| Namestitev mehanizma                              | `npm install {package}` preko `execFile` (brez lupinske interpolacije)           |
+| Namestitev mehanizma                              | `npm install {package}` prek `execFile` (brez interpolacije lupine)              |
 | Način porabe                                      | Ponudnik registriran kot `9router/{sub}/{model}` v mehanizmu usmerjanja          |
 | upravljanje ključev API                           | OmniRoute generira, šifrira v stanju mirovanja (AES-256-GCM) in vbrizga prek env |
 | Lokacija nadzorne plošče                          | `/dashboard/providers/services` (trije zavihki)                                  |

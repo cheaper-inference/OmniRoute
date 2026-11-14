@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "ניסיוני",
     "modalityBridgeVideoPromotionEligible": "כשיר",
-    "modalityBridgeVideoPromotionContextRequired": "קידום דורש שתי הרצות מזכות ובלתי תלויות עבור אותה גרסה מדויקת של המודל, המדיניות, הקורפוס והבנייה. הקשר שלא אומת נשאר במצב HOLD; בחירה במדיניות ניסיונית אינה מהווה אישור."
+    "modalityBridgeVideoPromotionContextRequired": "קידום דורש שתי הרצות מזכות ובלתי תלויות עבור אותה גרסה מדויקת של המודל, המדיניות, הקורפוס והבנייה. הקשר שלא אומת נשאר במצב HOLD; בחירה במדיניות ניסיונית אינה מהווה אישור.",
+    "proxyManagedCoresTab": "ליבות מנוהלות"
   },
   "contextRtk": {
     "title": "מנוע RTK",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "תצוגת מטמון"
   },
   "proxyConfigModal": {
+    "managedCore": "ליבת פרוקסי",
+    "managedSelectCore": "בחירת ליבה",
+    "managedSaveHint": "השמירה מורידה ומאמתת את הליבה הרשמית במידת הצורך, בודקת את התצורה ואז מפעילה את הפרוקסי הזה. הקלדה אינה מתקינה דבר.",
+    "errorSelectManagedCore": "יש לבחור sing-box או Xray לפני שמירת המנהרה הזאת",
     "levelGlobal": "גלובלי",
     "levelProvider": "ספק",
     "levelCombo": "קומבו",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "ליבות פרוקסי מנוהלות",
+    "description": "יש להדביק קישור למנהרה בשדה המארח של הפרוקסי המותאם אישית כדי לשמור ולשייך אותו. כאן אפשר גם לשמור הגדרת JSON מקורית לחיבור יוצא בלי לשנות שיוך כלשהו.",
+    "saveHint": "השמירה מאמתת את הליבה הרשמית במידת הצורך ובודקת את התצורה המקורית לפני ההפעלה. המקורות דורשים הצפנה. אין התקנה בתצוגה מקדימה, הפעלה אוטומטית או שינויים בפרוקסי שקוף.",
+    "saveActivate": "שמירה והפעלה",
+    "core": "ליבה",
+    "selectCore": "בחירת ליבה",
+    "name": "שם",
+    "source": "קישור למקור או JSON מקורי לחיבור יוצא",
+    "start": "הפעלה",
+    "stop": "עצירה",
+    "loadError": "לא ניתן לטעון ליבות מנוהלות",
+    "operationError": "הפעולה בליבה המנוהלת נכשלה",
+    "state": "{state, select, not_installed {לא מותקנת} stopped {עצורה} starting {בתהליך הפעלה} running {פועלת} stopping {בתהליך עצירה} error {שגיאה} other {לא ידוע}}",
+    "binaryTitle": "גרסת הליבה וקובץ הרצה מותאם אישית",
+    "binaryHint": "השינויים משפיעים על כל שרת פרוקסי שמור המשתמש בליבה זו. ליבה פעילה מופעלת מחדש רק לאחר אימות. ארכיונים רשמיים דורשים ערך גיבוב SHA-256 שפורסם. קבצים בינאריים מותאמים אישית משתמשים בנפרד בערך הגיבוב שסיפקת.",
+    "distribution": "הפצת הליבה",
+    "checkUpdates": "בדיקת גרסאות זמינות",
+    "noVerifiedReleases": "אין לפלטפורמה זו גרסה יציבה עם קובץ הפצה מאומת.",
+    "version": "גרסה",
+    "installVersion": "התקנה ושימוש בגרסה שנבחרה",
+    "customPath": "נתיב מוחלט לקובץ ההרצה בשרת OmniRoute",
+    "customHash": "ערך SHA-256 הצפוי של קובץ ההרצה",
+    "customTrust": "אני נותן אמון בקובץ הרצה זה. הוא יכול להריץ קוד בהרשאות של OmniRoute; גיבוב תואם מאמת שלמות, לא בטיחות.",
+    "useCustom": "ייבוא ושימוש בליבה מותאמת אישית",
+    "subscriptionUrl": "כתובת URL של מנוי ב-HTTPS",
+    "subscriptionHint": "יש לטעון או לרענן ידנית, לבחור צומת תואם ואז לבדוק או לשמור. פעולה זו אינה מפעילה רענון אוטומטי של המנוי. צמתים שאינם נתמכים מדווחים במקום להשתנות ללא הודעה.",
+    "loadSubscription": "טעינה או רענון של מנוי",
+    "skippedNodes": "צמתים לא נתמכים שדולגו: {count}",
+    "subscriptionNode": "צומת מנוי",
+    "selectNode": "בחירת צומת",
+    "fragmentEnable": "הפעלת פיצול TLS ClientHello ‏(Xray / Mahsa)",
+    "fragmentHint": "רק עבור TLS או REALITY מעל TCP או WebSocket. האורך הוא 1–4096 בתים והמרווח הוא 0–1000 אלפיות שנייה. יש להשתמש בערך יחיד או בטווח עולה. אין בכך הבטחה לגישה דרך סינון.",
+    "fragmentLength": "אורך מקטע (בתים)",
+    "fragmentInterval": "מרווח בין מקטעים (אלפיות שנייה)",
+    "testHint": "הבדיקה עשויה להכין את הליבה שנבחרה ויוצרת קשר עם api.ipify.org דרך HTTPS באמצעות פרוקסי זמני. דבר אינו נשמר או מוקצה. הבדיקה אינה בודקת ספק AI כלשהו.",
+    "testSource": "בדיקה לפני שמירה",
+    "testSuccess": "בדיקת HTTPS הצליחה. כתובת IP ביציאה: {ip}; השהיה: {ms} ms."
   }
 }

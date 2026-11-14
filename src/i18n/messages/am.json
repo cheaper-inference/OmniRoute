@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "ሙከራዊ",
     "modalityBridgeVideoPromotionEligible": "ብቁ",
-    "modalityBridgeVideoPromotionContextRequired": "ማሳደግ ለተመሳሳዩ ትክክለኛ የሞዴል ክለሳ፣ ፖሊሲ፣ ኮርፐስ እና ቢልድ መስፈርቱን የሚያሟሉ ሁለት ገለልተኛ አሂዶችን ይጠይቃል። ያልተረጋገጠ አውድ HOLD ሆኖ ይቆያል፤ ሙከራዊ ፖሊሲን መምረጥ ማጽደቅ አይደለም።"
+    "modalityBridgeVideoPromotionContextRequired": "ማሳደግ ለተመሳሳዩ ትክክለኛ የሞዴል ክለሳ፣ ፖሊሲ፣ ኮርፐስ እና ቢልድ መስፈርቱን የሚያሟሉ ሁለት ገለልተኛ አሂዶችን ይጠይቃል። ያልተረጋገጠ አውድ HOLD ሆኖ ይቆያል፤ ሙከራዊ ፖሊሲን መምረጥ ማጽደቅ አይደለም።",
+    "proxyManagedCoresTab": "የሚተዳደሩ ኮሮች"
   },
   "contextRtk": {
     "title": "RTK ሞተር",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "የመሸጎጫ እይታ"
   },
   "proxyConfigModal": {
+    "managedCore": "የፕሮክሲ ኮር",
+    "managedSelectCore": "ኮር ይምረጡ",
+    "managedSaveHint": "ማስቀመጥ አስፈላጊ ከሆነ ኦፊሴላዊውን ኮር ያወርዳል እና ያረጋግጣል፣ ውቅሩን ይመረምራል፣ ከዚያም ይህን ፕሮክሲ ያነቃል። መተየብ ምንም ነገር አይጭንም።",
+    "errorSelectManagedCore": "ይህን ቱነል ከማስቀመጥዎ በፊት sing-box ወይም Xray ይምረጡ",
     "levelGlobal": "አጠቃላይ",
     "levelProvider": "አቅራቢ",
     "levelCombo": "ጥምረት",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "የሚተዳደሩ የፕሮክሲ ኮሮች",
+    "description": "ለማስቀመጥ እና ለመመደብ የቱነል አገናኙን በብጁ ፕሮክሲ አስተናጋጅ መስክ ውስጥ ይለጥፉ። እዚህ ማንኛውንም ምደባ ሳይቀይሩ በኮሩ የሚደገፍ የወጪ ግንኙነት JSON ትርጉም ማስቀመጥም ይችላሉ።",
+    "saveHint": "በማስቀመጥ ጊዜ አስፈላጊ ከሆነ ኦፊሴላዊው ኮር ይረጋገጣል፣ ከማንቃት በፊትም በኮሩ የሚደገፈው ውቅር ይመረመራል። ምንጮች ምስጠራ ይፈልጋሉ። በቅድመ እይታ ጊዜ መጫን፣ በራስ-ሰር ማስጀመር ወይም የግልጽ ፕሮክሲ ለውጥ አይከናወንም።",
+    "saveActivate": "አስቀምጥ እና አንቃ",
+    "core": "ኮር",
+    "selectCore": "ኮር ይምረጡ",
+    "name": "ስም",
+    "source": "የምንጭ አገናኝ ወይም በኮሩ የሚደገፍ የወጪ ግንኙነት JSON",
+    "start": "ጀምር",
+    "stop": "አቁም",
+    "loadError": "የሚተዳደሩ ኮሮችን መጫን አልተቻለም",
+    "operationError": "የሚተዳደረው ኮር ክዋኔ አልተሳካም",
+    "state": "{state, select, not_installed {አልተጫነም} stopped {ቆሟል} starting {እየጀመረ ነው} running {እየሠራ ነው} stopping {እየቆመ ነው} error {ስህተት} other {ያልታወቀ}}",
+    "binaryTitle": "የኮር ስሪት እና ብጁ ተፈጻሚ ፋይል",
+    "binaryHint": "ለውጦቹ ይህን ኮር የሚጠቀሙ ሁሉንም የተቀመጡ ፕሮክሲዎች ይነካሉ። እየሰራ ያለ ኮር እንደገና የሚጀምረው ከማረጋገጫ በኋላ ብቻ ነው። ይፋዊ ማህደሮች የታተመ SHA-256 ማጠቃለያ ዋጋ ይፈልጋሉ። ብጁ ባይነሪ ፋይሎች እርስዎ የሰጡትን ማጠቃለያ ዋጋ ለየብቻ ይጠቀማሉ።",
+    "distribution": "የኮር ስርጭት",
+    "checkUpdates": "ያሉትን ስሪቶች ያረጋግጡ",
+    "noVerifiedReleases": "ለዚህ መድረክ የተረጋገጠ ፋይል ያለው የተረጋጋ ልቀት የለም።",
+    "version": "ስሪት",
+    "installVersion": "የተመረጠውን ስሪት ይጫኑ እና ይጠቀሙ",
+    "customPath": "በOmniRoute አገልጋይ ላይ ያለው የተፈጻሚ ፋይል ሙሉ መንገድ",
+    "customHash": "የተፈጻሚ ፋይሉ የሚጠበቀው SHA-256",
+    "customTrust": "ይህን ተፈጻሚ ፋይል አምነዋለሁ። በOmniRoute ፈቃዶች ኮድ ማስኬድ ይችላል፤ የሚዛመድ ሃሽ ፋይሉ እንዳልተቀየረ ያረጋግጣል እንጂ ደህንነቱን አያረጋግጥም።",
+    "useCustom": "ብጁ ኮር ያስገቡ እና ይጠቀሙ",
+    "subscriptionUrl": "የደንበኝነት HTTPS URL",
+    "subscriptionHint": "በእጅ ይጫኑ ወይም ያድሱ፣ ተስማሚ ኖድ ይምረጡ፣ ከዚያም ይፈትኑት ወይም ያስቀምጡት። ይህ የደንበኝነት ራስ-ሰር እድሳትን አያነቃም። ያልተደገፉ ኖዶች በዝምታ ከመቀየር ይልቅ ሪፖርት ይደረጋሉ።",
+    "loadSubscription": "ደንበኝነት ይጫኑ ወይም ያድሱ",
+    "skippedNodes": "የተዘለሉ ያልተደገፉ ኖዶች፦ {count}",
+    "subscriptionNode": "የደንበኝነት ኖድ",
+    "selectNode": "ኖድ ይምረጡ",
+    "fragmentEnable": "TLS ClientHello ወደ ቁርጥራጮች መክፈልን ያንቁ (Xray / Mahsa)",
+    "fragmentHint": "በTCP ወይም WebSocket ላይ ላለ TLS ወይም REALITY ብቻ። ርዝመቱ 1–4096 ባይት ነው፤ የጊዜ ክፍተቱ 0–1000 ሚሊሰከንድ ነው። አንድ ዋጋ ወይም ከትንሽ ወደ ትልቅ የሚሄድ ክልል ይጠቀሙ። ይህ ማጣሪያን አልፎ መድረስን አያረጋግጥም።",
+    "fragmentLength": "የቁርጥራጭ ርዝመት (ባይት)",
+    "fragmentInterval": "የቁርጥራጮች የጊዜ ክፍተት (ሚሊሰከንድ)",
+    "testHint": "ሙከራው የተመረጠውን ኮር ሊያዘጋጅ ይችላል፣ እና በጊዜያዊ ፕሮክሲ በኩል api.ipify.org ን በHTTPS ያገናኛል። ምንም አይቀመጥም ወይም አይመደብም። ማንኛውንም የAI አቅራቢ አይፈትንም።",
+    "testSource": "ከማስቀመጥ በፊት ይፈትኑ",
+    "testSuccess": "የHTTPS ሙከራ ተሳክቷል። የመውጫ IP፦ {ip}፤ መዘግየት፦ {ms} ms."
   }
 }

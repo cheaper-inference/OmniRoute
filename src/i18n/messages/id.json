@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Eksperimental",
     "modalityBridgeVideoPromotionEligible": "Memenuhi syarat",
-    "modalityBridgeVideoPromotionContextRequired": "Promosi memerlukan dua proses yang memenuhi syarat secara independen untuk revisi model, kebijakan, korpus, dan build yang sama persis. Konteks yang belum diverifikasi tetap berstatus HOLD; memilih kebijakan eksperimental bukanlah persetujuan."
+    "modalityBridgeVideoPromotionContextRequired": "Promosi memerlukan dua proses yang memenuhi syarat secara independen untuk revisi model, kebijakan, korpus, dan build yang sama persis. Konteks yang belum diverifikasi tetap berstatus HOLD; memilih kebijakan eksperimental bukanlah persetujuan.",
+    "proxyManagedCoresTab": "Inti terkelola"
   },
   "contextRtk": {
     "title": "Mesin RTK",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Tampilan cache"
   },
   "proxyConfigModal": {
+    "managedCore": "Inti proxy",
+    "managedSelectCore": "Pilih inti",
+    "managedSaveHint": "Saat disimpan, inti resmi diunduh dan diverifikasi jika diperlukan, konfigurasi diperiksa, lalu proxy ini diaktifkan. Mengetik tidak menginstal apa pun.",
+    "errorSelectManagedCore": "Pilih sing-box atau Xray sebelum menyimpan terowongan ini",
     "levelGlobal": "Global",
     "levelProvider": "Penyedia",
     "levelCombo": "kombo",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Inti proxy terkelola",
+    "description": "Tempel tautan terowongan di kolom host proxy kustom untuk menyimpan dan menetapkannya. Di sini Anda juga dapat menyimpan definisi JSON bawaan untuk koneksi keluar tanpa mengubah penetapan apa pun.",
+    "saveHint": "Saat disimpan, inti resmi diverifikasi jika diperlukan dan konfigurasi bawaan diperiksa sebelum aktivasi. Sumber memerlukan enkripsi. Tidak ada instalasi saat pratinjau, mulai otomatis, atau perubahan proxy transparan.",
+    "saveActivate": "Simpan dan aktifkan",
+    "core": "Inti",
+    "selectCore": "Pilih inti",
+    "name": "Nama",
+    "source": "Tautan sumber atau JSON bawaan untuk koneksi keluar",
+    "start": "Mulai",
+    "stop": "Hentikan",
+    "loadError": "Tidak dapat memuat inti terkelola",
+    "operationError": "Operasi inti terkelola gagal",
+    "state": "{state, select, not_installed {Belum diinstal} stopped {Dihentikan} starting {Memulai} running {Berjalan} stopping {Menghentikan} error {Kesalahan} other {Tidak diketahui}}",
+    "binaryTitle": "Versi inti dan berkas eksekusi khusus",
+    "binaryHint": "Perubahan memengaruhi semua proksi tersimpan yang menggunakan inti ini. Inti yang berjalan hanya dimulai ulang setelah validasi. Arsip resmi memerlukan hash SHA-256 yang dipublikasikan. Biner khusus menggunakan hash yang Anda berikan secara terpisah.",
+    "distribution": "Distribusi inti",
+    "checkUpdates": "Periksa versi yang tersedia",
+    "noVerifiedReleases": "Tidak ada rilis stabil dengan berkas terverifikasi yang tersedia untuk platform ini.",
+    "version": "Versi",
+    "installVersion": "Pasang dan gunakan versi yang dipilih",
+    "customPath": "Jalur absolut berkas eksekusi di server OmniRoute",
+    "customHash": "SHA-256 berkas eksekusi yang diharapkan",
+    "customTrust": "Saya memercayai berkas eksekusi ini. Berkas ini dapat menjalankan kode dengan izin OmniRoute; hash yang cocok memverifikasi integritas, bukan keamanan.",
+    "useCustom": "Impor dan gunakan inti khusus",
+    "subscriptionUrl": "URL HTTPS langganan",
+    "subscriptionHint": "Muat atau perbarui secara manual, pilih simpul yang kompatibel, lalu uji atau simpan. Ini tidak mengaktifkan pembaruan langganan otomatis. Simpul yang tidak didukung dilaporkan, bukan diubah tanpa pemberitahuan.",
+    "loadSubscription": "Muat atau perbarui langganan",
+    "skippedNodes": "Simpul yang tidak didukung dilewati: {count}",
+    "subscriptionNode": "Simpul langganan",
+    "selectNode": "Pilih simpul",
+    "fragmentEnable": "Aktifkan fragmentasi TLS ClientHello (Xray / Mahsa)",
+    "fragmentHint": "Hanya untuk TLS atau REALITY melalui TCP atau WebSocket. Panjangnya 1–4096 byte; intervalnya 0–1000 milidetik. Gunakan satu nilai atau rentang menaik. Ini tidak menjamin akses melewati penyaringan.",
+    "fragmentLength": "Panjang fragmen (byte)",
+    "fragmentInterval": "Interval fragmen (milidetik)",
+    "testHint": "Pengujian dapat menyiapkan inti yang dipilih dan menghubungi api.ipify.org melalui HTTPS menggunakan proksi sementara. Tidak ada yang disimpan atau ditetapkan. Pengujian ini tidak menguji penyedia AI mana pun.",
+    "testSource": "Uji sebelum menyimpan",
+    "testSuccess": "Uji HTTPS berhasil. IP keluar: {ip}; latensi: {ms} ms."
   }
 }

@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Eksperimentinė",
     "modalityBridgeVideoPromotionEligible": "Atitinka reikalavimus",
-    "modalityBridgeVideoPromotionContextRequired": "Perkėlimui į aukštesnį lygį reikalingi du nepriklausomi kvalifikacinius reikalavimus atitinkantys vykdymai su ta pačia modelio versija, politika, tekstynu ir komponavimo versija. Nepatvirtintam kontekstui išlaikoma būsena HOLD; eksperimentinės politikos pasirinkimas nėra patvirtinimas."
+    "modalityBridgeVideoPromotionContextRequired": "Perkėlimui į aukštesnį lygį reikalingi du nepriklausomi kvalifikacinius reikalavimus atitinkantys vykdymai su ta pačia modelio versija, politika, tekstynu ir komponavimo versija. Nepatvirtintam kontekstui išlaikoma būsena HOLD; eksperimentinės politikos pasirinkimas nėra patvirtinimas.",
+    "proxyManagedCoresTab": "Valdomi branduoliai"
   },
   "contextRtk": {
     "title": "RTK variklis",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Podėlio rodinys"
   },
   "proxyConfigModal": {
+    "managedCore": "Tarpinio serverio branduolys",
+    "managedSelectCore": "Pasirinkite branduolį",
+    "managedSaveHint": "Išsaugant prireikus atsisiunčiamas ir patikrinamas oficialus branduolys, patikrinama konfigūracija, o tada aktyvinamas šis tarpinis serveris. Teksto įvedimas nieko neįdiegia.",
+    "errorSelectManagedCore": "Prieš išsaugodami šį tunelį pasirinkite sing-box arba Xray",
     "levelGlobal": "Visuotinis",
     "levelProvider": "Teikėjo",
     "levelCombo": "Derinio",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Valdomi tarpinio serverio branduoliai",
+    "description": "Įklijuokite tunelio nuorodą į pasirinktinio tarpinio serverio pagrindinio kompiuterio lauką, kad ją išsaugotumėte ir priskirtumėte. Čia taip pat galite išsaugoti išeinančio ryšio aprašą branduolio savuoju JSON formatu nekeisdami jokio priskyrimo.",
+    "saveHint": "Išsaugant prireikus patikrinamas oficialaus branduolio autentiškumas, o prieš aktyvinimą patikrinama konfigūracija branduolio savuoju formatu. Šaltiniai turi būti užšifruoti. Peržiūros metu niekas nediegiama, automatinis paleidimas neatliekamas, o skaidriojo tarpinio serverio nustatymai nekeičiami.",
+    "saveActivate": "Išsaugoti ir aktyvinti",
+    "core": "Branduolys",
+    "selectCore": "Pasirinkite branduolį",
+    "name": "Pavadinimas",
+    "source": "Šaltinio nuoroda arba išeinantis ryšys branduolio savuoju JSON formatu",
+    "start": "Paleisti",
+    "stop": "Sustabdyti",
+    "loadError": "Nepavyko įkelti valdomų branduolių",
+    "operationError": "Valdomo branduolio operacija nepavyko",
+    "state": "{state, select, not_installed {Neįdiegtas} stopped {Sustabdytas} starting {Paleidžiamas} running {Veikia} stopping {Stabdomas} error {Klaida} other {Nežinoma}}",
+    "binaryTitle": "Branduolio versija ir pasirinktinis vykdomasis failas",
+    "binaryHint": "Pakeitimai paveikia visus išsaugotus tarpinius serverius, naudojančius šį branduolį. Veikiantis branduolys paleidžiamas iš naujo tik po patikros. Oficialiems archyvams būtina paskelbta SHA-256 kontrolinė suma. Pasirinktiniai dvejetainiai failai atskirai naudoja jūsų pateiktą kontrolinę sumą.",
+    "distribution": "Branduolio platinimo variantas",
+    "checkUpdates": "Tikrinti galimas versijas",
+    "noVerifiedReleases": "Šiai platformai nėra stabilios laidos su patikrintu failu.",
+    "version": "Versija",
+    "installVersion": "Įdiegti ir naudoti pasirinktą versiją",
+    "customPath": "Absoliutus vykdomojo failo kelias OmniRoute serveryje",
+    "customHash": "Tikėtina vykdomojo failo SHA-256 kontrolinė suma",
+    "customTrust": "Pasitikiu šiuo vykdomuoju failu. Jis gali vykdyti kodą su OmniRoute leidimais; sutampanti maiša patvirtina vientisumą, o ne saugumą.",
+    "useCustom": "Importuoti ir naudoti pasirinktinį branduolį",
+    "subscriptionUrl": "Prenumeratos HTTPS URL",
+    "subscriptionHint": "Įkelkite arba atnaujinkite rankiniu būdu, pasirinkite suderinamą mazgą, tada jį išbandykite arba išsaugokite. Tai neįjungia automatinio prenumeratos atnaujinimo. Apie nepalaikomus mazgus pranešama, užuot juos nepastebimai pakeitus.",
+    "loadSubscription": "Įkelti arba atnaujinti prenumeratą",
+    "skippedNodes": "Praleisti nepalaikomi mazgai: {count}",
+    "subscriptionNode": "Prenumeratos mazgas",
+    "selectNode": "Pasirinkite mazgą",
+    "fragmentEnable": "Įjungti TLS ClientHello skaidymą (Xray / Mahsa)",
+    "fragmentHint": "Tik TLS arba REALITY per TCP arba WebSocket. Ilgis: 1–4096 baitai; intervalas: 0–1000 milisekundžių. Naudokite vieną reikšmę arba didėjantį diapazoną. Tai negarantuoja prieigos per filtravimą.",
+    "fragmentLength": "Fragmento ilgis (baitais)",
+    "fragmentInterval": "Fragmentų intervalas (milisekundėmis)",
+    "testHint": "Bandymas gali paruošti pasirinktą branduolį ir kreipiasi į api.ipify.org per HTTPS naudodamas laikiną tarpinį serverį. Niekas neišsaugoma ir nepriskiriama. Netikrinamas joks AI teikėjas.",
+    "testSource": "Išbandyti prieš išsaugant",
+    "testSuccess": "HTTPS bandymas sėkmingas. Išėjimo IP: {ip}; delsa: {ms} ms."
   }
 }

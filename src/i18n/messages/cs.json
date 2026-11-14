@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Experimentální",
     "modalityBridgeVideoPromotionEligible": "Způsobilé",
-    "modalityBridgeVideoPromotionContextRequired": "Povýšení vyžaduje dvě nezávislá kvalifikační spuštění pro přesně stejnou revizi modelu, zásadu, korpus a sestavení. Neověřený kontext zůstává ve stavu HOLD; výběr experimentální zásady nepředstavuje schválení."
+    "modalityBridgeVideoPromotionContextRequired": "Povýšení vyžaduje dvě nezávislá kvalifikační spuštění pro přesně stejnou revizi modelu, zásadu, korpus a sestavení. Neověřený kontext zůstává ve stavu HOLD; výběr experimentální zásady nepředstavuje schválení.",
+    "proxyManagedCoresTab": "Spravovaná jádra"
   },
   "contextRtk": {
     "title": "Modul RTK",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Zobrazení mezipaměti"
   },
   "proxyConfigModal": {
+    "managedCore": "Jádro proxy",
+    "managedSelectCore": "Vyberte jádro",
+    "managedSaveHint": "Při ukládání se v případě potřeby stáhne a ověří oficiální jádro, zkontroluje se konfigurace a poté se toto proxy aktivuje. Samotné zadávání textu nic neinstaluje.",
+    "errorSelectManagedCore": "Před uložením tohoto tunelu vyberte sing-box nebo Xray",
     "levelGlobal": "Globální",
     "levelProvider": "Poskytovatel",
     "levelCombo": "Kombinace",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Spravovaná jádra proxy",
+    "description": "Vložte odkaz na tunel do pole hostitele vlastního proxy, abyste jej uložili a přiřadili. Zde můžete také uložit definici odchozího připojení v nativním formátu JSON, aniž byste změnili jakékoli přiřazení.",
+    "saveHint": "Při ukládání se v případě potřeby ověří oficiální jádro a před aktivací se zkontroluje nativní konfigurace. Zdroje vyžadují šifrování. Během náhledu se nic neinstaluje, neprobíhá automatické spouštění ani změny transparentního proxy.",
+    "saveActivate": "Uložit a aktivovat",
+    "core": "Jádro",
+    "selectCore": "Vyberte jádro",
+    "name": "Název",
+    "source": "Odkaz na zdroj nebo definice odchozího připojení v nativním formátu JSON",
+    "start": "Spustit",
+    "stop": "Zastavit",
+    "loadError": "Spravovaná jádra nelze načíst",
+    "operationError": "Operace se spravovaným jádrem selhala",
+    "state": "{state, select, not_installed {Nenainstalováno} stopped {Zastaveno} starting {Spouštění} running {Spuštěno} stopping {Zastavování} error {Chyba} other {Neznámý stav}}",
+    "binaryTitle": "Verze jádra a vlastní spustitelný soubor",
+    "binaryHint": "Změny ovlivní všechny uložené proxy používající toto jádro. Spuštěné jádro se restartuje až po ověření. Oficiální archivy vyžadují zveřejněný otisk SHA-256. Vlastní binární soubory používají samostatně vámi dodaný otisk.",
+    "distribution": "Distribuce jádra",
+    "checkUpdates": "Zkontrolovat dostupné verze",
+    "noVerifiedReleases": "Pro tuto platformu není dostupné stabilní vydání s ověřeným souborem.",
+    "version": "Verze",
+    "installVersion": "Nainstalovat a používat vybranou verzi",
+    "customPath": "Absolutní cesta ke spustitelnému souboru na serveru OmniRoute",
+    "customHash": "Očekávaný SHA-256 spustitelného souboru",
+    "customTrust": "Důvěřuji tomuto spustitelnému souboru. Může spouštět kód s oprávněními OmniRoute; shodný hash ověřuje integritu, nikoli bezpečnost.",
+    "useCustom": "Importovat a používat vlastní jádro",
+    "subscriptionUrl": "HTTPS URL předplatného",
+    "subscriptionHint": "Načtěte nebo obnovte ručně, vyberte kompatibilní uzel a poté jej otestujte nebo uložte. Tím se nezapne automatická obnova předplatného. Nepodporované uzly jsou hlášeny místo tiché změny.",
+    "loadSubscription": "Načíst nebo obnovit předplatné",
+    "skippedNodes": "Přeskočené nepodporované uzly: {count}",
+    "subscriptionNode": "Uzel předplatného",
+    "selectNode": "Vybrat uzel",
+    "fragmentEnable": "Zapnout fragmentaci TLS ClientHello (Xray / Mahsa)",
+    "fragmentHint": "Pouze pro TLS nebo REALITY přes TCP či WebSocket. Délka je 1–4096 bajtů; interval je 0–1000 milisekund. Použijte jednu hodnotu nebo vzestupný rozsah. To nezaručuje přístup přes filtry.",
+    "fragmentLength": "Délka fragmentu (bajty)",
+    "fragmentInterval": "Interval fragmentů (milisekundy)",
+    "testHint": "Test může připravit vybrané jádro a kontaktuje api.ipify.org přes HTTPS prostřednictvím dočasné proxy. Nic se neukládá ani nepřiřazuje. Netestuje se žádný poskytovatel AI.",
+    "testSource": "Otestovat před uložením",
+    "testSuccess": "Test HTTPS byl úspěšný. Výstupní IP: {ip}; latence: {ms} ms."
   }
 }

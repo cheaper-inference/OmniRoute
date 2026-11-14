@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Eksperimentel",
     "modalityBridgeVideoPromotionEligible": "Kvalificeret",
-    "modalityBridgeVideoPromotionContextRequired": "Oprykning kræver to uafhængige kvalificerende kørsler for den nøjagtige modelrevision, politik, det pågældende korpus og build. En ubekræftet kontekst forbliver på HOLD; valg af en eksperimentel politik er ikke en godkendelse."
+    "modalityBridgeVideoPromotionContextRequired": "Oprykning kræver to uafhængige kvalificerende kørsler for den nøjagtige modelrevision, politik, det pågældende korpus og build. En ubekræftet kontekst forbliver på HOLD; valg af en eksperimentel politik er ikke en godkendelse.",
+    "proxyManagedCoresTab": "Administrerede kerner"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Cachevisning"
   },
   "proxyConfigModal": {
+    "managedCore": "Proxykerne",
+    "managedSelectCore": "Vælg en kerne",
+    "managedSaveHint": "Når du gemmer, downloades og verificeres den officielle kerne om nødvendigt, konfigurationen kontrolleres, og derefter aktiveres denne proxy. Indtastning installerer ikke noget.",
+    "errorSelectManagedCore": "Vælg sing-box eller Xray, før du gemmer denne tunnel",
     "levelGlobal": "Globalt",
     "levelProvider": "Udbyder",
     "levelCombo": "Kombination",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Administrerede proxykerner",
+    "description": "Indsæt et tunnellink i værtsfeltet for en brugerdefineret proxy for at gemme og tildele det. Her kan du også gemme en definition af en udgående forbindelse i kernens eget JSON-format uden at ændre nogen tildeling.",
+    "saveHint": "Når du gemmer, verificeres den officielle kerne om nødvendigt, og konfigurationen i kernens eget format kontrolleres før aktivering. Kilder kræver kryptering. Ingen installation under forhåndsvisning, automatisk start eller ændringer af transparent proxy.",
+    "saveActivate": "Gem og aktivér",
+    "core": "Kerne",
+    "selectCore": "Vælg en kerne",
+    "name": "Navn",
+    "source": "Kildelink eller udgående forbindelse i kernens eget JSON-format",
+    "start": "Start",
+    "stop": "Stop",
+    "loadError": "Kunne ikke indlæse administrerede kerner",
+    "operationError": "Handlingen på den administrerede kerne mislykkedes",
+    "state": "{state, select, not_installed {Ikke installeret} stopped {Stoppet} starting {Starter} running {Kører} stopping {Stopper} error {Fejl} other {Ukendt}}",
+    "binaryTitle": "Kerneversion og brugerdefineret eksekverbar fil",
+    "binaryHint": "Ændringer påvirker alle gemte proxyer, som bruger denne kerne. En kørende kerne genstarter først efter validering. Officielle arkiver kræver en offentliggjort SHA-256-kontrolsum. Brugerdefinerede binære filer bruger separat den kontrolsum, du angiver.",
+    "distribution": "Kernedistribution",
+    "checkUpdates": "Tjek tilgængelige versioner",
+    "noVerifiedReleases": "Der er ingen stabil udgivelse med en verificeret fil til denne platform.",
+    "version": "Version",
+    "installVersion": "Installer og brug den valgte version",
+    "customPath": "Absolut sti til den eksekverbare fil på OmniRoute-serveren",
+    "customHash": "Forventet SHA-256 for den eksekverbare fil",
+    "customTrust": "Jeg stoler på denne eksekverbare fil. Den kan køre kode med OmniRoutes tilladelser; en tilsvarende hash bekræfter integritet, ikke sikkerhed.",
+    "useCustom": "Importer og brug brugerdefineret kerne",
+    "subscriptionUrl": "HTTPS-URL til abonnement",
+    "subscriptionHint": "Indlæs eller opdater manuelt, vælg en kompatibel node, og test eller gem den derefter. Dette aktiverer ikke automatisk opdatering af abonnementet. Ikke-understøttede noder rapporteres i stedet for at blive ændret uden besked.",
+    "loadSubscription": "Indlæs eller opdater abonnement",
+    "skippedNodes": "Ikke-understøttede noder sprunget over: {count}",
+    "subscriptionNode": "Abonnementsnode",
+    "selectNode": "Vælg en node",
+    "fragmentEnable": "Aktivér TLS ClientHello-fragmentering (Xray / Mahsa)",
+    "fragmentHint": "Kun til TLS eller REALITY over TCP eller WebSocket. Længden er 1–4096 byte; intervallet er 0–1000 millisekunder. Brug én værdi eller et stigende interval. Dette garanterer ikke adgang gennem filtrering.",
+    "fragmentLength": "Fragmentlængde (byte)",
+    "fragmentInterval": "Fragmentinterval (millisekunder)",
+    "testHint": "Testen kan klargøre den valgte kerne og kontakter api.ipify.org via HTTPS gennem en midlertidig proxy. Intet gemmes eller tildeles. Ingen AI-udbyder testes.",
+    "testSource": "Test før lagring",
+    "testSuccess": "HTTPS-test bestået. Udgående IP: {ip}; latenstid: {ms} ms."
   }
 }

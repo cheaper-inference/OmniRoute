@@ -45,7 +45,25 @@ Barcha sakkizta bir xil nazorat modeliga amal qiladi:
 - OmniRoute ularni `DATA_DIR/services/{name}/` ostida o'rnatadi ( OmniRoute o'z `package.json` dan ajratilgan)
 - OmniRoute ularni bola jarayonlari sifatida yaratadi va nazorat qiladi
 - OmniRoute vaqtinchalik API kalitini bolaning muhitiga kiritadi va uni uzilishlarsiz aylantiradi (agar mavjud bo'lsa)
-- Barcha boshqaruv yo'llari (`/api/services/*`) mavjud**LOCAL_ONLY** — faqat orqaga qaytish orqali kirish mumkin (qattiq qoida №17)
+- Barcha boshqaruv yo'llari (`/api/services/*`) mavjud**LOCAL_ONLY** — faqat orqaga qaytish orqali kirish mumkin (qattiq qoida #17)
+
+### Boshqariladigan proksi yadrolari
+
+Maxsus proksi xost maydoni V2Ray manba havolasini ham qabul qiladi. Tanlang** qo'shiq qutisi** yoki** Rentgen** aniq, keyin Saqlash tugmasini bosing. Yozish hech qachon yadroni yuklab olmaydi yoki ishga tushirmaydi. Saqlash rasmiy nashr arxivini tekshiradi, mahalliy konfiguratsiyani tasdiqlaydi, alohida localhost SOCKS tinglovchisini ishga tushiradi va shundan keyingina proksi-server registriga topshiriq yozadi. Muvaffaqiyatsiz faollashtirish oldingi boshqariladigan konfiguratsiya va jarayonni tiklaydi. `STORAGE_ENCRYPTION_KEY` talab qilinadi; manba havolalari shifrlangan.
+
+Boshqariladigan fayllar `DATA_DIR/services/managed-proxy/` ostida, TPROXY dan alohida yashaydi. Tanlangan yadro uchun bitta jarayon, 100 tagacha tinglovchi mavjud. Hech qanday avtomatik ishga tushirish yoki global marshrutlash standarti o'zgarmaydi. Muvaffaqiyatli saqlash faqat ushbu boshqariladigan yadro uchun faollashtirishni eslab qoladi; Ilovani ishga tushirish allaqachon tasdiqlangan ikkilik fayldan foydalangan holda yoqilgan saqlangan yadrolarni qayta tiklaydi, hech qachon yuklash vaqtida yuklanmaydi. Aniq to'xtash faollashtirish belgisini o'chiradi. Yo'qolgan yoki shikastlangan ikkilik manbani qayta saqlashni talab qiladi. Ro'yxatga olish kitobini o'chirish manba va tinglovchini mahalliy sifatida olib tashlaydi; oddiy so‘nggi nuqta tahrirlari boshqariladigan satrlar uchun rad etiladi, shuning uchun saqlangan manba o‘zining marshrutlangan tinglovchisidan jimgina chetga chiqa olmaydi.
+
+| Manba formati                         | qo'shiq qutisi                                                                              | Rentgen                                                                                     |
+| ------------------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| VLESS, VMess, troyan, Shadowsocks URI | Qo'llab-quvvatlanadigan konvertatsiya                                                       | Qo'llab-quvvatlanadigan konvertatsiya                                                       |
+| Hysteria2/hy2, TUIC, AnyTLS URI       | Qo'llab-quvvatlanadigan konvertatsiya                                                       | Rad etilgan; mos keladigan yadrodan foydalaning                                             |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade | VLESS/VMess/Trojan uchun qo'llab-quvvatlanadi                                               | VLESS/VMess/Trojan uchun qo'llab-quvvatlanadi                                               |
+| XHTTP URI transport                   | Rad etilgan                                                                                 | Qo'llab-quvvatlanadigan konvertatsiya                                                       |
+| Mahalliy chiquvchi JSON               | Tanlangan yadroning ruxsat etilgan proksi protocols/options, mahalliy sifatida tekshiriladi | Tanlangan yadroning ruxsat etilgan proksi protocols/options, mahalliy sifatida tekshiriladi |
+
+Noma'lum sim opsiyalari, xavfsiz bo'lmagan TLS bayroqlari, tashqi plaginlar, mahalliy fayl yo'li opsiyalari va qo'llab-quvvatlanmaydigan kombinatsiyalar jimgina o'chirish o'rniga rad etiladi. Native ob'ektlar butun yadro konfiguratsiyalari emas, balki chiquvchi ta'riflardir; control/direct/bypass chiqishlari qabul qilinmaydi. sing-box 1.14-dagi WireGuard oxirgi nuqtalardan foydalanadi, shuning uchun u mahalliy chiquvchi sifatida qabul qilinmaydi. Bu barcha formatli konvertor emas; SSR, eski whole-base64 Shadowsocks havolalari, ixtiyoriy Clash ob'ektlari va jadvalda mavjud bo'lmagan transport variantlari uchun alohida qo'llab-quvvatlanadigan manba formati kerak.
+
+`/api/services/managed-proxy` autentifikatsiya qilingan va faqat orqaga qaytish: GET tahrirlangan metamaʼlumotlarni roʻyxatlaydi, POST `{core,name,sourceLink,id?,assignment?}` saqlaydi, PATCH `{core,action:"start"|"stop"}` qabul qiladi. Uy egasining ishonchli peer-stamp quvur liniyasi mavjud bo'lishi kerak. Mahalliy diagnostika bostiriladi, chunki ular hisob ma'lumotlarini o'z ichiga olishi mumkin; hayot tsikli hodisalari manba havolalari yoki yuqori oqim yuklarisiz mavjud tuzilgan dastur fayllari jurnalidan foydalanadi. Qo'llab-quvvatlash uchun faqat tozalangan dastur jurnallarini biriktiring. Rasmiy versiyalar sing-box 1.14.3 va Xray 26.3.27-ga reliz-aktiv SHA-256 manifestlari bilan biriktirilgan; kelajakdagi yangilanishlar versiyani va barcha tasdiqlangan dayjestlarni birgalikda o'zgartirishni talab qiladi.
 
 ### Asosiy qarorlar (dizayn rejasidan)
 

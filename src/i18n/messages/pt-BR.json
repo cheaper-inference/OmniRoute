@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Experimental",
     "modalityBridgeVideoPromotionEligible": "Elegível",
-    "modalityBridgeVideoPromotionContextRequired": "A promoção exige duas execuções independentes qualificadas para a revisão exata do modelo, a política, o corpus e o build. Um contexto não verificado permanece HOLD; selecionar uma política experimental não é uma aprovação."
+    "modalityBridgeVideoPromotionContextRequired": "A promoção exige duas execuções independentes qualificadas para a revisão exata do modelo, a política, o corpus e o build. Um contexto não verificado permanece HOLD; selecionar uma política experimental não é uma aprovação.",
+    "proxyManagedCoresTab": "Núcleos gerenciados"
   },
   "contextRtk": {
     "title": "Motor RTK",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Visualização do cache"
   },
   "proxyConfigModal": {
+    "managedCore": "Núcleo do proxy",
+    "managedSelectCore": "Selecione um núcleo",
+    "managedSaveHint": "Ao salvar, o núcleo oficial é baixado e verificado, se necessário, a configuração é validada e o proxy é ativado. Digitar não instala nada.",
+    "errorSelectManagedCore": "Selecione sing-box ou Xray antes de salvar este túnel",
     "levelGlobal": "Globais",
     "levelProvider": "Provedor",
     "levelCombo": "Combinação",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Núcleos de proxy gerenciados",
+    "description": "Cole um link de túnel no campo de host do proxy personalizado para salvá-lo e atribuí-lo. Aqui você também pode salvar uma definição JSON nativa de saída sem alterar nenhuma atribuição.",
+    "saveHint": "Ao salvar, o núcleo oficial é verificado, se necessário, e a configuração nativa é validada antes da ativação. As fontes exigem criptografia. Não há instalação durante a prévia, inicialização automática nem alterações de proxy transparente.",
+    "saveActivate": "Salvar e ativar",
+    "core": "Núcleo",
+    "selectCore": "Selecione um núcleo",
+    "name": "Nome",
+    "source": "Link de origem ou JSON nativo de saída",
+    "start": "Iniciar",
+    "stop": "Parar",
+    "loadError": "Não foi possível carregar os núcleos gerenciados",
+    "operationError": "Falha na operação do núcleo gerenciado",
+    "state": "{state, select, not_installed {Não instalado} stopped {Parado} starting {Iniciando} running {Em execução} stopping {Parando} error {Erro} other {Desconhecido}}",
+    "binaryTitle": "Versão do núcleo e executável personalizado",
+    "binaryHint": "As alterações afetam todos os proxies salvos que usam este núcleo. Um núcleo em execução só reinicia após a validação. Os arquivos oficiais exigem um resumo SHA-256 publicado. Os binários personalizados usam separadamente o resumo que você fornecer.",
+    "distribution": "Distribuição do núcleo",
+    "checkUpdates": "Verificar versões disponíveis",
+    "noVerifiedReleases": "Não há versão estável com um arquivo verificado disponível para esta plataforma.",
+    "version": "Versão",
+    "installVersion": "Instalar e usar a versão selecionada",
+    "customPath": "Caminho absoluto do executável no servidor OmniRoute",
+    "customHash": "SHA-256 esperado do executável",
+    "customTrust": "Confio neste executável. Ele pode executar código com as permissões do OmniRoute; um hash correspondente verifica a integridade, não a segurança.",
+    "useCustom": "Importar e usar núcleo personalizado",
+    "subscriptionUrl": "URL HTTPS da assinatura",
+    "subscriptionHint": "Carregue ou atualize manualmente, selecione um nó compatível e depois teste ou salve. Isso não ativa a atualização automática da assinatura. Os nós não compatíveis são informados em vez de serem alterados silenciosamente.",
+    "loadSubscription": "Carregar ou atualizar assinatura",
+    "skippedNodes": "Nós não compatíveis ignorados: {count}",
+    "subscriptionNode": "Nó da assinatura",
+    "selectNode": "Selecionar um nó",
+    "fragmentEnable": "Ativar fragmentação de TLS ClientHello (Xray / Mahsa)",
+    "fragmentHint": "Somente para TLS ou REALITY sobre TCP ou WebSocket. O comprimento é de 1–4096 bytes; o intervalo é de 0–1000 milissegundos. Use um valor único ou um intervalo crescente. Isso não garante o acesso através de filtros.",
+    "fragmentLength": "Comprimento do fragmento (bytes)",
+    "fragmentInterval": "Intervalo de fragmentação (milissegundos)",
+    "testHint": "O teste pode preparar o núcleo selecionado e contata api.ipify.org por HTTPS através de um proxy temporário. Nada é salvo ou atribuído. Nenhum provedor de IA é testado.",
+    "testSource": "Testar antes de salvar",
+    "testSuccess": "Teste HTTPS aprovado. IP de saída: {ip}; latência: {ms} ms."
   }
 }

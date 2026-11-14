@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Eksperimentell",
     "modalityBridgeVideoPromotionEligible": "Kvalifisert",
-    "modalityBridgeVideoPromotionContextRequired": "Promotering krever to uavhengige kvalifiserende kjøringer for nøyaktig samme modellrevisjon, policy, korpus og bygg. En ubekreftet kontekst forblir HOLD. Valg av en eksperimentell policy innebærer ikke godkjenning."
+    "modalityBridgeVideoPromotionContextRequired": "Promotering krever to uavhengige kvalifiserende kjøringer for nøyaktig samme modellrevisjon, policy, korpus og bygg. En ubekreftet kontekst forblir HOLD. Valg av en eksperimentell policy innebærer ikke godkjenning.",
+    "proxyManagedCoresTab": "Administrerte kjerner"
   },
   "contextRtk": {
     "title": "RTK-motor",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Hurtigbuffervisning"
   },
   "proxyConfigModal": {
+    "managedCore": "Mellomtjenerkjerne",
+    "managedSelectCore": "Velg en kjerne",
+    "managedSaveHint": "Ved lagring lastes den offisielle kjernen ned og verifiseres ved behov, konfigurasjonen kontrolleres, og deretter aktiveres denne mellomtjeneren. Inntasting installerer ingenting.",
+    "errorSelectManagedCore": "Velg sing-box eller Xray før du lagrer denne tunnelen",
     "levelGlobal": "Globalt",
     "levelProvider": "Leverandør",
     "levelCombo": "Kombinasjon",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Administrerte mellomtjenerkjerner",
+    "description": "Lim inn en tunnellenke i vertsfeltet for den egendefinerte mellomtjeneren for å lagre og tilordne den. Her kan du også lagre en definisjon av en utgående tilkobling i kjernens eget JSON-format uten å endre noen tilordning.",
+    "saveHint": "Ved lagring verifiseres den offisielle kjernen ved behov, og konfigurasjonen i kjernens eget format kontrolleres før aktivering. Kilder krever kryptering. Ingen installasjon under forhåndsvisning, automatisk oppstart eller endringer av den transparente mellomtjeneren.",
+    "saveActivate": "Lagre og aktiver",
+    "core": "Kjerne",
+    "selectCore": "Velg en kjerne",
+    "name": "Navn",
+    "source": "Kildelenke eller utgående tilkobling i kjernens eget JSON-format",
+    "start": "Start",
+    "stop": "Stopp",
+    "loadError": "Kunne ikke laste inn administrerte kjerner",
+    "operationError": "Operasjonen på den administrerte kjernen mislyktes",
+    "state": "{state, select, not_installed {Ikke installert} stopped {Stoppet} starting {Starter} running {Kjører} stopping {Stopper} error {Feil} other {Ukjent}}",
+    "binaryTitle": "Kjerneversjon og egendefinert kjørbar fil",
+    "binaryHint": "Endringer påvirker alle lagrede proxyer som bruker denne kjernen. En kjørende kjerne starter på nytt først etter validering. Offisielle arkiver krever en publisert SHA-256-kontrollsum. Egendefinerte binærfiler bruker separat kontrollsummen du oppgir.",
+    "distribution": "Kjernedistribusjon",
+    "checkUpdates": "Sjekk tilgjengelige versjoner",
+    "noVerifiedReleases": "Ingen stabil utgivelse med en verifisert fil er tilgjengelig for denne plattformen.",
+    "version": "Versjon",
+    "installVersion": "Installer og bruk valgt versjon",
+    "customPath": "Absolutt bane til den kjørbare filen på OmniRoute-serveren",
+    "customHash": "Forventet SHA-256 for den kjørbare filen",
+    "customTrust": "Jeg stoler på denne kjørbare filen. Den kan kjøre kode med OmniRoutes tillatelser; en samsvarende hash bekrefter integritet, ikke sikkerhet.",
+    "useCustom": "Importer og bruk egendefinert kjerne",
+    "subscriptionUrl": "HTTPS-URL for abonnement",
+    "subscriptionHint": "Last inn eller oppdater manuelt, velg en kompatibel node, og test eller lagre den deretter. Dette aktiverer ikke automatisk oppdatering av abonnementet. Noder som ikke støttes, rapporteres i stedet for å endres uten varsel.",
+    "loadSubscription": "Last inn eller oppdater abonnement",
+    "skippedNodes": "Hoppet over noder som ikke støttes: {count}",
+    "subscriptionNode": "Abonnementsnode",
+    "selectNode": "Velg en node",
+    "fragmentEnable": "Aktiver TLS ClientHello-fragmentering (Xray / Mahsa)",
+    "fragmentHint": "Kun for TLS eller REALITY over TCP eller WebSocket. Lengden er 1–4096 byte; intervallet er 0–1000 millisekunder. Bruk én verdi eller et stigende intervall. Dette garanterer ikke tilgang gjennom filtrering.",
+    "fragmentLength": "Fragmentlengde (byte)",
+    "fragmentInterval": "Fragmentintervall (millisekunder)",
+    "testHint": "Testen kan klargjøre den valgte kjernen og kontakter api.ipify.org via HTTPS gjennom en midlertidig proxy. Ingenting lagres eller tilordnes. Ingen KI-leverandør testes.",
+    "testSource": "Test før lagring",
+    "testSuccess": "HTTPS-test bestått. Utgående IP: {ip}; forsinkelse: {ms} ms."
   }
 }

@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Eksperimental",
     "modalityBridgeVideoPromotionEligible": "Uyğundur",
-    "modalityBridgeVideoPromotionContextRequired": "İrəli çəkilmə üçün dəqiq model reviziyası, siyasət, korpus və yığım üzrə tələblərə cavab verən iki müstəqil icra tələb olunur. Yoxlanılmamış kontekst HOLD statusunda qalır; eksperimental siyasətin seçilməsi təsdiq demək deyil."
+    "modalityBridgeVideoPromotionContextRequired": "İrəli çəkilmə üçün dəqiq model reviziyası, siyasət, korpus və yığım üzrə tələblərə cavab verən iki müstəqil icra tələb olunur. Yoxlanılmamış kontekst HOLD statusunda qalır; eksperimental siyasətin seçilməsi təsdiq demək deyil.",
+    "proxyManagedCoresTab": "İdarə olunan nüvələr"
   },
   "contextRtk": {
     "title": "RTK Mühərriki",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Keş görünüşü"
   },
   "proxyConfigModal": {
+    "managedCore": "Proksi nüvəsi",
+    "managedSelectCore": "Nüvə seçin",
+    "managedSaveHint": "Saxlama zamanı lazım gələrsə rəsmi nüvə endirilir və doğrulanır, konfiqurasiya yoxlanılır, sonra bu proksi aktivləşdirilir. Mətn daxil etmək heç nə quraşdırmır.",
+    "errorSelectManagedCore": "Bu tuneli saxlamazdan əvvəl sing-box və ya Xray seçin",
     "levelGlobal": "Qlobal",
     "levelProvider": "Provayder",
     "levelCombo": "Kombinasiya",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "İdarə olunan proksi nüvələri",
+    "description": "Saxlamaq və təyin etmək üçün tunel keçidini fərdi proksinin host sahəsinə yapışdırın. Burada heç bir təyinatı dəyişmədən yerli çıxış JSON tərifini də saxlaya bilərsiniz.",
+    "saveHint": "Saxlama zamanı lazım gələrsə rəsmi nüvə doğrulanır və aktivləşdirmədən əvvəl yerli konfiqurasiya yoxlanılır. Mənbələr şifrələmə tələb edir. Önizləmə zamanı quraşdırma, avtomatik başlatma və ya şəffaf proksi dəyişiklikləri edilmir.",
+    "saveActivate": "Saxla və aktivləşdir",
+    "core": "Nüvə",
+    "selectCore": "Nüvə seçin",
+    "name": "Ad",
+    "source": "Mənbə keçidi və ya yerli çıxış JSON-u",
+    "start": "Başlat",
+    "stop": "Dayandır",
+    "loadError": "İdarə olunan nüvələri yükləmək mümkün olmadı",
+    "operationError": "İdarə olunan nüvə əməliyyatı uğursuz oldu",
+    "state": "{state, select, not_installed {Quraşdırılmayıb} stopped {Dayandırılıb} starting {Başladılır} running {İşləyir} stopping {Dayandırılır} error {Xəta} other {Naməlum}}",
+    "binaryTitle": "Nüvə versiyası və xüsusi icra faylı",
+    "binaryHint": "Dəyişikliklər bu nüvədən istifadə edən bütün saxlanmış proksilərə təsir edir. İşləyən nüvə yalnız yoxlamadan sonra yenidən başladılır. Rəsmi arxivlər üçün dərc edilmiş SHA-256 xülasəsi tələb olunur. Xüsusi binar fayllar təqdim etdiyiniz xülasədən ayrıca istifadə edir.",
+    "distribution": "Nüvə distributivi",
+    "checkUpdates": "Mövcud versiyaları yoxla",
+    "noVerifiedReleases": "Bu platforma üçün təsdiqlənmiş faylı olan sabit buraxılış mövcud deyil.",
+    "version": "Versiya",
+    "installVersion": "Seçilmiş versiyanı quraşdır və istifadə et",
+    "customPath": "OmniRoute serverində icra faylının mütləq yolu",
+    "customHash": "İcra faylının gözlənilən SHA-256 dəyəri",
+    "customTrust": "Bu icra faylına etibar edirəm. O, OmniRoute icazələri ilə kod işlədə bilər; heşin uyğun gəlməsi təhlükəsizliyi deyil, bütövlüyü təsdiqləyir.",
+    "useCustom": "Xüsusi nüvəni idxal et və istifadə et",
+    "subscriptionUrl": "HTTPS abunə URL-i",
+    "subscriptionHint": "Əl ilə yükləyin və ya yeniləyin, uyğun qovşaq seçin, sonra sınaqdan keçirin və ya saxlayın. Bu, abunənin avtomatik yenilənməsini aktivləşdirmir. Dəstəklənməyən qovşaqlar səssizcə dəyişdirilmək əvəzinə bildirilir.",
+    "loadSubscription": "Abunəni yüklə və ya yenilə",
+    "skippedNodes": "Ötürülmüş dəstəklənməyən qovşaqlar: {count}",
+    "subscriptionNode": "Abunə qovşağı",
+    "selectNode": "Qovşaq seçin",
+    "fragmentEnable": "TLS ClientHello fraqmentləşdirilməsini aktivləşdir (Xray / Mahsa)",
+    "fragmentHint": "Yalnız TCP və ya WebSocket üzərindən TLS və ya REALITY üçün. Uzunluq 1–4096 bayt, interval 0–1000 millisaniyədir. Tək dəyər və ya artan diapazon istifadə edin. Bu, filtrləmədən keçərək girişə zəmanət vermir.",
+    "fragmentLength": "Fraqment uzunluğu (bayt)",
+    "fragmentInterval": "Fraqment intervalı (millisaniyə)",
+    "testHint": "Sınaq seçilmiş nüvəni hazırlaya bilər və müvəqqəti proksi vasitəsilə HTTPS üzərindən api.ipify.org ilə əlaqə yaradır. Heç nə saxlanmır və ya təyin edilmir. Heç bir AI provayderi yoxlanılmır.",
+    "testSource": "Saxlamadan əvvəl sınaqdan keçir",
+    "testSuccess": "HTTPS sınağı uğurludur. Çıxış IP-si: {ip}; gecikmə: {ms} ms."
   }
 }

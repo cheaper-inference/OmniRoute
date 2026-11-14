@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "실험적",
     "modalityBridgeVideoPromotionEligible": "적격",
-    "modalityBridgeVideoPromotionContextRequired": "승격하려면 정확히 동일한 모델 리비전, 정책, 코퍼스 및 빌드에 대해 서로 독립적인 적격 실행이 두 번 필요합니다. 검증되지 않은 컨텍스트는 HOLD 상태로 유지되며, 실험적 정책을 선택하는 것은 승인을 의미하지 않습니다."
+    "modalityBridgeVideoPromotionContextRequired": "승격하려면 정확히 동일한 모델 리비전, 정책, 코퍼스 및 빌드에 대해 서로 독립적인 적격 실행이 두 번 필요합니다. 검증되지 않은 컨텍스트는 HOLD 상태로 유지되며, 실험적 정책을 선택하는 것은 승인을 의미하지 않습니다.",
+    "proxyManagedCoresTab": "관리형 코어"
   },
   "contextRtk": {
     "title": "RTK 엔진",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "캐시 보기"
   },
   "proxyConfigModal": {
+    "managedCore": "프록시 코어",
+    "managedSelectCore": "코어 선택",
+    "managedSaveHint": "저장 시 필요한 경우 공식 코어를 다운로드하고 검증한 다음, 설정을 확인하고 이 프록시를 활성화합니다. 입력만으로는 아무것도 설치되지 않습니다.",
+    "errorSelectManagedCore": "이 터널을 저장하기 전에 sing-box 또는 Xray를 선택하세요",
     "levelGlobal": "글로벌",
     "levelProvider": "공급자",
     "levelCombo": "콤보",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "관리형 프록시 코어",
+    "description": "터널 링크를 저장하고 할당하려면 사용자 지정 프록시의 호스트 필드에 붙여넣으세요. 여기에서는 할당을 변경하지 않고 네이티브 형식의 아웃바운드 JSON 정의를 저장할 수도 있습니다.",
+    "saveHint": "저장 시 필요한 경우 공식 코어를 검증하고 활성화 전에 네이티브 설정을 확인합니다. 소스에는 암호화가 필요합니다. 미리 보기 중 설치, 자동 시작 또는 투명 프록시 변경은 수행하지 않습니다.",
+    "saveActivate": "저장 및 활성화",
+    "core": "코어",
+    "selectCore": "코어 선택",
+    "name": "이름",
+    "source": "소스 링크 또는 네이티브 형식의 아웃바운드 JSON",
+    "start": "시작",
+    "stop": "중지",
+    "loadError": "관리형 코어를 불러올 수 없습니다",
+    "operationError": "관리형 코어 작업에 실패했습니다",
+    "state": "{state, select, not_installed {설치되지 않음} stopped {중지됨} starting {시작 중} running {실행 중} stopping {중지 중} error {오류} other {알 수 없음}}",
+    "binaryTitle": "코어 버전 및 사용자 지정 실행 파일",
+    "binaryHint": "변경 사항은 이 코어를 사용하는 저장된 모든 프록시에 영향을 줍니다. 실행 중인 코어는 검증 후에만 다시 시작됩니다. 공식 압축 파일에는 게시된 SHA-256 다이제스트가 필요합니다. 사용자 지정 바이너리에는 사용자가 제공한 다이제스트가 별도로 사용됩니다.",
+    "distribution": "코어 배포판",
+    "checkUpdates": "사용 가능한 버전 확인",
+    "noVerifiedReleases": "이 플랫폼에는 검증된 자산을 포함하는 안정 릴리스가 없습니다.",
+    "version": "버전",
+    "installVersion": "선택한 버전 설치 및 사용",
+    "customPath": "OmniRoute 서버의 실행 파일 절대 경로",
+    "customHash": "예상 실행 파일 SHA-256",
+    "customTrust": "이 실행 파일을 신뢰합니다. OmniRoute의 권한으로 코드를 실행할 수 있습니다. 해시 일치는 무결성을 검증할 뿐 안전성을 보장하지 않습니다.",
+    "useCustom": "사용자 지정 코어 가져오기 및 사용",
+    "subscriptionUrl": "HTTPS 구독 URL",
+    "subscriptionHint": "수동으로 불러오거나 새로 고친 후 호환되는 노드를 선택하고 테스트하거나 저장하세요. 구독 자동 새로 고침은 활성화되지 않습니다. 지원되지 않는 노드는 조용히 변경되는 대신 보고됩니다.",
+    "loadSubscription": "구독 불러오기 또는 새로 고침",
+    "skippedNodes": "건너뛴 미지원 노드: {count}",
+    "subscriptionNode": "구독 노드",
+    "selectNode": "노드 선택",
+    "fragmentEnable": "TLS ClientHello 분할 활성화 (Xray / Mahsa)",
+    "fragmentHint": "TCP 또는 WebSocket을 통한 TLS 또는 REALITY에만 적용됩니다. 길이는 1–4096바이트, 간격은 0–1000밀리초입니다. 단일 값 또는 오름차순 범위를 사용하세요. 필터링을 통과하는 접속을 보장하지 않습니다.",
+    "fragmentLength": "조각 길이(바이트)",
+    "fragmentInterval": "조각 간격(밀리초)",
+    "testHint": "테스트 시 선택한 코어를 준비할 수 있으며 임시 프록시를 통해 HTTPS로 api.ipify.org에 접속합니다. 아무것도 저장하거나 할당하지 않습니다. AI 제공업체를 테스트하지 않습니다.",
+    "testSource": "저장 전 테스트",
+    "testSuccess": "HTTPS 테스트 성공. 출구 IP: {ip}, 지연 시간: {ms} ms."
   }
 }

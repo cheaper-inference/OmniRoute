@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Experimentell",
     "modalityBridgeVideoPromotionEligible": "Berechtigt",
-    "modalityBridgeVideoPromotionContextRequired": "Die Hochstufung erfordert zwei unabhängige qualifizierende Durchläufe für exakt dieselbe Modellrevision, Richtlinie, denselben Korpus und Build. Ein nicht verifizierter Kontext verbleibt im Status HOLD; die Auswahl einer experimentellen Richtlinie stellt keine Genehmigung dar."
+    "modalityBridgeVideoPromotionContextRequired": "Die Hochstufung erfordert zwei unabhängige qualifizierende Durchläufe für exakt dieselbe Modellrevision, Richtlinie, denselben Korpus und Build. Ein nicht verifizierter Kontext verbleibt im Status HOLD; die Auswahl einer experimentellen Richtlinie stellt keine Genehmigung dar.",
+    "proxyManagedCoresTab": "Verwaltete Kerne"
   },
   "contextRtk": {
     "title": "RTK-Engine",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Cache-Ansicht"
   },
   "proxyConfigModal": {
+    "managedCore": "Proxy-Kern",
+    "managedSelectCore": "Kern auswählen",
+    "managedSaveHint": "Beim Speichern wird bei Bedarf der offizielle Kern heruntergeladen und verifiziert, die Konfiguration geprüft und anschließend dieser Proxy aktiviert. Die Texteingabe installiert nichts.",
+    "errorSelectManagedCore": "Wählen Sie sing-box oder Xray aus, bevor Sie diesen Tunnel speichern",
     "levelGlobal": "Global",
     "levelProvider": "Anbieter",
     "levelCombo": "Kombi",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Verwaltete Proxy-Kerne",
+    "description": "Fügen Sie einen Tunnel-Link in das Host-Feld des benutzerdefinierten Proxys ein, um ihn zu speichern und zuzuweisen. Hier können Sie auch eine ausgehende Verbindung im nativen JSON-Format definieren und speichern, ohne eine Zuweisung zu ändern.",
+    "saveHint": "Beim Speichern wird bei Bedarf der offizielle Kern verifiziert und die native Konfiguration vor der Aktivierung geprüft. Quellen müssen verschlüsselt sein. Keine Installation während der Vorschau, kein Autostart und keine Änderungen am transparenten Proxy.",
+    "saveActivate": "Speichern und aktivieren",
+    "core": "Kern",
+    "selectCore": "Kern auswählen",
+    "name": "Name",
+    "source": "Quell-Link oder ausgehende Verbindung im nativen JSON-Format",
+    "start": "Starten",
+    "stop": "Stoppen",
+    "loadError": "Verwaltete Kerne konnten nicht geladen werden",
+    "operationError": "Aktion für den verwalteten Kern fehlgeschlagen",
+    "state": "{state, select, not_installed {Nicht installiert} stopped {Gestoppt} starting {Wird gestartet} running {Läuft} stopping {Wird gestoppt} error {Fehler} other {Unbekannt}}",
+    "binaryTitle": "Core-Version und benutzerdefinierte ausführbare Datei",
+    "binaryHint": "Änderungen betreffen alle gespeicherten Proxys, die diesen Core verwenden. Ein laufender Core startet erst nach der Validierung neu. Offizielle Archive erfordern einen veröffentlichten SHA-256-Prüfwert. Benutzerdefinierte Binärdateien verwenden separat den von Ihnen angegebenen Prüfwert.",
+    "distribution": "Core-Distribution",
+    "checkUpdates": "Verfügbare Versionen prüfen",
+    "noVerifiedReleases": "Für diese Plattform ist keine stabile Version mit einer verifizierten Datei verfügbar.",
+    "version": "Version",
+    "installVersion": "Ausgewählte Version installieren und verwenden",
+    "customPath": "Absoluter Pfad der ausführbaren Datei auf dem OmniRoute-Server",
+    "customHash": "Erwarteter SHA-256-Prüfwert der ausführbaren Datei",
+    "customTrust": "Ich vertraue dieser ausführbaren Datei. Sie kann Code mit den Berechtigungen von OmniRoute ausführen; ein übereinstimmender Hash bestätigt die Integrität, nicht die Sicherheit.",
+    "useCustom": "Benutzerdefinierten Core importieren und verwenden",
+    "subscriptionUrl": "HTTPS-Abonnement-URL",
+    "subscriptionHint": "Manuell laden oder aktualisieren, einen kompatiblen Knoten auswählen und anschließend testen oder speichern. Dies aktiviert keine automatische Abonnementaktualisierung. Nicht unterstützte Knoten werden gemeldet, statt stillschweigend geändert zu werden.",
+    "loadSubscription": "Abonnement laden oder aktualisieren",
+    "skippedNodes": "Übersprungene nicht unterstützte Knoten: {count}",
+    "subscriptionNode": "Abonnementknoten",
+    "selectNode": "Knoten auswählen",
+    "fragmentEnable": "TLS-ClientHello-Fragmentierung aktivieren (Xray / Mahsa)",
+    "fragmentHint": "Nur für TLS oder REALITY über TCP oder WebSocket. Länge: 1–4096 Bytes; Intervall: 0–1000 Millisekunden. Verwenden Sie einen einzelnen Wert oder einen aufsteigenden Bereich. Dies garantiert keinen Zugang durch Filter hindurch.",
+    "fragmentLength": "Fragmentlänge (Bytes)",
+    "fragmentInterval": "Fragmentintervall (Millisekunden)",
+    "testHint": "Der Test kann den ausgewählten Core vorbereiten und kontaktiert api.ipify.org über HTTPS durch einen temporären Proxy. Es wird nichts gespeichert oder zugewiesen. Es wird kein KI-Anbieter getestet.",
+    "testSource": "Vor dem Speichern testen",
+    "testSuccess": "HTTPS-Test bestanden. Ausgangs-IP: {ip}; Latenz: {ms} ms."
   }
 }

@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Experimentală",
     "modalityBridgeVideoPromotionEligible": "Eligibilă",
-    "modalityBridgeVideoPromotionContextRequired": "Promovarea necesită două rulări independente eligibile pentru exact aceeași revizie a modelului, politică, corpus și versiune. Un context neverificat rămâne în starea HOLD; selectarea unei politici experimentale nu reprezintă o aprobare."
+    "modalityBridgeVideoPromotionContextRequired": "Promovarea necesită două rulări independente eligibile pentru exact aceeași revizie a modelului, politică, corpus și versiune. Un context neverificat rămâne în starea HOLD; selectarea unei politici experimentale nu reprezintă o aprobare.",
+    "proxyManagedCoresTab": "Nuclee gestionate"
   },
   "contextRtk": {
     "title": "Motor RTK",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Vizualizare cache"
   },
   "proxyConfigModal": {
+    "managedCore": "Nucleu proxy",
+    "managedSelectCore": "Selectați un nucleu",
+    "managedSaveHint": "La salvare se descarcă și se verifică nucleul oficial, dacă este necesar, se controlează configurația, apoi se activează acest proxy. Tastarea nu instalează nimic.",
+    "errorSelectManagedCore": "Selectați sing-box sau Xray înainte de a salva acest tunel",
     "levelGlobal": "Global",
     "levelProvider": "Furnizor",
     "levelCombo": "Combinație",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Nuclee proxy gestionate",
+    "description": "Lipiți un link de tunel în câmpul gazdei pentru proxy-ul personalizat pentru a-l salva și atribui. Aici puteți salva și o definiție a conexiunii de ieșire în format JSON nativ fără a modifica nicio atribuire.",
+    "saveHint": "La salvare se verifică nucleul oficial, dacă este necesar, și se controlează configurația nativă înainte de activare. Sursele necesită criptare. Nu se efectuează instalări în timpul previzualizării, porniri automate sau modificări ale proxy-ului transparent.",
+    "saveActivate": "Salvați și activați",
+    "core": "Nucleu",
+    "selectCore": "Selectați un nucleu",
+    "name": "Nume",
+    "source": "Link sursă sau conexiune de ieșire în format JSON nativ",
+    "start": "Porniți",
+    "stop": "Opriți",
+    "loadError": "Nu s-au putut încărca nucleele gestionate",
+    "operationError": "Operația asupra nucleului gestionat a eșuat",
+    "state": "{state, select, not_installed {Neinstalat} stopped {Oprit} starting {În curs de pornire} running {În execuție} stopping {În curs de oprire} error {Eroare} other {Necunoscut}}",
+    "binaryTitle": "Versiunea nucleului și executabil personalizat",
+    "binaryHint": "Modificările afectează toate proxy-urile salvate care folosesc acest nucleu. Un nucleu în execuție repornește numai după validare. Arhivele oficiale necesită un hash SHA-256 publicat. Fișierele binare personalizate folosesc separat hash-ul furnizat de tine.",
+    "distribution": "Distribuția nucleului",
+    "checkUpdates": "Verifică versiunile disponibile",
+    "noVerifiedReleases": "Nu există o versiune stabilă cu un fișier verificat pentru această platformă.",
+    "version": "Versiune",
+    "installVersion": "Instalează și folosește versiunea selectată",
+    "customPath": "Calea absolută a executabilului pe serverul OmniRoute",
+    "customHash": "SHA-256 așteptat al executabilului",
+    "customTrust": "Am încredere în acest executabil. Poate executa cod cu permisiunile OmniRoute; un hash identic verifică integritatea, nu siguranța.",
+    "useCustom": "Importă și folosește un nucleu personalizat",
+    "subscriptionUrl": "URL HTTPS al abonamentului",
+    "subscriptionHint": "Încarcă sau actualizează manual, selectează un nod compatibil, apoi testează-l sau salvează-l. Aceasta nu activează actualizarea automată a abonamentului. Nodurile neacceptate sunt raportate în loc să fie modificate fără notificare.",
+    "loadSubscription": "Încarcă sau actualizează abonamentul",
+    "skippedNodes": "Noduri neacceptate omise: {count}",
+    "subscriptionNode": "Nod din abonament",
+    "selectNode": "Selectează un nod",
+    "fragmentEnable": "Activează fragmentarea TLS ClientHello (Xray / Mahsa)",
+    "fragmentHint": "Numai pentru TLS sau REALITY prin TCP sau WebSocket. Lungimea este de 1–4096 octeți; intervalul este de 0–1000 milisecunde. Folosește o singură valoare sau un interval crescător. Aceasta nu garantează accesul prin filtre.",
+    "fragmentLength": "Lungimea fragmentului (octeți)",
+    "fragmentInterval": "Intervalul fragmentelor (milisecunde)",
+    "testHint": "Testul poate pregăti nucleul selectat și contactează api.ipify.org prin HTTPS folosind un proxy temporar. Nimic nu este salvat sau atribuit. Nu este testat niciun furnizor de AI.",
+    "testSource": "Testează înainte de salvare",
+    "testSuccess": "Test HTTPS reușit. IP de ieșire: {ip}; latență: {ms} ms."
   }
 }

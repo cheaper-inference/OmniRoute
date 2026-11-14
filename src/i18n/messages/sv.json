@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Experimentell",
     "modalityBridgeVideoPromotionEligible": "Kvalificerad",
-    "modalityBridgeVideoPromotionContextRequired": "Uppflyttning kräver två oberoende kvalificerande körningar för exakt samma modellrevision, policy, korpus och bygge. En overifierad kontext förblir HOLD; att välja en experimentell policy innebär inte ett godkännande."
+    "modalityBridgeVideoPromotionContextRequired": "Uppflyttning kräver två oberoende kvalificerande körningar för exakt samma modellrevision, policy, korpus och bygge. En overifierad kontext förblir HOLD; att välja en experimentell policy innebär inte ett godkännande.",
+    "proxyManagedCoresTab": "Hanterade kärnor"
   },
   "contextRtk": {
     "title": "RTK-motor",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Cachevy"
   },
   "proxyConfigModal": {
+    "managedCore": "Proxykärna",
+    "managedSelectCore": "Välj en kärna",
+    "managedSaveHint": "När du sparar laddas den officiella kärnan ned och verifieras vid behov, konfigurationen kontrolleras och sedan aktiveras denna proxy. Att skriva installerar ingenting.",
+    "errorSelectManagedCore": "Välj sing-box eller Xray innan du sparar denna tunnel",
     "levelGlobal": "Global",
     "levelProvider": "Leverantör",
     "levelCombo": "Kombination",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Hanterade proxykärnor",
+    "description": "Klistra in en tunnellänk i värdfältet för anpassad proxy för att spara och tilldela den. Här kan du också spara en inbyggd JSON-definition för utgående anslutning utan att ändra några tilldelningar.",
+    "saveHint": "När du sparar verifieras den officiella kärnan vid behov och den inbyggda konfigurationen kontrolleras före aktivering. Källor kräver kryptering. Ingen installation vid förhandsgranskning, autostart eller ändring av transparent proxy sker.",
+    "saveActivate": "Spara och aktivera",
+    "core": "Kärna",
+    "selectCore": "Välj en kärna",
+    "name": "Namn",
+    "source": "Källänk eller inbyggd JSON för utgående anslutning",
+    "start": "Starta",
+    "stop": "Stoppa",
+    "loadError": "Kunde inte läsa in hanterade kärnor",
+    "operationError": "Åtgärden för den hanterade kärnan misslyckades",
+    "state": "{state, select, not_installed {Inte installerad} stopped {Stoppad} starting {Startar} running {Körs} stopping {Stoppar} error {Fel} other {Okänd}}",
+    "binaryTitle": "Kärnversion och egen körbar fil",
+    "binaryHint": "Ändringar påverkar alla sparade proxyservrar som använder denna kärna. En körande kärna startas om först efter validering. Officiella arkiv kräver en publicerad SHA-256-kontrollsumma. Egna binärfiler använder separat den kontrollsumma du anger.",
+    "distribution": "Kärndistribution",
+    "checkUpdates": "Kontrollera tillgängliga versioner",
+    "noVerifiedReleases": "Ingen stabil version med en verifierad fil finns tillgänglig för denna plattform.",
+    "version": "Version",
+    "installVersion": "Installera och använd vald version",
+    "customPath": "Absolut sökväg till den körbara filen på OmniRoute-servern",
+    "customHash": "Förväntad SHA-256 för den körbara filen",
+    "customTrust": "Jag litar på denna körbara fil. Den kan köra kod med OmniRoutes behörigheter; en matchande hash verifierar integriteten, inte säkerheten.",
+    "useCustom": "Importera och använd egen kärna",
+    "subscriptionUrl": "HTTPS-URL för prenumerationen",
+    "subscriptionHint": "Läs in eller uppdatera manuellt, välj en kompatibel nod och testa eller spara den sedan. Detta aktiverar inte automatisk uppdatering av prenumerationen. Noder som inte stöds rapporteras i stället för att ändras utan meddelande.",
+    "loadSubscription": "Läs in eller uppdatera prenumeration",
+    "skippedNodes": "Överhoppade noder som inte stöds: {count}",
+    "subscriptionNode": "Prenumerationsnod",
+    "selectNode": "Välj en nod",
+    "fragmentEnable": "Aktivera fragmentering av TLS ClientHello (Xray / Mahsa)",
+    "fragmentHint": "Endast för TLS eller REALITY över TCP eller WebSocket. Längden är 1–4096 byte; intervallet är 0–1000 millisekunder. Använd ett värde eller ett stigande intervall. Detta garanterar inte åtkomst genom filtrering.",
+    "fragmentLength": "Fragmentlängd (byte)",
+    "fragmentInterval": "Fragmentintervall (millisekunder)",
+    "testHint": "Testet kan förbereda den valda kärnan och kontaktar api.ipify.org via HTTPS genom en tillfällig proxy. Inget sparas eller tilldelas. Ingen AI-leverantör testas.",
+    "testSource": "Testa före sparande",
+    "testSuccess": "HTTPS-testet lyckades. Utgående IP: {ip}; latens: {ms} ms."
   }
 }

@@ -47,16 +47,34 @@ It-tmienja kollha jsegwu l-istess mudell superviżorju:
 - OmniRoute jinjetta ċavetta API effimera fl-ambjent tat-tifel u dawwarha mingħajr ħin ta’ waqfien (fejn applikabbli)
 - Ir-rotot kollha ta’ ġestjoni (`/api/services/*`) huma**LOCAL_ONLY** — aċċessibbli biss minn loopback (regola iebsa #17)
 
+### Proxy cores ġestiti
+
+Il-qasam Custom proxy host jaċċetta wkoll link tas-sors V2Ray. Agħżel** sing-box** jew** Xray** espliċitament, imbagħad ikklikkja Save. It-tajpjar qatt ma jniżżel jew jibda qalba. Save jivverifika l-arkivju tar-rilaxx uffiċjali, jivvalida konfigurazzjoni nattiva, jibda semmiegħ SOCKS localhost distint, u mbagħad biss jikteb l-assenjazzjoni tar-reġistru tal-prokura. L-attivazzjoni falluta tirrestawra l-konfigurazzjoni u l-proċess ġestiti preċedenti. `STORAGE_ENCRYPTION_KEY` huwa meħtieġ; links tas-sors huma encrypted.
+
+Fajls immaniġġjati jgħixu taħt `DATA_DIR/services/managed-proxy/`, separati minn TPROXY. Hemm proċess wieħed proprjetà għal kull qalba magħżula, sa 100 semmiegħa. L-ebda awtostart jew default tar-routing globali ma jinbidel. Successful Save jiftakar l-attivazzjoni għal din il-qalba ġestita biss; l-istartjar tal-applikazzjoni jirrestawra l-qlub salvati attivati bl-użu tal-binarju diġà vverifikat, qatt download tal-boot-time. Waqfien espliċitu jneħħi dik il-bandiera ta' attivazzjoni. Binarju nieqes jew bil-ħsara jeħtieġ li s-sors jerġa' jiġi salvat. It-tħassir tar-reġistru jneħħi s-sors u s-semmiegħ lokalment; edits ta' endpoint ordinarji huma miċħuda għal ringieli ġestiti sabiex is-sors issejvjat ma jkunx jista' jiċċaqlaq siekta mis-semmiegħ irrotta tiegħu.
+
+| Format tas-sors                       | sing-box                                                                   | Xray                                                                       |
+| ------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| VLESS, VMess, Trojan, Shadowsocks URI | Konverżjoni appoġġjata                                                     | Konverżjoni appoġġjata                                                     |
+| Hysteria2/hy2, TUIC, AnyTLS URI       | Konverżjoni appoġġjata                                                     | Miċħuda; uża qalba kompatibbli                                             |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade | Appoġġjat għal VLESS/VMess/Trojan                                          | Appoġġjat għal VLESS/VMess/Trojan                                          |
+| XHTTP URI trasport                    | Miċħuda                                                                    | Konverżjoni appoġġjata                                                     |
+| Native outbound JSON                  | Proxy permess tal-qalba magħżula protocols/options, iċċekkjat b'mod nattiv | Proxy permess tal-qalba magħżula protocols/options, iċċekkjat b'mod nattiv |
+
+Għażliet tal-wajer mhux magħrufa, bnadar TLS mhux sikuri, plugins esterni, għażliet lokali tal-passaġġ tal-fajls u kombinazzjonijiet mhux appoġġjati huma miċħuda aktar milli mormija fis-skiet. Oġġetti indiġeni huma definizzjonijiet barra, mhux konfigurazzjonijiet tal-qalba kollha; control/direct/bypass outbounds mhumiex aċċettati. WireGuard fuq sing-box 1.14 juża endpoints, għalhekk mhuwiex aċċettat bħala barra nattiva. Dan mhuwiex konvertitur tal-format kollu; SSR, whole-base64 legacy Shadowsocks links, oġġetti Clash arbitrarji u varjanti tat-trasport assenti mit-tabella jeħtieġu format sors appoġġjat separatament.
+
+`/api/services/managed-proxy` hija awtentikata u loopback biss: GET telenka metadata rediġjata, POST jiffranka `{core,name,sourceLink,id?,assignment?}`, PATCH jaċċetta `{core,action:"start"|"stop"}`. Il-pipeline ta' timbru tal-pari fdati tal-ospitant irid ikun preżenti. Id-dijanjostiċi tal-qalba indiġeni huma mrażżna minħabba li jista 'jkun fihom kredenzjali; avvenimenti taċ-ċiklu tal-ħajja jużaw il-logger tal-fajl tal-applikazzjoni strutturat eżistenti mingħajr links tas-sors jew payloads upstream. Ehmeż zkuk tal-applikazzjoni sanitizzati biss għall-appoġġ. Verżjonijiet uffiċjali huma pinnjati għal sing-box 1.14.3 u Xray 26.3.27 b'manifesti SHA-256 release-asset; aġġornamenti futuri jeħtieġu li tinbidel il-verżjoni u d-diġesti kollha verifikati flimkien.
+
 ### Deċiżjonijiet ewlenin (mill-pjan tad-disinn)
 
-| Deċiżjoni                                    | Valur                                                                                       |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| Aċċess għad-dashboard għal 9Router native UI | Reverse proxy fi `/dashboard/providers/services/9router/embed/*`                            |
-| Mekkaniżmu ta 'installazzjoni                | `npm install {package}` permezz ta' `execFile` (l-ebda interpolazzjoni tal-qoxra)           |
-| Mod ta 'konsum                               | Fornitur irreġistrat bħala `9router/{sub}/{model}` fir-routing engine                       |
-| API key management                           | OmniRoute tiġġenera, tikkodifika waqt il-mistrieħ (AES-256-GCM), u tinjetta permezz ta' env |
-| Post tad-daxxbord                            | `/dashboard/providers/services` (tliet tabs)                                                |
-| Auto-start                                   | Toggle kull servizz, default OFF                                                            |
+| Deċiżjoni                               | Valur                                                                                       |
+| --------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Aċċess dashboard għal 9Router native UI | Reverse proxy fi `/dashboard/providers/services/9router/embed/*`                            |
+| Mekkaniżmu ta 'installazzjoni           | `npm install {package}` permezz ta' `execFile` (l-ebda interpolazzjoni tal-qoxra)           |
+| Mod ta 'konsum                          | Fornitur irreġistrat bħala `9router/{sub}/{model}` fir-routing engine                       |
+| API key management                      | OmniRoute tiġġenera, tikkodifika waqt il-mistrieħ (AES-256-GCM), u tinjetta permezz ta' env |
+| Post tad-daxxbord                       | `/dashboard/providers/services` (tliet tabs)                                                |
+| Auto-start                              | Toggle kull servizz, default OFF                                                            |
 
 ---
 

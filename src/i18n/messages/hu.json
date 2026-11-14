@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Kísérleti",
     "modalityBridgeVideoPromotionEligible": "Jogosult",
-    "modalityBridgeVideoPromotionContextRequired": "Az előléptetéshez két független, minősítő futtatás szükséges pontosan ugyanazzal a modellverzióval, szabályzattal, korpusszal és builddel. Az ellenőrizetlen kontextus továbbra is HOLD állapotban marad; egy kísérleti szabályzat kiválasztása nem jelent jóváhagyást."
+    "modalityBridgeVideoPromotionContextRequired": "Az előléptetéshez két független, minősítő futtatás szükséges pontosan ugyanazzal a modellverzióval, szabályzattal, korpusszal és builddel. Az ellenőrizetlen kontextus továbbra is HOLD állapotban marad; egy kísérleti szabályzat kiválasztása nem jelent jóváhagyást.",
+    "proxyManagedCoresTab": "Felügyelt magok"
   },
   "contextRtk": {
     "title": "RTK-motor",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Gyorsítótárnézet"
   },
   "proxyConfigModal": {
+    "managedCore": "Proxymag",
+    "managedSelectCore": "Válasszon magot",
+    "managedSaveHint": "Mentéskor szükség esetén letöltjük és ellenőrizzük a hivatalos magot, ellenőrizzük a konfigurációt, majd aktiváljuk ezt a proxyt. A gépelés semmit sem telepít.",
+    "errorSelectManagedCore": "Az alagút mentése előtt válassza ki a sing-box vagy az Xray magot",
     "levelGlobal": "Globális",
     "levelProvider": "Szolgáltató",
     "levelCombo": "Kombináció",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Felügyelt proxymagok",
+    "description": "Illesszen be egy alagúthivatkozást az egyéni proxy gazdagépmezőjébe a mentéséhez és hozzárendeléséhez. Itt natív JSON-formátumú kimenő kapcsolatdefiníciót is menthet a meglévő hozzárendelések módosítása nélkül.",
+    "saveHint": "Mentéskor szükség esetén ellenőrizzük a hivatalos mag hitelességét, aktiválás előtt pedig a natív konfigurációt. A források titkosítást igényelnek. Előnézet közben nincs telepítés, nincs automatikus indítás és nem változik az átlátszó proxy beállítása.",
+    "saveActivate": "Mentés és aktiválás",
+    "core": "Mag",
+    "selectCore": "Válasszon magot",
+    "name": "Név",
+    "source": "Forráshivatkozás vagy natív JSON-formátumú kimenő kapcsolat",
+    "start": "Indítás",
+    "stop": "Leállítás",
+    "loadError": "Nem sikerült betölteni a felügyelt magokat",
+    "operationError": "A felügyelt mag művelete sikertelen",
+    "state": "{state, select, not_installed {Nincs telepítve} stopped {Leállítva} starting {Indítás alatt} running {Fut} stopping {Leállítás alatt} error {Hiba} other {Ismeretlen}}",
+    "binaryTitle": "Magverzió és egyéni futtatható fájl",
+    "binaryHint": "A változtatások minden mentett proxyt érintenek, amely ezt a magot használja. A futó mag csak az ellenőrzés után indul újra. A hivatalos archívumokhoz közzétett SHA-256-kivonat szükséges. Az egyéni bináris fájlok külön az Ön által megadott kivonatot használják.",
+    "distribution": "Magdisztribúció",
+    "checkUpdates": "Elérhető verziók keresése",
+    "noVerifiedReleases": "Ehhez a platformhoz nem érhető el ellenőrzött fájlt tartalmazó stabil kiadás.",
+    "version": "Verzió",
+    "installVersion": "A kiválasztott verzió telepítése és használata",
+    "customPath": "A futtatható fájl abszolút elérési útja az OmniRoute szerverén",
+    "customHash": "A futtatható fájl elvárt SHA-256-kivonata",
+    "customTrust": "Megbízom ebben a futtatható fájlban. Az OmniRoute jogosultságaival futtathat kódot; az egyező kivonat a sértetlenséget igazolja, nem a biztonságot.",
+    "useCustom": "Egyéni mag importálása és használata",
+    "subscriptionUrl": "Az előfizetés HTTPS URL-címe",
+    "subscriptionHint": "Töltse be vagy frissítse kézzel, válasszon egy kompatibilis csomópontot, majd tesztelje vagy mentse. Ez nem kapcsolja be az előfizetés automatikus frissítését. A nem támogatott csomópontokról jelentés készül ahelyett, hogy észrevétlenül módosulnának.",
+    "loadSubscription": "Előfizetés betöltése vagy frissítése",
+    "skippedNodes": "Kihagyott nem támogatott csomópontok: {count}",
+    "subscriptionNode": "Előfizetési csomópont",
+    "selectNode": "Csomópont kiválasztása",
+    "fragmentEnable": "TLS ClientHello darabolás engedélyezése (Xray / Mahsa)",
+    "fragmentHint": "Csak TCP-n vagy WebSocketen keresztüli TLS vagy REALITY esetén. A hossz 1–4096 bájt; az időköz 0–1000 ezredmásodperc. Használjon egyetlen értéket vagy növekvő tartományt. Ez nem garantálja a szűrésen keresztüli hozzáférést.",
+    "fragmentLength": "Darabhossz (bájt)",
+    "fragmentInterval": "Darabok közötti időköz (ezredmásodperc)",
+    "testHint": "A teszt előkészítheti a kiválasztott magot, és HTTPS-en keresztül, ideiglenes proxyn át kapcsolódik az api.ipify.org címhez. Semmi nem kerül mentésre vagy hozzárendelésre. Egyetlen MI-szolgáltatót sem tesztel.",
+    "testSource": "Tesztelés mentés előtt",
+    "testSuccess": "A HTTPS-teszt sikeres. Kimenő IP: {ip}; késleltetés: {ms} ms."
   }
 }

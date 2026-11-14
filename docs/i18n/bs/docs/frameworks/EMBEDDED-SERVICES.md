@@ -47,16 +47,34 @@ Svih osam prate isti model nadzora:
 - OmniRoute ubrizgava efemerni API ključ u djetetovo okruženje i rotira ga bez zastoja (gdje je primjenjivo)
 - Svi putevi upravljanja (`/api/services/*`) su**LOCAL_ONLY** — dostupan samo iz povratne petlje (tvrdo pravilo #17)
 
+### Upravljana proxy jezgra
+
+Polje Custom proxy host također prihvata V2Ray izvornu vezu. Odaberite** sing-box** ili** Xray** eksplicitno, a zatim kliknite na Sačuvaj. Kucanje nikada ne preuzima niti pokreće jezgro. Sačuvaj provjerava zvaničnu arhivu izdanja, potvrđuje izvornu konfiguraciju, pokreće poseban lokalni host SOCKS slušač i tek onda upisuje dodjelu proxy registra. Neuspješna aktivacija vraća prethodnu upravljanu konfiguraciju i proces. `STORAGE_ENCRYPTION_KEY` je obavezan; izvorne veze su šifrirane.
+
+Upravljani fajlovi žive pod `DATA_DIR/services/managed-proxy/`, odvojeno od TPROXY. Postoji jedan proces u vlasništvu po odabranom jezgru, do 100 slušatelja. Nije promijenjeno automatsko pokretanje ili globalno rutiranje. Uspješno spremanje pamti aktivaciju samo za ovo upravljano jezgro; Pokretanje aplikacije vraća omogućene sačuvane jezgre koristeći već provjerenu binarnu datoteku, nikada preuzimanje prilikom pokretanja. Eksplicitno zaustavljanje briše tu zastavicu za aktivaciju. Binarni fajl koji nedostaje ili je oštećen zahteva ponovno čuvanje izvora. Brisanjem registra lokalno se uklanja izvor i slušatelj; obična uređivanja krajnje tačke se odbijaju za upravljane redove tako da sačuvani izvor ne može tiho da odstupi od svog usmeravanog slušaoca.
+
+| Izvorni format                          | sing-box                                                               | Xray                                                                   |
+| --------------------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| VLESS, VMess, trojanac, Shadowsocks URI | Podržana konverzija                                                    | Podržana konverzija                                                    |
+| Hysteria2/hy2, TUIC, AnyTLS URI         | Podržana konverzija                                                    | Odbijeno; koristite kompatibilno jezgro                                |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade   | Podržano za VLESS/VMess/Trojan                                         | Podržano za VLESS/VMess/Trojan                                         |
+| XHTTP URI transport                     | Odbijeno                                                               | Podržana konverzija                                                    |
+| Izvorni odlazni JSON                    | Odabrani dozvoljeni proxy protocols/options jezgre, izvorno provjereno | Odabrani dozvoljeni proxy protocols/options jezgre, izvorno provjereno |
+
+Nepoznate žične opcije, nesigurne TLS zastavice, eksterni dodaci, lokalne opcije putanje datoteka i nepodržane kombinacije se odbijaju umjesto tiho odbacuju. Nativni objekti su izlazne definicije, a ne konfiguracije cijele jezgre; control/direct/bypass izlazni podaci nisu prihvaćeni. WireGuard na sing-box 1.14 koristi krajnje tačke, tako da nije prihvaćen kao izvorni izlaz. Ovo nije konverter svih formata; SSR, naslijeđene whole-base64 Shadowsocks veze, proizvoljni Clash objekti i transportne varijante koje su odsutne u tabeli trebaju zasebno podržan izvorni format.
+
+`/api/services/managed-proxy` je autentificiran i samo za povratnu petlju: GET navodi redigovane metapodatke, POST čuva `{core,name,sourceLink,id?,assignment?}`, PATCH prihvata `{core,action:"start"|"stop"}`. Mora biti prisutan hostov pouzdani peer-stamp cjevovod. Dijagnostika izvorne jezgre je potisnuta jer može sadržavati vjerodajnice; Događaji životnog ciklusa koriste postojeći strukturirani program za evidentiranje datoteka bez izvornih veza ili upstream korisnih opterećenja. Priložite samo dezinficirane zapisnike aplikacija za podršku. Zvanične verzije su zakačene na sing-box 1.14.3 i Xray 26.3.27 sa manifestima SHA-256 -a za oslobađanje; buduća ažuriranja zahtijevaju promjenu verzije i svih provjerenih sažetaka zajedno.
+
 ### Ključne odluke (iz plana dizajna)
 
-| Odluka                                        | Vrijednost                                                                       |
-| --------------------------------------------- | -------------------------------------------------------------------------------- |
-| Pristup kontrolnoj tabli izvornom UI 9Routeru | Obrnuti proxy na `/dashboard/providers/services/9router/embed/*`                 |
-| Mehanizam ugradnje                            | `npm install {package}` preko `execFile` (bez interpolacije ljuske)              |
-| Način potrošnje                               | Provajder registrovan kao `9router/{sub}/{model}` u mehanizmu rutiranja          |
-| API upravljanje ključevima                    | OmniRoute generiše, šifrira u stanju mirovanja (AES-256-GCM) i ubacuje preko env |
-| Lokacija nadzorne ploče                       | `/dashboard/providers/services` (tri kartice)                                    |
-| Auto-start                                    | Prebaci po usluzi, zadani OFF                                                    |
+| Odluka                                        | Vrijednost                                                                  |
+| --------------------------------------------- | --------------------------------------------------------------------------- |
+| Pristup kontrolnoj tabli izvornom UI 9Routeru | Obrnuti proxy na `/dashboard/providers/services/9router/embed/*`            |
+| Mehanizam ugradnje                            | `npm install {package}` preko `execFile` (bez interpolacije ljuske)         |
+| Način potrošnje                               | Provajder registrovan kao `9router/{sub}/{model}` u mehanizmu rutiranja     |
+| API upravljanje ključevima                    | OmniRoute generiše, šifrira u mirovanju (AES-256-GCM) i injektira preko env |
+| Lokacija nadzorne ploče                       | `/dashboard/providers/services` (tri kartice)                               |
+| Auto-start                                    | Prebaci po usluzi, zadani OFF                                               |
 
 ---
 

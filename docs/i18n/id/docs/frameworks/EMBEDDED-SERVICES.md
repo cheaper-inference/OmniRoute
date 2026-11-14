@@ -47,6 +47,24 @@ Kedelapannya mengikuti model pengawasan yang sama:
 - OmniRoute memasukkan kunci API sementara ke dalam lingkungan anak dan memutarnya tanpa waktu henti (jika berlaku)
 - Semua rute manajemen (`/api/services/*`) adalah**LOCAL_ONLY** — hanya dapat diakses dari loopback (aturan keras #17)
 
+### Inti proksi terkelola
+
+Bidang Host proksi khusus juga menerima tautan sumber V2Ray. Memilih** kotak bernyanyi** atau** sinar X** secara eksplisit, lalu klik Simpan. Mengetik tidak pernah mengunduh atau memulai inti. Simpan memverifikasi arsip rilis resmi, memvalidasi konfigurasi asli, memulai pendengar SOCKS localhost yang berbeda, dan baru kemudian menulis tugas registri proksi. Aktivasi yang gagal memulihkan konfigurasi dan proses terkelola sebelumnya. `STORAGE_ENCRYPTION_KEY` diperlukan; tautan sumber dienkripsi.
+
+File yang dikelola berada di bawah `DATA_DIR/services/managed-proxy/`, terpisah dari TPROXY. Ada satu proses yang dimiliki per inti yang dipilih, hingga 100 pendengar. Tidak ada autostart atau default perutean global yang diubah. Penyimpanan yang berhasil mengingat aktivasi hanya untuk inti terkelola ini; startup aplikasi memulihkan inti tersimpan yang diaktifkan menggunakan biner yang sudah terverifikasi, tidak pernah mengunduh saat boot. Berhenti Eksplisit menghapus tanda aktivasi itu. Biner yang hilang atau rusak memerlukan penyimpanan ulang sumbernya. Penghapusan registri menghapus sumber dan pendengar secara lokal; pengeditan titik akhir biasa ditolak untuk baris terkelola sehingga sumber yang disimpan tidak dapat berpindah secara diam-diam dari pendengar yang dirutekan.
+
+| Format sumber                         | kotak bernyanyi                                                                       | sinar X                                                                               |
+| ------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| VLESS, VMess, Trojan, Shadowsocks URI | Konversi yang didukung                                                                | Konversi yang didukung                                                                |
+| Hysteria2/hy2, TUIC, AnyTLS URI       | Konversi yang didukung                                                                | Ditolak; menggunakan inti yang kompatibel                                             |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade | Didukung untuk VLESS/VMess/Trojan                                                     | Didukung untuk VLESS/VMess/Trojan                                                     |
+| transportasi XHTTP URI                | Ditolak                                                                               | Konversi yang didukung                                                                |
+| JSON keluar asli                      | Proksi yang diizinkan dari inti yang dipilih protocols/options, diperiksa secara asli | Proksi yang diizinkan dari inti yang dipilih protocols/options, diperiksa secara asli |
+
+Opsi kabel yang tidak dikenal, flag TLS yang tidak aman, plugin eksternal, opsi jalur file lokal, dan kombinasi yang tidak didukung akan ditolak daripada dibuang secara diam-diam. Objek asli adalah definisi keluar, bukan konfigurasi inti keseluruhan; control/direct/bypass keluar tidak diterima. WireGuard pada sing-box 1.14 menggunakan titik akhir, sehingga tidak diterima sebagai outbound asli. Ini bukan konverter semua format; SSR, tautan whole-base64 Shadowsocks lama, objek Clash arbitrer, dan varian transportasi yang tidak ada dalam tabel memerlukan format sumber yang didukung secara terpisah.
+
+`/api/services/managed-proxy` diautentikasi dan hanya loopback: GET mencantumkan metadata yang disunting, POST menyimpan `{core,name,sourceLink,id?,assignment?}`, PATCH menerima `{core,action:"start"|"stop"}`. Pipeline stempel rekan tepercaya dari host harus ada. Diagnostik inti asli disembunyikan karena dapat berisi kredensial; peristiwa siklus hidup menggunakan pencatat file aplikasi terstruktur yang ada tanpa tautan sumber atau muatan upstream. Lampirkan hanya log aplikasi yang sudah dibersihkan untuk dukungan. Versi resmi disematkan ke sing-box 1.14.3 dan Xray 26.3.27 dengan manifes SHA-256 aset rilis; pembaruan di masa mendatang memerlukan perubahan versi dan semua intisari terverifikasi secara bersamaan.
+
 ### Keputusan penting (dari rencana desain)
 
 | Keputusan                       | Nilai                                                                                           |

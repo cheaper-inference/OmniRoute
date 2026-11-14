@@ -9827,7 +9827,8 @@
       "statsEmpty": "No detections yet.",
       "statsRequest": "Requests"
     },
-    "jev": "Jev"
+    "jev": "Jev",
+    "proxyManagedCoresTab": "Managed cores"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Cache view"
   },
   "proxyConfigModal": {
+    "managedCore": "Proxy core",
+    "managedSelectCore": "Select a core",
+    "managedSaveHint": "Save downloads and verifies the official core if needed, checks the configuration, then activates this proxy. Typing does not install anything.",
+    "errorSelectManagedCore": "Select sing-box or Xray before saving this tunnel",
     "levelGlobal": "Global",
     "levelProvider": "Provider",
     "levelCombo": "Combo",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "Recovery reuses the original payload and key. After reload, restore the exact endpoint, connection, transport and input. New generation starts a separate billable request. Up to 20 receipts are kept in this tab.",
     "streamIncomplete": "The stream ended without a complete final event. Upstream completion is unknown.",
     "streamError": "The upstream stream reported an error. Received files remain available."
+  },
+  "managedProxy": {
+    "title": "Managed proxy cores",
+    "description": "Paste a tunnel link in the Custom proxy host field to save and assign it. Here you can also save a native outbound JSON definition without changing any assignment.",
+    "saveHint": "Save verifies the official core if needed and checks native configuration before activation. Sources require encryption. No preview installation, autostart or transparent-proxy changes.",
+    "saveActivate": "Save and activate",
+    "core": "Core",
+    "selectCore": "Select a core",
+    "name": "Name",
+    "source": "Source link or native outbound JSON",
+    "start": "Start",
+    "stop": "Stop",
+    "loadError": "Unable to load managed cores",
+    "operationError": "Managed core operation failed",
+    "state": "{state, select, not_installed {Not installed} stopped {Stopped} starting {Starting} running {Running} stopping {Stopping} error {Error} other {Unknown}}",
+    "binaryTitle": "Core version and custom executable",
+    "binaryHint": "Changes affect every saved proxy using this core. A running core restarts only after validation. Official archives require a published SHA-256 digest. Custom binaries use your supplied digest separately.",
+    "distribution": "Core distribution",
+    "checkUpdates": "Check available versions",
+    "noVerifiedReleases": "No stable release with a verified asset is available for this platform.",
+    "version": "Version",
+    "installVersion": "Install and use selected version",
+    "customPath": "Absolute executable path on the OmniRoute server",
+    "customHash": "Expected executable SHA-256",
+    "customTrust": "I trust this executable. It can run code with OmniRoute's permissions; a matching hash verifies integrity, not safety.",
+    "useCustom": "Import and use custom core",
+    "subscriptionUrl": "HTTPS subscription URL",
+    "subscriptionHint": "Load or refresh manually, select a compatible node, then test or save it. This does not enable automatic subscription refresh. Unsupported nodes are reported instead of being silently changed.",
+    "loadSubscription": "Load or refresh subscription",
+    "skippedNodes": "Unsupported nodes skipped: {count}",
+    "subscriptionNode": "Subscription node",
+    "selectNode": "Select a node",
+    "fragmentEnable": "Enable TLS ClientHello fragmentation (Xray / Mahsa)",
+    "fragmentHint": "For TLS or REALITY over TCP or WebSocket only. Length is 1–4096 bytes; interval is 0–1000 milliseconds. Use one value or an ascending range. This does not guarantee access through filtering.",
+    "fragmentLength": "Fragment length (bytes)",
+    "fragmentInterval": "Fragment interval (milliseconds)",
+    "testHint": "Testing may prepare the selected core and contacts api.ipify.org over HTTPS through a temporary proxy. Nothing is saved or assigned. It does not test any AI provider.",
+    "testSource": "Test before saving",
+    "testSuccess": "HTTPS test passed. Egress IP: {ip}; latency: {ms} ms."
   }
 }

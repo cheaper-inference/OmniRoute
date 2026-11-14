@@ -47,6 +47,24 @@ Gbogbo awọn mẹjọ tẹle awoṣe abojuto kanna:
 - OmniRoute fi bọtini API ephemeral sinu agbegbe ọmọde ati yiyi pada laisi akoko isinmi (nibiti o ba wulo)
 - Gbogbo awọn ipa ọna iṣakoso (`/api/services/*`) jẹ**LOCAL_ONLY** — wiwọle nikan lati loopback (ofin lile #17)
 
+### Awọn ohun kohun aṣoju ti iṣakoso
+
+Aaye agbalejo aṣoju aṣa tun gba ọna asopọ orisun V2Ray kan. Yan** apoti orin** tabi** Xray** ni gbangba, lẹhinna tẹ Fipamọ. Titẹ ko ṣe igbasilẹ tabi bẹrẹ mojuto. Ṣafipamọ jẹri iwe-ipamọ itusilẹ ti oṣiṣẹ, ṣe atunto atunto abinibi, bẹrẹ olutẹtisi localhost SOCKS kan pato, ati pe lẹhinna nikan kọ iṣẹ iyansilẹ iforukọsilẹ aṣoju. Imuṣiṣẹ ti kuna ṣe atunṣe iṣeto iṣakoso iṣaaju ati ilana. `STORAGE_ENCRYPTION_KEY` nilo; awọn ọna asopọ orisun ti wa ni ti paroko.
+
+Awọn faili iṣakoso n gbe labẹ `DATA_DIR/services/managed-proxy/`, lọtọ lati TPROXY. Ilana ohun-ini kan wa fun mojuto ti a yan, to awọn olutẹtisi 100. Ko si adaṣe adaṣe tabi aiyipada ipa-ọna agbaye ti yipada. Fipamọ Aṣeyọri ranti imuṣiṣẹ fun ipilẹ iṣakoso yii nikan; Ibẹrẹ ohun elo ṣe atunṣe awọn ohun kohun ti o fipamọ ni lilo alakomeji ti a ti rii tẹlẹ, kii ṣe igbasilẹ akoko-bata. Iduro ti o han gbangba n pa asia imuṣiṣẹ naa kuro. Alakomeji ti o padanu tabi ti bajẹ nilo tun-fifipamọ orisun kan. Iforukọsilẹ piparẹ kuro ni orisun ati olutẹtisi ni agbegbe; Awọn atunṣe ipari ipari lasan ni a kọ fun awọn ori ila ti a ṣakoso nitoribẹẹ orisun ti o fipamọ ko le fi ipalọlọ fifo kuro ninu olutẹtisi rẹ.
+
+| Orisun kika                             | apoti orin                                                                      | Xray                                                                            |
+| --------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| VLESS, VMess, Tirojanu, Shadowsocks URI | Iyipada atilẹyin                                                                | Iyipada atilẹyin                                                                |
+| Hysteria2/hy2, TUIC, AnyTLS URI         | Iyipada atilẹyin                                                                | Kọ silẹ; lo mojuto ibaramu                                                      |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade   | Atilẹyin fun VLESS/VMess/Trojan                                                 | Atilẹyin fun VLESS/VMess/Trojan                                                 |
+| XHTTP URI irinna                        | Ti kọ                                                                           | Iyipada atilẹyin                                                                |
+| Ilu abinibi JSON                        | Aṣoju protocols/options ti a gba laaye ti mojuto ti a ti yan, ṣayẹwo ni abinibi | Aṣoju protocols/options ti a gba laaye ti mojuto ti a ti yan, ṣayẹwo ni abinibi |
+
+Awọn aṣayan waya ti a ko mọ, awọn asia TLS ti ko ni aabo, awọn afikun ita, awọn aṣayan ọna-faili agbegbe ati awọn akojọpọ ti ko ṣe atilẹyin jẹ kọ kuku ju sisọnu ni ipalọlọ. Awọn nkan abinibi jẹ awọn asọye ti o njade lo, kii ṣe awọn atunto gbogbo-mojuto; Awọn ijade control/direct/bypass ko gba. WireGuard lori apoti orin 1.14 nlo awọn aaye ipari, nitorinaa ko gba bi ijade abinibi. Eyi kii ṣe oluyipada ọna kika gbogbo; SSR, legacy whole-base64 Shadowsocks awọn ọna asopọ, awọn nkan Clash lainidii ati awọn iyatọ gbigbe ti ko si ni tabili nilo ọna kika orisun ti o ni atilẹyin lọtọ.
+
+`/api/services/managed-proxy` jẹ ifọwọsi ati loopback-nikan: awọn atokọ GET ti a ṣe atunṣe metadata, POST fipamọ `{core,name,sourceLink,id?,assignment?}`, PATCH gba `{core,action:"start"|"stop"}`. Opopona opo gigun ti ontẹ ẹlẹgbẹ ti agbalejo gbọdọ wa. Awọn iwadii aisan inu abinibi ti wa ni idinku nitori wọn le ni awọn iwe-ẹri ninu; awọn iṣẹlẹ igbesi aye lo oluṣamulo faili ohun elo ti o wa tẹlẹ laisi awọn ọna asopọ orisun tabi awọn fifuye isanwo oke. So awọn iwe ohun elo ti a sọ di mimọ nikan fun atilẹyin. Awọn ẹya osise ti wa ni ṣoki si apoti orin 1.14.3 ati Xray 26.3.27 pẹlu awọn ifihan dukia SHA-256 ; awọn imudojuiwọn ọjọ iwaju nilo iyipada ẹya ati gbogbo awọn idawọle ti a rii daju papọ.
+
 ### Awọn ipinnu pataki (lati inu ero apẹrẹ)
 
 | Ipinnu                                | Iye                                                                                  |

@@ -1,0 +1,1 @@
+- **feat(proxy):** add explicit sing-box and Xray management when saving a proxy, with checksum-verified core preparation, isolated loopback listeners, encrypted source storage and rollback on failed activation or assignment ([#16457](https://github.com/diegosouzapw/OmniRoute/pull/16457)) — thanks @KiaroSama

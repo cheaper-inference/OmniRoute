@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Ya majaribio",
     "modalityBridgeVideoPromotionEligible": "Inastahiki",
-    "modalityBridgeVideoPromotionContextRequired": "Upandishaji unahitaji majaribio mawili huru yanayokidhi vigezo kwa toleo mahususi la modeli, sera, korpasi na muundo wa programu. Muktadha ambao haujathibitishwa hubaki HOLD; kuchagua sera ya majaribio si idhini."
+    "modalityBridgeVideoPromotionContextRequired": "Upandishaji unahitaji majaribio mawili huru yanayokidhi vigezo kwa toleo mahususi la modeli, sera, korpasi na muundo wa programu. Muktadha ambao haujathibitishwa hubaki HOLD; kuchagua sera ya majaribio si idhini.",
+    "proxyManagedCoresTab": "Viini vinavyosimamiwa"
   },
   "contextRtk": {
     "title": "Injini ya RTK",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Mwonekano wa kache"
   },
   "proxyConfigModal": {
+    "managedCore": "Kiini cha proksi",
+    "managedSelectCore": "Chagua kiini",
+    "managedSaveHint": "Kuhifadhi hupakua na kuthibitisha kiini rasmi ikihitajika, hukagua usanidi, kisha huwezesha proksi hii. Kuandika hakusakinishi chochote.",
+    "errorSelectManagedCore": "Chagua sing-box au Xray kabla ya kuhifadhi handaki hili",
     "levelGlobal": "Ya Jumla",
     "levelProvider": "Mtoa Huduma",
     "levelCombo": "Mchanganyiko",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Viini vya proksi vinavyosimamiwa",
+    "description": "Bandika kiungo cha handaki katika sehemu ya seva ya proksi maalumu ili kukihifadhi na kukikabidhi. Hapa unaweza pia kuhifadhi ufafanuzi wa asili wa JSON wa muunganisho unaotoka bila kubadilisha ukabidhi wowote.",
+    "saveHint": "Wakati wa kuhifadhi, kiini rasmi kinathibitishwa ikihitajika na usanidi wa asili hukaguliwa kabla ya kuwezeshwa. Vyanzo vinahitaji usimbaji fiche. Hakuna usakinishaji wakati wa hakiki, kuanza kiotomatiki au mabadiliko ya proksi inayopitisha trafiki bila kuonekana.",
+    "saveActivate": "Hifadhi na uwezeshe",
+    "core": "Kiini",
+    "selectCore": "Chagua kiini",
+    "name": "Jina",
+    "source": "Kiungo cha chanzo au JSON ya asili ya muunganisho unaotoka",
+    "start": "Anzisha",
+    "stop": "Simamisha",
+    "loadError": "Imeshindikana kupakia viini vinavyosimamiwa",
+    "operationError": "Operesheni ya kiini kinachosimamiwa imeshindwa",
+    "state": "{state, select, not_installed {Hakijasakinishwa} stopped {Kimesimamishwa} starting {Kinaanza} running {Kinafanya kazi} stopping {Kinasimama} error {Hitilafu} other {Haijulikani}}",
+    "binaryTitle": "Toleo la kiini na faili maalumu inayotekelezeka",
+    "binaryHint": "Mabadiliko yanaathiri kila proksi iliyohifadhiwa inayotumia kiini hiki. Kiini kinachoendesha huanza upya tu baada ya uthibitishaji. Kumbukumbu rasmi zinahitaji muhtasari wa SHA-256 uliochapishwa. Faili maalumu za binari hutumia kando muhtasari unaotoa.",
+    "distribution": "Usambazaji wa kiini",
+    "checkUpdates": "Angalia matoleo yanayopatikana",
+    "noVerifiedReleases": "Hakuna toleo thabiti lenye faili iliyothibitishwa linalopatikana kwa jukwaa hili.",
+    "version": "Toleo",
+    "installVersion": "Sakinisha na utumie toleo lililochaguliwa",
+    "customPath": "Njia kamili ya faili inayotekelezeka kwenye seva ya OmniRoute",
+    "customHash": "SHA-256 inayotarajiwa ya faili inayotekelezeka",
+    "customTrust": "Ninaamini faili hii inayotekelezeka. Inaweza kuendesha msimbo kwa ruhusa za OmniRoute; hashi inayolingana inathibitisha uadilifu wa faili, si usalama wake.",
+    "useCustom": "Ingiza na utumie kiini maalumu",
+    "subscriptionUrl": "URL ya HTTPS ya usajili",
+    "subscriptionHint": "Pakia au onyesha upya wewe mwenyewe, chagua nodi inayooana, kisha ijaribu au ihifadhi. Hii haiwezeshi kuonyesha upya usajili kiotomatiki. Nodi zisizotumika zinaripotiwa badala ya kubadilishwa kimya kimya.",
+    "loadSubscription": "Pakia au onyesha upya usajili",
+    "skippedNodes": "Nodi zisizotumika zilizorukwa: {count}",
+    "subscriptionNode": "Nodi ya usajili",
+    "selectNode": "Chagua nodi",
+    "fragmentEnable": "Wezesha ugawaji wa TLS ClientHello katika vipande (Xray / Mahsa)",
+    "fragmentHint": "Kwa TLS au REALITY kupitia TCP au WebSocket pekee. Urefu ni baiti 1–4096; muda kati ya vipande ni milisekunde 0–1000. Tumia thamani moja au masafa yanayopanda. Hii haihakikishi ufikiaji kupitia uchujaji.",
+    "fragmentLength": "Urefu wa kipande (baiti)",
+    "fragmentInterval": "Muda kati ya vipande (milisekunde)",
+    "testHint": "Jaribio linaweza kuandaa kiini kilichochaguliwa na linawasiliana na api.ipify.org kupitia HTTPS kwa kutumia proksi ya muda. Hakuna kinachohifadhiwa au kukabidhiwa. Halijaribu mtoa huduma yeyote wa AI.",
+    "testSource": "Jaribu kabla ya kuhifadhi",
+    "testSuccess": "Jaribio la HTTPS limefaulu. IP ya kutoka: {ip}; muda wa kusubiri: {ms} ms."
   }
 }

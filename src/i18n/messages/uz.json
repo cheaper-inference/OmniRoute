@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Tajribaviy",
     "modalityBridgeVideoPromotionEligible": "Talablarga javob beradi",
-    "modalityBridgeVideoPromotionContextRequired": "Yuqori bosqichga oʻtkazish uchun aynan shu model tahriri, siyosat, korpus va yigʻilma boʻyicha talablarga javob beradigan ikkita mustaqil ishga tushirish talab etiladi. Tasdiqlanmagan kontekst HOLD holatida qoladi; tajribaviy siyosatni tanlash tasdiqlash hisoblanmaydi."
+    "modalityBridgeVideoPromotionContextRequired": "Yuqori bosqichga oʻtkazish uchun aynan shu model tahriri, siyosat, korpus va yigʻilma boʻyicha talablarga javob beradigan ikkita mustaqil ishga tushirish talab etiladi. Tasdiqlanmagan kontekst HOLD holatida qoladi; tajribaviy siyosatni tanlash tasdiqlash hisoblanmaydi.",
+    "proxyManagedCoresTab": "Boshqariladigan yadrolar"
   },
   "contextRtk": {
     "title": "RTK mexanizmi",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Kesh koʻrinishi"
   },
   "proxyConfigModal": {
+    "managedCore": "Proksi yadrosi",
+    "managedSelectCore": "Yadroni tanlang",
+    "managedSaveHint": "Saqlash kerak bo‘lsa rasmiy yadroni yuklab olib tasdiqlaydi, konfiguratsiyani tekshiradi, so‘ng ushbu proksini faollashtiradi. Matn kiritish hech narsani o‘rnatmaydi.",
+    "errorSelectManagedCore": "Ushbu tunnelni saqlashdan oldin sing-box yoki Xray tanlang",
     "levelGlobal": "Umumiy",
     "levelProvider": "Provayder",
     "levelCombo": "Kombinatsiya",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Boshqariladigan proksi yadrolari",
+    "description": "Saqlash va tayinlash uchun tunnel havolasini maxsus proksining xost maydoniga joylashtiring. Bu yerda hech bir tayinlashni o‘zgartirmasdan chiqish ulanishining mahalliy JSON ta’rifini ham saqlashingiz mumkin.",
+    "saveHint": "Saqlash vaqtida kerak bo‘lsa rasmiy yadro tasdiqlanadi va faollashtirishdan oldin mahalliy konfiguratsiya tekshiriladi. Manbalar shifrlashni talab qiladi. Oldindan ko‘rishda o‘rnatish, avtomatik ishga tushirish yoki shaffof proksiga o‘zgartirish kiritish amalga oshirilmaydi.",
+    "saveActivate": "Saqlash va faollashtirish",
+    "core": "Yadro",
+    "selectCore": "Yadroni tanlang",
+    "name": "Nomi",
+    "source": "Manba havolasi yoki chiqish ulanishining mahalliy JSON ta’rifi",
+    "start": "Ishga tushirish",
+    "stop": "To‘xtatish",
+    "loadError": "Boshqariladigan yadrolarni yuklab bo‘lmadi",
+    "operationError": "Boshqariladigan yadro amali bajarilmadi",
+    "state": "{state, select, not_installed {O‘rnatilmagan} stopped {To‘xtatilgan} starting {Ishga tushmoqda} running {Ishlamoqda} stopping {To‘xtatilmoqda} error {Xato} other {Noma’lum}}",
+    "binaryTitle": "Yadro versiyasi va maxsus bajariluvchi fayl",
+    "binaryHint": "Oʻzgarishlar ushbu yadrodan foydalanadigan barcha saqlangan proksilarga taʼsir qiladi. Ishlayotgan yadro faqat tekshiruvdan soʻng qayta ishga tushadi. Rasmiy arxivlar eʼlon qilingan SHA-256 xeshini talab qiladi. Maxsus binar fayllar siz taqdim etgan xeshdan alohida foydalanadi.",
+    "distribution": "Yadro distributivi",
+    "checkUpdates": "Mavjud versiyalarni tekshirish",
+    "noVerifiedReleases": "Ushbu platforma uchun tekshirilgan faylga ega barqaror reliz mavjud emas.",
+    "version": "Versiya",
+    "installVersion": "Tanlangan versiyani oʻrnatish va ishlatish",
+    "customPath": "OmniRoute serveridagi bajariluvchi faylning mutlaq yoʻli",
+    "customHash": "Bajariluvchi faylning kutilayotgan SHA-256 qiymati",
+    "customTrust": "Men bu bajariluvchi faylga ishonaman. U OmniRoute ruxsatlari bilan kodni ishga tushirishi mumkin; xesh mos kelishi xavfsizlikni emas, yaxlitlikni tasdiqlaydi.",
+    "useCustom": "Maxsus yadroni import qilish va ishlatish",
+    "subscriptionUrl": "HTTPS obuna URL manzili",
+    "subscriptionHint": "Qoʻlda yuklang yoki yangilang, mos tugunni tanlang, soʻng sinang yoki saqlang. Bu obunani avtomatik yangilashni yoqmaydi. Qoʻllab-quvvatlanmaydigan tugunlar yashirincha oʻzgartirilmaydi, ular haqida xabar beriladi.",
+    "loadSubscription": "Obunani yuklash yoki yangilash",
+    "skippedNodes": "Oʻtkazib yuborilgan qoʻllab-quvvatlanmaydigan tugunlar: {count}",
+    "subscriptionNode": "Obuna tuguni",
+    "selectNode": "Tugunni tanlang",
+    "fragmentEnable": "TLS ClientHello fragmentatsiyasini yoqish (Xray / Mahsa)",
+    "fragmentHint": "Faqat TCP yoki WebSocket orqali TLS yoki REALITY uchun. Uzunlik 1–4096 bayt; interval 0–1000 millisekund. Bitta qiymat yoki oʻsuvchi oraliqdan foydalaning. Bu filtrlashdan oʻtib kirishni kafolatlamaydi.",
+    "fragmentLength": "Fragment uzunligi (bayt)",
+    "fragmentInterval": "Fragment oraligʻi (millisekund)",
+    "testHint": "Sinov tanlangan yadroni tayyorlashi mumkin va vaqtinchalik proksi orqali HTTPS yordamida api.ipify.org bilan bogʻlanadi. Hech narsa saqlanmaydi yoki tayinlanmaydi. Hech qanday AI provayderi sinovdan oʻtkazilmaydi.",
+    "testSource": "Saqlashdan oldin sinash",
+    "testSuccess": "HTTPS sinovi muvaffaqiyatli oʻtdi. Chiqish IP manzili: {ip}; kechikish: {ms} ms."
   }
 }

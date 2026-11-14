@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Eksperimental",
     "modalityBridgeVideoPromotionEligible": "Kwalipikado",
-    "modalityBridgeVideoPromotionContextRequired": "Ang pag-promote ay nangangailangan ng dalawang magkahiwalay na kwalipikadong pagpapatakbo para sa eksaktong rebisyon ng modelo, patakaran, corpus, at build. Mananatiling HOLD ang isang hindi beripikadong konteksto; ang pagpili ng eksperimental na patakaran ay hindi nangangahulugang pag-apruba."
+    "modalityBridgeVideoPromotionContextRequired": "Ang pag-promote ay nangangailangan ng dalawang magkahiwalay na kwalipikadong pagpapatakbo para sa eksaktong rebisyon ng modelo, patakaran, corpus, at build. Mananatiling HOLD ang isang hindi beripikadong konteksto; ang pagpili ng eksperimental na patakaran ay hindi nangangahulugang pag-apruba.",
+    "proxyManagedCoresTab": "Mga pinamamahalaang core"
   },
   "contextRtk": {
     "title": "Engine ng RTK",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "View ng cache"
   },
   "proxyConfigModal": {
+    "managedCore": "Core ng proxy",
+    "managedSelectCore": "Pumili ng core",
+    "managedSaveHint": "Kapag nag-save, dina-download at bineberipika ang opisyal na core kung kinakailangan, sinusuri ang configuration, at saka ina-activate ang proxy na ito. Walang nai-install sa pagta-type lamang.",
+    "errorSelectManagedCore": "Piliin ang sing-box o Xray bago i-save ang tunnel na ito",
     "levelGlobal": "Pangkalahatan",
     "levelProvider": "Tagapagbigay",
     "levelCombo": "Kombinasyon",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Mga pinamamahalaang proxy core",
+    "description": "Mag-paste ng tunnel link sa field ng host ng pasadyang proxy upang i-save at italaga ito. Dito, maaari ka ring mag-save ng depinisyon ng outbound sa native na JSON format nang hindi binabago ang anumang pagtatalaga.",
+    "saveHint": "Kapag nag-save, bineberipika ang opisyal na core kung kinakailangan at sinusuri ang native na configuration bago i-activate. Kailangang naka-encrypt ang mga source. Walang pag-install habang nagpe-preview, awtomatikong pagsisimula, o pagbabago sa transparent proxy.",
+    "saveActivate": "I-save at i-activate",
+    "core": "Core",
+    "selectCore": "Pumili ng core",
+    "name": "Pangalan",
+    "source": "Link ng pinagmulan o outbound JSON sa native na format",
+    "start": "Simulan",
+    "stop": "Ihinto",
+    "loadError": "Hindi ma-load ang mga pinamamahalaang core",
+    "operationError": "Nabigo ang operasyon ng pinamamahalaang core",
+    "state": "{state, select, not_installed {Hindi naka-install} stopped {Nakahinto} starting {Nagsisimula} running {Gumagana} stopping {Humihinto} error {Error} other {Hindi alam}}",
+    "binaryTitle": "Bersyon ng core at pasadyang executable",
+    "binaryHint": "Nakaaapekto ang mga pagbabago sa lahat ng naka-save na proxy na gumagamit ng core na ito. Magre-restart lang ang tumatakbong core pagkatapos ng validation. Nangangailangan ang mga opisyal na archive ng nailathalang SHA-256 digest. Hiwalay na ginagamit ng mga pasadyang binary ang digest na ibinigay mo.",
+    "distribution": "Distribusyon ng core",
+    "checkUpdates": "Suriin ang mga available na bersyon",
+    "noVerifiedReleases": "Walang stable na release na may beripikadong file para sa platform na ito.",
+    "version": "Bersyon",
+    "installVersion": "I-install at gamitin ang napiling bersyon",
+    "customPath": "Ganap na path ng executable sa OmniRoute server",
+    "customHash": "Inaasahang SHA-256 ng executable",
+    "customTrust": "Pinagkakatiwalaan ko ang executable na ito. Maaari itong magpatakbo ng code gamit ang mga pahintulot ng OmniRoute; ang magkatugmang hash ay nagpapatunay ng integridad, hindi ng kaligtasan.",
+    "useCustom": "I-import at gamitin ang pasadyang core",
+    "subscriptionUrl": "HTTPS URL ng subscription",
+    "subscriptionHint": "Manu-manong i-load o i-refresh, pumili ng katugmang node, at saka ito subukan o i-save. Hindi nito pinapagana ang awtomatikong pag-refresh ng subscription. Iniuulat ang mga hindi sinusuportahang node sa halip na tahimik na baguhin ang mga ito.",
+    "loadSubscription": "I-load o i-refresh ang subscription",
+    "skippedNodes": "Mga hindi sinusuportahang node na nilaktawan: {count}",
+    "subscriptionNode": "Node ng subscription",
+    "selectNode": "Pumili ng node",
+    "fragmentEnable": "Paganahin ang fragmentation ng TLS ClientHello (Xray / Mahsa)",
+    "fragmentHint": "Para lang sa TLS o REALITY sa TCP o WebSocket. Ang haba ay 1–4096 byte; ang pagitan ay 0–1000 millisecond. Gumamit ng isang halaga o pataas na saklaw. Hindi nito ginagarantiya ang access sa kabila ng pag-filter.",
+    "fragmentLength": "Haba ng fragment (byte)",
+    "fragmentInterval": "Pagitan ng mga fragment (millisecond)",
+    "testHint": "Maaaring ihanda ng pagsubok ang napiling core at kumokonekta ito sa api.ipify.org gamit ang HTTPS sa pamamagitan ng pansamantalang proxy. Walang sine-save o itinatalaga. Hindi nito sinusubukan ang anumang AI provider.",
+    "testSource": "Subukan bago i-save",
+    "testSuccess": "Matagumpay ang HTTPS test. Papalabas na IP: {ip}; latency: {ms} ms."
   }
 }

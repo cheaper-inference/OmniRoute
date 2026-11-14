@@ -9827,7 +9827,8 @@
     "modalityBridgeVideoPromotionHold": "HOLD",
     "modalityBridgeVideoPromotionExperimental": "Expérimental",
     "modalityBridgeVideoPromotionEligible": "Éligible",
-    "modalityBridgeVideoPromotionContextRequired": "La promotion nécessite deux exécutions de qualification indépendantes pour la révision exacte du modèle, la politique, le corpus et le build. Un contexte non vérifié reste en statut HOLD ; la sélection d’une politique expérimentale ne constitue pas une approbation."
+    "modalityBridgeVideoPromotionContextRequired": "La promotion nécessite deux exécutions de qualification indépendantes pour la révision exacte du modèle, la politique, le corpus et le build. Un contexte non vérifié reste en statut HOLD ; la sélection d’une politique expérimentale ne constitue pas une approbation.",
+    "proxyManagedCoresTab": "Noyaux gérés"
   },
   "contextRtk": {
     "title": "Moteur RTK",
@@ -12222,6 +12223,10 @@
     "viewSwitcherAria": "Vue du cache"
   },
   "proxyConfigModal": {
+    "managedCore": "Noyau du proxy",
+    "managedSelectCore": "Sélectionnez un noyau",
+    "managedSaveHint": "Lors de l’enregistrement, le noyau officiel est téléchargé et vérifié si nécessaire, la configuration est contrôlée, puis ce proxy est activé. La saisie de texte n’installe rien.",
+    "errorSelectManagedCore": "Sélectionnez sing-box ou Xray avant d’enregistrer ce tunnel",
     "levelGlobal": "Mondial",
     "levelProvider": "Fournisseur",
     "levelCombo": "Combinaison",
@@ -16645,5 +16650,44 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Noyaux de proxy gérés",
+    "description": "Collez un lien de tunnel dans le champ hôte du proxy personnalisé pour l’enregistrer et l’affecter. Vous pouvez également enregistrer ici une définition de connexion sortante au format JSON natif sans modifier aucune affectation.",
+    "saveHint": "Lors de l’enregistrement, le noyau officiel est vérifié si nécessaire et la configuration native est contrôlée avant l’activation. Les sources doivent être chiffrées. Aucune installation pendant l’aperçu, aucun démarrage automatique ni aucune modification du proxy transparent.",
+    "saveActivate": "Enregistrer et activer",
+    "core": "Noyau",
+    "selectCore": "Sélectionnez un noyau",
+    "name": "Nom",
+    "source": "Lien source ou connexion sortante au format JSON natif",
+    "start": "Démarrer",
+    "stop": "Arrêter",
+    "loadError": "Impossible de charger les noyaux gérés",
+    "operationError": "Échec de l’opération sur le noyau géré",
+    "state": "{state, select, not_installed {Non installé} stopped {Arrêté} starting {Démarrage en cours} running {En cours d’exécution} stopping {Arrêt en cours} error {Erreur} other {Inconnu}}",
+    "binaryTitle": "Version du cœur et exécutable personnalisé",
+    "binaryHint": "Les modifications affectent tous les proxys enregistrés utilisant ce cœur. Un cœur en cours d’exécution ne redémarre qu’après validation. Les archives officielles nécessitent une empreinte SHA-256 publiée. Les binaires personnalisés utilisent séparément l’empreinte que vous fournissez.",
+    "distribution": "Distribution du cœur",
+    "checkUpdates": "Vérifier les versions disponibles",
+    "noVerifiedReleases": "Aucune version stable avec un fichier vérifié n’est disponible pour cette plateforme.",
+    "version": "Version",
+    "installVersion": "Installer et utiliser la version sélectionnée",
+    "customPath": "Chemin absolu de l’exécutable sur le serveur OmniRoute",
+    "customHash": "SHA-256 attendu de l’exécutable",
+    "customTrust": "Je fais confiance à cet exécutable. Il peut exécuter du code avec les permissions d’OmniRoute ; une empreinte correspondante vérifie l’intégrité, pas la sécurité.",
+    "useCustom": "Importer et utiliser un cœur personnalisé",
+    "subscriptionUrl": "URL HTTPS de l’abonnement",
+    "subscriptionHint": "Chargez ou actualisez manuellement, sélectionnez un nœud compatible, puis testez-le ou enregistrez-le. Cela n’active pas l’actualisation automatique de l’abonnement. Les nœuds non pris en charge sont signalés au lieu d’être modifiés silencieusement.",
+    "loadSubscription": "Charger ou actualiser l’abonnement",
+    "skippedNodes": "Nœuds non pris en charge ignorés : {count}",
+    "subscriptionNode": "Nœud de l’abonnement",
+    "selectNode": "Sélectionner un nœud",
+    "fragmentEnable": "Activer la fragmentation de TLS ClientHello (Xray / Mahsa)",
+    "fragmentHint": "Uniquement pour TLS ou REALITY sur TCP ou WebSocket. La longueur est de 1–4096 octets ; l’intervalle est de 0–1000 millisecondes. Utilisez une valeur unique ou une plage croissante. Cela ne garantit pas l’accès à travers le filtrage.",
+    "fragmentLength": "Longueur du fragment (octets)",
+    "fragmentInterval": "Intervalle de fragmentation (millisecondes)",
+    "testHint": "Le test peut préparer le cœur sélectionné et contacte api.ipify.org en HTTPS via un proxy temporaire. Rien n’est enregistré ni attribué. Aucun fournisseur d’IA n’est testé.",
+    "testSource": "Tester avant d’enregistrer",
+    "testSuccess": "Test HTTPS réussi. IP de sortie : {ip} ; latence : {ms} ms."
   }
 }
