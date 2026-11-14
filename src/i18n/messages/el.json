@@ -2153,6 +2153,7 @@
     "inputTokens": "Tokens Εισόδου",
     "outputTokens": "Tokens Εξόδου",
     "estCost": "Εκτιμώμενο Κόστος",
+    "costSplit": "Αναφέρεται {reported} · εκτίμηση {estimated}",
     "infraTitle": "Υποδομή",
     "infraAccounts": "Λογαριασμοί",
     "infraProviders": "Πάροχοι",

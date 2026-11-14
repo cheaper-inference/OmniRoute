@@ -2153,6 +2153,7 @@
     "inputTokens": "Àwọn Tókìnì Àbáwọlé",
     "outputTokens": "Àwọn Tókìnì Àbájáde",
     "estCost": "Ìdíwọ̀n Iye Owó",
+    "costSplit": "A ti {reported} · a ṣe akiyesi {estimated}",
     "infraTitle": "Amáyédẹrùn",
     "infraAccounts": "Àwọn Àkọọ́lẹ̀",
     "infraProviders": "Àwọn Olùpèsè",

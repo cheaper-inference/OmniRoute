@@ -390,6 +390,14 @@ export default function UsageAnalytics() {
           icon="payments"
           label={t("estCost")}
           value={<AnimatedNumber value={s.totalCost} format={fmtCost} integer={false} />}
+          subValue={
+            Number(s.costEstimated) > 0
+              ? t("costSplit", {
+                  reported: fmtCost(Number(s.costReported) || 0),
+                  estimated: fmtCost(Number(s.costEstimated) || 0),
+                })
+              : undefined
+          }
           tooltip={
             s.totalCost !== undefined && s.totalCost !== null
               ? `$${Number(s.totalCost).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`

@@ -2153,6 +2153,7 @@
     "inputTokens": "Tokens na Shigarwa",
     "outputTokens": "Tokens na Fitarwa",
     "estCost": "Kiyasin Kuɗi",
+    "costSplit": "Anja {reported} · kima {estimated}",
     "infraTitle": "Ababen More Rayuwa",
     "infraAccounts": "Asusu",
     "infraProviders": "Masu Samarwa",

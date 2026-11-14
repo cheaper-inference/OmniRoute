@@ -2153,6 +2153,7 @@
     "inputTokens": "Sisendtokenid",
     "outputTokens": "Väljundtokenid",
     "estCost": "Hinnanguline kulu",
+    "costSplit": "Teatatud {reported} · arvutuse hinda {estimated}",
     "infraTitle": "Taristu",
     "infraAccounts": "Kontod",
     "infraProviders": "Teenusepakkujad",

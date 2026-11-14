@@ -2153,6 +2153,7 @@
     "inputTokens": "โทเค็นขาเข้า",
     "outputTokens": "โทเค็นขาออก",
     "estCost": "ค่าใช้จ่ายโดยประมาณ",
+    "costSplit": "รายงาน {reported} · ประเมิน {estimated}",
     "infraTitle": "โครงสร้างพื้นฐาน",
     "infraAccounts": "บัญชี",
     "infraProviders": "ผู้ให้บริการ",

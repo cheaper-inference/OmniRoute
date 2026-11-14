@@ -2153,6 +2153,7 @@
     "inputTokens": "உள்ளீட்டு டோக்கன்கள்",
     "outputTokens": "வெளியீட்டு டோக்கன்கள்",
     "estCost": "மதிப்பிடப்பட்ட செலவு",
+    "costSplit": "அறிக்கை {reported} · மதிப்பீடு {estimated}",
     "infraTitle": "கட்டமைப்பு",
     "infraAccounts": "கணக்குகள்",
     "infraProviders": "வழங்குநர்கள்",

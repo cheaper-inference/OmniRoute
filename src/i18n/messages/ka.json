@@ -2153,6 +2153,7 @@
     "inputTokens": "შემავალი ტოკენები",
     "outputTokens": "გამავალი ტოკენები",
     "estCost": "სავარაუდო ღირებულება",
+    "costSplit": "დასაბეჭდება {reported} · შეფასებული {estimated}",
     "infraTitle": "ინფრასტრუქტურა",
     "infraAccounts": "ანგარიშები",
     "infraProviders": "პროვაიდერები",

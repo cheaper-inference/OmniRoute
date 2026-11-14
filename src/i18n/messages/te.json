@@ -2153,6 +2153,7 @@
     "inputTokens": "ఇన్‌పుట్ టోకెన్లు",
     "outputTokens": "అవుట్‌పుట్ టోకెన్లు",
     "estCost": "అంచనా వ్యయం",
+    "costSplit": "అవగాహన {reported} · అంచనా {estimated}",
     "infraTitle": "మౌలిక సదుపాయాలు",
     "infraAccounts": "ఖాతాలు",
     "infraProviders": "ప్రొవైడర్లు",

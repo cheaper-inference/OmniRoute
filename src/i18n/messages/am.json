@@ -2153,6 +2153,7 @@
     "inputTokens": "የግቤት ቶከኖች",
     "outputTokens": "የውጤት ቶከኖች",
     "estCost": "የተገመተ ወጪ",
+    "costSplit": "ገልጸዋል {reported} · ተጋላጭ {estimated}",
     "infraTitle": "መሠረተ ልማት",
     "infraAccounts": "መለያዎች",
     "infraProviders": "አቅራቢዎች",

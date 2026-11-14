@@ -2153,6 +2153,7 @@
     "inputTokens": "Jetons d'entrée",
     "outputTokens": "Jetons de sortie",
     "estCost": "Coût estimé",
+    "costSplit": "Déclaré {reported} · estimé {estimated}",
     "infraTitle": "Infrastructure",
     "infraAccounts": "Comptes",
     "infraProviders": "Fournisseurs",

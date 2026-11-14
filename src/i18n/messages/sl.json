@@ -2153,6 +2153,7 @@
     "inputTokens": "Vhodni žetoni",
     "outputTokens": "Izhodni žetoni",
     "estCost": "Ocenjeni stroški",
+    "costSplit": "Poročano {reported} · ocenjeno {estimated}",
     "infraTitle": "Infrastruktura",
     "infraAccounts": "Računi",
     "infraProviders": "Ponudniki",

@@ -2153,6 +2153,7 @@
     "inputTokens": "输入 Token",
     "outputTokens": "输出 Token",
     "estCost": "预估成本",
+    "costSplit": "上游报价 {reported} · 目录价估算 {estimated}",
     "infraTitle": "基础设施",
     "infraAccounts": "账号",
     "infraProviders": "提供者",

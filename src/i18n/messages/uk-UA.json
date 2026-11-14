@@ -2153,6 +2153,7 @@
     "inputTokens": "Вхідні токени",
     "outputTokens": "Вихідні токени",
     "estCost": "Орієнт. вартість",
+    "costSplit": "Завитане {reported} · оцінене {estimated}",
     "infraTitle": "Інфраструктура",
     "infraAccounts": "Акаунти",
     "infraProviders": "Провайдери",

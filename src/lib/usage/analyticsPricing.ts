@@ -246,6 +246,64 @@ export function computeUsageRowCost(
   );
 }
 
+/**
+ * The same cost, split by where the number came from: an amount the provider
+ * itself reported (credit-metered upstreams, OpenRouter's `usage.cost`) versus a
+ * figure priced from token counts against the model catalog. Those two are not
+ * interchangeable — one is a bill, the other an estimate — so callers can show
+ * them apart while `total` keeps summing to the value they already display.
+ */
+export interface UsageRowCostSplit {
+  total: number;
+  reported: number;
+  estimated: number;
+}
+
+export function splitUsageRowCost(
+  input: object,
+  pricingByProvider: PricingByProvider,
+  providerAliasMap: Record<string, string>,
+  normalizeModelName: (model: string) => string,
+  computeCostFromPricing: ComputeCostFromPricing,
+  flatRateAsZero = true,
+  pricingContext?: PricingResolutionContext
+): UsageRowCostSplit {
+  const row = input as Record<string, unknown>;
+  const provider = toStringValue(row.provider);
+  const model = toStringValue(row.model);
+  if (!provider || !model) return { total: 0, reported: 0, estimated: 0 };
+  const serviceTier = normalizeServiceTier(row.serviceTier ?? row.service_tier);
+  const isAggregated = toNumber(row.isAggregated ?? row.is_aggregated) > 0;
+  const storedCost = toNumber(row.storedCost ?? row.stored_cost);
+
+  if (flatRateAsZero && isFlatRateProvider(provider)) {
+    return { total: 0, reported: 0, estimated: 0 };
+  }
+  if (isAggregated && storedCost > 0) {
+    return { total: storedCost, reported: storedCost, estimated: 0 };
+  }
+
+  const rawStoredCost = isAggregated ? 0 : storedCost;
+  const pricing = resolveModelPricing(
+    pricingByProvider,
+    providerAliasMap,
+    provider,
+    model,
+    normalizeModelName,
+    serviceTier,
+    pricingContext
+  );
+  if (!pricing) return { total: rawStoredCost, reported: rawStoredCost, estimated: 0 };
+
+  const estimated = computeCostFromPricing(pricing, getPriceableTokens(row), {
+    provider,
+    model,
+    serviceTier,
+    flatRateAsZero,
+  });
+  return { total: rawStoredCost + estimated, reported: rawStoredCost, estimated };
+}
+
 export function computeUsageRowStandardCost(
   input: object,
   pricingByProvider: PricingByProvider,

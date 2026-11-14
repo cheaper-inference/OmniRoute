@@ -2153,6 +2153,7 @@
     "inputTokens": "توکن‌های ورودی",
     "outputTokens": "توکن‌های خروجی",
     "estCost": "هزینه تخمینی",
+    "costSplit": "گزارش شده {reported} · تخمینی {estimated}",
     "infraTitle": "زیرساخت",
     "infraAccounts": "حساب‌ها",
     "infraProviders": "ارائه‌دهندگان",

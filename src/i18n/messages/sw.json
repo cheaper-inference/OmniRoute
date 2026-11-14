@@ -2153,6 +2153,7 @@
     "inputTokens": "Tokeni za Ingizo",
     "outputTokens": "Tokeni za Toleo",
     "estCost": "Kadirio la Gharama",
+    "costSplit": "Ilipohodhiwa {reported} · takamuzi {estimated}",
     "infraTitle": "Miundombinu",
     "infraAccounts": "Akaunti",
     "infraProviders": "Watoa Huduma",

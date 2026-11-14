@@ -2153,6 +2153,7 @@
     "inputTokens": "ආදාන ටෝකන",
     "outputTokens": "ප්රතිදාන ටෝකන",
     "estCost": "ඇස්තමේන්තුගත පිරිවැය",
+    "costSplit": "වාර්තා කරන ලද්ද්‍ය {reported} · අනුමානය {estimated}",
     "infraTitle": "යටිතල පහසුකම්",
     "infraAccounts": "ගිණුම්",
     "infraProviders": "සපයන්නන්",

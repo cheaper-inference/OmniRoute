@@ -2153,6 +2153,7 @@
     "inputTokens": "အဝင်တိုကင်များ",
     "outputTokens": "အထွက်တိုကင်များ",
     "estCost": "ခန့်မှန်းကုန်ကျစရိတ်",
+    "costSplit": "ရိपोर्टသည် {reported} · ခန့်မှန်းသည် {estimated}",
     "infraTitle": "အခြေခံအဆောက်အအုံ",
     "infraAccounts": "အကောင့်များ",
     "infraProviders": "ဝန်ဆောင်မှုပေးသူများ",

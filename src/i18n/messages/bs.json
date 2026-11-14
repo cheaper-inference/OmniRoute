@@ -2153,6 +2153,7 @@
     "inputTokens": "Ulazni tokeni",
     "outputTokens": "Izlazni tokeni",
     "estCost": "Proc. trošak",
+    "costSplit": "Prijavljeno {reported} · procijenjeno {estimated}",
     "infraTitle": "Infrastruktura",
     "infraAccounts": "Računi",
     "infraProviders": "Provajderi",

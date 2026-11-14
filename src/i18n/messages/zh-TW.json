@@ -2153,6 +2153,7 @@
     "inputTokens": "輸入 Token",
     "outputTokens": "輸出 Token",
     "estCost": "預估成本",
+    "costSplit": "上游報價 {reported} · 目錄價估算 {estimated}",
     "infraTitle": "基礎設施",
     "infraAccounts": "帳號",
     "infraProviders": "提供者",

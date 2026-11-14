@@ -2153,6 +2153,7 @@
     "inputTokens": "इनपुट टोकन",
     "outputTokens": "आउटपुट टोकन",
     "estCost": "अनुमानित लागत",
+    "costSplit": "रिपोर्ट किया गया {reported} · अनुमानित {estimated}",
     "infraTitle": "इन्फ्रास्ट्रक्चर",
     "infraAccounts": "खाते",
     "infraProviders": "प्रदाता",

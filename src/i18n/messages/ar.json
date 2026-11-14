@@ -2153,6 +2153,7 @@
     "inputTokens": "رموز الإدخال",
     "outputTokens": "رموز الإخراج",
     "estCost": "التكلفة التقديرية",
+    "costSplit": "مُبلّغ {reported} · مُقدَّر {estimated}",
     "infraTitle": "البنية التحتية",
     "infraAccounts": "الحسابات",
     "infraProviders": "المزودون",

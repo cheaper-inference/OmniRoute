@@ -2153,6 +2153,7 @@
     "inputTokens": "טוקני קלט",
     "outputTokens": "טוקני פלט",
     "estCost": "עלות משוערת",
+    "costSplit": "דווח {reported} · אומדן {estimated}",
     "infraTitle": "תשתית",
     "infraAccounts": "חשבונות",
     "infraProviders": "ספקים",

@@ -2153,6 +2153,7 @@
     "inputTokens": "Tokens tal-Input",
     "outputTokens": "Tokens tal-Output",
     "estCost": "Spiża Stmata",
+    "costSplit": "Reportjat {reported} · stmatat {estimated}",
     "infraTitle": "Infrastruttura",
     "infraAccounts": "Kontijiet",
     "infraProviders": "Fornituri",

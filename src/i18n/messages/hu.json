@@ -2153,6 +2153,7 @@
     "inputTokens": "Bemeneti tokenek",
     "outputTokens": "Kimeneti tokenek",
     "estCost": "Becsült költség",
+    "costSplit": "Jelentett {reported} · becsült {estimated}",
     "infraTitle": "Infrastruktúra",
     "infraAccounts": "Fiókok",
     "infraProviders": "Szolgáltatók",

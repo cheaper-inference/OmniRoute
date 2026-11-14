@@ -2153,6 +2153,7 @@
     "inputTokens": "入力トークン数",
     "outputTokens": "出力トークン数",
     "estCost": "推定コスト",
+    "costSplit": "報告 {reported} · 推定 {estimated}",
     "infraTitle": "インフラストラクチャ",
     "infraAccounts": "アカウント",
     "infraProviders": "プロバイダー",

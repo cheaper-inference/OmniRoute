@@ -2153,6 +2153,7 @@
     "inputTokens": "Mga Input Token",
     "outputTokens": "Mga Output Token",
     "estCost": "Tantiyang Gastos",
+    "costSplit": "Na-report {reported} · in-aaklatan {estimated}",
     "infraTitle": "Imprastraktura",
     "infraAccounts": "Mga Account",
     "infraProviders": "Mga Provider",
