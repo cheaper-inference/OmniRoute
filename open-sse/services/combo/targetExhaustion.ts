@@ -46,6 +46,7 @@ import { getCachedClaudeQuotaScopeDecision } from "../claudeQuotaScopeBridge.ts"
 import { resolveProviderId } from "@/shared/constants/providers";
 import { LOCAL_MODEL_COOLDOWN_HEADER } from "../../utils/localCooldownHeader.ts";
 import { isExplicitModelCapacityFailure } from "../accountFallback/perModelFailureScope.ts";
+import { targetSupportsEndpoint } from "./endpointCapabilities.ts";
 import { isModelScopedAccessDenial } from "../accountFallback/modelScopedAccessDenial.ts";
 import type { ComboLogger, ResolvedComboTarget } from "./types.ts";
 
@@ -423,6 +424,16 @@ export function applyComboTargetExhaustion(
   // shared by both combo dispatchers.
   const providerExhausted = isProviderQuotaExhausted(provider, opts);
   if (providerExhausted) {
+    // A web executor attempts one selected account, not the whole provider pool.
+    // Exhausting that account must leave sibling pinned accounts eligible.
+    if (
+      effectiveTarget.connectionId &&
+      (targetSupportsEndpoint(effectiveTarget.modelStr, "search", provider) ||
+        targetSupportsEndpoint(effectiveTarget.modelStr, "web-fetch", provider))
+    ) {
+      sets.exhaustedConnections.add(`${provider}:${effectiveTarget.connectionId}`);
+      return { ...derived, providerExhausted, durableExhaustion: durableMark };
+    }
     markProviderQuotaExhaustion(provider as string, opts);
     return {
       ...derived,

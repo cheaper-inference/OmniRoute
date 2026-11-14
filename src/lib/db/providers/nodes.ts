@@ -14,19 +14,34 @@ function normalizeDailyQuotaResetHour(value: unknown): number | null {
   return value === 0 || value ? Number(value) : null;
 }
 
+function parseStoredJson(storedJson: string | null): unknown {
+  if (!storedJson) return null;
+  try {
+    return JSON.parse(storedJson);
+  } catch {
+    return null;
+  }
+}
+
 function withParsedCustomHeaders(node: JsonRecord, storedJson: string | null): JsonRecord {
   const result: JsonRecord = { ...node };
-  if (storedJson) {
-    try {
-      result.customHeaders = JSON.parse(storedJson);
-    } catch {
-      result.customHeaders = null;
-    }
-  } else {
-    result.customHeaders = null;
-  }
+  result.customHeaders = parseStoredJson(storedJson);
   delete result.customHeadersJson;
+  // Custom JSON API node config (#4929 port): exposed parsed, like rowToCamel does.
+  result.customJsonConfig = parseStoredJson(
+    (result.customJsonConfigJson as string | null | undefined) ?? null
+  );
+  delete result.customJsonConfigJson;
   return result;
+}
+
+/** Stored JSON for a custom JSON API node config; undefined keeps the existing value. */
+function customJsonConfigColumn(data: JsonRecord, existing: JsonRecord | null): string | null {
+  if (data.customJsonConfig !== undefined) {
+    return data.customJsonConfig ? JSON.stringify(data.customJsonConfig) : null;
+  }
+  const stored = existing?.custom_json_config_json;
+  return typeof stored === "string" ? stored : null;
 }
 
 interface StatementLike<TRow = unknown> {
@@ -135,6 +150,7 @@ export async function createProviderNode(data: JsonRecord) {
     // Optional operator-supplied remote icon URL (#2166) — plain TEXT, no JSON parsing needed.
     iconUrl: data.iconUrl || null,
     customHeadersJson,
+    customJsonConfigJson: customJsonConfigColumn(data, null),
     dailyQuotaResetTimezone: data.dailyQuotaResetTimezone || null,
     dailyQuotaResetHour: normalizeDailyQuotaResetHour(data.dailyQuotaResetHour),
     createdAt: now,
@@ -144,8 +160,8 @@ export async function createProviderNode(data: JsonRecord) {
   const result = db
     .prepare(
       `
-    INSERT INTO provider_nodes (id, type, name, prefix, api_type, base_url, chat_path, models_path, icon_url, custom_headers_json, daily_quota_reset_timezone, daily_quota_reset_hour, created_at, updated_at)
-    VALUES (@id, @type, @name, @prefix, @apiType, @baseUrl, @chatPath, @modelsPath, @iconUrl, @customHeadersJson, @dailyQuotaResetTimezone, @dailyQuotaResetHour, @createdAt, @updatedAt)
+    INSERT INTO provider_nodes (id, type, name, prefix, api_type, base_url, chat_path, models_path, icon_url, custom_headers_json, custom_json_config_json, daily_quota_reset_timezone, daily_quota_reset_hour, created_at, updated_at)
+    VALUES (@id, @type, @name, @prefix, @apiType, @baseUrl, @chatPath, @modelsPath, @iconUrl, @customHeadersJson, @customJsonConfigJson, @dailyQuotaResetTimezone, @dailyQuotaResetHour, @createdAt, @updatedAt)
     ON CONFLICT(id) DO NOTHING
   `
     )
@@ -183,6 +199,8 @@ export async function updateProviderNode(id: string, data: JsonRecord) {
     const existingJson = (existing as JsonRecord).custom_headers_json;
     merged["customHeadersJson"] = typeof existingJson === "string" ? existingJson : null;
   }
+  merged["customJsonConfigJson"] = customJsonConfigColumn(data, existing as JsonRecord);
+  delete merged["customJsonConfig"];
 
   db.prepare(
     `
@@ -190,6 +208,7 @@ export async function updateProviderNode(id: string, data: JsonRecord) {
     api_type = @apiType, base_url = @baseUrl, chat_path = @chatPath,
     models_path = @modelsPath, icon_url = @iconUrl,
     custom_headers_json = @customHeadersJson,
+    custom_json_config_json = @customJsonConfigJson,
     daily_quota_reset_timezone = @dailyQuotaResetTimezone,
     daily_quota_reset_hour = @dailyQuotaResetHour,
     updated_at = @updatedAt
@@ -208,6 +227,7 @@ export async function updateProviderNode(id: string, data: JsonRecord) {
     // stored custom icon when the caller submits an empty value.
     iconUrl: merged["iconUrl"] || null,
     customHeadersJson: merged["customHeadersJson"] || null,
+    customJsonConfigJson: merged["customJsonConfigJson"],
     dailyQuotaResetTimezone: merged["dailyQuotaResetTimezone"] || null,
     dailyQuotaResetHour: normalizeDailyQuotaResetHour(merged["dailyQuotaResetHour"]),
     updatedAt: merged["updatedAt"],
