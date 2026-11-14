@@ -13,6 +13,7 @@ export const LAUNCH_FLAG_WORDS = [
   "--model",
   "--provider",
   "--pick",
+  "--all-models",
   "--favorite",
   "--unfavorite",
   "--profile",

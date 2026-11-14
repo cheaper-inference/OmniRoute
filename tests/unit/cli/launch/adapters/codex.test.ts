@@ -261,19 +261,19 @@ test("model outside the view: catalog stays the view, plan warns", () => {
   assert.equal(plan.argv.at(-1), 'model="plain/no-tools"');
 });
 
-test("view limit: at most 100 catalog entries, priority follows view order", () => {
-  const rows = Array.from({ length: 120 }, (_, i) => ({
+test("view limit: at most 500 catalog entries, priority follows view order", () => {
+  const rows = Array.from({ length: 520 }, (_, i) => ({
     id: `bulk/m-${String(i).padStart(3, "0")}`,
     contextTokens: 64000,
     capabilities: ["tool_calling"],
     kind: "model" as const,
   }));
   const ctx = ctxFor({ rows });
-  assert.equal(ctx.view.rows.length, 100);
+  assert.equal(ctx.view.rows.length, 500);
   const plan = adapter.plan(ctx) as LaunchPlan;
   checkPlanInvariants(plan, ctx, { adapter, injectedIds });
   const models = catalog(plan).models;
-  assert.equal(plan.modelList.injected, 100);
+  assert.equal(plan.modelList.injected, 500);
   assert.deepEqual(
     models.slice(0, 3).map((m) => m.priority),
     [0, 1, 2]
@@ -303,4 +303,33 @@ test("expanded catalog is valid Codex JSON with the vendored base instructions",
     for (const key of required) assert.ok(key in model, `${String(model.slug)} has ${key}`);
     assert.equal(model.base_instructions, text);
   }
+});
+
+test("view spread: every provider keeps rows and the view has exactly the cap", () => {
+  const rows = [] as Array<{
+    id: string;
+    contextTokens: number;
+    capabilities: string[];
+    kind: "model";
+  }>;
+  for (const [provider, count] of [
+    ["big", 900],
+    ["mid", 60],
+    ["small", 10],
+  ] as const) {
+    for (let i = 0; i < count; i += 1) {
+      rows.push({
+        id: `${provider}/m-${String(i).padStart(4, "0")}`,
+        contextTokens: 64000,
+        capabilities: ["tool_calling"],
+        kind: "model",
+      });
+    }
+  }
+  const ctx = ctxFor({ rows });
+  assert.equal(ctx.view.rows.length, 500);
+  const providers = new Set(ctx.view.rows.map((r) => r.id.split("/")[0]));
+  assert.deepEqual([...providers].sort(), ["big", "mid", "small"]);
+  assert.equal(adapter.capabilities.modelList.view.spread, "provider");
+  assert.deepEqual(adapter.contract, { major: 1, minor: 3 });
 });

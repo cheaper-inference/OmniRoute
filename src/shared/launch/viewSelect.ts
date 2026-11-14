@@ -8,7 +8,7 @@
  * Pure on purpose: no imports, no I/O, no clock, no randomness. The hash is a self-contained
  * SHA-256 so this module runs unchanged in Node, the CLI bundle and the browser.
  *
- * Order of operations: filter -> order -> dedupe -> limit. Authorization (what the parent key may
+ * Order of operations: filter -> order -> dedupe -> limit (optionally spread across providers). Authorization (what the parent key may
  * see) happens BEFORE this function, server side; selectView can only drop rows, never add.
  *
  * Unknown context (row without a positive `contextTokens`): KEPT by `minContextTokens`, dropped
@@ -59,11 +59,24 @@ export interface ViewSelectSpec {
     excludeIds?: string[];
     /** Keep combo and auto rows. Default true. */
     combos?: boolean;
+    /** Keep built-in `auto` rows (`kind: "auto"`). Default true. False drops them while user
+     *  combos (`kind: "combo"`) stay. Contract 1.3. */
+    auto?: boolean;
+    /** Keep only model rows served by one of these providers: a row matches when its id prefix
+     *  (text before the first `/`) or its `provider` (the catalog `owned_by`) is listed. Combo
+     *  and auto rows are not affected (use `combos` / `auto`). Absent = every provider; an empty
+     *  list keeps no model row. Contract 1.3. */
+    providers?: string[];
   };
   /** "preferences" (default): favorites, then recents, then catalog order. "catalog": as given. */
   order?: "preferences" | "catalog";
   /** Cap on the number of rows, applied last. Absent = no cap. */
   limit?: number;
+  /** How `limit` cuts when it cuts. "head" (default): the first `limit` rows. "provider": the
+   *  favorites/recents first, then the rest round robin across providers (in first-appearance
+   *  order; combo and auto rows form one group), so every provider keeps rows. The result
+   *  stays in view order. Contract 1.3. */
+  spread?: "head" | "provider";
 }
 
 /** One normalized view row (section 2 `LaunchModelView.rows[number]`). */
@@ -83,6 +96,8 @@ export interface ViewCatalogRow extends LaunchViewRow {
   type?: string;
   /** Wire protocols the row is callable over; absent = any. */
   protocols?: ReadonlyArray<WireProtocol>;
+  /** Serving provider as the catalog writes it (`owned_by`); read by `filter.providers`. */
+  provider?: string;
 }
 
 export interface ViewPreferences {
@@ -135,6 +150,55 @@ export function globMatch(pattern: string, value: string): boolean {
   return true;
 }
 
+/** The id prefix before the first `/` ("" when the id has none). */
+export function rowProviderPrefix(row: { id: string }): string {
+  const slash = row.id.indexOf("/");
+  return slash > 0 ? row.id.slice(0, slash) : "";
+}
+
+/** Group key for `spread: "provider"`: combos and autos share one group. */
+function spreadKey(row: ViewCatalogRow): string {
+  if (row.kind === "combo" || row.kind === "auto") return "\u0000combo";
+  return rowProviderPrefix(row) || (typeof row.provider === "string" ? row.provider : "");
+}
+
+/**
+ * Cut `ordered` to `limit` rows: preferred rows (favorites/recents) first, then one row per
+ * provider group per round. The kept rows are returned in their original order.
+ */
+function spreadCut(
+  ordered: ViewCatalogRow[],
+  limit: number,
+  preferred: ReadonlySet<string>
+): ViewCatalogRow[] {
+  if (ordered.length <= limit) return ordered;
+  const keep = new Set<number>();
+  ordered.forEach((row, index) => {
+    if (keep.size < limit && preferred.has(row.id)) keep.add(index);
+  });
+  const groups = new Map<string, number[]>();
+  ordered.forEach((row, index) => {
+    if (keep.has(index)) return;
+    const key = spreadKey(row);
+    const list = groups.get(key);
+    if (list) list.push(index);
+    else groups.set(key, [index]);
+  });
+  const queues = [...groups.values()];
+  for (let round = 0; keep.size < limit; round++) {
+    let added = false;
+    for (const queue of queues) {
+      if (keep.size >= limit) break;
+      if (round < queue.length) {
+        keep.add(queue[round]);
+        added = true;
+      }
+    }
+    if (!added) break;
+  }
+  return ordered.filter((_, index) => keep.has(index));
+}
+
 function rowPasses(row: ViewCatalogRow, spec: ViewSelectSpec): boolean {
   const filter = spec.filter || {};
   if (!row || typeof row.id !== "string" || row.id === "") return false;
@@ -144,6 +208,14 @@ function rowPasses(row: ViewCatalogRow, spec: ViewSelectSpec): boolean {
   if (!(kinds as string[]).includes(rowType)) return false;
 
   if (filter.combos === false && (row.kind === "combo" || row.kind === "auto")) return false;
+  if (filter.auto === false && row.kind === "auto") return false;
+  if (Array.isArray(filter.providers) && row.kind !== "combo" && row.kind !== "auto") {
+    if (!filter.providers.includes(rowProviderPrefix(row))) {
+      if (typeof row.provider !== "string" || !filter.providers.includes(row.provider)) {
+        return false;
+      }
+    }
+  }
 
   if (filter.protocols && filter.protocols.length > 0 && Array.isArray(row.protocols)) {
     if (!row.protocols.some((protocol) => filter.protocols!.includes(protocol))) return false;
@@ -202,9 +274,10 @@ export function selectView(
   }
 
   let ordered = kept;
-  if ((spec.order ?? "preferences") === "preferences") {
+  const usePreferences = (spec.order ?? "preferences") === "preferences";
+  const preferred = usePreferences ? [...(prefs.favorites || []), ...(prefs.recent || [])] : [];
+  if (usePreferences) {
     const rank = new Map<string, number>();
-    const preferred = [...(prefs.favorites || []), ...(prefs.recent || [])];
     for (const id of preferred) if (!rank.has(id)) rank.set(id, rank.size);
     ordered = kept
       .map((row, index) => ({ row, index, rank: rank.has(row.id) ? rank.get(row.id)! : Infinity }))
@@ -213,7 +286,11 @@ export function selectView(
   }
 
   if (typeof spec.limit === "number" && spec.limit >= 0) {
-    ordered = ordered.slice(0, Math.floor(spec.limit));
+    const limit = Math.floor(spec.limit);
+    ordered =
+      spec.spread === "provider"
+        ? spreadCut(ordered, limit, new Set(preferred))
+        : ordered.slice(0, limit);
   }
 
   const ids = ordered.map((row) => row.id);

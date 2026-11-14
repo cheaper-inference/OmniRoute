@@ -53,38 +53,58 @@ function failingFilter(row, spec) {
 }
 
 /**
+ * The default launch narrowing (contract 1.3): model rows of the connected providers only
+ * (`providers` = their id prefixes and catalog `owned_by` ids), no built-in `auto` rows; user
+ * combos stay. `--all-models` skips it.
+ * @param {import("../contract.d.ts").ViewSelectSpec} spec
+ * @param {ReadonlyArray<string>} providers
+ */
+export function connectedViewSpec(spec, providers) {
+  return { ...spec, filter: { ...(spec.filter || {}), providers: [...providers], auto: false } };
+}
+
+/**
  * Compute the launch view from catalog rows.
  *
- * `options.pin` (the explicit `--model`) is always kept: when the adapter's `limit` would cut it,
- * the view becomes the pin first, then the other selected rows in normal order, up to `limit`.
- * A pin that exists in the catalog but fails a view filter is a `ModelUnsuitable` error naming
- * the filter; a pin absent from the catalog is left to the picker (ModelNotFound + suggestions).
+ * `options.providers` (the connected providers' prefixes) narrows the view with
+ * `connectedViewSpec`; absent = the full catalog (`--all-models`, or an older gateway).
+ *
+ * `options.pin` (the explicit `--model`) is always kept, even from a provider outside
+ * `options.providers`: when it is not selected (cut by `limit`, or filtered out by the connected
+ * narrowing) the view becomes the pin first, then the other selected rows, up to `limit`.
+ * A pin that exists in the catalog but fails an adapter view filter is a `ModelUnsuitable` error
+ * naming the filter; a pin absent from the catalog is left to the picker (ModelNotFound +
+ * suggestions).
  * @param {ReadonlyArray<import("../contract.d.ts").ViewCatalogRow>} rows
  * @param {import("../contract.d.ts").LaunchAdapter} adapter
  * @param {import("../contract.d.ts").ViewPreferences} [prefs]
- * @param {{ pin?: string }} [options]
+ * @param {{ pin?: string, providers?: ReadonlyArray<string> }} [options]
  * @returns {{ view: import("../contract.d.ts").LaunchModelView, ids: string[] }}
  */
 export function computeView(rows, adapter, prefs = {}, options = {}) {
-  const spec = effectiveViewSpec(adapter);
+  const base = effectiveViewSpec(adapter);
+  const spec = options.providers ? connectedViewSpec(base, options.providers) : base;
   let selection = selectView(rows, spec, prefs);
   const pin = options.pin;
   if (pin && !selection.ids.includes(pin)) {
-    const unlimited = selectView(rows, { ...spec, limit: undefined }, prefs);
+    const unlimited = selectView(rows, { ...base, limit: undefined }, prefs);
     const index = unlimited.ids.indexOf(pin);
     if (index >= 0) {
       const limit = typeof spec.limit === "number" ? Math.max(1, Math.floor(spec.limit)) : Infinity;
-      const order = [index, ...unlimited.ids.map((_, i) => i).filter((i) => i !== index)];
-      const picked = order.slice(0, limit);
-      const ids = picked.map((i) => unlimited.ids[i]);
-      selection = { ids, rows: picked.map((i) => unlimited.rows[i]), hash: viewHash(ids) };
+      const rest = selectView(
+        (rows || []).filter((row) => row && row.id !== pin),
+        { ...spec, limit: Number.isFinite(limit) ? limit - 1 : undefined },
+        prefs
+      );
+      const ids = [pin, ...rest.ids];
+      selection = { ids, rows: [unlimited.rows[index], ...rest.rows], hash: viewHash(ids) };
     } else {
       const raw = (rows || []).find((row) => row && row.id === pin);
-      const failed = raw ? failingFilter(raw, spec) : null;
+      const failed = raw ? failingFilter(raw, base) : null;
       if (raw && failed) {
         throw new LaunchError(
           "ModelUnsuitable",
-          `model ${pin} does not fit the ${adapter.id} launch view (${spec.name}): it fails the ${failed} filter`
+          `model ${pin} does not fit the ${adapter.id} launch view (${base.name}): it fails the ${failed} filter`
         );
       }
     }

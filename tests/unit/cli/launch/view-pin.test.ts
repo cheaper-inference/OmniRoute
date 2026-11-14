@@ -14,11 +14,11 @@ import kilo from "../../../../bin/cli/launch/adapters/kilo.mjs";
 import codex from "../../../../bin/cli/launch/adapters/codex.mjs";
 import { startStubGateway } from "../../../helpers/launch/stubGateway.mjs";
 
-const PIN_INDEX = 250;
+const PIN_INDEX = 550;
 
-/** 300 tool-capable chat rows in the gateway /v1/models shape. */
+/** 600 tool-capable chat rows (past every adapter cap) in the gateway /v1/models shape. */
 function bigCatalog() {
-  return Array.from({ length: 300 }, (_, i) => ({
+  return Array.from({ length: 600 }, (_, i) => ({
     id: `bulk/model-${String(i).padStart(3, "0")}`,
     object: "model",
     owned_by: "bulk",
@@ -67,7 +67,7 @@ for (const adapter of [opencode, kilo, codex]) {
     assert.ok(!unpinned.ids.includes(PIN), "without the pin the limit cuts it");
   });
 
-  test(`${adapter.id}: --model ${PIN} in a 300-row catalog launches`, async () => {
+  test(`${adapter.id}: --model ${PIN} in a 600-row catalog launches`, async () => {
     const stub = await startStubGateway({ models: bigCatalog() });
     const root = mkdtempSync(join(tmpdir(), "launch-pin-"));
     try {

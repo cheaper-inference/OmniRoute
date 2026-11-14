@@ -26,7 +26,9 @@ const BASE_INSTRUCTIONS_ASSET = "codex/base-instructions.txt";
 const FALLBACK_CONTEXT_WINDOW = 128000;
 const MIN_CONTEXT_TOKENS = 32000;
 /** Each catalog entry carries ~21 KB of base instructions; cap the file at ~2 MB. */
-const VIEW_LIMIT = 100;
+// The catalog goes to a file and a server-side view (gateway max LAUNCH_VIEW_MAX_IDS = 5000), so
+// no env limit applies. 500 keeps the Codex /model picker usable and stays far under 5000.
+const VIEW_LIMIT = 500;
 
 /** Stale OpenAI/Codex credentials removed from the child (launch-codex.mjs:41-48). */
 const STRIPPED_ENV_KEYS = [
@@ -253,7 +255,7 @@ function versionChecks(ctx) {
 }
 
 export default defineAdapter({
-  contract: { major: 1, minor: 1 },
+  contract: { major: 1, minor: 3 },
   id: "codex",
   binaries: ["codex"],
   capabilities: {
@@ -270,6 +272,7 @@ export default defineAdapter({
         },
         order: "preferences",
         limit: VIEW_LIMIT,
+        spread: "provider",
       },
       serve: { shape: "codex" },
       injectLimit: VIEW_LIMIT,
