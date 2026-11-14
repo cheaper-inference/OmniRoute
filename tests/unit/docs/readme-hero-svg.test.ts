@@ -3,6 +3,18 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { renderReadmeHero, HERO_COPY } from "../../../scripts/docs/gen-readme-hero.mjs";
 import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
+import { loadFactsSnapshot } from "../../../scripts/release/facts.mjs";
+
+// The numbers drawn in this diagram are DERIVED (plan 2026-11-13): the release refresh
+// (`npm run release:refresh-derived`) regenerates the SVG from docs/reference/derived-facts.json.
+// Between releases the live code moves ahead of the drawing by design, so the counts gate's
+// readers are run here with the snapshot facts the drawing was generated from, never with the
+// live code. The live comparison is release mode's job.
+const snapshotFacts = loadFactsSnapshot();
+assert.ok(
+  snapshotFacts,
+  "docs/reference/derived-facts.json is missing — run npm run release:refresh-derived"
+);
 
 // The committed hero must be exactly what the generator produces, draw the kit type as
 // outlines, keep every string as text, keep the counts gate's numbers readable as text and
@@ -39,9 +51,11 @@ test("every copy string stays in the file as text", async () => {
   }
 });
 
-test("the counts gate still reads the hero's canonical numbers (live code, same check CI runs)", async () => {
+test("the counts gate still reads the hero's canonical numbers (snapshot facts, same check the release runs)", async () => {
   const svg = await renderReadmeHero();
-  const check = buildChecks().find((c) => c.label === "SVG canonical numbers (live code)");
+  const check = buildChecks({ facts: snapshotFacts }).find(
+    (c) => c.label === "SVG canonical numbers (live code)"
+  );
   assert.ok(check, "the counts gate no longer has the SVG canonical-numbers check");
   const res = check.validate(svg);
   assert.equal(res.ok, true, res.detail);

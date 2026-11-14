@@ -16,14 +16,24 @@
 //                                        even though AGENTS.md calls this document
 //                                        "the full strategy table"
 //
-// The count is asserted against the code rather than hardcoded, so adding a
-// strategy and updating the prose stays a two-step chore instead of a silent lie.
+// Two different things are checked, against two different sources:
+//
+// - The strategy NAMES are checked against the code: a PR that adds a strategy writes its name
+//   into these lists and into the AUTO-COMBO.md table itself (that text is the PR's own content).
+// - The strategy COUNT is a derived number (plan 2026-11-13): feature PRs no longer write it;
+//   `npm run release:refresh-derived` rewrites it and records the same value in
+//   docs/reference/derived-facts.json. Between releases the code count moves ahead of the prose
+//   by design, so the stated counts are compared with the snapshot (written by the same refresh
+//   as the prose), never with the live constant. The snapshot itself must equal the code right
+//   after a refresh; that is the release-mode check (`release:refresh-derived --check`).
+//
 // `quota-share` is deliberately NOT public (`INTERNAL_ROUTING_STRATEGY_VALUES`),
 // so it must never appear in these lists.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 
+import { loadFactsSnapshot } from "../../scripts/release/facts.mjs";
 import {
   INTERNAL_ROUTING_STRATEGY_VALUES,
   ROUTING_STRATEGY_VALUES,
@@ -31,6 +41,14 @@ import {
 
 const PUBLIC = [...ROUTING_STRATEGY_VALUES] as string[];
 const INTERNAL = [...INTERNAL_ROUTING_STRATEGY_VALUES] as string[];
+
+const snapshot = loadFactsSnapshot() as { routingStrategies: number } | null;
+assert.ok(
+  snapshot,
+  "docs/reference/derived-facts.json is missing — run npm run release:refresh-derived"
+);
+/** The strategy count the prose must state: the one recorded by the last refresh. */
+const COUNT = snapshot.routingStrategies;
 
 function doc(path: string): string {
   return readFileSync(new URL(`../../${path}`, import.meta.url), "utf8");
@@ -61,6 +79,9 @@ test("DOC-01: the code exposes a non-trivial public strategy set", () => {
   // Guards the test itself: if the constant ever empties, every count assertion
   // below would pass vacuously.
   assert.ok(PUBLIC.length >= 20, `expected >= 20 public strategies, got ${PUBLIC.length}`);
+  // Same guard for the snapshot count the prose is compared with (it may differ from the code
+  // between releases, by design).
+  assert.ok(COUNT >= 20, `expected >= 20 strategies in derived-facts.json, got ${COUNT}`);
   assert.ok(PUBLIC.includes("quota-weighted"), "quota-weighted must be public");
   assert.ok(!PUBLIC.includes("quota-share"), "quota-share must stay internal");
   assert.deepEqual(INTERNAL, ["quota-share"]);
@@ -73,8 +94,8 @@ test("DOC-01: AGENTS.md states the real count and lists every public strategy", 
   assert.ok(count, "AGENTS.md must state a public-strategy count");
   assert.equal(
     Number(count[1]),
-    PUBLIC.length,
-    `AGENTS.md says ${count[1]} public strategies but the code has ${PUBLIC.length}`
+    COUNT,
+    `AGENTS.md says ${count[1]} public strategies but derived-facts.json has ${COUNT}`
   );
 
   const line = text.split("\n").find((l) => /public strategies/.test(l)) ?? "";
@@ -95,8 +116,8 @@ test("DOC-01: the AGENTS.md reference-table row agrees with the code", () => {
   assert.ok(count, "the reference-table row must state a strategy count");
   assert.equal(
     Number(count[1]),
-    PUBLIC.length,
-    `the reference-table row says ${count[1]} strategies, code has ${PUBLIC.length}`
+    COUNT,
+    `the reference-table row says ${count[1]} strategies, derived-facts.json has ${COUNT}`
   );
 });
 
@@ -110,8 +131,8 @@ test("DOC-01: open-sse/services/AGENTS.md states the real count and full list", 
   assert.ok(count, "the strategies line must state a count in parentheses");
   assert.equal(
     Number(count[1]),
-    PUBLIC.length,
-    `open-sse/services/AGENTS.md says ${count[1]}, code has ${PUBLIC.length}`
+    COUNT,
+    `open-sse/services/AGENTS.md says ${count[1]}, derived-facts.json has ${COUNT}`
   );
 
   // `P2C` is the one documented in caps; normalize so the check is not a
@@ -132,8 +153,8 @@ test("DOC-01: AUTO-COMBO.md count and full strategy table match the code", () =>
   for (const count of counts) {
     assert.equal(
       count,
-      PUBLIC.length,
-      `AUTO-COMBO.md states ${count} strategies, code has ${PUBLIC.length}`
+      COUNT,
+      `AUTO-COMBO.md states ${count} strategies, derived-facts.json has ${COUNT}`
     );
   }
 
@@ -160,8 +181,8 @@ test("DOC-01: the bs i18n fork agrees with the code too", () => {
   assert.ok(count, "the bs mirror must state a strategy count");
   assert.equal(
     Number(count[1]),
-    PUBLIC.length,
-    `docs/i18n/bs/AGENTS.md says ${count[1]}, code has ${PUBLIC.length}`
+    COUNT,
+    `docs/i18n/bs/AGENTS.md says ${count[1]}, derived-facts.json has ${COUNT}`
   );
 
   const missing = PUBLIC.filter((strategy) => !line.includes(strategy));

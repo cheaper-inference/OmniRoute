@@ -225,6 +225,8 @@
     "check:changelog-integrity": "node scripts/check/check-changelog-integrity.mjs",
     "sweep:stale-fragments": "node scripts/release/sweep-stale-fragments.mjs",
     "changelog:aggregate": "node scripts/release/aggregate-changelog.mjs",
+    "facts": "node scripts/release/facts.mjs",
+    "release:refresh-derived": "node scripts/release/refresh-derived.mjs",
     "check:agent-skills-sync": "node --import tsx/esm scripts/skills/generate-agent-skills.mjs",
     "check:build-scope": "node scripts/check/check-build-scope.mjs",
     "check:error-helper": "node scripts/check/check-error-helper.mjs",

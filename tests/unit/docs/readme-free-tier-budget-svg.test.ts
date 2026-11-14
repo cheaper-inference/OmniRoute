@@ -8,6 +8,18 @@ import {
   fmtWords,
 } from "../../../scripts/docs/gen-readme-free-tier-budget.mjs";
 import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
+import { loadFactsSnapshot } from "../../../scripts/release/facts.mjs";
+
+// The numbers drawn in this diagram are DERIVED (plan 2026-11-13): the release refresh
+// (`npm run release:refresh-derived`) regenerates the SVG from docs/reference/derived-facts.json.
+// Between releases the live code moves ahead of the drawing by design, so the counts gate's
+// readers are run here with the snapshot facts the drawing was generated from, never with the
+// live code. The live comparison is release mode's job.
+const snapshotFacts = loadFactsSnapshot();
+assert.ok(
+  snapshotFacts,
+  "docs/reference/derived-facts.json is missing — run npm run release:refresh-derived"
+);
 
 // The committed free-tier budget card must be exactly what the generator produces from the live
 // catalog, draw the kit type as outlines, keep every string as text, keep the counts gate's
@@ -44,9 +56,9 @@ test("every copy string stays in the file as text", async () => {
   }
 });
 
-test("the counts gate's own readers of this file accept the generated content (live code)", async () => {
+test("the counts gate's own readers of this file accept the generated content (snapshot facts)", async () => {
   const svg = await renderReadmeFreeTierBudget();
-  const checks = buildChecks().filter(
+  const checks = buildChecks({ facts: snapshotFacts }).filter(
     (c) => Array.isArray(c.files) && c.files.includes("docs/diagrams/free-tier-budget.svg")
   );
   assert.ok(checks.length > 0, "the counts gate no longer reads free-tier-budget.svg");
