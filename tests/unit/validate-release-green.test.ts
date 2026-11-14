@@ -287,6 +287,13 @@ test("migration-numbering and migrations-fresh are HARD gates, numbering first",
     "migration-numbering must run check:migration-numbering as a HARD gate"
   );
   assert.doesNotMatch(src, /driftCmd\(\s*"migration-numbering"/);
+  // Push/schedule runs have no PR base: the step compares the tree with the newest release
+  // tag instead, so a non-commuting pair that landed by a manual merge is still caught.
+  assert.match(
+    src,
+    /hardCmd\(\s*"migration-numbering"[\s\S]*?\["run",\s*"check:migration-numbering",\s*"--",\s*"--base-latest-tag"\]/,
+    "migration-numbering must compare with the latest release tag (--base-latest-tag)"
+  );
   const numberingAt = src.search(/hardCmd\(\s*"migration-numbering"/);
   const freshAt = src.search(/hardCmd\(\s*"migrations-fresh"/);
   assert.ok(

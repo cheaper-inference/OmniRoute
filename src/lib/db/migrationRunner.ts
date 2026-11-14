@@ -296,10 +296,14 @@ export function getMigrationFiles(): Array<{ version: string; name: string; path
         `that is not yet on main or on any release/* branch (regenerate its name with ` +
         `\`npm run db:new-migration -- <description>\`); the other one may already have ` +
         `run on user databases under its current name, and renaming it would apply it again. ` +
-        `If both are already merged, rename the later one and add a ` +
-        `RENAMED_MIGRATION_COMPATIBILITY entry from its old version and name to the new ` +
-        `ones, so databases that applied it under the old version do not run it again. ` +
-        `See _tasks/features-v3.8.4/9route/POST-MERGE-AUDIT.md.`
+        `If both are already merged, rename the later one WITHOUT changing its content and ` +
+        `add a RENAMED_MIGRATION_COMPATIBILITY entry from its old version and name to the ` +
+        `new ones, so databases that applied it under the old version do not run it again ` +
+        `(check:migration-numbering accepts that rename only with the entry and identical ` +
+        `content, and checks that the new position does not change the schema and that ` +
+        `upgraded databases do not run it again, so pick a new timestamp near the old one, ` +
+        `never the same timestamp with another name, which the runner would apply again; a ` +
+        `schema change goes in a new migration). See docs/ops/DATABASE_GUIDE.md.`
     );
   }
 

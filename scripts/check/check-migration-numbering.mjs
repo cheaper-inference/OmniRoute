@@ -19,11 +19,22 @@
 //     quebraria no boot.
 // As migrations por data não são sequenciais: não criam buraco nem entram na faixa antiga.
 // Por isso o gate também COMPARA COM A BASE (scripts/check/lib/migrationBaseDiff.mjs):
-// migration da base apagada ou renomeada → falha; editada → aviso; por data adicionada com
-// carimbo ≤ o maior da base → checagem de comutação (scripts/check/migration-commutation.ts).
-// Base: `--base <ref>`, env MIGRATION_BASE_REF ou, em PR/fila do GitHub, o 1º pai do merge
-// ref / merge_group.base_sha / merge-base com origin/$GITHUB_BASE_REF (falha fechada sem
-// base). Fora de CI e sem base, a comparação é pulada.
+//   - migration da base apagada ou renomeada → falha, tenha saído numa tag ou não (builds
+//     da branch de release já a rodaram), exceto renomeação coberta por entrada de
+//     RENAMED_MIGRATION_COMPATIBILITY com conteúdo idêntico (aviso + checagem de comutação,
+//     qualquer que seja o carimbo novo, com --must-not-apply <alvo>: falha se o runner real
+//     aplicar o alvo de novo num banco atualizado); renomeação que mantém a versão (só a
+//     descrição muda) falha sempre, com ou sem entrada;
+//   - editada → aviso + checagem de comutação (falha se o schema final diverge);
+//   - por data adicionada com carimbo ≤ o maior da base → checagem de comutação
+//     (scripts/check/migration-commutation.ts); fora de ordem, editada ou renomeada com DML
+//     → aviso; migration do PR que não aplica depois de todas as da base → falha com dica
+//     de corrigir o SQL;
+//   - formato antigo adicionado abaixo do maior número antigo da base → falha.
+// Base: `--base <ref>`, `--base-latest-tag` (maior tag vX.Y.Z do histórico; Release-Green),
+// env MIGRATION_BASE_REF ou, em PR/fila do GitHub, o 1º pai do merge ref /
+// merge_group.base_sha / merge-base com origin/$GITHUB_BASE_REF (falha fechada sem base).
+// Fora de CI e sem base, a comparação é pulada.
 // Regras de nome compartilhadas com o gerador: scripts/check/lib/migrationNaming.mjs.
 // As anomalias conhecidas são derivadas das listas de migrationRunner.ts
 // (LEGACY_VERSION_SLOT_MIGRATIONS / SUPERSEDED_DUPLICATE_MIGRATIONS) + a auditoria
@@ -35,13 +46,18 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { assertNoStale } from "./lib/allowlist.mjs";
 import {
+  APPLIED_AGAIN_PHRASE,
+  classifyRemovals,
   findBaseDiffAnomalies,
   listBaseMigrations,
   listHeadMigrations,
   MIGRATIONS_REL_DIR,
+  NOT_AFTER_BASE_PHRASE,
   parseGateArgs,
+  readRenamedMigrationCompatibility,
   resolveBaseRef,
   runCommutationCheck,
+  sqlHasDml,
 } from "./lib/migrationBaseDiff.mjs";
 import {
   classifyMigrationFilename,
@@ -279,14 +295,105 @@ const RESTORE_HINT = (version) =>
   `restaure com git checkout <base> -- ${MIGRATIONS_REL_DIR}/${version}_*.sql; nunca libere na allowlist`;
 
 /**
+ * Motivo da renomeação que mantém a versão (só a descrição muda): com a entrada de
+ * compatibilidade, reconcileRenumberedMigrations (src/lib/db/migrationRunner/schemaState.ts,
+ * caso isSameSlotReplacement) apaga a linha do ledger e aplica o arquivo de novo.
+ */
+const SAME_VERSION_RENAME_REASON =
+  "o runner trata a mesma versão com outro nome como migration nova e a aplicaria de novo nos " +
+  "bancos que já a rodaram; use outro carimbo + entrada de compatibilidade, ou mantenha o nome";
+
+/** Aviso não bloqueante: anotação no GitHub Actions, linha ⚠ fora dele. */
+function warn(env, name, message) {
+  if (env.GITHUB_ACTIONS === "true") {
+    console.log(`::warning file=${MIGRATIONS_REL_DIR}/${name}::${message}`);
+  } else {
+    console.log(`  ⚠ ${name}: ${message}`);
+  }
+}
+
+const indent = (text) =>
+  text
+    .split("\n")
+    .map((line) => `      ${line}`)
+    .join("\n");
+
+/**
+ * Arquivos da base que sumiram do disco. Regra estrita: falha sempre, exceto a renomeação
+ * coberta por entrada de RENAMED_MIGRATION_COMPATIBILITY com conteúdo idêntico (aviso). Uma
+ * tag de release não muda nada: todo push numa release/v* já rodou a migration em bancos
+ * reais (homologação, Docker :next, VPS, sync do Enterprise). Devolve as falhas e as
+ * renomeações cobertas, que sempre passam pela checagem de comutação.
+ *
+ * @returns {{ problems: string[], renamed: Array<{ name: string, to: string }> }}
+ */
+function checkRemovals({ env, removed, baseFiles, headFiles }) {
+  if (removed.length === 0) return { problems: [], renamed: [] };
+  const compat = readRenamedMigrationCompatibility(cwd);
+  const verdict = classifyRemovals({ removed, baseFiles, headFiles, compat });
+
+  const problems = [];
+  for (const { name, to, covered } of verdict.renamedSameVersion) {
+    const version = name.slice(0, name.indexOf("_"));
+    problems.push(
+      `  ✗ ${name}: renomeada para ${to} mantendo a versão ${version}` +
+        `${covered ? " (com entrada em RENAMED_MIGRATION_COMPATIBILITY)" : ""}. ` +
+        (covered
+          ? SAME_VERSION_RENAME_REASON
+          : `Sem entrada, o runner a pula pela versão nos bancos que já a rodaram (um conteúdo ` +
+            `novo nunca roda neles) e acusa a renumeração a cada boot; com uma entrada no ` +
+            `mesmo carimbo, ${SAME_VERSION_RENAME_REASON}`) +
+        `\n    → restaure com git checkout <base> -- ${MIGRATIONS_REL_DIR}/${name}`
+    );
+  }
+  for (const { name, to } of verdict.renamedCovered) {
+    warn(
+      env,
+      name,
+      `renomeada para ${to}, coberta pela entrada de RENAMED_MIGRATION_COMPATIBILITY ` +
+        `(conteúdo idêntico): bancos que já a aplicaram só têm a linha do ledger movida e não ` +
+        `a rodam de novo. A checagem de comutação confere a posição nova e que o runner não ` +
+        `a roda de novo num banco atualizado.`
+    );
+  }
+  for (const { name, to } of verdict.renamedChanged) {
+    problems.push(
+      `  ✗ ${name}: renomeada para ${to} com entrada em RENAMED_MIGRATION_COMPATIBILITY, mas o ` +
+        `conteúdo mudou; bancos que já a aplicaram só têm a linha do ledger movida e nunca ` +
+        `rodam o conteúdo novo. Mantenha o conteúdo idêntico na renomeação e faça a mudança ` +
+        `numa migration nova (npm run db:new-migration)`
+    );
+  }
+  for (const { name, renamedTo } of verdict.forbidden) {
+    problems.push(
+      `  ✗ ${name}: migration já mesclada não pode ser apagada nem renomeada` +
+        `${renamedTo ? ` (renomeada para ${renamedTo}?)` : ""}. Os builds da branch de ` +
+        `release (homologação, Docker :next, VPS, sync do Enterprise) já a rodaram, mesmo sem ` +
+        `tag: apagar deixa instalações novas sem ela, renomear a roda de novo nos bancos que ` +
+        `já a aplicaram.\n` +
+        `    → restaure com git checkout <base> -- ${MIGRATIONS_REL_DIR}/${name}\n` +
+        `    → para reverter, mantenha o arquivo e desfaça o schema numa migration nova: npm ` +
+        `run db:new-migration -- <descrição>, com DROP ... IF EXISTS\n` +
+        `    → para renomear (ex.: colisão de carimbo), mantenha o conteúdo idêntico, adicione ` +
+        `uma entrada em RENAMED_MIGRATION_COMPATIBILITY (src/lib/db/migrationRunner/` +
+        `constants.ts) e use um carimbo novo, diferente do antigo e perto dele (o mesmo ` +
+        `carimbo com outro nome é recusado: o runner a rodaria de novo): a checagem de ` +
+        `comutação confere a posição nova e que o banco atualizado não a roda de novo`
+    );
+  }
+  return { problems, renamed: verdict.renamedCovered };
+}
+
+/**
  * Comparação com a base. Devolve as linhas de problema (falha) e imprime avisos e notas.
  *
- * @param {{ argvBase: string | null, regularNames: string[], staticProblems: number }} input
+ * @param {{ argvBase: string | null, baseLatestTag: boolean, regularNames: string[],
+ *   staticProblems: number }} input
  * @returns {string[]}
  */
-function compareWithBase({ argvBase, regularNames, staticProblems }) {
+function compareWithBase({ argvBase, baseLatestTag, regularNames, staticProblems }) {
   const env = process.env;
-  const base = resolveBaseRef({ cwd, cliBase: argvBase, env });
+  const base = resolveBaseRef({ cwd, cliBase: argvBase, latestTag: baseLatestTag, env });
   if (base.status === "skipped") {
     console.log("[check-migration-numbering] comparação com a base: pulada (sem --base)");
     return [];
@@ -301,74 +408,161 @@ function compareWithBase({ argvBase, regularNames, staticProblems }) {
   } catch (err) {
     return [`  ✗ comparação com a base: ${err instanceof Error ? err.message : String(err)}`];
   }
-  const { removed, modified, addedOutOfOrder, baseMaxTimestamp } = findBaseDiffAnomalies({
-    baseFiles,
-    headFiles,
-  });
+  const { removed, modified, addedOutOfOrder, addedLegacyBelowBase, baseMaxTimestamp } =
+    findBaseDiffAnomalies({ baseFiles, headFiles });
   console.log(
     `[check-migration-numbering] comparação com a base ${base.sha.slice(0, 12)} (${base.label}): ` +
       `${baseFiles.size} migration(s) na base`
   );
 
   const problems = [];
-  for (const { name, renamedTo } of removed) {
+  let renamed = [];
+  try {
+    const removals = checkRemovals({ env, removed, baseFiles, headFiles });
+    problems.push(...removals.problems);
+    renamed = removals.renamed;
+  } catch (err) {
     problems.push(
-      `  ✗ ${name}: migration já mesclada não pode ser apagada nem renomeada` +
-        (renamedTo ? ` (renomeada para ${renamedTo}?)` : "") +
-        `; restaure com git checkout <base> -- ${MIGRATIONS_REL_DIR}/${name} e, se precisa ` +
-        `mudar o schema, crie uma nova com npm run db:new-migration (bancos que já a ` +
-        `aplicaram a rodariam de novo, e instalações novas ficariam sem ela)`
+      `  ✗ comparação com a base (remoções): ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
+
+  for (const name of addedLegacyBelowBase) {
+    problems.push(
+      `  ✗ ${name}: a série antiga está congelada (o número fica abaixo da maior migration ` +
+        `antiga da base); migrations novas usam carimbo: npm run db:new-migration`
     );
   }
 
   for (const name of modified) {
-    const message =
+    warn(
+      env,
+      name,
       `conteúdo alterado de migration já mesclada ${name}: bancos que já a aplicaram NÃO ` +
-      `rodam a versão nova. Só corrija assim se a mudança for inócua para eles (ex.: ` +
-      `tornar idempotente); senão crie uma nova com npm run db:new-migration.`;
-    if (env.GITHUB_ACTIONS === "true") {
-      console.log(`::warning file=${MIGRATIONS_REL_DIR}/${name}::${message}`);
-    } else {
-      console.log(`  ⚠ ${message}`);
+        `rodam a versão nova. Só corrija assim se a mudança for inócua para eles (ex.: ` +
+        `tornar idempotente); senão crie uma nova com npm run db:new-migration. A checagem ` +
+        `de comutação confere que o schema final não muda.`
+    );
+  }
+
+  // A covered rename always commutes, whatever its new stamp: fresh installs apply it at the
+  // new position, upgraded databases only get the ledger row moved (B-1). A rename target
+  // with an old stamp is not "out of order" for the hints: it was merged under its old name.
+  const renamedTargets = new Set(renamed.map((item) => item.to));
+  const outOfOrder = addedOutOfOrder.filter((name) => !renamedTargets.has(name));
+  const toCommute = [...new Set([...outOfOrder, ...modified, ...renamedTargets])].sort();
+  for (const name of toCommute) {
+    let sql;
+    try {
+      sql = fs.readFileSync(path.join(MIGRATIONS_DIR, name), "utf-8");
+    } catch {
+      continue;
+    }
+    if (sqlHasDml(sql)) {
+      warn(
+        env,
+        name,
+        `tem DML (INSERT/UPDATE/DELETE/REPLACE) e está fora de ordem, foi editada ou ` +
+          `renomeada: a checagem de comutação não compara dados. Revise se a ordem em que ` +
+          `bancos atualizados e novos a aplicam muda o resultado.`
+      );
     }
   }
 
-  if (addedOutOfOrder.length === 0) return problems;
+  if (toCommute.length === 0) return problems;
+  const renamedList = renamed.map(({ name, to }) => `${name} → ${to}`).join(", ");
+  const scope = [
+    outOfOrder.length > 0 ? `fora de ordem: ${outOfOrder.join(", ")}` : null,
+    modified.length > 0 ? `editadas: ${modified.join(", ")}` : null,
+    renamed.length > 0 ? `renomeadas: ${renamedList}` : null,
+  ]
+    .filter(Boolean)
+    .join("; ");
   if (problems.length > 0 || staticProblems > 0) {
-    console.log(
-      `  ℹ checagem de comutação pulada até corrigir as anomalias acima ` +
-        `(${addedOutOfOrder.join(", ")})`
-    );
+    console.log(`  ℹ checagem de comutação pulada até corrigir as anomalias acima (${scope})`);
     return problems;
   }
 
+  // The upgraded path keeps every base file, renamed ones under their OLD name: the runner
+  // relocates their ledger row through the RENAMED_MIGRATION_COMPATIBILITY entry. Each rename
+  // target goes in --must-not-apply (C2): the checker fails if the real runner applies it
+  // again on the upgraded database, which also catches an entry the text parser misread.
   const result = runCommutationCheck({
     cwd,
     baseFiles,
     migrationsDir: MIGRATIONS_DIR,
     headNames: regularNames,
+    mustNotApply: [...renamedTargets],
     env,
   });
-  if (result.status === "equal") {
-    for (const name of addedOutOfOrder) {
+  if (result.status !== "error" && result.output.includes(APPLIED_AGAIN_PHRASE)) {
+    // Checked before "equal": a rename target applied again is a failure even if the final
+    // schema matches (idempotent SQL, or DML the schema comparison does not see).
+    problems.push(
+      `  ✗ migration renomeada rodaria de novo (${scope}):\n` +
+        indent(result.output) +
+        `\n    → o runner não reconhece a renomeação; confira a entrada em ` +
+        `RENAMED_MIGRATION_COMPATIBILITY (versão e nome antigos e novos)`
+    );
+  } else if (result.status === "equal") {
+    for (const name of outOfOrder) {
       console.log(
         `  ℹ ${name}: fora de ordem, mas comuta (carimbo ≤ ${baseMaxTimestamp}, o maior da ` +
           `base; banco atualizado e banco novo terminam com o mesmo schema)`
       );
     }
-  } else if (result.status === "different") {
+    for (const name of modified) {
+      console.log(
+        `  ℹ ${name}: editada, mas banco atualizado e banco novo terminam com o mesmo schema`
+      );
+    }
+    for (const { name, to } of renamed) {
+      console.log(
+        `  ℹ ${to}: renomeada de ${name}, mas banco atualizado e banco novo terminam com o ` +
+          `mesmo schema`
+      );
+    }
+  } else if (result.status === "different" && result.output.includes(NOT_AFTER_BASE_PHRASE)) {
+    // C1: a PR migration fails on the upgraded path (on its own or on both paths). Renaming
+    // is not the fix by default; it only helps when the file depends on another PR migration
+    // with a later stamp.
     problems.push(
-      `  ✗ fora de ordem e NÃO comuta (${addedOutOfOrder.join(", ")}: carimbo ≤ ` +
-        `${baseMaxTimestamp}, o maior da base): banco atualizado e banco novo divergem:\n` +
-        result.output
-          .split("\n")
-          .map((line) => `      ${line}`)
-          .join("\n") +
-        `\n    → regere o nome com npm run db:new-migration (renomear é seguro: o arquivo ` +
-        `ainda não foi mesclado)`
+      `  ✗ migration do PR não aplica (${scope}):\n` +
+        indent(result.output) +
+        `\n    → corrija o SQL contra o schema atual da base; se ela depende de outra migration ` +
+        `do PR com carimbo maior, regere o nome com npm run db:new-migration`
+    );
+  } else if (result.status === "different") {
+    const hints = [];
+    if (outOfOrder.length > 0) {
+      hints.push(
+        `    → fora de ordem (${outOfOrder.join(", ")}; carimbo ≤ ${baseMaxTimestamp}, o ` +
+          `maior da base): regere o nome com npm run db:new-migration (renomear é seguro: o ` +
+          `arquivo ainda não foi mesclado)`
+      );
+    }
+    if (modified.length > 0) {
+      hints.push(
+        `    → editadas (${modified.join(", ")}): bancos atualizados não reaplicam a migration ` +
+          `editada (ela já está no ledger); devolva o conteúdo da base e faça a mudança numa ` +
+          `migration nova (npm run db:new-migration)`
+      );
+    }
+    if (renamed.length > 0) {
+      hints.push(
+        `    → renomeadas (${renamedList}): a renomeação muda a posição da migration em ` +
+          `instalações novas, mas não em bancos atualizados (o runner só move a linha do ` +
+          `ledger); desfaça a renomeação (volte ao nome antigo) ou escolha outro carimbo novo, ` +
+          `perto do antigo, em que ela comute; nunca o mesmo carimbo com outro nome`
+      );
+    }
+    problems.push(
+      `  ✗ checagem de comutação (${scope}): banco atualizado e banco novo divergem:\n` +
+        indent(result.output) +
+        `\n${hints.join("\n")}`
     );
   } else {
-    const message = `checagem de comutação não rodou para ${addedOutOfOrder.join(", ")}: ${result.output}`;
+    const message = `checagem de comutação não rodou (${scope}): ${result.output}`;
     if (isCi(env)) problems.push(`  ✗ ${message}`);
     else console.log(`  ⚠ ${message} (fora de CI: só aviso)`);
   }
@@ -444,7 +638,12 @@ function main() {
 
   const staticProblems = problems.length;
   problems.push(
-    ...compareWithBase({ argvBase: args.base, regularNames: filenames, staticProblems })
+    ...compareWithBase({
+      argvBase: args.base,
+      baseLatestTag: args.baseLatestTag,
+      regularNames: filenames,
+      staticProblems,
+    })
   );
 
   if (problems.length > 0) {
