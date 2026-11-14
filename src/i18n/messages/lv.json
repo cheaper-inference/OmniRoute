@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "Tādējādi pašlaik pievienotie nodrošinātāji/modeļi, kas atbilst šai veidnei, tiks saglabāti rediģējamā kombinācijā.",
     "duplicateAutoComboFailedPrefix": "Neizdevās dublēt automātisko kombināciju:",
     "duplicateAutoComboUnknownError": "Nezināma kļūda",
-    "duplicateAutoComboTitle": "Izveidot statisku kombināciju no {name}"
+    "duplicateAutoComboTitle": "Izveidot statisku kombināciju no {name}",
+    "endpointBehaviorTitle": "Galapunkta uzvedība",
+    "endpointBehaviorDescription": "Neatkarīgi konfigurējiet mērķus un maršrutēšanas stratēģiju katrai API iespējai. Tukšas iespējas netiek saglabātas. Tērzēšana joprojām ir ar mantojumu saderīga noklusējuma funkcija.",
+    "endpointTabsAria": "Kombinētās iespējas",
+    "endpointChatTargetRequired": "Pievienojiet vismaz vienu tērzēšanas mērķi, lai kombinācija būtu saderīga ar klientiem.",
+    "endpointWeightedRouteTotalInvalid": "Katram svērtajam spēju maršrutam ir jābūt 100%.",
+    "endpointTabs": {
+      "chat": "Tērzēšana",
+      "search": "Meklēt",
+      "web-fetch": "Atnest",
+      "embeddings": "Iegulumi",
+      "rerank": "Pārrindot",
+      "images": "Attēli",
+      "image-edits": "Attēlu labojumi",
+      "videos": "Video",
+      "music": "Mūzika",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Audio tulkošana",
+      "audio-generation": "Skaņas ģenerēšana"
+    }
   },
   "costs": {
     "title": "Izmaksas",

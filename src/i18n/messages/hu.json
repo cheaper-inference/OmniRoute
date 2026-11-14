@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "Ez rögzíti az éppen csatlakoztatott szolgáltatókat/modelleket, amelyek megfelelnek ennek a sablonnak, egy szerkeszthető kombinációba.",
     "duplicateAutoComboFailedPrefix": "Az automatikus kombináció duplikálása sikertelen:",
     "duplicateAutoComboUnknownError": "Ismeretlen hiba",
-    "duplicateAutoComboTitle": "Hozzon létre statikus kombinációt a(z) {name}-ból"
+    "duplicateAutoComboTitle": "Hozzon létre statikus kombinációt a(z) {name}-ból",
+    "endpointBehaviorTitle": "Végpont viselkedése",
+    "endpointBehaviorDescription": "Konfigurálja a célokat és az útválasztási stratégiát függetlenül minden egyes API képességhez. Az üres képességek nem kerülnek mentésre. A chat továbbra is az örökölt-kompatibilis alapértelmezett.",
+    "endpointTabsAria": "Kombinált képesség",
+    "endpointChatTargetRequired": "Adjon hozzá legalább egy csevegési célt, hogy a kombináció kompatibilis legyen az ügyfelekkel.",
+    "endpointWeightedRouteTotalInvalid": "Minden súlyozott képességútnak 100%-os össztömegűnek kell lennie.",
+    "endpointTabs": {
+      "chat": "Csevegés",
+      "search": "Keresés",
+      "web-fetch": "Fetch",
+      "embeddings": "Beágyazások",
+      "rerank": "Rerank",
+      "images": "Képek",
+      "image-edits": "Képszerkesztések",
+      "videos": "Videó",
+      "music": "Zene",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Hangfordítás",
+      "audio-generation": "Hanggenerálás"
+    }
   },
   "costs": {
     "title": "Költségek",

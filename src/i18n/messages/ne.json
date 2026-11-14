@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "यसले यो टेम्प्लेटसँग मेल खाने हाल जडान भएका प्रदायक/मोडेलहरूको स्न्यापसट लिएर सम्पादनयोग्य कम्बो बनाउनेछ।",
     "duplicateAutoComboFailedPrefix": "स्वचालित कम्बो डुप्लिकेट गर्न असफल भयो:",
     "duplicateAutoComboUnknownError": "अज्ञात त्रुटि",
-    "duplicateAutoComboTitle": "{name} बाट स्थिर कम्बो सिर्जना गर्नुहोस्"
+    "duplicateAutoComboTitle": "{name} बाट स्थिर कम्बो सिर्जना गर्नुहोस्",
+    "endpointBehaviorTitle": "अन्तिम बिन्दु व्यवहार",
+    "endpointBehaviorDescription": "प्रत्येक API क्षमताको लागि स्वतन्त्र रूपमा लक्ष्य र मार्ग रणनीति कन्फिगर गर्नुहोस्। खाली क्षमताहरू बचत गरिएका छैनन्। च्याट लेगेसी-कम्प्याटिबल डिफल्ट रहन्छ।",
+    "endpointTabsAria": "कम्बो क्षमता",
+    "endpointChatTargetRequired": "ग्राहकहरूसँग कम्बो मिल्दो राख्न कम्तिमा एउटा च्याट लक्ष्य थप्नुहोस्।",
+    "endpointWeightedRouteTotalInvalid": "प्रत्येक भारित क्षमता मार्गमा 100% को कुल वजन हुनुपर्छ।",
+    "endpointTabs": {
+      "chat": "च्याट",
+      "search": "खोज्नुहोस्",
+      "web-fetch": "ल्याउनुहोस्",
+      "embeddings": "इम्बेडिङहरू",
+      "rerank": "पुन: क्रमबद्ध गर्नुहोस्",
+      "images": "छविहरू",
+      "image-edits": "छवि सम्पादनहरू",
+      "videos": "भिडियो",
+      "music": "संगीत",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "अडियो अनुवाद",
+      "audio-generation": "ध्वनि पुस्ता"
+    }
   },
   "costs": {
     "title": "लागत",

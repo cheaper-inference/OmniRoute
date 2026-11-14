@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "سيؤدي هذا إلى التقاط المزودين/النماذج المتصلة حاليًا التي تطابق هذا القالب في مجموعة قابلة للتحرير.",
     "duplicateAutoComboFailedPrefix": "فشل تكرار المجموعة التلقائية:",
     "duplicateAutoComboUnknownError": "خطأ غير معروف",
-    "duplicateAutoComboTitle": "إنشاء مجموعة ثابتة من {name}"
+    "duplicateAutoComboTitle": "إنشاء مجموعة ثابتة من {name}",
+    "endpointBehaviorTitle": "سلوك نقطة النهاية",
+    "endpointBehaviorDescription": "قم بتكوين الأهداف وإستراتيجية التوجيه بشكل مستقل لكل قدرة API. لا يتم حفظ القدرات الفارغة. تظل الدردشة هي الخيار الافتراضي المتوافق مع القديم.",
+    "endpointTabsAria": "القدرة على التحرير والسرد",
+    "endpointChatTargetRequired": "قم بإضافة هدف دردشة واحد على الأقل للحفاظ على توافق المجموعة مع العملاء.",
+    "endpointWeightedRouteTotalInvalid": "يجب أن يكون لكل مسار قدرة مرجحة وزن إجمالي قدره 100%.",
+    "endpointTabs": {
+      "chat": "محادثة",
+      "search": "يبحث",
+      "web-fetch": "أحضر",
+      "embeddings": "التضمين",
+      "rerank": "إعادة الترتيب",
+      "images": "الصور",
+      "image-edits": "تعديلات الصور",
+      "videos": "فيديو",
+      "music": "موسيقى",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "الترجمة الصوتية",
+      "audio-generation": "توليد الصوت"
+    }
   },
   "costs": {
     "title": "التكاليف",

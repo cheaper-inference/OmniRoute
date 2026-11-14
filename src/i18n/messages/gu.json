@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "આ ટેમપ્લેટ સાથે મેચ થતા વર્તમાન જોડાયેલા પ્રદાતાઓ/મોડેલને સંપાદનીય કોમ્બોમાં સ્નેપશોટ લેશે.",
     "duplicateAutoComboFailedPrefix": "ઓટોકોમ્બો ડુપ્લિકેટ કરવામાં નિષ્ફળ:",
     "duplicateAutoComboUnknownError": "અજ્ઞાત ભૂલ",
-    "duplicateAutoComboTitle": "{name} માંથી સ્ટેટિક કોમ્બો બનાવો"
+    "duplicateAutoComboTitle": "{name} માંથી સ્ટેટિક કોમ્બો બનાવો",
+    "endpointBehaviorTitle": "અંતિમ બિંદુ વર્તન",
+    "endpointBehaviorDescription": "દરેક API ક્ષમતા માટે લક્ષ્યો અને રૂટીંગ વ્યૂહરચના સ્વતંત્ર રીતે ગોઠવો. ખાલી ક્ષમતાઓ સાચવવામાં આવતી નથી. ચેટ એ લેગસી-સુસંગત ડિફોલ્ટ રહે છે.",
+    "endpointTabsAria": "કોમ્બો ક્ષમતા",
+    "endpointChatTargetRequired": "કોમ્બોને ક્લાયંટ સાથે સુસંગત રાખવા માટે ઓછામાં ઓછું એક ચેટ લક્ષ્ય ઉમેરો.",
+    "endpointWeightedRouteTotalInvalid": "દરેક ભારિત ક્ષમતા માર્ગનું કુલ વજન 100% હોવું આવશ્યક છે.",
+    "endpointTabs": {
+      "chat": "ચેટ",
+      "search": "શોધો",
+      "web-fetch": "મેળવો",
+      "embeddings": "એમ્બેડિંગ્સ",
+      "rerank": "પુનઃ રેન્ક",
+      "images": "છબીઓ",
+      "image-edits": "છબી સંપાદનો",
+      "videos": "વિડિયો",
+      "music": "સંગીત",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "ઑડિઓ અનુવાદ",
+      "audio-generation": "સાઉન્ડ જનરેશન"
+    }
   },
   "costs": {
     "title": "ખર્ચ",

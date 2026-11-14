@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "Tämä tallentaa tämän mallin mukaiset tällä hetkellä yhdistetyt tarjoajat/mallit muokattavaan yhdistelmään.",
     "duplicateAutoComboFailedPrefix": "Automaattisen yhdistelmän kaksoiskappaleen luonti epäonnistui:",
     "duplicateAutoComboUnknownError": "Tuntematon virhe",
-    "duplicateAutoComboTitle": "Luo staattinen yhdistelmä kohteesta {name}"
+    "duplicateAutoComboTitle": "Luo staattinen yhdistelmä kohteesta {name}",
+    "endpointBehaviorTitle": "Päätepisteen käyttäytyminen",
+    "endpointBehaviorDescription": "Määritä tavoitteet ja reititysstrategia erikseen jokaiselle API -ominaisuudesta. Tyhjiä ominaisuuksia ei tallenneta. Chat pysyy vanhan ajan yhteensopivana oletuksena.",
+    "endpointTabsAria": "Combo-ominaisuus",
+    "endpointChatTargetRequired": "Lisää vähintään yksi Chat-kohde pitääksesi yhdistelmän yhteensopivana asiakkaiden kanssa.",
+    "endpointWeightedRouteTotalInvalid": "Jokaisen painotetun kykyreitin kokonaispainon on oltava 100 %.",
+    "endpointTabs": {
+      "chat": "Chat",
+      "search": "Haku",
+      "web-fetch": "Hae",
+      "embeddings": "Upotukset",
+      "rerank": "Järjestä uudelleen",
+      "images": "Kuvat",
+      "image-edits": "Kuvan muokkaukset",
+      "videos": "Video",
+      "music": "Musiikki",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Äänen käännös",
+      "audio-generation": "Äänentuotanto"
+    }
   },
   "costs": {
     "title": "Kustannukset",

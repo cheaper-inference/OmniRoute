@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "Bu shablonga mos keladigan, hozir ulangan provayderlar/modellarning joriy holatini tahrirlanadigan kombinatsiya sifatida saqlaydi.",
     "duplicateAutoComboFailedPrefix": "Avtomatik kombinatsiyani nusxalab bo‘lmadi:",
     "duplicateAutoComboUnknownError": "Noma’lum xato",
-    "duplicateAutoComboTitle": "{name} asosida statik kombinatsiya yaratish"
+    "duplicateAutoComboTitle": "{name} asosida statik kombinatsiya yaratish",
+    "endpointBehaviorTitle": "Yakuniy nuqta harakati",
+    "endpointBehaviorDescription": "Har bir API qobiliyati uchun maqsadlar va marshrutlash strategiyasini mustaqil ravishda sozlang. Bo'sh imkoniyatlar saqlanmaydi. Chat eskiga mos keladigan sukut bo'lib qoladi.",
+    "endpointTabsAria": "Kombo qobiliyati",
+    "endpointChatTargetRequired": "Komboni mijozlar bilan moslashtirish uchun kamida bitta Chat maqsadini qo'shing.",
+    "endpointWeightedRouteTotalInvalid": "Har bir vaznli qobiliyat marshrutining umumiy og'irligi 100% bo'lishi kerak.",
+    "endpointTabs": {
+      "chat": "Chat",
+      "search": "Qidiruv",
+      "web-fetch": "Olib olish",
+      "embeddings": "O'rnatishlar",
+      "rerank": "Qayta tartiblash",
+      "images": "Tasvirlar",
+      "image-edits": "Rasmni tahrirlash",
+      "videos": "Video",
+      "music": "Musiqa",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Audio tarjima",
+      "audio-generation": "Ovoz hosil qilish"
+    }
   },
   "costs": {
     "title": "Xarajatlar",

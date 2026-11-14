@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "สิ่งนี้จะจับภาพผู้ให้บริการ/โมเดลที่เชื่อมต่ออยู่ในปัจจุบันซึ่งตรงกับเทมเพลตนี้ลงในคอมโบที่แก้ไขได้",
     "duplicateAutoComboFailedPrefix": "ล้มเหลวในการทำสำเนาคอมโบอัตโนมัติ:",
     "duplicateAutoComboUnknownError": "ข้อผิดพลาดที่ไม่ทราบสาเหตุ",
-    "duplicateAutoComboTitle": "สร้างคอมโบคงที่จาก {name}"
+    "duplicateAutoComboTitle": "สร้างคอมโบคงที่จาก {name}",
+    "endpointBehaviorTitle": "พฤติกรรมจุดสิ้นสุด",
+    "endpointBehaviorDescription": "กำหนดค่าเป้าหมายและกลยุทธ์การกำหนดเส้นทางอย่างเป็นอิสระสำหรับความสามารถ API แต่ละรายการ ความสามารถที่ว่างเปล่าจะไม่ถูกบันทึก Chat ยังคงเป็นค่าเริ่มต้นที่เข้ากันได้กับระบบเดิม",
+    "endpointTabsAria": "ความสามารถคอมโบ",
+    "endpointChatTargetRequired": "เพิ่มเป้าหมายการแชทอย่างน้อยหนึ่งรายการเพื่อให้คอมโบเข้ากันได้กับไคลเอนต์",
+    "endpointWeightedRouteTotalInvalid": "เส้นทางความสามารถแบบถ่วงน้ำหนักทุกเส้นทางจะต้องมีน้ำหนักรวม 100%",
+    "endpointTabs": {
+      "chat": "แชท",
+      "search": "ค้นหา",
+      "web-fetch": "ดึงข้อมูล",
+      "embeddings": "การฝัง",
+      "rerank": "จัดอันดับใหม่",
+      "images": "รูปภาพ",
+      "image-edits": "การแก้ไขภาพ",
+      "videos": "วีดีโอ",
+      "music": "ดนตรี",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "การแปลด้วยเสียง",
+      "audio-generation": "การสร้างเสียง"
+    }
   },
   "costs": {
     "title": "ค่าใช้จ่าย",

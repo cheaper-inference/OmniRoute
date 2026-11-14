@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "Dit maakt een momentopname van de momenteel verbonden providers/modellen die overeenkomen met dit sjabloon in een bewerkbare combinatie.",
     "duplicateAutoComboFailedPrefix": "Automatische combinatie dupliceren mislukt:",
     "duplicateAutoComboUnknownError": "Onbekende fout",
-    "duplicateAutoComboTitle": "Maak een statische combinatie van {name}"
+    "duplicateAutoComboTitle": "Maak een statische combinatie van {name}",
+    "endpointBehaviorTitle": "Eindpuntgedrag",
+    "endpointBehaviorDescription": "Configureer doelen en routeringsstrategie onafhankelijk voor elke API mogelijkheid. Lege mogelijkheden worden niet opgeslagen. Chat blijft de verouderde standaard.",
+    "endpointTabsAria": "Combo-mogelijkheid",
+    "endpointChatTargetRequired": "Voeg ten minste één Chat-doel toe om de combo compatibel te houden met klanten.",
+    "endpointWeightedRouteTotalInvalid": "Elke gewogen capaciteitsroute moet een totaalgewicht van 100% hebben.",
+    "endpointTabs": {
+      "chat": "Chatten",
+      "search": "Zoekopdracht",
+      "web-fetch": "Ophalen",
+      "embeddings": "Inbedding",
+      "rerank": "Herschikken",
+      "images": "Afbeeldingen",
+      "image-edits": "Beeldbewerkingen",
+      "videos": "Video",
+      "music": "Muziek",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Audiovertaling",
+      "audio-generation": "Geluid generatie"
+    }
   },
   "costs": {
     "title": "Kosten",

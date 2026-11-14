@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "Esto capturará los proveedores/modelos conectados actualmente que coincidan con esta plantilla en una combinación editable.",
     "duplicateAutoComboFailedPrefix": "Error al duplicar la combinación automática:",
     "duplicateAutoComboUnknownError": "Error desconocido",
-    "duplicateAutoComboTitle": "Crear una combinación estática de {name}"
+    "duplicateAutoComboTitle": "Crear una combinación estática de {name}",
+    "endpointBehaviorTitle": "Comportamiento del punto final",
+    "endpointBehaviorDescription": "Configure los objetivos y la estrategia de enrutamiento de forma independiente para cada capacidad API. Las capacidades vacías no se guardan. El chat sigue siendo el valor predeterminado compatible con versiones anteriores.",
+    "endpointTabsAria": "Capacidad combinada",
+    "endpointChatTargetRequired": "Agregue al menos un objetivo de Chat para mantener el combo compatible con los clientes.",
+    "endpointWeightedRouteTotalInvalid": "Cada ruta de capacidad ponderada debe tener un peso total del 100%.",
+    "endpointTabs": {
+      "chat": "Charlar",
+      "search": "Buscar",
+      "web-fetch": "Buscar",
+      "embeddings": "Incrustaciones",
+      "rerank": "Reclasificar",
+      "images": "Imágenes",
+      "image-edits": "Ediciones de imágenes",
+      "videos": "Video",
+      "music": "Música",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Traducción de audio",
+      "audio-generation": "Generación de sonido"
+    }
   },
   "costs": {
     "title": "Costos",

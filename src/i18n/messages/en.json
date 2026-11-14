@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "This will snapshot the currently connected providers/models that match this template into an editable combo.",
     "duplicateAutoComboFailedPrefix": "Failed to duplicate auto-combo:",
     "duplicateAutoComboUnknownError": "Unknown error",
-    "duplicateAutoComboTitle": "Create a static combo from {name}"
+    "duplicateAutoComboTitle": "Create a static combo from {name}",
+    "endpointBehaviorTitle": "Endpoint behavior",
+    "endpointBehaviorDescription": "Configure targets and routing strategy independently for each API capability. Empty capabilities are not saved. Chat remains the legacy-compatible default.",
+    "endpointTabsAria": "Combo capability",
+    "endpointChatTargetRequired": "Add at least one Chat target to keep the combo compatible with clients.",
+    "endpointWeightedRouteTotalInvalid": "Every weighted capability route must have a total weight of 100%.",
+    "endpointTabs": {
+      "chat": "Chat",
+      "search": "Search",
+      "web-fetch": "Fetch",
+      "embeddings": "Embeddings",
+      "rerank": "Rerank",
+      "images": "Images",
+      "image-edits": "Image edits",
+      "videos": "Video",
+      "music": "Music",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Audio translation",
+      "audio-generation": "Sound generation"
+    }
   },
   "costs": {
     "title": "Costs",

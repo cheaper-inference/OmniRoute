@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "Dette vil tage et øjebliksbillede af de aktuelt tilsluttede udbydere/modeller, der matcher denne skabelon, i en redigerbar kombination.",
     "duplicateAutoComboFailedPrefix": "Kopiering af auto-kombination mislykkedes:",
     "duplicateAutoComboUnknownError": "Ukendt fejl",
-    "duplicateAutoComboTitle": "Opret en statisk kombination fra {name}"
+    "duplicateAutoComboTitle": "Opret en statisk kombination fra {name}",
+    "endpointBehaviorTitle": "Endpoint adfærd",
+    "endpointBehaviorDescription": "Konfigurer mål og routingstrategi uafhængigt for hver API kapacitet. Tomme funktioner gemmes ikke. Chat forbliver den legacy-kompatible standard.",
+    "endpointTabsAria": "Combo evne",
+    "endpointChatTargetRequired": "Tilføj mindst ét Chat-mål for at holde kombinationen kompatibel med klienter.",
+    "endpointWeightedRouteTotalInvalid": "Hver vejet kapacitetsrute skal have en totalvægt på 100 %.",
+    "endpointTabs": {
+      "chat": "Snak",
+      "search": "Søge",
+      "web-fetch": "Hent",
+      "embeddings": "Indlejringer",
+      "rerank": "Genranger",
+      "images": "Billeder",
+      "image-edits": "Billedredigeringer",
+      "videos": "Video",
+      "music": "Musik",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Lydoversættelse",
+      "audio-generation": "Lydgenerering"
+    }
   },
   "costs": {
     "title": "Omkostninger",

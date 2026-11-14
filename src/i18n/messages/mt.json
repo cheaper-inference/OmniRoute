@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "Dan se joħloq snapshot tal-fornituri/mudelli konnessi bħalissa li jaqblu ma’ din is-sagoma, f’kombinazzjoni li tista’ tiġi editjata.",
     "duplicateAutoComboFailedPrefix": "Ma rnexxilniex nidduplikaw il-kombinazzjoni awtomatika:",
     "duplicateAutoComboUnknownError": "Żball mhux magħruf",
-    "duplicateAutoComboTitle": "Oħloq kombinazzjoni statika minn {name}"
+    "duplicateAutoComboTitle": "Oħloq kombinazzjoni statika minn {name}",
+    "endpointBehaviorTitle": "Imġieba tal-endpoint",
+    "endpointBehaviorDescription": "Ikkonfigura l-miri u l-istrateġija tar-rotta b'mod indipendenti għal kull kapaċità API. Il-kapaċitajiet vojta ma jiġux salvati. Iċ-chat tibqa' l-inadempjenza kompatibbli mal-legat.",
+    "endpointTabsAria": "Kapaċità Combo",
+    "endpointChatTargetRequired": "Żid mill-inqas mira waħda Chat biex iżżomm il-combo kompatibbli mal-klijenti.",
+    "endpointWeightedRouteTotalInvalid": "Kull rotta ta' kapaċità peżata għandu jkollha piż totali ta' 100%.",
+    "endpointTabs": {
+      "chat": "Chat",
+      "search": "Fittex",
+      "web-fetch": "Ġib",
+      "embeddings": "Inkorporazzjonijiet",
+      "rerank": "Rerank",
+      "images": "Stampi",
+      "image-edits": "Editjar tal-immaġni",
+      "videos": "Video",
+      "music": "Mużika",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Traduzzjoni awdjo",
+      "audio-generation": "Ġenerazzjoni tal-ħoss"
+    }
   },
   "costs": {
     "title": "Spejjeż",

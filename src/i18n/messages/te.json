@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "ఈ టెంప్లేట్‌తో సరిపోయే ప్రస్తుత కనెక్ట్ చేసిన ప్రొవైడర్లు/మోడల్‌లను ఎడిటబుల్ కంబోలో స్నాప్‌షాట్ తీసుకుంటుంది.",
     "duplicateAutoComboFailedPrefix": "ఆటోకంబో డూప్లికేట్ చేయడంలో విఫలమైంది:",
     "duplicateAutoComboUnknownError": "తెలియని దోషం",
-    "duplicateAutoComboTitle": "{name} నుండి స్థిర కంబో సృష్టించండి"
+    "duplicateAutoComboTitle": "{name} నుండి స్థిర కంబో సృష్టించండి",
+    "endpointBehaviorTitle": "ఎండ్ పాయింట్ ప్రవర్తన",
+    "endpointBehaviorDescription": "ప్రతి API సామర్థ్యం కోసం స్వతంత్రంగా లక్ష్యాలను మరియు రూటింగ్ వ్యూహాన్ని కాన్ఫిగర్ చేయండి. ఖాళీ సామర్థ్యాలు సేవ్ చేయబడవు. చాట్ లెగసీ-అనుకూల డిఫాల్ట్గా మిగిలిపోయింది.",
+    "endpointTabsAria": "కాంబో సామర్థ్యం",
+    "endpointChatTargetRequired": "కాంబోను క్లయింట్లకు అనుకూలంగా ఉంచడానికి కనీసం ఒక చాట్ లక్ష్యాన్ని జోడించండి.",
+    "endpointWeightedRouteTotalInvalid": "ప్రతి వెయిటెడ్ కెపాబిలిటీ రూట్ తప్పనిసరిగా 100% మొత్తం బరువును కలిగి ఉండాలి.",
+    "endpointTabs": {
+      "chat": "చాట్ చేయండి",
+      "search": "శోధించండి",
+      "web-fetch": "పొందండి",
+      "embeddings": "పొందుపరచడం",
+      "rerank": "రీర్యాంక్",
+      "images": "చిత్రాలు",
+      "image-edits": "చిత్ర సవరణలు",
+      "videos": "వీడియో",
+      "music": "సంగీతం",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "ఆడియో అనువాదం",
+      "audio-generation": "ధ్వని ఉత్పత్తి"
+    }
   },
   "costs": {
     "title": "ఖర్చులు",

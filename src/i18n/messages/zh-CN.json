@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "这将把与此模板匹配的当前连接提供者/模型快照到可编辑的组合中。",
     "duplicateAutoComboFailedPrefix": "复制自动组合失败：",
     "duplicateAutoComboUnknownError": "未知错误",
-    "duplicateAutoComboTitle": "从{name}创建静态组合"
+    "duplicateAutoComboTitle": "从{name}创建静态组合",
+    "endpointBehaviorTitle": "端点行为",
+    "endpointBehaviorDescription": "为每个API功能独立配置目标和路由策略。不保存空功能。聊天仍然是旧版兼容的默认设置。",
+    "endpointTabsAria": "组合能力",
+    "endpointChatTargetRequired": "添加至少一个聊天目标以保持组合与客户端兼容。",
+    "endpointWeightedRouteTotalInvalid": "每条加权能力路线的总权重必须为 100%。",
+    "endpointTabs": {
+      "chat": "聊天",
+      "search": "搜索",
+      "web-fetch": "拿来",
+      "embeddings": "嵌入",
+      "rerank": "重新排序",
+      "images": "图片",
+      "image-edits": "图像编辑",
+      "videos": "视频",
+      "music": "音乐",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "音频翻译",
+      "audio-generation": "声音产生"
+    }
   },
   "costs": {
     "title": "成本",

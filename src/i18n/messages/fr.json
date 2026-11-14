@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "Cela capturera les fournisseurs/modèles actuellement connectés qui correspondent à ce modèle dans une combinaison modifiable.",
     "duplicateAutoComboFailedPrefix": "Échec de la duplication de la combinaison automatique :",
     "duplicateAutoComboUnknownError": "Erreur inconnue",
-    "duplicateAutoComboTitle": "Créer une combinaison statique à partir de {name}"
+    "duplicateAutoComboTitle": "Créer une combinaison statique à partir de {name}",
+    "endpointBehaviorTitle": "Comportement du point de terminaison",
+    "endpointBehaviorDescription": "Configurez les cibles et la stratégie de routage indépendamment pour chaque fonctionnalité API. Les capacités vides ne sont pas enregistrées. Le chat reste la version par défaut compatible avec l'héritage.",
+    "endpointTabsAria": "Capacité combinée",
+    "endpointChatTargetRequired": "Ajoutez au moins une cible Chat pour que le combo reste compatible avec les clients.",
+    "endpointWeightedRouteTotalInvalid": "Chaque itinéraire de capacité pondéré doit avoir un poids total de 100 %.",
+    "endpointTabs": {
+      "chat": "Chat",
+      "search": "Recherche",
+      "web-fetch": "Aller chercher",
+      "embeddings": "Intégrations",
+      "rerank": "Reclasser",
+      "images": "Images",
+      "image-edits": "Modifications d'images",
+      "videos": "Vidéo",
+      "music": "Musique",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Traduction audio",
+      "audio-generation": "Génération sonore"
+    }
   },
   "costs": {
     "title": "Coûts",

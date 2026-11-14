@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "මෙමඟින් මෙම අච්චුවට ගැළපෙන, දැනට සම්බන්ධිත සැපයුම්කරුවන්/ආකෘතිවල වත්මන් තත්ත්වය සංස්කරණය කළ හැකි සංයෝජනයක් ලෙස සුරකිනු ඇත.",
     "duplicateAutoComboFailedPrefix": "ස්වයංක්රීය සංයෝජනය අනුපිටපත් කිරීමට අසමත් විය:",
     "duplicateAutoComboUnknownError": "නොදන්නා දෝෂයකි",
-    "duplicateAutoComboTitle": "{name} වෙතින් ස්ථිතික සංයෝජනයක් සාදන්න"
+    "duplicateAutoComboTitle": "{name} වෙතින් ස්ථිතික සංයෝජනයක් සාදන්න",
+    "endpointBehaviorTitle": "අන්ත ලක්ෂ්‍ය හැසිරීම",
+    "endpointBehaviorDescription": "එක් එක් API හැකියාව සඳහා ස්වාධීනව ඉලක්ක සහ මාර්ගගත කිරීමේ උපාය වින්‍යාස කරන්න. හිස් හැකියාවන් සුරැකෙන්නේ නැත. කතාබස් උරුමයට ගැළපෙන පෙරනිමිය ලෙස පවතී.",
+    "endpointTabsAria": "සංයුක්ත හැකියාව",
+    "endpointChatTargetRequired": "සේවාලාභීන් සමඟ සංයුක්තව අනුකූලව තබා ගැනීමට අවම වශයෙන් එක් කතාබස් ඉලක්කයක් එක් කරන්න.",
+    "endpointWeightedRouteTotalInvalid": "සෑම බරිත හැකියාවන් මාර්ගයක්ම 100% ක සම්පූර්ණ බරක් තිබිය යුතුය.",
+    "endpointTabs": {
+      "chat": "කතාබස් කරන්න",
+      "search": "සොයන්න",
+      "web-fetch": "ගෙනෙන්න",
+      "embeddings": "කාවැද්දීම",
+      "rerank": "Rerank",
+      "images": "රූප",
+      "image-edits": "රූප සංස්කරණ",
+      "videos": "වීඩියෝ",
+      "music": "සංගීතය",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "ශ්රව්ය පරිවර්තනය",
+      "audio-generation": "ශබ්ද උත්පාදනය"
+    }
   },
   "costs": {
     "title": "පිරිවැය",

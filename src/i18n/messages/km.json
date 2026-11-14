@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "វានឹងថតស្ថានភាពបច្ចុប្បន្ននៃអ្នកផ្តល់សេវា/ម៉ូដែលដែលបានតភ្ជាប់ និងត្រូវគ្នានឹងគំរូនេះ ទៅជាបន្សំដែលអាចកែសម្រួលបាន។",
     "duplicateAutoComboFailedPrefix": "មិនអាចចម្លងបន្សំស្វ័យប្រវត្តិបានទេ៖",
     "duplicateAutoComboUnknownError": "កំហុសដែលមិនស្គាល់",
-    "duplicateAutoComboTitle": "បង្កើតបន្សំថេរពី {name}"
+    "duplicateAutoComboTitle": "បង្កើតបន្សំថេរពី {name}",
+    "endpointBehaviorTitle": "ឥរិយាបថចំណុចបញ្ចប់",
+    "endpointBehaviorDescription": "កំណត់រចនាសម្ព័ន្ធគោលដៅ និងយុទ្ធសាស្ត្រកំណត់ទិសដៅដោយឯករាជ្យសម្រាប់សមត្ថភាព API នីមួយៗ។ សមត្ថភាពទទេមិនត្រូវបានរក្សាទុកទេ។ ការជជែកនៅតែជាលំនាំដើមដែលត្រូវគ្នានឹងកេរ្តិ៍ដំណែល។",
+    "endpointTabsAria": "សមត្ថភាពបន្សំ",
+    "endpointChatTargetRequired": "បន្ថែមគោលដៅជជែកយ៉ាងហោចណាស់មួយ ដើម្បីរក្សាបន្សំដែលត្រូវគ្នាជាមួយអតិថិជន។",
+    "endpointWeightedRouteTotalInvalid": "រាល់ផ្លូវដែលមានសមត្ថភាពទម្ងន់ត្រូវមានទម្ងន់សរុប 100% ។",
+    "endpointTabs": {
+      "chat": "ជជែក",
+      "search": "ស្វែងរក",
+      "web-fetch": "យក",
+      "embeddings": "ការបង្កប់",
+      "rerank": "ចំណាត់ថ្នាក់ឡើងវិញ",
+      "images": "រូបភាព",
+      "image-edits": "ការកែសម្រួលរូបភាព",
+      "videos": "វីដេអូ",
+      "music": "តន្ត្រី",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "ការបកប្រែជាសំឡេង",
+      "audio-generation": "ការបង្កើតសំឡេង"
+    }
   },
   "costs": {
     "title": "ការចំណាយ",

@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "이 템플릿과 일치하는 현재 연결된 제공자/모델을 편집 가능한 콤보로 스냅샷합니다.",
     "duplicateAutoComboFailedPrefix": "자동 콤보 복제 실패:",
     "duplicateAutoComboUnknownError": "알 수 없는 오류",
-    "duplicateAutoComboTitle": "{name}에서 정적 콤보 만들기"
+    "duplicateAutoComboTitle": "{name}에서 정적 콤보 만들기",
+    "endpointBehaviorTitle": "엔드포인트 동작",
+    "endpointBehaviorDescription": "각 API 기능에 대해 독립적으로 대상과 라우팅 전략을 구성합니다. 빈 기능은 저장되지 않습니다. 채팅은 레거시 호환 기본값으로 유지됩니다.",
+    "endpointTabsAria": "콤보 기능",
+    "endpointChatTargetRequired": "콤보가 클라이언트와 호환되도록 하려면 하나 이상의 Chat 대상을 추가하세요.",
+    "endpointWeightedRouteTotalInvalid": "모든 가중치 기능 경로의 총 가중치는 100%여야 합니다.",
+    "endpointTabs": {
+      "chat": "채팅",
+      "search": "찾다",
+      "web-fetch": "술책",
+      "embeddings": "임베딩",
+      "rerank": "순위 재지정",
+      "images": "이미지",
+      "image-edits": "이미지 편집",
+      "videos": "동영상",
+      "music": "음악",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "오디오 번역",
+      "audio-generation": "사운드 생성"
+    }
   },
   "costs": {
     "title": "비용",

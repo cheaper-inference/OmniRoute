@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "Hii itachukua picha ya watoa huduma/watolei sambazwa sasa yanayolingana na kioo hiki katika combo inayoedit.",
     "duplicateAutoComboFailedPrefix": "Imeshindwa kuiga combo ya otomatiki:",
     "duplicateAutoComboUnknownError": "Hitilafai isiyojulikana",
-    "duplicateAutoComboTitle": "Tengeneza combo thabiti kutoka {name}"
+    "duplicateAutoComboTitle": "Tengeneza combo thabiti kutoka {name}",
+    "endpointBehaviorTitle": "Tabia ya mwisho",
+    "endpointBehaviorDescription": "Sanidi malengo na mkakati wa uelekezaji kwa kujitegemea kwa kila uwezo wa API. Uwezo tupu haujahifadhiwa. Gumzo linasalia kuwa chaguomsingi linalooana na urithi.",
+    "endpointTabsAria": "Uwezo wa mchanganyiko",
+    "endpointChatTargetRequired": "Ongeza angalau lengo moja la Gumzo ili kuweka mchanganyiko huo sambamba na wateja.",
+    "endpointWeightedRouteTotalInvalid": "Kila njia ya uwezo iliyopimwa lazima iwe na uzito wa 100%.",
+    "endpointTabs": {
+      "chat": "Soga",
+      "search": "Tafuta",
+      "web-fetch": "Leta",
+      "embeddings": "Upachikaji",
+      "rerank": "Weka upya",
+      "images": "Picha",
+      "image-edits": "Marekebisho ya picha",
+      "videos": "Video",
+      "music": "Muziki",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Tafsiri ya sauti",
+      "audio-generation": "Kizazi cha sauti"
+    }
   },
   "costs": {
     "title": "Gharama",

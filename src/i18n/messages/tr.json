@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "Bu, bu şablona uygun olarak şu anda bağlı olan sağlayıcıları/modelleri düzenlenebilir bir kombinasyonda yakalayacaktır.",
     "duplicateAutoComboFailedPrefix": "Otomatik kombinasyon kopyalanamadı:",
     "duplicateAutoComboUnknownError": "Bilinmeyen hata",
-    "duplicateAutoComboTitle": "{name}-den statik bir kombinasyon oluştur"
+    "duplicateAutoComboTitle": "{name}-den statik bir kombinasyon oluştur",
+    "endpointBehaviorTitle": "Uç nokta davranışı",
+    "endpointBehaviorDescription": "Her API yeteneği için hedefleri ve yönlendirme stratejisini bağımsız olarak yapılandırın. Boş yetenekler kaydedilmez. Sohbet, eski uyumlu varsayılan olarak kalır.",
+    "endpointTabsAria": "Kombo yeteneği",
+    "endpointChatTargetRequired": "Kombinin istemcilerle uyumlu kalmasını sağlamak için en az bir Sohbet hedefi ekleyin.",
+    "endpointWeightedRouteTotalInvalid": "Her ağırlıklı yetenek rotasının toplam ağırlığı %100 olmalıdır.",
+    "endpointTabs": {
+      "chat": "Sohbet",
+      "search": "Aramak",
+      "web-fetch": "Gidip getirmek",
+      "embeddings": "Gömmeler",
+      "rerank": "Yeniden Sırala",
+      "images": "Görseller",
+      "image-edits": "Resim düzenlemeleri",
+      "videos": "Video",
+      "music": "Müzik",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Ses çevirisi",
+      "audio-generation": "Ses üretimi"
+    }
   },
   "costs": {
     "title": "Maliyetler",

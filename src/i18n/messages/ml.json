@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "ഈ ടെംപ്ലേറ്റുമായി പൊരുത്തപ്പെടുന്ന, നിലവിൽ കണക്റ്റ് ചെയ്തിരിക്കുന്ന പ്രൊവൈഡർമാരുടെയും മോഡലുകളുടെയും ഒരു സ്നാപ്പ്ഷോട്ട് എഡിറ്റ് ചെയ്യാവുന്ന കോംബോയാക്കി മാറ്റും.",
     "duplicateAutoComboFailedPrefix": "ഓട്ടോ-കോംബോ പകർത്തുന്നതിൽ പരാജയപ്പെട്ടു:",
     "duplicateAutoComboUnknownError": "അജ്ഞാത പിശക്",
-    "duplicateAutoComboTitle": "{name}-ൽ നിന്ന് ഒരു സ്റ്റാറ്റിക് കോംബോ സൃഷ്ടിക്കുക"
+    "duplicateAutoComboTitle": "{name}-ൽ നിന്ന് ഒരു സ്റ്റാറ്റിക് കോംബോ സൃഷ്ടിക്കുക",
+    "endpointBehaviorTitle": "എൻഡ്പോയിൻ്റ് പെരുമാറ്റം",
+    "endpointBehaviorDescription": "ഓരോ API കഴിവിനും സ്വതന്ത്രമായി ടാർഗെറ്റുകളും റൂട്ടിംഗ് തന്ത്രവും കോൺഫിഗർ ചെയ്യുക. ശൂന്യമായ കഴിവുകൾ സംരക്ഷിക്കപ്പെടുന്നില്ല. ചാറ്റ് ലെഗസി-അനുയോജ്യമായ സ്ഥിരസ്ഥിതിയായി തുടരുന്നു.",
+    "endpointTabsAria": "കോംബോ കഴിവ്",
+    "endpointChatTargetRequired": "ക്ലയൻ്റുകളുമായി കോംബോ അനുയോജ്യമാക്കാൻ കുറഞ്ഞത് ഒരു ചാറ്റ് ടാർഗെറ്റെങ്കിലും ചേർക്കുക.",
+    "endpointWeightedRouteTotalInvalid": "ഓരോ വെയ്റ്റഡ് ശേഷി റൂട്ടിനും മൊത്തം 100% ഭാരം ഉണ്ടായിരിക്കണം.",
+    "endpointTabs": {
+      "chat": "ചാറ്റ്",
+      "search": "തിരയുക",
+      "web-fetch": "കൊണ്ടുവരിക",
+      "embeddings": "ഉൾച്ചേർക്കലുകൾ",
+      "rerank": "റീറാങ്ക് ചെയ്യുക",
+      "images": "ചിത്രങ്ങൾ",
+      "image-edits": "ഇമേജ് എഡിറ്റുകൾ",
+      "videos": "വീഡിയോ",
+      "music": "സംഗീതം",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "ഓഡിയോ വിവർത്തനം",
+      "audio-generation": "സൗണ്ട് ജനറേഷൻ"
+    }
   },
   "costs": {
     "title": "ചെലവുകൾ",

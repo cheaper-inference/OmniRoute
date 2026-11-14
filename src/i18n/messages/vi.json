@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "Điều này sẽ chụp lại các nhà cung cấp/mô hình đang kết nối hiện tại phù hợp với mẫu này vào một tổ hợp có thể chỉnh sửa.",
     "duplicateAutoComboFailedPrefix": "Không thể sao chép tổ hợp tự động:",
     "duplicateAutoComboUnknownError": "Lỗi không xác định",
-    "duplicateAutoComboTitle": "Tạo tổ hợp tĩnh từ {name}"
+    "duplicateAutoComboTitle": "Tạo tổ hợp tĩnh từ {name}",
+    "endpointBehaviorTitle": "Hành vi điểm cuối",
+    "endpointBehaviorDescription": "Định cấu hình mục tiêu và chiến lược định tuyến độc lập cho từng khả năng API. Khả năng trống không được lưu. Trò chuyện vẫn là mặc định tương thích với phiên bản cũ.",
+    "endpointTabsAria": "Khả năng kết hợp",
+    "endpointChatTargetRequired": "Thêm ít nhất một mục tiêu Trò chuyện để giữ cho combo này tương thích với khách hàng.",
+    "endpointWeightedRouteTotalInvalid": "Mỗi lộ trình khả năng có trọng số phải có tổng trọng số là 100%.",
+    "endpointTabs": {
+      "chat": "Trò chuyện",
+      "search": "Tìm kiếm",
+      "web-fetch": "Tìm về",
+      "embeddings": "Nhúng",
+      "rerank": "Xếp hạng lại",
+      "images": "Hình ảnh",
+      "image-edits": "Chỉnh sửa hình ảnh",
+      "videos": "Băng hình",
+      "music": "Âm nhạc",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Dịch âm thanh",
+      "audio-generation": "Tạo âm thanh"
+    }
   },
   "costs": {
     "title": "Chi phí",

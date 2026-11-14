@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "या टेम्पलेटशी जुळणारे सध्या कनेक्ट केलेले प्रदाता/मॉडेल्स संपादनयोग्य कॉम्बोमध्ये स्नॅपशॉट घेईल.",
     "duplicateAutoComboFailedPrefix": "ऑटोकॉम्बो डुप्लिकेट करण्यात अपयश:",
     "duplicateAutoComboUnknownError": "अज्ञात त्रुटी",
-    "duplicateAutoComboTitle": "{name} मधून स्थिर कॉम्बो तयार करा"
+    "duplicateAutoComboTitle": "{name} मधून स्थिर कॉम्बो तयार करा",
+    "endpointBehaviorTitle": "अंत्यबिंदू वर्तन",
+    "endpointBehaviorDescription": "प्रत्येक API क्षमतेसाठी लक्ष्य आणि राउटिंग धोरण स्वतंत्रपणे कॉन्फिगर करा. रिक्त क्षमता जतन केल्या जात नाहीत. चॅट हे लीगेसी-सुसंगत डीफॉल्ट राहते.",
+    "endpointTabsAria": "कॉम्बो क्षमता",
+    "endpointChatTargetRequired": "क्लायंटसह कॉम्बो सुसंगत ठेवण्यासाठी किमान एक चॅट लक्ष्य जोडा.",
+    "endpointWeightedRouteTotalInvalid": "प्रत्येक भारित क्षमता मार्गाचे एकूण वजन 100% असणे आवश्यक आहे.",
+    "endpointTabs": {
+      "chat": "गप्पा",
+      "search": "शोधा",
+      "web-fetch": "आणा",
+      "embeddings": "एम्बेडिंग",
+      "rerank": "पुन्हा रँक करा",
+      "images": "प्रतिमा",
+      "image-edits": "प्रतिमा संपादने",
+      "videos": "व्हिडिओ",
+      "music": "संगीत",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "ऑडिओ अनुवाद",
+      "audio-generation": "आवाज निर्मिती"
+    }
   },
   "costs": {
     "title": "खर्च",

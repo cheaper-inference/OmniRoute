@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "இந்த டெம்ப்ளேட்டுடன் பொருந்தும் தற்போதைய இணைக்கப்பட்ட வழங்குநர்கள்/மாதிரிகளை திருத்தக்கூடிய கம்போவில் எடுக்கும்.",
     "duplicateAutoComboFailedPrefix": "ஆட்டோகம்போ நகலெடுத்தல் தோல்வியடைந்தது:",
     "duplicateAutoComboUnknownError": "அறியப்படாத பிழை",
-    "duplicateAutoComboTitle": "{name} இலிருந்து நிலையான கம்போ உருவாக்கவும்"
+    "duplicateAutoComboTitle": "{name} இலிருந்து நிலையான கம்போ உருவாக்கவும்",
+    "endpointBehaviorTitle": "இறுதிப்புள்ளி நடத்தை",
+    "endpointBehaviorDescription": "ஒவ்வொரு API திறனுக்கும் சுயாதீனமாக இலக்குகள் மற்றும் ரூட்டிங் உத்தியை உள்ளமைக்கவும். வெற்று திறன்கள் சேமிக்கப்படவில்லை. அரட்டை மரபு-இணக்க இயல்புநிலையாகவே உள்ளது.",
+    "endpointTabsAria": "சேர்க்கை திறன்",
+    "endpointChatTargetRequired": "காம்போவை வாடிக்கையாளர்களுடன் இணக்கமாக வைத்திருக்க குறைந்தபட்சம் ஒரு அரட்டை இலக்கைச் சேர்க்கவும்.",
+    "endpointWeightedRouteTotalInvalid": "ஒவ்வொரு எடையுள்ள திறன் பாதையும் 100% மொத்த எடையைக் கொண்டிருக்க வேண்டும்.",
+    "endpointTabs": {
+      "chat": "அரட்டை",
+      "search": "தேடு",
+      "web-fetch": "எடுக்கவும்",
+      "embeddings": "உட்பொதிப்புகள்",
+      "rerank": "ரீரேங்க்",
+      "images": "படங்கள்",
+      "image-edits": "படத் திருத்தங்கள்",
+      "videos": "வீடியோ",
+      "music": "இசை",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "ஆடியோ மொழிபெயர்ப்பு",
+      "audio-generation": "ஒலி உருவாக்கம்"
+    }
   },
   "costs": {
     "title": "செலவுகள்",

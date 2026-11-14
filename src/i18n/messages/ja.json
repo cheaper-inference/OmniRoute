@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "このテンプレートに一致する現在接続されているプロバイダー/モデルを編集可能なコンボとしてスナップショットします。",
     "duplicateAutoComboFailedPrefix": "オートコンボの複製に失敗しました：",
     "duplicateAutoComboUnknownError": "不明なエラー",
-    "duplicateAutoComboTitle": "{name}から静的コンボを作成"
+    "duplicateAutoComboTitle": "{name}から静的コンボを作成",
+    "endpointBehaviorTitle": "エンドポイントの動作",
+    "endpointBehaviorDescription": "API機能ごとにターゲットとルーティング戦略を個別に構成します。空の機能は保存されません。チャットはレガシー互換のデフォルトのままです。",
+    "endpointTabsAria": "コンボ能力",
+    "endpointChatTargetRequired": "コンボとクライアントとの互換性を維持するには、少なくとも 1 つのチャット ターゲットを追加します。",
+    "endpointWeightedRouteTotalInvalid": "すべての重み付けされた機能ルートの合計重みは 100% である必要があります。",
+    "endpointTabs": {
+      "chat": "チャット",
+      "search": "検索",
+      "web-fetch": "フェッチ",
+      "embeddings": "埋め込み",
+      "rerank": "リランク",
+      "images": "画像",
+      "image-edits": "画像編集",
+      "videos": "ビデオ",
+      "music": "音楽",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "音声翻訳",
+      "audio-generation": "音の生成"
+    }
   },
   "costs": {
     "title": "コスト",

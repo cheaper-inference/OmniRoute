@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "ଏହା ଏହି ଟେମ୍ପ୍ଲେଟ୍ ସହ ମେଳ ଖାଉଥିବା ବର୍ତ୍ତମାନ ସଂଯୁକ୍ତ ପ୍ରଦାନକାରୀ/ମଡେଲ୍ଗୁଡ଼ିକର ଏକ ସ୍ନାପ୍ସଟ୍ ନେଇ ତାହାକୁ ଏକ ସମ୍ପାଦନଯୋଗ୍ୟ କମ୍ବୋରେ ପରିଣତ କରିବ।",
     "duplicateAutoComboFailedPrefix": "ସ୍ୱୟଂଚାଳିତ କମ୍ବୋର ନକଲ କରିବାରେ ବିଫଳ:",
     "duplicateAutoComboUnknownError": "ଅଜଣା ତ୍ରୁଟି",
-    "duplicateAutoComboTitle": "{name} ରୁ ଏକ ସ୍ଥିର କମ୍ବୋ ସୃଷ୍ଟି କରନ୍ତୁ"
+    "duplicateAutoComboTitle": "{name} ରୁ ଏକ ସ୍ଥିର କମ୍ବୋ ସୃଷ୍ଟି କରନ୍ତୁ",
+    "endpointBehaviorTitle": "ଶେଷ ବିନ୍ଦୁ ଆଚରଣ \\|",
+    "endpointBehaviorDescription": "ପ୍ରତ୍ୟେକ API ସାମର୍ଥ୍ୟ ପାଇଁ ସ୍ ently ାଧୀନ ଭାବରେ ଲକ୍ଷ୍ୟ ଏବଂ ରାଉଟିଙ୍ଗ୍ ରଣନୀତି ବିନ୍ୟାସ କରନ୍ତୁ \\| ଖାଲି କ୍ଷମତା ସଞ୍ଚୟ ହୋଇନାହିଁ \\| ଚାଟ୍ ପୁରୁଣା-ସୁସଙ୍ଗତ ଡିଫଲ୍ଟ ରହିଥାଏ \\|",
+    "endpointTabsAria": "କମ୍ବୋ ସାମର୍ଥ୍ୟ \\|",
+    "endpointChatTargetRequired": "କମ୍ବୋକୁ ଗ୍ରାହକମାନଙ୍କ ସହିତ ସୁସଙ୍ଗତ ରଖିବା ପାଇଁ ଅତିକମରେ ଗୋଟିଏ ଚାଟ୍ ଟାର୍ଗେଟ୍ ଯୋଡନ୍ତୁ \\|",
+    "endpointWeightedRouteTotalInvalid": "ପ୍ରତ୍ୟେକ ଓଜନ ବିଶିଷ୍ଟ ସାମର୍ଥ୍ୟ ମାର୍ଗର ମୋଟ ଓଜନ 100% ରହିବା ଜରୁରୀ \\|",
+    "endpointTabs": {
+      "chat": "ଚାଟ୍ କରନ୍ତୁ \\|",
+      "search": "ସନ୍ଧାନ କର \\|",
+      "web-fetch": "ଆଣ \\|",
+      "embeddings": "ଏମ୍ବେଡିଂ",
+      "rerank": "ରେରାନ୍କ \\|",
+      "images": "ପ୍ରତିଛବିଗୁଡିକ",
+      "image-edits": "ପ୍ରତିଛବି ସମ୍ପାଦନା \\|",
+      "videos": "ଭିଡିଓ",
+      "music": "ସଙ୍ଗୀତ",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "ଅଡିଓ ଅନୁବାଦ \\|",
+      "audio-generation": "ଶବ୍ଦ ଉତ୍ପାଦନ"
+    }
   },
   "costs": {
     "title": "ଖର୍ଚ୍ଚ",

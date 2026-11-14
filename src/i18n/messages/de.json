@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "Dadurch werden die aktuell verbundenen Anbieter/Modelle, die dieser Vorlage entsprechen, in einer bearbeitbaren Kombination gespeichert.",
     "duplicateAutoComboFailedPrefix": "Automatische Kombination konnte nicht dupliziert werden:",
     "duplicateAutoComboUnknownError": "Unbekannter Fehler",
-    "duplicateAutoComboTitle": "Erstelle eine statische Kombination aus {name}"
+    "duplicateAutoComboTitle": "Erstelle eine statische Kombination aus {name}",
+    "endpointBehaviorTitle": "Endpunktverhalten",
+    "endpointBehaviorDescription": "Konfigurieren Sie Ziele und Routing-Strategie unabhängig für jede API Funktion. Leere Funktionen werden nicht gespeichert. Chat bleibt die Legacy-kompatible Standardeinstellung.",
+    "endpointTabsAria": "Combo-Fähigkeit",
+    "endpointChatTargetRequired": "Fügen Sie mindestens ein Chat-Ziel hinzu, um die Kombination mit Clients kompatibel zu halten.",
+    "endpointWeightedRouteTotalInvalid": "Jede gewichtete Fähigkeitsroute muss ein Gesamtgewicht von 100 % haben.",
+    "endpointTabs": {
+      "chat": "Chatten",
+      "search": "Suchen",
+      "web-fetch": "Bringen",
+      "embeddings": "Einbettungen",
+      "rerank": "Neu einstufen",
+      "images": "Bilder",
+      "image-edits": "Bildbearbeitungen",
+      "videos": "Video",
+      "music": "Musik",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Audioübersetzung",
+      "audio-generation": "Klangerzeugung"
+    }
   },
   "costs": {
     "title": "Kosten",

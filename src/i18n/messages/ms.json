@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "Ini akan mengambil snapshot penyedia/model yang disambungkan semasa yang sepadan dengan templat ini ke dalam kombo yang boleh diedit.",
     "duplicateAutoComboFailedPrefix": "Gagal menduplikasi kombo automatik:",
     "duplicateAutoComboUnknownError": "Ralat tidak diketahui",
-    "duplicateAutoComboTitle": "Cipta kombo statik dari {name}"
+    "duplicateAutoComboTitle": "Cipta kombo statik dari {name}",
+    "endpointBehaviorTitle": "Tingkah laku titik akhir",
+    "endpointBehaviorDescription": "Konfigurasikan sasaran dan strategi penghalaan secara bebas untuk setiap keupayaan API. Keupayaan kosong tidak disimpan. Sembang kekal sebagai lalai serasi warisan.",
+    "endpointTabsAria": "Keupayaan kombo",
+    "endpointChatTargetRequired": "Tambahkan sekurang-kurangnya satu sasaran Sembang untuk memastikan kombo serasi dengan pelanggan.",
+    "endpointWeightedRouteTotalInvalid": "Setiap laluan keupayaan berwajaran mesti mempunyai jumlah berat sebanyak 100%.",
+    "endpointTabs": {
+      "chat": "Sembang",
+      "search": "Cari",
+      "web-fetch": "Ambil",
+      "embeddings": "Embeddings",
+      "rerank": "Kedudukan semula",
+      "images": "Imej",
+      "image-edits": "Suntingan imej",
+      "videos": "Video",
+      "music": "Muzik",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Terjemahan audio",
+      "audio-generation": "Penjanaan bunyi"
+    }
   },
   "costs": {
     "title": "Kos",

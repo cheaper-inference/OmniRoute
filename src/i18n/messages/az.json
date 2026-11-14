@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "Bu, bu şablona uyğun olan hazırkı qoşulmuş provayderləri/modeləri redaktə oluna bilən kombo kimi saxlayacaq.",
     "duplicateAutoComboFailedPrefix": "Avtokombo kopyalanması uğursuz oldu:",
     "duplicateAutoComboUnknownError": "Naməlum xəta",
-    "duplicateAutoComboTitle": "{name}-dan statik kombo yarat"
+    "duplicateAutoComboTitle": "{name}-dan statik kombo yarat",
+    "endpointBehaviorTitle": "Son nöqtə davranışı",
+    "endpointBehaviorDescription": "Hər bir API qabiliyyəti üçün müstəqil olaraq hədəfləri və marşrutlaşdırma strategiyasını konfiqurasiya edin. Boş imkanlar saxlanmır. Çat köhnəyə uyğun defolt olaraq qalır.",
+    "endpointTabsAria": "Kombo qabiliyyəti",
+    "endpointChatTargetRequired": "Komboyu müştərilərlə uyğun saxlamaq üçün ən azı bir Söhbət hədəfi əlavə edin.",
+    "endpointWeightedRouteTotalInvalid": "Hər çəkili qabiliyyət marşrutunun ümumi çəkisi 100% olmalıdır.",
+    "endpointTabs": {
+      "chat": "Söhbət",
+      "search": "Axtar",
+      "web-fetch": "gətirmək",
+      "embeddings": "Yerləşdirmələr",
+      "rerank": "Yenidən sıralayın",
+      "images": "Şəkillər",
+      "image-edits": "Şəkil redaktələri",
+      "videos": "Video",
+      "music": "Musiqi",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Audio tərcümə",
+      "audio-generation": "Səs nəsli"
+    }
   },
   "costs": {
     "title": "Xərclər",

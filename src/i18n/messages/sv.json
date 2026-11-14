@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "Detta kommer att ta en ögonblicksbild av de för närvarande anslutna leverantörerna/modellerna som matchar denna mall i en redigerbar kombination.",
     "duplicateAutoComboFailedPrefix": "Kopiering av automatisk kombination misslyckades:",
     "duplicateAutoComboUnknownError": "Okänt fel",
-    "duplicateAutoComboTitle": "Skapa en statisk kombination från {name}"
+    "duplicateAutoComboTitle": "Skapa en statisk kombination från {name}",
+    "endpointBehaviorTitle": "Endpoint beteende",
+    "endpointBehaviorDescription": "Konfigurera mål och routingstrategi oberoende för varje API kapacitet. Tomma funktioner sparas inte. Chatt förblir den äldre-kompatibla standarden.",
+    "endpointTabsAria": "Kombinationsförmåga",
+    "endpointChatTargetRequired": "Lägg till minst ett chattmål för att hålla kombinationen kompatibel med klienter.",
+    "endpointWeightedRouteTotalInvalid": "Varje vägd kapacitetsväg måste ha en totalvikt på 100 %.",
+    "endpointTabs": {
+      "chat": "Chatta",
+      "search": "Söka",
+      "web-fetch": "Hämta",
+      "embeddings": "Inbäddningar",
+      "rerank": "Rangordna om",
+      "images": "Bilder",
+      "image-edits": "Bildredigeringar",
+      "videos": "Video",
+      "music": "Musik",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Ljudöversättning",
+      "audio-generation": "Ljudgenerering"
+    }
   },
   "costs": {
     "title": "Kostnader",

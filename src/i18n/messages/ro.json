@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "Acesta va captura furnizorii/modelurile conectate în prezent care se potrivesc cu acest șablon într-o combinație editabilă.",
     "duplicateAutoComboFailedPrefix": "Duplicarea combinației automate a eșuat:",
     "duplicateAutoComboUnknownError": "Eroare necunoscută",
-    "duplicateAutoComboTitle": "Creați o combinație statică din {name}"
+    "duplicateAutoComboTitle": "Creați o combinație statică din {name}",
+    "endpointBehaviorTitle": "Comportamentul punctului final",
+    "endpointBehaviorDescription": "Configurați ținte și strategia de rutare independent pentru fiecare capacitate API. Capacitățile goale nu sunt salvate. Chatul rămâne implicit compatibil vechi.",
+    "endpointTabsAria": "Capacitate combo",
+    "endpointChatTargetRequired": "Adăugați cel puțin o țintă de chat pentru a menține combo-ul compatibil cu clienții.",
+    "endpointWeightedRouteTotalInvalid": "Fiecare rută de capacitate ponderată trebuie să aibă o greutate totală de 100%.",
+    "endpointTabs": {
+      "chat": "Chat",
+      "search": "Căutare",
+      "web-fetch": "Preluare",
+      "embeddings": "Înglobări",
+      "rerank": "Reclasează",
+      "images": "Imagini",
+      "image-edits": "Editări de imagini",
+      "videos": "Video",
+      "music": "Muzică",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Traducere audio",
+      "audio-generation": "Generare de sunet"
+    }
   },
   "costs": {
     "title": "Costuri",

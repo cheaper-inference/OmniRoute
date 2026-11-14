@@ -27,6 +27,8 @@ import { nimbleFetch } from "../executors/nimble-fetch.ts";
 import { anysearchFetch } from "../executors/anysearch-fetch.ts";
 import { parallelFetch } from "../executors/parallel-fetch.ts";
 import { keenableFetch } from "../executors/keenable-fetch.ts";
+import type { WebFetchProviderId } from "../config/webFetchProviders.ts";
+export { WEB_FETCH_PROVIDERS, type WebFetchProviderId } from "../config/webFetchProviders.ts";
 
 export type WebFetchFormat = "markdown" | "html" | "links" | "screenshot";
 
@@ -69,21 +71,6 @@ export interface WebFetchCredentials {
   baseUrl?: string;
   providerSpecificData?: Record<string, unknown>;
 }
-
-export const WEB_FETCH_PROVIDERS = Object.freeze([
-  "firecrawl",
-  "jina-reader",
-  "tavily-search",
-  "tinyfish",
-  "anysearch-search",
-  "context7",
-  "nimble-search",
-  "parallel-search",
-  "keenable-search",
-] as const);
-// Derived from the array — adding a provider to WEB_FETCH_PROVIDERS
-// automatically widens the union; they cannot drift apart.
-export type WebFetchProviderId = (typeof WEB_FETCH_PROVIDERS)[number];
 
 /**
  * Providers that only run when the caller names them explicitly — they are not

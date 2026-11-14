@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "یہ اس ٹیمپلیٹ سے ملنے والے موجودہ منسلک فراہم کنندگان/ماڈلز کو ایڈیٹ ایبل کمبو میں اسنیپ شاট لے گا۔",
     "duplicateAutoComboFailedPrefix": "آٹو کمبو ڈپلیکیٹ کرنے میں ناکام:",
     "duplicateAutoComboUnknownError": "نامعلوم خرابی",
-    "duplicateAutoComboTitle": "{name} سے ایک جامد کمبو بنائیں"
+    "duplicateAutoComboTitle": "{name} سے ایک جامد کمبو بنائیں",
+    "endpointBehaviorTitle": "اختتامی نقطہ سلوک",
+    "endpointBehaviorDescription": "ہر API صلاحیت کے لیے اہداف اور روٹنگ کی حکمت عملی کو آزادانہ طور پر ترتیب دیں۔ خالی صلاحیتیں محفوظ نہیں ہیں۔ چیٹ میراث سے مطابقت رکھنے والا ڈیفالٹ رہتا ہے۔",
+    "endpointTabsAria": "کومبو کی صلاحیت",
+    "endpointChatTargetRequired": "کمبو کو کلائنٹس کے ساتھ ہم آہنگ رکھنے کے لیے کم از کم ایک چیٹ ہدف شامل کریں۔",
+    "endpointWeightedRouteTotalInvalid": "ہر وزنی صلاحیت والے راستے کا کل وزن 100% ہونا چاہیے۔",
+    "endpointTabs": {
+      "chat": "گپ شپ",
+      "search": "تلاش کریں۔",
+      "web-fetch": "لانا",
+      "embeddings": "ایمبیڈنگز",
+      "rerank": "رینک",
+      "images": "امیجز",
+      "image-edits": "تصویری ترامیم",
+      "videos": "ویڈیو",
+      "music": "موسیقی",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "آڈیو ترجمہ",
+      "audio-generation": "آواز کی نسل"
+    }
   },
   "costs": {
     "title": "اخراجات",

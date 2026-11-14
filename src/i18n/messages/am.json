@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "ይህ ከዚህ አብነት ጋር የሚዛመዱትን በአሁኑ ጊዜ የተገናኙ አቅራቢዎች/ሞዴሎች ቅጽበታዊ ቅጂ ወደሚስተካከል ጥምረት ይቀይራል።",
     "duplicateAutoComboFailedPrefix": "ራስ-ሰር ጥምረቱን ማባዛት አልተሳካም፦",
     "duplicateAutoComboUnknownError": "ያልታወቀ ስህተት",
-    "duplicateAutoComboTitle": "ከ{name} የማይለወጥ ጥምረት ፍጠር"
+    "duplicateAutoComboTitle": "ከ{name} የማይለወጥ ጥምረት ፍጠር",
+    "endpointBehaviorTitle": "የመጨረሻ ነጥብ ባህሪ",
+    "endpointBehaviorDescription": "ለእያንዳንዱ API ችሎታ ኢላማዎችን እና የማዞሪያ ስትራቴጂን ለብቻው ያዋቅሩ። ባዶ ችሎታዎች አልተቀመጡም። ቻት ከውርስ ጋር የሚስማማ ነባሪ ሆኖ ይቆያል።",
+    "endpointTabsAria": "ጥምር ችሎታ",
+    "endpointChatTargetRequired": "ጥምር ከደንበኞች ጋር ተኳሃኝ እንዲሆን ቢያንስ አንድ የውይይት ኢላማ ያክሉ።",
+    "endpointWeightedRouteTotalInvalid": "እያንዳንዱ የክብደት አቅም መንገድ አጠቃላይ ክብደት 100% ሊኖረው ይገባል።",
+    "endpointTabs": {
+      "chat": "ተወያይ",
+      "search": "ፈልግ",
+      "web-fetch": "አምጣ",
+      "embeddings": "መክተቻዎች",
+      "rerank": "እንደገና ያዝ",
+      "images": "ምስሎች",
+      "image-edits": "የምስል አርትዖቶች",
+      "videos": "ቪዲዮ",
+      "music": "ሙዚቃ",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "የድምጽ ትርጉም",
+      "audio-generation": "የድምፅ ማመንጨት"
+    }
   },
   "costs": {
     "title": "ወጪዎች",

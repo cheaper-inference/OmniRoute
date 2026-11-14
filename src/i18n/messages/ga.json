@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "Déanfaidh sé seo cóip de na soláthraithe/samhlacha atá nasctha faoi láthair agus a mheaitseálann an teimpléad seo, agus cuirfidh sé i gcomhcheangal ineagarthóireachta iad.",
     "duplicateAutoComboFailedPrefix": "Theip ar chóip den chomhcheangal uathoibríoch a chruthú:",
     "duplicateAutoComboUnknownError": "Earráid anaithnid",
-    "duplicateAutoComboTitle": "Cruthaigh comhcheangal statach ó {name}"
+    "duplicateAutoComboTitle": "Cruthaigh comhcheangal statach ó {name}",
+    "endpointBehaviorTitle": "Iompar críochphointe",
+    "endpointBehaviorDescription": "Cumraigh spriocanna agus straitéis ródaithe go neamhspleách do gach cumas API. Ní shábháiltear cumais fholmha. Fanann Chat mar an réamhshocrú atá comhoiriúnach le hoidhreacht.",
+    "endpointTabsAria": "Cumas teaglama",
+    "endpointChatTargetRequired": "Cuir sprioc Chat amháin ar a laghad leis chun an teaglama a choinneáil comhoiriúnach le cliaint.",
+    "endpointWeightedRouteTotalInvalid": "Caithfidh meáchan iomlán 100% a bheith ag gach bealach cumais ualaithe.",
+    "endpointTabs": {
+      "chat": "Comhrá",
+      "search": "Cuardach",
+      "web-fetch": "beir",
+      "embeddings": "Leabaithe",
+      "rerank": "Athrang",
+      "images": "Íomhánna",
+      "image-edits": "Athruithe íomhánna",
+      "videos": "Físeán",
+      "music": "Ceol",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Aistriúchán fuaime",
+      "audio-generation": "Giniúint fuaime"
+    }
   },
   "costs": {
     "title": "Costais",

@@ -4467,7 +4467,28 @@
     "duplicateAutoComboSnapshotMsg": "Αυτό θα αποτυπώσει τους παρόχους/τα μοντέλα που είναι συνδεδεμένα αυτή τη στιγμή και ταιριάζουν σε αυτό το πρότυπο, δημιουργώντας έναν επεξεργάσιμο συνδυασμό.",
     "duplicateAutoComboFailedPrefix": "Αποτυχία αντιγραφής αυτόματου συνδυασμού:",
     "duplicateAutoComboUnknownError": "Άγνωστο σφάλμα",
-    "duplicateAutoComboTitle": "Δημιουργία στατικού συνδυασμού από {name}"
+    "duplicateAutoComboTitle": "Δημιουργία στατικού συνδυασμού από {name}",
+    "endpointBehaviorTitle": "Συμπεριφορά τελικού σημείου",
+    "endpointBehaviorDescription": "Διαμορφώστε τους στόχους και τη στρατηγική δρομολόγησης ανεξάρτητα για κάθε δυνατότητα API. Οι κενές δυνατότητες δεν αποθηκεύονται. Η συνομιλία παραμένει η προεπιλεγμένη συμβατή με παλαιού τύπου.",
+    "endpointTabsAria": "Δυνατότητα συνδυασμού",
+    "endpointChatTargetRequired": "Προσθέστε τουλάχιστον έναν στόχο συνομιλίας για να διατηρήσετε τον συνδυασμό συμβατό με πελάτες.",
+    "endpointWeightedRouteTotalInvalid": "Κάθε διαδρομή σταθμισμένης ικανότητας πρέπει να έχει συνολικό βάρος 100%.",
+    "endpointTabs": {
+      "chat": "Κουβέντα",
+      "search": "Ερευνα",
+      "web-fetch": "Φέρω",
+      "embeddings": "Ενσωματώσεις",
+      "rerank": "Ανακατάταξη",
+      "images": "εικόνες",
+      "image-edits": "Επεξεργασίες εικόνας",
+      "videos": "Βίντεο",
+      "music": "Μουσική",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Ηχητική μετάφραση",
+      "audio-generation": "Γενιά ήχου"
+    }
   },
   "costs": {
     "title": "Κόστη",
