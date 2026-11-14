@@ -34,6 +34,10 @@ import { persistCreditBalance, getAllPersistedCreditBalances } from "@/lib/db/cr
 import { setConnectionRateLimitUntil } from "@/lib/db/providers";
 import { markAntigravityModelQuotaExhausted } from "../services/antigravityFamilyCooldown.ts";
 import { cleanModelName } from "./antigravity/modelResolution.ts";
+import {
+  AntigravityRemoteImageError,
+  inlineAntigravityRemoteImages,
+} from "./antigravity/remoteImageInline.ts";
 export { cleanModelName } from "./antigravity/modelResolution.ts";
 import { resolveAntigravityOutputCap } from "./antigravityOutputCap.ts";
 export { MAX_ANTIGRAVITY_OUTPUT_TOKENS } from "./antigravityOutputCap.ts";
@@ -927,14 +931,37 @@ export class AntigravityExecutor extends BaseExecutor {
         return { ...c, role, parts };
       }) || [];
 
-    const contents: AntigravityContent[] = [];
+    const mergedContents: AntigravityContent[] = [];
     for (const c of normalizedContents) {
       if (!Array.isArray(c.parts) || c.parts.length === 0) continue;
-      if (contents.length > 0 && contents[contents.length - 1].role === c.role) {
-        contents[contents.length - 1].parts.push(...c.parts);
+      if (mergedContents.length > 0 && mergedContents[mergedContents.length - 1].role === c.role) {
+        mergedContents[mergedContents.length - 1].parts.push(...c.parts);
       } else {
-        contents.push(c);
+        mergedContents.push(c);
       }
+    }
+
+    // Antigravity rejects `fileData` image URLs (the translator labels them `image/*`) with
+    // a 400, so download each remote image and send it as `inlineData` instead.
+    let contents: AntigravityContent[];
+    try {
+      contents = await inlineAntigravityRemoteImages(mergedContents, {
+        signal,
+        cacheKey: bodyRecord,
+      });
+    } catch (error) {
+      if (!(error instanceof AntigravityRemoteImageError)) throw error;
+      const resp = new Response(
+        JSON.stringify({
+          error: {
+            message: error.message,
+            type: "invalid_request_error",
+            code: "invalid_image_url",
+          },
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+      return resp as unknown as never;
     }
 
     const identity = buildAntigravityEnvelopeIdentity({
