@@ -48,7 +48,11 @@ import {
 } from "@/shared/utils/fetchTimeout";
 import { sanitizeErrorMessage, sanitizeUpstreamDetails } from "../utils/error.ts";
 
-import { prepareImageOutputOptions } from "./imageGeneration/outputFormat.ts";
+import { normalizeImageOutput, prepareImageOutputOptions } from "./imageGeneration/outputFormat.ts";
+import {
+  prepareFalImageOutputOptions,
+  prepareStabilityImageOutputOptions,
+} from "./imageGeneration/providerOutputOptions.ts";
 import { handleSDWebUIImageGeneration } from "./imageGeneration/providers/sdWebUI.ts";
 import { handleHyperbolicImageGeneration } from "./imageGeneration/providers/hyperbolic.ts";
 import { handleHuggingFaceImageGeneration } from "./imageGeneration/providers/huggingface.ts";
@@ -1777,7 +1781,10 @@ async function handleFalAIImageGeneration({
 }) {
   const startTime = Date.now();
   const token = credentials.apiKey || credentials.accessToken;
-  let falModel = model.startsWith("fal-ai/") ? model : `fal-ai/${model}`;
+  let falModel =
+    model.startsWith("fal-ai/") || model.startsWith("openai/") ? model : `fal-ai/${model}`;
+  const schemaInput =
+    prepareFalInput && (!isLegacyFalEndpoint(model) || body.fal_input !== undefined);
   const { imageUrl, imageUrls } = extractImageInputs(body);
   let upstreamBody: Record<string, unknown> = {
     prompt: body.prompt,
@@ -1789,8 +1796,11 @@ async function handleFalAIImageGeneration({
   if (body.seed !== undefined) upstreamBody.seed = body.seed;
   if (body.style) upstreamBody.style = normalizeRecraftStyle(body.style);
 
-  const outputFormat = normalizeRequestedImageFormat(body, "png");
-  if (outputFormat) upstreamBody.output_format = outputFormat;
+  const outputOptions = schemaInput
+    ? { options: {} }
+    : prepareFalImageOutputOptions(body, falModel);
+  if ("error" in outputOptions) return { success: false, status: 400, error: outputOptions.error };
+  Object.assign(upstreamBody, outputOptions.options);
 
   if (model.includes("flux-pro/v1.1") && !model.includes("ultra")) {
     upstreamBody.image_size = mapFalImageSize(body.size, "landscape_4_3");
@@ -1825,7 +1835,7 @@ async function handleFalAIImageGeneration({
   try {
     if (prepareFalInput) {
       falModel = falSelectionEndpoint(model);
-      if (!isLegacyFalEndpoint(model) || body.fal_input !== undefined) {
+      if (schemaInput) {
         upstreamBody = await prepareFalInput(
           falModel,
           falCompatibilityBody(body, imageUrls),
@@ -1865,6 +1875,12 @@ async function handleFalAIImageGeneration({
     // The native path honors an explicit `url`; the established path always returns base64.
     const defaultFormat = prepareFalInput && body.response_format === "url" ? "url" : "b64_json";
     const images = await normalizeProviderImagePayload(payload, body, log, defaultFormat);
+    const output = normalizeImageOutput(
+      payload,
+      images,
+      upstreamBody.output_format,
+      log?.warn?.bind(log)
+    );
     return saveImageSuccessResult({
       provider,
       model,
@@ -1872,7 +1888,8 @@ async function handleFalAIImageGeneration({
       requestBody: upstreamBody,
       responseBody: { images_count: images.length },
       created: payload.created,
-      images,
+      images: output.items,
+      outputFormat: output.outputFormat,
     });
   } catch (err) {
     if (log) log.error("IMAGE", `${provider} fetch error: ${err.message}`);
@@ -1915,13 +1932,10 @@ async function handleStabilityAIImageGeneration({
     };
   }
 
+  const outputOptions = prepareStabilityImageOutputOptions(body, model);
+  if ("error" in outputOptions) return { success: false, status: 400, error: outputOptions.error };
   const { imageUrl, maskUrl } = extractImageInputs(body);
-  const upstreamBody: Record<string, unknown> = {
-    output_format:
-      model === "remove-background"
-        ? normalizeRequestedImageFormat(body, "png", ["png", "webp"])
-        : normalizeRequestedImageFormat(body, "png"),
-  };
+  const upstreamBody: Record<string, unknown> = { ...outputOptions.options };
   const formData = new FormData();
 
   appendOptionalFormValue(formData, "output_format", upstreamBody.output_format);
@@ -2064,6 +2078,12 @@ async function handleStabilityAIImageGeneration({
     }
 
     const images = await normalizeProviderImagePayload(payload, body, log, "b64_json");
+    const output = normalizeImageOutput(
+      payload,
+      images,
+      upstreamBody.output_format,
+      log?.warn?.bind(log)
+    );
     return saveImageSuccessResult({
       provider,
       model,
@@ -2071,7 +2091,8 @@ async function handleStabilityAIImageGeneration({
       requestBody: upstreamBody,
       responseBody: { images_count: images.length },
       created: payload.created,
-      images,
+      images: output.items,
+      outputFormat: output.outputFormat,
     });
   } catch (err) {
     if (log) log.error("IMAGE", `${provider} fetch error: ${err.message}`);
