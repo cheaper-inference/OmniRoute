@@ -7,6 +7,7 @@ import {
   findFlag,
   findTokenSites,
 } from "../contract.mjs";
+import { requireLaunchModel } from "./_shared/gemini-preflight.mjs";
 
 const MIN_VERSION = "1.0.109";
 const RECOMMENDED_CONTEXT = 128000;
@@ -34,16 +35,6 @@ const ALWAYS_UNSET = [
   "COPILOT_PROVIDER_TRANSPORT",
 ];
 
-function parseSemver(text) {
-  const match = /(\d+)\.(\d+)\.(\d+)/.exec(String(text ?? "").trim());
-  return match ? [Number(match[1]), Number(match[2]), Number(match[3])] : null;
-}
-
-function compareSemver(a, b) {
-  for (let i = 0; i < 3; i += 1) if (a[i] !== b[i]) return a[i] < b[i] ? -1 : 1;
-  return 0;
-}
-
 function knownContext(row) {
   const value = row && row.contextTokens;
   return typeof value === "number" && value > 0 ? value : null;
@@ -55,6 +46,65 @@ function modelWarnings(model) {
     return [`Copilot recommends 128k context; ${model.id} has ${context}`];
   }
   return [];
+}
+
+function preflightSpec(ctx) {
+  return {
+    platforms: PLATFORMS,
+    platformMessage: `Copilot CLI does not support ${ctx.platform}`,
+    gate: VERSION_GATE,
+    tooOld: `Copilot CLI ${ctx.tool.version} is older than ${MIN_VERSION}; a saved providers.json could override the launch env.`,
+    tooOldHint: UPGRADE_HINT,
+    noRows: "No OmniRoute model matches the copilot view.",
+    noRowsHint: "Connect a provider with a tool-calling chat model, then retry.",
+    noModel: "Copilot CLI needs a model.",
+    noModelHint: "use omnirouter launch copilot --model <id>",
+  };
+}
+
+function rejectPassthrough(args) {
+  for (const rule of PASSTHROUGH) {
+    if (findFlag(args, rule.flag, { takesValue: true })) {
+      throw new LaunchError("ConfigConflict", `${rule.flag}: ${rule.message}`, {
+        hint: rule.message,
+      });
+    }
+  }
+}
+
+/** COPILOT_PROVIDER_* env for the chosen model; notes an unknown context window. */
+function providerEnv(ctx, model, notes) {
+  const set = {
+    COPILOT_PROVIDER_BASE_URL: ensureV1(ctx.gateway.rootUrl),
+    COPILOT_PROVIDER_TYPE: "openai",
+    COPILOT_PROVIDER_WIRE_API: "completions",
+    COPILOT_PROVIDER_API_KEY: ctx.auth.token,
+    COPILOT_MODEL: model.id,
+    COPILOT_OFFLINE: "true",
+    COPILOT_AUTO_UPDATE: "false",
+  };
+  const context = knownContext(model);
+  if (context !== null) {
+    set.COPILOT_PROVIDER_MAX_PROMPT_TOKENS = String(context);
+  } else {
+    notes.push(
+      `${model.id} has no known context window; Copilot assumes ${RECOMMENDED_CONTEXT} prompt tokens.`
+    );
+  }
+  if (typeof model.maxOutputTokens === "number" && model.maxOutputTokens > 0) {
+    set.COPILOT_PROVIDER_MAX_OUTPUT_TOKENS = String(model.maxOutputTokens);
+  }
+  return set;
+}
+
+/** ALWAYS_UNSET plus stray COPILOT_PROVIDER_* keys from baseEnv, minus what we set, sorted. */
+function unsetKeys(baseEnv, set) {
+  const unset = new Set(ALWAYS_UNSET);
+  for (const key of Object.keys(baseEnv).sort()) {
+    if (key.startsWith("COPILOT_PROVIDER_") && !(key in set)) unset.add(key);
+  }
+  for (const key of unset) if (key in set) unset.delete(key);
+  return [...unset].sort();
 }
 
 export default defineAdapter({
@@ -92,74 +142,17 @@ export default defineAdapter({
     return modelWarnings(model);
   },
   plan(ctx) {
-    if (!PLATFORMS.includes(ctx.platform)) {
-      throw new LaunchError("UnsupportedPlatform", `Copilot CLI does not support ${ctx.platform}`);
-    }
-
     const warnings = [];
-    const current = parseSemver(ctx.tool.version);
-    const min = parseSemver(MIN_VERSION);
-    if (current && min && compareSemver(current, min) < 0) {
-      throw new LaunchError(
-        "ToolVersionTooOld",
-        `Copilot CLI ${ctx.tool.version} is older than ${MIN_VERSION}; a saved providers.json could override the launch env.`,
-        { hint: UPGRADE_HINT }
-      );
-    }
-
-    if (ctx.view.rows.length === 0) {
-      throw new LaunchError("ModelNotFound", "No OmniRoute model matches the copilot view.", {
-        hint: "Connect a provider with a tool-calling chat model, then retry.",
-      });
-    }
-    const model = ctx.model;
-    if (!model) {
-      throw new LaunchError("ModelRequired", "Copilot CLI needs a model.", {
-        hint: "use omnirouter launch copilot --model <id>",
-      });
-    }
-
-    for (const rule of PASSTHROUGH) {
-      if (findFlag(ctx.passthroughArgs, rule.flag, { takesValue: true })) {
-        throw new LaunchError("ConfigConflict", `${rule.flag}: ${rule.message}`, {
-          hint: rule.message,
-        });
-      }
-    }
+    const model = requireLaunchModel(ctx, preflightSpec(ctx), warnings);
+    rejectPassthrough(ctx.passthroughArgs);
 
     const notes = [];
-    const context = knownContext(model);
     warnings.push(...modelWarnings(model));
-
-    const set = {
-      COPILOT_PROVIDER_BASE_URL: ensureV1(ctx.gateway.rootUrl),
-      COPILOT_PROVIDER_TYPE: "openai",
-      COPILOT_PROVIDER_WIRE_API: "completions",
-      COPILOT_PROVIDER_API_KEY: ctx.auth.token,
-      COPILOT_MODEL: model.id,
-      COPILOT_OFFLINE: "true",
-      COPILOT_AUTO_UPDATE: "false",
-    };
-    if (context !== null) {
-      set.COPILOT_PROVIDER_MAX_PROMPT_TOKENS = String(context);
-    } else {
-      notes.push(
-        `${model.id} has no known context window; Copilot assumes ${RECOMMENDED_CONTEXT} prompt tokens.`
-      );
-    }
-    if (typeof model.maxOutputTokens === "number" && model.maxOutputTokens > 0) {
-      set.COPILOT_PROVIDER_MAX_OUTPUT_TOKENS = String(model.maxOutputTokens);
-    }
-
-    const unset = new Set(ALWAYS_UNSET);
-    for (const key of Object.keys(ctx.baseEnv).sort()) {
-      if (key.startsWith("COPILOT_PROVIDER_") && !(key in set)) unset.add(key);
-    }
-    for (const key of unset) if (key in set) unset.delete(key);
+    const set = providerEnv(ctx, model, notes);
 
     const plan = createPlan("copilot", {
       argv: ["--model", model.id, ...ctx.passthroughArgs],
-      env: { set, unset: [...unset].sort() },
+      env: { set, unset: unsetKeys(ctx.baseEnv, set) },
       notes,
       warnings,
       preflight: [

@@ -8,6 +8,7 @@ import {
   findFlag,
   findTokenSites,
 } from "../contract.mjs";
+import { requireLaunchModel } from "./_shared/gemini-preflight.mjs";
 
 const VERSION_GATE = { args: ["--version"], min: "2.0.0", recommended: "2.6.2" };
 const NPM_INSTALL = "npm install -g @moonshot-ai/kimi-code";
@@ -44,16 +45,58 @@ const ALWAYS_UNSET = [
   "KIMI_CODE_PROVIDER_NAME",
 ];
 
-function parseSemver(text) {
-  const m = /(\d+)\.(\d+)\.(\d+)/.exec(String(text ?? ""));
-  return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null;
+const MODEL_HINT = "use omnirouter launch kimi --model <id>";
+
+function preflightSpec(ctx) {
+  const version = ctx.tool.version;
+  return {
+    platforms: PLATFORMS,
+    platformMessage: `Kimi Code CLI is not supported on ${ctx.platform}.`,
+    gate: VERSION_GATE,
+    tooOld: `kimi ${version} is older than ${VERSION_GATE.min}; it looks like the legacy Python kimi-cli, which is not supported.`,
+    tooOldHint: `${NPM_INSTALL} (or: ${INSTALL_SH})`,
+    behind: `kimi ${version} is older than the recommended ${VERSION_GATE.recommended}; upgrade with: ${NPM_INSTALL}`,
+    noRows: "No OmniRoute model matches the kimi view.",
+    noRowsHint: "Connect a provider with tool-calling chat models, then retry.",
+    noModel: "kimi needs a model.",
+    noModelHint: MODEL_HINT,
+  };
 }
 
-function compareSemver(a, b) {
-  for (let i = 0; i < 3; i += 1) {
-    if (a[i] !== b[i]) return a[i] < b[i] ? -1 : 1;
+function rejectPassthrough(args) {
+  for (const rule of PASSTHROUGH) {
+    if (findFlag(args, [rule.flag, ...(rule.aliases || [])])) {
+      throw new LaunchError("ConfigConflict", rule.message, { hint: MODEL_HINT });
+    }
   }
-  return 0;
+}
+
+/** The model's context window, or FALLBACK_CONTEXT (with a note) when it is unknown. */
+function contextSize(model, notes) {
+  if (typeof model.contextTokens === "number" && model.contextTokens > 0) {
+    return model.contextTokens;
+  }
+  notes.push(
+    `Context size of ${model.id} is unknown; using ${FALLBACK_CONTEXT} for KIMI_MODEL_MAX_CONTEXT_SIZE.`
+  );
+  return FALLBACK_CONTEXT;
+}
+
+function capabilityList(model) {
+  const modelCaps = Array.isArray(model.capabilities) ? model.capabilities : [];
+  const capList = ["tool_use"];
+  if (modelCaps.includes("vision")) capList.push("image_in");
+  if (modelCaps.includes("reasoning")) capList.push("thinking");
+  return capList.join(",");
+}
+
+/** ALWAYS_UNSET plus every KIMI_MODEL_* key in baseEnv that we do not set, sorted. */
+function unsetKeys(baseEnv) {
+  const unset = new Set(ALWAYS_UNSET);
+  for (const key of Object.keys(baseEnv).sort()) {
+    if (key.startsWith("KIMI_MODEL_") && !SET_KEYS.has(key)) unset.add(key);
+  }
+  return [...unset].sort();
 }
 
 export default defineAdapter({
@@ -88,64 +131,13 @@ export default defineAdapter({
     passthrough: PASSTHROUGH,
   },
   plan(ctx) {
-    if (!PLATFORMS.includes(ctx.platform)) {
-      throw new LaunchError(
-        "UnsupportedPlatform",
-        `Kimi Code CLI is not supported on ${ctx.platform}.`
-      );
-    }
-
     const warnings = [];
     const notes = [];
+    const model = requireLaunchModel(ctx, preflightSpec(ctx), warnings);
+    rejectPassthrough(ctx.passthroughArgs);
 
-    const have = parseSemver(ctx.tool.version);
-    if (have) {
-      if (compareSemver(have, parseSemver(VERSION_GATE.min)) < 0) {
-        throw new LaunchError(
-          "ToolVersionTooOld",
-          `kimi ${ctx.tool.version} is older than ${VERSION_GATE.min}; it looks like the legacy Python kimi-cli, which is not supported.`,
-          { hint: `${NPM_INSTALL} (or: ${INSTALL_SH})` }
-        );
-      }
-      if (compareSemver(have, parseSemver(VERSION_GATE.recommended)) < 0) {
-        warnings.push(
-          `kimi ${ctx.tool.version} is older than the recommended ${VERSION_GATE.recommended}; upgrade with: ${NPM_INSTALL}`
-        );
-      }
-    }
-
-    if (ctx.view.rows.length === 0) {
-      throw new LaunchError("ModelNotFound", "No OmniRoute model matches the kimi view.", {
-        hint: "Connect a provider with tool-calling chat models, then retry.",
-      });
-    }
-    if (!ctx.model) {
-      throw new LaunchError("ModelRequired", "kimi needs a model.", {
-        hint: "use omnirouter launch kimi --model <id>",
-      });
-    }
-
-    for (const rule of PASSTHROUGH) {
-      if (findFlag(ctx.passthroughArgs, [rule.flag, ...(rule.aliases || [])])) {
-        throw new LaunchError("ConfigConflict", rule.message, {
-          hint: "use omnirouter launch kimi --model <id>",
-        });
-      }
-    }
-
-    const model = ctx.model;
     const id = model.id;
-    const known = typeof model.contextTokens === "number" && model.contextTokens > 0;
-    if (!known) {
-      notes.push(
-        `Context size of ${id} is unknown; using ${FALLBACK_CONTEXT} for KIMI_MODEL_MAX_CONTEXT_SIZE.`
-      );
-    }
-    const modelCaps = Array.isArray(model.capabilities) ? model.capabilities : [];
-    const capList = ["tool_use"];
-    if (modelCaps.includes("vision")) capList.push("image_in");
-    if (modelCaps.includes("reasoning")) capList.push("thinking");
-
+    const maxContext = contextSize(model, notes);
     notes.push("Your own config.toml models stay visible in /model (merged with the overlay).");
 
     const set = {
@@ -153,20 +145,16 @@ export default defineAdapter({
       KIMI_MODEL_API_KEY: ctx.auth.token,
       KIMI_MODEL_PROVIDER_TYPE: "openai",
       KIMI_MODEL_BASE_URL: ensureV1(ctx.gateway.rootUrl),
-      KIMI_MODEL_MAX_CONTEXT_SIZE: String(known ? model.contextTokens : FALLBACK_CONTEXT),
-      KIMI_MODEL_CAPABILITIES: capList.join(","),
+      KIMI_MODEL_MAX_CONTEXT_SIZE: String(maxContext),
+      KIMI_MODEL_CAPABILITIES: capabilityList(model),
       KIMI_MODEL_DISPLAY_NAME: `OmniRoute ${id}`,
       KIMI_DISABLE_TELEMETRY: "1",
       KIMI_CODE_NO_AUTO_UPDATE: "1",
     };
-    const unset = new Set(ALWAYS_UNSET);
-    for (const key of Object.keys(ctx.baseEnv).sort()) {
-      if (key.startsWith("KIMI_MODEL_") && !SET_KEYS.has(key)) unset.add(key);
-    }
 
     const plan = createPlan("kimi", {
       argv: [...ctx.passthroughArgs],
-      env: { set, unset: [...unset].sort() },
+      env: { set, unset: unsetKeys(ctx.baseEnv) },
       notes,
       warnings,
       modelList: { strategy: "inject", viewHash: ctx.view.hash, injected: 1 },

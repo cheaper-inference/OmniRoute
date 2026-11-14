@@ -26,11 +26,12 @@ import {
   defineAdapter,
   ensureV1,
   findFlag,
-  findTokenSites,
   injectRows,
   rowLabel,
   yaml,
 } from "../contract.mjs";
+import { injectModelList, withTokenSites } from "./_shared/inject.mjs";
+import { parseSemver, semverLess } from "./_shared/semver.mjs";
 
 const TOOL_ID = "hermes";
 const MIN_CONTEXT = 64000; // _enforce_minimum_context hard reject
@@ -73,20 +74,6 @@ const MODEL_HINT =
   "Hermes refuses models under 64,000 tokens of context and needs a known window to pin; " +
   "pick another model with --model";
 
-/** "1.2.3" -> [1, 2, 3]; null when the text has no x.y.z. */
-function parseSemver(text) {
-  const match = /(\d+)\.(\d+)\.(\d+)/.exec(String(text ?? ""));
-  return match ? [Number(match[1]), Number(match[2]), Number(match[3])] : null;
-}
-
-/** <0 when a < b, 0 when equal, >0 when a > b. */
-function compareSemver(a, b) {
-  for (let i = 0; i < 3; i++) {
-    if (a[i] !== b[i]) return a[i] - b[i];
-  }
-  return 0;
-}
-
 /**
  * Local mirror of the core version gate so the plan (and its golden) carries the outcome.
  * Unknown versions (`vunknown` from a tagless checkout) are accepted.
@@ -94,14 +81,14 @@ function compareSemver(a, b) {
 function versionWarnings(ctx, gate) {
   const current = parseSemver(ctx.tool.version);
   if (!current) return [];
-  if (gate.min && compareSemver(current, parseSemver(gate.min)) < 0) {
+  if (gate.min && semverLess(current, parseSemver(gate.min))) {
     throw new LaunchError(
       "ToolVersionTooOld",
       `Hermes Agent ${ctx.tool.version} is older than the minimum ${gate.min}`,
       { hint: "Re-run the Hermes Agent installer to update" }
     );
   }
-  if (gate.recommended && compareSemver(current, parseSemver(gate.recommended)) < 0) {
+  if (gate.recommended && semverLess(current, parseSemver(gate.recommended))) {
     return [
       `Hermes Agent ${ctx.tool.version} is older than ${gate.recommended}; the launch config ` +
         "(model.key_env, providers:) is only verified on newer releases; re-run the " +
@@ -256,28 +243,28 @@ function plan(ctx) {
     warnings.push("The temp-home recipe and gateway teardown are not yet verified on Windows");
   }
 
-  const result = createPlan(TOOL_ID, {
-    argv: [...ctx.passthroughArgs],
-    env: {
-      set: {
-        HERMES_HOME: "${TMP}",
-        HERMES_GATEWAY_LOCK_DIR: ctx.util.tempPath(LOCK_DIR),
-        [KEY_ENV]: ctx.auth.token,
+  return withTokenSites(
+    createPlan(TOOL_ID, {
+      argv: [...ctx.passthroughArgs],
+      env: {
+        set: {
+          HERMES_HOME: "${TMP}",
+          HERMES_GATEWAY_LOCK_DIR: ctx.util.tempPath(LOCK_DIR),
+          [KEY_ENV]: ctx.auth.token,
+        },
+        unset: ENV_UNSET.slice(),
       },
-      unset: ENV_UNSET.slice(),
-    },
-    tempFiles: [{ path: "config.yaml", contents: yaml(config), mode: 0o600, format: "yaml" }],
-    tempDirs: [{ path: LOCK_DIR, mode: 0o700 }],
-    needsTempDir: true,
-    notes,
-    warnings,
-    teardown: [
-      { argv: ["${TOOL}", "gateway", "stop"], env: "plan", timeoutMs: 5000, onError: "warn" },
-    ],
-    modelList: { strategy: "inject", viewHash: ctx.view.hash, injected: rows.length },
-  });
-  result.secretSites = findTokenSites(result);
-  return result;
+      tempFiles: [{ path: "config.yaml", contents: yaml(config), mode: 0o600, format: "yaml" }],
+      tempDirs: [{ path: LOCK_DIR, mode: 0o700 }],
+      needsTempDir: true,
+      notes,
+      warnings,
+      teardown: [
+        { argv: ["${TOOL}", "gateway", "stop"], env: "plan", timeoutMs: 5000, onError: "warn" },
+      ],
+      modelList: injectModelList(ctx, rows.length),
+    })
+  );
 }
 
 export default defineAdapter({

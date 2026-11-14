@@ -13,26 +13,11 @@ import {
   statePath,
   tempPath,
 } from "../contract.mjs";
+import { isSemverBelow } from "./_shared/semver.mjs";
 
 const MIN_VERSION = "0.101.0";
 const DEFAULT_MAX_TOKENS = 16384;
 const PROVIDER_ID = "omniroute";
-
-function semverParts(value) {
-  const match = /(\d+)\.(\d+)\.(\d+)/.exec(String(value ?? ""));
-  return match ? [Number(match[1]), Number(match[2]), Number(match[3])] : null;
-}
-
-/** True when `version` is strictly below `floor`; unparseable or absent versions are not. */
-function isBelow(version, floor) {
-  const a = semverParts(version);
-  const b = semverParts(floor);
-  if (!a || !b) return false;
-  for (let i = 0; i < 3; i++) {
-    if (a[i] !== b[i]) return a[i] < b[i];
-  }
-  return false;
-}
 
 function modelEntry(row) {
   const entry = {
@@ -137,7 +122,7 @@ export default defineAdapter({
     }
 
     const warnings = [];
-    if (isBelow(ctx.tool.version, MIN_VERSION)) {
+    if (isSemverBelow(ctx.tool.version, MIN_VERSION)) {
       throw new LaunchError(
         "ToolVersionTooOld",
         `Crush ${ctx.tool.version} is older than ${MIN_VERSION}, the oldest tested version.`,

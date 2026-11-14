@@ -1,7 +1,8 @@
 // Boundary test: adapter purity and the contract.mjs re-export boundary rules.
-// Static scan of bin/cli/launch/adapters/*.mjs, bin/cli/launch/contract.mjs and its sibling
-// modules bin/cli/launch/contract/*.mjs, plus runtime
-// invariants on every adapter found (vacuous until adapters exist).
+// Static scan of bin/cli/launch/adapters/*.mjs, the shared adapter helpers in
+// bin/cli/launch/adapters/_shared/*.mjs, bin/cli/launch/contract.mjs and its sibling modules
+// bin/cli/launch/contract/*.mjs, plus runtime invariants on every adapter found (vacuous until
+// adapters exist).
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -18,6 +19,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, "../../../..");
 const LAUNCH_DIR = join(ROOT, "bin/cli/launch");
 const ADAPTERS_DIR = join(LAUNCH_DIR, "adapters");
+const SHARED_DIR = join(ADAPTERS_DIR, "_shared");
 const CONTRACT_FILE = join(LAUNCH_DIR, "contract.mjs");
 const CONTRACT_PARTS_DIR = join(LAUNCH_DIR, "contract");
 
@@ -25,6 +27,17 @@ const CONTRACT_PARTS_DIR = join(LAUNCH_DIR, "contract");
 const REGISTRY_SIZE = 19;
 
 const ADAPTER_ALLOWED_IMPORTS = new Set(["../contract.mjs"]);
+/** Adapters may also import the pure shared helpers in adapters/_shared/. */
+const ADAPTER_SHARED_IMPORT = /^\.\/_shared\/[a-z0-9][a-z0-9-]*\.mjs$/;
+/** A shared helper imports only the contract and its _shared/ siblings. */
+const SHARED_ALLOWED_IMPORTS = new Set(["../../contract.mjs"]);
+const SHARED_SIBLING_IMPORT = /^\.\/[a-z0-9][a-z0-9-]*\.mjs$/;
+
+type ImportRule = (spec: string) => boolean;
+const isAdapterImport: ImportRule = (spec) =>
+  ADAPTER_ALLOWED_IMPORTS.has(spec) || ADAPTER_SHARED_IMPORT.test(spec);
+const isSharedImport: ImportRule = (spec) =>
+  SHARED_ALLOWED_IMPORTS.has(spec) || SHARED_SIBLING_IMPORT.test(spec);
 /** The documented exceptions at the top of contract.mjs (the adapter purity rule). */
 const CONTRACT_ALLOWED_IMPORTS = new Set([
   "../utils/claudeWindowEnv.mjs",
@@ -94,12 +107,18 @@ export function listImports(source: string): string[] {
 }
 
 /** Violations of the adapter purity rule in one adapter source. Empty array = clean. */
-export function adapterViolations(source: string, file = "adapter.mjs"): string[] {
+export function adapterViolations(
+  source: string,
+  file = "adapter.mjs",
+  allowed: ImportRule = isAdapterImport
+): string[] {
   const code = stripComments(source);
   const problems: string[] = [];
   for (const spec of listImports(source)) {
-    if (!ADAPTER_ALLOWED_IMPORTS.has(spec)) {
-      problems.push(`${file}: forbidden import ${JSON.stringify(spec)} (only ../contract.mjs)`);
+    if (!allowed(spec)) {
+      problems.push(
+        `${file}: forbidden import ${JSON.stringify(spec)} (only ../contract.mjs and ./_shared/)`
+      );
     }
   }
   if (/\bfetch\s*\(/.test(code)) problems.push(`${file}: fetch( is forbidden`);
@@ -142,16 +161,51 @@ function isRegistrationList(file: string): boolean {
   return file.endsWith("index.mjs") || file.endsWith("all.mjs");
 }
 
-function scanDir(dir: string): string[] {
+function scanDir(dir: string, allowed: ImportRule = isAdapterImport): string[] {
   // adapters/index.mjs (lazy index) and adapters/all.mjs (eager list) import ./<id>.mjs;
   // they are registration lists, not adapters.
   return adapterFiles(dir)
     .filter((file) => !isRegistrationList(file))
-    .flatMap((file) => adapterViolations(readFileSync(file, "utf8"), relative(ROOT, file)));
+    .flatMap((file) =>
+      adapterViolations(readFileSync(file, "utf8"), relative(ROOT, file), allowed)
+    );
 }
 
 test("every adapter imports only ../contract.mjs and reads no process/fetch (vacuous when none)", () => {
   assert.deepEqual(scanDir(ADAPTERS_DIR), []);
+});
+
+test("every adapters/_shared helper imports only the contract or a sibling and stays pure", () => {
+  assert.ok(adapterFiles(SHARED_DIR).length > 0, "adapters/_shared holds the shared helpers");
+  assert.deepEqual(scanDir(SHARED_DIR, isSharedImport), []);
+});
+
+test("the import rules accept only the documented specifiers", () => {
+  assert.equal(isAdapterImport("../contract.mjs"), true);
+  assert.equal(isAdapterImport("./_shared/semver.mjs"), true);
+  assert.equal(isAdapterImport("./_shared/../codex.mjs"), false);
+  assert.equal(isAdapterImport("./_shared/nested/x.mjs"), false);
+  assert.equal(isAdapterImport("../../contract.mjs"), false);
+  assert.equal(isSharedImport("../../contract.mjs"), true);
+  assert.equal(isSharedImport("./semver.mjs"), true);
+  assert.equal(isSharedImport("../codex.mjs"), false);
+  assert.equal(isSharedImport("../contract.mjs"), false);
+  assert.equal(isSharedImport("node:fs"), false);
+  for (const [source, expected] of [
+    [`import fs from "node:fs";`, /forbidden import "node:fs"/],
+    [`const home = process.env.HOME;`, /process\.\* reads/],
+    [`const r = fetch("http://x");`, /fetch\( is forbidden/],
+  ] as Array<[string, RegExp]>) {
+    const problems = adapterViolations(
+      `import { createPlan } from "../../contract.mjs";\n${source}\n`,
+      "_shared/x.mjs",
+      isSharedImport
+    );
+    assert.ok(
+      problems.some((problem) => expected.test(problem)),
+      JSON.stringify(problems)
+    );
+  }
 });
 
 test("contract.mjs imports nothing beyond the documented exceptions", () => {

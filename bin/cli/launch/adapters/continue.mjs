@@ -7,6 +7,8 @@ import {
   findFlag,
   findTokenSites,
 } from "../contract.mjs";
+import { assertPlatform, assertViewRows } from "./_shared/gemini-preflight.mjs";
+import { isSemverBelow } from "./_shared/semver.mjs";
 
 const INJECT_LIMIT = 20;
 const FALLBACK_CONTEXT = 32768;
@@ -38,14 +40,43 @@ const PASSTHROUGH = [
   },
 ];
 
-function parseSemver(value) {
-  const m = /(\d+)\.(\d+)\.(\d+)/.exec(String(value ?? "").trim());
-  return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null;
+function knownContext(row) {
+  return typeof row.contextTokens === "number" && row.contextTokens > 0;
 }
 
-function compareSemver(a, b) {
-  for (let i = 0; i < 3; i += 1) if (a[i] !== b[i]) return a[i] < b[i] ? -1 : 1;
-  return 0;
+function checkPassthrough(args, warnings) {
+  for (const rule of PASSTHROUGH) {
+    if (!findFlag(args, rule.flag)) continue;
+    if (rule.action === "warn") warnings.push(rule.message);
+    else throw new LaunchError("ConfigConflict", rule.message);
+  }
+}
+
+/** Chosen model first, the rest in view order, capped at the limit. */
+function configRows(ctx) {
+  if (!ctx.model) return ctx.view.rows.slice(0, INJECT_LIMIT);
+  return [ctx.model, ...ctx.view.rows.filter((row) => row.id !== ctx.model.id)].slice(
+    0,
+    INJECT_LIMIT
+  );
+}
+
+function modelEntry(row, apiBase) {
+  const contextLength = knownContext(row) ? row.contextTokens : FALLBACK_CONTEXT;
+  const quarter = Math.floor(contextLength / 4);
+  const maxTokens =
+    typeof row.maxOutputTokens === "number" && row.maxOutputTokens > 0
+      ? Math.min(row.maxOutputTokens, quarter)
+      : quarter;
+  return {
+    name: row.id,
+    provider: "openai",
+    model: row.id,
+    apiBase,
+    apiKey: SECRET_REF,
+    roles: ["chat", "edit", "apply"],
+    defaultCompletionOptions: { contextLength, maxTokens },
+  };
 }
 
 export default defineAdapter({
@@ -73,60 +104,23 @@ export default defineAdapter({
     passthrough: PASSTHROUGH,
   },
   plan(ctx) {
-    if (!PLATFORMS.includes(ctx.platform)) {
-      throw new LaunchError(
-        "UnsupportedPlatform",
-        `Continue CLI does not support ${ctx.platform}.`
-      );
-    }
+    assertPlatform(ctx, PLATFORMS, `Continue CLI does not support ${ctx.platform}.`);
     const warnings = [];
-    const have = parseSemver(ctx.tool.version);
-    const rec = parseSemver(VERSION_GATE.recommended);
-    if (have && rec && compareSemver(have, rec) < 0) {
+    if (isSemverBelow(ctx.tool.version, VERSION_GATE.recommended)) {
       warnings.push(
         `Continue CLI ${ctx.tool.version} is older than the tested ${VERSION_GATE.recommended}; upgrade with: ${INSTALL}`
       );
     }
-    if (ctx.view.rows.length === 0) {
-      throw new LaunchError("ModelNotFound", "No OmniRoute model matches the continue view.", {
-        hint: "Connect a provider with tool-calling chat models, then retry.",
-      });
-    }
-    for (const rule of PASSTHROUGH) {
-      if (!findFlag(ctx.passthroughArgs, rule.flag)) continue;
-      if (rule.action === "warn") warnings.push(rule.message);
-      else throw new LaunchError("ConfigConflict", rule.message);
-    }
+    assertViewRows(
+      ctx,
+      "No OmniRoute model matches the continue view.",
+      "Connect a provider with tool-calling chat models, then retry."
+    );
+    checkPassthrough(ctx.passthroughArgs, warnings);
 
-    // Chosen model first, the rest in view order, capped at the limit.
-    const rows = ctx.model
-      ? [ctx.model, ...ctx.view.rows.filter((row) => row.id !== ctx.model.id)].slice(
-          0,
-          INJECT_LIMIT
-        )
-      : ctx.view.rows.slice(0, INJECT_LIMIT);
-
+    const rows = configRows(ctx);
     const apiBase = ensureV1(ctx.gateway.rootUrl);
-    let usedFallback = false;
-    const models = rows.map((row) => {
-      const known = typeof row.contextTokens === "number" && row.contextTokens > 0;
-      if (!known) usedFallback = true;
-      const contextLength = known ? row.contextTokens : FALLBACK_CONTEXT;
-      const quarter = Math.floor(contextLength / 4);
-      const maxTokens =
-        typeof row.maxOutputTokens === "number" && row.maxOutputTokens > 0
-          ? Math.min(row.maxOutputTokens, quarter)
-          : quarter;
-      return {
-        name: row.id,
-        provider: "openai",
-        model: row.id,
-        apiBase,
-        apiKey: SECRET_REF,
-        roles: ["chat", "edit", "apply"],
-        defaultCompletionOptions: { contextLength, maxTokens },
-      };
-    });
+    const models = rows.map((row) => modelEntry(row, apiBase));
     const config = {
       name: "OmniRoute Launch",
       version: "1.0.0",
@@ -135,7 +129,7 @@ export default defineAdapter({
     };
 
     const notes = [];
-    if (usedFallback) {
+    if (!rows.every(knownContext)) {
       notes.push(
         `Some models report no context window; used ${FALLBACK_CONTEXT} tokens for them in the Continue config.`
       );

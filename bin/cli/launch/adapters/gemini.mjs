@@ -7,10 +7,12 @@ import {
   findTokenSites,
   stripTrailingSlash,
 } from "../contract.mjs";
+import { requireLaunchModel } from "./_shared/gemini-preflight.mjs";
 
 const VERSION_GATE = { args: ["--version"], min: "0.25.0", recommended: "0.68.0" };
 const UPGRADE_HINT = "npm install -g @google/gemini-cli@latest";
 const PLATFORMS = ["darwin", "linux", "win32"];
+const MODEL_HINT = "use omnirouter launch gemini --model <id>";
 
 // Auxiliary model aliases the CLI hard-codes to gemini-* ids.
 // UNVERIFIED: the exact alias keys were not confirmed by a live run of every one.
@@ -57,16 +59,6 @@ const PASSTHROUGH = [
   },
 ];
 
-function parseSemver(text) {
-  const m = /(\d+)\.(\d+)\.(\d+)/.exec(String(text ?? "").trim());
-  return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null;
-}
-
-function compareSemver(a, b) {
-  for (let i = 0; i < 3; i += 1) if (a[i] !== b[i]) return a[i] < b[i] ? -1 : 1;
-  return 0;
-}
-
 function isGeminiModel(id) {
   return String(id)
     .split("/")
@@ -80,6 +72,116 @@ function noProxy(existing) {
     if (entry && !entries.includes(entry)) entries.push(entry);
   }
   return entries.join(",");
+}
+
+const UNSET_KEYS = [
+  "CODE_ASSIST_ENDPOINT",
+  "GEMINI_CLI_AUTH_OVERRIDE",
+  "GEMINI_DEFAULT_AUTH_TYPE",
+  "GEMINI_MODEL",
+  "GOOGLE_API_KEY",
+  "GOOGLE_GENAI_API_VERSION",
+  "GOOGLE_GENAI_USE_GCA",
+  "GOOGLE_GENAI_USE_VERTEXAI",
+  "GOOGLE_VERTEX_BASE_URL",
+];
+
+function preflightSpec(ctx) {
+  const version = ctx.tool.version;
+  return {
+    platforms: PLATFORMS,
+    platformMessage: `Gemini CLI launch is not supported on ${ctx.platform}`,
+    gate: VERSION_GATE,
+    tooOld: `Gemini CLI ${version} is older than ${VERSION_GATE.min} (needs GEMINI_CLI_HOME support)`,
+    tooOldHint: UPGRADE_HINT,
+    behind: `Gemini CLI ${version} is older than the tested ${VERSION_GATE.recommended}; upgrade with: ${UPGRADE_HINT}`,
+    noRows: "No OmniRoute model matches the gemini view",
+    noRowsHint: "Connect a provider with tool-calling chat models, then retry",
+    noModel: "Gemini CLI needs a model",
+    noModelHint: MODEL_HINT,
+  };
+}
+
+/** Throw on a rejected passthrough flag, collect the warnings of the warn rules. */
+function checkPassthrough(args, warnings) {
+  for (const rule of PASSTHROUGH) {
+    const names = [rule.flag, ...(rule.aliases || [])];
+    if (!findFlag(args, names, { takesValue: rule.takesValue })) continue;
+    if (rule.action === "reject") {
+      throw new LaunchError("ConfigConflict", rule.message, { hint: MODEL_HINT });
+    }
+    if (rule.action === "warn") warnings.push(rule.message);
+  }
+}
+
+/** Compression threshold for a known context window (1M tokens is the CLI's assumption). */
+function compressionThreshold(model) {
+  if (!(typeof model.contextTokens === "number" && model.contextTokens > 0)) return null;
+  const threshold = Math.max(0.05, (0.5 * model.contextTokens) / 1048576);
+  return Math.round(threshold * 1000) / 1000;
+}
+
+function auxAliases(modelId) {
+  const customAliases = {};
+  for (const alias of AUX_ALIASES) {
+    customAliases[alias] = { extends: "base", modelConfig: { model: modelId } };
+  }
+  return customAliases;
+}
+
+/** The launcher's settings.json overlay (merged over the user's settings.json). */
+function geminiSettings(model, notes) {
+  const ours = {
+    security: { auth: { selectedType: "gemini-api-key" } },
+    privacy: { usageStatisticsEnabled: false },
+    general: { enableAutoUpdate: false, enableAutoUpdateNotification: false },
+    ide: { hasSeenNudge: true },
+  };
+  const compression = compressionThreshold(model);
+  if (compression !== null) {
+    ours.model = { compressionThreshold: compression };
+  } else {
+    notes.push(
+      "Model context size is unknown: Gemini CLI keeps its default compression threshold (assumes 1M tokens)"
+    );
+  }
+  ours.modelConfigs = { customAliases: auxAliases(model.id) };
+  ours.agents = {
+    overrides: { codebase_investigator: { modelConfig: { model: model.id } } },
+  };
+  if (!isGeminiModel(model.id)) {
+    ours.tools = { exclude: ["google_web_search", "web_fetch"] };
+    notes.push("Non-Gemini model: google_web_search and web_fetch tools are disabled");
+  }
+  return ours;
+}
+
+/** Headless (-p/--prompt) in an untrusted cwd exits 55 without --skip-trust, so we add it. */
+function skipTrustArgs(args, notes) {
+  if (findFlag(args, ["-p", "--prompt"]) === null) {
+    notes.push(
+      "Folder trust stays on: an untrusted folder will prompt (or fail headless); trust it in Gemini CLI first"
+    );
+    return [];
+  }
+  if (findFlag(args, ["--skip-trust"], { takesValue: false })) return [];
+  notes.push("Headless prompt: --skip-trust added so an untrusted folder does not exit 55");
+  return ["--skip-trust"];
+}
+
+function geminiEnv(ctx, userGeminiDir, sep) {
+  const set = {
+    GEMINI_CLI_HOME: "${TMP}",
+    GOOGLE_GEMINI_BASE_URL: stripTrailingSlash(ctx.gateway.rootUrl),
+    GEMINI_API_KEY: ctx.auth.token,
+    GEMINI_API_KEY_AUTH_MECHANISM: "bearer",
+    NO_PROXY: noProxy(ctx.baseEnv.NO_PROXY),
+  };
+  if (!ctx.baseEnv.GEMINI_CLI_TRUSTED_FOLDERS_PATH) {
+    set.GEMINI_CLI_TRUSTED_FOLDERS_PATH = `${userGeminiDir}${sep}trustedFolders.json`;
+  }
+  const unset = UNSET_KEYS.filter((key) => !(key in set)).sort();
+  return { set, unset };
 }
 
 export default defineAdapter({
@@ -112,125 +214,19 @@ export default defineAdapter({
     passthrough: PASSTHROUGH,
   },
   plan(ctx) {
-    if (!PLATFORMS.includes(ctx.platform)) {
-      throw new LaunchError(
-        "UnsupportedPlatform",
-        `Gemini CLI launch is not supported on ${ctx.platform}`
-      );
-    }
     const warnings = [];
     const notes = [];
+    const model = requireLaunchModel(ctx, preflightSpec(ctx), warnings);
+    checkPassthrough(ctx.passthroughArgs, warnings);
 
-    const have = parseSemver(ctx.tool.version);
-    if (have) {
-      if (compareSemver(have, parseSemver(VERSION_GATE.min)) < 0) {
-        throw new LaunchError(
-          "ToolVersionTooOld",
-          `Gemini CLI ${ctx.tool.version} is older than ${VERSION_GATE.min} (needs GEMINI_CLI_HOME support)`,
-          { hint: UPGRADE_HINT }
-        );
-      }
-      if (compareSemver(have, parseSemver(VERSION_GATE.recommended)) < 0) {
-        warnings.push(
-          `Gemini CLI ${ctx.tool.version} is older than the tested ${VERSION_GATE.recommended}; upgrade with: ${UPGRADE_HINT}`
-        );
-      }
-    }
-
-    if (ctx.view.rows.length === 0) {
-      throw new LaunchError("ModelNotFound", "No OmniRoute model matches the gemini view", {
-        hint: "Connect a provider with tool-calling chat models, then retry",
-      });
-    }
-    if (!ctx.model) {
-      throw new LaunchError("ModelRequired", "Gemini CLI needs a model", {
-        hint: "use omnirouter launch gemini --model <id>",
-      });
-    }
-
-    for (const rule of PASSTHROUGH) {
-      const names = [rule.flag, ...(rule.aliases || [])];
-      if (!findFlag(ctx.passthroughArgs, names, { takesValue: rule.takesValue })) continue;
-      if (rule.action === "reject") {
-        throw new LaunchError("ConfigConflict", rule.message, {
-          hint: "use omnirouter launch gemini --model <id>",
-        });
-      }
-      if (rule.action === "warn") warnings.push(rule.message);
-    }
-
-    const model = ctx.model;
     const sep = ctx.platform === "win32" ? "\\" : "/";
-    const userHome = ctx.baseEnv.GEMINI_CLI_HOME || ctx.homeDir;
-    const userGeminiDir = `${userHome}${sep}.gemini`;
-
-    const ours = {
-      security: { auth: { selectedType: "gemini-api-key" } },
-      privacy: { usageStatisticsEnabled: false },
-      general: { enableAutoUpdate: false, enableAutoUpdateNotification: false },
-      ide: { hasSeenNudge: true },
-    };
-    if (typeof model.contextTokens === "number" && model.contextTokens > 0) {
-      const threshold = Math.max(0.05, (0.5 * model.contextTokens) / 1048576);
-      ours.model = { compressionThreshold: Math.round(threshold * 1000) / 1000 };
-    } else {
-      notes.push(
-        "Model context size is unknown: Gemini CLI keeps its default compression threshold (assumes 1M tokens)"
-      );
-    }
-    const customAliases = {};
-    for (const alias of AUX_ALIASES) {
-      customAliases[alias] = { extends: "base", modelConfig: { model: model.id } };
-    }
-    ours.modelConfigs = { customAliases };
-    ours.agents = {
-      overrides: { codebase_investigator: { modelConfig: { model: model.id } } },
-    };
-    if (!isGeminiModel(model.id)) {
-      ours.tools = { exclude: ["google_web_search", "web_fetch"] };
-      notes.push("Non-Gemini model: google_web_search and web_fetch tools are disabled");
-    }
-    // Headless (-p/--prompt) in an untrusted cwd exits 55 without --skip-trust, so we add it.
-    const headless = findFlag(ctx.passthroughArgs, ["-p", "--prompt"]) !== null;
-    const addSkipTrust =
-      headless && !findFlag(ctx.passthroughArgs, ["--skip-trust"], { takesValue: false });
-    if (headless) {
-      if (addSkipTrust)
-        notes.push("Headless prompt: --skip-trust added so an untrusted folder does not exit 55");
-    } else {
-      notes.push(
-        "Folder trust stays on: an untrusted folder will prompt (or fail headless); trust it in Gemini CLI first"
-      );
-    }
-
-    const set = {
-      GEMINI_CLI_HOME: "${TMP}",
-      GOOGLE_GEMINI_BASE_URL: stripTrailingSlash(ctx.gateway.rootUrl),
-      GEMINI_API_KEY: ctx.auth.token,
-      GEMINI_API_KEY_AUTH_MECHANISM: "bearer",
-      NO_PROXY: noProxy(ctx.baseEnv.NO_PROXY),
-    };
-    if (!ctx.baseEnv.GEMINI_CLI_TRUSTED_FOLDERS_PATH) {
-      set.GEMINI_CLI_TRUSTED_FOLDERS_PATH = `${userGeminiDir}${sep}trustedFolders.json`;
-    }
-
-    const unset = [
-      "CODE_ASSIST_ENDPOINT",
-      "GEMINI_CLI_AUTH_OVERRIDE",
-      "GEMINI_DEFAULT_AUTH_TYPE",
-      "GEMINI_MODEL",
-      "GOOGLE_API_KEY",
-      "GOOGLE_GENAI_API_VERSION",
-      "GOOGLE_GENAI_USE_GCA",
-      "GOOGLE_GENAI_USE_VERTEXAI",
-      "GOOGLE_VERTEX_BASE_URL",
-    ]
-      .filter((key) => !(key in set))
-      .sort();
+    const userGeminiDir = `${ctx.baseEnv.GEMINI_CLI_HOME || ctx.homeDir}${sep}.gemini`;
+    const ours = geminiSettings(model, notes);
+    const trustArgs = skipTrustArgs(ctx.passthroughArgs, notes);
 
     const plan = createPlan("gemini", {
-      argv: ["-m", model.id, ...(addSkipTrust ? ["--skip-trust"] : []), ...ctx.passthroughArgs],
-      env: { set, unset },
+      argv: ["-m", model.id, ...trustArgs, ...ctx.passthroughArgs],
+      env: geminiEnv(ctx, userGeminiDir, sep),
       tempFiles: [
         {
           path: ".gemini/settings.json",

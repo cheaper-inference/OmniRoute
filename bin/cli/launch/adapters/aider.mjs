@@ -23,10 +23,10 @@ import {
   defineAdapter,
   dotenv,
   findFlag,
-  findTokenSites,
   hasFlag,
   injectRows,
 } from "../contract.mjs";
+import { injectModelList, withTokenSites } from "./_shared/inject.mjs";
 
 const PROVIDER_PREFIX = "openai/";
 
@@ -49,6 +49,97 @@ function metadataEntry(row) {
     entry.max_tokens = row.maxOutputTokens;
   }
   return entry;
+}
+
+function assertPlannable(ctx) {
+  if (ctx.view.rows.length === 0) {
+    throw new LaunchError("ModelNotFound", "No models available for aider in this view.", {
+      hint: "Check that at least one provider is connected and serves openai-chat.",
+    });
+  }
+  if (!ctx.model) {
+    throw new LaunchError("ModelRequired", "aider needs a model.", {
+      hint: "Pass --model <id> or let the launcher pick one.",
+    });
+  }
+}
+
+/** Warn when a user --model lacks the provider prefix litellm needs to reach the gateway. */
+function prefixWarnings(userModel) {
+  if (!userModel || String(userModel.value ?? "").startsWith(PROVIDER_PREFIX)) return [];
+  return [
+    `aider --model ${userModel.value} has no "${PROVIDER_PREFIX}" prefix; litellm may not route it through the gateway.`,
+  ];
+}
+
+function modelMetadata(ctx) {
+  const metadata = {};
+  for (const row of injectRows(ctx)) metadata[toToolModelId(row.id)] = metadataEntry(row);
+  return metadata;
+}
+
+/** Our model flags, each skipped when the user passed it. */
+function modelFlags(args, userModel, modelId) {
+  const flags = [];
+  if (!userModel) flags.push("--model", modelId);
+  if (!hasFlag(args, ["--weak-model"])) flags.push("--weak-model", modelId);
+  if (!hasFlag(args, ["--editor-model"])) flags.push("--editor-model", modelId);
+  return flags;
+}
+
+function aiderTempFiles(baseUrl, token, metadata) {
+  return [
+    {
+      path: "aider.env",
+      contents: dotenv({ AIDER_OPENAI_API_BASE: baseUrl, AIDER_OPENAI_API_KEY: token }),
+      mode: 0o600,
+      format: "env",
+    },
+    {
+      path: "aider.model.metadata.json",
+      contents: `${JSON.stringify(metadata, null, 2)}\n`,
+      mode: 0o600,
+      format: "json",
+    },
+  ];
+}
+
+function plan(ctx) {
+  assertPlannable(ctx);
+
+  const args = ctx.passthroughArgs;
+  const userModel = findFlag(args, ["--model"]);
+  const modelId = userModel?.value ?? toToolModelId(ctx.model.id);
+  const warnings = prefixWarnings(userModel);
+  const metadata = modelMetadata(ctx);
+  const baseUrl = ctx.util.ensureV1(ctx.gateway.rootUrl);
+
+  const argv = [
+    "--env-file",
+    ctx.util.tempPath("aider.env"),
+    ...modelFlags(args, userModel, modelId),
+    "--model-metadata-file",
+    ctx.util.tempPath("aider.model.metadata.json"),
+    "--no-show-model-warnings",
+    "--no-check-update",
+    "--no-show-release-notes",
+    "--no-analytics",
+    ...args,
+  ];
+
+  return withTokenSites(
+    createPlan("aider", {
+      argv,
+      env: {
+        set: {},
+        unset: ["OPENAI_API_KEY", "OPENAI_API_BASE", "OPENAI_BASE_URL"],
+      },
+      tempFiles: aiderTempFiles(baseUrl, ctx.auth.token, metadata),
+      warnings,
+      notes: [`aider talks to ${baseUrl} as ${modelId}`],
+      modelList: injectModelList(ctx, Object.keys(metadata).length),
+    })
+  );
 }
 
 export default defineAdapter({
@@ -114,80 +205,5 @@ export default defineAdapter({
 
   toToolModelId,
 
-  plan(ctx) {
-    if (ctx.view.rows.length === 0) {
-      throw new LaunchError("ModelNotFound", "No models available for aider in this view.", {
-        hint: "Check that at least one provider is connected and serves openai-chat.",
-      });
-    }
-    if (!ctx.model) {
-      throw new LaunchError("ModelRequired", "aider needs a model.", {
-        hint: "Pass --model <id> or let the launcher pick one.",
-      });
-    }
-
-    const args = ctx.passthroughArgs;
-    const userModel = findFlag(args, ["--model"]);
-    const modelId = userModel?.value ?? toToolModelId(ctx.model.id);
-    const warnings = [];
-    if (userModel && !String(userModel.value ?? "").startsWith(PROVIDER_PREFIX)) {
-      warnings.push(
-        `aider --model ${userModel.value} has no "${PROVIDER_PREFIX}" prefix; litellm may not route it through the gateway.`
-      );
-    }
-
-    const envPath = ctx.util.tempPath("aider.env");
-    const metaPath = ctx.util.tempPath("aider.model.metadata.json");
-
-    const metadata = {};
-    for (const row of injectRows(ctx)) metadata[toToolModelId(row.id)] = metadataEntry(row);
-
-    const argv = ["--env-file", envPath];
-    if (!userModel) argv.push("--model", modelId);
-    if (!hasFlag(args, ["--weak-model"])) argv.push("--weak-model", modelId);
-    if (!hasFlag(args, ["--editor-model"])) argv.push("--editor-model", modelId);
-    argv.push(
-      "--model-metadata-file",
-      metaPath,
-      "--no-show-model-warnings",
-      "--no-check-update",
-      "--no-show-release-notes",
-      "--no-analytics",
-      ...args
-    );
-
-    const plan = createPlan("aider", {
-      argv,
-      env: {
-        set: {},
-        unset: ["OPENAI_API_KEY", "OPENAI_API_BASE", "OPENAI_BASE_URL"],
-      },
-      tempFiles: [
-        {
-          path: "aider.env",
-          contents: dotenv({
-            AIDER_OPENAI_API_BASE: ctx.util.ensureV1(ctx.gateway.rootUrl),
-            AIDER_OPENAI_API_KEY: ctx.auth.token,
-          }),
-          mode: 0o600,
-          format: "env",
-        },
-        {
-          path: "aider.model.metadata.json",
-          contents: `${JSON.stringify(metadata, null, 2)}\n`,
-          mode: 0o600,
-          format: "json",
-        },
-      ],
-      warnings,
-      notes: [`aider talks to ${ctx.util.ensureV1(ctx.gateway.rootUrl)} as ${modelId}`],
-      modelList: {
-        strategy: "inject",
-        viewHash: ctx.view.hash,
-        injected: Object.keys(metadata).length,
-      },
-    });
-    plan.secretSites = findTokenSites(plan);
-    return plan;
-  },
+  plan,
 });

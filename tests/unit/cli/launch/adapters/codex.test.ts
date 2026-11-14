@@ -10,7 +10,8 @@
 //   10000, experimental_supported_tools, base_instructions, context_window 128000 fallback,
 //   supports_reasoning_summary_parameter false for non-reasoning rows).
 // - base_instructions = Codex prompt.md (asset codex/base-instructions.txt).
-// - service_tier, check_for_update_on_startup, analytics.enabled, feedback.enabled.
+// - service_tier, check_for_update_on_startup, analytics.enabled, feedback.enabled,
+//   features.plugins=false (no curated plugin catalog sync, verified live on 0.169.0).
 // - OMNIROUTE_API_KEY never empty (sentinel) and the stripped OPENAI_* / CODEX_API_KEY env.
 // - owned passthrough (-m/--model, -p/--profile, --oss, --local-provider, -c on model,
 //   model_provider, model_providers.*, model_catalog_json, profile).
@@ -84,6 +85,11 @@ test("default: provider -c flags, ${STATE} catalog, key only in env", () => {
     'model_providers.omniroute.base_url="http://127.0.0.1:20128/v1"'
   );
   assert.equal(argValue(plan, "model_catalog_json="), 'model_catalog_json="${STATE}/model.json"');
+  // No curated plugin sync: it leaves a background git fetch running after codex exits.
+  assert.equal(argValue(plan, "features.plugins="), "features.plugins=false");
+  const pluginsAt = plan.argv.indexOf("features.plugins=false");
+  assert.equal(plan.argv[pluginsAt - 1], "-c");
+  assert.ok(pluginsAt < plan.argv.indexOf(argValue(plan, "model=")), "before the model override");
   assert.deepEqual(plan.env.set, { OMNIROUTE_API_KEY: "${TOKEN}" });
   assert.deepEqual(plan.secretSites, [{ kind: "env", key: "OMNIROUTE_API_KEY" }]);
   assert.equal(plan.needsTempDir, false);

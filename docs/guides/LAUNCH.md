@@ -70,7 +70,7 @@ this session only, `both` does both.
 ## Per-tool notes
 
 - `claude`: Claude Code can save a default model into your `settings.json` when you pick one with `/model` and press Enter. The launcher never writes that file, but it compares the `model` key after exit and warns if it changed. Versions 2.1.83 to 2.1.241 get one custom model row and a warning instead of the full picker. A managed `availableModels` allowlist still filters the picker rows.
-- `codex`: Everything rides on `-c` overrides, so your `config.toml` is not edited. The launcher warns after exit if Codex changed it (project trust or `/model`).
+- `codex`: Everything rides on `-c` overrides, so your `config.toml` is not edited. The launcher warns after exit if Codex changed it (project trust or `/model`). Launched sessions pass `-c features.plugins=false`, because Codex otherwise starts a background clone of its plugin catalog that keeps running after the launch exits. This also turns off Codex plugins you installed, for that session only; add `-- -c features.plugins=true` to the launch to turn them back on.
 - `copilot`: Only the chosen model is available in the session. Models under 128k context get a warning.
 - `gemini`: Folder trust stays on, so trust the folder in Gemini CLI first or it will prompt (or fail headless). Non-Gemini models have `google_web_search` and `web_fetch` disabled. Auxiliary model alias names come from research and were not all verified live.
 - `hermes`: Sessions, memory and skills live in a temp home and are discarded on exit. Teardown runs `hermes gateway stop` so the background gateway does not outlive the launch. The temp-home recipe and teardown are not verified on Windows (a warning is shown).

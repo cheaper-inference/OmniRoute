@@ -32,24 +32,18 @@ import {
   rowLabel,
   tempPath,
 } from "../contract.mjs";
+import { assertViewRows } from "./_shared/gemini-preflight.mjs";
+import {
+  applyQwenVersionGate,
+  assertMinContext,
+  warnUnknownContext,
+} from "./_shared/qwen-gates.mjs";
 
 const SETTINGS_FILE = "qwen-system-settings.json";
 const KEY_ENV = "OMNIROUTE_API_KEY";
 const RECOMMENDED = "0.27.0";
 const MODEL_FLAGS = ["--model", "-m"];
 const AUTH_FLAG = "--auth-type";
-
-/** Tiny semver compare: -1, 0, 1 on major.minor.patch (non-numeric parts count as 0). */
-function compareVersions(a, b) {
-  const pa = String(a).split("-")[0].split(".");
-  const pb = String(b).split("-")[0].split(".");
-  for (let i = 0; i < 3; i++) {
-    const x = Number.parseInt(pa[i] ?? "0", 10) || 0;
-    const y = Number.parseInt(pb[i] ?? "0", 10) || 0;
-    if (x !== y) return x < y ? -1 : 1;
-  }
-  return 0;
-}
 
 function providerEntry(row, baseUrl) {
   const entry = {
@@ -106,6 +100,45 @@ const CAPABILITIES = {
   ],
 };
 
+function assertModelChoice(ctx, userModel) {
+  if (!ctx.model && !userModel) {
+    throw new LaunchError("ModelRequired", "Qwen Code requires a model.", {
+      hint: "Pass --model <id> (omnirouter launch qwen --model <id>).",
+    });
+  }
+}
+
+function qwenSettings(ctx, rows) {
+  const baseUrl = ensureV1(ctx.gateway.rootUrl);
+  const settings = {
+    general: { enableAutoUpdate: false },
+    memory: { enableManagedAutoMemory: false },
+    privacy: { usageStatisticsEnabled: false },
+    security: { auth: { selectedType: "openai" } },
+    modelProviders: { openai: rows.map((row) => providerEntry(row, baseUrl)) },
+  };
+  if (ctx.model) settings.model = { name: ctx.model.id };
+  return settings;
+}
+
+function warnUserAuth(args, warnings) {
+  const userAuth = findFlag(args, [AUTH_FLAG]);
+  if (userAuth && userAuth.value !== "openai") {
+    warnings.push(
+      `--auth-type ${userAuth.value ?? ""} was passed by the user and may bypass the OmniRoute gateway.`
+    );
+  }
+}
+
+/** Our --auth-type and --model unless the user passed them, then the user's args. */
+function qwenArgv(ctx, args, userModel) {
+  const argv = [];
+  if (!hasFlag(args, [AUTH_FLAG])) argv.push(AUTH_FLAG, "openai");
+  if (!userModel && ctx.model) argv.push("--model", ctx.model.id);
+  argv.push(...args);
+  return argv;
+}
+
 export default defineAdapter({
   contract: { major: 1, minor: 1 },
   id: "qwen",
@@ -114,79 +147,23 @@ export default defineAdapter({
   capabilities: CAPABILITIES,
 
   plan(ctx) {
-    const capabilities = CAPABILITIES;
     const args = ctx.passthroughArgs;
     const userModel = findFlag(args, MODEL_FLAGS);
-
-    if (ctx.view.rows.length === 0) {
-      throw new LaunchError("ModelNotFound", "No models available for Qwen Code.", {
-        hint: "Qwen Code needs OpenAI chat models with tool calling; connect a provider or relax the view.",
-      });
-    }
-    if (!ctx.model && !userModel) {
-      throw new LaunchError("ModelRequired", "Qwen Code requires a model.", {
-        hint: "Pass --model <id> (omnirouter launch qwen --model <id>).",
-      });
-    }
-    const min = capabilities.minContextTokens;
-    if (
-      ctx.model &&
-      typeof min === "number" &&
-      typeof ctx.model.contextTokens === "number" &&
-      ctx.model.contextTokens > 0 &&
-      ctx.model.contextTokens < min
-    ) {
-      throw new LaunchError(
-        "ModelUnsuitable",
-        `${ctx.model.id} has a ${ctx.model.contextTokens} token window; Qwen Code needs at least ${min}.`,
-        { hint: "Pick a model with a larger context window." }
-      );
-    }
+    assertViewRows(
+      ctx,
+      "No models available for Qwen Code.",
+      "Qwen Code needs OpenAI chat models with tool calling; connect a provider or relax the view."
+    );
+    assertModelChoice(ctx, userModel);
+    assertMinContext(ctx.model, CAPABILITIES.minContextTokens);
 
     const warnings = [];
-    const gate = capabilities.versionGate;
-    const version = ctx.tool.version;
-    if (version && gate.min && compareVersions(version, gate.min) < 0) {
-      throw new LaunchError(
-        "ToolVersionTooOld",
-        `Qwen Code ${version} is older than the required ${gate.min}.`,
-        { hint: "Upgrade with: npm install -g @qwen-code/qwen-code@latest" }
-      );
-    }
-    if (version && gate.recommended && compareVersions(version, gate.recommended) < 0) {
-      warnings.push(
-        `Qwen Code ${version} is older than the recommended ${gate.recommended}; upgrade with: npm install -g @qwen-code/qwen-code@latest`
-      );
-    }
-
-    const baseUrl = ensureV1(ctx.gateway.rootUrl);
-    const rows = injectRows(ctx, capabilities.modelList.injectLimit);
-    const settings = {
-      general: { enableAutoUpdate: false },
-      memory: { enableManagedAutoMemory: false },
-      privacy: { usageStatisticsEnabled: false },
-      security: { auth: { selectedType: "openai" } },
-      modelProviders: { openai: rows.map((row) => providerEntry(row, baseUrl)) },
-    };
-    if (ctx.model) {
-      settings.model = { name: ctx.model.id };
-      if (!(typeof ctx.model.contextTokens === "number" && ctx.model.contextTokens > 0)) {
-        warnings.push(
-          `${ctx.model.id} has no known context window; Qwen Code assumes its default (200000 tokens).`
-        );
-      }
-    }
-
-    const userAuth = findFlag(args, [AUTH_FLAG]);
-    if (userAuth && userAuth.value !== "openai") {
-      warnings.push(
-        `--auth-type ${userAuth.value ?? ""} was passed by the user and may bypass the OmniRoute gateway.`
-      );
-    }
-    const argv = [];
-    if (!hasFlag(args, [AUTH_FLAG])) argv.push(AUTH_FLAG, "openai");
-    if (!userModel && ctx.model) argv.push("--model", ctx.model.id);
-    argv.push(...args);
+    applyQwenVersionGate(ctx.tool.version, CAPABILITIES.versionGate, warnings);
+    const rows = injectRows(ctx, CAPABILITIES.modelList.injectLimit);
+    const settings = qwenSettings(ctx, rows);
+    warnUnknownContext(ctx.model, warnings);
+    warnUserAuth(args, warnings);
+    const argv = qwenArgv(ctx, args, userModel);
 
     const plan = createPlan("qwen", {
       argv,
