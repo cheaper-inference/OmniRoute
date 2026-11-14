@@ -190,6 +190,7 @@ export default function FilesListTab({
           className="text-sm"
           aria-label={t("batchFilesListFilesTable")}
           scrollbarLabel={t("batchFilesListFilesTable")}
+          containerClassName="rounded-none border-0"
         >
           <TableHeader>
             <TableRow>
