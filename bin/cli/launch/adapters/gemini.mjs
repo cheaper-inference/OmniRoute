@@ -190,9 +190,18 @@ export default defineAdapter({
       ours.tools = { exclude: ["google_web_search", "web_fetch"] };
       notes.push("Non-Gemini model: google_web_search and web_fetch tools are disabled");
     }
-    notes.push(
-      "Folder trust stays on: an untrusted folder will prompt (or fail headless); trust it in Gemini CLI first"
-    );
+    // Headless (-p/--prompt) in an untrusted cwd exits 55 without --skip-trust, so we add it.
+    const headless = findFlag(ctx.passthroughArgs, ["-p", "--prompt"]) !== null;
+    const addSkipTrust =
+      headless && !findFlag(ctx.passthroughArgs, ["--skip-trust"], { takesValue: false });
+    if (headless) {
+      if (addSkipTrust)
+        notes.push("Headless prompt: --skip-trust added so an untrusted folder does not exit 55");
+    } else {
+      notes.push(
+        "Folder trust stays on: an untrusted folder will prompt (or fail headless); trust it in Gemini CLI first"
+      );
+    }
 
     const set = {
       GEMINI_CLI_HOME: "${TMP}",
@@ -220,7 +229,7 @@ export default defineAdapter({
       .sort();
 
     const plan = createPlan("gemini", {
-      argv: ["-m", model.id, ...ctx.passthroughArgs],
+      argv: ["-m", model.id, ...(addSkipTrust ? ["--skip-trust"] : []), ...ctx.passthroughArgs],
       env: { set, unset },
       tempFiles: [
         {

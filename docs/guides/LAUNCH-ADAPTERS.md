@@ -167,6 +167,18 @@ tempFiles: [
 modelList: { strategy: "inject", viewHash: ctx.view.hash, injected: rows.length },
 ```
 
+### One-shot use
+
+Pass the tool's own one-shot args after `--`. When they start with a subcommand listed in the
+adapter's `ONE_SHOT_SUBCOMMANDS`, that subcommand replaces the default interactive one:
+
+- goose: `-- run --no-session -q -t "<prompt>"` runs `goose run ...` instead of `goose session`.
+- openclaw: `-- agent --message "<prompt>"` runs `openclaw agent --local ...` instead of the TUI.
+- deepseek: `-- headless "<prompt>"` runs `dsh headless --patch <tmp> ...` instead of `dsh web`.
+- gemini: with `-p` or `--prompt` the adapter adds `--skip-trust` unless you passed it.
+- crush: `-- run "<prompt>"` gets `--verbose` added, because crush 0.101.0 can exit with empty
+  stdout without it.
+
 For preflight and teardown, see `openclaw.mjs` (a `node-version` preflight) and `hermes.mjs` (a
 `${TOOL} gateway stop` teardown). For `mergeJson` and a version-gated model picker, see
 `claude.mjs`.

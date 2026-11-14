@@ -23,6 +23,9 @@ import { LaunchError, createPlan, defineAdapter, findTokenSites } from "../contr
 const MIN_VERSION = "1.59.0";
 const MIN_CONTEXT_TOKENS = 32000;
 
+/** Documented non-interactive one-shot subcommands (`goose run -t TEXT`); replaces the default `session`. */
+const ONE_SHOT_SUBCOMMANDS = ["run"];
+
 /** Env that would override or leak into our routing (dossier section 3, "Scrub inherited env"). */
 const SCRUB_KEYS = [
   "OPENAI_HOST",
@@ -189,7 +192,10 @@ export default defineAdapter({
 
     const plan = createPlan("goose", {
       // Always an explicit subcommand: bare `goose` without a config.yaml starts `configure`.
-      argv: ["session", ...ctx.passthroughArgs],
+      // Passthrough starting with a one-shot subcommand replaces the default `session`.
+      argv: ONE_SHOT_SUBCOMMANDS.includes(ctx.passthroughArgs[0])
+        ? [...ctx.passthroughArgs]
+        : ["session", ...ctx.passthroughArgs],
       env: { set: env, unset: [...unset].sort() },
       warnings,
       notes: [

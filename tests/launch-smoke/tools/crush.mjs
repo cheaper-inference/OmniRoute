@@ -10,7 +10,8 @@ const expectation = {
   keyHeaders: ["authorization"],
   expectStdout: "OMNI-SMOKE-OK",
   timeoutMs: 120000,
-  notes: "dossier tools/crush.md; crush run",
+  notes:
+    "dossier tools/crush.md; crush run. Adapter adds --verbose (crush 0.101.0 flaky empty stdout, 30/30 with it vs 6/10 without)",
 };
 
 export default expectation;

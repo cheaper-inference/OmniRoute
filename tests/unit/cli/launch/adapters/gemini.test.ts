@@ -146,3 +146,25 @@ test("throws", () => {
     });
   }
 });
+
+test("one-shot -p adds --skip-trust", () => {
+  const { plan } = run("one-shot", { args: ["-p", "hi"] });
+  assert.deepEqual(plan.argv, ["-m", "anthropic/claude-sonnet-4-6", "--skip-trust", "-p", "hi"]);
+  assert.ok(!plan.notes.some((n: string) => /Folder trust stays on/.test(n)));
+});
+
+test("one-shot --prompt=x adds --skip-trust", () => {
+  const { plan } = run("one-shot-long", { args: ["--prompt=hi"] });
+  assert.deepEqual(plan.argv, ["-m", "anthropic/claude-sonnet-4-6", "--skip-trust", "--prompt=hi"]);
+});
+
+test("one-shot with user --skip-trust is not duplicated", () => {
+  const { plan } = run("one-shot-user-skip-trust", { args: ["--skip-trust", "-p", "hi"] });
+  assert.deepEqual(plan.argv, ["-m", "anthropic/claude-sonnet-4-6", "--skip-trust", "-p", "hi"]);
+});
+
+test("no prompt flag leaves argv unchanged", () => {
+  const { plan } = run("no-prompt", { args: ["--approval-mode", "yolo"] });
+  assert.deepEqual(plan.argv, ["-m", "anthropic/claude-sonnet-4-6", "--approval-mode", "yolo"]);
+  assert.ok(plan.notes.some((n: string) => /Folder trust stays on/.test(n)));
+});

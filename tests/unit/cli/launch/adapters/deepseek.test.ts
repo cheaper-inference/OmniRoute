@@ -120,3 +120,20 @@ test("old and new versions never gate (dossier gives no min)", () => {
     assert.deepEqual(adapter.plan(ctx).warnings, []);
   }
 });
+
+test("one-shot: headless replaces web, patch stays", () => {
+  const plan = run("one-shot", { args: ["headless", "reply with OK"] });
+  assert.deepEqual(plan.argv, [
+    "headless",
+    "--patch",
+    "${TMP}/omniroute.cordis.yml",
+    "reply with OK",
+  ]);
+  assert.ok(!plan.argv.includes("web"));
+  assert.equal(plan.notes.length, 0);
+});
+
+test("non-one-shot passthrough keeps the web subcommand", () => {
+  const plan = run("passthrough", { args: ["--port", "3081", "--no-open"] });
+  assert.equal(plan.argv[0], "web");
+});

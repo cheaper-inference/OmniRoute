@@ -144,3 +144,21 @@ test("goose: explicit model below minContextTokens throws ModelUnsuitable", () =
   assert.ok((ctx.model?.contextTokens ?? 0) < (adapter.capabilities.minContextTokens ?? 0));
   assert.throws(() => adapter.plan(ctx), hasCode("ModelUnsuitable"));
 });
+
+test("goose: one-shot passthrough replaces the default session subcommand", () => {
+  const ctx = fixtureCtx({
+    ...base,
+    args: ["run", "--no-session", "-q", "-t", "reply with OK"],
+  });
+  const plan = adapter.plan(ctx);
+  check(plan, ctx);
+  assertGolden("goose", "one-shot", plan);
+  assert.deepEqual(plan.argv, ["run", "--no-session", "-q", "-t", "reply with OK"]);
+});
+
+test("goose: no passthrough and non one-shot passthrough keep the session subcommand", () => {
+  const none = adapter.plan(fixtureCtx({ ...base }));
+  assert.deepEqual(none.argv, ["session"]);
+  const other = adapter.plan(fixtureCtx({ ...base, args: ["--resume", "run"] }));
+  assert.deepEqual(other.argv, ["session", "--resume", "run"]);
+});

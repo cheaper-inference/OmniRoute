@@ -32,6 +32,9 @@ import {
 const ID = "deepseek";
 const PROVIDER_ID = "omniroute";
 const KEY_ENV = "OMNIROUTER_DSH_API_KEY";
+// One-shot subcommands (`dsh --help`: "dsh headless ..."). When the passthrough starts with one,
+// it replaces the default `web` profile; `--patch` is a launcher flag, valid for any profile.
+const ONE_SHOT_SUBCOMMANDS = ["headless"];
 const PATCH_FILE = "omniroute.cordis.yml";
 const MIN_CONTEXT_TOKENS = 98304;
 const DEFAULT_CONTEXT_WINDOW = 131072;
@@ -107,16 +110,22 @@ function plan(ctx) {
     { id: "agent-default-model", config: { provider: PROVIDER_ID, model: model.id } },
   ];
 
+  const oneShot = ONE_SHOT_SUBCOMMANDS.includes(ctx.passthroughArgs[0]);
+  const patchPath = ctx.util.tempPath(PATCH_FILE);
   const parts = {
-    argv: ["web", "--patch", ctx.util.tempPath(PATCH_FILE), ...ctx.passthroughArgs],
+    argv: oneShot
+      ? [ctx.passthroughArgs[0], "--patch", patchPath, ...ctx.passthroughArgs.slice(1)]
+      : ["web", "--patch", patchPath, ...ctx.passthroughArgs],
     env: {
       set: { [KEY_ENV]: ctx.auth.token, DSH_TELEMETRY_DISABLED: "1" },
       unset: [],
     },
     tempFiles: [{ path: PATCH_FILE, contents: ctx.util.yaml(patch), mode: 0o600, format: "yaml" }],
-    notes: [
-      "DeepSeek Harness web UI opens in your browser (default http://127.0.0.1:3080); use --port after -- if it is taken.",
-    ],
+    notes: oneShot
+      ? []
+      : [
+          "DeepSeek Harness web UI opens in your browser (default http://127.0.0.1:3080); use --port after -- if it is taken.",
+        ],
     warnings: [],
     preflight: [
       {

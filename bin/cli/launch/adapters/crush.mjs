@@ -48,6 +48,21 @@ function modelEntry(row) {
   return entry;
 }
 
+// One-shot subcommand: `crush run <prompt>`. crush 0.101.0 non-interactive stdout is flaky
+// (about 40% of runs exit 0 with empty stdout, even with --quiet or --debug); passing --verbose
+// (logs go to stderr) made 30 of 30 runs flush the reply, so the adapter adds it.
+const ONE_SHOT_SUBCOMMANDS = ["run"];
+
+function oneShotArgv(args) {
+  if (
+    !ONE_SHOT_SUBCOMMANDS.includes(args[0]) ||
+    hasFlag(args, ["--verbose", "-v"], { takesValue: false })
+  ) {
+    return [...args];
+  }
+  return [args[0], "--verbose", ...args.slice(1)];
+}
+
 export default defineAdapter({
   contract: { major: 1, minor: 1 },
   id: "crush",
@@ -156,7 +171,7 @@ export default defineAdapter({
     };
 
     const plan = createPlan("crush", {
-      argv: [...ctx.passthroughArgs],
+      argv: oneShotArgv(ctx.passthroughArgs),
       env: {
         set: {
           CRUSH_DATA_DIR: statePath("data"),
