@@ -1,4 +1,4 @@
-// `--json` with a real launch (architecture 9, 12.3): one JSON document on stdout after exit.
+// `--json` with a real launch: one JSON document on stdout after exit.
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -13,6 +13,8 @@ import {
   findTokenSites,
 } from "../../../../bin/cli/launch/contract.mjs";
 import { runLaunch } from "../../../../bin/cli/launch/core/pipeline.mjs";
+
+type ExecOpts = { afterExit: (result: { exitCode: number }) => Promise<unknown> | unknown };
 
 const TOKEN = "olx_secret_session_token_value";
 const SUMMARY = { sessionId: "s1", toolId: "fake", requests: 2, inputTokens: 10, outputTokens: 5 };
@@ -118,7 +120,7 @@ async function run(
       writeLastLaunch: () => undefined,
       readToolDefaults: () => undefined,
       readLastLaunch: () => undefined,
-      execute: async (_plan: unknown, o: any) => {
+      execute: async (_plan: unknown, o: ExecOpts) => {
         await o.afterExit({ exitCode: opts.exitCode ?? 3 });
         return { exitCode: opts.exitCode ?? 3, warnings: [] };
       },

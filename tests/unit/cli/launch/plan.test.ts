@@ -1,4 +1,4 @@
-// plan.mjs: context, validation, redaction, dry-run render (architecture 5, 5.1).
+// plan.mjs: context, validation, redaction, dry-run render.
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -20,8 +20,15 @@ import {
   validatePlan,
 } from "../../../../bin/cli/launch/core/plan.mjs";
 import { fixtureCtx } from "./_helpers/fixtureCtx.mjs";
+import type {
+  LaunchContext,
+  LaunchPlan,
+  LaunchModelRow,
+} from "../../../../bin/cli/launch/contract.d.ts";
 
-function adapterWith(planFn: (ctx: any) => any, extra: object = {}) {
+type ErrLike = { code?: string; message?: string; hint?: string; exitCode?: number; name?: string };
+
+function adapterWith(planFn: (ctx: LaunchContext) => LaunchPlan, extra: object = {}) {
   return defineAdapter({
     contract: { major: 1, minor: 1 },
     id: "fixture-tool",
@@ -40,7 +47,7 @@ function adapterWith(planFn: (ctx: any) => any, extra: object = {}) {
   });
 }
 
-function goodPlan(ctx: any, parts: object = {}) {
+function goodPlan(ctx: LaunchContext, parts: object = {}) {
   const plan = createPlan("fixture-tool", {
     argv: ["--config", "${TMP}/c.json"],
     env: { set: { KEY: "${TOKEN}" }, unset: ["OTHER"] },
@@ -90,7 +97,7 @@ test("validatePlan accepts a good plan", () => {
 test("validatePlan rejects each broken invariant as Internal", () => {
   const ctx = fixtureCtx();
   const adapter = adapterWith((c) => goodPlan(c));
-  const cases: Array<[string, any, RegExp]> = [
+  const cases: Array<[string, Record<string, unknown>, RegExp]> = [
     ["token in argv", { argv: ["--key", "${TOKEN}"] }, /in argv/],
     ["undeclared secret", { secretSites: [] }, /not in secretSites/],
     [
@@ -147,7 +154,7 @@ test("validatePlan rejects each broken invariant as Internal", () => {
     const plan = { ...goodPlan(ctx), ...patch };
     assert.throws(
       () => validatePlan(plan, ctx, adapter),
-      (error: any) => error.code === "Internal" && pattern.test(error.message),
+      (error: ErrLike) => error.code === "Internal" && pattern.test(error.message),
       name
     );
   }
@@ -166,7 +173,7 @@ test("validatePlan: tempDirs (1.2) accepted under tmp and state, bad ones reject
   };
   assert.doesNotThrow(() => validatePlan(good, ctx, adapter));
 
-  const cases: Array<[string, any, RegExp]> = [
+  const cases: Array<[string, Record<string, unknown>, RegExp]> = [
     ["traversal", [{ path: "../x" }], /temp dir path "\.\.\/x" escapes its root/],
     ["inner traversal", [{ path: "a/../../x" }], /escapes its root/],
     ["absolute", [{ path: "/etc/x" }], /escapes its root/],
@@ -183,7 +190,7 @@ test("validatePlan: tempDirs (1.2) accepted under tmp and state, bad ones reject
     const plan = { ...goodPlan(ctx), tempDirs };
     assert.throws(
       () => validatePlan(plan, ctx, adapter),
-      (error: any) => error.code === "Internal" && pattern.test(error.message),
+      (error: ErrLike) => error.code === "Internal" && pattern.test(error.message),
       name
     );
   }
@@ -196,7 +203,7 @@ test("validatePlan: tempDirs (1.2) accepted under tmp and state, bad ones reject
   });
   assert.throws(
     () => validatePlan(bare, ctx, adapter),
-    (error: any) => error.code === "Internal" && /needsTempDir/.test(error.message)
+    (error: ErrLike) => error.code === "Internal" && /needsTempDir/.test(error.message)
   );
   const stateOnly = createPlan("fixture-tool", {
     tempDirs: [{ path: "locks", root: "state" }],
@@ -209,18 +216,18 @@ test("validatePlan: tempDirs (1.2) accepted under tmp and state, bad ones reject
 test("planLaunch runs middleware around plan(), adds modelWarnings, validates last", () => {
   const ctx = fixtureCtx();
   const adapter = adapterWith((c) => goodPlan(c, { notes: [c.settings.tag ?? "none"] }), {
-    modelWarnings: (row: any) => [`warn ${row.id}`],
+    modelWarnings: (row: LaunchModelRow) => [`warn ${row.id}`],
   });
   const middleware = [
     {
       id: "late",
       order: 600,
-      afterPlan: (plan: any) => ({ ...plan, notes: [...plan.notes, "late"] }),
+      afterPlan: (plan: LaunchPlan) => ({ ...plan, notes: [...plan.notes, "late"] }),
     },
     {
       id: "tag",
       order: 100,
-      beforePlan: (c: any) => ({ ...c, settings: { ...c.settings, tag: "t1" } }),
+      beforePlan: (c: LaunchContext) => ({ ...c, settings: { ...c.settings, tag: "t1" } }),
     },
   ];
   const { plan, appliedMiddleware } = planLaunch(adapter, ctx, { middleware });
@@ -229,7 +236,7 @@ test("planLaunch runs middleware around plan(), adds modelWarnings, validates la
   assert.deepEqual(appliedMiddleware, ["tag", "late"]);
 
   const smuggler = [
-    { id: "evil", afterPlan: (p: any) => ({ ...p, argv: [...p.argv, "${TOKEN}"] }) },
+    { id: "evil", afterPlan: (p: LaunchPlan) => ({ ...p, argv: [...p.argv, "${TOKEN}"] }) },
   ];
   assert.throws(() => planLaunch(adapter, ctx, { middleware: smuggler }), /in argv/);
 });
@@ -244,7 +251,7 @@ test("planLaunch maps adapter errors: allowed codes pass, others become Internal
         }),
         ctx
       ),
-    (e: any) => e.code === "ModelRequired"
+    (e: ErrLike) => e.code === "ModelRequired"
   );
   assert.throws(
     () =>
@@ -254,7 +261,7 @@ test("planLaunch maps adapter errors: allowed codes pass, others become Internal
         }),
         ctx
       ),
-    (e: any) => e.code === "Internal"
+    (e: ErrLike) => e.code === "Internal"
   );
   assert.throws(
     () =>
@@ -264,7 +271,7 @@ test("planLaunch maps adapter errors: allowed codes pass, others become Internal
         }),
         ctx
       ),
-    (e: any) => e.code === "Internal" && /boom/.test(e.message)
+    (e: ErrLike) => e.code === "Internal" && /boom/.test(e.message)
   );
 });
 

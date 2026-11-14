@@ -5,6 +5,8 @@ import { createSessionClient, startHeartbeat } from "../../../../bin/cli/launch/
 import { viewHash } from "../../../../src/shared/launch/viewSelect.ts";
 import { startStubGateway } from "../../../helpers/launch/stubGateway.mjs";
 
+type ErrLike = { code?: string; message?: string; hint?: string; exitCode?: number; name?: string };
+
 test("mint, PATCH view, heartbeat, usage, DELETE against the stub gateway", async () => {
   const stub = await startStubGateway({ parentKey: "sk-parent" });
   try {
@@ -23,7 +25,7 @@ test("mint, PATCH view, heartbeat, usage, DELETE against the stub gateway", asyn
     assert.equal(usage.sessionId, session.sessionId);
     await client.revoke(session);
     assert.equal(record.revoked, true);
-    const patch = stub.requests.find((r: any) => r.method === "PATCH");
+    const patch = stub.requests.find((r: { method: string }) => r.method === "PATCH");
     assert.equal(patch.auth, session.token, ":id routes use the session token");
   } finally {
     await stub.close();
@@ -36,9 +38,9 @@ test("error mapping: 404 GatewayTooOld, 401 AuthFailed, 400 ViewInvalid, network
     const client = createSessionClient({ rootUrl: old.url });
     await assert.rejects(
       client.capabilities(),
-      (e: any) => e.code === "GatewayTooOld" && e.exitCode === 69
+      (e: ErrLike) => e.code === "GatewayTooOld" && e.exitCode === 69
     );
-    await assert.rejects(client.mint({ tool: "x" }), (e: any) => e.code === "GatewayTooOld");
+    await assert.rejects(client.mint({ tool: "x" }), (e: ErrLike) => e.code === "GatewayTooOld");
   } finally {
     await old.close();
   }
@@ -47,13 +49,13 @@ test("error mapping: 404 GatewayTooOld, 401 AuthFailed, 400 ViewInvalid, network
     const client = createSessionClient({ rootUrl: auth.url, credential: "wrong" });
     await assert.rejects(
       client.mint({ tool: "x" }),
-      (e: any) => e.code === "AuthFailed" && e.exitCode === 77
+      (e: ErrLike) => e.code === "AuthFailed" && e.exitCode === 77
     );
     const ok = createSessionClient({ rootUrl: auth.url, credential: "right" });
     const session = await ok.mint({ tool: "x" });
     await assert.rejects(
       ok.patchView(session, { hash: "h", ids: "nope" }),
-      (e: any) => e.code === "ViewInvalid" && e.exitCode === 70
+      (e: ErrLike) => e.code === "ViewInvalid" && e.exitCode === 70
     );
     assert.ok(!(await ok.revoke(session).then(() => "ok")).includes("olx_"));
   } finally {
@@ -64,7 +66,7 @@ test("error mapping: 404 GatewayTooOld, 401 AuthFailed, 400 ViewInvalid, network
   await closed.close();
   await assert.rejects(
     createSessionClient({ rootUrl: url }).capabilities(),
-    (e: any) => e.code === "GatewayUnreachable"
+    (e: ErrLike) => e.code === "GatewayUnreachable"
   );
 });
 
@@ -121,7 +123,7 @@ test("mint sends sessionTag only when a tag is given", async () => {
   }
 });
 
-test("stub validates bodies with the gateway Zod schemas (400 like G1)", async () => {
+test("stub validates bodies with the gateway Zod schemas (400 like the real launch session route)", async () => {
   const stub = await startStubGateway({ parentKey: "sk-parent" });
   try {
     const post = (body: unknown) =>

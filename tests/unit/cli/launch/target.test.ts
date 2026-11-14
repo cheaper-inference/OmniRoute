@@ -8,6 +8,8 @@ import {
   isLoopbackUrl,
 } from "../../../../bin/cli/launch/core/target.mjs";
 
+type ErrLike = { code?: string; message?: string; hint?: string; exitCode?: number; name?: string };
+
 const noContext = { resolveContext: () => null };
 
 test("local default, PORT env, --port; root URL has no /v1", () => {
@@ -18,7 +20,7 @@ test("local default, PORT env, --port; root URL has no /v1", () => {
   assert.equal(t.rootUrl, "http://127.0.0.1:4000");
   assert.throws(
     () => resolveTarget({ port: "abc" }, { env: {}, ...noContext }),
-    (e: any) => e.code === "UsageError"
+    (e: ErrLike) => e.code === "UsageError"
   );
   assert.equal(normalizeRootUrl("https://x.example/v1/"), "https://x.example");
 });
@@ -32,11 +34,11 @@ test("--remote / --base-url win and are remote; bad URLs are usage errors", () =
   );
   assert.throws(
     () => resolveTarget({ remote: "ftp://x" }, { env: {}, ...noContext }),
-    (e: any) => e.code === "UsageError"
+    (e: ErrLike) => e.code === "UsageError"
   );
   assert.throws(
     () => resolveTarget({ remote: "https://u:p@x" }, { env: {}, ...noContext }),
-    (e: any) => e.code === "UsageError"
+    (e: ErrLike) => e.code === "UsageError"
   );
 });
 
@@ -78,11 +80,11 @@ test("credential precedence: option > --api-key-env > context > OMNIROUTE_API_KE
   });
   assert.throws(
     () => resolveTarget({ apiKeyEnv: "NOPE" }, { env, ...noContext }),
-    (e: any) => e.code === "UsageError"
+    (e: ErrLike) => e.code === "UsageError"
   );
   assert.throws(
     () => resolveTarget({ apiKeyEnv: "bad-name" }, { env, ...noContext }),
-    (e: any) => e.code === "UsageError"
+    (e: ErrLike) => e.code === "UsageError"
   );
   assert.deepEqual(resolveTarget({}, { env, ...noContext }).credential, {
     value: "from-default-env",

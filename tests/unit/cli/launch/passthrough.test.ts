@@ -6,6 +6,8 @@ import { join } from "node:path";
 
 import { applyPassthrough, readJsonValue } from "../../../../bin/cli/launch/core/passthrough.mjs";
 
+type ErrLike = { code?: string; message?: string; hint?: string; exitCode?: number; name?: string };
+
 const dir = mkdtempSync(join(tmpdir(), "olx-pass-"));
 test.after(() => rmSync(dir, { recursive: true, force: true }));
 
@@ -30,11 +32,11 @@ test("mergeJson: inline and file values are parsed, merged in order and removed 
   assert.equal(readJsonValue("s.json", "--settings", { cwd: dir }).a, 1);
   assert.throws(
     () => applyPassthrough(["--settings", "{bad"], RULES),
-    (e: any) => e.code === "UsageError"
+    (e: ErrLike) => e.code === "UsageError"
   );
   assert.throws(
     () => applyPassthrough(["--settings", "missing.json"], RULES, { cwd: dir }),
-    (e: any) => e.code === "UsageError"
+    (e: ErrLike) => e.code === "UsageError"
   );
 });
 
@@ -47,11 +49,11 @@ test("warn keeps the args and reports; aliases and boolean flags", () => {
 test("reject -> UsageError; owned honours valuePrefixes -> ConfigConflict", () => {
   assert.throws(
     () => applyPassthrough(["--dangerous", "1"], RULES),
-    (e: any) => e.code === "UsageError" && e.message === "no"
+    (e: ErrLike) => e.code === "UsageError" && e.message === "no"
   );
   assert.throws(
     () => applyPassthrough(["-c", "model_provider=x"], RULES),
-    (e: any) => e.code === "ConfigConflict"
+    (e: ErrLike) => e.code === "ConfigConflict"
   );
   assert.deepEqual(applyPassthrough(["-c", "theme=dark"], RULES).args, ["-c", "theme=dark"]);
 });

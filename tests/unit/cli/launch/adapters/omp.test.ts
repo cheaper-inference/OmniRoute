@@ -1,37 +1,52 @@
-// omp adapter goldens. Recipe lines come from the dossier tools/omp.md:
-// - section 3 option A: `-e` extension with pi.registerProvider, api openai-completions,
+// omp adapter goldens. Recipe facts under test:
+// - `-e` extension with pi.registerProvider, api openai-completions,
 //   OMNIROUTE_API_KEY always exported (sentinel when auth is off), --model omniroute/<id>,
 //   skip our --model when the user passes --model, --api-key not trusted.
-// - section 4: static models[] fields and the 128000 / 32768 defaults.
-// - section 5: --config overlay with startup.checkUpdate false, --provider is legacy.
-// - section 1: version gate min 18.8.5, install commands.
+// - static models[] fields and the 128000 / 32768 defaults.
+// - --config overlay with startup.checkUpdate false, --provider is legacy.
+// - version gate min 18.8.5, install commands.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import adapter from "../../../../../bin/cli/launch/adapters/omp.mjs";
 import { isLaunchError } from "../../../../../bin/cli/launch/contract.mjs";
 import { FIXTURE_ROWS, fixtureCtx } from "../_helpers/fixtureCtx.mjs";
 import { assertGolden, checkPlanInvariants } from "../_helpers/golden.mjs";
+import type {
+  LaunchPlan,
+  TempFileSpec,
+  LaunchContext,
+} from "../../../../../bin/cli/launch/contract.d.ts";
+
+type ErrLike = { code?: string; message?: string; hint?: string; exitCode?: number; name?: string };
+// fixtureCtx takes JSDoc-typed overrides; tests pass partial viewSpec values, hence the casts below.
+type CtxOverrides = Parameters<typeof fixtureCtx>[0];
 
 const view = adapter.capabilities.modelList.view;
 
-function extractIds(plan: any): string[] {
-  const file = plan.tempFiles.find((f: any) => f.path === "omniroute.ts");
+function extractIds(plan: LaunchPlan): string[] {
+  const file = plan.tempFiles.find((f: TempFileSpec) => f.path === "omniroute.ts");
   const text: string = file.contents;
   const start = text.indexOf("const MODELS = ") + "const MODELS = ".length;
   const end = text.indexOf(";\n\nexport default", start);
-  return JSON.parse(text.slice(start, end)).map((m: any) => m.id);
+  return JSON.parse(text.slice(start, end)).map((m: { id: string }) => m.id);
 }
 
-function run(name: string, overrides: Record<string, unknown> = {}, ctxPatch?: (c: any) => any) {
+function run(
+  name: string,
+  overrides: Record<string, unknown> = {},
+  ctxPatch?: (c: LaunchContext) => LaunchContext
+) {
   const base = fixtureCtx({
     tool: adapter.id,
     viewSpec: view,
     version: "18.8.5",
     ...overrides,
-  } as any);
+  } as unknown as CtxOverrides);
   const ctx = ctxPatch ? ctxPatch(base) : base;
   const plan = adapter.plan(ctx);
-  checkPlanInvariants(plan, ctx, { adapter, injectedIds: extractIds } as any);
+  checkPlanInvariants(plan, ctx, { adapter, injectedIds: extractIds } as unknown as Parameters<
+    typeof checkPlanInvariants
+  >[2]);
   assertGolden(adapter.id, name, plan);
   return plan;
 }
@@ -47,7 +62,7 @@ test("omp adapter declares its capabilities", () => {
 
 test("extension apiKey is the bare env var name and the plan env carries the token", () => {
   const plan = run("default");
-  const ext: string = plan.tempFiles.find((f: any) => f.path === "omniroute.ts").contents;
+  const ext: string = plan.tempFiles.find((f: TempFileSpec) => f.path === "omniroute.ts").contents;
   assert.match(ext, /apiKey: "OMNIROUTE_API_KEY",/);
   assert.equal(ext.includes("$OMNIROUTE_API_KEY"), false);
   assert.equal(plan.env.set.OMNIROUTE_API_KEY, "${TOKEN}");
@@ -86,23 +101,32 @@ test("legacy --provider skips our --model", () => {
     viewSpec: view,
     version: "18.8.5",
     args: ["--provider", "omniroute"],
-  } as any);
+  } as unknown as CtxOverrides);
   const plan = adapter.plan(ctx);
   assert.equal(plan.argv.includes("--model"), false);
 });
 
 test("throws ToolVersionTooOld below the minimum", () => {
-  const ctx = fixtureCtx({ tool: adapter.id, viewSpec: view, version: "18.8.0" } as any);
+  const ctx = fixtureCtx({
+    tool: adapter.id,
+    viewSpec: view,
+    version: "18.8.0",
+  } as unknown as CtxOverrides);
   assert.throws(
     () => adapter.plan(ctx),
-    (e: any) => isLaunchError(e) && e.code === "ToolVersionTooOld"
+    (e: ErrLike) => isLaunchError(e) && e.code === "ToolVersionTooOld"
   );
 });
 test("throws ModelNotFound on an empty view", () => {
-  const ctx = fixtureCtx({ tool: adapter.id, viewSpec: view, version: "18.8.5", rows: [] } as any);
+  const ctx = fixtureCtx({
+    tool: adapter.id,
+    viewSpec: view,
+    version: "18.8.5",
+    rows: [],
+  } as unknown as CtxOverrides);
   assert.throws(
     () => adapter.plan(ctx),
-    (e: any) => isLaunchError(e) && e.code === "ModelNotFound"
+    (e: ErrLike) => isLaunchError(e) && e.code === "ModelNotFound"
   );
 });
 test("throws ModelUnsuitable for a small explicit model", () => {
@@ -121,9 +145,9 @@ test("throws ModelUnsuitable for a small explicit model", () => {
     ],
     viewSpec: { name: "omp", filter: {}, order: "catalog" },
     model: "tiny/ctx-16k",
-  } as any);
+  } as unknown as CtxOverrides);
   assert.throws(
     () => adapter.plan(ctx),
-    (e: any) => isLaunchError(e) && e.code === "ModelUnsuitable"
+    (e: ErrLike) => isLaunchError(e) && e.code === "ModelUnsuitable"
   );
 });
