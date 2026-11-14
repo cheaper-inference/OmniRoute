@@ -101,12 +101,33 @@ export const taskPatternOverridesSchema = z
   })
   .strict();
 
+// Replaced as a whole on update (no deep merge), so every field is required; `model` may only
+// be empty while the block is disabled.
+export const taskComplexityRoutingSchema = z
+  .object({
+    enabled: z.boolean(),
+    minScore: z.number().int().min(0).max(100),
+    model: z.string().trim().max(200),
+  })
+  .strict()
+  .superRefine((value, ctx) => {
+    if (value.enabled && value.model.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "model is required when complexityRouting is enabled",
+        path: ["model"],
+      });
+    }
+  });
+
 export const updateTaskRoutingSchema = z
   .object({
     enabled: z.boolean().optional(),
     taskModelMap: taskRoutingModelMapSchema.optional(),
     detectionEnabled: z.boolean().optional(),
     patternOverrides: taskPatternOverridesSchema.optional(),
+    detectionAnchor: z.enum(["latest-user", "first-user"]).optional(),
+    complexityRouting: taskComplexityRoutingSchema.optional(),
   })
   .strict()
   .superRefine((value, ctx) => {
@@ -114,7 +135,9 @@ export const updateTaskRoutingSchema = z
       value.enabled === undefined &&
       value.taskModelMap === undefined &&
       value.detectionEnabled === undefined &&
-      value.patternOverrides === undefined
+      value.patternOverrides === undefined &&
+      value.detectionAnchor === undefined &&
+      value.complexityRouting === undefined
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
