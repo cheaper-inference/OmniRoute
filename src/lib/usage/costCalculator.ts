@@ -10,6 +10,7 @@
 import { toNumber } from "@/shared/utils/numeric";
 import { splitCodexReasoningSuffix } from "@omniroute/open-sse/executors/codex/reasoningSuffix.ts";
 import { resolveClaudeEffortVariantBase } from "@omniroute/open-sse/handlers/chatCore/claudeEffortVariant.ts";
+import { readCacheWriteUsage } from "@omniroute/open-sse/utils/cacheWriteUsage.ts";
 import { isCreditMeteredProvider } from "./creditMeteredProviders";
 import { isFlatRateProvider } from "./flatRateProviders";
 
@@ -233,6 +234,35 @@ function applyLongContextTier(
 }
 
 /**
+ * Extra cost of provider-reported 1-hour cache writes over the single `cache_creation` price
+ * (the 5-minute rate). An explicit `cache_creation_1h` rate wins; native Claude otherwise bills
+ * 2x input. Other routes keep the single price. An unsplit remainder stays 5-minute, and
+ * invalid or inconsistent tier counters price nothing extra.
+ */
+function oneHourCacheWritePremium(
+  rates: Record<string, unknown>,
+  tokens: CostTokenUsage,
+  cacheCreationTokens: number,
+  cacheCreationPrice: number,
+  options: CostCalculationOptions
+): number {
+  if (cacheCreationTokens <= 0) return 0;
+  const { oneHour, status } = readCacheWriteUsage(tokens);
+  if (!oneHour || status === "invalid" || status === "inconsistent") return 0;
+  const explicit = rates.cache_creation_1h;
+  const claude =
+    ["anthropic", "claude", "cc"].includes(normalizeServiceTier(options.provider)) &&
+    String(options.model ?? "").startsWith("claude-");
+  const price =
+    typeof explicit === "number" && Number.isFinite(explicit) && explicit >= 0
+      ? explicit
+      : claude
+        ? toNumber(rates.input, 0) * 2
+        : cacheCreationPrice;
+  return (Math.min(oneHour, cacheCreationTokens) * (price - cacheCreationPrice)) / 1_000_000;
+}
+
+/**
  * Calculate cost for a usage entry.
  *
  * @param {string} provider
@@ -322,6 +352,7 @@ export function computeCostFromPricing(
   cost = Math.max(0, cost);
 
   if (cacheCreationTokens > 0) cost += cacheCreationTokens * (cacheCreationPrice / 1_000_000);
+  cost += oneHourCacheWritePremium(rates, tokens, cacheCreationTokens, cacheCreationPrice, options);
 
   return cost * getCodexFastCostMultiplier(options.provider, options.model, options.serviceTier);
 }

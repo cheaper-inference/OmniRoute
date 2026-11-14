@@ -284,6 +284,21 @@ function pendingDetailBytes(detail: PendingRequestDetail): number {
   return bytes;
 }
 
+/**
+ * Merge normalized metadata into a tracked detail. Only a payload field can move
+ * the retained byte total, so scalar-only updates (stage, status, tokens) skip the
+ * before/after walks over the retained previews.
+ */
+function applyPendingMetadata(detail: PendingRequestDetail, normalized: PendingRequestMetadata) {
+  if (!PENDING_PAYLOAD_FIELDS.some((field) => field in normalized)) {
+    Object.assign(detail, normalized);
+    return;
+  }
+  const before = pendingDetailBytes(detail);
+  Object.assign(detail, normalized);
+  pendingState.totalPendingDetailBytes += pendingDetailBytes(detail) - before;
+}
+
 function removePendingCorrelationFor(detail: PendingRequestDetail): void {
   if (!detail.correlationId) return;
   const correlationEntry = pendingIdByCorrelation.get(detail.correlationId);
@@ -659,9 +674,7 @@ export function updatePendingRequest(
   const detail = details[lastIdx];
   const normalized = normalizePendingMetadata(metadata);
   if (!pendingRequests.details[connectionId]?.[modelKey]?.includes(detail)) return;
-  const before = pendingDetailBytes(detail);
-  Object.assign(detail, normalized);
-  pendingState.totalPendingDetailBytes += pendingDetailBytes(detail) - before;
+  applyPendingMetadata(detail, normalized);
   enforcePendingByteCeiling();
 }
 
@@ -673,9 +686,7 @@ export function updatePendingRequestById(
   if (!detail) return false;
   const normalized = normalizePendingMetadata(metadata);
   if (resolvePendingIdentity(id) !== detail) return false;
-  const before = pendingDetailBytes(detail);
-  Object.assign(detail, normalized);
-  pendingState.totalPendingDetailBytes += pendingDetailBytes(detail) - before;
+  applyPendingMetadata(detail, normalized);
   enforcePendingByteCeiling();
   return true;
 }
