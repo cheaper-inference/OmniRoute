@@ -64,7 +64,7 @@ function hasFramedFalse(node: JsxTag): boolean {
 
 /**
  * The class text a class-like attribute always renders: a string literal, or the literal parts
- * of a template literal. Any other expression (a conditional, `cn(...)`, a variable) is
+ * of a template literal (a class only counts when whitespace or the template edge bounds it). Any other expression (a conditional, `cn(...)`, a variable) is
  * unresolved and returns null, so an inactive branch can neither satisfy nor trip the guard.
  */
 function staticClassText(node: JsxTag, name: string): string | null {
@@ -75,7 +75,9 @@ function staticClassText(node: JsxTag, name: string): string | null {
   if (!expr) return null;
   if (ts.isStringLiteral(expr) || ts.isNoSubstitutionTemplateLiteral(expr)) return expr.text;
   if (ts.isTemplateExpression(expr)) {
-    return [expr.head.text, ...expr.templateSpans.map((span) => span.literal.text)].join(" ");
+    // Each `${...}` becomes a non-space sentinel, so a class written right against an
+    // interpolation (`border-0${suffix}`) is not a whole class: it can render as `border-0-x`.
+    return [expr.head.text, ...expr.templateSpans.map((span) => span.literal.text)].join("\u0000");
   }
   return null;
 }
@@ -183,6 +185,7 @@ test("the guard detects framed tables and bordered sub-panels in a card", () => 
         `export const Q = () => <Card><Table containerClassName={flat ? "rounded-none border-0" : ""} /></Card>;`,
         `export const R = () => <Card><Table containerClassName={\`mt-3 \${extra}\`} /></Card>;`,
         `export const S = () => <Card><div className={\`border \${tone}\`}><DataTable framed={false} /></div></Card>;`,
+        `export const V = () => <Card><Table containerClassName={\`rounded-none border-0\${suffix}\`} /></Card>;`,
         "",
       ].join("\n")
     );
@@ -200,6 +203,7 @@ test("the guard detects framed tables and bordered sub-panels in a card", () => 
         `export const P = () => <Card>{() => <Table />}</Card>;`,
         `export const T = () => <Card><Table containerClassName={\`rounded-none border-0 \${extra}\`} /></Card>;`,
         `export const U = () => <Card><div className={open ? "border p-2" : "p-2"}><Table containerClassName="rounded-none border-0" /></div></Card>;`,
+        `export const X = () => <Card><div className={\`border\${suffix} p-2\`}><Table containerClassName={\`\${extra} rounded-none border-0\`} /></div></Card>;`,
         "",
       ].join("\n")
     );
@@ -209,11 +213,12 @@ test("the guard detects framed tables and bordered sub-panels in a card", () => 
       found.join("\n")
     );
     // One violation per bad case. H, I and S are reported for their bordered sub-panel only
-    // (their tables are unframed); Q and R because a dynamic container class proves nothing.
+    // (their tables are unframed); Q, R and V because a dynamic container class proves nothing
+    // (V: `border-0${suffix}` can render as `border-0-x`).
     const lines = found.map((v) => Number(v.split(":")[1].split(" ")[0]));
-    assert.deepEqual(lines, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], found.join("\n"));
+    assert.deepEqual(lines, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], found.join("\n"));
     for (const i of [5, 6, 10]) assert.ok(found[i].includes("bordered <div>"), found[i]);
-    for (const i of [8, 9]) assert.ok(found[i].includes("<Table> inside <Card>"), found[i]);
+    for (const i of [8, 9, 11]) assert.ok(found[i].includes("<Table> inside <Card>"), found[i]);
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
