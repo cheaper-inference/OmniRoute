@@ -38,6 +38,7 @@ import { isOpencodeFreeTierRefusal } from "../../executors/opencodeGeoBlock.ts";
 import { isChatGptWebBridgeFailure } from "../../utils/chatgptWebBridgeFailure.ts";
 import { getTrustedLocalRateLimitResponse } from "../rateLimitManager/errors.ts";
 import { TRANSLATION_FAILURE_CODE } from "../../handlers/chatCore/translationFailure.ts";
+import { MALFORMED_TOOL_CALL_ARGUMENTS_CODE } from "../../handlers/chatCore/malformedToolCallArguments.ts";
 import { isLocalModelPolicyResponse } from "../resolvedModelAccess.ts";
 import { isInstanceDraining as isDraining } from "../../utils/drainStatus.ts";
 import type { ResolvedComboTarget } from "./types.ts";
@@ -616,6 +617,8 @@ export function shouldSkipConnDisable(
     result.errorType === "plugin_block" ||
     // #14815: translation fails locally on the client's body — no account is at fault.
     result.errorCode === TRANSLATION_FAILURE_CODE ||
+    // #17198: malformed tool-call arguments in one response are no account fault.
+    result.errorCode === MALFORMED_TOOL_CALL_ARGUMENTS_CODE ||
     (is401 && hasExtraKeys) ||
     // Cursor's typed model-unavailable 404 is not a malformed request. Reuse
     // the same model attribution predicate as failure persistence; ordinary

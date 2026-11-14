@@ -175,6 +175,7 @@ const SAFE_PUBLIC_ERROR_IDENTIFIERS = new Set([
   "m365_image_upload_unauthorized",
   "priority_access_exhausted",
   "reasoning_turns_exhausted",
+  "malformed_tool_call_arguments",
   "message_limit",
   "meta_ai_empty_response",
   "meta_ai_mode_switch_failed",
