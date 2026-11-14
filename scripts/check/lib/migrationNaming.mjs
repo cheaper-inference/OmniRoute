@@ -16,7 +16,8 @@
 /**
  * Número antigo mais alto, CONGELADO na mudança de formato. A PR da mudança foi aberta com
  * a release/v3.8.54 em 239; antes de ela entrar, o merge train 2 mesclou
- * `240_provider_node_custom_json_config.sql` (#18353) e `241_seen_models.sql` (#18359).
+ * `240_provider_node_custom_json_config.sql` (#18353) e `241_seen_models.sql` (#16864, que o
+ * trem renumerou de 240 para 241).
  * Migration mesclada nunca é renomeada, então o congelamento é no maior número que já está
  * na base: se outra `NNN_` entrar antes desta PR, suba este valor no mesmo merge. Daqui em
  * diante toda migration nova usa o carimbo de data e hora. Um arquivo antigo acima deste
