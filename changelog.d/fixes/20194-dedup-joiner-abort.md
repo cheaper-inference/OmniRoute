@@ -1,0 +1,1 @@
+- **fix(sse):** let a deduplicated request run its own upstream call when the first caller disconnects. ([#20194](https://github.com/cheaper-inference/OmniRoute/pull/20194))

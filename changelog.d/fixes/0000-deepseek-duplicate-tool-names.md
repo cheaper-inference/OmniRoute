@@ -1,1 +1,0 @@
-- **fix(sse):** requests to DeepSeek models (`deepseek-*`, on any provider) keep only the first definition of a repeated tool name, because DeepSeek answers a repeated name with HTTP 400 "Tool names must be unique". Other models are not changed.

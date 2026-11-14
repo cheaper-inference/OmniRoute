@@ -1,0 +1,1 @@
+- **fix(sse):** a failed memory-settings read is logged at debug level; the request still runs with memory off, as before, but the cause is now visible. ([#20194](https://github.com/cheaper-inference/OmniRoute/pull/20194))

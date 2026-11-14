@@ -1,0 +1,1 @@
+- **fix(skills):** registering the same skill again (same API key, name and version) now updates the existing row and keeps its id and run history, instead of adding a duplicate. Migration 240 removes old duplicates once (keeps the newest) and adds a unique index. ([#20194](https://github.com/cheaper-inference/OmniRoute/pull/20194))

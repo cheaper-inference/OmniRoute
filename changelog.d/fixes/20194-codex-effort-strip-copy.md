@@ -1,0 +1,1 @@
+- **fix(sse):** in a combo, the Codex effort-suffix guard no longer removes the client's `output_config.effort` from the request body that the next combo target reads. ([#20194](https://github.com/cheaper-inference/OmniRoute/pull/20194))
