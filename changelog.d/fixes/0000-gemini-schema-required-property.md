@@ -1,1 +1,0 @@
-- **fix(gemini):** a tool parameter named `required` is no longer deleted from the schema when a sibling parameter is named `properties`.

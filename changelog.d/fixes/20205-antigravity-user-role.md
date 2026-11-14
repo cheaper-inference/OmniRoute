@@ -1,0 +1,1 @@
+- **fix(sse):** keep a user follow-up beside an Antigravity tool result as a user message. ([#20205](https://github.com/cheaper-inference/OmniRoute/pull/20205))
