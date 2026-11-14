@@ -12,7 +12,7 @@ const expectation = {
   timeoutMs: 60000,
   pty: { waitMs: 20000, inputDelayMs: 6000, input: "reply with OK\r" },
   notes:
-    "dossier tools/goose.md section 3; GOOSE_PATH_ROOT isolates state into the launcher temp dir. Headless: passthrough `run ...` replaces the default `session` subcommand.",
+    "recipe from the tool's own docs and source; GOOSE_PATH_ROOT isolates state into the launcher temp dir. Headless: passthrough `run ...` replaces the default `session` subcommand.",
 };
 
 export default expectation;

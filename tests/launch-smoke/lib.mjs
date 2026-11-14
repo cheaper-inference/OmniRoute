@@ -17,23 +17,54 @@ import { fileURLToPath } from "node:url";
 
 export const WORKTREE = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const OMNIROUTER = join(WORKTREE, "bin", "omnirouter.mjs");
-export const SANDBOX = process.env.OLAUNCH_SANDBOX || "/home/krrish/tmp/olaunch/sandbox";
-export const DEFAULT_OUT = process.env.OLAUNCH_SMOKE_OUT || "/home/krrish/tmp/olaunch/smoke";
+/** Optional tool install root ($LAUNCH_SMOKE_SANDBOX). Unset: no sandbox, tools come from PATH. */
+export const SANDBOX = process.env.LAUNCH_SMOKE_SANDBOX || "";
+/** Output dir when --out is not given: $LAUNCH_SMOKE_OUT, else <os tmpdir>/omniroute-launch-smoke. */
+export const DEFAULT_OUT =
+  process.env.LAUNCH_SMOKE_OUT || join(os.tmpdir(), "omniroute-launch-smoke");
 export const PROMPT = "reply with OK";
 /** The launcher's private temp dir prefix (bin/cli/launch/core/tempfiles.mjs). */
 export const LAUNCH_TMP_PREFIX = "omnirouter-";
 /** Full minted token shape (stub: olx_<16>_<32>, base32 lower). */
 export const TOKEN_RE = /olx_[a-z2-7]{16}_[a-z2-7]{32}/;
 
-/** Sandbox PATH entries from sandbox/env.sh, prepended when present. */
+/** Sandbox PATH entries (npm/bin, venv/bin, bin), prepended when present. No sandbox: PATH as is. */
 export function sandboxPath(basePath = process.env.PATH || "") {
+  if (!SANDBOX) return basePath;
   const extra = ["npm/bin", "venv/bin", "bin"].map((p) => join(SANDBOX, p)).filter(existsSync);
   return [...extra, basePath].join(":");
 }
 
-export function readToolsJson() {
-  const file = join(SANDBOX, "tools.json");
-  return existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : {};
+/** Executable name per tool id where it differs from the id. */
+const TOOL_BINS = { continue: "cn", deepseek: "dsh" };
+
+function onPath(name, pathValue = process.env.PATH || "") {
+  for (const dir of pathValue.split(":").filter(Boolean)) {
+    const file = join(dir, name);
+    try {
+      if (existsSync(file) && !lstatSync(file).isDirectory()) return file;
+    } catch {
+      // unreadable PATH entry: ignore
+    }
+  }
+  return null;
+}
+
+/**
+ * Installed tools: <sandbox>/tools.json when a sandbox is set, else every id in `ids` whose
+ * executable is on PATH (status "global").
+ */
+export function readToolsJson(ids = []) {
+  if (SANDBOX) {
+    const file = join(SANDBOX, "tools.json");
+    return existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : {};
+  }
+  const out = {};
+  for (const id of ids) {
+    const bin = onPath(TOOL_BINS[id] || id);
+    if (bin) out[id] = { status: "global", bin };
+  }
+  return out;
 }
 
 /** Fresh temp root with HOME, XDG dirs, TMPDIR, DATA_DIR and a work dir inside it. */
@@ -321,7 +352,6 @@ export async function runPty(
 }
 
 export function stripAnsi(s) {
-  // eslint-disable-next-line no-control-regex
   return String(s).replace(
     /\x1b\[[0-9;?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(\x07|\x1b\\)|\x1b[()][A-Za-z0-9]|\x1b[=>]/g,
     ""

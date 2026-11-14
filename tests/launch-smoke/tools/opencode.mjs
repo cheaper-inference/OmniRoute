@@ -10,7 +10,7 @@ const expectation = {
   keyHeaders: ["authorization"],
   expectStdout: "OMNI-SMOKE-OK",
   timeoutMs: 120000,
-  notes: "dossier tools/opencode.md; inline config via OPENCODE_CONFIG_CONTENT",
+  notes: "recipe from the tool's own docs and source; inline config via OPENCODE_CONFIG_CONTENT",
 };
 
 export default expectation;

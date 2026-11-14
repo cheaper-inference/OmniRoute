@@ -11,7 +11,7 @@ const expectation = {
   expectStdout: "OMNI-SMOKE-OK",
   timeoutMs: 180000,
   notes:
-    "dossier tools/hermes.md; teardown check: after exit `pgrep -af hermes` must list no process whose cmdline or /proc/<pid>/environ references the sandbox root (launcher runs `hermes gateway stop`; temp HERMES_HOME is removed)",
+    "recipe from the tool's own docs and source; teardown check: after exit `pgrep -af hermes` must list no process whose cmdline or /proc/<pid>/environ references the sandbox root (launcher runs `hermes gateway stop`; temp HERMES_HOME is removed)",
 };
 
 export default expectation;

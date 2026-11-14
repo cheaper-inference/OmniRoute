@@ -1,18 +1,19 @@
 #!/usr/bin/env node
-// Live smoke for `omnirouter launch <tool>` (architecture section 16.2 steps 3 to 5). Advisory,
-// never part of the default unit run.
+// Live smoke for `omnirouter launch <tool>` against real tool installs. Advisory, never part of
+// the default unit run.
 //
 //   npm run test:launch:smoke                        phase A (stub gateway), every installed tool
 //   node tests/launch-smoke/run.mjs --phase b        phase B (real gateway + mock upstream)
 //   node tests/launch-smoke/run.mjs --phase all --only claude,codex --out <dir> --no-dry-run
 //   node tests/launch-smoke/run.mjs --phase c        phase C (real gateway + REAL provider models;
-//                                                    needs $OLAUNCH_SECRETS provider exports)
+//                                                    needs $LAUNCH_SMOKE_SECRETS or --secrets)
 //   --phase takes a, b, c, all (= a,b) or a comma list such as a,b,c
 //
-// Tools come from $OLAUNCH_SANDBOX/tools.json (status installed|global) intersected with the
-// expectation files in tests/launch-smoke/tools/<id>.mjs. Tools without an expectation file or
-// not installed are reported as skipped, never passed. Results: <out>/results.json and
-// <out>/results.md (default /home/krrish/tmp/olaunch/smoke). Exit 1 when any run failed.
+// Tools come from $LAUNCH_SMOKE_SANDBOX/tools.json (status installed|global) or, with no sandbox,
+// from PATH, intersected with the expectation files in tests/launch-smoke/tools/<id>.mjs. Tools
+// without an expectation file or not installed are reported as skipped, never passed. Results:
+// <out>/results.json and <out>/results.md (default $LAUNCH_SMOKE_OUT, else
+// <os tmpdir>/omniroute-launch-smoke). Exit 1 when any run failed. See README.md.
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -39,7 +40,7 @@ function parseArgs(argv) {
       process.stdout.write(
         readFileSync(new URL(import.meta.url), "utf8")
           .split("\n")
-          .slice(1, 12)
+          .slice(1, 16)
           .join("\n") + "\n"
       );
       process.exit(0);
@@ -125,6 +126,7 @@ function renderMarkdown(results) {
   if (results.phaseC) {
     const c = results.phaseC;
     lines.push("", "## Phase C gateway", "");
+    if (c.skipped) lines.push(`- ${c.skipped}`);
     for (const x of c.connections || [])
       lines.push(`- provider ${x.provider} (${x.name}): providers test ${x.test}`);
     if (c.models)
@@ -199,8 +201,8 @@ async function main() {
   const logsDir = join(opts.out, "logs");
   mkdirSync(logsDir, { recursive: true });
   const sandboxParent = join(opts.out, "sandboxes");
-  const toolsJson = readToolsJson();
   const expectations = await loadExpectations();
+  const toolsJson = readToolsJson([...expectations.keys()]);
   const ids = [...new Set([...Object.keys(toolsJson), ...expectations.keys()])].filter(
     (id) => !opts.only || opts.only.includes(id)
   );
@@ -309,7 +311,8 @@ async function main() {
     process.stdout.write(
       `phase B: ${failedB.length} failed${phaseB?.error ? `, error: ${phaseB.error}` : ""}\n`
     );
-  if (runC)
+  if (runC && phaseC?.skipped) process.stdout.write(`${phaseC.skipped}\n`);
+  else if (runC)
     process.stdout.write(
       `phase C: ${failedC.length} failed${phaseC?.error ? `, error: ${phaseC.error}` : ""}; gateway DATA_DIR deleted: ${phaseC?.dataDirDeleted}\n`
     );

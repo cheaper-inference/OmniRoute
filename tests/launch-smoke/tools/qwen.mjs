@@ -10,7 +10,7 @@ const expectation = {
   keyHeaders: ["authorization"],
   expectStdout: "OMNI-SMOKE-OK",
   timeoutMs: 120000,
-  notes: "dossier tools/qwen.md section 7; openai chat route",
+  notes: "recipe from the tool's own docs and source; openai chat route",
 };
 
 export default expectation;

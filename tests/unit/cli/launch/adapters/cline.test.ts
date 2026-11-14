@@ -1,16 +1,15 @@
-// Cline adapter tests. Recipe lines come from /home/krrish/tmp/olaunch/tools/cline.md:
-// - tier core, binary `cline`, install `npm install -g cline`: lines 3, 17-19
-// - `--version` bare semver, min 3.0.67 (custom providers broken before): lines 20-21, 149
-// - protocol openai-chat, base URL with /v1 (ensureV1): lines 28-35
-// - sandbox env CLINE_SANDBOX / CLINE_SANDBOX_DATA_DIR / CLINE_DATA_DIR, CLINE_DIR left unset:
-//   lines 44-48
-// - temp files providers.json, models.json, global-settings.json (0600): lines 50-53, 57-78
-// - custom provider id `omniroute`, key only in providers.json, never argv: lines 55, 91-94
-// - extra env CLINE_NO_AUTO_UPDATE, CLINE_DISABLE_CLINE_PASS_NOTICE, NO_UPDATE_NOTIFIER:
-//   lines 75, 114, 119
-// - models.json limits, 128k / 16k fallback: lines 105-109
-// - passthrough rejects (-k, --data-dir, --config, -z), warn --acp, -P/-m last-wins: lines 96-101
-// - post-exit ~/.cline/data/settings/* unchanged: lines 155-158
+// Cline adapter tests. Recipe from the tool's own docs and source:
+// - tier core, binary `cline`, install `npm install -g cline`
+// - `--version` bare semver, min 3.0.67 (custom providers broken before)
+// - protocol openai-chat, base URL with /v1 (ensureV1)
+// - sandbox env CLINE_SANDBOX / CLINE_SANDBOX_DATA_DIR / CLINE_DATA_DIR, CLINE_DIR left unset
+// - temp files providers.json, models.json, global-settings.json (0600)
+// - custom provider id `omniroute`, key only in providers.json, never argv
+// - extra env CLINE_NO_AUTO_UPDATE, CLINE_DISABLE_CLINE_PASS_NOTICE, NO_UPDATE_NOTIFIER
+// - models.json limits, 128k / 16k fallback
+// - passthrough rejects (-k, --data-dir, --config, -z), warn --acp, -P/-m last-wins
+// - post-exit ~/.cline/data/settings/* unchanged
+
 import { test } from "node:test";
 import assert from "node:assert/strict";
 

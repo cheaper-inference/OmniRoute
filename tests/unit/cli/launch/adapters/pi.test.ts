@@ -1,11 +1,12 @@
-// Pi adapter golden tests. Recipe lines come from /home/krrish/tmp/olaunch/tools/pi.md:
-// - section 1: binary `pi`, install commands, min version 0.85.1 (--version).
-// - section 2: api "openai-completions" against <root>/v1.
-// - section 3: `-e <state>/omniroute.ts --provider omniroute --model <id>`, key via env
+// Pi adapter golden tests. Recipe from the tool's own docs and source:
+// - binary `pi`, install commands, min version 0.85.1 (--version).
+// - api "openai-completions" against <root>/v1.
+// - `-e <state>/omniroute.ts --provider omniroute --model <id>`, key via env
 //   OMNIROUTE_API_KEY ("$OMNIROUTE_API_KEY" in the file), sentinel when auth is off,
 //   PI_SKIP_VERSION_CHECK=1, skip our --provider/--model when the user passes either.
-// - section 4: model fields (reasoning, input, zero cost, contextWindow 128000, maxTokens).
-// - section 5: no NO_PROXY (open item), no -ne/-nc/--no-session/--offline.
+// - model fields (reasoning, input, zero cost, contextWindow 128000, maxTokens).
+// - no NO_PROXY (open item), no -ne/-nc/--no-session/--offline.
+
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import adapter from "../../../../../bin/cli/launch/adapters/pi.mjs";

@@ -10,7 +10,7 @@ const expectation = {
   keyHeaders: ["authorization"],
   expectStdout: "OMNI-SMOKE-OK",
   timeoutMs: 120000,
-  notes: "dossier tools/pi.md sections 3 and 7; stdin must be closed",
+  notes: "recipe from the tool's own docs and source; stdin must be closed",
 };
 
 export default expectation;
