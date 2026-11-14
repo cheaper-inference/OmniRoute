@@ -191,6 +191,13 @@
       "command": "node --import tsx/esm scripts/skills/generate-agent-skills.mjs"
     },
     {
+      "id": "check:generated-artifacts",
+      "job": "lint",
+      "args": ["run", "check:generated-artifacts"],
+      "kind": "hard",
+      "command": "node --import tsx/esm scripts/check/check-generated-artifacts.mjs"
+    },
+    {
       "id": "check:lockfile",
       "job": "lint",
       "args": ["run", "check:lockfile"],
