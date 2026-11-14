@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "Přidat referenci kombinace",
     "builderComboRefStep": "Přidat referenci kombinace",
     "builderPinnedAccount": "Připnutý účet",
+    "builderRestrictAccounts": "Omezit na účty (volitelné)",
+    "builderRestrictAccountsHint": "Ponechte prázdné pro použití všech aktivních účtů. Pokud vyberete účty, automatické směrování bude používat pouze tyto účty.",
     "builderLegacyEntry": "Starší položka",
     "builderStaleModel": "Není v aktuálním katalogu",
     "reviewName": "Název",

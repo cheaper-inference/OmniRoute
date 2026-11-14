@@ -1,0 +1,1 @@
+- **feat(dashboard):** Add searchable Combo provider, model, account and reference selectors, preserve filtered account restrictions, and add local search to dynamic model and saved-proxy selectors without changing exact identities or email privacy ([#19288](https://github.com/cheaper-inference/OmniRoute/pull/19288)) — thanks @KiaroSama

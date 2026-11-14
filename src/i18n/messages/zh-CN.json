@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "添加组合引用",
     "builderComboRefStep": "添加组合引用步骤",
     "builderPinnedAccount": "固定账户",
+    "builderRestrictAccounts": "限定使用账户（可选）",
+    "builderRestrictAccountsHint": "留空则使用所有活跃账户。选择账户后，自动路由仅使用这些账户。",
     "builderLegacyEntry": "旧版条目",
     "builderStaleModel": "不在实时目录中",
     "reviewName": "名称",

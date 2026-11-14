@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "Ավելացնել կոմբոյի հղում",
     "builderComboRefStep": "Ավելացնել կոմբոյի հղում",
     "builderPinnedAccount": "Ամրացված հաշիվ",
+    "builderRestrictAccounts": "Սահմանափակել ընտրված հաշիվներով (ըստ ցանկության)",
+    "builderRestrictAccountsHint": "Բոլոր ակտիվ հաշիվներն օգտագործելու համար թողեք դատարկ։ Հաշիվներ ընտրելու դեպքում ավտոմատ երթուղավորումը կսահմանափակվի միայն այդ հաշիվներով։",
     "builderLegacyEntry": "Հին ձևաչափի գրառում",
     "builderStaleModel": "Կենդանի կատալոգում չկա",
     "reviewName": "Անուն",

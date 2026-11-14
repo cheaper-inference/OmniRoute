@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "Lägg till kombinationsreferens",
     "builderComboRefStep": "Lägg till kombinationsreferens",
     "builderPinnedAccount": "Fäst konto",
+    "builderRestrictAccounts": "Begränsa till konton (valfritt)",
+    "builderRestrictAccountsHint": "Lämna tomt för att använda alla aktiva konton. Om konton väljs begränsas den automatiska routningen till dessa konton.",
     "builderLegacyEntry": "Äldre post",
     "builderStaleModel": "Finns inte i livekatalogen",
     "reviewName": "Namn",

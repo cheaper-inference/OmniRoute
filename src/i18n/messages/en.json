@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "Add combo reference",
     "builderComboRefStep": "Add combo reference",
     "builderPinnedAccount": "Pinned Account",
+    "builderRestrictAccounts": "Restrict to accounts (optional)",
+    "builderRestrictAccountsHint": "Leave empty to use all active accounts. When selected, automatic routing stays within these accounts.",
     "builderLegacyEntry": "Legacy entry",
     "builderStaleModel": "Not in live catalog",
     "reviewName": "Name",

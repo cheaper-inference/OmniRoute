@@ -9,6 +9,7 @@ import Input from "./Input";
 import Modal from "./Modal";
 import SegmentedControl from "./SegmentedControl";
 import Select from "./Select";
+import SearchableSelectField from "@/shared/components/SearchableSelectField";
 import { cn } from "@/shared/utils/cn";
 import DistributeProxiesButton from "./DistributeProxiesButton";
 import NoAuthProviderToggle from "./NoAuthProviderToggle";
@@ -840,21 +841,26 @@ export default function NoAuthAccountCard({
             />
 
             {proxyMode === "saved" ? (
-              <Select
+              <SearchableSelectField
                 value={selectedProxyId}
-                onChange={(e) => setSelectedProxyId(e.target.value)}
-                aria-label={t("saved")}
-                selectClassName="text-xs"
-              >
-                <option value="">
-                  {savedProxies.length === 0 ? t("noSavedProxies") : t("inheritConnectionOption")}
-                </option>
-                {savedProxies.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {(p.name || p.host) ?? p.id} ({p.type || "socks5"}://{p.host}:{p.port})
-                  </option>
-                ))}
-              </Select>
+                onValueChange={setSelectedProxyId}
+                label={t("saved")}
+                resetKey={proxyAccountId}
+                options={[
+                  {
+                    value: "",
+                    label:
+                      savedProxies.length === 0
+                        ? t("noSavedProxies")
+                        : t("inheritConnectionOption"),
+                    alwaysVisible: true,
+                  },
+                  ...savedProxies.map((p) => ({
+                    value: p.id,
+                    label: `${(p.name || p.host) ?? p.id} (${p.type || "socks5"}://${p.host}:${p.port})`,
+                  })),
+                ]}
+              />
             ) : (
               <>
                 <div className="flex gap-2">

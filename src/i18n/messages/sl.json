@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "Dodaj sklic na kombinacijo",
     "builderComboRefStep": "Dodaj sklic na kombinacijo",
     "builderPinnedAccount": "Pripeti račun",
+    "builderRestrictAccounts": "Omeji na račune (neobvezno)",
+    "builderRestrictAccountsHint": "Pustite prazno za uporabo vseh aktivnih računov. Če izberete račune, je samodejno usmerjanje omejeno samo na te račune.",
     "builderLegacyEntry": "Vnos starejše različice",
     "builderStaleModel": "Ni v živem katalogu",
     "reviewName": "Ime",

@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "Adaugă o referință la combinație",
     "builderComboRefStep": "Adaugă o referință la combinație",
     "builderPinnedAccount": "Cont fixat",
+    "builderRestrictAccounts": "Restricționare la conturi (opțional)",
+    "builderRestrictAccountsHint": "Lăsați câmpul gol pentru a folosi toate conturile active. Dacă selectați conturi, rutarea automată va folosi doar aceste conturi.",
     "builderLegacyEntry": "Intrare moștenită",
     "builderStaleModel": "Nu este în catalogul live",
     "reviewName": "Nume",

@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "Ajouter une référence de combinaison",
     "builderComboRefStep": "Ajouter une référence de combinaison",
     "builderPinnedAccount": "Compte épinglé",
+    "builderRestrictAccounts": "Restreindre aux comptes (facultatif)",
+    "builderRestrictAccountsHint": "Laissez ce champ vide pour utiliser tous les comptes actifs. Si vous sélectionnez des comptes, le routage automatique utilisera uniquement ces comptes.",
     "builderLegacyEntry": "Ancienne entrée",
     "builderStaleModel": "Absent du catalogue en direct",
     "reviewName": "Nom",

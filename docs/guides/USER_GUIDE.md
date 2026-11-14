@@ -251,6 +251,21 @@ Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 
 You can reorder combo cards directly in **Dashboard → Combos** by dragging the handle on each card. The order is stored in SQLite and restored on reload.
 
+### Find a provider, model, or account
+
+In Create or Edit Combo, the step-by-step Provider, Model, Account, and combo-reference
+pickers include a local search field. Search by a displayed name, identifier, provider alias,
+or model source, then click a result or use the arrow keys and Enter. Multiple search terms
+must all match. Clearing the search or pressing Escape leaves the selected value unchanged.
+
+The automatic account choice stays visible while searching. Its optional account restriction
+list has a separate filter: selected accounts outside the visible results stay selected, and
+the count includes them. Hidden email fragments are not searchable while email privacy is on.
+Add the step and save the combo as usual; typing a query does not save or test anything.
+
+The same local search is available for connection-test models, Custom CLI default and alias
+models, and saved-proxy choices. Existing save, apply, and test actions remain separate.
+
 ### Example 1: Maximize Subscription → Cheap Backup
 
 ```

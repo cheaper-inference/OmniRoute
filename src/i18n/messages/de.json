@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "Combo-Referenz hinzufügen",
     "builderComboRefStep": "Kombinationsreferenz hinzufügen",
     "builderPinnedAccount": "Angeheftetes Konto",
+    "builderRestrictAccounts": "Auf Konten beschränken (optional)",
+    "builderRestrictAccountsHint": "Leer lassen, um alle aktiven Konten zu verwenden. Wenn Konten ausgewählt sind, verwendet das automatische Routing nur diese Konten.",
     "builderLegacyEntry": "Legacy-Eintrag",
     "builderStaleModel": "Nicht im Live-Katalog",
     "reviewName": "Name",

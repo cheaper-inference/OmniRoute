@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "Kombinasiya istinadı əlavə et",
     "builderComboRefStep": "Kombinasiya istinadı əlavə et",
     "builderPinnedAccount": "Sabitlənmiş hesab",
+    "builderRestrictAccounts": "Hesablarla məhdudlaşdır (istəyə bağlı)",
+    "builderRestrictAccountsHint": "Bütün aktiv hesablardan istifadə etmək üçün boş saxlayın. Hesablar seçildikdə avtomatik yönləndirmə yalnız bu hesablarla məhdudlaşır.",
     "builderLegacyEntry": "Köhnə qeyd",
     "builderStaleModel": "Canlı kataloqda yoxdur",
     "reviewName": "Ad",

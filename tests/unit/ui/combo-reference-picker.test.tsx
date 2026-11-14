@@ -6,7 +6,7 @@ import { resolve } from "node:path";
 import ComboReferencePicker from "@/app/(dashboard)/dashboard/combos/ComboReferencePicker";
 
 function t(key: string): string {
-  return key;
+  return key === "reviewSteps" ? "Steps" : key;
 }
 t.has = () => false;
 
@@ -15,10 +15,10 @@ const options = [
   { id: "b", name: "beta", strategy: "round-robin", stepCount: 3 },
 ];
 
-// The picker renders the kit (Radix) Select, which has no DOM <option>s: open the combobox
-// with the keyboard and read the role="option" items instead.
+// The searchable adapter opens from a labelled button and exposes a search combobox
+// plus role="option" items, rather than a native select.
 function openPicker(getByRole) {
-  fireEvent.keyDown(getByRole("combobox"), { key: "Enter" });
+  fireEvent.keyDown(getByRole("button", { name: "Reference another combo" }), { key: "Enter" });
 }
 
 beforeAll(() => {
@@ -38,14 +38,12 @@ describe("ComboReferencePicker", () => {
     const { getByRole, getAllByRole } = render(
       <ComboReferencePicker t={t} value="" onChange={() => {}} options={options} onAdd={() => {}} />
     );
-    expect(getByRole("combobox", { name: "Reference another combo" }).textContent).toContain(
+    expect(getByRole("button", { name: "Reference another combo" }).textContent).toContain(
       "Select an existing combo to reference"
     );
     openPicker(getByRole);
-    const texts = getAllByRole("option").map((o) =>
-      (o.textContent || "").replace(/\s+/g, " ").trim()
-    );
-    expect(texts).toEqual(["alpha · priority · 1 step", "beta · round-robin · 3 steps"]);
+    const labels = getAllByRole("option").map((option) => option.getAttribute("aria-label"));
+    expect(labels).toEqual(["alpha priority · Steps: 1", "beta round-robin · Steps: 3"]);
   });
 
   it("reports the selected combo name and disables Add until one is chosen", () => {
@@ -58,7 +56,12 @@ describe("ComboReferencePicker", () => {
     expect(button.disabled).toBe(true);
 
     openPicker(getByRole);
-    fireEvent.click(getByRole("option", { name: "beta · round-robin · 3 steps" }));
+    fireEvent.change(getByRole("combobox", { name: "Search" }), {
+      target: { value: "round-robin" },
+    });
+    expect(onChange).not.toHaveBeenCalled();
+    expect(button.disabled).toBe(true);
+    fireEvent.click(getByRole("option", { name: "beta round-robin · Steps: 3" }));
     expect(onChange).toHaveBeenCalledWith("beta");
 
     rerender(

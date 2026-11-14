@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "បន្ថែមសេចក្តីយោងបន្សំ",
     "builderComboRefStep": "បន្ថែមសេចក្ដីយោងបន្សំ",
     "builderPinnedAccount": "គណនីដែលបានខ្ទាស់",
+    "builderRestrictAccounts": "កំណត់ឱ្យប្រើតែគណនីដែលបានជ្រើសរើស (ជាជម្រើស)",
+    "builderRestrictAccountsHint": "ទុកឱ្យទទេដើម្បីប្រើគណនីសកម្មទាំងអស់។ ប្រសិនបើបានជ្រើសរើសគណនី ការកំណត់ផ្លូវដោយស្វ័យប្រវត្តិនឹងប្រើតែគណនីទាំងនោះប៉ុណ្ណោះ។",
     "builderLegacyEntry": "ធាតុពីជំនាន់មុន",
     "builderStaleModel": "មិនមាននៅក្នុងកាតាឡុកផ្ទាល់ទេ",
     "reviewName": "ឈ្មោះ",

@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { gotoDashboardRoute } from "./helpers/dashboardAuth";
+import { chooseSearchableOption } from "./helpers/searchableSelect";
 
 type ComboStub = {
   id: string;
@@ -224,9 +225,21 @@ test.describe("Combos flow", () => {
 
     await expect(comboDialog.locator('[data-testid="combo-builder-stage-steps"]')).toBeVisible();
     await expect(comboNextButton).toBeDisabled();
-    await comboDialog.locator('[data-testid="combo-builder-provider"]').selectOption("openai");
-    await comboDialog.locator('[data-testid="combo-builder-model"]').selectOption("qa-test-model");
-    await comboDialog.locator('[data-testid="combo-builder-account"]').selectOption("conn-openai");
+    await chooseSearchableOption(
+      page,
+      comboDialog.locator('[data-testid="combo-builder-provider"]'),
+      "openai"
+    );
+    await chooseSearchableOption(
+      page,
+      comboDialog.locator('[data-testid="combo-builder-model"]'),
+      "qa-test-model"
+    );
+    await chooseSearchableOption(
+      page,
+      comboDialog.locator('[data-testid="combo-builder-account"]'),
+      "conn-openai"
+    );
     await comboDialog.locator('[data-testid="combo-builder-add-step"]').click();
     await expect(comboNextButton).toBeEnabled();
     await comboNextButton.click();

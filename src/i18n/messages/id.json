@@ -4383,6 +4383,8 @@
     "builderAddComboRef": "Tambahkan referensi combo",
     "builderComboRefStep": "Tambahkan referensi combo",
     "builderPinnedAccount": "Akun yang Disematkan",
+    "builderRestrictAccounts": "Batasi ke akun tertentu (opsional)",
+    "builderRestrictAccountsHint": "Biarkan kosong untuk menggunakan semua akun aktif. Jika akun dipilih, perutean otomatis hanya akan menggunakan akun tersebut.",
     "builderLegacyEntry": "Entri lama",
     "builderStaleModel": "Tidak ada di katalog langsung",
     "reviewName": "Nama",
