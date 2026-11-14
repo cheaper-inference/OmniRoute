@@ -1,1 +1,0 @@
-- **fix(translator):** OpenAI to Claude requests no longer send `thinking: {type: "enabled"}` without a budget or an empty system text block, and keep `temperature` for API-key and compatible Claude providers and when thinking is disabled.

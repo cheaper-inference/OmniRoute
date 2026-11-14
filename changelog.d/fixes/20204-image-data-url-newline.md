@@ -1,0 +1,1 @@
+- **fix(sse):** an OpenAI image or file part given as a base64 data URL that contains line breaks (MIME-wrapped base64) is now sent to Claude as a base64 block with the breaks removed, instead of an invalid URL source (images) or a silent drop (files). ([#20204](https://github.com/cheaper-inference/OmniRoute/pull/20204))

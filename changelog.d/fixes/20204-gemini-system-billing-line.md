@@ -1,0 +1,1 @@
+- **fix(translator):** Claude Code's rotating `x-anthropic-billing-header:` line is now dropped from the system prompt of OpenAI-format requests sent to Gemini and Antigravity, so it no longer breaks prompt-cache prefixes. ([#20204](https://github.com/cheaper-inference/OmniRoute/pull/20204))
