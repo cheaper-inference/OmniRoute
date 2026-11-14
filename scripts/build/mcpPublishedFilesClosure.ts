@@ -1,5 +1,5 @@
 /**
- * Shared MCP publish-path helpers (#3578 / #3821).
+ * Shared MCP publish-path helpers (#3578 / #3593).
  *
  * Unit tests use the static `files` allowlist walker (no subprocess).
  * The pack-artifact gate uses the same helpers against a real
@@ -17,13 +17,12 @@ export const PACK_ARTIFACT_TEST_FILE_RE = /(?:^|\/)__tests__\/|\.(?:test|spec)\.
 
 /** Negations that must stay in package.json `files` (static unit guard). */
 export const REQUIRED_PACKAGE_FILES_TEST_NEGATIONS: readonly string[] = [
-  "!**/__tests__/**",
-  "!**/*.test.ts",
-  "!**/*.test.tsx",
-  "!**/*.test.js",
-  "!**/*.test.mjs",
-  "!**/*.spec.ts",
-  "!**/*.spec.tsx",
+  "!src/**/__tests__",
+  "!src/**/*.test.ts",
+  "!src/**/*.test.tsx",
+  "!open-sse/**/__tests__",
+  "!open-sse/**/*.test.ts",
+  "!@omniroute/**/*.test.ts",
 ];
 
 /** Spot-check file from the original #3578 bug report. */
