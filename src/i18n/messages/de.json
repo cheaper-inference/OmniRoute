@@ -2076,6 +2076,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Zwischengespeicherte Eingabetokens",
+    "inputTokensHint": "Cache-Lesezugriffe sind ausgeschlossen. Cache-Schreibzugriffe zählen weiterhin als Eingabetokens.",
+    "inputSplitUnavailable": "Die Aufschlüsselung der Eingabe ist nicht verfügbar, da die Cache-Lesedaten unvollständig oder inkonsistent sind.",
+    "cachedInputTokensHint": "Nur gemeldete Cache-Lesezugriffe, die bereits in der Gesamteingabe enthalten sind.",
     "title": "Analytik",
     "usageAnalyticsTitle": "Nutzungsanalysen",
     "tokenDisplayCompact": "Kompakt",

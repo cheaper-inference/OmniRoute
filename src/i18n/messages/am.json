@@ -2076,6 +2076,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "በመሸጎጫ የተቀመጡ የግቤት ቶከኖች",
+    "inputTokensHint": "ከመሸጎጫ ማንበቦችን አያካትትም። ወደ መሸጎጫ መጻፎች እንደ ግቤት ቶከኖች መቆጠራቸው ይቀጥላል።",
+    "inputSplitUnavailable": "የመሸጎጫ ንባብ ውሂብ ያልተሟላ ወይም የማይጣጣም ስለሆነ የግቤት ክፍፍሉ አይገኝም።",
+    "cachedInputTokensHint": "ሪፖርት የተደረጉ የመሸጎጫ ንባቦች ብቻ፣ ቀድሞውኑ በጠቅላላ ግቤት ውስጥ ተካትተዋል።",
     "title": "ትንታኔ",
     "usageAnalyticsTitle": "የአጠቃቀም ትንታኔ",
     "tokenDisplayCompact": "አጭር",

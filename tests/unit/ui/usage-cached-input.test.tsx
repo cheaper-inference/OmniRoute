@@ -88,8 +88,15 @@ describe("provider cached input reporting", () => {
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);
       });
-      const cache = screen.getByTestId("cached-input-tokens");
-      expect(cache.textContent).toContain("Cache Read Tokens: 60+ (Partial)");
+      expect(screen.getByRole("group", { name: "Total Input Tokens" }).textContent).toContain(
+        "100"
+      );
+      expect(screen.getByRole("group", { name: "Cached Input Tokens" }).textContent).toContain(
+        "60+ (Partial)"
+      );
+      expect(screen.getByRole("group", { name: "Input Tokens" }).textContent).toContain(
+        "No data available"
+      );
       expect(fetch).toHaveBeenCalledWith(expect.stringContaining("/api/usage/analytics?"));
       expect(fetch).toHaveBeenCalledTimes(1);
     } finally {

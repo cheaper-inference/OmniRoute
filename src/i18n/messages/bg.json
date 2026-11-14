@@ -2076,6 +2076,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Входни токени от кеша",
+    "inputTokensHint": "Изключва четенията от кеша. Записите в кеша продължават да се броят като входни токени.",
+    "inputSplitUnavailable": "Разбивката на входа не е налична, защото данните за четене от кеша са непълни или непоследователни.",
+    "cachedInputTokensHint": "Само отчетените четения от кеша, вече включени в общия вход.",
     "title": "Анализ",
     "usageAnalyticsTitle": "Анализ на потреблението",
     "tokenDisplayCompact": "Компактно",

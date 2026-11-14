@@ -2076,6 +2076,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Входные токены из кэша",
+    "inputTokensHint": "Не включает чтение из кэша. Запись в кэш по-прежнему учитывается как входные токены.",
+    "inputSplitUnavailable": "Разбивка входных данных недоступна, поскольку данные о чтении из кэша неполны или противоречивы.",
+    "cachedInputTokensHint": "Только зарегистрированные чтения из кэша, уже включённые в общий объём входных данных.",
     "title": "Аналитика",
     "usageAnalyticsTitle": "Аналитика использования",
     "tokenDisplayCompact": "Компактно",

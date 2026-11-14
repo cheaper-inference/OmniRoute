@@ -2076,6 +2076,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Tokens tal-input fil-cache",
+    "inputTokensHint": "Jeskludi l-qari mill-cache. Il-kitbiet fil-cache xorta jingħaddu bħala tokens tal-input.",
+    "inputSplitUnavailable": "It-tqassim tal-input mhuwiex disponibbli għax id-data tal-qari mill-cache mhijiex kompluta jew hija inkonsistenti.",
+    "cachedInputTokensHint": "Qari mill-cache rrappurtat biss, diġà inkluż fl-input totali.",
     "title": "Analitika",
     "usageAnalyticsTitle": "Analitika tal-użu",
     "tokenDisplayCompact": "Kompatt",

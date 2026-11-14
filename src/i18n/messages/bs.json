@@ -2076,6 +2076,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Ulazni tokeni iz predmemorije",
+    "inputTokensHint": "Isključuje čitanja iz predmemorije. Upisi u predmemoriju i dalje se računaju kao ulazni tokeni.",
+    "inputSplitUnavailable": "Podjela ulaza nije dostupna jer su podaci o čitanju predmemorije nepotpuni ili nedosljedni.",
+    "cachedInputTokensHint": "Samo prijavljena čitanja iz predmemorije, već uključena u ukupan ulaz.",
     "title": "Analitika",
     "usageAnalyticsTitle": "Analitika korištenja",
     "tokenDisplayCompact": "Sažeto",

@@ -2076,6 +2076,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "క్యాష్‌లో నిల్వ చేసిన ఇన్‌పుట్ టోకెన్‌లు",
+    "inputTokensHint": "క్యాష్ నుండి చదివినవి మినహాయించబడతాయి. క్యాష్‌లో రాసినవి ఇన్‌పుట్ టోకెన్‌లుగానే లెక్కించబడతాయి.",
+    "inputSplitUnavailable": "క్యాష్ రీడ్ డేటా అసంపూర్ణంగా లేదా అసంగతంగా ఉన్నందున ఇన్‌పుట్ విభజన అందుబాటులో లేదు.",
+    "cachedInputTokensHint": "నివేదించిన క్యాష్ రీడ్‌లు మాత్రమే; ఇవి మొత్తం ఇన్‌పుట్‌లో ఇప్పటికే చేర్చబడ్డాయి.",
     "title": "విశ్లేషణలు",
     "usageAnalyticsTitle": "వినియోగ విశ్లేషణలు",
     "tokenDisplayCompact": "సంక్షిప్తం",

@@ -2076,6 +2076,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "توکن‌های ورودی ذخیره‌شده در حافظهٔ نهان",
+    "inputTokensHint": "خواندن از حافظهٔ نهان را شامل نمی‌شود. نوشتن در حافظهٔ نهان همچنان جزو توکن‌های ورودی محسوب می‌شود.",
+    "inputSplitUnavailable": "تفکیک ورودی در دسترس نیست زیرا داده‌های خواندن از حافظهٔ نهان ناقص یا ناسازگار هستند.",
+    "cachedInputTokensHint": "فقط خواندن‌های گزارش‌شده از حافظهٔ نهان که از قبل در کل ورودی محاسبه شده‌اند.",
     "title": "تحلیلها",
     "usageAnalyticsTitle": "تحلیل مصرف",
     "tokenDisplayCompact": "فشرده",

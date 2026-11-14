@@ -2076,6 +2076,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS Ìrántí / Òkìtì)"
   },
   "analytics": {
+    "cachedInputTokens": "Àwọn tóókìn ìwọlé tí a fi pamọ́ sínú káàṣì",
+    "inputTokensHint": "Kò ka kíkà láti inú káàṣì sí. Kíkọ sínú káàṣì ṣì ń jẹ́ àwọn tóókìn ìwọlé.",
+    "inputSplitUnavailable": "Pípín ìwọlé kò sí nítorí dátà kíkà káàṣì kò pé tàbí kò bára mu.",
+    "cachedInputTokensHint": "Kíkà káàṣì tí a ròyìn nìkan, tí ó ti wà nínú àpapọ̀ ìwọlé.",
     "title": "Ìtúpalẹ̀",
     "usageAnalyticsTitle": "Ìtúpalẹ̀ Ìlò",
     "tokenDisplayCompact": "Kúkúrú",

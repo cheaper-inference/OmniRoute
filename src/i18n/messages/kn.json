@@ -2076,6 +2076,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "ಕ್ಯಾಶ್‌ನಲ್ಲಿರುವ ಇನ್‌ಪುಟ್ ಟೋಕನ್‌ಗಳು",
+    "inputTokensHint": "ಕ್ಯಾಶ್‌ನಿಂದ ಓದಿದವುಗಳನ್ನು ಹೊರತುಪಡಿಸುತ್ತದೆ. ಕ್ಯಾಶ್‌ಗೆ ಬರೆದವುಗಳನ್ನು ಇನ್‌ಪುಟ್ ಟೋಕನ್‌ಗಳಾಗಿಯೇ ಎಣಿಸಲಾಗುತ್ತದೆ.",
+    "inputSplitUnavailable": "ಕ್ಯಾಶ್ ಓದುವ ಡೇಟಾ ಅಪೂರ್ಣ ಅಥವಾ ಅಸಂಗತವಾಗಿರುವುದರಿಂದ ಇನ್‌ಪುಟ್ ವಿಭಜನೆ ಲಭ್ಯವಿಲ್ಲ.",
+    "cachedInputTokensHint": "ವರದಿಯಾದ ಕ್ಯಾಶ್ ಓದುಗಳು ಮಾತ್ರ; ಇವು ಒಟ್ಟು ಇನ್‌ಪುಟ್‌ನಲ್ಲಿ ಈಗಾಗಲೇ ಸೇರಿವೆ.",
     "title": "ವಿಶ್ಲೇಷಣೆ",
     "usageAnalyticsTitle": "ಬಳಕೆ ವಿಶ್ಲೇಷಣೆ",
     "tokenDisplayCompact": "ಸಂಕ್ಷಿಪ್ತ",

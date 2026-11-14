@@ -2076,6 +2076,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "ক্যাশে সংরক্ষিত ইনপুট টোকেন",
+    "inputTokensHint": "ক্যাশ থেকে পড়া টোকেন বাদ দেয়। ক্যাশে লেখা টোকেন ইনপুট টোকেন হিসেবেই গণনা করা হয়।",
+    "inputSplitUnavailable": "ইনপুটের বিভাজন উপলব্ধ নয় কারণ ক্যাশ থেকে পড়ার তথ্য অসম্পূর্ণ বা অসংগত।",
+    "cachedInputTokensHint": "শুধু রিপোর্ট করা ক্যাশ রিড, যা মোট ইনপুটে ইতিমধ্যেই অন্তর্ভুক্ত।",
     "title": "বিশ্লেষণ",
     "usageAnalyticsTitle": "ব্যবহারের বিশ্লেষণ",
     "tokenDisplayCompact": "সংক্ষিপ্ত",
