@@ -1,1 +1,0 @@
-- **fix(call-logs):** A call log whose detail artifact was published successfully no longer runs a second `UPDATE` that matches zero rows; the "mark missing" `UPDATE` now runs only for a skipped, failed or expired artifact write, so each detail-bearing request takes one less SQLite write.

@@ -1,1 +1,0 @@
-- **fix(usage):** The requests-by-provider-date report now sums archived `total_requests` instead of counting one request per summary row, and it floors raw history at `retention.usageHistory` like the main analytics route, so rows between day 7 and the rollup boundary no longer vanish from the report.

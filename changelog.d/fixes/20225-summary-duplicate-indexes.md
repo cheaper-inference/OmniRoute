@@ -1,0 +1,1 @@
+- **fix(db):** The daily and hourly usage summary tables no longer keep two redundant copies of their provider/model/date index; boot drops them and keeps the UNIQUE index that the rollup upsert needs, so each new summary bucket writes two fewer index entries per table. ([#20225](https://github.com/cheaper-inference/OmniRoute/pull/20225))
