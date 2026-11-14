@@ -37,7 +37,7 @@ job "approval" ── approve.mjs writes commit status omni-queue/approval = suc
                   (App token, creator <appSlug>[bot])
         │
         ▼
-job "tick" (every 5 min, on label changes and when a candidate's CI completes;
+job "tick" (every 5 min, on queue-relevant PR events and when a candidate's CI completes;
             one global concurrency group omni-queue-tick: a running tick is never
             cancelled; a newer waiting tick replaces an older waiting one, which shows
             up as a "cancelled" omni-queue run and is harmless)
@@ -98,6 +98,12 @@ App token.
   merge commit of its own; it lands with the batch and is reported as merged with it.
 - **CI profile**: `ci.yml` and `quality.yml` treat a push to `omni-queue/**` like a `merge_group`
   event (full profile, hosted runners). Deploy and publish workflows never run on that prefix.
+- **Never stricter than a pull request**: the gates that are base-relative on a pull request
+  (`check:file-size`, `check:complexity-ratchets`, `check:dead-code`, `check:boundary`,
+  `check:ts7-diagnostics-ratchet`) compare a candidate with its base (`--base-ref` = the
+  candidate base), and the i18n docs drift check is advisory against that base, as it is on a
+  pull request. Drift the base picked up mid-cycle therefore never reds a candidate; the absolute
+  and strict verdicts stay on `main`, `merge_group` and Release-Green.
 - **AI attribution over the whole range**: with `merge-ff` the contributors' own commits land
   unchanged, so `ci.yml` runs `check:ai-attribution` over `<candidate base>..<candidate>` (Hard
   Rule #16), not only over the PR metadata.
@@ -146,6 +152,12 @@ queue's own control plane: `.github/workflows/**`, `.github/actions/**`, `script
 from the default branch, and a candidate runs the workflows of its own tree with repository
 secrets, so a PR that changes any of them could add an approver, switch `mode`, empty
 `requiredChecks` or read a secret. Such a PR needs `protected-approved` on top of the queue label.
+
+**Label names live in two places.** `label`, `protectedApprovalLabel` and `blockLabels` are read
+from the config by the scripts, but the job filters of `.github/workflows/omni-queue.yml` (see
+[Kill switch](#kill-switch)) cannot read a file, so the same names are repeated there as literals.
+Renaming or adding a label means changing both; `tests/unit/merge-queue/workflows.test.mjs` fails
+when they differ.
 
 **Why commit statuses.** "The label was applied after the last push" cannot be decided from
 commit dates: they are set by the author and trivially forged. Instead, the `approval` job
@@ -304,13 +316,20 @@ base tip that nothing landed after the cut. Forks never inherit repository varia
 The workflow and the orchestrator must exist on the **default branch**: `schedule`,
 `workflow_run` and `pull_request_target` always run the default branch's copy of the workflow.
 
+`pull_request_target` fires for every pull request of the repository, and each job mints an App
+token, so the jobs' `if:` keep only the events the queue cares about. The `approval` job starts
+only when the label added or removed is `label` or `protectedApprovalLabel`. A pull request event
+starts a tick only when that label is one of those two or one of `blockLabels`, when the pull
+request carries the queue label, or when the event is the merge of a pull request (a base
+moved). A label on, or a push to, a pull request that is not queued starts nothing.
+
 The 5-minute `schedule` trigger only acts on `cheaper-inference/OmniRoute`: both jobs skip a
 scheduled run in any other repository (a fork, or the sandbox used for the rehearsal). There,
-ticks come from label changes, from a candidate's CI finishing (`workflow_run`), and from a
-manual "Run workflow". GitHub may also take a long time to start a cron in a new repository (none
-fired during the first hour of the rehearsal sandbox), so the cron is a safety net, never the
-main driver: a batch whose window has passed is composed by the next label change, the next
-candidate CI completion or a manual tick.
+ticks come from the pull request events above, from a candidate's CI finishing (`workflow_run`),
+and from a manual "Run workflow". GitHub may also take a long time to start a cron in a new
+repository (none fired during the first hour of the rehearsal sandbox), so the cron is a safety
+net, never the main driver: a batch whose window has passed is composed by the next
+queue-relevant pull request event, the next candidate CI completion or a manual tick.
 
 ## Actions event policy (`pull_request_target` in public repositories)
 
@@ -549,7 +568,8 @@ shadow mode on the real repository. In order:
    production repository (see
    [Actions event policy](#actions-event-policy-pull_request_target-in-public-repositories)); it
    is needed already for shadow mode.
-5. Decide the label: keep `omni-queue` or set `label` to `queue`.
+5. Decide the label: keep `omni-queue` or set `label` to `queue` (in the config **and** in the
+   job filters of `omni-queue.yml`, see [Eligibility](#eligibility)).
 6. Update the merge skills and `AGENTS.md` (agent-instruction surfaces: each change needs the
    owner's explicit approval).
 

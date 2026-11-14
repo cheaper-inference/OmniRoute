@@ -170,6 +170,10 @@ function parse(text) {
   return ast;
 }
 
+// Object filter (`labels.*.name`): `.*` selects every element, the next key maps over them.
+const FILTERED = Symbol("object filter");
+const filtered = (values) => Object.assign(values, { [FILTERED]: true });
+
 const FUNCTIONS = {
   startsWith: (a, b) =>
     String(a ?? "")
@@ -220,6 +224,9 @@ function evaluate(node, ctx) {
       const obj = evaluate(node.e, ctx);
       const key = evaluate(node.key, ctx);
       if (obj === null || typeof obj !== "object") return null;
+      if (key === "*") return filtered(Array.isArray(obj) ? [...obj] : Object.values(obj));
+      if (obj[FILTERED])
+        return filtered(obj.filter((x) => isRecord(x) && key in x).map((x) => x[key]));
       return key in obj ? (obj[key] ?? null) : null;
     }
     case "call": {
@@ -405,6 +412,14 @@ test("the evaluator follows GitHub semantics on the constructs the guards use", 
     "x-other"
   );
   assert.equal(condition("github.event.action == 'labeled' || 'it''s'", ctx), true);
+  // Object filter + contains(): an exact (case-insensitive) element match, never a substring.
+  const labelled = {
+    github: { event: { pull_request: { labels: [{ name: "A" }, { name: "bc" }] } } },
+  };
+  const has = (name) =>
+    condition(`contains(github.event.pull_request.labels.*.name, '${name}')`, labelled);
+  assert.deepEqual([has("a"), has("bc"), has("b"), has("")], [true, true, false, false]);
+  assert.equal(condition("contains(github.event.pull_request.labels.*.name, 'a')", ctx), false);
   assert.throws(() => condition("unknownroot.value", ctx), /unknown context root/);
   assert.throws(() => condition("github.ref ~ 'x'", ctx), /unsupported character/);
 });
@@ -584,13 +599,36 @@ const queue = loadWorkflow("omni-queue.yml");
 // Parsed content only (comments are allowed to name what the workflow must not use).
 const queueText = JSON.stringify(queue);
 
-function queueContext(eventName, { enabled = "true", action = "", approval } = {}) {
+const queueConfig = JSON.parse(readText("config/merge-queue/config.json"));
+
+/**
+ * Context of one omni-queue.yml trigger. A pull_request_target event is, by default, one the
+ * queue cares about: the pull request carries the queue label, and a labeled / unlabeled action
+ * names that label. `label` (the event's label), `prLabels` (the labels the pull request carries
+ * when the event fires) and `merged` model every other pull request event.
+ */
+function queueContext(
+  eventName,
+  { enabled = "true", action = "", approval, label, prLabels, merged = false } = {}
+) {
+  const event = { action, repository: { default_branch: "release/v3.8.54" } };
+  if (eventName === "pull_request_target") {
+    event.number = 7;
+    if (action === "labeled" || action === "unlabeled") {
+      event.label = { name: label ?? queueConfig.label };
+    }
+    event.pull_request = {
+      number: 7,
+      merged,
+      labels: (prLabels ?? [queueConfig.label]).map((name) => ({ name })),
+    };
+  }
   return {
     github: {
       event_name: eventName,
       repository: "cheaper-inference/OmniRoute",
       ref: "refs/heads/release/v3.8.54",
-      event: { action, repository: { default_branch: "release/v3.8.54" } },
+      event,
     },
     vars: { OMNI_QUEUE_ENABLED: enabled },
     needs: approval ? { approval: { result: approval } } : {},
@@ -720,6 +758,154 @@ test("approval runs only for label changes; the tick tolerates a skipped approva
   assert.equal(condition(tick.if, fork), false);
 });
 
+test("only pull request events the queue cares about start the privileged jobs", () => {
+  // Every pull_request_target run mints an App token. Unfiltered, any label on any pull request
+  // started the approval job and any of the four actions started a tick: hundreds of privileged
+  // runs a day on a busy repository, and a contributor could keep ticks running by pushing.
+  const { label: queueLabel, protectedApprovalLabel, blockLabels } = queueConfig;
+  const unrelated = ["bug", `${queueLabel}-dashboard`, `x-${queueLabel}`];
+  for (const name of unrelated) {
+    assert.ok(![queueLabel, protectedApprovalLabel, ...blockLabels].includes(name), name);
+  }
+  const jobs = (action, opts = {}) =>
+    scheduledJobs(queue, queueContext("pull_request_target", { action, ...opts }));
+  const neither = { approval: false, tick: false };
+  const tickOnly = { approval: false, tick: true };
+  const both = { approval: true, tick: true };
+
+  for (const action of ["labeled", "unlabeled"]) {
+    for (const label of unrelated) {
+      // An unrelated label on a pull request that is not queued: nothing runs.
+      assert.deepEqual(jobs(action, { label, prLabels: [label] }), neither, `${action} ${label}`);
+      assert.deepEqual(jobs(action, { label, prLabels: [] }), neither, `${action} ${label}`);
+      // On a queued pull request it only wakes the tick (the PR carries the queue label).
+      assert.deepEqual(
+        jobs(action, { label, prLabels: [queueLabel, label] }),
+        tickOnly,
+        `${action} ${label} on a queued PR`
+      );
+    }
+    // The two approval labels bind / withdraw an approval and wake the tick, queued or not
+    // (`unlabeled` fires after the label is gone from the pull request).
+    for (const label of [queueLabel, protectedApprovalLabel]) {
+      for (const prLabels of [[], [label], [queueLabel, protectedApprovalLabel]]) {
+        assert.deepEqual(jobs(action, { label, prLabels }), both, `${action} ${label}`);
+      }
+    }
+    // A block label changes eligibility: tick, never the approval job.
+    for (const label of blockLabels) {
+      assert.deepEqual(
+        jobs(action, { label, prLabels: [queueLabel, label] }),
+        tickOnly,
+        `${action} ${label} on a queued PR`
+      );
+      assert.deepEqual(jobs(action, { label, prLabels: [] }), tickOnly, `${action} ${label}`);
+    }
+  }
+
+  // A push: only when the pull request is queued (its approval is bound to the old head).
+  assert.deepEqual(jobs("synchronize", { prLabels: [] }), neither);
+  assert.deepEqual(
+    jobs("synchronize", { prLabels: [protectedApprovalLabel, ...unrelated] }),
+    neither
+  );
+  assert.deepEqual(jobs("synchronize", { prLabels: [queueLabel] }), tickOnly);
+  assert.deepEqual(jobs("synchronize", { prLabels: ["bug", queueLabel] }), tickOnly);
+
+  // closed: a merge moved a base (queued or not); an unmerged close matters only when queued.
+  assert.deepEqual(jobs("closed", { prLabels: [], merged: true }), tickOnly);
+  assert.deepEqual(jobs("closed", { prLabels: unrelated, merged: true }), tickOnly);
+  assert.deepEqual(jobs("closed", { prLabels: [], merged: false }), neither);
+  assert.deepEqual(jobs("closed", { prLabels: [queueLabel], merged: false }), tickOnly);
+  // `merged` counts on `closed` only.
+  assert.deepEqual(jobs("synchronize", { prLabels: [], merged: true }), neither);
+
+  // Every other trigger is unchanged: the tick runs, the approval job does not.
+  for (const [event, action] of [
+    ["schedule", ""],
+    ["workflow_run", "completed"],
+    ["workflow_dispatch", ""],
+  ]) {
+    assert.deepEqual(scheduledJobs(queue, queueContext(event, { action })), tickOnly, event);
+  }
+
+  // The kill switch still wins over every one of the events that start a job.
+  for (const [action, opts] of [
+    ["labeled", { label: queueLabel }],
+    ["labeled", { label: blockLabels[0] }],
+    ["synchronize", {}],
+    ["closed", { prLabels: [], merged: true }],
+  ]) {
+    assert.deepEqual(
+      jobs(action, { ...opts, enabled: "false" }),
+      neither,
+      `${action} switched off`
+    );
+  }
+});
+
+/** Dotted path of a context access (`github.event.label.name`), or null for anything else. */
+function contextPath(node) {
+  if (node?.k === "ctx") return node.name;
+  if (node?.k !== "prop" || node.key.k !== "lit") return null;
+  const parent = contextPath(node.e);
+  return parent === null ? null : `${parent}.${node.key.v}`;
+}
+
+/** The label names a job's `if:` compares the event's label and the PR's labels with. */
+function labelLiterals(expr) {
+  const out = { eventLabel: [], prLabels: [], eventLabelReads: 0, prLabelReads: 0 };
+  const literal = (node) => {
+    assert.equal(node?.k, "lit", `a label is compared with a literal in: ${expr}`);
+    assert.equal(typeof node.v, "string");
+    return node.v;
+  };
+  const walk = (node) => {
+    if (node === null || typeof node !== "object") return;
+    const path = contextPath(node);
+    if (path === "github.event.label.name") out.eventLabelReads++;
+    if (path === "github.event.pull_request.labels.*.name") out.prLabelReads++;
+    if (path !== null) return;
+    if (node.k === "cmp" && node.op === "==") {
+      for (const [side, other] of [
+        [node.a, node.b],
+        [node.b, node.a],
+      ]) {
+        if (contextPath(side) === "github.event.label.name") out.eventLabel.push(literal(other));
+      }
+    }
+    if (node.k === "call" && node.name === "contains") {
+      if (contextPath(node.args[0]) === "github.event.pull_request.labels.*.name") {
+        out.prLabels.push(literal(node.args[1]));
+      }
+    }
+    for (const child of [node.e, node.a, node.b, ...(node.args ?? [])]) walk(child);
+  };
+  walk(parse(String(expr).trim()));
+  // Every read of a label is one of the two shapes above (no !=, startsWith, …).
+  assert.equal(out.eventLabelReads, out.eventLabel.length, expr);
+  assert.equal(out.prLabelReads, out.prLabels.length, expr);
+  return { eventLabel: out.eventLabel.sort(), prLabels: out.prLabels.sort() };
+}
+
+test("the label names in the queue's job filters are the ones in config.json", () => {
+  // A workflow `if:` cannot read config/merge-queue/config.json, so omni-queue.yml repeats the
+  // label names as literals. Renaming a label in one place only would silently stop approvals
+  // (or ticks) from starting: both must change together.
+  const { label, protectedApprovalLabel, blockLabels } = queueConfig;
+  const names = [label, protectedApprovalLabel, ...blockLabels];
+  assert.ok(names.every((n) => typeof n === "string" && n.length > 0));
+  assert.equal(new Set(names.map((n) => n.toLowerCase())).size, names.length, "distinct labels");
+  assert.deepEqual(labelLiterals(queue.jobs.approval.if), {
+    eventLabel: [label, protectedApprovalLabel].sort(),
+    prLabels: [],
+  });
+  assert.deepEqual(labelLiterals(queue.jobs.tick.if), {
+    eventLabel: [...names].sort(),
+    prLabels: [label],
+  });
+});
+
 test("one global tick at a time, never cancelled; approvals outside that group", () => {
   assert.equal(queue.concurrency, undefined, "no workflow-level group (it would gate approvals)");
   assert.deepEqual(queue.jobs.tick.concurrency, {
@@ -732,8 +918,9 @@ test("one global tick at a time, never cancelled; approvals outside that group",
   // the others: a PR-only group would let an unrelated label event, or the other approval label,
   // replace a pending "labeled omni-queue" run and lose the approval. A run replaced in its own
   // group is superseded by a newer event on the same label, which re-reads the current labels.
-  // github.event.number is the PR number of a pull_request_target payload (the file never names
-  // github.event.pull_request: see "the queue never checks out or runs PR code").
+  // github.event.number is the PR number of a pull_request_target payload (the file names
+  // github.event.pull_request only in the tick's trigger filter: see "the queue never checks out
+  // or runs PR code").
   assert.deepEqual(queue.jobs.approval.concurrency, {
     group: "omni-queue-approval-${{ github.event.number }}-${{ github.event.label.name }}",
     "cancel-in-progress": false,
@@ -799,8 +986,20 @@ test("the tick's test/sandbox overrides are never set by the real workflow", () 
 });
 
 test("the queue never checks out or runs PR code", () => {
-  // Nothing PR-controlled is read anywhere in the file (refs, repos, titles, heads).
-  assert.doesNotMatch(queueText, /github\.event\.pull_request|github\.head_ref|workflow_run\.head/);
+  // Nothing PR-controlled is read anywhere in the file (refs, repos, titles, heads). The one
+  // read of the pull request payload is the tick's trigger filter: the labels the PR carries
+  // (applied by people with triage rights, never by a fork author) and `merged`, compared
+  // inside the job's `if:` and never handed to a step.
+  const tickIf = String(queue.jobs.tick.if);
+  const filterReads = /github\.event\.pull_request\.(labels\.\*\.name|merged)(?![\w.[])/g;
+  const withoutFilter = JSON.stringify({
+    ...queue,
+    jobs: { ...queue.jobs, tick: { ...queue.jobs.tick, if: tickIf.replace(filterReads, "") } },
+  });
+  assert.doesNotMatch(
+    withoutFilter,
+    /github\.event\.pull_request|github\.head_ref|workflow_run\.head/
+  );
   for (const [id, job] of Object.entries(queue.jobs)) {
     const checkouts = job.steps.filter((s) => String(s.uses ?? "").startsWith("actions/checkout@"));
     assert.equal(checkouts.length, 1, `${id} has one checkout`);
@@ -1379,4 +1578,136 @@ test("ci.yml: the candidate range is checked for AI attribution (merge-ff keeps 
   );
   // The checkout carries the full history the range needs.
   assert.equal(lint.steps[0].with["fetch-depth"], 0);
+});
+
+// ───────────────────────────── candidate profile: base-relative gates ─────────────────────────────
+//
+// A gate that is base-relative (or advisory) on a pull request must judge a candidate the same
+// way, against the candidate base: in its absolute / strict mode, drift the base picked up
+// mid-cycle reds EVERY candidate and the queue blames innocent pull requests.
+
+const PR_BASE_SHA = "f".repeat(40);
+const withChanges = (ctx) => ({ ...ctx, needs: { changes: { outputs: ctx.__outputs.changes } } });
+
+/** The event contexts a base-relative step must tell apart. `base` = the SHA it must receive. */
+function baseRelativeContexts() {
+  const pr = prContext("fix/x");
+  pr.github.event.pull_request.base.sha = PR_BASE_SHA;
+  return [
+    { name: "candidate push", ctx: pushContext(CANDIDATE_REF), base: BASE_SHA },
+    { name: "pull request", ctx: pr, base: PR_BASE_SHA },
+    { name: "push to main", ctx: pushContext("refs/heads/main"), base: "" },
+    {
+      name: "merge_group",
+      ctx: pushContext("refs/heads/gh-readonly-queue/x", { eventName: "merge_group" }),
+      base: "",
+    },
+    {
+      name: "workflow_dispatch",
+      ctx: pushContext("refs/heads/release/v3.8.54", { eventName: "workflow_dispatch" }),
+      base: "",
+    },
+  ].map((c) => ({ ...c, ctx: withChanges(c.ctx) }));
+}
+
+/** `npm run <script> [-- args…]` invocations of one step, as script → args after `--`. */
+function npmRuns(npmArgs) {
+  const runs = new Map();
+  let current = null;
+  for (const arg of npmArgs ?? []) {
+    if (arg === "run") current = null;
+    else if (current === null) runs.set(arg, (current = []));
+    else current.push(arg);
+  }
+  return runs;
+}
+
+/** The job receives the candidate base and has it in its clone (full history, like a PR). */
+function assertBaseAvailable(job, where) {
+  assert.ok([job.needs].flat().includes("changes"), `${where} receives the candidate base`);
+  const checkout = job.steps.find((s) => String(s.uses ?? "").startsWith("actions/checkout@"));
+  assert.equal(checkout.with["fetch-depth"], 0, `${where}: the base must be in the clone`);
+}
+
+test("ci.yml: the boundary ratchet is base-relative on a candidate, absolute on main", (t) => {
+  const lint = loadWorkflow("ci.yml").jobs.lint;
+  assertBaseAvailable(lint, "lint");
+  const step = lint.steps.find((s) => s.name === "Boundary ratchet (open-sse → src)");
+  assert.ok(step, "boundary ratchet step");
+  for (const { name, ctx, base } of baseRelativeContexts()) {
+    const sha = String(render(step.env.PR_BASE_SHA, ctx) ?? "");
+    assert.equal(sha, base, `PR_BASE_SHA on ${name}`);
+    const res = runStep(t, step, { PR_BASE_SHA: sha });
+    assert.equal(res.code, 0, res.stderr);
+    assert.deepEqual(
+      res.npmArgs,
+      base
+        ? ["run", "check:boundary:ratchet", "--", "--base-ref", base]
+        : ["run", "check:boundary:ratchet"],
+      name
+    );
+  }
+});
+
+test("quality.yml: file-size, new-code, boundary and TS7 gates compare a candidate with its base", (t) => {
+  const fast = loadWorkflow("quality.yml").jobs["fast-gates"];
+  assertBaseAvailable(fast, "fast-gates");
+  const step = fast.steps.find((s) => s.name === "Quality gates (all, non-fail-fast)");
+  assert.ok(step, "quality gates step");
+  for (const { name, ctx, base } of baseRelativeContexts()) {
+    const sha = String(render(step.env.PR_BASE_SHA, ctx) ?? "");
+    assert.equal(sha, base, `PR_BASE_SHA on ${name}`);
+    const res = runStep(t, step, { PR_BASE_SHA: sha });
+    assert.equal(res.code, 0, res.stderr);
+    const runs = npmRuns(res.npmArgs);
+    const relative = base ? ["--", "--base-ref", base] : [];
+    for (const gate of ["file-size", "complexity-ratchets", "dead-code"]) {
+      assert.deepEqual(runs.get(`check:${gate}`), relative, `${gate} on ${name}`);
+    }
+    assert.deepEqual(
+      runs.get("check:boundary"),
+      base ? ["--", "--ratchet", "--base-ref", base] : ["--", "--ratchet"],
+      `boundary on ${name}`
+    );
+    // The TS7 ratchet has no absolute mode: without a base it does not run at all.
+    assert.deepEqual(
+      runs.get("check:ts7-diagnostics-ratchet"),
+      base ? relative : undefined,
+      `ts7-diagnostics-ratchet on ${name}`
+    );
+    // Controls: gates without a base-relative mode are called the same way everywhere.
+    assert.deepEqual(runs.get("check:deps"), [], name);
+    assert.deepEqual(runs.get("check:cycles"), ["--", "--ratchet"], name);
+  }
+});
+
+test("ci.yml: i18n docs drift is advisory against the candidate base, strict on main", () => {
+  const job = loadWorkflow("ci.yml").jobs["docs-sync-strict"];
+  assert.ok([job.needs].flat().includes("changes"), "docs-sync-strict receives the candidate base");
+  const one = (pick, what) => {
+    const found = job.steps.filter(pick);
+    assert.equal(found.length, 1, `exactly one ${what} step`);
+    return found[0];
+  };
+  const baseCheckout = one((s) => s.with?.path === ".i18n-base", "base checkout");
+  const advisory = one((s) => String(s.run ?? "").includes("--base-report"), "advisory drift");
+  const strict = one(
+    (s) => s.run === "node scripts/i18n/check-translation-drift.mjs",
+    "strict drift"
+  );
+  assert.match(baseCheckout.uses, /^actions\/checkout@/);
+  assert.equal(baseCheckout.with["persist-credentials"], false);
+  // Both invocations of the advisory comparison are warn-only: it can never red the job.
+  const driftCalls = advisory.run.split("\n").filter((l) => l.includes("check-translation-drift"));
+  assert.equal(driftCalls.length, 2);
+  for (const call of driftCalls) assert.match(call, / --warn( |$)/);
+  assert.match(driftCalls[0], /--root \.i18n-base /);
+  for (const { name, ctx, base } of baseRelativeContexts()) {
+    const relative = base !== "";
+    assert.equal(condition(baseCheckout.if, ctx), relative, `base checkout on ${name}`);
+    assert.equal(condition(advisory.if, ctx), relative, `advisory drift on ${name}`);
+    assert.equal(condition(strict.if, ctx), !relative, `strict drift on ${name}`);
+    // The base tree of the comparison is the PR base on a PR, the candidate base on a candidate.
+    if (relative) assert.equal(render(baseCheckout.with.ref, ctx), base, `base ref on ${name}`);
+  }
 });

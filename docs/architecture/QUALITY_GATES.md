@@ -416,6 +416,12 @@ count exceeds the larger of `metrics.boundaryOpenSseToSrc` and the count on the 
 above the ceiling is reported (`base drift herdado`) but never reds an innocent PR; push → main
 keeps the absolute ceiling, and an unresolvable base SHA falls back to it with a warning.
 
+An omni-queue candidate (a push to `omni-queue/**`, see [OMNI_QUEUE.md](../ops/OMNI_QUEUE.md))
+gets the same treatment as a pull request: both workflows pass the candidate base
+(`needs.changes.outputs.candidateBase`) as `--base-ref`, and `check:ts7-diagnostics-ratchet` runs
+against it too. For the two new-code gates the comparison base is that SHA itself, not the first
+parent of the top merge commit, so every pull request of the batch is judged.
+
 `workflow_dispatch` runs, the release-green sweep and the nightly headroom job have no PR base
 and keep the absolute (global) comparison. Coverage, duplication and type-coverage stay global
 for now (their tools do not produce a per-file diff cheaply) — candidates for the same treatment.

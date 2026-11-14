@@ -50,7 +50,9 @@ on:
     workflows: ["CI", "Quality Gates"]
     types: [completed]
     branches: ["omni-queue/**"]
-  # Label changes bind/withdraw approvals (job `approval`); every listed action wakes the tick.
+  # Label changes bind/withdraw approvals (job `approval`); the listed actions wake the tick.
+  # This trigger fires for EVERY pull request, and each job mints an App token: the jobs' `if:`
+  # keep only the events the queue cares about (see both jobs).
   pull_request_target:
     types: [labeled, unlabeled, synchronize, closed]
 
@@ -63,8 +65,13 @@ jobs:
   # group is keyed on PR AND label: two runs for the same label never interleave their label
   # re-read and status write (a stale `failure` after a newer `success`), and a pending run can
   # only be replaced by a newer event on the same label, whose run re-reads the current labels.
-  # An unrelated label, or the other approval label, runs in its own group and replaces nothing.
+  # An unrelated label (skipped by the `if:` below), or the other approval label, has its own
+  # group and replaces nothing.
   # (github.event.number = the PR number of a pull_request_target payload.)
+  #
+  # Only the two approval labels start it (`label` and `protectedApprovalLabel` of
+  # config/merge-queue/config.json). An `if:` cannot read that file, so the names are repeated
+  # here: rename a label in BOTH places (tests/unit/merge-queue/workflows.test.mjs compares them).
   approval:
     name: Approval
     if: >-
@@ -72,6 +79,7 @@ jobs:
       && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
       && github.event_name == 'pull_request_target'
       && (github.event.action == 'labeled' || github.event.action == 'unlabeled')
+      && (github.event.label.name == 'omni-queue' || github.event.label.name == 'protected-approved')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     concurrency:
@@ -110,13 +118,28 @@ jobs:
   tick:
     name: Tick
     needs: approval
-    # !cancelled() (not always()): the approval job is skipped on every event but a label
-    # change, and an operator who cancels the run mid-incident must stop the tick too.
+    # !cancelled() (not always()): the approval job is skipped on every event but an approval
+    # label change, and an operator who cancels the run mid-incident must stop the tick too.
+    #
+    # A pull request event starts a tick only when it can change what the queue does: the
+    # event's label is an approval label or one of config.json's `blockLabels`, the pull request
+    # carries the queue label, or a merge moved a base. Anything else (a label on, or a push to,
+    # a pull request that is not queued) starts nothing; the 5-minute cron stays the safety net.
+    # Same label literals as config/merge-queue/config.json: rename in BOTH places.
     if: >-
       !cancelled()
       && vars.OMNI_QUEUE_ENABLED == 'true'
       && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
       && (needs.approval.result == 'success' || needs.approval.result == 'skipped')
+      && (github.event_name != 'pull_request_target'
+        || github.event.label.name == 'omni-queue'
+        || github.event.label.name == 'protected-approved'
+        || github.event.label.name == 'hold'
+        || github.event.label.name == 'hold-vps'
+        || github.event.label.name == 'do-not-merge'
+        || github.event.label.name == 'wip'
+        || contains(github.event.pull_request.labels.*.name, 'omni-queue')
+        || (github.event.action == 'closed' && github.event.pull_request.merged == true))
     runs-on: ubuntu-latest
     timeout-minutes: 30
     # ONE writer of queue state at a time, across every base and every trigger. Never cancel a
