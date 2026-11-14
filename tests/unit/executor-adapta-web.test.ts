@@ -62,4 +62,24 @@ describe("AdaptaWebExecutor", () => {
     const connected = await executor.testConnection({ apiKey: "" });
     assert.equal(connected, false);
   });
+
+  it("buildAdaptaMessages produces Adapta-shaped messages with ids", () => {
+    const msgs = mod.buildAdaptaMessages(
+      [
+        { role: "system", content: "sys" },
+        { role: "user", content: "hi" },
+        { role: "assistant", content: "hello" },
+      ],
+      "CLAUDE_5_5_SONNET",
+      "chat-1"
+    );
+    assert.equal(msgs.length, 2);
+    assert.ok(typeof msgs[0].id === "string" && msgs[0].id.length > 0);
+    assert.equal(msgs[0].role, "user");
+    assert.deepEqual(msgs[0].parts, [{ type: "text", text: "sys\n\nhi" }]);
+    assert.equal(msgs[1].role, "assistant");
+    assert.equal(msgs[1].parts[0].text, "hello");
+    assert.equal(msgs[1].state, "done");
+    assert.equal(msgs[1].metadata?.model, "CLAUDE_5_5_SONNET");
+  });
 });
