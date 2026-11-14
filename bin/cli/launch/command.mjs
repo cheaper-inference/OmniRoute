@@ -42,6 +42,33 @@ function displayNameOf(registry, adapter) {
   return registry.entry?.(adapter.id)?.displayName ?? adapter.displayName ?? adapter.id;
 }
 
+/** Registered ids in registry order, without loading adapters when the registry can. */
+function registryIds(registry) {
+  if (typeof registry.ids === "function") return registry.ids();
+  return registry.list().map((adapter) => adapter.id);
+}
+
+/** Every registered adapter, loading lazy ones (registries without `loadAll` are eager). */
+async function registryAdapters(registry) {
+  if (typeof registry.loadAll === "function") return registry.loadAll();
+  return registry.list();
+}
+
+/** `{ id, tier, displayName }` per registered tool, from metadata only when available. */
+function registryRows(registry) {
+  if (typeof registry.ids === "function" && typeof registry.entry === "function") {
+    return registry.ids().map((id) => {
+      const entry = registry.entry(id);
+      return { id, tier: entry.tier, displayName: entry.displayName };
+    });
+  }
+  return registry.list().map((adapter) => ({
+    id: adapter.id,
+    tier: adapter.capabilities.tier,
+    displayName: displayNameOf(registry, adapter),
+  }));
+}
+
 function defaultSetExitCode(code) {
   process.exitCode = code;
 }
@@ -178,8 +205,9 @@ export async function listLaunchTools(registry, deps = {}) {
   const { resolveBinary, probeTool } = deps.resolveBinary
     ? deps
     : await import("./core/resolve-bin.mjs");
+  const adapters = await registryAdapters(registry);
   return Promise.all(
-    registry.list().map(async (adapter) => {
+    adapters.map(async (adapter) => {
       const caps = adapter.capabilities;
       const row = {
         id: adapter.id,
@@ -278,12 +306,10 @@ export async function runCleanup({
 function helpFooter(registry) {
   const lines = ["", "Launchable tools:"];
   try {
-    for (const adapter of registry.list()) {
-      const aliases = registry.aliasesOf?.(adapter.id) || [];
+    for (const row of registryRows(registry)) {
+      const aliases = registry.aliasesOf?.(row.id) || [];
       const alias = aliases.length > 0 ? ` (aliases: ${aliases.join(", ")})` : "";
-      lines.push(
-        `  ${adapter.id.padEnd(10)} ${adapter.capabilities.tier.padEnd(10)} ${displayNameOf(registry, adapter)}${alias}`
-      );
+      lines.push(`  ${row.id.padEnd(10)} ${row.tier.padEnd(10)} ${row.displayName}${alias}`);
     }
   } catch {
     lines.push("  (registry unavailable)");
@@ -399,7 +425,7 @@ export function registerLaunchCommand(program, { legacy = false, deps = {} } = {
       }
 
       if (!toolId && !flags.preset) {
-        const ids = registry.list().map((a) => a.id);
+        const ids = registryIds(registry);
         throw new LaunchError("UsageError", "missing tool", {
           hint: `launchable tools: ${ids.join(", ")} (or omnirouter launch --list)`,
         });

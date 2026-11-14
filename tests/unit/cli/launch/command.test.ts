@@ -611,7 +611,9 @@ test("e2e: unknown tool through the real pipeline exits 2 with launchable ids", 
   assert.match(doc.error.hint, /claude/);
 });
 
-const CORE_TOOLS = launchRegistry.list({ tier: "core" }).map((a: { id: string }) => a.id);
+const CORE_TOOLS = launchRegistry
+  .ids()
+  .filter((id: string) => launchRegistry.entry(id)?.tier === "core");
 
 test("the core tier has the 12 documented core tools", () => {
   assert.deepEqual(

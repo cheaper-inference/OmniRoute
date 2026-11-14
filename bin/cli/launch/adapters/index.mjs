@@ -1,50 +1,42 @@
 /**
- * Launch adapter registration list: every adapter
- * whose tier is not "later". Tier "later" adapters stay out of v1 builds.
+ * Lazy launch adapter index: static metadata for every adapter whose tier is not "later", in
+ * adapter (file) order, so startup can resolve ids, aliases and help text without importing
+ * any adapter module. `load()` imports the adapter on demand.
+ *
+ * Fields mirror the adapter itself: `displayName` is `adapter.displayName` (undefined when the
+ * adapter has none; the registry then falls back to the manifest), `tier` is
+ * `adapter.capabilities.tier`, `aliases` is `adapter.aliases` (empty when none).
+ * tests/unit/cli/launch/registry.test.ts checks this index against ./all.mjs so it cannot
+ * drift: update both together when adding or changing an adapter.
  */
 
-import aider from "./aider.mjs";
-import claude from "./claude.mjs";
-import cline from "./cline.mjs";
-import codex from "./codex.mjs";
-import continue_ from "./continue.mjs";
-import copilot from "./copilot.mjs";
-import crush from "./crush.mjs";
-import deepseek from "./deepseek.mjs";
-import gemini from "./gemini.mjs";
-import goose from "./goose.mjs";
-import hermes from "./hermes.mjs";
-import kilo from "./kilo.mjs";
-import kimi from "./kimi.mjs";
-import omp from "./omp.mjs";
-import openclaw from "./openclaw.mjs";
-import opencode from "./opencode.mjs";
-import pi from "./pi.mjs";
-import pool from "./pool.mjs";
-import qwen from "./qwen.mjs";
+const entry = (id, displayName, tier, load) =>
+  Object.freeze({ id, displayName, tier, aliases: Object.freeze([]), load });
 
-const ALL_ADAPTERS = [
-  aider,
-  claude,
-  cline,
-  codex,
-  continue_,
-  copilot,
-  crush,
-  deepseek,
-  gemini,
-  goose,
-  hermes,
-  kilo,
-  kimi,
-  omp,
-  openclaw,
-  opencode,
-  pi,
-  pool,
-  qwen,
-];
-
-export const ADAPTERS = Object.freeze(
-  ALL_ADAPTERS.filter((adapter) => adapter.capabilities.tier !== "later")
-);
+export const ADAPTER_INDEX = Object.freeze([
+  entry("aider", "Aider", "core", () => import("./aider.mjs").then((m) => m.default)),
+  entry("claude", undefined, "core", () => import("./claude.mjs").then((m) => m.default)),
+  entry("cline", "Cline", "core", () => import("./cline.mjs").then((m) => m.default)),
+  entry("codex", undefined, "core", () => import("./codex.mjs").then((m) => m.default)),
+  entry("continue", "Continue CLI", "supported", () =>
+    import("./continue.mjs").then((m) => m.default)
+  ),
+  entry("copilot", "GitHub Copilot CLI", "supported", () =>
+    import("./copilot.mjs").then((m) => m.default)
+  ),
+  entry("crush", "Crush", "core", () => import("./crush.mjs").then((m) => m.default)),
+  entry("deepseek", "DeepSeek Harness", "core", () =>
+    import("./deepseek.mjs").then((m) => m.default)
+  ),
+  entry("gemini", "Gemini CLI", "supported", () => import("./gemini.mjs").then((m) => m.default)),
+  entry("goose", "Goose", "supported", () => import("./goose.mjs").then((m) => m.default)),
+  entry("hermes", "Hermes Agent", "core", () => import("./hermes.mjs").then((m) => m.default)),
+  entry("kilo", "Kilo Code CLI", "supported", () => import("./kilo.mjs").then((m) => m.default)),
+  entry("kimi", "Kimi Code CLI", "supported", () => import("./kimi.mjs").then((m) => m.default)),
+  entry("omp", "Oh My Pi", "core", () => import("./omp.mjs").then((m) => m.default)),
+  entry("openclaw", "OpenClaw", "core", () => import("./openclaw.mjs").then((m) => m.default)),
+  entry("opencode", "OpenCode", "core", () => import("./opencode.mjs").then((m) => m.default)),
+  entry("pi", "Pi", "core", () => import("./pi.mjs").then((m) => m.default)),
+  entry("pool", "Poolside Pool", "supported", () => import("./pool.mjs").then((m) => m.default)),
+  entry("qwen", "Qwen Code", "core", () => import("./qwen.mjs").then((m) => m.default)),
+]);

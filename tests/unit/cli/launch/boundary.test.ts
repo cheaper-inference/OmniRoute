@@ -119,10 +119,15 @@ function adapterFiles(dir: string): string[] {
     .map((name) => join(dir, name));
 }
 
+function isRegistrationList(file: string): boolean {
+  return file.endsWith("index.mjs") || file.endsWith("all.mjs");
+}
+
 function scanDir(dir: string): string[] {
-  // adapters/index.mjs is the registration list (static imports of ./<id>.mjs), not an adapter.
+  // adapters/index.mjs (lazy index) and adapters/all.mjs (eager list) import ./<id>.mjs;
+  // they are registration lists, not adapters.
   return adapterFiles(dir)
-    .filter((file) => !file.endsWith("index.mjs"))
+    .filter((file) => !isRegistrationList(file))
     .flatMap((file) => adapterViolations(readFileSync(file, "utf8"), relative(ROOT, file)));
 }
 
@@ -201,18 +206,20 @@ test("contract scanner rejects an undocumented import", () => {
   assert.match(contractViolations(`import fs from "node:fs";`)[0], /undocumented import/);
 });
 
-test("adapters/index.mjs imports only sibling adapters (./<id>.mjs)", () => {
-  const index = join(ADAPTERS_DIR, "index.mjs");
-  if (!existsSync(index)) return;
-  const specs = listImports(readFileSync(index, "utf8"));
-  assert.ok(specs.length > 0, "index.mjs registers adapters");
-  for (const spec of specs) {
-    assert.match(spec, /^\.\/[a-z0-9][a-z0-9-]*\.mjs$/, `index.mjs: forbidden import ${spec}`);
+test("adapters/index.mjs and adapters/all.mjs import only sibling adapters (./<id>.mjs)", () => {
+  for (const name of ["index.mjs", "all.mjs"]) {
+    const file = join(ADAPTERS_DIR, name);
+    if (!existsSync(file)) continue;
+    const specs = listImports(readFileSync(file, "utf8"));
+    assert.ok(specs.length > 0, `${name} registers adapters`);
+    for (const spec of specs) {
+      assert.match(spec, /^\.\/[a-z0-9][a-z0-9-]*\.mjs$/, `${name}: forbidden import ${spec}`);
+    }
   }
 });
 
 test("every adapter satisfies the plan invariants under a throwing process/fetch proxy", async () => {
-  const files = adapterFiles(ADAPTERS_DIR).filter((file) => !file.endsWith("index.mjs"));
+  const files = adapterFiles(ADAPTERS_DIR).filter((file) => !isRegistrationList(file));
   assert.equal(files.length, REGISTRY_SIZE, "adapters/ holds exactly the expected adapter files");
   let checked = 0;
   for (const file of files) {
