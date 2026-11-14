@@ -290,7 +290,10 @@ The commands behind it:
   files in one pass, in this order (step ids for `--only=`): `provider-reference`
   (`docs/reference/PROVIDER_REFERENCE.md`), `facts` (the snapshot), `numbers` (the counts gate's
   rewrite plan applied to the docs, then carried to their `docs/i18n/` mirrors),
-  `readme-diagrams`, `skills` (generated `SKILL.md`), `ui-keys` and `llm-mirrors`. The
+  `readme-diagrams`, `skills` (generated `SKILL.md`), `e2e-timings` (skipped until the tree
+  ships `syncE2eTimings`), `ui-keys` (prunes keys `en.json` dropped and, with
+  `--rewritten-since=<ref>` — default `origin/main` — re-queues English values rewritten since
+  the last release) and `llm-mirrors`. The
   `changelog` step is opt-in (`--with-changelog`, release profile only). `--profile=nightly`
   never touches a version claim. With `-- --check` it writes nothing and exits 1 when any file
   would change or a managed value needs a manual edit (listing both); exit 2 on an
