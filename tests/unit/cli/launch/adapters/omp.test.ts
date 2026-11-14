@@ -45,6 +45,14 @@ test("omp adapter declares its capabilities", () => {
   assert.ok(Object.isFrozen(adapter));
 });
 
+test("extension apiKey is the bare env var name and the plan env carries the token", () => {
+  const plan = run("default");
+  const ext: string = plan.tempFiles.find((f: any) => f.path === "omniroute.ts").contents;
+  assert.match(ext, /apiKey: "OMNIROUTE_API_KEY",/);
+  assert.equal(ext.includes("$OMNIROUTE_API_KEY"), false);
+  assert.equal(plan.env.set.OMNIROUTE_API_KEY, "${TOKEN}");
+});
+
 test("golden: default", () => {
   const plan = run("default");
   assert.deepEqual(plan.argv.slice(0, 4), [

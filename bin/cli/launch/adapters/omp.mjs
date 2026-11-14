@@ -51,7 +51,7 @@ function buildExtension(models, baseUrl) {
     '  pi.registerProvider("omniroute", {',
     '    name: "OmniRoute",',
     `    baseUrl: ${JSON.stringify(baseUrl)},`,
-    '    apiKey: "$OMNIROUTE_API_KEY",',
+    '    apiKey: "OMNIROUTE_API_KEY",',
     '    api: "openai-completions",',
     "    models: MODELS,",
     "  });",
