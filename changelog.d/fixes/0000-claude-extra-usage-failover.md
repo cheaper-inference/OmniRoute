@@ -1,0 +1,1 @@
+- **fix(sse):** a Claude OAuth HTTP 400 `invalid_request_error` carrying an account-quota signal ("You're out of extra usage") is no longer treated as request-scoped: the connection gets its normal short quota cooldown and the request fails over to the next Claude connection instead of returning the 400.
