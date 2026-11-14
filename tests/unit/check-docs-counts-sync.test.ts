@@ -258,7 +258,7 @@ const makeRefValidator = makeProviderReferenceValidator as (
   expected: number
 ) => (content: string) => { ok: boolean; detail: string };
 const makePkgValidator = makePackageDescriptionValidator as (
-  expected: number
+  expected?: number
 ) => (content: string) => { ok: boolean; detail: string };
 const checkSvg = checkSvgCanonicalNumbers as (
   content: string,
@@ -278,14 +278,37 @@ test("provider-reference validator accepts the live total and rejects a stale do
   assert.equal(v("# Provider Reference\n\nNo total marker.").ok, false);
 });
 
-test("package.json description validator catches a stale provider count", () => {
-  const v = makePkgValidator(338);
-  assert.equal(v(JSON.stringify({ description: "Unified AI router with 338 providers" })).ok, true);
+test("package.json description validator rejects any exact provider count", () => {
+  // The description is count-free since 2026-11-13: a number there made every
+  // provider PR conflict on that one line. The guard keeps the number from coming back.
+  const v = makePkgValidator();
+  const desc = (d: string) => v(JSON.stringify({ description: d }));
+  assert.equal(desc("Unified AI router with hundreds of providers, auto fallback").ok, true);
+  for (const stale of [
+    "Unified AI router with 393 providers",
+    "Unified AI router with 390+ providers",
+    "Unified AI router with 1,000 providers",
+    "Unified AI router with 160+ AI providers",
+    "Unified AI router with 393 LLM Providers",
+  ]) {
+    const r = desc(stale);
+    assert.equal(r.ok, false, `an exact provider count must be a red: ${stale}`);
+    assert.match(r.detail, /exact provider count/);
+  }
+  // Even the live total is rejected — the semantic is "no count", not "the right count".
   assert.equal(
-    v(JSON.stringify({ description: "Unified AI router with 291 providers" })).ok,
+    makePkgValidator(393)(JSON.stringify({ description: "with 393 providers" })).ok,
     false
   );
+  assert.equal(v(JSON.stringify({ description: "" })).ok, false);
+  assert.equal(v(JSON.stringify({ name: "omniroute" })).ok, false);
   assert.equal(v("not json at all {").ok, false);
+});
+
+test("the shipped package.json description carries no exact provider count", () => {
+  const pkg = readFileSync(path.resolve(here, "../../package.json"), "utf8");
+  const r = makePkgValidator()(pkg);
+  assert.equal(r.ok, true, r.detail);
 });
 
 test("migrations claim validator accepts the real count and rejects stale styles", () => {
