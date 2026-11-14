@@ -118,7 +118,8 @@ export async function checkSemanticCache({
         body.top_p,
         apiKeyId ?? undefined,
         outputContractOf(body),
-        signatureScopeOf(clientRawRequest?.headers)
+        signatureScopeOf(clientRawRequest?.headers),
+        provider
       );
       const legacyCached = getCachedResponse(signature);
       if (legacyCached) {
@@ -195,7 +196,8 @@ export async function checkSemanticCache({
         body.top_p,
         apiKeyId ?? undefined,
         outputContractOf(body),
-        signatureScopeOf(clientRawRequest?.headers)
+        signatureScopeOf(clientRawRequest?.headers),
+        provider
       );
 
       const targetSignature =

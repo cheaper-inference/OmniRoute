@@ -93,7 +93,8 @@ function writeStreamingCacheEntry(
       args.body.top_p,
       args.apiKeyId ?? undefined,
       outputContractOf(args.body),
-      signatureScopeOf(args.headers)
+      signatureScopeOf(args.headers),
+      args.provider
     );
     const tokensSaved = streamTokensSaved(args.streamUsage);
     deps.setCachedResponse(sig, args.model, cleanBody, tokensSaved);

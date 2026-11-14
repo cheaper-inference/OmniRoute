@@ -166,7 +166,7 @@ export function clearMemoryCache(): void {
  * These are stored under their raw request-body key only — no camelCase mirror exists,
  * because every caller passes `outputContractOf(body)` through untouched.
  */
-export const SEMANTIC_CACHE_KEY_SCHEMA = 3;
+export const SEMANTIC_CACHE_KEY_SCHEMA = 4;
 
 /**
  * Canonical (sorted-key) JSON serializer shared by both exact-cache hashes. Re-exported here so the
@@ -304,7 +304,8 @@ export function generateSignature(
   topP = 1,
   apiKeyId?: string,
   constraints?: SignatureConstraints | null,
-  scope?: SignatureScope | null
+  scope?: SignatureScope | null,
+  provider?: string | null
 ) {
   // JSON round-trip retains JSON.stringify omission/default semantics before sorting
   // nested object keys. Versioning prevents reads of older incomplete signatures.
@@ -323,6 +324,8 @@ export function generateSignature(
         text_format: constraints?.text_format,
         ...pickGenerationParams(constraints),
         cache_key: scope?.cacheKey || undefined,
+        // Two provider nodes can serve one model id: the answering provider is part of the key.
+        provider: provider || undefined,
       })
     )
   );
