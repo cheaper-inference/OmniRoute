@@ -309,7 +309,7 @@ export default function ProviderStatsPage() {
           }
         />
 
-        <Table scrollbarLabel={t("providerBreakdown")}>
+        <Table scrollbarLabel={t("providerBreakdown")} containerClassName="rounded-none border-0">
           <TableHeader>
             <TableRow>
               <TableHead>{t("provider")}</TableHead>
@@ -452,7 +452,7 @@ export default function ProviderStatsPage() {
           icon="speed"
           className="p-5"
         >
-          <Table scrollbarLabel={t("comboMetrics")}>
+          <Table scrollbarLabel={t("comboMetrics")} containerClassName="rounded-none border-0">
             <TableHeader>
               <TableRow>
                 <TableHead>{t("combo")}</TableHead>

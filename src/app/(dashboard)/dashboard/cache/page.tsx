@@ -533,7 +533,8 @@ export default function CachePage() {
                     />
                   </div>
 
-                  <div className="w-full rounded-xl border border-border bg-bg-subtle p-5">
+                  {/* A plain section: the Card is the only frame around the table (#19620). */}
+                  <div className="w-full">
                     <div>
                       <h3 className="text-sm font-medium text-text-main">{t("byProvider")}</h3>
                       <p className="mt-1 text-sm text-text-muted">{t("providerCacheRateDesc")}</p>
@@ -542,7 +543,7 @@ export default function CachePage() {
                     {providerEntries.length > 0 ? (
                       <Table
                         className="text-sm"
-                        containerClassName="mt-3"
+                        containerClassName="mt-3 rounded-none border-0"
                         scrollbarLabel={t("byProvider")}
                       >
                         <TableHeader>
@@ -785,7 +786,8 @@ export default function CachePage() {
                 </div>
               </div>
 
-              <div className="rounded-xl border border-border bg-bg-subtle p-5">
+              {/* A plain section: the Card is the only frame around the entries (#19620). */}
+              <div>
                 <div className="mb-4 flex flex-col gap-1">
                   <h3 className="text-sm font-medium text-text-main">{t("entries")}</h3>
                   <p className="text-sm text-text-muted">{t("semanticEntriesDesc")}</p>

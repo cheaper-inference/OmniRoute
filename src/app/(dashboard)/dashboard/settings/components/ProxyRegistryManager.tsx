@@ -771,7 +771,7 @@ export default function ProxyRegistryManager({
         ) : items.length === 0 ? (
           <EmptyState icon="dns" title={t("noProxies")} />
         ) : (
-          <Table scrollbarLabel={t("title")}>
+          <Table scrollbarLabel={t("title")} containerClassName="rounded-none border-0">
             <TableHeader>
               <TableRow>
                 <TableHead className="w-8">
