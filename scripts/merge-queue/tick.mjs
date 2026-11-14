@@ -911,6 +911,7 @@ class Tick {
         baseSha: f.baseSha,
         baseCheck: null,
         baseRedIssueOpen: false,
+        aggregateChecks: this.config.aggregateChecks,
       });
       if (own.kind === "infra") return this.infraPath(f, `base-check infra failure: ${own.detail}`);
       const baseCheck = {
@@ -935,6 +936,7 @@ class Tick {
         baseSha: f.baseSha,
         baseCheck,
         baseRedIssueOpen: Boolean(issue),
+        aggregateChecks: this.config.aggregateChecks,
       });
       if (verdict.kind === "base-red") {
         return this.pauseBaseRed({ ...parked, baseSha: f.baseSha }, issue, verdict.detail);
@@ -966,6 +968,7 @@ class Tick {
       baseSha: f.baseSha,
       baseCheck,
       baseRedIssueOpen: Boolean(issue),
+      aggregateChecks: this.config.aggregateChecks,
     });
     this.note(`${f.batchId} red (${names}): ${verdict.kind}`);
     switch (verdict.kind) {
