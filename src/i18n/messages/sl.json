@@ -6705,6 +6705,10 @@
     "tokenrouterManagementKeyHint": "Ključ računa z nadzorne plošče TokenRouter (Settings → Management Key). Uporablja se samo za branje kvote in stanja, nikoli za zahteve. Shranjeni ključ ni prikazan; pustite prazno, da ga ohranite.",
     "newApiAggregatorToggleLabel": "Prehod agregatorja",
     "newApiAggregatorToggleHint": "Omogočite zaznavanje stanja za agregatorska vozlišča New-API / One-API / Sub2API. Nadzorna plošča bo prikazala značko stanja, usmerjanje s predhodnim preverjanjem kvote pa bo preskočilo izčrpane račune.",
+    "quotaCheck": "Preverjanje kvote",
+    "quotaCheckHint": "Prebere preostale kredite API ključev tega vozlišča s standardne končne točke in jih prikaže v Omejitve ponudnikov. Končna točka kvote, ki ste jo ročno nastavili na ključu, ostane nespremenjena.",
+    "quotaPath": "Pot kvote",
+    "quotaPathHint": "Pošlje se kot zahteva GET na osnovni URL skupaj s to potjo, z API ključem tega ključa. Odgovor JSON mora vsebovati številsko polje credits; neobvezni polji total in used določata vrstico porabe.",
     "newApiAggregatorConsoleApiKeyHint": "Sistemski žeton za dostop do agregatorjeve končne točke /api/user/self. To ni API-ključ za usmerjanje.",
     "newApiAggregatorUserIdHint": "Vrednost glave New-Api-User, ki se uporablja za pridobivanje stanja uporabnikove kvote pri agregatorju.",
     "newApiAggregatorQuotaPerUnitLabel": "Kvota na enoto",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Dovoli začasno hrambo datotek JPEG samo, ko overjena zahteva nastavi tudi drilldown: true. Neobdelani videoposnetki se nikoli ne hranijo.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Dovoli overjeno podrobno pregledovanje sličic",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Dovoli ključem API, da berejo in brišejo samo lastne neprosojne identifikatorje. Anonimni dostop ali dostop med različnimi ključi ni dovoljen.",
-    "modalityBridgeVideoDrilldownUsage": "Shranjene datoteke JPEG/bajti"
+    "modalityBridgeVideoDrilldownUsage": "Shranjene datoteke JPEG/bajti",
+    "modalityBridgeVideoPromotionTitle": "Pripravljenost naprednega pravilnika",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Poskusno",
+    "modalityBridgeVideoPromotionEligible": "Upravičeno",
+    "modalityBridgeVideoPromotionContextRequired": "Napredovanje zahteva dva neodvisna ustrezna zagona za popolnoma enako revizijo modela, pravilnik, korpus in graditev. Nepreverjen kontekst ostane v stanju HOLD; izbira poskusnega pravilnika ne pomeni odobritve."
   },
   "contextRtk": {
     "title": "Pogon RTK",

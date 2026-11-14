@@ -6696,6 +6696,10 @@
     "tokenrouterManagementKeyHint": "Κλειδί λογαριασμού από τον πίνακα ελέγχου του TokenRouter (Settings → Management Key). Χρησιμοποιείται μόνο για ανάγνωση ορίου χρήσης και υπολοίπου, ποτέ για αιτήματα. Το αποθηκευμένο κλειδί δεν εμφανίζεται· αφήστε κενό για να το διατηρήσετε.",
     "newApiAggregatorToggleLabel": "Πύλη συγκέντρωσης",
     "newApiAggregatorToggleHint": "Ενεργοποίηση ανίχνευσης υπολοίπου για κόμβους συγκέντρωσης New-API / One-API / Sub2API. Ο πίνακας ελέγχου θα εμφανίζει το σήμα υπολοίπου και η δρομολόγηση προελέγχου ποσόστωσης θα παραλείπει τους εξαντλημένους λογαριασμούς.",
+    "quotaCheck": "Έλεγχος ορίου",
+    "quotaCheckHint": "Διαβάζει τις υπόλοιπες μονάδες των κλειδιών API αυτού του κόμβου από ένα τυπικό endpoint και τις εμφανίζει στα Όρια παρόχων. Ένα endpoint ορίου που ρυθμίσατε χειροκίνητα σε ένα κλειδί παραμένει αμετάβλητο.",
+    "quotaPath": "Διαδρομή ορίου",
+    "quotaPathHint": "Αποστέλλεται ως αίτημα GET στη βασική URL συν αυτή τη διαδρομή, με το κλειδί API του κλειδιού. Η απόκριση JSON πρέπει να περιλαμβάνει αριθμητικό πεδίο credits· τα προαιρετικά πεδία total και used καθορίζουν τη γραμμή χρήσης.",
     "newApiAggregatorConsoleApiKeyHint": "Διακριτικό πρόσβασης συστήματος για το endpoint /api/user/self της υπηρεσίας συγκέντρωσης. Δεν είναι το κλειδί API δρομολόγησης.",
     "newApiAggregatorUserIdHint": "Τιμή κεφαλίδας New-Api-User που χρησιμοποιείται για την ανάκτηση του υπολοίπου ποσόστωσης του χρήστη της υπηρεσίας συγκέντρωσης.",
     "newApiAggregatorQuotaPerUnitLabel": "Ποσόστωση ανά μονάδα",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Να επιτρέπεται η προσωρινή διατήρηση JPEG μόνο όταν το πιστοποιημένο αίτημα ορίζει επίσης drilldown: true. Τα ανεπεξέργαστα βίντεο δεν διατηρούνται ποτέ.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Να επιτρέπεται η λεπτομερής εξέταση καρέ με πιστοποίηση",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Να επιτρέπεται στα κλειδιά API να διαβάζουν και να διαγράφουν μόνο τα δικά τους αδιαφανή αναγνωριστικά. Δεν επιτρέπεται ανώνυμη πρόσβαση ή πρόσβαση μεταξύ διαφορετικών κλειδιών.",
-    "modalityBridgeVideoDrilldownUsage": "Διατηρούμενα JPEG / byte"
+    "modalityBridgeVideoDrilldownUsage": "Διατηρούμενα JPEG / byte",
+    "modalityBridgeVideoPromotionTitle": "Ετοιμότητα προηγμένης πολιτικής",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Πειραματικό",
+    "modalityBridgeVideoPromotionEligible": "Επιλέξιμο",
+    "modalityBridgeVideoPromotionContextRequired": "Η προώθηση απαιτεί δύο ανεξάρτητες εκτελέσεις που πληρούν τα κριτήρια για την ακριβή αναθεώρηση μοντέλου, την πολιτική, το σώμα κειμένων και την έκδοση. Ένα μη επαληθευμένο περιβάλλον παραμένει σε HOLD· η επιλογή μιας πειραματικής πολιτικής δεν συνιστά έγκριση."
   },
   "contextRtk": {
     "title": "Μηχανή RTK",

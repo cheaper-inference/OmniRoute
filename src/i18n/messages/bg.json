@@ -6696,6 +6696,10 @@
     "tokenrouterManagementKeyHint": "Ключ на акаунта от таблото на TokenRouter (Settings → Management Key). Използва се само за четене на квотата и баланса, никога за заявки. Запазеният ключ не се показва; оставете празно, за да го запазите.",
     "newApiAggregatorToggleLabel": "Агрегаторен шлюз",
     "newApiAggregatorToggleHint": "Активирайте откритие на баланс за New-API / One-API / Sub2API агрегаторни възли. Таблото за управление ще показва значка за баланс, а маршрутизацията за предварителна проверка на квотата ще пропуска изчерпаните акаунти.",
+    "quotaCheck": "Проверка на квотата",
+    "quotaCheckHint": "Чете оставащите кредити на API ключовете на този възел от стандартна крайна точка и ги показва в Ограничения на доставчика. Крайна точка за квота, която сте конфигурирали ръчно за даден ключ, остава непроменена.",
+    "quotaPath": "Път на квотата",
+    "quotaPathHint": "Изпраща се като GET заявка към базовия URL плюс този път, с API ключа на ключа. JSON отговорът трябва да съдържа числово поле credits; незадължителните полета total и used управляват лентата за използване.",
     "newApiAggregatorConsoleApiKeyHint": "Токен за достъп до системата за крайна точка /api/user/self на агрегатора. Не е ключът за маршрутизиране на API.",
     "newApiAggregatorUserIdHint": "New-Api-User заглавна стойност, използвана за извличане на баланса на квотата на агрегаторския потребител.",
     "newApiAggregatorQuotaPerUnitLabel": "Квота на единица",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Разрешава временно запазване на JPEG файлове само когато удостоверената заявка също задава drilldown: true. Необработените видеоклипове никога не се запазват.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Разрешаване на детайлен преглед на кадри за удостоверени потребители",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Разрешава на API ключовете да четат и изтриват само собствените си непрозрачни идентификатори. Не се допуска анонимен достъп или достъп между различни ключове.",
-    "modalityBridgeVideoDrilldownUsage": "Запазени JPEG файлове / байтове"
+    "modalityBridgeVideoDrilldownUsage": "Запазени JPEG файлове / байтове",
+    "modalityBridgeVideoPromotionTitle": "Готовност за разширени политики",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Експериментална",
+    "modalityBridgeVideoPromotionEligible": "Допустимо",
+    "modalityBridgeVideoPromotionContextRequired": "Преминаването изисква две независими квалифициращи изпълнения за точно същата ревизия на модела, политика, корпус и компилация. Непровереният контекст остава в състояние HOLD; избирането на експериментална политика не представлява одобрение."
   },
   "contextRtk": {
     "title": "RTK Engine",

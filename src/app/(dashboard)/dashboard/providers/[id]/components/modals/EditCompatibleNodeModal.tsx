@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, Badge, Input, Modal, Select, Toggle } from "@/shared/components";
 import { isValidProviderIconUrl } from "@/shared/validation/iconUrl";
+import { DEFAULT_COMPATIBLE_QUOTA_PATH } from "@/shared/utils/compatibleQuotaCheck";
 import { CC_COMPATIBLE_DEFAULT_CHAT_PATH } from "../../providerDetailConstants";
 import NewApiAggregatorFields from "./NewApiAggregatorFields";
 import { providerText } from "../../providerPageHelpers";
@@ -20,6 +21,8 @@ interface EditCompatibleNodeModalNode {
   dailyQuotaResetTimezone?: string | null;
   dailyQuotaResetHour?: number | null;
   providerSpecificData?: Record<string, unknown>;
+  /** Derived from the node's connections (useProviderConnections). */
+  quotaCheck?: { enabled: boolean; path: string } | null;
 }
 
 interface EditCompatibleNodeModalProps {
@@ -54,6 +57,8 @@ export default function EditCompatibleNodeModal({
     quotaPerUnit: "",
     dailyQuotaResetTimezone: "",
     dailyQuotaResetHour: "",
+    quotaCheckEnabled: false,
+    quotaPath: DEFAULT_COMPATIBLE_QUOTA_PATH,
   });
   const [saving, setSaving] = useState(false);
   const [checkKey, setCheckKey] = useState("");
@@ -109,6 +114,8 @@ export default function EditCompatibleNodeModal({
           node.dailyQuotaResetHour === 0 || node.dailyQuotaResetHour
             ? String(node.dailyQuotaResetHour)
             : "",
+        quotaCheckEnabled: node.quotaCheck?.enabled === true,
+        quotaPath: node.quotaCheck?.path || DEFAULT_COMPATIBLE_QUOTA_PATH,
       });
       setSaveError(null);
       setIconUrlError(null);
@@ -159,6 +166,10 @@ export default function EditCompatibleNodeModal({
       if (!isAnthropic) {
         payload.apiType = formData.apiType;
       }
+      payload.quotaCheck = {
+        enabled: formData.quotaCheckEnabled,
+        path: formData.quotaPath.trim() || DEFAULT_COMPATIBLE_QUOTA_PATH,
+      };
       // Aggregator gateway fields (#9415)
       if (formData.newApiAggregatorBalance) {
         payload.providerSpecificData = {
@@ -319,6 +330,21 @@ export default function EditCompatibleNodeModal({
           onChange={(patch) => setFormData({ ...formData, ...patch })}
           t={t}
         />
+        <Toggle
+          label={t("quotaCheck")}
+          description={t("quotaCheckHint")}
+          checked={formData.quotaCheckEnabled}
+          onChange={(checked: boolean) => setFormData({ ...formData, quotaCheckEnabled: checked })}
+        />
+        {formData.quotaCheckEnabled && (
+          <Input
+            label={t("quotaPath")}
+            value={formData.quotaPath}
+            onChange={(e) => setFormData({ ...formData, quotaPath: e.target.value })}
+            placeholder={DEFAULT_COMPATIBLE_QUOTA_PATH}
+            hint={t("quotaPathHint")}
+          />
+        )}
         <Button
           variant="ghost"
           size="sm"

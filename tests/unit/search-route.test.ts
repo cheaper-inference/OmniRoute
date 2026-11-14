@@ -273,7 +273,7 @@ test("v1 search POST uses stored You.com credentials and returns unified news re
   }
 });
 
-test("v1 search POST accepts authless SearXNG with provider_options baseUrl", async () => {
+test("v1 search POST accepts authless SearXNG with a public provider_options baseUrl", async () => {
   const originalFetch = globalThis.fetch;
   let capturedUrl = "";
 
@@ -304,7 +304,7 @@ test("v1 search POST accepts authless SearXNG with provider_options baseUrl", as
           provider: "searxng-search",
           search_type: "news",
           provider_options: {
-            baseUrl: "http://127.0.0.1:9090/custom-search",
+            baseUrl: "https://searx.example.org/custom-search",
           },
         }),
       })
@@ -314,11 +314,39 @@ test("v1 search POST accepts authless SearXNG with provider_options baseUrl", as
     assert.equal(response.status, 200);
     assert.equal(
       capturedUrl,
-      "http://127.0.0.1:9090/custom-search/search?q=self+hosted+meta+search&format=json&categories=news"
+      "https://searx.example.org/custom-search/search?q=self+hosted+meta+search&format=json&categories=news"
     );
     assert.equal(body.provider, "searxng-search");
     assert.equal(body.results[0].title, "SearXNG result");
     assert.equal(body.results[0].citation.provider, "searxng-search");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("v1 search POST refuses a loopback provider_options baseUrl without fetching it", async () => {
+  const originalFetch = globalThis.fetch;
+  let fetched = 0;
+  globalThis.fetch = async () => {
+    fetched++;
+    return new Response("{}", { status: 200 });
+  };
+
+  try {
+    const response = await searchRoute.POST(
+      new Request("http://localhost/api/v1/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: "internal probe",
+          provider: "searxng-search",
+          provider_options: { baseUrl: "http://127.0.0.1:9090" },
+        }),
+      })
+    );
+
+    assert.notEqual(response.status, 200);
+    assert.equal(fetched, 0);
   } finally {
     globalThis.fetch = originalFetch;
   }

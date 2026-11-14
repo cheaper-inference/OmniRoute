@@ -6705,6 +6705,10 @@
     "tokenrouterManagementKeyHint": "Paskyros raktas iš TokenRouter valdymo skydelio (Settings → Management Key). Naudojamas tik kvotai ir likučiui nuskaityti, niekada užklausoms. Išsaugotas raktas nerodomas; palikite tuščią, kad jį išlaikytumėte.",
     "newApiAggregatorToggleLabel": "Agregatoriaus tinklų sietuvas",
     "newApiAggregatorToggleHint": "Įjungti New-API / One-API / Sub2API agregatoriaus mazgų likučio aptikimą. Prietaisų skydelyje bus rodoma likučio žyma, o išankstinis maršruto parinkimas pagal kvotą praleis išnaudotas paskyras.",
+    "quotaCheck": "Kvotos patikra",
+    "quotaCheckHint": "Nuskaito likusius šio mazgo API raktų kreditus iš standartinio galinio taško ir parodo juos skiltyje Teikėjų apribojimai. Rankiniu būdu raktui sukonfigūruotas kvotos galinis taškas lieka nepakeistas.",
+    "quotaPath": "Kvotos kelias",
+    "quotaPathHint": "Siunčiama kaip GET užklausa į bazinį URL su šiuo keliu, naudojant rakto API raktą. JSON atsakyme turi būti skaitinis laukas credits; neprivalomi laukai total ir used valdo naudojimo juostą.",
     "newApiAggregatorConsoleApiKeyHint": "Sistemos prieigos raktas, skirtas agregatoriaus /api/user/self galiniam taškui. Tai nėra maršruto parinkimo API raktas.",
     "newApiAggregatorUserIdHint": "New-API-User antraštės reikšmė, naudojama agregatoriaus naudotojo kvotos likučiui gauti.",
     "newApiAggregatorQuotaPerUnitLabel": "Kvota vienam vienetui",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Leisti laikinai saugoti JPEG failus tik tada, kai autentifikuotoje užklausoje taip pat nustatyta drilldown: true. Neapdoroti vaizdo įrašai niekada nesaugomi.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Leisti autentifikuotą išsamią kadrų peržiūrą",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Leisti API raktams skaityti ir šalinti tik savo nepermatomus identifikatorius. Anoniminė arba kitų raktų prieiga neleidžiama.",
-    "modalityBridgeVideoDrilldownUsage": "Išsaugoti JPEG failai / baitai"
+    "modalityBridgeVideoDrilldownUsage": "Išsaugoti JPEG failai / baitai",
+    "modalityBridgeVideoPromotionTitle": "Pažangios politikos parengtis",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Eksperimentinė",
+    "modalityBridgeVideoPromotionEligible": "Atitinka reikalavimus",
+    "modalityBridgeVideoPromotionContextRequired": "Perkėlimui į aukštesnį lygį reikalingi du nepriklausomi kvalifikacinius reikalavimus atitinkantys vykdymai su ta pačia modelio versija, politika, tekstynu ir komponavimo versija. Nepatvirtintam kontekstui išlaikoma būsena HOLD; eksperimentinės politikos pasirinkimas nėra patvirtinimas."
   },
   "contextRtk": {
     "title": "RTK variklis",

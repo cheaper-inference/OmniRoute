@@ -6696,6 +6696,10 @@
     "tokenrouterManagementKeyHint": "TokenRouter ड्यासबोर्डबाट खाता कुञ्जी (Settings → Management Key)। कोटा र ब्यालेन्स पढ्न मात्र प्रयोग हुन्छ, अनुरोधहरूका लागि कहिल्यै होइन। सुरक्षित गरिएको कुञ्जी देखाइँदैन; यसलाई राख्न खाली छोड्नुहोस्।",
     "newApiAggregatorToggleLabel": "एग्रिगेटर गेटवे",
     "newApiAggregatorToggleHint": "New-API / One-API / Sub2API एग्रिगेटर नोडहरूका लागि ब्यालेन्स पहिचान सक्षम गर्नुहोस्। ड्यासबोर्डले ब्यालेन्स ब्याज देखाउनेछ र कोटा-प्रीफ्लाइट राउटिङले सकिएका खाताहरू छोड्नेछ।",
+    "quotaCheck": "कोटा जाँच",
+    "quotaCheckHint": "यस नोडका API कुञ्जीहरूको बाँकी क्रेडिट मानक एन्डपोइन्टबाट पढ्नुहोस् र प्रदायकका सीमाहरू मा देखाउनुहोस्। कुनै कुञ्जीमा तपाईंले हातैले कन्फिगर गरेको कोटा एन्डपोइन्ट परिवर्तन हुँदैन।",
+    "quotaPath": "कोटा पथ",
+    "quotaPathHint": "कुञ्जीको API कुञ्जीसहित आधार URL र यो पथमा GET अनुरोधको रूपमा पठाइन्छ। JSON प्रतिक्रियामा संख्यात्मक credits फिल्ड हुनुपर्छ; वैकल्पिक total र used फिल्डले प्रयोग बार निर्धारण गर्छन्।",
     "newApiAggregatorConsoleApiKeyHint": "एग्रिगेटरको /api/user/self एन्डपोइन्टका लागि सिस्टम एक्सेस टोकन। यो राउटिङ API कुञ्जी होइन।",
     "newApiAggregatorUserIdHint": "एग्रिगेटर प्रयोगकर्ताको कोटा ब्यालेन्स प्राप्त गर्न प्रयोग गरिने New-Api-User हेडर मान।",
     "newApiAggregatorQuotaPerUnitLabel": "प्रति एकाइ कोटा",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "प्रमाणीकृत अनुरोधले drilldown: true पनि सेट गरेको अवस्थामा मात्र अस्थायी JPEG कायम राख्न अनुमति दिनुहोस्। कच्चा भिडियोहरू कहिल्यै कायम राखिँदैनन्।",
     "modalityBridgeVideoDrilldownRemoteEnabled": "प्रमाणीकृत फ्रेम ड्रिल-डाउन अनुमति दिनुहोस्",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "API कुञ्जीहरूलाई आफ्नै अपारदर्शी ह्यान्डलहरू मात्र पढ्न र मेटाउन अनुमति दिनुहोस्। बेनामी वा अन्य कुञ्जीबाट पहुँच अनुमति छैन।",
-    "modalityBridgeVideoDrilldownUsage": "कायम राखिएका JPEGहरू / बाइटहरू"
+    "modalityBridgeVideoDrilldownUsage": "कायम राखिएका JPEGहरू / बाइटहरू",
+    "modalityBridgeVideoPromotionTitle": "उन्नत नीति तत्परता",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "प्रयोगात्मक",
+    "modalityBridgeVideoPromotionEligible": "योग्य",
+    "modalityBridgeVideoPromotionContextRequired": "स्तरोन्नतिका लागि ठ्याक्कै उही मोडेल संशोधन, नीति, कर्पस र बिल्डमा दुईवटा स्वतन्त्र योग्य रन आवश्यक हुन्छन्। अप्रमाणित सन्दर्भ HOLD मै रहन्छ; प्रयोगात्मक नीति चयन गर्नु स्वीकृति होइन।"
   },
   "contextRtk": {
     "title": "RTK इन्जिन",

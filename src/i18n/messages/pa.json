@@ -6696,6 +6696,10 @@
     "tokenrouterManagementKeyHint": "TokenRouter ਡੈਸ਼ਬੋਰਡ ਤੋਂ ਖਾਤਾ ਕੁੰਜੀ (Settings → Management Key)। ਸਿਰਫ਼ ਕੋਟਾ ਅਤੇ ਬਕਾਇਆ ਪੜ੍ਹਨ ਲਈ ਵਰਤੀ ਜਾਂਦੀ ਹੈ, ਬੇਨਤੀਆਂ ਲਈ ਕਦੇ ਨਹੀਂ। ਸੰਭਾਲੀ ਕੁੰਜੀ ਨਹੀਂ ਦਿਖਾਈ ਜਾਂਦੀ; ਇਸਨੂੰ ਰੱਖਣ ਲਈ ਖਾਲੀ ਛੱਡੋ।",
     "newApiAggregatorToggleLabel": "ਐਗਰੀਗੇਟਰ ਗੇਟਵੇ",
     "newApiAggregatorToggleHint": "New-API / One-API / Sub2API ਐਗਰੀਗੇਟਰ ਨੋਡਾਂ ਲਈ ਬਕਾਇਆ ਪਤਾ ਲਗਾਉਣਾ ਸਮਰੱਥ ਕਰੋ। ਡੈਸ਼ਬੋਰਡ ਬਕਾਇਆ ਬੈਜ ਦਿਖਾਏਗਾ ਅਤੇ ਕੋਟਾ-ਪ੍ਰੀਫਲਾਈਟ ਰੂਟਿੰਗ ਕੋਟਾ ਖ਼ਤਮ ਹੋ ਚੁੱਕੇ ਖਾਤਿਆਂ ਨੂੰ ਛੱਡ ਦੇਵੇਗੀ।",
+    "quotaCheck": "ਕੋਟਾ ਜਾਂਚ",
+    "quotaCheckHint": "ਇਸ ਨੋਡ ਦੀਆਂ API ਕੁੰਜੀਆਂ ਦੇ ਬਾਕੀ ਕ੍ਰੈਡਿਟ ਇੱਕ ਮਿਆਰੀ ਐਂਡਪੁਆਇੰਟ ਤੋਂ ਪੜ੍ਹੋ ਅਤੇ ਪ੍ਰਦਾਤਾ ਦੀਆਂ ਸੀਮਾਵਾਂ ਵਿੱਚ ਦਿਖਾਓ। ਕਿਸੇ ਕੁੰਜੀ 'ਤੇ ਤੁਹਾਡੇ ਵੱਲੋਂ ਹੱਥੀਂ ਸੰਰਚਿਤ ਕੀਤਾ ਕੋਟਾ ਐਂਡਪੁਆਇੰਟ ਬਦਲਿਆ ਨਹੀਂ ਜਾਂਦਾ।",
+    "quotaPath": "ਕੋਟਾ ਪਾਥ",
+    "quotaPathHint": "ਕੁੰਜੀ ਦੀ API ਕੁੰਜੀ ਨਾਲ ਬੇਸ URL ਅਤੇ ਇਸ ਪਾਥ 'ਤੇ GET ਬੇਨਤੀ ਵਜੋਂ ਭੇਜਿਆ ਜਾਂਦਾ ਹੈ। JSON ਜਵਾਬ ਵਿੱਚ ਇੱਕ ਸੰਖਿਆਤਮਕ credits ਖੇਤਰ ਹੋਣਾ ਲਾਜ਼ਮੀ ਹੈ; ਵਿਕਲਪਿਕ total ਅਤੇ used ਖੇਤਰ ਵਰਤੋਂ ਪੱਟੀ ਨਿਰਧਾਰਤ ਕਰਦੇ ਹਨ।",
     "newApiAggregatorConsoleApiKeyHint": "ਐਗਰੀਗੇਟਰ ਦੇ /api/user/self ਐਂਡਪੌਇੰਟ ਲਈ ਸਿਸਟਮ ਐਕਸੈੱਸ ਟੋਕਨ। ਇਹ ਰੂਟਿੰਗ API ਕੁੰਜੀ ਨਹੀਂ ਹੈ।",
     "newApiAggregatorUserIdHint": "ਐਗਰੀਗੇਟਰ ਵਰਤੋਂਕਾਰ ਦਾ ਕੋਟਾ ਬਕਾਇਆ ਪ੍ਰਾਪਤ ਕਰਨ ਲਈ ਵਰਤਿਆ ਜਾਣ ਵਾਲਾ New-Api-User ਹੈਡਰ ਮੁੱਲ।",
     "newApiAggregatorQuotaPerUnitLabel": "ਪ੍ਰਤੀ ਇਕਾਈ ਕੋਟਾ",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "ਅਸਥਾਈ JPEG ਸੰਭਾਲ ਦੀ ਆਗਿਆ ਸਿਰਫ਼ ਉਦੋਂ ਦਿਓ ਜਦੋਂ ਪ੍ਰਮਾਣਿਤ ਬੇਨਤੀ drilldown: true ਵੀ ਸੈੱਟ ਕਰਦੀ ਹੋਵੇ। ਕੱਚੇ ਵੀਡੀਓ ਕਦੇ ਵੀ ਸੰਭਾਲੇ ਨਹੀਂ ਜਾਂਦੇ।",
     "modalityBridgeVideoDrilldownRemoteEnabled": "ਪ੍ਰਮਾਣਿਤ ਫ੍ਰੇਮ ਡ੍ਰਿਲ-ਡਾਊਨ ਦੀ ਆਗਿਆ ਦਿਓ",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "API ਕੁੰਜੀਆਂ ਨੂੰ ਸਿਰਫ਼ ਆਪਣੇ ਅਸਪਸ਼ਟ ਹੈਂਡਲ ਪੜ੍ਹਨ ਅਤੇ ਮਿਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿਓ। ਅਗਿਆਤ ਜਾਂ ਵੱਖਰੀ ਕੁੰਜੀ ਰਾਹੀਂ ਪਹੁੰਚ ਦੀ ਆਗਿਆ ਨਹੀਂ ਹੈ।",
-    "modalityBridgeVideoDrilldownUsage": "ਸੰਭਾਲੇ ਗਏ JPEGs / ਬਾਈਟ"
+    "modalityBridgeVideoDrilldownUsage": "ਸੰਭਾਲੇ ਗਏ JPEGs / ਬਾਈਟ",
+    "modalityBridgeVideoPromotionTitle": "ਉੱਨਤ ਨੀਤੀ ਤਿਆਰੀ",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "ਪ੍ਰਯੋਗਾਤਮਕ",
+    "modalityBridgeVideoPromotionEligible": "ਯੋਗ",
+    "modalityBridgeVideoPromotionContextRequired": "ਤਰੱਕੀ ਲਈ ਬਿਲਕੁਲ ਉਸੇ ਮਾਡਲ ਸੰਸ਼ੋਧਨ, ਨੀਤੀ, ਕੋਰਪਸ ਅਤੇ ਬਿਲਡ ਵਾਸਤੇ ਦੋ ਸੁਤੰਤਰ ਯੋਗਤਾ-ਪੂਰਨ ਰਨ ਲੋੜੀਂਦੇ ਹਨ। ਇੱਕ ਅਪ੍ਰਮਾਣਿਤ ਸੰਦਰਭ HOLD ਹੀ ਰਹਿੰਦਾ ਹੈ; ਕਿਸੇ ਪ੍ਰਯੋਗਾਤਮਕ ਨੀਤੀ ਦੀ ਚੋਣ ਮਨਜ਼ੂਰੀ ਨਹੀਂ ਹੈ।"
   },
   "contextRtk": {
     "title": "RTK ਇੰਜਣ",
