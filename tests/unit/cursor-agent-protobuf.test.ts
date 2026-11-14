@@ -334,29 +334,45 @@ test("encodeAgentRunRequest emits composer parameters", () => {
   assert.ok(text.includes("true"), "parameter value 'true' present");
 });
 
-test("encodeAgentRunRequest sends fast=false for standard Grok 4.7 effort aliases", () => {
-  const request = encodeAgentRunRequest({ modelId: "grok-4.7-medium", userText: "hi" });
-  const run = findField(decodeFields(request), 1);
-  assert.ok(run?.wireType === WT_LEN);
-  const fields = decodeFields(run.bytes);
-  const requestedModel = findField(fields, 9);
-  assert.ok(requestedModel?.wireType === WT_LEN);
-  const modelFields = decodeFields(requestedModel.bytes);
-  const textField = (source: ReturnType<typeof decodeFields>, number: number) => {
-    const field = findField(source, number);
-    assert.ok(field?.wireType === WT_LEN);
-    return field.bytes.toString("utf8");
+test("encodeAgentRunRequest sends standard Grok 4.7 effort through RequestedModel only", () => {
+  const decodeRequestedModel = (modelId: string) => {
+    const request = encodeAgentRunRequest({ modelId, userText: "hi" });
+    const run = findField(decodeFields(request), 1);
+    assert.ok(run?.wireType === WT_LEN);
+    const fields = decodeFields(run.bytes);
+    // Grok 4.7 effort variants must omit ModelDetails; Cursor can otherwise
+    // classify the request as Fast even when RequestedModel says fast=false.
+    assert.equal(findField(fields, 3), undefined);
+    const requestedModel = findField(fields, 9);
+    assert.ok(requestedModel?.wireType === WT_LEN);
+    const modelFields = decodeFields(requestedModel.bytes);
+    const textField = (source: ReturnType<typeof decodeFields>, number: number) => {
+      const field = findField(source, number);
+      assert.ok(field?.wireType === WT_LEN);
+      return field.bytes.toString("utf8");
+    };
+    const parameters = modelFields.filter((field) => field.fieldNumber === 3).map((field) => {
+      assert.ok(field.wireType === WT_LEN);
+      const pair = decodeFields(field.bytes);
+      return [textField(pair, 1), textField(pair, 2)];
+    });
+    return { modelId: textField(modelFields, 1), parameters };
   };
-  assert.equal(textField(modelFields, 1), "grok-4.7");
-  const parameters = modelFields.filter((field) => field.fieldNumber === 3).map((field) => {
-    assert.ok(field.wireType === WT_LEN);
-    const pair = decodeFields(field.bytes);
-    return [textField(pair, 1), textField(pair, 2)];
+
+  assert.deepEqual(decodeRequestedModel("grok-4.7-medium"), {
+    modelId: "grok-4.7",
+    parameters: [
+      ["reasoning_effort", "medium"],
+      ["fast", "false"],
+    ],
   });
-  assert.deepEqual(parameters, [
-    ["effort", "medium"],
-    ["fast", "false"],
-  ]);
+  assert.deepEqual(decodeRequestedModel("grok-4.7-medium-fast"), {
+    modelId: "grok-4.7",
+    parameters: [
+      ["reasoning_effort", "medium"],
+      ["fast", "true"],
+    ],
+  });
 });
 
 test("encodeAgentRunRequest sends ModelDetails for pinned thinking models (#3714)", () => {
