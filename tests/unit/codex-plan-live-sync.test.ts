@@ -8,7 +8,7 @@ import { isCodexPlanEligibleForModel } from "../../open-sse/services/codexPlanEl
 
 const paidModel = "gpt-6-sol";
 
-test("live Free -> Plus upgrades both OAuth plan fields and unlocks paid Codex routing", async () => {
+test("live Free -> Plus updates OAuth plans and unlocks paid Codex routing", async () => {
   const connection = {
     id: "codex-1",
     provider: "codex",
@@ -52,7 +52,11 @@ test("live Plus -> Free downgrades routing eligibility", async () => {
 
 test("do not overwrite a valid plan on missing, invalid, stale or failed usage", async () => {
   let writes = 0;
-  const initial = { id: "codex-3", provider: "codex", providerSpecificData: { chatgptPlanType: "plus" } };
+  const initial = {
+    id: "codex-3",
+    provider: "codex",
+    providerSpecificData: { chatgptPlanType: "plus" },
+  };
   for (const usage of [
     null,
     {},
@@ -67,7 +71,10 @@ test("do not overwrite a valid plan on missing, invalid, stale or failed usage",
     assert.equal(updated, initial);
   }
   assert.equal(writes, 0);
-  assert.equal(codexPlanFromUsage({ plan: "self_serve_business_prolite" }), "self_serve_business_prolite");
+  assert.equal(
+    codexPlanFromUsage({ plan: "self_serve_business_prolite" }),
+    "self_serve_business_prolite"
+  );
 });
 
 test("no DB write for unchanged or differently-cased existing plans", async () => {
@@ -77,19 +84,29 @@ test("no DB write for unchanged or differently-cased existing plans", async () =
     provider: "codex",
     providerSpecificData: { chatgptPlanType: "Plus", workspacePlanType: "PLUS" },
   };
-  const updated = await syncCodexPlanFromUsage(connection, { plan: "plus" }, async () => { writes += 1; });
+  const updated = await syncCodexPlanFromUsage(connection, { plan: "plus" }, async () => {
+    writes += 1;
+  });
   assert.equal(updated, connection);
   assert.equal(writes, 0);
 });
 
 test("does not rewrite unrelated providers or missing workspace field", async () => {
   let writes = 0;
-  const other = { id: "other", provider: "claude", providerSpecificData: { chatgptPlanType: "free" } };
+  const other = {
+    id: "other",
+    provider: "claude",
+    providerSpecificData: { chatgptPlanType: "free" },
+  };
   assert.equal(
     await syncCodexPlanFromUsage(other, { plan: "plus" }, async () => { writes += 1; }),
     other
   );
-  const codex = { id: "codex-5", provider: "codex", providerSpecificData: { chatgptPlanType: "free", priority: 9 } };
+  const codex = {
+    id: "codex-5",
+    provider: "codex",
+    providerSpecificData: { chatgptPlanType: "free", priority: 9 },
+  };
   const updated = await syncCodexPlanFromUsage(codex, { plan: "plus" }, async (_id, fields) => {
     assert.deepEqual(fields, { chatgptPlanType: "plus" });
     writes += 1;
@@ -100,7 +117,11 @@ test("does not rewrite unrelated providers or missing workspace field", async ()
 
 test("metadata persistence failures do not break successful quota reads", async (t) => {
   t.mock.method(console, "warn", () => undefined);
-  const connection = { id: "codex-6", provider: "codex", providerSpecificData: { chatgptPlanType: "free" } };
+  const connection = {
+    id: "codex-6",
+    provider: "codex",
+    providerSpecificData: { chatgptPlanType: "free" },
+  };
   const updated = await syncCodexPlanFromUsage(connection, { plan: "plus" }, async () => {
     throw new Error("database locked");
   });
