@@ -311,17 +311,24 @@ export function convertUsageToQuotaInfo(
     isAntigravityProvider(context.provider) && context.requestedModel
       ? getAntigravityQuotaFamily(context.requestedModel)
       : null;
-  const providerScopedWindows =
-    requestedFamily === "gemini" || requestedFamily === "claude"
-      ? Object.fromEntries(
-          Object.entries(windows).filter(([key]) => {
-            if (key.endsWith("_weekly")) {
-              return antigravityWeeklyWindowMatchesFamily(key, requestedFamily);
-            }
-            return getAntigravityQuotaFamily(key) === requestedFamily;
-          })
-        )
-      : windows;
+  let providerScopedWindows = windows;
+  if (requestedFamily === "gemini" || requestedFamily === "claude") {
+    providerScopedWindows = Object.fromEntries(
+      Object.entries(windows).filter(([key]) => {
+        if (key.endsWith("_weekly")) {
+          return antigravityWeeklyWindowMatchesFamily(key, requestedFamily);
+        }
+        return getAntigravityQuotaFamily(key) === requestedFamily;
+      })
+    );
+  } else if (context.provider === "tokenharbor" && context.requestedModel) {
+    // TokenHarbor's weekly `free` window covers only `:free` models; paid models draw on
+    // the Pass window / USD balance, so a spent free allowance must not exhaust them.
+    const wantsFree = context.requestedModel.endsWith(":free");
+    providerScopedWindows = Object.fromEntries(
+      Object.entries(windows).filter(([key]) => (key === "free") === wantsFree)
+    );
+  }
   if (Object.keys(providerScopedWindows).length === 0) return null;
 
   const normalized = normalizeQuotaWindows(providerScopedWindows, context);

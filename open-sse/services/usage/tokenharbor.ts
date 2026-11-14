@@ -69,20 +69,20 @@ export async function getTokenHarborUsage(apiKey: string) {
   }
 
   try {
-    const [res, balanceUsd] = await Promise.all([
-      fetch(TOKENHARBOR_CONFIG.freeTierUrl, {
-        headers: { Authorization: `Bearer ${apiKey}` },
-        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-      }),
-      fetchBalanceUsd(apiKey),
-    ]);
+    // Read the free-tier body inside its own branch: left unread while a slow balance call
+    // runs, it would be cancelled by its timeout signal and the Free/Pass rows lost.
+    const freeTier = fetch(TOKENHARBOR_CONFIG.freeTierUrl, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    }).then(async (res) => ({ res, body: res.ok ? await res.json() : null }));
+    const [{ res, body }, balanceUsd] = await Promise.all([freeTier, fetchBalanceUsd(apiKey)]);
 
     if (!res.ok) {
       if (res.status === 401) return { message: "Invalid TokenHarbor API key." };
       return { message: `TokenHarbor quota API error (${res.status})` };
     }
 
-    const data = toRecord(await res.json());
+    const data = toRecord(body);
     const onPlan = data.on_plan === true;
     const planName = typeof data.plan_name === "string" && data.plan_name ? data.plan_name : null;
     const plan = onPlan && planName ? planName : "Free";

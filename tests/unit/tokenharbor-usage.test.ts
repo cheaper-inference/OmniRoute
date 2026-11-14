@@ -7,6 +7,7 @@ import assert from "node:assert/strict";
 
 import { USAGE_SUPPORTED_PROVIDERS } from "../../src/shared/constants/providers.ts";
 import { USAGE_FETCHER_PROVIDERS } from "../../open-sse/services/usage.ts";
+import { convertUsageToQuotaInfo } from "../../open-sse/services/genericQuotaFetcher.ts";
 import { parseQuotaData } from "../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/quotaParsing.ts";
 
 const T = await import("../../open-sse/services/usage/tokenharbor.ts");
@@ -120,6 +121,57 @@ test("an account that never used :free models still shows a full Free allowance"
     };
     assert.equal(r.quotas?.free?.remainingPercentage, 100);
     assert.equal(r.quotas?.free?.resetAt, null);
+  } finally {
+    restore();
+  }
+});
+
+test(
+  "the free-tier body is read without waiting for the balance call",
+  { timeout: 2000 },
+  async () => {
+    // Balance settles only after the free-tier body is consumed; reading that body after
+    // Promise.all would deadlock here (in production: lose it to its timeout signal).
+    let markFreeRead!: () => void;
+    const freeRead = new Promise<void>((resolve) => (markFreeRead = resolve));
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (url: string | URL) => {
+      if (new URL(String(url)).pathname === "/api/cli/free-tier") {
+        const res = json(FREE_TIER);
+        const read = res.json.bind(res);
+        res.json = async () => {
+          const body = await read();
+          markFreeRead();
+          return body;
+        };
+        return res;
+      }
+      await freeRead;
+      return json({ balance_usd: 1 });
+    }) as typeof fetch;
+    try {
+      const r = (await T.getTokenHarborUsage("k")) as { quotas?: Record<string, unknown> };
+      assert.ok(r.quotas?.free && r.quotas?.pass && r.quotas?.balance);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  }
+);
+
+test("a spent free allowance blocks only :free models, not paid Pass usage", async () => {
+  const restore = mockFetch({
+    "/api/cli/free-tier": () => json(FREE_TIER),
+    "/api/cli/balance": () => json({ balance_usd: 0 }),
+  });
+  try {
+    const usage = await T.getTokenHarborUsage("k");
+    const ctx = (requestedModel: string) => ({ provider: "tokenharbor", requestedModel });
+    const paid = convertUsageToQuotaInfo(usage, ctx("deepseek-v4.1-flash"));
+    assert.equal(paid?.limitReached, false);
+    assert.deepEqual(Object.keys(paid?.windows ?? {}), ["pass"]);
+    const free = convertUsageToQuotaInfo(usage, ctx("deepseek-v4.1-flash:free"));
+    assert.equal(free?.limitReached, true);
+    assert.deepEqual(Object.keys(free?.windows ?? {}), ["free"]);
   } finally {
     restore();
   }
