@@ -56,17 +56,20 @@ export function safeAwsRegion(region: unknown, fallback = "us-east-1"): string {
 export const KIRO_PROFILE_REGIONS = ["us-east-1", "eu-central-1"] as const;
 
 /**
- * CodeWhisperer / Amazon Q runtime host for a region. All regions — us-east-1
- * included — use the regional Amazon Q endpoint `q.{region}.amazonaws.com`.
+ * CodeWhisperer / Amazon Q runtime host for a region. us-east-1 keeps the legacy
+ * codewhisperer.us-east-1 host (AWS Builder ID home region); other regions use the regional
+ * Amazon Q endpoint `q.{region}.amazonaws.com` — codewhisperer.{region}.amazonaws.com does not
+ * resolve for non-us-east-1 regions.
  *
- * us-east-1 used the legacy `codewhisperer.us-east-1.amazonaws.com` host until #19607. The
- * current kiro-cli (3.1.0) embeds only `runtime.*.kiro.dev` and `q.<region>.amazonaws.com`,
- * so every region now follows it onto the regional Amazon Q host. This is not what fixes
- * Kiro's 403 "This version of Kiro is no longer supported": that gate checks the
- * User-Agent (see KIRO_SDK_USER_AGENT), and with a supported one both hosts pass it.
+ * Do not move us-east-1 to q.us-east-1. Builder ID tokens carry no profileArn, and both
+ * runtime.us-east-1.kiro.dev and q.us-east-1 answer them with 400 "profileArn is required for
+ * this request"; codewhisperer.us-east-1 is the host that serves them (#19748). Kiro's version
+ * gate (#19607) checks the User-Agent, not the host, so this host passes it too.
  */
 export function kiroRuntimeHost(region: string): string {
-  return `https://q.${region}.amazonaws.com`;
+  return region === "us-east-1"
+    ? "https://codewhisperer.us-east-1.amazonaws.com"
+    : `https://q.${region}.amazonaws.com`;
 }
 
 /** Region selector value that asks API-key import to detect the key's Amazon Q region. */

@@ -3715,8 +3715,8 @@
       }
     },
     "url": {
-      "nonStream": "https://q.us-east-1.amazonaws.com/generateAssistantResponse",
-      "stream": "https://q.us-east-1.amazonaws.com/generateAssistantResponse"
+      "nonStream": "https://codewhisperer.us-east-1.amazonaws.com/generateAssistantResponse",
+      "stream": "https://codewhisperer.us-east-1.amazonaws.com/generateAssistantResponse"
     }
   },
   "lambda-ai": {

@@ -207,9 +207,9 @@ test("kiro service User-Agent identifies a Kiro IDE release above the next versi
   assert.equal(getKiroServiceHeaders()["User-Agent"], KIRO_SDK_USER_AGENT);
 });
 
-test("connections served only by q.<region> send the Kiro IDE User-Agent", async () => {
+test("connections that skip the branded gateway send the Kiro IDE User-Agent", async () => {
   // api_key, external_idp and eu-central-1 never reach the branded gateway, so the
-  // User-Agent alone decides whether they pass the gate.
+  // User-Agent alone decides whether they pass the gate on their single AWS host.
   const cases: Credentials[] = [
     { apiKey: "ksk_test", providerSpecificData: { authMethod: "api_key", region: "us-east-1" } },
     {
@@ -225,8 +225,8 @@ test("connections served only by q.<region> send the Kiro IDE User-Agent", async
     const { urls, headers } = await captureExecuteRequests(credentials);
     const label = JSON.stringify(credentials.providerSpecificData);
     assert.ok(
-      urls.every((u) => /^https:\/\/q\.[a-z0-9-]+\.amazonaws\.com\//.test(u)),
-      `${label} must use the regional Amazon Q host, got ${JSON.stringify(urls)}`
+      urls.length === 1 && !urls[0].includes("kiro.dev"),
+      `${label} must call a single AWS host, got ${JSON.stringify(urls)}`
     );
     const ua = String(headers["User-Agent"] ?? "");
     const version = kiroIdeVersion(ua);
@@ -256,26 +256,72 @@ test("API-key import probe sends the Kiro IDE User-Agent", async () => {
   assert.ok(version && atLeast(version, NEXT_IDE_FLOOR), `probe sent User-Agent: ${probeUa}`);
 });
 
-test("kiroRuntimeHost uses the regional Amazon Q host in us-east-1, like kiro-cli 3.1.0", () => {
-  // kiro-cli 3.1.0 embeds only runtime.*.kiro.dev and q.<region>.amazonaws.com. The
-  // codewhisperer host still answers, but OmniRoute follows the current client's hosts.
-  assert.equal(
-    kiroRuntimeHost("us-east-1"),
-    "https://q.us-east-1.amazonaws.com",
-    "us-east-1 runtime must use the regional Amazon Q host"
-  );
+test("kiroRuntimeHost keeps codewhisperer.us-east-1 for us-east-1 (#19748)", () => {
+  // The version gate checks the User-Agent, not the host (live matrix above), so the
+  // gate does not require moving hosts. Builder ID needs this one: see the next test.
+  assert.equal(kiroRuntimeHost("us-east-1"), "https://codewhisperer.us-east-1.amazonaws.com");
   assert.equal(kiroRuntimeHost("eu-central-1"), "https://q.eu-central-1.amazonaws.com");
 });
 
-test("idc connection in us-east-1 uses only the regional Amazon Q host", async () => {
-  // The gate is User-Agent based, not host based: with the Kiro IDE identity a real IdC
-  // completion returned 200 from q.us-east-1 (live, 2026-11-10). IdC keeps its pre-#19607
-  // single-surface routing; the branded gateway is not needed to pass the gate.
+test("Builder ID without a profileArn falls back to the host that serves it (#19748)", async () => {
+  // #19748, 3.8.53 + the #19607 hotfix on Windows, Builder ID: the branded gateway answers
+  // 400 "profileArn is required", OmniRoute falls back to the regional host, and with that
+  // host moved to q.us-east-1 the fallback got the same 400. codewhisperer.us-east-1 serves
+  // profileArn-less Builder ID tokens (live 2026-09-10, see open-sse/executors/kiro.ts).
+  const executor = new KiroExecutor();
+  executor.transformEventStreamToSSE = () =>
+    new Response("data: [DONE]\n\n", {
+      status: 200,
+      headers: { "Content-Type": "text/event-stream" },
+    });
+  const profileArnRequired = () =>
+    new Response(
+      JSON.stringify({ message: "profileArn is required for this request.", reason: null }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
+    );
+  const originalFetch = globalThis.fetch;
+  const urls: string[] = [];
+  globalThis.fetch = (async (url: URL | string) => {
+    const target = String(url);
+    urls.push(target);
+    if (target.startsWith("https://codewhisperer.us-east-1.amazonaws.com/")) {
+      return new Response("ok", { status: 200 });
+    }
+    return profileArnRequired();
+  }) as typeof fetch;
+  let status = 0;
+  try {
+    const result = await executor.execute({
+      model: "claude-sonnet-4.5",
+      body: { conversationState: {} },
+      stream: true,
+      credentials: {
+        accessToken: "builder-id-token",
+        providerSpecificData: { authMethod: "builder-id", region: "us-east-1" },
+      },
+    } as Parameters<KiroExecutor["execute"]>[0]);
+    status = (result.response as Response).status;
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+  assert.deepEqual(urls, [
+    "https://runtime.us-east-1.kiro.dev/generateAssistantResponse",
+    "https://codewhisperer.us-east-1.amazonaws.com/generateAssistantResponse",
+  ]);
+  assert.equal(status, 200);
+});
+
+test("idc connection in us-east-1 uses only codewhisperer.us-east-1, as before #19607", async () => {
+  // The gate is User-Agent based, not host based: with the Kiro IDE identity both
+  // q.us-east-1 and codewhisperer.us-east-1 pass it (live, 2026-11-10). IdC keeps its
+  // pre-#19607 single-surface routing; the branded gateway is not needed to pass the gate.
   const { urls } = await captureExecuteRequests({
     accessToken: "idc-token",
     providerSpecificData: { authMethod: "idc", region: "us-east-1" },
   });
-  assert.deepEqual(urls, ["https://q.us-east-1.amazonaws.com/generateAssistantResponse"]);
+  assert.deepEqual(urls, [
+    "https://codewhisperer.us-east-1.amazonaws.com/generateAssistantResponse",
+  ]);
 });
 
 /**
@@ -357,9 +403,9 @@ test("kiro catalog keeps its own Kiro IDE identity, separate from inference", as
   assert.notDeepEqual(kiroIdeVersion(KIRO_SDK_USER_AGENT), [0, 10, 32]);
 });
 
-test("kiro usage fetches use the regional Amazon Q host in us-east-1", () => {
-  // GetUsageLimits used the legacy codewhisperer host for us-east-1 profiles; since
-  // #19607 it follows the rest of the integration onto q.us-east-1.
+test("kiro usage fetches keep codewhisperer.us-east-1 in us-east-1", () => {
+  // GetUsageLimits stays on the same us-east-1 host as inference (#19748). An earlier
+  // revision of #19607 moved it to q.us-east-1 together with inference.
   //
   // The usage module captures OMNIROUTE_CODEWHISPERER_BASE_URL at module load, and
   // `test:unit:fast` runs with --test-isolation=none — ~60 alphabetically-earlier test
@@ -379,8 +425,7 @@ test("kiro usage fetches use the regional Amazon Q host in us-east-1", () => {
       encoding: "utf8",
       // Minimal child env: runtime essentials only. OMNIROUTE_CODEWHISPERER_BASE_URL
       // is deliberately absent so the usage module's load-time capture resolves the
-      // default (regional Q host) — the fixture also sets it deliberately to the
-      // legacy value *after* its own import to prove default routing stands.
+      // default host.
       env: buildIsolatedChildEnv(),
       timeout: 60_000,
     }

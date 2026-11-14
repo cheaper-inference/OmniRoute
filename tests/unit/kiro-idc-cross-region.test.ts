@@ -159,9 +159,8 @@ test("discoverKiroProfileArnAcrossRegions: a non-EU (ap-southeast-2) IdC resolve
     resolveKiroRuntimeRegion({ region: "ap-southeast-2", profileArn: arn }),
     "us-east-1"
   );
-  // The us-east-1 profile region is probed before the ap-southeast-2 IdC-region fallback
-  // (on the regional Q host since #19607, previously codewhisperer.us-east-1).
-  assert.ok(requested.some((u) => u.startsWith("https://q.us-east-1.amazonaws.com/")));
+  // The us-east-1 profile region is probed before the ap-southeast-2 IdC-region fallback.
+  assert.ok(requested.some((u) => u.startsWith("https://codewhisperer.us-east-1.amazonaws.com/")));
 });
 
 test("discoverKiroProfileArnAcrossRegions: no token / no profile yields undefined without throwing", async () => {

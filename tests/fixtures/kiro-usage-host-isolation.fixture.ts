@@ -6,7 +6,7 @@
  * env capture before this assertion runs.
  *
  * The env override is deleted BEFORE importing the usage module, so the capture
- * resolves the default — exactly the routing this fixture pins (#19607).
+ * resolves the default — exactly the routing this fixture pins (#19607, #19748).
  */
 import assert from "node:assert/strict";
 
@@ -50,11 +50,8 @@ try {
 }
 
 assert.ok(captured.length > 0, "usage fetcher must have issued at least one request");
-assert.ok(
-  captured.every((u) => !u.includes("codewhisperer.")),
-  `default usage routing must avoid the legacy codewhisperer host; got ${JSON.stringify(captured)}`
-);
-assert.ok(
-  captured.some((u) => u.startsWith("https://q.us-east-1.amazonaws.com")),
-  `default usage routing must ride the regional Amazon Q host; got ${JSON.stringify(captured)}`
+assert.equal(
+  captured[0],
+  "https://codewhisperer.us-east-1.amazonaws.com",
+  `default usage routing must keep codewhisperer.us-east-1 (#19748); got ${JSON.stringify(captured)}`
 );

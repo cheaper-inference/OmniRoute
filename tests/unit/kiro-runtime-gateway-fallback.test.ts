@@ -79,8 +79,7 @@ test("KiroExecutor.execute falls back to the regional CodeWhisperer host when th
 
     assert.equal(calledUrls.length, 2);
     assert.match(calledUrls[0], /^https:\/\/runtime\.us-east-1\.kiro\.dev/);
-    // Regional Amazon Q host (codewhisperer.us-east-1 before #19607).
-    assert.match(calledUrls[1], /^https:\/\/q\.us-east-1\.amazonaws\.com/);
+    assert.match(calledUrls[1], /^https:\/\/codewhisperer\.us-east-1\.amazonaws\.com/);
     assert.equal((result.response as Response).status, 200);
   } finally {
     globalThis.fetch = originalFetch;
