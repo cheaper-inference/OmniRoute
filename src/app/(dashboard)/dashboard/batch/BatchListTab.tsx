@@ -436,6 +436,7 @@ export default function BatchListTab({
           className="text-sm"
           aria-label={t("batchListBatchesTable")}
           scrollbarLabel={t("batchListBatchesTable")}
+          containerClassName="rounded-none border-0"
         >
           <TableHeader>
             <TableRow>
