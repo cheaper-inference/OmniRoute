@@ -3100,6 +3100,38 @@
     "compareEmptyDescription": "지연 시간, 비용, URL 중복도와 함께 결과가 나란히 표시됩니다"
   },
   "cliTools": {
+    "ompRoleDefault": "Default",
+    "ompRoleDefaultDesc": "Main model for every omp chat and agent turn",
+    "ompRoleSmol": "Fast (smol)",
+    "ompRoleSmolDesc": "Quick work: the sonic subagent, prewalk, skill descriptions; commit fallback",
+    "ompRoleSlow": "Thinking (slow)",
+    "ompRoleSlowDesc": "Deep reasoning model (omp --slow / --model slow)",
+    "ompRolePlan": "Architect (plan)",
+    "ompRolePlanDesc": "Planning and architecture (omp --plan / plan mode)",
+    "ompRoleVision": "Vision",
+    "ompRoleVisionDesc": "Describes attached images when the active model is text-only",
+    "ompRoleTask": "Subtask (task)",
+    "ompRoleTaskDesc": "General-purpose subagents spawned by the task tool",
+    "ompRoleAdvisor": "Advisor",
+    "ompRoleAdvisorDesc": "Advisor runtime that reviews each turn and injects notes",
+    "ompRoleCommit": "Commit",
+    "ompRoleCommitDesc": "omp commit message generation (falls back to smol)",
+    "ompRoleTiny": "Tiny",
+    "ompRoleTinyDesc": "Session titles and background classification (falls back to commit, then smol)",
+    "ompRoleDesigner": "Designer",
+    "ompRoleDesignerDesc": "UI and design work (omp designer role)",
+    "ompUnset": "Not set (omp fallback)",
+    "ompOnDisk": "On disk",
+    "ompPending": "Pending",
+    "ompVerified": "Verified on disk",
+    "ompApply": "Apply to Oh My Pi",
+    "ompConfirmApply": "Write {count} role change(s) to {path}? A timestamped backup is kept.",
+    "ompSavedVerified": "Saved to {path} and verified on disk ({count} role(s) changed). New omp sessions use the new models.",
+    "ompSavedUnverified": "Saved to {path}, but the read-back did not match — check the file.",
+    "ompRolesWillUpdate": "{count} role(s) will update",
+    "ompNoModels": "No active OmniRoute models to choose from. Connect a provider first.",
+    "ompNotInstalled": "Oh My Pi config not found at {path}.",
+    "ompSaveDescription": "Writes the omniroute provider to ~/.omp/agent/models.yml and only the OmniRoute-owned modelRoles values in ~/.omp/agent/config.yml (timestamped backups are kept; an unparsable file is never overwritten). Roles that point at other providers are left untouched. A project's own .omp/config.yml still overrides these inside that project.",
     "title": "CLI 도구",
     "classifierCompatTitle": "자동 권한 분류기 호환성",
     "classifierCompatDescription": "Claude Code의 <code>--permission-mode auto</code> 보안 분류기를 가상의 허용 응답으로 단락(short-circuit)시켜 대체 경로가 닫힌 상태로 실패하지 않도록 합니다. 기본값은 꺼짐입니다.",
@@ -3441,6 +3473,36 @@
         "notes": {
           "0": "OpenCode는 API 키 구성이 필요합니다.",
           "1": "기본 URL을 OmniRoute 엔드포인트로 설정하세요."
+        }
+      },
+      "omp": {
+        "steps": {
+          "1": {
+            "title": "Install Oh My Pi",
+            "desc": "Install via curl: curl -fsSL https://omp.sh/install | sh (or via bun: bun install -g @oh-my-pi/pi-coding-agent)"
+          },
+          "2": {
+            "title": "API Key"
+          },
+          "3": {
+            "title": "Configure OmniRoute",
+            "desc": "Run: omniroute setup-omp — writes the omniroute provider into ~/.omp/agent/models.yml and model roles into ~/.omp/agent/config.yml."
+          },
+          "4": {
+            "title": "Select Model"
+          },
+          "5": {
+            "title": "Verify Setup",
+            "desc": "List the models Oh My Pi discovered from OmniRoute: omp models omniroute"
+          },
+          "6": {
+            "title": "Run"
+          }
+        },
+        "notes": {
+          "0": "Oh My Pi reads custom OpenAI-compatible providers from ~/.omp/agent/models.yml. OmniRoute adds itself as a provider with auto-discovery — models appear automatically in omp's /model menu.",
+          "1": "Config paths: ~/.omp/agent/models.yml (providers) and ~/.omp/agent/config.yml (model roles).",
+          "2": "omp's /model picker mirrors OmniRoute's /v1/models one-to-one (combos and image/free-tier catalogs included). Narrow it with `omp models find <pattern>` or pin roles with `omniroute setup-omp --role <role>=<id>`."
         }
       },
       "kiro": {

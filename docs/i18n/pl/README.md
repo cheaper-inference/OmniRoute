@@ -661,6 +661,9 @@ aktualnym katalogu znajdziesz na stronie **[radar.omniroute.online/planos](https
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b>deyin.ai</b></sub><br/><sub>                           </sub></a></td>
   </tr>
+  <tr>
+    <td align="center" width="76"><a href="https://github.com/can1357/oh-my-pi"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Oh My Pi"/><br/><sub><b>Oh My Pi</b></sub><br/><sub>                           </sub></a></td>
+  </tr>
 </table>
 </div>
 

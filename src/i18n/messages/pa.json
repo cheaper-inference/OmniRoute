@@ -3100,6 +3100,38 @@
     "compareEmptyDescription": "ਨਤੀਜੇ ਲੇਟੈਂਸੀ, ਲਾਗਤ ਅਤੇ URL ਓਵਰਲੈਪ ਸਮੇਤ ਨਾਲ-ਨਾਲ ਦਿਖਾਏ ਜਾਣਗੇ"
   },
   "cliTools": {
+    "ompRoleDefault": "Default",
+    "ompRoleDefaultDesc": "Main model for every omp chat and agent turn",
+    "ompRoleSmol": "Fast (smol)",
+    "ompRoleSmolDesc": "Quick work: the sonic subagent, prewalk, skill descriptions; commit fallback",
+    "ompRoleSlow": "Thinking (slow)",
+    "ompRoleSlowDesc": "Deep reasoning model (omp --slow / --model slow)",
+    "ompRolePlan": "Architect (plan)",
+    "ompRolePlanDesc": "Planning and architecture (omp --plan / plan mode)",
+    "ompRoleVision": "Vision",
+    "ompRoleVisionDesc": "Describes attached images when the active model is text-only",
+    "ompRoleTask": "Subtask (task)",
+    "ompRoleTaskDesc": "General-purpose subagents spawned by the task tool",
+    "ompRoleAdvisor": "Advisor",
+    "ompRoleAdvisorDesc": "Advisor runtime that reviews each turn and injects notes",
+    "ompRoleCommit": "Commit",
+    "ompRoleCommitDesc": "omp commit message generation (falls back to smol)",
+    "ompRoleTiny": "Tiny",
+    "ompRoleTinyDesc": "Session titles and background classification (falls back to commit, then smol)",
+    "ompRoleDesigner": "Designer",
+    "ompRoleDesignerDesc": "UI and design work (omp designer role)",
+    "ompUnset": "Not set (omp fallback)",
+    "ompOnDisk": "On disk",
+    "ompPending": "Pending",
+    "ompVerified": "Verified on disk",
+    "ompApply": "Apply to Oh My Pi",
+    "ompConfirmApply": "Write {count} role change(s) to {path}? A timestamped backup is kept.",
+    "ompSavedVerified": "Saved to {path} and verified on disk ({count} role(s) changed). New omp sessions use the new models.",
+    "ompSavedUnverified": "Saved to {path}, but the read-back did not match — check the file.",
+    "ompRolesWillUpdate": "{count} role(s) will update",
+    "ompNoModels": "No active OmniRoute models to choose from. Connect a provider first.",
+    "ompNotInstalled": "Oh My Pi config not found at {path}.",
+    "ompSaveDescription": "Writes the omniroute provider to ~/.omp/agent/models.yml and only the OmniRoute-owned modelRoles values in ~/.omp/agent/config.yml (timestamped backups are kept; an unparsable file is never overwritten). Roles that point at other providers are left untouched. A project's own .omp/config.yml still overrides these inside that project.",
     "title": "CLI ਟੂਲ",
     "classifierCompatTitle": "ਆਟੋ-ਅਨੁਮਤੀ ਵਰਗੀਕਰਤਾ ਅਨੁਕੂਲਤਾ",
     "classifierCompatDescription": "ਇੱਕ ਕ੍ਰਿਤ੍ਰਿਮ ਮਨਜ਼ੂਰੀ ਜਵਾਬ ਨਾਲ Claude Code ਦੇ <code>--permission-mode auto</code> ਸੁਰੱਖਿਆ ਵਰਗੀਕਰਤਾ ਨੂੰ ਸ਼ਾਰਟ-ਸਰਕਿਟ ਕਰੋ, ਤਾਂ ਜੋ ਫਾਲਬੈਕ ਰੂਟ ਫੇਲ-ਕਲੋਜ਼ਡ ਨਾ ਹੋਣ। ਮੂਲ ਰੂਪ ਵਿੱਚ ਬੰਦ ਹੈ।",
@@ -3441,6 +3473,36 @@
         "notes": {
           "0": "OpenCode ਲਈ API ਕੁੰਜੀ ਦੀ ਕੌਂਫਿਗਰੇਸ਼ਨ ਲੋੜੀਂਦੀ ਹੈ।",
           "1": "ਬੇਸ URL ਨੂੰ ਆਪਣੇ OmniRoute ਐਂਡਪੌਇੰਟ 'ਤੇ ਸੈੱਟ ਕਰੋ।"
+        }
+      },
+      "omp": {
+        "steps": {
+          "1": {
+            "title": "Install Oh My Pi",
+            "desc": "Install via curl: curl -fsSL https://omp.sh/install | sh (or via bun: bun install -g @oh-my-pi/pi-coding-agent)"
+          },
+          "2": {
+            "title": "API Key"
+          },
+          "3": {
+            "title": "Configure OmniRoute",
+            "desc": "Run: omniroute setup-omp — writes the omniroute provider into ~/.omp/agent/models.yml and model roles into ~/.omp/agent/config.yml."
+          },
+          "4": {
+            "title": "Select Model"
+          },
+          "5": {
+            "title": "Verify Setup",
+            "desc": "List the models Oh My Pi discovered from OmniRoute: omp models omniroute"
+          },
+          "6": {
+            "title": "Run"
+          }
+        },
+        "notes": {
+          "0": "Oh My Pi reads custom OpenAI-compatible providers from ~/.omp/agent/models.yml. OmniRoute adds itself as a provider with auto-discovery — models appear automatically in omp's /model menu.",
+          "1": "Config paths: ~/.omp/agent/models.yml (providers) and ~/.omp/agent/config.yml (model roles).",
+          "2": "omp's /model picker mirrors OmniRoute's /v1/models one-to-one (combos and image/free-tier catalogs included). Narrow it with `omp models find <pattern>` or pin roles with `omniroute setup-omp --role <role>=<id>`."
         }
       },
       "kiro": {

@@ -9,7 +9,7 @@ import fs from "fs/promises";
 import { dump as yamlDump } from "js-yaml";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { ompSettingsSchema } from "@/shared/validation/schemas/cli";
-import { getOmpCredentials, saveOmpCredentials, deleteOmpCredentials } from "@/lib/db/omp";
+import { getOmpCredentials, deleteOmpCredentials } from "@/lib/db/omp";
 import { requireCliToolsAuth } from "@/lib/api/requireCliToolsAuth";
 import { createBackup } from "@/shared/services/backupService";
 import { OMP_ROLE_IDS, type OmpRoleId } from "@/shared/constants/ompRoles";
@@ -26,6 +26,8 @@ const execAsync = promisify(exec);
 const PROVIDER_ID = "omniroute";
 const ROLE_PREFIX = `${PROVIDER_ID}/`;
 const BACKUP_TOOL_ID = "omp";
+/** models.yml references the key by this env-var NAME; the secret never lands on disk. */
+const OMP_API_KEY_ENV = "OMNIROUTE_API_KEY";
 
 const getOmpDir = () => path.join(os.homedir(), ".omp", "agent");
 const getOmpDbPath = () => path.join(getOmpDir(), "agent.db");
@@ -187,7 +189,8 @@ export async function GET(request: Request) {
         providers: {
           [PROVIDER_ID]: {
             baseUrl: ymlProvider?.baseUrl || creds.baseUrl,
-            apiKey: ymlProvider?.apiKey || creds.apiKey,
+            // Never echo a stored credential: the file holds the env-var NAME.
+            apiKey: ymlProvider?.apiKey === OMP_API_KEY_ENV ? OMP_API_KEY_ENV : null,
             discovery: ymlProvider?.discovery?.type || null,
           },
         },
@@ -216,10 +219,12 @@ export async function POST(request: Request) {
     if (isValidationFailure(validation)) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
-    const { baseUrl, apiKey, roles } = validation.data;
+    const { baseUrl, roles } = validation.data;
 
-    const normalizedBaseUrl = baseUrl.endsWith("/v1") ? baseUrl : `${baseUrl}/v1`;
-    const keyRef = apiKey || "sk_omniroute";
+    const trimmedBaseUrl = baseUrl.replace(/\/+$/, "");
+    const normalizedBaseUrl = trimmedBaseUrl.endsWith("/v1")
+      ? trimmedBaseUrl
+      : `${trimmedBaseUrl}/v1`;
 
     await fs.mkdir(getOmpDir(), { recursive: true });
 
@@ -231,9 +236,12 @@ export async function POST(request: Request) {
     // 1. Write models.yml — provider config + auto-discovery
     if (!modelsYml.providers) modelsYml.providers = {};
 
+    // Secret policy (same as `omniroute setup-omp`): the file references the
+    // key by env-var NAME — a submitted key value is accepted for backwards
+    // compatibility with the dashboard form but is NEVER persisted.
     modelsYml.providers[PROVIDER_ID] = {
       baseUrl: normalizedBaseUrl,
-      apiKey: keyRef,
+      apiKey: OMP_API_KEY_ENV,
       api: "openai-completions",
       authHeader: true,
       disableStrictTools: true,
@@ -247,13 +255,10 @@ export async function POST(request: Request) {
       await writeYml(getOmpConfigYmlPath(), configYml);
     }
 
-    // 3. Write auth_credentials — so omp sees omniroute as "logged in"
-    saveOmpCredentials(PROVIDER_ID, keyRef, normalizedBaseUrl);
-
     return NextResponse.json({
       success: true,
       message:
-        "Oh My Pi settings applied! Run omp and all OmniRoute models appear under omniroute in /model.",
+        "Oh My Pi settings applied! Export OMNIROUTE_API_KEY, then run omp — all OmniRoute models appear under omniroute in /model.",
       configPath: getOmpModelsYmlPath(),
       ...(configYml ? { modelRoles: getRouterRoles(configYml) } : {}),
     });

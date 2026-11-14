@@ -232,6 +232,15 @@ function genericEnv(baseEnv, kind, baseUrl, authToken, model, options = {}) {
       delete env[key];
     }
     if (
+      kind === "omp" &&
+      (key === "OMNIROUTE_API_KEY" ||
+        key.startsWith("XDG_") ||
+        key.startsWith("OPENAI_") ||
+        key.startsWith("ANTHROPIC_"))
+    ) {
+      delete env[key];
+    }
+    if (
       kind === "gemini" &&
       /^(GOOGLE_GEMINI_BASE_URL|GEMINI_API_KEY|GOOGLE_API_KEY|GEMINI_CLI_HOME|GEMINI_DEFAULT_AUTH_TYPE|GOOGLE_GENAI_USE_VERTEXAI|GOOGLE_GENAI_USE_GCA)$/.test(
         key
@@ -271,6 +280,8 @@ function genericEnv(baseEnv, kind, baseUrl, authToken, model, options = {}) {
   } else if (kind === "whycodes") {
     // `-P omniroute` reads OMNIROUTE_API_KEY; never OPENAI_API_KEY, which a configured
     // `openai` fallback would send to api.openai.com.
+    env.OMNIROUTE_API_KEY = token;
+  } else if (kind === "omp") {
     env.OMNIROUTE_API_KEY = token;
   } else if (kind === "gemini") {
     // Verified against @google/gemini-cli 0.50.0: the SDK appends
@@ -353,9 +364,11 @@ async function buildGenericPlan(target, rawOpts, args = []) {
         ? "temporary QWEN_HOME (removed after exit)"
         : target === "gemini"
           ? "temporary GEMINI_CLI_HOME (removed after exit)"
-          : target === "opencode"
-            ? "OPENCODE_CONFIG_CONTENT (process environment only)"
-            : undefined,
+          : target === "omp"
+            ? "temporary OMP home (removed after exit)"
+            : target === "opencode"
+              ? "OPENCODE_CONFIG_CONTENT (process environment only)"
+              : undefined,
   };
 }
 
@@ -428,22 +441,44 @@ async function runGenericTarget(target, rawOpts, args) {
       mode: 0o600,
     });
     childEnv.GEMINI_CLI_HOME = overlayHome;
-  }
-
-  const child = spawn(
-    commandSpec.command,
-    quoteShellArgsForSpawn(
-      [...providerArgs, ...modelArgs, ...args],
-      process.platform,
-      commandSpec.shell
-    ),
-    {
-      env: childEnv,
-      stdio: "inherit",
-      shell: commandSpec.shell,
-      ...(process.platform === "win32" ? { windowsHide: true } : {}),
+  } else if (target === "omp") {
+    // Generate the overlay document BEFORE creating the temp home: the
+    // cleanup handler is only registered after spawn, so a generator/import
+    // failure after mkdtemp would leak the directory. No fallback template —
+    // a generator throw fails the run loudly.
+    const { generateOmpConfig } =
+      await import("../../../src/lib/cli-helper/config-generator/omp.ts");
+    const modelsYml = await generateOmpConfig({ baseUrl: ensureV1BaseUrl(baseUrl) });
+    overlayHome = mkdtempSync(join(os.tmpdir(), "omniroute-omp-run-"));
+    try {
+      const agentDir = join(overlayHome, ".omp", "agent");
+      mkdirSync(agentDir, { recursive: true });
+      // omp 18.x also honors XDG_CONFIG_HOME / XDG_STATE_HOME / XDG_DATA_HOME /
+      // XDG_CACHE_HOME; without pinning them into the overlay an inherited value
+      // would touch REAL user state despite the isolated HOME.
+      mkdirSync(join(overlayHome, ".config"), { recursive: true });
+      mkdirSync(join(overlayHome, ".local", "state"), { recursive: true });
+      mkdirSync(join(overlayHome, ".local", "share"), { recursive: true });
+      mkdirSync(join(overlayHome, ".cache"), { recursive: true });
+      writeFileSync(join(agentDir, "models.yml"), modelsYml, {
+        encoding: "utf8",
+        mode: 0o600,
+      });
+      childEnv.HOME = overlayHome;
+      childEnv.XDG_CONFIG_HOME = join(overlayHome, ".config");
+      childEnv.XDG_STATE_HOME = join(overlayHome, ".local", "state");
+      childEnv.XDG_DATA_HOME = join(overlayHome, ".local", "share");
+      childEnv.XDG_CACHE_HOME = join(overlayHome, ".cache");
+    } catch (error) {
+      try {
+        rmSync(overlayHome, { recursive: true, force: true });
+      } catch {
+        // Best-effort cleanup of a half-written overlay.
+      }
+      overlayHome = undefined;
+      throw error;
     }
-  );
+  }
 
   const cleanup = () => {
     if (!overlayHome) return;
@@ -453,6 +488,28 @@ async function runGenericTarget(target, rawOpts, args) {
       // Best-effort cleanup; the directory contains no persistent credentials.
     }
   };
+
+  let child;
+  try {
+    child = spawn(
+      commandSpec.command,
+      quoteShellArgsForSpawn(
+        [...providerArgs, ...modelArgs, ...args],
+        process.platform,
+        commandSpec.shell
+      ),
+      {
+        env: childEnv,
+        stdio: "inherit",
+        shell: commandSpec.shell,
+        ...(process.platform === "win32" ? { windowsHide: true } : {}),
+      }
+    );
+  } catch (error) {
+    cleanup();
+    console.error(String(error?.message || error));
+    return 1;
+  }
 
   return await new Promise((resolve) => {
     let settled = false;

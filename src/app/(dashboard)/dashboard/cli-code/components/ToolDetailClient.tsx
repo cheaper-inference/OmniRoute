@@ -22,6 +22,7 @@ import {
   GrokBuildToolCard,
   KiloToolCard,
   OpenClawToolCard,
+  OmpToolCard,
   PiToolCard,
 } from "./index";
 
@@ -282,6 +283,8 @@ export default function ToolDetailClient({ toolId, category }: ToolDetailClientP
         return <GrokBuildToolCard {...cardProps} />;
       case "antigravity":
         return <AntigravityToolCard {...cardProps} />;
+      case "omp":
+        return <OmpToolCard {...cardProps} />;
       case "custom":
         return <CustomCliCard {...cardProps} />;
       default:
