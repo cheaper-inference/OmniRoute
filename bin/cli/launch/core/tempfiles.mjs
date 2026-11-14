@@ -29,24 +29,28 @@ export function resolveUnder(rootDir, relPath) {
     throw new LaunchError("Internal", "temp file root directory is not available");
   }
   const rel = typeof relPath === "string" ? relPath : "";
-  if (
-    rel === "" ||
-    isAbsolute(rel) ||
-    /^[A-Za-z]:/.test(rel) ||
-    rel.split(/[\\/]/).some((segment) => segment === "..")
-  ) {
+  if (isInvalidRelPath(rel)) {
     throw new LaunchError("Internal", `invalid temp file path: ${JSON.stringify(relPath)}`);
   }
   const root = resolve(rootDir);
   const target = resolve(root, rel);
-  const back = relative(root, target);
-  if (back === "" || back.startsWith(`..${sep}`) || back === ".." || isAbsolute(back)) {
+  if (escapesRoot(relative(root, target))) {
     throw new LaunchError(
       "Internal",
       `temp file path escapes its root: ${JSON.stringify(relPath)}`
     );
   }
   return target;
+}
+
+function isInvalidRelPath(rel) {
+  if (rel === "" || isAbsolute(rel) || /^[A-Za-z]:/.test(rel)) return true;
+  return rel.split(/[\\/]/).some((segment) => segment === "..");
+}
+
+function escapesRoot(back) {
+  if (back === "" || back === ".." || isAbsolute(back)) return true;
+  return back.startsWith(`..${sep}`);
 }
 
 /** mkdir -p with mode 0700. */

@@ -69,20 +69,10 @@ function installHint(adapter, platform) {
 export async function resolveBinary(adapter, deps = {}) {
   const platform = deps.platform ?? process.platform;
   const env = deps.env ?? process.env;
+  const lookup = platform === "win32" ? lookupWindows : lookupPosix;
   for (const name of adapter.binaries) {
-    if (platform === "win32") {
-      const probe = deps.probe ?? probeWindowsBinary;
-      const found = await probe(name);
-      const lines = Array.isArray(found) ? found : found ? [found] : [];
-      const exe = lines.find((line) => /\.exe$/i.test(line));
-      if (exe) return { command: exe, shell: false };
-      const shim = lines.find((line) => /\.(?:cmd|bat)$/i.test(line));
-      if (shim) return { command: shim, shell: true };
-    } else {
-      const which = deps.which ?? ((bin) => findOnPath(bin, env.PATH));
-      const found = which(name);
-      if (found) return { command: found, shell: false };
-    }
+    const resolved = await lookup(name, deps, env);
+    if (resolved) return resolved;
   }
   throw new LaunchError(
     "ToolNotFound",
@@ -91,6 +81,24 @@ export async function resolveBinary(adapter, deps = {}) {
       hint: installHint(adapter, platform),
     }
   );
+}
+
+/** win32: prefer a real `.exe`, else a `.cmd`/`.bat` shim through the shell. */
+async function lookupWindows(name, deps) {
+  const probe = deps.probe ?? probeWindowsBinary;
+  const found = await probe(name);
+  const lines = Array.isArray(found) ? found : found ? [found] : [];
+  const exe = lines.find((line) => /\.exe$/i.test(line));
+  if (exe) return { command: exe, shell: false };
+  const shim = lines.find((line) => /\.(?:cmd|bat)$/i.test(line));
+  return shim ? { command: shim, shell: true } : null;
+}
+
+/** POSIX: the first binary found on PATH. */
+function lookupPosix(name, deps, env) {
+  const which = deps.which ?? ((bin) => findOnPath(bin, env.PATH));
+  const found = which(name);
+  return found ? { command: found, shell: false } : null;
 }
 
 /** `<command> <args>` stdout+stderr text, or "" on failure (5 s cap). */
@@ -121,21 +129,29 @@ export async function probeTool(adapter, bin, deps = {}) {
   if (!gate) return { version: undefined, features: {}, warnings: [] };
   const now = deps.now ?? Date.now;
   const key = deps.cacheDir ? versionCacheKey(bin, gate) : null;
-  if (key && !deps.refreshCache) {
-    const cached = lookupVersion(deps.cacheDir, key, now);
-    if (cached !== undefined) {
-      return { version: cached, ...applyVersionGate(adapter, cached, deps.platform) };
-    }
-  }
+  const cached = readCachedVersion(deps, key, now);
+  const version = cached ?? (await runAndParse(bin, gate, deps));
+  if (cached === undefined) storeProbed(deps, key, version, now);
+  return { version, ...applyVersionGate(adapter, version, deps.platform) };
+}
+
+function readCachedVersion(deps, key, now) {
+  if (!key || deps.refreshCache) return undefined;
+  return lookupVersion(deps.cacheDir, key, now);
+}
+
+async function runAndParse(bin, gate, deps) {
   const run = deps.runVersion ?? runVersionCommand;
   const text = await run(bin.command, gate.args, {
     shell: bin.shell,
     platform: deps.platform,
     env: deps.env,
   });
-  const version = parseVersion(String(text ?? ""), gate.pattern);
+  return parseVersion(String(text ?? ""), gate.pattern);
+}
+
+function storeProbed(deps, key, version, now) {
   if (key && version !== undefined) storeVersion(deps.cacheDir, key, version, now);
-  return { version, ...applyVersionGate(adapter, version, deps.platform) };
 }
 
 /**
@@ -144,19 +160,9 @@ export async function probeTool(adapter, bin, deps = {}) {
  */
 export function applyVersionGate(adapter, version, platform = process.platform) {
   const gate = adapter.capabilities.versionGate;
-  const features = {};
-  const warnings = [];
-  if (!gate) return { features, warnings };
-  for (const [name, first] of Object.entries(gate.features || {})) {
-    features[name] = version !== undefined && compareVersions(version, first) >= 0;
-  }
-  if (version === undefined) {
-    if (gate.min || gate.recommended) {
-      warnings.push(`${adapter.id}: could not read the tool version; assuming a supported one`);
-      for (const name of Object.keys(features)) features[name] = true;
-    }
-    return { features, warnings };
-  }
+  if (!gate) return { features: {}, warnings: [] };
+  const features = computeFeatures(gate, version);
+  if (version === undefined) return unknownVersionResult(adapter, gate, features);
   if (gate.min && compareVersions(version, gate.min) < 0) {
     throw new LaunchError(
       "ToolVersionTooOld",
@@ -166,10 +172,28 @@ export function applyVersionGate(adapter, version, platform = process.platform) 
       }
     );
   }
+  const warnings = [];
   if (gate.recommended && compareVersions(version, gate.recommended) < 0) {
     warnings.push(
       `${adapter.id} ${version} works, but ${gate.recommended} or newer is recommended`
     );
+  }
+  return { features, warnings };
+}
+
+function computeFeatures(gate, version) {
+  const features = {};
+  for (const [name, first] of Object.entries(gate.features || {})) {
+    features[name] = version !== undefined && compareVersions(version, first) >= 0;
+  }
+  return features;
+}
+
+function unknownVersionResult(adapter, gate, features) {
+  const warnings = [];
+  if (gate.min || gate.recommended) {
+    warnings.push(`${adapter.id}: could not read the tool version; assuming a supported one`);
+    for (const name of Object.keys(features)) features[name] = true;
   }
   return { features, warnings };
 }

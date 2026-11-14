@@ -87,21 +87,23 @@ export function resolveLocalPort(target, flags = {}, env = process.env) {
   );
 }
 
-export async function acquireGateway({
+/** Remote strategy: probe the target URL only. */
+function acquireRemoteTarget(target) {
+  const url = targetUrl(target);
+  if (!url) throw new LaunchError("UsageError", "Remote target has no URL");
+  return acquireRemote({ rootUrl: url });
+}
+
+/** Local strategy: lease (and maybe auto-start) a gateway on the resolved port. */
+async function acquireLocalTarget({
   target,
   flags = {},
   stateDir = defaultStateDir(),
-  log,
+  say,
   toolId = null,
   sessionId = null,
   overrides = {},
-} = {}) {
-  const say = toLogger(log);
-  if (isRemoteTarget(target)) {
-    const url = targetUrl(target);
-    if (!url) throw new LaunchError("UsageError", "Remote target has no URL");
-    return acquireRemote({ rootUrl: url });
-  }
+}) {
   const port = resolveLocalPort(target, flags);
   const startTimeoutMs = resolveReadyTimeoutMs({ timeoutMs: flags.startTimeoutMs });
   const handle = await acquireLocal({
@@ -119,45 +121,83 @@ export async function acquireGateway({
   return handle;
 }
 
+export async function acquireGateway(options = {}) {
+  const say = toLogger(options.log);
+  if (isRemoteTarget(options.target)) return acquireRemoteTarget(options.target);
+  return acquireLocalTarget({ ...options, say });
+}
+
+const OWNED_STATES = Object.freeze(["starting", "ready", "stopping"]);
+
+/** gateway.json states in which the launcher (its reaper) owns the gateway. */
+function isOwnedState(state) {
+  return OWNED_STATES.includes(String(state));
+}
+
+function classifierFrom(overrides) {
+  return overrides.classifyPidIdentity || classifyPidIdentity;
+}
+
+/** Port for `gateway status`: explicit, else the recorded one, else the launch default. */
+function statusPort(port, record) {
+  return parsePort(port) ?? parsePort(record?.port) ?? resolveLocalPort(null);
+}
+
+/** Owned / kept flags of the record for `port` (the reaper liveness check runs first). */
+function recordOwnership(record, port, running, classify) {
+  const samePort = Boolean(record) && record.port === port;
+  const reaperAlive = samePort && isOurProcessAlive(record.reaperPid, { classify });
+  return {
+    owned: reaperAlive && isOwnedState(record.state),
+    kept: samePort && record.state === "kept" && running,
+  };
+}
+
+function addOwnedDetails(status, record, { owned, kept }) {
+  if ((owned || kept) && Number.isInteger(record.serverPid)) status.pid = record.serverPid;
+  if (owned) status.state = record.state;
+  return status;
+}
+
 export async function gatewayStatus({ stateDir = defaultStateDir(), port, overrides = {} } = {}) {
-  const classify = overrides.classifyPidIdentity || classifyPidIdentity;
+  const classify = classifierFrom(overrides);
   const g = readGatewayRecord(stateDir);
-  const resolvedPort = parsePort(port) ?? parsePort(g?.port) ?? resolveLocalPort(null);
+  const resolvedPort = statusPort(port, g);
   const baseUrl = localRootUrl(resolvedPort);
   const running = await probeHealth(baseUrl);
-  const samePort = Boolean(g) && g.port === resolvedPort;
-  const reaperAlive = samePort && isOurProcessAlive(g.reaperPid, { classify });
-  const owned =
-    samePort && reaperAlive && ["starting", "ready", "stopping"].includes(String(g.state));
-  const kept = samePort && g.state === "kept" && running;
+  const ownership = recordOwnership(g, resolvedPort, running, classify);
   const leases = liveLeases(stateDir, {
     staleMs: overrides.leaseStaleMs ?? LEASE_STALE_MS,
   }).length;
-  const status = { running, owned, leases, kept, baseUrl };
-  if (samePort && (owned || kept) && Number.isInteger(g.serverPid)) status.pid = g.serverPid;
-  if (owned) status.state = g.state;
-  return status;
+  const { owned, kept } = ownership;
+  return addOwnedDetails({ running, owned, leases, kept, baseUrl }, g, ownership);
 }
 
 export async function keepGateway({ stateDir = defaultStateDir(), overrides = {} } = {}) {
   return keepLocal({ stateDir, lockTimeoutMs: overrides.lockTimeoutMs });
 }
 
+function isLauncherOwned(record, classify) {
+  return (
+    Boolean(record) &&
+    isOwnedState(record.state) &&
+    isOurProcessAlive(record.reaperPid, { classify })
+  );
+}
+
+function notOwnedError(record) {
+  return new LaunchError("UsageError", "No launcher-started gateway is running", {
+    hint:
+      record?.state === "kept"
+        ? "It was kept, so it is a normal gateway now: use `omniroute stop`"
+        : "Use `omniroute stop` for a gateway you started yourself",
+  });
+}
+
 export async function stopOwnedGateway({ stateDir = defaultStateDir(), overrides = {} } = {}) {
-  const classify = overrides.classifyPidIdentity || classifyPidIdentity;
+  const classify = classifierFrom(overrides);
   const g = readGatewayRecord(stateDir);
-  const owned =
-    g &&
-    ["starting", "ready", "stopping"].includes(String(g.state)) &&
-    isOurProcessAlive(g.reaperPid, { classify });
-  if (!owned) {
-    throw new LaunchError("UsageError", "No launcher-started gateway is running", {
-      hint:
-        g?.state === "kept"
-          ? "It was kept, so it is a normal gateway now: use `omniroute stop`"
-          : "Use `omniroute stop` for a gateway you started yourself",
-    });
-  }
+  if (!isLauncherOwned(g, classify)) throw notOwnedError(g);
   await stopReaper(g.reaperPid, { classify, stateDir, generation: g.generation });
   // The reaper deletes gateway.json itself; clear a leftover only if it is still this one.
   if (!isOurProcessAlive(g.reaperPid, { classify })) {
