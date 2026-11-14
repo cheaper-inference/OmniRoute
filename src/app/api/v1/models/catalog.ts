@@ -1,6 +1,7 @@
 import { createCatalogConnectionExclusionFilter } from "@/lib/providerModels/copilotCatalogRejections";
 import { PROVIDER_MODELS, PROVIDER_ID_TO_ALIAS } from "@/shared/constants/models";
 import { NOAUTH_PROVIDERS } from "@/shared/constants/providers";
+import { isLocalCliUnavailableOnHost } from "@/lib/providers/localCliHostAvailability";
 import { getCombos } from "@/lib/db/combos";
 import { createHiddenModelLookup } from "@/lib/hiddenModelLookup";
 import { getSettings } from "@/lib/db/settings";
@@ -543,8 +544,23 @@ async function buildUnifiedModelsResponseCore(
     }
 
     // noAuth providers have no DB rows; settings.blockedProviders disables them.
+    // A local-CLI provider whose program/bridge is definitively absent on this host (and
+    // that has no connection of its own) cannot serve any request, so it is not advertised.
+    const hostUnavailableNoAuth = new Set<string>();
     for (const p of Object.values(NOAUTH_PROVIDERS)) {
       if (isNoAuthProviderBlocked(blockedProviders, p.id, "alias" in p ? p.alias : null)) continue;
+      const providerAlias = "alias" in p && typeof p.alias === "string" ? p.alias : null;
+      if (
+        "isLocalCli" in p &&
+        p.isLocalCli === true &&
+        !connectionsByProvider.has(p.id) &&
+        !(providerAlias && connectionsByProvider.has(providerAlias)) &&
+        isLocalCliUnavailableOnHost(p.id)
+      ) {
+        hostUnavailableNoAuth.add(p.id);
+        if (providerAlias) hostUnavailableNoAuth.add(providerAlias);
+        continue;
+      }
       activeAliases.add(p.id);
       if ("alias" in p && typeof p.alias === "string") activeAliases.add(p.alias);
     }
@@ -591,7 +607,11 @@ async function buildUnifiedModelsResponseCore(
       const alias = providerIdToAlias[providerId] || providerKey;
       // noAuth providers have no connection rows — treat every model as eligible. (#2798)
       const isNoAuth = isNoAuthProviderKey(providerId, providerKey, alias);
-      if (isNoAuth && !isNoAuthProviderBlocked(blockedProviders, providerId, providerKey, alias))
+      if (
+        isNoAuth &&
+        !isNoAuthProviderBlocked(blockedProviders, providerId, providerKey, alias) &&
+        !hostUnavailableNoAuth.has(providerId)
+      )
         return true;
       return hasEligibleConnectionForModel(
         getConnectionsForProvider(providerKey, providerId, alias),
