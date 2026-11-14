@@ -7,6 +7,7 @@ import { delimiter, isAbsolute, join } from "node:path";
 
 import { LaunchError } from "../contract.mjs";
 import { compareVersions, parseVersion } from "./preflight.mjs";
+import { lookupVersion, storeVersion, versionCacheKey } from "./version-cache.mjs";
 import { quoteShellArgsForSpawn } from "../../utils/winShellArgs.mjs";
 
 /** `where.exe <command>` -> matching lines, [] when nothing is found. */
@@ -112,12 +113,20 @@ export function runVersionCommand(
  * Probe the tool version and apply the version gate.
  * @param {import("../contract.d.ts").LaunchAdapter} adapter
  * @param {{ command: string, shell: boolean }} bin
- * @param {{ runVersion?: typeof runVersionCommand, platform?: string, env?: object }} [deps]
+ * @param {{ runVersion?: typeof runVersionCommand, platform?: string, env?: object, cacheDir?: string, refreshCache?: boolean, now?: () => number }} [deps]
  * @returns {Promise<{ version?: string, features: Record<string, boolean>, warnings: string[] }>}
  */
 export async function probeTool(adapter, bin, deps = {}) {
   const gate = adapter.capabilities.versionGate;
   if (!gate) return { version: undefined, features: {}, warnings: [] };
+  const now = deps.now ?? Date.now;
+  const key = deps.cacheDir ? versionCacheKey(bin, gate) : null;
+  if (key && !deps.refreshCache) {
+    const cached = lookupVersion(deps.cacheDir, key, now);
+    if (cached !== undefined) {
+      return { version: cached, ...applyVersionGate(adapter, cached, deps.platform) };
+    }
+  }
   const run = deps.runVersion ?? runVersionCommand;
   const text = await run(bin.command, gate.args, {
     shell: bin.shell,
@@ -125,6 +134,7 @@ export async function probeTool(adapter, bin, deps = {}) {
     env: deps.env,
   });
   const version = parseVersion(String(text ?? ""), gate.pattern);
+  if (key && version !== undefined) storeVersion(deps.cacheDir, key, version, now);
   return { version, ...applyVersionGate(adapter, version, deps.platform) };
 }
 
