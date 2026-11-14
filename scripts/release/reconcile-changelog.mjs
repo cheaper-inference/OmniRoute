@@ -303,16 +303,42 @@ export function computeCoverage(
   return { cited, uncovered };
 }
 
-/** Rank authors by commits; key = GitHub login of the merged PR when known, else the mailmap name. */
+/**
+ * Landings in the cycle: one per commit, except that a PR landed by omni-queue (merge-ff keeps
+ * every contributor commit, where a squash leaves one) counts once. Keeps the numbers comparable
+ * with squash-only cycles.
+ */
+export function landingUnits(rows) {
+  const queuePrs = new Set();
+  let count = 0;
+  for (const r of rows) {
+    if (!r.queue) count++;
+    else if (!queuePrs.has(r.queue.pr)) {
+      queuePrs.add(r.queue.pr);
+      count++;
+    }
+  }
+  return { count, queuePrs: queuePrs.size };
+}
+
+/**
+ * Rank authors by commits; key = GitHub login of the merged PR when known, else the mailmap name.
+ * A PR landed by omni-queue counts as one commit (see landingUnits).
+ */
 export function rankAuthors(rows, limit = 25) {
   const counts = {};
   const names = {};
+  const countedQueuePrs = new Set();
   for (const r of rows) {
     if (BOT_RE.test(r.authorName)) continue;
     const k = r.prAuthor || r.authorName;
-    counts[k] = (counts[k] || 0) + 1;
     names[k] ??= {};
     names[k][r.authorName] = (names[k][r.authorName] || 0) + 1;
+    if (r.queue) {
+      if (countedQueuePrs.has(r.queue.pr)) continue;
+      countedQueuePrs.add(r.queue.pr);
+    }
+    counts[k] = (counts[k] || 0) + 1;
   }
   const display = (k) => Object.entries(names[k]).sort((a, b) => b[1] - a[1])[0][0];
   return {
@@ -359,6 +385,12 @@ export function renderSection({
   }
   const humans = rows.filter((r) => !BOT_RE.test(r.authorName));
   const people = new Set([...Object.keys(ranking.counts), ...handles].map((x) => x.toLowerCase()));
+  // Squash-only cycles render exactly as before; with omni-queue landings a PR counts once.
+  const units = landingUnits(rows);
+  const queued = units.queuePrs > 0;
+  const commitsRow = queued
+    ? `| 📝 Commits in the cycle (a PR landed by omni-queue counts once) | **${fmt(units.count)}** |`
+    : `| 📝 Commits in the cycle | **${fmt(rows.length)}** |`;
   const lines = [
     `## [${version}] — ${dateSuffix}`,
     ``,
@@ -369,7 +401,8 @@ export function renderSection({
     `| | |`,
     `| --- | ---: |`,
     `| 👥 People who contributed | **${fmt(people.size)}** |`,
-    `| 📝 Commits in the cycle | **${fmt(rows.length)}** |`,
+    commitsRow,
+    ...(queued ? [`| 🚦 Pull requests landed by omni-queue | **${fmt(units.queuePrs)}** |`] : []),
     `| 🔀 Pull requests referenced | **${fmt(prRefs.size)}** |`,
     `| 📋 Changelog entries | **${fmt(bullets.length)}** |`,
     `| 🙌 Contributors credited in entries | **${fmt(handles.size)}** |`,
@@ -385,7 +418,7 @@ export function renderSection({
     ``,
     `### 🏆 Top 25 contributors this cycle`,
     ``,
-    `_By commits in \`${baseTip}..${headTip}\`, author identities consolidated via \`.mailmap\` and the merged PR's GitHub login. Bots excluded._`,
+    `_By commits in \`${baseTip}..${headTip}\`, author identities consolidated via \`.mailmap\` and the merged PR's GitHub login. Bots excluded.${queued ? " A PR landed by omni-queue counts as one commit." : ""}_`,
     ``,
     `| # | Contributor | Commits |`,
     `| ---: | --- | ---: |`,
